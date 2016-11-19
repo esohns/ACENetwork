@@ -48,19 +48,18 @@ struct DHCP_Stream_SessionData;
 struct DHCP_Stream_UserData;
 
 //typedef Net_IConnection_T<ACE_INET_Addr,
-//                          DHCP_Configuration,
-//                          DHCP_ConnectionState,
+//                          struct DHCP_Configuration,
+//                          struct DHCP_ConnectionState,
 //                          DHCP_RuntimeStatistic_t,
 //                          DHCP_Stream> DHCP_IConnection_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 DHCP_Configuration,
-                                 DHCP_ConnectionState,
+                                 struct DHCP_Configuration,
+                                 struct DHCP_ConnectionState,
                                  DHCP_RuntimeStatistic_t,
-                                 /////////
-                                 DHCP_Stream_UserData> DHCP_IConnection_Manager_t;
+                                 struct DHCP_Stream_UserData> DHCP_IConnection_Manager_t;
 
 //typedef Common_INotify_T<unsigned int,
-//                         DHCP_Stream_SessionData,
+//                         struct DHCP_Stream_SessionData,
 //                         DHCP_Record,
 //                         DHCP_SessionMessage> DHCP_IStreamNotify_t;
 
@@ -75,7 +74,7 @@ struct DHCP_SocketHandlerConfiguration
     PDUSize = DHCP_BUFFER_SIZE;
   };
 
-  DHCP_Stream_UserData* userData;
+  struct DHCP_Stream_UserData* userData;
 };
 
 //struct DHCP_ConnectorConfiguration
@@ -87,10 +86,10 @@ struct DHCP_SocketHandlerConfiguration
 //   //, statisticCollectionInterval (0)
 //  {};
 //
-//  //DHCP_Configuration*              configuration;
-//  DHCP_IConnection_Manager_t*      connectionManager;
-//  DHCP_SocketHandlerConfiguration* socketHandlerConfiguration;
-//  unsigned int                    statisticCollectionInterval; // statistic collecting interval (second(s)) [0: off]
+//  //struct DHCP_Configuration*            configuration;
+//  DHCP_IConnection_Manager_t*             connectionManager;
+//  struct DHCP_SocketHandlerConfiguration* socketHandlerConfiguration;
+//  unsigned int                            statisticCollectionInterval; // statistic collecting interval (second(s)) [0: off]
 //};
 
 struct DHCP_ProtocolConfiguration
@@ -126,12 +125,12 @@ struct DHCP_ModuleHandlerConfiguration
 
 //  Test_U_IConnection_t*       connection; // UDP target/net IO module
 
-  bool                        printFinalReport;
-  bool                        printProgressDot; // file writer module
-  bool                        pushStatisticMessages;
+  bool                               printFinalReport;
+  bool                               printProgressDot; // file writer module
+  bool                               pushStatisticMessages;
 
-  DHCP_ProtocolConfiguration* protocolConfiguration;
-  DHCP_StreamConfiguration*   streamConfiguration;
+  struct DHCP_ProtocolConfiguration* protocolConfiguration;
+  struct DHCP_StreamConfiguration*   streamConfiguration;
 };
 
 struct DHCP_StreamConfiguration
@@ -147,11 +146,11 @@ struct DHCP_StreamConfiguration
     bufferSize = DHCP_BUFFER_SIZE;
   };
 
-  Stream_ModuleConfiguration*      moduleConfiguration;        // stream module configuration
-  DHCP_ModuleHandlerConfiguration* moduleHandlerConfiguration; // module handler configuration
-  DHCP_ProtocolConfiguration*      protocolConfiguration;      // protocol configuration
+  struct Stream_ModuleConfiguration*      moduleConfiguration;        // stream module configuration
+  struct DHCP_ModuleHandlerConfiguration* moduleHandlerConfiguration; // module handler configuration
+  struct DHCP_ProtocolConfiguration*      protocolConfiguration;      // protocol configuration
 
-  //DHCP_Stream_UserData*           userData;
+  //struct DHCP_Stream_UserData*           userData;
 };
 
 #endif

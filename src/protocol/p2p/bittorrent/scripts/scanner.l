@@ -13,11 +13,11 @@ bittorrent_lex (yy::BitTorrent_Parser::semantic_type* yylval_param, \
                 BitTorrent_IParser* iparser_p,                      \
                 yyscan_t yyscanner)
  */
-#define YY_DECL                                \
-yytokentype                                    \
-bittorrent_lex (YYSTYPE* yylval_param,         \
-                YYLTYPE* yylloc_param,         \
-                BitTorrent_IParser* iparser_p, \
+#define YY_DECL                                 \
+yytokentype                                     \
+bittorrent_lex (YYSTYPE* yylval_param,          \
+                YYLTYPE* yylloc_param,          \
+                BitTorrent_IParser_t* iparser_p, \
                 yyscan_t yyscanner)
 // ... and declare it for the parser's sake
 YY_DECL;
@@ -73,7 +73,7 @@ void bittorrent_set_column (int, yyscan_t);
 /* *IMPORTANT NOTE*: flex 2.5.4 does not recognize 'reentrant, nounistd,
                      ansi-definitions, ansi-prototypes, header-file extra-type'
 */
-%option extra-type="BitTorrent_IParser*"
+%option extra-type="BitTorrent_IParser_t*"
 /* %option nounput */
 
 /* *NOTE*: for protcol specification, see:
@@ -438,7 +438,7 @@ bittorrent_wrap (yyscan_t yyscanner)
   NETWORK_TRACE (ACE_TEXT ("::bittorrent_wrap"));
 
   struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
-  BitTorrent_IParser* iparser_p =
+  BitTorrent_IParser_t* iparser_p =
       bittorrent_get_extra (yyscanner);
 
   // sanity check(s)

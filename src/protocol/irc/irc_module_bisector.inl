@@ -32,8 +32,7 @@
 #include "irc_bisector.h"
 #include "irc_defines.h"
 
-template <typename LockType,
-          typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -45,8 +44,7 @@ template <typename LockType,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
-IRC_Module_Bisector_T<LockType,
-                      SynchStrategyType,
+IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,
@@ -57,10 +55,12 @@ IRC_Module_Bisector_T<LockType,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType>::IRC_Module_Bisector_T (typename LockType::MUTEX* lock_in)
- : inherited (lock_in, // lock handle
-              false,   // auto-start ?
-              true)    // generate sesssion messages ?
+                      StatisticContainerType>::IRC_Module_Bisector_T (ACE_SYNCH_MUTEX_T* lock_in,
+                                                                      bool autoStart_in,
+                                                                      bool generateSessionMessages_in)
+ : inherited (lock_in,
+              autoStart_in,
+              generateSessionMessages_in)
  , bufferState_ (NULL)
  , context_ (NULL)
  , numberOfFrames_ (0)
@@ -78,8 +78,7 @@ IRC_Module_Bisector_T<LockType,
                           context_);
 }
 
-template <typename LockType,
-          typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -91,8 +90,7 @@ template <typename LockType,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
-IRC_Module_Bisector_T<LockType,
-                      SynchStrategyType,
+IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,
@@ -116,8 +114,7 @@ IRC_Module_Bisector_T<LockType,
     buffer_->release ();
 }
 
-template <typename LockType,
-          typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -130,8 +127,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-IRC_Module_Bisector_T<LockType,
-                      SynchStrategyType,
+IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,
@@ -202,8 +198,7 @@ IRC_Module_Bisector_T<LockType,
   return result;
 }
 
-template <typename LockType,
-          typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -216,8 +211,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-IRC_Module_Bisector_T<LockType,
-                      SynchStrategyType,
+IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,
@@ -442,8 +436,7 @@ IRC_Module_Bisector_T<LockType,
 //               currentNumFrames));
 }
 
-template <typename LockType,
-          typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -456,8 +449,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-IRC_Module_Bisector_T<LockType,
-                      SynchStrategyType,
+IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,
@@ -508,8 +500,7 @@ IRC_Module_Bisector_T<LockType,
   } // end SWITCH
 }
 
-template <typename LockType,
-          typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -522,8 +513,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-IRC_Module_Bisector_T<LockType,
-                      SynchStrategyType,
+IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,
@@ -560,7 +550,7 @@ IRC_Module_Bisector_T<LockType,
   return true;
 }
 
-//template <typename LockType,
+//template <ACE_SYNCH_DECL,
 //          typename TaskSynchType,
 //          typename TimePolicyType,
 //          typename SessionMessageType,
@@ -571,7 +561,7 @@ IRC_Module_Bisector_T<LockType,
 //          typename SessionDataContainerType,
 //          typename StatisticContainerType>
 //void
-//IRC_Module_Bisector_T<LockType,
+//IRC_Module_Bisector_T<ACE_SYNCH_USE,
 //                      TaskSynchType,
 //                      TimePolicyType,
 //                      SessionMessageType,
@@ -589,7 +579,7 @@ IRC_Module_Bisector_T<LockType,
 //  ACE_NOTREACHED (return);
 //}
 
-//template <typename LockType,
+//template <ACE_SYNCH_DECL,
 //          typename TaskSynchType,
 //          typename TimePolicyType,
 //          typename SessionMessageType,
@@ -600,7 +590,7 @@ IRC_Module_Bisector_T<LockType,
 //          typename SessionDataContainerType,
 //          typename StatisticContainerType>
 //bool
-//IRC_Module_Bisector_T<LockType,
+//IRC_Module_Bisector_T<ACE_SYNCH_USE,
 //                      TaskSynchType,
 //                      TimePolicyType,
 //                      SessionMessageType,
@@ -656,8 +646,7 @@ IRC_Module_Bisector_T<LockType,
 //                                       inherited::configuration_->streamConfiguration->messageAllocator);
 //}
 
-template <typename LockType,
-          typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -670,8 +659,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-IRC_Module_Bisector_T<LockType,
-                      SynchStrategyType,
+IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,
@@ -719,8 +707,7 @@ IRC_Module_Bisector_T<LockType,
   return true;
 }
 
-template <typename LockType,
-          typename SynchStrategyType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -733,8 +720,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-IRC_Module_Bisector_T<LockType,
-                      SynchStrategyType,
+IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,

@@ -106,9 +106,7 @@ class HTTP_Module_Parser_T
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename LockType,
-          ////////////////////////////////
-          ACE_SYNCH_DECL,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           ////////////////////////////////
           typename ControlMessageType,
@@ -126,8 +124,7 @@ template <typename LockType,
           ////////////////////////////////
           typename StatisticContainerType>
 class HTTP_Module_ParserH_T
- : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ACE_SYNCH_USE,
+ : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
                                       ControlMessageType,
                                       DataMessageType,
@@ -147,8 +144,7 @@ class HTTP_Module_ParserH_T
 
   // *PORTABILITY*: for some reason, this base class member is not exposed
   //                (MSVC/gcc)
-  using Stream_HeadModuleTaskBase_T<LockType,
-                                    ACE_SYNCH_USE,
+  using Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                     TimePolicyType,
                                     ControlMessageType,
                                     DataMessageType,
@@ -179,8 +175,7 @@ class HTTP_Module_ParserH_T
   DataMessageType* headFragment_;
 
  private:
-  typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ACE_SYNCH_USE,
+  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
                                       ControlMessageType,
                                       DataMessageType,

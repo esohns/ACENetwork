@@ -99,23 +99,19 @@ class Net_IRecordParser_T
 
 //////////////////////////////////////////
 
-template <typename DataMessageType>
+template <typename RecordType>
 class Net_IStreamParser_T
  : public Net_IParser
 {
  public:
   inline virtual ~Net_IStreamParser_T () {};
 
-  // convenient types
-  typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
-  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
-
-  virtual DataMessageType& current () = 0;
+  virtual RecordType& current () = 0;
 
   ////////////////////////////////////////
   // callbacks
   // *IMPORTANT NOTE*: fire-and-forget API
-  virtual void message (DataMessageType*&) = 0; // data message
+  virtual void record (RecordType*&) = 0; // data record
 };
 
 #endif

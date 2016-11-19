@@ -212,8 +212,7 @@ DHCP_Module_Parser_T<ACE_SYNCH_USE,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -225,22 +224,23 @@ template <typename LockType,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
-DHCP_Module_ParserH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     ControlMessageType,
-                     DataMessageType,
-                     SessionMessageType,
-                     ConfigurationType,
-                     StreamControlType,
-                     StreamNotificationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType>::DHCP_Module_ParserH_T (LockType* lock_in)
- : inherited (lock_in, // lock handle
-              false,   // auto-start ?
-              true)    // generate sesssion messages ?
+DHCP_Module_ParserH_T<ACE_SYNCH_USE,
+                      TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
+                      SessionMessageType,
+                      ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType>::DHCP_Module_ParserH_T (ACE_SYNCH_MUTEX_T* lock_in,
+                                                                      bool autoStart_in,
+                                                                      bool generateSessionMessages_in)
+ : inherited (lock_in,
+              autoStart_in,
+              generateSessionMessages_in)
  , debugScanner_ (DHCP_DEFAULT_LEX_TRACE) // trace scanning ?
  , debugParser_ (DHCP_DEFAULT_YACC_TRACE) // trace parsing ?
  , driver_ (DHCP_DEFAULT_LEX_TRACE,  // trace scanning ?
@@ -251,8 +251,7 @@ DHCP_Module_ParserH_T<LockType,
 
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -264,26 +263,24 @@ template <typename LockType,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
-DHCP_Module_ParserH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     ControlMessageType,
-                     DataMessageType,
-                     SessionMessageType,
-                     ConfigurationType,
-                     StreamControlType,
-                     StreamNotificationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType>::~DHCP_Module_ParserH_T ()
+DHCP_Module_ParserH_T<ACE_SYNCH_USE,
+                      TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
+                      SessionMessageType,
+                      ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType>::~DHCP_Module_ParserH_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::~DHCP_Module_ParserH_T"));
 
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -296,19 +293,18 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-DHCP_Module_ParserH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     ControlMessageType,
-                     DataMessageType,
-                     SessionMessageType,
-                     ConfigurationType,
-                     StreamControlType,
-                     StreamNotificationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType>::initialize (const ConfigurationType& configuration_in)
+DHCP_Module_ParserH_T<ACE_SYNCH_USE,
+                      TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
+                      SessionMessageType,
+                      ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::initialize"));
 
@@ -339,8 +335,7 @@ DHCP_Module_ParserH_T<LockType,
   return result;
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -353,20 +348,19 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-DHCP_Module_ParserH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     ControlMessageType,
-                     DataMessageType,
-                     SessionMessageType,
-                     ConfigurationType,
-                     StreamControlType,
-                     StreamNotificationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType>::handleDataMessage (DataMessageType*& message_inout,
-                                                                 bool& passMessageDownstream_out)
+DHCP_Module_ParserH_T<ACE_SYNCH_USE,
+                      TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
+                      SessionMessageType,
+                      ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType>::handleDataMessage (DataMessageType*& message_inout,
+                                                                  bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::handleDataMessage"));
 
@@ -421,8 +415,7 @@ DHCP_Module_ParserH_T<LockType,
   } // end IF
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -435,20 +428,19 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-DHCP_Module_ParserH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     ControlMessageType,
-                     DataMessageType,
-                     SessionMessageType,
-                     ConfigurationType,
-                     StreamControlType,
-                     StreamNotificationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                    bool& passMessageDownstream_out)
+DHCP_Module_ParserH_T<ACE_SYNCH_USE,
+                      TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
+                      SessionMessageType,
+                      ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                     bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::handleSessionMessage"));
 
@@ -480,8 +472,7 @@ DHCP_Module_ParserH_T<LockType,
   } // end SWITCH
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -494,19 +485,18 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-DHCP_Module_ParserH_T<LockType,
-                     TaskSynchType,
-                     TimePolicyType,
-                     ControlMessageType,
-                     DataMessageType,
-                     SessionMessageType,
-                     ConfigurationType,
-                     StreamControlType,
-                     StreamNotificationType,
-                     StreamStateType,
-                     SessionDataType,
-                     SessionDataContainerType,
-                     StatisticContainerType>::collect (StatisticContainerType& data_out)
+DHCP_Module_ParserH_T<ACE_SYNCH_USE,
+                      TimePolicyType,
+                      ControlMessageType,
+                      DataMessageType,
+                      SessionMessageType,
+                      ConfigurationType,
+                      StreamControlType,
+                      StreamNotificationType,
+                      StreamStateType,
+                      SessionDataType,
+                      SessionDataContainerType,
+                      StatisticContainerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::collect"));
 
@@ -529,7 +519,7 @@ DHCP_Module_ParserH_T<LockType,
   return true;
 }
 
-//template <typename LockType,
+//template <ACE_SYNCH_USE,
 //          typename TaskSynchType,
 //          typename TimePolicyType,
 //          typename SessionMessageType,
@@ -540,7 +530,7 @@ DHCP_Module_ParserH_T<LockType,
 //          typename SessionDataContainerType,
 //          typename StatisticContainerType>
 //void
-//DHCP_Module_ParserH_T<LockType,
+//DHCP_Module_ParserH_T<ACE_SYNCH_USE,
 //                     TaskSynchType,
 //                     TimePolicyType,
 //                     SessionMessageType,
@@ -558,7 +548,7 @@ DHCP_Module_ParserH_T<LockType,
 //  ACE_NOTREACHED (return);
 //}
 
-//template <typename LockType,
+//template <ACE_SYNCH_USE,
 //          typename TaskSynchType,
 //          typename TimePolicyType,
 //          typename SessionMessageType,
@@ -569,7 +559,7 @@ DHCP_Module_ParserH_T<LockType,
 //          typename SessionDataContainerType,
 //          typename StatisticContainerType>
 //bool
-//DHCP_Module_ParserH_T<LockType,
+//DHCP_Module_ParserH_T<ACE_SYNCH_USE,
 //                     TaskSynchType,
 //                     TimePolicyType,
 //                     SessionMessageType,

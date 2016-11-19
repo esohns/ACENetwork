@@ -98,9 +98,9 @@ struct HTTP_ConnectionState
    , userData (NULL)
   {};
 
-  HTTP_Configuration*   configuration;
+  struct HTTP_Configuration*   configuration;
 
-  HTTP_Stream_UserData* userData;
+  struct HTTP_Stream_UserData* userData;
 };
 
 #endif

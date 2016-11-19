@@ -27,7 +27,7 @@
 
 #include "net_macros.h"
 
-template <typename LockType,
+template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -39,7 +39,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
-Net_Module_SocketHandler_T<LockType,
+Net_Module_SocketHandler_T<ACE_SYNCH_USE,
                            ControlMessageType,
                            DataMessageType,
                            SessionMessageType,
@@ -50,10 +50,12 @@ Net_Module_SocketHandler_T<LockType,
                            SessionDataType,
                            SessionDataContainerType,
                            StatisticContainerType,
-                           ProtocolHeaderType>::Net_Module_SocketHandler_T (typename LockType::MUTEX* lock_in)
- : inherited (lock_in, // lock handle
-              false,   // auto-start ?
-              true)    // generate sesssion messages ?
+                           ProtocolHeaderType>::Net_Module_SocketHandler_T (ACE_SYNCH_MUTEX_T* lock_in,
+                                                                            bool autoStart_in,
+                                                                            bool generateSessionMessages_in)
+ : inherited (lock_in,
+              autoStart_in,
+              generateSessionMessages_in)
  , currentBuffer_ (NULL)
  , currentMessage_ (NULL)
  , currentMessageLength_ (0)
@@ -62,7 +64,7 @@ Net_Module_SocketHandler_T<LockType,
 
 }
 
-template <typename LockType,
+template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -74,7 +76,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
-Net_Module_SocketHandler_T<LockType,
+Net_Module_SocketHandler_T<ACE_SYNCH_USE,
                            ControlMessageType,
                            DataMessageType,
                            SessionMessageType,
@@ -93,7 +95,7 @@ Net_Module_SocketHandler_T<LockType,
     currentMessage_->release ();
 }
 
-template <typename LockType,
+template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -106,7 +108,7 @@ template <typename LockType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 bool
-Net_Module_SocketHandler_T<LockType,
+Net_Module_SocketHandler_T<ACE_SYNCH_USE,
                            ControlMessageType,
                            DataMessageType,
                            SessionMessageType,
@@ -148,7 +150,7 @@ Net_Module_SocketHandler_T<LockType,
   return result;
 }
 
-template <typename LockType,
+template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -161,7 +163,7 @@ template <typename LockType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 void
-Net_Module_SocketHandler_T<LockType,
+Net_Module_SocketHandler_T<ACE_SYNCH_USE,
                            ControlMessageType,
                            DataMessageType,
                            SessionMessageType,
@@ -214,7 +216,7 @@ Net_Module_SocketHandler_T<LockType,
   } // end WHILE
 }
 
-template <typename LockType,
+template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -227,7 +229,7 @@ template <typename LockType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 void
-Net_Module_SocketHandler_T<LockType,
+Net_Module_SocketHandler_T<ACE_SYNCH_USE,
                            ControlMessageType,
                            DataMessageType,
                            SessionMessageType,
@@ -308,7 +310,7 @@ Net_Module_SocketHandler_T<LockType,
   } // end SWITCH
 }
 
-template <typename LockType,
+template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -321,7 +323,7 @@ template <typename LockType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 bool
-Net_Module_SocketHandler_T<LockType,
+Net_Module_SocketHandler_T<ACE_SYNCH_USE,
                            ControlMessageType,
                            DataMessageType,
                            SessionMessageType,
@@ -359,7 +361,7 @@ Net_Module_SocketHandler_T<LockType,
   return true;
 }
 
-//template <typename LockType,
+//template <ACE_SYNCH_DECL,
 //          typename SessionMessageType,
 //          typename DataMessageType,
 //          typename ConfigurationType,
@@ -369,7 +371,7 @@ Net_Module_SocketHandler_T<LockType,
 //          typename StatisticContainerType,
 //          typename ProtocolHeaderType>
 //void
-//Net_Module_SocketHandler_T<LockType,
+//Net_Module_SocketHandler_T<ACE_SYNCH_USE,
 //                           SessionMessageType,
 //                           DataMessageType,
 //                           ConfigurationType,
@@ -386,7 +388,7 @@ Net_Module_SocketHandler_T<LockType,
 //  ACE_NOTREACHED (return;)
 //}
 
-template <typename LockType,
+template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -399,7 +401,7 @@ template <typename LockType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 bool
-Net_Module_SocketHandler_T<LockType,
+Net_Module_SocketHandler_T<ACE_SYNCH_USE,
                            ControlMessageType,
                            DataMessageType,
                            SessionMessageType,
@@ -568,7 +570,7 @@ Net_Module_SocketHandler_T<LockType,
 //   return message_out;
 // }
 
-//template <typename LockType,
+//template <ACE_SYNCH_DECL,
 //          typename SessionMessageType,
 //          typename DataMessageType,
 //          typename ConfigurationType,
@@ -578,7 +580,7 @@ Net_Module_SocketHandler_T<LockType,
 //          typename StatisticContainerType,
 //          typename ProtocolHeaderType>
 //bool
-//Net_Module_SocketHandler_T<LockType,
+//Net_Module_SocketHandler_T<ACE_SYNCH_USE,
 //                           SessionMessageType,
 //                           DataMessageType,
 //                           ConfigurationType,
@@ -626,7 +628,7 @@ Net_Module_SocketHandler_T<LockType,
 
 /////////////////////////////////////////
 
-template <typename LockType,
+template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -637,7 +639,7 @@ template <typename LockType,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
-Net_Module_UDPSocketHandler_T<LockType,
+Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               ControlMessageType,
                               DataMessageType,
                               SessionMessageType,
@@ -647,16 +649,18 @@ Net_Module_UDPSocketHandler_T<LockType,
                               StreamStateType,
                               SessionDataType,
                               SessionDataContainerType,
-                              StatisticContainerType>::Net_Module_UDPSocketHandler_T (LockType* lock_in)
- : inherited (lock_in, // lock handle
-              false,   // auto-start ?
-              true)    // generate sesssion messages ?
+                              StatisticContainerType>::Net_Module_UDPSocketHandler_T (ACE_SYNCH_MUTEX_T* lock_in,
+                                                                                      bool autoStart_in,
+                                                                                      bool generateSessionMessages_in)
+ : inherited (lock_in,
+              autoStart_in,
+              generateSessionMessages_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::Net_Module_UDPSocketHandler_T"));
 
 }
 
-template <typename LockType,
+template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -667,7 +671,7 @@ template <typename LockType,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
-Net_Module_UDPSocketHandler_T<LockType,
+Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               ControlMessageType,
                               DataMessageType,
                               SessionMessageType,
@@ -683,7 +687,7 @@ Net_Module_UDPSocketHandler_T<LockType,
 
 }
 
-template <typename LockType,
+template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -695,7 +699,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-Net_Module_UDPSocketHandler_T<LockType,
+Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               ControlMessageType,
                               DataMessageType,
                               SessionMessageType,
@@ -738,7 +742,7 @@ Net_Module_UDPSocketHandler_T<LockType,
 //  return inherited::sessionID_;
 //}
 
-template <typename LockType,
+template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -750,7 +754,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-Net_Module_UDPSocketHandler_T<LockType,
+Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               ControlMessageType,
                               DataMessageType,
                               SessionMessageType,
@@ -784,7 +788,7 @@ Net_Module_UDPSocketHandler_T<LockType,
 //  } // end IF
 }
 
-template <typename LockType,
+template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -796,7 +800,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-Net_Module_UDPSocketHandler_T<LockType,
+Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               ControlMessageType,
                               DataMessageType,
                               SessionMessageType,
@@ -875,7 +879,7 @@ Net_Module_UDPSocketHandler_T<LockType,
   } // end SWITCH
 }
 
-template <typename LockType,
+template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
@@ -887,7 +891,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-Net_Module_UDPSocketHandler_T<LockType,
+Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               ControlMessageType,
                               DataMessageType,
                               SessionMessageType,
@@ -922,7 +926,7 @@ Net_Module_UDPSocketHandler_T<LockType,
   return true;
 }
 
-//template <typename LockType,
+//template <ACE_SYNCH_DECL,
 //          typename SessionMessageType,
 //          typename DataMessageType,
 //          typename ConfigurationType,
@@ -931,7 +935,7 @@ Net_Module_UDPSocketHandler_T<LockType,
 //          typename SessionDataContainerType,
 //          typename StatisticContainerType>
 //void
-//Net_Module_UDPSocketHandler_T<LockType,
+//Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
 //                              SessionMessageType,
 //                              DataMessageType,
 //                              ConfigurationType,
@@ -980,7 +984,7 @@ Net_Module_UDPSocketHandler_T<LockType,
 //   return message_out;
 // }
 
-//template <typename LockType,
+//template <ACE_SYNCH_DECL,
 //          typename SessionMessageType,
 //          typename DataMessageType,
 //          typename ConfigurationType,
@@ -989,7 +993,7 @@ Net_Module_UDPSocketHandler_T<LockType,
 //          typename SessionDataContainerType,
 //          typename StatisticContainerType>
 //bool
-//Net_Module_UDPSocketHandler_T<LockType,
+//Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
 //                              SessionMessageType,
 //                              DataMessageType,
 //                              ConfigurationType,

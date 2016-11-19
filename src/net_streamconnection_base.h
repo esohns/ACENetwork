@@ -79,7 +79,6 @@ class Net_StreamConnectionBase_T
 
   virtual void set (Net_ClientServerRole);
   //virtual void finalize ();
-  virtual void ping (); // ping the peer !
 
 //  // *NOTE*: enqueue any received data onto our stream for further processing
 //  virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
@@ -163,7 +162,7 @@ class Net_AsynchStreamConnectionBase_T
   //                   ACE_Message_Block&); // (initial) data (if any)
   virtual void act (const void*); // act
 
-  // implement (part of) Net_ISocketConnection_T
+  // implement (part of) Net_IStreamConnection_T
   //virtual const HandlerConfigurationType& get () const;
   virtual const StreamType& stream () const;
   // *IMPORTANT NOTE*: fire-and-forget API
@@ -175,7 +174,6 @@ class Net_AsynchStreamConnectionBase_T
 
   virtual void set (Net_ClientServerRole);
   //virtual void finalize ();
-  virtual void ping (); // ping the peer !
 
   // convenient typedefs
   typedef Net_ITransportLayer_T<SocketConfigurationType> ITRANSPORTLAYER_T;

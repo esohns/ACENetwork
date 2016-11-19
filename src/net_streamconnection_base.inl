@@ -358,33 +358,6 @@ template <typename HandlerType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
-void
-Net_StreamConnectionBase_T<HandlerType,
-                           AddressType,
-                           ConfigurationType,
-                           StateType,
-                           StatisticContainerType,
-                           SocketConfigurationType,
-                           HandlerConfigurationType,
-                           StreamType,
-                           StreamStatusType,
-                           UserDataType>::ping ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::ping"));
-
-  inherited::stream_.ping ();
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename StreamStatusType,
-          typename UserDataType>
 int
 Net_StreamConnectionBase_T<HandlerType,
                            AddressType,
@@ -997,33 +970,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                       *configuration_.socketConfiguration))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ITransportLayer_T::initialize(), continuing\n")));
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename StreamStatusType,
-          typename UserDataType>
-void
-Net_AsynchStreamConnectionBase_T<HandlerType,
-                                 AddressType,
-                                 ConfigurationType,
-                                 StateType,
-                                 StatisticContainerType,
-                                 SocketConfigurationType,
-                                 HandlerConfigurationType,
-                                 StreamType,
-                                 StreamStatusType,
-                                 UserDataType>::ping ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::ping"));
-
-  inherited::stream_.ping ();
 }
 
 template <typename HandlerType,

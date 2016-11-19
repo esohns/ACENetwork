@@ -307,7 +307,7 @@ HTTP_Stream_T<StreamStateType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: module \"%s\" not found, aborting\n"),
-                inherited::name (),
+                ACE_TEXT (inherited::name ().c_str ()),
                 ACE_TEXT ("StatisticReport")));
     return false;
   } // end IF

@@ -41,8 +41,8 @@
 template <typename HandlerType,
           ////////////////////////////////
           typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
+          typename ConfigurationType, // connection-
+          typename StateType, // connection-
           typename StatisticContainerType,
           ////////////////////////////////
           typename HandlerConfigurationType, // socket-

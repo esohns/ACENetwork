@@ -38,20 +38,21 @@ typedef void* yyscan_t;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
 struct YYLTYPE;
 
-template <typename SessionMessageType>
+template <typename MessageType,
+          typename SessionMessageType>
 class BitTorrent_ParserDriver_T
- : public BitTorrent_IParser
+ : public BitTorrent_IParser_T<struct BitTorrent_Record>
 {
  public:
   BitTorrent_ParserDriver_T (bool,  // debug scanning ?
                              bool); // debug parsing ?
   virtual ~BitTorrent_ParserDriver_T ();
 
-  // implement (part of) BitTorrent_IParser
+  // implement (part of) BitTorrent_IParser_T
   virtual void initialize (bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,        // debug scanner ?
                            bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,       // debug parser ?
                            ACE_Message_Queue_Base* = NULL,               // data buffer queue (yywrap)
-                           bool = BITTORRENT_DEFAULT_USE_YY_SCAN_BUFFER, // yy_scan_buffer() ? : yy_scan_bytes()
+//                           bool = BITTORRENT_DEFAULT_USE_YY_SCAN_BUFFER, // yy_scan_buffer() ? : yy_scan_bytes()
                            bool = false);                                // block in parse() ?
   inline virtual ACE_Message_Block* buffer () { return fragment_; };
   inline virtual bool debugScanner () const { return bittorrent_get_debug (scannerState_); };
@@ -65,6 +66,7 @@ class BitTorrent_ParserDriver_T
   virtual bool switchBuffer ();
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
   virtual void wait ();
+  inline virtual struct BitTorrent_Record& current () { struct BitTorrent_Record dummy; ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) };
 
   virtual void dump_state () const;
 

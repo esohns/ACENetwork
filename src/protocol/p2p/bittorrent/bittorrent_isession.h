@@ -30,7 +30,7 @@
 class ACE_Message_Block;
 
 template <typename AddressType,
-          typename ConfigurationType,
+          typename ConfigurationType, // connection-
           typename ConnectionStateType,
           typename StatisticContainerType,
           ////////////////////////////////
@@ -66,6 +66,7 @@ class BitTorrent_ISession_T
 
   //--------------------------------------
 
+  virtual void notify (const struct HTTP_Record&) = 0; // tracker message record
   virtual void notify (const struct BitTorrent_Record&, // message record
                        ACE_Message_Block* = NULL) = 0;  // data piece (if applicable)
 };

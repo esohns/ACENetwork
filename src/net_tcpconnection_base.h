@@ -63,38 +63,38 @@ class Net_TCPConnectionBase_T
                                      UserDataType>
  , public Net_TransportLayer_TCP
 {
- friend class ACE_Acceptor<Net_TCPConnectionBase_T<HandlerType,
-                                                   ConfigurationType,
-                                                   StateType,
-                                                   StatisticContainerType,
-                                                   HandlerConfigurationType,
-                                                   StreamType,
-                                                   UserDataType>,
-                           ACE_SOCK_ACCEPTOR>;
- friend class ACE_Acceptor<Net_TCPConnectionBase_T<HandlerType,
-                                                   ConfigurationType,
-                                                   StateType,
-                                                   StatisticContainerType,
-                                                   HandlerConfigurationType,
-                                                   StreamType,
-                                                   UserDataType>,
-                           Net_SOCK_Acceptor>;
- friend class ACE_Connector<Net_TCPConnectionBase_T<HandlerType,
+  friend class ACE_Acceptor<Net_TCPConnectionBase_T<HandlerType,
                                                     ConfigurationType,
                                                     StateType,
                                                     StatisticContainerType,
                                                     HandlerConfigurationType,
                                                     StreamType,
                                                     UserDataType>,
-                            ACE_SOCK_CONNECTOR>;
- friend class ACE_Connector<Net_TCPConnectionBase_T<HandlerType,
-                                                   ConfigurationType,
-                                                   StateType,
-                                                   StatisticContainerType,
-                                                   HandlerConfigurationType,
-                                                   StreamType,
-                                                   UserDataType>,
-                            Net_SOCK_Connector>;
+                            ACE_SOCK_ACCEPTOR>;
+  friend class ACE_Acceptor<Net_TCPConnectionBase_T<HandlerType,
+                                                    ConfigurationType,
+                                                    StateType,
+                                                    StatisticContainerType,
+                                                    HandlerConfigurationType,
+                                                    StreamType,
+                                                    UserDataType>,
+                            Net_SOCK_Acceptor>;
+  friend class ACE_Connector<Net_TCPConnectionBase_T<HandlerType,
+                                                     ConfigurationType,
+                                                     StateType,
+                                                     StatisticContainerType,
+                                                     HandlerConfigurationType,
+                                                     StreamType,
+                                                     UserDataType>,
+                             ACE_SOCK_CONNECTOR>;
+  friend class ACE_Connector<Net_TCPConnectionBase_T<HandlerType,
+                                                     ConfigurationType,
+                                                     StateType,
+                                                     StatisticContainerType,
+                                                     HandlerConfigurationType,
+                                                     StreamType,
+                                                     UserDataType>,
+                             Net_SOCK_Connector>;
 
  public:
   typedef Net_StreamConnectionBase_T<HandlerType,
@@ -166,19 +166,19 @@ class Net_AsynchTCPConnectionBase_T
  , public Net_TransportLayer_TCP
 {
   friend class ACE_Asynch_Acceptor<Net_AsynchTCPConnectionBase_T<HandlerType,
-                                                                ConfigurationType,
-                                                                StateType,
-                                                                StatisticContainerType,
-                                                                HandlerConfigurationType,
-                                                                StreamType,
-                                                                UserDataType> >;
- friend class ACE_Asynch_Connector<Net_AsynchTCPConnectionBase_T<HandlerType,
                                                                  ConfigurationType,
                                                                  StateType,
                                                                  StatisticContainerType,
                                                                  HandlerConfigurationType,
                                                                  StreamType,
                                                                  UserDataType> >;
+  friend class ACE_Asynch_Connector<Net_AsynchTCPConnectionBase_T<HandlerType,
+                                                                  ConfigurationType,
+                                                                  StateType,
+                                                                  StatisticContainerType,
+                                                                  HandlerConfigurationType,
+                                                                  StreamType,
+                                                                  UserDataType> >;
 
  public:
   typedef Net_AsynchStreamConnectionBase_T<HandlerType,

@@ -39,8 +39,8 @@
 template <typename HandlerType,
           ////////////////////////////////
           typename AddressType,
-          typename ConfigurationType,
-          typename StateType, // (connection) state
+          typename ConfigurationType, // connection-
+          typename StateType, // connection-
           typename StatisticContainerType,
           typename StreamType,
           ////////////////////////////////

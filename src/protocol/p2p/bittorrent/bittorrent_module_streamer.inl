@@ -95,14 +95,13 @@ BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
   // --> create the appropriate bytestream corresponding to its elements
   const typename DataMessageType::DATA_T& data_container_r =
       message_inout->get ();
-  const typename DataMessageType::DATA_T::DATA_T& data_r =
+  const typename DataMessageType::DATA_T::DATA_T& record_r =
         data_container_r.get ();
-  ACE_ASSERT (data_r.record);
-  std::string buffer;
-  bool is_request = true;
+
   std::ostringstream converter;
-  std::string content_buffer;
   // *TODO*: remove type inferences
+
+  ACE_ASSERT (false);
 
 //  // sanity check
 //  if (message_inout->space () < buffer.size ())

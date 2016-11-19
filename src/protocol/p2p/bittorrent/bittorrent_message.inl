@@ -85,8 +85,11 @@ BitTorrent_Message_T<SessionDataType>::command () const
   // sanity check(s)
   if (!inherited::isInitialized_)
     return BITTORRENT_MESSAGETYPE_INVALID;
+  ACE_ASSERT (inherited::data_);
 
-  return inherited::data_.type;
+  const struct BitTorrent_Record& record_r = inherited::data_->get ();
+
+  return record_r.type;
 }
 
 template <typename SessionDataType>
@@ -104,82 +107,18 @@ BitTorrent_Message_T<SessionDataType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::dump_state"));
 
+  // sanity check(s)
+  if (!inherited::isInitialized_)
+    return;
+  ACE_ASSERT (inherited::data_);
+
+  const struct BitTorrent_Record& record_r = inherited::data_->get ();
+
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("***** Message (ID: %u, %u byte(s)) *****\n%s"),
               inherited::id (),
               inherited::total_length (),
-              ACE_TEXT (BitTorrent_Tools::Record2String (inherited::data_).c_str ())));
-}
-
-template <typename SessionDataType>
-int
-BitTorrent_Message_T<SessionDataType>::crunch (void)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::crunch"));
-
-  int result = -1;
-
-//  // sanity check(s)
-//  // *IMPORTANT NOTE*: this check is NOT enough (race condition). Also, there
-//  //                   may be trailing messages (in fact, that should be the
-//  //                   norm), and/or (almost any) number(s) of fragments
-//  //                   referencing the same buffer
-//  ACE_ASSERT (inherited::reference_count () <= 2);
-  // ... assuming stream processing is indeed single-threaded (CHECK !!!), then
-  // the reference count at this stage should be <=2: "this", and (most
-  // probably), the next, trailing "message head" (of course, it could be just
-  // "this")
-  // step1: align rd_ptr() with base()
-  result = inherited::crunch ();
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Message_Block::crunch(): \"%m\", aborting\n")));
-    return -1;
-  } // end IF
-
-  // step2: copy (part of) the data
-  ACE_Message_Block* message_block_p = NULL;
-  size_t amount, space, length = 0;
-  for (message_block_p = inherited::cont ();
-       message_block_p;
-       message_block_p = message_block_p->cont ())
-  {
-    space = inherited::space ();
-    length = message_block_p->length ();
-    amount = (space < length ? space : length);
-    result = inherited::copy (message_block_p->rd_ptr (), amount);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
-      return -1;
-    } // end IF
-
-    // adjust read pointer accordingly
-    message_block_p->rd_ptr (amount);
-  } // end FOR
-
-  // step3: release any thusly obsoleted continuations
-  message_block_p = inherited::cont ();
-  ACE_Message_Block* previous_p = this;
-  ACE_Message_Block* obsolete_p = NULL;
-  do
-  {
-    // finished ?
-    if (!message_block_p)
-      break;
-
-    if (message_block_p->length () == 0)
-    {
-      obsolete_p = message_block_p;
-      message_block_p = message_block_p->cont ();
-      previous_p->cont (message_block_p);
-      obsolete_p->release ();
-    } // end IF
-  } while (true);
-
-  return 0;
+              ACE_TEXT (BitTorrent_Tools::Record2String (record_r).c_str ())));
 }
 
 template <typename SessionDataType>

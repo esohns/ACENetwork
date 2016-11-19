@@ -18,27 +18,20 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef BITTORRENT_IPARSER_H
-#define BITTORRENT_IPARSER_H
-
-#include <string>
+#ifndef BITTORRENT_IPARSER_T_H
+#define BITTORRENT_IPARSER_T_H
 
 #include "net_iparser.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_stream_common.h"
 
-//// forward declarations;
-//struct BitTorrent_SessionData;
-//template <typename SessionDataType>
-//class BitTorrent_Message_T;
-//typedef BitTorrent_Message_T<BitTorrent_SessionData> BitTorrent_Message_t;
-
-class BitTorrent_IParser
- : public Net_IStreamParser_T<BitTorrent_Message_t>
+template <typename MessageType>
+class BitTorrent_IParser_T
+ : public Net_IStreamParser_T<MessageType>
 {
  public:
-  inline virtual ~BitTorrent_IParser () {};
+  inline virtual ~BitTorrent_IParser_T () {};
 
   ////////////////////////////////////////
   // callbacks
@@ -50,5 +43,7 @@ class BitTorrent_IParser
 
 typedef Net_IRecordParser_T<struct BitTorrent_MetaInfo> BitTorrent_MetaInfo_IParser_t;
 typedef Net_IScanner_T<BitTorrent_MetaInfo_IParser_t> BitTorrent_MetaInfo_IScanner_t;
+
+typedef BitTorrent_IParser_T<struct BitTorrent_Record> BitTorrent_IParser_t;
 
 #endif

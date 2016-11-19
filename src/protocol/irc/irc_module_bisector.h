@@ -38,9 +38,7 @@ class ACE_Message_Block;
 class Stream_IAllocator;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
 
-template <typename LockType,
-          ////////////////////////////////
-          ACE_SYNCH_DECL,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -57,8 +55,7 @@ template <typename LockType,
           ////////////////////////////////
           typename StatisticContainerType>
 class IRC_Module_Bisector_T
- : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ACE_SYNCH_USE,
+ : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
                                       ControlMessageType,
                                       DataMessageType,
@@ -72,13 +69,14 @@ class IRC_Module_Bisector_T
                                       StatisticContainerType>
 {
  public:
-  IRC_Module_Bisector_T (typename LockType::MUTEX* = NULL); // lock handle (state machine)
+  IRC_Module_Bisector_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
+                         bool = false,              // auto-start ?
+                         bool = true);              // generate session messages ?
   virtual ~IRC_Module_Bisector_T ();
 
   // *PORTABILITY*: for some reason, this base class member is not exposed
   //                (MSVC/gcc)
-  using Stream_HeadModuleTaskBase_T<LockType,
-                                    ACE_SYNCH_USE,
+  using Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                     TimePolicyType,
                                     ControlMessageType,
                                     DataMessageType,
@@ -106,8 +104,7 @@ class IRC_Module_Bisector_T
   //virtual void report () const;
 
  private:
-  typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ACE_SYNCH_USE,
+  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
                                       ControlMessageType,
                                       DataMessageType,

@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <ace/Synch.h>
 #include "bittorrent_client_tools.h"
 
 #include <ace/Configuration.h>
@@ -35,7 +36,7 @@
 
 ACE_HANDLE
 BitTorrent_Client_Tools::connect (BitTorrent_Client_IConnector_t& connector_in,
-                                  const ACE_INET_Addr& peerAddress_in,
+                                  const ACE_INET_Addr& address_in,
                                   bool cloneModule_in,
                                   bool deleteModule_in,
                                   Stream_Module_t*& finalModule_inout)
@@ -59,9 +60,7 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IConnector_t& connector_in,
   ACE_ASSERT (user_data_p->configuration);
 
   // step1: set up configuration
-  user_data_p->configuration->protocolConfiguration.loginOptions =
-    loginOptions_in;
-  user_data_p->configuration->socketConfiguration.address = peerAddress_in;
+  user_data_p->configuration->socketConfiguration.address = address_in;
   if (finalModule_inout)
   {
     user_data_p->configuration->streamConfiguration.cloneModule =
@@ -87,14 +86,14 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IConnector_t& connector_in,
   //                           user_data_p);
 
   // step3: (try to) connect to the server
-  return_value = connector_in.connect (peerAddress_in);
+  return_value = connector_in.connect (address_in);
   if (return_value == ACE_INVALID_HANDLE)
   {
     // debug info
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result = peerAddress_in.addr_to_string (buffer,
-                                            sizeof (buffer));
+    result = address_in.addr_to_string (buffer,
+                                        sizeof (buffer));
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));

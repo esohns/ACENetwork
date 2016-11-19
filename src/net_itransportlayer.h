@@ -25,29 +25,26 @@
 
 #include "net_common.h"
 
-//// forward declarations
-//enum Common_DispatchType;
-//enum Net_ClientServerRole;
-//enum Net_TransportLayerType;
-
 template <typename ConfigurationType>
 class Net_ITransportLayer_T
 {
  public:
   inline virtual ~Net_ITransportLayer_T () {};
 
+  // *TODO*: this is an ICMP (i.e. link-layer) (or protocol-level) function
+  //         --> move somewhere else
   virtual void ping () = 0;
 
   // information
   // *TODO*: move this somewhere else
-  virtual Common_DispatchType dispatch () = 0;
-  virtual Net_ClientServerRole role () = 0;
-  virtual void set (Net_ClientServerRole) = 0;
-  virtual Net_TransportLayerType transportLayer () = 0;
+  virtual enum Common_DispatchType dispatch () = 0;
+  virtual enum Net_ClientServerRole role () = 0;
+  virtual void set (enum Net_ClientServerRole) = 0;
+  virtual enum Net_TransportLayerType transportLayer () = 0;
 
  //protected:
-  virtual bool initialize (Common_DispatchType,
-                           Net_ClientServerRole,
+  virtual bool initialize (enum Common_DispatchType,
+                           enum Net_ClientServerRole,
                            const ConfigurationType&) = 0;
   virtual void finalize () = 0;
 };

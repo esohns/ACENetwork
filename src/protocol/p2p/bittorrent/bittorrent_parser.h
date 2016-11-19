@@ -51,6 +51,7 @@ extern int bittorrent_debug;
 #include <string>
 
 #include "bittorrent_exports.h"
+#include "bittorrent_iparser.h"
 
 /* enum yytokentype
 {
@@ -66,9 +67,6 @@ extern int bittorrent_debug;
 //#define YYTOKENTYPE
 /*#undef YYTOKENTYPE*/
 /* enum yytokentype; */
-class BitTorrent_IParser;
-struct BitTorrent_PeerHandshake;
-struct BitTorrent_Record;
 //class BitTorrent_Scanner;
 //struct YYLTYPE;
 
@@ -89,6 +87,8 @@ typedef void* yyscan_t;
 #define YYDEBUG 1
 extern int BitTorrent_Export yydebug;
 #define YYERROR_VERBOSE 1
+
+#undef YYTOKENTYPE
 
 
 
@@ -147,13 +147,13 @@ struct YYLTYPE
 
 
 
-int bittorrent_parse (BitTorrent_IParser* iparser_p, yyscan_t yyscanner);
+int bittorrent_parse (BitTorrent_IParser_t* iparser_p, yyscan_t yyscanner);
 /* "%code provides" blocks.  */
 
 
 void BitTorrent_Export yysetdebug (int);
-void BitTorrent_Export yyerror (YYLTYPE*, BitTorrent_IParser*, yyscan_t, const char*);
-int BitTorrent_Export yyparse (BitTorrent_IParser*, yyscan_t);
+void BitTorrent_Export yyerror (YYLTYPE*, BitTorrent_IParser_t*, yyscan_t, const char*);
+int BitTorrent_Export yyparse (BitTorrent_IParser_t*, yyscan_t);
 void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);
 
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2

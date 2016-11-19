@@ -47,8 +47,8 @@ struct DHCP_Stream_SessionData;
 struct DHCP_Stream_UserData;
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    DHCP_Stream_SessionData,
-                                    Stream_SessionMessageType,
+                                    struct DHCP_Stream_SessionData,
+                                    enum Stream_SessionMessageType,
                                     DHCP_Record,
                                     DHCP_SessionMessage> DHCP_ISessionNotify_t;
 
@@ -133,12 +133,12 @@ struct DHCP_ConnectionState
    , xid (0)
   {};
 
-  DHCP_Configuration*   configuration;
-  DHCP_Stream_UserData* userData;
+  struct DHCP_Configuration*   configuration;
+  struct DHCP_Stream_UserData* userData;
 
-  ACE_INET_Addr         serverAddress;
-  ACE_Time_Value        timeStamp; // lease timeout
-  unsigned int          xid;       // session ID
+  ACE_INET_Addr                serverAddress;
+  ACE_Time_Value               timeStamp; // lease timeout
+  unsigned int                 xid;       // session ID
 };
 
 #endif

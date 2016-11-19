@@ -51,6 +51,14 @@ Test_U_TCPConnection::~Test_U_TCPConnection ()
 
 }
 
+void
+Test_U_TCPConnection::ping ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_TCPConnection::ping"));
+
+  inherited::stream_.ping ();
+}
+
 //////////////////////////////////////////
 
 Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
@@ -74,4 +82,12 @@ Test_U_AsynchTCPConnection::~Test_U_AsynchTCPConnection ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::~Test_U_AsynchTCPConnection"));
 
+}
+
+void
+Test_U_AsynchTCPConnection::ping ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::ping"));
+
+  inherited::stream_.ping ();
 }

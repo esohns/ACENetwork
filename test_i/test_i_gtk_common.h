@@ -28,6 +28,7 @@
 
 #include <gtk/gtk.h>
 
+#include "common_ui_common.h"
 #include "common_ui_gtk_common.h"
 
 #include "stream_common.h"
@@ -35,18 +36,19 @@
 // forward declarations
 struct Test_I_Configuration;
 
-enum Test_I_GTK_Event
-{
-  TEST_I_GKTEVENT_INVALID = -1,
-  // ------------------------------------
-  TEST_I_GTKEVENT_START = 0,
-  TEST_I_GTKEVENT_DATA,
-  TEST_I_GTKEVENT_END,
-  TEST_I_GTKEVENT_STATISTIC,
-  // ------------------------------------
-  TEST_I_GTKEVENT_MAX
-};
-typedef std::deque<Test_I_GTK_Event> Test_I_GTK_Events_t;
+//enum Test_I_GTK_Event
+//{
+//  TEST_I_GKTEVENT_INVALID = -1,
+//  // ------------------------------------
+//  TEST_I_GTKEVENT_START = 0,
+//  TEST_I_GTKEVENT_DATA,
+//  TEST_I_GTKEVENT_END,
+//  TEST_I_GTKEVENT_STATISTIC,
+//  // ------------------------------------
+//  TEST_I_GTKEVENT_MAX
+//};
+//typedef std::deque<enum Test_I_GTK_Event> Test_I_GTK_Events_t;
+typedef std::deque<enum Common_UI_Event> Test_I_GTK_Events_t;
 typedef Test_I_GTK_Events_t::const_iterator Test_I_GTK_EventsIterator_t;
 
 typedef std::map<guint, ACE_Thread_ID> Test_I_PendingActions_t;
@@ -64,11 +66,11 @@ struct Test_I_GTK_ProgressData
    , statistic ()
   {};
 
-  Test_I_CompletedActions_t completedActions;
+  Test_I_CompletedActions_t  completedActions;
   //  GdkCursorType                      cursorType;
-  Common_UI_GTKState*       GTKState;
-  Test_I_PendingActions_t   pendingActions;
-  Stream_Statistic          statistic;
+  struct Common_UI_GTKState* GTKState;
+  Test_I_PendingActions_t    pendingActions;
+  struct Stream_Statistic    statistic;
 };
 
 struct Test_I_GTK_CBData

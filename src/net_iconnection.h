@@ -125,11 +125,11 @@ class Net_ISocketConnection_T
  , public Common_IInitialize_T<HandlerConfigurationType>
 {
  public:
-  // convenience types
-  typedef Net_IConnection_T<AddressType,
-                            ConfigurationType,
-                            StateType,
-                            StatisticContainerType> ICONNECTION_T;
+//  // convenient types
+//  typedef Net_IConnection_T<AddressType,
+//                            ConfigurationType,
+//                            StateType,
+//                            StatisticContainerType> ICONNECTION_T;
 
   virtual ~Net_ISocketConnection_T () {};
 
@@ -202,15 +202,15 @@ class Net_ISession_T
   virtual void connect (Net_ConnectionId_t) = 0;    // connection id
   virtual void disconnect (Net_ConnectionId_t) = 0; // connection id
 
-  // convenient types
-  typedef Net_IStreamConnection_T<AddressType,
-                                  ConfigurationType,
-                                  ConnectionStateType,
-                                  StatisticContainerType,
-                                  SocketConfigurationType,
-                                  HandlerConfigurationType,
-                                  StreamType,
-                                  StreamStatusType> ISTREAM_CONNECTION_T;
+//  // convenient types
+//  typedef Net_IStreamConnection_T<AddressType,
+//                                  ConfigurationType,
+//                                  ConnectionStateType,
+//                                  StatisticContainerType,
+//                                  SocketConfigurationType,
+//                                  HandlerConfigurationType,
+//                                  StreamType,
+//                                  StreamStatusType> ISTREAM_CONNECTION_T;
 };
 
 #endif

@@ -21,12 +21,11 @@
 #ifndef NET_SESSION_BASE_H
 #define NET_SESSION_BASE_H
 
-#include <ace/Asynch_Connector.h>
-#include <ace/config-macros.h>
-#include <ace/Connector.h>
+//#include <ace/Asynch_Connector.h>
+//#include <ace/config-macros.h>
+//#include <ace/Connector.h>
 #include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
-#include <ace/SOCK_Connector.h>
+//#include <ace/SOCK_Connector.h>
 #include <ace/Synch_Traits.h>
 
 #include "net_common.h"
@@ -46,6 +45,7 @@ template <typename AddressType,
           ////////////////////////////////
           typename ConnectionType, // derived from Net_IConnection_T
           typename ConnectionManagerType, // derived from Net_IConnectionManager_T
+          typename ConnectorType,
           ////////////////////////////////
           typename StateType,
           typename SessionInterfaceType> // derived from Net_ISession_T
@@ -62,8 +62,9 @@ class Net_SessionBase_T
 //                                 StateType>
 {
  public:
-  Net_SessionBase_T (ConnectionManagerType* = NULL,  // connection manager handle
-                     bool = !NET_EVENT_USE_REACTOR); // asynchronous ?
+  Net_SessionBase_T (const HandlerConfigurationType&, // socket handler configuration
+                     ConnectionManagerType* = NULL,   // connection manager handle
+                     bool = !NET_EVENT_USE_REACTOR);  // asynchronous ?
   virtual ~Net_SessionBase_T ();
 
   // implement (part of) Net_ISession_T
@@ -80,20 +81,23 @@ class Net_SessionBase_T
 
  protected:
   // convenient types
+  typedef ConnectorType CONNECTOR_T;
+//  typedef ACE_Connector<ConnectionType,
+//                        ACE_SOCK_CONNECTOR> CONNECTOR_T;
+//  typedef ACE_Asynch_Connector<ConnectionType> ASYNCH_CONNECTOR_T;
   typedef SessionInterfaceType ISESSION_T;
-  typedef ACE_Connector<ConnectionType,
-                        ACE_SOCK_CONNECTOR> CONNECTOR_T;
-  typedef ACE_Asynch_Connector<ConnectionType> ASYNCH_CONNECTOR_T;
 
-  ConnectionManagerType* connectionManager_;
-  ACE_SYNCH_MUTEX        lock_;
-  StateType              state_;
+  HandlerConfigurationType* configuration_;
+  ConnectionManagerType*    connectionManager_;
+  bool                      isAsynch_;
+
+  ACE_SYNCH_MUTEX           lock_;
+  StateType                 state_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_SessionBase_T (const Net_SessionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_SessionBase_T& operator= (const Net_SessionBase_T&))
 
-  bool                   isAsynch_;
 };
 
 // include template definition

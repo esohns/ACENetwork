@@ -20,7 +20,7 @@
 #include "stdafx.h"
 
 #include <ace/Synch.h>
-#include "IRC_client_gui_tools.h"
+#include "bittorrent_client_gui_tools.h"
 
 #include <ace/Log_Msg.h>
 
@@ -28,114 +28,114 @@
 
 #include "net_macros.h"
 
-#include "IRC_client_network.h"
+#include "bittorrent_client_network.h"
 
-#include "IRC_client_gui_connection.h"
-#include "IRC_client_gui_defines.h"
+#include "bittorrent_client_gui_session.h"
+#include "bittorrent_client_gui_defines.h"
 
-bool
-IRC_Client_UI_Tools::current (const std::string& timeStamp_in,
-                              const IRC_Client_GUI_Connections_t& connections_in,
-                              std::string& nickName_out,
-                              std::string& channel_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_UI_Tools::current"));
+//bool
+//IRC_Client_UI_Tools::current (const std::string& timeStamp_in,
+//                              const IRC_Client_GUI_Connections_t& connections_in,
+//                              std::string& nickName_out,
+//                              std::string& channel_out)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("IRC_Client_UI_Tools::current"));
 
-  // initialize return value(s)
-  nickName_out.clear ();
-  channel_out.clear ();
+//  // initialize return value(s)
+//  nickName_out.clear ();
+//  channel_out.clear ();
 
-  // step1: retrieve connection handle
-  IRC_Client_GUI_Connection* connection_p = NULL;
-  for (IRC_Client_GUI_ConnectionsConstIterator_t iterator = connections_in.begin ();
-       iterator != connections_in.end ();
-       ++iterator)
-  {
-    const IRC_Client_GTK_ConnectionCBData& connection_data_r =
-      (*iterator).second->get ();
-    if (connection_data_r.timeStamp == timeStamp_in)
-    {
-      connection_p = (*iterator).second;
-      ACE_ASSERT (connection_p);
-      //connection_p->current (nickName_out,
-      //                       channel_out);
-      const IRC_Client_SessionState& connection_state_r =
-        connection_p->state ();
-      nickName_out = connection_state_r.nickName;
-      channel_out = connection_state_r.channel;
-      break;
-    } // end IF
-  } // end FOR
-  if (!connection_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("could not find connection (timestamp was: \"%s\"), aborting\n")));
-    return false;
-  } // end IF
+//  // step1: retrieve connection handle
+//  IRC_Client_GUI_Connection* connection_p = NULL;
+//  for (IRC_Client_GUI_ConnectionsConstIterator_t iterator = connections_in.begin ();
+//       iterator != connections_in.end ();
+//       ++iterator)
+//  {
+//    const IRC_Client_GTK_ConnectionCBData& connection_data_r =
+//      (*iterator).second->get ();
+//    if (connection_data_r.timeStamp == timeStamp_in)
+//    {
+//      connection_p = (*iterator).second;
+//      ACE_ASSERT (connection_p);
+//      //connection_p->current (nickName_out,
+//      //                       channel_out);
+//      const IRC_Client_SessionState& connection_state_r =
+//        connection_p->state ();
+//      nickName_out = connection_state_r.nickName;
+//      channel_out = connection_state_r.channel;
+//      break;
+//    } // end IF
+//  } // end FOR
+//  if (!connection_p)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("could not find connection (timestamp was: \"%s\"), aborting\n")));
+//    return false;
+//  } // end IF
 
-  return true;
-}
+//  return true;
+//}
 
-IRC_Client_GUI_Connection*
-IRC_Client_UI_Tools::current (const Common_UI_GTKState& GTKState_in,
-                              const IRC_Client_GUI_Connections_t& connections_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_UI_Tools::current"));
+//IRC_Client_GUI_Connection*
+//IRC_Client_UI_Tools::current (const Common_UI_GTKState& GTKState_in,
+//                              const IRC_Client_GUI_Connections_t& connections_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("IRC_Client_UI_Tools::current"));
 
-  // initialize return value(s)
-  IRC_Client_GUI_Connection* result_p = NULL;
+//  // initialize return value(s)
+//  IRC_Client_GUI_Connection* result_p = NULL;
 
-  // sanity check(s)
-  Common_UI_GTKBuildersConstIterator_t iterator =
-    GTKState_in.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != GTKState_in.builders.end ());
+//  // sanity check(s)
+//  Common_UI_GTKBuildersConstIterator_t iterator =
+//    GTKState_in.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+//  // sanity check(s)
+//  ACE_ASSERT (iterator != GTKState_in.builders.end ());
 
-  // step1: retrieve connections notebook
-  GtkNotebook* notebook_p =
-    GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_NOTEBOOK_CONNECTIONS)));
-  ACE_ASSERT (notebook_p);
-  gint tab_number = gtk_notebook_get_current_page (notebook_p);
-  if (tab_number == -1)
-    return NULL; // no connection page (yet ?)
-  GtkWidget* widget_p = gtk_notebook_get_nth_page (notebook_p,
-                                                   tab_number);
-  ACE_ASSERT (widget_p);
+//  // step1: retrieve connections notebook
+//  GtkNotebook* notebook_p =
+//    GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
+//                                          ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_NOTEBOOK_CONNECTIONS)));
+//  ACE_ASSERT (notebook_p);
+//  gint tab_number = gtk_notebook_get_current_page (notebook_p);
+//  if (tab_number == -1)
+//    return NULL; // no connection page (yet ?)
+//  GtkWidget* widget_p = gtk_notebook_get_nth_page (notebook_p,
+//                                                   tab_number);
+//  ACE_ASSERT (widget_p);
 
-  // step2: find connection whose main window corresponds with the currently
-  //        active notebook page
-  for (IRC_Client_GUI_ConnectionsConstIterator_t iterator_2 = connections_in.begin ();
-       iterator_2 != connections_in.end ();
-       ++iterator_2)
-  {
-    const IRC_Client_GTK_ConnectionCBData& connection_data_r =
-      (*iterator_2).second->get ();
-    Common_UI_GTKBuildersConstIterator_t iterator_3 =
-      GTKState_in.builders.find (connection_data_r.timeStamp);
-    if (iterator_3 == GTKState_in.builders.end ())
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("could not find builder (connection was: \"%s\"), aborting\n"),
-                  ACE_TEXT (connection_data_r.label.c_str ())));
-      break;
-    } // end IF
+//  // step2: find connection whose main window corresponds with the currently
+//  //        active notebook page
+//  for (IRC_Client_GUI_ConnectionsConstIterator_t iterator_2 = connections_in.begin ();
+//       iterator_2 != connections_in.end ();
+//       ++iterator_2)
+//  {
+//    const IRC_Client_GTK_ConnectionCBData& connection_data_r =
+//      (*iterator_2).second->get ();
+//    Common_UI_GTKBuildersConstIterator_t iterator_3 =
+//      GTKState_in.builders.find (connection_data_r.timeStamp);
+//    if (iterator_3 == GTKState_in.builders.end ())
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("could not find builder (connection was: \"%s\"), aborting\n"),
+//                  ACE_TEXT (connection_data_r.label.c_str ())));
+//      break;
+//    } // end IF
 
-    GtkWidget* widget_2 =
-      GTK_WIDGET (gtk_builder_get_object ((*iterator_3).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_VBOX_CONNECTION)));
-    ACE_ASSERT (widget_2);
-    if (widget_p == widget_2)
-    {
-      result_p = (*iterator_2).second;
-      break;
-    } // end IF
-  } // end FOR
+//    GtkWidget* widget_2 =
+//      GTK_WIDGET (gtk_builder_get_object ((*iterator_3).second.second,
+//                                          ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_VBOX_CONNECTION)));
+//    ACE_ASSERT (widget_2);
+//    if (widget_p == widget_2)
+//    {
+//      result_p = (*iterator_2).second;
+//      break;
+//    } // end IF
+//  } // end FOR
 
-  // *NOTE*: there is a delay between connection establishment and registration.
-  //         In this state, a server page is already added, even though
-  //         CBData_in.connections has not been updated (yet)
-  //         --> no connection will be found here
+//  // *NOTE*: there is a delay between connection establishment and registration.
+//  //         In this state, a server page is already added, even though
+//  //         CBData_in.connections has not been updated (yet)
+//  //         --> no connection will be found here
 
-  return result_p;
-}
+//  return result_p;
+//}

@@ -117,7 +117,6 @@ class IRC_Stream_T
                                 DataMessageType,
                                 SessionMessageType> STREAMER_T;
   typedef IRC_Module_Bisector_T<ACE_MT_SYNCH,
-                                ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 ControlMessageType,
                                 DataMessageType,

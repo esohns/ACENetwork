@@ -87,13 +87,13 @@ connection_setup_function (void* arg_in)
     gdk_threads_enter ();
     progress_bar_p =
       GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_PROGRESSBAR)));
+                                                ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_PROGRESSBAR)));
     ACE_ASSERT (progress_bar_p);
 
     // generate context ID
     statusbar_p =
       GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_STATUSBAR)));
+                                             ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_STATUSBAR)));
     ACE_ASSERT (statusbar_p);
     //string_p =
     //  Common_UI_Tools::Locale2UTF8 ((*data_p->phonebookIterator).second.hostName);
@@ -491,12 +491,12 @@ idle_add_channel_cb (gpointer userData_in)
   // retrieve (dummy) parent window
   window_p =
     GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_WINDOW_TAB_CHANNEL)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_WINDOW_TAB_CHANNEL)));
   ACE_ASSERT (window_p);
   // retrieve channel tab label
   hbox_p =
     GTK_HBOX (gtk_builder_get_object ((*iterator).second.second,
-                                      ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_HBOX_CHANNEL_TAB)));
+                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_HBOX_CHANNEL_TAB)));
   ACE_ASSERT (hbox_p);
   g_object_ref (hbox_p);
   gtk_container_remove (GTK_CONTAINER (window_p),
@@ -504,7 +504,7 @@ idle_add_channel_cb (gpointer userData_in)
   // set tab label
   label_p =
     GTK_LABEL (gtk_builder_get_object ((*iterator).second.second,
-                                       ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_LABEL_CHANNEL_TAB)));
+                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_LABEL_CHANNEL_TAB)));
   ACE_ASSERT (label_p);
   if (!bittorrent_Tools::isValidChannelName (data_p->id))
   {
@@ -516,20 +516,20 @@ idle_add_channel_cb (gpointer userData_in)
     // hide channel mode tab frame
     frame_p =
       GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
-                                         ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_FRAME_CHANNELMODE)));
+                                         ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_FRAME_CHANNELMODE)));
     ACE_ASSERT (frame_p);
     gtk_widget_hide (GTK_WIDGET (frame_p));
     // hide channel tab treeview
     tree_view_p =
       GTK_TREE_VIEW (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TREEVIEW_CHANNEL)));
+                                             ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TREEVIEW_CHANNEL)));
     ACE_ASSERT (tree_view_p);
     gtk_widget_hide (GTK_WIDGET (tree_view_p));
 
     // erase "topic" label
     label_2 =
       GTK_LABEL (gtk_builder_get_object ((*iterator).second.second,
-                                         ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_LABEL_TOPIC)));
+                                         ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_LABEL_TOPIC)));
     ACE_ASSERT (label_2);
     gtk_label_set_text (label_2, NULL);
   } // end IF
@@ -541,12 +541,12 @@ idle_add_channel_cb (gpointer userData_in)
   // retrieve (dummy) parent window
   window_p =
     GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_WINDOW_CHANNEL)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_WINDOW_CHANNEL)));
   ACE_ASSERT (window_p);
   // retrieve channel tab
   vbox_p =
     GTK_VBOX (gtk_builder_get_object ((*iterator).second.second,
-                                      ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_VBOX_CHANNEL)));
+                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_VBOX_CHANNEL)));
   ACE_ASSERT (vbox_p);
   g_object_ref (vbox_p);
   gtk_container_remove (GTK_CONTAINER (window_p),
@@ -565,7 +565,7 @@ idle_add_channel_cb (gpointer userData_in)
 
   notebook_p =
       GTK_NOTEBOOK (gtk_builder_get_object ((*iterator_2).second.second,
-                                            ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_NOTEBOOK_CHANNELS)));
+                                            ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_NOTEBOOK_CHANNELS)));
   ACE_ASSERT (notebook_p);
   page_number = gtk_notebook_append_page (notebook_p,
                                           GTK_WIDGET (vbox_p),
@@ -591,7 +591,7 @@ idle_add_channel_cb (gpointer userData_in)
   g_object_unref (vbox_p);
 
   // activate new page (iff it's a channel tab !)
-  if (bittorrent_Tools::isValidChannelName (data_p->id))
+  if (BitTorrent_Tools::isValidChannelName (data_p->id))
   {
     // *IMPORTANT NOTE*: release lock while switching pages
     ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->GTKState->lock);
@@ -612,8 +612,8 @@ idle_add_connection_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_add_connection_cb"));
 
-  bittorrent_Client_GTK_ConnectionCBData* data_p =
-    static_cast<bittorrent_Client_GTK_ConnectionCBData*> (userData_in);
+  BitTorrent_Client_GTK_SessionCBData* data_p =
+    static_cast<BitTorrent_Client_GTK_SessionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -651,12 +651,12 @@ idle_add_connection_cb (gpointer userData_in)
   // retrieve (dummy) parent window
   window_p =
     GTK_WINDOW (gtk_builder_get_object ((*iterator_2).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_WINDOW_TAB_CONNECTION)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_WINDOW_TAB_CONNECTION)));
   ACE_ASSERT (window_p);
   // retrieve server tab label
   hbox_p =
     GTK_HBOX (gtk_builder_get_object ((*iterator_2).second.second,
-                                      ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_HBOX_CONNECTION_TAB)));
+                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_HBOX_CONNECTION_TAB)));
   ACE_ASSERT (hbox_p);
   g_object_ref (hbox_p);
   gtk_container_remove (GTK_CONTAINER (window_p),
@@ -664,7 +664,7 @@ idle_add_connection_cb (gpointer userData_in)
   // set tab label
   label_p =
     GTK_LABEL (gtk_builder_get_object ((*iterator_2).second.second,
-                                       ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_LABEL_CONNECTION_TAB)));
+                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_LABEL_CONNECTION_TAB)));
   ACE_ASSERT (label_p);
   string_p = Common_UI_Tools::Locale2UTF8 (data_p->label);
   if (!string_p)
@@ -683,19 +683,19 @@ idle_add_connection_cb (gpointer userData_in)
   // disable close button (until connection is fully established)
   button_p =
     GTK_BUTTON (gtk_builder_get_object ((*iterator_2).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_BUTTON_DISCONNECT)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_DISCONNECT)));
   ACE_ASSERT (button_p);
   gtk_widget_set_sensitive (GTK_WIDGET (button_p), FALSE);
 
   // retrieve (dummy) parent window
   window_p =
     GTK_WINDOW (gtk_builder_get_object ((*iterator_2).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_WINDOW_CONNECTION)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_WINDOW_CONNECTION)));
   ACE_ASSERT (window_p);
   // retrieve server tab
   vbox_p =
     GTK_VBOX (gtk_builder_get_object ((*iterator_2).second.second,
-                                      ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_VBOX_CONNECTION)));
+                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_VBOX_CONNECTION)));
   ACE_ASSERT (vbox_p);
   g_object_ref (vbox_p);
   gtk_container_remove (GTK_CONTAINER (window_p),
@@ -703,7 +703,7 @@ idle_add_connection_cb (gpointer userData_in)
 
   notebook_p =
     GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_NOTEBOOK_CONNECTIONS)));
+                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_NOTEBOOK_CONNECTIONS)));
   ACE_ASSERT (notebook_p);
   page_number = gtk_notebook_append_page (notebook_p,
                                           GTK_WIDGET (vbox_p),
@@ -788,11 +788,11 @@ idle_initialize_UI_cb (gpointer userData_in)
   // step2: populate phonebook
   GtkTreeStore* tree_store_p =
     GTK_TREE_STORE (gtk_builder_get_object ((*iterator).second.second,
-                                            ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TREESTORE_SERVERS)));
+                                            ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TREESTORE_SERVERS)));
   ACE_ASSERT (tree_store_p);
   GtkComboBox* combo_box_p =
     GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-                                           ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_COMBOBOX_SERVERS)));
+                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_COMBOBOX_SERVERS)));
   ACE_ASSERT (combo_box_p);
   // *NOTE*: the combobox displays (selectable) column headers
   //         --> don't want that
@@ -861,7 +861,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   //                               &const_cast<main_cb_data&> (userData_in));
   GtkEntry* entry_p =
     GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                       ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_ENTRY_SEND)));
+                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_ENTRY_SEND)));
   ACE_ASSERT (entry_p);
   gulong result = g_signal_connect (entry_p,
                                     ACE_TEXT_ALWAYS_CHAR ("focus-in-event"),
@@ -875,7 +875,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (result);
   GtkButton* button_p =
     GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_BUTTON_SEND)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_SEND)));
   ACE_ASSERT (button_p);
   result = g_signal_connect (button_p,
                              ACE_TEXT_ALWAYS_CHAR ("clicked"),
@@ -884,7 +884,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (result);
   button_p =
     GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_BUTTON_CONNECT)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_CONNECT)));
   ACE_ASSERT (button_p);
   result = g_signal_connect (button_p,
                              ACE_TEXT_ALWAYS_CHAR ("clicked"),
@@ -893,7 +893,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (result);
   button_p =
     GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_BUTTON_ABOUT)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_ABOUT)));
   ACE_ASSERT (button_p);
   result = g_signal_connect (button_p,
                              ACE_TEXT_ALWAYS_CHAR ("clicked"),
@@ -902,7 +902,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   ACE_ASSERT (result);
   button_p =
     GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_BUTTON_QUIT)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_QUIT)));
   ACE_ASSERT (button_p);
   result = g_signal_connect (button_p,
                              ACE_TEXT_ALWAYS_CHAR ("clicked"),
@@ -914,7 +914,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   // step4: retrieve toplevel handle
   GtkWindow* window_p =
     GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_WINDOW_MAIN)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_WINDOW_MAIN)));
   ACE_ASSERT (window_p);
   if (!window_p)
   {
@@ -940,11 +940,11 @@ idle_initialize_UI_cb (gpointer userData_in)
 
   GtkStatusbar* statusbar_p =
     GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
-                                           ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_STATUSBAR)));
+                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_STATUSBAR)));
   ACE_ASSERT (statusbar_p);
   data_p->contextID =
     gtk_statusbar_get_context_id (statusbar_p,
-                                  ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_STATUSBAR_CONTEXT_DESCRIPTION));
+                                  ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_STATUSBAR_CONTEXT_DESCRIPTION));
 
   //// use correct screen
   //if (parentWidget_in)
@@ -959,7 +959,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   //                   (100% on Linux, ~30% on Windows)
   //                   --> use a timer
   guint refresh_interval =
-    static_cast<guint> ((1.0F / static_cast<float> (bittorrent_CLIENT_GUI_GTK_LOG_REFRESH_RATE)) * 1000.0F);
+    static_cast<guint> ((1.0F / static_cast<float> (BITTORRENT_CLIENT_GUI_GTK_LOG_REFRESH_RATE)) * 1000.0F);
   event_source_id = g_timeout_add_full (G_PRIORITY_DEFAULT,
                                         refresh_interval, // ms
                                         idle_update_display_cb,
@@ -1023,7 +1023,7 @@ idle_remove_channel_cb (gpointer userData_in)
   // remove channel page from connection notebook ?
   notebook_p =
     GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_NOTEBOOK_CHANNELS)));
+                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_NOTEBOOK_CHANNELS)));
   ACE_ASSERT (notebook_p);
   if (data_p->handler->isServerLog ())
     goto done; // skip page removal (that page belongs to the connection)
@@ -1041,7 +1041,7 @@ idle_remove_channel_cb (gpointer userData_in)
 
   vbox_p =
       GTK_VBOX (gtk_builder_get_object ((*iterator_2).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_VBOX_CHANNEL)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_VBOX_CHANNEL)));
   ACE_ASSERT (vbox_p);
   page_number = gtk_notebook_page_num (notebook_p,
                                        GTK_WIDGET (vbox_p));
@@ -1061,8 +1061,8 @@ done:
   number_of_pages = gtk_notebook_get_n_pages (notebook_p);
   if ((number_of_pages == 1) && data_p->connection->closing_)
   {
-    bittorrent_Client_GTK_ConnectionCBData* cb_data_p =
-        &const_cast<bittorrent_Client_GTK_ConnectionCBData&> (data_p->connection->get ());
+    BitTorrent_Client_GTK_SessionCBData* cb_data_p =
+        &const_cast<BitTorrent_Client_GTK_SessionCBData&> (data_p->connection->get ());
     cb_data_p->eventSourceID =
       g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
                        idle_remove_connection_cb,
@@ -1087,8 +1087,8 @@ idle_remove_connection_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_remove_connection_cb"));
 
-  bittorrent_Client_GTK_ConnectionCBData* data_p =
-    static_cast<bittorrent_Client_GTK_ConnectionCBData*> (userData_in);
+  BitTorrent_Client_GTK_SessionCBData* data_p =
+    static_cast<BitTorrent_Client_GTK_SessionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1129,11 +1129,11 @@ idle_remove_connection_cb (gpointer userData_in)
   // remove server page from parent notebook
   notebook_p =
     GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_NOTEBOOK_CONNECTIONS)));
+                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_NOTEBOOK_CONNECTIONS)));
   ACE_ASSERT (notebook_p);
   vbox_p =
     GTK_VBOX (gtk_builder_get_object ((*iterator_2).second.second,
-                                      ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_VBOX_CONNECTION)));
+                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_VBOX_CONNECTION)));
   ACE_ASSERT (vbox_p);
   page_number = gtk_notebook_page_num (notebook_p,
                                        GTK_WIDGET (vbox_p));
@@ -1155,7 +1155,7 @@ idle_remove_connection_cb (gpointer userData_in)
   // if necessary, shrink main window
   window_p =
     GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_WINDOW_MAIN)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_WINDOW_MAIN)));
   ACE_ASSERT (window_p);
   gtk_window_resize (window_p, 1, 1);
 
@@ -1204,67 +1204,67 @@ idle_update_channel_modes_cb (gpointer userData_in)
   // display (changed) channel modes
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_KEY)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_KEY)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 data_p->channelModes[CHANNELMODE_PASSWORD]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_VOICE)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_VOICE)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 data_p->channelModes[CHANNELMODE_VOICE]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BAN)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BAN)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 data_p->channelModes[CHANNELMODE_BAN]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_USERLIMIT)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_USERLIMIT)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 data_p->channelModes[CHANNELMODE_USERLIMIT]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_MODERATED)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_MODERATED)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 data_p->channelModes[CHANNELMODE_MODERATED]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BLOCKFOREIGN)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BLOCKFOREIGN)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 data_p->channelModes[CHANNELMODE_BLOCKFOREIGNMSGS]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_RESTRICTOPIC)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_RESTRICTOPIC)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 data_p->channelModes[CHANNELMODE_RESTRICTEDTOPIC]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_INVITEONLY)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_INVITEONLY)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 data_p->channelModes[CHANNELMODE_INVITEONLY]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_SECRET)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_SECRET)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 data_p->channelModes[CHANNELMODE_SECRET]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_PRIVATE)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_PRIVATE)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 data_p->channelModes[CHANNELMODE_PRIVATE]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_OPERATOR)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_OPERATOR)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 data_p->channelModes[CHANNELMODE_OPERATOR]);
@@ -1274,7 +1274,7 @@ idle_update_channel_modes_cb (gpointer userData_in)
   // retrieve channel tab mode hbox handle
   hbox_p =
     GTK_HBOX (gtk_builder_get_object ((*iterator).second.second,
-                                      ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_HBOX_CHANNELMODE)));
+                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_HBOX_CHANNELMODE)));
   ACE_ASSERT (hbox_p);
   gtk_widget_set_sensitive (GTK_WIDGET (hbox_p),
                             data_p->channelModes.test (CHANNELMODE_OPERATOR));
@@ -1345,7 +1345,7 @@ idle_update_progress_cb (gpointer userData_in)
 
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_PROGRESSBAR)));
+                                              ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_PROGRESSBAR)));
   ACE_ASSERT (progress_bar_p);
 
   ACE_THR_FUNC_RETURN exit_status;
@@ -1401,7 +1401,7 @@ idle_update_progress_cb (gpointer userData_in)
       //  } // end IF
       //  GtkWindow* window_p =
       //    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
-      //                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_WINDOW_MAIN)));
+      //                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_WINDOW_MAIN)));
       //  ACE_ASSERT (window_p);
       //  GdkWindow* window_2 = gtk_widget_get_window (GTK_WIDGET (window_p));
       //  ACE_ASSERT (window_2);
@@ -1423,8 +1423,8 @@ idle_update_user_modes_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_user_modes_cb"));
 
-  bittorrent_Client_GTK_ConnectionCBData* data_p =
-    static_cast<bittorrent_Client_GTK_ConnectionCBData*> (userData_in);
+  BitTorrent_Client_GTK_SessionCBData* data_p =
+    static_cast<BitTorrent_Client_GTK_SessionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1464,43 +1464,43 @@ idle_update_user_modes_cb (gpointer userData_in)
   // display (changed) user modes
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
+                                                ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 connection_state_p->userModes[USERMODE_AWAY]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE)));
+                                                ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 connection_state_p->userModes[USERMODE_INVISIBLE]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES)));
+                                                ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 connection_state_p->userModes[USERMODE_RECVNOTICES]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR)));
+                                                ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 connection_state_p->userModes[USERMODE_OPERATOR]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED)));
+                                                ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 connection_state_p->userModes[USERMODE_RESTRICTEDCONN]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR)));
+                                                ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 connection_state_p->userModes[USERMODE_LOCALOPERATOR]);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS)));
+                                                ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS)));
   ACE_ASSERT (toggle_button_p);
   gtk_toggle_button_set_active (toggle_button_p,
                                 connection_state_p->userModes[USERMODE_RECVWALLOPS]);
@@ -1536,7 +1536,7 @@ button_about_clicked_cb (GtkWidget* widget_in,
   // retrieve about dialog handle
   GtkDialog* dialog_p =
     GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_DIALOG_MAIN_ABOUT)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_DIALOG_MAIN_ABOUT)));
   ACE_ASSERT (dialog_p);
 
   // run dialog
@@ -1568,7 +1568,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   // step1: retrieve active phonebook entry
   GtkComboBox* combo_box_p =
     GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-                                           ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_COMBOBOX_SERVERS)));
+                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_COMBOBOX_SERVERS)));
   ACE_ASSERT (combo_box_p);
   GtkTreeIter tree_iter;
   //   GValue active_value;
@@ -1664,7 +1664,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
    data_p->configuration->protocolConfiguration.loginOptions;
   GtkEntry* entry_p =
     GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                       ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_ENTRY_MAIN)));
+                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_ENTRY_MAIN)));
   ACE_ASSERT (entry_p);
   gtk_entry_buffer_delete_text (gtk_entry_get_buffer (entry_p),
                                 0, -1);
@@ -1681,7 +1681,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   // retrieve entry dialog handle
   GtkDialog* dialog_p =
     GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_DIALOG_MAIN_ENTRY)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_DIALOG_MAIN_ENTRY)));
   ACE_ASSERT (dialog_p);
   gtk_window_set_title (GTK_WINDOW (dialog_p),
                         ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_DIALOG_ENTRY_TITLE_NICK));
@@ -1733,7 +1733,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
            iterator_2 != data_p->connections.end ();
            ++iterator_2)
       {
-        const bittorrent_Client_GTK_ConnectionCBData& connection_data_r =
+        const BitTorrent_Client_GTK_SessionCBData& connection_data_r =
           (*iterator_2).second->get ();
         const bittorrent_Client_SessionState& connection_state_r =
           (*iterator_2).second->state ();
@@ -1752,7 +1752,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
       // remind the user
       GtkMessageDialog* message_dialog_p =
           GTK_MESSAGE_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-                                                      ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_DIALOG_MAIN_MESSAGE)));
+                                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_DIALOG_MAIN_MESSAGE)));
       ACE_ASSERT (message_dialog_p);
       gtk_message_dialog_set_markup (message_dialog_p,
                                      ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_MESSAGEDIALOG_TEXT_NICKNAMETAKEN));
@@ -1841,13 +1841,13 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   //{
   //  GtkWindow* window_p =
   //    GTK_WINDOW (gtk_builder_get_object ((*iterator).second.second,
-  //                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_WINDOW_MAIN)));
+  //                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_WINDOW_MAIN)));
   //  ACE_ASSERT (window_p);
   //  GdkWindow* window_2 = gtk_widget_get_window (GTK_WIDGET (window_p));
   //  ACE_ASSERT (window_2);
   //  GdkCursor* cursor_p = gdk_window_get_cursor (window_2);
   //  data_p->progressData.cursorType = gdk_cursor_get_cursor_type (cursor_p);
-  //  cursor_p = gdk_cursor_new (bittorrent_CLIENT_GUI_GTK_CURSOR_BUSY);
+  //  cursor_p = gdk_cursor_new (BITTORRENT_CLIENT_GUI_GTK_CURSOR_BUSY);
   //  if (!cursor_p)
   //  {
   //    ACE_DEBUG ((LM_ERROR,
@@ -1870,7 +1870,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   //} // end IF
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_PROGRESSBAR)));
+                                              ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_PROGRESSBAR)));
   ACE_ASSERT (progress_bar_p);
   gint width, height;
   gtk_widget_get_size_request (GTK_WIDGET (progress_bar_p), &width, &height);
@@ -1887,7 +1887,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
       //                 &data_p->progressData,
       //                 NULL);
       g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,                        // _LOW doesn't work (on Win32)
-                          bittorrent_CLIENT_GUI_GTK_PROGRESSBAR_UPDATE_INTERVAL, // ms (?)
+                          BITTORRENT_CLIENT_GUI_GTK_PROGRESSBAR_UPDATE_INTERVAL, // ms (?)
                           idle_update_progress_cb,
                           &data_p->progressData,
                           NULL);
@@ -1936,7 +1936,7 @@ entry_send_changed_cb (GtkWidget* widget_in,
   ACE_ASSERT (entry_p);
   GtkButton* button_p =
     GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_BUTTON_SEND)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_SEND)));
   ACE_ASSERT (button_p);
 
   guint16 text_length = gtk_entry_get_text_length (entry_p);
@@ -1967,7 +1967,7 @@ entry_send_kb_focused_cb (GtkWidget* widget_in,
   // make the "change" button the default widget...
   GtkButton* button_p =
     GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_BUTTON_SEND)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_SEND)));
   ACE_ASSERT (button_p);
   gtk_widget_grab_default (GTK_WIDGET (button_p));
 
@@ -2013,7 +2013,7 @@ button_send_clicked_cb (GtkWidget* widget_in,
   GtkEntryBuffer* buffer_p = NULL;
   GtkEntry* entry_p =
     GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                       ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_ENTRY_SEND)));
+                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_ENTRY_SEND)));
   ACE_ASSERT (entry_p);
   buffer_p = gtk_entry_get_buffer (entry_p);
   ACE_ASSERT (buffer_p);
@@ -2095,7 +2095,7 @@ button_send_clicked_cb (GtkWidget* widget_in,
   receivers.push_back (active_id);
   //bittorrent_Client_IIRCControl* controller_p =
   //  (*connections_iterator).second->getController ();
-  const bittorrent_Client_GTK_ConnectionCBData& connection_data_r =
+  const BitTorrent_Client_GTK_SessionCBData& connection_data_r =
     connection_p->get ();
   ACE_ASSERT (connection_data_r.controller);
   try {
@@ -2169,8 +2169,8 @@ button_disconnect_clicked_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::button_disconnect_clicked_cb"));
 
-  bittorrent_Client_GTK_ConnectionCBData* data_p =
-    static_cast<bittorrent_Client_GTK_ConnectionCBData*> (userData_in);
+  BitTorrent_Client_GTK_SessionCBData* data_p =
+    static_cast<BitTorrent_Client_GTK_SessionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (widget_in);
@@ -2214,8 +2214,8 @@ nickname_entry_kb_focused_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (event_in);
-  bittorrent_Client_GTK_ConnectionCBData* data_p =
-    static_cast<bittorrent_Client_GTK_ConnectionCBData*> (userData_in);
+  BitTorrent_Client_GTK_SessionCBData* data_p =
+    static_cast<BitTorrent_Client_GTK_SessionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -2236,7 +2236,7 @@ nickname_entry_kb_focused_cb (GtkWidget* widget_in,
   // make the "change" button the default widget...
   GtkButton* button_p =
     GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_BUTTON_NICK_ACCEPT)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_NICK_ACCEPT)));
   ACE_ASSERT (button_p);
   gtk_widget_grab_default (GTK_WIDGET (button_p));
 
@@ -2250,8 +2250,8 @@ nickname_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::nickname_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  bittorrent_Client_GTK_ConnectionCBData* data_p =
-    static_cast<bittorrent_Client_GTK_ConnectionCBData*> (userData_in);
+  BitTorrent_Client_GTK_SessionCBData* data_p =
+    static_cast<BitTorrent_Client_GTK_SessionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -2273,7 +2273,7 @@ nickname_clicked_cb (GtkWidget* widget_in,
   // retrieve buffer handle
   GtkEntry* entry_p =
     GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                       ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_ENTRY_NICK)));
+                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_ENTRY_NICK)));
   ACE_ASSERT (entry_p);
   GtkEntryBuffer* entry_buffer_p = gtk_entry_get_buffer (entry_p);
   ACE_ASSERT (entry_buffer_p);
@@ -2328,8 +2328,8 @@ usersbox_changed_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::usersbox_changed_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  bittorrent_Client_GTK_ConnectionCBData* data_p =
-    static_cast<bittorrent_Client_GTK_ConnectionCBData*> (userData_in);
+  BitTorrent_Client_GTK_SessionCBData* data_p =
+    static_cast<BitTorrent_Client_GTK_SessionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (widget_in);
@@ -2404,8 +2404,8 @@ refresh_users_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::refresh_users_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  bittorrent_Client_GTK_ConnectionCBData* data_p =
-    static_cast<bittorrent_Client_GTK_ConnectionCBData*> (userData_in);
+  BitTorrent_Client_GTK_SessionCBData* data_p =
+    static_cast<BitTorrent_Client_GTK_SessionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -2443,8 +2443,8 @@ channel_entry_kb_focused_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (event_in);
-  bittorrent_Client_GTK_ConnectionCBData* data_p =
-    static_cast<bittorrent_Client_GTK_ConnectionCBData*> (userData_in);
+  BitTorrent_Client_GTK_SessionCBData* data_p =
+    static_cast<BitTorrent_Client_GTK_SessionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -2465,7 +2465,7 @@ channel_entry_kb_focused_cb (GtkWidget* widget_in,
   // make the "change" button the default widget...
   GtkButton* button_p =
     GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_BUTTON_JOIN)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_JOIN)));
   ACE_ASSERT (button_p);
   gtk_widget_grab_default (GTK_WIDGET (button_p));
 
@@ -2479,8 +2479,8 @@ join_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::join_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  bittorrent_Client_GTK_ConnectionCBData* data_p =
-    static_cast<bittorrent_Client_GTK_ConnectionCBData*> (userData_in);
+  BitTorrent_Client_GTK_SessionCBData* data_p =
+    static_cast<BitTorrent_Client_GTK_SessionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -2503,7 +2503,7 @@ join_clicked_cb (GtkWidget* widget_in,
   // retrieve buffer handle
   GtkEntry* entry_p =
     GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                       ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_ENTRY_CONNECTION_CHANNEL)));
+                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_ENTRY_CONNECTION_CHANNEL)));
   ACE_ASSERT (entry_p);
   GtkEntryBuffer* entry_buffer_p = gtk_entry_get_buffer (entry_p);
   ACE_ASSERT (entry_buffer_p);
@@ -2563,8 +2563,8 @@ channelbox_changed_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::channelbox_changed_cb"));
 
-  bittorrent_Client_GTK_ConnectionCBData* data_p =
-    static_cast<bittorrent_Client_GTK_ConnectionCBData*> (userData_in);
+  BitTorrent_Client_GTK_SessionCBData* data_p =
+    static_cast<BitTorrent_Client_GTK_SessionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (widget_in);
@@ -2644,8 +2644,8 @@ refresh_channels_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::refresh_channels_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  bittorrent_Client_GTK_ConnectionCBData* data_p =
-    static_cast<bittorrent_Client_GTK_ConnectionCBData*> (userData_in);
+  BitTorrent_Client_GTK_SessionCBData* data_p =
+    static_cast<BitTorrent_Client_GTK_SessionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -2669,8 +2669,8 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
 
   int result = -1;
 
-  bittorrent_Client_GTK_ConnectionCBData* data_p =
-    static_cast<bittorrent_Client_GTK_ConnectionCBData*> (userData_in);
+  BitTorrent_Client_GTK_SessionCBData* data_p =
+    static_cast<BitTorrent_Client_GTK_SessionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (toggleButton_in);
@@ -2680,43 +2680,43 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
   // find out which button toggled...
   const gchar* name_p = gtk_buildable_get_name (GTK_BUILDABLE (toggleButton_in));
   result = ACE_OS::strcmp (name_p,
-                           ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY));
+                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY));
   if (result == 0)
     mode = USERMODE_AWAY;
   else
   {
     result = ACE_OS::strcmp (name_p,
-                             ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE));
+                             ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE));
     if (result == 0)
       mode = USERMODE_INVISIBLE;
     else
     {
       result = ACE_OS::strcmp (name_p,
-                               ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR));
+                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR));
       if (result == 0)
         mode = USERMODE_OPERATOR;
       else
       {
         result = ACE_OS::strcmp (name_p,
-                                 ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR));
+                                 ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR));
         if (result == 0)
           mode = USERMODE_LOCALOPERATOR;
         else
         {
           result = ACE_OS::strcmp (name_p,
-                                   ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED));
+                                   ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED));
           if (result == 0)
             mode = USERMODE_RESTRICTEDCONN;
           else
           {
             result = ACE_OS::strcmp (name_p,
-                                     ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES));
+                                     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES));
             if (result == 0)
               mode = USERMODE_RECVNOTICES;
             else
             {
               result = ACE_OS::strcmp (name_p,
-                                       ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS));
+                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS));
               if (result == 0)
                 mode = USERMODE_RECVWALLOPS;
               else
@@ -2798,8 +2798,8 @@ switch_channel_cb (GtkNotebook* notebook_in,
 
   ACE_UNUSED_ARG (notebook_in);
   ACE_UNUSED_ARG (page_in);
-  bittorrent_Client_GTK_ConnectionCBData* data_p =
-    static_cast<bittorrent_Client_GTK_ConnectionCBData*> (userData_in);
+  BitTorrent_Client_GTK_SessionCBData* data_p =
+    static_cast<BitTorrent_Client_GTK_SessionCBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -2816,7 +2816,7 @@ switch_channel_cb (GtkNotebook* notebook_in,
   // --> disable corresponding widget(s) in the main UI
   GtkHBox* hbox_p =
       GTK_HBOX (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_HBOX_SEND)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_HBOX_SEND)));
   ACE_ASSERT (hbox_p);
   gtk_widget_set_sensitive (GTK_WIDGET (hbox_p), (pageNum_in != 0));
 }
@@ -2827,8 +2827,8 @@ action_away_cb (GtkAction* action_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::action_away_cb"));
 
-  bittorrent_Client_GTK_ConnectionCBData* data_p =
-    static_cast<bittorrent_Client_GTK_ConnectionCBData*>(userData_in);
+  BitTorrent_Client_GTK_SessionCBData* data_p =
+    static_cast<BitTorrent_Client_GTK_SessionCBData*>(userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -2844,7 +2844,7 @@ action_away_cb (GtkAction* action_in,
 
   GtkToggleButton* togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_TOOLS_1)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_TOOLS_1)));
   ACE_ASSERT (togglebutton_p);
 
   bool activating = gtk_toggle_button_get_active (togglebutton_p);
@@ -2878,7 +2878,7 @@ action_away_cb (GtkAction* action_in,
   {
     GtkEntry* entry_p =
       GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                         ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_ENTRY_CONNECTION)));
+                                         ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_ENTRY_CONNECTION)));
     ACE_ASSERT (entry_p);
     // clean up
     gtk_entry_buffer_delete_text (gtk_entry_get_buffer (entry_p),
@@ -2894,7 +2894,7 @@ action_away_cb (GtkAction* action_in,
 
     GtkDialog* dialog_p =
       GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_DIALOG_CONNECTION_ENTRY)));
+                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_DIALOG_CONNECTION_ENTRY)));
     ACE_ASSERT (dialog_p);
     gtk_window_set_title (GTK_WINDOW (dialog_p),
                           ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_DIALOG_ENTRY_TITLE_AWAY));
@@ -2964,14 +2964,14 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
     gtk_buildable_get_name (GTK_BUILDABLE (toggleButton_in));
   result =
     ACE_OS::strcmp (name_p,
-                    ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_ANONYMOUS));
+                    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_ANONYMOUS));
   if (result == 0)
     mode = CHANNELMODE_ANONYMOUS;
   else
   {
     result =
       ACE_OS::strcmp (name_p,
-                      ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BAN));
+                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BAN));
     if (result == 0)
     {
       mode = CHANNELMODE_BAN;
@@ -2983,14 +2983,14 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
     {
       result =
         ACE_OS::strcmp (name_p,
-                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_INVITEONLY));
+                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_INVITEONLY));
       if (result == 0)
         mode = CHANNELMODE_INVITEONLY;
       else
       {
         result =
           ACE_OS::strcmp (name_p,
-                          ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_KEY));
+                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_KEY));
         if (result == 0)
         {
           mode = CHANNELMODE_PASSWORD;
@@ -3002,7 +3002,7 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
         {
           result =
             ACE_OS::strcmp (name_p,
-                            ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_USERLIMIT));
+                            ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_USERLIMIT));
           if (result == 0)
           {
             mode = CHANNELMODE_USERLIMIT;
@@ -3014,63 +3014,63 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
           {
             result =
               ACE_OS::strcmp (name_p,
-                              ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_MODERATED));
+                              ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_MODERATED));
             if (result == 0)
               mode = CHANNELMODE_MODERATED;
             else
             {
               result =
                 ACE_OS::strcmp (name_p,
-                                ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BLOCKFOREIGN));
+                                ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_BLOCKFOREIGN));
               if (result == 0)
                 mode = CHANNELMODE_BLOCKFOREIGNMSGS;
               else
               {
                 result =
                   ACE_OS::strcmp (name_p,
-                                  ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_OPERATOR));
+                                  ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_OPERATOR));
                 if (result == 0)
                   mode = CHANNELMODE_OPERATOR;
                 else
                 {
                   result =
                     ACE_OS::strcmp (name_p,
-                                    ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_PRIVATE));
+                                    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_PRIVATE));
                   if (result == 0)
                     mode = CHANNELMODE_PRIVATE;
                   else
                   {
                     result =
                       ACE_OS::strcmp (name_p,
-                                      ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_QUIET));
+                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_QUIET));
                     if (result == 0)
                       mode = CHANNELMODE_QUIET;
                     else
                     {
                       result =
                         ACE_OS::strcmp (name_p,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_REOP));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_REOP));
                       if (result == 0)
                         mode = CHANNELMODE_REOP;
                       else
                       {
                         result =
                           ACE_OS::strcmp (name_p,
-                                          ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_SECRET));
+                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_SECRET));
                         if (result == 0)
                           mode = CHANNELMODE_SECRET;
                         else
                         {
                           result =
                             ACE_OS::strcmp (name_p,
-                                            ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_RESTRICTOPIC));
+                                            ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_RESTRICTOPIC));
                           if (result == 0)
                             mode = CHANNELMODE_RESTRICTEDTOPIC;
                           else
                           {
                             result =
                               ACE_OS::strcmp (name_p,
-                                              ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_VOICE));
+                                              ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_CHANNELMODE_VOICE));
                             if (result == 0)
                             {
                               mode = CHANNELMODE_VOICE;
@@ -3133,7 +3133,7 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
 
   // *TODO*: there must be a better way to do this
   //         (see: bittorrent_client_messagehandler.cpp:480)
-  const bittorrent_Client_GTK_ConnectionCBData& connection_data_r =
+  const BitTorrent_Client_GTK_SessionCBData& connection_data_r =
     data_p->connection->get ();
   std::string builder_label = connection_data_r.timeStamp;
   builder_label += ACE_TEXT_ALWAYS_CHAR ("::");
@@ -3151,7 +3151,7 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
   {
     GtkEntry* entry_p =
       GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                         ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_ENTRY_CHANNEL)));
+                                         ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_ENTRY_CHANNEL)));
     ACE_ASSERT (entry_p);
     // clean up
     gtk_entry_buffer_delete_text (gtk_entry_get_buffer (entry_p),
@@ -3164,7 +3164,7 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
     // retrieve entry dialog handle
     GtkDialog* dialog_p =
       GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_DIALOG_CHANNEL_ENTRY)));
+                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_DIALOG_CHANNEL_ENTRY)));
     ACE_ASSERT (dialog_p);
     gtk_window_set_title (GTK_WINDOW (dialog_p),
                           entry_label.c_str ());
@@ -3243,7 +3243,7 @@ topic_clicked_cb (GtkWidget* widget_in,
 
   // *TODO*: there must be a better way to do this
   //         (see: bittorrent_client_messagehandler.cpp:480)
-  const bittorrent_Client_GTK_ConnectionCBData& connection_data_r =
+  const BitTorrent_Client_GTK_SessionCBData& connection_data_r =
     data_p->connection->get ();
   std::string builder_label = connection_data_r.timeStamp;
   builder_label += ACE_TEXT_ALWAYS_CHAR ("::");
@@ -3257,7 +3257,7 @@ topic_clicked_cb (GtkWidget* widget_in,
   // retrieve entry handle
   GtkEntry* entry_p =
     GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
-                                       ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_ENTRY_CHANNEL)));
+                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_ENTRY_CHANNEL)));
   ACE_ASSERT (entry_p);
 //   gtk_entry_set_max_length(entry_p,
 //                            0); // no limit
@@ -3266,7 +3266,7 @@ topic_clicked_cb (GtkWidget* widget_in,
   // retrieve label handle
   GtkLabel* label_p =
     GTK_LABEL (gtk_builder_get_object ((*iterator).second.second,
-                                       ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_LABEL_TOPIC)));
+                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_LABEL_TOPIC)));
   ACE_ASSERT (label_p);
   gtk_entry_buffer_set_text (gtk_entry_get_buffer (entry_p),
                              gtk_label_get_text (label_p),
@@ -3277,7 +3277,7 @@ topic_clicked_cb (GtkWidget* widget_in,
   // retrieve entry dialog handle
   GtkDialog* dialog_p =
     GTK_DIALOG (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_DIALOG_CHANNEL_ENTRY)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_DIALOG_CHANNEL_ENTRY)));
   ACE_ASSERT (dialog_p);
   gtk_window_set_title (GTK_WINDOW (dialog_p),
                         ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_DIALOG_ENTRY_TITLE_TOPIC));
@@ -3467,7 +3467,7 @@ members_clicked_cb (GtkWidget* widget_in,
   string_list_iterator_t self = data_p->parameters.end ();
   const bittorrent_Client_SessionState& connection_state_r =
     data_p->connection->state ();
-  //const bittorrent_Client_GTK_ConnectionCBData& connection_data_r =
+  //const BitTorrent_Client_GTK_SessionCBData& connection_data_r =
   //  data_p->connection->get ();
   for (;
        iterator_2 != data_p->parameters.end ();
@@ -3496,7 +3496,7 @@ members_clicked_cb (GtkWidget* widget_in,
   // initialize popup menu
   GtkMenu* menu_p =
     GTK_MENU (gtk_builder_get_object ((*iterator).second.second,
-                                      ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_MENU_CHANNEL)));
+                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_MENU_CHANNEL)));
   ACE_ASSERT (menu_p);
 
   // initialize active_channels submenu
@@ -3512,7 +3512,7 @@ members_clicked_cb (GtkWidget* widget_in,
     // clear popup menu
     GtkMenu* menu_2 =
       GTK_MENU (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_MENU_CHANNEL_INVITE)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_MENU_CHANNEL_INVITE)));
     ACE_ASSERT (menu_2);
     list_p =
       gtk_container_get_children (GTK_CONTAINER (menu_2));
@@ -3530,7 +3530,7 @@ members_clicked_cb (GtkWidget* widget_in,
     // populate popup menu
     GtkAction* action_p =
       GTK_ACTION (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_ACTION_INVITE)));
+                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_ACTION_INVITE)));
     ACE_ASSERT (action_p);
     menu_item_p = NULL;
     for (string_list_const_iterator_t iterator_2 = active_channels.begin ();
@@ -3552,7 +3552,7 @@ members_clicked_cb (GtkWidget* widget_in,
 
     menu_item_p =
       GTK_MENU_ITEM (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_MENUITEM_INVITE)));
+                                             ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_MENUITEM_INVITE)));
     ACE_ASSERT (menu_item_p);
     gtk_widget_set_sensitive (GTK_WIDGET (menu_item_p), TRUE);
   } // end IF
@@ -3560,7 +3560,7 @@ members_clicked_cb (GtkWidget* widget_in,
   {
     menu_item_p =
       GTK_MENU_ITEM (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_MENUITEM_INVITE)));
+                                             ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_MENUITEM_INVITE)));
     ACE_ASSERT (menu_item_p);
     gtk_widget_set_sensitive (GTK_WIDGET (menu_item_p), FALSE);
   } // end ELSE
@@ -3568,13 +3568,13 @@ members_clicked_cb (GtkWidget* widget_in,
   // en-/disable some entries...
   menu_item_p =
     GTK_MENU_ITEM (gtk_builder_get_object ((*iterator).second.second,
-                                           ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_MENUITEM_KICK)));
+                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_MENUITEM_KICK)));
   ACE_ASSERT (menu_item_p);
   gtk_widget_set_sensitive (GTK_WIDGET (menu_item_p),
                             data_p->channelModes.test (CHANNELMODE_OPERATOR));
   menu_item_p =
     GTK_MENU_ITEM (gtk_builder_get_object ((*iterator).second.second,
-                                           ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_MENUITEM_BAN)));
+                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_MENUITEM_BAN)));
   ACE_ASSERT (menu_item_p);
   gtk_widget_set_sensitive (GTK_WIDGET (menu_item_p),
                             data_p->channelModes.test (CHANNELMODE_OPERATOR));
@@ -3640,7 +3640,7 @@ action_invite_cb (GtkAction* action_in,
   // --> currently active menuitem of the invite_channel_members_menu
   GtkMenu* menu_p =
     GTK_MENU (gtk_builder_get_object ((*iterator).second.second,
-                                      ACE_TEXT_ALWAYS_CHAR (bittorrent_CLIENT_GUI_GTK_MENU_CHANNEL_INVITE)));
+                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_MENU_CHANNEL_INVITE)));
   ACE_ASSERT (menu_p);
   GtkMenuItem* menu_item_p =
     GTK_MENU_ITEM (gtk_menu_get_active (menu_p));

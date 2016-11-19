@@ -81,7 +81,8 @@ class IRC_Export IRC_Message
  protected:
    // *NOTE*: to be used by allocators
    IRC_Message (ACE_Data_Block*, // data block to use
-                ACE_Allocator*); // message allocator
+                ACE_Allocator*,  // message allocator
+                bool = true);    // increment running message counter ?
    //   IRC_Client_Message(ACE_Allocator*); // message allocator
 
   // copy ctor to be used by duplicate() and child classes

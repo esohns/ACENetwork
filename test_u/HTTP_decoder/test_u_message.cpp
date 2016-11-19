@@ -25,7 +25,7 @@
 #include <ace/Log_Msg.h>
 #include <ace/Malloc_Base.h>
 
-#include "http_tools.h"
+//#include "http_tools.h"
 
 #include "net_macros.h"
 
@@ -123,26 +123,11 @@ Test_U_Message::duplicate (void) const
   return message_p;
 }
 
-HTTP_Method_t
-Test_U_Message::command () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::command"));
+//std::string
+//Test_U_Message::CommandType2String (HTTP_Method_t method_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::CommandType2String"));
 
-  // sanity check(s)
-  if (!inherited::isInitialized_)
-    return HTTP_Codes::HTTP_METHOD_INVALID;
-  ACE_ASSERT (inherited::data_);
-
-  const struct HTTP_Record& data_r = inherited::data_->get ();
-
-  return data_r.method;
-}
-
-std::string
-Test_U_Message::CommandType2String (HTTP_Method_t method_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::CommandType2String"));
-
-  return (method_in == HTTP_Codes::HTTP_METHOD_INVALID ? ACE_TEXT_ALWAYS_CHAR (HTTP_COMMAND_STRING_RESPONSE)
-                                                       : HTTP_Tools::Method2String (method_in));
-}
+//  return (method_in == HTTP_Codes::HTTP_METHOD_INVALID ? ACE_TEXT_ALWAYS_CHAR (HTTP_COMMAND_STRING_RESPONSE)
+//                                                       : HTTP_Tools::Method2String (method_in));
+//}

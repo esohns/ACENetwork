@@ -19,68 +19,70 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <ace/Synch.h>
+#include "bittorrent_client_configuration.h"
 #include "bittorrent_client_stream.h"
 
-BitTorrent_Client_PeerStream::BitTorrent_Client_PeerStream (const std::string& name_in)
- : inherited (name_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_PeerStream::BitTorrent_Client_PeerStream"));
+//BitTorrent_Client_PeerStream::BitTorrent_Client_PeerStream (const std::string& name_in)
+// : inherited (name_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_PeerStream::BitTorrent_Client_PeerStream"));
 
-  for (Stream_ModuleListIterator_t iterator = inherited::modules_.begin ();
-       iterator != inherited::modules_.end ();
-       iterator++)
-    (*iterator)->next (NULL);
-}
+//  for (Stream_ModuleListIterator_t iterator = inherited::modules_.begin ();
+//       iterator != inherited::modules_.end ();
+//       iterator++)
+//    (*iterator)->next (NULL);
+//}
 
-BitTorrent_Client_PeerStream::~BitTorrent_Client_PeerStream ()
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_PeerStream::~BitTorrent_Client_PeerStream"));
+//BitTorrent_Client_PeerStream::~BitTorrent_Client_PeerStream ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_PeerStream::~BitTorrent_Client_PeerStream"));
 
-  // *NOTE*: this implements an ordered shutdown on destruction
-  inherited::shutdown ();
-}
+//  // *NOTE*: this implements an ordered shutdown on destruction
+//  inherited::shutdown ();
+//}
 
-bool
-BitTorrent_Client_PeerStream::load (Stream_ModuleList_t& list_out,
-                                    bool& deleteModules_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_PeerStream::load"));
-
-
-
-  return inherited::load (list_out,
-                          deleteModules_out);
-}
-
-//////////////////////////////////////////
-
-BitTorrent_Client_TrackerStream::BitTorrent_Client_TrackerStream (const std::string& name_in)
- : inherited (name_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_TrackerStream::BitTorrent_Client_TrackerStream"));
-
-  for (Stream_ModuleListIterator_t iterator = inherited::modules_.begin ();
-       iterator != inherited::modules_.end ();
-       iterator++)
-    (*iterator)->next (NULL);
-}
-
-BitTorrent_Client_TrackerStream::~BitTorrent_Client_TrackerStream ()
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_TrackerStream::~BitTorrent_Client_TrackerStream"));
-
-  // *NOTE*: this implements an ordered shutdown on destruction
-  inherited::shutdown ();
-}
-
-bool
-BitTorrent_Client_TrackerStream::load (Stream_ModuleList_t& list_out,
-                                       bool& deleteModules_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_TrackerStream::load"));
+////bool
+////BitTorrent_Client_PeerStream::load (Stream_ModuleList_t& list_out,
+////                                    bool& deleteModules_out)
+////{
+////  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_PeerStream::load"));
 
 
 
-  return inherited::load (list_out,
-                          deleteModules_out);
-}
+////  return inherited::load (list_out,
+////                          deleteModules_out);
+////}
+
+////////////////////////////////////////////
+
+//BitTorrent_Client_TrackerStream::BitTorrent_Client_TrackerStream (const std::string& name_in)
+// : inherited (name_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_TrackerStream::BitTorrent_Client_TrackerStream"));
+
+//  for (Stream_ModuleListIterator_t iterator = inherited::modules_.begin ();
+//       iterator != inherited::modules_.end ();
+//       iterator++)
+//    (*iterator)->next (NULL);
+//}
+
+//BitTorrent_Client_TrackerStream::~BitTorrent_Client_TrackerStream ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_TrackerStream::~BitTorrent_Client_TrackerStream"));
+
+//  // *NOTE*: this implements an ordered shutdown on destruction
+//  inherited::shutdown ();
+//}
+
+//bool
+//BitTorrent_Client_TrackerStream::load (Stream_ModuleList_t& list_out,
+//                                       bool& deleteModules_out)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_TrackerStream::load"));
+
+
+
+//  return inherited::load (list_out,
+//                          deleteModules_out);
+//}

@@ -36,25 +36,20 @@
 #include "bittorrent_common.h"
 
 #include "bittorrent_client_gui_common.h"
+#include "bittorrent_client_network.h"
 #include "bittorrent_client_stream_common.h"
 
-// forward declaration(s)
-struct Common_UI_GTKState;
-
-/**
-  @author Erik Sohns <eriksohns@123mail.org>
-*/
 template <typename ConnectionType>
 class BitTorrent_Client_GUI_Session_T
- : public BitTorrent_Client_IStreamNotify_t
+ : public BitTorrent_Client_IPeerNotify_t
  , public Common_IGet_T<struct BitTorrent_Client_GTK_SessionCBData>
 {
  public:
-  BitTorrent_Client_GUI_Session_T (Common_UI_GTKState*,               // GTK state handle
-                                   BitTorrent_Client_GUI_Sessions_t*, // sessions handle
-                                   guint,                             // (statusbar) context ID
-                                   const std::string&,                // (server tab) label
-                                   const std::string&);               // UI (glade) file directory
+  BitTorrent_Client_GUI_Session_T (struct BitTorrent_Client_GTK_SessionCBData*, // GTK state handle
+                                   BitTorrent_Client_GUI_Sessions_t*,           // sessions handle
+                                   guint,                                       // (statusbar) context ID
+                                   const std::string&,                          // (server tab) label
+                                   const std::string&);                         // UI (glade) file directory
   // *WARNING*: must be called with
   //            BitTorrent_Client_GTK_CBData::Common_UI_GTKState::lock held !
   virtual ~BitTorrent_Client_GUI_Session_T ();
@@ -72,12 +67,12 @@ class BitTorrent_Client_GUI_Session_T
                        const Stream_SessionMessageType&);
   virtual void end (Stream_SessionId_t);
   virtual void notify (Stream_SessionId_t,
-                       const BitTorrent_Client_Message_t&);
+                       const BitTorrent_Client_PeerMessage&);
   virtual void notify (Stream_SessionId_t,
                        const BitTorrent_Client_SessionMessage&);
 
   // implement Common_IGet_T
-  virtual const BitTorrent_Client_GTK_SessionCBData& get () const;
+  virtual const struct BitTorrent_Client_GTK_SessionCBData& get () const;
 
   // *WARNING*: callers may need protection from:
   //            - the thread(s) servicing the UI (GTK) event loop
@@ -98,9 +93,9 @@ class BitTorrent_Client_GUI_Session_T
 
  private:
   typedef std::map<std::string,
-                   ConnectionType* > CONNECTIONS_T;
-  typedef CONNECTIONS_T::const_iterator CONNECTIONS_CONSTITERATOR_T;
-  typedef CONNECTIONS_T::iterator CONNECTIONS_ITERATOR_T;
+                   ConnectionType*> CONNECTIONS_T;
+  typedef typename CONNECTIONS_T::const_iterator CONNECTIONS_CONSTITERATOR_T;
+  typedef typename CONNECTIONS_T::iterator CONNECTIONS_ITERATOR_T;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_GUI_Session_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_GUI_Session_T (const BitTorrent_Client_GUI_Session_T&))
@@ -110,18 +105,21 @@ class BitTorrent_Client_GUI_Session_T
   void forward (const std::string&,  // channel/nickname
                 const std::string&); // message text
   void log (const std::string&);
-  void log (const IRC_Record&);
-  void error (const IRC_Record&,
+  void log (const struct BitTorrent_Record&);
+  void error (const struct BitTorrent_Record&,
               bool = true); // locked access ?
 
-  struct BitTorrent_Client_GTK_SessionCBData CBData_;
-  guint                                      contextID_;
-  bool                                       isFirstUsersMsg_;
-  struct BitTorrent_Client_SessionState      sessionState_;
-  std::string                                UIFileDirectory_;
+  struct BitTorrent_Client_GTK_SessionCBData* CBData_;
+  guint                                       contextID_;
+  bool                                        isFirstUsersMsg_;
+  struct BitTorrent_Client_SessionState*      sessionState_;
+  std::string                                 UIFileDirectory_;
 
-  mutable ACE_SYNCH_MUTEX                    lock_;
-  CONNECTIONS_T                              messageHandlers_;
+  mutable ACE_SYNCH_MUTEX                     lock_;
+  CONNECTIONS_T                               messageHandlers_;
 };
+
+// include template definition
+#include "bittorrent_client_gui_session.inl"
 
 #endif

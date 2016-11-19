@@ -69,7 +69,7 @@ struct DHCP_Stream_SessionData
    //, currentStatistic ()
   {};
 
-  DHCP_ConnectionState*   connectionState;
+  struct DHCP_ConnectionState* connectionState;
 
   //DHCP_RuntimeStatistic_t currentStatistic;
 };
@@ -84,8 +84,8 @@ struct DHCP_Stream_UserData
   {};
 
   // *TODO*: remove these ASAP
-  Stream_ModuleConfiguration*     moduleConfiguration;
-  DHCP_ModuleHandlerConfiguration* moduleHandlerConfiguration;
+  struct Stream_ModuleConfiguration*     moduleConfiguration;
+  struct DHCP_ModuleHandlerConfiguration* moduleHandlerConfiguration;
 };
 
 struct DHCP_StreamState
@@ -97,23 +97,23 @@ struct DHCP_StreamState
    , userData (NULL)
   {};
 
-  DHCP_Stream_SessionData* currentSessionData;
-  DHCP_Stream_UserData*    userData;
+  struct DHCP_Stream_SessionData* currentSessionData;
+  struct DHCP_Stream_UserData*    userData;
 };
 
 //typedef Stream_SessionData_T<DHCP_Stream_SessionData> DHCP_Stream_SessionData_t;
 
 //typedef Common_INotify_T<unsigned int,
-//                         DHCP_Stream_SessionData,
+//                         struct DHCP_Stream_SessionData,
 //                         DHCP_Record,
 //                         DHCP_SessionMessage> DHCP_IStreamNotify_t;
-typedef Stream_INotify_T<Stream_SessionMessageType> DHCP_Stream_INotify_t;
+typedef Stream_INotify_T<enum Stream_SessionMessageType> DHCP_Stream_INotify_t;
 
-//typedef DHCP_Stream_T<DHCP_StreamState,
-//                      DHCP_StreamConfiguration,
+//typedef DHCP_Stream_T<struct DHCP_StreamState,
+//                      struct DHCP_StreamConfiguration,
 //                      DHCP_RuntimeStatistic_t,
-//                      DHCP_ModuleHandlerConfiguration,
-//                      DHCP_Stream_SessionData,
+//                      struct DHCP_ModuleHandlerConfiguration,
+//                      struct DHCP_Stream_SessionData,
 //                      DHCP_Stream_SessionData_t,
 //                      ACE_Message_Block,
 //                      DHCP_Message_t,

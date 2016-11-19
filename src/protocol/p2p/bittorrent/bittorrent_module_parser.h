@@ -53,7 +53,8 @@ class BitTorrent_Module_Parser_T
                                   SessionMessageType,
                                   Stream_SessionId_t,
                                   Stream_SessionMessageType>
- , public BitTorrent_ParserDriver_T<SessionMessageType>
+ , public BitTorrent_ParserDriver_T<DataMessageType,
+                                    SessionMessageType>
 {
  public:
   BitTorrent_Module_Parser_T ();
@@ -80,7 +81,8 @@ class BitTorrent_Module_Parser_T
                                   SessionMessageType,
                                   Stream_SessionId_t,
                                   Stream_SessionMessageType> inherited;
-  typedef BitTorrent_ParserDriver_T<SessionMessageType> inherited2;
+  typedef BitTorrent_ParserDriver_T<DataMessageType,
+                                    SessionMessageType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_Parser_T (const BitTorrent_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_Parser_T& operator= (const BitTorrent_Module_Parser_T&))
@@ -89,9 +91,11 @@ class BitTorrent_Module_Parser_T
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
   typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
 
-  // implement (part of) BitTorrent_IParser
-  inline virtual DataMessageType& current () { return headFragment_; };
-  virtual void message (DataMessageType*&); // data message
+  // implement (part of) BitTorrent_IParser_T
+  ////////////////////////////////////////
+  // callbacks
+  // *IMPORTANT NOTE*: fire-and-forget API
+  virtual void record (struct BitTorrent_Record*&); // data record
   virtual void handshake (struct BitTorrent_PeerHandshake*&); // handshake
 
   // *NOTE*: strips the protocol data from the message buffer, leaving the
@@ -106,9 +110,7 @@ class BitTorrent_Module_Parser_T
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename LockType,
-          ////////////////////////////////
-          ACE_SYNCH_DECL,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           ////////////////////////////////
           typename ControlMessageType,
@@ -126,8 +128,7 @@ template <typename LockType,
           ////////////////////////////////
           typename StatisticContainerType>
 class BitTorrent_Module_ParserH_T
- : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ACE_SYNCH_USE,
+ : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
                                       ControlMessageType,
                                       DataMessageType,
@@ -139,7 +140,8 @@ class BitTorrent_Module_ParserH_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType>
- , public BitTorrent_ParserDriver_T<SessionMessageType>
+ , public BitTorrent_ParserDriver_T<DataMessageType,
+                                    SessionMessageType>
 {
  public:
   BitTorrent_Module_ParserH_T ();
@@ -147,8 +149,7 @@ class BitTorrent_Module_ParserH_T
 
   // *PORTABILITY*: for some reason, this base class member is not exposed
   //                (MSVC/gcc)
-  using Stream_HeadModuleTaskBase_T<LockType,
-                                    ACE_SYNCH_USE,
+  using Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                     TimePolicyType,
                                     ControlMessageType,
                                     DataMessageType,
@@ -179,8 +180,7 @@ class BitTorrent_Module_ParserH_T
   DataMessageType* headFragment_;
 
  private:
-  typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ACE_SYNCH_USE,
+  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
                                       ControlMessageType,
                                       DataMessageType,
@@ -192,19 +192,22 @@ class BitTorrent_Module_ParserH_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType> inherited;
-  typedef BitTorrent_ParserDriver_T<SessionMessageType> inherited2;
+  typedef BitTorrent_ParserDriver_T<DataMessageType,
+                                    SessionMessageType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_ParserH_T (const BitTorrent_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_ParserH_T& operator= (const BitTorrent_Module_ParserH_T&))
 
-  // implement (part of) BitTorrent_IParser
-  inline virtual DataMessageType& current () { return headFragment_; };
-  virtual void message (DataMessageType*&); // data message
-  virtual void handshake (struct BitTorrent_PeerHandshake*&); // handshake
-
   // convenient types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
   typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
+
+  // implement (part of) BitTorrent_IParser_T
+  ////////////////////////////////////////
+  // callbacks
+  // *IMPORTANT NOTE*: fire-and-forget API
+  virtual void record (struct BitTorrent_Record*&); // data record
+  virtual void handshake (struct BitTorrent_PeerHandshake*&); // handshake
 
   // *NOTE*: strips the protocol data from the message buffer, leaving the
   //         'piece' content. This data is then available only from the message

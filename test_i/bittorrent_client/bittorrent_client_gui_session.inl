@@ -41,13 +41,14 @@
 #include "bittorrent_client_gui_defines.h"
 #include "bittorrent_client_gui_messagehandler.h"
 
-BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GTKState* GTKState_in,
-                                                                    BitTorrent_Client_GUI_Connections_t* connections_in,
-                                                                    guint contextID_in,
-                                                                    const std::string& label_in,
-                                                                    const std::string& UIFileDirectory_in)
+template <typename ConnectionType>
+BitTorrent_Client_GUI_Session_T<ConnectionType>::BitTorrent_Client_GUI_Session_T (struct BitTorrent_Client_GTK_SessionCBData* CBData_in,
+                                                                                  BitTorrent_Client_GUI_Sessions_t* sessions_in,
+                                                                                  guint contextID_in,
+                                                                                  const std::string& label_in,
+                                                                                  const std::string& UIFileDirectory_in)
  : closing_ (false)
- , CBData_ ()
+ , CBData_ (CBData_in)
  , contextID_ (contextID_in)
  , isFirstUsersMsg_ (true)
  , sessionState_ (NULL)
@@ -55,11 +56,11 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
  , lock_ ()
  , messageHandlers_ ()
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::BitTorrent_Client_GUI_Session_T"));
 
   // sanity check(s)
-  ACE_ASSERT (GTKState_in);
-  ACE_ASSERT (connections_in);
+  ACE_ASSERT (CBData_in);
+  ACE_ASSERT (sessions_in);
   if (!Common_File_Tools::isDirectory (UIFileDirectory_in))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -69,11 +70,10 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   } // end IF
 
   // initialize cb data
-  CBData_.connections = connections_in;
-  CBData_.eventSourceID = 0;
-  CBData_.GTKState = GTKState_in;
-  //   CBData_.nick.clear(); // cannot set this now...
-  CBData_.label = label_in;
+  CBData_->sessions = sessions_in;
+  CBData_->eventSourceID = 0;
+  //   CBData_->nick.clear(); // cannot set this now...
+  CBData_->label = label_in;
   ACE_TCHAR time_stamp[27]; // ISO-8601 format
   ACE_OS::memset (&time_stamp, 0, sizeof (time_stamp));
   ACE_TCHAR* result_p = ACE::timestamp (COMMON_TIME_NOW,
@@ -86,7 +86,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
                 ACE_TEXT ("failed to ACE::timestamp(): \"%m\", returning\n")));
     return;
   } // end IF
-  CBData_.timeStamp = ACE_TEXT_ALWAYS_CHAR (time_stamp);
+  CBData_->timeStamp = ACE_TEXT_ALWAYS_CHAR (time_stamp);
 
   // create new GtkBuilder
   GtkBuilder* builder_p = gtk_builder_new ();
@@ -98,7 +98,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   } // end IF
   std::string ui_definition_filename = UIFileDirectory_;
   ui_definition_filename += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  ui_definition_filename += ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_UI_CONNECTION_FILE);
+  ui_definition_filename += ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_UI_CONNECTION_FILE);
   if (!Common_File_Tools::isReadable (ui_definition_filename))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -136,7 +136,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   // retrieve server tab channels store
   GtkListStore* list_store_p =
     GTK_LIST_STORE (gtk_builder_get_object (builder_p,
-                                            ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_LISTSTORE_CHANNELS)));
+                                            ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_LISTSTORE_CHANNELS)));
   ACE_ASSERT (list_store_p);
   // make it sort the channels by #members...
   gtk_tree_sortable_set_sort_column_id (GTK_TREE_SORTABLE (list_store_p),
@@ -145,7 +145,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   // connect signal(s)
   GtkButton* button_p =
     GTK_BUTTON (gtk_builder_get_object (builder_p,
-                                        ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_BUTTON_DISCONNECT)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_DISCONNECT)));
   ACE_ASSERT (button_p);
   gulong result_2 = g_signal_connect (button_p,
                                       ACE_TEXT_ALWAYS_CHAR ("clicked"),
@@ -154,7 +154,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   ACE_ASSERT (result_2);
   GtkEntry* entry_p =
     GTK_ENTRY (gtk_builder_get_object (builder_p,
-                                       ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_ENTRY_NICK)));
+                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_ENTRY_NICK)));
   ACE_ASSERT (entry_p);
   result_2 = g_signal_connect (entry_p,
                                ACE_TEXT_ALWAYS_CHAR ("focus-in-event"),
@@ -163,7 +163,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   ACE_ASSERT (result_2);
   button_p =
     GTK_BUTTON (gtk_builder_get_object (builder_p,
-                                        ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_BUTTON_NICK_ACCEPT)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_NICK_ACCEPT)));
   ACE_ASSERT (button_p);
   result_2 = g_signal_connect (button_p,
                                ACE_TEXT_ALWAYS_CHAR ("clicked"),
@@ -172,7 +172,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   ACE_ASSERT (result_2);
   GtkComboBox* combo_box_p =
     GTK_COMBO_BOX (gtk_builder_get_object (builder_p,
-                                           ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_COMBOBOX_USERS)));
+                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_COMBOBOX_USERS)));
   ACE_ASSERT (combo_box_p);
   result_2 = g_signal_connect (combo_box_p,
                                ACE_TEXT_ALWAYS_CHAR ("changed"),
@@ -181,7 +181,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   ACE_ASSERT (result_2);
   button_p =
     GTK_BUTTON (gtk_builder_get_object (builder_p,
-                                        ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_BUTTON_USERS_REFRESH)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_USERS_REFRESH)));
   ACE_ASSERT (button_p);
   result_2 = g_signal_connect (button_p,
                                ACE_TEXT_ALWAYS_CHAR ("clicked"),
@@ -190,7 +190,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   ACE_ASSERT (result_2);
   entry_p =
     GTK_ENTRY (gtk_builder_get_object (builder_p,
-                                       ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_ENTRY_CONNECTION_CHANNEL)));
+                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_ENTRY_CONNECTION_CHANNEL)));
   ACE_ASSERT (entry_p);
   result_2 = g_signal_connect (entry_p,
                                ACE_TEXT_ALWAYS_CHAR ("focus-in-event"),
@@ -199,7 +199,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   ACE_ASSERT (result_2);
   button_p =
     GTK_BUTTON (gtk_builder_get_object (builder_p,
-                                        ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_BUTTON_JOIN)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_JOIN)));
   ACE_ASSERT (button_p);
   result_2 = g_signal_connect (button_p,
                                ACE_TEXT_ALWAYS_CHAR ("clicked"),
@@ -208,7 +208,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   ACE_ASSERT (result_2);
   combo_box_p =
     GTK_COMBO_BOX (gtk_builder_get_object (builder_p,
-                                           ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_COMBOBOX_CHANNELS)));
+                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_COMBOBOX_CHANNELS)));
   ACE_ASSERT (combo_box_p);
   result_2 = g_signal_connect (combo_box_p,
                                ACE_TEXT_ALWAYS_CHAR ("changed"),
@@ -217,7 +217,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   ACE_ASSERT (result_2);
   button_p =
     GTK_BUTTON (gtk_builder_get_object (builder_p,
-                                        ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_BUTTON_CHANNELS_REFRESH)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_CHANNELS_REFRESH)));
   ACE_ASSERT (button_p);
   result_2 = g_signal_connect (button_p,
                                ACE_TEXT_ALWAYS_CHAR ("clicked"),
@@ -229,7 +229,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   // togglebuttons
   GtkToggleButton* toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
   ACE_ASSERT (toggle_button_p);
   //PangoAttribute* pango_attribute_p = pango_attr_scale_new (PANGO_SCALE_SMALL);
   //if (!pango_attribute_p)
@@ -347,7 +347,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   //ACE_ASSERT (result_2);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_INVISIBLE)));
   ACE_ASSERT (toggle_button_p);
   //label_p = GTK_LABEL (gtk_bin_get_child (GTK_BIN (toggle_button_p)));
   //ACE_ASSERT (label_p);
@@ -391,7 +391,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   ACE_ASSERT (result_2);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_OPERATOR)));
   ACE_ASSERT (toggle_button_p);
   result_2 = g_signal_connect (toggle_button_p,
                                ACE_TEXT_ALWAYS_CHAR ("toggled"),
@@ -400,7 +400,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   ACE_ASSERT (result_2);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_LOCALOPERATOR)));
   ACE_ASSERT (toggle_button_p);
   result_2 = g_signal_connect (toggle_button_p,
                                ACE_TEXT_ALWAYS_CHAR ("toggled"),
@@ -409,7 +409,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   ACE_ASSERT (result_2);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_RESTRICTED)));
   ACE_ASSERT (toggle_button_p);
   result_2 = g_signal_connect (toggle_button_p,
                                ACE_TEXT_ALWAYS_CHAR ("toggled"),
@@ -418,7 +418,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   ACE_ASSERT (result_2);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_NOTICES)));
   ACE_ASSERT (toggle_button_p);
   result_2 = g_signal_connect (toggle_button_p,
                                ACE_TEXT_ALWAYS_CHAR ("toggled"),
@@ -427,7 +427,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   ACE_ASSERT (result_2);
   toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object (builder_p,
-                                               ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_WALLOPS)));
   ACE_ASSERT (toggle_button_p);
   result_2 = g_signal_connect (toggle_button_p,
                                ACE_TEXT_ALWAYS_CHAR ("toggled"),
@@ -438,7 +438,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   //// actions
   //GtkAction* action_p =
   //  GTK_ACTION (gtk_builder_get_object (builder_p,
-  //                                      ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_ACTION_AWAY)));
+  //                                      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_ACTION_AWAY)));
   //ACE_ASSERT (action_p);
   //result_2 = g_signal_connect (action_p,
   //                           ACE_TEXT_ALWAYS_CHAR ("activate"),
@@ -449,7 +449,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   // retrieve channel tabs
   GtkNotebook* notebook_p =
     GTK_NOTEBOOK (gtk_builder_get_object (builder_p,
-                                          ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_NOTEBOOK_CHANNELS)));
+                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_NOTEBOOK_CHANNELS)));
   ACE_ASSERT (notebook_p);
   result_2 = g_signal_connect (notebook_p,
                                ACE_TEXT_ALWAYS_CHAR ("switch-page"),
@@ -460,7 +460,7 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   // retrieve server log tab child
   GtkScrolledWindow* scrolled_window_p =
     GTK_SCROLLED_WINDOW (gtk_builder_get_object (builder_p,
-                                                 ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_SCROLLEDWINDOW_CONNECTION)));
+                                                 ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_SCROLLEDWINDOW_CONNECTION)));
   ACE_ASSERT (scrolled_window_p);
   // disallow reordering the server log tab
   gtk_notebook_set_tab_reorderable (notebook_p,
@@ -468,18 +468,18 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
                                     FALSE);
 
   { // synch access
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
-    CBData_.GTKState->builders[CBData_.timeStamp] =
+    CBData_->builders[CBData_->timeStamp] =
         std::make_pair (ui_definition_filename, builder_p);
   } // end lock scope
 
   // create default BitTorrent_Client_GUI_MessageHandler (== server log)
   BitTorrent_Client_GUI_MessageHandler* message_handler_p = NULL;
   ACE_NEW_NORETURN (message_handler_p,
-                    BitTorrent_Client_GUI_MessageHandler (CBData_.GTKState,
+                    BitTorrent_Client_GUI_MessageHandler (CBData_,
                                                    this,
-                                                   CBData_.timeStamp));
+                                                   CBData_->timeStamp));
   if (!message_handler_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -487,8 +487,8 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
 
     // clean up
     g_object_unref (G_OBJECT (builder_p));
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
-    CBData_.GTKState->builders.erase (CBData_.timeStamp);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    CBData_->builders.erase (CBData_->timeStamp);
 
     return;
   } // end IF
@@ -498,12 +498,11 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
   // *NOTE*: in theory, there is a race condition as the user may start
   // interacting with the new UI elements by now - as GTK will draw the new elements
   // only after we return, this is not really a problem...
-  { // synch access
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-    std::pair <MESSAGE_HANDLERSITERATOR_T, bool> result =
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+    std::pair<MESSAGE_HANDLERSITERATOR_T, bool> result_3 =
         messageHandlers_.insert (std::make_pair (std::string (),
                                                  message_handler_p));
-    if (!result.second)
+    if (!result_3.second)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to insert message handler: \"%m\", returning\n")));
@@ -511,80 +510,83 @@ BitTorrent_Client_GUI_Connection::BitTorrent_Client_GUI_Connection (Common_UI_GT
       // clean up
       delete message_handler_p;
       g_object_unref (G_OBJECT (builder_p));
-      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
-      CBData_.GTKState->builders.erase (CBData_.timeStamp);
+
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+        CBData_->builders.erase (CBData_->timeStamp);
+      } // end lock scope
 
       return;
     } // end IF
   } // end lock scope
 
-  { // synch access
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
-
-    CBData_.eventSourceID =
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    CBData_->eventSourceID =
       g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
                        idle_add_connection_cb,
                        &CBData_,
                        NULL);
-    if (!CBData_.eventSourceID)
+    if (!CBData_->eventSourceID)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_idle_add_full(idle_add_connection_cb): \"%m\", returning\n")));
       return;
     } // end IF
-    CBData_.GTKState->eventSourceIds.insert (CBData_.eventSourceID);
+    CBData_->eventSourceIds.insert (CBData_->eventSourceID);
   } // end lock scope
 }
 
-BitTorrent_Client_GUI_Connection::~BitTorrent_Client_GUI_Connection ()
+template <typename ConnectionType>
+BitTorrent_Client_GUI_Session_T<ConnectionType>::~BitTorrent_Client_GUI_Session_T ()
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::~BitTorrent_Client_GUI_Connection"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::~BitTorrent_Client_GUI_Session_T"));
 
   // sanity check(s)
-  ACE_ASSERT (CBData_.GTKState);
+  ACE_ASSERT (CBData_);
 
-//  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_.GTKState->lock);
+//  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (CBData_->lock);
 
   // remove builder
   Common_UI_GTKBuildersIterator_t iterator =
-    CBData_.GTKState->builders.find (CBData_.timeStamp);
+    CBData_->builders.find (CBData_->timeStamp);
   // sanity check(s)
-  if (iterator == CBData_.GTKState->builders.end ())
+  if (iterator == CBData_->builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (was: \"%s\") builder not found, returning\n"),
-                ACE_TEXT (CBData_.label.c_str ())));
+                ACE_TEXT (CBData_->label.c_str ())));
     return;
   } // end IF
   g_object_unref (G_OBJECT ((*iterator).second.second));
-  CBData_.GTKState->builders.erase (iterator);
+  CBData_->builders.erase (iterator);
 }
 
+template <typename ConnectionType>
 void
-BitTorrent_Client_GUI_Connection::initialize (BitTorrent_Client_SessionState* sessionState_in,
-                                       IRC_IControl* controller_in)
+BitTorrent_Client_GUI_Session_T<ConnectionType>::initialize (BitTorrent_Client_SessionState* sessionState_in,
+                                                             BitTorrent_IControl* controller_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::initialize"));
 
   ACE_ASSERT (controller_in);
   ACE_ASSERT (sessionState_in);
 
-  CBData_.controller = controller_in;
+  CBData_->controller = controller_in;
   sessionState_ = sessionState_in;
 }
 
+template <typename ConnectionType>
 void
-BitTorrent_Client_GUI_Connection::finalize (bool lockedAccess_in)
+BitTorrent_Client_GUI_Session_T<ConnectionType>::finalize (bool lockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::finalize"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::finalize"));
 
   // sanity check(s)
-  ACE_ASSERT (CBData_.GTKState);
+  ACE_ASSERT (CBData_);
 
   int result = -1;
   if (lockedAccess_in)
   {
-    result = CBData_.GTKState->lock.acquire ();
+    result = CBData_->lock.acquire ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
@@ -608,18 +610,18 @@ BitTorrent_Client_GUI_Connection::finalize (bool lockedAccess_in)
       cb_data_p = &(*iterator_2).second->get ();
       ACE_ASSERT (cb_data_p);
 
-      iterator = CBData_.GTKState->builders.find (cb_data_p->builderLabel);
+      iterator = CBData_->builders.find (cb_data_p->builderLabel);
       // sanity check(s)
-      if (iterator == CBData_.GTKState->builders.end ())
+      if (iterator == CBData_->builders.end ())
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("handler (was: \"%s\") builder not found, continuing\n"),
-                    ACE_TEXT (CBData_.label.c_str ())));
+                    ACE_TEXT (CBData_->label.c_str ())));
         continue;
       } // end IF
       button_p =
           GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_BUTTON_PART)));
+                                              ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_PART)));
       ACE_ASSERT (button_p);
       gtk_widget_set_sensitive (GTK_WIDGET (button_p), FALSE);
     } // end FOR
@@ -628,39 +630,40 @@ BitTorrent_Client_GUI_Connection::finalize (bool lockedAccess_in)
 
   if (lockedAccess_in)
   {
-    result = CBData_.GTKState->lock.release ();
+    result = CBData_->lock.release ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
   } // end IF
 }
 
+template <typename ConnectionType>
 void
-BitTorrent_Client_GUI_Connection::start (Stream_SessionId_t sessionID_in,
-                                  const BitTorrent_Client_SessionData& sessionData_in)
+BitTorrent_Client_GUI_Session_T<ConnectionType>::start (Stream_SessionId_t sessionID_in,
+                                                        const BitTorrent_Client_SessionData& sessionData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::start"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::start"));
 
   ACE_UNUSED_ARG (sessionID_in);
   ACE_UNUSED_ARG (sessionData_in);
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
-    CBData_.GTKState->builders.find (CBData_.timeStamp);
+    CBData_->builders.find (CBData_->timeStamp);
   // sanity check(s)
-  if (iterator == CBData_.GTKState->builders.end ())
+  if (iterator == CBData_->builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (was: \"%s\") builder not found, returning\n"),
-                ACE_TEXT (CBData_.label.c_str ())));
+                ACE_TEXT (CBData_->label.c_str ())));
     return;
   } // end IF
 
   // enable close button
   GtkButton* button_p =
     GTK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_BUTTON_DISCONNECT)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_BUTTON_DISCONNECT)));
   ACE_ASSERT (button_p);
   gdk_threads_enter ();
   gtk_widget_set_sensitive (GTK_WIDGET (button_p), TRUE);
@@ -670,11 +673,12 @@ BitTorrent_Client_GUI_Connection::start (Stream_SessionId_t sessionID_in,
 //              ACE_TEXT("connected...\n")));
 }
 
+template <typename ConnectionType>
 void
-BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
-                                   const Stream_SessionMessageType& sessionEvent_in)
+BitTorrent_Client_GUI_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionID_in,
+                                                         const Stream_SessionMessageType& sessionEvent_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::notify"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::notify"));
 
   ACE_UNUSED_ARG (sessionID_in);
   ACE_UNUSED_ARG (sessionEvent_in);
@@ -685,55 +689,57 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
   ACE_NOTREACHED (return;)
 }
 
+template <typename ConnectionType>
 void
-BitTorrent_Client_GUI_Connection::end (Stream_SessionId_t sessionID_in)
+BitTorrent_Client_GUI_Session_T<ConnectionType>::end (Stream_SessionId_t sessionID_in)
 {
-  NETWORK_TRACE(ACE_TEXT("BitTorrent_Client_GUI_Connection::end"));
+  NETWORK_TRACE(ACE_TEXT("BitTorrent_Client_GUI_Session_T::end"));
 
   ACE_UNUSED_ARG (sessionID_in);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection \"%s\" closed/lost\n"),
-              ACE_TEXT (CBData_.label.c_str ())));
+              ACE_TEXT (CBData_->label.c_str ())));
 
 //  // *NOTE*: this is the final invocation from the controller
 //  //         --> unsubscribe anyway
-//  if (CBData_.controller)
+//  if (CBData_->controller)
 //  {
 //    try {
-//      CBData_.controller->unsubscribe (this);
+//      CBData_->controller->unsubscribe (this);
 //    } catch (...) {
 //      ACE_DEBUG ((LM_ERROR,
 //                  ACE_TEXT ("caught exception in IRC_IControl::unsubscribe(%@), continuing\n"),
 //                  this));
 //    }
-//    CBData_.controller = NULL;
+//    CBData_->controller = NULL;
 //  } // end IF
 
   close ();
 }
 
+template <typename ConnectionType>
 void
-BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
-                                   const IRC_Message& message_in)
+BitTorrent_Client_GUI_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionID_in,
+                                                         const BitTorrent_Client_PeerMessage& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::notify"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::notify"));
 
   ACE_UNUSED_ARG (sessionID_in);
 
   // sanity check(s)
-  ACE_ASSERT (CBData_.GTKState);
+  ACE_ASSERT (CBData_);
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
   Common_UI_GTKBuildersIterator_t iterator =
-      CBData_.GTKState->builders.find (CBData_.timeStamp);
+      CBData_->builders.find (CBData_->timeStamp);
   // sanity check(s)
-  if (iterator == CBData_.GTKState->builders.end ())
+  if (iterator == CBData_->builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (was: \"%s\") builder not found, returning\n"),
-                ACE_TEXT (CBData_.label.c_str ())));
+                ACE_TEXT (CBData_->label.c_str ())));
     return;
   } // end IF
 
@@ -758,7 +764,7 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
           // set server tab nickname label
           GtkLabel* label_p =
             GTK_LABEL (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_LABEL_NICK)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_LABEL_NICK)));
           ACE_ASSERT (label_p);
           // --> see Pango Text Attribute Markup Language...
           std::string nickname_string = ACE_TEXT_ALWAYS_CHAR ("<b><i>nickname</i></b> ");
@@ -769,12 +775,12 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
           // retrieve button handle
           GtkHBox* hbox_p =
             GTK_HBOX (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_HBOX_NICK_CHANNEL)));
+                                              ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_HBOX_NICK_CHANNEL)));
           ACE_ASSERT (hbox_p);
           gtk_widget_set_sensitive (GTK_WIDGET (hbox_p), TRUE);
           hbox_p =
             GTK_HBOX (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_HBOX_USERMODE)));
+                                              ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_HBOX_USERMODE)));
           ACE_ASSERT (hbox_p);
           gtk_widget_set_sensitive (GTK_WIDGET (hbox_p), TRUE);
 
@@ -883,7 +889,7 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
           // retrieve togglebutton
           GtkToggleButton* toggle_button_p =
             GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                       ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
+                                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
           ACE_ASSERT (toggle_button_p);
           gtk_toggle_button_set_active (toggle_button_p, FALSE);
 
@@ -904,7 +910,7 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
           // retrieve togglebutton
           GtkToggleButton* toggle_button_p =
             GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                       ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
+                                                       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY)));
           ACE_ASSERT (toggle_button_p);
           gtk_toggle_button_set_active (toggle_button_p, TRUE);
 
@@ -923,7 +929,7 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
           //// retrieve server tab users store
           //GtkComboBox* combobox_p =
           //  GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-          //                                         ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_COMBOBOX_USERS)));
+          //                                         ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_COMBOBOX_USERS)));
           //ACE_ASSERT (combobox_p);
           //gtk_widget_set_sensitive (GTK_WIDGET (combobox_p), TRUE);
 
@@ -940,7 +946,7 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
           // retrieve server tab channels store
           GtkListStore* liststore_p =
             GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
-                                                    ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_LISTSTORE_CHANNELS)));
+                                                    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_LISTSTORE_CHANNELS)));
           ACE_ASSERT (liststore_p);
 
           // clear the store
@@ -959,7 +965,7 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
           //// retrieve server tab channels store
           //GtkComboBox* combobox_p =
           //  GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
-          //                                         ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_COMBOBOX_CHANNELS)));
+          //                                         ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_COMBOBOX_CHANNELS)));
           //ACE_ASSERT (combobox_p);
           //gtk_widget_set_sensitive (GTK_WIDGET (combobox_p), TRUE);
 
@@ -974,7 +980,7 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
           // retrieve server tab channels store
           GtkListStore* list_store_p =
             GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
-                                                    ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_LISTSTORE_CHANNELS)));
+                                                    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_LISTSTORE_CHANNELS)));
           ACE_ASSERT (list_store_p);
 
           // convert <# visible>
@@ -1091,13 +1097,13 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
 
           // retrieve server tab users store
           Common_UI_GTKBuildersIterator_t iterator_3 =
-            CBData_.GTKState->builders.find (CBData_.timeStamp);
+            CBData_->builders.find (CBData_->timeStamp);
           // sanity check(s)
-          if (iterator_3 == CBData_.GTKState->builders.end ())
+          if (iterator_3 == CBData_->builders.end ())
           {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("connection (was: \"%s\") builder not found, returning\n"),
-                        ACE_TEXT (CBData_.label.c_str ())));
+                        ACE_TEXT (CBData_->label.c_str ())));
 
             // clean up
             gdk_threads_leave ();
@@ -1107,7 +1113,7 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
 
           GtkListStore* list_store_p =
             GTK_LIST_STORE (gtk_builder_get_object ((*iterator_3).second.second,
-                                                    ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_LISTSTORE_USERS)));
+                                                    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_LISTSTORE_USERS)));
           ACE_ASSERT (list_store_p);
 
           if (isFirstUsersMsg_)
@@ -1332,7 +1338,7 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
 
           GtkLabel* label_p =
             GTK_LABEL (gtk_builder_get_object ((*iterator).second.second,
-                                               ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_LABEL_NICK)));
+                                               ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_LABEL_NICK)));
           ACE_ASSERT (label_p);
           // --> see Pango Text Attribute Markup Language...
           std::string nickname_string = ACE_TEXT_ALWAYS_CHAR ("<b><i>nickname</i></b> ");
@@ -1386,10 +1392,10 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
 //            // query channel members
 //            string_list_t channels;
 //            channels.push_back (record_r.parameters_.front ());
-//            ACE_ASSERT (CBData_.controller);
+//            ACE_ASSERT (CBData_->controller);
 //            try
 //            {
-//              CBData_.controller->names (channels);
+//              CBData_->controller->names (channels);
 //            }
 //            catch (...)
 //            {
@@ -1471,7 +1477,7 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
           {
             // --> user mode
             // *WARNING*: needs the lock protection, otherwise there is a race...
-            CBData_.acknowledgements +=
+            CBData_->acknowledgements +=
               IRC_Tools::merge (record_r.parameters_.back (),
                                        sessionState_->userModes);
 
@@ -1487,7 +1493,7 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
               break;
             } // end IF
             // *TODO*: this id is never removed from the list
-            CBData_.GTKState->eventSourceIds.insert (event_source_id);
+            CBData_->eventSourceIds.insert (event_source_id);
           } // end IF
           else
           {
@@ -1637,28 +1643,35 @@ BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
     }
   } // end SWITCH
 }
+
+template <typename ConnectionType>
 void
-BitTorrent_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
-                                   const BitTorrent_Client_SessionMessage& sessionMessage_in)
+BitTorrent_Client_GUI_Session_T<ConnectionType>::notify (Stream_SessionId_t sessionID_in,
+                                                         const BitTorrent_Client_SessionMessage& sessionMessage_in)
 {
-  NETWORK_TRACE(ACE_TEXT("BitTorrent_Client_GUI_Connection::notify"));
+  NETWORK_TRACE(ACE_TEXT("BitTorrent_Client_GUI_Session_T::notify"));
 
   ACE_UNUSED_ARG (sessionID_in);
   ACE_UNUSED_ARG (sessionMessage_in);
 }
 
-const BitTorrent_Client_GTK_ConnectionCBData&
-BitTorrent_Client_GUI_Connection::get () const
+template <typename ConnectionType>
+const struct BitTorrent_Client_GTK_SessionCBData&
+BitTorrent_Client_GUI_Session_T<ConnectionType>::get () const
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::get"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::get"));
 
-  return CBData_;
+  // sanity check(s)
+  ACE_ASSERT (CBData_);
+
+  return *CBData_;
 }
 
+template <typename ConnectionType>
 BitTorrent_Client_GUI_MessageHandler*
-BitTorrent_Client_GUI_Connection::getHandler (const std::string& id_in)
+BitTorrent_Client_GUI_Session_T<ConnectionType>::getHandler (const std::string& id_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::getHandler"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::getHandler"));
 
   // existing conversation ? --> retrieve message handler
 
@@ -1670,10 +1683,10 @@ BitTorrent_Client_GUI_Connection::getHandler (const std::string& id_in)
 }
 
 //void
-//BitTorrent_Client_GUI_Connection::current (std::string& nickname_out,
+//BitTorrent_Client_GUI_Session_T::current (std::string& nickname_out,
 //                                    std::string& channel_out) const
 //{
-//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::current"));
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::current"));
 //
 //  // sanity check(s)
 //  ACE_ASSERT (sessionState_);
@@ -1682,10 +1695,11 @@ BitTorrent_Client_GUI_Connection::getHandler (const std::string& id_in)
 //  // *TODO*: keep this information synchronized
 //  channel_out = sessionState_->channel;
 //}
+template <typename ConnectionType>
 const BitTorrent_Client_SessionState&
-BitTorrent_Client_GUI_Connection::state () const
+BitTorrent_Client_GUI_Session_T<ConnectionType>::state () const
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::state"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::state"));
 
   // sanity check(s)
   ACE_ASSERT (sessionState_);
@@ -1693,21 +1707,22 @@ BitTorrent_Client_GUI_Connection::state () const
   return *sessionState_;
 }
 
+template <typename ConnectionType>
 BitTorrent_Client_GUI_MessageHandler*
-BitTorrent_Client_GUI_Connection::getActiveHandler (bool lockedAccess_in,
-                                             bool gdkLockedAccess_in) const
+BitTorrent_Client_GUI_Session_T<ConnectionType>::getActiveHandler (bool lockedAccess_in,
+                                                                   bool gdkLockedAccess_in) const
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::getActiveHandler"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::getActiveHandler"));
 
   BitTorrent_Client_GUI_MessageHandler* return_value = NULL;
 
   // sanity check(s)
-  ACE_ASSERT (CBData_.GTKState);
+  ACE_ASSERT (CBData_);
 
   int result = -1;
   if (lockedAccess_in)
   {
-    result = CBData_.GTKState->lock.acquire ();
+    result = CBData_->lock.acquire ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
@@ -1721,13 +1736,13 @@ BitTorrent_Client_GUI_Connection::getActiveHandler (bool lockedAccess_in,
   GtkWidget* widget_2 = NULL;
 
   Common_UI_GTKBuildersIterator_t iterator =
-    CBData_.GTKState->builders.find (CBData_.timeStamp);
+    CBData_->builders.find (CBData_->timeStamp);
   // sanity check(s)
-  if (iterator == CBData_.GTKState->builders.end ())
+  if (iterator == CBData_->builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (was: \"%s\") builder not found, aborting\n"),
-                ACE_TEXT (CBData_.label.c_str ())));
+                ACE_TEXT (CBData_->label.c_str ())));
     goto clean_up;
   } // end IF
 
@@ -1736,7 +1751,7 @@ BitTorrent_Client_GUI_Connection::getActiveHandler (bool lockedAccess_in,
   // retrieve server tab channel tabs handle
   notebook_p =
     GTK_NOTEBOOK (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_NOTEBOOK_CHANNELS)));
+                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_NOTEBOOK_CHANNELS)));
   ACE_ASSERT (notebook_p);
   page_number = gtk_notebook_get_current_page (notebook_p);
   if (page_number == -1)
@@ -1757,7 +1772,7 @@ BitTorrent_Client_GUI_Connection::getActiveHandler (bool lockedAccess_in,
 
   server_log_p =
     GTK_WIDGET (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_SCROLLEDWINDOW_CONNECTION)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_SCROLLEDWINDOW_CONNECTION)));
   ACE_ASSERT (server_log_p);
   server_log_active = (widget_p == server_log_p);
 
@@ -1791,7 +1806,7 @@ BitTorrent_Client_GUI_Connection::getActiveHandler (bool lockedAccess_in,
 clean_up:
   if (lockedAccess_in)
   {
-    result = CBData_.GTKState->lock.release ();
+    result = CBData_->lock.release ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
@@ -1800,10 +1815,11 @@ clean_up:
   return return_value;
 }
 
+template <typename ConnectionType>
 void
-BitTorrent_Client_GUI_Connection::close ()
+BitTorrent_Client_GUI_Session_T<ConnectionType>::close ()
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::close"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::close"));
 
   BitTorrent_Client_GTK_HandlerCBData* cb_data_p = NULL;
 
@@ -1824,7 +1840,7 @@ BitTorrent_Client_GUI_Connection::close ()
                          cb_data_p,
                          NULL);
       if (cb_data_p->eventSourceID)
-        CBData_.GTKState->eventSourceIds.insert (cb_data_p->eventSourceID);
+        CBData_->eventSourceIds.insert (cb_data_p->eventSourceID);
       else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to g_idle_add_full(idle_remove_channel_cb): \"%m\", continuing\n")));
@@ -1834,11 +1850,12 @@ BitTorrent_Client_GUI_Connection::close ()
   } // end lock scope
 }
 
+template <typename ConnectionType>
 void
-BitTorrent_Client_GUI_Connection::forward (const std::string& channel_in,
-                                    const std::string& messageText_in)
+BitTorrent_Client_GUI_Session_T<ConnectionType>::forward (const std::string& channel_in,
+                                                          const std::string& messageText_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::forward"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::forward"));
 
   // --> pass to channel log
 
@@ -1863,10 +1880,11 @@ BitTorrent_Client_GUI_Connection::forward (const std::string& channel_in,
   } // end lock scope
 }
 
+template <typename ConnectionType>
 void
-BitTorrent_Client_GUI_Connection::log (const std::string& message_in)
+BitTorrent_Client_GUI_Session_T<ConnectionType>::log (const std::string& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::log"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::log"));
 
   // --> pass to server log
 
@@ -1884,10 +1902,11 @@ BitTorrent_Client_GUI_Connection::log (const std::string& message_in)
   } // end lock scope
 }
 
+template <typename ConnectionType>
 void
-BitTorrent_Client_GUI_Connection::log (const IRC_Record& message_in)
+BitTorrent_Client_GUI_Session_T<ConnectionType>::log (const struct BitTorrent_Record& record_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::log"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::log"));
 
   // --> pass to server log
 
@@ -1905,32 +1924,33 @@ BitTorrent_Client_GUI_Connection::log (const IRC_Record& message_in)
   } // end lock scope
 }
 
+template <typename ConnectionType>
 void
-BitTorrent_Client_GUI_Connection::error (const IRC_Record& message_in,
-                                  bool lockedAccess_in)
+BitTorrent_Client_GUI_Session_T<ConnectionType>::error (const struct BitTorrent_Record& record_in,
+                                                        bool lockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::error"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::error"));
 
   // sanity check(s)
-  ACE_ASSERT (CBData_.GTKState);
+  ACE_ASSERT (CBData_);
 
   int result = -1;
   if (lockedAccess_in)
   {
-    result = CBData_.GTKState->lock.acquire ();
+    result = CBData_->lock.acquire ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
   } // end IF
 
   Common_UI_GTKBuildersIterator_t iterator =
-    CBData_.GTKState->builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
+    CBData_->builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
   // sanity check(s)
-  if (iterator == CBData_.GTKState->builders.end ())
+  if (iterator == CBData_->builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (was: \"%s\") main builder not found, returning\n"),
-                ACE_TEXT (CBData_.label.c_str ())));
+                ACE_TEXT (CBData_->label.c_str ())));
     return;
   } // end IF
 
@@ -1938,34 +1958,35 @@ BitTorrent_Client_GUI_Connection::error (const IRC_Record& message_in,
   // error --> print on statusbar
   GtkStatusbar* statusbar_p =
     GTK_STATUSBAR (gtk_builder_get_object ((*iterator).second.second,
-                                           ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_STATUSBAR)));
+                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_STATUSBAR)));
   ACE_ASSERT (statusbar_p);
   gtk_statusbar_push (statusbar_p,
                       contextID_,
-                      IRC_Tools::dump (message_in).c_str ());
+                      BitTorrent_Tools::dump (message_in).c_str ());
   gdk_threads_leave ();
 
   if (lockedAccess_in)
   {
-    result = CBData_.GTKState->lock.release ();
+    result = CBData_->lock.release ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
   } // end IF
 }
 
+template <typename ConnectionType>
 gint
-BitTorrent_Client_GUI_Connection::exists (const std::string& id_in,
-                                   bool gdkLockedAccess_in) const
+BitTorrent_Client_GUI_Session_T<ConnectionType>::exists (const std::string& id_in,
+                                                         bool gdkLockedAccess_in) const
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::exists"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::exists"));
 
   gint result = -1;
 
   // sanity check(s)
-  ACE_ASSERT (CBData_.GTKState);
+  ACE_ASSERT (CBData_);
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock, result);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, CBData_->lock, result);
 
   { // synch access
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, result);
@@ -1979,13 +2000,13 @@ BitTorrent_Client_GUI_Connection::exists (const std::string& id_in,
       return result;
 
     Common_UI_GTKBuildersIterator_t iterator_2 =
-        CBData_.GTKState->builders.find (CBData_.timeStamp);
+        CBData_->builders.find (CBData_->timeStamp);
     // sanity check(s)
-    if (iterator_2 == CBData_.GTKState->builders.end ())
+    if (iterator_2 == CBData_->builders.end ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("connection (was: \"%s\") builder not found, aborting\n"),
-                  ACE_TEXT (CBData_.label.c_str ())));
+                  ACE_TEXT (CBData_->label.c_str ())));
       return result;
     } // end IF
 
@@ -1994,7 +2015,7 @@ BitTorrent_Client_GUI_Connection::exists (const std::string& id_in,
     // retrieve server tab channel tabs handle
     GtkNotebook* notebook_p =
         GTK_NOTEBOOK (gtk_builder_get_object ((*iterator_2).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_NOTEBOOK_CHANNELS)));
+                                              ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_NOTEBOOK_CHANNELS)));
     ACE_ASSERT (notebook_p);
 
     GtkWidget* widget_p = NULL;
@@ -2023,10 +2044,11 @@ BitTorrent_Client_GUI_Connection::exists (const std::string& id_in,
   return result;
 }
 
+template <typename ConnectionType>
 void
-BitTorrent_Client_GUI_Connection::channels (string_list_t& channels_out)
+BitTorrent_Client_GUI_Session_T<ConnectionType>::channels (string_list_t& channels_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::channels"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::channels"));
 
   // initialize return value
   channels_out.clear ();
@@ -2041,49 +2063,50 @@ BitTorrent_Client_GUI_Connection::channels (string_list_t& channels_out)
   } // end lock scope
 }
 
+template <typename ConnectionType>
 void
-BitTorrent_Client_GUI_Connection::createMessageHandler (const std::string& id_in,
-                                                 bool lockedAccess_in,
-                                                 bool gdkLockedAccess_in)
+BitTorrent_Client_GUI_Session_T<ConnectionType>::createMessageHandler (const std::string& id_in,
+                                                                       bool lockedAccess_in,
+                                                                       bool gdkLockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::createMessageHandler"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::createMessageHandler"));
 
   // sanity check(s)
-  ACE_ASSERT (CBData_.GTKState);
-  ACE_ASSERT (CBData_.connections);
+  ACE_ASSERT (CBData_);
+  ACE_ASSERT (CBData_->connections);
 
   int result = -1;
   BitTorrent_Client_GUI_MessageHandler* message_handler_p = NULL;
 
   if (lockedAccess_in)
   {
-    result = CBData_.GTKState->lock.acquire ();
+    result = CBData_->lock.acquire ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
   } // end IF
 
   Common_UI_GTKBuildersIterator_t iterator =
-    CBData_.GTKState->builders.find (CBData_.timeStamp);
+    CBData_->builders.find (CBData_->timeStamp);
   // sanity check(s)
-  if (iterator == CBData_.GTKState->builders.end ())
+  if (iterator == CBData_->builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (was: \"%s\") builder not found, returning\n"),
-                ACE_TEXT (CBData_.label.c_str ())));
+                ACE_TEXT (CBData_->label.c_str ())));
     goto clean_up;
   } // end IF
 
   // create new BitTorrent_Client_GUI_MessageHandler
 //  gdk_threads_enter ();
   ACE_NEW_NORETURN (message_handler_p,
-                    BitTorrent_Client_GUI_MessageHandler (CBData_.GTKState,
-                                                   this,
-                                                   CBData_.controller,
-                                                   id_in,
-                                                   UIFileDirectory_,
-                                                   CBData_.timeStamp,
-                                                   gdkLockedAccess_in));
+                    BitTorrent_Client_GUI_MessageHandler (CBData_,
+                                                          this,
+                                                          CBData_->controller,
+                                                          id_in,
+                                                          UIFileDirectory_,
+                                                          CBData_->timeStamp,
+                                                          gdkLockedAccess_in));
   if (!message_handler_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -2100,17 +2123,17 @@ BitTorrent_Client_GUI_Connection::createMessageHandler (const std::string& id_in
 
     // check whether this is the first channel of the first connection
     // --> enable corresponding widget(s) in the main UI
-    if ((CBData_.connections->size () == 1) &&
+    if ((CBData_->connections->size () == 1) &&
         (messageHandlers_.size () == 2)) // server log + first channel
     {
       iterator =
-        CBData_.GTKState->builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
+        CBData_->builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
       // sanity check(s)
-      ACE_ASSERT (iterator != CBData_.GTKState->builders.end ());
+      ACE_ASSERT (iterator != CBData_->builders.end ());
       gdk_threads_enter ();
       GtkHBox* hbox_p =
         GTK_HBOX (gtk_builder_get_object ((*iterator).second.second,
-                                          ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_HBOX_SEND)));
+                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_HBOX_SEND)));
       ACE_ASSERT (hbox_p);
       gtk_widget_set_sensitive (GTK_WIDGET (hbox_p), TRUE);
       gdk_threads_leave ();
@@ -2120,26 +2143,27 @@ BitTorrent_Client_GUI_Connection::createMessageHandler (const std::string& id_in
 clean_up:
   if (lockedAccess_in)
   {
-    result = CBData_.GTKState->lock.release ();
+    result = CBData_->lock.release ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
   } // end IF
 }
 
+template <typename ConnectionType>
 void
-BitTorrent_Client_GUI_Connection::terminateMessageHandler (const std::string& id_in,
-                                                    bool lockedAccess_in)
+BitTorrent_Client_GUI_Session_T<ConnectionType>::terminateMessageHandler (const std::string& id_in,
+                                                                          bool lockedAccess_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Connection::terminateMessageHandler"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::terminateMessageHandler"));
 
   // sanity check(s)
-  ACE_ASSERT (CBData_.GTKState);
+  ACE_ASSERT (CBData_);
 
   int result = -1;
   if (lockedAccess_in)
   {
-    result = CBData_.GTKState->lock.acquire ();
+    result = CBData_->lock.acquire ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
@@ -2170,24 +2194,24 @@ BitTorrent_Client_GUI_Connection::terminateMessageHandler (const std::string& id
                        cb_data_p,
                        NULL);
   if (cb_data_p->eventSourceID)
-    CBData_.GTKState->eventSourceIds.insert (cb_data_p->eventSourceID);
+    CBData_->eventSourceIds.insert (cb_data_p->eventSourceID);
   else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to g_idle_add_full(idle_remove_channel_cb): \"%m\", continuing\n")));
 
   // check whether this was the last handler of the last connection
   // --> disable corresponding widgets in the main UI
-  if ((CBData_.connections->size () == 1) &&
+  if ((CBData_->connections->size () == 1) &&
       (messageHandlers_.size () == 1)) // server log
   {
     Common_UI_GTKBuildersIterator_t iterator =
-      CBData_.GTKState->builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
+      CBData_->builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
     // sanity check(s)
-    ACE_ASSERT (iterator != CBData_.GTKState->builders.end ());
+    ACE_ASSERT (iterator != CBData_->builders.end ());
     gdk_threads_enter ();
     GtkHBox* hbox_p =
       GTK_HBOX (gtk_builder_get_object ((*iterator).second.second,
-                                        ACE_TEXT_ALWAYS_CHAR (BitTorrent_Client_GUI_GTK_HBOX_SEND)));
+                                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_HBOX_SEND)));
     ACE_ASSERT (hbox_p);
     gtk_widget_set_sensitive (GTK_WIDGET (hbox_p), FALSE);
     gdk_threads_leave ();
@@ -2196,7 +2220,7 @@ BitTorrent_Client_GUI_Connection::terminateMessageHandler (const std::string& id
 clean_up:
   if (lockedAccess_in)
   {
-    result = CBData_.GTKState->lock.release ();
+    result = CBData_->lock.release ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));

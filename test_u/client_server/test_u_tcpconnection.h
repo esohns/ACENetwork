@@ -63,6 +63,9 @@ class Test_U_TCPConnection
                         const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Test_U_TCPConnection ();
 
+  // implement (part of) Net_ITransportLayer_T
+  virtual void ping ();
+
  private:
   typedef Net_TCPConnectionBase_T<Test_U_TCPHandler_t,
                                   struct Test_U_Configuration,
@@ -104,6 +107,9 @@ class Test_U_AsynchTCPConnection
   Test_U_AsynchTCPConnection (ICONNECTION_MANAGER_T*,                        // connection manager handle
                               const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Test_U_AsynchTCPConnection ();
+
+  // implement (part of) Net_ITransportLayer_T
+  virtual void ping ();
 
  private:
   typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPHandler_t,

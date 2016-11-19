@@ -19,12 +19,16 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <ace/Synch.h>
 #include "bittorrent_client_sessionmessage.h"
 
 #include <ace/Log_Msg.h>
 #include <ace/Malloc_Base.h>
 
 #include "net_macros.h"
+
+#include "bittorrent_client_configuration.h"
+#include "bittorrent_client_stream_common.h"
 
 BitTorrent_Client_SessionMessage::BitTorrent_Client_SessionMessage (enum Stream_SessionMessageType messageType_in,
                                                                     BitTorrent_Client_SessionData_t*& sessionData_inout,

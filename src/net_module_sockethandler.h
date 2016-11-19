@@ -32,7 +32,7 @@
 // forward declarations
 class Stream_IAllocator;
 
-template <typename LockType,                 // connection stream state machine lock
+template <ACE_SYNCH_DECL,
           ////////////////////////////////
           typename ControlMessageType,
           typename DataMessageType,
@@ -51,8 +51,7 @@ template <typename LockType,                 // connection stream state machine 
           ////////////////////////////////
           typename ProtocolHeaderType>
 class Net_Module_SocketHandler_T
- : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ACE_MT_SYNCH,
+ : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       Common_TimePolicy_t,
                                       ControlMessageType,
                                       DataMessageType,
@@ -66,14 +65,15 @@ class Net_Module_SocketHandler_T
                                       StatisticContainerType>
 {
  public:
-  Net_Module_SocketHandler_T (typename LockType::MUTEX* = NULL); // lock handle (state machine)
+  Net_Module_SocketHandler_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
+                              bool = false,              // auto-start ?
+                              bool = true);              // generate session messages ?
   virtual ~Net_Module_SocketHandler_T ();
 
 #if defined (__GNUG__) || defined (_MSC_VER)
   // *NOTE*: for some obscure reason, these base class members are not exposed
   //         (MSVC/gcc)
-  using Stream_HeadModuleTaskBase_T<LockType,
-                                    ACE_MT_SYNCH,
+  using Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                     Common_TimePolicy_t,
                                     ControlMessageType,
                                     DataMessageType,
@@ -85,7 +85,7 @@ class Net_Module_SocketHandler_T
                                     SessionDataType,
                                     SessionDataContainerType,
                                     StatisticContainerType>::initialize;
-  using Stream_StateMachine_Control_T<LockType>::initialize;
+  using Stream_StateMachine_Control_T<ACE_SYNCH_USE>::initialize;
 #endif
 
   // override (part of) Stream_IModuleHandler_T
@@ -107,8 +107,7 @@ class Net_Module_SocketHandler_T
   //virtual void report () const;
 
  private:
-  typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ACE_MT_SYNCH,
+  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       Common_TimePolicy_t,
                                       ControlMessageType,
                                       DataMessageType,
@@ -138,7 +137,7 @@ class Net_Module_SocketHandler_T
 
 //////////////////////////////////////////
 
-template <typename LockType,
+template <ACE_SYNCH_DECL,
           ////////////////////////////////
           typename ControlMessageType,
           typename DataMessageType,
@@ -155,8 +154,7 @@ template <typename LockType,
           ////////////////////////////////
           typename StatisticContainerType>
 class Net_Module_UDPSocketHandler_T
- : public Stream_HeadModuleTaskBase_T<LockType,
-                                      ACE_MT_SYNCH,
+ : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       Common_TimePolicy_t,
                                       ControlMessageType,
                                       DataMessageType,
@@ -170,7 +168,9 @@ class Net_Module_UDPSocketHandler_T
                                       StatisticContainerType>
 {
  public:
-  Net_Module_UDPSocketHandler_T (LockType* = NULL); // lock handle (state machine)
+  Net_Module_UDPSocketHandler_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
+                                 bool = false,              // auto-start ?
+                                 bool = true);              // generate session messages ?
   virtual ~Net_Module_UDPSocketHandler_T ();
 
   // override (part of) Stream_IModuleHandler_T
@@ -192,8 +192,7 @@ class Net_Module_UDPSocketHandler_T
   //virtual void report () const;
 
  private:
-  typedef Stream_HeadModuleTaskBase_T<LockType,
-                                      ACE_MT_SYNCH,
+  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       Common_TimePolicy_t,
                                       ControlMessageType,
                                       DataMessageType,
@@ -211,7 +210,7 @@ class Net_Module_UDPSocketHandler_T
   ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T& operator= (const Net_Module_UDPSocketHandler_T&))
 
   //// helper methods
-  //bool putStatisticMessage (const StatisticContainerType&) const; // statistics info
+  //bool putStatisticMessage (const StatisticContainerType&) const; // statistic info
 };
 
 // include template definition

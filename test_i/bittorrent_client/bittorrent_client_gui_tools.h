@@ -35,15 +35,15 @@ class BitTorrent_Client_GUI_Connection;
 class BitTorrent_Client_UI_Tools
 {
  public:
-  // *WARNING*: these members must be called with
-  //            BitTorrent_Client_GTK_CBData::Common_UI_GTKState::lock held !
-  static bool current (const std::string&,                  // (connection-) timestamp
-                       const BitTorrent_Client_GUI_Connections_t&, // connections
-                       std::string&,                        // return value: nickname
-                       std::string&);                       // return value: channel
-  // *WARNING*: this requires gdk_threads_enter()/leave() protection !
-  static BitTorrent_Client_GUI_Connection* current (const Common_UI_GTKState&,            // GTK state
-                                                    const BitTorrent_Client_GUI_Connections_t&); // connections
+//  // *WARNING*: these must be called with
+//  //            BitTorrent_Client_GTK_CBData::Common_UI_GTKState::lock held !
+//  static bool current (const std::string&,                         // (connection-) timestamp
+//                       const BitTorrent_Client_GUI_Connections_t&, // connections
+//                       std::string&,                               // return value: nickname
+//                       std::string&);                              // return value: channel
+//  // *WARNING*: this requires gdk_threads_enter()/leave() protection !
+//  static BitTorrent_Client_GUI_Connection* current (const Common_UI_GTKState&,            // GTK state
+//                                                    const BitTorrent_Client_GUI_Connections_t&); // connections
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_UI_Tools ())

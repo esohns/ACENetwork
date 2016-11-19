@@ -30,6 +30,8 @@
 #include "bittorrent_isession.h"
 #include "bittorrent_tools.h"
 
+#include "http_tools.h"
+
 template <typename AddressType,
           typename ConfigurationType,
           typename StatisticContainerType,
@@ -41,6 +43,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -55,6 +58,7 @@ BitTorrent_Module_PeerHandler_T<AddressType,
                                 StreamStatusType,
                                 SocketConfigurationType,
                                 HandlerConfigurationType,
+                                ConnectionConfigurationType,
                                 ConnectionStateType,
                                 SessionStateType,
                                 CBDataType>::BitTorrent_Module_PeerHandler_T ()
@@ -78,6 +82,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -92,6 +97,7 @@ BitTorrent_Module_PeerHandler_T<AddressType,
                                 StreamStatusType,
                                 SocketConfigurationType,
                                 HandlerConfigurationType,
+                                ConnectionConfigurationType,
                                 ConnectionStateType,
                                 SessionStateType,
                                 CBDataType>::~BitTorrent_Module_PeerHandler_T ()
@@ -111,6 +117,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -126,6 +133,7 @@ BitTorrent_Module_PeerHandler_T<AddressType,
                                 StreamStatusType,
                                 SocketConfigurationType,
                                 HandlerConfigurationType,
+                                ConnectionConfigurationType,
                                 ConnectionStateType,
                                 SessionStateType,
                                 CBDataType>::initialize (const ConfigurationType& configuration_in)
@@ -170,6 +178,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -185,6 +194,7 @@ BitTorrent_Module_PeerHandler_T<AddressType,
                                 StreamStatusType,
                                 SocketConfigurationType,
                                 HandlerConfigurationType,
+                                ConnectionConfigurationType,
                                 ConnectionStateType,
                                 SessionStateType,
                                 CBDataType>::handleDataMessage (MessageType*& message_inout,
@@ -199,11 +209,13 @@ BitTorrent_Module_PeerHandler_T<AddressType,
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->protocolConfiguration);
 
-  const struct BitTorrent_Record& data_r = message_inout->get ();
+  const typename MessageType::DATA_T& data_container_r = message_inout->get ();
+  const struct BitTorrent_Record& record_r = data_container_r.get ();
+
 #if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s\n"),
-              ACE_TEXT (BitTorrent_Tools::Record2String (data_r).c_str ())));
+              ACE_TEXT (BitTorrent_Tools::Record2String (record_r).c_str ())));
 #endif
 
   inherited::handleDataMessage (message_inout,
@@ -221,6 +233,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -236,6 +249,7 @@ BitTorrent_Module_PeerHandler_T<AddressType,
                                 StreamStatusType,
                                 SocketConfigurationType,
                                 HandlerConfigurationType,
+                                ConnectionConfigurationType,
                                 ConnectionStateType,
                                 SessionStateType,
                                 CBDataType>::handleSessionMessage (SessionMessageType*& message_inout,
@@ -243,7 +257,7 @@ BitTorrent_Module_PeerHandler_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_PeerHandler_T::handleSessionMessage"));
 
-  int result = -1;
+//  int result = -1;
 
   // don't care (implies yes per default, if we're part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
@@ -256,13 +270,7 @@ BitTorrent_Module_PeerHandler_T<AddressType,
   {
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
-      if (!inherited::subscribe (this))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: failed to Common_ISubscribe_T::subscribe(), aborting\n"),
-                    inherited::mod_->name ()));
-        goto error;
-      } // end IF
+      inherited::subscribe (this);
 
 //      const SessionDataType& session_data_container_r =
 //          message_inout->get ();
@@ -291,16 +299,13 @@ BitTorrent_Module_PeerHandler_T<AddressType,
       break;
 
 error:
-      this->notify (STREAM_SESSION_MESSAGE_ABORT);
+      inherited::notify (STREAM_SESSION_MESSAGE_ABORT);
 
       return;
     }
     case STREAM_SESSION_MESSAGE_END:
     {
-      if (!inherited::unsubscribe (this))
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: failed to Common_ISubscribe_T::unsubscribe(), continuing\n"),
-                    inherited::mod_->name ()));
+      inherited::unsubscribe (this);
 
 //      // remember connection has been closed
 //      {
@@ -585,6 +590,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -601,6 +607,7 @@ BitTorrent_Module_PeerHandler_T<AddressType,
                                 StreamStatusType,
                                 SocketConfigurationType,
                                 HandlerConfigurationType,
+                                ConnectionConfigurationType,
                                 ConnectionStateType,
                                 SessionStateType,
                                 CBDataType>::clone ()
@@ -641,6 +648,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -656,6 +664,7 @@ BitTorrent_Module_PeerHandler_T<AddressType,
                                 StreamStatusType,
                                 SocketConfigurationType,
                                 HandlerConfigurationType,
+                                ConnectionConfigurationType,
                                 ConnectionStateType,
                                 SessionStateType,
                                 CBDataType>::start (Stream_SessionId_t sessionID_in,
@@ -673,10 +682,10 @@ BitTorrent_Module_PeerHandler_T<AddressType,
                                        &const_cast<SessionDataType&> (sessionData_in)));
 
   try {
-    session_->peerConnect (sessionID_in);
+    session_->connect (sessionID_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in BitTorrent_ISession_T::peerConnect (), returning\n")));
+                ACE_TEXT ("caught exception in Net_ISession_T::connect (), returning\n")));
     return;
   }
 
@@ -709,6 +718,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -724,6 +734,7 @@ BitTorrent_Module_PeerHandler_T<AddressType,
                                 StreamStatusType,
                                 SocketConfigurationType,
                                 HandlerConfigurationType,
+                                ConnectionConfigurationType,
                                 ConnectionStateType,
                                 SessionStateType,
                                 CBDataType>::notify (Stream_SessionId_t sessionID_in,
@@ -751,6 +762,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -766,6 +778,7 @@ BitTorrent_Module_PeerHandler_T<AddressType,
                                 StreamStatusType,
                                 SocketConfigurationType,
                                 HandlerConfigurationType,
+                                ConnectionConfigurationType,
                                 ConnectionStateType,
                                 SessionStateType,
                                 CBDataType>::end (Stream_SessionId_t sessionID_in)
@@ -779,10 +792,10 @@ BitTorrent_Module_PeerHandler_T<AddressType,
   ACE_ASSERT (iterator != sessionData_.end ());
 
   try {
-    session_->peerDisconnect (sessionID_in);
+    session_->disconnect (sessionID_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in BitTorrent_ISession_T::peerDisconnect (), returning\n")));
+                ACE_TEXT ("caught exception in Net_ISession_T::disconnect (), returning\n")));
     return;
   }
 
@@ -816,6 +829,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -831,6 +845,7 @@ BitTorrent_Module_PeerHandler_T<AddressType,
                                 StreamStatusType,
                                 SocketConfigurationType,
                                 HandlerConfigurationType,
+                                ConnectionConfigurationType,
                                 ConnectionStateType,
                                 SessionStateType,
                                 CBDataType>::notify (Stream_SessionId_t sessionID_in,
@@ -844,7 +859,9 @@ BitTorrent_Module_PeerHandler_T<AddressType,
   ACE_ASSERT (CBData_);
   ACE_ASSERT (session_);
 
-  const struct BitTorrent_Record& record_r = message_in.get ();
+  const typename MessageType::DATA_T& data_container_r = message_in.get ();
+  const struct BitTorrent_Record& record_r = data_container_r.get ();
+
   try {
     session_->notify (record_r,
                       ((record_r.type == BITTORRENT_MESSAGETYPE_PIECE) ? &const_cast<MessageType&> (message_in)
@@ -872,6 +889,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -887,6 +905,7 @@ BitTorrent_Module_PeerHandler_T<AddressType,
                                 StreamStatusType,
                                 SocketConfigurationType,
                                 HandlerConfigurationType,
+                                ConnectionConfigurationType,
                                 ConnectionStateType,
                                 SessionStateType,
                                 CBDataType>::notify (Stream_SessionId_t sessionID_in,
@@ -953,6 +972,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -967,6 +987,7 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
                                    StreamStatusType,
                                    SocketConfigurationType,
                                    HandlerConfigurationType,
+                                   ConnectionConfigurationType,
                                    ConnectionStateType,
                                    SessionStateType,
                                    CBDataType>::BitTorrent_Module_TrackerHandler_T ()
@@ -990,6 +1011,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -1004,6 +1026,7 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
                                    StreamStatusType,
                                    SocketConfigurationType,
                                    HandlerConfigurationType,
+                                   ConnectionConfigurationType,
                                    ConnectionStateType,
                                    SessionStateType,
                                    CBDataType>::~BitTorrent_Module_TrackerHandler_T ()
@@ -1023,6 +1046,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -1038,6 +1062,7 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
                                    StreamStatusType,
                                    SocketConfigurationType,
                                    HandlerConfigurationType,
+                                   ConnectionConfigurationType,
                                    ConnectionStateType,
                                    SessionStateType,
                                    CBDataType>::initialize (const ConfigurationType& configuration_in)
@@ -1082,6 +1107,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -1097,6 +1123,7 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
                                    StreamStatusType,
                                    SocketConfigurationType,
                                    HandlerConfigurationType,
+                                   ConnectionConfigurationType,
                                    ConnectionStateType,
                                    SessionStateType,
                                    CBDataType>::handleDataMessage (MessageType*& message_inout,
@@ -1111,11 +1138,13 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->protocolConfiguration);
 
-  const struct BitTorrent_Record& data_r = message_inout->get ();
+  const typename MessageType::DATA_T& data_container_r =
+      message_inout->get ();
+  const struct HTTP_Record& record_r = data_container_r.get ();
 #if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s\n"),
-              ACE_TEXT (BitTorrent_Tools::Record2String (data_r).c_str ())));
+              ACE_TEXT (HTTP_Tools::dump (record_r).c_str ())));
 #endif
 
   inherited::handleDataMessage (message_inout,
@@ -1133,6 +1162,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -1148,6 +1178,7 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
                                    StreamStatusType,
                                    SocketConfigurationType,
                                    HandlerConfigurationType,
+                                   ConnectionConfigurationType,
                                    ConnectionStateType,
                                    SessionStateType,
                                    CBDataType>::handleSessionMessage (SessionMessageType*& message_inout,
@@ -1155,7 +1186,7 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_TrackerHandler_T::handleSessionMessage"));
 
-  int result = -1;
+//  int result = -1;
 
   // don't care (implies yes per default, if we're part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
@@ -1168,13 +1199,7 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
   {
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
-      if (!inherited::subscribe (this))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: failed to Common_ISubscribe_T::subscribe(), aborting\n"),
-                    inherited::mod_->name ()));
-        goto error;
-      } // end IF
+      inherited::subscribe (this);
 
 //      const SessionDataType& session_data_container_r =
 //          message_inout->get ();
@@ -1203,16 +1228,13 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
       break;
 
 error:
-      this->notify (STREAM_SESSION_MESSAGE_ABORT);
+      inherited::notify (STREAM_SESSION_MESSAGE_ABORT);
 
       return;
     }
     case STREAM_SESSION_MESSAGE_END:
     {
-      if (!inherited::unsubscribe (this))
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: failed to Common_ISubscribe_T::unsubscribe(), continuing\n"),
-                    inherited::mod_->name ()));
+      inherited::unsubscribe (this);
 
 //      // remember connection has been closed
 //      {
@@ -1497,6 +1519,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -1513,6 +1536,7 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
                                    StreamStatusType,
                                    SocketConfigurationType,
                                    HandlerConfigurationType,
+                                   ConnectionConfigurationType,
                                    ConnectionStateType,
                                    SessionStateType,
                                    CBDataType>::clone ()
@@ -1553,6 +1577,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -1568,6 +1593,7 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
                                    StreamStatusType,
                                    SocketConfigurationType,
                                    HandlerConfigurationType,
+                                   ConnectionConfigurationType,
                                    ConnectionStateType,
                                    SessionStateType,
                                    CBDataType>::start (Stream_SessionId_t sessionID_in,
@@ -1585,10 +1611,10 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
                                        &const_cast<SessionDataType&> (sessionData_in)));
 
   try {
-    session_->peerConnect (sessionID_in);
+    session_->trackerConnect (sessionID_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in BitTorrent_ISession_T::peerConnect (), returning\n")));
+                ACE_TEXT ("caught exception in BitTorrent_ISession_T::trackerConnect (), returning\n")));
     return;
   }
 
@@ -1621,6 +1647,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -1636,6 +1663,7 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
                                    StreamStatusType,
                                    SocketConfigurationType,
                                    HandlerConfigurationType,
+                                   ConnectionConfigurationType,
                                    ConnectionStateType,
                                    SessionStateType,
                                    CBDataType>::notify (Stream_SessionId_t sessionID_in,
@@ -1663,6 +1691,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -1678,6 +1707,7 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
                                    StreamStatusType,
                                    SocketConfigurationType,
                                    HandlerConfigurationType,
+                                   ConnectionConfigurationType,
                                    ConnectionStateType,
                                    SessionStateType,
                                    CBDataType>::end (Stream_SessionId_t sessionID_in)
@@ -1691,10 +1721,10 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
   ACE_ASSERT (iterator != sessionData_.end ());
 
   try {
-    session_->peerDisconnect (sessionID_in);
+    session_->trackerDisconnect (sessionID_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in BitTorrent_ISession_T::peerDisconnect (), returning\n")));
+                ACE_TEXT ("caught exception in BitTorrent_ISession_T::trackerDisconnect (), returning\n")));
     return;
   }
 
@@ -1728,6 +1758,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -1743,6 +1774,7 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
                                    StreamStatusType,
                                    SocketConfigurationType,
                                    HandlerConfigurationType,
+                                   ConnectionConfigurationType,
                                    ConnectionStateType,
                                    SessionStateType,
                                    CBDataType>::notify (Stream_SessionId_t sessionID_in,
@@ -1756,11 +1788,12 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
   ACE_ASSERT (CBData_);
   ACE_ASSERT (session_);
 
-  const struct BitTorrent_Record& record_r = message_in.get ();
+  const typename MessageType::DATA_T& data_container_r =
+      message_in.get ();
+  const struct HTTP_Record& record_r = data_container_r.get ();
+
   try {
-    session_->notify (record_r,
-                      ((record_r.type == BITTORRENT_MESSAGETYPE_PIECE) ? &const_cast<MessageType&> (message_in)
-                                                                       : NULL));
+    session_->notify (record_r);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in BitTorrent_ISession_T::notify(), returning\n")));
@@ -1769,7 +1802,6 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
   {
     ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
-    CBData_->progressData.transferred += message_in.total_length ();
     CBData_->eventStack.push_back (COMMON_UI_EVENT_DATA);
   } // end lock scope
 }
@@ -1784,6 +1816,7 @@ template <typename AddressType,
           typename StreamStatusType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename SessionStateType,
           typename CBDataType>
@@ -1799,6 +1832,7 @@ BitTorrent_Module_TrackerHandler_T<AddressType,
                                    StreamStatusType,
                                    SocketConfigurationType,
                                    HandlerConfigurationType,
+                                   ConnectionConfigurationType,
                                    ConnectionStateType,
                                    SessionStateType,
                                    CBDataType>::notify (Stream_SessionId_t sessionID_in,

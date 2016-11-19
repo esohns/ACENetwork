@@ -31,28 +31,29 @@
 
 //class Net_Export Net_InetTransportLayer_Base
 class Net_InetTransportLayer_Base
- : virtual public Net_ITransportLayer_T<Net_SocketConfiguration>
+ : virtual public Net_ITransportLayer_T<struct Net_SocketConfiguration>
 {
  public:
   virtual ~Net_InetTransportLayer_Base ();
 
   // implement (part of) Net_ITransportLayer_T
-  virtual Common_DispatchType dispatch ();
-  virtual Net_ClientServerRole role ();
-  virtual Net_TransportLayerType transportLayer ();
+  inline virtual void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  virtual enum Common_DispatchType dispatch ();
+  virtual enum Net_ClientServerRole role ();
+  virtual enum Net_TransportLayerType transportLayer ();
 
  protected:
-  Net_InetTransportLayer_Base (Net_TransportLayerType);
+  Net_InetTransportLayer_Base (enum Net_TransportLayerType);
 
   // implement (part of) Net_ITransportLayer_T
-  virtual bool initialize (Common_DispatchType,
-                           Net_ClientServerRole,
-                           const Net_SocketConfiguration&);
+  virtual bool initialize (enum Common_DispatchType,
+                           enum Net_ClientServerRole,
+                           const struct Net_SocketConfiguration&);
   virtual void finalize ();
 
-  Common_DispatchType    dispatch_;
-  Net_ClientServerRole   role_;
-  Net_TransportLayerType transportLayer_;
+  enum Common_DispatchType    dispatch_;
+  enum Net_ClientServerRole   role_;
+  enum Net_TransportLayerType transportLayer_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_InetTransportLayer_Base ())
@@ -60,6 +61,10 @@ class Net_InetTransportLayer_Base
   ACE_UNIMPLEMENTED_FUNC (Net_InetTransportLayer_Base& operator= (const Net_InetTransportLayer_Base&))
 };
 
+//////////////////////////////////////////
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 //class Net_Export Net_NetlinkTransportLayer_Base
 class Net_NetlinkTransportLayer_Base
  : virtual public Net_ITransportLayer_T<Net_SocketConfiguration>
@@ -68,26 +73,27 @@ class Net_NetlinkTransportLayer_Base
   virtual ~Net_NetlinkTransportLayer_Base ();
 
   // implement (part of) Net_ITransportLayer_T
-  virtual Common_DispatchType dispatch ();
-  virtual Net_ClientServerRole role ();
-  virtual Net_TransportLayerType transportLayer ();
+  virtual enum Common_DispatchType dispatch ();
+  virtual enum Net_ClientServerRole role ();
+  virtual enum Net_TransportLayerType transportLayer ();
 
  protected:
   Net_NetlinkTransportLayer_Base ();
 
   // implement (part of) Net_ITransportLayer_T
-  virtual bool initialize (Common_DispatchType,
-                           Net_ClientServerRole,
-                           const Net_SocketConfiguration&);
+  virtual bool initialize (enum Common_DispatchType,
+                           enum Net_ClientServerRole,
+                           const struct Net_SocketConfiguration&);
   virtual void finalize ();
 
-  Common_DispatchType    dispatch_;
-  Net_ClientServerRole   role_;
-  Net_TransportLayerType transportLayer_;
+  enum Common_DispatchType    dispatch_;
+  enum Net_ClientServerRole   role_;
+  enum Net_TransportLayerType transportLayer_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkTransportLayer_Base (const Net_NetlinkTransportLayer_Base&))
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkTransportLayer_Base& operator= (const Net_NetlinkTransportLayer_Base&))
 };
+#endif
 
 #endif

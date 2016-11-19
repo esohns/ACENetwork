@@ -29,7 +29,7 @@
 
 #include <gtk/gtk.h>
 
-//#include "bittorrent_client_stream_common.h"
+#include "test_i_gtk_common.h"
 
 // forward declaration(s)
 struct Common_UI_GTKState;
@@ -45,26 +45,26 @@ typedef std::set<ACE_thread_t> BitTorrent_Client_GUI_CompletedActions_t;
 typedef BitTorrent_Client_GUI_CompletedActions_t::iterator BitTorrent_Client_GUI_CompletedActionsIterator_t;
 
 struct BitTorrent_Client_GTK_ProgressData
+ : Test_I_GTK_ProgressData
 {
   inline BitTorrent_Client_GTK_ProgressData ()
-   : completedActions ()
-   , cursorType (GDK_LAST_CURSOR)
-   , GTKState (NULL)
+   : Test_I_GTK_ProgressData ()
+   , completedActions ()
    , pendingActions ()
+   , transferred (0)
   {};
 
   BitTorrent_Client_GUI_CompletedActions_t completedActions;
-  GdkCursorType                            cursorType;
-  struct Common_UI_GTKState*               GTKState;
   BitTorrent_Client_GUI_PendingActions_t   pendingActions;
+  unsigned int                             transferred;
 };
 
 struct BitTorrent_Client_Configuration;
 struct BitTorrent_Client_GTK_CBData
- : Common_UI_GTKState
+ : Test_I_GTK_CBData
 {
   inline BitTorrent_Client_GTK_CBData ()
-   : Common_UI_GTKState ()
+   : Test_I_GTK_CBData ()
    , configuration (NULL)
    , contextID (0)
    , progressData ()

@@ -126,8 +126,7 @@ class HTTP_Stream_T
   //                               SessionDataType,
   //                               SessionDataContainerType,
   //                               StatisticContainerType> BISECTOR_T;
-  typedef HTTP_Module_ParserH_T<ACE_SYNCH_MUTEX,
-                                ACE_MT_SYNCH,
+  typedef HTTP_Module_ParserH_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 ControlMessageType,
                                 DataMessageType,

@@ -42,8 +42,8 @@ template <typename HandlerType,
           typename ConnectorType, // ACE_SOCK_CONNECTOR
           ////////////////////////////////
           typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
+          typename ConfigurationType, // connection-
+          typename StateType, // connection-
           typename StatisticContainerType,
           ////////////////////////////////
           typename HandlerConfigurationType, // socket-

@@ -58,6 +58,9 @@ struct BitTorrent_Client_Configuration
    : socketConfiguration ()
    , socketHandlerConfiguration ()
    ///////////////////////////////////////
+   , allocatorConfiguration ()
+   , moduleConfiguration ()
+   , moduleHandlerConfiguration ()
    , streamConfiguration ()
    , userData ()
    ///////////////////////////////////////
@@ -73,6 +76,7 @@ struct BitTorrent_Client_Configuration
   struct Net_SocketConfiguration                      socketConfiguration;
   struct BitTorrent_Client_SocketHandlerConfiguration socketHandlerConfiguration;
   // ****************************** stream *************************************
+  struct BitTorrent_AllocatorConfiguration            allocatorConfiguration;
   struct Stream_ModuleConfiguration                   moduleConfiguration;
   struct BitTorrent_Client_ModuleHandlerConfiguration moduleHandlerConfiguration;
   struct BitTorrent_Client_StreamConfiguration        streamConfiguration;

@@ -127,13 +127,13 @@ struct Net_ConnectionState
    , userData (NULL)
   {};
 
-  Net_Connection_Status  status;
+  enum Net_Connection_Status status;
 
-  Net_RuntimeStatistic_t currentStatistic;
-  ACE_Time_Value         lastCollectionTimestamp;
-  ACE_SYNCH_MUTEX        lock;
+  Net_RuntimeStatistic_t     currentStatistic;
+  ACE_Time_Value             lastCollectionTimestamp;
+  ACE_SYNCH_MUTEX            lock;
 
-  Net_UserData*          userData;
+  struct Net_UserData*       userData;
 };
 
 #endif

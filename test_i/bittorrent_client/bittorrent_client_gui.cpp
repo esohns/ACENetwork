@@ -60,10 +60,10 @@
 
 #include "test_i_defines.h"
 
+#include <ace/Synch.h>
 #include "bittorrent_client_configuration.h"
 #include "bittorrent_client_defines.h"
 #include "bittorrent_client_gui_callbacks.h"
-#include <ace/Synch.h>
 #include "bittorrent_client_gui_common.h"
 #include "bittorrent_client_gui_defines.h"
 #include "bittorrent_client_network.h"
@@ -540,19 +540,21 @@ do_work (bool useThreadPool_in,
   // [- signal timer expiration to perform server queries] (see above)
 
   // step5: start GTK event loop
-  userData_in.GTKState.initializationHook = idle_initialize_UI_cb;
-  userData_in.GTKState.finalizationHook = idle_finalize_UI_cb;
-  userData_in.GTKState.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
+  userData_in.initializationHook = idle_initialize_UI_cb;
+  userData_in.finalizationHook = idle_finalize_UI_cb;
+  userData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
     std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
-  userData_in.GTKState.userData = &userData_in;
+  userData_in.userData = &userData_in;
 
-  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
+  Common_UI_GTK_Manager* gtk_manager_p =
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  gtk_manager_p->start ();
   ACE_Time_Value one_second (1, 0);
   int result = ACE_OS::sleep (one_second);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::sleep(): \"%m\", continuing\n")));
-  if (!COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
+  if (!gtk_manager_p->isRunning ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
@@ -573,7 +575,7 @@ do_work (bool useThreadPool_in,
 
     // clean up
     timer_manager_p->stop ();
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+    gtk_manager_p->stop ();
 
     return;
   } // end IF
@@ -585,7 +587,7 @@ do_work (bool useThreadPool_in,
                                 group_id);
 
   // step8: clean up
-  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->wait ();
+  gtk_manager_p->wait ();
   timer_manager_p->stop ();
 
   // wait for connection processing to complete
@@ -596,408 +598,408 @@ do_work (bool useThreadPool_in,
               ACE_TEXT ("finished working...\n")));
 }
 
-void
-do_parsePhonebookFile (const std::string& phonebookFilename_in,
-                       BitTorrent_Client_PhoneBook& phoneBook_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("::do_parsePhonebookFile"));
+//void
+//do_parsePhonebookFile (const std::string& phonebookFilename_in,
+//                       BitTorrent_Client_PhoneBook& phoneBook_out)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("::do_parsePhonebookFile"));
 
-  // initialize return value(s)
-  phoneBook_out.timeStamp.update (ACE_Time_Value::zero);
-  phoneBook_out.networks.clear ();
-  phoneBook_out.servers.clear ();
+//  // initialize return value(s)
+//  phoneBook_out.timeStamp.update (ACE_Time_Value::zero);
+//  phoneBook_out.networks.clear ();
+//  phoneBook_out.servers.clear ();
 
-  int result = -1;
-  ACE_Configuration_Heap configuration_heap;
-  result = configuration_heap.open ();
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("ACE_Configuration_Heap::open() failed, returning\n")));
-    return;
-  } // end IF
+//  int result = -1;
+//  ACE_Configuration_Heap configuration_heap;
+//  result = configuration_heap.open ();
+//  if (result == -1)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("ACE_Configuration_Heap::open() failed, returning\n")));
+//    return;
+//  } // end IF
 
-  ACE_Ini_ImpExp ini_import_export (configuration_heap);
-  result = ini_import_export.import_config (phonebookFilename_in.c_str ());
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("ACE_Ini_ImpExp::import_config(\"%s\") failed, returning\n"),
-                ACE_TEXT (phonebookFilename_in.c_str ())));
-    return;
-  } // end IF
+//  ACE_Ini_ImpExp ini_import_export (configuration_heap);
+//  result = ini_import_export.import_config (phonebookFilename_in.c_str ());
+//  if (result == -1)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("ACE_Ini_ImpExp::import_config(\"%s\") failed, returning\n"),
+//                ACE_TEXT (phonebookFilename_in.c_str ())));
+//    return;
+//  } // end IF
 
-  // step1: find/open "timestamp" section...
-  ACE_Configuration_Section_Key section_key;
-  result =
-    configuration_heap.open_section (configuration_heap.root_section (),
-                                     ACE_TEXT (BITTORRENT_CLIENT_CNF_TIMESTAMP_SECTION_HEADER),
-                                     0, // MUST exist !
-                                     section_key);
-  if (result == -1)
-  {
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Configuration_Heap::open_section(\"%s\"), returning\n"),
-                ACE_TEXT (BITTORRENT_CLIENT_CNF_TIMESTAMP_SECTION_HEADER)));
-    return;
-  } // end IF
+//  // step1: find/open "timestamp" section...
+//  ACE_Configuration_Section_Key section_key;
+//  result =
+//    configuration_heap.open_section (configuration_heap.root_section (),
+//                                     ACE_TEXT (BITTORRENT_CLIENT_CNF_TIMESTAMP_SECTION_HEADER),
+//                                     0, // MUST exist !
+//                                     section_key);
+//  if (result == -1)
+//  {
+//    ACE_ERROR ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Configuration_Heap::open_section(\"%s\"), returning\n"),
+//                ACE_TEXT (BITTORRENT_CLIENT_CNF_TIMESTAMP_SECTION_HEADER)));
+//    return;
+//  } // end IF
 
-  // import value...
-  int index = 0;
-  ACE_TString item_name, item_value;
-  ACE_Configuration::VALUETYPE item_type;
-  std::stringstream converter;
-  while (configuration_heap.enumerate_values (section_key,
-                                              index,
-                                              item_name,
-                                              item_type) == 0)
-  {
-    result =
-      configuration_heap.get_string_value (section_key,
-                                           ACE_TEXT (item_name.c_str ()),
-                                           item_value);
-    if (result == -1)
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Configuration_Heap::get_string_value(\"%s\"), returning\n"),
-                  ACE_TEXT (item_name.c_str ())));
-      return;
-    } // end IF
+//  // import value...
+//  int index = 0;
+//  ACE_TString item_name, item_value;
+//  ACE_Configuration::VALUETYPE item_type;
+//  std::stringstream converter;
+//  while (configuration_heap.enumerate_values (section_key,
+//                                              index,
+//                                              item_name,
+//                                              item_type) == 0)
+//  {
+//    result =
+//      configuration_heap.get_string_value (section_key,
+//                                           ACE_TEXT (item_name.c_str ()),
+//                                           item_value);
+//    if (result == -1)
+//    {
+//      ACE_ERROR ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_Configuration_Heap::get_string_value(\"%s\"), returning\n"),
+//                  ACE_TEXT (item_name.c_str ())));
+//      return;
+//    } // end IF
 
-//     ACE_DEBUG((LM_DEBUG,
-//                ACE_TEXT("enumerated %s, type %d\n"),
-//                val_name.c_str(),
-//                val_type));
+////     ACE_DEBUG((LM_DEBUG,
+////                ACE_TEXT("enumerated %s, type %d\n"),
+////                val_name.c_str(),
+////                val_type));
 
-    if (item_name == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_CNF_DATE_SECTION_HEADER))
-    {
-      std::string time_stamp = ACE_TEXT_ALWAYS_CHAR (item_value.c_str ());
-      // parse timestamp
-      std::string::size_type current_fwd_slash = 0;
-      std::string::size_type last_fwd_slash = 0;
-      current_fwd_slash = time_stamp.find ('/', 0);
-// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
-#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
-      if (current_fwd_slash == -1)
-#else
-      if (current_fwd_slash == std::string::npos)
-#endif
-      {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT ("\"%s\": failed to parse timestamp (was: \"%s\"), returning\n"),
-                    ACE_TEXT (phonebookFilename_in.c_str ()),
-                    ACE_TEXT (item_value.c_str ())));
-        return;
-      } // end IF
-      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-      converter.clear ();
-      converter << time_stamp.substr (0, current_fwd_slash);
-      long day = 0;
-      converter >> day;
-      phoneBook_out.timeStamp.day (day);
-      last_fwd_slash = current_fwd_slash;
-      current_fwd_slash = time_stamp.find ('/', current_fwd_slash + 1);
-// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
-#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
-      if (current_fwd_slash == -1)
-#else
-      if (current_fwd_slash == std::string::npos)
-#endif
-      {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT ("\"%s\": failed to parse timestamp (was: \"%s\"), returning\n"),
-                    ACE_TEXT (phonebookFilename_in.c_str ()),
-                    ACE_TEXT (item_value.c_str ())));
-        return;
-      } // end IF
-      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-      converter.clear ();
-      converter << time_stamp.substr (last_fwd_slash + 1,
-                                      last_fwd_slash - current_fwd_slash - 1);
-      long month = 0;
-      converter >> month;
-      phoneBook_out.timeStamp.month (month);
-      last_fwd_slash = current_fwd_slash;
-      current_fwd_slash = time_stamp.find ('/', current_fwd_slash + 1);
-// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
-#if defined(_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
-      if (current_fwd_slash != -1)
-#else
-      if (current_fwd_slash != std::string::npos)
-#endif
-      {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT ("\"%s\": failed to parse timestamp (was: \"%s\"), returning\n"),
-                    ACE_TEXT (phonebookFilename_in.c_str ()),
-                    ACE_TEXT (item_value.c_str ())));
-        return;
-      } // end IF
-      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-      converter.clear ();
-      converter << time_stamp.substr (last_fwd_slash + 1,
-// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
-#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
-                                    -1);
-#else
-                                    std::string::npos);
-#endif
-      long year = 0;
-      converter >> year;
-      phoneBook_out.timeStamp.year (year);
-    } // end IF
+//    if (item_name == ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_CNF_DATE_SECTION_HEADER))
+//    {
+//      std::string time_stamp = ACE_TEXT_ALWAYS_CHAR (item_value.c_str ());
+//      // parse timestamp
+//      std::string::size_type current_fwd_slash = 0;
+//      std::string::size_type last_fwd_slash = 0;
+//      current_fwd_slash = time_stamp.find ('/', 0);
+//// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
+//#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
+//      if (current_fwd_slash == -1)
+//#else
+//      if (current_fwd_slash == std::string::npos)
+//#endif
+//      {
+//        ACE_ERROR ((LM_ERROR,
+//                    ACE_TEXT ("\"%s\": failed to parse timestamp (was: \"%s\"), returning\n"),
+//                    ACE_TEXT (phonebookFilename_in.c_str ()),
+//                    ACE_TEXT (item_value.c_str ())));
+//        return;
+//      } // end IF
+//      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+//      converter.clear ();
+//      converter << time_stamp.substr (0, current_fwd_slash);
+//      long day = 0;
+//      converter >> day;
+//      phoneBook_out.timeStamp.day (day);
+//      last_fwd_slash = current_fwd_slash;
+//      current_fwd_slash = time_stamp.find ('/', current_fwd_slash + 1);
+//// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
+//#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
+//      if (current_fwd_slash == -1)
+//#else
+//      if (current_fwd_slash == std::string::npos)
+//#endif
+//      {
+//        ACE_ERROR ((LM_ERROR,
+//                    ACE_TEXT ("\"%s\": failed to parse timestamp (was: \"%s\"), returning\n"),
+//                    ACE_TEXT (phonebookFilename_in.c_str ()),
+//                    ACE_TEXT (item_value.c_str ())));
+//        return;
+//      } // end IF
+//      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+//      converter.clear ();
+//      converter << time_stamp.substr (last_fwd_slash + 1,
+//                                      last_fwd_slash - current_fwd_slash - 1);
+//      long month = 0;
+//      converter >> month;
+//      phoneBook_out.timeStamp.month (month);
+//      last_fwd_slash = current_fwd_slash;
+//      current_fwd_slash = time_stamp.find ('/', current_fwd_slash + 1);
+//// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
+//#if defined(_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
+//      if (current_fwd_slash != -1)
+//#else
+//      if (current_fwd_slash != std::string::npos)
+//#endif
+//      {
+//        ACE_ERROR ((LM_ERROR,
+//                    ACE_TEXT ("\"%s\": failed to parse timestamp (was: \"%s\"), returning\n"),
+//                    ACE_TEXT (phonebookFilename_in.c_str ()),
+//                    ACE_TEXT (item_value.c_str ())));
+//        return;
+//      } // end IF
+//      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+//      converter.clear ();
+//      converter << time_stamp.substr (last_fwd_slash + 1,
+//// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
+//#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
+//                                    -1);
+//#else
+//                                    std::string::npos);
+//#endif
+//      long year = 0;
+//      converter >> year;
+//      phoneBook_out.timeStamp.year (year);
+//    } // end IF
 
-    ++index;
-  } // end WHILE
+//    ++index;
+//  } // end WHILE
 
-//   ACE_DEBUG((LM_DEBUG,
-//              ACE_TEXT("timestamp (d/m/y, h:m:s.u): %d/%d/%d, %d:%d:%d.%d\n"),
-//              phoneBook_out.timestamp.day(),
-//              phoneBook_out.timestamp.month(),
-//              phoneBook_out.timestamp.year(),
-//              phoneBook_out.timestamp.hour(),
-//              phoneBook_out.timestamp.minute(),
-//              phoneBook_out.timestamp.second(),
-//              phoneBook_out.timestamp.microsec()));
+////   ACE_DEBUG((LM_DEBUG,
+////              ACE_TEXT("timestamp (d/m/y, h:m:s.u): %d/%d/%d, %d:%d:%d.%d\n"),
+////              phoneBook_out.timestamp.day(),
+////              phoneBook_out.timestamp.month(),
+////              phoneBook_out.timestamp.year(),
+////              phoneBook_out.timestamp.hour(),
+////              phoneBook_out.timestamp.minute(),
+////              phoneBook_out.timestamp.second(),
+////              phoneBook_out.timestamp.microsec()));
 
-  // step2: find/open "networks" section...
-  result =
-    configuration_heap.open_section (configuration_heap.root_section (),
-                                     ACE_TEXT (BITTORRENT_CLIENT_CNF_NETWORKS_SECTION_HEADER),
-                                     0, // MUST exist !
-                                     section_key);
-  if (result == -1)
-  {
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Configuration_Heap::open_section(\"%s\"), returning\n"),
-                ACE_TEXT (BITTORRENT_CLIENT_CNF_NETWORKS_SECTION_HEADER)));
-    return;
-  } // end IF
+//  // step2: find/open "networks" section...
+//  result =
+//    configuration_heap.open_section (configuration_heap.root_section (),
+//                                     ACE_TEXT (BITTORRENT_CLIENT_CNF_NETWORKS_SECTION_HEADER),
+//                                     0, // MUST exist !
+//                                     section_key);
+//  if (result == -1)
+//  {
+//    ACE_ERROR ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Configuration_Heap::open_section(\"%s\"), returning\n"),
+//                ACE_TEXT (BITTORRENT_CLIENT_CNF_NETWORKS_SECTION_HEADER)));
+//    return;
+//  } // end IF
 
-  // import values...
-  index = 0;
-  while (configuration_heap.enumerate_values (section_key,
-                                              index,
-                                              item_name,
-                                              item_type) == 0)
-  {
-    result = configuration_heap.get_string_value (section_key,
-                                                  ACE_TEXT (item_name.c_str ()),
-                                                  item_value);
-    if (result == -1)
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Configuration_Heap::get_string_value(\"%s\"), returning\n"),
-                  ACE_TEXT (item_name.c_str ())));
-      return;
-    } // end IF
+//  // import values...
+//  index = 0;
+//  while (configuration_heap.enumerate_values (section_key,
+//                                              index,
+//                                              item_name,
+//                                              item_type) == 0)
+//  {
+//    result = configuration_heap.get_string_value (section_key,
+//                                                  ACE_TEXT (item_name.c_str ()),
+//                                                  item_value);
+//    if (result == -1)
+//    {
+//      ACE_ERROR ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_Configuration_Heap::get_string_value(\"%s\"), returning\n"),
+//                  ACE_TEXT (item_name.c_str ())));
+//      return;
+//    } // end IF
 
-//     ACE_DEBUG ((LM_DEBUG,
-//                 ACE_TEXT ("enumerated %s, type %d\n"),
-//                 ACE_TEXT (val_name.c_str ()),
-//                 val_type));
+////     ACE_DEBUG ((LM_DEBUG,
+////                 ACE_TEXT ("enumerated %s, type %d\n"),
+////                 ACE_TEXT (val_name.c_str ()),
+////                 val_type));
 
-    phoneBook_out.networks.insert (item_value.c_str ());
+//    phoneBook_out.networks.insert (item_value.c_str ());
 
-    ++index;
-  } // end WHILE
+//    ++index;
+//  } // end WHILE
 
-  // step3: find/open "servers" section...
-  result =
-    configuration_heap.open_section (configuration_heap.root_section (),
-                                     ACE_TEXT (BITTORRENT_CLIENT_CNF_SERVERS_SECTION_HEADER),
-                                     0, // MUST exist !
-                                     section_key);
-  if (result == -1)
-  {
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Configuration_Heap::open_section(\"%s\"), returning\n"),
-                ACE_TEXT (BITTORRENT_CLIENT_CNF_SERVERS_SECTION_HEADER)));
-    return;
-  } // end IF
+//  // step3: find/open "servers" section...
+//  result =
+//    configuration_heap.open_section (configuration_heap.root_section (),
+//                                     ACE_TEXT (BITTORRENT_CLIENT_CNF_SERVERS_SECTION_HEADER),
+//                                     0, // MUST exist !
+//                                     section_key);
+//  if (result == -1)
+//  {
+//    ACE_ERROR ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Configuration_Heap::open_section(\"%s\"), returning\n"),
+//                ACE_TEXT (BITTORRENT_CLIENT_CNF_SERVERS_SECTION_HEADER)));
+//    return;
+//  } // end IF
 
-  // import values...
-  index = 0;
-  BitTorrent_Client_ConnectionEntry entry;
-  std::string entry_name;
-  BitTorrent_Client_PortRange_t port_range;
-  bool no_range = false;
-  while (configuration_heap.enumerate_values (section_key,
-                                              index,
-                                              item_name,
-                                              item_type) == 0)
-  {
-    entry.ports.clear ();
+//  // import values...
+//  index = 0;
+//  BitTorrent_Client_ConnectionEntry entry;
+//  std::string entry_name;
+//  BitTorrent_Client_PortRange_t port_range;
+//  bool no_range = false;
+//  while (configuration_heap.enumerate_values (section_key,
+//                                              index,
+//                                              item_name,
+//                                              item_type) == 0)
+//  {
+//    entry.ports.clear ();
 
-    result =
-      configuration_heap.get_string_value (section_key,
-                                           ACE_TEXT (item_name.c_str ()),
-                                           item_value);
-    if (result == -1)
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Configuration_Heap::get_string_value(\"%s\"), returning\n"),
-                  ACE_TEXT (item_name.c_str ())));
-      return;
-    } // end IF
+//    result =
+//      configuration_heap.get_string_value (section_key,
+//                                           ACE_TEXT (item_name.c_str ()),
+//                                           item_value);
+//    if (result == -1)
+//    {
+//      ACE_ERROR ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_Configuration_Heap::get_string_value(\"%s\"), returning\n"),
+//                  ACE_TEXT (item_name.c_str ())));
+//      return;
+//    } // end IF
 
-//     ACE_DEBUG ((LM_DEBUG,
-//                 ACE_TEXT ("enumerated %s, type %d\n"),
-//                 ACE_TEXT (item_name.c_str ()),
-//                 item_type));
+////     ACE_DEBUG ((LM_DEBUG,
+////                 ACE_TEXT ("enumerated %s, type %d\n"),
+////                 ACE_TEXT (item_name.c_str ()),
+////                 item_type));
 
-    std::string line_string = item_value.c_str ();
+//    std::string line_string = item_value.c_str ();
 
-    // parse connection name
-    std::string::size_type current_position = 0;
-// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
-#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
-    std::string::size_type last_position = -1;
-#else
-    std::string::size_type last_position = std::string::npos;
-#endif
-    current_position =
-      line_string.find (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_PHONEBOOK_KEYWORD_SERVER), 0);
-// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
-#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
-    if (current_position == -1)
-#else
-    if (current_position == std::string::npos)
-#endif
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT ("\"%s\": failed to parse server (was: \"%s\"), returning\n"),
-                  ACE_TEXT (phonebookFilename_in.c_str ()),
-                  ACE_TEXT (item_value.c_str ())));
-      return;
-    } // end IF
-    // *TODO*: needs further parsing...
-    entry_name = line_string.substr (0, current_position);
-    last_position = current_position + 6;
+//    // parse connection name
+//    std::string::size_type current_position = 0;
+//// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
+//#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
+//    std::string::size_type last_position = -1;
+//#else
+//    std::string::size_type last_position = std::string::npos;
+//#endif
+//    current_position =
+//      line_string.find (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_PHONEBOOK_KEYWORD_SERVER), 0);
+//// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
+//#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
+//    if (current_position == -1)
+//#else
+//    if (current_position == std::string::npos)
+//#endif
+//    {
+//      ACE_ERROR ((LM_ERROR,
+//                  ACE_TEXT ("\"%s\": failed to parse server (was: \"%s\"), returning\n"),
+//                  ACE_TEXT (phonebookFilename_in.c_str ()),
+//                  ACE_TEXT (item_value.c_str ())));
+//      return;
+//    } // end IF
+//    // *TODO*: needs further parsing...
+//    entry_name = line_string.substr (0, current_position);
+//    last_position = current_position + 6;
 
-    // parse hostname
-    current_position = line_string.find (':', last_position + 1);
-// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
-#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
-    if (current_position == -1)
-#else
-    if (current_position == std::string::npos)
-#endif
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT ("\"%s\": failed to parse server (was: \"%s\"), returning\n"),
-                  ACE_TEXT (phonebookFilename_in.c_str ()),
-                  ACE_TEXT (item_value.c_str ())));
-      return;
-    } // end IF
-    entry.hostName =
-      line_string.substr (last_position + 1,
-                          current_position - last_position - 1);
-    last_position = current_position;
+//    // parse hostname
+//    current_position = line_string.find (':', last_position + 1);
+//// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
+//#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
+//    if (current_position == -1)
+//#else
+//    if (current_position == std::string::npos)
+//#endif
+//    {
+//      ACE_ERROR ((LM_ERROR,
+//                  ACE_TEXT ("\"%s\": failed to parse server (was: \"%s\"), returning\n"),
+//                  ACE_TEXT (phonebookFilename_in.c_str ()),
+//                  ACE_TEXT (item_value.c_str ())));
+//      return;
+//    } // end IF
+//    entry.hostName =
+//      line_string.substr (last_position + 1,
+//                          current_position - last_position - 1);
+//    last_position = current_position;
 
-    // parse (list of) port ranges
-// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
-#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
-    std::string::size_type next_comma = -1;
-#else
-    std::string::size_type next_comma = std::string::npos;
-#endif
-    std::string::size_type group =
-      line_string.find (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_PHONEBOOK_KEYWORD_GROUP),
-                        current_position + 1);
-// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
-#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
-    if (group == -1)
-#else
-    if (group == std::string::npos)
-#endif
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT ("\"%s\": failed to parse server (was: \"%s\"), returning\n"),
-                  ACE_TEXT (phonebookFilename_in.c_str ()),
-                  ACE_TEXT (item_value.c_str ())));
-      return;
-    } // end IF
-    do
-    {
-      no_range = false;
+//    // parse (list of) port ranges
+//// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
+//#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
+//    std::string::size_type next_comma = -1;
+//#else
+//    std::string::size_type next_comma = std::string::npos;
+//#endif
+//    std::string::size_type group =
+//      line_string.find (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_PHONEBOOK_KEYWORD_GROUP),
+//                        current_position + 1);
+//// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
+//#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
+//    if (group == -1)
+//#else
+//    if (group == std::string::npos)
+//#endif
+//    {
+//      ACE_ERROR ((LM_ERROR,
+//                  ACE_TEXT ("\"%s\": failed to parse server (was: \"%s\"), returning\n"),
+//                  ACE_TEXT (phonebookFilename_in.c_str ()),
+//                  ACE_TEXT (item_value.c_str ())));
+//      return;
+//    } // end IF
+//    do
+//    {
+//      no_range = false;
 
-      next_comma = line_string.find (',', current_position + 1);
-      if (next_comma > group) next_comma = group;
+//      next_comma = line_string.find (',', current_position + 1);
+//      if (next_comma > group) next_comma = group;
 
-      // port range ?
-      current_position = line_string.find ('-', current_position + 1);
-// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
-#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
-      if ((current_position == -1)                ||
-#else
-      if ((current_position == std::string::npos) ||
-#endif
-          (current_position > next_comma))
-        no_range = true;
-      else
-      {
-        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter.clear ();
-        converter << line_string.substr (last_position + 1,
-                                         current_position - last_position - 1);
-        converter >> port_range.first;
+//      // port range ?
+//      current_position = line_string.find ('-', current_position + 1);
+//// *TODO*: there is a linking problem using std::string::npos in MSVC 2010...
+//#if defined (_MSC_VER) && (_MSC_VER >= 1600) /* VS2010 or newer */
+//      if ((current_position == -1)                ||
+//#else
+//      if ((current_position == std::string::npos) ||
+//#endif
+//          (current_position > next_comma))
+//        no_range = true;
+//      else
+//      {
+//        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+//        converter.clear ();
+//        converter << line_string.substr (last_position + 1,
+//                                         current_position - last_position - 1);
+//        converter >> port_range.first;
 
-        last_position = current_position;
-      } // end ELSE
-      current_position = next_comma;
-      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-      converter.clear ();
-      converter << line_string.substr (last_position + 1,
-                                       current_position - last_position - 1);
-      converter >> port_range.second;
-      if (no_range) port_range.first = port_range.second;
-      entry.ports.push_back (port_range);
+//        last_position = current_position;
+//      } // end ELSE
+//      current_position = next_comma;
+//      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+//      converter.clear ();
+//      converter << line_string.substr (last_position + 1,
+//                                       current_position - last_position - 1);
+//      converter >> port_range.second;
+//      if (no_range) port_range.first = port_range.second;
+//      entry.ports.push_back (port_range);
 
-      // skip to next port(range)
-      if (next_comma == group)
-      {
-        // this means that the end of the list has been reached...
-        // --> skip over "GROUP:"
-        last_position = next_comma + 5;
+//      // skip to next port(range)
+//      if (next_comma == group)
+//      {
+//        // this means that the end of the list has been reached...
+//        // --> skip over "GROUP:"
+//        last_position = next_comma + 5;
 
-        // proceed
-        break;
-      } // end IF
+//        // proceed
+//        break;
+//      } // end IF
 
-      last_position = current_position;
-    } while (true);
+//      last_position = current_position;
+//    } while (true);
 
-    // parse "group" (== network)
-    entry.netWork = line_string.substr (last_position + 1);
+//    // parse "group" (== network)
+//    entry.netWork = line_string.substr (last_position + 1);
 
-    phoneBook_out.networks.insert (entry.netWork);
-    phoneBook_out.servers.insert (std::make_pair (entry_name, entry));
+//    phoneBook_out.networks.insert (entry.netWork);
+//    phoneBook_out.servers.insert (std::make_pair (entry_name, entry));
 
-    ++index;
-  } // end WHILE
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("parsed %u phonebook (timestamp: %u/%u/%u) entries (%u network(s))...\n"),
-              phoneBook_out.servers.size (),
-              phoneBook_out.timeStamp.month (),
-              phoneBook_out.timeStamp.day (),
-              phoneBook_out.timeStamp.year (),
-              phoneBook_out.networks.size ()));
+//    ++index;
+//  } // end WHILE
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("parsed %u phonebook (timestamp: %u/%u/%u) entries (%u network(s))...\n"),
+//              phoneBook_out.servers.size (),
+//              phoneBook_out.timeStamp.month (),
+//              phoneBook_out.timeStamp.day (),
+//              phoneBook_out.timeStamp.year (),
+//              phoneBook_out.networks.size ()));
 
-  // add localhost
-  entry.hostName = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_SERVER_HOSTNAME);
-  entry.ports.clear ();
-  entry.ports.push_back (std::make_pair (BITTORRENT_DEFAULT_SERVER_PORT,
-                                         BITTORRENT_DEFAULT_SERVER_PORT));
-  entry.netWork.clear ();
-  phoneBook_out.servers.insert (std::make_pair (entry.hostName, entry));
+//  // add localhost
+//  entry.hostName = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_SERVER_HOSTNAME);
+//  entry.ports.clear ();
+//  entry.ports.push_back (std::make_pair (BITTORRENT_DEFAULT_SERVER_PORT,
+//                                         BITTORRENT_DEFAULT_SERVER_PORT));
+//  entry.netWork.clear ();
+//  phoneBook_out.servers.insert (std::make_pair (entry.hostName, entry));
 
-  //   for (BITTORRENT_CLIENT_NetworksIterator_t iterator = phoneBook_out.networks.begin ();
-  //        iterator != phoneBook_out.networks.end ();
-  //        iterator++)
-  //     ACE_DEBUG ((LM_DEBUG,
-  //                 ACE_TEXT ("network: \"%s\"\n"),
-  //                 ACE_TEXT ((*iterator).c_str ())));
-}
+//  //   for (BITTORRENT_CLIENT_NetworksIterator_t iterator = phoneBook_out.networks.begin ();
+//  //        iterator != phoneBook_out.networks.end ();
+//  //        iterator++)
+//  //     ACE_DEBUG ((LM_DEBUG,
+//  //                 ACE_TEXT ("network: \"%s\"\n"),
+//  //                 ACE_TEXT ((*iterator).c_str ())));
+//}
 
 void
 do_printVersion (const std::string& programName_in)
@@ -1298,8 +1300,10 @@ ACE_TMAIN (int argc_in,
   // initialize protocol configuration
   Stream_CachedAllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
                                                                               BITTORRENT_BUFFER_SIZE);
-  BitTorrent_Client_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES,
-                                                          &heap_allocator);
+  BitTorrent_Client_PeerMessageAllocator_t peer_message_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                   &heap_allocator);
+  BitTorrent_Client_TrackerMessageAllocator_t tracker_message_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                         &heap_allocator);
 
   BitTorrent_Client_Configuration configuration;
   BitTorrent_Client_UserData user_data;
@@ -1310,12 +1314,14 @@ ACE_TMAIN (int argc_in,
   configuration.socketHandlerConfiguration.socketConfiguration =
       &configuration.socketConfiguration;
   ////////////////////////// stream configuration //////////////////////////////
-  configuration.streamConfiguration.messageAllocator = &message_allocator;
+  configuration.streamConfiguration.messageAllocator = &peer_message_allocator;
   configuration.streamConfiguration.moduleConfiguration->streamConfiguration =
       &configuration.streamConfiguration;
-  configuration.moduleHandlerConfiguration.traceParsing = debug;
   configuration.streamConfiguration.statisticReportingInterval =
       reporting_interval;
+  configuration.streamConfiguration.trackerMessageAllocator =
+      &tracker_message_allocator;
+  configuration.moduleHandlerConfiguration.traceParsing = debug;
   configuration.userData = &user_data;
 
   BitTorrent_Client_GTK_CBData cb_user_data;
@@ -1323,72 +1329,11 @@ ACE_TMAIN (int argc_in,
   cb_user_data.UIFileDirectory = UIDefinitionFile_directory;
 //   userData.phoneBook;
 //   userData.loginOptions.password = ;
-  cb_user_data.configuration->protocolConfiguration.loginOptions.nickName =
-      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_NICKNAME);
+//  cb_user_data.configuration->protocolConfiguration.loginOptions.nickName =
+//      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_NICKNAME);
 //   userData.loginOptions.user.username = ;
-  std::string host_name;
-  if (!Net_Common_Tools::getHostname (host_name))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::getHostname(), aborting\n")));
 
-    Common_Tools::finalizeSignals (signal_set,
-                                   previous_signal_actions,
-                                   previous_signal_mask);
-    Common_Tools::finalizeLogging ();
-    // *PORTABILITY*: on Windows, fini ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    result = ACE::fini ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
-
-    return EXIT_FAILURE;
-  } // end IF
-  if (BITTORRENT_PRT_USERMSG_TRADITIONAL)
-  {
-    configuration.protocolConfiguration.loginOptions.user.hostName.discriminator =
-      BitTorrent_LoginOptions::User::Hostname::STRING;
-    configuration.protocolConfiguration.loginOptions.user.hostName.string =
-      &host_name;
-  } // end IF
-  else
-  {
-    configuration.protocolConfiguration.loginOptions.user.hostName.discriminator =
-      BitTorrent_LoginOptions::User::Hostname::MODE;
-    // *NOTE*: hybrid-7.2.3 seems to have a bug: 4 --> +i
-    configuration.protocolConfiguration.loginOptions.user.hostName.mode =
-      BITTORRENT_DEFAULT_USERMODE;
-  } // end ELSE
-  configuration.protocolConfiguration.loginOptions.user.serverName =
-    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_SERVERNAME);
-  configuration.protocolConfiguration.loginOptions.channel =
-    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_CHANNEL);
-  // populate user/realname
-  Common_Tools::getCurrentUserName (configuration.protocolConfiguration.loginOptions.user.userName,
-                                    configuration.protocolConfiguration.loginOptions.user.realName);
-
-  cb_user_data.GTKState.RCFiles.push_back (rc_file_name);
-
-  // step7: parse configuration file(s) (if any)
-  if (load_phonebook)
-    do_parsePhonebookFile (phonebook_file_name,
-                           cb_user_data.phoneBook);
-  if (!configuration_file_name.empty ())
-  {
-    BitTorrent_Client_Connections_t connections;
-    BitTorrent_Client_Tools::parseConfigurationFile (configuration_file_name,
-                                                     configuration.protocolConfiguration.loginOptions,
-                                                     connections);
-
-    // add connections to phonebook
-    for (BitTorrent_Client_ConnectionsIterator_t iterator = connections.begin ();
-         iterator != connections.end ();
-         ++iterator)
-      cb_user_data.phoneBook.servers.insert (std::make_pair ((*iterator).hostName,
-                                                             *iterator));
-  } // end IF
+  cb_user_data.RCFiles.push_back (rc_file_name);
 
   configuration.socketHandlerConfiguration.messageAllocator =
     configuration.streamConfiguration.messageAllocator;
@@ -1401,14 +1346,14 @@ ACE_TMAIN (int argc_in,
 
   configuration.useReactor = use_reactor;
 
-  cb_user_data.progressData.GTKState = &cb_user_data.GTKState;
+  cb_user_data.progressData.GTKState = &cb_user_data;
 
   // step8: initialize GTK UI
   Common_UI_GtkBuilderDefinition ui_definition (argc_in,
                                                 argv_in);
   COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                             argv_in,
-                                                            &cb_user_data.GTKState,
+                                                            &cb_user_data,
                                                             &ui_definition);
 
   // step9: do work

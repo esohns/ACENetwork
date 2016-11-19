@@ -30,6 +30,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename ConnectionType,
           typename ConnectionManagerType,
+          typename ConnectorType,
           typename StateType,
           typename SessionInterfaceType>
 Net_SessionBase_T<AddressType,
@@ -40,13 +41,16 @@ Net_SessionBase_T<AddressType,
                   HandlerConfigurationType,
                   ConnectionType,
                   ConnectionManagerType,
+                  ConnectorType,
                   StateType,
-                  SessionInterfaceType>::Net_SessionBase_T (ConnectionManagerType* interfaceHandle_in,
+                  SessionInterfaceType>::Net_SessionBase_T (const HandlerConfigurationType& configuration_in,
+                                                            ConnectionManagerType* interfaceHandle_in,
                                                             bool asynchronous_in)
- : connectionManager_ (interfaceHandle_in)
+ : configuration_ (&const_cast<HandlerConfigurationType&> (configuration_in))
+ , connectionManager_ (interfaceHandle_in)
+ , isAsynch_ (asynchronous_in)
  , lock_ ()
  , state_ ()
- , isAsynch_ (asynchronous_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::Net_SessionBase_T"));
 
@@ -60,6 +64,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename ConnectionType,
           typename ConnectionManagerType,
+          typename ConnectorType,
           typename StateType,
           typename SessionInterfaceType>
 Net_SessionBase_T<AddressType,
@@ -70,6 +75,7 @@ Net_SessionBase_T<AddressType,
                   HandlerConfigurationType,
                   ConnectionType,
                   ConnectionManagerType,
+                  ConnectorType,
                   StateType,
                   SessionInterfaceType>::~Net_SessionBase_T ()
 {
@@ -98,6 +104,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename ConnectionType,
           typename ConnectionManagerType,
+          typename ConnectorType,
           typename StateType,
           typename SessionInterfaceType>
 void
@@ -109,13 +116,14 @@ Net_SessionBase_T<AddressType,
                   HandlerConfigurationType,
                   ConnectionType,
                   ConnectionManagerType,
+                  ConnectorType,
                   StateType,
                   SessionInterfaceType>::connect (const AddressType& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::connect"));
 
-  CONNECTOR_T connector;
-  ASYNCH_CONNECTOR_T asynch_connector;
+  ConnectorType connector (connectionManager_,
+                           ACE_Time_Value::zero);
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
 
   // debug info
@@ -127,13 +135,23 @@ Net_SessionBase_T<AddressType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
 
-  if (isAsynch_)
-    handle = connector.connect (address_in);
-  else
+  // step1: initialize connector
+  typename ConnectorType::ICONNECTOR_T* iconnector_p = &connector;
+  ACE_ASSERT (configuration_);
+  if (!iconnector_p->initialize (*configuration_))
   {
-    asynch_connector.connect (address_in);
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
+    return;
+  } // end IF
+
+  // step2: try to connect
+  handle = iconnector_p->connect (address_in);
+  if (isAsynch_)
+  {
 
   } // end ELSE
+  else
   if (handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -155,6 +173,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename ConnectionType,
           typename ConnectionManagerType,
+          typename ConnectorType,
           typename StateType,
           typename SessionInterfaceType>
 void
@@ -166,6 +185,7 @@ Net_SessionBase_T<AddressType,
                   HandlerConfigurationType,
                   ConnectionType,
                   ConnectionManagerType,
+                  ConnectorType,
                   StateType,
                   SessionInterfaceType>::disconnect (const AddressType& address_in)
 {
@@ -193,7 +213,7 @@ Net_SessionBase_T<AddressType,
   } // end IF
 
   connection_p->close ();
-  connection_p->release ();
+  connection_p->decrease ();
 }
 
 //////////////////////////////////////////
@@ -206,6 +226,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename ConnectionType,
           typename ConnectionManagerType,
+          typename ConnectorType,
           typename StateType,
           typename SessionInterfaceType>
 void
@@ -217,6 +238,7 @@ Net_SessionBase_T<AddressType,
                   HandlerConfigurationType,
                   ConnectionType,
                   ConnectionManagerType,
+                  ConnectorType,
                   StateType,
                   SessionInterfaceType>::connect (Net_ConnectionId_t id_in)
 {
@@ -235,6 +257,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename ConnectionType,
           typename ConnectionManagerType,
+          typename ConnectorType,
           typename StateType,
           typename SessionInterfaceType>
 void
@@ -246,6 +269,7 @@ Net_SessionBase_T<AddressType,
                   HandlerConfigurationType,
                   ConnectionType,
                   ConnectionManagerType,
+                  ConnectorType,
                   StateType,
                   SessionInterfaceType>::disconnect (Net_ConnectionId_t id_in)
 {

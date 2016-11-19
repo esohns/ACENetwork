@@ -39,7 +39,6 @@ using namespace std;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <ace/Init_ACE.h>
 #endif
-#include <ace/Synch.h>
 #include <ace/POSIX_Proactor.h>
 #include <ace/Proactor.h>
 #include <ace/Profile_Timer.h>
@@ -73,9 +72,12 @@ using namespace std;
 #include "bittorrent_icontrol.h"
 #include "bittorrent_tools.h"
 
+#include <ace/Synch.h>
 #include "bittorrent_client_configuration.h"
 #include "bittorrent_client_curses.h"
 #include "bittorrent_client_defines.h"
+// *TODO*: to be removed ASAP
+#include "bittorrent_client_gui_common.h"
 #include "bittorrent_client_network.h"
 #include "bittorrent_client_session_common.h"
 #include "bittorrent_client_signalhandler.h"
@@ -421,7 +423,7 @@ connection_setup_curses_function (void* arg_in)
   BitTorrent_Client_IPeerStreamConnection_t* stream_connection_p = NULL;
   bool result_2 = false;
   const Stream_Module_t* module_p = NULL;
-  const BitTorrent_Client_PeerStream* stream_p = NULL;
+  const BitTorrent_Client_PeerStream_t* stream_p = NULL;
   BitTorrent_IControl* icontrol_p = NULL;
   ACE_Time_Value deadline = ACE_Time_Value::zero;
   std::string channel_string;
@@ -782,8 +784,12 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
     return;
   } // end IF
 
-  BitTorrent_Client_Session_t session;
-  BitTorrent_Client_AsynchSession_t asynch_session;
+  BitTorrent_Client_Session_t session (configuration_in.socketHandlerConfiguration,
+                                       connection_manager_p,
+                                       !configuration_in.useReactor);
+  BitTorrent_Client_AsynchSession_t asynch_session (configuration_in.socketHandlerConfiguration,
+                                                    connection_manager_p,
+                                                    !configuration_in.useReactor);
 
   // step6b: (try to) connect to the torrent tracker
   ACE_INET_Addr peer_address;
@@ -1057,14 +1063,18 @@ ACE_TMAIN (int argc_in,
   // initialize protocol configuration
   Stream_CachedAllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
                                                                               BITTORRENT_BUFFER_SIZE);
-  BitTorrent_Client_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES,
-                                                          &heap_allocator);
+  BitTorrent_Client_PeerMessageAllocator_t peer_message_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                   &heap_allocator);
+  BitTorrent_Client_TrackerMessageAllocator_t tracker_message_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                         &heap_allocator);
 
   BitTorrent_Client_Configuration configuration;
   ////////////////////////////////////////
-  configuration.streamConfiguration.messageAllocator = &message_allocator;
+  configuration.streamConfiguration.messageAllocator = &peer_message_allocator;
   configuration.streamConfiguration.statisticReportingInterval =
     statistic_reporting_interval;
+configuration.streamConfiguration.trackerMessageAllocator =
+    &tracker_message_allocator;
   ////////////////////////////////////////
 //  configuration.protocolConfiguration.loginOptions.nickName =
 //    ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);

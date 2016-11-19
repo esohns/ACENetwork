@@ -23,27 +23,54 @@
 
 #include <ace/Global_Macros.h>
 
+#include "stream_common.h"
+#include "stream_control_message.h"
+#include "stream_session_data.h"
 #include "stream_session_message_base.h"
 
+#include "bittorrent_stream_common.h"
+
 #include "bittorrent_client_common.h"
-#include "bittorrent_client_stream_common.h"
 
 // forward declarations
+struct BitTorrent_Client_SessionData;
+typedef Stream_SessionData_T<struct BitTorrent_Client_SessionData> BitTorrent_Client_SessionData_t;
+struct BitTorrent_Client_UserData;
+class BitTorrent_Client_PeerMessage;
+class BitTorrent_Client_SessionMessage;
+typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
+                                struct BitTorrent_AllocatorConfiguration,
+                                BitTorrent_Client_PeerMessage,
+                                BitTorrent_Client_SessionMessage> BitTorrent_Client_ControlMessage_t;
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
+template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
+template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
 class BitTorrent_Client_SessionMessage
- : public Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
+ : public Stream_SessionMessageBase_T<struct BitTorrent_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       BitTorrent_Client_SessionData_t,
                                       struct BitTorrent_Client_UserData,
                                       BitTorrent_Client_ControlMessage_t,
-                                      BitTorrent_Message>
+                                      BitTorrent_Client_PeerMessage>
 {
-//  // enable access to private ctor(s)
-//  friend class Net_StreamMessageAllocator;
-//  friend class Stream_MessageAllocatorHeapBase<Net_Message, Net_SessionMessage>;
+  // enable access to specific private ctors
+  friend class Stream_MessageAllocatorHeapBase_T<struct BitTorrent_AllocatorConfiguration,
+                                                 BitTorrent_Client_ControlMessage_t,
+                                                 BitTorrent_Client_PeerMessage,
+                                                 BitTorrent_Client_SessionMessage>;
+  friend class Stream_CachedMessageAllocator_T<struct BitTorrent_AllocatorConfiguration,
+                                               BitTorrent_Client_ControlMessage_t,
+                                               BitTorrent_Client_PeerMessage,
+                                               BitTorrent_Client_SessionMessage>;
 
  public:
   // *NOTE*: assume lifetime responsibility for the second argument !
@@ -61,12 +88,12 @@ class BitTorrent_Client_SessionMessage
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
+  typedef Stream_SessionMessageBase_T<struct BitTorrent_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       BitTorrent_Client_SessionData_t,
                                       struct BitTorrent_Client_UserData,
                                       BitTorrent_Client_ControlMessage_t,
-                                      BitTorrent_Message> inherited;
+                                      BitTorrent_Client_PeerMessage> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_SessionMessage ())
   // copy ctor (to be used by duplicate())

@@ -206,16 +206,16 @@ struct IRC_ConnectionState
    , userData (NULL)
   {};
 
-  IRC_Configuration*     configuration;
-  IRC_IControl*          controller;
+  struct IRC_Configuration*   configuration;
+  IRC_IControl*               controller;
 
-  IRC_RuntimeStatistic_t currentStatistic;
-  ACE_Time_Value         lastCollectionTimestamp;
-  ACE_SYNCH_MUTEX        lock;
+  IRC_RuntimeStatistic_t      currentStatistic;
+  ACE_Time_Value              lastCollectionTimestamp;
+  ACE_SYNCH_MUTEX             lock;
 
-  Net_Connection_Status  status;
+  enum Net_Connection_Status  status;
 
-  IRC_Stream_UserData*   userData;
+  struct IRC_Stream_UserData* userData;
 };
 
 struct IRC_SessionState

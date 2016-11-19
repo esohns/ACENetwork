@@ -23,7 +23,7 @@
 
 #include <ace/Global_Macros.h>
 
-#include "stream_data_message_base.h"
+#include "http_message.h"
 
 #include "test_u_HTTP_decoder_common.h"
 
@@ -36,16 +36,22 @@ template <typename AllocatorConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
+template <typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
 class Test_U_Message
- : public Stream_DataMessageBase_2<Test_U_AllocatorConfiguration,
-                                   Test_U_ControlMessage_t,
-                                   Test_U_SessionMessage,
-                                   Test_U_MessageData_t,
-                                   HTTP_Method_t>
+ : public HTTP_Message_T<Test_U_AllocatorConfiguration,
+                         Test_U_ControlMessage_t,
+                         Test_U_SessionMessage>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
+                                                 Test_U_ControlMessage_t,
+                                                 Test_U_Message,
+                                                 Test_U_SessionMessage>;
+  friend class Stream_CachedMessageAllocator_T<Test_U_AllocatorConfiguration,
                                                  Test_U_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
@@ -59,10 +65,7 @@ class Test_U_Message
   // *NOTE*: this uses our allocator (if any) to create a new message
   virtual ACE_Message_Block* duplicate (void) const;
 
-  // implement Stream_MessageBase_T
-  virtual HTTP_Method_t command () const; // return value: message type
-
-  static std::string CommandType2String (HTTP_Method_t);
+//  static std::string CommandType2String (HTTP_Method_t);
 
  protected:
   // copy ctor to be used by duplicate() and child classes
@@ -72,11 +75,9 @@ class Test_U_Message
  private:
 //  typedef Stream_DataMessageBase_T<xmlDoc,
 //                                   Stream_CommandType_t> inherited;
-  typedef Stream_DataMessageBase_2<Test_U_AllocatorConfiguration,
-                                   Test_U_ControlMessage_t,
-                                   Test_U_SessionMessage,
-                                   Test_U_MessageData_t,
-                                   HTTP_Method_t> inherited;
+  typedef HTTP_Message_T<Test_U_AllocatorConfiguration,
+                         Test_U_ControlMessage_t,
+                         Test_U_SessionMessage> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Message ())
   // *NOTE*: to be used by message allocators

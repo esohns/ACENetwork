@@ -31,8 +31,10 @@
 #include "bittorrent_scanner.h"
 #include "bittorrent_tools.h"
 
-template <typename SessionMessageType>
-BitTorrent_ParserDriver_T<SessionMessageType>::BitTorrent_ParserDriver_T (bool traceScanning_in,
+template <typename MessageType,
+          typename SessionMessageType>
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::BitTorrent_ParserDriver_T (bool traceScanning_in,
                                                                           bool traceParsing_in)
  : fragment_ (NULL)
  , offset_ (0)
@@ -67,8 +69,10 @@ BitTorrent_ParserDriver_T<SessionMessageType>::BitTorrent_ParserDriver_T (bool t
 #endif
 }
 
-template <typename SessionMessageType>
-BitTorrent_ParserDriver_T<SessionMessageType>::~BitTorrent_ParserDriver_T ()
+template <typename MessageType,
+          typename SessionMessageType>
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::~BitTorrent_ParserDriver_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::~BitTorrent_ParserDriver_T"));
 
@@ -78,12 +82,14 @@ BitTorrent_ParserDriver_T<SessionMessageType>::~BitTorrent_ParserDriver_T ()
                 ACE_TEXT ("failed to yylex_destroy: \"%m\", continuing\n")));
 }
 
-template <typename SessionMessageType>
+template <typename MessageType,
+          typename SessionMessageType>
 void
-BitTorrent_ParserDriver_T<SessionMessageType>::initialize (bool traceScanning_in,
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::initialize (bool traceScanning_in,
                                                            bool traceParsing_in,
                                                            ACE_Message_Queue_Base* messageQueue_in,
-                                                           bool useYYScanBuffer_in,
+//                                                           bool useYYScanBuffer_in,
                                                            bool blockInParse_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::initialize"));
@@ -101,7 +107,7 @@ BitTorrent_ParserDriver_T<SessionMessageType>::initialize (bool traceScanning_in
     {
       ACE_ASSERT (scannerState_);
       bittorrent__delete_buffer (bufferState_,
-                                         scannerState_);
+                                 scannerState_);
       bufferState_ = NULL;
     } // end IF
     //if (scannerState_)
@@ -121,10 +127,10 @@ BitTorrent_ParserDriver_T<SessionMessageType>::initialize (bool traceScanning_in
   blockInParse_ = blockInParse_in;
   trace_ = traceParsing_in;
   messageQueue_ = messageQueue_in;
-  useYYScanBuffer_ = useYYScanBuffer_in;
+//  useYYScanBuffer_ = useYYScanBuffer_in;
 
   bittorrent_set_debug ((traceScanning_in ? 1 : 0),
-                                scannerState_);
+                        scannerState_);
 #if YYDEBUG
   //parser_.set_debug_level (traceParsing_in ? 1
   //                                         : 0); // binary (see bison manual)
@@ -136,11 +142,13 @@ BitTorrent_ParserDriver_T<SessionMessageType>::initialize (bool traceScanning_in
   isInitialized_ = true;
 }
 
-template <typename SessionMessageType>
+template <typename MessageType,
+          typename SessionMessageType>
 void
 //BitTorrent_ParserDriver_T<SessionMessageType>::error (const YYLTYPE& location_in,
 //                                                      const std::string& message_in)
-BitTorrent_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::error (const std::string& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::error"));
 
@@ -194,9 +202,11 @@ BitTorrent_ParserDriver_T<SessionMessageType>::error (const std::string& message
 ////   std::clog << message_in << std::endl;
 //}
 
-template <typename SessionMessageType>
+template <typename MessageType,
+          typename SessionMessageType>
 bool
-BitTorrent_ParserDriver_T<SessionMessageType>::switchBuffer ()
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::switchBuffer ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::switchBuffer"));
 
@@ -249,9 +259,11 @@ BitTorrent_ParserDriver_T<SessionMessageType>::switchBuffer ()
   return true;
 }
 
-template <typename SessionMessageType>
+template <typename MessageType,
+          typename SessionMessageType>
 void
-BitTorrent_ParserDriver_T<SessionMessageType>::wait ()
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::wait ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::wait"));
 
@@ -331,9 +343,11 @@ BitTorrent_ParserDriver_T<SessionMessageType>::wait ()
   } // end IF
 }
 
-template <typename SessionMessageType>
+template <typename MessageType,
+          typename SessionMessageType>
 void
-BitTorrent_ParserDriver_T<SessionMessageType>::dump_state () const
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::dump_state"));
 
@@ -343,9 +357,11 @@ BitTorrent_ParserDriver_T<SessionMessageType>::dump_state () const
   ACE_NOTREACHED (return;)
 }
 
-template <typename SessionMessageType>
+template <typename MessageType,
+          typename SessionMessageType>
 bool
-BitTorrent_ParserDriver_T<SessionMessageType>::parse (ACE_Message_Block* data_in)
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::parse (ACE_Message_Block* data_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::parse"));
 
@@ -413,9 +429,11 @@ continue_:
   return (result == 0);
 }
 
-template <typename SessionMessageType>
+template <typename MessageType,
+          typename SessionMessageType>
 bool
-BitTorrent_ParserDriver_T<SessionMessageType>::scan_begin ()
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::scan_begin ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::scan_begin"));
 
@@ -460,9 +478,11 @@ BitTorrent_ParserDriver_T<SessionMessageType>::scan_begin ()
   return true;
 }
 
-template <typename SessionMessageType>
+template <typename MessageType,
+          typename SessionMessageType>
 void
-BitTorrent_ParserDriver_T<SessionMessageType>::scan_end ()
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::scan_end ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::scan_end"));
 

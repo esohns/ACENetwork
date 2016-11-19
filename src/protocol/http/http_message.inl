@@ -102,9 +102,11 @@ HTTP_Message_T<AllocatorConfigurationType,
   // sanity check(s)
   if (!inherited::isInitialized_)
     return HTTP_Codes::HTTP_METHOD_INVALID;
-  ACE_ASSERT (inherited::data_);
 
-  return inherited::data_->method_;
+  const typename inherited::DATA_T& data_container_r = inherited::get ();
+  const struct HTTP_Record& record_r = data_container_r.get ();
+
+  return record_r.method;
 }
 
 template <typename AllocatorConfigurationType,
@@ -132,6 +134,8 @@ HTTP_Message_T<AllocatorConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::dump_state"));
 
   std::ostringstream converter;
+  const typename inherited::DATA_T& data_container_r = inherited::get ();
+  const struct HTTP_Record& record_r = data_container_r.get ();
 
   // count continuations
   unsigned int count = 1;
@@ -152,10 +156,12 @@ HTTP_Message_T<AllocatorConfigurationType,
     info += ACE_TEXT ("\"\n");
   } // end FOR
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("***** Message (ID: %u, %u byte(s)) *****\n%s"),
+              ACE_TEXT ("***** Message (ID: %u, %u byte(s)) *****\n%s\n%s"),
               inherited::id (),
               inherited::total_length (),
-              ACE_TEXT (info.c_str ())));
+              ACE_TEXT (info.c_str ()),
+              ACE_TEXT (HTTP_Tools::dump (record_r).c_str ())));
+
   // delegate to base
   inherited::dump_state ();
 }
@@ -183,7 +189,7 @@ HTTP_Message_T<AllocatorConfigurationType,
   // probably), the next, trailing "message head" (of course, it could be just
   // "this")
   // step1: align rd_ptr() with base()
-  result = inherited::crunch ();
+  result = ACE_Message_Block::crunch ();
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,

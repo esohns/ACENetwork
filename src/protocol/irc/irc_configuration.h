@@ -49,18 +49,18 @@ struct IRC_Stream_SessionData;
 struct IRC_Stream_UserData;
 
 //typedef Net_IConnection_T<ACE_INET_Addr,
-//                          IRC_Configuration,
-//                          IRC_ConnectionState,
+//                          struct IRC_Configuration,
+//                          struct IRC_ConnectionState,
 //                          IRC_RuntimeStatistic_t,
 //                          IRC_Stream> IRC_IConnection_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 IRC_Configuration,
-                                 IRC_ConnectionState,
+                                 struct IRC_Configuration,
+                                 struct IRC_ConnectionState,
                                  IRC_RuntimeStatistic_t,
-                                 IRC_Stream_UserData> IRC_IConnection_Manager_t;
+                                 struct IRC_Stream_UserData> IRC_IConnection_Manager_t;
 
 //typedef Common_INotify_T<unsigned int,
-//                         IRC_Stream_SessionData,
+//                         struct IRC_Stream_SessionData,
 //                         IRC_Record,
 //                         IRC_SessionMessage> IRC_IStreamNotify_t;
 //typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
@@ -76,7 +76,7 @@ struct IRC_SocketHandlerConfiguration
     PDUSize = IRC_BUFFER_SIZE;
   };
 
-  IRC_Stream_UserData* userData;
+  struct IRC_Stream_UserData* userData;
 };
 
 //struct IRC_ConnectorConfiguration
@@ -88,10 +88,10 @@ struct IRC_SocketHandlerConfiguration
 //   //, statisticCollectionInterval (0)
 //  {};
 //
-//  //IRC_Configuration*              configuration;
-//  IRC_IConnection_Manager_t*      connectionManager;
-//  IRC_SocketHandlerConfiguration* socketHandlerConfiguration;
-//  unsigned int                    statisticCollectionInterval; // statistic collecting interval (second(s)) [0: off]
+//  //struct IRC_Configuration*              configuration;
+//  IRC_IConnection_Manager_t*             connectionManager;
+//  struct IRC_SocketHandlerConfiguration* socketHandlerConfiguration;
+//  unsigned int                           statisticCollectionInterval; // statistic collecting interval (second(s)) [0: off]
 //};
 
 struct IRC_ProtocolConfiguration
@@ -102,44 +102,39 @@ struct IRC_ProtocolConfiguration
    , printPingDot (IRC_CLIENT_DEFAULT_PRINT_PINGDOT)
   {};
 
-  bool             automaticPong; // automatically answer "ping" messages
-  IRC_LoginOptions loginOptions;
-  bool             printPingDot;  // print dot '.' (stdlog) for answered PINGs
+  bool                    automaticPong; // automatically answer "ping" messages
+  struct IRC_LoginOptions loginOptions;
+  bool                    printPingDot;  // print dot '.' (stdlog) for answered PINGs
 };
 
 struct IRC_ModuleHandlerConfiguration
- : public Stream_ModuleHandlerConfiguration
+ : Stream_ModuleHandlerConfiguration
 {
   inline IRC_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    , crunchMessages (IRC_DEFAULT_CRUNCH_MESSAGES)
    , inbound (false)
-   , traceParsing (IRC_DEFAULT_YACC_TRACE)
-   , traceScanning (IRC_DEFAULT_LEX_TRACE)
    , printFinalReport (true)
    , printProgressDot (false)
    , pushStatisticMessages (true)
    , protocolConfiguration (NULL)
-   , streamConfiguration (NULL)
+//   , streamConfiguration (NULL)
   {};
 
   // *NOTE*: this option may be useful for (downstream) parsers that only work
   //         on CONTIGUOUS buffers (i.e. cannot parse chained message blocks)
   // *WARNING*: currently, this does NOT work with multithreaded streams
   //            --> USE WITH CAUTION !
-  bool                       crunchMessages; // parser module(s)
+  bool                              crunchMessages; // parser module(s)
 
-  bool                       inbound; // statistic/IO module
+  bool                              inbound; // statistic/IO module
 
-  bool                       traceParsing; // parser module(s)
-  bool                       traceScanning; // parser module(s)
+  bool                              printFinalReport; // statistic module
+  bool                              printProgressDot; // file writer module
+  bool                              pushStatisticMessages; // statistic module
 
-  bool                       printFinalReport; // statistic module
-  bool                       printProgressDot; // file writer module
-  bool                       pushStatisticMessages; // statistic module
-
-  IRC_ProtocolConfiguration* protocolConfiguration;
-  Stream_Configuration*      streamConfiguration;
+  struct IRC_ProtocolConfiguration* protocolConfiguration;
+//  struct Stream_Configuration*      streamConfiguration;
 };
 
 struct IRC_StreamConfiguration
@@ -155,11 +150,11 @@ struct IRC_StreamConfiguration
     bufferSize = IRC_BUFFER_SIZE;
   };
 
-  Stream_ModuleConfiguration     moduleConfiguration_2;        // stream module configuration
-  IRC_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration
-  IRC_ProtocolConfiguration*     protocolConfiguration;        // protocol configuration
+  struct Stream_ModuleConfiguration     moduleConfiguration_2;        // stream module configuration
+  struct IRC_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration
+  struct IRC_ProtocolConfiguration*     protocolConfiguration;        // protocol configuration
 
-  //IRC_Stream_UserData*           userData;
+  //struct IRC_Stream_UserData*           userData;
 };
 
 #endif

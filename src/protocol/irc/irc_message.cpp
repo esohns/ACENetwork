@@ -46,9 +46,11 @@ IRC_Message::IRC_Message (const IRC_Message& message_in)
 }
 
 IRC_Message::IRC_Message (ACE_Data_Block* dataBlock_in,
-                          ACE_Allocator* messageAllocator_in)
- : inherited (dataBlock_in,        // use (don't own !) this data block
-              messageAllocator_in) // use this when destruction is imminent...
+                          ACE_Allocator* messageAllocator_in,
+                          bool incrementMessageCounter_in)
+ : inherited (dataBlock_in,
+              messageAllocator_in,
+              incrementMessageCounter_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Message::IRC_Message"));
 

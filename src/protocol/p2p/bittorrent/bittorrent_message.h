@@ -37,7 +37,6 @@
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
-typedef Stream_DataBase_T<struct BitTorrent_Record> BitTorrent_MessageData_t;
 template <typename SessionDataType>
 class BitTorrent_SessionMessage_T;
 template <typename AllocatorConfigurationType,
@@ -51,26 +50,26 @@ template <typename AllocatorConfigurationType,
 
 template <typename SessionDataType>
 class BitTorrent_Message_T
- : public Stream_DataMessageBase_T<struct Stream_AllocatorConfiguration,
-                                   Stream_ControlMessage_T<enum Stream_ControlType,
-                                                           struct Stream_AllocatorConfiguration,
+ : public Stream_DataMessageBase_2<struct BitTorrent_AllocatorConfiguration,
+                                   Stream_ControlMessage_T<enum Stream_ControlMessageType,
+                                                           struct BitTorrent_AllocatorConfiguration,
                                                            BitTorrent_Message_T<SessionDataType>,
                                                            BitTorrent_SessionMessage_T<SessionDataType> >,
                                    BitTorrent_SessionMessage_T<SessionDataType>,
-                                   BitTorrent_MessageData_t,
+                                   Stream_DataBase_T<struct BitTorrent_Record>,
                                    enum BitTorrent_MessageType>
 {
   // enable access to specific private ctors
-  friend class Stream_MessageAllocatorHeapBase_T<struct Stream_AllocatorConfiguration,
-                                                 Stream_ControlMessage_T<enum Stream_ControlType,
-                                                                         struct Stream_AllocatorConfiguration,
+  friend class Stream_MessageAllocatorHeapBase_T<struct BitTorrent_AllocatorConfiguration,
+                                                 Stream_ControlMessage_T<enum Stream_ControlMessageType,
+                                                                         struct BitTorrent_AllocatorConfiguration,
                                                                          BitTorrent_Message_T<SessionDataType>,
                                                                          BitTorrent_SessionMessage_T<SessionDataType> >,
                                                  BitTorrent_Message_T<SessionDataType>,
                                                  BitTorrent_SessionMessage_T<SessionDataType> >;
-  friend class Stream_CachedMessageAllocator_T<struct Stream_AllocatorConfiguration,
-                                               Stream_ControlMessage_T<enum Stream_ControlType,
-                                                                       struct Stream_AllocatorConfiguration,
+  friend class Stream_CachedMessageAllocator_T<struct BitTorrent_AllocatorConfiguration,
+                                               Stream_ControlMessage_T<enum Stream_ControlMessageType,
+                                                                       struct BitTorrent_AllocatorConfiguration,
                                                                        BitTorrent_Message_T<SessionDataType>,
                                                                        BitTorrent_SessionMessage_T<SessionDataType> >,
                                                BitTorrent_Message_T<SessionDataType>,
@@ -85,23 +84,6 @@ class BitTorrent_Message_T
 
   // implement Common_IDumpState
   virtual void dump_state () const;
-
-  // "normalize" the data in this message (fragment) by:
-  // 1. aligning the rd_ptr with base() --> ACE_Message_Block::crunch()/::memmove()
-  // *WARNING*: if we share buffers, this may well clobber data referenced by
-  // preceding messages THAT MAY STILL BE IN USE DOWNSTREAM
-  // --> safe only IFF stream processing is single-threaded !
-  // --> still, we make a "best-effort", simply to reduce fragmentation...
-  // 2. COPYING all bits from any continuation(s) into our buffer (until
-  //    capacity() has been reached)
-  // 3. adjusting the write pointer accordingly
-  // 4. releasing obsoleted continuations
-  // --> *NOTE*: IF this is done CONSISTENTLY, AND:
-  // - our buffer has capacity for a FULL message (i.e. maximum allowed size)
-  // - our peer keeps to the standard and doesn't send oversized messages (!)
-  // --> THEN this measure ensures that EVERY single buffer contains a CONTIGUOUS
-  //     and COMPLETE message...
-  virtual int crunch (void);
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
@@ -120,13 +102,13 @@ class BitTorrent_Message_T
   BitTorrent_Message_T (const BitTorrent_Message_T&);
 
  private:
-  typedef Stream_DataMessageBase_T<struct Stream_AllocatorConfiguration,
-                                   Stream_ControlMessage_T<enum Stream_ControlType,
-                                                           struct Stream_AllocatorConfiguration,
+  typedef Stream_DataMessageBase_2<struct BitTorrent_AllocatorConfiguration,
+                                   Stream_ControlMessage_T<enum Stream_ControlMessageType,
+                                                           struct BitTorrent_AllocatorConfiguration,
                                                            BitTorrent_Message_T<SessionDataType>,
                                                            BitTorrent_SessionMessage_T<SessionDataType> >,
                                    BitTorrent_SessionMessage_T<SessionDataType>,
-                                   BitTorrent_MessageData_t,
+                                   Stream_DataBase_T<struct BitTorrent_Record>,
                                    enum BitTorrent_MessageType> inherited;
 
   // convenient types

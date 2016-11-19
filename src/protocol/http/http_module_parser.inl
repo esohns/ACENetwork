@@ -451,8 +451,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -464,8 +463,7 @@ template <typename LockType,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
-HTTP_Module_ParserH_T<LockType,
-                      TaskSynchType,
+HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,
@@ -491,8 +489,7 @@ HTTP_Module_ParserH_T<LockType,
 
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -504,8 +501,7 @@ template <typename LockType,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
-HTTP_Module_ParserH_T<LockType,
-                      TaskSynchType,
+HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,
@@ -524,8 +520,7 @@ HTTP_Module_ParserH_T<LockType,
     headFragment_->release ();
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -538,8 +533,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-HTTP_Module_ParserH_T<LockType,
-                      TaskSynchType,
+HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,
@@ -589,8 +583,7 @@ HTTP_Module_ParserH_T<LockType,
   return inherited::initialize (configuration_in);
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -603,8 +596,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-HTTP_Module_ParserH_T<LockType,
-                      TaskSynchType,
+HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,
@@ -766,8 +758,7 @@ error:
   } // end IF
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -780,8 +771,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-HTTP_Module_ParserH_T<LockType,
-                      TaskSynchType,
+HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,
@@ -864,7 +854,7 @@ HTTP_Module_ParserH_T<LockType,
   } // end SWITCH
 }
 
-//template <typename LockType,
+//template <ACE_SYNCH_DECL,
 //          typename TaskSynchType,
 //          typename TimePolicyType,
 //          typename SessionMessageType,
@@ -875,9 +865,8 @@ HTTP_Module_ParserH_T<LockType,
 //          typename SessionDataContainerType,
 //          typename StatisticContainerType>
 //DataMessageType*
-//HTTP_Module_ParserH_T<LockType,
-//                     TaskSynchType,
-//                     TimePolicyType,
+//HTTP_Module_ParserH_T<ACE_SYNCH_USE,
+//                      TimePolicyType,
 //                     SessionMessageType,
 //                     DataMessageType,
 //                     ConfigurationType,
@@ -931,8 +920,7 @@ HTTP_Module_ParserH_T<LockType,
 //  return message_p;
 //}
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -945,8 +933,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-HTTP_Module_ParserH_T<LockType,
-                      TaskSynchType,
+HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,
@@ -981,8 +968,7 @@ HTTP_Module_ParserH_T<LockType,
   return true;
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -995,8 +981,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-HTTP_Module_ParserH_T<LockType,
-                      TaskSynchType,
+HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,
@@ -1030,8 +1015,7 @@ HTTP_Module_ParserH_T<LockType,
   inherited2::finished_ = true;
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -1044,8 +1028,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-HTTP_Module_ParserH_T<LockType,
-                      TaskSynchType,
+HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
                       DataMessageType,

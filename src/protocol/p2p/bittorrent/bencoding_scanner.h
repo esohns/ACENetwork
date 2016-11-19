@@ -322,10 +322,10 @@ void Net_Bencoding_free (void *  );
 
 //int yyFlexLexer::yywrap() { return 1; }
 //int yyFlexLexer::yylex()
-//	{
-//	LexerError( "yyFlexLexer::yylex invoked but %option yyclass used" );
-//	return 0;
-//	}
+//  {
+//  LexerError( "yyFlexLexer::yylex invoked but %option yyclass used" );
+//  return 0;
+//  }
 
 //#define YY_DECL int Net_BencodingScanner::yylex()
 
@@ -445,5 +445,6 @@ static int yy_flex_strlen (yyconst char * );
 #undef YY_DECL
 #endif
 
+#line 454 "bencoding_scanner.h"
 #undef Net_Bencoding_IN_HEADER
 #endif /* Net_Bencoding_HEADER_H */

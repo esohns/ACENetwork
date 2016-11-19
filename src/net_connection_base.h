@@ -49,13 +49,7 @@ class Net_ConnectionBase_T
                                     StatisticContainerType>
 {
  public:
-  // implement (part of) Net_IConnection_T
-  virtual const ConfigurationType& get () const; // return value: type
-  virtual bool initialize (const ConfigurationType&); // configuration
-  virtual const StateType& state () const;
-  virtual Net_Connection_Status status () const;
-
- protected:
+  // convenient types
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
                             StateType,
@@ -66,6 +60,14 @@ class Net_ConnectionBase_T
                                    StatisticContainerType,
                                    UserDataType> ICONNECTION_MANAGER_T;
 
+  // implement (part of) Net_IConnection_T
+  virtual const ConfigurationType& get () const; // return value: type
+  virtual bool initialize (const ConfigurationType&); // configuration
+  virtual const StateType& state () const;
+  virtual Net_Connection_Status status () const;
+
+
+ protected:
   Net_ConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
                         const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Net_ConnectionBase_T ();

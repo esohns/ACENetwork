@@ -91,7 +91,6 @@ typedef DHCP_Module_Discover_T<ACE_MT_SYNCH,
                                Test_U_OutboundConnectorBcast_t,
                                Test_U_OutboundConnector_t> Test_U_Module_DHCPDiscover;
 typedef DHCP_Module_DiscoverH_T<ACE_MT_SYNCH,
-                                ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 ACE_Message_Block,
                                 Test_U_Message,

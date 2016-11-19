@@ -50,7 +50,7 @@ template <typename AddressType,
 class BitTorrent_ISession_T;
 
 template <typename AddressType,
-          typename ConfigurationType,
+          typename ConfigurationType, // module-
           typename StatisticContainerType,
           typename ControlMessageType,
           typename MessageType,
@@ -59,7 +59,8 @@ template <typename AddressType,
           typename StreamType,
           typename StreamStatusType,
           typename SocketConfigurationType,
-          typename HandlerConfigurationType,
+          typename HandlerConfigurationType, // socket-
+          typename ConnectionConfigurationType, // connection-
           typename ConnectionStateType,
           typename SessionStateType,
           ////////////////////////////////
@@ -144,11 +145,12 @@ class BitTorrent_Module_PeerHandler_T
                                           StreamStatusType,
                                           SocketConfigurationType,
                                           HandlerConfigurationType,
+                                          ConnectionConfigurationType,
                                           ConnectionStateType,
                                           SessionStateType,
                                           CBDataType> OWN_TYPE_T;
   typedef BitTorrent_ISession_T<AddressType,
-                                ConfigurationType,
+                                ConnectionConfigurationType,
                                 ConnectionStateType,
                                 StatisticContainerType,
                                 SocketConfigurationType,
@@ -171,7 +173,7 @@ class BitTorrent_Module_PeerHandler_T
 //////////////////////////////////////////
 
 template <typename AddressType,
-          typename ConfigurationType,
+          typename ConfigurationType, // module-
           typename StatisticContainerType,
           typename ControlMessageType,
           typename MessageType,
@@ -180,7 +182,8 @@ template <typename AddressType,
           typename StreamType,
           typename StreamStatusType,
           typename SocketConfigurationType,
-          typename HandlerConfigurationType,
+          typename HandlerConfigurationType, // socket-
+          typename ConnectionConfigurationType, // connection-
           typename ConnectionStateType,
           typename SessionStateType,
           ////////////////////////////////
@@ -265,11 +268,12 @@ class BitTorrent_Module_TrackerHandler_T
                                              StreamStatusType,
                                              SocketConfigurationType,
                                              HandlerConfigurationType,
+                                             ConnectionConfigurationType,
                                              ConnectionStateType,
                                              SessionStateType,
                                              CBDataType> OWN_TYPE_T;
   typedef BitTorrent_ISession_T<AddressType,
-                                ConfigurationType,
+                                ConnectionConfigurationType,
                                 ConnectionStateType,
                                 StatisticContainerType,
                                 SocketConfigurationType,

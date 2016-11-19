@@ -309,27 +309,28 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
                            ConfigurationType,
                            ControlMessageType,
                            DataMessageType,
-                           SessionMessageType>::message (DataMessageType*& message_inout)
+                           SessionMessageType>::record (struct BitTorrent_Record*& record_inout)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Parser_T::message"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Parser_T::record"));
 
   // sanity check(s)
-  ACE_ASSERT (message_inout);
-  ACE_ASSERT (message_inout->isInitialized ());
+  ACE_ASSERT (record_inout);
+  ACE_ASSERT (headFragment_);
 
   DATA_CONTAINER_T& data_container_r =
-      const_cast<DATA_CONTAINER_T&> (message_inout->get ());
-  DATA_T& data_r = data_container_r.get ();
+      const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
+  data_container_r.set (record_inout);
+  record_inout = NULL;
 
   // debug info
   if (inherited2::trace_)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
-                ACE_TEXT (BitTorrent_Tools::Record2String (data_r).c_str ())));
+                ACE_TEXT (BitTorrent_Tools::Record2String (*record_inout).c_str ())));
 
   // make sure the whole fragment chain references the same data record
   DataMessageType* message_p =
-      dynamic_cast<DataMessageType*> (message_inout->cont ());
+      dynamic_cast<DataMessageType*> (headFragment_->cont ());
   while (message_p)
   {
     data_container_r.increase ();
@@ -339,7 +340,7 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
     message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE
 
-  int result = inherited::put_next (message_inout, NULL);
+  int result = inherited::put_next (headFragment_, NULL);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -347,11 +348,10 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
                 inherited::mod_->name ()));
 
     // clean up
-    message_inout->release ();
+    headFragment_->release ();
   } // end IF
-  message_inout = NULL;
+  headFragment_ = NULL;
 }
-
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
@@ -392,8 +392,7 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -405,8 +404,7 @@ template <typename LockType,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
-BitTorrent_Module_ParserH_T<LockType,
-                            TaskSynchType,
+BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -432,8 +430,7 @@ BitTorrent_Module_ParserH_T<LockType,
 
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -445,8 +442,7 @@ template <typename LockType,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
-BitTorrent_Module_ParserH_T<LockType,
-                            TaskSynchType,
+BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -465,8 +461,7 @@ BitTorrent_Module_ParserH_T<LockType,
     headFragment_->release ();
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -479,8 +474,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-BitTorrent_Module_ParserH_T<LockType,
-                            TaskSynchType,
+BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -522,14 +516,13 @@ BitTorrent_Module_ParserH_T<LockType,
   inherited2::initialize (debugScanner_,
                           debugParser_,
                           inherited::msg_queue_,
-                          true,
+//                          true,
                           true);
 
   return inherited::initialize (configuration_in);
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -542,8 +535,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-BitTorrent_Module_ParserH_T<LockType,
-                            TaskSynchType,
+BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -624,8 +616,8 @@ BitTorrent_Module_ParserH_T<LockType,
     } // end IF
     // the message fragment has been parsed successfully
 
-    if (!this->hasFinished ())
-      goto continue_; // --> wait for more data to arrive
+//    if (!this->hasFinished ())
+//      goto continue_; // --> wait for more data to arrive
 
 //    // set session data format
 //    // sanity check(s)
@@ -650,18 +642,18 @@ BitTorrent_Module_ParserH_T<LockType,
     // make sure the whole fragment chain references the same data record
     // sanity check(s)
     ACE_ASSERT (headFragment_->isInitialized ());
-    DATA_CONTAINER_T* data_container_p =
-        &const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
-    DATA_CONTAINER_T* data_container_2 = NULL;
-    message_p = dynamic_cast<DataMessageType*> (headFragment_->cont ());
-    while (message_p)
-    {
-      data_container_p->increase ();
-      data_container_2 = data_container_p;
-      message_p->initialize (data_container_2,
-                             NULL);
-      message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
-    } // end WHILE
+//    DATA_CONTAINER_T* data_container_p =
+//        &const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
+//    DATA_CONTAINER_T* data_container_2 = NULL;
+//    message_p = dynamic_cast<DataMessageType*> (headFragment_->cont ());
+//    while (message_p)
+//    {
+//      data_container_p->increase ();
+//      data_container_2 = data_container_p;
+//      message_p->initialize (data_container_2,
+//                             NULL);
+//      message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
+//    } // end WHILE
   } // end lock scope
 
   // *NOTE*: the message has been parsed successfully
@@ -705,8 +697,7 @@ error:
   } // end IF
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -719,8 +710,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-BitTorrent_Module_ParserH_T<LockType,
-                            TaskSynchType,
+BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -803,7 +793,7 @@ BitTorrent_Module_ParserH_T<LockType,
   } // end SWITCH
 }
 
-//template <typename LockType,
+//template <ACE_SYNCH_DECL,
 //          typename TaskSynchType,
 //          typename TimePolicyType,
 //          typename SessionMessageType,
@@ -814,7 +804,7 @@ BitTorrent_Module_ParserH_T<LockType,
 //          typename SessionDataContainerType,
 //          typename StatisticContainerType>
 //DataMessageType*
-//BitTorrent_Module_ParserH_T<LockType,
+//BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
 //                     TaskSynchType,
 //                     TimePolicyType,
 //                     SessionMessageType,
@@ -870,8 +860,7 @@ BitTorrent_Module_ParserH_T<LockType,
 //  return message_p;
 //}
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -884,8 +873,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 bool
-BitTorrent_Module_ParserH_T<LockType,
-                            TaskSynchType,
+BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -920,8 +908,7 @@ BitTorrent_Module_ParserH_T<LockType,
   return true;
 }
 
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -934,8 +921,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-BitTorrent_Module_ParserH_T<LockType,
-                            TaskSynchType,
+BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -946,27 +932,28 @@ BitTorrent_Module_ParserH_T<LockType,
                             StreamStateType,
                             SessionDataType,
                             SessionDataContainerType,
-                            StatisticContainerType>::message (DataMessageType*& message_inout)
+                            StatisticContainerType>::record (struct BitTorrent_Record*& record_inout)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::message"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::record"));
 
   // sanity check(s)
-  ACE_ASSERT (message_inout);
-  ACE_ASSERT (message_inout->isInitialized ());
+  ACE_ASSERT (record_inout);
+  ACE_ASSERT (headFragment_);
 
   DATA_CONTAINER_T& data_container_r =
-      const_cast<DATA_CONTAINER_T&> (message_inout->get ());
-  DATA_T& data_r = data_container_r.get ();
+      const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
+  data_container_r.set (record_inout);
+  record_inout = NULL;
 
   // debug info
   if (inherited2::trace_)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
-                ACE_TEXT (BitTorrent_Tools::Record2String (data_r).c_str ())));
+                ACE_TEXT (BitTorrent_Tools::Record2String (*record_inout).c_str ())));
 
   // make sure the whole fragment chain references the same data record
   DataMessageType* message_p =
-      dynamic_cast<DataMessageType*> (message_inout->cont ());
+      dynamic_cast<DataMessageType*> (headFragment_->cont ());
   while (message_p)
   {
     data_container_r.increase ();
@@ -976,7 +963,7 @@ BitTorrent_Module_ParserH_T<LockType,
     message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE
 
-  int result = inherited::put_next (message_inout, NULL);
+  int result = inherited::put_next (headFragment_, NULL);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -984,13 +971,11 @@ BitTorrent_Module_ParserH_T<LockType,
                 inherited::mod_->name ()));
 
     // clean up
-    message_inout->release ();
+    headFragment_->release ();
   } // end IF
-  message_inout = NULL;
+  headFragment_ = NULL;
 }
-
-template <typename LockType,
-          typename TaskSynchType,
+template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
           typename DataMessageType,
@@ -1003,8 +988,7 @@ template <typename LockType,
           typename SessionDataContainerType,
           typename StatisticContainerType>
 void
-BitTorrent_Module_ParserH_T<LockType,
-                            TaskSynchType,
+BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             ControlMessageType,
                             DataMessageType,
@@ -1033,7 +1017,7 @@ BitTorrent_Module_ParserH_T<LockType,
       const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
 
   // sanity check(s)
-  ACE_ASSERT (!session_data_r.handshake);
+  ACE_ASSERT (session_data_r.handshake == NULL);
 
   // *TODO*: remove type inference
   session_data_r.handshake = handshake_inout;

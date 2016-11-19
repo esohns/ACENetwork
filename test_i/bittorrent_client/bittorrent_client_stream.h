@@ -28,7 +28,7 @@
 #include "bittorrent_common.h"
 #include "bittorrent_message.h"
 #include "bittorrent_stream.h"
-#include "bittorrent_stream_common.h"
+//#include "bittorrent_stream_common.h"
 
 #include "bittorrent_client_common_modules.h"
 #include "bittorrent_client_sessionmessage.h"
@@ -36,96 +36,98 @@
 
 #include "test_i_gtk_common.h"
 
-class BitTorrent_Client_PeerStream
- : public BitTorrent_PeerStream_T<struct BitTorrent_Client_StreamState,
-                                  struct BitTorrent_Client_StreamConfiguration,
-                                  BitTorrent_RuntimeStatistic_t,
-                                  struct BitTorrent_Client_ModuleHandlerConfiguration,
-                                  struct BitTorrent_Client_SessionData,
-                                  BitTorrent_Client_SessionData_t,
-                                  BitTorrent_Client_ControlMessage_t,
-                                  BitTorrent_Client_Message_t,
-                                  BitTorrent_Client_SessionMessage,
-                                  struct BitTorrent_Client_Configuration,
-                                  struct BitTorrent_Client_ConnectionState,
-                                  struct BitTorrent_Client_SocketHandlerConfiguration,
-                                  struct BitTorrent_Client_SessionState,
-                                  Test_I_GTK_CBData>
-{
- public:
-  BitTorrent_Client_PeerStream (const std::string&); // name
-  virtual ~BitTorrent_Client_PeerStream ();
+//class BitTorrent_Client_PeerStream
+// : public BitTorrent_PeerStream_T<struct BitTorrent_Client_StreamState,
+//                                  struct BitTorrent_Client_StreamConfiguration,
+//                                  BitTorrent_RuntimeStatistic_t,
+//                                  struct BitTorrent_Client_ModuleHandlerConfiguration,
+//                                  struct BitTorrent_Client_SessionData,
+//                                  BitTorrent_Client_SessionData_t,
+//                                  BitTorrent_Client_PeerControlMessage_t,
+//                                  BitTorrent_Client_PeerMessage,
+//                                  BitTorrent_Client_SessionMessage,
+//                                  struct BitTorrent_Client_Configuration,
+//                                  struct BitTorrent_Client_ConnectionState,
+//                                  struct BitTorrent_Client_SocketHandlerConfiguration,
+//                                  struct BitTorrent_Client_SessionState,
+//                                  struct BitTorrent_Client_GTK_CBData>
+//{
+// public:
+//  BitTorrent_Client_PeerStream (const std::string&); // name
+//  virtual ~BitTorrent_Client_PeerStream ();
+
+////  // implement (part of) Stream_IStreamControlBase
+////  virtual bool load (Stream_ModuleList_t&, // return value: module list
+////                     bool&);               // return value: delete modules ?
+
+// private:
+//  typedef BitTorrent_PeerStream_T<struct BitTorrent_Client_StreamState,
+//                                  struct BitTorrent_Client_StreamConfiguration,
+//                                  BitTorrent_RuntimeStatistic_t,
+//                                  struct BitTorrent_Client_ModuleHandlerConfiguration,
+//                                  struct BitTorrent_Client_SessionData,
+//                                  BitTorrent_Client_SessionData_t,
+//                                  BitTorrent_Client_PeerControlMessage_t,
+//                                  BitTorrent_Client_PeerMessage,
+//                                  BitTorrent_Client_SessionMessage,
+//                                  struct BitTorrent_Client_Configuration,
+//                                  struct BitTorrent_Client_ConnectionState,
+//                                  struct BitTorrent_Client_SocketHandlerConfiguration,
+//                                  struct BitTorrent_Client_SessionState,
+//                                  struct BitTorrent_Client_GTK_CBData> inherited;
+
+//  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_PeerStream ())
+//  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_PeerStream (const BitTorrent_Client_PeerStream&))
+//  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_PeerStream& operator= (const BitTorrent_Client_PeerStream&))
+//};
+
+////////////////////////////////////////////
+
+//class BitTorrent_Client_TrackerStream
+// : public BitTorrent_TrackerStream_T<struct BitTorrent_Client_StreamState,
+//                                     struct BitTorrent_Client_StreamConfiguration,
+//                                     BitTorrent_RuntimeStatistic_t,
+//                                     struct BitTorrent_Client_ModuleHandlerConfiguration,
+//                                     struct BitTorrent_Client_SessionData,
+//                                     BitTorrent_Client_SessionData_t,
+//                                     BitTorrent_Client_TrackerControlMessage_t,
+//                                     BitTorrent_Client_TrackerMessage,
+//                                     BitTorrent_Client_SessionMessage,
+//                                     BitTorrent_Client_PeerStream,
+//                                     struct BitTorrent_Client_Configuration,
+//                                     struct BitTorrent_Client_ConnectionState,
+//                                     struct BitTorrent_Client_SocketHandlerConfiguration,
+//                                     struct BitTorrent_Client_SessionState,
+//                                     struct BitTorrent_Client_GTK_CBData>
+//{
+// public:
+//  BitTorrent_Client_TrackerStream (const std::string&); // name
+//  virtual ~BitTorrent_Client_TrackerStream ();
 
 //  // implement (part of) Stream_IStreamControlBase
 //  virtual bool load (Stream_ModuleList_t&, // return value: module list
 //                     bool&);               // return value: delete modules ?
 
- private:
-  typedef BitTorrent_PeerStream_T<struct BitTorrent_Client_StreamState,
-                                  struct BitTorrent_Client_StreamConfiguration,
-                                  BitTorrent_RuntimeStatistic_t,
-                                  struct BitTorrent_Client_ModuleHandlerConfiguration,
-                                  struct BitTorrent_Client_SessionData,
-                                  BitTorrent_Client_SessionData_t,
-                                  BitTorrent_Client_ControlMessage_t,
-                                  BitTorrent_Client_Message_t,
-                                  BitTorrent_Client_SessionMessage,
-                                  struct BitTorrent_Client_Configuration,
-                                  struct BitTorrent_Client_ConnectionState,
-                                  struct BitTorrent_Client_SocketHandlerConfiguration,
-                                  struct BitTorrent_Client_SessionState,
-                                  Test_I_GTK_CBData> inherited;
+// private:
+//  typedef BitTorrent_TrackerStream_T<struct BitTorrent_Client_StreamState,
+//                                     struct BitTorrent_Client_StreamConfiguration,
+//                                     BitTorrent_RuntimeStatistic_t,
+//                                     struct BitTorrent_Client_ModuleHandlerConfiguration,
+//                                     struct BitTorrent_Client_SessionData,
+//                                     BitTorrent_Client_SessionData_t,
+//                                     BitTorrent_Client_TrackerControlMessage_t,
+//                                     BitTorrent_Client_TrackerMessage,
+//                                     BitTorrent_Client_SessionMessage,
+//                                     BitTorrent_Client_PeerStream,
+//                                     struct BitTorrent_Client_Configuration,
+//                                     struct BitTorrent_Client_ConnectionState,
+//                                     struct BitTorrent_Client_SocketHandlerConfiguration,
+//                                     struct BitTorrent_Client_SessionState,
+//                                     struct BitTorrent_Client_GTK_CBData> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_PeerStream ())
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_PeerStream (const BitTorrent_Client_PeerStream&))
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_PeerStream& operator= (const BitTorrent_Client_PeerStream&))
-};
-
-//////////////////////////////////////////
-
-class BitTorrent_Client_TrackerStream
- : public BitTorrent_TrackerStream_T<struct BitTorrent_Client_StreamState,
-                                     struct BitTorrent_Client_StreamConfiguration,
-                                     BitTorrent_RuntimeStatistic_t,
-                                     struct BitTorrent_Client_ModuleHandlerConfiguration,
-                                     struct BitTorrent_Client_SessionData,
-                                     BitTorrent_Client_SessionData_t,
-                                     BitTorrent_Client_ControlMessage_t,
-                                     BitTorrent_Client_Message_t,
-                                     BitTorrent_Client_SessionMessage,
-                                     struct BitTorrent_Client_Configuration,
-                                     struct BitTorrent_Client_ConnectionState,
-                                     struct BitTorrent_Client_SocketHandlerConfiguration,
-                                     struct BitTorrent_Client_SessionState,
-                                     Test_I_GTK_CBData>
-{
- public:
-  BitTorrent_Client_TrackerStream (const std::string&); // name
-  virtual ~BitTorrent_Client_TrackerStream ();
-
-  // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&, // return value: module list
-                     bool&);               // return value: delete modules ?
-
- private:
-  typedef BitTorrent_TrackerStream_T<struct BitTorrent_Client_StreamState,
-                                     struct BitTorrent_Client_StreamConfiguration,
-                                     BitTorrent_RuntimeStatistic_t,
-                                     struct BitTorrent_Client_ModuleHandlerConfiguration,
-                                     struct BitTorrent_Client_SessionData,
-                                     BitTorrent_Client_SessionData_t,
-                                     BitTorrent_Client_ControlMessage_t,
-                                     BitTorrent_Client_Message_t,
-                                     BitTorrent_Client_SessionMessage,
-                                     struct BitTorrent_Client_Configuration,
-                                     struct BitTorrent_Client_ConnectionState,
-                                     struct BitTorrent_Client_SocketHandlerConfiguration,
-                                     struct BitTorrent_Client_SessionState,
-                                     Test_I_GTK_CBData> inherited;
-
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_TrackerStream ())
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_TrackerStream (const BitTorrent_Client_TrackerStream&))
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_TrackerStream& operator= (const BitTorrent_Client_TrackerStream&))
-};
+//  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_TrackerStream ())
+//  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_TrackerStream (const BitTorrent_Client_TrackerStream&))
+//  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_TrackerStream& operator= (const BitTorrent_Client_TrackerStream&))
+//};
 
 #endif

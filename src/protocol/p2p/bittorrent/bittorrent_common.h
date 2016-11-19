@@ -184,7 +184,7 @@ struct BitTorrent_Record
  { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); };
 
   unsigned int                               length;
-  BitTorrent_MessageType                     type;
+  enum BitTorrent_MessageType                type;
 
   // *TODO*: this belongs in the union; however, traditional C doesn't support
   //         class-type union members

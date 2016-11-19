@@ -274,11 +274,11 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
     {
       // retain session ID for reporting...
       // *TODO*: remove type inferences
-      const typename SessionMessageType::SESSION_DATA_T& session_data_container_r =
+      const typename SessionMessageType::DATA_T& data_container_r =
           message_inout->get ();
-      const typename SessionMessageType::SESSION_DATA_T::DATA_T& session_data_r =
-          session_data_container_r.get ();
-      sessionID_ = session_data_r.sessionID;
+      const typename SessionMessageType::DATA_T::DATA_T& data_r =
+          data_container_r.get ();
+      sessionID_ = data_r.sessionID;
 
       // statistics reporting
       if (reportingInterval_)

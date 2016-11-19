@@ -149,10 +149,12 @@ set (bittorrent_client_SRCS
      bittorrent_client_defines.h
 #     bittorrent_client_inputhandler.cpp
 #     bittorrent_client_inputhandler.h
+     bittorrent_client_message.cpp
+     bittorrent_client_message.h
      bittorrent_client_network.h
      bittorrent_client_session_common.h
- #    bittorrent_client_sessionmessage.cpp
- #    bittorrent_client_sessionmessage.h
+     bittorrent_client_sessionmessage.cpp
+     bittorrent_client_sessionmessage.h
      bittorrent_client_signalhandler.cpp
      bittorrent_client_signalhandler.h
      bittorrent_client_stream.cpp
@@ -243,9 +245,11 @@ set (bittorrent_client_gui_SRCS
      bittorrent_client_gui_session.inl
      bittorrent_client_gui_tools.cpp
      bittorrent_client_gui_tools.h
+     bittorrent_client_message.cpp
+     bittorrent_client_message.h
      bittorrent_client_network.h
-#     bittorrent_client_sessionmessage.cpp
-#     bittorrent_client_sessionmessage.h
+     bittorrent_client_sessionmessage.cpp
+     bittorrent_client_sessionmessage.h
      bittorrent_client_signalhandler.cpp
      bittorrent_client_signalhandler.h
      bittorrent_client_stream.cpp
