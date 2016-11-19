@@ -93,6 +93,7 @@ else ()
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src)
 endif ()
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/..)
 
 ############## next target ################

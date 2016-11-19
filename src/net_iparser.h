@@ -24,6 +24,8 @@
 #include <string>
 #include <vector>
 
+#include "location.hh"
+
 #include "common_idumpstate.h"
 #include "common_iget.h"
 
@@ -66,8 +68,9 @@ class Net_IParser
   virtual bool isBlocking () const = 0;
 
 //  virtual void error (const struct YYLTYPE&,
-//                      const std::string&) = 0;
-  virtual void error (const std::string&) = 0;
+  virtual void error (const yy::location&,
+                      const std::string&) = 0;
+//  virtual void error (const std::string&) = 0;
 
   // *NOTE*: to be invoked by the scanner (ONLY !)
   virtual void offset (unsigned int) = 0; // offset (increment)

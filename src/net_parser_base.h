@@ -72,7 +72,7 @@ class Net_ParserBase_T
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
   virtual void wait ();
 
-  virtual void dump_state () const;
+  inline virtual void dump_state () const { ACE_ASSERT (false); ACE_NOTSUP; };
 
  protected:
   ACE_Message_Block*      fragment_;

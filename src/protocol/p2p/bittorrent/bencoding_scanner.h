@@ -78,7 +78,7 @@ Net_BencodingScanner::yylex (BitTorrent_MetaInfo_IParser_t* parser)
      * We will address this in a future release of flex, or omit the C++ scanner
      * altogether.
      */
-    #define yyFlexLexer Net_Bencoding_FlexLexer
+//    #define yyFlexLexer Net_Bencoding_FlexLexer
 /* %endif */
 
 /* %if-c-only */

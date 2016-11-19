@@ -36,7 +36,7 @@ class ACE_Message_Block;
 class ACE_Message_Queue_Base;
 typedef void* yyscan_t;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
-struct YYLTYPE;
+//struct YYLTYPE;
 
 template <typename MessageType,
           typename SessionMessageType>
@@ -57,9 +57,9 @@ class BitTorrent_ParserDriver_T
   inline virtual ACE_Message_Block* buffer () { return fragment_; };
   inline virtual bool debugScanner () const { return bittorrent_get_debug (scannerState_); };
   inline virtual bool isBlocking () const { return blockInParse_; };
-//  virtual void error (const YYLTYPE&,      // location
-//                      const std::string&); // message
-  virtual void error (const std::string&); // message
+  virtual void error (const yy::location&, // location
+                      const std::string&); // message
+//  virtual void error (const std::string&); // message
   inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }; // offset (increment)
   inline virtual unsigned int offset () const { return offset_; };
   virtual bool parse (ACE_Message_Block*); // data buffer handle

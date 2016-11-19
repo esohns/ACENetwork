@@ -39,8 +39,6 @@
 // forward declarations
 //class BitTorrent_Client_Message;
 //class BitTorrent_Client_SessionMessage;
-class BitTorrent_Client_PeerStream;
-class BitTorrent_Client_TrackerStream;
 struct BitTorrent_Client_GTK_CBData;
 
 typedef BitTorrent_Module_Streamer_T<ACE_MT_SYNCH,
@@ -122,7 +120,7 @@ typedef BitTorrent_Module_PeerHandler_T<ACE_INET_Addr,
                                         BitTorrent_Client_PeerMessage,
                                         BitTorrent_Client_SessionMessage,
                                         struct BitTorrent_Client_SessionData,
-                                        BitTorrent_Client_PeerStream,
+                                        BitTorrent_Client_PeerStream_t,
                                         enum Stream_StateMachine_ControlState,
                                         struct Net_SocketConfiguration,
                                         struct BitTorrent_Client_SocketHandlerConfiguration,
@@ -147,7 +145,7 @@ typedef BitTorrent_Module_TrackerHandler_T<ACE_INET_Addr,
                                            BitTorrent_Client_TrackerMessage,
                                            BitTorrent_Client_SessionMessage,
                                            struct BitTorrent_Client_SessionData,
-                                           BitTorrent_Client_PeerStream,
+                                           BitTorrent_Client_PeerStream_t,
                                            enum Stream_StateMachine_ControlState,
                                            struct Net_SocketConfiguration,
                                            struct BitTorrent_Client_SocketHandlerConfiguration,

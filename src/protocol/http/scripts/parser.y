@@ -452,10 +452,10 @@ yy::HTTP_Parser::error (const location_type& location_in,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Parser::error"));
 
-  ACE_UNUSED_ARG (location_in);
+/*  ACE_UNUSED_ARG (location_in);*/
 
-/*  iparser_p->error (location_in, message_in);*/
-  iparser_p->error (message_in);
+  iparser_p->error (location_in, message_in);
+/*  iparser_p->error (message_in);*/
 }
 
 void

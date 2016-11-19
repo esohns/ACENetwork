@@ -145,28 +145,29 @@ BitTorrent_ParserDriver_T<MessageType,
 template <typename MessageType,
           typename SessionMessageType>
 void
-//BitTorrent_ParserDriver_T<SessionMessageType>::error (const YYLTYPE& location_in,
-//                                                      const std::string& message_in)
 BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::error (const std::string& message_in)
+                          SessionMessageType>::error (const yy::location& location_in,
+                                                      const std::string& message_in)
+//BitTorrent_ParserDriver_T<MessageType,
+//                          SessionMessageType>::error (const std::string& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::error"));
 
-//  std::ostringstream converter;
-//  converter << location_in;
+  std::ostringstream converter;
+  converter << location_in;
 
   // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
-//  ACE_DEBUG ((LM_ERROR,
-//              ACE_TEXT ("(@%d.%d-%d.%d): %s\n"),
-//              location_in.begin.line, location_in.begin.column,
-//              location_in.end.line, location_in.end.column,
-//              ACE_TEXT (message_in.c_str ())));
   ACE_DEBUG ((LM_ERROR,
-//              ACE_TEXT ("failed to parse \"%s\" (@%s): \"%s\"\n"),
-              ACE_TEXT ("failed to BitTorrent_Parser::parse(): \"%s\"\n"),
-//              std::string (fragment_->rd_ptr (), fragment_->length ()).c_str (),
-//              converter.str ().c_str (),
-              message_in.c_str ()));
+              ACE_TEXT ("(@%d.%d-%d.%d): \"%s\"\n"),
+              location_in.begin.line, location_in.begin.column,
+              location_in.end.line, location_in.end.column,
+              ACE_TEXT (message_in.c_str ())));
+//  ACE_DEBUG ((LM_ERROR,
+////              ACE_TEXT ("failed to parse \"%s\" (@%s): \"%s\"\n"),
+//              ACE_TEXT ("failed to BitTorrent_Parser::parse(): \"%s\"\n"),
+////              std::string (fragment_->rd_ptr (), fragment_->length ()).c_str (),
+////              converter.str ().c_str (),
+//              message_in.c_str ()));
 
   // dump message
   ACE_Message_Block* message_block_p = fragment_;
@@ -393,10 +394,10 @@ BitTorrent_ParserDriver_T<MessageType,
 
   // parse data fragment
   try {
-    result = ::yyparse (this, scannerState_);
+    result = ::bittorrent_parse (this, scannerState_);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
+                ACE_TEXT ("caught exception in ::bittorrent_parse(), continuing\n")));
     result = 1;
   }
   switch (result)

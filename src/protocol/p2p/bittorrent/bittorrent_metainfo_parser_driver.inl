@@ -53,26 +53,27 @@ BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::~BitTorrent_MetaInfo_Par
 template <typename SessionMessageType>
 void
 //BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::error (const YYLTYPE& location_in,
-//                                                      const std::string& message_in)
-BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
+BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::error (const yy::location& location_in,
+                                                               const std::string& message_in)
+//BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::error"));
 
-//  std::ostringstream converter;
-//  converter << location_in;
+  std::ostringstream converter;
+  converter << location_in;
 
   // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
-//  ACE_DEBUG ((LM_ERROR,
-//              ACE_TEXT ("(@%d.%d-%d.%d): %s\n"),
-//              location_in.begin.line, location_in.begin.column,
-//              location_in.end.line, location_in.end.column,
-//              ACE_TEXT (message_in.c_str ())));
   ACE_DEBUG ((LM_ERROR,
-//              ACE_TEXT ("failed to parse \"%s\" (@%s): \"%s\"\n"),
-              ACE_TEXT ("failed to BitTorrent_Parser::parse(): \"%s\"\n"),
-//              std::string (fragment_->rd_ptr (), fragment_->length ()).c_str (),
-//              converter.str ().c_str (),
-              message_in.c_str ()));
+              ACE_TEXT ("(@%d.%d-%d.%d): %s\n"),
+              location_in.begin.line, location_in.begin.column,
+              location_in.end.line, location_in.end.column,
+              ACE_TEXT (message_in.c_str ())));
+//  ACE_DEBUG ((LM_ERROR,
+////              ACE_TEXT ("failed to parse \"%s\" (@%s): \"%s\"\n"),
+//              ACE_TEXT ("failed to BitTorrent_Parser::parse(): \"%s\"\n"),
+////              std::string (fragment_->rd_ptr (), fragment_->length ()).c_str (),
+////              converter.str ().c_str (),
+//              message_in.c_str ()));
 
   // dump message
   ACE_Message_Block* message_block_p = inherited::fragment_;

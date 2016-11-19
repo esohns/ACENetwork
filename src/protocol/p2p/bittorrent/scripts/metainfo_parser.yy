@@ -339,21 +339,21 @@ dictionary_value: "string" { $$ = $1.size ();
                   | "dictionary" dictionary_items { $$ = $2; };
 %%
 
-/* void
+void
 yy::BitTorrent_MetaInfo_Parser::error (const location_type& location_in,
                                        const std::string& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_Parser::error"));
 
   try {
-    iparser_p->error (location_in, message_in);
+    parser->error (location_in, message_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in BitTorrent_MetaInfo_IParser::error(), continuing\n")));
   }
 }
 
-void
+/*void
 yy::BitTorrent_MetaInfo_Parser::set (yyscan_t context_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_Parser::set"));

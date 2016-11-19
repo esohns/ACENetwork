@@ -25,6 +25,8 @@
 
 #include <ace/Global_Macros.h>
 
+#include "location.hh"
+
 #include "net_parser_base.h"
 
 #include "bencoding_scanner.h"
@@ -60,8 +62,9 @@ class BitTorrent_MetaInfo_ParserDriver_T
   using PARSER_BASE_T::switchBuffer;
   using PARSER_BASE_T::wait;
 //  virtual void error (const YYLTYPE&,      // location
-//                      const std::string&); // message
-  virtual void error (const std::string&); // message
+  virtual void error (const yy::location&, // location
+                      const std::string&); // message
+//  virtual void error (const std::string&); // message
   inline virtual struct BitTorrent_MetaInfo& current () { return record_; };
   inline virtual bool hasFinished () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
   virtual void record (struct BitTorrent_MetaInfo*&); // data record

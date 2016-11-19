@@ -222,6 +222,87 @@ Net_ParserBase_T<ScannerType,
                  ParserType,
                  ParserInterfaceType,
                  ArgumentType,
+                 SessionMessageType>::parse (ACE_Message_Block* data_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_ParserBase_T::parse"));
+
+  // sanity check(s)
+  ACE_ASSERT (isInitialized_);
+  ACE_ASSERT (data_in);
+
+  // retain a handle to the 'current' fragment
+  fragment_ = data_in;
+  offset_ = 0;
+
+  int result = -1;
+  bool do_scan_end = false;
+  if (!scan_begin ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ParserBase_T::scan_begin(), aborting\n")));
+    goto error;
+  } // end IF
+  do_scan_end = true;
+
+  // initialize scanner ?
+  if (isFirst_)
+  {
+    isFirst_ = false;
+
+//    bittorrent_set_column (1, state_);
+//    bittorrent_set_lineno (1, state_);
+  } // end IF
+
+  // parse data fragment
+  try {
+//    result = ::yyparse (this, state_);
+    parser_.parse ();
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
+                ACE_TEXT ("caught exception in ParserType::parse(), continuing\n")));
+    result = 1;
+  }
+  switch (result)
+  {
+    case 0:
+      break; // done/need more data
+    case 1:
+    default:
+    { // *NOTE*: most probable reason: connection
+      //         has been closed --> session end
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("failed to parse BitTorrent PDU (result was: %d), aborting\n"),
+                  result));
+      goto error;
+    }
+  } // end SWITCH
+
+  // finalize buffer/scanner
+  scan_end ();
+  do_scan_end = false;
+
+  goto continue_;
+
+error:
+  if (do_scan_end)
+    scan_end ();
+  fragment_ = NULL;
+
+continue_:
+  return (result == 0);
+}
+
+template <typename ScannerType,
+          typename ParserType,
+          typename ParserInterfaceType,
+          typename ArgumentType,
+          typename SessionMessageType>
+bool
+Net_ParserBase_T<ScannerType,
+                 ParserType,
+                 ParserInterfaceType,
+                 ArgumentType,
                  SessionMessageType>::switchBuffer ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ParserBase_T::switchBuffer"));
@@ -362,87 +443,6 @@ Net_ParserBase_T<ScannerType,
          message_block_2 = message_block_2->cont ());
     message_block_2->cont (message_block_p);
   } // end IF
-}
-
-template <typename ScannerType,
-          typename ParserType,
-          typename ParserInterfaceType,
-          typename ArgumentType,
-          typename SessionMessageType>
-bool
-Net_ParserBase_T<ScannerType,
-                 ParserType,
-                 ParserInterfaceType,
-                 ArgumentType,
-                 SessionMessageType>::parse (ACE_Message_Block* data_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_ParserBase_T::parse"));
-
-  // sanity check(s)
-  ACE_ASSERT (isInitialized_);
-  ACE_ASSERT (data_in);
-
-  // retain a handle to the 'current' fragment
-  fragment_ = data_in;
-  offset_ = 0;
-
-  int result = -1;
-  bool do_scan_end = false;
-  if (!scan_begin ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ParserBase_T::scan_begin(), aborting\n")));
-    goto error;
-  } // end IF
-  do_scan_end = true;
-
-  // initialize scanner ?
-  if (isFirst_)
-  {
-    isFirst_ = false;
-
-//    bittorrent_set_column (1, state_);
-//    bittorrent_set_lineno (1, state_);
-  } // end IF
-
-  // parse data fragment
-  try {
-//    result = ::yyparse (this, state_);
-    parser_.parse ();
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
-                ACE_TEXT ("caught exception in ParserType::parse(), continuing\n")));
-    result = 1;
-  }
-  switch (result)
-  {
-    case 0:
-      break; // done/need more data
-    case 1:
-    default:
-    { // *NOTE*: most probable reason: connection
-      //         has been closed --> session end
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("failed to parse BitTorrent PDU (result was: %d), aborting\n"),
-                  result));
-      goto error;
-    }
-  } // end SWITCH
-
-  // finalize buffer/scanner
-  scan_end ();
-  do_scan_end = false;
-
-  goto continue_;
-
-error:
-  if (do_scan_end)
-    scan_end ();
-  fragment_ = NULL;
-
-continue_:
-  return (result == 0);
 }
 
 template <typename ScannerType,

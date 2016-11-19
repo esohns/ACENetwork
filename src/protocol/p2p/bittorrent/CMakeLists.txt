@@ -12,6 +12,21 @@
 # endif ()
 #endif ()
 
+#set (FLEX_LIB_FILE libfl.so)
+#if (UNIX)
+# find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
+#               DOC "searching for ${FLEX_LIB_FILE} (system paths)")
+#elseif (WIN32)
+# unset (FLEX_LIB_FILE)
+# set (FLEX_LIB_FILE libfl.lib)
+# find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
+#               DOC "searching for ${FLEX_LIB_FILE} (system paths)")
+#endif ()
+##if (NOT EXISTS ACE_LIBRARY)
+#if (NOT FLEX_LIBRARY)
+# message (FATAL_ERROR "could not find ${FLEX_LIB_FILE} (was: \"${FLEX_LIBRARY}\"), aborting")
+#endif ()
+
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -165,7 +180,9 @@ set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES DEFINE_SYM
 set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
 #target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${CMAKE_THREAD_LIBS_INIT})
-if (WIN32)
+if (UNIX)
+# target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${FLEX_LIBRARY})
+elseif (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${ACE_LIBRARY})
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent Common)
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ACEStream)

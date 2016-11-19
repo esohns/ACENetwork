@@ -3175,14 +3175,21 @@ yyerror (YYLTYPE* location_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::yyerror"));
 
-  ACE_UNUSED_ARG (location_in);
+/*  ACE_UNUSED_ARG (location_in);*/
   ACE_UNUSED_ARG (context_in);
 
   // sanity check(s)
   ACE_ASSERT (iparser_in);
 
-//  iparser_in->error (*location_in, std::string (message_in));
-  iparser_in->error (std::string (message_in));
+  yy::location location;
+  location.initialize (YY_NULLPTR,
+                       location_in->first_line,
+                       location_in->first_column);
+  location.lines (location_in->last_line - location_in->first_line);
+  location.columns (location_in->last_column - location_in->first_column);
+
+  iparser_in->error (location, std::string (message_in));
+/*  iparser_in->error (std::string (message_in));*/
 }
 
 void

@@ -56,8 +56,9 @@ class HTTP_ParserDriver_T
   inline virtual bool debugScanner () const { return HTTP_Scanner_get_debug (scannerState_); };
   inline virtual bool isBlocking () const { return blockInParse_; };
 //  virtual void error (const struct YYLTYPE&, // location
-//                      const std::string&);   // message
-  virtual void error (const std::string&); // message
+  virtual void error (const yy::location&, // location
+                      const std::string&); // message
+//  virtual void error (const std::string&); // message
   inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }; // offset (increment)
   inline virtual unsigned int offset () const { return offset_; };
   virtual bool parse (ACE_Message_Block*); // data buffer handle
