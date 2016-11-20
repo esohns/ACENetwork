@@ -241,6 +241,94 @@ namespace yy {
   | Symbol types.  |
   `---------------*/
 
+  inline
+  BitTorrent_MetaInfo_Parser::syntax_error::syntax_error (const location_type& l, const std::string& m)
+    : std::runtime_error (m)
+    , location (l)
+  {}
+
+  // basic_symbol.
+  template <typename Base>
+  inline
+  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol ()
+    : value ()
+  {}
+
+  template <typename Base>
+  inline
+  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
+    : Base (other)
+    , value ()
+    , location (other.location)
+  {
+    value = other.value;
+  }
+
+
+  template <typename Base>
+  inline
+  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+
+  /// Constructor for valueless symbols.
+  template <typename Base>
+  inline
+  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
+    : Base (t)
+    , value ()
+    , location (l)
+  {}
+
+  template <typename Base>
+  inline
+  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::~basic_symbol ()
+  {
+  }
+
+  template <typename Base>
+  inline
+  void
+  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::move (basic_symbol& s)
+  {
+    super_type::move(s);
+    value = s.value;
+    location = s.location;
+  }
+
+  // by_type.
+  inline
+  BitTorrent_MetaInfo_Parser::by_type::by_type ()
+     : type (empty)
+  {}
+
+  inline
+  BitTorrent_MetaInfo_Parser::by_type::by_type (const by_type& other)
+    : type (other.type)
+  {}
+
+  inline
+  BitTorrent_MetaInfo_Parser::by_type::by_type (token_type t)
+    : type (yytranslate_ (t))
+  {}
+
+  inline
+  void
+  BitTorrent_MetaInfo_Parser::by_type::move (by_type& that)
+  {
+    type = that.type;
+    that.type = empty;
+  }
+
+  inline
+  int
+  BitTorrent_MetaInfo_Parser::by_type::type_get () const
+  {
+    return type;
+  }
 
 
   // by_state.
@@ -283,37 +371,7 @@ namespace yy {
   BitTorrent_MetaInfo_Parser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
     : super_type (s, that.location)
   {
-      switch (that.type_get ())
-    {
-      case 6: // "dictionary"
-      case 9: // metainfo
-      case 12: // dictionary_items
-        value.move< Bencoding_Dictionary_t* > (that.value);
-        break;
-
-      case 11: // list_item
-      case 13: // dictionary_item
-      case 15: // dictionary_value
-        value.move< Bencoding_Element* > (that.value);
-        break;
-
-      case 7: // "list"
-      case 10: // list_items
-        value.move< Bencoding_List_t* > (that.value);
-        break;
-
-      case 5: // "integer"
-        value.move< int > (that.value);
-        break;
-
-      case 4: // "string"
-        value.move< std::string > (that.value);
-        break;
-
-      default:
-        break;
-    }
-
+    value = that.value;
     // that is emptied.
     that.type = empty;
   }
@@ -323,37 +381,7 @@ namespace yy {
   BitTorrent_MetaInfo_Parser::stack_symbol_type::operator= (const stack_symbol_type& that)
   {
     state = that.state;
-      switch (that.type_get ())
-    {
-      case 6: // "dictionary"
-      case 9: // metainfo
-      case 12: // dictionary_items
-        value.copy< Bencoding_Dictionary_t* > (that.value);
-        break;
-
-      case 11: // list_item
-      case 13: // dictionary_item
-      case 15: // dictionary_value
-        value.copy< Bencoding_Element* > (that.value);
-        break;
-
-      case 7: // "list"
-      case 10: // list_items
-        value.copy< Bencoding_List_t* > (that.value);
-        break;
-
-      case 5: // "integer"
-        value.copy< int > (that.value);
-        break;
-
-      case 4: // "string"
-        value.copy< std::string > (that.value);
-        break;
-
-      default:
-        break;
-    }
-
+    value = that.value;
     location = that.location;
     return *this;
   }
@@ -366,6 +394,9 @@ namespace yy {
   {
     if (yymsg)
       YY_SYMBOL_PRINT (yymsg, yysym);
+
+    // User destructor.
+    YYUSE (yysym.type_get ());
   }
 
 #if YYDEBUG
@@ -382,52 +413,52 @@ namespace yy {
         << yysym.location << ": ";
     switch (yytype)
     {
-            case 4: // "string"
+            case 4: // "integer"
 
 
-        { yyoutput << yysym.value.template as< std::string > (); }
-
-        break;
-
-      case 5: // "integer"
-
-
-        { yyoutput << yysym.value.template as< int > (); }
+        { yyoutput << (yysym.value.ival); }
 
         break;
 
-      case 6: // "dictionary"
+      case 5: // "string"
 
 
-        { yyoutput << BitTorrent_Tools::Dictionary2String (*yysym.value.template as< Bencoding_Dictionary_t* > ()); }
+        { yyoutput << *(yysym.value.sval); }
 
         break;
 
-      case 7: // "list"
+      case 6: // "list"
 
 
-        { yyoutput << BitTorrent_Tools::List2String (*yysym.value.template as< Bencoding_List_t* > ()); }
+        { yyoutput << BitTorrent_Tools::List2String (*(yysym.value.lval)); }
+
+        break;
+
+      case 7: // "dictionary"
+
+
+        { yyoutput << BitTorrent_Tools::Dictionary2String (*(yysym.value.dval)); }
 
         break;
 
       case 9: // metainfo
 
 
-        { yyoutput << BitTorrent_Tools::Dictionary2String (*yysym.value.template as< Bencoding_Dictionary_t* > ()); }
+        { yyoutput << BitTorrent_Tools::Dictionary2String (*(yysym.value.dval)); }
 
         break;
 
-      case 10: // list_items
+      case 11: // list_items
 
 
-        { yyoutput << BitTorrent_Tools::List2String (*yysym.value.template as< Bencoding_List_t* > ()); }
+        { yyoutput << BitTorrent_Tools::List2String (*(yysym.value.lval)); }
 
         break;
 
-      case 12: // dictionary_items
+      case 15: // dictionary_items
 
 
-        { yyoutput << BitTorrent_Tools::Dictionary2String (*yysym.value.template as< Bencoding_Dictionary_t* > ()); }
+        { yyoutput << BitTorrent_Tools::Dictionary2String (*(yysym.value.dval)); }
 
         break;
 
@@ -587,8 +618,7 @@ namespace yy {
         YYCDEBUG << "Reading a token: ";
         try
           {
-            symbol_type yylookahead (yylex (parser));
-            yyla.move (yylookahead);
+            yyla.type = yytranslate_ (yylex (&yyla.value, &yyla.location, parser));
           }
         catch (const syntax_error& yyexc)
           {
@@ -643,40 +673,16 @@ namespace yy {
     {
       stack_symbol_type yylhs;
       yylhs.state = yy_lr_goto_state_(yystack_[yylen].state, yyr1_[yyn]);
-      /* Variants are always initialized to an empty instance of the
-         correct type. The default '$$ = $1' action is NOT applied
-         when using variants.  */
-        switch (yyr1_[yyn])
-    {
-      case 6: // "dictionary"
-      case 9: // metainfo
-      case 12: // dictionary_items
-        yylhs.value.build< Bencoding_Dictionary_t* > ();
-        break;
+      /* If YYLEN is nonzero, implement the default value of the
+         action: '$$ = $1'.  Otherwise, use the top of the stack.
 
-      case 11: // list_item
-      case 13: // dictionary_item
-      case 15: // dictionary_value
-        yylhs.value.build< Bencoding_Element* > ();
-        break;
-
-      case 7: // "list"
-      case 10: // list_items
-        yylhs.value.build< Bencoding_List_t* > ();
-        break;
-
-      case 5: // "integer"
-        yylhs.value.build< int > ();
-        break;
-
-      case 4: // "string"
-        yylhs.value.build< std::string > ();
-        break;
-
-      default:
-        break;
-    }
-
+         Otherwise, the following line sets YYLHS.VALUE to garbage.
+         This behavior is undocumented and Bison users should not rely
+         upon it.  */
+      if (yylen)
+        yylhs.value = yystack_[yylen - 1].value;
+      else
+        yylhs.value = yystack_[0].value;
 
       // Compute the default @$.
       {
@@ -693,22 +699,23 @@ namespace yy {
   case 2:
 
     {
-                                                  Bencoding_Dictionary_t& dictionary_r =
-                                                    parser->current ();
-                                                  Bencoding_Dictionary_t* dictionary_p =
-                                                    &dictionary_r;
-                                                  try {
-                                                    parser->record (dictionary_p);
-                                                  } catch (...) {
-                                                    ACE_DEBUG ((LM_ERROR,
-                                                                ACE_TEXT ("caught exception in BitTorrent_MetaInfo_IParser::record(), continuing\n")));
-                                                  } }
+                                 parser->setDictionary ((yystack_[0].value.dval)); }
 
     break;
 
   case 3:
 
-    { }
+    {
+                                     Bencoding_Dictionary_t& dictionary_r =
+                                       parser->current ();
+                                     Bencoding_Dictionary_t* dictionary_p =
+                                       &dictionary_r;
+                                     try {
+                                       parser->record (dictionary_p);
+                                     } catch (...) {
+                                       ACE_DEBUG ((LM_ERROR,
+                                                   ACE_TEXT ("caught exception in BitTorrent_MetaInfo_IParser::record(), continuing\n")));
+                                     } }
 
     break;
 
@@ -720,28 +727,27 @@ namespace yy {
 
   case 5:
 
-    {
-                                 Bencoding_List_t* list_p =
-                                   const_cast<Bencoding_List_t*> (parser->get ());
-                                 Bencoding_Element* element_p = NULL;
-                                 ACE_NEW_NORETURN (element_p,
-                                                   Bencoding_Element ());
-                                 ACE_ASSERT (element_p);
-                                 element_p->type =
-                                   Bencoding_Element::BENCODING_TYPE_STRING;
-                                 std::string* string_p = NULL;
-                                 ACE_NEW_NORETURN (string_p,
-                                                   std::string ());
-                                 ACE_ASSERT (string_p);
-                                 *string_p = yystack_[0].value.as< std::string > ();
-                                 element_p->type =
-                                   Bencoding_Element::BENCODING_TYPE_STRING;
-                                 element_p->string = string_p;
-                                 list_p->push_back (element_p); }
+    { }
 
     break;
 
   case 6:
+
+    {
+                             Bencoding_List_t* list_p =
+                               const_cast<Bencoding_List_t*> (parser->get ());
+                             Bencoding_Element* element_p = NULL;
+                             ACE_NEW_NORETURN (element_p,
+                                               Bencoding_Element ());
+                             ACE_ASSERT (element_p);
+                             element_p->type =
+                               Bencoding_Element::BENCODING_TYPE_STRING;
+                             element_p->string = (yystack_[0].value.sval);
+                             list_p->push_back (element_p); }
+
+    break;
+
+  case 7:
 
     {
                                 Bencoding_List_t* list_p =
@@ -752,59 +758,54 @@ namespace yy {
                                 ACE_ASSERT (element_p);
                                 element_p->type =
                                   Bencoding_Element::BENCODING_TYPE_INTEGER;
-                                element_p->integer = yystack_[0].value.as< int > ();
+                                element_p->integer = (yystack_[0].value.ival);
                                 list_p->push_back (element_p); }
-
-    break;
-
-  case 7:
-
-    {
-                                        Bencoding_List_t* list_p =
-                                          const_cast<Bencoding_List_t*> (parser->get ());
-                                        Bencoding_Element* element_p = NULL;
-                                        ACE_NEW_NORETURN (element_p,
-                                                          Bencoding_Element ());
-                                        ACE_ASSERT (element_p);
-                                        element_p->type =
-                                          Bencoding_Element::BENCODING_TYPE_LIST;
-                                        element_p->list = yystack_[0].value.as< Bencoding_List_t* > ();
-                                        list_p->push_back (element_p); }
 
     break;
 
   case 8:
 
     {
-                                                    Bencoding_List_t* list_p =
-                                                      const_cast<Bencoding_List_t*> (parser->get ());
-                                                    Bencoding_Element* element_p = NULL;
-                                                    ACE_NEW_NORETURN (element_p,
-                                                                      Bencoding_Element ());
-                                                    ACE_ASSERT (element_p);
-                                                    element_p->type =
-                                                      Bencoding_Element::BENCODING_TYPE_DICTIONARY;
-                                                    element_p->dictionary = yystack_[0].value.as< Bencoding_Dictionary_t* > ();
-                                                    list_p->push_back (element_p); }
+                             parser->set ((yystack_[0].value.lval)); }
 
     break;
 
   case 9:
 
-    { }
+    {
+                               Bencoding_List_t* list_p =
+                                 const_cast<Bencoding_List_t*> (parser->get ());
+                               Bencoding_Element* element_p = NULL;
+                               ACE_NEW_NORETURN (element_p,
+                                                 Bencoding_Element ());
+                               ACE_ASSERT (element_p);
+                               element_p->type =
+                                 Bencoding_Element::BENCODING_TYPE_LIST;
+                               element_p->list = (yystack_[0].value.lval);
+                               list_p->push_back (element_p); }
 
     break;
 
   case 10:
 
-    { }
+    {
+                                    parser->setDictionary ((yystack_[0].value.dval)); }
 
     break;
 
   case 11:
 
     {
-                            *dictionary_key = yystack_[0].value.as< std::string > (); }
+                                     Bencoding_List_t* list_p =
+                                       const_cast<Bencoding_List_t*> (parser->get ());
+                                     Bencoding_Element* element_p = NULL;
+                                     ACE_NEW_NORETURN (element_p,
+                                                       Bencoding_Element ());
+                                     ACE_ASSERT (element_p);
+                                     element_p->type =
+                                       Bencoding_Element::BENCODING_TYPE_DICTIONARY;
+                                     element_p->dictionary = (yystack_[0].value.dval);
+                                     list_p->push_back (element_p); }
 
     break;
 
@@ -816,11 +817,30 @@ namespace yy {
 
   case 13:
 
+    { }
+
+    break;
+
+  case 14:
+
+    {
+                            *dictionary_key = *(yystack_[0].value.sval); }
+
+    break;
+
+  case 15:
+
+    { }
+
+    break;
+
+  case 16:
+
     {
                              ACE_DEBUG ((LM_DEBUG,
                                          ACE_TEXT ("key: \"%s\": \"%s\"\n"),
                                          ACE_TEXT (dictionary_key->c_str ()),
-                                         ACE_TEXT (yystack_[0].value.as< std::string > ().c_str ())));
+                                         ACE_TEXT ((yystack_[0].value.sval)->c_str ())));
 
                              Bencoding_Dictionary_t& dictionary_r =
                                parser->current ();
@@ -830,26 +850,19 @@ namespace yy {
                              ACE_ASSERT (element_p);
                              element_p->type =
                                Bencoding_Element::BENCODING_TYPE_STRING;
-                             std::string* string_p = NULL;
-                             ACE_NEW_NORETURN (string_p,
-                                               std::string ());
-                             ACE_ASSERT (string_p);
-                             *string_p = yystack_[0].value.as< std::string > ();
-                             element_p->type =
-                               Bencoding_Element::BENCODING_TYPE_STRING;
-                             element_p->string = string_p;
+                             element_p->string = (yystack_[0].value.sval);
                              dictionary_r.insert (std::make_pair (*dictionary_key,
                                                                   element_p)); }
 
     break;
 
-  case 14:
+  case 17:
 
     {
                                 ACE_DEBUG ((LM_DEBUG,
                                             ACE_TEXT ("key: \"%s\": %d\n"),
                                             ACE_TEXT (dictionary_key->c_str ()),
-                                            yystack_[0].value.as< int > ()));
+                                            (yystack_[0].value.ival)));
 
                                 Bencoding_Dictionary_t& dictionary_r =
                                   parser->current ();
@@ -859,43 +872,57 @@ namespace yy {
                                 ACE_ASSERT (element_p);
                                 element_p->type =
                                   Bencoding_Element::BENCODING_TYPE_INTEGER;
-                                element_p->integer = yystack_[0].value.as< int > ();
+                                element_p->integer = (yystack_[0].value.ival);
                                 dictionary_r.insert (std::make_pair (*dictionary_key,
                                                                      element_p)); }
 
     break;
 
-  case 15:
+  case 18:
 
     {
-                                        Bencoding_Dictionary_t& dictionary_r =
-                                          parser->current ();
-                                        Bencoding_Element* element_p = NULL;
-                                        ACE_NEW_NORETURN (element_p,
-                                                          Bencoding_Element ());
-                                        ACE_ASSERT (element_p);
-                                        element_p->type =
-                                          Bencoding_Element::BENCODING_TYPE_LIST;
-                                        element_p->list = yystack_[0].value.as< Bencoding_List_t* > ();
-                                        dictionary_r.insert (std::make_pair (*dictionary_key,
-                                                                             element_p)); }
+                             parser->set ((yystack_[0].value.lval)); }
 
     break;
 
-  case 16:
+  case 19:
 
     {
-                                                    Bencoding_Dictionary_t& dictionary_r =
-                                                      parser->current ();
-                                                    Bencoding_Element* element_p = NULL;
-                                                    ACE_NEW_NORETURN (element_p,
-                                                                      Bencoding_Element ());
-                                                    ACE_ASSERT (element_p);
-                                                    element_p->type =
-                                                      Bencoding_Element::BENCODING_TYPE_DICTIONARY;
-                                                    element_p->dictionary = yystack_[0].value.as< Bencoding_Dictionary_t* > ();
-                                                    dictionary_r.insert (std::make_pair (*dictionary_key,
-                                                                                         element_p)); }
+                               Bencoding_Dictionary_t& dictionary_r =
+                                 parser->current ();
+                               Bencoding_Element* element_p = NULL;
+                               ACE_NEW_NORETURN (element_p,
+                                                 Bencoding_Element ());
+                               ACE_ASSERT (element_p);
+                               element_p->type =
+                                 Bencoding_Element::BENCODING_TYPE_LIST;
+                               element_p->list = (yystack_[0].value.lval);
+                               dictionary_r.insert (std::make_pair (*dictionary_key,
+                                                                    element_p)); }
+
+    break;
+
+  case 20:
+
+    {
+                                    parser->setDictionary ((yystack_[0].value.dval)); }
+
+    break;
+
+  case 21:
+
+    {
+                                     Bencoding_Dictionary_t& dictionary_r =
+                                       parser->current ();
+                                     Bencoding_Element* element_p = NULL;
+                                     ACE_NEW_NORETURN (element_p,
+                                                       Bencoding_Element ());
+                                     ACE_ASSERT (element_p);
+                                     element_p->type =
+                                       Bencoding_Element::BENCODING_TYPE_DICTIONARY;
+                                     element_p->dictionary = (yystack_[0].value.dval);
+                                     dictionary_r.insert (std::make_pair (*dictionary_key,
+                                                                          element_p)); }
 
     break;
 
@@ -1155,72 +1182,76 @@ namespace yy {
   }
 
 
-  const signed char BitTorrent_MetaInfo_Parser::yypact_ninf_ = -11;
+  const signed char BitTorrent_MetaInfo_Parser::yypact_ninf_ = -16;
 
   const signed char BitTorrent_MetaInfo_Parser::yytable_ninf_ = -1;
 
   const signed char
   BitTorrent_MetaInfo_Parser::yypact_[] =
   {
-      -1,   -11,     6,     8,   -11,   -11,   -11,    -3,   -11,   -11,
-     -11,   -11,   -11,     8,     4,   -11,   -11,   -11,   -11,   -11,
-       8,     4
+       1,   -16,     9,   -16,   -16,     5,   -16,   -16,    -3,   -16,
+     -16,   -16,   -16,   -16,   -16,   -16,    -1,   -16,   -16,   -16,
+     -16,   -16,   -16,    -1,   -16
   };
 
   const unsigned char
   BitTorrent_MetaInfo_Parser::yydefact_[] =
   {
-       0,    10,     0,     2,     1,    11,     9,     0,    13,    14,
-      10,     4,    12,    16,    15,     5,     6,    10,     4,     3,
-       8,     7
+       0,     2,     0,    13,     1,     3,    14,    12,     0,    17,
+      16,    18,    20,    15,     5,    13,    19,    21,     8,    10,
+       4,     5,    13,     9,    11
   };
 
   const signed char
   BitTorrent_MetaInfo_Parser::yypgoto_[] =
   {
-     -11,   -11,    -5,   -11,   -10,   -11,   -11,   -11
+     -16,   -16,   -16,   -10,   -16,   -16,   -16,   -15,   -16,   -16,
+     -16,   -16,   -16
   };
 
   const signed char
   BitTorrent_MetaInfo_Parser::yydefgoto_[] =
   {
-      -1,     2,    14,    19,     3,     6,     7,    12
+      -1,     2,     3,    16,    20,    21,    22,     5,     7,     8,
+      13,    14,    15
   };
 
   const unsigned char
   BitTorrent_MetaInfo_Parser::yytable_[] =
   {
-      13,     8,     9,    10,    11,     1,     4,    20,    15,    16,
-      17,    18,     5,    21
+      17,     9,    10,    11,    12,    18,    19,    24,     1,     4,
+       6,    23
   };
 
   const unsigned char
   BitTorrent_MetaInfo_Parser::yycheck_[] =
   {
-      10,     4,     5,     6,     7,     6,     0,    17,     4,     5,
-       6,     7,     4,    18
+      15,     4,     5,     6,     7,     6,     7,    22,     7,     0,
+       5,    21
   };
 
   const unsigned char
   BitTorrent_MetaInfo_Parser::yystos_[] =
   {
-       0,     6,     9,    12,     0,     4,    13,    14,     4,     5,
-       6,     7,    15,    12,    10,     4,     5,     6,     7,    11,
-      12,    10
+       0,     7,     9,    10,     0,    15,     5,    16,    17,     4,
+       5,     6,     7,    18,    19,    20,    11,    15,     6,     7,
+      12,    13,    14,    11,    15
   };
 
   const unsigned char
   BitTorrent_MetaInfo_Parser::yyr1_[] =
   {
-       0,     8,     9,    10,    10,    11,    11,    11,    11,    12,
-      12,    14,    13,    15,    15,    15,    15
+       0,     8,    10,     9,    11,    11,    12,    12,    13,    12,
+      14,    12,    15,    15,    17,    16,    18,    18,    19,    18,
+      20,    18
   };
 
   const unsigned char
   BitTorrent_MetaInfo_Parser::yyr2_[] =
   {
-       0,     2,     2,     2,     0,     1,     1,     2,     2,     2,
-       0,     0,     3,     1,     1,     2,     2
+       0,     2,     0,     3,     2,     0,     1,     1,     0,     3,
+       0,     3,     2,     0,     0,     3,     1,     1,     0,     3,
+       0,     3
   };
 
 
@@ -1230,18 +1261,19 @@ namespace yy {
   const char*
   const BitTorrent_MetaInfo_Parser::yytname_[] =
   {
-  "\"end\"", "error", "$undefined", "\"end_of_fragment\"", "\"string\"",
-  "\"integer\"", "\"dictionary\"", "\"list\"", "$accept", "metainfo",
-  "list_items", "list_item", "dictionary_items", "dictionary_item", "$@1",
-  "dictionary_value", YY_NULLPTR
+  "\"end\"", "error", "$undefined", "\"end_of_fragment\"", "\"integer\"",
+  "\"string\"", "\"list\"", "\"dictionary\"", "$accept", "metainfo", "$@1",
+  "list_items", "list_item", "$@2", "$@3", "dictionary_items",
+  "dictionary_item", "$@4", "dictionary_value", "$@5", "$@6", YY_NULLPTR
   };
 
 #if YYDEBUG
   const unsigned short int
   BitTorrent_MetaInfo_Parser::yyrline_[] =
   {
-       0,   219,   219,   230,   231,   232,   250,   261,   272,   283,
-     284,   285,   285,   288,   312,   329,   341
+       0,   223,   223,   223,   236,   237,   238,   249,   260,   260,
+     273,   273,   286,   287,   288,   288,   291,   308,   325,   325,
+     339,   339
   };
 
   // Print the state stack on the debug stream.
@@ -1273,6 +1305,53 @@ namespace yy {
   }
 #endif // YYDEBUG
 
+  // Symbol number corresponding to token number t.
+  inline
+  BitTorrent_MetaInfo_Parser::token_number_type
+  BitTorrent_MetaInfo_Parser::yytranslate_ (int t)
+  {
+    static
+    const token_number_type
+    translate_table[] =
+    {
+     0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
+       5,     6,     7
+    };
+    const unsigned int user_token_number_max_ = 262;
+    const token_number_type undef_token_ = 2;
+
+    if (static_cast<int>(t) <= yyeof_)
+      return yyeof_;
+    else if (static_cast<unsigned int> (t) <= user_token_number_max_)
+      return translate_table[t];
+    else
+      return undef_token_;
+  }
 
 
 } // yy

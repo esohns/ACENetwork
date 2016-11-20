@@ -30,11 +30,14 @@
 
 class BitTorrent_MetaInfo_IParser
  : public Net_IRecordParser_T<Bencoding_Dictionary_t>
- , public Common_ISetP_T<Bencoding_Dictionary_t>
+// *TODO*: find out why gcc complains about ambiguity here
+// , public Common_ISetP_T<Bencoding_Dictionary_t>
  , public Common_IGetSetP_T<Bencoding_List_t>
 {
  public:
-  inline virtual ~BitTorrent_MetaInfo_IParser () {};
+  virtual ~BitTorrent_MetaInfo_IParser () {};
+
+  virtual void setDictionary (Bencoding_Dictionary_t*) = 0; // dictionary handle
 };
 
 template <typename RecordType>
@@ -42,7 +45,7 @@ class BitTorrent_IParser_T
  : public Net_IStreamParser_T<RecordType>
 {
  public:
-  inline virtual ~BitTorrent_IParser_T () {};
+  virtual ~BitTorrent_IParser_T () {};
 
   ////////////////////////////////////////
   // callbacks

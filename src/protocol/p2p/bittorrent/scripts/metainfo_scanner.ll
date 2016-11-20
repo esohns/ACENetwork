@@ -30,7 +30,9 @@
 
     // override yyFlexLexer::yylex()
 //    virtual int yylex ();
-    virtual yy::BitTorrent_MetaInfo_Parser::symbol_type yylex (BitTorrent_MetaInfo_IParser*);
+    virtual yy::BitTorrent_MetaInfo_Parser::token_type yylex (yy::BitTorrent_MetaInfo_Parser::semantic_type*,
+                                                              yy::location*,
+                                                              BitTorrent_MetaInfo_IParser*);
 
     yy::location                 location_;
 
@@ -43,9 +45,12 @@
 #undef YY_STRUCT_YY_BUFFER_STATE
 #endif
 
-#define YY_DECL                             \
-yy::BitTorrent_MetaInfo_Parser::symbol_type \
-BitTorrent_MetaInfoScanner::yylex (BitTorrent_MetaInfo_IParser* parser)
+//yy::BitTorrent_MetaInfo_Parser::symbol_type
+#define YY_DECL                                                                           \
+yy::BitTorrent_MetaInfo_Parser::token_type                                                \
+BitTorrent_MetaInfoScanner::yylex (yy::BitTorrent_MetaInfo_Parser::semantic_type* yylval, \
+                                   yy::location* location,                                \
+                                   BitTorrent_MetaInfo_IParser* parser)
 // ... and declare it for the parser's sake
 //YY_DECL;
 
@@ -72,7 +77,8 @@ BitTorrent_MetaInfoScanner::yylex (BitTorrent_MetaInfo_IParser* parser)
 
   // the original yyterminate() macro returns int. Since this uses Bison 3
   // variants as tokens, redefine it to change type to `Parser::semantic_type`
-  #define yyterminate() yy::BitTorrent_MetaInfo_Parser::make_END (location_);
+//  #define yyterminate() yy::BitTorrent_MetaInfo_Parser::make_END (location_)
+  #define yyterminate() return yy::BitTorrent_MetaInfo_Parser::token::END
 
   // this tracks the current scanner location. Action is called when length of
   // the token is known
@@ -179,11 +185,10 @@ METAINFO_FILE                     {DICTIONARY}
 "d"                    { ACE_ASSERT (yyleng == 1);
                          parser->offset (1);
                          BEGIN(state_dictionary_key);
-                         const Bencoding_Dictionary_t* dictionary_p = NULL;
-                         ACE_NEW_NORETURN (dictionary_p,
+                         ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
-                         ACE_ASSERT (dictionary_p);
-                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (dictionary_p, location_); }
+                         ACE_ASSERT (yylval->dval);
+                         return yy::BitTorrent_MetaInfo_Parser::token::DICTIONARY; }
 } // end <INITIAL>
 <state_string>{
 {DIGIT}+               {
@@ -197,16 +202,18 @@ METAINFO_FILE                     {DICTIONARY}
                          if (!string_length)
                          { // --> found an empty string
                            yy_pop_state ();
-                           return yy::BitTorrent_MetaInfo_Parser::make_STRING (std::string (), location_);
+                           return yy::BitTorrent_MetaInfo_Parser::token::STRING;
                          } }
 {OCTET}{1}             { ACE_ASSERT (string_length != 0);
                          parser->offset (string_length);
-                         std::string string_i;
-                         string_i.push_back (yytext[0]);
+                         ACE_NEW_NORETURN (yylval->sval,
+                                           std::string ());
+                         ACE_ASSERT (yylval->sval);
+                         yylval->sval->push_back (yytext[0]);
                          for (unsigned int i = 0; i < (string_length - 1); ++i)
-                           string_i.push_back (yyinput ());
+                           yylval->sval->push_back (yyinput ());
                          yy_pop_state ();
-                         return yy::BitTorrent_MetaInfo_Parser::make_STRING (string_i, location_); }
+                         return yy::BitTorrent_MetaInfo_Parser::token::STRING; }
 } // end <state_string>
 <state_integer>{
 "e"                    { ACE_ASSERT (yyleng == 1);
@@ -217,9 +224,8 @@ METAINFO_FILE                     {DICTIONARY}
                          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                          converter.clear ();
                          converter << yytext;
-                         int i = -1;
-                         converter >> i;
-                         return yy::BitTorrent_MetaInfo_Parser::make_INTEGER (i, location_); }
+                         converter >> yylval->ival;
+                         return yy::BitTorrent_MetaInfo_Parser::token::INTEGER; }
 "i"                    { ACE_ASSERT (yyleng == 1);
                          parser->offset (1); }
 } // end <state_integer>
@@ -229,25 +235,23 @@ METAINFO_FILE                     {DICTIONARY}
                          yy_pop_state (); }
 {DIGIT}{1}             { yyless (0);
                          yy_push_state (state_string); }
-"i"                    { yyless (0);
-                         ACE_ASSERT (yyleng == 1);
+"i"                    { ACE_ASSERT (yyleng == 1);
+                         yyless (0);
                          yy_push_state (state_integer); }
-"l"                    { yyless (0);
-                         ACE_ASSERT (yyleng == 1);
+"l"                    { ACE_ASSERT (yyleng == 1);
+                         yyless (0);
                          yy_push_state (state_list);
-                         const Bencoding_List_t* list_p = NULL;
-                         ACE_NEW_NORETURN (list_p,
+                         ACE_NEW_NORETURN (yylval->lval,
                                            Bencoding_List_t ());
-                         ACE_ASSERT (list_p);
-                         return yy::BitTorrent_MetaInfo_Parser::make_LIST (list_p, location_); }
-"d"                    { yyless (0);
-                         ACE_ASSERT (yyleng == 1);
+                         ACE_ASSERT (yylval->lval);
+                         return yy::BitTorrent_MetaInfo_Parser::token::LIST; }
+"d"                    { ACE_ASSERT (yyleng == 1);
+                         yyless (0);
                          yy_push_state (state_dictionary_key);
-                         const Bencoding_Dictionary_t* dictionary_p = NULL;
-                         ACE_NEW_NORETURN (dictionary_p,
+                         ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
-                         ACE_ASSERT (dictionary_p);
-                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (dictionary_p, location_); }
+                         ACE_ASSERT (yylval->dval);
+                         return yy::BitTorrent_MetaInfo_Parser::token::DICTIONARY; }
 } // end <state_list>
 <state_dictionary_key>{
 "e"                    { ACE_ASSERT (yyleng == 1);
@@ -261,33 +265,31 @@ METAINFO_FILE                     {DICTIONARY}
 {DIGIT}{1}             { yyless (0);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_string); }
-"i"                    { yyless (0);
-                         ACE_ASSERT (yyleng == 1);
+"i"                    { ACE_ASSERT (yyleng == 1);
+                         yyless (0);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_integer); }
-"l"                    { yyless (0);
-                         ACE_ASSERT (yyleng == 1);
+"l"                    { ACE_ASSERT (yyleng == 1);
+                         yyless (0);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_list);
-                         const Bencoding_List_t* list_p = NULL;
-                         ACE_NEW_NORETURN (list_p,
+                         ACE_NEW_NORETURN (yylval->lval,
                                            Bencoding_List_t ());
-                         ACE_ASSERT (list_p);
-                         return yy::BitTorrent_MetaInfo_Parser::make_LIST (list_p, location_); }
-"d"                    { yyless (0);
-                         ACE_ASSERT (yyleng == 1);
+                         ACE_ASSERT (yylval->lval);
+                         return yy::BitTorrent_MetaInfo_Parser::token::LIST; }
+"d"                    { ACE_ASSERT (yyleng == 1);
+                         yyless (0);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_dictionary_key);
-                         const Bencoding_Dictionary_t* dictionary_p = NULL;
-                         ACE_NEW_NORETURN (dictionary_p,
+                         ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
-                         ACE_ASSERT (dictionary_p);
-                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (dictionary_p, location_); }
+                         ACE_ASSERT (yylval->dval);
+                         return yy::BitTorrent_MetaInfo_Parser::token::DICTIONARY; }
 } // end <state_dictionary_value>
-<<EOF>>                { return yy::BitTorrent_MetaInfo_Parser::make_END (location_); }
+<<EOF>>                { return yy::BitTorrent_MetaInfo_Parser::token::END; }
 <*>{OCTET}             { /* *TODO*: use (?s:.) ? */
                          if (!parser->isBlocking ())
-                           return yy::BitTorrent_MetaInfo_Parser::make_END_OF_FRAGMENT (location_);
+                           return yy::BitTorrent_MetaInfo_Parser::token::END_OF_FRAGMENT;
 
                          // wait for more data fragment(s)
                          if (!parser->switchBuffer ())

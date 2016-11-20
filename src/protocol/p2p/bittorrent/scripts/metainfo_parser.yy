@@ -34,9 +34,9 @@
 /* %define api.pure                  true */
 /* *TODO*: implement a push parser */
 /* %define api.push-pull             push */
-%define api.token.constructor
+/*%define api.token.constructor*/
 /* %define api.token.prefix          {} */
-%define api.value.type            variant
+/*%define api.value.type            variant*/
 /* %define api.value.union.name      YYSTYPE */
 /* %define lr.default-reduction      most */
 /* %define lr.default-reduction      accepting */
@@ -128,11 +128,14 @@ typedef union YYSTYPE
 }
 
 // symbols
-/*%union
+%union
 {
-  int          ival;
-  std::string* sval;
-}*/
+  int                     ival;
+  std::string*            sval;
+  Bencoding_Element*      eval;
+  Bencoding_List_t*       lval;
+  Bencoding_Dictionary_t* dval;
+}
 
 /*%token <int>         INTEGER;*/
 /*%token <std::string> STRING; */
@@ -179,17 +182,17 @@ typedef union YYSTYPE
  END_OF_FRAGMENT "end_of_fragment"
  END 0           "end"
 ;
-%token <std::string>             STRING     "string"
-%token <int>                     INTEGER    "integer"
-%token <Bencoding_Dictionary_t*> DICTIONARY "dictionary"
-%token <Bencoding_List_t*>       LIST       "list"
+%token <ival> INTEGER    "integer"
+%token <sval> STRING     "string"
+%token <lval> LIST       "list"
+%token <dval> DICTIONARY "dictionary"
 // non-terminals
-%type  <Bencoding_Dictionary_t*> metainfo dictionary_items
-%type  <Bencoding_List_t*> list_items
-%type  <Bencoding_Element*> dictionary_item dictionary_value list_item
+%type  <dval> metainfo dictionary_items
+%type  <lval> list_items
+%type  <eval> dictionary_item dictionary_value list_item
 
-/*%precedence "dictionary" "list"
-%precedence "integer"*/
+%precedence "integer" "string"
+%precedence "list" "dictionary"
 
 %code provides {
 /*void BitTorrent_Export yysetdebug (int);
@@ -209,44 +212,40 @@ void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
 /* %destructor               { ACE_DEBUG ((LM_DEBUG,
                                         ACE_TEXT ("discarding tagless symbol...\n"))); } <> */
 /*%printer    { yyoutput << $$; } <*>;*/
-%printer    { yyoutput << $$; } <std::string>
-%printer    { yyoutput << $$; } <int>
-%printer    { yyoutput << BitTorrent_Tools::List2String (*$$); } <Bencoding_List_t*>
-%printer    { yyoutput << BitTorrent_Tools::Dictionary2String (*$$); } <Bencoding_Dictionary_t*>
+%printer    { yyoutput << $$; } <ival>
+%printer    { yyoutput << *$$; } <sval>
+/*%printer    { yyoutput << BitTorrent_Tools::List2String (*$$); } <eval>*/
+%printer    { yyoutput << BitTorrent_Tools::List2String (*$$); } <lval>
+%printer    { yyoutput << BitTorrent_Tools::Dictionary2String (*$$); } <dval>
 
 %%
 %start            metainfo   ;
-metainfo:         "dictionary" dictionary_items {
-                                                  Bencoding_Dictionary_t& dictionary_r =
-                                                    parser->current ();
-                                                  Bencoding_Dictionary_t* dictionary_p =
-                                                    &dictionary_r;
-                                                  try {
-                                                    parser->record (dictionary_p);
-                                                  } catch (...) {
-                                                    ACE_DEBUG ((LM_ERROR,
-                                                                ACE_TEXT ("caught exception in BitTorrent_MetaInfo_IParser::record(), continuing\n")));
-                                                  } };
+metainfo:         "dictionary" {
+                                 parser->setDictionary ($1); }
+                  dictionary_items {
+                                     Bencoding_Dictionary_t& dictionary_r =
+                                       parser->current ();
+                                     Bencoding_Dictionary_t* dictionary_p =
+                                       &dictionary_r;
+                                     try {
+                                       parser->record (dictionary_p);
+                                     } catch (...) {
+                                       ACE_DEBUG ((LM_ERROR,
+                                                   ACE_TEXT ("caught exception in BitTorrent_MetaInfo_IParser::record(), continuing\n")));
+                                     } };
 list_items:       list_items list_item { };
                   | %empty             { };
-list_item:        "string"     {
-                                 Bencoding_List_t* list_p =
-                                   const_cast<Bencoding_List_t*> (parser->get ());
-                                 Bencoding_Element* element_p = NULL;
-                                 ACE_NEW_NORETURN (element_p,
-                                                   Bencoding_Element ());
-                                 ACE_ASSERT (element_p);
-                                 element_p->type =
-                                   Bencoding_Element::BENCODING_TYPE_STRING;
-                                 std::string* string_p = NULL;
-                                 ACE_NEW_NORETURN (string_p,
-                                                   std::string ());
-                                 ACE_ASSERT (string_p);
-                                 *string_p = $1;
-                                 element_p->type =
-                                   Bencoding_Element::BENCODING_TYPE_STRING;
-                                 element_p->string = string_p;
-                                 list_p->push_back (element_p); };
+list_item:        "string" {
+                             Bencoding_List_t* list_p =
+                               const_cast<Bencoding_List_t*> (parser->get ());
+                             Bencoding_Element* element_p = NULL;
+                             ACE_NEW_NORETURN (element_p,
+                                               Bencoding_Element ());
+                             ACE_ASSERT (element_p);
+                             element_p->type =
+                               Bencoding_Element::BENCODING_TYPE_STRING;
+                             element_p->string = $1;
+                             list_p->push_back (element_p); };
                   | "integer" {
                                 Bencoding_List_t* list_p =
                                   const_cast<Bencoding_List_t*> (parser->get ());
@@ -258,38 +257,42 @@ list_item:        "string"     {
                                   Bencoding_Element::BENCODING_TYPE_INTEGER;
                                 element_p->integer = $1;
                                 list_p->push_back (element_p); };
-                  | "list" list_items {
-                                        Bencoding_List_t* list_p =
-                                          const_cast<Bencoding_List_t*> (parser->get ());
-                                        Bencoding_Element* element_p = NULL;
-                                        ACE_NEW_NORETURN (element_p,
-                                                          Bencoding_Element ());
-                                        ACE_ASSERT (element_p);
-                                        element_p->type =
-                                          Bencoding_Element::BENCODING_TYPE_LIST;
-                                        element_p->list = $2;
-                                        list_p->push_back (element_p); };
-                  | "dictionary" dictionary_items {
-                                                    Bencoding_List_t* list_p =
-                                                      const_cast<Bencoding_List_t*> (parser->get ());
-                                                    Bencoding_Element* element_p = NULL;
-                                                    ACE_NEW_NORETURN (element_p,
-                                                                      Bencoding_Element ());
-                                                    ACE_ASSERT (element_p);
-                                                    element_p->type =
-                                                      Bencoding_Element::BENCODING_TYPE_DICTIONARY;
-                                                    element_p->dictionary = $2;
-                                                    list_p->push_back (element_p); };
+                  | "list" {
+                             parser->set ($1); }
+                  list_items {
+                               Bencoding_List_t* list_p =
+                                 const_cast<Bencoding_List_t*> (parser->get ());
+                               Bencoding_Element* element_p = NULL;
+                               ACE_NEW_NORETURN (element_p,
+                                                 Bencoding_Element ());
+                               ACE_ASSERT (element_p);
+                               element_p->type =
+                                 Bencoding_Element::BENCODING_TYPE_LIST;
+                               element_p->list = $3;
+                               list_p->push_back (element_p); };
+                  | "dictionary"  {
+                                    parser->setDictionary ($1); }
+                  dictionary_items {
+                                     Bencoding_List_t* list_p =
+                                       const_cast<Bencoding_List_t*> (parser->get ());
+                                     Bencoding_Element* element_p = NULL;
+                                     ACE_NEW_NORETURN (element_p,
+                                                       Bencoding_Element ());
+                                     ACE_ASSERT (element_p);
+                                     element_p->type =
+                                       Bencoding_Element::BENCODING_TYPE_DICTIONARY;
+                                     element_p->dictionary = $3;
+                                     list_p->push_back (element_p); };
 dictionary_items: dictionary_items dictionary_item { };
                   | %empty { };
 dictionary_item: "string" {
-                            *dictionary_key = $1; }
+                            *dictionary_key = *$1; }
                  dictionary_value { };
 dictionary_value: "string" {
                              ACE_DEBUG ((LM_DEBUG,
                                          ACE_TEXT ("key: \"%s\": \"%s\"\n"),
                                          ACE_TEXT (dictionary_key->c_str ()),
-                                         ACE_TEXT ($1.c_str ())));
+                                         ACE_TEXT ($1->c_str ())));
 
                              Bencoding_Dictionary_t& dictionary_r =
                                parser->current ();
@@ -299,14 +302,7 @@ dictionary_value: "string" {
                              ACE_ASSERT (element_p);
                              element_p->type =
                                Bencoding_Element::BENCODING_TYPE_STRING;
-                             std::string* string_p = NULL;
-                             ACE_NEW_NORETURN (string_p,
-                                               std::string ());
-                             ACE_ASSERT (string_p);
-                             *string_p = $1;
-                             element_p->type =
-                               Bencoding_Element::BENCODING_TYPE_STRING;
-                             element_p->string = string_p;
+                             element_p->string = $1;
                              dictionary_r.insert (std::make_pair (*dictionary_key,
                                                                   element_p)); };
                   | "integer" {
@@ -326,30 +322,34 @@ dictionary_value: "string" {
                                 element_p->integer = $1;
                                 dictionary_r.insert (std::make_pair (*dictionary_key,
                                                                      element_p)); };
-                  | "list" list_items {
-                                        Bencoding_Dictionary_t& dictionary_r =
-                                          parser->current ();
-                                        Bencoding_Element* element_p = NULL;
-                                        ACE_NEW_NORETURN (element_p,
-                                                          Bencoding_Element ());
-                                        ACE_ASSERT (element_p);
-                                        element_p->type =
-                                          Bencoding_Element::BENCODING_TYPE_LIST;
-                                        element_p->list = $2;
-                                        dictionary_r.insert (std::make_pair (*dictionary_key,
-                                                                             element_p)); };
-                  | "dictionary" dictionary_items {
-                                                    Bencoding_Dictionary_t& dictionary_r =
-                                                      parser->current ();
-                                                    Bencoding_Element* element_p = NULL;
-                                                    ACE_NEW_NORETURN (element_p,
-                                                                      Bencoding_Element ());
-                                                    ACE_ASSERT (element_p);
-                                                    element_p->type =
-                                                      Bencoding_Element::BENCODING_TYPE_DICTIONARY;
-                                                    element_p->dictionary = $2;
-                                                    dictionary_r.insert (std::make_pair (*dictionary_key,
-                                                                                         element_p)); };
+                  | "list" {
+                             parser->set ($1); }
+                  list_items {
+                               Bencoding_Dictionary_t& dictionary_r =
+                                 parser->current ();
+                               Bencoding_Element* element_p = NULL;
+                               ACE_NEW_NORETURN (element_p,
+                                                 Bencoding_Element ());
+                               ACE_ASSERT (element_p);
+                               element_p->type =
+                                 Bencoding_Element::BENCODING_TYPE_LIST;
+                               element_p->list = $3;
+                               dictionary_r.insert (std::make_pair (*dictionary_key,
+                                                                    element_p)); };
+                  | "dictionary"  {
+                                    parser->setDictionary ($1); }
+                  dictionary_items {
+                                     Bencoding_Dictionary_t& dictionary_r =
+                                       parser->current ();
+                                     Bencoding_Element* element_p = NULL;
+                                     ACE_NEW_NORETURN (element_p,
+                                                       Bencoding_Element ());
+                                     ACE_ASSERT (element_p);
+                                     element_p->type =
+                                       Bencoding_Element::BENCODING_TYPE_DICTIONARY;
+                                     element_p->dictionary = $3;
+                                     dictionary_r.insert (std::make_pair (*dictionary_key,
+                                                                          element_p)); };
 %%
 
 void

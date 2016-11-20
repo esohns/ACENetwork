@@ -124,6 +124,19 @@ BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::record (Bencoding_Dictio
 
 template <typename SessionMessageType>
 void
+//BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::set (Bencoding_Dictionary_t* dictionary_in)
+BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::setDictionary (Bencoding_Dictionary_t* dictionary_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::setDictionary"));
+
+  currentDictionary_ = dictionary_in;
+
+  if (!metaInfo_)
+    metaInfo_ = dictionary_in;
+}
+
+template <typename SessionMessageType>
+void
 BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::dump_state"));

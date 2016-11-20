@@ -29,7 +29,9 @@
 
     // override yyFlexLexer::yylex()
 //    virtual int yylex ();
-    virtual yy::BitTorrent_MetaInfo_Parser::symbol_type yylex (BitTorrent_MetaInfo_IParser*);
+    virtual yy::BitTorrent_MetaInfo_Parser::token_type yylex (yy::BitTorrent_MetaInfo_Parser::semantic_type*,
+                                                              yy::location*,
+                                                              BitTorrent_MetaInfo_IParser*);
 
     yy::location                 location_;
 
@@ -42,9 +44,12 @@
 #undef YY_STRUCT_YY_BUFFER_STATE
 #endif
 
-#define YY_DECL                             \
-yy::BitTorrent_MetaInfo_Parser::symbol_type \
-BitTorrent_MetaInfoScanner::yylex (BitTorrent_MetaInfo_IParser* parser)
+//yy::BitTorrent_MetaInfo_Parser::symbol_type
+#define YY_DECL                                                                           \
+yy::BitTorrent_MetaInfo_Parser::token_type                                                \
+BitTorrent_MetaInfoScanner::yylex (yy::BitTorrent_MetaInfo_Parser::semantic_type* yylval, \
+                                   yy::location* location,                                \
+                                   BitTorrent_MetaInfo_IParser* parser)
 // ... and declare it for the parser's sake
 //YY_DECL;
 
@@ -1631,8 +1636,8 @@ static yyconst yy_state_type yy_NUL_trans[35] =
 
 static yyconst flex_int32_t yy_rule_linenum[20] =
     {   0,
-      179,  189,  195,  202,  212,  215,  223,  227,  230,  232,
-      235,  243,  253,  256,  261,  264,  268,  277,  288
+      185,  194,  200,  207,  219,  222,  229,  233,  236,  238,
+      241,  248,  257,  260,  265,  268,  272,  280,  290
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -1659,7 +1664,8 @@ static yyconst flex_int32_t yy_rule_linenum[20] =
 
   // the original yyterminate() macro returns int. Since this uses Bison 3
   // variants as tokens, redefine it to change type to `Parser::semantic_type`
-  #define yyterminate() yy::BitTorrent_MetaInfo_Parser::make_END (location_);
+//  #define yyterminate() yy::BitTorrent_MetaInfo_Parser::make_END (location_)
+  #define yyterminate() return yy::BitTorrent_MetaInfo_Parser::token::END
 
   // this tracks the current scanner location. Action is called when length of
   // the token is known
@@ -1967,11 +1973,10 @@ YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
                          parser->offset (1);
                          BEGIN(state_dictionary_key);
-                         const Bencoding_Dictionary_t* dictionary_p = NULL;
-                         ACE_NEW_NORETURN (dictionary_p,
+                         ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
-                         ACE_ASSERT (dictionary_p);
-                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (dictionary_p, location_); }
+                         ACE_ASSERT (yylval->dval);
+                         return yy::BitTorrent_MetaInfo_Parser::token::DICTIONARY; }
   YY_BREAK
 // end <INITIAL>
 
@@ -1991,7 +1996,7 @@ YY_RULE_SETUP
                          if (!string_length)
                          { // --> found an empty string
                            yy_pop_state ();
-                           return yy::BitTorrent_MetaInfo_Parser::make_STRING (std::string (), location_);
+                           return yy::BitTorrent_MetaInfo_Parser::token::STRING;
                          } }
   YY_BREAK
 case 4:
@@ -1999,12 +2004,14 @@ case 4:
 YY_RULE_SETUP
 { ACE_ASSERT (string_length != 0);
                          parser->offset (string_length);
-                         std::string string_i;
-                         string_i.push_back (yytext[0]);
+                         ACE_NEW_NORETURN (yylval->sval,
+                                           std::string ());
+                         ACE_ASSERT (yylval->sval);
+                         yylval->sval->push_back (yytext[0]);
                          for (unsigned int i = 0; i < (string_length - 1); ++i)
-                           string_i.push_back (yyinput ());
+                           yylval->sval->push_back (yyinput ());
                          yy_pop_state ();
-                         return yy::BitTorrent_MetaInfo_Parser::make_STRING (string_i, location_); }
+                         return yy::BitTorrent_MetaInfo_Parser::token::STRING; }
   YY_BREAK
 // end <state_string>
 
@@ -2021,9 +2028,8 @@ YY_RULE_SETUP
                          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                          converter.clear ();
                          converter << yytext;
-                         int i = -1;
-                         converter >> i;
-                         return yy::BitTorrent_MetaInfo_Parser::make_INTEGER (i, location_); }
+                         converter >> yylval->ival;
+                         return yy::BitTorrent_MetaInfo_Parser::token::INTEGER; }
   YY_BREAK
 case 7:
 YY_RULE_SETUP
@@ -2045,31 +2051,29 @@ YY_RULE_SETUP
   YY_BREAK
 case 10:
 YY_RULE_SETUP
-{ yyless (0);
-                         ACE_ASSERT (yyleng == 1);
+{ ACE_ASSERT (yyleng == 1);
+                         yyless (0);
                          yy_push_state (state_integer); }
   YY_BREAK
 case 11:
 YY_RULE_SETUP
-{ yyless (0);
-                         ACE_ASSERT (yyleng == 1);
+{ ACE_ASSERT (yyleng == 1);
+                         yyless (0);
                          yy_push_state (state_list);
-                         const Bencoding_List_t* list_p = NULL;
-                         ACE_NEW_NORETURN (list_p,
+                         ACE_NEW_NORETURN (yylval->lval,
                                            Bencoding_List_t ());
-                         ACE_ASSERT (list_p);
-                         return yy::BitTorrent_MetaInfo_Parser::make_LIST (list_p, location_); }
+                         ACE_ASSERT (yylval->lval);
+                         return yy::BitTorrent_MetaInfo_Parser::token::LIST; }
   YY_BREAK
 case 12:
 YY_RULE_SETUP
-{ yyless (0);
-                         ACE_ASSERT (yyleng == 1);
+{ ACE_ASSERT (yyleng == 1);
+                         yyless (0);
                          yy_push_state (state_dictionary_key);
-                         const Bencoding_Dictionary_t* dictionary_p = NULL;
-                         ACE_NEW_NORETURN (dictionary_p,
+                         ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
-                         ACE_ASSERT (dictionary_p);
-                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (dictionary_p, location_); }
+                         ACE_ASSERT (yylval->dval);
+                         return yy::BitTorrent_MetaInfo_Parser::token::DICTIONARY; }
   YY_BREAK
 // end <state_list>
 
@@ -2095,34 +2099,32 @@ YY_RULE_SETUP
   YY_BREAK
 case 16:
 YY_RULE_SETUP
-{ yyless (0);
-                         ACE_ASSERT (yyleng == 1);
+{ ACE_ASSERT (yyleng == 1);
+                         yyless (0);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_integer); }
   YY_BREAK
 case 17:
 YY_RULE_SETUP
-{ yyless (0);
-                         ACE_ASSERT (yyleng == 1);
+{ ACE_ASSERT (yyleng == 1);
+                         yyless (0);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_list);
-                         const Bencoding_List_t* list_p = NULL;
-                         ACE_NEW_NORETURN (list_p,
+                         ACE_NEW_NORETURN (yylval->lval,
                                            Bencoding_List_t ());
-                         ACE_ASSERT (list_p);
-                         return yy::BitTorrent_MetaInfo_Parser::make_LIST (list_p, location_); }
+                         ACE_ASSERT (yylval->lval);
+                         return yy::BitTorrent_MetaInfo_Parser::token::LIST; }
   YY_BREAK
 case 18:
 YY_RULE_SETUP
-{ yyless (0);
-                         ACE_ASSERT (yyleng == 1);
+{ ACE_ASSERT (yyleng == 1);
+                         yyless (0);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_dictionary_key);
-                         const Bencoding_Dictionary_t* dictionary_p = NULL;
-                         ACE_NEW_NORETURN (dictionary_p,
+                         ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
-                         ACE_ASSERT (dictionary_p);
-                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (dictionary_p, location_); }
+                         ACE_ASSERT (yylval->dval);
+                         return yy::BitTorrent_MetaInfo_Parser::token::DICTIONARY; }
   YY_BREAK
 // end <state_dictionary_value>
 case YY_STATE_EOF(INITIAL):
@@ -2131,14 +2133,14 @@ case YY_STATE_EOF(state_integer):
 case YY_STATE_EOF(state_list):
 case YY_STATE_EOF(state_dictionary_key):
 case YY_STATE_EOF(state_dictionary_value):
-{ return yy::BitTorrent_MetaInfo_Parser::make_END (location_); }
+{ return yy::BitTorrent_MetaInfo_Parser::token::END; }
   YY_BREAK
 case 19:
 /* rule 19 can match eol */
 YY_RULE_SETUP
 { /* *TODO*: use (?s:.) ? */
                          if (!parser->isBlocking ())
-                           return yy::BitTorrent_MetaInfo_Parser::make_END_OF_FRAGMENT (location_);
+                           return yy::BitTorrent_MetaInfo_Parser::token::END_OF_FRAGMENT;
 
                          // wait for more data fragment(s)
                          if (!parser->switchBuffer ())

@@ -33,7 +33,9 @@
 
     // override yyFlexLexer::yylex()
 //    virtual int yylex ();
-    virtual yy::BitTorrent_MetaInfo_Parser::symbol_type yylex (BitTorrent_MetaInfo_IParser*);
+    virtual yy::BitTorrent_MetaInfo_Parser::token_type yylex (yy::BitTorrent_MetaInfo_Parser::semantic_type*,
+                                                              yy::location*,
+                                                              BitTorrent_MetaInfo_IParser*);
 
     yy::location                 location_;
 
@@ -46,9 +48,12 @@
 #undef YY_STRUCT_YY_BUFFER_STATE
 #endif
 
-#define YY_DECL                             \
-yy::BitTorrent_MetaInfo_Parser::symbol_type \
-BitTorrent_MetaInfoScanner::yylex (BitTorrent_MetaInfo_IParser* parser)
+//yy::BitTorrent_MetaInfo_Parser::symbol_type
+#define YY_DECL                                                                           \
+yy::BitTorrent_MetaInfo_Parser::token_type                                                \
+BitTorrent_MetaInfoScanner::yylex (yy::BitTorrent_MetaInfo_Parser::semantic_type* yylval, \
+                                   yy::location* location,                                \
+                                   BitTorrent_MetaInfo_IParser* parser)
 // ... and declare it for the parser's sake
 //YY_DECL;
 

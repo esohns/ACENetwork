@@ -65,10 +65,12 @@ class BitTorrent_MetaInfo_ParserDriver_T
   virtual void error (const yy::location&, // location
                       const std::string&); // message
 //  virtual void error (const std::string&); // message
-  inline virtual Bencoding_Dictionary_t& current () { return *currentDictionary_; };
+  inline virtual Bencoding_Dictionary_t& current () { ACE_ASSERT (currentDictionary_); return *currentDictionary_; };
   inline virtual bool hasFinished () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
   virtual void record (Bencoding_Dictionary_t*&); // data record
-  inline virtual void set (Bencoding_Dictionary_t* dictionary_in) { currentDictionary_ = dictionary_in; };
+  // *IMPORTANT NOTE*: this also sets metaInfo_ (on first invocation)
+//  virtual void set (Bencoding_Dictionary_t*); // dictionary
+  virtual void setDictionary (Bencoding_Dictionary_t*); // dictionary
   inline virtual void set (Bencoding_List_t* list_in) { currentList_ = list_in; };
   inline virtual const Bencoding_List_t* const get () const { return currentList_; };
 

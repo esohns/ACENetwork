@@ -98,11 +98,6 @@ typedef union YYSTYPE
 # include <string>
 # include "stack.hh"
 # include "location.hh"
-#include <typeinfo>
-#ifndef YYASSERT
-# include <cassert>
-# define YYASSERT assert
-#endif
 
 
 #ifndef YY_ATTRIBUTE
@@ -169,159 +164,6 @@ namespace yy {
 
 
 
-  /// A char[S] buffer to store and retrieve objects.
-  ///
-  /// Sort of a variant, but does not keep track of the nature
-  /// of the stored data, since that knowledge is available
-  /// via the current state.
-  template <size_t S>
-  struct variant
-  {
-    /// Type of *this.
-    typedef variant<S> self_type;
-
-    /// Empty construction.
-    variant ()
-      : yytname_ (YY_NULLPTR)
-    {}
-
-    /// Construct and fill.
-    template <typename T>
-    variant (const T& t)
-      : yytname_ (typeid (T).name ())
-    {
-      YYASSERT (sizeof (T) <= S);
-      new (yyas_<T> ()) T (t);
-    }
-
-    /// Destruction, allowed only if empty.
-    ~variant ()
-    {
-      YYASSERT (!yytname_);
-    }
-
-    /// Instantiate an empty \a T in here.
-    template <typename T>
-    T&
-    build ()
-    {
-      YYASSERT (!yytname_);
-      YYASSERT (sizeof (T) <= S);
-      yytname_ = typeid (T).name ();
-      return *new (yyas_<T> ()) T;
-    }
-
-    /// Instantiate a \a T in here from \a t.
-    template <typename T>
-    T&
-    build (const T& t)
-    {
-      YYASSERT (!yytname_);
-      YYASSERT (sizeof (T) <= S);
-      yytname_ = typeid (T).name ();
-      return *new (yyas_<T> ()) T (t);
-    }
-
-    /// Accessor to a built \a T.
-    template <typename T>
-    T&
-    as ()
-    {
-      YYASSERT (yytname_ == typeid (T).name ());
-      YYASSERT (sizeof (T) <= S);
-      return *yyas_<T> ();
-    }
-
-    /// Const accessor to a built \a T (for %printer).
-    template <typename T>
-    const T&
-    as () const
-    {
-      YYASSERT (yytname_ == typeid (T).name ());
-      YYASSERT (sizeof (T) <= S);
-      return *yyas_<T> ();
-    }
-
-    /// Swap the content with \a other, of same type.
-    ///
-    /// Both variants must be built beforehand, because swapping the actual
-    /// data requires reading it (with as()), and this is not possible on
-    /// unconstructed variants: it would require some dynamic testing, which
-    /// should not be the variant's responsability.
-    /// Swapping between built and (possibly) non-built is done with
-    /// variant::move ().
-    template <typename T>
-    void
-    swap (self_type& other)
-    {
-      YYASSERT (yytname_);
-      YYASSERT (yytname_ == other.yytname_);
-      std::swap (as<T> (), other.as<T> ());
-    }
-
-    /// Move the content of \a other to this.
-    ///
-    /// Destroys \a other.
-    template <typename T>
-    void
-    move (self_type& other)
-    {
-      build<T> ();
-      swap<T> (other);
-      other.destroy<T> ();
-    }
-
-    /// Copy the content of \a other to this.
-    template <typename T>
-    void
-    copy (const self_type& other)
-    {
-      build<T> (other.as<T> ());
-    }
-
-    /// Destroy the stored \a T.
-    template <typename T>
-    void
-    destroy ()
-    {
-      as<T> ().~T ();
-      yytname_ = YY_NULLPTR;
-    }
-
-  private:
-    /// Prohibit blind copies.
-    self_type& operator=(const self_type&);
-    variant (const self_type&);
-
-    /// Accessor to raw memory as \a T.
-    template <typename T>
-    T*
-    yyas_ ()
-    {
-      void *yyp = yybuffer_.yyraw;
-      return static_cast<T*> (yyp);
-     }
-
-    /// Const accessor to raw memory as \a T.
-    template <typename T>
-    const T*
-    yyas_ () const
-    {
-      const void *yyp = yybuffer_.yyraw;
-      return static_cast<const T*> (yyp);
-     }
-
-    union
-    {
-      /// Strongest alignment constraints.
-      long double yyalign_me;
-      /// A buffer large enough to store any of the semantic values.
-      char yyraw[S];
-    } yybuffer_;
-
-    /// Whether the content is built: if defined, the name of the stored type.
-    const char *yytname_;
-  };
 
 
   /// A Bison parser.
@@ -329,32 +171,19 @@ namespace yy {
   {
   public:
 #ifndef YYSTYPE
-    /// An auxiliary type to compute the largest semantic type.
-    union union_type
-    {
-      // "dictionary"
-      // metainfo
-      // dictionary_items
-      char dummy1[sizeof(Bencoding_Dictionary_t*)];
-
-      // list_item
-      // dictionary_item
-      // dictionary_value
-      char dummy2[sizeof(Bencoding_Element*)];
-
-      // "list"
-      // list_items
-      char dummy3[sizeof(Bencoding_List_t*)];
-
-      // "integer"
-      char dummy4[sizeof(int)];
-
-      // "string"
-      char dummy5[sizeof(std::string)];
-};
-
     /// Symbol semantic values.
-    typedef variant<sizeof(union_type)> semantic_type;
+    union semantic_type
+    {
+    
+
+  int                     ival;
+  std::string*            sval;
+  Bencoding_Element*      eval;
+  Bencoding_List_t*       lval;
+  Bencoding_Dictionary_t* dval;
+
+
+    };
 #else
     typedef YYSTYPE semantic_type;
 #endif
@@ -375,10 +204,10 @@ namespace yy {
       {
         END = 0,
         END_OF_FRAGMENT = 258,
-        STRING = 259,
-        INTEGER = 260,
-        DICTIONARY = 261,
-        LIST = 262
+        INTEGER = 259,
+        STRING = 260,
+        LIST = 261,
+        DICTIONARY = 262
       };
     };
 
@@ -409,20 +238,9 @@ namespace yy {
       /// Copy constructor.
       basic_symbol (const basic_symbol& other);
 
-      /// Constructor for valueless symbols, and symbols from each type.
-
-  basic_symbol (typename Base::kind_type t, const location_type& l);
-
-  basic_symbol (typename Base::kind_type t, const Bencoding_Dictionary_t* v, const location_type& l);
-
-  basic_symbol (typename Base::kind_type t, const Bencoding_Element* v, const location_type& l);
-
-  basic_symbol (typename Base::kind_type t, const Bencoding_List_t* v, const location_type& l);
-
-  basic_symbol (typename Base::kind_type t, const int v, const location_type& l);
-
-  basic_symbol (typename Base::kind_type t, const std::string v, const location_type& l);
-
+      /// Constructor for valueless symbols.
+      basic_symbol (typename Base::kind_type t,
+                    const location_type& l);
 
       /// Constructor for symbols with semantic value.
       basic_symbol (typename Base::kind_type t,
@@ -479,31 +297,6 @@ namespace yy {
 
     /// "External" symbols: returned by the scanner.
     typedef basic_symbol<by_type> symbol_type;
-
-    // Symbol constructors declarations.
-    static inline
-    symbol_type
-    make_END (const location_type& l);
-
-    static inline
-    symbol_type
-    make_END_OF_FRAGMENT (const location_type& l);
-
-    static inline
-    symbol_type
-    make_STRING (const std::string& v, const location_type& l);
-
-    static inline
-    symbol_type
-    make_INTEGER (const int& v, const location_type& l);
-
-    static inline
-    symbol_type
-    make_DICTIONARY (const Bencoding_Dictionary_t*& v, const location_type& l);
-
-    static inline
-    symbol_type
-    make_LIST (const Bencoding_List_t*& v, const location_type& l);
 
 
     /// Build a parser object.
@@ -567,7 +360,7 @@ namespace yy {
     static const signed char yytable_ninf_;
 
     /// Convert a scanner token number \a t to a symbol number.
-    static token_number_type yytranslate_ (token_type t);
+    static token_number_type yytranslate_ (int t);
 
     // Tables.
   // YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
@@ -705,8 +498,8 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 13,     ///< Last index in yytable_.
-      yynnts_ = 8,  ///< Number of nonterminal symbols.
+      yylast_ = 11,     ///< Last index in yytable_.
+      yynnts_ = 13,  ///< Number of nonterminal symbols.
       yyempty_ = -2,
       yyfinal_ = 4, ///< Termination state number.
       yyterror_ = 1,
@@ -720,362 +513,6 @@ namespace yy {
     BitTorrent_MetaInfoScanner* scanner;
     std::string* dictionary_key;
   };
-
-  // Symbol number corresponding to token number t.
-  inline
-  BitTorrent_MetaInfo_Parser::token_number_type
-  BitTorrent_MetaInfo_Parser::yytranslate_ (token_type t)
-  {
-    static
-    const token_number_type
-    translate_table[] =
-    {
-     0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7
-    };
-    const unsigned int user_token_number_max_ = 262;
-    const token_number_type undef_token_ = 2;
-
-    if (static_cast<int>(t) <= yyeof_)
-      return yyeof_;
-    else if (static_cast<unsigned int> (t) <= user_token_number_max_)
-      return translate_table[t];
-    else
-      return undef_token_;
-  }
-
-  inline
-  BitTorrent_MetaInfo_Parser::syntax_error::syntax_error (const location_type& l, const std::string& m)
-    : std::runtime_error (m)
-    , location (l)
-  {}
-
-  // basic_symbol.
-  template <typename Base>
-  inline
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol ()
-    : value ()
-  {}
-
-  template <typename Base>
-  inline
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
-    : Base (other)
-    , value ()
-    , location (other.location)
-  {
-      switch (other.type_get ())
-    {
-      case 6: // "dictionary"
-      case 9: // metainfo
-      case 12: // dictionary_items
-        value.copy< Bencoding_Dictionary_t* > (other.value);
-        break;
-
-      case 11: // list_item
-      case 13: // dictionary_item
-      case 15: // dictionary_value
-        value.copy< Bencoding_Element* > (other.value);
-        break;
-
-      case 7: // "list"
-      case 10: // list_items
-        value.copy< Bencoding_List_t* > (other.value);
-        break;
-
-      case 5: // "integer"
-        value.copy< int > (other.value);
-        break;
-
-      case 4: // "string"
-        value.copy< std::string > (other.value);
-        break;
-
-      default:
-        break;
-    }
-
-  }
-
-
-  template <typename Base>
-  inline
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v, const location_type& l)
-    : Base (t)
-    , value ()
-    , location (l)
-  {
-    (void) v;
-      switch (this->type_get ())
-    {
-      case 6: // "dictionary"
-      case 9: // metainfo
-      case 12: // dictionary_items
-        value.copy< Bencoding_Dictionary_t* > (v);
-        break;
-
-      case 11: // list_item
-      case 13: // dictionary_item
-      case 15: // dictionary_value
-        value.copy< Bencoding_Element* > (v);
-        break;
-
-      case 7: // "list"
-      case 10: // list_items
-        value.copy< Bencoding_List_t* > (v);
-        break;
-
-      case 5: // "integer"
-        value.copy< int > (v);
-        break;
-
-      case 4: // "string"
-        value.copy< std::string > (v);
-        break;
-
-      default:
-        break;
-    }
-}
-
-
-  // Implementation of basic_symbol constructor for each type.
-
-  template <typename Base>
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
-    : Base (t)
-    , value ()
-    , location (l)
-  {}
-
-  template <typename Base>
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const Bencoding_Dictionary_t* v, const location_type& l)
-    : Base (t)
-    , value (v)
-    , location (l)
-  {}
-
-  template <typename Base>
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const Bencoding_Element* v, const location_type& l)
-    : Base (t)
-    , value (v)
-    , location (l)
-  {}
-
-  template <typename Base>
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const Bencoding_List_t* v, const location_type& l)
-    : Base (t)
-    , value (v)
-    , location (l)
-  {}
-
-  template <typename Base>
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const int v, const location_type& l)
-    : Base (t)
-    , value (v)
-    , location (l)
-  {}
-
-  template <typename Base>
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::string v, const location_type& l)
-    : Base (t)
-    , value (v)
-    , location (l)
-  {}
-
-
-  template <typename Base>
-  inline
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::~basic_symbol ()
-  {
-    // User destructor.
-    symbol_number_type yytype = this->type_get ();
-    switch (yytype)
-    {
-   default:
-      break;
-    }
-
-    // Type destructor.
-    switch (yytype)
-    {
-      case 6: // "dictionary"
-      case 9: // metainfo
-      case 12: // dictionary_items
-        value.template destroy< Bencoding_Dictionary_t* > ();
-        break;
-
-      case 11: // list_item
-      case 13: // dictionary_item
-      case 15: // dictionary_value
-        value.template destroy< Bencoding_Element* > ();
-        break;
-
-      case 7: // "list"
-      case 10: // list_items
-        value.template destroy< Bencoding_List_t* > ();
-        break;
-
-      case 5: // "integer"
-        value.template destroy< int > ();
-        break;
-
-      case 4: // "string"
-        value.template destroy< std::string > ();
-        break;
-
-      default:
-        break;
-    }
-
-  }
-
-  template <typename Base>
-  inline
-  void
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::move (basic_symbol& s)
-  {
-    super_type::move(s);
-      switch (this->type_get ())
-    {
-      case 6: // "dictionary"
-      case 9: // metainfo
-      case 12: // dictionary_items
-        value.move< Bencoding_Dictionary_t* > (s.value);
-        break;
-
-      case 11: // list_item
-      case 13: // dictionary_item
-      case 15: // dictionary_value
-        value.move< Bencoding_Element* > (s.value);
-        break;
-
-      case 7: // "list"
-      case 10: // list_items
-        value.move< Bencoding_List_t* > (s.value);
-        break;
-
-      case 5: // "integer"
-        value.move< int > (s.value);
-        break;
-
-      case 4: // "string"
-        value.move< std::string > (s.value);
-        break;
-
-      default:
-        break;
-    }
-
-    location = s.location;
-  }
-
-  // by_type.
-  inline
-  BitTorrent_MetaInfo_Parser::by_type::by_type ()
-     : type (empty)
-  {}
-
-  inline
-  BitTorrent_MetaInfo_Parser::by_type::by_type (const by_type& other)
-    : type (other.type)
-  {}
-
-  inline
-  BitTorrent_MetaInfo_Parser::by_type::by_type (token_type t)
-    : type (yytranslate_ (t))
-  {}
-
-  inline
-  void
-  BitTorrent_MetaInfo_Parser::by_type::move (by_type& that)
-  {
-    type = that.type;
-    that.type = empty;
-  }
-
-  inline
-  int
-  BitTorrent_MetaInfo_Parser::by_type::type_get () const
-  {
-    return type;
-  }
-
-  inline
-  BitTorrent_MetaInfo_Parser::token_type
-  BitTorrent_MetaInfo_Parser::by_type::token () const
-  {
-    // YYTOKNUM[NUM] -- (External) token number corresponding to the
-    // (internal) symbol number NUM (which must be that of a token).  */
-    static
-    const unsigned short int
-    yytoken_number_[] =
-    {
-       0,   256,   257,   258,   259,   260,   261,   262
-    };
-    return static_cast<token_type> (yytoken_number_[type]);
-  }
-  // Implementation of make_symbol for each symbol type.
-  BitTorrent_MetaInfo_Parser::symbol_type
-  BitTorrent_MetaInfo_Parser::make_END (const location_type& l)
-  {
-    return symbol_type (token::END, l);
-  }
-
-  BitTorrent_MetaInfo_Parser::symbol_type
-  BitTorrent_MetaInfo_Parser::make_END_OF_FRAGMENT (const location_type& l)
-  {
-    return symbol_type (token::END_OF_FRAGMENT, l);
-  }
-
-  BitTorrent_MetaInfo_Parser::symbol_type
-  BitTorrent_MetaInfo_Parser::make_STRING (const std::string& v, const location_type& l)
-  {
-    return symbol_type (token::STRING, v, l);
-  }
-
-  BitTorrent_MetaInfo_Parser::symbol_type
-  BitTorrent_MetaInfo_Parser::make_INTEGER (const int& v, const location_type& l)
-  {
-    return symbol_type (token::INTEGER, v, l);
-  }
-
-  BitTorrent_MetaInfo_Parser::symbol_type
-  BitTorrent_MetaInfo_Parser::make_DICTIONARY (const Bencoding_Dictionary_t*& v, const location_type& l)
-  {
-    return symbol_type (token::DICTIONARY, v, l);
-  }
-
-  BitTorrent_MetaInfo_Parser::symbol_type
-  BitTorrent_MetaInfo_Parser::make_LIST (const Bencoding_List_t*& v, const location_type& l)
-  {
-    return symbol_type (token::LIST, v, l);
-  }
 
 
 
