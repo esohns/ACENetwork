@@ -239,9 +239,9 @@ using namespace std;
 #endif
 
 /* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  17
+#define YYFINAL  4
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   14
+#define YYLAST   13
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  16
@@ -250,7 +250,7 @@ using namespace std;
 /* YYNRULES -- Number of rules.  */
 #define YYNRULES  16
 /* YYNRULES -- Number of states.  */
-#define YYNSTATES  19
+#define YYNSTATES  18
 /* YYMAXRHS -- Maximum number of symbols on right-hand side of rule.  */
 #define YYMAXRHS 2
 /* YYMAXLEFT -- Maximum number of symbols to the left of a handle
@@ -326,8 +326,8 @@ static const char *const yytname[] =
      STATE-NUM.  */
 static const signed char yypact[] =
 {
-       9,    -4,    13,    -5,    -5,    -5,    -5,    -5,    -5,    -5,
-      -5,    -5,    -5,    -5,    -5,    -5,    -4,    -5,    -5
+       9,    -5,    13,    -4,    -5,    -5,    -5,    -5,    -5,    -5,
+      -5,    -5,    -5,    -5,    -5,    -5,    -5,    -5
 };
 
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -335,20 +335,20 @@ static const signed char yypact[] =
      means the default is an error.  */
 static const unsigned char yydefact[] =
 {
-       0,     4,     0,     5,     6,     7,     8,     9,    10,    11,
-      12,    13,    14,    15,    16,     2,     4,     1,     3
+       0,     4,     0,     2,     1,     5,     6,     7,     8,     9,
+      10,    11,    12,    13,    14,    15,    16,     3
 };
 
   /* YYPGOTO[NTERM-NUM].  */
 static const signed char yypgoto[] =
 {
-      -5,    -5,    -2,    -5
+      -5,    -5,    -5,    -5
 };
 
   /* YYDEFGOTO[NTERM-NUM].  */
 static const signed char yydefgoto[] =
 {
-      -1,     2,    15,    16
+      -1,     2,     3,    17
 };
 
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -356,22 +356,22 @@ static const signed char yydefgoto[] =
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const unsigned char yytable[] =
 {
-       3,     4,     5,     6,     7,     8,     9,    10,    11,    12,
-      13,    14,     1,    17,    18
+       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+      15,    16,     1,     4
 };
 
 static const unsigned char yycheck[] =
 {
        4,     5,     6,     7,     8,     9,    10,    11,    12,    13,
-      14,    15,     3,     0,    16
+      14,    15,     3,     0
 };
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
 static const unsigned char yystos[] =
 {
-       0,     3,    17,     4,     5,     6,     7,     8,     9,    10,
-      11,    12,    13,    14,    15,    18,    19,     0,    18
+       0,     3,    17,    18,     0,     4,     5,     6,     7,     8,
+       9,    10,    11,    12,    13,    14,    15,    19
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
@@ -418,7 +418,7 @@ static const yybool yyimmediate[] =
 static const unsigned char yyconflp[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0
+       0,     0,     0,     0
 };
 
 /* YYCONFL[I] -- lists of conflicting rule numbers, each terminated by

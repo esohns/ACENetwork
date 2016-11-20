@@ -41,7 +41,7 @@ typedef struct yy_buffer_state* YY_BUFFER_STATE;
 template <typename MessageType,
           typename SessionMessageType>
 class BitTorrent_ParserDriver_T
- : public BitTorrent_IParser_T<struct BitTorrent_Record>
+ : public BitTorrent_IParser_t
 {
  public:
   BitTorrent_ParserDriver_T (bool,  // debug scanning ?
@@ -63,10 +63,10 @@ class BitTorrent_ParserDriver_T
   inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }; // offset (increment)
   inline virtual unsigned int offset () const { return offset_; };
   virtual bool parse (ACE_Message_Block*); // data buffer handle
-  virtual bool switchBuffer ();
+  virtual bool switchBuffer (bool = false); // unlink current fragment ?
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
   virtual void wait ();
-  inline virtual struct BitTorrent_Record& current () { struct BitTorrent_Record dummy; ACE_ASSERT (false); ACE_NOTSUP_RETURN (dummy); ACE_NOTREACHED (return dummy;) };
+  virtual struct BitTorrent_Record& current ();
 
   virtual void dump_state () const;
 
@@ -86,9 +86,6 @@ class BitTorrent_ParserDriver_T
 
   bool                    blockInParse_;
   bool                    isFirst_;
-
-  //// parser
-  //yy::BitTorrent_Parser    parser_;
 
   // scanner
   yyscan_t                scannerState_;

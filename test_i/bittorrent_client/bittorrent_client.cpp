@@ -98,7 +98,8 @@ do_printUsage (const std::string& programName_in)
 #if defined (DEBUG_DEBUGGER)
   configuration_path = Common_File_Tools::getWorkingDirectory();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_i");
+  configuration_path +=
+      ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
 #endif // #ifdef DEBUG_DEBUGGER
 
   std::cout << ACE_TEXT ("usage: ")
@@ -173,7 +174,8 @@ do_processArguments (int argc_in,
 #if defined (DEBUG_DEBUGGER)
   configuration_path = Common_File_Tools::getWorkingDirectory ();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_i");
+  configuration_path +=
+      ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
 #endif // #ifdef DEBUG_DEBUGGER
 
   debugParser_out                = false;
@@ -761,15 +763,24 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
                              NULL);
 
   // step5: parse torrent metadata
-  struct BitTorrent_MetaInfo meta_info;
+  Bencoding_Dictionary_t* meta_info_p = NULL;
   if (!BitTorrent_Tools::parseMetaInfoFile (metaInfoFileName_in,
-                                            meta_info))
+                                            meta_info_p,
+                                            configuration_in.moduleHandlerConfiguration.traceParsing,
+                                            configuration_in.moduleHandlerConfiguration.traceScanning))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to BitTorrent_Tools::parseMetaInfoFile(\"%s\"), returning\n"),
                 ACE_TEXT (metaInfoFileName_in.c_str ())));
     return;
   } // end IF
+  ACE_ASSERT (meta_info_p);
+#if defined (_DEBUG)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s\n"),
+              ACE_TEXT (BitTorrent_Tools::MetaInfo2String (*meta_info_p).c_str ())));
+#endif
+  BitTorrent_Tools::free (meta_info_p);
 
   // event loop(s):
   // - catch SIGINT/SIGQUIT/SIGTERM/... signals (connect / perform orderly shutdown)
@@ -905,9 +916,9 @@ ACE_TMAIN (int argc_in,
 #if defined (DEBUG_DEBUGGER)
   configuration_path = Common_File_Tools::getWorkingDirectory();
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_i");
+  configuration_path +=
+      ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
 #endif // #ifdef DEBUG_DEBUGGER
-
 
   bool debug_parser                          = false;
 
@@ -1076,8 +1087,8 @@ ACE_TMAIN (int argc_in,
 configuration.streamConfiguration.trackerMessageAllocator =
     &tracker_message_allocator;
   ////////////////////////////////////////
-//  configuration.protocolConfiguration.loginOptions.nickName =
-//    ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);
+  configuration.moduleHandlerConfiguration.traceParsing = debug_parser;
+  configuration.moduleHandlerConfiguration.traceScanning = debug_parser;
   ///////////////////////////////////////
   configuration.useReactor = use_reactor;
 

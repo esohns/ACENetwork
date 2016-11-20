@@ -81,7 +81,7 @@
 /*#undef YYTOKENTYPE*/
 /* enum yytokentype; */
 //struct YYLTYPE;
-class Net_BencodingScanner;
+class BitTorrent_MetaInfoScanner;
 
 /* #define YYSTYPE
 typedef union YYSTYPE
@@ -103,18 +103,18 @@ typedef union YYSTYPE
 }
 
 // calling conventions / parameter passing
-%parse-param              { BitTorrent_MetaInfo_IParser_t* parser }
-%parse-param              { Net_BencodingScanner* scanner }
+%parse-param              { BitTorrent_MetaInfo_IParser* parser }
+%parse-param              { BitTorrent_MetaInfoScanner* scanner }
 // *NOTE*: cannot use %initial-action, as it is scoped
 // *TODO*: find a better way to do this
 %parse-param              { std::string* dictionary_key }
 /*%parse-param              { yyscan_t yyscanner }*/
 /*%lex-param                { YYSTYPE* yylval }
 %lex-param                { YYLTYPE* yylloc } */
-%lex-param                { BitTorrent_MetaInfo_IParser_t* parser }
-/*%lex-param                { Net_BencodingScanner* scanner }*/
+%lex-param                { BitTorrent_MetaInfo_IParser* parser }
+/*%lex-param                { BitTorrent_MetaInfoScanner* scanner }*/
 /*%lex-param                { yyscan_t yyscanner }*/
-/* %param                    { BitTorrent_MetaInfo_IParser_t* iparser_p }
+/* %param                    { BitTorrent_MetaInfo_IParser* parser }
 %param                    { yyscan_t yyscanner } */
 
 %initial-action
@@ -160,11 +160,11 @@ typedef union YYSTYPE
 
 #include "net_macros.h"
 
-#include "bencoding_scanner.h"
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"
 /*#include <ace/Synch.h>*/
 #include "bittorrent_metainfo_parser_driver.h"
+#include "bittorrent_metainfo_scanner.h"
 #include "bittorrent_tools.h"
 
 // *TODO*: this shouldn't be necessary
@@ -174,17 +174,22 @@ typedef union YYSTYPE
 //#define YYPRINT(file, type, value) yyprint (file, type, value)
 }
 
+// terminals
 %token
- DICTIONARY      "dictionary"
  END_OF_FRAGMENT "end_of_fragment"
  END 0           "end"
 ;
-%token <std::string>                STRING  "string"
-%token <int>                        INTEGER "integer"
-%token <BitTorrent_MetaInfo_List_t> LIST    "list"
-%type  <unsigned int> metainfo
-%type  <unsigned int> dictionary_items dictionary_item dictionary_value
-%type  <unsigned int> list_items list_item
+%token <std::string>             STRING     "string"
+%token <int>                     INTEGER    "integer"
+%token <Bencoding_Dictionary_t*> DICTIONARY "dictionary"
+%token <Bencoding_List_t*>       LIST       "list"
+// non-terminals
+%type  <Bencoding_Dictionary_t*> metainfo dictionary_items
+%type  <Bencoding_List_t*> list_items
+%type  <Bencoding_Element*> dictionary_item dictionary_value list_item
+
+/*%precedence "dictionary" "list"
+%precedence "integer"*/
 
 %code provides {
 /*void BitTorrent_Export yysetdebug (int);
@@ -205,138 +210,146 @@ void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
                                         ACE_TEXT ("discarding tagless symbol...\n"))); } <> */
 /*%printer    { yyoutput << $$; } <*>;*/
 %printer    { yyoutput << $$; } <std::string>
-%printer    { yyoutput << $$; } <unsigned int>
-%printer    { for (BitTorrent_MetaInfo_ListIterator_t iterator = $$.begin();
-                   iterator != $$.end ();
-                   ++iterator)
-                yyoutput << *iterator << ','; } <BitTorrent_MetaInfo_List_t>
+%printer    { yyoutput << $$; } <int>
+%printer    { yyoutput << BitTorrent_Tools::List2String (*$$); } <Bencoding_List_t*>
+%printer    { yyoutput << BitTorrent_Tools::Dictionary2String (*$$); } <Bencoding_Dictionary_t*>
 
 %%
 %start            metainfo   ;
-metainfo:         dictionary_items { $$ = $1;
-                                     struct BitTorrent_MetaInfo& metainfo_r =
-                                       parser->current ();
-                                     struct BitTorrent_MetaInfo* metainfo_p =
-                                       &metainfo_r;
-                                     try {
-                                       parser->record (metainfo_p);
-                                     } catch (...) {
-                                       ACE_DEBUG ((LM_ERROR,
-                                                   ACE_TEXT ("caught exception in BitTorrent_MetaInfo_IParser::record(), continuing\n")));
-                                     } };
-list_items:       list_item list_items { $$ = $1 + $2; };
-                  | %empty             { $$ = 0; };
-list_item:        "string"     { $$ = $1.size ();
-
-                                 struct BitTorrent_MetaInfo& metainfo_r =
-                                   parser->current ();
-                                 if (*dictionary_key == ACE_TEXT_ALWAYS_CHAR ("announce-list"))
-                                 {
-                                   BitTorrent_MetaInfo_AnnounceList_t& current_r =
-                                     metainfo_r.announceList.back ();
-                                   current_r.push_back ($1);
-                                 } };
-                  | "integer" { $$ = 0; };
-                  | "list" list_items { $$ = $2;
-
-                                        struct BitTorrent_MetaInfo& metainfo_r =
-                                          const_cast<struct BitTorrent_MetaInfo&> (parser->current ());
-                                        if (*dictionary_key == ACE_TEXT_ALWAYS_CHAR ("announce-list"))
-                                        {
-                                          BitTorrent_MetaInfo_AnnounceList_t announce_list;
-                                          metainfo_r.announceList.push_back (announce_list);
-                                        } };
-                  | "dictionary" dictionary_items { $$ = $2; };
-dictionary_items: dictionary_item dictionary_items { $$ = $1 + $2; };
-                  | %empty                         { $$ = 0; };
-dictionary_item:  "string" dictionary_value { $$ = $1.size () + $2;
-                                              *dictionary_key = $1; };
-dictionary_value: "string" { $$ = $1.size ();
+metainfo:         "dictionary" dictionary_items {
+                                                  Bencoding_Dictionary_t& dictionary_r =
+                                                    parser->current ();
+                                                  Bencoding_Dictionary_t* dictionary_p =
+                                                    &dictionary_r;
+                                                  try {
+                                                    parser->record (dictionary_p);
+                                                  } catch (...) {
+                                                    ACE_DEBUG ((LM_ERROR,
+                                                                ACE_TEXT ("caught exception in BitTorrent_MetaInfo_IParser::record(), continuing\n")));
+                                                  } };
+list_items:       list_items list_item { };
+                  | %empty             { };
+list_item:        "string"     {
+                                 Bencoding_List_t* list_p =
+                                   const_cast<Bencoding_List_t*> (parser->get ());
+                                 Bencoding_Element* element_p = NULL;
+                                 ACE_NEW_NORETURN (element_p,
+                                                   Bencoding_Element ());
+                                 ACE_ASSERT (element_p);
+                                 element_p->type =
+                                   Bencoding_Element::BENCODING_TYPE_STRING;
+                                 std::string* string_p = NULL;
+                                 ACE_NEW_NORETURN (string_p,
+                                                   std::string ());
+                                 ACE_ASSERT (string_p);
+                                 *string_p = $1;
+                                 element_p->type =
+                                   Bencoding_Element::BENCODING_TYPE_STRING;
+                                 element_p->string = string_p;
+                                 list_p->push_back (element_p); };
+                  | "integer" {
+                                Bencoding_List_t* list_p =
+                                  const_cast<Bencoding_List_t*> (parser->get ());
+                                Bencoding_Element* element_p = NULL;
+                                ACE_NEW_NORETURN (element_p,
+                                                  Bencoding_Element ());
+                                ACE_ASSERT (element_p);
+                                element_p->type =
+                                  Bencoding_Element::BENCODING_TYPE_INTEGER;
+                                element_p->integer = $1;
+                                list_p->push_back (element_p); };
+                  | "list" list_items {
+                                        Bencoding_List_t* list_p =
+                                          const_cast<Bencoding_List_t*> (parser->get ());
+                                        Bencoding_Element* element_p = NULL;
+                                        ACE_NEW_NORETURN (element_p,
+                                                          Bencoding_Element ());
+                                        ACE_ASSERT (element_p);
+                                        element_p->type =
+                                          Bencoding_Element::BENCODING_TYPE_LIST;
+                                        element_p->list = $2;
+                                        list_p->push_back (element_p); };
+                  | "dictionary" dictionary_items {
+                                                    Bencoding_List_t* list_p =
+                                                      const_cast<Bencoding_List_t*> (parser->get ());
+                                                    Bencoding_Element* element_p = NULL;
+                                                    ACE_NEW_NORETURN (element_p,
+                                                                      Bencoding_Element ());
+                                                    ACE_ASSERT (element_p);
+                                                    element_p->type =
+                                                      Bencoding_Element::BENCODING_TYPE_DICTIONARY;
+                                                    element_p->dictionary = $2;
+                                                    list_p->push_back (element_p); };
+dictionary_items: dictionary_items dictionary_item { };
+                  | %empty { };
+dictionary_item: "string" {
+                            *dictionary_key = $1; }
+                 dictionary_value { };
+dictionary_value: "string" {
                              ACE_DEBUG ((LM_DEBUG,
                                          ACE_TEXT ("key: \"%s\": \"%s\"\n"),
                                          ACE_TEXT (dictionary_key->c_str ()),
                                          ACE_TEXT ($1.c_str ())));
 
-                             struct BitTorrent_MetaInfo& metainfo_r =
+                             Bencoding_Dictionary_t& dictionary_r =
                                parser->current ();
-                             if (metainfo_r.singleFileMode)
-                             { ACE_ASSERT (metainfo_r.info.single_file);
-                               if (*dictionary_key == ACE_TEXT_ALWAYS_CHAR ("pieces"))
-                                 metainfo_r.info.single_file->pieces = $1;
-                               else if (*dictionary_key == ACE_TEXT_ALWAYS_CHAR ("name"))
-                                 metainfo_r.info.single_file->name = $1;
-                               else if (*dictionary_key == ACE_TEXT_ALWAYS_CHAR ("md5sum"))
-                                 metainfo_r.info.single_file->md5sum = $1;
-                             } // end ELSE IF
-                             else
-                             { ACE_ASSERT (metainfo_r.info.multiple_file);
-                               if (*dictionary_key == ACE_TEXT_ALWAYS_CHAR ("pieces"))
-                                 metainfo_r.info.multiple_file->pieces = $1;
-                               else if (*dictionary_key == ACE_TEXT_ALWAYS_CHAR ("name"))
-                                 metainfo_r.info.multiple_file->name = $1;
-                               else if (*dictionary_key == ACE_TEXT_ALWAYS_CHAR ("md5sum"))
-                               {
-                                 struct BitTorrent_MetaInfo_InfoDictionary_MultipleFile_File& current_r =
-                                   metainfo_r.info.multiple_file->files.back ();
-                                 current_r.md5sum = $1;
-                               } // end ELSE IF
-                             } };
-                  | "integer" { $$ = $1;
+                             Bencoding_Element* element_p = NULL;
+                             ACE_NEW_NORETURN (element_p,
+                                               Bencoding_Element ());
+                             ACE_ASSERT (element_p);
+                             element_p->type =
+                               Bencoding_Element::BENCODING_TYPE_STRING;
+                             std::string* string_p = NULL;
+                             ACE_NEW_NORETURN (string_p,
+                                               std::string ());
+                             ACE_ASSERT (string_p);
+                             *string_p = $1;
+                             element_p->type =
+                               Bencoding_Element::BENCODING_TYPE_STRING;
+                             element_p->string = string_p;
+                             dictionary_r.insert (std::make_pair (*dictionary_key,
+                                                                  element_p)); };
+                  | "integer" {
                                 ACE_DEBUG ((LM_DEBUG,
                                             ACE_TEXT ("key: \"%s\": %d\n"),
                                             ACE_TEXT (dictionary_key->c_str ()),
                                             $1));
 
-                                struct BitTorrent_MetaInfo& metainfo_r =
+                                Bencoding_Dictionary_t& dictionary_r =
                                   parser->current ();
-
-                                if (metainfo_r.singleFileMode)
-                                { ACE_ASSERT (metainfo_r.info.single_file);
-                                  if (*dictionary_key == ACE_TEXT_ALWAYS_CHAR ("piece length"))
-                                    metainfo_r.info.single_file->pieceLength = $1;
-                                  else if (*dictionary_key == ACE_TEXT_ALWAYS_CHAR ("private"))
-                                    metainfo_r.info.single_file->_private = $1;
-                                  else if (*dictionary_key == ACE_TEXT_ALWAYS_CHAR ("length"))
-                                    metainfo_r.info.single_file->length = $1;
-                                }
-                                else
-                                { ACE_ASSERT (metainfo_r.info.multiple_file);
-                                  if (*dictionary_key == ACE_TEXT_ALWAYS_CHAR ("piece length"))
-                                    metainfo_r.info.multiple_file->pieceLength = $1;
-                                  else if (*dictionary_key == ACE_TEXT_ALWAYS_CHAR ("private"))
-                                    metainfo_r.info.multiple_file->_private = $1;
-                                  else if (*dictionary_key == ACE_TEXT_ALWAYS_CHAR ("length"))
-                                  {
-                                    struct BitTorrent_MetaInfo_InfoDictionary_MultipleFile_File& current_r =
-                                      metainfo_r.info.multiple_file->files.back ();
-                                    current_r.length = $1;
-                                  }
-                                } };
-                  | "list" list_items { $$ = $2;
-
-                                        struct BitTorrent_MetaInfo& metainfo_r =
+                                Bencoding_Element* element_p = NULL;
+                                ACE_NEW_NORETURN (element_p,
+                                                  Bencoding_Element ());
+                                ACE_ASSERT (element_p);
+                                element_p->type =
+                                  Bencoding_Element::BENCODING_TYPE_INTEGER;
+                                element_p->integer = $1;
+                                dictionary_r.insert (std::make_pair (*dictionary_key,
+                                                                     element_p)); };
+                  | "list" list_items {
+                                        Bencoding_Dictionary_t& dictionary_r =
                                           parser->current ();
-
-                                        if (metainfo_r.singleFileMode) {}
-                                        else
-                                        { ACE_ASSERT (metainfo_r.info.multiple_file);
-                                          if (*dictionary_key == ACE_TEXT_ALWAYS_CHAR ("path"))
-                                          {
-                                            struct BitTorrent_MetaInfo_InfoDictionary_MultipleFile_File& current_r =
-                                              metainfo_r.info.multiple_file->files.back ();
-                                            BitTorrent_MetaInfo_ListIterator_t iterator =
-                                              $1.begin ();
-                                            current_r.path = *iterator;
-                                            for (;
-                                                 iterator != $1.end ();
-                                                 ++iterator)
-                                            {
-                                              current_r.path += ACE_DIRECTORY_SEPARATOR_STR;
-                                              current_r.path += *iterator;
-                                            } // end FOR
-                                          } // end IF
-                                        } };
-                  | "dictionary" dictionary_items { $$ = $2; };
+                                        Bencoding_Element* element_p = NULL;
+                                        ACE_NEW_NORETURN (element_p,
+                                                          Bencoding_Element ());
+                                        ACE_ASSERT (element_p);
+                                        element_p->type =
+                                          Bencoding_Element::BENCODING_TYPE_LIST;
+                                        element_p->list = $2;
+                                        dictionary_r.insert (std::make_pair (*dictionary_key,
+                                                                             element_p)); };
+                  | "dictionary" dictionary_items {
+                                                    Bencoding_Dictionary_t& dictionary_r =
+                                                      parser->current ();
+                                                    Bencoding_Element* element_p = NULL;
+                                                    ACE_NEW_NORETURN (element_p,
+                                                                      Bencoding_Element ());
+                                                    ACE_ASSERT (element_p);
+                                                    element_p->type =
+                                                      Bencoding_Element::BENCODING_TYPE_DICTIONARY;
+                                                    element_p->dictionary = $2;
+                                                    dictionary_r.insert (std::make_pair (*dictionary_key,
+                                                                                         element_p)); };
 %%
 
 void

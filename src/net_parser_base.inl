@@ -67,8 +67,8 @@ Net_ParserBase_T<ScannerType,
 //  yy_set_debug ((traceScanning_in ? 1 : 0),
 //                state_);
   scanner_.set_debug (traceScanning_in ? 1 : 0);
-#if YYDEBUG
   parser_.set_debug_level (traceParsing_in ? 1 : 0);
+#if YYDEBUG
 //  yydebug = (trace_ ? 1 : 0);
 //  yysetdebug (trace_ ? 1 : 0);
 #endif
@@ -303,13 +303,14 @@ Net_ParserBase_T<ScannerType,
                  ParserType,
                  ParserInterfaceType,
                  ArgumentType,
-                 SessionMessageType>::switchBuffer ()
+                 SessionMessageType>::switchBuffer (bool unlink_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ParserBase_T::switchBuffer"));
 
   // sanity check(s)
   ACE_ASSERT (fragment_);
 
+  ACE_Message_Block* message_block_p = fragment_;
   if (!fragment_->cont ())
   {
     // sanity check(s)
@@ -327,6 +328,10 @@ Net_ParserBase_T<ScannerType,
   } // end IF
   fragment_ = fragment_->cont ();
   offset_ = 0;
+
+  // unlink ?
+  if (unlink_in)
+    message_block_p->cont (NULL);
 
   // switch to the next fragment
 
@@ -469,9 +474,10 @@ Net_ParserBase_T<ScannerType,
   streamBuffer_.set (fragment_->rd_ptr (),
                      fragment_->length () + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE );
 //  stream_.rdbuf (&streamBuffer_);
-  buffer_ =
-    scanner_.yy_create_buffer (&stream_,
-                               fragment_->length () + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE);
+  scanner_.switch_streams (&stream_, NULL);
+//  buffer_ =
+//    scanner_.yy_create_buffer (&stream_,
+//                               fragment_->length () + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE);
 //  if (useYYScanBuffer_)
 //    buffer_ =
 //      yy_scan_buffer (fragment_->rd_ptr (),
@@ -481,15 +487,15 @@ Net_ParserBase_T<ScannerType,
 //    buffer_ = yy_scan_bytes (fragment_->rd_ptr (),
 //                             fragment_->length (),
 //                             state_);
-  if (!buffer_)
-  {
-    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to yy_scan_buffer/bytes(0x%@, %d), aborting\n"),
-                ACE_TEXT ("failed to ScannerType::yy_create_buffer(0x%@, %d), aborting\n"),
-                fragment_->rd_ptr (),
-                fragment_->length ()));
-    return false;
-  } // end IF
+//  if (!buffer_)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+////                ACE_TEXT ("failed to yy_scan_buffer/bytes(0x%@, %d), aborting\n"),
+//                ACE_TEXT ("failed to ScannerType::yy_create_buffer(0x%@, %d), aborting\n"),
+//                fragment_->rd_ptr (),
+//                fragment_->length ()));
+//    return false;
+//  } // end IF
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("parsing fragment #%d --> %d byte(s)...\n"),
 //              counter++,

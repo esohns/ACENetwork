@@ -17,17 +17,17 @@ PROJECT_ROOT=$(dirname $0)/..
 #[ ! -d ./${PROJECT_ROOT} ] && echo "ERROR: invalid directory (was: ${PROJECT_ROOT}), aborting" && exit 1
 SCRIPTS_DIRECTORY=${PROJECT_ROOT}/scripts
 [ ! -d ${SCRIPTS_DIRECTORY} ] && echo "ERROR: invalid directory (was: ${SCRIPTS_DIRECTORY}), aborting" && exit 1
-BENCODING_LL=bencoding.ll
-[ ! -f ${SCRIPTS_DIRECTORY}/${BENCODING_LL} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${BENCODING_LL}), aborting" && exit 1
+METAINFO_LL=metainfo_scanner.ll
+[ ! -f ${SCRIPTS_DIRECTORY}/${METAINFO_LL} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${METAINFO_LL}), aborting" && exit 1
 SCANNER_L=scanner.l
 [ ! -f ${SCRIPTS_DIRECTORY}/${SCANNER_L} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${SCANNER_L}), aborting" && exit 1
 
 # generate a scanner for use by the bittorrent metainfo file parser
-flex --noline ${SCRIPTS_DIRECTORY}/${BENCODING_LL} 2>&1 | tee ${SCRIPTS_DIRECTORY}/bencoding_report.txt
-[ $? -ne 0 ] && echo "ERROR: failed to flex \"${BENCODING_LL}\", aborting" && exit 1
+flex --noline ${SCRIPTS_DIRECTORY}/${METAINFO_LL} 2>&1 | tee ${SCRIPTS_DIRECTORY}/bencoding_report.txt
+[ $? -ne 0 ] && echo "ERROR: failed to flex \"${METAINFO_LL}\", aborting" && exit 1
 
 # list generated files
-FILES="bencoding_scanner.cpp bencoding_scanner.h"
+FILES="bittorrent_metainfo_scanner.cpp bittorrent_metainfo_scanner.h"
 
 # -------------------------------------------------------------------
 

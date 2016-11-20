@@ -22,6 +22,7 @@
 #define BITTORRENT_COMMON_H
 
 #include <list>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -30,93 +31,125 @@
 #include <ace/config-macros.h>
 #include <ace/OS.h>
 
-typedef std::vector<std::string> BitTorrent_MetaInfo_List_t;
-typedef BitTorrent_MetaInfo_List_t::const_iterator BitTorrent_MetaInfo_ListIterator_t;
+// *NOTE*: the bencoding format is not really type-safe, so 'strict' languages
+//         like C/C++ need to jump through a few hoops here
+struct Bencoding_Element;
+typedef std::vector<Bencoding_Element*> Bencoding_List_t;
+typedef Bencoding_List_t::const_iterator Bencoding_ListIterator_t;
+typedef std::map<std::string, Bencoding_Element*> Bencoding_Dictionary_t;
+typedef Bencoding_Dictionary_t::const_iterator Bencoding_DictionaryIterator_t;
 
-struct BitTorrent_MetaInfo_InfoDictionary_Common
+struct Bencoding_Element
 {
-  inline BitTorrent_MetaInfo_InfoDictionary_Common ()
-   : pieceLength (0)
-   , pieces ()
-   , _private (-1)
+  inline Bencoding_Element ()
+   : type (BENCODING_TYPE_INVALID)
   {};
 
-  unsigned int pieceLength;
-  std::string  pieces;
-  int          _private;
+  enum Bencoding_ElementType
+  {
+    BENCODING_TYPE_INTEGER = 0,
+    BENCODING_TYPE_STRING,
+    BENCODING_TYPE_LIST,
+    BENCODING_TYPE_DICTIONARY,
+    //////////////////////////////////////
+    BENCODING_TYPE_MAX,
+    BENCODING_TYPE_INVALID
+  };
+
+  enum Bencoding_ElementType type;
+  union
+  {
+    int                     integer;
+    std::string*            string;
+    Bencoding_List_t*       list;
+    Bencoding_Dictionary_t* dictionary;
+  };
 };
-struct BitTorrent_MetaInfo_InfoDictionary_SingleFile
- : BitTorrent_MetaInfo_InfoDictionary_Common
-{
-//  inline BitTorrent_MetaInfo_InfoDictionary_SingleFile ()
-//   : BitTorrent_MetaInfo_InfoDictionary_Common ()
-//   , name ()
-//   , length (0)
-//   , md5sum ()
+
+//struct BitTorrent_MetaInfo_InfoDictionary_Common
+//{
+//  inline BitTorrent_MetaInfo_InfoDictionary_Common ()
+//   : pieceLength (0)
+//   , pieces ()
+//   , _private (-1)
 //  {};
 
-  std::string  name;
-  unsigned int length;
-  std::string  md5sum;
-};
-struct BitTorrent_MetaInfo_InfoDictionary_MultipleFile_File
-{
-//  inline BitTorrent_MetaInfo_InfoDictionary_MultipleFile_File ()
-//   : length (0)
-//   , md5sum ()
-//   , path ()
+//  unsigned int pieceLength;
+//  std::string  pieces;
+//  int          _private;
+//};
+//struct BitTorrent_MetaInfo_InfoDictionary_SingleFile
+// : BitTorrent_MetaInfo_InfoDictionary_Common
+//{
+////  inline BitTorrent_MetaInfo_InfoDictionary_SingleFile ()
+////   : BitTorrent_MetaInfo_InfoDictionary_Common ()
+////   , name ()
+////   , length (0)
+////   , md5sum ()
+////  {};
+
+//  std::string  name;
+//  unsigned int length;
+//  std::string  md5sum;
+//};
+//struct BitTorrent_MetaInfo_InfoDictionary_MultipleFile_File
+//{
+////  inline BitTorrent_MetaInfo_InfoDictionary_MultipleFile_File ()
+////   : length (0)
+////   , md5sum ()
+////   , path ()
+////  {};
+
+//  unsigned int length;
+//  std::string  md5sum;
+//  std::string  path;
+//};
+////typedef std::vector<struct BitTorrent_MetaInfo_InfoDictionary_MultipleFile_File> BitTorrent_MetaInfo_InfoDictionary_MultipleFile_Files_t;
+////typedef BitTorrent_MetaInfo_InfoDictionary_MultipleFile_Files_t::const_iterator BitTorrent_MetaInfo_InfoDictionary_MultipleFile_FilesIterator_t;
+//struct BitTorrent_MetaInfo_InfoDictionary_MultipleFile
+// : BitTorrent_MetaInfo_InfoDictionary_Common
+//{
+////  inline BitTorrent_MetaInfo_InfoDictionary_MultipleFile ()
+////   : BitTorrent_MetaInfo_InfoDictionary_Common ()
+////   , name ()
+////   , files ()
+////  {};
+
+//  std::string                                             name;
+//  BitTorrent_MetaInfo_InfoDictionary_MultipleFile_Files_t files;
+//};
+//union BitTorrent_MetaInfo_InfoDictionary
+//{
+//  struct BitTorrent_MetaInfo_InfoDictionary_SingleFile*   single_file;
+//  struct BitTorrent_MetaInfo_InfoDictionary_MultipleFile* multiple_file;
+//};
+//typedef std::list<std::string> BitTorrent_MetaInfo_AnnounceList_t;
+//typedef BitTorrent_MetaInfo_AnnounceList_t::const_iterator BitTorrent_MetaInfo_AnnounceListIterator_t;
+//typedef std::list<BitTorrent_MetaInfo_AnnounceList_t> BitTorrent_MetaInfo_AnnounceLists_t;
+//typedef BitTorrent_MetaInfo_AnnounceLists_t::const_iterator BitTorrent_MetaInfo_AnnounceListsIterator_t;
+//struct BitTorrent_MetaInfo
+//{
+//  inline BitTorrent_MetaInfo ()
+//   : singleFileMode (true)
+//   , info ()
+//   , announce ()
+//   , announceList ()
+//   , creationDate (0)
+//   , comment ()
+//   , createdBy ()
+//   , encoding ()
 //  {};
 
-  unsigned int length;
-  std::string  md5sum;
-  std::string  path;
-};
-typedef std::vector<struct BitTorrent_MetaInfo_InfoDictionary_MultipleFile_File> BitTorrent_MetaInfo_InfoDictionary_MultipleFile_Files_t;
-typedef BitTorrent_MetaInfo_InfoDictionary_MultipleFile_Files_t::const_iterator BitTorrent_MetaInfo_InfoDictionary_MultipleFile_FilesIterator_t;
-struct BitTorrent_MetaInfo_InfoDictionary_MultipleFile
- : BitTorrent_MetaInfo_InfoDictionary_Common
-{
-//  inline BitTorrent_MetaInfo_InfoDictionary_MultipleFile ()
-//   : BitTorrent_MetaInfo_InfoDictionary_Common ()
-//   , name ()
-//   , files ()
-//  {};
+//  bool                                     singleFileMode;
 
-  std::string                                             name;
-  BitTorrent_MetaInfo_InfoDictionary_MultipleFile_Files_t files;
-};
-union BitTorrent_MetaInfo_InfoDictionary
-{
-  struct BitTorrent_MetaInfo_InfoDictionary_SingleFile*   single_file;
-  struct BitTorrent_MetaInfo_InfoDictionary_MultipleFile* multiple_file;
-};
-typedef std::list<std::string> BitTorrent_MetaInfo_AnnounceList_t;
-typedef BitTorrent_MetaInfo_AnnounceList_t::const_iterator BitTorrent_MetaInfo_AnnounceListIterator_t;
-typedef std::list<BitTorrent_MetaInfo_AnnounceList_t> BitTorrent_MetaInfo_AnnounceLists_t;
-typedef BitTorrent_MetaInfo_AnnounceLists_t::const_iterator BitTorrent_MetaInfo_AnnounceListsIterator_t;
-struct BitTorrent_MetaInfo
-{
-  inline BitTorrent_MetaInfo ()
-   : singleFileMode (true)
-   , info ()
-   , announce ()
-   , announceList ()
-   , creationDate (0)
-   , comment ()
-   , createdBy ()
-   , encoding ()
-  {};
-
-  bool                                     singleFileMode;
-
-  union BitTorrent_MetaInfo_InfoDictionary info;
-  std::string                              announce;
-  BitTorrent_MetaInfo_AnnounceLists_t      announceList;
-  time_t                                   creationDate;
-  std::string                              comment;
-  std::string                              createdBy;
-  std::string                              encoding;
-};
+//  union BitTorrent_MetaInfo_InfoDictionary info;
+//  std::string                              announce;
+//  BitTorrent_MetaInfo_AnnounceLists_t      announceList;
+//  time_t                                   creationDate;
+//  std::string                              comment;
+//  std::string                              createdBy;
+//  std::string                              encoding;
+//};
 
 //////////////////////////////////////////
 
@@ -189,7 +222,8 @@ struct BitTorrent_Record
   // *TODO*: this belongs in the union; however, traditional C doesn't support
   //         class-type union members
   BitTorrent_MessagePayload_Bitfield         bitfield;
-  union {
+  union
+  {
     struct BitTorrent_MessagePayload_Cancel  cancel;
     BitTorrent_MessagePayload_Have           have;
     struct BitTorrent_MessagePayload_Piece   piece;

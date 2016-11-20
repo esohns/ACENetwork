@@ -21,14 +21,25 @@
 #ifndef BITTORRENT_IPARSER_T_H
 #define BITTORRENT_IPARSER_T_H
 
+#include "common_iget.h"
+
 #include "net_iparser.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_stream_common.h"
 
-template <typename MessageType>
+class BitTorrent_MetaInfo_IParser
+ : public Net_IRecordParser_T<Bencoding_Dictionary_t>
+ , public Common_ISetP_T<Bencoding_Dictionary_t>
+ , public Common_IGetSetP_T<Bencoding_List_t>
+{
+ public:
+  inline virtual ~BitTorrent_MetaInfo_IParser () {};
+};
+
+template <typename RecordType>
 class BitTorrent_IParser_T
- : public Net_IStreamParser_T<MessageType>
+ : public Net_IStreamParser_T<RecordType>
 {
  public:
   inline virtual ~BitTorrent_IParser_T () {};
@@ -41,8 +52,7 @@ class BitTorrent_IParser_T
 
 //////////////////////////////////////////
 
-typedef Net_IRecordParser_T<struct BitTorrent_MetaInfo> BitTorrent_MetaInfo_IParser_t;
-typedef Net_IScanner_T<BitTorrent_MetaInfo_IParser_t> BitTorrent_MetaInfo_IScanner_t;
+typedef Net_IScanner_T<BitTorrent_MetaInfo_IParser> BitTorrent_MetaInfo_IScanner_t;
 
 typedef BitTorrent_IParser_T<struct BitTorrent_Record> BitTorrent_IParser_t;
 

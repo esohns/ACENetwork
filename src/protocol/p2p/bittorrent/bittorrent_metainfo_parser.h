@@ -69,7 +69,7 @@
 /*#undef YYTOKENTYPE*/
 /* enum yytokentype; */
 //struct YYLTYPE;
-class Net_BencodingScanner;
+class BitTorrent_MetaInfoScanner;
 
 /* #define YYSTYPE
 typedef union YYSTYPE
@@ -332,22 +332,25 @@ namespace yy {
     /// An auxiliary type to compute the largest semantic type.
     union union_type
     {
-      // "list"
-      char dummy1[sizeof(BitTorrent_MetaInfo_List_t)];
-
-      // "integer"
-      char dummy2[sizeof(int)];
-
-      // "string"
-      char dummy3[sizeof(std::string)];
-
+      // "dictionary"
       // metainfo
-      // list_items
-      // list_item
       // dictionary_items
+      char dummy1[sizeof(Bencoding_Dictionary_t*)];
+
+      // list_item
       // dictionary_item
       // dictionary_value
-      char dummy4[sizeof(unsigned int)];
+      char dummy2[sizeof(Bencoding_Element*)];
+
+      // "list"
+      // list_items
+      char dummy3[sizeof(Bencoding_List_t*)];
+
+      // "integer"
+      char dummy4[sizeof(int)];
+
+      // "string"
+      char dummy5[sizeof(std::string)];
 };
 
     /// Symbol semantic values.
@@ -371,10 +374,10 @@ namespace yy {
       enum yytokentype
       {
         END = 0,
-        DICTIONARY = 258,
-        END_OF_FRAGMENT = 259,
-        STRING = 260,
-        INTEGER = 261,
+        END_OF_FRAGMENT = 258,
+        STRING = 259,
+        INTEGER = 260,
+        DICTIONARY = 261,
         LIST = 262
       };
     };
@@ -410,13 +413,15 @@ namespace yy {
 
   basic_symbol (typename Base::kind_type t, const location_type& l);
 
-  basic_symbol (typename Base::kind_type t, const BitTorrent_MetaInfo_List_t v, const location_type& l);
+  basic_symbol (typename Base::kind_type t, const Bencoding_Dictionary_t* v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const Bencoding_Element* v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const Bencoding_List_t* v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const int v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const std::string v, const location_type& l);
-
-  basic_symbol (typename Base::kind_type t, const unsigned int v, const location_type& l);
 
 
       /// Constructor for symbols with semantic value.
@@ -482,10 +487,6 @@ namespace yy {
 
     static inline
     symbol_type
-    make_DICTIONARY (const location_type& l);
-
-    static inline
-    symbol_type
     make_END_OF_FRAGMENT (const location_type& l);
 
     static inline
@@ -498,11 +499,15 @@ namespace yy {
 
     static inline
     symbol_type
-    make_LIST (const BitTorrent_MetaInfo_List_t& v, const location_type& l);
+    make_DICTIONARY (const Bencoding_Dictionary_t*& v, const location_type& l);
+
+    static inline
+    symbol_type
+    make_LIST (const Bencoding_List_t*& v, const location_type& l);
 
 
     /// Build a parser object.
-    BitTorrent_MetaInfo_Parser (BitTorrent_MetaInfo_IParser_t* parser_yyarg, Net_BencodingScanner* scanner_yyarg, std::string* dictionary_key_yyarg);
+    BitTorrent_MetaInfo_Parser (BitTorrent_MetaInfo_IParser* parser_yyarg, BitTorrent_MetaInfoScanner* scanner_yyarg, std::string* dictionary_key_yyarg);
     virtual ~BitTorrent_MetaInfo_Parser ();
 
     /// Parse.
@@ -585,7 +590,7 @@ namespace yy {
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const unsigned char yytable_[];
 
-  static const signed char yycheck_[];
+  static const unsigned char yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -700,10 +705,10 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 15,     ///< Last index in yytable_.
-      yynnts_ = 7,  ///< Number of nonterminal symbols.
+      yylast_ = 13,     ///< Last index in yytable_.
+      yynnts_ = 8,  ///< Number of nonterminal symbols.
       yyempty_ = -2,
-      yyfinal_ = 10, ///< Termination state number.
+      yyfinal_ = 4, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
       yyntokens_ = 8  ///< Number of tokens.
@@ -711,8 +716,8 @@ namespace yy {
 
 
     // User arguments.
-    BitTorrent_MetaInfo_IParser_t* parser;
-    Net_BencodingScanner* scanner;
+    BitTorrent_MetaInfo_IParser* parser;
+    BitTorrent_MetaInfoScanner* scanner;
     std::string* dictionary_key;
   };
 
@@ -786,25 +791,29 @@ namespace yy {
   {
       switch (other.type_get ())
     {
-      case 7: // "list"
-        value.copy< BitTorrent_MetaInfo_List_t > (other.value);
+      case 6: // "dictionary"
+      case 9: // metainfo
+      case 12: // dictionary_items
+        value.copy< Bencoding_Dictionary_t* > (other.value);
         break;
 
-      case 6: // "integer"
+      case 11: // list_item
+      case 13: // dictionary_item
+      case 15: // dictionary_value
+        value.copy< Bencoding_Element* > (other.value);
+        break;
+
+      case 7: // "list"
+      case 10: // list_items
+        value.copy< Bencoding_List_t* > (other.value);
+        break;
+
+      case 5: // "integer"
         value.copy< int > (other.value);
         break;
 
-      case 5: // "string"
+      case 4: // "string"
         value.copy< std::string > (other.value);
-        break;
-
-      case 9: // metainfo
-      case 10: // list_items
-      case 11: // list_item
-      case 12: // dictionary_items
-      case 13: // dictionary_item
-      case 14: // dictionary_value
-        value.copy< unsigned int > (other.value);
         break;
 
       default:
@@ -824,25 +833,29 @@ namespace yy {
     (void) v;
       switch (this->type_get ())
     {
-      case 7: // "list"
-        value.copy< BitTorrent_MetaInfo_List_t > (v);
+      case 6: // "dictionary"
+      case 9: // metainfo
+      case 12: // dictionary_items
+        value.copy< Bencoding_Dictionary_t* > (v);
         break;
 
-      case 6: // "integer"
+      case 11: // list_item
+      case 13: // dictionary_item
+      case 15: // dictionary_value
+        value.copy< Bencoding_Element* > (v);
+        break;
+
+      case 7: // "list"
+      case 10: // list_items
+        value.copy< Bencoding_List_t* > (v);
+        break;
+
+      case 5: // "integer"
         value.copy< int > (v);
         break;
 
-      case 5: // "string"
+      case 4: // "string"
         value.copy< std::string > (v);
-        break;
-
-      case 9: // metainfo
-      case 10: // list_items
-      case 11: // list_item
-      case 12: // dictionary_items
-      case 13: // dictionary_item
-      case 14: // dictionary_value
-        value.copy< unsigned int > (v);
         break;
 
       default:
@@ -861,7 +874,21 @@ namespace yy {
   {}
 
   template <typename Base>
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const BitTorrent_MetaInfo_List_t v, const location_type& l)
+  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const Bencoding_Dictionary_t* v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const Bencoding_Element* v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const Bencoding_List_t* v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
@@ -876,13 +903,6 @@ namespace yy {
 
   template <typename Base>
   BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::string v, const location_type& l)
-    : Base (t)
-    , value (v)
-    , location (l)
-  {}
-
-  template <typename Base>
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const unsigned int v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
@@ -904,25 +924,29 @@ namespace yy {
     // Type destructor.
     switch (yytype)
     {
-      case 7: // "list"
-        value.template destroy< BitTorrent_MetaInfo_List_t > ();
+      case 6: // "dictionary"
+      case 9: // metainfo
+      case 12: // dictionary_items
+        value.template destroy< Bencoding_Dictionary_t* > ();
         break;
 
-      case 6: // "integer"
+      case 11: // list_item
+      case 13: // dictionary_item
+      case 15: // dictionary_value
+        value.template destroy< Bencoding_Element* > ();
+        break;
+
+      case 7: // "list"
+      case 10: // list_items
+        value.template destroy< Bencoding_List_t* > ();
+        break;
+
+      case 5: // "integer"
         value.template destroy< int > ();
         break;
 
-      case 5: // "string"
+      case 4: // "string"
         value.template destroy< std::string > ();
-        break;
-
-      case 9: // metainfo
-      case 10: // list_items
-      case 11: // list_item
-      case 12: // dictionary_items
-      case 13: // dictionary_item
-      case 14: // dictionary_value
-        value.template destroy< unsigned int > ();
         break;
 
       default:
@@ -939,25 +963,29 @@ namespace yy {
     super_type::move(s);
       switch (this->type_get ())
     {
-      case 7: // "list"
-        value.move< BitTorrent_MetaInfo_List_t > (s.value);
+      case 6: // "dictionary"
+      case 9: // metainfo
+      case 12: // dictionary_items
+        value.move< Bencoding_Dictionary_t* > (s.value);
         break;
 
-      case 6: // "integer"
+      case 11: // list_item
+      case 13: // dictionary_item
+      case 15: // dictionary_value
+        value.move< Bencoding_Element* > (s.value);
+        break;
+
+      case 7: // "list"
+      case 10: // list_items
+        value.move< Bencoding_List_t* > (s.value);
+        break;
+
+      case 5: // "integer"
         value.move< int > (s.value);
         break;
 
-      case 5: // "string"
+      case 4: // "string"
         value.move< std::string > (s.value);
-        break;
-
-      case 9: // metainfo
-      case 10: // list_items
-      case 11: // list_item
-      case 12: // dictionary_items
-      case 13: // dictionary_item
-      case 14: // dictionary_value
-        value.move< unsigned int > (s.value);
         break;
 
       default:
@@ -1020,12 +1048,6 @@ namespace yy {
   }
 
   BitTorrent_MetaInfo_Parser::symbol_type
-  BitTorrent_MetaInfo_Parser::make_DICTIONARY (const location_type& l)
-  {
-    return symbol_type (token::DICTIONARY, l);
-  }
-
-  BitTorrent_MetaInfo_Parser::symbol_type
   BitTorrent_MetaInfo_Parser::make_END_OF_FRAGMENT (const location_type& l)
   {
     return symbol_type (token::END_OF_FRAGMENT, l);
@@ -1044,7 +1066,13 @@ namespace yy {
   }
 
   BitTorrent_MetaInfo_Parser::symbol_type
-  BitTorrent_MetaInfo_Parser::make_LIST (const BitTorrent_MetaInfo_List_t& v, const location_type& l)
+  BitTorrent_MetaInfo_Parser::make_DICTIONARY (const Bencoding_Dictionary_t*& v, const location_type& l)
+  {
+    return symbol_type (token::DICTIONARY, v, l);
+  }
+
+  BitTorrent_MetaInfo_Parser::symbol_type
+  BitTorrent_MetaInfo_Parser::make_LIST (const Bencoding_List_t*& v, const location_type& l)
   {
     return symbol_type (token::LIST, v, l);
   }

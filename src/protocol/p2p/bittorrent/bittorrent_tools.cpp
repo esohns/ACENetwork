@@ -31,6 +31,7 @@
 #include "net_macros.h"
 
 #include "bittorrent_defines.h"
+#include <ace/Synch.h>
 #include "bittorrent_metainfo_parser_driver.h"
 
 std::string
@@ -194,23 +195,18 @@ BitTorrent_Tools::Type2String (enum BitTorrent_MessageType& type_in)
 
 bool
 BitTorrent_Tools::parseMetaInfoFile (const std::string& metaInfoFileName_in,
-                                     struct BitTorrent_MetaInfo& metaInfo_out,
+                                     Bencoding_Dictionary_t*& metaInfo_out,
                                      bool traceScanning_in,
                                      bool traceParsing_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::parseMetaInfoFile"));
 
   // initialize return value(s)
-  if (metaInfo_out.singleFileMode)
-  {
-    delete metaInfo_out.info.single_file;
-    metaInfo_out.info.single_file = NULL;
-  } // end IF
-  else
-  {
-    delete metaInfo_out.info.multiple_file;
-    metaInfo_out.info.multiple_file = NULL;
-  } // end ELSE
+  if (metaInfo_out)
+    BitTorrent_Tools::free (metaInfo_out);
+
+  // sanity check(s)
+  ACE_ASSERT (!metaInfo_out);
 
   BitTorrent_MetaInfo_ParserDriver_T<BitTorrent_SessionMessage_t> parser (traceScanning_in,
                                                                           traceParsing_in);
@@ -235,7 +231,7 @@ BitTorrent_Tools::parseMetaInfoFile (const std::string& metaInfoFileName_in,
     return false;
   } // end IF
   ACE_ASSERT (data_p);
-  unsigned int size = ACE_OS::strlen (reinterpret_cast<char*> (data_p)) + 1;
+  unsigned int size = Common_File_Tools::size (metaInfoFileName_in);
   ACE_Message_Block message_block (reinterpret_cast<char*> (data_p),
                                    size,
                                    ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY);
@@ -253,7 +249,7 @@ BitTorrent_Tools::parseMetaInfoFile (const std::string& metaInfoFileName_in,
               ACE_TEXT ("parsed meta-info file \"%s\"...\n"),
               ACE_TEXT (metaInfoFileName_in.c_str ())));
 
-  metaInfo_out = parser.record_;
+  metaInfo_out = parser.metaInfo_;
 
   result = true;
 
@@ -261,4 +257,193 @@ clean:
   delete [] data_p;
 
   return result;
+}
+
+void
+BitTorrent_Tools::free (Bencoding_Dictionary_t*& dictionary_inout)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::free"));
+
+  if (!dictionary_inout)
+    return;
+
+  for (Bencoding_DictionaryIterator_t iterator = dictionary_inout->begin ();
+       iterator != dictionary_inout->end ();
+       ++iterator)
+  {
+    switch ((*iterator).second->type)
+    {
+      case Bencoding_Element::BENCODING_TYPE_INTEGER:
+        break;
+      case Bencoding_Element::BENCODING_TYPE_STRING:
+        delete (*iterator).second->string; break;
+      case Bencoding_Element::BENCODING_TYPE_LIST:
+      {
+        BitTorrent_Tools::free ((*iterator).second->list);
+        break;
+      }
+      case Bencoding_Element::BENCODING_TYPE_DICTIONARY:
+      {
+        BitTorrent_Tools::free ((*iterator).second->dictionary);
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown type (was: %d), continuing\n"),
+                    ACE_TEXT ((*iterator).second->type)));
+        break;
+      }
+    } // end SWITCH
+  } // end FOR
+
+  delete dictionary_inout;
+  dictionary_inout = NULL;
+}
+
+std::string
+BitTorrent_Tools::Dictionary2String (const Bencoding_Dictionary_t& dictionary_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::Dictionary2String"));
+
+  std::string result (ACE_TEXT_ALWAYS_CHAR ("dictionary:\n"));
+
+  for (Bencoding_DictionaryIterator_t iterator = dictionary_in.begin ();
+       iterator != dictionary_in.end ();
+       ++iterator)
+  {
+    result += ACE_TEXT_ALWAYS_CHAR ("\"");
+    result += (*iterator).first;
+    result += ACE_TEXT_ALWAYS_CHAR ("\": ");
+
+    switch ((*iterator).second->type)
+    {
+      case Bencoding_Element::BENCODING_TYPE_INTEGER:
+      {
+        std::ostringstream converter;
+        converter << (*iterator).second->integer;
+        result += converter.str ();
+        result += ACE_TEXT_ALWAYS_CHAR ("\n");
+        break;
+      }
+      case Bencoding_Element::BENCODING_TYPE_STRING:
+      {
+        result += ACE_TEXT_ALWAYS_CHAR ("\"");
+        result += *(*iterator).second->string;
+        result += ACE_TEXT_ALWAYS_CHAR ("\"\n");
+        break;
+      }
+      case Bencoding_Element::BENCODING_TYPE_LIST:
+      {
+        result += BitTorrent_Tools::List2String (*(*iterator).second->list);
+        break;
+      }
+      case Bencoding_Element::BENCODING_TYPE_DICTIONARY:
+      {
+        result += BitTorrent_Tools::Dictionary2String (*(*iterator).second->dictionary);
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown type (was: %d), continuing\n"),
+                    ACE_TEXT ((*iterator).second->type)));
+        break;
+      }
+    } // end SWITCH
+  } // end FOR
+
+  return result;
+}
+std::string
+BitTorrent_Tools::List2String (const Bencoding_List_t& list_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::List2String"));
+
+  std::string result (ACE_TEXT_ALWAYS_CHAR ("list:\n"));
+
+  for (Bencoding_ListIterator_t iterator = list_in.begin ();
+       iterator != list_in.end ();
+       ++iterator)
+  {
+    switch ((*iterator)->type)
+    {
+      case Bencoding_Element::BENCODING_TYPE_INTEGER:
+      {
+        std::ostringstream converter;
+        converter << (*iterator)->integer;
+        result += converter.str ();
+        result += ACE_TEXT_ALWAYS_CHAR ("\n");
+        break;
+      }
+      case Bencoding_Element::BENCODING_TYPE_STRING:
+      {
+        result += ACE_TEXT_ALWAYS_CHAR ("\"");
+        result += *(*iterator)->string;
+        result += ACE_TEXT_ALWAYS_CHAR ("\"\n");
+        break;
+      }
+      case Bencoding_Element::BENCODING_TYPE_LIST:
+      {
+        result += BitTorrent_Tools::List2String (*(*iterator)->list);
+        break;
+      }
+      case Bencoding_Element::BENCODING_TYPE_DICTIONARY:
+      {
+        result += BitTorrent_Tools::Dictionary2String (*(*iterator)->dictionary);
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown type (was: %d), continuing\n"),
+                    ACE_TEXT ((*iterator)->type)));
+        break;
+      }
+    } // end SWITCH
+  } // end FOR
+
+  return result;
+}
+
+void
+BitTorrent_Tools::free (Bencoding_List_t*& list_inout)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::free"));
+
+  if (!list_inout)
+    return;
+
+  for (Bencoding_ListIterator_t iterator = list_inout->begin ();
+       iterator != list_inout->end ();
+       ++iterator)
+  {
+    switch ((*iterator)->type)
+    {
+      case Bencoding_Element::BENCODING_TYPE_INTEGER:
+        break;
+      case Bencoding_Element::BENCODING_TYPE_STRING:
+        delete (*iterator)->string; break;
+      case Bencoding_Element::BENCODING_TYPE_LIST:
+      {
+        BitTorrent_Tools::free ((*iterator)->list);
+        break;
+      }
+      case Bencoding_Element::BENCODING_TYPE_DICTIONARY:
+      {
+        BitTorrent_Tools::free ((*iterator)->dictionary);
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown type (was: %d), continuing\n"),
+                    ACE_TEXT ((*iterator)->type)));
+        break;
+      }
+    } // end SWITCH
+  } // end FOR
+
+  delete list_inout;
+  list_inout = NULL;
 }

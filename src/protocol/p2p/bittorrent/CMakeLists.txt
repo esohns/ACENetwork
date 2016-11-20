@@ -97,8 +97,6 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../http)
 set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      stdafx.cpp
      stdafx.h
-     bencoding_scanner.cpp
-     bencoding_scanner.h
      bittorrent_common.h
      bittorrent_defines.h
      bittorrent_exports.h
@@ -111,6 +109,8 @@ set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      bittorrent_metainfo_parser_driver.cpp
      bittorrent_metainfo_parser_driver.h
      bittorrent_metainfo_parser_driver.inl
+     bittorrent_metainfo_scanner.cpp
+     bittorrent_metainfo_scanner.h
      bittorrent_module_handler.cpp
      bittorrent_module_handler.h
      bittorrent_module_handler.inl
@@ -147,7 +147,7 @@ set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      position.hh
      stack.hh)
 set (${PROJECT_NAME}_Protocol_BitTorrent_SCRIPTS
-     scripts/bencoding.ll
+     scripts/metainfo_scanner.ll
      scripts/metainfo_parser.yy
      scripts/scanner.l
      scripts/parser.y)
@@ -198,7 +198,6 @@ export (TARGETS ${PROJECT_NAME}_Protocol_BitTorrent
 
 ############### install files ################
 install (FILES
-         bencoding_scanner.h
          bittorrent_common.h
          bittorrent_defines.h
          bittorrent_exports.h
@@ -206,6 +205,9 @@ install (FILES
          bittorrent_message.h
          bittorrent_message.inl
          bittorrent_metainfo_parser.h
+         bittorrent_metainfo_parser_driver.h
+         bittorrent_metainfo_parser_driver.inl
+         bittorrent_metainfo_scanner.h
          bittorrent_module_handler.h
          bittorrent_module_handler.inl
          bittorrent_module_parser.h

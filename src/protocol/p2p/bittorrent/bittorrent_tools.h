@@ -36,6 +36,10 @@ class BitTorrent_Export BitTorrent_Tools
   inline virtual ~BitTorrent_Tools () {};
 
   // debug info
+  static std::string Dictionary2String (const Bencoding_Dictionary_t&);
+  static std::string List2String (const Bencoding_List_t&);
+  inline static std::string MetaInfo2String (const Bencoding_Dictionary_t& metaInfo_in) { return BitTorrent_Tools::Dictionary2String (metaInfo_in); };
+
   static std::string Handshake2String (const struct BitTorrent_PeerHandshake&);
   static std::string Record2String (const struct BitTorrent_Record&);
 
@@ -44,16 +48,22 @@ class BitTorrent_Export BitTorrent_Tools
 //  static bool parseURL (const std::string&, // URL
 //                        ACE_INET_Addr&,     // return value: host address
 //                        std::string&);      // return value: URI
-  static bool parseMetaInfoFile (const std::string&,          // metainfo (aka .bittorrent) file
-                                 struct BitTorrent_MetaInfo&, // return value: metainfo
+  // *IMPORTANT NOTE*: caller needs to free the return value (second argument)
+  static bool parseMetaInfoFile (const std::string&,       // metainfo (aka .bittorrent) file
+                                 Bencoding_Dictionary_t*&, // return value: metainfo
                                  bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,
                                  bool = NET_PROTOCOL_DEFAULT_YACC_TRACE);
+
+  static void free (Bencoding_Dictionary_t*&); // metainfo
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools ())
   //ACE_UNIMPLEMENTED_FUNC (~BitTorrent_Tools ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools (const BitTorrent_Tools&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools& operator= (const BitTorrent_Tools&))
+
+  // helper methods
+  static void free (Bencoding_List_t*&); // bencoded list
 };
 
 #endif

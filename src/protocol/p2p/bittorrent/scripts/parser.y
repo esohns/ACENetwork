@@ -221,7 +221,7 @@ session:  "handshake" messages { $$ = 67 + $2; // 19 + 8 + 20 + 20
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::handshake(), continuing\n")));
                                  } };
-messages: message messages     { $$ = $1 + $2; };
+messages: messages message     { $$ = $1 + $2; };
           | %empty             { $$ = 0; };
 message:  "bitfield"           { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);

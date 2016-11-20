@@ -23,8 +23,8 @@
       <rule number="2" usefulness="useful">
         <lhs>messages</lhs>
         <rhs>
-          <symbol>message</symbol>
           <symbol>messages</symbol>
+          <symbol>message</symbol>
         </rhs>
       </rule>
       <rule number="3" usefulness="useful">
@@ -153,40 +153,11 @@
       <itemset>
         <item rule-number="1" point="1"/>
         <item rule-number="2" point="0"/>
-        <item rule-number="3" point="0">
-          <lookaheads>
-            <symbol>&quot;end&quot;</symbol>
-          </lookaheads>
-        </item>
-        <item rule-number="4" point="0"/>
-        <item rule-number="5" point="0"/>
-        <item rule-number="6" point="0"/>
-        <item rule-number="7" point="0"/>
-        <item rule-number="8" point="0"/>
-        <item rule-number="9" point="0"/>
-        <item rule-number="10" point="0"/>
-        <item rule-number="11" point="0"/>
-        <item rule-number="12" point="0"/>
-        <item rule-number="13" point="0"/>
-        <item rule-number="14" point="0"/>
-        <item rule-number="15" point="0"/>
+        <item rule-number="3" point="0"/>
       </itemset>
       <actions>
         <transitions>
-          <transition type="shift" symbol="&quot;bitfield&quot;" state="3"/>
-          <transition type="shift" symbol="&quot;cancel&quot;" state="4"/>
-          <transition type="shift" symbol="&quot;choke&quot;" state="5"/>
-          <transition type="shift" symbol="&quot;have&quot;" state="6"/>
-          <transition type="shift" symbol="&quot;interested&quot;" state="7"/>
-          <transition type="shift" symbol="&quot;keep-alive&quot;" state="8"/>
-          <transition type="shift" symbol="&quot;not_interested&quot;" state="9"/>
-          <transition type="shift" symbol="&quot;piece&quot;" state="10"/>
-          <transition type="shift" symbol="&quot;port&quot;" state="11"/>
-          <transition type="shift" symbol="&quot;request&quot;" state="12"/>
-          <transition type="shift" symbol="&quot;unchoke&quot;" state="13"/>
-          <transition type="shift" symbol="&quot;end_of_fragment&quot;" state="14"/>
-          <transition type="goto" symbol="messages" state="15"/>
-          <transition type="goto" symbol="message" state="16"/>
+          <transition type="goto" symbol="messages" state="3"/>
         </transitions>
         <errors/>
         <reductions>
@@ -202,7 +173,7 @@
       </itemset>
       <actions>
         <transitions>
-          <transition type="shift" symbol="&quot;end&quot;" state="17"/>
+          <transition type="shift" symbol="&quot;end&quot;" state="4"/>
         </transitions>
         <errors/>
         <reductions/>
@@ -212,195 +183,12 @@
 
     <state number="3">
       <itemset>
-        <item rule-number="4" point="1"/>
-      </itemset>
-      <actions>
-        <transitions/>
-        <errors/>
-        <reductions>
-          <reduction symbol="$default" rule="4" enabled="true"/>
-        </reductions>
-      </actions>
-      <solved-conflicts/>
-    </state>
-
-    <state number="4">
-      <itemset>
-        <item rule-number="5" point="1"/>
-      </itemset>
-      <actions>
-        <transitions/>
-        <errors/>
-        <reductions>
-          <reduction symbol="$default" rule="5" enabled="true"/>
-        </reductions>
-      </actions>
-      <solved-conflicts/>
-    </state>
-
-    <state number="5">
-      <itemset>
-        <item rule-number="6" point="1"/>
-      </itemset>
-      <actions>
-        <transitions/>
-        <errors/>
-        <reductions>
-          <reduction symbol="$default" rule="6" enabled="true"/>
-        </reductions>
-      </actions>
-      <solved-conflicts/>
-    </state>
-
-    <state number="6">
-      <itemset>
-        <item rule-number="7" point="1"/>
-      </itemset>
-      <actions>
-        <transitions/>
-        <errors/>
-        <reductions>
-          <reduction symbol="$default" rule="7" enabled="true"/>
-        </reductions>
-      </actions>
-      <solved-conflicts/>
-    </state>
-
-    <state number="7">
-      <itemset>
-        <item rule-number="8" point="1"/>
-      </itemset>
-      <actions>
-        <transitions/>
-        <errors/>
-        <reductions>
-          <reduction symbol="$default" rule="8" enabled="true"/>
-        </reductions>
-      </actions>
-      <solved-conflicts/>
-    </state>
-
-    <state number="8">
-      <itemset>
-        <item rule-number="9" point="1"/>
-      </itemset>
-      <actions>
-        <transitions/>
-        <errors/>
-        <reductions>
-          <reduction symbol="$default" rule="9" enabled="true"/>
-        </reductions>
-      </actions>
-      <solved-conflicts/>
-    </state>
-
-    <state number="9">
-      <itemset>
-        <item rule-number="10" point="1"/>
-      </itemset>
-      <actions>
-        <transitions/>
-        <errors/>
-        <reductions>
-          <reduction symbol="$default" rule="10" enabled="true"/>
-        </reductions>
-      </actions>
-      <solved-conflicts/>
-    </state>
-
-    <state number="10">
-      <itemset>
-        <item rule-number="11" point="1"/>
-      </itemset>
-      <actions>
-        <transitions/>
-        <errors/>
-        <reductions>
-          <reduction symbol="$default" rule="11" enabled="true"/>
-        </reductions>
-      </actions>
-      <solved-conflicts/>
-    </state>
-
-    <state number="11">
-      <itemset>
-        <item rule-number="12" point="1"/>
-      </itemset>
-      <actions>
-        <transitions/>
-        <errors/>
-        <reductions>
-          <reduction symbol="$default" rule="12" enabled="true"/>
-        </reductions>
-      </actions>
-      <solved-conflicts/>
-    </state>
-
-    <state number="12">
-      <itemset>
-        <item rule-number="13" point="1"/>
-      </itemset>
-      <actions>
-        <transitions/>
-        <errors/>
-        <reductions>
-          <reduction symbol="$default" rule="13" enabled="true"/>
-        </reductions>
-      </actions>
-      <solved-conflicts/>
-    </state>
-
-    <state number="13">
-      <itemset>
-        <item rule-number="14" point="1"/>
-      </itemset>
-      <actions>
-        <transitions/>
-        <errors/>
-        <reductions>
-          <reduction symbol="$default" rule="14" enabled="true"/>
-        </reductions>
-      </actions>
-      <solved-conflicts/>
-    </state>
-
-    <state number="14">
-      <itemset>
-        <item rule-number="15" point="1"/>
-      </itemset>
-      <actions>
-        <transitions/>
-        <errors/>
-        <reductions>
-          <reduction symbol="$default" rule="15" enabled="true"/>
-        </reductions>
-      </actions>
-      <solved-conflicts/>
-    </state>
-
-    <state number="15">
-      <itemset>
-        <item rule-number="1" point="2"/>
-      </itemset>
-      <actions>
-        <transitions/>
-        <errors/>
-        <reductions>
-          <reduction symbol="$default" rule="1" enabled="true"/>
-        </reductions>
-      </actions>
-      <solved-conflicts/>
-    </state>
-
-    <state number="16">
-      <itemset>
-        <item rule-number="2" point="0"/>
-        <item rule-number="2" point="1"/>
-        <item rule-number="3" point="0">
+        <item rule-number="1" point="2">
           <lookaheads>
             <symbol>&quot;end&quot;</symbol>
           </lookaheads>
         </item>
+        <item rule-number="2" point="1"/>
         <item rule-number="4" point="0"/>
         <item rule-number="5" point="0"/>
         <item rule-number="6" point="0"/>
@@ -416,30 +204,29 @@
       </itemset>
       <actions>
         <transitions>
-          <transition type="shift" symbol="&quot;bitfield&quot;" state="3"/>
-          <transition type="shift" symbol="&quot;cancel&quot;" state="4"/>
-          <transition type="shift" symbol="&quot;choke&quot;" state="5"/>
-          <transition type="shift" symbol="&quot;have&quot;" state="6"/>
-          <transition type="shift" symbol="&quot;interested&quot;" state="7"/>
-          <transition type="shift" symbol="&quot;keep-alive&quot;" state="8"/>
-          <transition type="shift" symbol="&quot;not_interested&quot;" state="9"/>
-          <transition type="shift" symbol="&quot;piece&quot;" state="10"/>
-          <transition type="shift" symbol="&quot;port&quot;" state="11"/>
-          <transition type="shift" symbol="&quot;request&quot;" state="12"/>
-          <transition type="shift" symbol="&quot;unchoke&quot;" state="13"/>
-          <transition type="shift" symbol="&quot;end_of_fragment&quot;" state="14"/>
-          <transition type="goto" symbol="messages" state="18"/>
-          <transition type="goto" symbol="message" state="16"/>
+          <transition type="shift" symbol="&quot;bitfield&quot;" state="5"/>
+          <transition type="shift" symbol="&quot;cancel&quot;" state="6"/>
+          <transition type="shift" symbol="&quot;choke&quot;" state="7"/>
+          <transition type="shift" symbol="&quot;have&quot;" state="8"/>
+          <transition type="shift" symbol="&quot;interested&quot;" state="9"/>
+          <transition type="shift" symbol="&quot;keep-alive&quot;" state="10"/>
+          <transition type="shift" symbol="&quot;not_interested&quot;" state="11"/>
+          <transition type="shift" symbol="&quot;piece&quot;" state="12"/>
+          <transition type="shift" symbol="&quot;port&quot;" state="13"/>
+          <transition type="shift" symbol="&quot;request&quot;" state="14"/>
+          <transition type="shift" symbol="&quot;unchoke&quot;" state="15"/>
+          <transition type="shift" symbol="&quot;end_of_fragment&quot;" state="16"/>
+          <transition type="goto" symbol="message" state="17"/>
         </transitions>
         <errors/>
         <reductions>
-          <reduction symbol="$default" rule="3" enabled="true"/>
+          <reduction symbol="$default" rule="1" enabled="true"/>
         </reductions>
       </actions>
       <solved-conflicts/>
     </state>
 
-    <state number="17">
+    <state number="4">
       <itemset>
         <item rule-number="0" point="2"/>
       </itemset>
@@ -453,7 +240,175 @@
       <solved-conflicts/>
     </state>
 
-    <state number="18">
+    <state number="5">
+      <itemset>
+        <item rule-number="4" point="1"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="4" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="6">
+      <itemset>
+        <item rule-number="5" point="1"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="5" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="7">
+      <itemset>
+        <item rule-number="6" point="1"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="6" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="8">
+      <itemset>
+        <item rule-number="7" point="1"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="7" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="9">
+      <itemset>
+        <item rule-number="8" point="1"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="8" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="10">
+      <itemset>
+        <item rule-number="9" point="1"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="9" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="11">
+      <itemset>
+        <item rule-number="10" point="1"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="10" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="12">
+      <itemset>
+        <item rule-number="11" point="1"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="11" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="13">
+      <itemset>
+        <item rule-number="12" point="1"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="12" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="14">
+      <itemset>
+        <item rule-number="13" point="1"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="13" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="15">
+      <itemset>
+        <item rule-number="14" point="1"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="14" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="16">
+      <itemset>
+        <item rule-number="15" point="1"/>
+      </itemset>
+      <actions>
+        <transitions/>
+        <errors/>
+        <reductions>
+          <reduction symbol="$default" rule="15" enabled="true"/>
+        </reductions>
+      </actions>
+      <solved-conflicts/>
+    </state>
+
+    <state number="17">
       <itemset>
         <item rule-number="2" point="2"/>
       </itemset>

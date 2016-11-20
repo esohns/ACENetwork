@@ -1,12 +1,12 @@
-#ifndef Net_Bencoding_HEADER_H
-#define Net_Bencoding_HEADER_H 1
-#define Net_Bencoding_IN_HEADER 1
+#ifndef BitTorrent_MetaInfoScanner_HEADER_H
+#define BitTorrent_MetaInfoScanner_HEADER_H 1
+#define BitTorrent_MetaInfoScanner_IN_HEADER 1
 
   #include <ace/Synch.h>
   #include "bittorrent_iparser.h"
   #include "bittorrent_metainfo_parser.h"
 
-#if defined (Net_Bencoding_IN_HEADER)
+#if defined (BitTorrent_MetaInfoScanner_IN_HEADER)
 /* This disables inclusion of unistd.h, which is not available using MSVC. The
  * C++ scanner uses STL streams instead. */
 #define YY_NO_UNISTD_H
@@ -15,40 +15,40 @@
 
   #include "location.hh"
 
-  class Net_BencodingScanner
+  class BitTorrent_MetaInfoScanner
    : public yyFlexLexer
    , public BitTorrent_MetaInfo_IScanner_t
   {
    public:
-    Net_BencodingScanner (std::istream* in = NULL,
-                          std::ostream* out = NULL)
+    BitTorrent_MetaInfoScanner (std::istream* in = NULL,
+                                std::ostream* out = NULL)
      : yyFlexLexer (in, out)
      , location_ ()
      , parser_ (NULL)
     {};
-    virtual ~Net_BencodingScanner () {};
+    virtual ~BitTorrent_MetaInfoScanner () {};
 
-    // implement BitTorrent_MetaInfo_IScanner_t
-    inline virtual void set (BitTorrent_MetaInfo_IParser_t* parser_in) { parser_ = parser_in; };
+    // implement BitTorrent_MetaInfo_IScanner
+    inline virtual void set (BitTorrent_MetaInfo_IParser* parser_in) { parser_ = parser_in; };
 
     // override yyFlexLexer::yylex()
 //    virtual int yylex ();
-    virtual yy::BitTorrent_MetaInfo_Parser::symbol_type yylex (BitTorrent_MetaInfo_IParser_t*);
+    virtual yy::BitTorrent_MetaInfo_Parser::symbol_type yylex (BitTorrent_MetaInfo_IParser*);
 
-    yy::location                   location_;
+    yy::location                 location_;
 
    private:
-    BitTorrent_MetaInfo_IParser_t* parser_;
+    BitTorrent_MetaInfo_IParser* parser_;
   };
 #else
 #define YY_STRUCT_YY_BUFFER_STATE
-  #include "bencoding_scanner.h"
+  #include "bittorrent_metainfo_scanner.h"
 #undef YY_STRUCT_YY_BUFFER_STATE
 #endif
 
 #define YY_DECL                             \
 yy::BitTorrent_MetaInfo_Parser::symbol_type \
-Net_BencodingScanner::yylex (BitTorrent_MetaInfo_IParser_t* parser)
+BitTorrent_MetaInfoScanner::yylex (BitTorrent_MetaInfo_IParser* parser)
 // ... and declare it for the parser's sake
 //YY_DECL;
 
@@ -78,7 +78,7 @@ Net_BencodingScanner::yylex (BitTorrent_MetaInfo_IParser_t* parser)
      * We will address this in a future release of flex, or omit the C++ scanner
      * altogether.
      */
-//    #define yyFlexLexer Net_Bencoding_FlexLexer
+//    #define yyFlexLexer BitTorrent_MetaInfoScanner_FlexLexer
 /* %endif */
 
 /* %if-c-only */
@@ -306,9 +306,9 @@ struct yy_buffer_state
 /* %endif */
 /* %endif */
 
-void *Net_Bencoding_alloc (yy_size_t  );
-void *Net_Bencoding_realloc (void *,yy_size_t  );
-void Net_Bencoding_free (void *  );
+void *BitTorrent_MetaInfoScanner_alloc (yy_size_t  );
+void *BitTorrent_MetaInfoScanner_realloc (void *,yy_size_t  );
+void BitTorrent_MetaInfoScanner_free (void *  );
 
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
@@ -322,12 +322,12 @@ void Net_Bencoding_free (void *  );
 
 //int yyFlexLexer::yywrap() { return 1; }
 //int yyFlexLexer::yylex()
-//  {
-//  LexerError( "yyFlexLexer::yylex invoked but %option yyclass used" );
-//  return 0;
-//  }
+//	{
+//	LexerError( "yyFlexLexer::yylex invoked but %option yyclass used" );
+//	return 0;
+//	}
 
-//#define YY_DECL int Net_BencodingScanner::yylex()
+//#define YY_DECL int BitTorrent_MetaInfoScanner::yylex()
 
 /* %if-c-only Standard (non-C++) definition */
 /* %endif */
@@ -445,6 +445,5 @@ static int yy_flex_strlen (yyconst char * );
 #undef YY_DECL
 #endif
 
-#line 454 "bencoding_scanner.h"
-#undef Net_Bencoding_IN_HEADER
-#endif /* Net_Bencoding_HEADER_H */
+#undef BitTorrent_MetaInfoScanner_IN_HEADER
+#endif /* BitTorrent_MetaInfoScanner_HEADER_H */

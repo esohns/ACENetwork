@@ -77,7 +77,10 @@ class Net_IParser
   virtual unsigned int offset () const = 0;
 
   virtual bool parse (ACE_Message_Block*) = 0; // data buffer handle
-  virtual bool switchBuffer () = 0;
+  // *IMPORTANT NOTE*: when the parser detects a frame end, it inserts a new
+  //                   buffer to the continuation and passes 'true'
+  //                   --> separate the current frame from the next
+  virtual bool switchBuffer (bool = false) = 0; // unlink current buffer ?
   virtual void wait () = 0;
 };
 

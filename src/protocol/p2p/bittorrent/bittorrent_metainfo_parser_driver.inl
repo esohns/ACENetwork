@@ -19,16 +19,12 @@
  ***************************************************************************/
 
 #include <ace/Log_Msg.h>
-#include <ace/Message_Block.h>
-#include <ace/Message_Queue.h>
 
 #include "net_macros.h"
 
-#include "bencoding_scanner.h"
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"
 #include "bittorrent_message.h"
-#include "bittorrent_metainfo_parser.h"
 #include "bittorrent_tools.h"
 
 template <typename SessionMessageType>
@@ -36,7 +32,9 @@ BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::BitTorrent_MetaInfo_Pars
                                                                                             bool traceParsing_in)
  : inherited (traceScanning_in,
               traceParsing_in)
- , record_ ()
+ , metaInfo_ (NULL)
+ , currentDictionary_ (NULL)
+ , currentList_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::BitTorrent_MetaInfo_ParserDriver_T"));
 
@@ -111,14 +109,17 @@ BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::error (const yy::locatio
 
 template <typename SessionMessageType>
 void
-BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::record (struct BitTorrent_MetaInfo*& record_in)
+BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::record (Bencoding_Dictionary_t*& metaInfo_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::record"));
 
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
+  // sanity check(s)
+  ACE_ASSERT (metaInfo_in);
+  ACE_ASSERT (metaInfo_in == metaInfo_);
 
-  ACE_NOTREACHED (return;)
+#if defined (_DEBUG)
+  dump_state ();
+#endif
 }
 
 template <typename SessionMessageType>
@@ -127,8 +128,10 @@ BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::dump_state"));
 
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
+  // sanity check(s)
+  ACE_ASSERT (metaInfo_);
 
-  ACE_NOTREACHED (return;)
+  ACE_DEBUG ((LM_INFO,
+              ACE_TEXT ("%s\n"),
+              ACE_TEXT (BitTorrent_Tools::MetaInfo2String (*metaInfo_).c_str ())));
 }

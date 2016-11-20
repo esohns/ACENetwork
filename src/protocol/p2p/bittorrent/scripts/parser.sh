@@ -25,13 +25,14 @@ PROJECT_ROOT=$(readlink -e $(dirname $0)/../../../../..)
 SCRIPTS_DIRECTORY=${PROJECT_ROOT}/src/protocol/p2p/bittorrent/scripts
 
 SOURCE_FILES="${SCRIPTS_DIRECTORY}/metainfo_parser.yy ${SCRIPTS_DIRECTORY}/parser.y"
-for FILE in $SOURCE_FILES
+for FILE in ${SOURCE_FILES}
 do
  if [ ! -f ${FILE} ]; then
   echo "ERROR: file ${FILE} not found, aborting"
   exit 1
  fi
- bison --graph --report=all --report-file=parser_report.txt --xml --warnings=all ${FILE}
+ REPORT_FILE=$(echo ${FILE} | sed -e 's/.[y]*y$/_report.txt/')
+ bison --graph --report=all --report-file=${REPORT_FILE} --xml --warnings=all ${FILE}
 #bison --feature=caret --graph --report=all --report-file=parser_report.txt --xml --warnings=all ${FILE}
  [ $? -ne 0 ] && echo "ERROR: \"${FILE}\" failed (status was: $?), aborting" && exit 1
  DOT_FILE=$(echo ${FILE} | sed -e 's/.[y]*y$/.dot/')
@@ -68,12 +69,13 @@ FILES="bittorrent_metainfo_parser.h bittorrent_metainfo_parser.cpp
 bittorrent_parser.h bittorrent_parser.cpp
 location.hh position.hh stack.hh"
 # move the files into the project directory
-for FILE in $FILES
+for FILE in ${FILES}
 do
- mv -f $FILE ${SCRIPTS_DIRECTORY}/..
+ mv -f ${FILE} ${SCRIPTS_DIRECTORY}/..
  if [ $? -ne 0 ]; then
-  echo "ERROR: failed to mv \"$FILE\", aborting"
+  echo "ERROR: failed to mv \"${FILE}\", aborting"
   exit 1
  fi
- echo "moved \"$FILE\"..."
+ echo "moved \"${FILE}\"..."
 done
+

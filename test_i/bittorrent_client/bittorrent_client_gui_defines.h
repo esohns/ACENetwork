@@ -28,7 +28,6 @@
 #define BITTORRENT_CLIENT_GUI_DEF_FILE_PHONEBOOK                        "bittorrent_client_phonebook.ini"
 
 // glade/GTKBuilder definitions
-#define BITTORRENT_CLIENT_GUI_GTK_UI_FILE_DIRECTORY                     "etc"
 // files
 #define BITTORRENT_CLIENT_GUI_GTK_UI_CHANNEL_FILE                       "bittorrent_client_channel.glade"
 #define BITTORRENT_CLIENT_GUI_GTK_UI_CONNECTION_FILE                    "bittorrent_client_connection.glade"

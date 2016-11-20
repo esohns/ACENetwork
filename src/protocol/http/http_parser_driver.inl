@@ -291,9 +291,11 @@ continue_:
 
 template <typename SessionMessageType>
 bool
-HTTP_ParserDriver_T<SessionMessageType>::switchBuffer ()
+HTTP_ParserDriver_T<SessionMessageType>::switchBuffer (bool unlink_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::switchBuffer"));
+
+  ACE_UNUSED_ARG (unlink_in);
 
   // sanity check(s)
   ACE_ASSERT (fragment_);

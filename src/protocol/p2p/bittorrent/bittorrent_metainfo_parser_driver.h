@@ -29,14 +29,14 @@
 
 #include "net_parser_base.h"
 
-#include "bencoding_scanner.h"
 #include "bittorrent_metainfo_parser.h"
+#include "bittorrent_metainfo_scanner.h"
 
 template <typename SessionMessageType>
 class BitTorrent_MetaInfo_ParserDriver_T
- : public Net_ParserBase_T<Net_BencodingScanner,
+ : public Net_ParserBase_T<BitTorrent_MetaInfoScanner,
                            yy::BitTorrent_MetaInfo_Parser,
-                           BitTorrent_MetaInfo_IParser_t,
+                           BitTorrent_MetaInfo_IParser,
                            std::string,
                            SessionMessageType>
 {
@@ -46,9 +46,9 @@ class BitTorrent_MetaInfo_ParserDriver_T
   virtual ~BitTorrent_MetaInfo_ParserDriver_T ();
 
   // convenient types
-  typedef Net_ParserBase_T<Net_BencodingScanner,
+  typedef Net_ParserBase_T<BitTorrent_MetaInfoScanner,
                            yy::BitTorrent_MetaInfo_Parser,
-                           BitTorrent_MetaInfo_IParser_t,
+                           BitTorrent_MetaInfo_IParser,
                            std::string,
                            SessionMessageType> PARSER_BASE_T;
 
@@ -65,24 +65,30 @@ class BitTorrent_MetaInfo_ParserDriver_T
   virtual void error (const yy::location&, // location
                       const std::string&); // message
 //  virtual void error (const std::string&); // message
-  inline virtual struct BitTorrent_MetaInfo& current () { return record_; };
+  inline virtual Bencoding_Dictionary_t& current () { return *currentDictionary_; };
   inline virtual bool hasFinished () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
-  virtual void record (struct BitTorrent_MetaInfo*&); // data record
+  virtual void record (Bencoding_Dictionary_t*&); // data record
+  inline virtual void set (Bencoding_Dictionary_t* dictionary_in) { currentDictionary_ = dictionary_in; };
+  inline virtual void set (Bencoding_List_t* list_in) { currentList_ = list_in; };
+  inline virtual const Bencoding_List_t* const get () const { return currentList_; };
 
   virtual void dump_state () const;
 
-  struct BitTorrent_MetaInfo record_;
+  Bencoding_Dictionary_t* metaInfo_;
 
  private:
-  typedef Net_ParserBase_T<Net_BencodingScanner,
+  typedef Net_ParserBase_T<BitTorrent_MetaInfoScanner,
                            yy::BitTorrent_MetaInfo_Parser,
-                           BitTorrent_MetaInfo_IParser_t,
+                           BitTorrent_MetaInfo_IParser,
                            std::string,
                            SessionMessageType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_MetaInfo_ParserDriver_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_MetaInfo_ParserDriver_T (const BitTorrent_MetaInfo_ParserDriver_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_MetaInfo_ParserDriver_T& operator= (const BitTorrent_MetaInfo_ParserDriver_T&))
+
+  Bencoding_Dictionary_t* currentDictionary_;
+  Bencoding_List_t*       currentList_;
 };
 
 // include template definition

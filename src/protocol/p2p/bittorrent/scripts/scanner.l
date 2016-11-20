@@ -350,7 +350,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                             ACE_Message_Block* message_p, *message_2;
                             unsigned int remainder = message_block_p->length ();
                             if (bytes_to_skip <= remainder)
-                            { // current fragment contains the whole chunk
+                            { // the current fragment contains the whole piece
                               // --> insert buffer
                               message_p = message_block_p->duplicate ();
                               ACE_ASSERT (message_p);
@@ -395,7 +395,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                               message_block_p->wr_ptr (message_block_p->rd_ptr () + remainder);
                               ACE_ASSERT (message_block_p->length () == remainder);
                             } // end ELSE
-                            if (!iparser_p->switchBuffer ())
+                            if (!iparser_p->switchBuffer (true))
                             {
                               ACE_DEBUG ((LM_ERROR,
                                           ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
@@ -420,8 +420,8 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 
                             // wait for more data fragment(s)
                             if (!iparser_p->switchBuffer ())
-                            { // *NOTE*: most probable reason: connection
-                              //         has been closed --> session end
+                            { // *NOTE*: most probable reason: connection has
+                              //         been closed --> session end
                               ACE_DEBUG ((LM_DEBUG,
                                           ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
                               return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed

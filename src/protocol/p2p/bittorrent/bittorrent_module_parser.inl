@@ -322,11 +322,34 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
   data_container_r.set (record_inout);
   record_inout = NULL;
 
+  const struct BitTorrent_Record& record_r = data_container_r.get ();
+
   // debug info
   if (inherited2::trace_)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
-                ACE_TEXT (BitTorrent_Tools::Record2String (*record_inout).c_str ())));
+                ACE_TEXT (BitTorrent_Tools::Record2String (record_r).c_str ())));
+
+  // set new head fragment ?
+  ACE_Message_Block* message_block_p = headFragment_;
+  do
+  {
+    if (!message_block_p->cont ()) break;
+    message_block_p = message_block_p->cont ();
+  } while (true);
+  if (message_block_p != inherited::fragment_)
+  {
+    message_block_p = headFragment_;
+    // *IMPORTANT NOTE*: the fragment has already been unlinked in the previous
+    //                   call to switchBuffer()
+    headFragment_ = dynamic_cast<DataMessageType*> (inherited::fragment_);
+    ACE_ASSERT (headFragment_);
+  } // end IF
+  else
+  {
+    message_block_p = headFragment_;
+    headFragment_ = NULL;
+  } // end ELSE
 
   // make sure the whole fragment chain references the same data record
   DataMessageType* message_p =
@@ -340,7 +363,7 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
     message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE
 
-  int result = inherited::put_next (headFragment_, NULL);
+  int result = inherited::put_next (message_block_p, NULL);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -348,9 +371,8 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
                 inherited::mod_->name ()));
 
     // clean up
-    headFragment_->release ();
+    message_block_p->release ();
   } // end IF
-  headFragment_ = NULL;
 }
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
@@ -945,11 +967,34 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
   data_container_r.set (record_inout);
   record_inout = NULL;
 
+  const struct BitTorrent_Record& record_r = data_container_r.get ();
+
   // debug info
   if (inherited2::trace_)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
-                ACE_TEXT (BitTorrent_Tools::Record2String (*record_inout).c_str ())));
+                ACE_TEXT (BitTorrent_Tools::Record2String (record_r).c_str ())));
+
+  // set new head fragment ?
+  ACE_Message_Block* message_block_p = headFragment_;
+  do
+  {
+    if (!message_block_p->cont ()) break;
+    message_block_p = message_block_p->cont ();
+  } while (true);
+  if (message_block_p != inherited2::fragment_)
+  {
+    message_block_p = headFragment_;
+    // *IMPORTANT NOTE*: the fragment has already been unlinked in the previous
+    //                   call to switchBuffer()
+    headFragment_ = dynamic_cast<DataMessageType*> (inherited2::fragment_);
+    ACE_ASSERT (headFragment_);
+  } // end IF
+  else
+  {
+    message_block_p = headFragment_;
+    headFragment_ = NULL;
+  } // end ELSE
 
   // make sure the whole fragment chain references the same data record
   DataMessageType* message_p =
@@ -963,7 +1008,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
     message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE
 
-  int result = inherited::put_next (headFragment_, NULL);
+  int result = inherited::put_next (message_block_p, NULL);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -971,9 +1016,8 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                 inherited::mod_->name ()));
 
     // clean up
-    headFragment_->release ();
+    message_block_p->release ();
   } // end IF
-  headFragment_ = NULL;
 }
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,

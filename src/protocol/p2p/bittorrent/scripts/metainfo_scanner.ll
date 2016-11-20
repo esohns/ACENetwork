@@ -3,7 +3,7 @@
   #include "bittorrent_iparser.h"
   #include "bittorrent_metainfo_parser.h"
 
-#if defined (Net_Bencoding_IN_HEADER)
+#if defined (BitTorrent_MetaInfoScanner_IN_HEADER)
 /* This disables inclusion of unistd.h, which is not available using MSVC. The
  * C++ scanner uses STL streams instead. */
 #define YY_NO_UNISTD_H
@@ -12,40 +12,40 @@
 
   #include "location.hh"
 
-  class Net_BencodingScanner
+  class BitTorrent_MetaInfoScanner
    : public yyFlexLexer
    , public BitTorrent_MetaInfo_IScanner_t
   {
    public:
-    Net_BencodingScanner (std::istream* in = NULL,
-                          std::ostream* out = NULL)
+    BitTorrent_MetaInfoScanner (std::istream* in = NULL,
+                                std::ostream* out = NULL)
      : yyFlexLexer (in, out)
      , location_ ()
      , parser_ (NULL)
     {};
-    virtual ~Net_BencodingScanner () {};
+    virtual ~BitTorrent_MetaInfoScanner () {};
 
-    // implement BitTorrent_MetaInfo_IScanner_t
-    inline virtual void set (BitTorrent_MetaInfo_IParser_t* parser_in) { parser_ = parser_in; };
+    // implement BitTorrent_MetaInfo_IScanner
+    inline virtual void set (BitTorrent_MetaInfo_IParser* parser_in) { parser_ = parser_in; };
 
     // override yyFlexLexer::yylex()
 //    virtual int yylex ();
-    virtual yy::BitTorrent_MetaInfo_Parser::symbol_type yylex (BitTorrent_MetaInfo_IParser_t*);
+    virtual yy::BitTorrent_MetaInfo_Parser::symbol_type yylex (BitTorrent_MetaInfo_IParser*);
 
-    yy::location                   location_;
+    yy::location                 location_;
 
    private:
-    BitTorrent_MetaInfo_IParser_t* parser_;
+    BitTorrent_MetaInfo_IParser* parser_;
   };
 #else
 #define YY_STRUCT_YY_BUFFER_STATE
-  #include "bencoding_scanner.h"
+  #include "bittorrent_metainfo_scanner.h"
 #undef YY_STRUCT_YY_BUFFER_STATE
 #endif
 
 #define YY_DECL                             \
 yy::BitTorrent_MetaInfo_Parser::symbol_type \
-Net_BencodingScanner::yylex (BitTorrent_MetaInfo_IParser_t* parser)
+BitTorrent_MetaInfoScanner::yylex (BitTorrent_MetaInfo_IParser* parser)
 // ... and declare it for the parser's sake
 //YY_DECL;
 
@@ -67,8 +67,8 @@ Net_BencodingScanner::yylex (BitTorrent_MetaInfo_IParser_t* parser)
   //#define ACE_IOSFWD_H
 
   #include <ace/Synch.h>
-  #include "bencoding_scanner.h"
   #include "bittorrent_metainfo_parser.h"
+  #include "bittorrent_metainfo_scanner.h"
 
   // the original yyterminate() macro returns int. Since this uses Bison 3
   // variants as tokens, redefine it to change type to `Parser::semantic_type`
@@ -98,9 +98,9 @@ Net_BencodingScanner::yylex (BitTorrent_MetaInfo_IParser_t* parser)
 
 %option ansi-definitions ansi-prototypes
 %option c++
-%option header-file="bencoding_scanner.h" outfile="bencoding_scanner.cpp"
-%option prefix="Net_Bencoding_"
-%option yyclass="Net_BencodingScanner"
+%option header-file="bittorrent_metainfo_scanner.h" outfile="bittorrent_metainfo_scanner.cpp"
+%option prefix="BitTorrent_MetaInfoScanner_"
+%option yyclass="BitTorrent_MetaInfoScanner"
 
 /* *NOTE*: for protcol specification, see:
            - http://bittorrent.org/beps/bep_0003.html
@@ -179,11 +179,11 @@ METAINFO_FILE                     {DICTIONARY}
 "d"                    { ACE_ASSERT (yyleng == 1);
                          parser->offset (1);
                          BEGIN(state_dictionary_key);
-                         Bencoding_List_t* dictionary_p = NULL;
+                         const Bencoding_Dictionary_t* dictionary_p = NULL;
                          ACE_NEW_NORETURN (dictionary_p,
                                            Bencoding_Dictionary_t ());
                          ACE_ASSERT (dictionary_p);
-                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (*dictionary_p, location_); }
+                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (dictionary_p, location_); }
 } // end <INITIAL>
 <state_string>{
 {DIGIT}+               {
@@ -235,19 +235,19 @@ METAINFO_FILE                     {DICTIONARY}
 "l"                    { yyless (0);
                          ACE_ASSERT (yyleng == 1);
                          yy_push_state (state_list);
-                         Bencoding_List_t* list_p = NULL;
+                         const Bencoding_List_t* list_p = NULL;
                          ACE_NEW_NORETURN (list_p,
                                            Bencoding_List_t ());
                          ACE_ASSERT (list_p);
-                         return yy::BitTorrent_MetaInfo_Parser::make_LIST (*list_p, location_); }
+                         return yy::BitTorrent_MetaInfo_Parser::make_LIST (list_p, location_); }
 "d"                    { yyless (0);
                          ACE_ASSERT (yyleng == 1);
                          yy_push_state (state_dictionary_key);
-                         Bencoding_List_t* dictionary_p = NULL;
+                         const Bencoding_Dictionary_t* dictionary_p = NULL;
                          ACE_NEW_NORETURN (dictionary_p,
                                            Bencoding_Dictionary_t ());
                          ACE_ASSERT (dictionary_p);
-                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (*dictionary_p, location_); }
+                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (dictionary_p, location_); }
 } // end <state_list>
 <state_dictionary_key>{
 "e"                    { ACE_ASSERT (yyleng == 1);
@@ -269,20 +269,20 @@ METAINFO_FILE                     {DICTIONARY}
                          ACE_ASSERT (yyleng == 1);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_list);
-                         Bencoding_List_t* list_p = NULL;
+                         const Bencoding_List_t* list_p = NULL;
                          ACE_NEW_NORETURN (list_p,
                                            Bencoding_List_t ());
                          ACE_ASSERT (list_p);
-                         return yy::BitTorrent_MetaInfo_Parser::make_LIST (*list_p, location_); }
+                         return yy::BitTorrent_MetaInfo_Parser::make_LIST (list_p, location_); }
 "d"                    { yyless (0);
                          ACE_ASSERT (yyleng == 1);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_dictionary_key);
-                         Bencoding_List_t* dictionary_p = NULL;
+                         const Bencoding_Dictionary_t* dictionary_p = NULL;
                          ACE_NEW_NORETURN (dictionary_p,
                                            Bencoding_Dictionary_t ());
                          ACE_ASSERT (dictionary_p);
-                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (*dictionary_p, location_); }
+                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (dictionary_p, location_); }
 } // end <state_dictionary_value>
 <<EOF>>                { return yy::BitTorrent_MetaInfo_Parser::make_END (location_); }
 <*>{OCTET}             { /* *TODO*: use (?s:.) ? */

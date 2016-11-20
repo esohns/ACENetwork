@@ -76,9 +76,9 @@ struct BitTorrent_StreamConfiguration;
 typedef Stream_Statistic BitTorrent_RuntimeStatistic_t;
 struct BitTorrent_ModuleHandlerConfiguration;
 struct BitTorrent_SessionData;
-typedef Stream_SessionData_T<BitTorrent_SessionData> BitTorrent_SessionData_t;
-typedef BitTorrent_Message_T<BitTorrent_SessionData> BitTorrent_Message_t;
-typedef BitTorrent_SessionMessage_T<BitTorrent_SessionData> BitTorrent_SessionMessage_t;
+typedef Stream_SessionData_T<struct BitTorrent_SessionData> BitTorrent_SessionData_t;
+typedef BitTorrent_Message_T<BitTorrent_SessionData_t> BitTorrent_Message_t;
+typedef BitTorrent_SessionMessage_T<struct BitTorrent_SessionData> BitTorrent_SessionMessage_t;
 typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
                                 struct BitTorrent_AllocatorConfiguration,
                                 BitTorrent_Message_t,

@@ -207,7 +207,79 @@ template <typename MessageType,
           typename SessionMessageType>
 bool
 BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::switchBuffer ()
+                          SessionMessageType>::parse (ACE_Message_Block* data_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::parse"));
+
+  // sanity check(s)
+  ACE_ASSERT (isInitialized_);
+  ACE_ASSERT (data_in);
+
+  // retain a handle to the 'current' fragment
+  fragment_ = data_in;
+  offset_ = 0;
+
+  int result = -1;
+  bool do_scan_end = false;
+  if (!scan_begin ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to BitTorrent_ParserDriver_T::scan_begin(), aborting\n")));
+    goto error;
+  } // end IF
+  do_scan_end = true;
+
+  // initialize scanner ?
+  if (isFirst_)
+  {
+    isFirst_ = false;
+    bittorrent_set_column (1, scannerState_);
+    bittorrent_set_lineno (1, scannerState_);
+  } // end IF
+
+  // parse data fragment
+  try {
+    result = ::bittorrent_parse (this, scannerState_);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in ::bittorrent_parse(), continuing\n")));
+    result = 1;
+  }
+  switch (result)
+  {
+    case 0:
+      break; // done/need more data
+    case 1:
+    default:
+    { // *NOTE*: most probable reason: connection
+      //         has been closed --> session end
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("failed to parse BitTorrent PDU (result was: %d), aborting\n"),
+                  result));
+      goto error;
+    }
+  } // end SWITCH
+
+  // finalize buffer/scanner
+  scan_end ();
+  do_scan_end = false;
+
+  goto continue_;
+
+error:
+  if (do_scan_end)
+    scan_end ();
+  fragment_ = NULL;
+
+continue_:
+  return (result == 0);
+}
+
+template <typename MessageType,
+          typename SessionMessageType>
+bool
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::switchBuffer (bool unlink_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::switchBuffer"));
 
@@ -215,6 +287,7 @@ BitTorrent_ParserDriver_T<MessageType,
   ACE_ASSERT (fragment_);
   ACE_ASSERT (scannerState_);
 
+  ACE_Message_Block* message_block_p = fragment_;
   if (!fragment_->cont ())
   {
     // sanity check(s)
@@ -232,6 +305,10 @@ BitTorrent_ParserDriver_T<MessageType,
   } // end IF
   fragment_ = fragment_->cont ();
   offset_ = 0;
+
+  // unlink ?
+  if (unlink_in)
+    message_block_p->cont (NULL);
 
   // switch to the next fragment
 
@@ -346,6 +423,23 @@ BitTorrent_ParserDriver_T<MessageType,
 
 template <typename MessageType,
           typename SessionMessageType>
+struct BitTorrent_Record&
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::current ()
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::current"));
+
+  // sanity check(s)
+  ACE_ASSERT (fragment_);
+
+  const typename MessageType::DATA_T& data_container_r =
+      dynamic_cast<MessageType*> (fragment_)->get ();
+
+  return const_cast<struct BitTorrent_Record&> (data_container_r.get ());
+}
+
+template <typename MessageType,
+          typename SessionMessageType>
 void
 BitTorrent_ParserDriver_T<MessageType,
                           SessionMessageType>::dump_state () const
@@ -356,78 +450,6 @@ BitTorrent_ParserDriver_T<MessageType,
   ACE_NOTSUP;
 
   ACE_NOTREACHED (return;)
-}
-
-template <typename MessageType,
-          typename SessionMessageType>
-bool
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::parse (ACE_Message_Block* data_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::parse"));
-
-  // sanity check(s)
-  ACE_ASSERT (isInitialized_);
-  ACE_ASSERT (data_in);
-
-  // retain a handle to the 'current' fragment
-  fragment_ = data_in;
-  offset_ = 0;
-
-  int result = -1;
-  bool do_scan_end = false;
-  if (!scan_begin ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to BitTorrent_ParserDriver_T::scan_begin(), aborting\n")));
-    goto error;
-  } // end IF
-  do_scan_end = true;
-
-  // initialize scanner ?
-  if (isFirst_)
-  {
-    isFirst_ = false;
-    bittorrent_set_column (1, scannerState_);
-    bittorrent_set_lineno (1, scannerState_);
-  } // end IF
-
-  // parse data fragment
-  try {
-    result = ::bittorrent_parse (this, scannerState_);
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in ::bittorrent_parse(), continuing\n")));
-    result = 1;
-  }
-  switch (result)
-  {
-    case 0:
-      break; // done/need more data
-    case 1:
-    default:
-    { // *NOTE*: most probable reason: connection
-      //         has been closed --> session end
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("failed to parse BitTorrent PDU (result was: %d), aborting\n"),
-                  result));
-      goto error;
-    }
-  } // end SWITCH
-
-  // finalize buffer/scanner
-  scan_end ();
-  do_scan_end = false;
-
-  goto continue_;
-
-error:
-  if (do_scan_end)
-    scan_end ();
-  fragment_ = NULL;
-
-continue_:
-  return (result == 0);
 }
 
 template <typename MessageType,

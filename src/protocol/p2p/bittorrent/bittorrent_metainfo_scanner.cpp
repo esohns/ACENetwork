@@ -2,7 +2,7 @@
   #include "bittorrent_iparser.h"
   #include "bittorrent_metainfo_parser.h"
 
-#if defined (Net_Bencoding_IN_HEADER)
+#if defined (BitTorrent_MetaInfoScanner_IN_HEADER)
 /* This disables inclusion of unistd.h, which is not available using MSVC. The
  * C++ scanner uses STL streams instead. */
 #define YY_NO_UNISTD_H
@@ -11,40 +11,40 @@
 
   #include "location.hh"
 
-  class Net_BencodingScanner
+  class BitTorrent_MetaInfoScanner
    : public yyFlexLexer
    , public BitTorrent_MetaInfo_IScanner_t
   {
    public:
-    Net_BencodingScanner (std::istream* in = NULL,
-                          std::ostream* out = NULL)
+    BitTorrent_MetaInfoScanner (std::istream* in = NULL,
+                                std::ostream* out = NULL)
      : yyFlexLexer (in, out)
      , location_ ()
      , parser_ (NULL)
     {};
-    virtual ~Net_BencodingScanner () {};
+    virtual ~BitTorrent_MetaInfoScanner () {};
 
-    // implement BitTorrent_MetaInfo_IScanner_t
-    inline virtual void set (BitTorrent_MetaInfo_IParser_t* parser_in) { parser_ = parser_in; };
+    // implement BitTorrent_MetaInfo_IScanner
+    inline virtual void set (BitTorrent_MetaInfo_IParser* parser_in) { parser_ = parser_in; };
 
     // override yyFlexLexer::yylex()
 //    virtual int yylex ();
-    virtual yy::BitTorrent_MetaInfo_Parser::symbol_type yylex (BitTorrent_MetaInfo_IParser_t*);
+    virtual yy::BitTorrent_MetaInfo_Parser::symbol_type yylex (BitTorrent_MetaInfo_IParser*);
 
-    yy::location                   location_;
+    yy::location                 location_;
 
    private:
-    BitTorrent_MetaInfo_IParser_t* parser_;
+    BitTorrent_MetaInfo_IParser* parser_;
   };
 #else
 #define YY_STRUCT_YY_BUFFER_STATE
-  #include "bencoding_scanner.h"
+  #include "bittorrent_metainfo_scanner.h"
 #undef YY_STRUCT_YY_BUFFER_STATE
 #endif
 
 #define YY_DECL                             \
 yy::BitTorrent_MetaInfo_Parser::symbol_type \
-Net_BencodingScanner::yylex (BitTorrent_MetaInfo_IParser_t* parser)
+BitTorrent_MetaInfoScanner::yylex (BitTorrent_MetaInfo_IParser* parser)
 // ... and declare it for the parser's sake
 //YY_DECL;
 
@@ -80,7 +80,7 @@ Net_BencodingScanner::yylex (BitTorrent_MetaInfo_IParser_t* parser)
      * We will address this in a future release of flex, or omit the C++ scanner
      * altogether.
      */
-//    #define yyFlexLexer Net_Bencoding_FlexLexer
+//    #define yyFlexLexer BitTorrent_MetaInfoScanner_FlexLexer
 /* %endif */
 
 /* %if-c-only */
@@ -422,9 +422,9 @@ struct yy_buffer_state
 /* %endif */
 /* %endif */
 
-void *Net_Bencoding_alloc (yy_size_t  );
-void *Net_Bencoding_realloc (void *,yy_size_t  );
-void Net_Bencoding_free (void *  );
+void *BitTorrent_MetaInfoScanner_alloc (yy_size_t  );
+void *BitTorrent_MetaInfoScanner_realloc (void *,yy_size_t  );
+void BitTorrent_MetaInfoScanner_free (void *  );
 
 #define yy_new_buffer yy_create_buffer
 
@@ -469,7 +469,7 @@ int yyFlexLexer::yylex()
   return 0;
   }
 
-//#define YY_DECL int Net_BencodingScanner::yylex()
+//#define YY_DECL int BitTorrent_MetaInfoScanner::yylex()
 
 /* %% [1.5] DFA */
 static yyconst flex_int32_t yy_nxt[][256] =
@@ -1610,9 +1610,9 @@ struct yy_trans_info
 static yyconst flex_int32_t yy_accept[35] =
     {   0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,   21,   19,    1,    4,    2,    3,    7,    6,
-        5,    9,   12,    8,   10,   11,   14,   13,   15,   18,
-       16,   17,    2,    7
+        0,    0,   21,   19,    1,    4,    2,    3,    6,    5,
+        7,    9,   12,    8,   10,   11,   14,   13,   15,   18,
+       16,   17,    2,    6
     } ;
 
 /* Table of booleans, true if rule could match eol. */
@@ -1631,8 +1631,8 @@ static yyconst yy_state_type yy_NUL_trans[35] =
 
 static yyconst flex_int32_t yy_rule_linenum[20] =
     {   0,
-      179,  185,  191,  198,  208,  210,  213,  223,  226,  228,
-      232,  237,  244,  247,  252,  255,  260,  266,  274
+      179,  189,  195,  202,  212,  215,  223,  227,  230,  232,
+      235,  243,  253,  256,  261,  264,  268,  277,  288
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -1654,8 +1654,8 @@ static yyconst flex_int32_t yy_rule_linenum[20] =
   //#define ACE_IOSFWD_H
 
   #include <ace/Synch.h>
-  #include "bencoding_scanner.h"
   #include "bittorrent_metainfo_parser.h"
+  #include "bittorrent_metainfo_scanner.h"
 
   // the original yyterminate() macro returns int. Since this uses Bison 3
   // variants as tokens, redefine it to change type to `Parser::semantic_type`
@@ -1967,7 +1967,11 @@ YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
                          parser->offset (1);
                          BEGIN(state_dictionary_key);
-                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (location_); }
+                         const Bencoding_Dictionary_t* dictionary_p = NULL;
+                         ACE_NEW_NORETURN (dictionary_p,
+                                           Bencoding_Dictionary_t ());
+                         ACE_ASSERT (dictionary_p);
+                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (dictionary_p, location_); }
   YY_BREAK
 // end <INITIAL>
 
@@ -2007,15 +2011,10 @@ YY_RULE_SETUP
 case 5:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
-                         parser->offset (1); }
-  YY_BREAK
-case 6:
-YY_RULE_SETUP
-{ ACE_ASSERT (yyleng == 1);
                          parser->offset (1);
                          yy_pop_state (); }
   YY_BREAK
-case 7:
+case 6:
 YY_RULE_SETUP
 {
                          parser->offset (yyleng);
@@ -2025,6 +2024,11 @@ YY_RULE_SETUP
                          int i = -1;
                          converter >> i;
                          return yy::BitTorrent_MetaInfo_Parser::make_INTEGER (i, location_); }
+  YY_BREAK
+case 7:
+YY_RULE_SETUP
+{ ACE_ASSERT (yyleng == 1);
+                         parser->offset (1); }
   YY_BREAK
 // end <state_integer>
 
@@ -2043,24 +2047,29 @@ case 10:
 YY_RULE_SETUP
 { yyless (0);
                          ACE_ASSERT (yyleng == 1);
-                         parser->offset (1);
                          yy_push_state (state_integer); }
   YY_BREAK
 case 11:
 YY_RULE_SETUP
 { yyless (0);
                          ACE_ASSERT (yyleng == 1);
-                         parser->offset (1);
                          yy_push_state (state_list);
-                         return yy::BitTorrent_MetaInfo_Parser::make_LIST (BitTorrent_MetaInfo_List_t (), location_); }
+                         const Bencoding_List_t* list_p = NULL;
+                         ACE_NEW_NORETURN (list_p,
+                                           Bencoding_List_t ());
+                         ACE_ASSERT (list_p);
+                         return yy::BitTorrent_MetaInfo_Parser::make_LIST (list_p, location_); }
   YY_BREAK
 case 12:
 YY_RULE_SETUP
 { yyless (0);
                          ACE_ASSERT (yyleng == 1);
-                         parser->offset (1);
                          yy_push_state (state_dictionary_key);
-                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (location_); }
+                         const Bencoding_Dictionary_t* dictionary_p = NULL;
+                         ACE_NEW_NORETURN (dictionary_p,
+                                           Bencoding_Dictionary_t ());
+                         ACE_ASSERT (dictionary_p);
+                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (dictionary_p, location_); }
   YY_BREAK
 // end <state_list>
 
@@ -2088,7 +2097,6 @@ case 16:
 YY_RULE_SETUP
 { yyless (0);
                          ACE_ASSERT (yyleng == 1);
-                         parser->offset (1);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_integer); }
   YY_BREAK
@@ -2096,19 +2104,25 @@ case 17:
 YY_RULE_SETUP
 { yyless (0);
                          ACE_ASSERT (yyleng == 1);
-                         parser->offset (1);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_list);
-                         return yy::BitTorrent_MetaInfo_Parser::make_LIST (BitTorrent_MetaInfo_List_t (), location_); }
+                         const Bencoding_List_t* list_p = NULL;
+                         ACE_NEW_NORETURN (list_p,
+                                           Bencoding_List_t ());
+                         ACE_ASSERT (list_p);
+                         return yy::BitTorrent_MetaInfo_Parser::make_LIST (list_p, location_); }
   YY_BREAK
 case 18:
 YY_RULE_SETUP
 { yyless (0);
                          ACE_ASSERT (yyleng == 1);
-                         parser->offset (1);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_dictionary_key);
-                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (location_); }
+                         const Bencoding_Dictionary_t* dictionary_p = NULL;
+                         ACE_NEW_NORETURN (dictionary_p,
+                                           Bencoding_Dictionary_t ());
+                         ACE_ASSERT (dictionary_p);
+                         return yy::BitTorrent_MetaInfo_Parser::make_DICTIONARY (dictionary_p, location_); }
   YY_BREAK
 // end <state_dictionary_value>
 case YY_STATE_EOF(INITIAL):
@@ -2311,9 +2325,9 @@ yyFlexLexer::yyFlexLexer( std::istream* arg_yyin, std::ostream* arg_yyout )
 yyFlexLexer::~yyFlexLexer()
 {
   delete [] yy_state_buf;
-  Net_Bencoding_free(yy_start_stack  );
+  BitTorrent_MetaInfoScanner_free(yy_start_stack  );
   yy_delete_buffer( YY_CURRENT_BUFFER );
-  Net_Bencoding_free(yy_buffer_stack  );
+  BitTorrent_MetaInfoScanner_free(yy_buffer_stack  );
 }
 
 /* The contents of this function are C++ specific, so the () macro is not used.
@@ -2448,7 +2462,7 @@ int yyFlexLexer::yy_get_next_buffer()
 
         b->yy_ch_buf = (char *)
           /* Include room in for 2 EOB chars. */
-          Net_Bencoding_realloc((void *) b->yy_ch_buf,b->yy_buf_size + 2  );
+          BitTorrent_MetaInfoScanner_realloc((void *) b->yy_ch_buf,b->yy_buf_size + 2  );
         }
       else
         /* Can't grow it, we don't own it. */
@@ -2497,7 +2511,7 @@ int yyFlexLexer::yy_get_next_buffer()
   if ((yy_size_t) ((yy_n_chars) + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
     /* Extend the array by 50%, plus the number we really need. */
     yy_size_t new_size = (yy_n_chars) + number_to_move + ((yy_n_chars) >> 1);
-    YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) Net_Bencoding_realloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
+    YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) BitTorrent_MetaInfoScanner_realloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size  );
     if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
       YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
   }
@@ -2776,7 +2790,7 @@ int yyFlexLexer::yy_get_next_buffer()
 {
   YY_BUFFER_STATE b;
 
-  b = (YY_BUFFER_STATE) Net_Bencoding_alloc(sizeof( struct yy_buffer_state )  );
+  b = (YY_BUFFER_STATE) BitTorrent_MetaInfoScanner_alloc(sizeof( struct yy_buffer_state )  );
   if ( ! b )
     YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
@@ -2785,7 +2799,7 @@ int yyFlexLexer::yy_get_next_buffer()
   /* yy_ch_buf has to be 2 characters longer than the size given because
    * we need to put in 2 end-of-buffer characters.
    */
-  b->yy_ch_buf = (char *) Net_Bencoding_alloc(b->yy_buf_size + 2  );
+  b->yy_ch_buf = (char *) BitTorrent_MetaInfoScanner_alloc(b->yy_buf_size + 2  );
   if ( ! b->yy_ch_buf )
     YY_FATAL_ERROR( "out of dynamic memory in yy_create_buffer()" );
 
@@ -2814,9 +2828,9 @@ int yyFlexLexer::yy_get_next_buffer()
     YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
   if ( b->yy_is_our_buffer )
-    Net_Bencoding_free((void *) b->yy_ch_buf  );
+    BitTorrent_MetaInfoScanner_free((void *) b->yy_ch_buf  );
 
-  Net_Bencoding_free((void *) b  );
+  BitTorrent_MetaInfoScanner_free((void *) b  );
 }
 
 /* Initializes or reinitializes a buffer.
@@ -2968,7 +2982,7 @@ void yyFlexLexer::yyensure_buffer_stack(void)
      * immediate realloc on the next call.
          */
     num_to_alloc = 1;
-    (yy_buffer_stack) = (struct yy_buffer_state**)Net_Bencoding_alloc
+    (yy_buffer_stack) = (struct yy_buffer_state**)BitTorrent_MetaInfoScanner_alloc
                 (num_to_alloc * sizeof(struct yy_buffer_state*)
                 );
     if ( ! (yy_buffer_stack) )
@@ -2987,7 +3001,7 @@ void yyFlexLexer::yyensure_buffer_stack(void)
     int grow_size = 8 /* arbitrary grow size */;
 
     num_to_alloc = (yy_buffer_stack_max) + grow_size;
-    (yy_buffer_stack) = (struct yy_buffer_state**)Net_Bencoding_realloc
+    (yy_buffer_stack) = (struct yy_buffer_state**)BitTorrent_MetaInfoScanner_realloc
                 ((yy_buffer_stack),
                 num_to_alloc * sizeof(struct yy_buffer_state*)
                 );
@@ -3024,10 +3038,10 @@ void yyFlexLexer::yyensure_buffer_stack(void)
     new_size = (yy_start_stack_depth) * sizeof( int );
 
     if ( ! (yy_start_stack) )
-      (yy_start_stack) = (int *) Net_Bencoding_alloc(new_size  );
+      (yy_start_stack) = (int *) BitTorrent_MetaInfoScanner_alloc(new_size  );
 
     else
-      (yy_start_stack) = (int *) Net_Bencoding_realloc((void *) (yy_start_stack),new_size  );
+      (yy_start_stack) = (int *) BitTorrent_MetaInfoScanner_realloc((void *) (yy_start_stack),new_size  );
 
     if ( ! (yy_start_stack) )
       YY_FATAL_ERROR( "out of memory expanding start-condition stack" );
@@ -3136,12 +3150,12 @@ static int yy_flex_strlen (yyconst char * s )
 }
 #endif
 
-void *Net_Bencoding_alloc (yy_size_t  size )
+void *BitTorrent_MetaInfoScanner_alloc (yy_size_t  size )
 {
   return (void *) malloc( size );
 }
 
-void *Net_Bencoding_realloc  (void * ptr, yy_size_t  size )
+void *BitTorrent_MetaInfoScanner_realloc  (void * ptr, yy_size_t  size )
 {
   /* The cast to (char *) in the following accommodates both
    * implementations that use char* generic pointers, and those
@@ -3153,9 +3167,9 @@ void *Net_Bencoding_realloc  (void * ptr, yy_size_t  size )
   return (void *) realloc( (char *) ptr, size );
 }
 
-void Net_Bencoding_free (void * ptr )
+void BitTorrent_MetaInfoScanner_free (void * ptr )
 {
-  free( (char *) ptr );	/* see Net_Bencoding_realloc() for (char *) cast */
+  free( (char *) ptr );	/* see BitTorrent_MetaInfoScanner_realloc() for (char *) cast */
 }
 
 /* %if-tables-serialization definitions */
