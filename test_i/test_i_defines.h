@@ -24,9 +24,15 @@
 // event dispatch
 #define TEST_I_DEFAULT_NUMBER_OF_TP_THREADS         3
 
+// stream
+#define TEST_I_DEFAULT_BUFFER_SIZE                  16384 // bytes
+#define TEST_I_MAX_MESSAGES                         0 // 0 --> no limits
+
 // (asynchronous) connections
 #define TEST_I_CONNECTION_ASYNCH_TIMEOUT            60 // second(s)
-#define TEST_I_CONNECTION_ASYNCH_TIMEOUT_INTERVAL   3  // second(s)
+// *IMPORTANT NOTE*: this means that asynchronous connections take at least this
+//                   amount of time to establish
+#define TEST_I_CONNECTION_ASYNCH_TIMEOUT_INTERVAL   1  // second(s)
 
 // sessions
 #define TEST_I_SESSION_LOG_FILENAME_PREFIX          "bittorrent_client_session"

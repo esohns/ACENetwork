@@ -68,6 +68,7 @@
 #include "bittorrent_client_gui_defines.h"
 #include "bittorrent_client_network.h"
 #include "bittorrent_client_signalhandler.h"
+#include "bittorrent_client_stream_common.h"
 #include "bittorrent_client_tools.h"
 
 void
@@ -125,15 +126,6 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (BITTORRENT_CLIENT_GUI_DEF_FILE_PHONEBOOK);
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-p[FILENAME]    : phonebook file [\"")
-            << path
-            << ACE_TEXT_ALWAYS_CHAR ("\"]")
-            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r              : use reactor [")
             << NET_EVENT_USE_REACTOR
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -171,8 +163,6 @@ do_processArguments (int argc_in,
                      std::string& UIRCFile_out,
                      bool& useThreadpool_out,
                      bool& logToFile_out,
-                     bool& loadPhonebook_out,
-                     std::string& phonebookFile_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
@@ -217,15 +207,6 @@ do_processArguments (int argc_in,
 
   logToFile_out                  = false;
 
-  loadPhonebook_out              = false;
-  phonebookFile_out              = configuration_path;
-  phonebookFile_out             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  phonebookFile_out             +=
-    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
-  phonebookFile_out             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  phonebookFile_out             +=
-    ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_DEF_FILE_PHONEBOOK);
-
   useReactor_out                 = NET_EVENT_USE_REACTOR;
 
   statisticReportingInterval_out =
@@ -243,7 +224,7 @@ do_processArguments (int argc_in,
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("c:dg:hlp::rs:tu:vx:"),
+                              ACE_TEXT ("c:dg:hlrs:tu:vx:"),
                               1, // skip command name
                               1, // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -278,12 +259,6 @@ do_processArguments (int argc_in,
       case 'l':
       {
         logToFile_out = true;
-        break;
-      }
-      case 'p':
-      {
-        loadPhonebook_out = true;
-        phonebookFile_out = argumentParser.opt_arg ();
         break;
       }
       case 'r':
@@ -460,22 +435,12 @@ do_work (bool useThreadPool_in,
   // step1: initialize IRC handler module
   userData_in.configuration->moduleHandlerConfiguration.streamConfiguration =
       &userData_in.configuration->streamConfiguration;
-  userData_in.configuration->moduleHandlerConfiguration.protocolConfiguration =
-      &userData_in.configuration->protocolConfiguration;
+//  userData_in.configuration->moduleHandlerConfiguration.protocolConfiguration =
+//      &userData_in.configuration->protocolConfiguration;
   userData_in.configuration->streamConfiguration.moduleHandlerConfiguration =
       &userData_in.configuration->moduleHandlerConfiguration;
   userData_in.configuration->streamConfiguration.moduleConfiguration =
       &userData_in.configuration->moduleConfiguration;
-  BitTorrent_Client_PeerHandler_Module peer_handler (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
-                                                     NULL,
-                                                     true);
-  BitTorrent_Client_TrackerHandler_Module tracker_handler (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
-                                                           NULL,
-                                                           true);
-  userData_in.configuration->streamConfiguration.module = &peer_handler;
-  userData_in.configuration->streamConfiguration.cloneModule = true;
-  userData_in.configuration->streamConfiguration.trackerModule =
-      &tracker_handler;
 
   // step2: initialize event dispatch
   struct Common_DispatchThreadData thread_data;
@@ -1122,15 +1087,6 @@ ACE_TMAIN (int argc_in,
 
   bool use_thread_pool                       = NET_EVENT_USE_THREAD_POOL;
   bool log_to_file                           = false;
-  bool load_phonebook                        = false;
-
-  std::string phonebook_file_name            = configuration_path;
-  phonebook_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  phonebook_file_name                       +=
-      ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
-  phonebook_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  phonebook_file_name                       +=
-      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_DEF_FILE_PHONEBOOK);
 
   bool use_reactor                           = NET_EVENT_USE_REACTOR;
 
@@ -1154,8 +1110,6 @@ ACE_TMAIN (int argc_in,
                             rc_file_name,
                             use_thread_pool,
                             log_to_file,
-                            load_phonebook,
-                            phonebook_file_name,
                             use_reactor,
                             reporting_interval,
                             trace_information,
@@ -1184,7 +1138,6 @@ ACE_TMAIN (int argc_in,
 
   // step2b: validate argument(s)
   if (!Common_File_Tools::isReadable (configuration_file_name) ||
-      !Common_File_Tools::isReadable (phonebook_file_name)     ||
       !Common_File_Tools::isReadable (ui_definition_file_name))
   {
     // make 'em learn...
@@ -1313,6 +1266,21 @@ ACE_TMAIN (int argc_in,
   ////////////////////// socket handler configuration //////////////////////////
   configuration.socketHandlerConfiguration.socketConfiguration =
       &configuration.socketConfiguration;
+  configuration.socketHandlerConfiguration.messageAllocator =
+      &peer_message_allocator;
+  configuration.socketHandlerConfiguration.statisticReportingInterval =
+    configuration.streamConfiguration.statisticReportingInterval;
+  configuration.socketHandlerConfiguration.userData =
+    configuration.userData;
+
+  configuration.trackerSocketHandlerConfiguration.socketConfiguration =
+      &configuration.socketConfiguration;
+  configuration.trackerSocketHandlerConfiguration.messageAllocator =
+      &tracker_message_allocator;
+  configuration.trackerSocketHandlerConfiguration.statisticReportingInterval =
+    configuration.streamConfiguration.statisticReportingInterval;
+  configuration.trackerSocketHandlerConfiguration.userData =
+    configuration.userData;
   ////////////////////////// stream configuration //////////////////////////////
   configuration.streamConfiguration.messageAllocator = &peer_message_allocator;
   configuration.streamConfiguration.moduleConfiguration->streamConfiguration =
@@ -1334,15 +1302,6 @@ ACE_TMAIN (int argc_in,
 //   userData.loginOptions.user.username = ;
 
   cb_user_data.RCFiles.push_back (rc_file_name);
-
-  configuration.socketHandlerConfiguration.messageAllocator =
-    configuration.streamConfiguration.messageAllocator;
-  configuration.socketHandlerConfiguration.socketConfiguration =
-    &configuration.socketConfiguration;
-  configuration.socketHandlerConfiguration.statisticReportingInterval =
-    configuration.streamConfiguration.statisticReportingInterval;
-  configuration.socketHandlerConfiguration.userData =
-    configuration.userData;
 
   configuration.useReactor = use_reactor;
 

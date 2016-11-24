@@ -55,16 +55,20 @@ struct BitTorrent_Client_CursesState;
 struct BitTorrent_Client_Configuration
 {
   inline BitTorrent_Client_Configuration ()
-   : socketConfiguration ()
-   , socketHandlerConfiguration ()
+   : signalHandlerConfiguration ()
    ///////////////////////////////////////
-   , allocatorConfiguration ()
+   , socketConfiguration ()
+   , socketHandlerConfiguration ()
+   , trackerSocketHandlerConfiguration ()
+   ///////////////////////////////////////
+//   , allocatorConfiguration ()
    , moduleConfiguration ()
    , moduleHandlerConfiguration ()
    , streamConfiguration ()
    , userData ()
    ///////////////////////////////////////
-   , protocolConfiguration ()
+//   , protocolConfiguration ()
+   , sessionConfiguration ()
    ///////////////////////////////////////
    , cursesState (NULL)
    , groupID (COMMON_EVENT_THREAD_GROUP_ID)
@@ -72,17 +76,23 @@ struct BitTorrent_Client_Configuration
    , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
+  // ****************************** signal *************************************
+  struct BitTorrent_Client_SignalHandlerConfiguration signalHandlerConfiguration;
   // ****************************** socket *************************************
   struct Net_SocketConfiguration                      socketConfiguration;
+  // *TODO*: this is a workaround to accomodate different message allocators for
+  //         each connection type. There must be a better way to implement this
   struct BitTorrent_Client_SocketHandlerConfiguration socketHandlerConfiguration;
+  struct BitTorrent_Client_SocketHandlerConfiguration trackerSocketHandlerConfiguration;
   // ****************************** stream *************************************
-  struct BitTorrent_AllocatorConfiguration            allocatorConfiguration;
+//  struct BitTorrent_AllocatorConfiguration            allocatorConfiguration;
   struct Stream_ModuleConfiguration                   moduleConfiguration;
   struct BitTorrent_Client_ModuleHandlerConfiguration moduleHandlerConfiguration;
   struct BitTorrent_Client_StreamConfiguration        streamConfiguration;
   struct BitTorrent_Client_UserData*                  userData;
   // ***************************** protocol ************************************
-  struct BitTorrent_ProtocolConfiguration             protocolConfiguration;
+//  struct BitTorrent_ProtocolConfiguration             protocolConfiguration;
+  struct BitTorrent_Client_SessionConfiguration       sessionConfiguration;
   // ***************************************************************************
   // *TODO*: move this somewhere else
   struct BitTorrent_Client_CursesState*               cursesState;

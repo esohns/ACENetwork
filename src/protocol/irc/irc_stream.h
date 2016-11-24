@@ -58,7 +58,6 @@ template <typename StreamStateType,
           typename SessionMessageType>
 class IRC_Stream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
-                        ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
                         Stream_SessionMessageType,
@@ -94,7 +93,6 @@ class IRC_Stream_T
 
  private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
-                        ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
                         Stream_SessionMessageType,

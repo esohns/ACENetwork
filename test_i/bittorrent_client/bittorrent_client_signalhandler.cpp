@@ -19,19 +19,18 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <ace/Synch.h>
 #include "bittorrent_client_signalhandler.h"
 
 #include <ace/Guard_T.h>
 #include <ace/Log_Msg.h>
 //#include <ace/Proactor.h>
 //#include <ace/Reactor.h>
-#include <ace/Synch_Traits.h>
 
 #include "common_tools.h"
 
 #include "net_macros.h"
 
-#include <ace/Synch.h>
 #include "bittorrent_client_curses.h"
 #include "bittorrent_client_network.h"
 
@@ -117,7 +116,12 @@ BitTorrent_Client_SignalHandler::handle (int signal_in)
 
   // ...abort ?
   if (abort)
-    BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abortLeastRecent ();
+  {
+    BitTorrent_Client_IConnection_Manager_t* connection_manager_p =
+        BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+
+    connection_manager_p->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST);
+  } // end IF
 
   // ...shutdown ?
   if (shutdown)
@@ -125,8 +129,7 @@ BitTorrent_Client_SignalHandler::handle (int signal_in)
     // step1: notify curses dispatch ?
     if (inherited::configuration_)
       if (inherited::configuration_->cursesState)
-      {
-        ACE_Guard<ACE_SYNCH_MUTEX> aGuard (inherited::configuration_->cursesState->lock);
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);
 
         inherited::configuration_->cursesState->finished = true;
       } // end IF

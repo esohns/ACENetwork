@@ -59,6 +59,16 @@ class Net_StreamConnectionBase_T
                                   StreamStatusType>
 {
  public:
+  // convenient types
+  typedef Net_IStreamConnection_T<AddressType,
+                                  ConfigurationType,
+                                  StateType,
+                                  StatisticContainerType,
+                                  SocketConfigurationType,
+                                  HandlerConfigurationType,
+                                  StreamType,
+                                  StreamStatusType> ISTREAM_CONNECTION_T;
+
   virtual ~Net_StreamConnectionBase_T ();
 
   // override some task-based members
@@ -154,6 +164,16 @@ class Net_AsynchStreamConnectionBase_T
                                   StreamStatusType>
 {
  public:
+  // convenient types
+  typedef Net_IStreamConnection_T<AddressType,
+                                  ConfigurationType,
+                                  StateType,
+                                  StatisticContainerType,
+                                  SocketConfigurationType,
+                                  HandlerConfigurationType,
+                                  StreamType,
+                                  StreamStatusType> ISTREAM_CONNECTION_T;
+
   virtual ~Net_AsynchStreamConnectionBase_T ();
 
   // override some ACE_Service_Handler members
@@ -188,7 +208,6 @@ class Net_AsynchStreamConnectionBase_T
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
-                                   //////
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   Net_AsynchStreamConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle

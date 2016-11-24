@@ -40,7 +40,6 @@ class Test_U_SessionMessage;
 
 class Test_U_InboundConnectionStream
  : public Stream_Base_T<ACE_MT_SYNCH,
-                        ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
                         Stream_SessionMessageType,
@@ -79,7 +78,6 @@ class Test_U_InboundConnectionStream
 
  private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
-                        ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
                         Stream_SessionMessageType,
@@ -104,7 +102,6 @@ class Test_U_InboundConnectionStream
 
 class Test_U_OutboundConnectionStream
  : public Stream_Base_T<ACE_MT_SYNCH,
-                        ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
                         Stream_SessionMessageType,
@@ -143,7 +140,6 @@ class Test_U_OutboundConnectionStream
 
  private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
-                        ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
                         Stream_SessionMessageType,

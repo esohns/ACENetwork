@@ -45,16 +45,23 @@ class BitTorrent_Export BitTorrent_Tools
 
   static std::string Type2String (enum BitTorrent_MessageType&);
 
-//  static bool parseURL (const std::string&, // URL
-//                        ACE_INET_Addr&,     // return value: host address
-//                        std::string&);      // return value: URI
+  // *NOTE*: this returns the 'info_hash' tracker HTTP request value
+  static std::string MetaInfo2InfoHash (const Bencoding_Dictionary_t&); // metainfo
+  static unsigned int MetaInfo2Length (const Bencoding_Dictionary_t&); // metainfo
+
   // *IMPORTANT NOTE*: caller needs to free the return value (second argument)
   static bool parseMetaInfoFile (const std::string&,       // metainfo (aka .bittorrent) file
                                  Bencoding_Dictionary_t*&, // return value: metainfo
                                  bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,
                                  bool = NET_PROTOCOL_DEFAULT_YACC_TRACE);
-
   static void free (Bencoding_Dictionary_t*&); // metainfo
+  // *NOTE*: this follows the Azureus style (encode client and version
+  //         information)
+  //         (see also: https://wiki.theory.org/BitTorrentSpecification#peer_id)
+  static std::string generatePeerId ();
+  // *NOTE*: the key length is not specified, so this generates 20 bytes, which
+  //         makes it somewhat consistent with the other request values
+  static std::string generateKey ();
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools ())
@@ -63,6 +70,8 @@ class BitTorrent_Export BitTorrent_Tools
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools& operator= (const BitTorrent_Tools&))
 
   // helper methods
+  static std::string bencode (const Bencoding_Dictionary_t&);
+  static std::string bencode (const Bencoding_List_t&);
   static void free (Bencoding_List_t*&); // bencoded list
 };
 

@@ -693,7 +693,8 @@ do_work (unsigned int bufferSize_in,
   Test_U_IConnection_t* connection_p = NULL;
   Test_U_IStreamConnection_t* istream_connection_p = NULL;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_Time_Value timeout (NET_CLIENT_DEFAULT_INITIALIZATION_TIMEOUT, 0);
+  ACE_Time_Value initialization_timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT,
+                                         0);
   ACE_Time_Value deadline;
   Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
 //  Test_U_MessageData* message_data_p = NULL;
@@ -760,7 +761,7 @@ do_work (unsigned int bufferSize_in,
   } // end IF
   // step1b: wait for the connection to finish initializing
   // *TODO*: avoid tight loop here
-  deadline = COMMON_TIME_NOW + timeout;
+  deadline = COMMON_TIME_NOW + initialization_timeout;
   do
   {
     status = connection_p->status ();
@@ -816,7 +817,7 @@ do_work (unsigned int bufferSize_in,
 //  } // end IF
 //  ACE_NEW_NORETURN (message_data_p->HTTPRecord,
   ACE_NEW_NORETURN (record_p,
-                    HTTP_Record ());
+                    struct HTTP_Record ());
 //  if (!message_data_p->HTTPRecord)
   if (!record_p)
   {

@@ -32,21 +32,23 @@
 // forward declaration(s)
 class ACE_Allocator;
 class Test_U_Message;
-template <typename AllocatorConfigurationType,
+template <ACE_SYNCH_DECL,
+          typename AllocatorConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Test_U_SessionMessage
- : public Stream_SessionMessageBase_T<Test_U_AllocatorConfiguration,
-                                      Stream_SessionMessageType,
+ : public Stream_SessionMessageBase_T<struct Test_U_AllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
                                       Test_U_StreamSessionData_t,
-                                      Test_U_UserData,
+                                      struct Test_U_UserData,
                                       Test_U_ControlMessage_t,
                                       Test_U_SessionMessage>
 {
   // grant access to specific private ctors
-  friend class Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
+  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                                 struct Test_U_AllocatorConfiguration,
                                                  Test_U_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
@@ -54,19 +56,19 @@ class Test_U_SessionMessage
  public:
   // *NOTE*: assumes responsibility for the second argument !
   // *TODO*: (using gcc) cannot pass reference to pointer for some reason
-  Test_U_SessionMessage (Stream_SessionMessageType,    // session message type
-                         Test_U_StreamSessionData_t*&, // session data container handle
-                         Test_U_UserData*);            // user data handle
+  Test_U_SessionMessage (enum Stream_SessionMessageType, // session message type
+                         Test_U_StreamSessionData_t*&,   // session data container handle
+                         struct Test_U_UserData*);       // user data handle
   virtual ~Test_U_SessionMessage ();
 
   // overloaded from ACE_Message_Block
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<Test_U_AllocatorConfiguration,
-                                      Stream_SessionMessageType,
+  typedef Stream_SessionMessageBase_T<struct Test_U_AllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
                                       Test_U_StreamSessionData_t,
-                                      Test_U_UserData,
+                                      struct Test_U_UserData,
                                       Test_U_ControlMessage_t,
                                       Test_U_SessionMessage> inherited;
 

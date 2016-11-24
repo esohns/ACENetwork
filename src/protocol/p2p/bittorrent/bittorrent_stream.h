@@ -40,7 +40,7 @@
 
 #include "bittorrent_common.h"
 //#include "bittorrent_module_bisector.h"
-#include "bittorrent_module_handler.h"
+//#include "bittorrent_module_handler.h"
 #include "bittorrent_module_parser.h"
 #include "bittorrent_module_streamer.h"
 
@@ -69,8 +69,7 @@ template <typename StreamStateType,
           typename SessionStateType,
           typename CBDataType>
 class BitTorrent_PeerStream_T
- : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        ACE_MT_SYNCH,
+ : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
                         enum Stream_SessionMessageType,
@@ -106,8 +105,7 @@ class BitTorrent_PeerStream_T
   inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
  private:
-  typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        ACE_MT_SYNCH,
+  typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
                         enum Stream_SessionMessageType,
@@ -213,30 +211,30 @@ class BitTorrent_PeerStream_T
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;
 
-  typedef BitTorrent_Module_PeerHandler_T<ACE_INET_Addr,
-                                          ModuleHandlerConfigurationType,
-                                          BitTorrent_RuntimeStatistic_t,
-                                          ControlMessageType,
-                                          DataMessageType,
-                                          SessionMessageType,
-                                          SessionDataType,
-                                          OWN_TYPE_T,
-                                          enum Stream_StateMachine_ControlState,
-                                          struct Net_SocketConfiguration,
-                                          HandlerConfigurationType,
-                                          ConnectionConfigurationType,
-                                          ConnectionStateType,
-                                          SessionStateType,
-                                          CBDataType> HANDLER_T;
-  typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
-                                         Common_TimePolicy_t,
-                                         Stream_SessionId_t,             // session id type
-                                         SessionDataType,                // session data type
-                                         Stream_SessionMessageType,      // session event type
-                                         Stream_ModuleConfiguration,
-                                         ModuleHandlerConfigurationType,
-                                         BitTorrent_INotify_t,           // stream notification interface type
-                                         HANDLER_T> MODULE_HANDLER_T;
+//  typedef BitTorrent_Module_PeerHandler_T<ACE_INET_Addr,
+//                                          ModuleHandlerConfigurationType,
+//                                          BitTorrent_RuntimeStatistic_t,
+//                                          ControlMessageType,
+//                                          DataMessageType,
+//                                          SessionMessageType,
+//                                          SessionDataType,
+//                                          OWN_TYPE_T,
+//                                          enum Stream_StateMachine_ControlState,
+//                                          struct Net_SocketConfiguration,
+//                                          HandlerConfigurationType,
+//                                          ConnectionConfigurationType,
+//                                          ConnectionStateType,
+//                                          SessionStateType,
+//                                          CBDataType> HANDLER_T;
+//  typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
+//                                         Common_TimePolicy_t,
+//                                         Stream_SessionId_t,             // session id type
+//                                         SessionDataType,                // session data type
+//                                         Stream_SessionMessageType,      // session event type
+//                                         Stream_ModuleConfiguration,
+//                                         ModuleHandlerConfigurationType,
+//                                         BitTorrent_INotify_t,           // stream notification interface type
+//                                         HANDLER_T> MODULE_HANDLER_T;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_PeerStream_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_PeerStream_T (const BitTorrent_PeerStream_T&))
@@ -323,30 +321,30 @@ class BitTorrent_TrackerStream_T
                                      SessionStateType,
                                      CBDataType> OWN_TYPE_T;
 
-  typedef BitTorrent_Module_TrackerHandler_T<ACE_INET_Addr,
-                                             ModuleHandlerConfigurationType,
-                                             BitTorrent_RuntimeStatistic_t,
-                                             ControlMessageType,
-                                             DataMessageType,
-                                             SessionMessageType,
-                                             SessionDataType,
-                                             PeerStreamType,
-                                             enum Stream_StateMachine_ControlState,
-                                             struct Net_SocketConfiguration,
-                                             HandlerConfigurationType,
-                                             ConnectionConfigurationType,
-                                             ConnectionStateType,
-                                             SessionStateType,
-                                             CBDataType> HANDLER_T;
-  typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
-                                         Common_TimePolicy_t,
-                                         Stream_SessionId_t,             // session id type
-                                         SessionDataType,                // session data type
-                                         Stream_SessionMessageType,      // session event type
-                                         Stream_ModuleConfiguration,
-                                         ModuleHandlerConfigurationType,
-                                         BitTorrent_INotify_t,           // stream notification interface type
-                                         HANDLER_T> MODULE_HANDLER_T;
+//  typedef BitTorrent_Module_TrackerHandler_T<ACE_INET_Addr,
+//                                             ModuleHandlerConfigurationType,
+//                                             BitTorrent_RuntimeStatistic_t,
+//                                             ControlMessageType,
+//                                             DataMessageType,
+//                                             SessionMessageType,
+//                                             SessionDataType,
+//                                             PeerStreamType,
+//                                             enum Stream_StateMachine_ControlState,
+//                                             struct Net_SocketConfiguration,
+//                                             HandlerConfigurationType,
+//                                             ConnectionConfigurationType,
+//                                             ConnectionStateType,
+//                                             SessionStateType,
+//                                             CBDataType> HANDLER_T;
+//  typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
+//                                         Common_TimePolicy_t,
+//                                         Stream_SessionId_t,             // session id type
+//                                         SessionDataType,                // session data type
+//                                         Stream_SessionMessageType,      // session event type
+//                                         Stream_ModuleConfiguration,
+//                                         ModuleHandlerConfigurationType,
+//                                         BitTorrent_INotify_t,           // stream notification interface type
+//                                         HANDLER_T> MODULE_HANDLER_T;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStream_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStream_T (const BitTorrent_TrackerStream_T&))

@@ -21,11 +21,14 @@
 
 #include "http_tools.h"
 
+#include <algorithm>
 #include <locale>
 #include <regex>
 #include <sstream>
 
 #include <ace/Log_Msg.h>
+
+#include "common_defines.h"
 
 #include "net_macros.h"
 
@@ -480,4 +483,43 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   ACE_ASSERT (match_results_3.ready () && !match_results_3.empty ());
 
   return true;
+}
+
+std::string
+HTTP_Tools::URLEncode (const std::string& string_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::URLEncode"));
+
+  std::string result;
+
+  std::locale locale (ACE_TEXT_ALWAYS_CHAR (COMMON_LOCALE_EN_US_STRING));
+  std::ostringstream converter;
+  converter << std::hex;
+  std::string converted_string;
+  for (std::string::const_iterator iterator = string_in.begin ();
+       iterator != string_in.end ();
+       ++iterator)
+  {
+    if (!std::isdigit (*iterator, locale) &&
+        !std::isalpha (*iterator, locale) &&
+        !((*iterator == '.') ||
+          (*iterator == '-') ||
+          (*iterator == '_') ||
+          (*iterator == '~')))
+    {
+      result += '%';
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter << *iterator;
+      converted_string = converter.str ();
+      std::transform (converted_string.begin (), converted_string.end (),
+                      converted_string.begin (),
+                      [](unsigned char c) { return std::toupper (c); });
+      result += converted_string;
+    } // end IF
+    else
+      result += *iterator;
+  } // end FOR
+
+  return result;
 }

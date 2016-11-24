@@ -54,19 +54,20 @@ struct Test_U_DHCPClient_Configuration
   ACE_HANDLE handle;          // listen handle (unicast)
 };
 
-typedef Stream_ControlMessage_T<Stream_ControlMessageType,
-                                Test_U_AllocatorConfiguration,
+typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
+                                struct Test_U_AllocatorConfiguration,
                                 Test_U_Message,
                                 Test_U_SessionMessage> Test_U_ControlMessage_t;
 
-typedef Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
+typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                          struct Test_U_AllocatorConfiguration,
                                           Test_U_ControlMessage_t,
                                           Test_U_Message,
                                           Test_U_SessionMessage> Test_U_MessageAllocator_t;
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    Test_U_StreamSessionData,
-                                    Stream_SessionMessageType,
+                                    struct Test_U_StreamSessionData,
+                                    enum Stream_SessionMessageType,
                                     Test_U_Message,
                                     Test_U_SessionMessage> Test_U_ISessionNotify_t;
 typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
@@ -83,9 +84,9 @@ struct Test_U_DHCPClient_GTK_CBData
    , subscribersLock ()
   {};
 
-  Test_U_DHCPClient_Configuration* configuration;
-  Test_U_Subscribers_t             subscribers;
-  ACE_SYNCH_RECURSIVE_MUTEX        subscribersLock;
+  struct Test_U_DHCPClient_Configuration* configuration;
+  Test_U_Subscribers_t                    subscribers;
+  ACE_SYNCH_RECURSIVE_MUTEX               subscribersLock;
 };
 
 //struct Test_U_DHCPClient_ThreadData
@@ -95,8 +96,8 @@ struct Test_U_DHCPClient_GTK_CBData
 //   , eventSourceID (0)
 //  {};
 
-//  Test_U_DHCPClient_GTK_CBData* CBData;
-//  guint                         eventSourceID;
+//  struct Test_U_DHCPClient_GTK_CBData* CBData;
+//  guint                                eventSourceID;
 //};
 
 #endif

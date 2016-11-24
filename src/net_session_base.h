@@ -28,15 +28,16 @@
 //#include <ace/SOCK_Connector.h>
 #include <ace/Synch_Traits.h>
 
+//#include "common_iget.h"
+
 #include "net_common.h"
 #include "net_defines.h"
-//#include "net_iconnection.h"
 
 // forward declarations
 class ACE_Message_Block;
 
 template <typename AddressType,
-          typename ConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename StatisticContainerType,
           ////////////////////////////////
@@ -47,35 +48,31 @@ template <typename AddressType,
           typename ConnectionManagerType, // derived from Net_IConnectionManager_T
           typename ConnectorType,
           ////////////////////////////////
+          typename ConfigurationType,
           typename StateType,
           typename SessionInterfaceType> // derived from Net_ISession_T
 class Net_SessionBase_T
  : public SessionInterfaceType
-// Net_ISession_T<AddressType,
-//                                 ConfigurationType,
-//                                 ConnectionStateType,
-//                                 StatisticContainerType,
-//                                 SocketConfigurationType,
-//                                 HandlerConfigurationType,
-//                                 typename ConnectionType::STREAM_T,
-//                                 typename ConnectionType::STREAM_T::STATUS_T,
-//                                 StateType>
 {
  public:
-  Net_SessionBase_T (const HandlerConfigurationType&, // socket handler configuration
-                     ConnectionManagerType* = NULL,   // connection manager handle
-                     bool = !NET_EVENT_USE_REACTOR);  // asynchronous ?
+  // convenient types
+  typedef ConnectionType ICONNECTION_T;
+//  typedef typename ConnectorType::ISTREAM_CONNECTION_T ISTREAM_CONNECTION_T;
+  typedef SessionInterfaceType ISESSION_T;
+
+  Net_SessionBase_T ();
   virtual ~Net_SessionBase_T ();
 
   // implement (part of) Net_ISession_T
+  virtual bool initialize (const ConfigurationType&);
   inline virtual const StateType& state () const { return state_; };
-
   virtual void connect (const AddressType&); // peer address
   virtual void disconnect (const AddressType&); // peer address
+  virtual void close (bool = false); // wait ?
 
   ////////////////////////////////////////
   // callbacks
-  // *TODO*: remove ASAP
+  // *TODO*: these should be private
   virtual void connect (Net_ConnectionId_t); // connection id
   virtual void disconnect (Net_ConnectionId_t); // connection id
 
@@ -85,19 +82,19 @@ class Net_SessionBase_T
 //  typedef ACE_Connector<ConnectionType,
 //                        ACE_SOCK_CONNECTOR> CONNECTOR_T;
 //  typedef ACE_Asynch_Connector<ConnectionType> ASYNCH_CONNECTOR_T;
-  typedef SessionInterfaceType ISESSION_T;
 
-  HandlerConfigurationType* configuration_;
+  ConfigurationType*        configuration_;
   ConnectionManagerType*    connectionManager_;
+  HandlerConfigurationType* handlerConfiguration_;
   bool                      isAsynch_;
 
   ACE_SYNCH_MUTEX           lock_;
+  ACE_SYNCH_CONDITION       condition_;
   StateType                 state_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_SessionBase_T (const Net_SessionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_SessionBase_T& operator= (const Net_SessionBase_T&))
-
 };
 
 // include template definition

@@ -31,26 +31,32 @@
 #include "bittorrent_defines.h"
 #include "bittorrent_tools.h"
 
-template <typename SessionDataType>
-BitTorrent_Message_T<SessionDataType>::BitTorrent_Message_T (unsigned int requestedSize_in)
+template <typename SessionDataType,
+          typename UserDataType>
+BitTorrent_Message_T<SessionDataType,
+                     UserDataType>::BitTorrent_Message_T (unsigned int requestedSize_in)
  : inherited (requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::BitTorrent_Message_T"));
 
 }
 
-template <typename SessionDataType>
-BitTorrent_Message_T<SessionDataType>::BitTorrent_Message_T (const BitTorrent_Message_T& message_in)
+template <typename SessionDataType,
+          typename UserDataType>
+BitTorrent_Message_T<SessionDataType,
+                     UserDataType>::BitTorrent_Message_T (const BitTorrent_Message_T& message_in)
  : inherited (message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::BitTorrent_Message_T"));
 
 }
 
-template <typename SessionDataType>
-BitTorrent_Message_T<SessionDataType>::BitTorrent_Message_T (ACE_Data_Block* dataBlock_in,
-                                                             ACE_Allocator* messageAllocator_in,
-                                                             bool incrementMessageCounter_in)
+template <typename SessionDataType,
+          typename UserDataType>
+BitTorrent_Message_T<SessionDataType,
+                     UserDataType>::BitTorrent_Message_T (ACE_Data_Block* dataBlock_in,
+                                                          ACE_Allocator* messageAllocator_in,
+                                                          bool incrementMessageCounter_in)
  : inherited (dataBlock_in,               // use (don't own !) this data block
               messageAllocator_in,        // allocator
               incrementMessageCounter_in) // increment message counter ?
@@ -68,17 +74,21 @@ BitTorrent_Message_T<SessionDataType>::BitTorrent_Message_T (ACE_Data_Block* dat
 //
 // }
 
-template <typename SessionDataType>
-BitTorrent_Message_T<SessionDataType>::~BitTorrent_Message_T ()
+template <typename SessionDataType,
+          typename UserDataType>
+BitTorrent_Message_T<SessionDataType,
+                     UserDataType>::~BitTorrent_Message_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::~BitTorrent_Message_T"));
 
   // *NOTE*: will be called just BEFORE this is passed back to the allocator
 }
 
-template <typename SessionDataType>
+template <typename SessionDataType,
+          typename UserDataType>
 enum BitTorrent_MessageType
-BitTorrent_Message_T<SessionDataType>::command () const
+BitTorrent_Message_T<SessionDataType,
+                     UserDataType>::command () const
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::command"));
 
@@ -92,18 +102,22 @@ BitTorrent_Message_T<SessionDataType>::command () const
   return record_r.type;
 }
 
-template <typename SessionDataType>
+template <typename SessionDataType,
+          typename UserDataType>
 std::string
-BitTorrent_Message_T<SessionDataType>::Command2String (enum BitTorrent_MessageType type_in)
+BitTorrent_Message_T<SessionDataType,
+                     UserDataType>::Command2String (enum BitTorrent_MessageType type_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::Command2String"));
 
   return BitTorrent_Tools::Type2String (type_in);
 }
 
-template <typename SessionDataType>
+template <typename SessionDataType,
+          typename UserDataType>
 void
-BitTorrent_Message_T<SessionDataType>::dump_state () const
+BitTorrent_Message_T<SessionDataType,
+                     UserDataType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::dump_state"));
 
@@ -121,9 +135,11 @@ BitTorrent_Message_T<SessionDataType>::dump_state () const
               ACE_TEXT (BitTorrent_Tools::Record2String (record_r).c_str ())));
 }
 
-template <typename SessionDataType>
+template <typename SessionDataType,
+          typename UserDataType>
 ACE_Message_Block*
-BitTorrent_Message_T<SessionDataType>::duplicate (void) const
+BitTorrent_Message_T<SessionDataType,
+                     UserDataType>::duplicate (void) const
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::duplicate"));
 
@@ -204,3 +220,123 @@ allocate:
 
   return message_p;
 }
+
+//////////////////////////////////////////
+
+template <typename SessionDataType,
+          typename UserDataType>
+BitTorrent_TrackerMessage_T<SessionDataType,
+                            UserDataType>::BitTorrent_TrackerMessage_T (unsigned int size_in)
+ : inherited (size_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::BitTorrent_TrackerMessage_T"));
+
+}
+
+template <typename SessionDataType,
+          typename UserDataType>
+BitTorrent_TrackerMessage_T<SessionDataType,
+                            UserDataType>::BitTorrent_TrackerMessage_T (const BitTorrent_TrackerMessage_T& message_in)
+ : inherited (message_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::BitTorrent_TrackerMessage_T"));
+
+}
+
+template <typename SessionDataType,
+          typename UserDataType>
+BitTorrent_TrackerMessage_T<SessionDataType,
+                            UserDataType>::BitTorrent_TrackerMessage_T (ACE_Data_Block* dataBlock_in,
+                                                                        ACE_Allocator* messageAllocator_in,
+                                                                        bool incrementMessageCounter_in)
+ : inherited (dataBlock_in,        // use (don't own (!) memory of-) this data block
+              messageAllocator_in, // re-use the same allocator
+              incrementMessageCounter_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::BitTorrent_TrackerMessage_T"));
+
+}
+
+//BitTorrent_TrackerMessage_T::BitTorrent_TrackerMessage_T (ACE_Allocator* messageAllocator_in)
+// : inherited (messageAllocator_in) // message block allocator
+//{
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::BitTorrent_TrackerMessage_T"));
+//
+//}
+
+template <typename SessionDataType,
+          typename UserDataType>
+BitTorrent_TrackerMessage_T<SessionDataType,
+                            UserDataType>::~BitTorrent_TrackerMessage_T ()
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::~BitTorrent_TrackerMessage_T"));
+
+}
+
+template <typename SessionDataType,
+          typename UserDataType>
+ACE_Message_Block*
+BitTorrent_TrackerMessage_T<SessionDataType,
+                            UserDataType>::duplicate (void) const
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::duplicate"));
+
+  OWN_TYPE_T* message_p = NULL;
+
+  // create a new BitTorrent_TrackerMessage_TBase that contains unique copies of
+  // the message block fields, but a (reference counted) shallow duplicate of
+  // the ACE_Data_Block.
+
+  // if there is no allocator, use the standard new and delete calls.
+  if (inherited::message_block_allocator_ == NULL)
+    ACE_NEW_NORETURN (message_p,
+                      OWN_TYPE_T (*this));
+  else // otherwise, use the existing message_block_allocator
+  {
+    // *NOTE*: the argument to malloc doesn't matter, as this will be
+    //         a shallow copy which just references the same data block
+    ACE_NEW_MALLOC_NORETURN (message_p,
+                             static_cast<OWN_TYPE_T*> (inherited::message_block_allocator_->calloc (inherited::capacity (),
+                                                                                                    '\0')),
+                             OWN_TYPE_T (*this));
+  } // end ELSE
+  if (!message_p)
+  {
+    Stream_IAllocator* allocator_p =
+      dynamic_cast<Stream_IAllocator*> (inherited::message_block_allocator_);
+    ACE_ASSERT (allocator_p);
+    if (allocator_p->block ())
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate BitTorrent_TrackerMessage_T: \"%m\", aborting\n")));
+    return NULL;
+  } // end IF
+
+  // increment the reference counts of any continuation messages
+  if (inherited::cont_)
+  {
+    message_p->cont_ = inherited::cont_->duplicate ();
+    if (!message_p->cont_)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to BitTorrent_TrackerMessage_TBase::duplicate(): \"%m\", aborting\n")));
+
+      // clean up
+      message_p->release ();
+
+      return NULL;
+    } // end IF
+  } // end IF
+
+  // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)...
+
+  return message_p;
+}
+
+//std::string
+//BitTorrent_TrackerMessage_T::CommandType2String (HTTP_Method_t method_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::CommandType2String"));
+
+//  return (method_in == HTTP_Codes::HTTP_METHOD_INVALID ? ACE_TEXT_ALWAYS_CHAR (HTTP_COMMAND_STRING_RESPONSE)
+//                                                       : HTTP_Tools::Method2String (method_in));
+//}

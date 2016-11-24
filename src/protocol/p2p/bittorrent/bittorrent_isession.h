@@ -30,7 +30,7 @@
 class ACE_Message_Block;
 
 template <typename AddressType,
-          typename ConfigurationType, // connection-
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename StatisticContainerType,
           ////////////////////////////////
@@ -40,16 +40,18 @@ template <typename AddressType,
           typename StreamType,
           typename StreamStatusType,
           ////////////////////////////////
+          typename ConfigurationType,
           typename StateType>
 class BitTorrent_ISession_T
  : public Net_ISession_T<AddressType,
-                         ConfigurationType,
+                         ConnectionConfigurationType,
                          ConnectionStateType,
                          StatisticContainerType,
                          SocketConfigurationType,
                          HandlerConfigurationType,
                          StreamType,
                          StreamStatusType,
+                         ConfigurationType,
                          StateType>
 {
  public:

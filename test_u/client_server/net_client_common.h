@@ -57,8 +57,8 @@ struct Test_U_Client_ConnectorConfiguration
    //, statisticCollectionInterval (0)
   {};
 
-  Test_U_IInetConnectionManager_t*   connectionManager;
-  Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
+  Test_U_IInetConnectionManager_t*          connectionManager;
+  struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
   //unsigned int                    statisticCollectionInterval; // statistic collecting interval (second(s)) [0: off]
 };
 
@@ -75,12 +75,12 @@ struct Test_U_Client_SignalHandlerConfiguration
    , statisticReportingInterval (0)
   {};
 
-  long                               actionTimerId;
-  Test_U_IConnector_t*               connector;
-  Stream_IAllocator*                 messageAllocator;
-  ACE_INET_Addr                      peerAddress;
-  Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
-  unsigned int                       statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
+  long                                      actionTimerId;
+  Test_U_IConnector_t*                      connector;
+  Stream_IAllocator*                        messageAllocator;
+  ACE_INET_Addr                             peerAddress;
+  struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
+  unsigned int                              statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
 };
 
 struct Test_U_Client_Configuration
@@ -93,18 +93,19 @@ struct Test_U_Client_Configuration
    , userData ()
   {};
 
-  Test_U_Client_SignalHandlerConfiguration signalHandlerConfiguration;
-  Test_U_Client_TimeoutHandler*            timeoutHandler;
+  struct Test_U_Client_SignalHandlerConfiguration signalHandlerConfiguration;
+  Test_U_Client_TimeoutHandler*                   timeoutHandler;
 
-  Test_U_UserData                          userData;
+  struct Test_U_UserData                          userData;
 };
 
-typedef Stream_ControlMessage_T<Stream_ControlMessageType,
-                                Stream_AllocatorConfiguration,
+typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
+                                struct Stream_AllocatorConfiguration,
                                 Test_U_Message,
                                 Test_U_SessionMessage> Test_U_ControlMessage_t;
 
-typedef Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
+typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                          struct Stream_AllocatorConfiguration,
                                           Test_U_ControlMessage_t,
                                           Test_U_Message,
                                           Test_U_SessionMessage> Test_U_StreamMessageAllocator_t;
@@ -112,8 +113,8 @@ typedef Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
 //////////////////////////////////////////
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    Test_U_StreamSessionData,
-                                    Stream_SessionMessageType,
+                                    struct Test_U_StreamSessionData,
+                                    enum Stream_SessionMessageType,
                                     Test_U_Message,
                                     Test_U_SessionMessage> Test_U_ISessionNotify_t;
 typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
@@ -131,9 +132,9 @@ struct Test_U_Client_GTK_CBData
    , subscribersLock ()
   {};
 
-  Test_U_Client_Configuration* configuration;
-  Test_U_Subscribers_t         subscribers;
-  ACE_SYNCH_RECURSIVE_MUTEX    subscribersLock;
+  struct Test_U_Client_Configuration* configuration;
+  Test_U_Subscribers_t                subscribers;
+  ACE_SYNCH_RECURSIVE_MUTEX           subscribersLock;
 };
 
 #endif

@@ -21,9 +21,13 @@
 #ifndef NET_CLIENT_DEFINES_H
 #define NET_CLIENT_DEFINES_H
 
-#define NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT     3 // seconds
-#define NET_CLIENT_DEFAULT_INITIALIZATION_TIMEOUT     3 // seconds
+// (asynchronous) connections
+#define NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT          NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT // seconds
+// *IMPORTANT NOTE*: unfortunately, this means that asynchronous connections
+//                   take at least this amount of time to establish
+// *TODO*: remove ASAP
+#define NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT_INTERVAL NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL  // second(s)
 
-#define NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS 3
+#define NET_CLIENT_DEFAULT_NUMBER_OF_DISPATCH_THREADS      3
 
 #endif

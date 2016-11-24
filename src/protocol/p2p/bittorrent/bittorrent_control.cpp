@@ -17,34 +17,7 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include "stdafx.h"
 
-#ifndef BITTORRENT_ICONTROL_H
-#define BITTORRENT_ICONTROL_H
-
-#include <map>
-#include <string>
-
-#include "common_iget.h"
-
-#include "bittorrent_common.h"
-
-template <typename SessionInterfaceType>
-class BitTorrent_IControl_T
- : public Common_IGet_T<std::map <std::string, SessionInterfaceType*> >
-{
- public:
-  inline virtual ~BitTorrent_IControl_T () {};
-
-  virtual void download (const std::string&) = 0; // metainfo (aka '.torrent') file URI
-  virtual SessionInterfaceType* get (const std::string&) = 0; // metainfo (aka '.torrent') file URI
-
-  virtual void stop (bool = false) = 0; // wait ?
-  virtual void wait () = 0;
-
-  ////////////////////////////////////////
-  // callbacks
-  virtual void notify (const std::string&,         // metainfo (aka '.torrent') file URI
-                       enum BitTorrent_Event) = 0; // event
-};
-
-#endif
+#include <ace/Synch.h>
+#include "bittorrent_control.h"

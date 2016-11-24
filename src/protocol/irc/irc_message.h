@@ -34,12 +34,14 @@ class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
 class IRC_SessionMessage;
-template <typename AllocatorConfigurationType,
+template <ACE_SYNCH_DECL,
+          typename AllocatorConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
 class Stream_MessageAllocatorHeapBase_T;
-template <typename AllocatorConfigurationType,
+template <ACE_SYNCH_DECL,
+          typename AllocatorConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
@@ -53,11 +55,13 @@ class IRC_Export IRC_Message
                                    IRC_CommandType_t>
 {
   // enable access to specific private ctors
-  friend class Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
+  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                                 Stream_AllocatorConfiguration,
                                                  IRC_ControlMessage_t,
                                                  IRC_Message,
                                                  IRC_SessionMessage>;
-  friend class Stream_CachedMessageAllocator_T<Stream_AllocatorConfiguration,
+  friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
+                                               Stream_AllocatorConfiguration,
                                                IRC_ControlMessage_t,
                                                IRC_Message,
                                                IRC_SessionMessage>;

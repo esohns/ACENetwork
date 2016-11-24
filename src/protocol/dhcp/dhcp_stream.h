@@ -56,8 +56,7 @@ template <typename StreamStateType,
           typename DataMessageType,
           typename SessionMessageType>
 class DHCP_Stream_T
- : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        ACE_MT_SYNCH,
+ : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
                         Stream_SessionMessageType,
@@ -90,8 +89,7 @@ class DHCP_Stream_T
   virtual void report () const;
 
  private:
-  typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        ACE_MT_SYNCH,
+  typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
                         Stream_SessionMessageType,

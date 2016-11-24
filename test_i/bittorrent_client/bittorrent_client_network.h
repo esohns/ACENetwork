@@ -46,21 +46,22 @@
 #include "bittorrent_stream_common.h"
 
 #include "bittorrent_client_common.h"
-#include "bittorrent_client_stream.h"
+//#include "bittorrent_client_stream.h"
 #include "bittorrent_client_stream_common.h"
 
 // forward declarations
 struct BitTorrent_Client_Configuration;
 struct BitTorrent_Client_UserData;
 template <typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
+          typename ConnectionConfigurationType,
+          typename ConnectionStateType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
-          typename SessionStateType>
+          typename ConfigurationType,
+          typename StateType>
 class BitTorrent_ISession_T;
 
 //////////////////////////////////////////
@@ -110,6 +111,7 @@ struct BitTorrent_Client_SocketHandlerConfiguration
   struct BitTorrent_Client_UserData* userData;
 };
 
+struct BitTorrent_Client_SessionConfiguration;
 struct BitTorrent_Client_SessionState;
 typedef BitTorrent_ISession_T<ACE_INET_Addr,
                               struct BitTorrent_Client_Configuration,
@@ -119,12 +121,13 @@ typedef BitTorrent_ISession_T<ACE_INET_Addr,
                               struct BitTorrent_Client_SocketHandlerConfiguration,
                               BitTorrent_Client_PeerStream_t,
                               enum Stream_StateMachine_ControlState,
+                              struct BitTorrent_Client_SessionConfiguration,
                               struct BitTorrent_Client_SessionState> BitTorrent_Client_ISession_t;
 struct BitTorrent_Client_ConnectionState
- : BitTorrent_ConnectionState
+ : Net_ConnectionState
 {
   inline BitTorrent_Client_ConnectionState ()
-   : BitTorrent_ConnectionState ()
+   : Net_ConnectionState ()
    , configuration (NULL)
    , connection (NULL)
    , session (NULL)
@@ -135,28 +138,6 @@ struct BitTorrent_Client_ConnectionState
   BitTorrent_Client_IConnection_t*        connection;
   BitTorrent_Client_ISession_t*           session;
 
-  struct BitTorrent_Client_UserData*      userData;
-};
-
-typedef std::map<Stream_SessionId_t, BitTorrent_Client_IConnection_t*> BitTorrent_Client_Connections_t;
-typedef BitTorrent_Client_Connections_t::iterator BitTorrent_Client_ConnectionsIterator_t;
-typedef std::map<std::string, BitTorrent_Client_Connections_t> BitTorrent_Client_SessionConnections_t;
-typedef BitTorrent_Client_SessionConnections_t::iterator BitTorrent_Client_SessionConnectionsIterator_t;
-
-struct BitTorrent_Client_SessionState
- : BitTorrent_SessionState
-{
-  inline BitTorrent_Client_SessionState ()
-   : BitTorrent_SessionState ()
-   , configuration (NULL)
-   , connections ()
-   , session (NULL)
-   , userData (NULL)
-  {};
-
-  struct BitTorrent_Client_Configuration* configuration;
-  BitTorrent_Client_SessionConnections_t  connections;
-  BitTorrent_Client_ISession_t*           session;
   struct BitTorrent_Client_UserData*      userData;
 };
 
@@ -292,5 +273,43 @@ typedef Net_Connection_Manager_T<ACE_INET_Addr,
 
 typedef ACE_Singleton<BitTorrent_Client_Connection_Manager_t,
                       ACE_SYNCH_MUTEX> BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON;
+
+//////////////////////////////////////////
+
+//typedef std::map<std::string, BitTorrent_Client_Connections_t> BitTorrent_Client_SessionConnections_t;
+//typedef BitTorrent_Client_SessionConnections_t::iterator BitTorrent_Client_SessionConnectionsIterator_t;
+template <typename SessionInterfaceType>
+class BitTorrent_IControl_T;
+typedef BitTorrent_IControl_T<BitTorrent_Client_ISession_t> BitTorrent_Client_IControl_t;
+
+struct BitTorrent_Client_SessionConfiguration
+ : BitTorrent_SessionConfiguration
+{
+  inline BitTorrent_Client_SessionConfiguration ()
+   : BitTorrent_SessionConfiguration ()
+   , connectionManager (NULL)
+   , socketHandlerConfiguration (NULL)
+   , trackerSocketHandlerConfiguration (NULL)
+  {};
+
+  BitTorrent_Client_Connection_Manager_t*              connectionManager;
+  struct BitTorrent_Client_SocketHandlerConfiguration* socketHandlerConfiguration;
+  struct BitTorrent_Client_SocketHandlerConfiguration* trackerSocketHandlerConfiguration;
+};
+
+struct BitTorrent_Client_SessionState
+ : BitTorrent_SessionState
+{
+  inline BitTorrent_Client_SessionState ()
+   : controller (NULL)
+   , session (NULL)
+//   , userData (NULL)
+  {};
+
+//  struct BitTorrent_Client_Configuration* configuration;
+  BitTorrent_Client_IControl_t*      controller;
+  BitTorrent_Client_ISession_t*      session;
+//  struct BitTorrent_Client_UserData* userData;
+};
 
 #endif

@@ -33,13 +33,14 @@
 class Test_U_SessionMessage;
 class Test_U_Message;
 
-typedef Stream_ControlMessage_T<Stream_ControlMessageType,
-                                Test_U_AllocatorConfiguration,
+typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
+                                struct Test_U_AllocatorConfiguration,
                                 Test_U_Message,
                                 Test_U_SessionMessage> Test_U_ControlMessage_t;
 
 //typedef Stream_IModuleHandler_T<Test_U_ModuleHandlerConfiguration> Test_U_IModuleHandler_t;
-typedef Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
+typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                          struct Test_U_AllocatorConfiguration,
                                           Test_U_ControlMessage_t,
                                           Test_U_Message,
                                           Test_U_SessionMessage> Test_U_MessageAllocator_t;

@@ -26,6 +26,7 @@
 #include "common_timer_manager_common.h"
 
 #include "net_common_tools.h"
+#include "net_defines.h"
 #include "net_macros.h"
 
 #include "net_client_defines.h"
@@ -530,7 +531,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
       typename ConnectorType::STREAM_T::MODULE_T* module_p = NULL;
       bool reset_configuration = false;
       ACE_Time_Value deadline = ACE_Time_Value::zero;
-      ACE_Time_Value timeout (NET_CLIENT_DEFAULT_INITIALIZATION_TIMEOUT, 0);
+      ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT, 0);
       Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
       bool use_reactor = false;
 
@@ -912,7 +913,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   ACE_ASSERT (connection_manager_p);
   typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
   ACE_Time_Value deadline = ACE_Time_Value::zero;
-  ACE_Time_Value timeout (NET_CLIENT_DEFAULT_INITIALIZATION_TIMEOUT, 0);
+  ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT, 0);
   Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
   typename ConnectorTypeBcast::ISTREAM_CONNECTION_T* istream_connection_p =
       NULL;

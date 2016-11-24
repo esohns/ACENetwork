@@ -1,16 +1,17 @@
 #option (GTK3_SUPPORT "compile Gtk3 support"
 #        ON)
 
-#include (FindPkgConfig)
-#if (UNIX)
-# #pkg_check_modules (PKG_ACE REQUIRED ACE)
+include (FindPkgConfig)
+if (UNIX)
+ #pkg_check_modules (PKG_ACE REQUIRED ACE)
+ pkg_check_modules (PKG_OPENSSL REQUIRED openssl)
 # if (GTK3_SUPPORT)
 #  pkg_check_modules (PKG_GTK3 REQUIRED gtk+-3.0)
-# else ()
+else ()
 ## pkg_check_modules (PKG_GTK_GLADE REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0 libglade-2.0)
 #  pkg_check_modules (PKG_GTK2 REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0)
 # endif ()
-#endif ()
+endif ()
 
 #set (FLEX_LIB_FILE libfl.so)
 #if (UNIX)
@@ -98,6 +99,9 @@ set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      stdafx.cpp
      stdafx.h
      bittorrent_common.h
+     bittorrent_control.cpp
+     bittorrent_control.h
+     bittorrent_control.inl
      bittorrent_defines.h
      bittorrent_exports.h
      bittorrent_iparser.h
@@ -111,9 +115,9 @@ set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      bittorrent_metainfo_parser_driver.inl
      bittorrent_metainfo_scanner.cpp
      bittorrent_metainfo_scanner.h
-     bittorrent_module_handler.cpp
-     bittorrent_module_handler.h
-     bittorrent_module_handler.inl
+#     bittorrent_module_handler.cpp
+#     bittorrent_module_handler.h
+#     bittorrent_module_handler.inl
      bittorrent_module_parser.cpp
      bittorrent_module_parser.h
      bittorrent_module_parser.inl
@@ -182,6 +186,7 @@ set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES VERSION ${
 #target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
 # target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${FLEX_LIBRARY})
+ target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${PKG_OPENSSL_LIBRARIES})
 elseif (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${ACE_LIBRARY})
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent Common)
@@ -199,6 +204,8 @@ export (TARGETS ${PROJECT_NAME}_Protocol_BitTorrent
 ############### install files ################
 install (FILES
          bittorrent_common.h
+         bittorrent_control.h
+         bittorrent_control.inl
          bittorrent_defines.h
          bittorrent_exports.h
          bittorrent_iparser.h
@@ -208,8 +215,8 @@ install (FILES
          bittorrent_metainfo_parser_driver.h
          bittorrent_metainfo_parser_driver.inl
          bittorrent_metainfo_scanner.h
-         bittorrent_module_handler.h
-         bittorrent_module_handler.inl
+#         bittorrent_module_handler.h
+#         bittorrent_module_handler.inl
          bittorrent_module_parser.h
          bittorrent_module_parser.inl
          bittorrent_module_streamer.h

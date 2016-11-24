@@ -64,6 +64,9 @@
 #endif
 
 #include "net_common_tools.h"
+#include "net_defines.h"
+
+#include "net_client_defines.h"
 
 #include "dhcp_defines.h"
 
@@ -147,7 +150,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-n[[STRING]]: network interface [\"")
-            << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT)
+            << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   // *TODO*: this doesn't really make sense (see '-n' option)
@@ -236,7 +239,7 @@ do_processArguments (int argc_in,
   UIDefinitonFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIDefinitonFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GLADE_FILE);
   logToFile_out = false;
-  interface_out = ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT);
+  interface_out = ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
   useLoopback_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   useThreadPool_out = NET_EVENT_USE_THREAD_POOL;
   sendRequestOnOffer_out = TEST_U_DEFAULT_DHCP_SEND_REQUEST_ON_OFFER;
@@ -717,7 +720,7 @@ do_work (bool requestBroadcastReplies_in,
       connection_manager_p;
   ACE_ASSERT (iconnection_manager_p);
   int group_id = -1;
-  ACE_Time_Value timeout (NET_CLIENT_DEFAULT_INITIALIZATION_TIMEOUT, 0);
+  ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT, 0);
 
   Test_U_IConnection_t* iconnection_p = NULL;
   Test_U_IStreamConnection_t* istream_connection_p = NULL;

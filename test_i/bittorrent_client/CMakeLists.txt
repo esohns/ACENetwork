@@ -164,16 +164,16 @@ set (bittorrent_client_SRCS
      bittorrent_client_defines.h
 #     bittorrent_client_inputhandler.cpp
 #     bittorrent_client_inputhandler.h
-     bittorrent_client_message.cpp
-     bittorrent_client_message.h
+#     bittorrent_client_message.cpp
+#     bittorrent_client_message.h
      bittorrent_client_network.h
      bittorrent_client_session_common.h
-     bittorrent_client_sessionmessage.cpp
-     bittorrent_client_sessionmessage.h
+#     bittorrent_client_sessionmessage.cpp
+#     bittorrent_client_sessionmessage.h
      bittorrent_client_signalhandler.cpp
      bittorrent_client_signalhandler.h
-     bittorrent_client_stream.cpp
-     bittorrent_client_stream.h
+#     bittorrent_client_stream.cpp
+#     bittorrent_client_stream.h
      bittorrent_client_stream_common.h
      bittorrent_client_tools.cpp
      bittorrent_client_tools.h)
@@ -258,22 +258,20 @@ set (bittorrent_client_gui_SRCS
      bittorrent_client_gui_callbacks.h
      bittorrent_client_gui_common.h
      bittorrent_client_gui_defines.h
-     bittorrent_client_gui_messagehandler.cpp
-     bittorrent_client_gui_messagehandler.h
      bittorrent_client_gui_session.cpp
      bittorrent_client_gui_session.h
      bittorrent_client_gui_session.inl
      bittorrent_client_gui_tools.cpp
      bittorrent_client_gui_tools.h
-     bittorrent_client_message.cpp
-     bittorrent_client_message.h
+#     bittorrent_client_message.cpp
+#     bittorrent_client_message.h
      bittorrent_client_network.h
-     bittorrent_client_sessionmessage.cpp
-     bittorrent_client_sessionmessage.h
+#     bittorrent_client_sessionmessage.cpp
+#     bittorrent_client_sessionmessage.h
      bittorrent_client_signalhandler.cpp
      bittorrent_client_signalhandler.h
-     bittorrent_client_stream.cpp
-     bittorrent_client_stream.h
+#     bittorrent_client_stream.cpp
+#     bittorrent_client_stream.h
      bittorrent_client_stream_common.h
      bittorrent_client_tools.cpp
      bittorrent_client_tools.h)
@@ -333,8 +331,8 @@ install (TARGETS ${EXECUTABLE_GUI}
          COMPONENT dev)
 install (FILES
          bittorrent_client.ini
-#         bittorrent_client_channel_tab.glade
+         bittorrent_client.rc
          bittorrent_client_main.glade
-#         bittorrent_client_server_page.glade
-#         servers.ini
+         bittorrent_client_session.glade
          DESTINATION etc/lib${PROJECT_NAME}/test_i COMPONENT config)
+

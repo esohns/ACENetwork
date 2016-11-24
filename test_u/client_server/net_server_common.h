@@ -47,15 +47,15 @@ typedef Common_IStatistic_T<Net_RuntimeStatistic_t> Test_U_Server_StatisticRepor
 
 // forward declarations
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 Test_U_Configuration,
-                                 Test_U_ConnectionState,
+                                 struct Test_U_Configuration,
+                                 struct Test_U_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 Test_U_UserData> Test_U_IInetConnectionManager_t;
+                                 struct Test_U_UserData> Test_U_IInetConnectionManager_t;
 class Test_U_SessionMessage;
 class Test_U_Message;
 struct Test_U_Server_ListenerConfiguration;
-typedef Net_IListener_T<Test_U_Server_ListenerConfiguration,
-                        Test_U_SocketHandlerConfiguration> Test_U_IListener_t;
+typedef Net_IListener_T<struct Test_U_Server_ListenerConfiguration,
+                        struct Test_U_SocketHandlerConfiguration> Test_U_IListener_t;
 
 //////////////////////////////////////////
 
@@ -84,9 +84,9 @@ struct Test_U_Server_ListenerConfiguration
 //   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {};
 
-  Test_U_IInetConnectionManager_t*   connectionManager;
-  Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
-//  bool                            useLoopBackDevice;
+  Test_U_IInetConnectionManager_t*          connectionManager;
+  struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
+//  bool                                    useLoopBackDevice;
 };
 
 struct Test_U_Server_Configuration
@@ -100,18 +100,19 @@ struct Test_U_Server_Configuration
    //, socketHandlerConfiguration ()
   {};
 
-  Test_U_IListener_t*                      listener;
-  Test_U_Server_ListenerConfiguration      listenerConfiguration;
+  Test_U_IListener_t*                             listener;
+  struct Test_U_Server_ListenerConfiguration      listenerConfiguration;
 
-  Test_U_Server_SignalHandlerConfiguration signalHandlerConfiguration;
+  struct Test_U_Server_SignalHandlerConfiguration signalHandlerConfiguration;
 };
 
-typedef Stream_ControlMessage_T<Stream_ControlMessageType,
-                                Stream_AllocatorConfiguration,
+typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
+                                struct Stream_AllocatorConfiguration,
                                 Test_U_Message,
                                 Test_U_SessionMessage> Test_U_ControlMessage_t;
 
-typedef Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
+typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                          struct Stream_AllocatorConfiguration,
                                           Test_U_ControlMessage_t,
                                           Test_U_Message,
                                           Test_U_SessionMessage> Test_U_StreamMessageAllocator_t;
@@ -119,8 +120,8 @@ typedef Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
 //////////////////////////////////////////
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    Test_U_StreamSessionData,
-                                    Stream_SessionMessageType,
+                                    struct Test_U_StreamSessionData,
+                                    enum Stream_SessionMessageType,
                                     Test_U_Message,
                                     Test_U_SessionMessage> Test_U_ISessionNotify_t;
 typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
@@ -136,9 +137,9 @@ struct Test_U_Server_GTK_CBData
    , subscribersLock ()
   {};
 
-  Test_U_Server_Configuration* configuration;
-  Test_U_Subscribers_t         subscribers;
-  ACE_SYNCH_RECURSIVE_MUTEX    subscribersLock;
+  struct Test_U_Server_Configuration* configuration;
+  Test_U_Subscribers_t                subscribers;
+  ACE_SYNCH_RECURSIVE_MUTEX           subscribersLock;
 };
 
 #endif

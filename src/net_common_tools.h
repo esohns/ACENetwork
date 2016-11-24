@@ -38,12 +38,15 @@ class Net_Common_Tools
   //         from the return value
   static std::string IPAddress2String (unsigned short, // port (network byte order !)
                                        unsigned int);  // IP address (network byte order !)
+  static ACE_INET_Addr string2IPAddress (std::string&); // host name (DNS name or dotted-decimal)
   static std::string IPProtocol2String (unsigned char); // protocol
   static std::string MACAddress2String (const unsigned char* const); // pointer to message data (START of ethernet header address field !)
   static std::string EthernetProtocolTypeID2String (unsigned short); // ethernet frame type (network (== big-endian) byte order !)
 
-//   static const bool selectNetworkInterface(const std::string&, // default interface identifier
-//                                            std::string&);      // return value: interface identifier
+  // *NOTE*: this returns the external (i.e. routable) IP address for clients
+  //         that sit behind a (NATted) gateway
+  static bool interface2ExternalIPAddress (const std::string&, // interface identifier
+                                           ACE_INET_Addr&);    // return value: external IP address
   static bool interface2IPAddress (const std::string&, // interface identifier
                                    ACE_INET_Addr&);    // return value: (first) IP address
   // *WARNING*: ensure that the array argument can hold at least 6 bytes !

@@ -25,6 +25,7 @@
 #include "common_ilock.h"
 #include "common_itask.h"
 
+#include "net_common.h"
 #include "net_iconnection.h"
 
 class Net_IConnectionManagerBase
@@ -35,16 +36,15 @@ class Net_IConnectionManagerBase
  public:
   inline virtual ~Net_IConnectionManagerBase () {};
 
+  virtual void abort (enum Net_Connection_AbortStrategy) = 0;
   virtual void abort (bool = false) = 0; // wait for completion ? (see wait())
+
   virtual unsigned int count () const = 0; // return value: # of connections
   // *IMPORTANT NOTE*: this API really makes sense only AFTER stop() has been
   //                   invoked, i.e. when new connections will be rejected;
   //                   otherwise this may block indefinetly
-  virtual void wait () const = 0;
 
-  // debugging
-  virtual void abortLeastRecent () = 0;
-  virtual void abortMostRecent () = 0;
+  virtual void wait () const = 0;
 };
 
 //////////////////////////////////////////

@@ -36,7 +36,8 @@ class BitTorrent_Client_Tools
                              const ACE_INET_Addr&,            // peer address
                              bool,                            // clone module ?
                              bool,                            // delete module ?
-                             Stream_Module_t*&);              // (final) module handle
+                             Stream_Module_t*&,               // (final) module handle
+                             bool = true);                    // peer ? : tracker
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_Tools ())

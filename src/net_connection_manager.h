@@ -96,16 +96,15 @@ class Net_Connection_Manager_T
   virtual bool deregister (ICONNECTION_T*); // connection handle
 
   // implement Net_IConnectionManagerBase
-  virtual void abort (bool = false); // wait for completion ? (see wait())
+  virtual void abort (enum Net_Connection_AbortStrategy); // strategy
+  // *IMPORTANT NOTE*: passing 'true' will hog the CPU --> use wait() instead
+  virtual void abort (bool = false); // wait for completion ?
   virtual unsigned int count () const; // return value: # of connections
   // *IMPORTANT NOTE*: this API really makes sense only AFTER stop() has been
   //                   invoked, i.e. when new connections will be rejected;
   //                   otherwise this may block indefinetly
   virtual void wait () const;
 
-  // ---------------------------------------------------------------------------
-  virtual void abortLeastRecent ();
-  virtual void abortMostRecent ();
   // ---------------------------------------------------------------------------
 
   // implement (part of) Common_IControl
@@ -125,7 +124,12 @@ class Net_Connection_Manager_T
   virtual void dump_state () const;
 
  private:
-  // convenience types
+  Net_Connection_Manager_T ();
+  ACE_UNIMPLEMENTED_FUNC (Net_Connection_Manager_T (const Net_Connection_Manager_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Connection_Manager_T& operator= (const Net_Connection_Manager_T&))
+  virtual ~Net_Connection_Manager_T ();
+
+  // convenient types
   typedef Net_Connection_Manager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
@@ -137,16 +141,14 @@ class Net_Connection_Manager_T
   typedef ACE_DLList_Reverse_Iterator<ICONNECTION_T> CONNECTION_CONTAINER_REVERSEITERATOR_T;
 
   // implement (part of) Common_IControl
-  virtual void initialize ();
+  inline virtual void initialize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   // implement (part of) Common_IStatistic_T
   // *WARNING*: this assumes lock_ is being held
   virtual bool collect (StatisticContainerType&); // return value: statistic data
 
-  Net_Connection_Manager_T ();
-  ACE_UNIMPLEMENTED_FUNC (Net_Connection_Manager_T (const Net_Connection_Manager_T&))
-  ACE_UNIMPLEMENTED_FUNC (Net_Connection_Manager_T& operator= (const Net_Connection_Manager_T&))
-  virtual ~Net_Connection_Manager_T ();
+  void abortLeastRecent ();
+  void abortMostRecent ();
 
   // implement blocking wait
   mutable ACE_SYNCH_RECURSIVE_CONDITION condition_;

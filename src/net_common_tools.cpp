@@ -67,7 +67,7 @@ Net_Common_Tools::IPAddress2String (unsigned short port_in,
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Inet_Addr::set: \"%m\", aborting\n")));
+                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
     return return_value;
   } // end IF
   result = inet_addr.addr_to_string (buffer,
@@ -94,6 +94,25 @@ Net_Common_Tools::IPAddress2String (unsigned short port_in,
   } // end IF
 
   return return_value;
+}
+
+ACE_INET_Addr
+Net_Common_Tools::string2IPAddress (std::string& address_in)
+{
+  NETWORK_TRACE ("Net_Common_Tools::string2IPAddress");
+
+  int result = -1;
+  ACE_INET_Addr inet_addr;
+  result = inet_addr.string_to_addr (address_in.c_str (),
+                                     AF_INET);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::string_to_addr(): \"%m\", aborting\n")));
+    return ACE_INET_Addr ();
+  } // end IF
+
+  return inet_addr;
 }
 
 std::string
@@ -465,102 +484,106 @@ Net_Common_Tools::EthernetProtocolTypeID2String (unsigned short frameType_in)
   return result;
 }
 
-// bool
-// Net_Common_Tools::selectNetworkInterface(const std::string& defaultInterfaceIdentifier_in,
-//                                              std::string& interfaceIdentifier_out)
-// {
-//   NETWORK_TRACE(ACE_TEXT("Net_Common_Tools::selectNetworkInterface"));
-//
-//   // init return value(s)
-//   interfaceIdentifier_out.resize(0);
-//
-//   pcap_if_t* all_devices = NULL;
-//   char errbuf[PCAP_ERRBUF_SIZE]; // defined in pcap.h
-//   if (pcap_findalldevs(&all_devices,
-//                        errbuf) == -1)
-//   {
-//     ACE_DEBUG((LM_ERROR,
-//                ACE_TEXT("failed to pcap_findalldevs(): \"%s\", aborting\n"),
-//                errbuf));
-//
-//     return false;
-//   } // end IF
-//
-//   // found default interface ?
-//   unsigned long i = 1;
-//   bool found_default = false;
-//   pcap_if_t* device = NULL;
-//   for (device = all_devices;
-//        device;
-//        device = device->next, i++)
-//   {
-//     // debug info
-//     ACE_DEBUG((LM_INFO,
-//                ACE_TEXT("#%u \"%s\": \"%s\"\n"),
-//                i,
-//                device->name,
-//                (device->description ?
-//                 device->description :
-//                 ACE_TEXT("no description available"))));
-//
-//     if (defaultInterfaceIdentifier_in == std::string(device->name))
-//     {
-//       interfaceIdentifier_out = defaultInterfaceIdentifier_in;
-//       found_default = true;
-//     } // end IF
-//   } // end FOR
-//   i--;
-//
-//   // sanity check: found any suitable device at all ?
-//   if (!all_devices)
-//   {
-//     ACE_DEBUG((LM_ERROR,
-//                ACE_TEXT("no interfaces found, aborting\n")));
-//
-//     // clean up
-//     pcap_freealldevs(all_devices);
-//
-//     return false;
-//   } // end IF
-//
-//   // couldn't find default interface ? ask user !
-//   if (!found_default)
-//   {
-//     unsigned long device_number = 0;
-//     std::cout << ACE_TEXT("default interface \"")
-//               << defaultInterfaceIdentifier_in.c_str()
-//               << ACE_TEXT("\" not found, please enter a valid interface number (1-")
-//               << i
-//               << ACE_TEXT("): ");
-//     std::cin >> device_number;
-//
-//     // sanity check: out of range ?
-//     if ((device_number < 1) ||
-//          (device_number > i))
-//     {
-//       ACE_DEBUG((LM_ERROR,
-//                  ACE_TEXT("selection: %u was out of range, aborting\n"),
-//                  device_number));
-//
-//       // clean up
-//       pcap_freealldevs(all_devices);
-//
-//       return false;
-//     } // end IF
-//
-//     // get selected device name
-//     for (device = all_devices, i = 0;
-//          i < (device_number - 1);
-//          device = device->next, i++);
-//
-//     interfaceIdentifier_out = device->name;
-//   } // end IF
-//
-//   // clean up
-//   pcap_freealldevs(all_devices);
-//
-//   return true;
-// }
+bool
+Net_Common_Tools::interface2ExternalIPAddress (const std::string& interfaceIdentifier_in,
+                                               ACE_INET_Addr& IPAddress_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interface2ExternalIPAddress"));
+
+  // initialize return value(s)
+  IPAddress_out.reset ();
+
+  // step1: determine the 'internal' IP address
+  ACE_INET_Addr internal_ip_address;
+  if (!Net_Common_Tools::interface2IPAddress (interfaceIdentifier_in,
+                                              internal_ip_address))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interface2IPAddress(\"%s\"), aborting\n"),
+                ACE_TEXT (interfaceIdentifier_in.c_str ())));
+    return false;
+  } // end IF
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (false);
+
+  ACE_NOTREACHED (return false;)
+#else
+  // *TODO*: this should work on most Linux systems, but is really a bad idea:
+  //         - relies on local 'nslookup'
+  //         - the 'opendns.com' domain resolution scheme
+  //         - temporary files
+  //         - system(3) call
+  //         --> extremely inefficient; remove ASAP
+  std::string filename_string = Common_File_Tools::getTempDirectory ();
+  filename_string += ACE_DIRECTORY_SEPARATOR_STR;
+  filename_string +=
+      Common_File_Tools::getTempFilename (ACE_TEXT_ALWAYS_CHAR (""));
+  std::string command_line_string =
+      ACE_TEXT_ALWAYS_CHAR ("nslookup myip.opendns.com. resolver1.opendns.com >> ");
+  command_line_string += filename_string;
+
+  int result = ACE_OS::system (ACE_TEXT (command_line_string.c_str ()));
+  if (result)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::system(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (command_line_string.c_str ())));
+    return false;
+  } // end IF
+  unsigned char* data_p = NULL;
+  if (!Common_File_Tools::load (filename_string,
+                                data_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_File_Tools::load(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (filename_string.c_str ())));
+    return false;
+  } // end IF
+  if (!Common_File_Tools::deleteFile (filename_string))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_File_Tools::deleteFile(\"%s\"), continuing\n"),
+                ACE_TEXT (filename_string.c_str ())));
+
+  std::string external_ip_address = reinterpret_cast<char*> (data_p);
+  delete [] data_p;
+
+  IPAddress_out = Net_Common_Tools::string2IPAddress (external_ip_address);
+#endif
+
+  // debug info
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  result = internal_ip_address.addr_to_string (buffer,
+                                               sizeof (buffer),
+                                               1);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+  ACE_TCHAR buffer_2[BUFSIZ];
+  ACE_OS::memset (buffer_2, 0, sizeof (buffer_2));
+  result = IPAddress_out.addr_to_string (buffer_2,
+                                         sizeof (buffer_2),
+                                         1);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("interface \"%s\" --> \"%s\" --> \"%s\"\n"),
+              ACE_TEXT (interfaceIdentifier_in.c_str ()),
+              buffer,
+              buffer_2));
+
+  return true;
+}
 
 bool
 Net_Common_Tools::interface2MACAddress (const std::string& interfaceIdentifier_in,

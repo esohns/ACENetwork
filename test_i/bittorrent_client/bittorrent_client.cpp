@@ -39,6 +39,7 @@ using namespace std;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <ace/Init_ACE.h>
 #endif
+#include <ace/Synch.h>
 #include <ace/POSIX_Proactor.h>
 #include <ace/Proactor.h>
 #include <ace/Profile_Timer.h>
@@ -61,6 +62,8 @@ using namespace std;
 
 #include "stream_cachedallocatorheap.h"
 
+#include "stream_misc_messagehandler.h"
+
 #ifdef HAVE_CONFIG_H
 #include "libACENetwork_config.h"
 #endif
@@ -68,11 +71,10 @@ using namespace std;
 #include "net_defines.h"
 
 #include "bittorrent_common.h"
+#include "bittorrent_control.h"
 #include "bittorrent_defines.h"
-#include "bittorrent_icontrol.h"
 #include "bittorrent_tools.h"
 
-#include <ace/Synch.h>
 #include "bittorrent_client_configuration.h"
 #include "bittorrent_client_curses.h"
 #include "bittorrent_client_defines.h"
@@ -81,6 +83,7 @@ using namespace std;
 #include "bittorrent_client_network.h"
 #include "bittorrent_client_session_common.h"
 #include "bittorrent_client_signalhandler.h"
+#include "bittorrent_client_stream_common.h"
 #include "bittorrent_client_tools.h"
 
 #include "test_i_defines.h"
@@ -399,9 +402,9 @@ do_initializeSignals (bool useReactor_in,
 }
 
 ACE_THR_FUNC_RETURN
-connection_setup_curses_function (void* arg_in)
+session_setup_curses_function (void* arg_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::connection_setup_curses_function"));
+  NETWORK_TRACE (ACE_TEXT ("::session_setup_curses_function"));
 
   ACE_UNUSED_ARG (arg_in);
 
@@ -412,214 +415,58 @@ connection_setup_curses_function (void* arg_in)
   return_value = arg_in;
 #endif
 
-  BitTorrent_Client_ThreadData* thread_data_p =
+  BitTorrent_Client_ThreadData* data_p =
     static_cast<BitTorrent_Client_ThreadData*> (arg_in);
 
   // sanity check(s)
-  ACE_ASSERT (thread_data_p);
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->controller);
 
-  int result = -1;
-  ACE_Time_Value delay (TEST_I_CONNECTION_ASYNCH_TIMEOUT_INTERVAL, 0);
-
-  BitTorrent_Client_IConnection_t* connection_p = NULL;
-  BitTorrent_Client_IPeerStreamConnection_t* stream_connection_p = NULL;
-  bool result_2 = false;
-  const Stream_Module_t* module_p = NULL;
-  const BitTorrent_Client_PeerStream_t* stream_p = NULL;
-  BitTorrent_IControl* icontrol_p = NULL;
-  ACE_Time_Value deadline = ACE_Time_Value::zero;
-  std::string channel_string;
-  BitTorrent_Client_IConnection_Manager_t* connection_manager_p =
-    BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (connection_manager_p);
-
-  // step1: wait for connection ?
-  if (!thread_data_p->useReactor)
-  {
-    ACE_Time_Value deadline =
-      (COMMON_TIME_NOW +
-       ACE_Time_Value (TEST_I_CONNECTION_ASYNCH_TIMEOUT, 0));
-
-    do
-    {
-      result = ACE_OS::sleep (delay);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
-                    &delay));
-
-      if (connection_manager_p->count () >= 1)
-        break; // done
-    } while (COMMON_TIME_NOW < deadline);
-  } // end IF
-  // *NOTE*: signal main thread (resumes dispatching)
-  Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
-                                       !thread_data_p->useReactor,
-                                       -1);
-
-  connection_p = connection_manager_p->operator[] (0);
-  if (!connection_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to BitTorrent_Client_IConnection_Manager_t::operator[0]: \"%m\", aborting\n")));
-    goto clean_up;
-  } // end IF
-
-  // step2: register connection with the server
-  // *NOTE*: this entails a little delay (waiting for the welcome notice...)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("registering IRC connection...\n")));
-
-  stream_connection_p =
-    dynamic_cast<BitTorrent_Client_IPeerStreamConnection_t*> (connection_p);
-  if (!stream_connection_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<BitTorrent_Client_IPeerStreamConnection_t>(%@): \"%m\", aborting\n"),
-                connection_p));
-    goto clean_up;
-  } // end IF
-  stream_p = &stream_connection_p->stream ();
-  for (Stream_Iterator_t iterator (*stream_p);
-       (iterator.next (module_p) != 0);
-       iterator.advance ())
-    if (ACE_OS::strcmp (module_p->name (),
-                        ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME)) == 0)
-      break;
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("module \"%s\" not found, aborting\n"),
-                ACE_TEXT (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME)));
-    goto clean_up;
-  } // end IF
-  icontrol_p =
-    dynamic_cast<BitTorrent_IControl*> (const_cast<Stream_Module_t*> (module_p)->writer ());
-  if (!icontrol_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<BitTorrent_IControl*>(0x%@), aborting\n"),
-                connection_p));
-    goto clean_up;
-  } // end IF
+  // step1: start a download session
   try {
-    result_2 =
-      icontrol_p->download (thread_data_p->URI);
+    data_p->controller->download (data_p->filename);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in BitTorrent_IControl::download(), continuing\n")));
+                ACE_TEXT ("caught exception in BitTorrent_IControl_T::download(\"%s\"), aborting\n"),
+                ACE_TEXT (data_p->filename.c_str ())));
+    goto error;
   }
-  if (!result_2)
+
+  // *NOTE*: signal main thread (resumes dispatching)
+  Common_Tools::finalizeEventDispatch (data_p->useReactor,
+                                       !data_p->useReactor,
+                                       -1);
+
+  // step2: run curses event dispatch ?
+  if (data_p->cursesState)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to BitTorrent_IControl::download(), aborting\n")));
-    goto clean_up;
-  } // end IF
-
-//  // step3: wait for registration to complete
-//  iregistration_p =
-//    dynamic_cast<IRC_IRegistrationStateMachine_t*> (const_cast<Stream_Module_t*> (module_p)->writer ());
-//  if (!iregistration_p)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to dynamic_cast<IRC_IRegistrationStateMachine_t*>: \"%m\", aborting\n")));
-//    goto clean_up;
-//  } // end ELSE
-//  // *NOTE*: this entails a little delay (waiting for connection registration...)
-//  delay.set (IRC_MAXIMUM_WELCOME_DELAY, 0);
-//  // *NOTE*: cannot use COMMON_TIME_NOW, as this is a high precision monotonous
-//  //         clock... --> use standard getimeofday
-//  deadline = ACE_OS::gettimeofday () + delay;
-//  try {
-//    result_2 = iregistration_p->wait (REGISTRATION_STATE_FINISHED,
-//                                      &deadline);
-//  } catch (...) {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("caught exception in BitTorrent_Client_IRegistration_t::wait(%#T), continuing\n"),
-//                &delay));
-//    result_2 = false;
-//  }
-//  if (!result_2 ||
-//      (iregistration_p->current () != REGISTRATION_STATE_FINISHED))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to BitTorrent_Client_IRegistration_t::wait(%#T), aborting\n"),
-//                &delay));
-//    goto clean_up;
-//  } // end IF
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("registering IRC connection...DONE\n")));
-
-//  // step4: join a channel
-//  channel_string =
-//    thread_data_p->configuration->protocolConfiguration.loginOptions.channel;
-//  // sanity check(s): has '#' prefix ?
-//  if (channel_string.find ('#', 0) != 0)
-//    channel_string.insert (channel_string.begin (), '#');
-//  // sanity check(s): larger than BitTorrent_Client_CNF_IRC_MAX_CHANNEL_LENGTH characters ?
-//  // *TODO*: support the CHANNELLEN=xxx "feature" of the server...
-//  if (channel_string.size () > IRC_PRT_MAXIMUM_CHANNEL_LENGTH)
-//    channel_string.resize (IRC_PRT_MAXIMUM_CHANNEL_LENGTH);
-//  channels.push_back (channel_string);
-//  try {
-//    icontrol_p->join (channels, keys);
-//  } catch (...) {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("caught exception in BitTorrent_Client_IIRCControl::join(\"%s\"), aborting\n"),
-//                ACE_TEXT (channel_string.c_str ())));
-//    goto clean_up;
-//  }
-
-  // step5: run curses event dispatch ?
-  if (thread_data_p->cursesState)
-  {
-    //BitTorrent_Client_ISession_t* session_p =
-    //  dynamic_cast<BitTorrent_Client_ISession_t*> (connection_p);
-    //if (!session_p)
-    //{
-    //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("failed to dynamic_cast<BitTorrent_Client_ISession_t*>(0x%@), aborting\n"),
-    //              connection_p));
-
-    //  // clean up
-    //  connection_p->decrease ();
-    //  Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
-    //                                       !thread_data_p->useReactor,
-    //                                       -1);
-
-    //  goto clean_up;
-    //} // end IF
-    //const BitTorrent_Client_ConnectionState& connection_state_r = session_p->state ();
-    const BitTorrent_Client_ConnectionState& connection_state_r =
-      connection_p->state ();
-    ACE_ASSERT (connection_state_r.session);
-    thread_data_p->cursesState->sessionState =
-      &const_cast<BitTorrent_Client_SessionState&> (connection_state_r.session->state ());
-
-    // step6: clean up
-    connection_p->decrease ();
-    connection_p = NULL;
+    BitTorrent_Client_ISession_t* session_p =
+        data_p->controller->get (data_p->filename);
+    if (!session_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to retrieve session handle (metainfo file was: \"%s\"), aborting\n"),
+                  ACE_TEXT (data_p->filename.c_str ())));
+      goto error;
+    } // end IF
+    data_p->cursesState->sessionState =
+      &const_cast<BitTorrent_Client_SessionState&> (session_p->state ());
 
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("running curses dispatch loop...\n")));
 
-    bool result_2 = curses_main (*thread_data_p->cursesState,
-                                 icontrol_p);
+    bool result_2 = curses_main (*data_p->cursesState,
+                                 data_p->controller);
     if (!result_2)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ::curses_main(), aborting\n")));
-      goto clean_up;
+      goto error;
     } // end IF
     else
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("running curses dispatch loop...DONE\n")));
   } // end IF
-  else
-  {
-    // step6: clean up
-    connection_p->decrease ();
-  } // end ELSE
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   return_value = 0;
@@ -627,17 +474,14 @@ connection_setup_curses_function (void* arg_in)
   return_value = NULL;
 #endif
 
-  goto done;
+  return return_value;
 
-clean_up:
-  if (connection_p)
-    connection_p->decrease ();
-
-  Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
-                                       !thread_data_p->useReactor,
+error:
+  // *NOTE*: signal main thread (resumes dispatching)
+  Common_Tools::finalizeEventDispatch (data_p->useReactor,
+                                       !data_p->useReactor,
                                        -1);
 
-done:
   return return_value;
 }
 
@@ -656,95 +500,85 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
   int result = -1;
   // *TODO*: clean this up
   BitTorrent_Client_CursesState curses_state;
+  BitTorrent_Client_ThreadData curses_thread_data;
+  ACE_thread_t thread_id = -1;
+  ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
+  //char thread_name[BUFSIZ];
+  //ACE_OS::memset (thread_name, 0, sizeof (thread_name));
+  char* thread_name_p = NULL;
+  const char* thread_name_2 = NULL;
+  int group_id_2 = (COMMON_EVENT_THREAD_GROUP_ID + 1); // *TODO*
+  ACE_Thread_Manager* thread_manager_p = NULL;
+  BitTorrent_Client_Control_t bittorrent_control (&configuration_in.sessionConfiguration);
+  Stream_AllocatorHeap_T<struct BitTorrent_AllocatorConfiguration> heap_allocator;
+  BitTorrent_Client_PeerMessageAllocator_t peer_message_allocator (TEST_I_MAX_MESSAGES, // maximum #buffers
+                                                                   &heap_allocator,     // heap allocator handle
+                                                                   true);               // block ?
+  BitTorrent_Client_TrackerMessageAllocator_t tracker_message_allocator (TEST_I_MAX_MESSAGES, // maximum #buffers
+                                                                         &heap_allocator,     // heap allocator handle
+                                                                         true);               // block ?
+  BitTorrent_Client_Connection_Manager_t* connection_manager_p =
+      BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
+
+  // step1: initialize configuration
   if (useCursesLibrary_in)
     configuration_in.cursesState = &curses_state;
 
-  // step1: initialize message handler module
   configuration_in.moduleHandlerConfiguration.streamConfiguration =
       &configuration_in.streamConfiguration;
-  configuration_in.moduleHandlerConfiguration.protocolConfiguration =
-      &configuration_in.protocolConfiguration;
+//  configuration_in.moduleHandlerConfiguration.protocolConfiguration =
+//      &configuration_in.protocolConfiguration;
+  configuration_in.streamConfiguration.messageAllocator =
+      &peer_message_allocator;
   configuration_in.streamConfiguration.moduleHandlerConfiguration =
       &configuration_in.moduleHandlerConfiguration;
   configuration_in.streamConfiguration.moduleConfiguration =
       &configuration_in.moduleConfiguration;
-  configuration_in.streamConfiguration.cloneModule = true;
-  configuration_in.streamConfiguration.deleteModule = false;
-  BitTorrent_Client_PeerHandler_Module peer_handler (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
-                                                     NULL);
-  BitTorrent_Client_TrackerHandler_Module tracker_handler (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
-                                                           NULL);
-  configuration_in.streamConfiguration.module = &peer_handler;
-  configuration_in.streamConfiguration.trackerModule = &tracker_handler;
+  configuration_in.streamConfiguration.trackerMessageAllocator =
+      &tracker_message_allocator;
+
 
   // step2: initialize event dispatch
-  struct Common_DispatchThreadData thread_data;
-  thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data.useReactor = configuration_in.useReactor;
+  struct Common_DispatchThreadData dispatch_thread_data;
+  dispatch_thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
+  dispatch_thread_data.useReactor = configuration_in.useReactor;
   if (!Common_Tools::initializeEventDispatch (configuration_in.useReactor,
-                                              (thread_data.numberOfDispatchThreads > 1),
-                                              thread_data.numberOfDispatchThreads,
-                                              thread_data.proactorType,
-                                              thread_data.reactorType,
+                                              (dispatch_thread_data.numberOfDispatchThreads > 1),
+                                              dispatch_thread_data.numberOfDispatchThreads,
+                                              dispatch_thread_data.proactorType,
+                                              dispatch_thread_data.reactorType,
                                               configuration_in.streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
-    return;
+    goto clean;
   } // end IF
 
-  // step3: initialize client connector
-  //BitTorrent_Client_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
-  //ACE_NEW_NORETURN (socket_handler_configuration_p,
-  //                  BitTorrent_Client_SocketHandlerConfiguration ());
-  //if (!socket_handler_configuration_p)
-  //{
-  //  ACE_DEBUG ((LM_CRITICAL,
-  //              ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-  //  return;
-  //} // end IF
+  // step3: initialize configuration (part 2)
   //configuration_in.socketHandlerConfiguration.bufferSize =
-  //  BitTorrent_Client_BUFFER_SIZE;
+  //  BITTORRENT_CLIENT_BUFFER_SIZE;
   configuration_in.socketHandlerConfiguration.messageAllocator =
-    configuration_in.streamConfiguration.messageAllocator;
+    &peer_message_allocator;
   configuration_in.socketHandlerConfiguration.socketConfiguration =
     &configuration_in.socketConfiguration;
   configuration_in.socketHandlerConfiguration.statisticReportingInterval =
     configuration_in.streamConfiguration.statisticReportingInterval;
-  //BitTorrent_Client_SessionState session_state;
-  //session_state.configuration = configuration_in;
-  //BitTorrent_Client_ConnectorConfiguration connector_configuration;
-  BitTorrent_Client_Connection_Manager_t* connection_manager_p =
-    BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-  //connector_configuration.connectionManager = connection_manager_p;
-  //connector_configuration.userData = &configuration_in.streamUserData;
-  //connector_configuration.socketHandlerConfiguration =
-  //  &configuration_in.socketHandlerConfiguration;
-  BitTorrent_Client_TrackerConnector_t connector (connection_manager_p,
-                                                  configuration_in.streamConfiguration.statisticReportingInterval);
-  BitTorrent_Client_AsynchTrackerConnector_t asynch_connector (connection_manager_p,
-                                                               configuration_in.streamConfiguration.statisticReportingInterval);
-  BitTorrent_Client_IConnector_t* connector_p = NULL;
-  if (configuration_in.useReactor)
-    connector_p = &connector;
-  else
-    connector_p = &asynch_connector;
-  //if (!connector_p->initialize (connector_configuration))
-  if (!connector_p->initialize (configuration_in.socketHandlerConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
-    return;
-  } // end IF
 
-  // step3: initialize signal handling
-  struct BitTorrent_Client_SignalHandlerConfiguration signal_handler_configuration;
-  signal_handler_configuration.cursesState = &curses_state;
-  if (!signalHandler_in.initialize (signal_handler_configuration))
+  configuration_in.trackerSocketHandlerConfiguration.messageAllocator =
+    &tracker_message_allocator;
+  configuration_in.trackerSocketHandlerConfiguration.socketConfiguration =
+    &configuration_in.socketConfiguration;
+  configuration_in.trackerSocketHandlerConfiguration.statisticReportingInterval =
+    configuration_in.streamConfiguration.statisticReportingInterval;
+
+  // step4: initialize signal handling
+  configuration_in.signalHandlerConfiguration.cursesState = &curses_state;
+  if (!signalHandler_in.initialize (configuration_in.signalHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to BitTorrent_Client_SignalHandler::initialize(), returning\n")));
-    return;
+    goto clean;
   } // end IF
   if (!Common_Tools::initializeSignals (signalSet_in,
                                         ignoredSignalSet_in,
@@ -753,74 +587,109 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeSignals(), returning\n")));
-    return;
+    goto clean;
   } // end IF
 
-  // step4: initialize connection manager
+  // step5: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
   connection_manager_p->set (configuration_in,
                              //configuration_in.streamUserData);
                              NULL);
-
-  // step5: parse torrent metadata
-  Bencoding_Dictionary_t* meta_info_p = NULL;
-  if (!BitTorrent_Tools::parseMetaInfoFile (metaInfoFileName_in,
-                                            meta_info_p,
-                                            configuration_in.moduleHandlerConfiguration.traceParsing,
-                                            configuration_in.moduleHandlerConfiguration.traceScanning))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to BitTorrent_Tools::parseMetaInfoFile(\"%s\"), returning\n"),
-                ACE_TEXT (metaInfoFileName_in.c_str ())));
-    return;
-  } // end IF
-  ACE_ASSERT (meta_info_p);
-#if defined (_DEBUG)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%s\n"),
-              ACE_TEXT (BitTorrent_Tools::MetaInfo2String (*meta_info_p).c_str ())));
-#endif
-  BitTorrent_Tools::free (meta_info_p);
 
   // event loop(s):
   // - catch SIGINT/SIGQUIT/SIGTERM/... signals (connect / perform orderly shutdown)
   // [- signal timer expiration to perform server queries] (see above)
 
   // step6a: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (thread_data,
+  if (!Common_Tools::startEventDispatch (dispatch_thread_data,
                                          configuration_in.groupID))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::startEventDispatch(), returning\n")));
-    return;
+    goto clean;
   } // end IF
 
-  BitTorrent_Client_Session_t session (configuration_in.socketHandlerConfiguration,
-                                       connection_manager_p,
-                                       !configuration_in.useReactor);
-  BitTorrent_Client_AsynchSession_t asynch_session (configuration_in.socketHandlerConfiguration,
-                                                    connection_manager_p,
-                                                    !configuration_in.useReactor);
-
   // step6b: (try to) connect to the torrent tracker
-  ACE_INET_Addr peer_address;
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  result = peer_address.addr_to_string (buffer,
-                                        sizeof (buffer));
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
 
-  if (configuration_in.useReactor)
-    session.connect (peer_address);
-  else
-    asynch_session.connect (peer_address);
+  curses_thread_data.configuration = &configuration_in;
+  curses_thread_data.controller = &bittorrent_control;
+  if (useCursesLibrary_in)
+    curses_thread_data.cursesState = &curses_state;
+  curses_thread_data.filename = metaInfoFileName_in;
+//  curses_thread_data.groupID = group_id_2;
+//  curses_thread_data.moduleHandlerConfiguration =
+//      &configuration_in.moduleHandlerConfiguration;
+  curses_thread_data.useReactor = configuration_in.useReactor;
+
+  ACE_NEW_NORETURN (thread_name_p,
+                    char[BUFSIZ]);
+  if (!thread_name_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+
+    // clean up
+    Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
+                                         !configuration_in.useReactor,
+                                         configuration_in.groupID);
+
+    goto clean;
+  } // end IF
+  ACE_OS::memset (thread_name_p, 0, sizeof (thread_name_p));
+  thread_name_2 = thread_name_p;
+  thread_manager_p = ACE_Thread_Manager::instance ();
+  ACE_ASSERT (thread_manager_p);
+  result =
+    thread_manager_p->spawn (::session_setup_curses_function, // function
+                             &curses_thread_data,             // argument
+                             (THR_NEW_LWP      |
+                              THR_JOINABLE     |
+                              THR_INHERIT_SCHED),             // flags
+                             &thread_id,                      // thread id
+                             &thread_handle,                  // thread handle
+                             ACE_DEFAULT_THREAD_PRIORITY,     // priority
+                             group_id_2,                      // group id
+                             NULL,                            // stack
+                             0,                               // stack size
+                             &thread_name_2);                 // name
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Thread_Manager::spawn(): \"%m\", returning\n")));
+
+    // clean up
+    Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
+                                         !configuration_in.useReactor,
+                                         configuration_in.groupID);
+
+    goto clean;
+  } // end IF
+
+  // dispatch connection attempt
+  Common_Tools::dispatchEvents (configuration_in.useReactor,
+                                configuration_in.groupID);
+
+  // *NOTE*: awoken by the worker thread (see above)...
+
+  if (connection_manager_p->count () < 1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to start session, returning\n")));
+
+    // clean up
+    result = thread_manager_p->wait_grp (group_id_2);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", continuing\n"),
+                  group_id_2));
+
+    goto clean;
+  } // end IF
+
+  ACE_DEBUG ((LM_ERROR,
+              ACE_TEXT ("started session...\n")));
 
   // *NOTE*: from this point, clean up any remote connections
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connected to \"%s\"...\n"),
-              buffer));
 
   Common_Tools::dispatchEvents (configuration_in.useReactor,
                                 configuration_in.groupID);
@@ -831,6 +700,9 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
+
+clean:
+  return;
 }
 
 void

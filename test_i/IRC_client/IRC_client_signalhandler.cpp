@@ -56,6 +56,8 @@ IRC_Client_SignalHandler::handle (int signal_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::handleSignal"));
 
   int result = -1;
+  IRC_Client_IConnection_Manager_t* connection_manager_p =
+      IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
 
   bool abort = false;
   bool connect = false;
@@ -117,7 +119,7 @@ IRC_Client_SignalHandler::handle (int signal_in)
 
   // ...abort ?
   if (abort)
-    IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abortLeastRecent ();
+    connection_manager_p->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST);
 
   // ...connect ?
   if (connect)
@@ -164,7 +166,7 @@ IRC_Client_SignalHandler::handle (int signal_in)
                   buffer));
 
       // release an existing connection, maybe that helps...
-      IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abortLeastRecent ();
+      connection_manager_p->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST);
     } // end IF
   } // end IF
 done_connect:
@@ -175,8 +177,7 @@ done_connect:
     // step1: notify curses dispatch ?
     if (inherited::configuration_)
       if (inherited::configuration_->cursesState)
-      {
-        ACE_Guard<ACE_SYNCH_MUTEX> aGuard (inherited::configuration_->cursesState->lock);
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);
 
         inherited::configuration_->cursesState->finished = true;
       } // end IF

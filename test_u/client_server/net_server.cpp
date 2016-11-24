@@ -145,7 +145,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [STRING]  : network interface [\"")
-            << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT)
+            << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   // *TODO*: this doesn't really make sense (see '-n' option)
@@ -221,7 +221,7 @@ do_processArguments (const int& argc_in,
   logToFile_out = false;
   useUDP_out = false;
   networkInterface_out =
-    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT);
+    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
   useLoopBack_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   listeningPortNumber_out = NET_SERVER_DEFAULT_LISTENING_PORT;
   useReactor_out = NET_EVENT_USE_REACTOR;
@@ -960,7 +960,7 @@ ACE_TMAIN (int argc_in,
   bool log_to_file = false;
   bool use_udp = false;
   std::string network_interface =
-    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT);
+    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
   bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   unsigned short listening_port_number = NET_SERVER_DEFAULT_LISTENING_PORT;
   bool use_reactor = NET_EVENT_USE_REACTOR;

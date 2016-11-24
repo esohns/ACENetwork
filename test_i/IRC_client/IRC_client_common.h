@@ -61,10 +61,10 @@ struct IRC_Client_SessionState;
 struct IRC_Client_SocketHandlerConfiguration;
 class IRC_Record;
 
-typedef Stream_INotify_T<Stream_SessionMessageType> IRC_Client_IStreamNotify_t;
+typedef Stream_INotify_T<enum Stream_SessionMessageType> IRC_Client_IStreamNotify_t;
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    IRC_Client_SessionData,
-                                    Stream_SessionMessageType,
+                                    struct IRC_Client_SessionData,
+                                    enum Stream_SessionMessageType,
                                     IRC_Message,
                                     IRC_Client_SessionMessage> IRC_Client_ISessionNotify_t;
 
@@ -86,10 +86,10 @@ struct IRC_Client_ConnectionEntry
   IRC_Client_PortRanges_t ports;
   std::string             netWork;
 };
-typedef std::vector<IRC_Client_ConnectionEntry> IRC_Client_Connections_t;
+typedef std::vector<struct IRC_Client_ConnectionEntry> IRC_Client_Connections_t;
 typedef IRC_Client_Connections_t::const_iterator IRC_Client_ConnectionsIterator_t;
 typedef std::multimap<std::string,
-                      IRC_Client_ConnectionEntry> IRC_Client_Servers_t;
+                      struct IRC_Client_ConnectionEntry> IRC_Client_Servers_t;
 typedef IRC_Client_Servers_t::const_iterator IRC_Client_ServersIterator_t;
 struct IRC_Client_PhoneBook
 {
@@ -122,11 +122,11 @@ struct IRC_Client_InputThreadData
    , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
-  IRC_Client_Configuration*              configuration;
-  IRC_Client_CursesState*                cursesState;
-  int                                    groupID;
-  IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
-  bool                                   useReactor;
+  struct IRC_Client_Configuration*              configuration;
+  struct IRC_Client_CursesState*                cursesState;
+  int                                           groupID;
+  struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
+  bool                                          useReactor;
 };
 
 struct IRC_Client_UserData
@@ -137,11 +137,11 @@ struct IRC_Client_UserData
    , moduleHandlerConfiguration (NULL)
   {};
 
-  IRC_Client_Configuration*              configuration;
+  struct IRC_Client_Configuration*              configuration;
 
   // *TODO*: remove these ASAP
-  Stream_ModuleConfiguration*            moduleConfiguration;
-  IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
+  struct Stream_ModuleConfiguration*            moduleConfiguration;
+  struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
 };
 
 struct IRC_Client_SessionData
@@ -153,9 +153,9 @@ struct IRC_Client_SessionData
    , userData (NULL)
   {};
 
-  IRC_Client_SessionState* connectionState;
+  struct IRC_Client_SessionState* connectionState;
 
-  IRC_Client_UserData*     userData;
+  struct IRC_Client_UserData*     userData;
 };
 
 typedef Stream_Statistic IRC_RuntimeStatistic_t;
@@ -170,10 +170,10 @@ struct IRC_Client_ConnectionState
    , userData (NULL)
   {};
 
-  IRC_Client_Configuration* configuration;
-  IRC_IControl*             controller;
+  struct IRC_Client_Configuration* configuration;
+  IRC_IControl*                    controller;
 
-  IRC_Client_UserData*      userData;
+  struct IRC_Client_UserData*      userData;
 };
 
 // *TODO*: remove this ASAP
@@ -200,7 +200,7 @@ struct IRC_Client_SessionState
 };
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         IRC_Client_SocketHandlerConfiguration> IRC_Client_IConnector_t;
+                         struct IRC_Client_SocketHandlerConfiguration> IRC_Client_IConnector_t;
 struct IRC_Client_CursesState;
 struct IRC_Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
@@ -212,12 +212,13 @@ struct IRC_Client_SignalHandlerConfiguration
    , peerAddress ()
   {};
 
-  IRC_Client_IConnector_t* connector;
-  IRC_Client_CursesState*  cursesState;
-  ACE_INET_Addr            peerAddress;
+  IRC_Client_IConnector_t*       connector;
+  struct IRC_Client_CursesState* cursesState;
+  ACE_INET_Addr                  peerAddress;
 };
 
-typedef Stream_CachedMessageAllocator_T<Stream_AllocatorConfiguration,
+typedef Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
+                                        struct Stream_AllocatorConfiguration,
                                         IRC_ControlMessage_t,
                                         IRC_Message,
                                         IRC_SessionMessage> IRC_Client_MessageAllocator_t;

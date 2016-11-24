@@ -56,8 +56,7 @@ template <typename StreamStateType,
           typename DataMessageType,
           typename SessionMessageType>
 class HTTP_Stream_T
- : public Stream_Base_T<ACE_SYNCH_MUTEX,
-                        ACE_MT_SYNCH,
+ : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
                         enum Stream_SessionMessageType,
@@ -93,8 +92,7 @@ class HTTP_Stream_T
   inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
  private:
-  typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        ACE_MT_SYNCH,
+  typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
                         enum Stream_SessionMessageType,

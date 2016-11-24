@@ -34,18 +34,20 @@ class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
 class Test_U_SessionMessage;
-template <typename AllocatorConfigurationType,
+template <ACE_SYNCH_DECL,
+          typename AllocatorConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Test_U_Message
- : public DHCP_Message_T<Test_U_AllocatorConfiguration,
+ : public DHCP_Message_T<struct Test_U_AllocatorConfiguration,
                          Test_U_ControlMessage_t,
                          Test_U_SessionMessage>
 {
   // grant access to specific private ctors
-  friend class Stream_MessageAllocatorHeapBase_T<Test_U_AllocatorConfiguration,
+  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                                 struct Test_U_AllocatorConfiguration,
                                                  Test_U_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
@@ -65,7 +67,7 @@ class Test_U_Message
   Test_U_Message (const Test_U_Message&);
 
  private:
-  typedef DHCP_Message_T<Test_U_AllocatorConfiguration,
+  typedef DHCP_Message_T<struct Test_U_AllocatorConfiguration,
                          Test_U_ControlMessage_t,
                          Test_U_SessionMessage> inherited;
 //  typedef Stream_DataMessageBase_2<Test_U_AllocatorConfiguration,

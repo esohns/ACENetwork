@@ -21,7 +21,10 @@
 
 #include "bittorrent_tools.h"
 
+#include <regex>
 #include <sstream>
+
+#include <openssl/sha.h>
 
 #include <ace/Log_Msg.h>
 #include <ace/Message_Block.h>
@@ -29,6 +32,10 @@
 #include "common_file_tools.h"
 
 #include "net_macros.h"
+
+#ifdef HAVE_CONFIG_H
+#include "libACENetwork_config.h"
+#endif
 
 #include "bittorrent_defines.h"
 #include <ace/Synch.h>
@@ -95,103 +102,76 @@ BitTorrent_Tools::Type2String (enum BitTorrent_MessageType& type_in)
   return result;
 }
 
-//bool
-//BitTorrent_Tools::parseURL (const std::string& URL_in,
-//                      ACE_INET_Addr& address_out,
-//                      std::string& URI_out)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::parseURL"));
+std::string
+BitTorrent_Tools::MetaInfo2InfoHash (const Bencoding_Dictionary_t& metaInfo_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::MetaInfo2InfoHash"));
 
-//  bool use_SSL = false;
-//  std::string hostname;
-//  unsigned short port = BitTorrent_DEFAULT_SERVER_PORT;
-//  std::istringstream converter;
-//  //std::string dotted_decimal_string;
-//  int result = -1;
+  std::string result;
 
-//  // step1: split protocol/hostname/port
-//  std::string regex_string =
-//    ACE_TEXT_ALWAYS_CHAR ("^(?:http(s)?://)?([[:alnum:]-.]+)(?:\\:([[:digit:]]{1,5}))?(.+)?$");
-//  std::regex regex (regex_string);
-//  std::smatch match_results;
-//  if (!std::regex_match (URL_in,
-//                         match_results,
-//                         regex,
-//                         std::regex_constants::match_default))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("invalid URL string (was: \"%s\"), aborting\n"),
-//                ACE_TEXT (URL_in.c_str ())));
-//    return false;
-//  } // end IF
-//  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+  Bencoding_DictionaryIterator_t iterator =
+      metaInfo_out.find (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_KEY));
+  if (iterator == metaInfo_out.end ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("metainfo key (was: \"%s\") not found, aborting\n"),
+                ACE_TEXT (BITTORRENT_METAINFO_INFO_KEY)));
+    return result;
+  } // end IF
+  ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
 
-//  if (match_results[1].matched)
-//    use_SSL = true;
-//  ACE_UNUSED_ARG (use_SSL);
-//  ACE_ASSERT (match_results[2].matched);
-//  hostname = match_results[2];
-//  if (match_results[3].matched)
-//  {
-//    converter.clear ();
-//    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-//    converter.str (match_results[3].str ());
-//    converter >> port;
-//  } // end IF
-//  ACE_ASSERT (match_results[4].matched);
-//  URI_out = match_results[4];
+  std::string bencoded_string =
+      BitTorrent_Tools::bencode (*(*iterator).second->dictionary);
+  unsigned char info_hash[SHA_DIGEST_LENGTH + 1];
+  SHA1 (reinterpret_cast<const unsigned char*> (bencoded_string.c_str ()),
+        bencoded_string.size (),
+        info_hash);
+  info_hash[SHA_DIGEST_LENGTH] = '\0';
+  result += reinterpret_cast<char*> (info_hash);
 
-//  // step2: validate address/verify host name exists
-//  //        --> resolve
-//  // *TODO*: support IPv6 as well
-//  //regex_string =
-//  //  ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]{1,3}\\.){4}$");
-//  //regex = regex_string;
-//  //std::smatch match_results_2;
-//  //if (std::regex_match (hostname,
-//  //                      match_results_2,
-//  //                      regex,
-//  //                      std::regex_constants::match_default))
-//  //{
-//  //  ACE_ASSERT (match_results_2.ready () &&
-//  //              !match_results_2.empty () &&
-//  //              match_results_2[1].matched);
-//  //  dotted_decimal_string = hostname;
-//  //} // end IF
-//  result = address_out.set (port,
-//                            hostname.c_str (),
-//                            1,
-//                            ACE_ADDRESS_FAMILY_INET);
-//  if (result == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_INET_Addr::set (): \"%m\", aborting\n")));
-//    return false;
-//  } // end IF
+  return result;
+}
 
-//  // step3: validate URI
-//  regex_string =
-//    ACE_TEXT_ALWAYS_CHAR ("^(\\/.+(?=\\/))*\\/(.+?)(\\.(html|htm))?$");
-//  //regex_string =
-//  //    ACE_TEXT_ALWAYS_CHAR ("^(?:http(?:s)?://)?((.+\\.)+([^\\/]+))(\\/.+(?=\\/))*\\/(.+?)(\\.(html|htm))?$");
-//  regex.assign (regex_string,
-//                (std::regex_constants::ECMAScript |
-//                 std::regex_constants::icase));
-//  std::smatch match_results_3;
-//  if (!std::regex_match (URI_out,
-//                         match_results_3,
-//                         regex,
-//                         std::regex_constants::match_default))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("invalid URI (was: \"%s\"), aborting\n"),
-//                ACE_TEXT (URI_out.c_str ())));
-//    return false;
-//  } // end IF
-//  ACE_ASSERT (match_results_3.ready () && !match_results_3.empty ());
+unsigned int
+BitTorrent_Tools::MetaInfo2Length (const Bencoding_Dictionary_t& metaInfo_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::MetaInfo2Length"));
 
-//  return true;
-//}
+  Bencoding_DictionaryIterator_t iterator =
+      metaInfo_in.find (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_KEY));
+  ACE_ASSERT (iterator != metaInfo_in.end ());
+  ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
+
+  // single-file mode ?
+  Bencoding_DictionaryIterator_t iterator_2 =
+      (*iterator).second->dictionary->find (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_LENGTH_KEY));
+  if (iterator_2 != (*iterator).second->dictionary->end ())
+  {
+    ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
+    return static_cast<unsigned int> ((*iterator_2).second->integer);
+  } // end IF
+
+  iterator_2 =
+      (*iterator).second->dictionary->find (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_FILES_KEY));
+  ACE_ASSERT (iterator_2 != (*iterator).second->dictionary->end ());
+  ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_LIST);
+
+  unsigned int result = 0;
+  for (Bencoding_ListIterator_t iterator_3 = (*iterator_2).second->list->begin ();
+       iterator_3 != (*iterator_2).second->list->end ();
+       ++iterator_3)
+  {
+    ACE_ASSERT ((*iterator_3)->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
+
+    iterator =
+      (*iterator_3)->dictionary->find (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_LENGTH_KEY));
+    ACE_ASSERT (iterator != (*iterator_3)->dictionary->end ());
+    ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
+    result += static_cast<unsigned int> ((*iterator).second->integer);
+  } // end FOR
+
+  return result;
+}
 
 bool
 BitTorrent_Tools::parseMetaInfoFile (const std::string& metaInfoFileName_in,
@@ -208,8 +188,8 @@ BitTorrent_Tools::parseMetaInfoFile (const std::string& metaInfoFileName_in,
   // sanity check(s)
   ACE_ASSERT (!metaInfo_out);
 
-  BitTorrent_MetaInfo_ParserDriver_T<BitTorrent_SessionMessage_t> parser (traceScanning_in,
-                                                                          traceParsing_in);
+  BitTorrent_MetaInfo_ParserDriver_T<BitTorrent_TrackerSessionMessage_t> parser (traceScanning_in,
+                                                                                 traceParsing_in);
   parser.initialize (traceScanning_in, // trace flex scanner ?
                      traceParsing_in,  // trace bison parser ?
                      NULL,             // data buffer queue (yywrap)
@@ -299,6 +279,88 @@ BitTorrent_Tools::free (Bencoding_Dictionary_t*& dictionary_inout)
 
   delete dictionary_inout;
   dictionary_inout = NULL;
+}
+
+std::string
+BitTorrent_Tools::generatePeerId ()
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::generatePeerId"));
+
+  // initialize return value(s)
+  std::string result = ACE_TEXT_ALWAYS_CHAR ("-");
+  result += ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PEER_ID_CLIENT_ID);
+
+  std::string library_version = ACE_TEXT_ALWAYS_CHAR ("0000");
+#ifdef HAVE_CONFIG_H
+  // parse library version
+  library_version =
+      ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_VERSION);
+  std::string regex_string =
+    ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]+).([[:digit:]]+).([[:digit:]]+)(.+)?$");
+  std::regex regex (regex_string);
+  std::smatch match_results;
+  if (!std::regex_match (library_version,
+                         match_results,
+                         regex,
+                         std::regex_constants::match_default))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid version string (was: \"%s\"), aborting\n"),
+                ACE_TEXT (library_version.c_str ())));
+    return std::string ();
+  } // end IF
+  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+  library_version = match_results[1];
+  if (library_version.size () < 4)
+    library_version += match_results[2];
+  if (library_version.size () < 4)
+    library_version += match_results[3];
+  if (library_version.size () < 4)
+    library_version += ACE_TEXT_ALWAYS_CHAR ("0");
+  library_version.resize (4);
+#endif
+  result += library_version;
+  result += ACE_TEXT_ALWAYS_CHAR ("-");
+
+  // generate 14 bytes of random data
+  time_t now = COMMON_TIME_NOW.sec ();
+  std::ostringstream converter;
+  converter << now;
+  std::string random_string = converter.str ();
+  unsigned char random_hash[SHA_DIGEST_LENGTH + 1];
+  SHA1 (reinterpret_cast<const unsigned char*> (random_string.c_str ()),
+        random_string.size (),
+        random_hash);
+  random_hash[SHA_DIGEST_LENGTH] = '\0';
+  result += reinterpret_cast<char*> (random_hash);
+  result.resize (BITTORRENT_TRACKER_REQUEST_PEER_ID_LENGTH);
+
+  return result;
+}
+
+std::string
+BitTorrent_Tools::generateKey ()
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::generateKey"));
+
+  // initialize return value(s)
+  std::string result;
+
+  // generate 20 bytes of random data
+  time_t now = COMMON_TIME_NOW.sec ();
+  std::ostringstream converter;
+  converter << now;
+  std::string random_string = converter.str ();
+  unsigned char random_hash[SHA_DIGEST_LENGTH + 1];
+  SHA1 (reinterpret_cast<const unsigned char*> (random_string.c_str ()),
+        random_string.size (),
+        random_hash);
+  random_hash[SHA_DIGEST_LENGTH] = '\0';
+  result += reinterpret_cast<char*> (random_hash);
+  result.resize (20);
+
+  return result;
 }
 
 std::string
@@ -402,6 +464,132 @@ BitTorrent_Tools::List2String (const Bencoding_List_t& list_in)
       }
     } // end SWITCH
   } // end FOR
+
+  return result;
+}
+
+std::string
+BitTorrent_Tools::bencode (const Bencoding_Dictionary_t& dictionary_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::bencode"));
+
+  // initialize return value
+  std::string result = ACE_TEXT_ALWAYS_CHAR ("d");
+
+  std::ostringstream converter;
+
+  for (Bencoding_DictionaryIterator_t iterator = dictionary_in.begin ();
+       iterator != dictionary_in.end ();
+       ++iterator)
+  {
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.clear ();
+    converter << (*iterator).first.size ();
+    result += converter.str ();
+    result += ':';
+    result += (*iterator).first;
+
+    switch ((*iterator).second->type)
+    {
+      case Bencoding_Element::BENCODING_TYPE_INTEGER:
+      {
+        result += 'i';
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << (*iterator).second->integer;
+        result += converter.str ();
+        result += 'e';
+        break;
+      }
+      case Bencoding_Element::BENCODING_TYPE_STRING:
+      {
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << (*iterator).second->string->size ();
+        result += converter.str ();
+        result += ':';
+        result += *(*iterator).second->string;
+        break;
+      }
+      case Bencoding_Element::BENCODING_TYPE_LIST:
+      {
+        result += BitTorrent_Tools::bencode (*(*iterator).second->list);
+        break;
+      }
+      case Bencoding_Element::BENCODING_TYPE_DICTIONARY:
+      {
+        result += BitTorrent_Tools::bencode (*(*iterator).second->dictionary);
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown type (was: %d), continuing\n"),
+                    ACE_TEXT ((*iterator).second->type)));
+        break;
+      }
+    } // end SWITCH
+  } // end FOR
+  result += 'e';
+
+  return result;
+}
+std::string
+BitTorrent_Tools::bencode (const Bencoding_List_t& list_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::bencode"));
+
+  // initialize return value
+  std::string result = ACE_TEXT_ALWAYS_CHAR ("l");
+
+  std::ostringstream converter;
+
+  for (Bencoding_ListIterator_t iterator = list_in.begin ();
+       iterator != list_in.end ();
+       ++iterator)
+  {
+    switch ((*iterator)->type)
+    {
+      case Bencoding_Element::BENCODING_TYPE_INTEGER:
+      {
+        result += 'i';
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << (*iterator)->integer;
+        result += converter.str ();
+        result += 'e';
+        break;
+      }
+      case Bencoding_Element::BENCODING_TYPE_STRING:
+      {
+        converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+        converter.clear ();
+        converter << (*iterator)->string->size ();
+        result += converter.str ();
+        result += ':';
+        result += *(*iterator)->string;
+        break;
+      }
+      case Bencoding_Element::BENCODING_TYPE_LIST:
+      {
+        result += BitTorrent_Tools::bencode (*(*iterator)->list);
+        break;
+      }
+      case Bencoding_Element::BENCODING_TYPE_DICTIONARY:
+      {
+        result += BitTorrent_Tools::bencode (*(*iterator)->dictionary);
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown type (was: %d), continuing\n"),
+                    ACE_TEXT ((*iterator)->type)));
+        break;
+      }
+    } // end SWITCH
+  } // end FOR
+  result += 'e';
 
   return result;
 }

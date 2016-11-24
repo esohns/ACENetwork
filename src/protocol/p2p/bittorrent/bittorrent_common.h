@@ -232,4 +232,14 @@ struct BitTorrent_Record
   };
 };
 
+//////////////////////////////////////////
+
+enum BitTorrent_Event
+{
+  BITTORRENT_EVENT_COMPLETE = 0,
+  ////////////////////////////////////////
+  BITTORRENT_EVENT_MAX,
+  BITTORRENT_EVENT_INVALID,
+};
+
 #endif

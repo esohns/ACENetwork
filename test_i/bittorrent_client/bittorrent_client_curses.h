@@ -39,9 +39,9 @@
 
 #include "common.h"
 
-#include "bittorrent_icontrol.h"
 
 #include "bittorrent_client_common.h"
+#include "bittorrent_client_network.h"
 #include "bittorrent_client_stream_common.h"
 
 // forward declaration(s)
@@ -97,7 +97,7 @@ void curses_log (const std::string&,             // metainfo file URI
                  BitTorrent_Client_CursesState&, // state
                  bool = true);                   // lock ?
 bool curses_main (BitTorrent_Client_CursesState&, // state
-                  BitTorrent_IControl*);          // controller
+                  BitTorrent_Client_IControl_t*); // controller
 bool curses_stop (const std::string&,              // metainfo file URI
                   BitTorrent_Client_CursesState&); // state
 bool curses_upload (const std::string&,              // metainfo file URI

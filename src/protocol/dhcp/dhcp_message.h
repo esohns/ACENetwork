@@ -35,12 +35,14 @@ class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
 //class DHCP_SessionMessage;
-template <typename AllocatorConfigurationType,
+template <ACE_SYNCH_DECL,
+          typename AllocatorConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
 class Stream_MessageAllocatorHeapBase_T;
-template <typename AllocatorConfigurationType,
+template <ACE_SYNCH_DECL,
+          typename AllocatorConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
@@ -57,13 +59,15 @@ class DHCP_Message_T
                                    DHCP_MessageType_t>
 {
   // enable access to specific private ctors
-  friend class Stream_MessageAllocatorHeapBase_T<AllocatorConfigurationType,
+  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                                 AllocatorConfigurationType,
                                                  ControlMessageType,
                                                  DHCP_Message_T<AllocatorConfigurationType,
                                                                 ControlMessageType,
                                                                 SessionMessageType>,
                                                  SessionMessageType>;
-  friend class Stream_CachedMessageAllocator_T<AllocatorConfigurationType,
+  friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
+                                               AllocatorConfigurationType,
                                                ControlMessageType,
                                                DHCP_Message_T<AllocatorConfigurationType,
                                                               ControlMessageType,

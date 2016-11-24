@@ -39,7 +39,8 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IConnector_t& connector_in,
                                   const ACE_INET_Addr& address_in,
                                   bool cloneModule_in,
                                   bool deleteModule_in,
-                                  Stream_Module_t*& finalModule_inout)
+                                  Stream_Module_t*& finalModule_inout,
+                                  bool isPeer_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_Tools::connect"));
 
@@ -73,7 +74,8 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IConnector_t& connector_in,
   } // end IF
 
   // step2: initialize connector
-  if (!connector_in.initialize (user_data_p->configuration->socketHandlerConfiguration))
+  if (!connector_in.initialize ((isPeer_in ? user_data_p->configuration->socketHandlerConfiguration
+                                           : user_data_p->configuration->trackerSocketHandlerConfiguration)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));

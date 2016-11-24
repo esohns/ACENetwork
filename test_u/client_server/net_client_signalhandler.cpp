@@ -118,7 +118,7 @@ Test_U_Client_SignalHandler::handle (int signal_in)
 
   // abort ?
   if (abort)
-    iconnection_manager_p->abortLeastRecent ();
+    iconnection_manager_p->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST);
 
   // connect ?
   if (connect &&

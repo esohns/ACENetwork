@@ -21,6 +21,8 @@
 #ifndef NET_COMMON_H
 #define NET_COMMON_H
 
+#include <set>
+
 #include <ace/Synch_Traits.h>
 #include <ace/Time_Value.h>
 
@@ -77,6 +79,15 @@ enum Net_TransportLayerType
 //  NET_STREAM_CONTROL_MAX,
 //  NET_STREAM_CONTROL_INVALID
 //};
+
+enum Net_Connection_AbortStrategy
+{
+  NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST = 0,
+  NET_CONNECTION_ABORT_STRATEGY_RECENT_MOST,
+  ////////////////////////////////////////
+  NET_CONNECTION_ABORT_STRATEGY_MAX,
+  NET_CONNECTION_ABORT_STRATEGY_INVALID
+};
 
 // *NOTE*: this extends ACE_Svc_Handler_Close (see Svc_Handler.h)
 enum Net_Connection_CloseReason
@@ -135,5 +146,8 @@ struct Net_ConnectionState
 
   struct Net_UserData*       userData;
 };
+
+typedef std::set<Net_ConnectionId_t> Net_Connections_t;
+typedef Net_Connections_t::iterator Net_ConnectionsIterator_t;
 
 #endif

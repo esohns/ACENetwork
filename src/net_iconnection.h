@@ -74,20 +74,19 @@ class Net_IConnection_T
   //         encapsulate most of the TCP/UDP protocol functionality, this API
   //         represents the appropriate asynchronous means to ensure that the
   //         forwarded data has in fact been transmitted successfully
-  // *IMPORTANT NOTE*: (As far as yours truly (???) is aware) the (Berkeley)
-  //                   sockets API does not in any way guarantee successful
-  //                   transmission of the data from (!) the socket buffers
-  //                   (this feature may already be protocol-specific ?); the
-  //                   send()-man pages do not clear things either, leaving
-  //                   network data delivery shrouded in mystery.
-  //                   In this sense the more platform-specific, asynchronous
+  // *IMPORTANT NOTE*: (As far as yours truly is aware) (Berkeley) sockets
+  //                   provide no means of verification of successful
+  //                   transmission of the data from (!) the kernel socket
+  //                   buffers (Note that this feature may also be protocol-
+  //                   specific); the send()-man pages do not clear things
+  //                   either, leaving socket data delivery shrouded in mystery.
+  //                   In this sense, the more platform-specific, asynchronous
   //                   APIs, as supported by the 'proactive' framework(s), may
-  //                   offer more 'reliable', protocol-agnostic results (again,
+  //                   deliver more reliable, protocol-agnostic results (again,
   //                   YMMV).
   //                   For the reactor based, blocking (!) API, this could be a
   //                   NOP
-  virtual void waitForCompletion (bool = true) = 0; // wait for any worker
-                                                    // thread(s) ?
+  virtual void waitForCompletion (bool = true) = 0; // wait for any worker thread(s) ?
 };
 
 //////////////////////////////////////////
@@ -175,7 +174,7 @@ class Net_IStreamConnection_T
 //////////////////////////////////////////
 
 template <typename AddressType,
-          typename ConfigurationType,
+          typename ConnectionConfigurationType,
           typename ConnectionStateType,
           typename StatisticContainerType,
           ////////////////////////////////
@@ -185,8 +184,11 @@ template <typename AddressType,
           typename StreamType,
           typename StreamStatusType,
           ////////////////////////////////
+          typename ConfigurationType,
           typename StateType>
 class Net_ISession_T
+ : public Common_IInitialize_T<ConfigurationType>
+// : public typename StreamType::IDATA_NOTIFY_T
 {
  public:
   virtual ~Net_ISession_T () {};
@@ -196,6 +198,8 @@ class Net_ISession_T
   virtual void connect (const AddressType&) = 0; // peer address
   virtual void disconnect (const AddressType&) = 0; // peer address
 
+  virtual void close (bool = false) = 0; // wait ?
+
   ////////////////////////////////////////
   // callbacks
   // *TODO*: remove ASAP
@@ -203,8 +207,12 @@ class Net_ISession_T
   virtual void disconnect (Net_ConnectionId_t) = 0; // connection id
 
 //  // convenient types
+//  typedef Net_IConnection_T<AddressType,
+//                            ConnectionConfigurationType,
+//                            StateType,
+//                            StatisticContainerType> ICONNECTION_T;
 //  typedef Net_IStreamConnection_T<AddressType,
-//                                  ConfigurationType,
+//                                  ConnectionConfigurationType,
 //                                  ConnectionStateType,
 //                                  StatisticContainerType,
 //                                  SocketConfigurationType,

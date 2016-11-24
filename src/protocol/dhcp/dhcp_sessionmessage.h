@@ -33,6 +33,18 @@
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
+template <ACE_SYNCH_DECL,
+          typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+class Stream_MessageAllocatorHeapBase_T;
+template <ACE_SYNCH_DECL,
+          typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType>
+class Stream_CachedMessageAllocator_T;
 
 template <typename ControlMessageType,
           typename DataMessageType,
@@ -45,9 +57,21 @@ class DHCP_SessionMessage_T
                                       ControlMessageType,
                                       DataMessageType>
 {
-//  // enable access to private ctor(s)
-//  friend class Net_StreamMessageAllocator;
-//  friend class Stream_MessageAllocatorHeapBase<Net_Message, Net_SessionMessage>;
+ // enable access to specific private ctors
+ friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                                Stream_AllocatorConfiguration,
+                                                ControlMessageType,
+                                                DataMessageType,
+                                                DHCP_SessionMessage_T<ControlMessageType,
+                                                                      DataMessageType,
+                                                                      SessionDataType> >;
+ friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
+                                              Stream_AllocatorConfiguration,
+                                              ControlMessageType,
+                                              DataMessageType,
+                                              DHCP_SessionMessage_T<ControlMessageType,
+                                                                    DataMessageType,
+                                                                    SessionDataType> >;
 
  public:
   // convenient types

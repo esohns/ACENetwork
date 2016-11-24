@@ -38,25 +38,26 @@ class ACE_Message_Block;
 class Test_U_Message;
 
 class Test_U_SessionMessage
- : public Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      Stream_SessionMessageType,
+ : public Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
                                       Test_U_StreamSessionData_t,
-                                      Test_U_UserData,
+                                      struct Test_U_UserData,
                                       Test_U_ControlMessage_t,
                                       Test_U_Message>
 {
 //  // enable access to private ctor(s)
 //  friend class Net_StreamMessageAllocator;
-  friend class Stream_MessageAllocatorHeapBase_T<Stream_AllocatorConfiguration,
+  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                                 struct Stream_AllocatorConfiguration,
                                                  Test_U_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
 
  public:
   // *NOTE*: assumes responsibility for the second argument !
-  Test_U_SessionMessage (Stream_SessionMessageType,    // session message type
-                         Test_U_StreamSessionData_t*&, // session data handle
-                         Test_U_UserData*);            // user data handle
+  Test_U_SessionMessage (enum Stream_SessionMessageType, // session message type
+                         Test_U_StreamSessionData_t*&,   // session data handle
+                         struct Test_U_UserData*);       // user data handle
     // *NOTE*: to be used by message allocators
   Test_U_SessionMessage (ACE_Allocator*); // message allocator
   Test_U_SessionMessage (ACE_Data_Block*, // data block
@@ -68,10 +69,10 @@ class Test_U_SessionMessage
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      Stream_SessionMessageType,
+  typedef Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
                                       Test_U_StreamSessionData_t,
-                                      Test_U_UserData,
+                                      struct Test_U_UserData,
                                       Test_U_ControlMessage_t,
                                       Test_U_Message> inherited;
 

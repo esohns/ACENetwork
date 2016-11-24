@@ -28,8 +28,9 @@
 #include "bittorrent_client_common.h"
 #include "bittorrent_client_configuration.h"
 #include "bittorrent_client_network.h"
-#include "bittorrent_client_stream.h"
 #include "bittorrent_client_stream_common.h"
+
+#include "bittorrent_client_gui_common.h"
 
 typedef BitTorrent_Session_T<struct BitTorrent_Client_SocketHandlerConfiguration,
                              struct BitTorrent_Client_Configuration,
@@ -42,8 +43,10 @@ typedef BitTorrent_Session_T<struct BitTorrent_Client_SocketHandlerConfiguration
                              BitTorrent_Client_IConnection_Manager_t,
                              BitTorrent_Client_PeerConnector_t,
                              BitTorrent_Client_TrackerConnector_t,
+                             struct BitTorrent_Client_SessionConfiguration,
                              struct BitTorrent_Client_SessionState,
-                             struct BitTorrent_Client_UserData> BitTorrent_Client_Session_t;
+                             struct BitTorrent_Client_UserData,
+                             struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_Session_t;
 typedef BitTorrent_Session_T<struct BitTorrent_Client_SocketHandlerConfiguration,
                              struct BitTorrent_Client_Configuration,
                              struct BitTorrent_Client_ConnectionState,
@@ -55,7 +58,21 @@ typedef BitTorrent_Session_T<struct BitTorrent_Client_SocketHandlerConfiguration
                              BitTorrent_Client_IConnection_Manager_t,
                              BitTorrent_Client_AsynchPeerConnector_t,
                              BitTorrent_Client_AsynchTrackerConnector_t,
+                             struct BitTorrent_Client_SessionConfiguration,
                              struct BitTorrent_Client_SessionState,
-                             struct BitTorrent_Client_UserData> BitTorrent_Client_AsynchSession_t;
+                             struct BitTorrent_Client_UserData,
+                             struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_AsynchSession_t;
+
+//////////////////////////////////////////
+
+template <typename SessionAsynchType,
+          typename SessionType,
+          typename SessionConfigurationType,
+          typename SessionStateType>
+class BitTorrent_Control_T;
+typedef BitTorrent_Control_T<BitTorrent_Client_AsynchSession_t,
+                             BitTorrent_Client_Session_t,
+                             struct BitTorrent_Client_SessionConfiguration,
+                             struct BitTorrent_Client_SessionState> BitTorrent_Client_Control_t;
 
 #endif

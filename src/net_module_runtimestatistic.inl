@@ -328,7 +328,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
 //       // *NOTE*: protect access to statistics data
 //       // from asynchronous API calls (as well as local reporting)...
 //       {
-//         ACE_Guard<ACE_Thread_Mutex> aGuard (statsLock_);
+//         ACE_Guard<ACE_SYNCH_MUTEX> aGuard (statsLock_);
 //
 //         currentStats_ = message_inout->getConfiguration ()->getStats ();
 //

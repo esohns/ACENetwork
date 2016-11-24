@@ -217,7 +217,7 @@ release:
 
 bool
 curses_main (BitTorrent_Client_CursesState& state_in,
-             BitTorrent_IControl* controller_in)
+             BitTorrent_Client_IControl_t* controller_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::curses_main"));
 

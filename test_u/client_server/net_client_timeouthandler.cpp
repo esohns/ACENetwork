@@ -368,10 +368,10 @@ Test_U_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
   } // end IF
 
   if (do_abort_oldest)
-    connection_manager_p->abortLeastRecent ();
+    connection_manager_p->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST);
 
   if (do_abort_youngest)
-    connection_manager_p->abortMostRecent ();
+    connection_manager_p->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_MOST);
 
   if (do_connect)
   {

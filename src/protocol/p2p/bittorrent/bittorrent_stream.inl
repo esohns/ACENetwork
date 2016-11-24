@@ -130,13 +130,13 @@ BitTorrent_PeerStream_T<StreamStateType,
   deleteModules_out = true;
 
   Stream_Module_t* module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  MODULE_HANDLER_T (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
-                                    NULL,
-                                    false),
-                  false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
+//  ACE_NEW_RETURN (module_p,
+//                  MODULE_HANDLER_T (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
+//                                    NULL,
+//                                    false),
+//                  false);
+//  modules_out.push_back (module_p);
+//  module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   MODULE_STATISTIC_T (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
                                       NULL,
@@ -496,15 +496,15 @@ BitTorrent_TrackerStream_T<StreamStateType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::load"));
 
   // initialize return value(s)
-  deleteModules_out = true;
+//  deleteModules_out = true;
 
-  Stream_Module_t* module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  MODULE_HANDLER_T (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
-                                    NULL,
-                                    false),
-                  false);
-  modules_out.push_back (module_p);
+//  Stream_Module_t* module_p = NULL;
+//  ACE_NEW_RETURN (module_p,
+//                  MODULE_HANDLER_T (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
+//                                    NULL,
+//                                    false),
+//                  false);
+//  modules_out.push_back (module_p);
 
   return inherited::load (modules_out,
                           deleteModules_out);

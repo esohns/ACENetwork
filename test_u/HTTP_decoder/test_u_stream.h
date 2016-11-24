@@ -41,7 +41,6 @@
 
 class Test_U_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
-                        ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
                         enum Stream_SessionMessageType,
@@ -80,7 +79,6 @@ class Test_U_Stream
 
  private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
-                        ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
                         enum Stream_SessionMessageType,

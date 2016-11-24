@@ -49,7 +49,7 @@ struct Net_SocketConfiguration
    , netlinkAddress ()
    , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
 #endif
-   , networkInterface (ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT))
+   , networkInterface (ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET))
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
    , writeOnly (false)
   {

@@ -25,9 +25,12 @@
 // *PORTABILITY*: nic device names are not portable
 //                --> (on Windows) let the user choose the interface from a list
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#define NET_INTERFACE_DEFAULT                           ""
+#define NET_INTERFACE_DEFAULT_ETHERNET                  ""
+#define NET_INTERFACE_DEFAULT_PPP                       ""
+#define NET_INTERFACE_LOOPBACK                          ""
 #else
-#define NET_INTERFACE_DEFAULT                           "eth0"
+#define NET_INTERFACE_DEFAULT_ETHERNET                  "eth0"
+#define NET_INTERFACE_DEFAULT_PPP                       "ppp0"
 #define NET_INTERFACE_LOOPBACK                          "lo"
 #endif
 #define NET_INTERFACE_DEFAULT_USE_LOOPBACK              false
@@ -77,13 +80,17 @@
 
 // connection / handler
 #define NET_CONNECTION_MAXIMUM_NUMBER_OF_OPEN           10
+#define NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT   3 // seconds
 #define NET_CONNECTION_HANDLER_THREAD_NAME              "connection dispatch"
 #define NET_CONNECTION_HANDLER_THREAD_GROUP_ID          2
 
+// (asynchronous) connections
+#define NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT           60 // second(s)
+#define NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL  1  // second(s)
+
 // event dispatch
-// default event dispatcher (default: use asynch I/O (proactor))
-#define NET_EVENT_USE_REACTOR                           false
-#define NET_EVENT_USE_THREAD_POOL                       false // multi-threaded event dispatch ?
+#define NET_EVENT_USE_REACTOR                           false // ? reactor : proactor
+#define NET_EVENT_USE_THREAD_POOL                       false // multi-threaded event dispatch ? (reactor only)
 #define NET_EVENT_TASK_GROUP_ID                         100
 
 // stream
