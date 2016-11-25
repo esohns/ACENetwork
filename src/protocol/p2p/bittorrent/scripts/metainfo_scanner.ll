@@ -185,6 +185,7 @@ METAINFO_FILE                     {DICTIONARY}
 "d"                    { ACE_ASSERT (yyleng == 1);
                          parser->offset (1);
                          BEGIN(state_dictionary_key);
+                         yy_push_state (state_dictionary_key);
                          ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
                          ACE_ASSERT (yylval->dval);
@@ -232,21 +233,19 @@ METAINFO_FILE                     {DICTIONARY}
 <state_list>{
 "e"                    { ACE_ASSERT (yyleng == 1);
                          parser->offset (1);
-                         yy_pop_state (); }
+                         yy_pop_state ();
+                         return yy::BitTorrent_MetaInfo_Parser::token::END_OF_LIST; }
 {DIGIT}{1}             { yyless (0);
                          yy_push_state (state_string); }
 "i"                    { ACE_ASSERT (yyleng == 1);
                          yyless (0);
                          yy_push_state (state_integer); }
 "l"                    { ACE_ASSERT (yyleng == 1);
-                         yyless (0);
-                         yy_push_state (state_list);
                          ACE_NEW_NORETURN (yylval->lval,
                                            Bencoding_List_t ());
                          ACE_ASSERT (yylval->lval);
                          return yy::BitTorrent_MetaInfo_Parser::token::LIST; }
 "d"                    { ACE_ASSERT (yyleng == 1);
-                         yyless (0);
                          yy_push_state (state_dictionary_key);
                          ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
@@ -256,7 +255,8 @@ METAINFO_FILE                     {DICTIONARY}
 <state_dictionary_key>{
 "e"                    { ACE_ASSERT (yyleng == 1);
                          parser->offset (1);
-                         yy_pop_state (); }
+                         yy_pop_state ();
+                         return yy::BitTorrent_MetaInfo_Parser::token::END_OF_DICTIONARY; }
 {DIGIT}{1}             { yyless (0);
                          BEGIN(state_dictionary_value);
                          yy_push_state (state_string); }
@@ -270,7 +270,6 @@ METAINFO_FILE                     {DICTIONARY}
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_integer); }
 "l"                    { ACE_ASSERT (yyleng == 1);
-                         yyless (0);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_list);
                          ACE_NEW_NORETURN (yylval->lval,
@@ -278,7 +277,6 @@ METAINFO_FILE                     {DICTIONARY}
                          ACE_ASSERT (yylval->lval);
                          return yy::BitTorrent_MetaInfo_Parser::token::LIST; }
 "d"                    { ACE_ASSERT (yyleng == 1);
-                         yyless (0);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_dictionary_key);
                          ACE_NEW_NORETURN (yylval->dval,
@@ -289,7 +287,7 @@ METAINFO_FILE                     {DICTIONARY}
 <<EOF>>                { return yy::BitTorrent_MetaInfo_Parser::token::END; }
 <*>{OCTET}             { /* *TODO*: use (?s:.) ? */
                          if (!parser->isBlocking ())
-                           return yy::BitTorrent_MetaInfo_Parser::token::END_OF_FRAGMENT;
+                           yyterminate(); // not enough data, cannot proceed
 
                          // wait for more data fragment(s)
                          if (!parser->switchBuffer ())

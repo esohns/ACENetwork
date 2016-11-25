@@ -107,7 +107,7 @@ typedef union YYSTYPE
 %parse-param              { BitTorrent_MetaInfoScanner* scanner }
 // *NOTE*: cannot use %initial-action, as it is scoped
 // *TODO*: find a better way to do this
-%parse-param              { std::string* dictionary_key }
+/*%parse-param              { std::string* dictionary_key }*/
 /*%parse-param              { yyscan_t yyscanner }*/
 /*%lex-param                { YYSTYPE* yylval }
 %lex-param                { YYLTYPE* yylloc } */
@@ -121,10 +121,6 @@ typedef union YYSTYPE
 {
   // initialize the location
   @$.initialize (YY_NULLPTR, 1, 1);
-
-  // sanity check(s)
-  ACE_ASSERT (dictionary_key);
-/*  std::string dictionary_key;*/
 }
 
 // symbols
@@ -179,8 +175,10 @@ typedef union YYSTYPE
 
 // terminals
 %token
- END_OF_FRAGMENT "end_of_fragment"
- END 0           "end"
+ END_OF_DICTIONARY "dictionary_end"
+ END_OF_LIST       "list_end"
+ END_OF_FRAGMENT   "end_of_fragment"
+ END 0             "end"
 ;
 %token <ival> INTEGER    "integer"
 %token <sval> STRING     "string"
@@ -191,8 +189,8 @@ typedef union YYSTYPE
 %type  <lval> list_items
 %type  <eval> dictionary_item dictionary_value list_item
 
-%precedence "integer" "string"
-%precedence "list" "dictionary"
+/*%precedence "integer" "string"
+%precedence "list" "dictionary"*/
 
 %code provides {
 /*void BitTorrent_Export yysetdebug (int);
@@ -219,137 +217,147 @@ void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
 %printer    { yyoutput << BitTorrent_Tools::Dictionary2String (*$$); } <dval>
 
 %%
-%start            metainfo   ;
+%start            metainfo;
 metainfo:         "dictionary" {
-                                 parser->setDictionary ($1); }
-                  dictionary_items {
-                                     Bencoding_Dictionary_t& dictionary_r =
-                                       parser->current ();
-                                     Bencoding_Dictionary_t* dictionary_p =
-                                       &dictionary_r;
-                                     try {
-                                       parser->record (dictionary_p);
-                                     } catch (...) {
-                                       ACE_DEBUG ((LM_ERROR,
-                                                   ACE_TEXT ("caught exception in BitTorrent_MetaInfo_IParser::record(), continuing\n")));
-                                     } };
-list_items:       list_items list_item { };
-                  | %empty             { };
+                    parser->pushDictionary ($1); }
+                  dictionary_items "dictionary_end" {
+                    Bencoding_Dictionary_t& dictionary_r = parser->current ();
+                    Bencoding_Dictionary_t* dictionary_p = &dictionary_r;
+                    try {
+                      parser->record (dictionary_p);
+                    } catch (...) {
+                      ACE_DEBUG ((LM_ERROR,
+                                  ACE_TEXT ("caught exception in BitTorrent_MetaInfo_IParser::record(), continuing\n")));
+                    } }
+list_items:       list_items list_item { }
+                  | %empty             { }
 list_item:        "string" {
-                             Bencoding_List_t* list_p =
-                               const_cast<Bencoding_List_t*> (parser->get ());
-                             Bencoding_Element* element_p = NULL;
-                             ACE_NEW_NORETURN (element_p,
-                                               Bencoding_Element ());
-                             ACE_ASSERT (element_p);
-                             element_p->type =
-                               Bencoding_Element::BENCODING_TYPE_STRING;
-                             element_p->string = $1;
-                             list_p->push_back (element_p); };
+                    Bencoding_List_t& list_r = parser->getList ();
+                    Bencoding_Element* element_p = NULL;
+                    ACE_NEW_NORETURN (element_p,
+                                      Bencoding_Element ());
+                    ACE_ASSERT (element_p);
+                    element_p->type = Bencoding_Element::BENCODING_TYPE_STRING;
+                    element_p->string = $1;
+                    list_r.push_back (element_p); }
                   | "integer" {
-                                Bencoding_List_t* list_p =
-                                  const_cast<Bencoding_List_t*> (parser->get ());
-                                Bencoding_Element* element_p = NULL;
-                                ACE_NEW_NORETURN (element_p,
-                                                  Bencoding_Element ());
-                                ACE_ASSERT (element_p);
-                                element_p->type =
-                                  Bencoding_Element::BENCODING_TYPE_INTEGER;
-                                element_p->integer = $1;
-                                list_p->push_back (element_p); };
+                    Bencoding_List_t& list_r = parser->getList ();
+                    Bencoding_Element* element_p = NULL;
+                    ACE_NEW_NORETURN (element_p,
+                                      Bencoding_Element ());
+                    ACE_ASSERT (element_p);
+                    element_p->type = Bencoding_Element::BENCODING_TYPE_INTEGER;
+                    element_p->integer = $1;
+                    list_r.push_back (element_p); }
                   | "list" {
-                             parser->set ($1); }
-                  list_items {
-                               Bencoding_List_t* list_p =
-                                 const_cast<Bencoding_List_t*> (parser->get ());
-                               Bencoding_Element* element_p = NULL;
-                               ACE_NEW_NORETURN (element_p,
-                                                 Bencoding_Element ());
-                               ACE_ASSERT (element_p);
-                               element_p->type =
-                                 Bencoding_Element::BENCODING_TYPE_LIST;
-                               element_p->list = $3;
-                               list_p->push_back (element_p); };
+                    parser->pushList ($1); }
+                  list_items "list_end" {
+                    Bencoding_Element* element_p = NULL;
+                    ACE_NEW_NORETURN (element_p,
+                                      Bencoding_Element ());
+                    ACE_ASSERT (element_p);
+                    element_p->type = Bencoding_Element::BENCODING_TYPE_LIST;
+                    element_p->list = $3;
+                    parser->popList ();
+                    Bencoding_List_t& list_r = parser->getList ();
+                    list_r.push_back (element_p); }
                   | "dictionary"  {
-                                    parser->setDictionary ($1); }
-                  dictionary_items {
-                                     Bencoding_List_t* list_p =
-                                       const_cast<Bencoding_List_t*> (parser->get ());
-                                     Bencoding_Element* element_p = NULL;
-                                     ACE_NEW_NORETURN (element_p,
-                                                       Bencoding_Element ());
-                                     ACE_ASSERT (element_p);
-                                     element_p->type =
-                                       Bencoding_Element::BENCODING_TYPE_DICTIONARY;
-                                     element_p->dictionary = $3;
-                                     list_p->push_back (element_p); };
-dictionary_items: dictionary_items dictionary_item { };
-                  | %empty { };
-dictionary_item: "string" {
-                            *dictionary_key = *$1; }
-                 dictionary_value { };
+                    parser->pushDictionary ($1); }
+                  dictionary_items "dictionary_end" {
+                    Bencoding_Element* element_p = NULL;
+                    ACE_NEW_NORETURN (element_p,
+                                      Bencoding_Element ());
+                    ACE_ASSERT (element_p);
+                    element_p->type =
+                      Bencoding_Element::BENCODING_TYPE_DICTIONARY;
+                    element_p->dictionary = $3;
+                    parser->popDictionary ();
+                    Bencoding_List_t& list_r = parser->getList ();
+                    list_r.push_back (element_p); }
+dictionary_items: dictionary_items dictionary_item { }
+                  | %empty { }
+dictionary_item:  "string" {
+                    parser->pushKey ($1); }
+                  dictionary_value { }
 dictionary_value: "string" {
-                             ACE_DEBUG ((LM_DEBUG,
-                                         ACE_TEXT ("key: \"%s\": \"%s\"\n"),
-                                         ACE_TEXT (dictionary_key->c_str ()),
-                                         ACE_TEXT ($1->c_str ())));
-
-                             Bencoding_Dictionary_t& dictionary_r =
-                               parser->current ();
-                             Bencoding_Element* element_p = NULL;
-                             ACE_NEW_NORETURN (element_p,
-                                               Bencoding_Element ());
-                             ACE_ASSERT (element_p);
-                             element_p->type =
-                               Bencoding_Element::BENCODING_TYPE_STRING;
-                             element_p->string = $1;
-                             dictionary_r.insert (std::make_pair (*dictionary_key,
-                                                                  element_p)); };
+                    std::string* key_string_p = &parser->getKey ();
+                    parser->popKey ();
+                    Bencoding_Element* element_p = NULL;
+                    ACE_NEW_NORETURN (element_p,
+                                      Bencoding_Element ());
+                    ACE_ASSERT (element_p);
+                    element_p->type = Bencoding_Element::BENCODING_TYPE_STRING;
+                    element_p->string = $1;
+                    Bencoding_Dictionary_t& dictionary_r =
+                      parser->getDictionary ();
+                    dictionary_r.insert (std::make_pair (key_string_p,
+                                                         element_p)); }
+/*                    ACE_DEBUG ((LM_DEBUG,
+                                ACE_TEXT ("[dictionary: %@] key: \"%s\": \"%s\"\n"),
+                                &dictionary_r,
+                                ACE_TEXT (key_string_p->c_str ()),
+                                ACE_TEXT ($1->c_str ()))); }*/
                   | "integer" {
-                                ACE_DEBUG ((LM_DEBUG,
-                                            ACE_TEXT ("key: \"%s\": %d\n"),
-                                            ACE_TEXT (dictionary_key->c_str ()),
-                                            $1));
-
-                                Bencoding_Dictionary_t& dictionary_r =
-                                  parser->current ();
-                                Bencoding_Element* element_p = NULL;
-                                ACE_NEW_NORETURN (element_p,
-                                                  Bencoding_Element ());
-                                ACE_ASSERT (element_p);
-                                element_p->type =
-                                  Bencoding_Element::BENCODING_TYPE_INTEGER;
-                                element_p->integer = $1;
-                                dictionary_r.insert (std::make_pair (*dictionary_key,
-                                                                     element_p)); };
+                    std::string* key_string_p = &parser->getKey ();
+                    parser->popKey ();
+                    Bencoding_Element* element_p = NULL;
+                    ACE_NEW_NORETURN (element_p,
+                                      Bencoding_Element ());
+                    ACE_ASSERT (element_p);
+                    element_p->type = Bencoding_Element::BENCODING_TYPE_INTEGER;
+                    element_p->integer = $1;
+                    Bencoding_Dictionary_t& dictionary_r =
+                      parser->getDictionary ();
+                    dictionary_r.insert (std::make_pair (key_string_p,
+                                                         element_p)); }
+/*                    ACE_DEBUG ((LM_DEBUG,
+                                ACE_TEXT ("[dictionary: %@] key: \"%s\": %d\n"),
+                                &dictionary_r,
+                                ACE_TEXT (key_string_p->c_str ()),
+                                $1)); }*/
                   | "list" {
-                             parser->set ($1); }
-                  list_items {
-                               Bencoding_Dictionary_t& dictionary_r =
-                                 parser->current ();
-                               Bencoding_Element* element_p = NULL;
-                               ACE_NEW_NORETURN (element_p,
-                                                 Bencoding_Element ());
-                               ACE_ASSERT (element_p);
-                               element_p->type =
-                                 Bencoding_Element::BENCODING_TYPE_LIST;
-                               element_p->list = $3;
-                               dictionary_r.insert (std::make_pair (*dictionary_key,
-                                                                    element_p)); };
+                    parser->pushList ($1); }
+                  list_items "list_end" {
+                    std::string* key_string_p = &parser->getKey ();
+                    parser->popKey ();
+                    Bencoding_Element* element_p = NULL;
+                    ACE_NEW_NORETURN (element_p,
+                                      Bencoding_Element ());
+                    ACE_ASSERT (element_p);
+                    element_p->type = Bencoding_Element::BENCODING_TYPE_LIST;
+                    element_p->list = $3;
+                    parser->popList ();
+                    Bencoding_Dictionary_t& dictionary_r =
+                      parser->getDictionary ();
+                    dictionary_r.insert (std::make_pair (key_string_p,
+                                                         element_p)); }
+/*                    ACE_DEBUG ((LM_DEBUG,
+                                ACE_TEXT ("[dictionary: %@] key: \"%s\": \"%s\"\n"),
+                                &dictionary_r,
+                                ACE_TEXT (key_string_p->c_str ()),
+                                ACE_TEXT (BitTorrent_Tools::List2String (*$3).c_str ()))); }*/
                   | "dictionary"  {
-                                    parser->setDictionary ($1); }
-                  dictionary_items {
-                                     Bencoding_Dictionary_t& dictionary_r =
-                                       parser->current ();
-                                     Bencoding_Element* element_p = NULL;
-                                     ACE_NEW_NORETURN (element_p,
-                                                       Bencoding_Element ());
-                                     ACE_ASSERT (element_p);
-                                     element_p->type =
-                                       Bencoding_Element::BENCODING_TYPE_DICTIONARY;
-                                     element_p->dictionary = $3;
-                                     dictionary_r.insert (std::make_pair (*dictionary_key,
-                                                                          element_p)); };
+                    parser->pushDictionary ($1); }
+                  dictionary_items "dictionary_end" {
+                    std::string* key_string_p = &parser->getKey ();
+                    parser->popKey ();
+                    Bencoding_Element* element_p = NULL;
+                    ACE_NEW_NORETURN (element_p,
+                                      Bencoding_Element ());
+                    ACE_ASSERT (element_p);
+                    element_p->type =
+                      Bencoding_Element::BENCODING_TYPE_DICTIONARY;
+                    element_p->dictionary = $3;
+                    parser->popDictionary ();
+                    Bencoding_Dictionary_t& dictionary_r =
+                      parser->getDictionary ();
+                    dictionary_r.insert (std::make_pair (key_string_p,
+                                                         element_p)); }
+/*                    ACE_DEBUG ((LM_DEBUG,
+                                ACE_TEXT ("[dictionary: %@] key: \"%s\": \"%s\"\n"),
+                                &dictionary_r,
+                                ACE_TEXT (key_string_p->c_str ()),
+                                ACE_TEXT (BitTorrent_Tools::Dictionary2String (*$3).c_str ()))); }*/
 %%
 
 void

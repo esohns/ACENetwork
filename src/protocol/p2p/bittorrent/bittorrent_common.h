@@ -22,7 +22,7 @@
 #define BITTORRENT_COMMON_H
 
 #include <list>
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -31,12 +31,31 @@
 #include <ace/config-macros.h>
 #include <ace/OS.h>
 
+struct string_p_hash
+ : public std::hash<std::string>
+{
+  size_t operator () (const std::string* string_in) const
+  { ACE_ASSERT (string_in);
+    return std::hash<std::string>::operator() (*string_in);
+  }
+};
+struct string_p_equal
+{
+  bool operator () (const std::string* lhs, const std::string* rhs) const
+  { ACE_ASSERT (lhs); ACE_ASSERT (rhs);
+    return (*lhs == *rhs);
+  }
+};
+
 // *NOTE*: the bencoding format is not really type-safe, so 'strict' languages
 //         like C/C++ need to jump through a few hoops here
 struct Bencoding_Element;
 typedef std::vector<Bencoding_Element*> Bencoding_List_t;
 typedef Bencoding_List_t::const_iterator Bencoding_ListIterator_t;
-typedef std::map<std::string, Bencoding_Element*> Bencoding_Dictionary_t;
+typedef std::unordered_map<std::string*,
+                           Bencoding_Element*,
+                           string_p_hash,
+                           string_p_equal>Bencoding_Dictionary_t;
 typedef Bencoding_Dictionary_t::const_iterator Bencoding_DictionaryIterator_t;
 
 struct Bencoding_Element

@@ -33,8 +33,8 @@ BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::BitTorrent_MetaInfo_Pars
  : inherited (traceScanning_in,
               traceParsing_in)
  , metaInfo_ (NULL)
- , currentDictionary_ (NULL)
- , currentList_ (NULL)
+ , dictionaries_ ()
+ , lists_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::BitTorrent_MetaInfo_ParserDriver_T"));
 
@@ -79,13 +79,15 @@ BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::error (const yy::locatio
   ACE_ASSERT (message_block_p);
   Common_IDumpState* idump_state_p =
     dynamic_cast<Common_IDumpState*> (message_block_p);
-  ACE_ASSERT (idump_state_p);
-  try {
-    idump_state_p->dump_state ();
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
-  }
+  if (idump_state_p)
+  {
+    try {
+      idump_state_p->dump_state ();
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
+    }
+  } // end IF
 
   //std::clog << location_in << ": " << message_in << std::endl;
 }
@@ -117,19 +119,19 @@ BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::record (Bencoding_Dictio
   ACE_ASSERT (metaInfo_in);
   ACE_ASSERT (metaInfo_in == metaInfo_);
 
-#if defined (_DEBUG)
-  dump_state ();
-#endif
+//#if defined (_DEBUG)
+//  dump_state ();
+//#endif
 }
 
 template <typename SessionMessageType>
 void
 //BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::set (Bencoding_Dictionary_t* dictionary_in)
-BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::setDictionary (Bencoding_Dictionary_t* dictionary_in)
+BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::pushDictionary (Bencoding_Dictionary_t* dictionary_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::setDictionary"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::pushDictionary"));
 
-  currentDictionary_ = dictionary_in;
+  dictionaries_.push (dictionary_in);
 
   if (!metaInfo_)
     metaInfo_ = dictionary_in;

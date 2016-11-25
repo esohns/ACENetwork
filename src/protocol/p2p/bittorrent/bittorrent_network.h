@@ -281,17 +281,19 @@ struct BitTorrent_SessionConfiguration
 {
   inline BitTorrent_SessionConfiguration ()
    : connectionManager (NULL)
-   , messageAllocator (NULL)
    , metaInfo (NULL)
    , socketHandlerConfiguration (NULL)
+   , traceParsing (NET_PROTOCOL_DEFAULT_YACC_TRACE)
+   , traceScanning (NET_PROTOCOL_DEFAULT_LEX_TRACE)
    , trackerSocketHandlerConfiguration (NULL)
    , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
   BitTorrent_Connection_Manager_t*       connectionManager;
-  Stream_IAllocator*                     messageAllocator;
   Bencoding_Dictionary_t*                metaInfo;
   struct Net_SocketHandlerConfiguration* socketHandlerConfiguration;
+  bool                                   traceParsing;
+  bool                                   traceScanning;
   struct Net_SocketHandlerConfiguration* trackerSocketHandlerConfiguration;
   bool                                   useReactor;
 };

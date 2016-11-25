@@ -21,6 +21,7 @@
 #ifndef BITTORRENT_METAINFO_PARSER_DRIVER_T_H
 #define BITTORRENT_METAINFO_PARSER_DRIVER_T_H
 
+#include <stack>
 #include <string>
 
 #include <ace/Global_Macros.h>
@@ -52,7 +53,7 @@ class BitTorrent_MetaInfo_ParserDriver_T
                            std::string,
                            SessionMessageType> PARSER_BASE_T;
 
-  // implement (part of) BitTorrent_MetaInfo_IParser_T
+  // implement (part of) BitTorrent_MetaInfo_IParser
   using PARSER_BASE_T::initialize;
   using PARSER_BASE_T::buffer;
   using PARSER_BASE_T::debugScanner;
@@ -65,18 +66,25 @@ class BitTorrent_MetaInfo_ParserDriver_T
   virtual void error (const yy::location&, // location
                       const std::string&); // message
 //  virtual void error (const std::string&); // message
-  inline virtual Bencoding_Dictionary_t& current () { ACE_ASSERT (currentDictionary_); return *currentDictionary_; };
+  inline virtual Bencoding_Dictionary_t& current () { ACE_ASSERT (metaInfo_); return *metaInfo_; };
   inline virtual bool hasFinished () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
   virtual void record (Bencoding_Dictionary_t*&); // data record
+  inline virtual Bencoding_Dictionary_t& getDictionary () { return *dictionaries_.top (); };
+  inline virtual std::string& getKey () { return *keys_.top (); };
+  inline virtual Bencoding_List_t& getList () { return *lists_.top (); };
+  inline virtual void popDictionary () { dictionaries_.pop (); };
+  inline virtual void popKey () { keys_.pop (); };
+  inline virtual void popList () { lists_.pop (); };
   // *IMPORTANT NOTE*: this also sets metaInfo_ (on first invocation)
-//  virtual void set (Bencoding_Dictionary_t*); // dictionary
-  virtual void setDictionary (Bencoding_Dictionary_t*); // dictionary
-  inline virtual void set (Bencoding_List_t* list_in) { currentList_ = list_in; };
-  inline virtual const Bencoding_List_t* const get () const { return currentList_; };
+  virtual void pushDictionary (Bencoding_Dictionary_t*); // dictionary
+  inline virtual void pushKey (std::string* key_in) { keys_.push (key_in); };
+  inline virtual void pushList (Bencoding_List_t* list_in) { lists_.push (list_in); };
+//  inline virtual const Bencoding_Dictionary_t& get () const { return *dictionaries_.top (); };
+//  inline virtual const Bencoding_List_t& get () const { return *lists_.top (); };
 
   virtual void dump_state () const;
 
-  Bencoding_Dictionary_t* metaInfo_;
+  Bencoding_Dictionary_t*             metaInfo_;
 
  private:
   typedef Net_ParserBase_T<BitTorrent_MetaInfoScanner,
@@ -89,8 +97,9 @@ class BitTorrent_MetaInfo_ParserDriver_T
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_MetaInfo_ParserDriver_T (const BitTorrent_MetaInfo_ParserDriver_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_MetaInfo_ParserDriver_T& operator= (const BitTorrent_MetaInfo_ParserDriver_T&))
 
-  Bencoding_Dictionary_t* currentDictionary_;
-  Bencoding_List_t*       currentList_;
+  std::stack<Bencoding_Dictionary_t*> dictionaries_;
+  std::stack<std::string*>            keys_;
+  std::stack<Bencoding_List_t*>       lists_;
 };
 
 // include template definition

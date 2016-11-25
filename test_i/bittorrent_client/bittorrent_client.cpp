@@ -510,13 +510,6 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
   int group_id_2 = (COMMON_EVENT_THREAD_GROUP_ID + 1); // *TODO*
   ACE_Thread_Manager* thread_manager_p = NULL;
   BitTorrent_Client_Control_t bittorrent_control (&configuration_in.sessionConfiguration);
-  Stream_AllocatorHeap_T<struct BitTorrent_AllocatorConfiguration> heap_allocator;
-  BitTorrent_Client_PeerMessageAllocator_t peer_message_allocator (TEST_I_MAX_MESSAGES, // maximum #buffers
-                                                                   &heap_allocator,     // heap allocator handle
-                                                                   true);               // block ?
-  BitTorrent_Client_TrackerMessageAllocator_t tracker_message_allocator (TEST_I_MAX_MESSAGES, // maximum #buffers
-                                                                         &heap_allocator,     // heap allocator handle
-                                                                         true);               // block ?
   BitTorrent_Client_Connection_Manager_t* connection_manager_p =
       BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
@@ -528,16 +521,10 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
   configuration_in.moduleHandlerConfiguration.streamConfiguration =
       &configuration_in.streamConfiguration;
 //  configuration_in.moduleHandlerConfiguration.protocolConfiguration =
-//      &configuration_in.protocolConfiguration;
-  configuration_in.streamConfiguration.messageAllocator =
-      &peer_message_allocator;
   configuration_in.streamConfiguration.moduleHandlerConfiguration =
       &configuration_in.moduleHandlerConfiguration;
   configuration_in.streamConfiguration.moduleConfiguration =
       &configuration_in.moduleConfiguration;
-  configuration_in.streamConfiguration.trackerMessageAllocator =
-      &tracker_message_allocator;
-
 
   // step2: initialize event dispatch
   struct Common_DispatchThreadData dispatch_thread_data;
@@ -559,18 +546,31 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
   //configuration_in.socketHandlerConfiguration.bufferSize =
   //  BITTORRENT_CLIENT_BUFFER_SIZE;
   configuration_in.socketHandlerConfiguration.messageAllocator =
-    &peer_message_allocator;
+    configuration_in.streamConfiguration.messageAllocator;
   configuration_in.socketHandlerConfiguration.socketConfiguration =
     &configuration_in.socketConfiguration;
   configuration_in.socketHandlerConfiguration.statisticReportingInterval =
     configuration_in.streamConfiguration.statisticReportingInterval;
 
   configuration_in.trackerSocketHandlerConfiguration.messageAllocator =
-    &tracker_message_allocator;
+    configuration_in.streamConfiguration.trackerMessageAllocator;
   configuration_in.trackerSocketHandlerConfiguration.socketConfiguration =
     &configuration_in.socketConfiguration;
   configuration_in.trackerSocketHandlerConfiguration.statisticReportingInterval =
     configuration_in.streamConfiguration.statisticReportingInterval;
+
+  configuration_in.sessionConfiguration.connectionManager =
+      connection_manager_p;
+  configuration_in.sessionConfiguration.socketHandlerConfiguration =
+      &configuration_in.socketHandlerConfiguration;
+  configuration_in.sessionConfiguration.traceScanning =
+      configuration_in.moduleHandlerConfiguration.traceScanning;
+  configuration_in.sessionConfiguration.traceParsing =
+      configuration_in.moduleHandlerConfiguration.traceParsing;
+  configuration_in.sessionConfiguration.trackerSocketHandlerConfiguration =
+      &configuration_in.trackerSocketHandlerConfiguration;
+  configuration_in.sessionConfiguration.useReactor =
+      configuration_in.useReactor;
 
   // step4: initialize signal handling
   configuration_in.signalHandlerConfiguration.cursesState = &curses_state;

@@ -203,11 +203,13 @@ namespace yy {
       enum yytokentype
       {
         END = 0,
-        END_OF_FRAGMENT = 258,
-        INTEGER = 259,
-        STRING = 260,
-        LIST = 261,
-        DICTIONARY = 262
+        END_OF_DICTIONARY = 258,
+        END_OF_LIST = 259,
+        END_OF_FRAGMENT = 260,
+        INTEGER = 261,
+        STRING = 262,
+        LIST = 263,
+        DICTIONARY = 264
       };
     };
 
@@ -300,7 +302,7 @@ namespace yy {
 
 
     /// Build a parser object.
-    BitTorrent_MetaInfo_Parser (BitTorrent_MetaInfo_IParser* parser_yyarg, BitTorrent_MetaInfoScanner* scanner_yyarg, std::string* dictionary_key_yyarg);
+    BitTorrent_MetaInfo_Parser (BitTorrent_MetaInfo_IParser* parser_yyarg, BitTorrent_MetaInfoScanner* scanner_yyarg);
     virtual ~BitTorrent_MetaInfo_Parser ();
 
     /// Parse.
@@ -383,7 +385,7 @@ namespace yy {
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const unsigned char yytable_[];
 
-  static const unsigned char yycheck_[];
+  static const signed char yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -498,20 +500,19 @@ namespace yy {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 11,     ///< Last index in yytable_.
+      yylast_ = 26,     ///< Last index in yytable_.
       yynnts_ = 13,  ///< Number of nonterminal symbols.
       yyempty_ = -2,
       yyfinal_ = 4, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
-      yyntokens_ = 8  ///< Number of tokens.
+      yyntokens_ = 10  ///< Number of tokens.
     };
 
 
     // User arguments.
     BitTorrent_MetaInfo_IParser* parser;
     BitTorrent_MetaInfoScanner* scanner;
-    std::string* dictionary_key;
   };
 
 

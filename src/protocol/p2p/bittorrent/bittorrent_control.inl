@@ -139,11 +139,14 @@ BitTorrent_Control_T<SessionAsynchType,
   ACE_Message_Block* message_block_p = NULL;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T* data_container_p =
       NULL;
+  std::string key = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_ANNOUNCE_KEY);
 
   // step1: parse metainfo
   ACE_ASSERT (!configuration_->metaInfo);
   if (!BitTorrent_Tools::parseMetaInfoFile (metaInfoFileName_in,
-                                            configuration_->metaInfo))
+                                            configuration_->metaInfo,
+                                            configuration_->traceScanning,
+                                            configuration_->traceParsing))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to BitTorrent_Tools::parseMetaInfoFile(\"%s\"), aborting\n"),
@@ -179,8 +182,7 @@ BitTorrent_Control_T<SessionAsynchType,
   session_state_p = &const_cast<SessionStateType&> (isession_p->state ());
 
   // step3: connect to the tracker
-  iterator =
-      configuration_->metaInfo->find (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_ANNOUNCE_KEY));
+  iterator = configuration_->metaInfo->find (&key);
   ACE_ASSERT (iterator != configuration_->metaInfo->end ());
   ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
   if (!HTTP_Tools::parseURL (*(*iterator).second->string,

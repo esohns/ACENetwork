@@ -41,9 +41,8 @@ Net_ParserBase_T<ScannerType,
  , offset_ (0)
  , trace_ (traceParsing_in)
  , parser_ (dynamic_cast<ParserInterfaceType*> (this), // parser
-            &scanner_,                                 // scanner
-            &argument_)                                // parser argument
- , argument_ ()
+            &scanner_)                                 // scanner
+// , argument_ ()
  , scanner_ ()
  , blockInParse_ (false)
  , isFirst_ (true)
@@ -256,7 +255,7 @@ Net_ParserBase_T<ScannerType,
   // parse data fragment
   try {
 //    result = ::yyparse (this, state_);
-    parser_.parse ();
+    result = parser_.parse ();
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
@@ -386,7 +385,12 @@ Net_ParserBase_T<ScannerType,
 
   // sanity check(s)
   ACE_ASSERT (blockInParse_);
-  ACE_ASSERT (messageQueue_);
+  if (!messageQueue_)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("message queue not set - cannot wait, returning\n")));
+      return;
+  } // end IF
 
   // 1. wait for data
   do
@@ -523,7 +527,8 @@ Net_ParserBase_T<ScannerType,
   NETWORK_TRACE (ACE_TEXT ("Net_ParserBase_T::scan_end"));
 
   // sanity check(s)
-  ACE_ASSERT (buffer_);
+  if (!buffer_)
+    return;
 
   // clean state
 //  yy_delete_buffer (buffer_,

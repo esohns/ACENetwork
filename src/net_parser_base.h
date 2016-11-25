@@ -81,7 +81,7 @@ class Net_ParserBase_T
 
   // parser
   ParserType              parser_;
-  ArgumentType            argument_;
+//  ArgumentType            argument_;
 
   // scanner
   ScannerType             scanner_;

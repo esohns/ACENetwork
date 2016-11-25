@@ -1636,8 +1636,8 @@ static yyconst yy_state_type yy_NUL_trans[35] =
 
 static yyconst flex_int32_t yy_rule_linenum[20] =
     {   0,
-      185,  194,  200,  207,  219,  222,  229,  233,  236,  238,
-      241,  248,  257,  260,  265,  268,  272,  280,  290
+      185,  195,  201,  208,  220,  223,  230,  234,  238,  240,
+      243,  248,  256,  260,  265,  268,  272,  279,  288
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -1973,6 +1973,7 @@ YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
                          parser->offset (1);
                          BEGIN(state_dictionary_key);
+                         yy_push_state (state_dictionary_key);
                          ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
                          ACE_ASSERT (yylval->dval);
@@ -2042,7 +2043,8 @@ case 8:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
                          parser->offset (1);
-                         yy_pop_state (); }
+                         yy_pop_state ();
+                         return yy::BitTorrent_MetaInfo_Parser::token::END_OF_LIST; }
   YY_BREAK
 case 9:
 YY_RULE_SETUP
@@ -2058,8 +2060,6 @@ YY_RULE_SETUP
 case 11:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
-                         yyless (0);
-                         yy_push_state (state_list);
                          ACE_NEW_NORETURN (yylval->lval,
                                            Bencoding_List_t ());
                          ACE_ASSERT (yylval->lval);
@@ -2068,7 +2068,6 @@ YY_RULE_SETUP
 case 12:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
-                         yyless (0);
                          yy_push_state (state_dictionary_key);
                          ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
@@ -2081,7 +2080,8 @@ case 13:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
                          parser->offset (1);
-                         yy_pop_state (); }
+                         yy_pop_state ();
+                         return yy::BitTorrent_MetaInfo_Parser::token::END_OF_DICTIONARY; }
   YY_BREAK
 case 14:
 YY_RULE_SETUP
@@ -2107,7 +2107,6 @@ YY_RULE_SETUP
 case 17:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
-                         yyless (0);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_list);
                          ACE_NEW_NORETURN (yylval->lval,
@@ -2118,7 +2117,6 @@ YY_RULE_SETUP
 case 18:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
-                         yyless (0);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_dictionary_key);
                          ACE_NEW_NORETURN (yylval->dval,
@@ -2140,7 +2138,7 @@ case 19:
 YY_RULE_SETUP
 { /* *TODO*: use (?s:.) ? */
                          if (!parser->isBlocking ())
-                           return yy::BitTorrent_MetaInfo_Parser::token::END_OF_FRAGMENT;
+                           yyterminate(); // not enough data, cannot proceed
 
                          // wait for more data fragment(s)
                          if (!parser->switchBuffer ())
