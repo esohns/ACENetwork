@@ -111,7 +111,7 @@ template <typename AddressType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
-          typename StreamType,
+          typename PeerStreamType,
           typename StreamStatusType,
           typename ConfigurationType,
           typename StateType>

@@ -423,7 +423,7 @@ BitTorrent_ParserDriver_T<MessageType,
 
 template <typename MessageType,
           typename SessionMessageType>
-struct BitTorrent_Record&
+BitTorrent_Record&
 BitTorrent_ParserDriver_T<MessageType,
                           SessionMessageType>::current ()
 {
@@ -471,15 +471,15 @@ BitTorrent_ParserDriver_T<MessageType,
   {
     bufferState_ =
       bittorrent__scan_buffer (fragment_->rd_ptr (),
-                                       fragment_->length () + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE,
-                                       scannerState_);
+                               fragment_->length () + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE,
+                               scannerState_);
   } // end IF
   else
   {
     bufferState_ =
       bittorrent__scan_bytes (fragment_->rd_ptr (),
-                                      fragment_->length (),
-                                      scannerState_);
+                              fragment_->length (),
+                              scannerState_);
   } // end ELSE
   if (!bufferState_)
   {
@@ -496,7 +496,7 @@ BitTorrent_ParserDriver_T<MessageType,
 
 //  // *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
 //  bittorrent__switch_to_buffer (bufferState_,
-//                                  scannerState_);
+//                                scannerState_);
 
   return true;
 }
@@ -514,6 +514,6 @@ BitTorrent_ParserDriver_T<MessageType,
 
   // clean state
   bittorrent__delete_buffer (bufferState_,
-                                     scannerState_);
+                             scannerState_);
   bufferState_ = NULL;
 }

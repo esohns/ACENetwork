@@ -39,10 +39,12 @@
 template <typename SessionAsynchType,
           typename SessionType,
           typename SessionConfigurationType,
+          typename SessionInterfaceType,
           typename SessionStateType>
 BitTorrent_Control_T<SessionAsynchType,
                      SessionType,
                      SessionConfigurationType,
+                     SessionInterfaceType,
                      SessionStateType>::BitTorrent_Control_T (SessionConfigurationType* configuration_in)
  : configuration_ (configuration_in)
  , lock_ ()
@@ -55,10 +57,12 @@ BitTorrent_Control_T<SessionAsynchType,
 template <typename SessionAsynchType,
           typename SessionType,
           typename SessionConfigurationType,
+          typename SessionInterfaceType,
           typename SessionStateType>
 BitTorrent_Control_T<SessionAsynchType,
                      SessionType,
                      SessionConfigurationType,
+                     SessionInterfaceType,
                      SessionStateType>::~BitTorrent_Control_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Control_T::~BitTorrent_Control_T"));
@@ -77,11 +81,13 @@ BitTorrent_Control_T<SessionAsynchType,
 template <typename SessionAsynchType,
           typename SessionType,
           typename SessionConfigurationType,
+          typename SessionInterfaceType,
           typename SessionStateType>
-typename SessionType::ISESSION_T*
+SessionInterfaceType*
 BitTorrent_Control_T<SessionAsynchType,
                      SessionType,
                      SessionConfigurationType,
+                     SessionInterfaceType,
                      SessionStateType>::get (const std::string& metaInfoFileName_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Control_T::get"));
@@ -106,11 +112,13 @@ BitTorrent_Control_T<SessionAsynchType,
 template <typename SessionAsynchType,
           typename SessionType,
           typename SessionConfigurationType,
+          typename SessionInterfaceType,
           typename SessionStateType>
 void
 BitTorrent_Control_T<SessionAsynchType,
                      SessionType,
                      SessionConfigurationType,
+                     SessionInterfaceType,
                      SessionStateType>::download (const std::string& metaInfoFileName_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Control_T::download"));
@@ -182,6 +190,15 @@ BitTorrent_Control_T<SessionAsynchType,
   session_state_p = &const_cast<SessionStateType&> (isession_p->state ());
 
   // step3: connect to the tracker
+  ACE_NEW_NORETURN (record_p,
+                    struct HTTP_Record ());
+  if (!record_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory, returning\n")));
+    goto error;
+  } // end IF
+
   iterator = configuration_->metaInfo->find (&key);
   ACE_ASSERT (iterator != configuration_->metaInfo->end ());
   ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
@@ -308,6 +325,7 @@ BitTorrent_Control_T<SessionAsynchType,
                 ACE_TEXT ("failed to allocate memory, returning\n")));
     goto error;
   } // end IF
+  record_p = NULL;
 allocate:
   message_p =
     static_cast<typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (configuration_->trackerSocketHandlerConfiguration->messageAllocator->malloc (configuration_->trackerSocketHandlerConfiguration->PDUSize));
@@ -349,16 +367,20 @@ error:
     iconnection_p->decrease ();
   if (isession_p)
     delete isession_p;
+  if (record_p)
+    delete record_p;
 }
 
 template <typename SessionAsynchType,
           typename SessionType,
           typename SessionConfigurationType,
+          typename SessionInterfaceType,
           typename SessionStateType>
 void
 BitTorrent_Control_T<SessionAsynchType,
                      SessionType,
                      SessionConfigurationType,
+                     SessionInterfaceType,
                      SessionStateType>::stop (bool waitForCompletion_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Control_T::stop"));
@@ -368,11 +390,13 @@ BitTorrent_Control_T<SessionAsynchType,
 template <typename SessionAsynchType,
           typename SessionType,
           typename SessionConfigurationType,
+          typename SessionInterfaceType,
           typename SessionStateType>
 void
 BitTorrent_Control_T<SessionAsynchType,
                      SessionType,
                      SessionConfigurationType,
+                     SessionInterfaceType,
                      SessionStateType>::wait ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Control_T::wait"));
@@ -382,11 +406,13 @@ BitTorrent_Control_T<SessionAsynchType,
 template <typename SessionAsynchType,
           typename SessionType,
           typename SessionConfigurationType,
+          typename SessionInterfaceType,
           typename SessionStateType>
 void
 BitTorrent_Control_T<SessionAsynchType,
                      SessionType,
                      SessionConfigurationType,
+                     SessionInterfaceType,
                      SessionStateType>::notify (const std::string& metaInfoFileName_in,
                                                 enum BitTorrent_Event event_in)
 {

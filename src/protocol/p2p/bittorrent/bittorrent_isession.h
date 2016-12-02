@@ -37,7 +37,7 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
-          typename StreamType,
+          typename PeerStreamType,
           typename StreamStatusType,
           ////////////////////////////////
           typename ConfigurationType,
@@ -49,7 +49,7 @@ class BitTorrent_ISession_T
                          StatisticContainerType,
                          SocketConfigurationType,
                          HandlerConfigurationType,
-                         StreamType,
+                         PeerStreamType,
                          StreamStatusType,
                          ConfigurationType,
                          StateType>

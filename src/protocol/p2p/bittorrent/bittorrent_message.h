@@ -98,7 +98,7 @@ class BitTorrent_Message_T
   BitTorrent_Message_T (unsigned int); // size
   virtual ~BitTorrent_Message_T ();
 
-  virtual enum BitTorrent_MessageType command () const; // return value: message type
+  //virtual enum BitTorrent_MessageType command () const; // return value: message type
   static std::string Command2String (enum BitTorrent_MessageType);
 
   // implement Common_IDumpState

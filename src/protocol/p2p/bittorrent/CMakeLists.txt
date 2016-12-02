@@ -4,7 +4,6 @@
 include (FindPkgConfig)
 if (UNIX)
  #pkg_check_modules (PKG_ACE REQUIRED ACE)
- pkg_check_modules (PKG_OPENSSL REQUIRED openssl)
 # if (GTK3_SUPPORT)
 #  pkg_check_modules (PKG_GTK3 REQUIRED gtk+-3.0)
 else ()
@@ -27,6 +26,21 @@ endif ()
 #if (NOT FLEX_LIBRARY)
 # message (FATAL_ERROR "could not find ${FLEX_LIB_FILE} (was: \"${FLEX_LIBRARY}\"), aborting")
 #endif ()
+
+set (PROJECTS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../../../..)
+set (OPENSSL_LIB_FILE libeay32.lib)
+if (UNIX)
+ pkg_check_modules (PKG_OPENSSL REQUIRED openssl)
+elseif (WIN32)
+ find_library (OPENSSL_LIBRARY ${OPENSSL_LIB_FILE}
+               PATHS ${PROJECTS_DIRECTORY}/openssl
+               PATH_SUFFIXES lib
+               DOC "searching for ${OPENSSL_LIB_FILE}")
+#if (NOT EXISTS OPENSSL_LIBRARY)
+ if (NOT OPENSSL_LIBRARY)
+  message (FATAL_ERROR "could not find ${OPENSSL_LIB_FILE} (was: \"${OPENSSL_LIBRARY}\"), aborting")
+ endif ()
+endif ()
 
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -87,6 +101,7 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libACEStream/src/modules/misc)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party/flex)
 endif ()
 #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../..)
@@ -115,9 +130,6 @@ set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      bittorrent_metainfo_parser_driver.inl
      bittorrent_metainfo_scanner.cpp
      bittorrent_metainfo_scanner.h
-#     bittorrent_module_handler.cpp
-#     bittorrent_module_handler.h
-#     bittorrent_module_handler.inl
      bittorrent_module_parser.cpp
      bittorrent_module_parser.h
      bittorrent_module_parser.inl
@@ -180,7 +192,7 @@ add_library (${PROJECT_NAME}_Protocol_BitTorrent SHARED
 add_dependencies (${PROJECT_NAME}_Protocol_BitTorrent Common)
 add_dependencies (${PROJECT_NAME}_Protocol_BitTorrent ACEStream)
 
-set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES DEFINE_SYMBOL bittorrent_BUILD_DLL)
+set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES DEFINE_SYMBOL BITTORRENT_BUILD_DLL)
 set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
 #target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${CMAKE_THREAD_LIBS_INIT})
@@ -189,6 +201,7 @@ if (UNIX)
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${PKG_OPENSSL_LIBRARIES})
 elseif (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${ACE_LIBRARY})
+ target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${OPENSSL_LIBRARY})
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent Common)
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ACEStream)
 endif ()
@@ -215,8 +228,6 @@ install (FILES
          bittorrent_metainfo_parser_driver.h
          bittorrent_metainfo_parser_driver.inl
          bittorrent_metainfo_scanner.h
-#         bittorrent_module_handler.h
-#         bittorrent_module_handler.inl
          bittorrent_module_parser.h
          bittorrent_module_parser.inl
          bittorrent_module_streamer.h

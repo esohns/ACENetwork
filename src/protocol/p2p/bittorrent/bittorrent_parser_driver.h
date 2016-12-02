@@ -27,6 +27,7 @@
 
 #include "location.hh"
 
+#include "bittorrent_common.h"
 #include "bittorrent_defines.h"
 #include "bittorrent_iparser.h"
 #include "bittorrent_scanner.h"

@@ -47,6 +47,9 @@ template <typename HandlerConfigurationType, // socket-
           typename TrackerStreamType,
           typename StreamStatusType,
           ////////////////////////////////
+          typename PeerModuleHandlerConfigurationType,
+          typename TrackerModuleHandlerConfigurationType,
+          ////////////////////////////////
           typename PeerConnectionType,
           typename TrackerConnectionType,
           ////////////////////////////////
@@ -128,14 +131,51 @@ class BitTorrent_Session_T
 //                        ACE_SOCK_CONNECTOR> TRACKER_CONNECTOR_T;
 //  typedef ACE_Asynch_Connector<TrackerConnectionType> TRACKER_ASYNCH_CONNECTOR_T;
   typedef TrackerConnectorType TRACKER_CONNECTOR_T;
+
+  typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+                                         PeerModuleHandlerConfigurationType,
+                                         typename PeerStreamType::CONTROL_MESSAGE_T,
+                                         typename PeerStreamType::MESSAGE_T,
+                                         typename PeerStreamType::SESSION_MESSAGE_T,
+                                         Stream_SessionId_t,
+                                         typename PeerStreamType::SESSION_DATA_T> PEER_MESSAGEHANDLER_T;
+  typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+                                         TrackerModuleHandlerConfigurationType,
+                                         typename TrackerStreamType::CONTROL_MESSAGE_T,
+                                         typename TrackerStreamType::MESSAGE_T,
+                                         typename TrackerStreamType::SESSION_MESSAGE_T,
+                                         Stream_SessionId_t,
+                                         typename TrackerStreamType::SESSION_DATA_T> TRACKER_MESSAGEHANDLER_T;
+
+  typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+                                         Stream_SessionId_t,
+                                         typename PeerStreamType::SESSION_DATA_T,
+                                         enum Stream_SessionMessageType,
+                                         struct Stream_ModuleConfiguration,
+                                         PeerModuleHandlerConfigurationType,
+                                         BitTorrent_INotify_t,
+                                         PEER_MESSAGEHANDLER_T> PEER_MESSAGEHANDLER_MODULE_T;
+  typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+                                         Stream_SessionId_t,
+                                         typename TrackerStreamType::SESSION_DATA_T,
+                                         enum Stream_SessionMessageType,
+                                         struct Stream_ModuleConfiguration,
+                                         TrackerModuleHandlerConfigurationType,
+                                         BitTorrent_INotify_t,
+                                         TRACKER_MESSAGEHANDLER_T> TRACKER_MESSAGEHANDLER_MODULE_T;
+
   typedef BitTorrent_PeerStreamHandler_T<typename PeerStreamType::SESSION_DATA_T,
                                          UserDataType,
                                          typename inherited::ISESSION_T,
-                                         CBDataType> PEER_STREAM_HANDLER_T;
+                                         CBDataType> PEER_HANDLER_T;
   typedef BitTorrent_TrackerStreamHandler_T<typename TrackerStreamType::SESSION_DATA_T,
                                             UserDataType,
                                             typename inherited::ISESSION_T,
-                                            CBDataType> TRACKER_STREAM_HANDLER_T;
+                                            CBDataType> TRACKER_HANDLER_T;
 
   // implement (part of) BitTorrent_ISession_T
   inline virtual void trackerConnect (Net_ConnectionId_t id_in) { inherited::connect (id_in); };
@@ -147,11 +187,11 @@ class BitTorrent_Session_T
   void error (const struct BitTorrent_Record&);
   void log (const struct BitTorrent_Record&);
 
-  bool                              logToFile_;
-  BitTorrent_PeerHandler_Module*    peerHandlerModule_;
-  PEER_STREAM_HANDLER_T             peerStreamHandler_;
-  BitTorrent_TrackerHandler_Module* trackerHandlerModule_;
-  TRACKER_STREAM_HANDLER_T          trackerStreamHandler_;
+  bool                             logToFile_;
+  PEER_MESSAGEHANDLER_MODULE_T*    peerHandlerModule_;
+  PEER_HANDLER_T                   peerStreamHandler_;
+  TRACKER_MESSAGEHANDLER_MODULE_T* trackerHandlerModule_;
+  TRACKER_HANDLER_T                trackerStreamHandler_;
 };
 
 // include template definition

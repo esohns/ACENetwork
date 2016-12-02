@@ -23,6 +23,8 @@
 
 #include <ace/Global_Macros.h>
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 #include "net_common.h"
 #include "net_exports.h"
 #include "net_transportlayer_base.h"
@@ -41,5 +43,6 @@ class Net_TransportLayer_Netlink
   ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Netlink (const Net_TransportLayer_Netlink&))
   ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_Netlink& operator= (const Net_TransportLayer_Netlink&))
 };
+#endif
 
 #endif

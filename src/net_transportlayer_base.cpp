@@ -38,7 +38,7 @@ Net_InetTransportLayer_Base::~Net_InetTransportLayer_Base ()
 
 }
 
-Common_DispatchType
+enum Common_DispatchType
 Net_InetTransportLayer_Base::dispatch ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::dispatch"));
@@ -46,7 +46,7 @@ Net_InetTransportLayer_Base::dispatch ()
   return dispatch_;
 }
 
-Net_ClientServerRole
+enum Net_ClientServerRole
 Net_InetTransportLayer_Base::role ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::role"));
@@ -54,7 +54,7 @@ Net_InetTransportLayer_Base::role ()
   return role_;
 }
 
-Net_TransportLayerType
+enum Net_TransportLayerType
 Net_InetTransportLayer_Base::transportLayer ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::transportLayer"));
@@ -63,8 +63,8 @@ Net_InetTransportLayer_Base::transportLayer ()
 }
 
 bool
-Net_InetTransportLayer_Base::initialize (Common_DispatchType dispatch_in,
-                                         Net_ClientServerRole role_in,
+Net_InetTransportLayer_Base::initialize (enum Common_DispatchType dispatch_in,
+                                         enum Net_ClientServerRole role_in,
                                          const Net_SocketConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::initialize"));
@@ -86,6 +86,8 @@ Net_InetTransportLayer_Base::finalize ()
 
 /////////////////////////////////////////
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base ()
  : dispatch_(COMMON_DISPATCH_INVALID)
  , role_(NET_ROLE_INVALID)
@@ -101,7 +103,7 @@ Net_NetlinkTransportLayer_Base::~Net_NetlinkTransportLayer_Base ()
 
 }
 
-Common_DispatchType
+enum Common_DispatchType
 Net_NetlinkTransportLayer_Base::dispatch ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::dispatch"));
@@ -109,7 +111,7 @@ Net_NetlinkTransportLayer_Base::dispatch ()
   return dispatch_;
 }
 
-Net_ClientServerRole
+enum Net_ClientServerRole
 Net_NetlinkTransportLayer_Base::role ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::role"));
@@ -117,7 +119,7 @@ Net_NetlinkTransportLayer_Base::role ()
   return role_;
 }
 
-Net_TransportLayerType
+enum Net_TransportLayerType
 Net_NetlinkTransportLayer_Base::transportLayer ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::transportLayer"));
@@ -126,8 +128,8 @@ Net_NetlinkTransportLayer_Base::transportLayer ()
 }
 
 bool
-Net_NetlinkTransportLayer_Base::initialize (Common_DispatchType dispatch_in,
-                                            Net_ClientServerRole role_in,
+Net_NetlinkTransportLayer_Base::initialize (enum Common_DispatchType dispatch_in,
+                                            enum Net_ClientServerRole role_in,
                                             const Net_SocketConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::initialize"));
@@ -147,3 +149,4 @@ Net_NetlinkTransportLayer_Base::finalize ()
 
   ACE_ASSERT (false);
 }
+#endif

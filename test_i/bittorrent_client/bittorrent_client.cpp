@@ -551,6 +551,8 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
     &configuration_in.socketConfiguration;
   configuration_in.socketHandlerConfiguration.statisticReportingInterval =
     configuration_in.streamConfiguration.statisticReportingInterval;
+  configuration_in.socketHandlerConfiguration.userData =
+    &configuration_in.userData;
 
   configuration_in.trackerSocketHandlerConfiguration.messageAllocator =
     configuration_in.streamConfiguration.trackerMessageAllocator;
@@ -558,6 +560,8 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
     &configuration_in.socketConfiguration;
   configuration_in.trackerSocketHandlerConfiguration.statisticReportingInterval =
     configuration_in.streamConfiguration.statisticReportingInterval;
+  configuration_in.trackerSocketHandlerConfiguration.userData =
+    &configuration_in.userData;
 
   configuration_in.sessionConfiguration.connectionManager =
       connection_manager_p;
@@ -572,8 +576,15 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
   configuration_in.sessionConfiguration.useReactor =
       configuration_in.useReactor;
 
-  // step4: initialize signal handling
   configuration_in.signalHandlerConfiguration.cursesState = &curses_state;
+
+  configuration_in.userData.configuration = &configuration_in;
+  configuration_in.userData.moduleConfiguration =
+      &configuration_in.moduleConfiguration;
+  configuration_in.userData.moduleHandlerConfiguration =
+      &configuration_in.moduleHandlerConfiguration;
+
+  // step4: initialize signal handling
   if (!signalHandler_in.initialize (configuration_in.signalHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,

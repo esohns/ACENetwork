@@ -33,6 +33,7 @@
 #include <ace/Init_ACE.h>
 #endif
 #include <ace/POSIX_Proactor.h>
+#include <ace/Synch.h>
 #include <ace/Proactor.h>
 #include <ace/Profile_Timer.h>
 #include <ace/Sig_Handler.h>
@@ -464,7 +465,7 @@ do_work (bool useThreadPool_in,
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
   connection_manager_p->set (*userData_in.configuration,
-                             userData_in.configuration->userData);
+                             &userData_in.configuration->userData);
 
   // step3b: initialize timer manager
   Common_Timer_Manager_t* timer_manager_p =
@@ -1259,9 +1260,6 @@ ACE_TMAIN (int argc_in,
                                                                          &heap_allocator);
 
   BitTorrent_Client_Configuration configuration;
-  BitTorrent_Client_UserData user_data;
-
-  user_data.configuration = &configuration;
 
   ////////////////////// socket handler configuration //////////////////////////
   configuration.socketHandlerConfiguration.socketConfiguration =
@@ -1271,7 +1269,7 @@ ACE_TMAIN (int argc_in,
   configuration.socketHandlerConfiguration.statisticReportingInterval =
     configuration.streamConfiguration.statisticReportingInterval;
   configuration.socketHandlerConfiguration.userData =
-    configuration.userData;
+    &configuration.userData;
 
   configuration.trackerSocketHandlerConfiguration.socketConfiguration =
       &configuration.socketConfiguration;
@@ -1280,7 +1278,7 @@ ACE_TMAIN (int argc_in,
   configuration.trackerSocketHandlerConfiguration.statisticReportingInterval =
     configuration.streamConfiguration.statisticReportingInterval;
   configuration.trackerSocketHandlerConfiguration.userData =
-    configuration.userData;
+    &configuration.userData;
   ////////////////////////// stream configuration //////////////////////////////
   configuration.streamConfiguration.messageAllocator = &peer_message_allocator;
   configuration.streamConfiguration.moduleConfiguration->streamConfiguration =
@@ -1290,7 +1288,12 @@ ACE_TMAIN (int argc_in,
   configuration.streamConfiguration.trackerMessageAllocator =
       &tracker_message_allocator;
   configuration.moduleHandlerConfiguration.traceParsing = debug;
-  configuration.userData = &user_data;
+
+  configuration.userData.configuration = &configuration;
+  configuration.userData.moduleConfiguration =
+      &configuration.moduleConfiguration;
+  configuration.userData.moduleHandlerConfiguration =
+      &configuration.moduleHandlerConfiguration;
 
   BitTorrent_Client_GTK_CBData cb_user_data;
   cb_user_data.configuration = &configuration;

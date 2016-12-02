@@ -98,9 +98,9 @@ class Net_StreamAsynchTCPSocketBase_T
                                    StateType,
                                    StatisticContainerType,
                                    UserDataType> ICONNECTION_MANAGER_T;
-  typedef Stream_IModule_T<Stream_SessionId_t,
+  typedef Stream_IModule_T</*Stream_SessionId_t,
                            typename StreamType::SESSION_DATA_T,
-                           Stream_SessionMessageType,
+                           Stream_SessionMessageType,*/
                            ACE_MT_SYNCH,
                            Common_TimePolicy_t,
                            ModuleConfigurationType,

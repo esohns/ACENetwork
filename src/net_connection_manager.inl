@@ -339,9 +339,9 @@ Net_Connection_Manager_T<AddressType,
       if (result_2 == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("connection not found (address was: \"%s\"), aborting\n"),
-                  buffer));
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("connection not found (address was: \"%s\"), aborting\n"),
+//                  buffer));
     } // end ELSE
   } // end lock scope
 

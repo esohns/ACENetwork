@@ -504,6 +504,7 @@ Net_Common_Tools::interface2ExternalIPAddress (const std::string& interfaceIdent
     return false;
   } // end IF
 
+  int result = -1;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_ASSERT (false);
   ACE_NOTSUP_RETURN (false);
@@ -524,7 +525,7 @@ Net_Common_Tools::interface2ExternalIPAddress (const std::string& interfaceIdent
       ACE_TEXT_ALWAYS_CHAR ("nslookup myip.opendns.com. resolver1.opendns.com >> ");
   command_line_string += filename_string;
 
-  int result = ACE_OS::system (ACE_TEXT (command_line_string.c_str ()));
+  result = ACE_OS::system (ACE_TEXT (command_line_string.c_str ()));
   if (result)
   {
     ACE_DEBUG ((LM_ERROR,

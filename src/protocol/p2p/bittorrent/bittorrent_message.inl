@@ -84,23 +84,23 @@ BitTorrent_Message_T<SessionDataType,
   // *NOTE*: will be called just BEFORE this is passed back to the allocator
 }
 
-template <typename SessionDataType,
-          typename UserDataType>
-enum BitTorrent_MessageType
-BitTorrent_Message_T<SessionDataType,
-                     UserDataType>::command () const
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::command"));
-
-  // sanity check(s)
-  if (!inherited::isInitialized_)
-    return BITTORRENT_MESSAGETYPE_INVALID;
-  ACE_ASSERT (inherited::data_);
-
-  const struct BitTorrent_Record& record_r = inherited::data_->get ();
-
-  return record_r.type;
-}
+//template <typename SessionDataType,
+//          typename UserDataType>
+//enum BitTorrent_MessageType
+//BitTorrent_Message_T<SessionDataType,
+//                     UserDataType>::command () const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::command"));
+//
+//  // sanity check(s)
+//  if (!inherited::isInitialized_)
+//    return BITTORRENT_MESSAGETYPE_INVALID;
+//  ACE_ASSERT (inherited::data_);
+//
+//  const struct BitTorrent_Record& record_r = inherited::data_->get ();
+//
+//  return record_r.type;
+//}
 
 template <typename SessionDataType,
           typename UserDataType>

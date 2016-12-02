@@ -33,21 +33,22 @@
 template <typename SessionAsynchType,
           typename SessionType,
           typename SessionConfigurationType,
+          typename SessionInterfaceType,
           typename SessionStateType>
 class BitTorrent_Control_T
- : public BitTorrent_IControl_T<typename SessionType::ISESSION_T>
+ : public BitTorrent_IControl_T<SessionInterfaceType>
 {
  public:
   // convenient types
-  typedef std::map<std::string, typename SessionType::ISESSION_T*> SESSIONS_T;
+  typedef std::map<std::string, SessionInterfaceType*> SESSIONS_T;
   typedef typename SESSIONS_T::iterator SESSIONS_ITERATOR_T;
 
   BitTorrent_Control_T (SessionConfigurationType*);
   virtual ~BitTorrent_Control_T ();
 
-  // imeplement BitTorrent_IControl_T
+  // implement BitTorrent_IControl_T
   inline virtual const SESSIONS_T& get () const { return sessions_; };
-  virtual typename SessionType::ISESSION_T* get (const std::string&); // metainfo (aka '.torrent') file URI
+  virtual SessionInterfaceType* get (const std::string&); // metainfo (aka '.torrent') file URI
   virtual void download (const std::string&); // metainfo (aka '.torrent') file URI
   virtual void stop (bool = false); // wait ?
   virtual void wait ();

@@ -61,7 +61,6 @@
 #define yyerror bittorrent_error
 #define yydebug bittorrent_debug
 
-
 /* First part of user declarations.  */
 
 
@@ -134,7 +133,7 @@ using namespace std;
 
 //#define YYPRINT(file, type, value) yyprint (file, type, value)
 
-
+int bittorrent_debug;
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -696,7 +695,7 @@ yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, YYL
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
    multiple parsers can coexist.  */
-int yydebug;
+//int yydebug;
 
 struct yyGLRStack;
 static void yypstack (struct yyGLRStack* yystackp, size_t yyk)

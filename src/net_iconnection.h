@@ -181,7 +181,7 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
           ////////////////////////////////
-          typename StreamType,
+          typename PeerStreamType,
           typename StreamStatusType,
           ////////////////////////////////
           typename ConfigurationType,

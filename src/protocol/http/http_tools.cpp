@@ -22,6 +22,7 @@
 #include "http_tools.h"
 
 #include <algorithm>
+#include <cctype>
 #include <locale>
 #include <regex>
 #include <sstream>

@@ -38,7 +38,7 @@ class BitTorrent_Export BitTorrent_Tools
   // debug info
   static std::string Dictionary2String (const Bencoding_Dictionary_t&);
   static std::string List2String (const Bencoding_List_t&);
-  inline static std::string MetaInfo2String (const Bencoding_Dictionary_t& metaInfo_in) { return BitTorrent_Tools::Dictionary2String (metaInfo_in); };
+  static std::string MetaInfo2String (const Bencoding_Dictionary_t&);
 
   static std::string Handshake2String (const struct BitTorrent_PeerHandshake&);
   static std::string Record2String (const struct BitTorrent_Record&);

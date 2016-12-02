@@ -89,7 +89,7 @@ struct BitTorrent_Client_Configuration
   struct Stream_ModuleConfiguration                   moduleConfiguration;
   struct BitTorrent_Client_ModuleHandlerConfiguration moduleHandlerConfiguration;
   struct BitTorrent_Client_StreamConfiguration        streamConfiguration;
-  struct BitTorrent_Client_UserData*                  userData;
+  struct BitTorrent_Client_UserData                   userData;
   // ***************************** protocol ************************************
 //  struct BitTorrent_ProtocolConfiguration             protocolConfiguration;
   struct BitTorrent_Client_SessionConfiguration       sessionConfiguration;
