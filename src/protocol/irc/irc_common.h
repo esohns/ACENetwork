@@ -43,14 +43,14 @@ class IRC_SessionMessage;
 struct IRC_Stream_SessionData;
 struct IRC_Stream_UserData;
 
-typedef Stream_ControlMessage_T<Stream_ControlMessageType,
-                                Stream_AllocatorConfiguration,
+typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
+                                struct Stream_AllocatorConfiguration,
                                 IRC_Message,
                                 IRC_SessionMessage> IRC_ControlMessage_t;
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    IRC_Stream_SessionData,
-                                    Stream_SessionMessageType,
+                                    struct IRC_Stream_SessionData,
+                                    enum Stream_SessionMessageType,
                                     IRC_Record,
                                     IRC_SessionMessage> IRC_ISessionNotify_t;
 //typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;

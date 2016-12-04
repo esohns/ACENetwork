@@ -510,20 +510,29 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
   int group_id_2 = (COMMON_EVENT_THREAD_GROUP_ID + 1); // *TODO*
   ACE_Thread_Manager* thread_manager_p = NULL;
   BitTorrent_Client_Control_t bittorrent_control (&configuration_in.sessionConfiguration);
-  BitTorrent_Client_Connection_Manager_t* connection_manager_p =
-      BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (connection_manager_p);
+  BitTorrent_Client_PeerConnection_Manager_t* peer_connection_manager_p =
+      BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
+  BitTorrent_Client_TrackerConnection_Manager_t* tracker_connection_manager_p =
+      BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (peer_connection_manager_p);
+  ACE_ASSERT (tracker_connection_manager_p);
 
   // step1: initialize configuration
   if (useCursesLibrary_in)
     configuration_in.cursesState = &curses_state;
 
-  configuration_in.moduleHandlerConfiguration.streamConfiguration =
-      &configuration_in.streamConfiguration;
+  configuration_in.peerModuleHandlerConfiguration.streamConfiguration =
+      &configuration_in.peerStreamConfiguration;
 //  configuration_in.moduleHandlerConfiguration.protocolConfiguration =
-  configuration_in.streamConfiguration.moduleHandlerConfiguration =
-      &configuration_in.moduleHandlerConfiguration;
-  configuration_in.streamConfiguration.moduleConfiguration =
+  configuration_in.peerStreamConfiguration.moduleHandlerConfiguration =
+      &configuration_in.peerModuleHandlerConfiguration;
+  configuration_in.peerStreamConfiguration.moduleConfiguration =
+      &configuration_in.moduleConfiguration;
+  configuration_in.trackerModuleHandlerConfiguration.streamConfiguration =
+      &configuration_in.trackerStreamConfiguration;
+  configuration_in.trackerStreamConfiguration.moduleHandlerConfiguration =
+      &configuration_in.trackerModuleHandlerConfiguration;
+  configuration_in.trackerStreamConfiguration.moduleConfiguration =
       &configuration_in.moduleConfiguration;
 
   // step2: initialize event dispatch
@@ -535,7 +544,7 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
                                               dispatch_thread_data.numberOfDispatchThreads,
                                               dispatch_thread_data.proactorType,
                                               dispatch_thread_data.reactorType,
-                                              configuration_in.streamConfiguration.serializeOutput))
+                                              configuration_in.peerStreamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
@@ -545,32 +554,34 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
   // step3: initialize configuration (part 2)
   //configuration_in.socketHandlerConfiguration.bufferSize =
   //  BITTORRENT_CLIENT_BUFFER_SIZE;
-  configuration_in.socketHandlerConfiguration.messageAllocator =
-    configuration_in.streamConfiguration.messageAllocator;
-  configuration_in.socketHandlerConfiguration.socketConfiguration =
+  configuration_in.peerSocketHandlerConfiguration.messageAllocator =
+    configuration_in.peerStreamConfiguration.messageAllocator;
+  configuration_in.peerSocketHandlerConfiguration.socketConfiguration =
     &configuration_in.socketConfiguration;
-  configuration_in.socketHandlerConfiguration.statisticReportingInterval =
-    configuration_in.streamConfiguration.statisticReportingInterval;
-  configuration_in.socketHandlerConfiguration.userData =
-    &configuration_in.userData;
+  configuration_in.peerSocketHandlerConfiguration.statisticReportingInterval =
+    configuration_in.peerStreamConfiguration.statisticReportingInterval;
+  configuration_in.peerSocketHandlerConfiguration.userData =
+    &configuration_in.peerUserData;
 
   configuration_in.trackerSocketHandlerConfiguration.messageAllocator =
-    configuration_in.streamConfiguration.trackerMessageAllocator;
+    configuration_in.trackerStreamConfiguration.messageAllocator;
   configuration_in.trackerSocketHandlerConfiguration.socketConfiguration =
     &configuration_in.socketConfiguration;
   configuration_in.trackerSocketHandlerConfiguration.statisticReportingInterval =
-    configuration_in.streamConfiguration.statisticReportingInterval;
+    configuration_in.trackerStreamConfiguration.statisticReportingInterval;
   configuration_in.trackerSocketHandlerConfiguration.userData =
-    &configuration_in.userData;
+    &configuration_in.trackerUserData;
 
   configuration_in.sessionConfiguration.connectionManager =
-      connection_manager_p;
+      peer_connection_manager_p;
+  configuration_in.sessionConfiguration.trackerConnectionManager =
+      tracker_connection_manager_p;
   configuration_in.sessionConfiguration.socketHandlerConfiguration =
-      &configuration_in.socketHandlerConfiguration;
+      &configuration_in.peerSocketHandlerConfiguration;
   configuration_in.sessionConfiguration.traceScanning =
-      configuration_in.moduleHandlerConfiguration.traceScanning;
+      configuration_in.peerModuleHandlerConfiguration.traceScanning;
   configuration_in.sessionConfiguration.traceParsing =
-      configuration_in.moduleHandlerConfiguration.traceParsing;
+      configuration_in.peerModuleHandlerConfiguration.traceParsing;
   configuration_in.sessionConfiguration.trackerSocketHandlerConfiguration =
       &configuration_in.trackerSocketHandlerConfiguration;
   configuration_in.sessionConfiguration.useReactor =
@@ -578,11 +589,18 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
 
   configuration_in.signalHandlerConfiguration.cursesState = &curses_state;
 
-  configuration_in.userData.configuration = &configuration_in;
-  configuration_in.userData.moduleConfiguration =
+  configuration_in.peerUserData.configuration =
+      &configuration_in.peerConnectionConfiguration;
+  configuration_in.peerUserData.moduleConfiguration =
       &configuration_in.moduleConfiguration;
-  configuration_in.userData.moduleHandlerConfiguration =
-      &configuration_in.moduleHandlerConfiguration;
+  configuration_in.peerUserData.moduleHandlerConfiguration =
+      &configuration_in.peerModuleHandlerConfiguration;
+  configuration_in.trackerUserData.configuration =
+      &configuration_in.trackerConnectionConfiguration;
+  configuration_in.trackerUserData.moduleConfiguration =
+      &configuration_in.moduleConfiguration;
+  configuration_in.trackerUserData.moduleHandlerConfiguration =
+      &configuration_in.trackerModuleHandlerConfiguration;
 
   // step4: initialize signal handling
   if (!signalHandler_in.initialize (configuration_in.signalHandlerConfiguration))
@@ -602,10 +620,14 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
   } // end IF
 
   // step5: initialize connection manager
-  connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  connection_manager_p->set (configuration_in,
-                             //configuration_in.streamUserData);
-                             NULL);
+  peer_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
+  peer_connection_manager_p->set (configuration_in.peerConnectionConfiguration,
+                                  //configuration_in.streamUserData);
+                                  NULL);
+  tracker_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
+  tracker_connection_manager_p->set (configuration_in.trackerConnectionConfiguration,
+                                     //configuration_in.streamUserData);
+                                     NULL);
 
   // event loop(s):
   // - catch SIGINT/SIGQUIT/SIGTERM/... signals (connect / perform orderly shutdown)
@@ -682,7 +704,7 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
 
   // *NOTE*: awoken by the worker thread (see above)...
 
-  if (connection_manager_p->count () < 1)
+  if (tracker_connection_manager_p->count () < 1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start session, returning\n")));
@@ -706,8 +728,10 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
                                 configuration_in.groupID);
 
   // step7: clean up
-  connection_manager_p->abort ();
-  connection_manager_p->wait ();
+  peer_connection_manager_p->abort ();
+  tracker_connection_manager_p->abort ();
+  peer_connection_manager_p->wait ();
+  tracker_connection_manager_p->wait ();
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -964,14 +988,19 @@ ACE_TMAIN (int argc_in,
 
   BitTorrent_Client_Configuration configuration;
   ////////////////////////////////////////
-  configuration.streamConfiguration.messageAllocator = &peer_message_allocator;
-  configuration.streamConfiguration.statisticReportingInterval =
-    statistic_reporting_interval;
-configuration.streamConfiguration.trackerMessageAllocator =
-    &tracker_message_allocator;
+  configuration.peerStreamConfiguration.messageAllocator =
+      &peer_message_allocator;
+  configuration.peerStreamConfiguration.statisticReportingInterval =
+      statistic_reporting_interval;
+  configuration.trackerStreamConfiguration.messageAllocator =
+      &tracker_message_allocator;
+  configuration.trackerStreamConfiguration.statisticReportingInterval =
+      statistic_reporting_interval;
   ////////////////////////////////////////
-  configuration.moduleHandlerConfiguration.traceParsing = debug_parser;
-  configuration.moduleHandlerConfiguration.traceScanning = debug_parser;
+  configuration.peerModuleHandlerConfiguration.traceParsing = debug_parser;
+  configuration.peerModuleHandlerConfiguration.traceScanning = debug_parser;
+  configuration.trackerModuleHandlerConfiguration.traceParsing = debug_parser;
+  configuration.trackerModuleHandlerConfiguration.traceScanning = debug_parser;
   ///////////////////////////////////////
   configuration.useReactor = use_reactor;
 

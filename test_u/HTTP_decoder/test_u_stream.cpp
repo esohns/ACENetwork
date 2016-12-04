@@ -109,8 +109,8 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
     return false;
   } // end IF
   ACE_ASSERT (inherited::sessionData_);
-  Test_U_StreamSessionData& session_data_r =
-      const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
+  Test_U_HTTPDecoder_SessionData& session_data_r =
+      const_cast<Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->get ());
   session_data_r.sessionID = configuration_in.sessionID;
   // *TODO*: remove type inferences
   ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
@@ -257,8 +257,8 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
   } // end IF
 
   // synch access
-  Test_U_StreamSessionData& session_data_r =
-      const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
+  Test_U_HTTPDecoder_SessionData& session_data_r =
+      const_cast<Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->get ());
   if (session_data_r.lock)
   {
     result = session_data_r.lock->acquire ();

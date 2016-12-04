@@ -519,7 +519,10 @@ curses_main (BitTorrent_Client_CursesState& state_in,
       case 27: // ESC
       {
         // close connection --> closes session --> closes program
-        BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
+        BitTorrent_Client_PeerConnection_Manager_t* connection_manager_p =
+            BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
+        ACE_ASSERT (connection_manager_p);
+        connection_manager_p->abort ();
         break;
       }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

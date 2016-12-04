@@ -187,12 +187,12 @@ IRC_Stream_T<StreamStateType,
     } // end IF
     Stream_Task_t* task_p = configuration_in.module->writer ();
     ACE_ASSERT (task_p);
-    typename inherited::MODULEHANDLER_IINITIALIZE_T* imodule_handler_p =
-        dynamic_cast<typename inherited::MODULEHANDLER_IINITIALIZE_T*> (task_p);
+    typename inherited::IMODULE_HANDLER_T* imodule_handler_p =
+        dynamic_cast<typename inherited::IMODULE_HANDLER_T*> (task_p);
     if (!imodule_handler_p)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<Common_IInitialize_T<HandlerConfigurationType>> failed, aborting\n"),
+                  ACE_TEXT ("%s: dynamic_cast<Stream_IModuleHandler_T> failed, aborting\n"),
                   configuration_in.module->name ()));
       return false;
     } // end IF
@@ -278,7 +278,9 @@ IRC_Stream_T<StreamStateType,
                 ACE_TEXT ("dynamic_cast<IRC_Module_Bisector_T*> failed, aborting\n")));
     return false;
   } // end IF
-  if (!bisector_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
+  // *TODO*: remove type inference
+  if (!bisector_impl_p->initialize (*configuration_in.moduleHandlerConfiguration,
+                                    configuration_in.messageAllocator))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),

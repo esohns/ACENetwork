@@ -22,8 +22,27 @@
 #define TEST_U_CONNECTION_COMMON_H
 
 #include "net_common.h"
+#include "net_configuration.h"
 
 #include "test_u_common.h"
+
+struct Test_U_StreamConfiguration;
+struct Test_U_ConnectionConfiguration
+ : Net_ConnectionConfiguration
+{
+  inline Test_U_ConnectionConfiguration ()
+   : Net_ConnectionConfiguration ()
+   ///////////////////////////////////////
+   , socketHandlerConfiguration (NULL)
+   , streamConfiguration (NULL)
+   , userData (NULL)
+  {};
+
+  struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
+  struct Test_U_StreamConfiguration*        streamConfiguration;
+
+  struct Test_U_UserData*                   userData;
+};
 
 struct Test_U_ConnectionState
  : Net_ConnectionState
@@ -33,7 +52,7 @@ struct Test_U_ConnectionState
    , userData (NULL)
   {};
 
-  Test_U_UserData* userData;
+  struct Test_U_UserData* userData;
 };
 
 #endif

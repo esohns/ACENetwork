@@ -136,7 +136,7 @@ BitTorrent_Control_T<SessionAsynchType,
   ACE_Time_Value deadline;
   ACE_Time_Value one_second (1, 0);
   int result = -1;
-  typename SessionType::ICONNECTION_T* iconnection_p = NULL;
+  typename SessionType::ITRACKER_CONNECTION_T* iconnection_p = NULL;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T* istream_connection_p = NULL;
   ACE_TCHAR buffer[BUFSIZ];
   ACE_OS::memset (buffer, 0, sizeof (buffer));
@@ -226,7 +226,8 @@ BitTorrent_Control_T<SessionAsynchType,
                   &one_second));
 
     // *TODO*: this does not work...
-    iconnection_p = configuration_->connectionManager->get (tracker_address);
+    iconnection_p =
+        configuration_->trackerConnectionManager->get (tracker_address);
     if (iconnection_p)
       break; // done
   } while (COMMON_TIME_NOW < deadline);
@@ -261,9 +262,9 @@ BitTorrent_Control_T<SessionAsynchType,
   record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
 
   record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_INFO_HASH_HEADER),
-                                           HTTP_Tools::URLEncode (BitTorrent_Tools::MetaInfo2InfoHash (*configuration_->metaInfo))));
+                                            HTTP_Tools::URLEncode (BitTorrent_Tools::MetaInfo2InfoHash (*configuration_->metaInfo))));
   record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PEER_ID_HEADER),
-                                           HTTP_Tools::URLEncode (BitTorrent_Tools::generatePeerId ())));
+                                            HTTP_Tools::URLEncode (BitTorrent_Tools::generatePeerId ())));
   converter << BITTORRENT_DEFAULT_PORT;
   record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PORT_HEADER),
                                            converter.str ()));

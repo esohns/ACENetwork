@@ -18,32 +18,62 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_PROTOCOL_SIGNALHANDLER_H
-#define TEST_U_PROTOCOL_SIGNALHANDLER_H
+#ifndef TEST_U_GTK_COMMON_H
+#define TEST_U_GTK_COMMON_H
 
-#include <ace/Global_Macros.h>
+#include <deque>
 
-#include "common_isignal.h"
-#include "common_signalhandler.h"
+#include "gtk/gtk.h"
 
-#include "test_u_HTTP_decoder_common.h"
+#include "common_ui_gtk_common.h"
 
-class Test_U_Protocol_SignalHandler
- : public Common_SignalHandler_T<Test_U_SignalHandlerConfiguration>
- , public Common_ISignal
+#include "stream_common.h"
+
+enum Test_U_GTK_Event
 {
- public:
-  Test_U_Protocol_SignalHandler ();
-  virtual ~Test_U_Protocol_SignalHandler ();
+  TEST_U_GTKEVENT_INVALID = -1,
+  TEST_U_GTKEVENT_CONNECT = 0,
+  TEST_U_GTKEVENT_DATA,
+  TEST_U_GTKEVENT_DISCONNECT,
+  TEST_U_GTKEVENT_STATISTIC,
+  // -------------------------------------
+  TEST_U_GTKEVENT_MAX
+};
+typedef std::deque<Test_U_GTK_Event> Test_U_GTK_Events_t;
+typedef Test_U_GTK_Events_t::const_iterator Test_U_GTK_EventsIterator_t;
 
-  // implement Common_ISignal
-  virtual void handle (int); // signal
+struct Test_U_GTK_ProgressData
+{
+  inline Test_U_GTK_ProgressData ()
+   : /*cursorType (GDK_LAST_CURSOR)
+   ,*/ GTKState (NULL)
+   , statistic ()
+   , transferred (0)
+   , size (0)
+  {};
 
- private:
-  typedef Common_SignalHandler_T<Test_U_SignalHandlerConfiguration> inherited;
+  //GdkCursorType       cursorType;
+  Common_UI_GTKState* GTKState;
+  Stream_Statistic    statistic;
+  size_t              transferred; // bytes
+  size_t              size; // bytes
+};
 
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Protocol_SignalHandler (const Test_U_Protocol_SignalHandler&))
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Protocol_SignalHandler& operator= (const Test_U_Protocol_SignalHandler&))
+struct Test_U_GTK_CBData
+ : Common_UI_GTKState
+{
+  inline Test_U_GTK_CBData ()
+   : Common_UI_GTKState ()
+   , allowUserRuntimeStatistic (true)
+   , eventStack ()
+   , progressData ()
+   , progressEventSourceID (0)
+  {};
+
+  bool                    allowUserRuntimeStatistic;
+  Test_U_GTK_Events_t     eventStack;
+  Test_U_GTK_ProgressData progressData;
+  guint                   progressEventSourceID;
 };
 
 #endif

@@ -36,9 +36,9 @@
 #include "net_iconnector.h"
 
 #include "test_u_common.h"
-
 #include "test_u_configuration.h"
-//#include "test_u_connection_manager_common.h"
+#include "test_u_gtk_common.h"
+#include "test_u_stream_common.h"
 
 // forward declaration(s)
 class Stream_IAllocator;
@@ -118,7 +118,7 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                     Test_U_Message,
                                     Test_U_SessionMessage> Test_U_ISessionNotify_t;
 typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
-typedef Test_U_Subscribers_t::iterator Test_U_SubscribersIterator_t;
+typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 
 typedef Common_ISubscribe_T<Test_U_ISessionNotify_t> Test_U_ISubscribe_t;
 
@@ -129,12 +129,11 @@ struct Test_U_Client_GTK_CBData
    : Test_U_GTK_CBData ()
    , configuration (NULL)
    , subscribers ()
-   , subscribersLock ()
   {};
 
   struct Test_U_Client_Configuration* configuration;
+
   Test_U_Subscribers_t                subscribers;
-  ACE_SYNCH_RECURSIVE_MUTEX           subscribersLock;
 };
 
 #endif

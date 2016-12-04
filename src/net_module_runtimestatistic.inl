@@ -18,9 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "ace/Guard_T.h"
-#include "ace/Log_Msg.h"
-#include "ace/Time_Value.h"
+#include <ace/Guard_T.h>
+#include <ace/Log_Msg.h>
+#include <ace/Time_Value.h>
 
 #include "common_timer_manager_common.h"
 
@@ -111,9 +111,8 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
                                   DataMessageType,
                                   SessionMessageType,
                                   ProtocolCommandType,
-                                  StatisticContainerType>::initialize (unsigned int reportingInterval_in,
-                                                                       bool printFinalReport_in,
-                                                                       const Stream_IAllocator* allocator_in)
+                                  StatisticContainerType>::initialize (const ConfigurationType& configuration_in,
+                                                                       Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::initialize"));
 
@@ -131,7 +130,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
     sessionID_ = 0;
     // reset various counters...
     {
-      ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+      ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, false);
 
       numInboundMessages_ = 0;
       numOutboundMessages_ = 0;
@@ -151,17 +150,17 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
     isInitialized_ = false;
   } // end IF
 
-  reportingInterval_ = reportingInterval_in;
+  reportingInterval_ = configuration_in.reportingInterval;
   if (reportingInterval_)
   {
     // schedule the second-granularity timer
     ACE_Time_Value interval (1, 0); // one second interval
     ACE_Event_Handler* event_handler_p = &resetTimeoutHandler_;
     resetTimeoutHandlerID_ =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (event_handler_p,                  // event handler
-                                                                  NULL,                             // ACT
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (event_handler_p,            // event handler
+                                                                  NULL,                       // ACT
                                                                   COMMON_TIME_NOW + interval, // first wakeup time
-                                                                  interval);                        // interval
+                                                                  interval);                  // interval
     if (resetTimeoutHandlerID_ == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -172,14 +171,13 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
 //               ACE_TEXT ("scheduled second-interval timer (ID: %d)...\n"),
 //               resetTimeoutHandlerID_));
   } // end IF
-  printFinalReport_ = printFinalReport_in;
+  printFinalReport_ = configuration_in.printFinalReport;
   allocator_ = allocator_in;
 //   // sanity check(s)
 //   if (!allocator_)
 //   {
 //     ACE_DEBUG ((LM_ERROR,
 //                 ACE_TEXT ("invalid argument (was NULL), aborting\n")));
-//
 //     return false;
 //   } // end IF
 
@@ -216,7 +214,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
   ACE_ASSERT (message_inout);
 
   {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
     // update counters...
     numInboundMessages_++;
@@ -259,7 +257,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
   ACE_ASSERT (isInitialized_);
 
   {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
     // update counters...
     // *NOTE*: currently, session messages travel only downstream...
@@ -288,10 +286,10 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
         ACE_ASSERT (localReportingHandlerID_ == -1);
         ACE_Event_Handler* event_handler_p = &localReportingHandler_;
         localReportingHandlerID_ =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (event_handler_p,                  // event handler
-                                                                      NULL,                             // act
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (event_handler_p,            // event handler
+                                                                      NULL,                       // act
                                                                       COMMON_TIME_NOW + interval, // first wakeup time
-                                                                      interval);                        // interval
+                                                                      interval);                  // interval
         if (localReportingHandlerID_ == -1)
         {
           ACE_DEBUG ((LM_ERROR,
@@ -367,7 +365,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
 
   // this should happen every second (roughly)...
   {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
     // remember this result (satisfies an asynchronous API)...
     lastMessagesPerSecondCount_ = messageCounter_;
@@ -407,7 +405,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
   ACE_OS::memset (&data_out, 0, sizeof (StatisticContainerType));
 
   {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, false);
 
     data_out.bytes = (numInboundBytes_ + numOutboundBytes_);
     data_out.dataMessages = (numInboundMessages_ + numOutboundMessages_);
@@ -437,7 +435,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::report"));
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
   ACE_DEBUG ((LM_INFO,
               ACE_TEXT ("*** [session: %u] RUNTIME STATISTICS ***\n--> Stream Statistics <--\n messages/sec: %u\n messages total [in/out]): %u/%u (data: %.2f%%)\n bytes/sec: %u\n bytes total: %.0f\n--> Cache Statistics <--\n current cache usage [%u messages / %u byte(s) allocated]\n*** RUNTIME STATISTICS ***\\END\n"),
@@ -475,7 +473,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
 
   {
     // synchronize access to statistics data
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
     if ((numInboundMessages_ + numOutboundMessages_))
     {
@@ -528,14 +526,16 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
 
   int result = -1;
 
+  Common_Timer_Manager_t* timer_manager_p =
+      COMMON_TIMERMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (timer_manager_p);
   const void* act_p = NULL;
   if (cancelAllTimers_in)
   {
     if (resetTimeoutHandlerID_ != -1)
     {
-      result =
-        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (resetTimeoutHandlerID_,
-                                                                  &act_p);
+      result = timer_manager_p->cancel_timer (resetTimeoutHandlerID_,
+                                              &act_p);
       if (result <= 0)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
@@ -547,9 +547,8 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
   if (localReportingHandlerID_ != -1)
   {
     act_p = NULL;
-    result =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (localReportingHandlerID_,
-                                                                &act_p);
+    result = timer_manager_p->cancel_timer (localReportingHandlerID_,
+                                            &act_p);
     if (result <= 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
@@ -652,7 +651,7 @@ Net_Module_Statistic_ReaderTask_T<SynchStrategyType,
   } // end IF
 
   {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (sibling_p->lock_);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, sibling_p->lock_, -1);
 
     // update counters...
     sibling_p->numOutboundMessages_++;

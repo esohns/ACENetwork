@@ -46,8 +46,8 @@ typedef IRC_Module_Bisector_T<ACE_MT_SYNCH,
                               IRC_Client_ModuleHandlerConfiguration,
                               int,
                               int,
-                              IRC_StreamState,
-                              IRC_Client_SessionData,
+                              struct IRC_StreamState,
+                              struct IRC_Client_SessionData,
                               IRC_Client_SessionData_t,
                               IRC_RuntimeStatistic_t> IRC_Client_Module_Bisector_t;
 
@@ -55,38 +55,38 @@ typedef IRC_Module_Parser_Module IRC_Client_Module_Parser_Module;
 
 typedef Stream_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-                                             IRC_Client_ModuleHandlerConfiguration,
+                                             struct IRC_Client_ModuleHandlerConfiguration,
                                              ACE_Message_Block,
                                              IRC_Message,
                                              IRC_Client_SessionMessage,
                                              IRC_CommandType_t,
                                              IRC_RuntimeStatistic_t,
-                                             IRC_Client_SessionData,
+                                             struct IRC_Client_SessionData,
                                              IRC_Client_SessionData_t> IRC_Client_Module_Statistic_ReaderTask_t;
 typedef Stream_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
                                              Common_TimePolicy_t,
-                                             IRC_Client_ModuleHandlerConfiguration,
+                                             struct IRC_Client_ModuleHandlerConfiguration,
                                              ACE_Message_Block,
                                              IRC_Message,
                                              IRC_Client_SessionMessage,
                                              IRC_CommandType_t,
                                              IRC_RuntimeStatistic_t,
-                                             IRC_Client_SessionData,
+                                             struct IRC_Client_SessionData,
                                              IRC_Client_SessionData_t> IRC_Client_Module_Statistic_WriterTask_t;
 
-DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                          // task synch type
-                          Common_TimePolicy_t,                   // time policy
-                          Stream_ModuleConfiguration,            // module configuration type
-                          IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
-                          IRC_Module_Streamer_t,                 // reader type
-                          IRC_Client_Module_Bisector_t,          // writer type
-                          IRC_Client_Module_Marshal);            // name
-DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                             // task synch type
-                          Common_TimePolicy_t,                      // time policy type
-                          Stream_ModuleConfiguration,               // module configuration type
-                          IRC_Client_ModuleHandlerConfiguration,    // module handler configuration type
-                          IRC_Client_Module_Statistic_ReaderTask_t, // reader type
-                          IRC_Client_Module_Statistic_WriterTask_t, // writer type
-                          IRC_Module_RuntimeStatistic);             // name
+DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                                 // task synch type
+                          Common_TimePolicy_t,                          // time policy
+                          struct Stream_ModuleConfiguration,            // module configuration type
+                          struct IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
+                          IRC_Module_Streamer_t,                        // reader type
+                          IRC_Client_Module_Bisector_t,                 // writer type
+                          IRC_Client_Module_Marshal);                   // name
+DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                                 // task synch type
+                          Common_TimePolicy_t,                          // time policy type
+                          struct Stream_ModuleConfiguration,            // module configuration type
+                          struct IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
+                          IRC_Client_Module_Statistic_ReaderTask_t,     // reader type
+                          IRC_Client_Module_Statistic_WriterTask_t,     // writer type
+                          IRC_Module_RuntimeStatistic);                 // name
 
 #endif

@@ -41,12 +41,13 @@
 #include "irc_stream_common.h"
 
 // forward declarations
+struct IRC_ConnectionConfiguration;
 struct IRC_ConnectionState;
 class IRC_Record;
 struct IRC_ModuleHandlerConfiguration;
 class IRC_SessionMessage;
 struct IRC_Stream_SessionData;
-struct IRC_Stream_UserData;
+struct IRC_UserData;
 
 //typedef Net_IConnection_T<ACE_INET_Addr,
 //                          struct IRC_Configuration,
@@ -54,10 +55,10 @@ struct IRC_Stream_UserData;
 //                          IRC_RuntimeStatistic_t,
 //                          IRC_Stream> IRC_IConnection_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 struct IRC_Configuration,
+                                 struct IRC_ConnectionConfiguration,
                                  struct IRC_ConnectionState,
                                  IRC_RuntimeStatistic_t,
-                                 struct IRC_Stream_UserData> IRC_IConnection_Manager_t;
+                                 struct IRC_UserData> IRC_IConnection_Manager_t;
 
 //typedef Common_INotify_T<unsigned int,
 //                         struct IRC_Stream_SessionData,
@@ -76,7 +77,7 @@ struct IRC_SocketHandlerConfiguration
     PDUSize = IRC_BUFFER_SIZE;
   };
 
-  struct IRC_Stream_UserData* userData;
+  struct IRC_UserData* userData;
 };
 
 //struct IRC_ConnectorConfiguration
@@ -114,7 +115,6 @@ struct IRC_ModuleHandlerConfiguration
    : Stream_ModuleHandlerConfiguration ()
    , crunchMessages (IRC_DEFAULT_CRUNCH_MESSAGES)
    , inbound (false)
-   , printFinalReport (true)
    , printProgressDot (false)
    , pushStatisticMessages (true)
    , protocolConfiguration (NULL)
@@ -129,7 +129,6 @@ struct IRC_ModuleHandlerConfiguration
 
   bool                              inbound; // statistic/IO module
 
-  bool                              printFinalReport; // statistic module
   bool                              printProgressDot; // file writer module
   bool                              pushStatisticMessages; // statistic module
 
@@ -154,7 +153,7 @@ struct IRC_StreamConfiguration
   struct IRC_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration
   struct IRC_ProtocolConfiguration*     protocolConfiguration;        // protocol configuration
 
-  //struct IRC_Stream_UserData*           userData;
+  //struct IRC_UserData*           userData;
 };
 
 #endif

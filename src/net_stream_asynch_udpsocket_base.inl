@@ -117,6 +117,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited4::configuration_);
+  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration);
+  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration);
+  ACE_ASSERT (inherited4::configuration_->streamConfiguration);
 
   int result = -1;
 #if defined (ACE_LINUX)
@@ -136,11 +139,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   ACE_INET_Addr SAP_any (static_cast<u_short> (0),
                          static_cast<ACE_UINT32> (INADDR_ANY));
   ACE_INET_Addr local_SAP =
-    (inherited4::configuration_->socketConfiguration.writeOnly ? SAP_any
-                                                               : inherited4::configuration_->socketConfiguration.address);
+    (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly ? SAP_any
+                                                                                            : inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->address);
 #if defined (ACE_LINUX)
   // (temporarily) elevate priviledges to open system sockets
-  if (!inherited4::configuration_->socketConfiguration.writeOnly &&
+  if (!inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly &&
       (local_SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEDGED_PORT))
   {
     if (!Common_Tools::setRootPriviledges ())
@@ -180,7 +183,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   inherited::handle (inherited2::get_handle ());
 
   // step2a: initialize base-class
-  if (!inherited::initialize (inherited4::configuration_->socketHandlerConfiguration))
+  if (!inherited::initialize (*inherited4::configuration_->socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_SocketHandlerBase::initialize(): \"%m\", aborting\n")));
@@ -206,19 +209,19 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // step3: initialize/start stream
 
   // step3a: connect stream head message queue with a notification pipe/queue ?
-  if (!inherited4::configuration_->streamConfiguration.useThreadPerConnection)
-    inherited4::configuration_->streamConfiguration.notificationStrategy =
+  if (!inherited4::configuration_->streamConfiguration->useThreadPerConnection)
+    inherited4::configuration_->streamConfiguration->notificationStrategy =
       this;
 
   // step3d: initialize stream
   // *TODO*: this clearly is a design glitch
-  inherited4::configuration_->streamConfiguration.sessionID =
+  inherited4::configuration_->streamConfiguration->sessionID =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       reinterpret_cast<size_t> (inherited::handle ()); // (== socket handle)
 #else
       static_cast<size_t> (inherited::handle ()); // (== socket handle)
 #endif
-  if (!stream_.initialize (inherited4::configuration_->streamConfiguration))
+  if (!stream_.initialize (*inherited4::configuration_->streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
@@ -244,7 +247,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   } // end IF
 
   // step4: start reading (need to pass any data ?)
-  if (!inherited4::configuration_->socketConfiguration.writeOnly)
+  if (!inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly)
   {
     if (messageBlock_in.length () == 0)
       inherited::initiate_read_dgram ();
@@ -293,7 +296,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     // *NOTE*: registered with the proactor at this point
     //         --> data may start arriving at handle_input ()
   } // end IF
-  if (inherited4::configuration_->socketConfiguration.writeOnly)
+  if (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly)
     this->decrease (); // float the connection (connection manager)
                        //ACE_ASSERT (this->count () == 2); // connection manager & read operation
                        //                                     (+ stream module(s))
@@ -355,6 +358,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited4::configuration_);
+  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration);
+  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration);
 
   int result = -1;
   Stream_Base_t* stream_p = (stream_.upStream () ? stream_.upStream ()
@@ -378,13 +383,13 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   size_t bytes_to_send = message_block_p->length ();
 send:
   ssize_t result_2 =
-    inherited::outputStream_.send (message_block_p,                                         // data
-                                   bytes_to_send,                                           // #bytes to send
-                                   0,                                                       // flags
-                                   inherited4::configuration_->socketConfiguration.address, // remote address (ignored)
-                                   NULL,                                                    // ACT
-                                   0,                                                       // priority
-                                   COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);                    // signal
+    inherited::outputStream_.send (message_block_p,                      // data
+                                   bytes_to_send,                        // #bytes to send
+                                   0,                                    // flags
+                                   inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->address, // remote address (ignored)
+                                   NULL,                                 // ACT
+                                   0,                                    // priority
+                                   COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
   if (result_2 == -1)
   {
     int error = ACE_OS::last_error ();
@@ -439,6 +444,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited4::configuration_);
+  ACE_ASSERT (inherited4::configuration_->streamConfiguration);
 
   // step1: wait for all workers within the stream (if any)
   stream_.stop (true,  // <-- wait for completion
@@ -446,7 +452,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   // step2: purge any pending notifications ?
   // *WARNING: do this here, while still holding on to the current write buffer
-  if (!inherited4::configuration_->streamConfiguration.useThreadPerConnection)
+  if (!inherited4::configuration_->streamConfiguration->useThreadPerConnection)
   {
     Stream_Iterator_t iterator (stream_);
     const Stream_Module_t* module_p = NULL;
@@ -518,6 +524,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited4::configuration_);
+  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration);
+  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration);
 
   handle_out = inherited2::get_handle ();
   localSAP_out.reset ();
@@ -527,8 +535,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
-  if (inherited4::configuration_->socketConfiguration.writeOnly)
-    remoteSAP_out = inherited4::configuration_->socketConfiguration.address;
+  if (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly)
+    remoteSAP_out =
+        inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->address;
 }
 
 template <typename HandlerType,
@@ -1116,6 +1125,9 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   // sanity check(s)
   ACE_ASSERT (inherited4::configuration_);
+  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration);
+  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration);
+  ACE_ASSERT (inherited4::configuration_->streamConfiguration);
 
   int result = -1;
   // *TODO*: remove type inferences
@@ -1123,9 +1135,9 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   // step1: open socket
   result =
-      inherited2::open (inherited4::configuration_->socketConfiguration.netlinkAddress,   // local SAP
-                        ACE_PROTOCOL_FAMILY_NETLINK,                                      // protocol family
-                        inherited4::configuration_->socketConfiguration.netlinkProtocol); // protocol
+      inherited2::open (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->netlinkAddress,   // local SAP
+                        ACE_PROTOCOL_FAMILY_NETLINK,                                                                   // protocol family
+                        inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->netlinkProtocol); // protocol
                         // NETLINK_USERSOCK);                                             // protocol
                         //NETLINK_GENERIC);                                              // protocol
   if (result == -1)
@@ -1146,7 +1158,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   } // end IF
 
   // step2a: initialize base-class
-  if (!inherited::initialize (inherited4::configuration_->socketHandlerConfiguration))
+  if (!inherited::initialize (*inherited4::configuration_->socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_SocketHandlerBase::initialize(): \"%m\", aborting\n")));
@@ -1158,18 +1170,19 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   // step3: initialize/start stream
   // step3a: connect stream head message queue with a notification pipe/queue ?
-  if (!inherited4::configuration_->streamConfiguration.useThreadPerConnection)
-    inherited4::configuration_->streamConfiguration.notificationStrategy = this;
+  if (!inherited4::configuration_->streamConfiguration->useThreadPerConnection)
+    inherited4::configuration_->streamConfiguration->notificationStrategy =
+        this;
 
   // *TODO*: this clearly is a design glitch
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inherited4::configuration_->streamConfiguration.sessionID =
+  inherited4::configuration_->streamConfiguration->sessionID =
     reinterpret_cast<unsigned int> (inherited2::get_handle ()); // (== socket handle)
 #else
-  inherited4::configuration_->streamConfiguration.sessionID =
+  inherited4::configuration_->streamConfiguration->sessionID =
     static_cast<unsigned int> (inherited2::get_handle ()); // (== socket handle)
 #endif
-  if (!stream_.initialize (inherited4::configuration_->streamConfiguration))
+  if (!stream_.initialize (*inherited4::configuration_->streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
@@ -1357,13 +1370,17 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   int result = -1;
 
+  // sanity check(s)
+  ACE_ASSERT (inherited4::configuration_);
+  ACE_ASSERT (inherited4::configuration_->streamConfiguration);
+
   // step1: wait for all workers within the stream (if any)
   if (stream_.isRunning ())
     stream_.stop (true); // <-- wait for completion
 
   // step2: purge any pending notifications ?
   // *WARNING: do this here, while still holding on to the current write buffer
-  if (!inherited4::configuration_.streamConfiguration.useThreadPerConnection)
+  if (!inherited4::configuration_->streamConfiguration->useThreadPerConnection)
   {
     Stream_Iterator_t iterator (stream_);
     const Stream_Module_t* module_p = NULL;
@@ -1426,6 +1443,11 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   int result = -1;
 
+  // sanity check(s)
+  ACE_ASSERT (inherited4::configuration_);
+  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration);
+  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration);
+
   handle_out = inherited2::get_handle ();
 //  result = localSAP_out.set (static_cast<u_short> (0),
 //                             static_cast<ACE_UINT32> (INADDR_NONE));
@@ -1434,7 +1456,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 //                ACE_TEXT ("failed to ACE_INET_Addr::set(0, %d): \"%m\", continuing\n"),
 //                INADDR_NONE));
   localSAP_out = ACE_Addr::sap_any;
-  if (!inherited4::configuration_.socketConfiguration.writeOnly)
+  if (!inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly)
   {
     result = inherited2::get_local_addr (localSAP_out);
     if (result == -1)
@@ -1442,7 +1464,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                   ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
   } // end IF
   remoteSAP_out =
-    inherited4::configuration_.socketConfiguration.peerAddress;
+      inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->peerAddress;
 }
 
 template <typename AddressType,

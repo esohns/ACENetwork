@@ -23,6 +23,7 @@
 
 #include <bitset>
 #include <deque>
+#include <list>
 #include <map>
 #include <set>
 #include <string>
@@ -40,6 +41,7 @@
 #include "stream_inotify.h"
 #include "stream_isessionnotify.h"
 
+#include "net_configuration.h"
 #include "net_defines.h"
 #include "net_iconnection.h"
 #include "net_iconnector.h"
@@ -50,8 +52,10 @@
 
 #include "FILE_Stream.h"
 #include "IOStream_alt_T.h"
+#include "IRC_client_defines.h"
 
 // forward declarations
+struct IRC_Client_ConnectionConfiguration;
 struct IRC_Client_Configuration;
 struct IRC_Client_CursesState;
 struct IRC_Client_ModuleHandlerConfiguration;
@@ -67,6 +71,8 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                     enum Stream_SessionMessageType,
                                     IRC_Message,
                                     IRC_Client_SessionMessage> IRC_Client_ISessionNotify_t;
+typedef std::list<IRC_Client_ISessionNotify_t*> IRC_Client_ISubscribers_t;
+typedef IRC_Client_ISubscribers_t::const_iterator IRC_Client_ISubscribersIterator_t;
 
 // phonebook
 typedef std::set<std::string> IRC_Client_Networks_t;
@@ -137,7 +143,7 @@ struct IRC_Client_UserData
    , moduleHandlerConfiguration (NULL)
   {};
 
-  struct IRC_Client_Configuration*              configuration;
+  struct IRC_Client_ConnectionConfiguration*    configuration;
 
   // *TODO*: remove these ASAP
   struct Stream_ModuleConfiguration*            moduleConfiguration;
@@ -160,6 +166,38 @@ struct IRC_Client_SessionData
 
 typedef Stream_Statistic IRC_RuntimeStatistic_t;
 
+struct IRC_Client_SocketHandlerConfiguration;
+struct IRC_StreamConfiguration;
+struct IRC_UserData;
+struct IRC_Client_ConnectionConfiguration
+ : Net_ConnectionConfiguration
+{
+  inline IRC_Client_ConnectionConfiguration ()
+   : Net_ConnectionConfiguration ()
+   ///////////////////////////////////////
+   , socketHandlerConfiguration (NULL)
+   , moduleHandlerConfiguration (NULL)
+   , streamConfiguration (NULL)
+   , protocolConfiguration (NULL)
+   , cursesState (NULL)
+   , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
+   , userData (NULL)
+   , useReactor (NET_EVENT_USE_REACTOR)
+  {};
+
+  struct IRC_Client_SocketHandlerConfiguration* socketHandlerConfiguration;
+
+  struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
+  struct IRC_Client_StreamConfiguration*        streamConfiguration;
+
+  struct IRC_ProtocolConfiguration*             protocolConfiguration;
+
+  struct IRC_Client_CursesState*                cursesState;
+  bool                                          logToFile;
+  struct IRC_Client_UserData*                   userData;
+  bool                                          useReactor;
+};
+
 struct IRC_Client_ConnectionState
  : IRC_ConnectionState
 {
@@ -170,10 +208,10 @@ struct IRC_Client_ConnectionState
    , userData (NULL)
   {};
 
-  struct IRC_Client_Configuration* configuration;
-  IRC_IControl*                    controller;
+  struct IRC_Client_ConnectionConfiguration* configuration;
+  IRC_IControl*                              controller;
 
-  struct IRC_Client_UserData*      userData;
+  struct IRC_Client_UserData*                userData;
 };
 
 // *TODO*: remove this ASAP

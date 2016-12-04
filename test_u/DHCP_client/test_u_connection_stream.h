@@ -41,16 +41,16 @@ class Test_U_SessionMessage;
 class Test_U_InboundConnectionStream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        int,
-                        Stream_SessionMessageType,
-                        Stream_StateMachine_ControlState,
-                        Test_U_StreamState,
-                        Test_U_StreamConfiguration,
-                        Test_U_RuntimeStatistic_t,
-                        Stream_ModuleConfiguration,
-                        Test_U_StreamModuleHandlerConfiguration,
-                        Test_U_StreamSessionData,   // session data
-                        Test_U_StreamSessionData_t, // session data container (reference counted)
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_U_StreamState,
+                        struct Test_U_StreamConfiguration,
+                        DHCP_RuntimeStatistic_t,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_U_StreamModuleHandlerConfiguration,
+                        struct Test_U_DHCPClient_SessionData,
+                        Test_U_DHCPClient_SessionData_t,
                         ACE_Message_Block,
                         Test_U_Message,
                         Test_U_SessionMessage>
@@ -64,13 +64,13 @@ class Test_U_InboundConnectionStream
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const Test_U_StreamConfiguration&, // configuration
-                           bool = true,                       // setup pipeline ?
-                           bool = true);                      // reset session data ?
+  virtual bool initialize (const struct Test_U_StreamConfiguration&, // configuration
+                           bool = true,                              // setup pipeline ?
+                           bool = true);                             // reset session data ?
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
-  virtual bool collect (Test_U_RuntimeStatistic_t&); // return value: statistic data
+  virtual bool collect (DHCP_RuntimeStatistic_t&); // return value: statistic data
   virtual void report () const;
 
   // *TODO*: re-consider this API
@@ -79,16 +79,16 @@ class Test_U_InboundConnectionStream
  private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        int,
-                        Stream_SessionMessageType,
-                        Stream_StateMachine_ControlState,
-                        Test_U_StreamState,
-                        Test_U_StreamConfiguration,
-                        Test_U_RuntimeStatistic_t,
-                        Stream_ModuleConfiguration,
-                        Test_U_StreamModuleHandlerConfiguration,
-                        Test_U_StreamSessionData,   // session data
-                        Test_U_StreamSessionData_t, // session data container (reference counted)
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_U_StreamState,
+                        struct Test_U_StreamConfiguration,
+                        DHCP_RuntimeStatistic_t,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_U_StreamModuleHandlerConfiguration,
+                        struct Test_U_DHCPClient_SessionData,
+                        Test_U_DHCPClient_SessionData_t,
                         ACE_Message_Block,
                         Test_U_Message,
                         Test_U_SessionMessage> inherited;
@@ -103,16 +103,16 @@ class Test_U_InboundConnectionStream
 class Test_U_OutboundConnectionStream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        int,
-                        Stream_SessionMessageType,
-                        Stream_StateMachine_ControlState,
-                        Test_U_StreamState,
-                        Test_U_StreamConfiguration,
-                        Test_U_RuntimeStatistic_t,
-                        Stream_ModuleConfiguration,
-                        Test_U_StreamModuleHandlerConfiguration,
-                        Test_U_StreamSessionData,   // session data
-                        Test_U_StreamSessionData_t, // session data container (reference counted)
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_U_StreamState,
+                        struct Test_U_StreamConfiguration,
+                        DHCP_RuntimeStatistic_t,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_U_StreamModuleHandlerConfiguration,
+                        struct Test_U_DHCPClient_SessionData,
+                        Test_U_DHCPClient_SessionData_t,
                         ACE_Message_Block,
                         Test_U_Message,
                         Test_U_SessionMessage>
@@ -126,13 +126,13 @@ class Test_U_OutboundConnectionStream
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const Test_U_StreamConfiguration&, // configuration
-                           bool = true,                       // setup pipeline ?
-                           bool = true);                      // reset session data ?
+  virtual bool initialize (const struct Test_U_StreamConfiguration&, // configuration
+                           bool = true,                              // setup pipeline ?
+                           bool = true);                             // reset session data ?
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
-  virtual bool collect (Test_U_RuntimeStatistic_t&); // return value: statistic data
+  virtual bool collect (DHCP_RuntimeStatistic_t&); // return value: statistic data
   virtual void report () const;
 
   // *TODO*: re-consider this API
@@ -141,16 +141,16 @@ class Test_U_OutboundConnectionStream
  private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        int,
-                        Stream_SessionMessageType,
-                        Stream_StateMachine_ControlState,
-                        Test_U_StreamState,
-                        Test_U_StreamConfiguration,
-                        Test_U_RuntimeStatistic_t,
-                        Stream_ModuleConfiguration,
-                        Test_U_StreamModuleHandlerConfiguration,
-                        Test_U_StreamSessionData,   // session data
-                        Test_U_StreamSessionData_t, // session data container (reference counted)
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_U_StreamState,
+                        struct Test_U_StreamConfiguration,
+                        DHCP_RuntimeStatistic_t,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_U_StreamModuleHandlerConfiguration,
+                        struct Test_U_DHCPClient_SessionData,
+                        Test_U_DHCPClient_SessionData_t,
                         ACE_Message_Block,
                         Test_U_Message,
                         Test_U_SessionMessage> inherited;

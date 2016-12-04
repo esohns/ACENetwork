@@ -114,8 +114,11 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   // step1: initialize base-class, tweak socket, initialize I/O, ...
   ACE_ASSERT (inherited3::configuration_);
+  ACE_ASSERT (inherited3::configuration_->socketHandlerConfiguration);
+  ACE_ASSERT (inherited3::configuration_->streamConfiguration);
+
   // *TODO*: remove type inferences
-  if (!inherited::initialize (inherited3::configuration_->socketHandlerConfiguration))
+  if (!inherited::initialize (*inherited3::configuration_->socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to HandlerType::initialize(), aborting\n")));
@@ -140,17 +143,18 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   // step2: initialize/start stream
   // step2a: connect the stream head message queue with this handler ?
-  if (!inherited3::configuration_->streamConfiguration.useThreadPerConnection)
-    inherited3::configuration_->streamConfiguration.notificationStrategy = this;
+  if (!inherited3::configuration_->streamConfiguration->useThreadPerConnection)
+    inherited3::configuration_->streamConfiguration->notificationStrategy =
+        this;
 
   // *TODO*: remove type inferences
-  inherited3::configuration_->streamConfiguration.sessionID =
+  inherited3::configuration_->streamConfiguration->sessionID =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     reinterpret_cast<size_t> (handle_in); // (== socket handle)
 #else
     static_cast<size_t> (handle_in); // (== socket handle)
 #endif
-  if (!stream_.initialize (inherited3::configuration_->streamConfiguration,
+  if (!stream_.initialize (*inherited3::configuration_->streamConfiguration,
                            true,
                            true))
   {
@@ -800,7 +804,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::report"));
 
   try {
-    return stream_.report ();
+    stream_.report ();
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));

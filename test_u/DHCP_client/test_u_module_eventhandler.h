@@ -42,7 +42,7 @@ class Test_U_Module_EventHandler
                                          Test_U_Message,
                                          Test_U_SessionMessage,
                                          Stream_SessionId_t,
-                                         Test_U_StreamSessionData>
+                                         Test_U_DHCPClient_SessionData>
 {
  public:
   Test_U_Module_EventHandler ();
@@ -60,14 +60,14 @@ class Test_U_Module_EventHandler
                                          Test_U_Message,
                                          Test_U_SessionMessage,
                                          Stream_SessionId_t,
-                                         Test_U_StreamSessionData> inherited;
+                                         Test_U_DHCPClient_SessionData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler (const Test_U_Module_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler& operator= (const Test_U_Module_EventHandler&))
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (Test_U_StreamSessionData,                // session data type
+DATASTREAM_MODULE_INPUT_ONLY (Test_U_DHCPClient_SessionData,           // session data type
                               Stream_SessionMessageType,               // session event type
                               Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
                               Test_U_IStreamNotify_t,                  // stream notification interface type

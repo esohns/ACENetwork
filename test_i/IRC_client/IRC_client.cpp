@@ -124,7 +124,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-r        : use reactor [")
-            << IRC_CLIENT_DEFAULT_USE_REACTOR
+            << NET_EVENT_USE_REACTOR
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-s [VALUE]: reporting interval (seconds: 0 --> OFF)")
@@ -724,6 +724,17 @@ do_work (IRC_Client_Configuration& configuration_in,
     &configuration_in.socketConfiguration;
   configuration_in.socketHandlerConfiguration.statisticReportingInterval =
     configuration_in.streamConfiguration.statisticReportingInterval;
+  configuration_in.connectionConfiguration.moduleHandlerConfiguration =
+    &configuration_in.moduleHandlerConfiguration;
+  configuration_in.connectionConfiguration.protocolConfiguration =
+    &configuration_in.protocolConfiguration;
+  configuration_in.connectionConfiguration.socketHandlerConfiguration =
+    &configuration_in.socketHandlerConfiguration;
+  configuration_in.connectionConfiguration.streamConfiguration =
+    &configuration_in.streamConfiguration;
+  configuration_in.connectionConfiguration.userData =
+    configuration_in.userData;
+
   //IRC_Client_SessionState session_state;
   //session_state.configuration = configuration_in;
   //IRC_Client_ConnectorConfiguration connector_configuration;
@@ -783,7 +794,7 @@ do_work (IRC_Client_Configuration& configuration_in,
 
   // step4: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  connection_manager_p->set (configuration_in,
+  connection_manager_p->set (configuration_in.connectionConfiguration,
                              //configuration_in.streamUserData);
                              NULL);
 
@@ -1045,7 +1056,7 @@ ACE_TMAIN (int argc_in,
   bool debug_parser                          = false;
   bool log_to_file                           = IRC_CLIENT_SESSION_DEFAULT_LOG;
   bool use_curses_library                    = IRC_CLIENT_SESSION_USE_CURSES;
-  bool use_reactor                           = IRC_CLIENT_DEFAULT_USE_REACTOR;
+  bool use_reactor                           = NET_EVENT_USE_REACTOR;
   unsigned int statistic_reporting_interval  =
       IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information                     = false;

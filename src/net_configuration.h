@@ -94,12 +94,26 @@ struct Net_ListenerConfiguration
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {};
 
-  ACE_INET_Addr                   address;
-  int                             addressFamily;
+  ACE_INET_Addr                          address;
+  int                                    addressFamily;
 //  Net_IInetConnectionManager_t*   connectionManager;
-  Stream_IAllocator*              messageAllocator;
-  Net_SocketHandlerConfiguration* socketHandlerConfiguration;
-  bool                            useLoopBackDevice;
+  Stream_IAllocator*                     messageAllocator;
+  struct Net_SocketHandlerConfiguration* socketHandlerConfiguration;
+  bool                                   useLoopBackDevice;
+};
+
+struct Net_ConnectionConfiguration
+{
+  inline Net_ConnectionConfiguration ()
+   : socketHandlerConfiguration (NULL)
+   , streamConfiguration (NULL)
+   , userData (NULL)
+  {};
+
+  struct Net_SocketHandlerConfiguration* socketHandlerConfiguration;
+  struct Stream_Configuration*           streamConfiguration;
+
+  struct Net_UserData*                   userData;
 };
 
 struct Net_SocketHandlerConfiguration
@@ -115,16 +129,16 @@ struct Net_SocketHandlerConfiguration
    , userData (NULL)
   {};
 
-  Net_ListenerConfiguration* listenerConfiguration;
-  Stream_IAllocator*         messageAllocator;
+  struct Net_ListenerConfiguration* listenerConfiguration;
+  Stream_IAllocator*                messageAllocator;
   // *NOTE*: applies to the corresponding protocol, if it has fixed size
   //         datagrams; otherwise, this is the size of the individual (opaque)
   //         stream buffers
-  unsigned int               PDUSize; // package data unit size
-  Net_SocketConfiguration*   socketConfiguration;
-  ACE_Time_Value             statisticReportingInterval; // [ACE_Time_Value::zero: off]
+  unsigned int                      PDUSize; // package data unit size
+  struct Net_SocketConfiguration*   socketConfiguration;
+  ACE_Time_Value                    statisticReportingInterval; // [ACE_Time_Value::zero: off]
 
-  Net_UserData*              userData;
+  struct Net_UserData*              userData;
 };
 
 #endif

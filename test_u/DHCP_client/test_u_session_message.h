@@ -41,7 +41,7 @@ template <ACE_SYNCH_DECL,
 class Test_U_SessionMessage
  : public Stream_SessionMessageBase_T<struct Test_U_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
-                                      Test_U_StreamSessionData_t,
+                                      Test_U_DHCPClient_SessionData_t,
                                       struct Test_U_UserData,
                                       Test_U_ControlMessage_t,
                                       Test_U_SessionMessage>
@@ -56,9 +56,9 @@ class Test_U_SessionMessage
  public:
   // *NOTE*: assumes responsibility for the second argument !
   // *TODO*: (using gcc) cannot pass reference to pointer for some reason
-  Test_U_SessionMessage (enum Stream_SessionMessageType, // session message type
-                         Test_U_StreamSessionData_t*&,   // session data container handle
-                         struct Test_U_UserData*);       // user data handle
+  Test_U_SessionMessage (enum Stream_SessionMessageType,    // session message type
+                         Test_U_DHCPClient_SessionData_t*&, // session data container handle
+                         struct Test_U_UserData*);          // user data handle
   virtual ~Test_U_SessionMessage ();
 
   // overloaded from ACE_Message_Block
@@ -67,7 +67,7 @@ class Test_U_SessionMessage
  private:
   typedef Stream_SessionMessageBase_T<struct Test_U_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
-                                      Test_U_StreamSessionData_t,
+                                      Test_U_DHCPClient_SessionData_t,
                                       struct Test_U_UserData,
                                       Test_U_ControlMessage_t,
                                       Test_U_SessionMessage> inherited;

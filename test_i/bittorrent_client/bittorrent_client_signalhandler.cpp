@@ -117,8 +117,9 @@ BitTorrent_Client_SignalHandler::handle (int signal_in)
   // ...abort ?
   if (abort)
   {
-    BitTorrent_Client_IConnection_Manager_t* connection_manager_p =
-        BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
+    BitTorrent_Client_IPeerConnection_Manager_t* connection_manager_p =
+        BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
+    ACE_ASSERT (connection_manager_p);
 
     connection_manager_p->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST);
   } // end IF

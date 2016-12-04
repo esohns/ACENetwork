@@ -671,13 +671,13 @@ BitTorrent_TrackerStream_T<StreamStateType,
 //  //             handle to the session data)
 //  module_p->arg (inherited::sessionData_);
 
-//  if (setupPipeline_in)
-//    if (!inherited::setup (NULL))
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to set up pipeline, aborting\n")));
-//      goto error;
-//    } // end IF
+  if (setupPipeline_in)
+    if (!inherited::setup (NULL))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to set up pipeline, aborting\n")));
+      goto error;
+    } // end IF
 
   inherited::isInitialized_ = true;
 

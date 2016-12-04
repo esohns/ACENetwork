@@ -34,7 +34,7 @@ class IRC_Client_SignalHandler
  , public Common_ISignal
 {
  public:
-  IRC_Client_SignalHandler (bool = IRC_CLIENT_DEFAULT_USE_REACTOR, // use reactor ?
+  IRC_Client_SignalHandler (bool = NET_EVENT_USE_REACTOR, // use reactor ?
                             bool = IRC_CLIENT_SESSION_USE_CURSES); // use curses library ?
   virtual ~IRC_Client_SignalHandler ();
 

@@ -28,11 +28,10 @@
 #include "stream_isessionnotify.h"
 #include "stream_messageallocatorheap_base.h"
 
+#include "test_u_stream_common.h"
+
 #include "test_u_common.h"
 #include "test_u_connection_common.h"
-//#include "test_u_message.h"
-//#include "test_u_session_message.h"
-//#include "test_u_stream.h"
 
 // forward declarations
 class Test_U_Message;
@@ -65,13 +64,6 @@ typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                           Test_U_Message,
                                           Test_U_SessionMessage> Test_U_MessageAllocator_t;
 
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct Test_U_StreamSessionData,
-                                    enum Stream_SessionMessageType,
-                                    Test_U_Message,
-                                    Test_U_SessionMessage> Test_U_ISessionNotify_t;
-typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
-typedef Test_U_Subscribers_t::iterator Test_U_SubscribersIterator_t;
 typedef Common_ISubscribe_T<Test_U_ISessionNotify_t> Test_U_ISubscribe_t;
 
 struct Test_U_DHCPClient_GTK_CBData
@@ -81,12 +73,11 @@ struct Test_U_DHCPClient_GTK_CBData
    : Test_U_GTK_CBData ()
    , configuration (NULL)
    , subscribers ()
-   , subscribersLock ()
   {};
 
   struct Test_U_DHCPClient_Configuration* configuration;
+
   Test_U_Subscribers_t                    subscribers;
-  ACE_SYNCH_RECURSIVE_MUTEX               subscribersLock;
 };
 
 //struct Test_U_DHCPClient_ThreadData

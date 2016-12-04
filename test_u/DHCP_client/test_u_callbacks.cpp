@@ -1146,10 +1146,10 @@ allocate:
 
   Test_U_InboundConnectionStream& stream_r =
       const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
-  const Test_U_StreamSessionData_t* session_data_container_p = stream_r.get ();
+  const Test_U_DHCPClient_SessionData_t* session_data_container_p = stream_r.get ();
   ACE_ASSERT (session_data_container_p);
-  Test_U_StreamSessionData& session_data_r =
-      const_cast<Test_U_StreamSessionData&> (session_data_container_p->get ());
+  Test_U_DHCPClient_SessionData& session_data_r =
+      const_cast<Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
   session_data_r.timeStamp = state_r.timeStamp;
   session_data_r.xid = DHCP_record.xid;
 
@@ -1208,10 +1208,11 @@ action_inform_activate_cb (GtkAction* action_in,
 
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
-  const Test_U_StreamSessionData_t* session_data_container_p = stream_r.get ();
+  const Test_U_DHCPClient_SessionData_t* session_data_container_p =
+      stream_r.get ();
   ACE_ASSERT (session_data_container_p);
-  Test_U_StreamSessionData& session_data_r =
-    const_cast<Test_U_StreamSessionData&> (session_data_container_p->get ());
+  Test_U_DHCPClient_SessionData& session_data_r =
+    const_cast<Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
 
   // clean up
   iconnection_p->decrease ();
@@ -1331,10 +1332,11 @@ action_request_activate_cb (GtkAction* action_in,
 
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
-  const Test_U_StreamSessionData_t* session_data_container_p = stream_r.get ();
+  const Test_U_DHCPClient_SessionData_t* session_data_container_p =
+      stream_r.get ();
   ACE_ASSERT (session_data_container_p);
-  Test_U_StreamSessionData& session_data_r =
-    const_cast<Test_U_StreamSessionData&> (session_data_container_p->get ());
+  Test_U_DHCPClient_SessionData& session_data_r =
+    const_cast<Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
 
   // clean up
   iconnection_p->decrease ();
@@ -1438,10 +1440,10 @@ action_release_activate_cb (GtkAction* action_in,
 
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
-  const Test_U_StreamSessionData_t* session_data_container_p = stream_r.get ();
+  const Test_U_DHCPClient_SessionData_t* session_data_container_p = stream_r.get ();
   ACE_ASSERT (session_data_container_p);
-  Test_U_StreamSessionData& session_data_r =
-    const_cast<Test_U_StreamSessionData&> (session_data_container_p->get ());
+  Test_U_DHCPClient_SessionData& session_data_r =
+    const_cast<Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
 
   // clean up
   iconnection_p->decrease ();

@@ -243,8 +243,9 @@ IRC_Session_T<ConnectionType,
     configuration_p = inherited::CONNECTION_BASE_T::configuration_;
   // sanity check(s)
   ACE_ASSERT (configuration_p);
+  ACE_ASSERT (configuration_p->protocolConfiguration);
   inherited::state_.nickName =
-    configuration_p->protocolConfiguration.loginOptions.nickName;
+      configuration_p->protocolConfiguration->loginOptions.nickName;
 
   // step1: initialize output
   //UIState_ = configuration_p->cursesState;
@@ -312,7 +313,7 @@ IRC_Session_T<ConnectionType,
     InputHandlerConfigurationType input_handler_configuration;
     //input_handler_configuration. = &state_;
     input_handler_configuration.streamConfiguration =
-      &configuration_p->streamConfiguration;
+      configuration_p->streamConfiguration;
     if (!inputHandler_->initialize (input_handler_configuration))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1070,7 +1071,7 @@ IRC_Session_T<ConnectionType,
   {
     ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
     module_handler_configuration_p =
-        &(inherited::CONNECTION_BASE_T::configuration_->moduleHandlerConfiguration);
+        inherited::CONNECTION_BASE_T::configuration_->moduleHandlerConfiguration;
   } // end ELSE
   ACE_ASSERT (module_handler_configuration_p);
 
@@ -1167,7 +1168,7 @@ IRC_Session_T<ConnectionType,
 //  } // end IF
 //  else
   module_handler_configuration_p =
-        &(inherited::CONNECTION_BASE_T::configuration_->moduleHandlerConfiguration);
+      inherited::CONNECTION_BASE_T::configuration_->moduleHandlerConfiguration;
   // sanity check(s)
   ACE_ASSERT (module_handler_configuration_p);
   module_handler_configuration_p->subscriber = this;

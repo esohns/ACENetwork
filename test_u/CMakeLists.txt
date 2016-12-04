@@ -22,6 +22,7 @@ set (${PROJECT_NAME}_Test_U_SRCS
      http_common_modules.h
      http_configuration.h
      test_u_common.h
+     test_u_gtk_common.h
      test_u_stream_common.h)
 #install (FILES
 #         ${PROJECT_NAME}_Test_U_SRCS

@@ -87,7 +87,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType>::initialize (const ConfigurationType& configuration_in)
+                     SessionMessageType>::initialize (const ConfigurationType& configuration_in,
+                                                      Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::initialize"));
 
@@ -126,7 +127,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 //                          true,
                           true);
 
-  return inherited::initialize (configuration_in);
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 template <ACE_SYNCH_DECL,
@@ -544,7 +546,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType>::initialize (const ConfigurationType& configuration_in)
+                      StatisticContainerType>::initialize (const ConfigurationType& configuration_in,
+                                                           Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::initialize"));
 
@@ -580,7 +583,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 //                          true,
                           true);
 
-  return inherited::initialize (configuration_in);
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 template <ACE_SYNCH_DECL,

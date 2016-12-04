@@ -494,8 +494,6 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
                 ACE_TEXT ("dynamic_cast<Net_Module_EventHandler> failed, returning\n")));
     return;
   } // end IF
-  event_handler_p->initialize (&CBData_in.subscribers,
-                               &CBData_in.subscribersLock);
   event_handler_p->subscribe (&ui_event_handler);
 
   Stream_AllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator;
@@ -528,7 +526,15 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // *TODO*: is this correct ?
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;
   configuration.streamConfiguration.userData = &configuration.userData;
-  configuration.userData.configuration = &configuration;
+  configuration.userData.configuration = &configuration.connectionConfiguration;
+
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.printFinalReport =
+      true;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribersLock =
+      &CBData_in.subscribersLock;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribers =
+      &CBData_in.subscribers;
+
   // ********************** socket configuration data **************************
   // ****************** socket handler configuration data **********************
   configuration.socketHandlerConfiguration.messageAllocator =
@@ -593,7 +599,7 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
   // step0d: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  connection_manager_p->set (configuration,
+  connection_manager_p->set (configuration.connectionConfiguration,
                              &configuration.userData);
 
   // step0e: initialize action timer

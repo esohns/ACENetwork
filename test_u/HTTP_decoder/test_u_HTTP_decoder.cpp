@@ -479,9 +479,9 @@ do_work (unsigned int bufferSize_in,
 
   // step0a: initialize configuration and stream
   Test_U_Configuration configuration;
-  configuration.userData.configuration = &configuration;
-  configuration.userData.streamConfiguration =
-      &configuration.streamConfiguration;
+  configuration.userData.configuration = &configuration.connectionConfiguration;
+//  configuration.userData.streamConfiguration =
+//      &configuration.streamConfiguration;
   configuration.useReactor = useReactor_in;
 
   Stream_AllocatorHeap_T<Test_U_AllocatorConfiguration> heap_allocator;
@@ -582,7 +582,7 @@ do_work (unsigned int bufferSize_in,
 
   // step0c: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  connection_manager_p->set (configuration,
+  connection_manager_p->set (configuration.connectionConfiguration,
                              &configuration.userData);
 
   // step0d: initialize regular (global) statistic reporting

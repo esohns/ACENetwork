@@ -43,15 +43,15 @@ class Test_U_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
-                        Stream_SessionMessageType,
-                        Stream_StateMachine_ControlState,
-                        Test_U_StreamState,
-                        Test_U_StreamConfiguration,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_U_StreamState,
+                        struct Test_U_StreamConfiguration,
                         Net_RuntimeStatistic_t,
-                        Stream_ModuleConfiguration,
-                        Stream_ModuleHandlerConfiguration,
-                        Test_U_StreamSessionData,   // session data
-                        Test_U_StreamSessionData_t, // session data container (reference counted)
+                        struct Stream_ModuleConfiguration,
+                        struct Test_U_ModuleHandlerConfiguration,
+                        struct Test_U_StreamSessionData, // session data
+                        Test_U_StreamSessionData_t,      // session data container (reference counted)
                         ACE_Message_Block,
                         Test_U_Message,
                         Test_U_SessionMessage>
@@ -64,9 +64,9 @@ class Test_U_Stream
   virtual bool load (Stream_ModuleList_t&); // return value: module list
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const Test_U_StreamConfiguration&, // configuration
-                           bool = true,                       // setup pipeline ?
-                           bool = true);                      // reset session data ?
+  virtual bool initialize (const struct Test_U_StreamConfiguration&, // configuration
+                           bool = true,                              // setup pipeline ?
+                           bool = true);                             // reset session data ?
 
   // *TODO*: re-consider this API
   void ping ();
@@ -80,14 +80,14 @@ class Test_U_Stream
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         int,
-                        Stream_SessionMessageType,
-                        Stream_StateMachine_ControlState,
-                        Test_U_StreamState,
-                        Test_U_StreamConfiguration,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_U_StreamState,
+                        struct Test_U_StreamConfiguration,
                         Net_RuntimeStatistic_t,
-                        Stream_ModuleConfiguration,
-                        Stream_ModuleHandlerConfiguration,
-                        Test_U_StreamSessionData,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_U_ModuleHandlerConfiguration,
+                        struct Test_U_StreamSessionData,
                         Test_U_StreamSessionData_t,
                         ACE_Message_Block,
                         Test_U_Message,

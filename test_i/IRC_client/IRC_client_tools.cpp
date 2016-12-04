@@ -234,7 +234,7 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   ACE_HANDLE return_value = ACE_INVALID_HANDLE;
 
   int result = -1;
-  IRC_Client_Configuration* configuration_p = NULL;
+  IRC_Client_ConnectionConfiguration* configuration_p = NULL;
   IRC_Client_UserData* user_data_p = NULL;
 
   // step0: retrive default configuration
@@ -245,25 +245,26 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
                              user_data_p);
   ACE_ASSERT (user_data_p);
   // *TODO*: remove type inferences
-  ACE_ASSERT (user_data_p->configuration);
+  ACE_ASSERT (configuration_p);
+  ACE_ASSERT (configuration_p->protocolConfiguration);
+  ACE_ASSERT (configuration_p->socketHandlerConfiguration);
+  ACE_ASSERT (configuration_p->streamConfiguration);
 
   // step1: set up configuration
-  user_data_p->configuration->protocolConfiguration.loginOptions =
-    loginOptions_in;
-  user_data_p->configuration->socketConfiguration.address = peerAddress_in;
+  configuration_p->protocolConfiguration->loginOptions =
+      loginOptions_in;
+  configuration_p->socketHandlerConfiguration->socketConfiguration->address =
+      peerAddress_in;
   if (finalModule_inout)
   {
-    user_data_p->configuration->streamConfiguration.cloneModule =
-      cloneModule_in;
-    user_data_p->configuration->streamConfiguration.deleteModule =
-      deleteModule_in;
-    user_data_p->configuration->streamConfiguration.module =
-      finalModule_inout;
+    configuration_p->streamConfiguration->cloneModule = cloneModule_in;
+    configuration_p->streamConfiguration->deleteModule = deleteModule_in;
+    configuration_p->streamConfiguration->module = finalModule_inout;
     if (deleteModule_in) finalModule_inout = NULL;
   } // end IF
 
   // step2: initialize connector
-  if (!connector_in.initialize (user_data_p->configuration->socketHandlerConfiguration))
+  if (!connector_in.initialize (*configuration_p->socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));

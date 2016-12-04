@@ -61,7 +61,8 @@ class HTTP_Module_Parser_T
   virtual ~HTTP_Module_Parser_T ();
 
   // override (part of) Stream_IModuleHandler_T
-  virtual bool initialize (const ConfigurationType&);
+  virtual bool initialize (const ConfigurationType&,
+                           Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
@@ -158,7 +159,8 @@ class HTTP_Module_ParserH_T
                                     StatisticContainerType>::initialize;
 
   // override (part of) Stream_IModuleHandler_T
-  virtual bool initialize (const ConfigurationType&);
+  virtual bool initialize (const ConfigurationType&,
+                           Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle

@@ -61,7 +61,8 @@ IRC_Client_Module_IRCHandler::~IRC_Client_Module_IRCHandler ()
 }
 
 bool
-IRC_Client_Module_IRCHandler::initialize (const IRC_Client_ModuleHandlerConfiguration& configuration_in)
+IRC_Client_Module_IRCHandler::initialize (const struct IRC_Client_ModuleHandlerConfiguration& configuration_in,
+                                          Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::initialize"));
 
@@ -76,13 +77,13 @@ IRC_Client_Module_IRCHandler::initialize (const IRC_Client_ModuleHandlerConfigur
                 ACE_TEXT ("re-initializing...\n")));
 
     {
-      ACE_Guard<ACE_SYNCH_MUTEX> aGuard (conditionLock_);
+      ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, conditionLock_, false);
 
       connectionIsAlive_ = false;
     } // end lock scope
 
     { // synch access to state machine
-      ACE_Guard<ACE_SYNCH_NULL_MUTEX> aGuard (*inherited2::stateLock_);
+      ACE_GUARD_RETURN (ACE_SYNCH_NULL_MUTEX, aGuard, *inherited2::stateLock_, false);
 
       inherited2::state_ = REGISTRATION_STATE_NICK;
     } // end lock scope
@@ -90,7 +91,7 @@ IRC_Client_Module_IRCHandler::initialize (const IRC_Client_ModuleHandlerConfigur
     receivedInitialNotice_ = false;
 
     { // synch access to subscribers
-      ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
+      ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
 
       subscribers_.clear ();
     } // end lock scope
@@ -102,16 +103,20 @@ IRC_Client_Module_IRCHandler::initialize (const IRC_Client_ModuleHandlerConfigur
 //     ACE_DEBUG((LM_DEBUG,
 //                ACE_TEXT("auto-answering ping messages...\n")));
 
-  inherited::initialize (&subscribers_,
-                         &lock_);
   if (configuration_in.subscriber)
   {
-    ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
+    ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
 
     subscribers_.push_back (configuration_in.subscriber);
   } // end IF
+  ACE_ASSERT (!configuration_in.subscribers && !configuration_in.subscribersLock);
+  const_cast<struct IRC_Client_ModuleHandlerConfiguration&> (configuration_in).subscribers =
+      &subscribers_;
+  const_cast<struct IRC_Client_ModuleHandlerConfiguration&> (configuration_in).subscribersLock =
+      &lock_;
 
-  isInitialized_ = inherited::initialize (configuration_in);
+  isInitialized_ = inherited::initialize (configuration_in,
+                                          allocator_in);
 
   return true;
 }

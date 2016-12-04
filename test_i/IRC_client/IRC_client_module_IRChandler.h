@@ -51,12 +51,12 @@ class IRC_Record;
 class IRC_Client_Module_IRCHandler
  : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
-                                         IRC_Client_ModuleHandlerConfiguration,
+                                         struct IRC_Client_ModuleHandlerConfiguration,
                                          ACE_Message_Block,
                                          IRC_Message,
                                          IRC_Client_SessionMessage,
                                          Stream_SessionId_t,
-                                         IRC_Client_SessionData>
+                                         struct IRC_Client_SessionData>
  , public IRC_StateMachine_Registration
  , public IRC_IControl
 {
@@ -67,7 +67,8 @@ class IRC_Client_Module_IRCHandler
   // implement (part of) Common_IStateMachine_T
   virtual bool wait (const ACE_Time_Value* = NULL);
 
-  virtual bool initialize (const IRC_Client_ModuleHandlerConfiguration&);
+  virtual bool initialize (const struct IRC_Client_ModuleHandlerConfiguration&,
+                           Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (IRC_Message*&, // data message handle
@@ -78,7 +79,7 @@ class IRC_Client_Module_IRCHandler
   // implement IRC_IControl
 //  virtual void subscribe (IRC_Client_IStreamNotify_t*); // new subscriber
 //  virtual void unsubscribe (IRC_Client_IStreamNotify_t*); // existing subscriber
-  virtual bool registerc (const IRC_LoginOptions&); // login details
+  virtual bool registerc (const struct IRC_LoginOptions&); // login details
   virtual void nick (const std::string&); // nick
   virtual void quit (const std::string&); // reason
   virtual void join (const string_list_t&,  // channel(s)
@@ -123,12 +124,12 @@ class IRC_Client_Module_IRCHandler
  private:
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
-                                         IRC_Client_ModuleHandlerConfiguration,
+                                         struct IRC_Client_ModuleHandlerConfiguration,
                                          ACE_Message_Block,
                                          IRC_Message,
                                          IRC_Client_SessionMessage,
                                          Stream_SessionId_t,
-                                         IRC_Client_SessionData> inherited;
+                                         struct IRC_Client_SessionData> inherited;
   typedef IRC_StateMachine_Registration inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler (const IRC_Client_Module_IRCHandler&))
@@ -139,10 +140,10 @@ class IRC_Client_Module_IRCHandler
 
   // helper methods
   IRC_Message* allocateMessage (unsigned int); // requested size
-  IRC_Record* allocateMessage (IRC_Record::CommandType); // command
+  struct IRC_Record* allocateMessage (IRC_Record::CommandType); // command
 
   // *NOTE*: "fire-and-forget" - the argument is consumed
-  void sendMessage (IRC_Record*&); // command handle
+  void sendMessage (struct IRC_Record*&); // command handle
 
   // convenient types
   typedef typename inherited::SUBSCRIBERS_T::iterator SUBSCRIBERS_ITERATOR_T;
@@ -168,10 +169,10 @@ class IRC_Client_Module_IRCHandler
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (IRC_Client_SessionData,                // session data type
-                              Stream_SessionMessageType,             // session event type
-                              IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
-                              IRC_Client_IStreamNotify_t,            // stream notification interface type
-                              IRC_Client_Module_IRCHandler);         // writer type
+DATASTREAM_MODULE_INPUT_ONLY (struct IRC_Client_SessionData,                // session data type
+                              enum Stream_SessionMessageType,               // session event type
+                              struct IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
+                              IRC_Client_IStreamNotify_t,                   // stream notification interface type
+                              IRC_Client_Module_IRCHandler);                // writer type
 
 #endif

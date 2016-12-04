@@ -108,7 +108,6 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 set (${PROJECT_NAME}_Protocol_EXE_SRCS
      stdafx.cpp
      stdafx.h
-     test_u_common.h
      test_u_common_modules.h
      test_u_connection_common.h
      test_u_connection_manager_common.h

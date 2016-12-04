@@ -520,7 +520,7 @@ do_work (bool requestBroadcastReplies_in,
 
   // step0c: initialize configuration and stream
   Test_U_DHCPClient_Configuration configuration;
-  configuration.userData.configuration = &configuration;
+  configuration.userData.configuration = &configuration.connectionConfiguration;
   configuration.userData.streamConfiguration =
       &configuration.streamConfiguration;
   configuration.useReactor = useReactor_in;
@@ -562,8 +562,6 @@ do_work (bool requestBroadcastReplies_in,
                 ACE_TEXT ("dynamic_cast<Test_U_Module_EventHandler> failed, returning\n")));
     return;
   } // end IF
-  event_handler_p->initialize (&CBData_in.subscribers,
-                               &CBData_in.subscribersLock);
   event_handler_p->subscribe (&ui_event_handler);
 
   Test_U_ConnectionManager_t* connection_manager_p =
@@ -618,6 +616,11 @@ do_work (bool requestBroadcastReplies_in,
   configuration.streamConfiguration.printFinalReport = true;
   configuration.streamConfiguration.statisticReportingInterval =
       statisticReportingInterval_in;
+
+  configuration.moduleHandlerConfiguration.printFinalReport = true;
+  configuration.moduleHandlerConfiguration.subscribersLock =
+      &CBData_in.subscribersLock;
+  configuration.moduleHandlerConfiguration.subscribers = &CBData_in.subscribers;
 
   // ********************** module configuration data **************************
   configuration.moduleConfiguration.streamConfiguration =
@@ -732,7 +735,7 @@ do_work (bool requestBroadcastReplies_in,
 
   // step0c: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  connection_manager_p->set (configuration,
+  connection_manager_p->set (configuration.connectionConfiguration,
                              &configuration.userData);
 
   // step0d: initialize regular (global) statistic reporting
@@ -819,7 +822,7 @@ do_work (bool requestBroadcastReplies_in,
   //         connection to the unicast address is handled by the discovery
   //         module
   configuration.streamConfiguration.module = NULL;
-  connection_manager_p->set (configuration,
+  connection_manager_p->set (configuration.connectionConfiguration,
                              &configuration.userData);
 
   ACE_OS::memset (buffer, 0, sizeof (buffer));
@@ -1125,11 +1128,11 @@ allocate:
 
     Test_U_OutboundConnectionStream& stream_r =
         const_cast<Test_U_OutboundConnectionStream&> (istream_connection_p->stream ());
-    const Test_U_StreamSessionData_t* session_data_container_p =
+    const Test_U_DHCPClient_SessionData_t* session_data_container_p =
         stream_r.get ();
     ACE_ASSERT (session_data_container_p);
-    Test_U_StreamSessionData& session_data_r =
-        const_cast<Test_U_StreamSessionData&> (session_data_container_p->get ());
+    Test_U_DHCPClient_SessionData& session_data_r =
+        const_cast<Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
     session_data_r.timeStamp = state_r.timeStamp;
     session_data_r.xid = DHCP_record.xid;
 

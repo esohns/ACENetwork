@@ -50,7 +50,7 @@ Test_U_EventHandler::~Test_U_EventHandler ()
 
 void
 Test_U_EventHandler::start (Stream_SessionId_t sessionID_in,
-                            const Test_U_StreamSessionData& sessionData_in)
+                            const Test_U_DHCPClient_SessionData& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::start"));
 
@@ -60,7 +60,7 @@ Test_U_EventHandler::start (Stream_SessionId_t sessionID_in,
   ACE_ASSERT (iterator == sessionDataMap_.end ());
 
   sessionDataMap_.insert (std::make_pair (sessionID_in,
-                                          &const_cast<Test_U_StreamSessionData&> (sessionData_in)));
+                                          &const_cast<Test_U_DHCPClient_SessionData&> (sessionData_in)));
 
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 

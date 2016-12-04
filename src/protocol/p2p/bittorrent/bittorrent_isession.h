@@ -30,12 +30,14 @@
 class ACE_Message_Block;
 
 template <typename AddressType,
-          typename ConnectionConfigurationType,
-          typename ConnectionStateType,
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
           typename StatisticContainerType,
           ////////////////////////////////
           typename SocketConfigurationType,
-          typename HandlerConfigurationType, // socket-
+          typename PeerHandlerConfigurationType, // peer socket-
+          typename TrackerHandlerConfigurationType, // tracker socket-
           ////////////////////////////////
           typename PeerStreamType,
           typename StreamStatusType,
@@ -44,11 +46,11 @@ template <typename AddressType,
           typename StateType>
 class BitTorrent_ISession_T
  : public Net_ISession_T<AddressType,
-                         ConnectionConfigurationType,
-                         ConnectionStateType,
+                         PeerConnectionConfigurationType,
+                         PeerConnectionStateType,
                          StatisticContainerType,
                          SocketConfigurationType,
-                         HandlerConfigurationType,
+                         PeerHandlerConfigurationType,
                          PeerStreamType,
                          StreamStatusType,
                          ConfigurationType,

@@ -43,7 +43,7 @@ struct BitTorrent_Client_GTK_CBData;
 
 typedef BitTorrent_Module_Streamer_T<ACE_MT_SYNCH,
                                      Common_TimePolicy_t,
-                                     struct BitTorrent_Client_ModuleHandlerConfiguration,
+                                     struct BitTorrent_Client_PeerModuleHandlerConfiguration,
                                      BitTorrent_Client_PeerControlMessage_t,
                                      BitTorrent_Client_PeerMessage_t,
                                      BitTorrent_Client_PeerSessionMessage_t> BitTorrent_Client_Streamer_t;
@@ -54,8 +54,8 @@ typedef BitTorrent_Module_Streamer_T<ACE_MT_SYNCH,
 //                              BitTorrent_Client_PeerControlMessage_t,
 //                              BitTorrent_Client_PeerMessage_t,
 //                              BitTorrent_Client_PeerSessionMessage,
-//                              struct BitTorrent_Client_ModuleHandlerConfiguration,
-//                              int,
+//                              struct BitTorrent_Client_PeerModuleHandlerConfiguration,
+//                              enum Stream_ControlType,
 //                              enum Stream_SessionMessageType,
 //                              struct BitTorrent_StreamState,
 //                              struct BitTorrent_Client_PeerSessionData,
@@ -66,25 +66,25 @@ typedef BitTorrent_Module_ParserH_T<ACE_MT_SYNCH,
                                     BitTorrent_Client_PeerControlMessage_t,
                                     BitTorrent_Client_PeerMessage_t,
                                     BitTorrent_Client_PeerSessionMessage_t,
-                                    struct BitTorrent_Client_ModuleHandlerConfiguration,
-                                    int,
+                                    struct BitTorrent_Client_PeerModuleHandlerConfiguration,
+                                    enum Stream_ControlType,
                                     enum Stream_SessionMessageType,
                                     struct BitTorrent_StreamState,
                                     struct BitTorrent_Client_PeerSessionData,
                                     BitTorrent_Client_PeerSessionData_t,
                                     BitTorrent_RuntimeStatistic_t> BitTorrent_Client_Parser_t;
 
-DATASTREAM_MODULE_DUPLEX (struct BitTorrent_Client_PeerSessionData,            // session data
-                          enum Stream_SessionMessageType,                      // session event type
-                          struct BitTorrent_Client_ModuleHandlerConfiguration, // module handler configuration type
-                          BitTorrent_INotify_t,                                // stream notification interface type
-                          BitTorrent_Client_Streamer_t,                        // reader type
-                          BitTorrent_Client_Parser_t,                          // writer type
-                          BitTorrent_Client_Marshal);                          // name
+DATASTREAM_MODULE_DUPLEX (struct BitTorrent_Client_PeerSessionData,                // session data
+                          enum Stream_SessionMessageType,                          // session event type
+                          struct BitTorrent_Client_PeerModuleHandlerConfiguration, // module handler configuration type
+                          BitTorrent_INotify_t,                                    // stream notification interface type
+                          BitTorrent_Client_Streamer_t,                            // reader type
+                          BitTorrent_Client_Parser_t,                              // writer type
+                          BitTorrent_Client_Marshal);                              // name
 
 typedef Stream_Module_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                    Common_TimePolicy_t,
-                                                   struct BitTorrent_Client_ModuleHandlerConfiguration,
+                                                   struct BitTorrent_Client_PeerModuleHandlerConfiguration,
                                                    BitTorrent_Client_PeerControlMessage_t,
                                                    BitTorrent_Client_PeerMessage_t,
                                                    BitTorrent_Client_PeerSessionMessage_t,
@@ -94,7 +94,7 @@ typedef Stream_Module_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                    BitTorrent_Client_PeerSessionData_t> BitTorrent_Client_StatisticReport_ReaderTask_t;
 typedef Stream_Module_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                    Common_TimePolicy_t,
-                                                   struct BitTorrent_Client_ModuleHandlerConfiguration,
+                                                   struct BitTorrent_Client_PeerModuleHandlerConfiguration,
                                                    BitTorrent_Client_PeerControlMessage_t,
                                                    BitTorrent_Client_PeerMessage_t,
                                                    BitTorrent_Client_PeerSessionMessage_t,
@@ -103,13 +103,13 @@ typedef Stream_Module_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                    struct BitTorrent_Client_PeerSessionData,
                                                    BitTorrent_Client_PeerSessionData_t> BitTorrent_Client_StatisticReport_WriterTask_t;
 
-DATASTREAM_MODULE_DUPLEX (struct BitTorrent_Client_PeerSessionData,            // session data
-                          enum Stream_SessionMessageType,                      // session event type
-                          struct BitTorrent_Client_ModuleHandlerConfiguration, // module handler configuration type
-                          BitTorrent_INotify_t,                                // stream notification interface type
-                          BitTorrent_Client_StatisticReport_ReaderTask_t,      // reader type
-                          BitTorrent_Client_StatisticReport_WriterTask_t,      // writer type
-                          BitTorrent_Client_StatisticReport);                  // name
+DATASTREAM_MODULE_DUPLEX (struct BitTorrent_Client_PeerSessionData,                // session data
+                          enum Stream_SessionMessageType,                          // session event type
+                          struct BitTorrent_Client_PeerModuleHandlerConfiguration, // module handler configuration type
+                          BitTorrent_INotify_t,                                    // stream notification interface type
+                          BitTorrent_Client_StatisticReport_ReaderTask_t,          // reader type
+                          BitTorrent_Client_StatisticReport_WriterTask_t,          // writer type
+                          BitTorrent_Client_StatisticReport);                      // name
 
 //////////////////////////////////////////
 

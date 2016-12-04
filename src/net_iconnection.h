@@ -179,7 +179,7 @@ template <typename AddressType,
           typename StatisticContainerType,
           ////////////////////////////////
           typename SocketConfigurationType,
-          typename HandlerConfigurationType,
+          typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename PeerStreamType,
           typename StreamStatusType,

@@ -489,8 +489,6 @@ do_work (unsigned int maximumNumberOfConnections_in,
                 ACE_TEXT ("dynamic_cast<Test_U_Module_EventHandler> failed, returning\n")));
     return;
   } // end IF
-  event_handler_p->initialize (&CBData_in.subscribers,
-                               &CBData_in.subscribersLock);
   event_handler_p->subscribe (&ui_event_handler);
 
   Stream_AllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator;
@@ -521,7 +519,15 @@ do_work (unsigned int maximumNumberOfConnections_in,
   configuration.streamConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
   configuration.streamConfiguration.userData = &configuration.userData;
-  configuration.userData.configuration = &configuration;
+  configuration.userData.configuration = &configuration.connectionConfiguration;
+
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.printFinalReport =
+      true;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribersLock =
+      &CBData_in.subscribersLock;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribers =
+      &CBData_in.subscribers;
+
   // ********************** socket configuration data **************************
   // ****************** socket handler configuration data **********************
   configuration.socketHandlerConfiguration.messageAllocator =
@@ -628,10 +634,13 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end IF
 
   // step3: initialize connection manager
-  TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->initialize (maximumNumberOfConnections_in);
   Test_U_UserData user_data;
-  TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->set (configuration,
-                                                        &user_data);
+  Test_U_InetConnectionManager_t* connection_manager_p =
+      TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
+  connection_manager_p->initialize (maximumNumberOfConnections_in);
+  connection_manager_p->set (configuration.connectionConfiguration,
+                             &user_data);
 
   // step4: handle events (signals, incoming connections/data, timers, ...)
   // reactor/proactor event loop:
@@ -741,8 +750,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   else
     configuration.listenerConfiguration.address.set_port_number (listeningPortNumber_in,
                                                                  1);
-  configuration.listenerConfiguration.connectionManager =
-    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  configuration.listenerConfiguration.connectionManager = connection_manager_p;
   configuration.listenerConfiguration.socketHandlerConfiguration =
     &configuration.socketHandlerConfiguration;
   //configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;

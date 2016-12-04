@@ -21,6 +21,8 @@
 #ifndef TEST_U_CONFIGURATION_H
 #define TEST_U_CONFIGURATION_H
 
+#include <list>
+
 #include <ace/INET_Addr.h>
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 #include <ace/Netlink_Addr.h>
@@ -29,6 +31,7 @@
 
 #include "stream_common.h"
 #include "stream_iallocator.h"
+#include "stream_isessionnotify.h"
 
 #include "net_configuration.h"
 #include "net_defines.h"
@@ -37,15 +40,21 @@
 #include "net_server_defines.h"
 
 #include "test_u_common.h"
+#include "test_u_stream_common.h"
+
+#include "test_u_connection_common.h"
 
 // forward declarations
-struct Test_U_Configuration;
+//struct Test_U_ConnectionConfiguration;
 struct Test_U_ConnectionState;
+class Test_U_Message;
+class Test_U_SessionMessage;
+
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 Test_U_Configuration,
-                                 Test_U_ConnectionState,
+                                 struct Test_U_ConnectionConfiguration,
+                                 struct Test_U_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 Test_U_UserData> Test_U_IInetConnectionManager_t;
+                                 struct Test_U_UserData> Test_U_IInetConnectionManager_t;
 
 struct Test_U_ProtocolConfiguration
 {
@@ -62,25 +71,34 @@ struct Test_U_ProtocolConfiguration
   bool           printPongMessages;
 };
 
+typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
+                                    struct Test_U_StreamSessionData,
+                                    enum Stream_SessionMessageType,
+                                    Test_U_Message,
+                                    Test_U_SessionMessage> Test_U_ISessionNotify_t;
+typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
+typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
+
 struct Test_U_ModuleHandlerConfiguration
- : public Stream_ModuleHandlerConfiguration
+ : Stream_ModuleHandlerConfiguration
 {
   inline Test_U_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    , inbound (false)
-   , printFinalReport (true)
    , printProgressDot (false)
    , pushStatisticMessages (true)
    , sessionData (NULL)
+   , subscribers (NULL)
   {};
 
-  bool                inbound; // statistic/IO module
-  bool                printFinalReport; // statistic module
-  bool                printProgressDot; // file writer module
-  bool                pushStatisticMessages; // statistic module
+  bool                             inbound; // statistic/IO module
+  bool                             printProgressDot; // file writer module
+  bool                             pushStatisticMessages; // statistic module
 
   // *TODO*: remove this (--> session message data)
-  Stream_SessionData* sessionData;
+  struct Test_U_StreamSessionData* sessionData;
+
+  Test_U_Subscribers_t*            subscribers;
 };
 
 struct Test_U_StreamConfiguration
@@ -89,6 +107,7 @@ struct Test_U_StreamConfiguration
   inline Test_U_StreamConfiguration ()
    : Stream_Configuration ()
    , moduleConfiguration_2 ()
+   , moduleHandlerConfiguration (NULL)
    , moduleHandlerConfiguration_2 ()
    , protocolConfiguration (NULL)
    , userData (NULL)
@@ -96,32 +115,36 @@ struct Test_U_StreamConfiguration
     bufferSize = NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
   };
 
-  Stream_ModuleConfiguration        moduleConfiguration_2;        // module configuration
-  Test_U_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration
-  Test_U_ProtocolConfiguration*     protocolConfiguration;        // protocol configuration
+  struct Stream_ModuleConfiguration         moduleConfiguration_2;        // module configuration
+  struct Test_U_ModuleHandlerConfiguration* moduleHandlerConfiguration;   // module handler configuration
+  struct Test_U_ModuleHandlerConfiguration  moduleHandlerConfiguration_2; // module handler configuration
+  struct Test_U_ProtocolConfiguration*      protocolConfiguration;        // protocol configuration
 
-  Test_U_UserData*                  userData;                     // user data
+  struct Test_U_UserData*                   userData;                     // user data
 };
 
+//struct Test_U_ConnectionConfiguration;
 struct Test_U_Configuration
 {
   inline Test_U_Configuration ()
    : socketConfiguration ()
    , socketHandlerConfiguration ()
+   , connectionConfiguration ()
    , streamConfiguration ()
    , protocolConfiguration ()
    , userData ()
   {};
 
   // **************************** socket data **********************************
-  Net_SocketConfiguration           socketConfiguration;
-  Test_U_SocketHandlerConfiguration socketHandlerConfiguration;
+  struct Net_SocketConfiguration           socketConfiguration;
+  struct Test_U_SocketHandlerConfiguration socketHandlerConfiguration;
+  struct Test_U_ConnectionConfiguration    connectionConfiguration;
   // **************************** stream data **********************************
-  Test_U_StreamConfiguration        streamConfiguration;
+  struct Test_U_StreamConfiguration        streamConfiguration;
   // *************************** protocol data *********************************
-  Test_U_ProtocolConfiguration      protocolConfiguration;
+  struct Test_U_ProtocolConfiguration      protocolConfiguration;
 
-  Test_U_UserData                   userData;
+  struct Test_U_UserData                   userData;
 };
 
 #endif

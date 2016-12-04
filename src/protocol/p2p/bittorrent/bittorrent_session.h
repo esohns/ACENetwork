@@ -39,9 +39,11 @@
 // forward declarations
 class ACE_Message_Block;
 
-template <typename HandlerConfigurationType, // socket-
-          typename ConnectionConfigurationType,
-          typename ConnectionStateType,
+template <typename PeerHandlerConfigurationType, // socket-
+          typename TrackerHandlerConfigurationType, // socket-
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
           ////////////////////////////////
           typename PeerStreamType,
           typename TrackerStreamType,
@@ -53,34 +55,38 @@ template <typename HandlerConfigurationType, // socket-
           typename PeerConnectionType,
           typename TrackerConnectionType,
           ////////////////////////////////
-          typename ConnectionManagerType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
           typename PeerConnectorType,
           typename TrackerConnectorType,
           ////////////////////////////////
           typename ConfigurationType,
           typename StateType,
           ////////////////////////////////
-          typename UserDataType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
           ////////////////////////////////
           typename CBDataType> // ui feedback data type
 class BitTorrent_Session_T
  : public Net_SessionBase_T<ACE_INET_Addr,
-                            ConnectionConfigurationType,
-                            ConnectionStateType,
+                            PeerConnectionConfigurationType,
+                            PeerConnectionStateType,
                             BitTorrent_RuntimeStatistic_t,
                             struct Net_SocketConfiguration,
-                            HandlerConfigurationType,
+                            PeerHandlerConfigurationType,
                             typename PeerConnectionType::ICONNECTION_T,
-                            ConnectionManagerType,
+                            PeerConnectionManagerType,
                             PeerConnectorType,
                             ConfigurationType,
                             StateType,
                             BitTorrent_ISession_T<ACE_INET_Addr,
-                                                  ConnectionConfigurationType,
-                                                  ConnectionStateType,
+                                                  PeerConnectionConfigurationType,
+                                                  TrackerConnectionConfigurationType,
+                                                  PeerConnectionStateType,
                                                   BitTorrent_RuntimeStatistic_t,
                                                   struct Net_SocketConfiguration,
-                                                  HandlerConfigurationType,
+                                                  PeerHandlerConfigurationType,
+                                                  TrackerHandlerConfigurationType,
                                                   PeerStreamType,
                                                   StreamStatusType,
                                                   ConfigurationType,
@@ -88,6 +94,7 @@ class BitTorrent_Session_T
 {
  public:
   // convenient types
+  typedef typename TrackerConnectionType::ICONNECTION_T ITRACKER_CONNECTION_T;
   typedef typename PeerConnectionType::ISTREAM_CONNECTION_T ISTREAM_CONNECTION_T;
   typedef typename TrackerConnectionType::ISTREAM_CONNECTION_T ITRACKER_STREAM_CONNECTION_T;
 
@@ -100,24 +107,30 @@ class BitTorrent_Session_T
   virtual void trackerConnect (const ACE_INET_Addr&);
   inline virtual void trackerDisconnect (const ACE_INET_Addr& address_in) { inherited::disconnect (address_in); };
 
+ protected:
+  TrackerConnectionManagerType*    trackerConnectionManager_;
+  TrackerHandlerConfigurationType* trackerHandlerConfiguration_;
+
  private:
   typedef Net_SessionBase_T<ACE_INET_Addr,
-                            ConnectionConfigurationType,
-                            ConnectionStateType,
+                            PeerConnectionConfigurationType,
+                            PeerConnectionStateType,
                             BitTorrent_RuntimeStatistic_t,
                             struct Net_SocketConfiguration,
-                            HandlerConfigurationType,
+                            PeerHandlerConfigurationType,
                             typename PeerConnectionType::ICONNECTION_T,
-                            ConnectionManagerType,
+                            PeerConnectionManagerType,
                             PeerConnectorType,
                             ConfigurationType,
                             StateType,
                             BitTorrent_ISession_T<ACE_INET_Addr,
-                                                  ConnectionConfigurationType,
-                                                  ConnectionStateType,
+                                                  PeerConnectionConfigurationType,
+                                                  TrackerConnectionConfigurationType,
+                                                  PeerConnectionStateType,
                                                   BitTorrent_RuntimeStatistic_t,
                                                   struct Net_SocketConfiguration,
-                                                  HandlerConfigurationType,
+                                                  PeerHandlerConfigurationType,
+                                                  TrackerHandlerConfigurationType,
                                                   PeerStreamType,
                                                   StreamStatusType,
                                                   ConfigurationType,
@@ -169,11 +182,11 @@ class BitTorrent_Session_T
                                          TRACKER_MESSAGEHANDLER_T> TRACKER_MESSAGEHANDLER_MODULE_T;
 
   typedef BitTorrent_PeerStreamHandler_T<typename PeerStreamType::SESSION_DATA_T,
-                                         UserDataType,
+                                         PeerUserDataType,
                                          typename inherited::ISESSION_T,
                                          CBDataType> PEER_HANDLER_T;
   typedef BitTorrent_TrackerStreamHandler_T<typename TrackerStreamType::SESSION_DATA_T,
-                                            UserDataType,
+                                            TrackerUserDataType,
                                             typename inherited::ISESSION_T,
                                             CBDataType> TRACKER_HANDLER_T;
 

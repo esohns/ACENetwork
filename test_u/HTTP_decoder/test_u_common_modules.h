@@ -26,6 +26,7 @@
 #include "common_time_common.h"
 
 #include "stream_common.h"
+#include "stream_session_data.h"
 #include "stream_streammodule_base.h"
 
 #include "stream_file_sink.h"
@@ -37,25 +38,30 @@
 //#include "http_module_bisector.h"
 #include "http_module_parser.h"
 #include "http_module_streamer.h"
-//#include "http_stream_common.h"
 
 #include "test_u_common.h"
+#include "test_u_message.h"
+#include "test_u_session_message.h"
+#include "test_u_stream_common.h"
 
 // forward declarations
-class Test_U_SessionMessage;
-class Test_U_Message;
+struct Test_U_HTTPDecoder_SessionData;
+typedef Stream_SessionData_T<struct Test_U_HTTPDecoder_SessionData> Test_U_HTTPDecoder_SessionData_t;
+class ACE_Message_Block;
+//class Test_U_Message;
+//class Test_U_SessionMessage;
 
 // declare module(s)
 //typedef HTTP_Module_Bisector_T<ACE_SYNCH_MUTEX,
-//                              ACE_MT_SYNCH,
-//                              Common_TimePolicy_t,
-//                              Test_U_SessionMessage,
-//                              Test_U_Message,
-//                              HTTP_ModuleHandlerConfiguration,
-//                              HTTP_StreamState,
-//                              HTTP_Stream_SessionData,
-//                              HTTP_Stream_SessionData_t,
-//                              HTTP_RuntimeStatistic_t> HTTP_Module_Bisector_t;
+//                               ACE_MT_SYNCH,
+//                               Common_TimePolicy_t,
+//                               Test_U_SessionMessage,
+//                               Test_U_Message,
+//                               struct HTTP_ModuleHandlerConfiguration,
+//                               struct HTTP_StreamState,
+//                               struct Test_U_HTTPDecoder_SessionData,
+//                               Test_U_HTTPDecoder_SessionData_t,
+//                               HTTP_RuntimeStatistic_t> HTTP_Module_Bisector_t;
 typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
                              struct Test_U_ModuleHandlerConfiguration,
@@ -77,8 +83,8 @@ typedef Stream_Module_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                    Test_U_SessionMessage,
                                                    HTTP_Method_t,
                                                    HTTP_RuntimeStatistic_t,
-                                                   struct Test_U_StreamSessionData,
-                                                   Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_ReaderTask_t;
+                                                   struct Test_U_HTTPDecoder_SessionData,
+                                                   Test_U_HTTPDecoder_SessionData_t> Test_U_Module_StatisticReport_ReaderTask_t;
 typedef Stream_Module_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                    Common_TimePolicy_t,
                                                    struct Test_U_ModuleHandlerConfiguration,
@@ -87,8 +93,8 @@ typedef Stream_Module_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                    Test_U_SessionMessage,
                                                    HTTP_Method_t,
                                                    HTTP_RuntimeStatistic_t,
-                                                   struct Test_U_StreamSessionData,
-                                                   Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_WriterTask_t;
+                                                   struct Test_U_HTTPDecoder_SessionData,
+                                                   Test_U_HTTPDecoder_SessionData_t> Test_U_Module_StatisticReport_WriterTask_t;
 
 typedef Stream_Module_FileWriter_T<ACE_MT_SYNCH,
                                    Common_TimePolicy_t,
@@ -96,22 +102,22 @@ typedef Stream_Module_FileWriter_T<ACE_MT_SYNCH,
                                    ACE_Message_Block,
                                    Test_U_Message,
                                    Test_U_SessionMessage,
-                                   struct Test_U_StreamSessionData> Test_U_Module_FileWriter;
+                                   struct Test_U_HTTPDecoder_SessionData> Test_U_Module_FileWriter;
 
 // declare module(s)
-//DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                    // task synch type
-//                              Common_TimePolicy_t,             // time policy
-//                              Stream_ModuleConfiguration,      // module configuration type
-//                              HTTP_ModuleHandlerConfiguration, // module handler configuration type
-//                              Test_U_Module_Parser);           // writer type
-//DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                   // task synch type
-//                          Common_TimePolicy_t,            // time policy
-//                          Stream_ModuleConfiguration,     // module configuration type
-//                          HTTP_ModuleHandlerConfiguration, // module handler configuration type
-//                          HTTP_Module_Streamer,            // reader type
-//                          HTTP_Module_Bisector_t,          // writer type
-//                          HTTP_Module_Marshal);            // name
-DATASTREAM_MODULE_DUPLEX (struct Test_U_StreamSessionData,          // session data type
+//DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                           // task synch type
+//                              Common_TimePolicy_t,                    // time policy
+//                              struct Stream_ModuleConfiguration,      // module configuration type
+//                              struct HTTP_ModuleHandlerConfiguration, // module handler configuration type
+//                              Test_U_Module_Parser);                  // writer type
+//DATASTREAM_MODULE_DUPLEX (ACE_MT_SYNCH,                           // task synch type
+//                          Common_TimePolicy_t,                    // time policy
+//                          struct Stream_ModuleConfiguration,      // module configuration type
+//                          struct HTTP_ModuleHandlerConfiguration, // module handler configuration type
+//                          HTTP_Module_Streamer,                   // reader type
+//                          HTTP_Module_Bisector_t,                 // writer type
+//                          HTTP_Module_Marshal);                   // name
+DATASTREAM_MODULE_DUPLEX (struct Test_U_HTTPDecoder_SessionData,    // session data type
                           enum Stream_SessionMessageType,           // session event type
                           struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
                           Test_U_IStreamNotify_t,                   // stream notification interface type
@@ -119,7 +125,7 @@ DATASTREAM_MODULE_DUPLEX (struct Test_U_StreamSessionData,          // session d
                           Test_U_Module_Parser,                     // writer type
                           Test_U_Module_Marshal);                   // name
 
-DATASTREAM_MODULE_DUPLEX (struct Test_U_StreamSessionData,            // session data type
+DATASTREAM_MODULE_DUPLEX (struct Test_U_HTTPDecoder_SessionData,      // session data type
                           enum Stream_SessionMessageType,             // session event type
                           struct Test_U_ModuleHandlerConfiguration,   // module handler configuration type
                           Test_U_IStreamNotify_t,                     // stream notification interface type
@@ -127,7 +133,7 @@ DATASTREAM_MODULE_DUPLEX (struct Test_U_StreamSessionData,            // session
                           Test_U_Module_StatisticReport_WriterTask_t, // writer type
                           Test_U_Module_StatisticReport);             // name
 
-DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_HTTPDecoder_SessionData,    // session data type
                               enum Stream_SessionMessageType,           // session event type
                               struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
                               Test_U_IStreamNotify_t,                   // stream notification interface type

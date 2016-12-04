@@ -134,7 +134,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r              : use reactor [")
-            << IRC_CLIENT_DEFAULT_USE_REACTOR
+            << NET_EVENT_USE_REACTOR
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]      : reporting interval (seconds) [0: off] [")
@@ -225,7 +225,7 @@ do_processArguments (int argc_in,
   phonebookFile_out             +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
 
-  useReactor_out                 = IRC_CLIENT_DEFAULT_USE_REACTOR;
+  useReactor_out                 = NET_EVENT_USE_REACTOR;
 
   statisticReportingInterval_out =
     IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
@@ -444,7 +444,7 @@ do_initializeSignals (bool useReactor_in,
 void
 do_work (bool useThreadPool_in,
          unsigned int numberOfDispatchThreads_in,
-         IRC_Client_GTK_CBData& userData_in,
+         IRC_Client_GTK_CBData& CBData_in,
          const std::string& UIDefinitionFile_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
@@ -454,17 +454,17 @@ do_work (bool useThreadPool_in,
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   // sanity check(s)
-  ACE_ASSERT (userData_in.configuration);
+  ACE_ASSERT (CBData_in.configuration);
 
   // step1: initialize IRC handler module
-  userData_in.configuration->moduleHandlerConfiguration.streamConfiguration =
-      &userData_in.configuration->streamConfiguration;
-  userData_in.configuration->moduleHandlerConfiguration.protocolConfiguration =
-      &userData_in.configuration->protocolConfiguration;
-  userData_in.configuration->streamConfiguration.moduleHandlerConfiguration =
-      &userData_in.configuration->moduleHandlerConfiguration;
-  userData_in.configuration->streamConfiguration.moduleConfiguration =
-      &userData_in.configuration->moduleConfiguration;
+  CBData_in.configuration->moduleHandlerConfiguration.streamConfiguration =
+      &CBData_in.configuration->streamConfiguration;
+  CBData_in.configuration->moduleHandlerConfiguration.protocolConfiguration =
+      &CBData_in.configuration->protocolConfiguration;
+  CBData_in.configuration->streamConfiguration.moduleHandlerConfiguration =
+      &CBData_in.configuration->moduleHandlerConfiguration;
+  CBData_in.configuration->streamConfiguration.moduleConfiguration =
+      &CBData_in.configuration->moduleConfiguration;
   IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
                                                    NULL,
                                                    true);
@@ -477,25 +477,25 @@ do_work (bool useThreadPool_in,
                 ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
     return;
   } // end IF
-  if (!IRCHandler_impl_p->initialize (userData_in.configuration->moduleHandlerConfiguration))
+  if (!IRCHandler_impl_p->initialize (CBData_in.configuration->moduleHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::initialize(), returning\n")));
     return;
   } // end IF
-  userData_in.configuration->streamConfiguration.module = &IRC_handler;
-  userData_in.configuration->streamConfiguration.cloneModule = true;
+  CBData_in.configuration->streamConfiguration.module = &IRC_handler;
+  CBData_in.configuration->streamConfiguration.cloneModule = true;
 
   // step2: initialize event dispatch
   struct Common_DispatchThreadData thread_data;
   thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data.useReactor = userData_in.configuration->useReactor;
-  if (!Common_Tools::initializeEventDispatch (userData_in.configuration->useReactor,
+  thread_data.useReactor = CBData_in.configuration->useReactor;
+  if (!Common_Tools::initializeEventDispatch (CBData_in.configuration->useReactor,
                                               (thread_data.numberOfDispatchThreads > 1),
                                               thread_data.numberOfDispatchThreads,
                                               thread_data.proactorType,
                                               thread_data.reactorType,
-                                              userData_in.configuration->streamConfiguration.serializeOutput))
+                                              CBData_in.configuration->streamConfiguration.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize event dispatch, returning\n")));
@@ -507,8 +507,8 @@ do_work (bool useThreadPool_in,
       IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  connection_manager_p->set (*userData_in.configuration,
-                             userData_in.configuration->userData);
+  connection_manager_p->set (CBData_in.configuration->connectionConfiguration,
+                             CBData_in.configuration->userData);
 
   // step3b: initialize timer manager
   Common_Timer_Manager_t* timer_manager_p =
@@ -549,11 +549,11 @@ do_work (bool useThreadPool_in,
   // [- signal timer expiration to perform server queries] (see above)
 
   // step5: start GTK event loop
-  userData_in.GTKState.initializationHook = idle_initialize_UI_cb;
-  userData_in.GTKState.finalizationHook = idle_finalize_UI_cb;
-  userData_in.GTKState.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
+  CBData_in.GTKState.initializationHook = idle_initialize_UI_cb;
+  CBData_in.GTKState.finalizationHook = idle_finalize_UI_cb;
+  CBData_in.GTKState.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
     std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
-  userData_in.GTKState.userData = &userData_in;
+  CBData_in.GTKState.userData = &CBData_in;
 
   COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
   ACE_Time_Value one_second (1, 0);
@@ -590,7 +590,7 @@ do_work (bool useThreadPool_in,
   // *NOTE*: from this point on, clean up any remote connections !
 
   // step7: dispatch events
-  Common_Tools::dispatchEvents (userData_in.configuration->useReactor,
+  Common_Tools::dispatchEvents (CBData_in.configuration->useReactor,
                                 group_id);
 
   // step8: clean up
@@ -1139,7 +1139,7 @@ ACE_TMAIN (int argc_in,
   phonebook_file_name                       +=
       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
 
-  bool use_reactor                           = IRC_CLIENT_DEFAULT_USE_REACTOR;
+  bool use_reactor                           = NET_EVENT_USE_REACTOR;
 
   unsigned int reporting_interval            =
     IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
@@ -1314,7 +1314,7 @@ ACE_TMAIN (int argc_in,
   IRC_Client_Configuration configuration;
   IRC_Client_UserData user_data;
 
-  user_data.configuration = &configuration;
+  user_data.configuration = &configuration.connectionConfiguration;
 
   ////////////////////// socket handler configuration //////////////////////////
   configuration.socketHandlerConfiguration.socketConfiguration =

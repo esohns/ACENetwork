@@ -42,7 +42,7 @@
 #include "IRC_client_stream_common.h"
 
 // forward declarations
-struct IRC_Client_Configuration;
+struct IRC_Client_ConnectionConfiguration;
 struct IRC_Client_CursesState;
 struct IRC_Client_SessionState;
 class IRC_Record;
@@ -52,15 +52,15 @@ class IRC_SessionMessage;
 struct IRC_Stream_SessionData;
 struct IRC_Client_UserData;
 //typedef Net_IConnection_T<ACE_INET_Addr,
-//                          IRC_Client_Configuration,
-//                          IRC_Client_ConnectionState,
+//                          struct IRC_Client_ConnectionConfiguration,
+//                          struct IRC_Client_ConnectionState,
 //                          IRC_Client_RuntimeStatistic_t,
 //                          IRC_Client_Stream> IRC_Client_IConnection_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 IRC_Client_Configuration,
-                                 IRC_Client_SessionState,
+                                 struct IRC_Client_ConnectionConfiguration,
+                                 struct IRC_Client_SessionState,
                                  IRC_RuntimeStatistic_t,
-                                 IRC_Client_UserData> IRC_Client_IConnection_Manager_t;
+                                 struct IRC_Client_UserData> IRC_Client_IConnection_Manager_t;
 
 //struct IRC_Client_ConnectorConfiguration
 //{
@@ -71,9 +71,9 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 //   //, statisticCollectionInterval (0)
 //  {};
 //
-//  //IRC_Client_Configuration*              configuration;
+//  //struct IRC_Client_Configuration*              configuration;
 //  IRC_Client_IConnection_Manager_t*      connectionManager;
-//  IRC_Client_SocketHandlerConfiguration* socketHandlerConfiguration;
+//  struct IRC_Client_SocketHandlerConfiguration* socketHandlerConfiguration;
 //  unsigned int                           statisticCollectionInterval; // statistics collecting interval (second(s)) [0: off]
 //};
 
@@ -86,7 +86,7 @@ struct IRC_Client_SocketHandlerConfiguration
    , userData (NULL)
   {};
 
-  IRC_Client_UserData* userData;
+  struct IRC_Client_UserData* userData;
 };
 
 struct IRC_Client_ModuleHandlerConfiguration
@@ -96,12 +96,15 @@ struct IRC_Client_ModuleHandlerConfiguration
    : IRC_ModuleHandlerConfiguration ()
    ///////////////////////////////////////
    , subscriber (NULL)
+   , subscribers (NULL)
    , userData (NULL)
   {};
 
   /* handler */
   IRC_Client_ISessionNotify_t* subscriber; // (initial) subscriber
-  IRC_Client_UserData*         userData;
+  IRC_Client_ISubscribers_t*   subscribers;
+
+  struct IRC_Client_UserData*  userData;
 };
 
 struct IRC_Client_StreamConfiguration
@@ -117,11 +120,11 @@ struct IRC_Client_StreamConfiguration
     bufferSize = IRC_BUFFER_SIZE;
   };
 
-  Stream_ModuleConfiguration*            moduleConfiguration;        // stream module configuration
-  IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration; // module handler configuration
-  IRC_ProtocolConfiguration*             protocolConfiguration;      // protocol configuration
+  struct Stream_ModuleConfiguration*            moduleConfiguration;        // stream module configuration
+  struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration; // module handler configuration
+  struct IRC_ProtocolConfiguration*             protocolConfiguration;      // protocol configuration
 
-  IRC_Client_UserData*                   userData;
+  struct IRC_Client_UserData*                   userData;
 };
 
 struct IRC_Client_InputHandlerConfiguration
@@ -131,8 +134,8 @@ struct IRC_Client_InputHandlerConfiguration
    , streamConfiguration (NULL)
   {};
 
-  IRC_IControl*         controller;
-  Stream_Configuration* streamConfiguration;
+  IRC_IControl*                controller;
+  struct Stream_Configuration* streamConfiguration;
 };
 
 struct IRC_Client_Configuration
@@ -140,6 +143,7 @@ struct IRC_Client_Configuration
   inline IRC_Client_Configuration ()
    : socketConfiguration ()
    , socketHandlerConfiguration ()
+   , connectionConfiguration ()
    ///////////////////////////////////////
    , streamConfiguration ()
    , userData ()
@@ -150,29 +154,30 @@ struct IRC_Client_Configuration
    , encoding (IRC_PRT_DEFAULT_ENCODING)
    , groupID (COMMON_EVENT_THREAD_GROUP_ID)
    , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
-   , useReactor (IRC_CLIENT_DEFAULT_USE_REACTOR)
+   , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
   // ****************************** socket *************************************
-  Net_SocketConfiguration               socketConfiguration;
-  IRC_Client_SocketHandlerConfiguration socketHandlerConfiguration;
+  struct Net_SocketConfiguration               socketConfiguration;
+  struct IRC_Client_SocketHandlerConfiguration socketHandlerConfiguration;
+  struct IRC_Client_ConnectionConfiguration    connectionConfiguration;
   // ****************************** stream *************************************
-  Stream_ModuleConfiguration            moduleConfiguration;
-  IRC_Client_ModuleHandlerConfiguration moduleHandlerConfiguration;
-  IRC_Client_StreamConfiguration        streamConfiguration;
-  IRC_Client_UserData*                  userData;
+  struct Stream_ModuleConfiguration            moduleConfiguration;
+  struct IRC_Client_ModuleHandlerConfiguration moduleHandlerConfiguration;
+  struct IRC_Client_StreamConfiguration        streamConfiguration;
+  struct IRC_Client_UserData*                  userData;
   // ***************************** protocol ************************************
-  IRC_ProtocolConfiguration             protocolConfiguration;
+  struct IRC_ProtocolConfiguration             protocolConfiguration;
   // ***************************************************************************
   // *TODO*: move this somewhere else
-  IRC_Client_CursesState*               cursesState;
+  struct IRC_Client_CursesState*               cursesState;
   // *NOTE*: see also https://en.wikipedia.org/wiki/Internet_Relay_Chat#Character_encoding
   // *TODO*: implement support for 7-bit ASCII (as it is the most compatible
   //         encoding)
-  IRC_CharacterEncoding                 encoding;
-  int                                   groupID;
-  bool                                  logToFile;
-  bool                                  useReactor;
+  enum IRC_CharacterEncoding                   encoding;
+  int                                          groupID;
+  bool                                         logToFile;
+  bool                                         useReactor;
 };
 
 #endif

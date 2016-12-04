@@ -41,18 +41,23 @@
 #include "bittorrent_client_stream_common.h"
 
 // forward declaration(s)
-struct BitTorrent_Client_Configuration;
-struct BitTorrent_Client_ConnectionState;
+struct BitTorrent_Client_PeerConnectionConfiguration;
+struct BitTorrent_Client_PeerConnectionState;
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          struct BitTorrent_Client_Configuration,
-                          struct BitTorrent_Client_ConnectionState,
-                          BitTorrent_RuntimeStatistic_t> BitTorrent_Client_IConnection_t;
+                          struct BitTorrent_Client_PeerConnectionConfiguration,
+                          struct BitTorrent_Client_PeerConnectionState,
+                          BitTorrent_RuntimeStatistic_t> BitTorrent_Client_IPeerConnection_t;
+//typedef Net_IConnection_T<ACE_INET_Addr,
+//                          struct BitTorrent_Client_TrackerConnectionConfiguration,
+//                          struct BitTorrent_Client_ConnectionState,
+//                          BitTorrent_RuntimeStatistic_t> BitTorrent_Client_ITrackerConnection_t;
 template <typename SessionInterfaceType,
           typename ConnectionType,
           typename ConnectionCBDataType>
 class BitTorrent_Client_GUI_Session_T;
+struct BitTorrent_Client_GTK_SessionCBData;
 typedef BitTorrent_Client_GUI_Session_T<BitTorrent_Client_ISession_t,
-                                        BitTorrent_Client_IConnection_t,
+                                        BitTorrent_Client_IPeerConnection_t,
                                         struct BitTorrent_Client_GTK_SessionCBData> BitTorrent_Client_GUI_Session_t;
 
 typedef std::map<std::string, BitTorrent_Client_GUI_Session_t*> BitTorrent_Client_GUI_Sessions_t;
@@ -90,6 +95,8 @@ struct BitTorrent_Client_GTK_CBData
    , controller (NULL)
    , progressData ()
    , sessions ()
+   , subscribers ()
+   , trackerSubscribers ()
    , UIFileDirectory ()
   {};
 
@@ -98,6 +105,8 @@ struct BitTorrent_Client_GTK_CBData
   BitTorrent_Client_IControl_t*             controller;
   struct BitTorrent_Client_GTK_ProgressData progressData;
   BitTorrent_Client_GUI_Sessions_t          sessions;
+  BitTorrent_Client_IPeerSubscribers_t      subscribers;
+  BitTorrent_Client_ITrackerSubscribers_t   trackerSubscribers;
   std::string                               UIFileDirectory;
 };
 

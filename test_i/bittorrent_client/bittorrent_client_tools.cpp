@@ -35,7 +35,8 @@
 #include "bittorrent_client_defines.h"
 
 ACE_HANDLE
-BitTorrent_Client_Tools::connect (BitTorrent_Client_IConnector_t& connector_in,
+BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnector_in,
+                                  BitTorrent_Client_ITrackerConnector_t& trackerConnector_in,
                                   const ACE_INET_Addr& address_in,
                                   bool cloneModule_in,
                                   bool deleteModule_in,
@@ -47,35 +48,67 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IConnector_t& connector_in,
   ACE_HANDLE return_value = ACE_INVALID_HANDLE;
 
   int result = -1;
-  BitTorrent_Client_Configuration* configuration_p = NULL;
-  BitTorrent_Client_UserData* user_data_p = NULL;
+  struct BitTorrent_Client_PeerConnectionConfiguration* peer_configuration_p =
+      NULL;
+  struct BitTorrent_Client_PeerUserData* peer_user_data_p = NULL;
+  struct BitTorrent_Client_TrackerConnectionConfiguration* tracker_configuration_p =
+      NULL;
+  struct BitTorrent_Client_TrackerUserData* tracker_user_data_p = NULL;
 
   // step0: retrive default configuration
-  BitTorrent_Client_IConnection_Manager_t* connection_manager_p =
-    BITTORRENT_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (connection_manager_p);
-  connection_manager_p->get (configuration_p,
-                             user_data_p);
-  ACE_ASSERT (user_data_p);
+  BitTorrent_Client_IPeerConnection_Manager_t* peer_connection_manager_p =
+    BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (peer_connection_manager_p);
+  BitTorrent_Client_ITrackerConnection_Manager_t* tracker_connection_manager_p =
+    BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (tracker_connection_manager_p);
+  peer_connection_manager_p->get (peer_configuration_p,
+                                  peer_user_data_p);
+  tracker_connection_manager_p->get (tracker_configuration_p,
+                                     tracker_user_data_p);
+  ACE_ASSERT (peer_user_data_p);
+  ACE_ASSERT (tracker_user_data_p);
   // *TODO*: remove type inferences
-  ACE_ASSERT (user_data_p->configuration);
+  ACE_ASSERT (peer_configuration_p);
+  ACE_ASSERT (peer_configuration_p->socketHandlerConfiguration);
+  ACE_ASSERT (peer_configuration_p->socketHandlerConfiguration->socketConfiguration);
+  ACE_ASSERT (peer_configuration_p->streamConfiguration);
+  ACE_ASSERT (tracker_configuration_p);
+  ACE_ASSERT (tracker_configuration_p->socketHandlerConfiguration);
+  ACE_ASSERT (tracker_configuration_p->socketHandlerConfiguration->socketConfiguration);
+  ACE_ASSERT (tracker_configuration_p->streamConfiguration);
 
   // step1: set up configuration
-  user_data_p->configuration->socketConfiguration.address = address_in;
+  if (isPeer_in)
+    peer_configuration_p->socketHandlerConfiguration->socketConfiguration->address =
+        address_in;
+  else
+    tracker_configuration_p->socketHandlerConfiguration->socketConfiguration->address =
+        address_in;
   if (finalModule_inout)
   {
-    user_data_p->configuration->streamConfiguration.cloneModule =
-      cloneModule_in;
-    user_data_p->configuration->streamConfiguration.deleteModule =
-      deleteModule_in;
-    user_data_p->configuration->streamConfiguration.module =
-      finalModule_inout;
+    if (isPeer_in)
+    {
+      peer_configuration_p->streamConfiguration->cloneModule = cloneModule_in;
+      peer_configuration_p->streamConfiguration->deleteModule = deleteModule_in;
+      peer_configuration_p->streamConfiguration->module = finalModule_inout;
+    } // end IF
+    else
+    {
+      tracker_configuration_p->streamConfiguration->cloneModule =
+          cloneModule_in;
+      tracker_configuration_p->streamConfiguration->deleteModule =
+          deleteModule_in;
+      tracker_configuration_p->streamConfiguration->module = finalModule_inout;
+    } // end ELSE
     if (deleteModule_in) finalModule_inout = NULL;
   } // end IF
 
   // step2: initialize connector
-  if (!connector_in.initialize ((isPeer_in ? user_data_p->configuration->socketHandlerConfiguration
-                                           : user_data_p->configuration->trackerSocketHandlerConfiguration)))
+  bool result_2 =
+      (isPeer_in ? peerConnector_in.initialize (*peer_configuration_p->socketHandlerConfiguration)
+                 : trackerConnector_in.initialize (*tracker_configuration_p->socketHandlerConfiguration));
+  if (!result_2)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
@@ -88,7 +121,8 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IConnector_t& connector_in,
   //                           user_data_p);
 
   // step3: (try to) connect to the server
-  return_value = connector_in.connect (address_in);
+  return_value = (isPeer_in ? peerConnector_in.connect (address_in)
+                            : trackerConnector_in.connect (address_in));
   if (return_value == ACE_INVALID_HANDLE)
   {
     // debug info

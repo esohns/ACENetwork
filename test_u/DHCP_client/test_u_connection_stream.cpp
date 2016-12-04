@@ -126,8 +126,8 @@ Test_U_InboundConnectionStream::initialize (const Test_U_StreamConfiguration& co
     return false;
   } // end IF
   ACE_ASSERT (inherited::sessionData_);
-  Test_U_StreamSessionData& session_data_r =
-    const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
+  Test_U_DHCPClient_SessionData& session_data_r =
+    const_cast<Test_U_DHCPClient_SessionData&> (inherited::sessionData_->get ());
   // *TODO*: remove type inferences
   session_data_r.sessionID = configuration_in.sessionID;
   ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
@@ -207,7 +207,7 @@ failed:
 }
 
 bool
-Test_U_InboundConnectionStream::collect (Test_U_RuntimeStatistic_t& data_out)
+Test_U_InboundConnectionStream::collect (DHCP_RuntimeStatistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_InboundConnectionStream::collect"));
 
@@ -215,8 +215,8 @@ Test_U_InboundConnectionStream::collect (Test_U_RuntimeStatistic_t& data_out)
   ACE_ASSERT (inherited::sessionData_);
 
   int result = -1;
-  Test_U_StreamSessionData& session_data_r =
-    const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
+  Test_U_DHCPClient_SessionData& session_data_r =
+    const_cast<Test_U_DHCPClient_SessionData&> (inherited::sessionData_->get ());
 
   Stream_Module_t* module_p =
     const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
@@ -382,8 +382,8 @@ Test_U_OutboundConnectionStream::initialize (const Test_U_StreamConfiguration& c
     return false;
   } // end IF
   ACE_ASSERT (inherited::sessionData_);
-  Test_U_StreamSessionData& session_data_r =
-    const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
+  Test_U_DHCPClient_SessionData& session_data_r =
+    const_cast<Test_U_DHCPClient_SessionData&> (inherited::sessionData_->get ());
   // *TODO*: remove type inferences
   ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
   session_data_r.targetFileName =
@@ -462,7 +462,7 @@ failed:
 }
 
 bool
-Test_U_OutboundConnectionStream::collect (Test_U_RuntimeStatistic_t& data_out)
+Test_U_OutboundConnectionStream::collect (DHCP_RuntimeStatistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_OutboundConnectionStream::collect"));
 
@@ -470,8 +470,8 @@ Test_U_OutboundConnectionStream::collect (Test_U_RuntimeStatistic_t& data_out)
   ACE_ASSERT (inherited::sessionData_);
 
   int result = -1;
-  Test_U_StreamSessionData& session_data_r =
-    const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
+  Test_U_DHCPClient_SessionData& session_data_r =
+    const_cast<Test_U_DHCPClient_SessionData&> (inherited::sessionData_->get ());
 
   Stream_Module_t* module_p =
     const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));

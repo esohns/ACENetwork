@@ -149,6 +149,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/client_server)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/dhcp)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ############## next target ################

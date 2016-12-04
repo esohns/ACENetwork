@@ -42,7 +42,7 @@ class Test_U_Stream;
 
 class Test_U_TCPConnection
  : public Net_TCPConnectionBase_T<Test_U_TCPHandler_t,
-                                  struct Test_U_Configuration,
+                                  struct Test_U_ConnectionConfiguration,
                                   struct Test_U_ConnectionState,
                                   Net_RuntimeStatistic_t,
                                   struct Test_U_SocketHandlerConfiguration,
@@ -54,7 +54,7 @@ class Test_U_TCPConnection
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   struct Test_U_Configuration,
+                                   struct Test_U_ConnectionConfiguration,
                                    struct Test_U_ConnectionState,
                                    Net_RuntimeStatistic_t,
                                    struct Test_U_UserData> ICONNECTION_MANAGER_T;
@@ -68,7 +68,7 @@ class Test_U_TCPConnection
 
  private:
   typedef Net_TCPConnectionBase_T<Test_U_TCPHandler_t,
-                                  struct Test_U_Configuration,
+                                  struct Test_U_ConnectionConfiguration,
                                   struct Test_U_ConnectionState,
                                   Net_RuntimeStatistic_t,
                                   struct Test_U_SocketHandlerConfiguration,
@@ -87,7 +87,7 @@ class Test_U_TCPConnection
 
 class Test_U_AsynchTCPConnection
  : public Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPHandler_t,
-                                        struct Test_U_Configuration,
+                                        struct Test_U_ConnectionConfiguration,
                                         struct Test_U_ConnectionState,
                                         Net_RuntimeStatistic_t,
                                         struct Test_U_SocketHandlerConfiguration,
@@ -99,7 +99,7 @@ class Test_U_AsynchTCPConnection
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   struct Test_U_Configuration,
+                                   struct Test_U_ConnectionConfiguration,
                                    struct Test_U_ConnectionState,
                                    Net_RuntimeStatistic_t,
                                    struct Test_U_UserData> ICONNECTION_MANAGER_T;
@@ -113,7 +113,7 @@ class Test_U_AsynchTCPConnection
 
  private:
   typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPHandler_t,
-                                        struct Test_U_Configuration,
+                                        struct Test_U_ConnectionConfiguration,
                                         struct Test_U_ConnectionState,
                                         Net_RuntimeStatistic_t,
                                         struct Test_U_SocketHandlerConfiguration,

@@ -29,9 +29,11 @@
 #include "bittorrent_defines.h"
 #include "bittorrent_tools.h"
 
-template <typename HandlerConfigurationType,
-          typename ConnectionConfigurationType,
-          typename ConnectionStateType,
+template <typename PeerHandlerConfigurationType,
+          typename TrackerHandlerConfigurationType,
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
@@ -39,16 +41,20 @@ template <typename HandlerConfigurationType,
           typename TrackerHandlerModuleType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
-          typename ConnectionManagerType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
           typename PeerConnectorType,
           typename TrackerConnectorType,
           typename ConfigurationType,
           typename StateType,
-          typename UserDataType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
           typename CBDataType>
-BitTorrent_Session_T<HandlerConfigurationType,
-                     ConnectionConfigurationType,
-                     ConnectionStateType,
+BitTorrent_Session_T<PeerHandlerConfigurationType,
+                     TrackerHandlerConfigurationType,
+                     PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
@@ -56,14 +62,18 @@ BitTorrent_Session_T<HandlerConfigurationType,
                      TrackerHandlerModuleType,
                      PeerConnectionType,
                      TrackerConnectionType,
-                     ConnectionManagerType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
                      PeerConnectorType,
                      TrackerConnectorType,
                      ConfigurationType,
                      StateType,
-                     UserDataType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
                      CBDataType>::BitTorrent_Session_T ()
  : inherited ()
+ , trackerConnectionManager_ (NULL)
+ , trackerHandlerConfiguration_ (NULL)
  , logToFile_ (BITTORRENT_DEFAULT_SESSION_LOG)
  , peerHandlerModule_ (NULL)
  , peerStreamHandler_ (this)
@@ -94,9 +104,11 @@ BitTorrent_Session_T<HandlerConfigurationType,
   } // end IF
 }
 
-template <typename HandlerConfigurationType,
-          typename ConnectionConfigurationType,
-          typename ConnectionStateType,
+template <typename PeerHandlerConfigurationType,
+          typename TrackerHandlerConfigurationType,
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
@@ -104,16 +116,20 @@ template <typename HandlerConfigurationType,
           typename TrackerHandlerModuleType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
-          typename ConnectionManagerType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
           typename PeerConnectorType,
           typename TrackerConnectorType,
           typename ConfigurationType,
           typename StateType,
-          typename UserDataType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
           typename CBDataType>
-BitTorrent_Session_T<HandlerConfigurationType,
-                     ConnectionConfigurationType,
-                     ConnectionStateType,
+BitTorrent_Session_T<PeerHandlerConfigurationType,
+                     TrackerHandlerConfigurationType,
+                     PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
@@ -121,12 +137,14 @@ BitTorrent_Session_T<HandlerConfigurationType,
                      TrackerHandlerModuleType,
                      PeerConnectionType,
                      TrackerConnectionType,
-                     ConnectionManagerType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
                      PeerConnectorType,
                      TrackerConnectorType,
                      ConfigurationType,
                      StateType,
-                     UserDataType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
                      CBDataType>::~BitTorrent_Session_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::~BitTorrent_Session_T"));
@@ -139,9 +157,11 @@ BitTorrent_Session_T<HandlerConfigurationType,
 
 //////////////////////////////////////////
 
-template <typename HandlerConfigurationType,
-          typename ConnectionConfigurationType,
-          typename ConnectionStateType,
+template <typename PeerHandlerConfigurationType,
+          typename TrackerHandlerConfigurationType,
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
@@ -149,17 +169,21 @@ template <typename HandlerConfigurationType,
           typename TrackerHandlerModuleType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
-          typename ConnectionManagerType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
           typename PeerConnectorType,
           typename TrackerConnectorType,
           typename ConfigurationType,
           typename StateType,
-          typename UserDataType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
           typename CBDataType>
 bool
-BitTorrent_Session_T<HandlerConfigurationType,
-                     ConnectionConfigurationType,
-                     ConnectionStateType,
+BitTorrent_Session_T<PeerHandlerConfigurationType,
+                     TrackerHandlerConfigurationType,
+                     PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
@@ -167,12 +191,14 @@ BitTorrent_Session_T<HandlerConfigurationType,
                      TrackerHandlerModuleType,
                      PeerConnectionType,
                      TrackerConnectionType,
-                     ConnectionManagerType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
                      PeerConnectorType,
                      TrackerConnectorType,
                      ConfigurationType,
                      StateType,
-                     UserDataType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
                      CBDataType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::initialize"));
@@ -184,13 +210,18 @@ BitTorrent_Session_T<HandlerConfigurationType,
   inherited::handlerConfiguration_ =
       const_cast<ConfigurationType&> (configuration_in).socketHandlerConfiguration;
   inherited::isAsynch_ = !configuration_in.useReactor;
+  trackerConnectionManager_ = configuration_in.trackerConnectionManager;
+  trackerHandlerConfiguration_ =
+      const_cast<ConfigurationType&> (configuration_in).trackerSocketHandlerConfiguration;
 
   return true;
 }
 
-template <typename HandlerConfigurationType,
-          typename ConnectionConfigurationType,
-          typename ConnectionStateType,
+template <typename PeerHandlerConfigurationType,
+          typename TrackerHandlerConfigurationType,
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
@@ -198,17 +229,21 @@ template <typename HandlerConfigurationType,
           typename TrackerHandlerModuleType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
-          typename ConnectionManagerType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
           typename PeerConnectorType,
           typename TrackerConnectorType,
           typename ConfigurationType,
           typename StateType,
-          typename UserDataType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
           typename CBDataType>
 void
-BitTorrent_Session_T<HandlerConfigurationType,
-                     ConnectionConfigurationType,
-                     ConnectionStateType,
+BitTorrent_Session_T<PeerHandlerConfigurationType,
+                     TrackerHandlerConfigurationType,
+                     PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
@@ -216,19 +251,21 @@ BitTorrent_Session_T<HandlerConfigurationType,
                      TrackerHandlerModuleType,
                      PeerConnectionType,
                      TrackerConnectionType,
-                     ConnectionManagerType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
                      PeerConnectorType,
                      TrackerConnectorType,
                      ConfigurationType,
                      StateType,
-                     UserDataType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
                      CBDataType>::connect (const ACE_INET_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::connect"));
 
   // step0: subscribe to notifications
-  ConnectionConfigurationType* configuration_p = NULL;
-  UserDataType* user_data_p = NULL;
+  PeerConnectionConfigurationType* configuration_p = NULL;
+  PeerUserDataType* user_data_p = NULL;
   typename PeerStreamType::IDATA_NOTIFY_T* subscriber_p = NULL;
   bool clone_module = false;
   bool delete_module = false;
@@ -238,26 +275,31 @@ BitTorrent_Session_T<HandlerConfigurationType,
     inherited::connectionManager_->get (configuration_p,
                                         user_data_p);
     ACE_ASSERT (configuration_p);
+    ACE_ASSERT (configuration_p->socketHandlerConfiguration);
+    ACE_ASSERT (configuration_p->socketHandlerConfiguration->socketConfiguration);
+    ACE_ASSERT (configuration_p->streamConfiguration);
+    ACE_ASSERT (configuration_p->streamConfiguration->moduleHandlerConfiguration);
+
     // *TODO*: remove type inferences
 
     // step1: set up configuration
-    configuration_p->socketConfiguration.address = address_in;
+    configuration_p->socketHandlerConfiguration->socketConfiguration->address =
+        address_in;
 
     subscriber_p =
-        configuration_p->moduleHandlerConfiguration.subscriber;
+        configuration_p->streamConfiguration->moduleHandlerConfiguration->subscriber;
     ACE_ASSERT (!subscriber_p);
-    configuration_p->moduleHandlerConfiguration.subscriber =
+    configuration_p->streamConfiguration->moduleHandlerConfiguration->subscriber =
         &peerStreamHandler_;
 
-    clone_module = configuration_p->streamConfiguration.cloneModule;
-    delete_module =
-        configuration_p->streamConfiguration.deleteModule;
-    module_p = configuration_p->streamConfiguration.module;
+    clone_module = configuration_p->streamConfiguration->cloneModule;
+    delete_module = configuration_p->streamConfiguration->deleteModule;
+    module_p = configuration_p->streamConfiguration->module;
     ACE_ASSERT (!module_p);
 
-    configuration_p->streamConfiguration.cloneModule = false;
-    configuration_p->streamConfiguration.deleteModule = false;
-    configuration_p->streamConfiguration.module = peerHandlerModule_;
+    configuration_p->streamConfiguration->cloneModule = false;
+    configuration_p->streamConfiguration->deleteModule = false;
+    configuration_p->streamConfiguration->module = peerHandlerModule_;
   } // end IF
 
   // step1: (try to) connect
@@ -266,17 +308,20 @@ BitTorrent_Session_T<HandlerConfigurationType,
   // step2: reset configuration
   if (inherited::connectionManager_)
   {
-    configuration_p->moduleHandlerConfiguration.subscriber = subscriber_p;
+    configuration_p->streamConfiguration->moduleHandlerConfiguration->subscriber =
+        subscriber_p;
 
-    configuration_p->streamConfiguration.cloneModule = clone_module;
-    configuration_p->streamConfiguration.deleteModule = delete_module;
-    configuration_p->streamConfiguration.module = module_p;
+    configuration_p->streamConfiguration->cloneModule = clone_module;
+    configuration_p->streamConfiguration->deleteModule = delete_module;
+    configuration_p->streamConfiguration->module = module_p;
   } // end IF
 };
 
-template <typename HandlerConfigurationType,
-          typename ConnectionConfigurationType,
-          typename ConnectionStateType,
+template <typename PeerHandlerConfigurationType,
+          typename TrackerHandlerConfigurationType,
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
@@ -284,17 +329,21 @@ template <typename HandlerConfigurationType,
           typename TrackerHandlerModuleType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
-          typename ConnectionManagerType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
           typename PeerConnectorType,
           typename TrackerConnectorType,
           typename ConfigurationType,
           typename StateType,
-          typename UserDataType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
           typename CBDataType>
 void
-BitTorrent_Session_T<HandlerConfigurationType,
-                     ConnectionConfigurationType,
-                     ConnectionStateType,
+BitTorrent_Session_T<PeerHandlerConfigurationType,
+                     TrackerHandlerConfigurationType,
+                     PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
@@ -302,17 +351,19 @@ BitTorrent_Session_T<HandlerConfigurationType,
                      TrackerHandlerModuleType,
                      PeerConnectionType,
                      TrackerConnectionType,
-                     ConnectionManagerType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
                      PeerConnectorType,
                      TrackerConnectorType,
                      ConfigurationType,
                      StateType,
-                     UserDataType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
                      CBDataType>::trackerConnect (const ACE_INET_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::trackerConnect"));
 
-  TrackerConnectorType connector (inherited::connectionManager_,
+  TrackerConnectorType connector (trackerConnectionManager_,
                                   ACE_Time_Value::zero);
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
 
@@ -326,36 +377,42 @@ BitTorrent_Session_T<HandlerConfigurationType,
                 ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
 
   // step0: subscribe to notifications
-  ConnectionConfigurationType* configuration_p = NULL;
-  UserDataType* user_data_p = NULL;
+  TrackerConnectionConfigurationType* configuration_p = NULL;
+  TrackerUserDataType* user_data_p = NULL;
   typename TrackerStreamType::IDATA_NOTIFY_T* subscriber_p = NULL;
   bool clone_module = false;
   bool delete_module = false;
   Stream_Module_t* module_p = NULL;
-  if (inherited::connectionManager_)
+  if (trackerConnectionManager_)
   {
-    inherited::connectionManager_->get (configuration_p,
-                                        user_data_p);
+    trackerConnectionManager_->get (configuration_p,
+                                    user_data_p);
     ACE_ASSERT (configuration_p);
+    ACE_ASSERT (configuration_p->socketHandlerConfiguration);
+    ACE_ASSERT (configuration_p->socketHandlerConfiguration->socketConfiguration);
+    ACE_ASSERT (configuration_p->streamConfiguration);
+    ACE_ASSERT (configuration_p->streamConfiguration->moduleHandlerConfiguration);
+
     // *TODO*: remove type inferences
 
     // step1: set up configuration
-    configuration_p->socketConfiguration.address = address_in;
+    configuration_p->socketHandlerConfiguration->socketConfiguration->address =
+        address_in;
 
     subscriber_p =
-        configuration_p->moduleHandlerConfiguration.trackerSubscriber;
+        configuration_p->streamConfiguration->moduleHandlerConfiguration->subscriber;
     ACE_ASSERT (!subscriber_p);
-    configuration_p->moduleHandlerConfiguration.trackerSubscriber =
+    configuration_p->streamConfiguration->moduleHandlerConfiguration->subscriber =
         &trackerStreamHandler_;
 
-    clone_module = configuration_p->streamConfiguration.cloneModule;
-    delete_module = configuration_p->streamConfiguration.deleteModule;
-    module_p = configuration_p->streamConfiguration.module;
+    clone_module = configuration_p->streamConfiguration->cloneModule;
+    delete_module = configuration_p->streamConfiguration->deleteModule;
+    module_p = configuration_p->streamConfiguration->module;
     ACE_ASSERT (!module_p);
 
-    configuration_p->streamConfiguration.cloneModule = false;
-    configuration_p->streamConfiguration.deleteModule = false;
-    configuration_p->streamConfiguration.module = trackerHandlerModule_;
+    configuration_p->streamConfiguration->cloneModule = false;
+    configuration_p->streamConfiguration->deleteModule = false;
+    configuration_p->streamConfiguration->module = trackerHandlerModule_;
   } // end IF
 
   ACE_Time_Value deadline;
@@ -368,8 +425,8 @@ BitTorrent_Session_T<HandlerConfigurationType,
   // step1: initialize connector
   typename TrackerConnectorType::ICONNECTOR_T* iconnector_p = &connector;
   typename TrackerConnectorType::ICONNECTION_T* iconnection_p = NULL;
-  ACE_ASSERT (inherited::handlerConfiguration_);
-  if (!iconnector_p->initialize (*inherited::handlerConfiguration_))
+  ACE_ASSERT (trackerHandlerConfiguration_);
+  if (!iconnector_p->initialize (*trackerHandlerConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -401,13 +458,13 @@ BitTorrent_Session_T<HandlerConfigurationType,
                     &delay));
 
       // *TODO*: this does not work...
-      iconnection_p = inherited::connectionManager_->get (address_in);
+      iconnection_p = trackerConnectionManager_->get (address_in);
       if (iconnection_p)
         break; // done
     } while (COMMON_TIME_NOW < deadline);
   } // end ELSE
   else
-    iconnection_p = inherited::connectionManager_->get (handle);
+    iconnection_p = trackerConnectionManager_->get (handle);
   if (!iconnection_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -453,20 +510,23 @@ BitTorrent_Session_T<HandlerConfigurationType,
   iconnection_p->decrease ();
 
 error:
-  if (inherited::connectionManager_)
+  if (trackerConnectionManager_)
   {
-    configuration_p->moduleHandlerConfiguration.trackerSubscriber =
+    configuration_p->streamConfiguration->moduleHandlerConfiguration->subscriber =
         subscriber_p;
 
-    configuration_p->streamConfiguration.cloneModule = clone_module;
-    configuration_p->streamConfiguration.deleteModule = delete_module;
-    configuration_p->streamConfiguration.module = module_p;
+    configuration_p->streamConfiguration->cloneModule = clone_module;
+    configuration_p->streamConfiguration->deleteModule = delete_module;
+    configuration_p->streamConfiguration->module = module_p;
+
   } // end IF
 };
 
-template <typename HandlerConfigurationType,
-          typename ConnectionConfigurationType,
-          typename ConnectionStateType,
+template <typename PeerHandlerConfigurationType,
+          typename TrackerHandlerConfigurationType,
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
@@ -474,17 +534,21 @@ template <typename HandlerConfigurationType,
           typename TrackerHandlerModuleType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
-          typename ConnectionManagerType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
           typename PeerConnectorType,
           typename TrackerConnectorType,
           typename ConfigurationType,
           typename StateType,
-          typename UserDataType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
           typename CBDataType>
 void
-BitTorrent_Session_T<HandlerConfigurationType,
-                     ConnectionConfigurationType,
-                     ConnectionStateType,
+BitTorrent_Session_T<PeerHandlerConfigurationType,
+                     TrackerHandlerConfigurationType,
+                     PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
@@ -492,12 +556,14 @@ BitTorrent_Session_T<HandlerConfigurationType,
                      TrackerHandlerModuleType,
                      PeerConnectionType,
                      TrackerConnectionType,
-                     ConnectionManagerType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
                      PeerConnectorType,
                      TrackerConnectorType,
                      ConfigurationType,
                      StateType,
-                     UserDataType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
                      CBDataType>::notify (const struct HTTP_Record& record_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::notify"));
@@ -508,9 +574,11 @@ BitTorrent_Session_T<HandlerConfigurationType,
               ACE_TEXT (HTTP_Tools::dump (record_in).c_str ())));
 #endif
 }
-template <typename HandlerConfigurationType,
-          typename ConnectionConfigurationType,
-          typename ConnectionStateType,
+template <typename PeerHandlerConfigurationType,
+          typename TrackerHandlerConfigurationType,
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
@@ -518,17 +586,21 @@ template <typename HandlerConfigurationType,
           typename TrackerHandlerModuleType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
-          typename ConnectionManagerType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
           typename PeerConnectorType,
           typename TrackerConnectorType,
           typename ConfigurationType,
           typename StateType,
-          typename UserDataType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
           typename CBDataType>
 void
-BitTorrent_Session_T<HandlerConfigurationType,
-                     ConnectionConfigurationType,
-                     ConnectionStateType,
+BitTorrent_Session_T<PeerHandlerConfigurationType,
+                     TrackerHandlerConfigurationType,
+                     PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
@@ -536,12 +608,14 @@ BitTorrent_Session_T<HandlerConfigurationType,
                      TrackerHandlerModuleType,
                      PeerConnectionType,
                      TrackerConnectionType,
-                     ConnectionManagerType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
                      PeerConnectorType,
                      TrackerConnectorType,
                      ConfigurationType,
                      StateType,
-                     UserDataType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
                      CBDataType>::notify (const struct BitTorrent_Record& record_in,
                                           ACE_Message_Block* messageBlock_in)
 {
@@ -576,9 +650,11 @@ BitTorrent_Session_T<HandlerConfigurationType,
 
 //////////////////////////////////////////
 
-template <typename HandlerConfigurationType,
-          typename ConnectionConfigurationType,
-          typename ConnectionStateType,
+template <typename PeerHandlerConfigurationType,
+          typename TrackerHandlerConfigurationType,
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
@@ -586,17 +662,21 @@ template <typename HandlerConfigurationType,
           typename TrackerHandlerModuleType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
-          typename ConnectionManagerType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
           typename PeerConnectorType,
           typename TrackerConnectorType,
           typename ConfigurationType,
           typename StateType,
-          typename UserDataType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
           typename CBDataType>
 void
-BitTorrent_Session_T<HandlerConfigurationType,
-                     ConnectionConfigurationType,
-                     ConnectionStateType,
+BitTorrent_Session_T<PeerHandlerConfigurationType,
+                     TrackerHandlerConfigurationType,
+                     PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
@@ -604,12 +684,14 @@ BitTorrent_Session_T<HandlerConfigurationType,
                      TrackerHandlerModuleType,
                      PeerConnectionType,
                      TrackerConnectionType,
-                     ConnectionManagerType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
                      PeerConnectorType,
                      TrackerConnectorType,
                      ConfigurationType,
                      StateType,
-                     UserDataType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
                      CBDataType>::error (const struct BitTorrent_Record& record_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::error"));
@@ -620,9 +702,11 @@ BitTorrent_Session_T<HandlerConfigurationType,
               ACE_TEXT (message_text.c_str ())));
 }
 
-template <typename HandlerConfigurationType,
-          typename ConnectionConfigurationType,
-          typename ConnectionStateType,
+template <typename PeerHandlerConfigurationType,
+          typename TrackerHandlerConfigurationType,
+          typename PeerConnectionConfigurationType,
+          typename TrackerConnectionConfigurationType,
+          typename PeerConnectionStateType,
           typename PeerStreamType,
           typename TrackerStreamType,
           typename StreamStatusType,
@@ -630,17 +714,21 @@ template <typename HandlerConfigurationType,
           typename TrackerHandlerModuleType,
           typename PeerConnectionType,
           typename TrackerConnectionType,
-          typename ConnectionManagerType,
+          typename PeerConnectionManagerType,
+          typename TrackerConnectionManagerType,
           typename PeerConnectorType,
           typename TrackerConnectorType,
           typename ConfigurationType,
           typename StateType,
-          typename UserDataType,
+          typename PeerUserDataType,
+          typename TrackerUserDataType,
           typename CBDataType>
 void
-BitTorrent_Session_T<HandlerConfigurationType,
-                     ConnectionConfigurationType,
-                     ConnectionStateType,
+BitTorrent_Session_T<PeerHandlerConfigurationType,
+                     TrackerHandlerConfigurationType,
+                     PeerConnectionConfigurationType,
+                     TrackerConnectionConfigurationType,
+                     PeerConnectionStateType,
                      PeerStreamType,
                      TrackerStreamType,
                      StreamStatusType,
@@ -648,12 +736,14 @@ BitTorrent_Session_T<HandlerConfigurationType,
                      TrackerHandlerModuleType,
                      PeerConnectionType,
                      TrackerConnectionType,
-                     ConnectionManagerType,
+                     PeerConnectionManagerType,
+                     TrackerConnectionManagerType,
                      PeerConnectorType,
                      TrackerConnectorType,
                      ConfigurationType,
                      StateType,
-                     UserDataType,
+                     PeerUserDataType,
+                     TrackerUserDataType,
                      CBDataType>::log (const struct BitTorrent_Record& record_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::log"));

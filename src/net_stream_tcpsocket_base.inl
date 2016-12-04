@@ -145,6 +145,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
+  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   int result = -1;
   bool handle_manager = false;
@@ -178,7 +180,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   inherited::closing_ = true;
   // *TODO*: find a better way to do this
   serializeOutput_ =
-    inherited2::configuration_->streamConfiguration.serializeOutput;
+    inherited2::configuration_->streamConfiguration->serializeOutput;
 
   // step1: register with the connection manager (if any)
   // *IMPORTANT NOTE*: register with the connection manager FIRST, otherwise
@@ -198,19 +200,19 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // step2a: connect stream head message queue with the reactor notification
   //         pipe ?
   // *TODO*: remove type inferences
-  if (!inherited2::configuration_->streamConfiguration.useThreadPerConnection)
-    inherited2::configuration_->streamConfiguration.notificationStrategy =
+  if (!inherited2::configuration_->streamConfiguration->useThreadPerConnection)
+    inherited2::configuration_->streamConfiguration->notificationStrategy =
       &(inherited::notificationStrategy_);
 
   // step2c: initialize stream
   // *TODO*: remove type inferences
-  inherited2::configuration_->streamConfiguration.sessionID =
+  inherited2::configuration_->streamConfiguration->sessionID =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     reinterpret_cast<size_t> (inherited::get_handle ()); // (== socket handle)
 #else
     static_cast<size_t> (inherited::get_handle ()); // (== socket handle)
 #endif
-  if (!stream_.initialize (inherited2::configuration_->streamConfiguration))
+  if (!stream_.initialize (*inherited2::configuration_->streamConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
@@ -238,7 +240,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // step3: tweak socket, register I/O handle with the reactor, ...
   // *NOTE*: as soon as this returns, data starts arriving at handle_input()
   result =
-    inherited::open (&inherited2::configuration_->socketHandlerConfiguration);
+    inherited::open (inherited2::configuration_->socketHandlerConfiguration);
   if (result == -1)
   {
     // *NOTE*: this can happen when the connection handle is still registered
@@ -461,17 +463,18 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // sanity check
   ACE_ASSERT (inherited2::configuration_);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
   ACE_ASSERT (!currentReadBuffer_);
 
   // read some data from the socket
   // *TODO*: remove type inference
   currentReadBuffer_ =
-    allocateMessage (inherited2::configuration_->streamConfiguration.bufferSize);
+    allocateMessage (inherited2::configuration_->streamConfiguration->bufferSize);
   if (!currentReadBuffer_)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                inherited2::configuration_->streamConfiguration.bufferSize));
+                inherited2::configuration_->streamConfiguration->bufferSize));
     return -1;
   } // end IF
 
@@ -598,6 +601,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   int result = -1;
   ssize_t bytes_sent = 0;
@@ -629,7 +633,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
     // send next data chunk from the stream
     // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
     //                   been notified to the reactor
-    if (!inherited2::configuration_->streamConfiguration.useThreadPerConnection)
+    if (!inherited2::configuration_->streamConfiguration->useThreadPerConnection)
       result = stream_.get (currentWriteBuffer_, NULL);
     else
       result = inherited::getq (currentWriteBuffer_, NULL);
@@ -642,8 +646,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
       if ((error != EAGAIN)   && // 11   : connection has been closed
           (error != ESHUTDOWN))  // 10058: queue has been deactivated
         ACE_DEBUG ((LM_ERROR,
-                    (inherited2::configuration_->streamConfiguration.useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
-                                                                                            : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
+                    (inherited2::configuration_->streamConfiguration->useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
+                                                                                             : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
       goto release;
     } // end IF
   } // end IF
@@ -651,7 +655,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   result = 0;
 
   // finished ?
-  if (inherited2::configuration_->streamConfiguration.useThreadPerConnection &&
+  if (inherited2::configuration_->streamConfiguration->useThreadPerConnection &&
       currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
   {
     //       ACE_DEBUG ((LM_DEBUG,
@@ -804,6 +808,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   switch (mask_in)
   {
@@ -815,8 +820,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                                              //     accept failed (e.g. too many connections) /
                                              //     select failed (EBADF see Select_Reactor_T.cpp) /
                                              //     user abort
-    {
-      // step1: signal completion and wait for all processing
+    { // step1: signal completion and wait for all processing
       // *IMPORTANT NOTE*: when the socket closes, any dispatching threads
       //                   currently servicing the socket handle will call
       //                   handle_close()
@@ -830,15 +834,14 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
-      if (!inherited2::configuration_->streamConfiguration.useThreadPerConnection)
-      {
-        // *IMPORTANT NOTE*: in a multithreaded environment, in particular when
+      if (!inherited2::configuration_->streamConfiguration->useThreadPerConnection)
+      { // *IMPORTANT NOTE*: in a multithreaded environment, in particular when
         //                   using a multithreaded reactor, there may still be
         //                   in-flight notifications being dispatched at this
         //                   stage. In that case, do not rely on releasing all
         //                   handler resources "manually", use reference
-        //                   counting instead.
-        //                   --> this just speeds things up a little.
+        //                   counting instead
+        //                   --> this just speeds things up a little
         ACE_Reactor* reactor_p = inherited::reactor ();
         ACE_ASSERT (reactor_p);
         result =
@@ -1257,7 +1260,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::report"));
 
   try {
-    return stream_.report ();
+    stream_.report ();
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic::report(), aborting\n")));
@@ -1341,17 +1344,18 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   // initialize return value(s)
   ACE_Message_Block* message_block_p = NULL;
 
   //if (inherited::configuration_.messageAllocator)
-  if (inherited2::configuration_->streamConfiguration.messageAllocator)
+  if (inherited2::configuration_->streamConfiguration->messageAllocator)
   {
 allocate:
     try {
       message_block_p =
-        static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration.messageAllocator->malloc (requestedSize_in));
+        static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
@@ -1361,7 +1365,7 @@ allocate:
 
     // keep retrying ?
     if (!message_block_p &&
-        !inherited2::configuration_->streamConfiguration.messageAllocator->block ())
+        !inherited2::configuration_->streamConfiguration->messageAllocator->block ())
       goto allocate;
   } // end IF
   else
@@ -1379,9 +1383,9 @@ allocate:
                                          NULL));
   if (!message_block_p)
   {
-    if (inherited2::configuration_->streamConfiguration.messageAllocator)
+    if (inherited2::configuration_->streamConfiguration->messageAllocator)
     {
-      if (inherited2::configuration_->streamConfiguration.messageAllocator->block ())
+      if (inherited2::configuration_->streamConfiguration->messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     } // end IF

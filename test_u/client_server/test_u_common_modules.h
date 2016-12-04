@@ -47,43 +47,43 @@ typedef Net_Module_SocketHandler_T<ACE_MT_SYNCH,
                                    Test_U_ControlMessage_t,
                                    Test_U_Message,
                                    Test_U_SessionMessage,
-                                   Test_U_ModuleHandlerConfiguration,
-                                   Stream_ControlType,
-                                   Stream_SessionMessageType,
-                                   Test_U_StreamState,
-                                   Test_U_StreamSessionData,
+                                   struct Test_U_ModuleHandlerConfiguration,
+                                   enum Stream_ControlType,
+                                   enum Stream_SessionMessageType,
+                                   struct Test_U_StreamState,
+                                   struct Test_U_StreamSessionData,
                                    Test_U_StreamSessionData_t,
                                    Net_RuntimeStatistic_t,
                                    Net_Remote_Comm::MessageHeader> Test_U_Module_SocketHandler;
-DATASTREAM_MODULE_INPUT_ONLY (Test_U_StreamSessionData,          // session data type
-                              Stream_SessionMessageType,         // session event type
-                              Test_U_ModuleHandlerConfiguration, // module handler configuration type
-                              Test_U_IStreamNotify_t,            // stream notification interface type
-                              Test_U_Module_SocketHandler);      // writer type
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
+                              enum Stream_SessionMessageType,           // session event type
+                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                              Test_U_IStreamNotify_t,                   // stream notification interface type
+                              Test_U_Module_SocketHandler);             // writer type
 
 typedef Stream_Module_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                    Common_TimePolicy_t,
-                                                   Test_U_ModuleHandlerConfiguration,
+                                                   struct Test_U_ModuleHandlerConfiguration,
                                                    Test_U_ControlMessage_t,
                                                    Test_U_Message,
                                                    Test_U_SessionMessage,
                                                    Net_MessageType_t,
                                                    Net_RuntimeStatistic_t,
-                                                   Test_U_StreamSessionData,
+                                                   struct Test_U_StreamSessionData,
                                                    Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_ReaderTask_t;
 typedef Stream_Module_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                    Common_TimePolicy_t,
-                                                   Test_U_ModuleHandlerConfiguration,
+                                                   struct Test_U_ModuleHandlerConfiguration,
                                                    Test_U_ControlMessage_t,
                                                    Test_U_Message,
                                                    Test_U_SessionMessage,
                                                    Net_MessageType_t,
                                                    Net_RuntimeStatistic_t,
-                                                   Test_U_StreamSessionData,
+                                                   struct Test_U_StreamSessionData,
                                                    Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_WriterTask_t;
-DATASTREAM_MODULE_DUPLEX (Test_U_StreamSessionData,                   // session data type
-                          Stream_SessionMessageType,                  // session event type
-                          Stream_ModuleHandlerConfiguration,          // module handler configuration type
+DATASTREAM_MODULE_DUPLEX (struct Test_U_StreamSessionData,            // session data type
+                          enum Stream_SessionMessageType,             // session event type
+                          struct Test_U_ModuleHandlerConfiguration,   // module handler configuration type
                           Test_U_IStreamNotify_t,                     // stream notification interface type
                           Test_U_Module_StatisticReport_ReaderTask_t, // reader type
                           Test_U_Module_StatisticReport_WriterTask_t, // writer type
