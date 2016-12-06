@@ -412,7 +412,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   // step0a: set state
   // *IMPORTANT NOTE*: set the state early to avoid deadlock in
   //                   waitForCompletion() (see below), which may be implicitly
-  //                   invoked by stream_finished()
+  //                   invoked by stream_.finished()
   // *TODO*: remove type inference
   if (inherited3::state_.status != NET_CONNECTION_STATUS_CLOSED)
     inherited3::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
@@ -427,8 +427,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   // step1: shut down the processing stream
   stream_.finished (false); // finish upstream (if any)
-  //stream_.flush (false, // do not flush inbound data
-  //               true); // flush upstream (if any)
+  stream_.flush (false, // do not flush inbound data
+                 false, // do not flush session messages
+                 true); // flush upstream (if any)
   stream_.wait (true,   // wait for worker(s) (if any)
                 false,  // wait for upstream (if any)
                 false); // wait for downstream (if any)

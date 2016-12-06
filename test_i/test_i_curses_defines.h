@@ -18,13 +18,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef BITTORRENT_CLIENT_DEFINES_H
-#define BITTORRENT_CLIENT_DEFINES_H
+#ifndef TEST_I_CURSES_DEFINES_H
+#define TEST_I_CURSES_DEFINES_H
 
-#define BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE "bittorrent_client.ini"
+// colors
+#define TEST_I_CURSES_COLOR_LOG                     1
+#define TEST_I_CURSES_COLOR_STATUS                  2
 
-#define BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE "test.torrent"
-
-#define BITTORRENT_CLIENT_DEFAULT_USE_CURSES   false // use (PD|N)curses library ?
+// cursor
+#define TEST_I_CURSES_CURSOR_MODE_INVISIBLE         0
+#define TEST_I_CURSES_CURSOR_MODE_NORMAL            1 // terminal-specific
+#define TEST_I_CURSES_CURSOR_MODE_HIGHLIGHTED       2 // terminal-specific
+#define TEST_I_CURSES_DEFAULT_CURSOR_MODE           TEST_I_CURSES_CURSOR_MODE_NORMAL
 
 #endif

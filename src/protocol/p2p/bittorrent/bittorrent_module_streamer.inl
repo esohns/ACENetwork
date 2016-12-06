@@ -81,7 +81,7 @@ BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Streamer_T::handleDataMessage"));
 
-  int result = -1;
+//  int result = -1;
 
   // don't care (implies yes per default, if part of a stream)
   // *NOTE*: as this is an "upstream" module, the "wording" is wrong

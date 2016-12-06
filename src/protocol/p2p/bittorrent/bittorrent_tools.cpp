@@ -110,7 +110,12 @@ BitTorrent_Tools::MetaInfo2InfoHash (const Bencoding_Dictionary_t& metaInfo_out)
   std::string result;
 
   std::string key = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_KEY);
-  Bencoding_DictionaryIterator_t iterator = metaInfo_out.find (&key);
+//  Bencoding_DictionaryIterator_t iterator = metaInfo_out.find (&key);
+  Bencoding_DictionaryIterator_t iterator = metaInfo_out.begin ();
+  for (;
+       iterator != metaInfo_out.end ();
+       ++iterator)
+    if (*(*iterator).first == key) break;
   if (iterator == metaInfo_out.end ())
   {
     ACE_DEBUG ((LM_ERROR,
@@ -138,14 +143,25 @@ BitTorrent_Tools::MetaInfo2Length (const Bencoding_Dictionary_t& metaInfo_in)
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::MetaInfo2Length"));
 
   std::string key = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_KEY);
-  Bencoding_DictionaryIterator_t iterator = metaInfo_in.find (&key);
+//  Bencoding_DictionaryIterator_t iterator = metaInfo_in.find (&key);
+  Bencoding_DictionaryIterator_t iterator = metaInfo_in.begin ();
+  for (;
+       iterator != metaInfo_in.end ();
+       ++iterator)
+    if (*(*iterator).first == key) break;
   ACE_ASSERT (iterator != metaInfo_in.end ());
   ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
 
   // single-file mode ?
   key = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_LENGTH_KEY);
+//  Bencoding_DictionaryIterator_t iterator_2 =
+//      (*iterator).second->dictionary->find (&key);
   Bencoding_DictionaryIterator_t iterator_2 =
-      (*iterator).second->dictionary->find (&key);
+      (*iterator).second->dictionary->begin ();
+  for (;
+       iterator_2 != (*iterator).second->dictionary->end ();
+       ++iterator_2)
+    if (*(*iterator_2).first == key) break;
   if (iterator_2 != (*iterator).second->dictionary->end ())
   {
     ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
@@ -153,7 +169,12 @@ BitTorrent_Tools::MetaInfo2Length (const Bencoding_Dictionary_t& metaInfo_in)
   } // end IF
 
   key = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_FILES_KEY);
-  iterator_2 = (*iterator).second->dictionary->find (&key);
+//  iterator_2 = (*iterator).second->dictionary->find (&key);
+  iterator_2 = (*iterator).second->dictionary->begin ();
+  for (;
+       iterator_2 != (*iterator).second->dictionary->end ();
+       ++iterator_2)
+    if (*(*iterator_2).first == key) break;
   ACE_ASSERT (iterator_2 != (*iterator).second->dictionary->end ());
   ACE_ASSERT ((*iterator_2).second->type == Bencoding_Element::BENCODING_TYPE_LIST);
 
@@ -165,7 +186,12 @@ BitTorrent_Tools::MetaInfo2Length (const Bencoding_Dictionary_t& metaInfo_in)
   {
     ACE_ASSERT ((*iterator_3)->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
 
-    iterator = (*iterator_3)->dictionary->find (&key);
+//    iterator = (*iterator_3)->dictionary->find (&key);
+    iterator = (*iterator_3)->dictionary->begin ();
+    for (;
+         iterator != (*iterator_3)->dictionary->end ();
+         ++iterator)
+      if (*(*iterator).first == key) break;
     ACE_ASSERT (iterator != (*iterator_3)->dictionary->end ());
     ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_INTEGER);
     result += static_cast<unsigned int> ((*iterator).second->integer);

@@ -672,7 +672,7 @@ BitTorrent_TrackerStream_T<StreamStateType,
 //  module_p->arg (inherited::sessionData_);
 
   if (setupPipeline_in)
-    if (!inherited::setup (NULL))
+    if (!inherited::setup (configuration_in.notificationStrategy))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to set up pipeline, aborting\n")));

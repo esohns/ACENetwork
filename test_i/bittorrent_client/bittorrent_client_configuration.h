@@ -78,7 +78,7 @@ struct BitTorrent_Client_Configuration
    , peerConnectionConfiguration ()
    , trackerConnectionConfiguration ()
    ///////////////////////////////////////
-//   , allocatorConfiguration ()
+   , allocatorConfiguration ()
    , moduleConfiguration ()
    , peerModuleHandlerConfiguration ()
    , peerStreamConfiguration ()
@@ -107,7 +107,7 @@ struct BitTorrent_Client_Configuration
   struct BitTorrent_Client_PeerConnectionConfiguration       peerConnectionConfiguration;
   struct BitTorrent_Client_TrackerConnectionConfiguration    trackerConnectionConfiguration;
   // ****************************** stream *************************************
-//  struct BitTorrent_AllocatorConfiguration            allocatorConfiguration;
+  struct BitTorrent_AllocatorConfiguration                   allocatorConfiguration;
   struct Stream_ModuleConfiguration                          moduleConfiguration;
   struct BitTorrent_Client_PeerModuleHandlerConfiguration    peerModuleHandlerConfiguration;
   struct BitTorrent_Client_PeerStreamConfiguration           peerStreamConfiguration;

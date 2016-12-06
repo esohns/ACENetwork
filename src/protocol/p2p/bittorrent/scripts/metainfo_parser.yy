@@ -126,7 +126,7 @@ typedef union YYSTYPE
 // symbols
 %union
 {
-  int                     ival;
+  ACE_INT64               ival;
   std::string*            sval;
   Bencoding_Element*      eval;
   Bencoding_List_t*       lval;
@@ -290,8 +290,10 @@ dictionary_value: "string" {
                     element_p->string = $1;
                     Bencoding_Dictionary_t& dictionary_r =
                       parser->getDictionary ();
-                    dictionary_r.insert (std::make_pair (key_string_p,
-                                                         element_p)); }
+/*                    dictionary_r.insert (std::make_pair (key_string_p,
+                                                         element_p)); }*/
+                    dictionary_r.push_back (std::make_pair (key_string_p,
+                                                            element_p)); }
 /*                    ACE_DEBUG ((LM_DEBUG,
                                 ACE_TEXT ("[dictionary: %@] key: \"%s\": \"%s\"\n"),
                                 &dictionary_r,
@@ -308,8 +310,10 @@ dictionary_value: "string" {
                     element_p->integer = $1;
                     Bencoding_Dictionary_t& dictionary_r =
                       parser->getDictionary ();
-                    dictionary_r.insert (std::make_pair (key_string_p,
-                                                         element_p)); }
+/*                    dictionary_r.insert (std::make_pair (key_string_p,
+                                                         element_p)); }*/
+                    dictionary_r.push_back (std::make_pair (key_string_p,
+                                                            element_p)); }
 /*                    ACE_DEBUG ((LM_DEBUG,
                                 ACE_TEXT ("[dictionary: %@] key: \"%s\": %d\n"),
                                 &dictionary_r,
@@ -329,8 +333,10 @@ dictionary_value: "string" {
                     parser->popList ();
                     Bencoding_Dictionary_t& dictionary_r =
                       parser->getDictionary ();
-                    dictionary_r.insert (std::make_pair (key_string_p,
-                                                         element_p)); }
+/*                    dictionary_r.insert (std::make_pair (key_string_p,
+                                                         element_p)); }*/
+                    dictionary_r.push_back (std::make_pair (key_string_p,
+                                                            element_p)); }
 /*                    ACE_DEBUG ((LM_DEBUG,
                                 ACE_TEXT ("[dictionary: %@] key: \"%s\": \"%s\"\n"),
                                 &dictionary_r,
@@ -351,8 +357,10 @@ dictionary_value: "string" {
                     parser->popDictionary ();
                     Bencoding_Dictionary_t& dictionary_r =
                       parser->getDictionary ();
-                    dictionary_r.insert (std::make_pair (key_string_p,
-                                                         element_p)); }
+/*                    dictionary_r.insert (std::make_pair (key_string_p,
+                                                         element_p)); }*/
+                    dictionary_r.push_back (std::make_pair (key_string_p,
+                                                            element_p)); }
 /*                    ACE_DEBUG ((LM_DEBUG,
                                 ACE_TEXT ("[dictionary: %@] key: \"%s\": \"%s\"\n"),
                                 &dictionary_r,

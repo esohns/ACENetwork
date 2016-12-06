@@ -86,8 +86,7 @@ Net_SessionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::~Net_SessionBase_T"));
 
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
     // sanity check(s)
     ACE_ASSERT (connectionManager_);
@@ -225,20 +224,19 @@ Net_SessionBase_T<AddressType,
     deadline =
         (COMMON_TIME_NOW +
          ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT, 0));
-    ACE_Time_Value delay (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL,
-                          0);
+    ACE_Time_Value delay (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL, 0);
     do
     {
+      // *TODO*: this does not work...
+      iconnection_p = connectionManager_->get (address_in);
+      if (iconnection_p)
+        break; // done
+
       result = ACE_OS::sleep (delay);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
                     &delay));
-
-      // *TODO*: this does not work...
-      iconnection_p = connectionManager_->get (address_in);
-      if (iconnection_p)
-        break; // done
     } while (COMMON_TIME_NOW < deadline);
   } // end ELSE
   else
@@ -384,8 +382,7 @@ Net_SessionBase_T<AddressType,
 
   int result = -1;
 
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
     // sanity check(s)
     ACE_ASSERT (connectionManager_);
@@ -451,8 +448,7 @@ Net_SessionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::connect"));
 
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
     std::pair<Net_ConnectionsIterator_t, bool> result =
         state_.connections.insert (id_in);
@@ -492,8 +488,7 @@ Net_SessionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::disconnect"));
 
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
     Net_ConnectionsIterator_t iterator = state_.connections.find (id_in);
     ACE_ASSERT (iterator != state_.connections.end ());

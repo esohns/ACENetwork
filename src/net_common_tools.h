@@ -34,17 +34,19 @@ class Net_Common_Tools
 {
  public:
   // --- general tools ---
-  // *NOTE*: if (the first argument == 0), the trailing ":0" will be cropped
+  // *NOTE*: if (the first argument is '0'), the trailing ":0" will be cropped
   //         from the return value
+  inline static std::string IPAddress2String (const ACE_INET_Addr& address_in) { return Net_Common_Tools::IPAddress2String (0, ACE_HTONL (address_in.get_ip_address ())); };
   static std::string IPAddress2String (unsigned short, // port (network byte order !)
-                                       unsigned int);  // IP address (network byte order !)
+                                       ACE_UINT32);    // IP address (network byte order !)
+  // *NOTE*: (see also: ace/INET_Addr.h:237)
   static ACE_INET_Addr string2IPAddress (std::string&); // host name (DNS name or dotted-decimal)
   static std::string IPProtocol2String (unsigned char); // protocol
   static std::string MACAddress2String (const unsigned char* const); // pointer to message data (START of ethernet header address field !)
   static std::string EthernetProtocolTypeID2String (unsigned short); // ethernet frame type (network (== big-endian) byte order !)
 
   // *NOTE*: this returns the external (i.e. routable) IP address for clients
-  //         that sit behind a (NATted) gateway
+  //         behind a (NATted-) gateway
   static bool interface2ExternalIPAddress (const std::string&, // interface identifier
                                            ACE_INET_Addr&);    // return value: external IP address
   static bool interface2IPAddress (const std::string&, // interface identifier
@@ -52,6 +54,9 @@ class Net_Common_Tools
   // *WARNING*: ensure that the array argument can hold at least 6 bytes !
   static bool interface2MACAddress (const std::string&, // interface identifier
                                     unsigned char[]);   // return value: MAC address
+  // *NOTE*: returns the 'default' network interface, i.e. the interface
+  //         associated with the default route or gateway
+  static std::string getInterface ();
   static bool getAddress (std::string&,  // host name
                           std::string&); // dotted-decimal
   static bool getHostname (std::string&); // return value: hostname

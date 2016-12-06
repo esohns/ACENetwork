@@ -46,17 +46,17 @@ using namespace std;
 
 #include "bittorrent_client_network.h"
 
-#include "test_i_defines.h"
+#include "test_i_curses_defines.h"
 
 bool
 curses_start (const std::string& URI_in,
               BitTorrent_Client_CursesState& state_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::curses_join"));
+  NETWORK_TRACE (ACE_TEXT ("::curses_start"));
 
   ACE_UNUSED_ARG (URI_in);
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_in.lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_in.lock, false);
 
   int result = -1;
   BitTorrent_Client_CursesSessionsIterator_t iterator =
@@ -256,10 +256,13 @@ curses_main (BitTorrent_Client_CursesState& state_in,
 #endif
 //  nofilter ();
 
+//  setupterm (NULL, ACE_STDOUT, &result_2);
+
   // *NOTE*: if this fails, the program exits, which is not intended behavior
   // *TODO*: --> use newterm() instead
   //state_in.screen = initscr ();
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+  // *NOTE*: set $TERM to some terminal type (e.g. 'xterm-color')
   state_in.screen = newterm (NULL, NULL, NULL); // use $TERM, STD_OUT, STD_IN
   if (!state_in.screen)
   {
@@ -269,8 +272,8 @@ curses_main (BitTorrent_Client_CursesState& state_in,
     goto close;
   } // end IF
 #endif
-  // *NOTE*: for some (odd) reason, newterm does not work as advertised
-  //         (curscr, stdscr corrupt, return value works though)
+  // *NOTE*: for some reason, newterm does not work as advertised
+  //         (curscr, stdscr corrupt; return value works though)
   stdscr_p = initscr ();
   if (!stdscr_p)
   {
@@ -321,14 +324,11 @@ curses_main (BitTorrent_Client_CursesState& state_in,
     } // end IF
   } // end IF
 
-  result = curs_set (TEST_I_CURSES_CURSOR_MODE); // cursor mode
+  result = curs_set (TEST_I_CURSES_DEFAULT_CURSOR_MODE); // cursor mode
   if (result == ERR)
-  {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to curs_set(%d), aborting\n"),
-                TEST_I_CURSES_CURSOR_MODE));
-    goto close;
-  } // end IF
+                ACE_TEXT ("failed to curs_set(%d), continuing\n"),
+                TEST_I_CURSES_DEFAULT_CURSOR_MODE));
   result = nonl ();
   if (result == ERR)
   {
@@ -459,13 +459,13 @@ curses_main (BitTorrent_Client_CursesState& state_in,
                 ACE_TEXT ("failed to noecho(), aborting\n")));
     goto clean;
   } // end IF
-  result = raw (); // disable line buffering, special character processing
-  if (result == ERR)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to raw(), aborting\n")));
-    goto clean;
-  } // end IF
+//  result = raw (); // disable line buffering, special character processing
+//  if (result == ERR)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to raw(), aborting\n")));
+//    goto clean;
+//  } // end IF
   result = keypad (state_in.input, TRUE); // enable function/arrow/... keys
   if (result == ERR)
   {
@@ -509,8 +509,8 @@ curses_main (BitTorrent_Client_CursesState& state_in,
     state_in.backLog.clear ();
 
     // step3bc: get user input
-    { // *IMPORTANT NOTE*: release lock while waiting for input
-      ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard, reverse_lock, false);
+    // *IMPORTANT NOTE*: release lock while waiting for input
+    { ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard, reverse_lock, false);
 
       ch = wgetch (state_in.input);
     } // end lock scope
@@ -518,11 +518,8 @@ curses_main (BitTorrent_Client_CursesState& state_in,
     {
       case 27: // ESC
       {
-        // close connection --> closes session --> closes program
-        BitTorrent_Client_PeerConnection_Manager_t* connection_manager_p =
-            BITTORRENT_CLIENT_PEERCONNECTION_MANAGER_SINGLETON::instance ();
-        ACE_ASSERT (connection_manager_p);
-        connection_manager_p->abort ();
+        // close all sessions
+        controller_in->stop (true); // wait
         break;
       }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

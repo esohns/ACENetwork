@@ -103,13 +103,17 @@ BitTorrent_Client_SignalHandler::handle (int signal_in)
 
       break;
     }
+    case SIGCLD:
     default:
     {
-      // *PORTABILITY*: tracing in a signal handler context is not portable
-      // *TODO*
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("invalid/unknown signal: \"%S\", returning\n"),
-                  signal_in));
+      if (signal_in != SIGCLD)
+      {
+        // *PORTABILITY*: tracing in a signal handler context is not portable
+        // *TODO*
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown signal: \"%S\", returning\n"),
+                    signal_in));
+      } // end IF
       return;
     }
   } // end SWITCH

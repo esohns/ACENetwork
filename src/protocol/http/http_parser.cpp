@@ -539,21 +539,14 @@ namespace yy {
 
         break;
 
-      case 24: // regular_body
+      case 24: // chunked_body
 
 
         { (yysym.value.ival) = 0; }
 
         break;
 
-      case 25: // chunked_body
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 26: // chunks
+      case 25: // chunks
 
 
         { (yysym.value.ival) = 0; }
@@ -727,21 +720,14 @@ namespace yy {
 
         break;
 
-      case 24: // regular_body
+      case 24: // chunked_body
 
 
         { debug_stream () << (yysym.value.ival); }
 
         break;
 
-      case 25: // chunked_body
-
-
-        { debug_stream () << (yysym.value.ival); }
-
-        break;
-
-      case 26: // chunks
+      case 25: // chunks
 
 
         { debug_stream () << (yysym.value.ival); }
@@ -1215,7 +1201,7 @@ namespace yy {
 
   case 19:
 
-    { (yylhs.value.ival) = (yystack_[1].value.ival) + (yystack_[0].value.ival);
+    { (yylhs.value.ival) = (yystack_[0].value.ival);
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        HTTP_HeadersIterator_t iterator =
@@ -1225,7 +1211,7 @@ namespace yy {
                                                        converter.str ((*iterator).second);
                                                        unsigned int content_length = 0;
                                                        converter >> content_length;
-                                                       if ((yystack_[1].value.ival) == content_length)
+                                                       if ((yystack_[0].value.ival) == static_cast<int> (content_length))
                                                        {
                                                          struct HTTP_Record* record_p =
                                                            &record_r;
@@ -1256,58 +1242,6 @@ namespace yy {
 
   case 22:
 
-    { (yylhs.value.ival) = (yystack_[1].value.ival) + (yystack_[0].value.ival);
-                                                       struct HTTP_Record& record_r =
-                                                         iparser_p->current ();
-                                                       HTTP_HeadersIterator_t iterator =
-                                                         record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
-                                                       ACE_ASSERT (iterator != record_r.headers.end ());
-                                                       std::istringstream converter;
-                                                       converter.str ((*iterator).second);
-                                                       unsigned int content_length = 0;
-                                                       converter >> content_length;
-                                                       if ((yystack_[1].value.ival) == content_length)
-                                                       {
-                                                         struct HTTP_Record* record_p =
-                                                           &record_r;
-                                                         try {
-                                                           iparser_p->record (record_p);
-                                                         } catch (...) {
-                                                           ACE_DEBUG ((LM_ERROR,
-                                                                       ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
-                                                         }
-                                                         YYACCEPT;
-                                                       } }
-
-    break;
-
-  case 23:
-
-    { (yylhs.value.ival) = (yystack_[0].value.ival);
-                                                       yyclearin;
-                                                       YYACCEPT; }
-
-    break;
-
-  case 24:
-
-    { (yylhs.value.ival) = 0;
-                                                       struct HTTP_Record& record_r =
-                                                         iparser_p->current ();
-                                                       struct HTTP_Record* record_p =
-                                                           &record_r;
-                                                       try {
-                                                         iparser_p->record (record_p);
-                                                       } catch (...) {
-                                                         ACE_DEBUG ((LM_ERROR,
-                                                                     ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
-                                                       }
-                                                       YYACCEPT; }
-
-    break;
-
-  case 25:
-
     { (yylhs.value.ival) = (yystack_[2].value.ival) + (yystack_[1].value.ival) + (yystack_[0].value.ival); // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
                                                      struct HTTP_Record& record_r =
                                                        iparser_p->current ();
@@ -1323,7 +1257,7 @@ namespace yy {
 
     break;
 
-  case 26:
+  case 23:
 
     { (yylhs.value.ival) = (yystack_[0].value.ival);
                                                        yyclearin;
@@ -1331,20 +1265,20 @@ namespace yy {
 
     break;
 
-  case 27:
+  case 24:
 
     { (yylhs.value.ival) = 0;
                                                        YYACCEPT; }
 
     break;
 
-  case 28:
+  case 25:
 
     { (yylhs.value.ival) = (yystack_[1].value.ival) + (yystack_[0].value.ival); }
 
     break;
 
-  case 29:
+  case 26:
 
     { (yylhs.value.ival) = 0; }
 
@@ -1608,16 +1542,15 @@ namespace yy {
 
   const signed char HTTP_Parser::yypact_ninf_ = -14;
 
-  const signed char HTTP_Parser::yytable_ninf_ = -28;
+  const signed char HTTP_Parser::yytable_ninf_ = -25;
 
   const signed char
   HTTP_Parser::yypact_[] =
   {
-      -1,     2,    -3,   -14,     7,    18,    -2,   -14,   -14,    -4,
-       6,   -14,   -14,    -4,   -14,     9,   -14,   -14,   -14,   -14,
-      20,   -14,   -14,   -14,    20,    12,     1,   -14,   -14,   -14,
-      12,   -14,   -14,    16,   -14,   -14,    -4,   -14,   -14,    10,
-     -14
+      -1,     2,    -3,   -14,     7,    12,    -2,   -14,   -14,    -4,
+       6,   -14,   -14,    -4,   -14,    11,   -14,   -14,   -14,   -14,
+      18,   -14,   -14,   -14,    18,   -14,     1,   -14,   -14,   -14,
+      14,   -14,   -14,    -4,   -14,    10,   -14
   };
 
   const unsigned char
@@ -1625,40 +1558,39 @@ namespace yy {
   {
        0,     0,     0,     5,     0,     0,     0,     8,     3,    18,
        0,    13,     4,    18,     1,     0,     9,    10,     7,    17,
-       6,    14,    15,    12,    11,    24,    29,    21,     2,    16,
-      24,    23,    19,    29,    26,    20,    18,    22,    28,     0,
-      25
+       6,    14,    15,    12,    11,    19,    26,    21,     2,    16,
+      26,    23,    20,    18,    25,     0,    22
   };
 
   const signed char
   HTTP_Parser::yypgoto_[] =
   {
      -14,   -14,   -14,   -14,   -14,   -14,   -14,   -14,   -14,   -13,
-     -14,     0,   -14,    -5
+     -14,   -14,     0
   };
 
   const signed char
   HTTP_Parser::yydefgoto_[] =
   {
       -1,     4,     5,     8,     9,    18,    12,    13,    23,    20,
-      28,    32,    35,    36
+      28,    32,    33
   };
 
   const signed char
   HTTP_Parser::yytable_[] =
   {
-      24,   -27,     1,    16,     2,    10,     6,    14,    19,    11,
-      17,     3,    33,    34,     7,    21,    29,    40,    22,    25,
-      26,    27,    30,    39,    31,    15,    29,    33,    38,     0,
-      37
+      24,   -24,     1,    16,     2,    10,     6,    14,    19,    11,
+      17,     3,    30,    31,     7,    21,    29,    36,    22,    15,
+      35,    25,    26,    27,    29,    30,     0,     0,     0,     0,
+      34
   };
 
   const signed char
   HTTP_Parser::yycheck_[] =
   {
       13,     0,     3,     5,     5,     8,     4,     0,    12,    12,
-      12,    12,    11,    12,    12,     9,     6,     7,    12,    10,
-      11,    12,    10,    36,    12,     7,     6,    11,    33,    -1,
+      12,    12,    11,    12,    12,     9,     6,     7,    12,     7,
+      33,    10,    11,    12,     6,    11,    -1,    -1,    -1,    -1,
       30
   };
 
@@ -1668,8 +1600,7 @@ namespace yy {
        0,     3,     5,    12,    14,    15,     4,    12,    16,    17,
        8,    12,    19,    20,     0,     7,     5,    12,    18,    12,
       22,     9,    12,    21,    22,    10,    11,    12,    23,     6,
-      10,    12,    24,    11,    12,    25,    26,    24,    26,    22,
-       7
+      11,    12,    24,    25,    25,    22,     7
   };
 
   const unsigned char
@@ -1677,15 +1608,15 @@ namespace yy {
   {
        0,    13,    14,    15,    15,    15,    16,    17,    17,    18,
       18,    19,    20,    20,    21,    21,    22,    22,    22,    23,
-      23,    23,    24,    24,    24,    25,    25,    25,    26,    26
+      23,    23,    24,    24,    24,    25,    25
   };
 
   const unsigned char
   HTTP_Parser::yyr2_[] =
   {
        0,     2,     3,     2,     2,     1,     2,     2,     1,     1,
-       1,     2,     2,     1,     1,     1,     2,     1,     0,     2,
-       2,     1,     2,     1,     0,     3,     1,     0,     2,     0
+       1,     2,     2,     1,     1,     1,     2,     1,     0,     1,
+       2,     1,     3,     1,     0,     2,     0
   };
 
 
@@ -1700,7 +1631,7 @@ namespace yy {
   "\"body\"", "\"chunk\"", "\"end_of_fragment\"", "$accept", "message",
   "head", "head_rest1", "request_line_rest1", "request_line_rest2",
   "head_rest2", "status_line_rest1", "status_line_rest2", "headers",
-  "body", "regular_body", "chunked_body", "chunks", YY_NULLPTR
+  "body", "chunked_body", "chunks", YY_NULLPTR
   };
 
 #if YYDEBUG
@@ -1708,8 +1639,8 @@ namespace yy {
   HTTP_Parser::yyrline_[] =
   {
        0,   215,   215,   216,   225,   255,   257,   258,   266,   268,
-     277,   279,   280,   293,   295,   303,   305,   355,   358,   360,
-     382,   383,   386,   408,   411,   425,   437,   440,   444,   445
+     277,   279,   280,   293,   295,   303,   305,   355,   359,   360,
+     382,   383,   386,   398,   403,   405,   407
   };
 
   // Print the state stack on the debug stream.
@@ -1801,7 +1732,7 @@ yy::HTTP_Parser::error (const location_type& location_in,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Parser::error"));
 
-  ACE_UNUSED_ARG (location_in);
+/*  ACE_UNUSED_ARG (location_in);*/
 
   iparser_p->error (location_in, message_in);
 /*  iparser_p->error (message_in);*/

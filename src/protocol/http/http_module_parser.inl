@@ -1011,10 +1011,23 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                 ACE_TEXT ("%s"),
                 ACE_TEXT (HTTP_Tools::dump (*record_inout).c_str ())));
 
-  DATA_CONTAINER_T& data_container_r =
-      const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
-//  data_container_r.set (record_inout);
+  DATA_CONTAINER_T* data_container_p = NULL;
+  ACE_NEW_NORETURN (data_container_p,
+                    DATA_CONTAINER_T ());
+  if (!data_container_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate DATA_CONTAINER_T: \"%m\", returning\n")));
+
+    record_inout = NULL;
+
+    return;
+  } // end IF
+  data_container_p->set (record_inout);
   record_inout = NULL;
+
+  headFragment_->initialize (data_container_p,
+                             NULL);
 
   inherited2::finished_ = true;
 }

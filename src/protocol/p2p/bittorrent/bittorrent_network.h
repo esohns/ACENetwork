@@ -82,6 +82,7 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
+          typename ControllerInterfaceType,
           typename CBDataType>
 class BitTorrent_Session_T;
 
@@ -347,12 +348,17 @@ struct BitTorrent_TrackerConnectionConfiguration
   struct BitTorrent_UserData*                   userData;
 };
 
+template <typename SessionInterfaceType>
+class BitTorrent_IControl_T;
+typedef BitTorrent_IControl_T<BitTorrent_ISession_t> BitTorrent_IControl_t;
 struct BitTorrent_SessionConfiguration
 {
   inline BitTorrent_SessionConfiguration ()
    : connectionManager (NULL)
+   , controller_ (NULL)
    , trackerConnectionManager (NULL)
    , metaInfo (NULL)
+   , metaInfoFileName ()
    , socketHandlerConfiguration (NULL)
    , traceParsing (NET_PROTOCOL_DEFAULT_YACC_TRACE)
    , traceScanning (NET_PROTOCOL_DEFAULT_LEX_TRACE)
@@ -361,8 +367,10 @@ struct BitTorrent_SessionConfiguration
   {};
 
   BitTorrent_PeerConnection_Manager_t*    connectionManager;
+  BitTorrent_IControl_t*                  controller_;
   BitTorrent_TrackerConnection_Manager_t* trackerConnectionManager;
   Bencoding_Dictionary_t*                 metaInfo;
+  std::string                             metaInfoFileName;
   struct Net_SocketHandlerConfiguration*  socketHandlerConfiguration;
   bool                                    traceParsing;
   bool                                    traceScanning;
@@ -370,9 +378,6 @@ struct BitTorrent_SessionConfiguration
   bool                                    useReactor;
 };
 
-template <typename SessionInterfaceType>
-class BitTorrent_IControl_T;
-typedef BitTorrent_IControl_T<BitTorrent_ISession_t> BitTorrent_IControl_t;
 struct BitTorrent_SessionState
 {
   inline BitTorrent_SessionState ()
@@ -413,6 +418,7 @@ typedef BitTorrent_Session_T<struct Net_SocketHandlerConfiguration,
                              struct BitTorrent_SessionState,
                              struct BitTorrent_UserData,
                              struct BitTorrent_UserData,
+                             BitTorrent_IControl_t,
                              struct Common_UI_State> BitTorrent_Session_t;
 typedef BitTorrent_Session_T<struct Net_SocketHandlerConfiguration,
                              struct Net_SocketHandlerConfiguration,
@@ -434,6 +440,7 @@ typedef BitTorrent_Session_T<struct Net_SocketHandlerConfiguration,
                              struct BitTorrent_SessionState,
                              struct BitTorrent_UserData,
                              struct BitTorrent_UserData,
+                             BitTorrent_IControl_t,
                              struct Common_UI_State> BitTorrent_AsynchSession_t;
 
 //////////////////////////////////////////

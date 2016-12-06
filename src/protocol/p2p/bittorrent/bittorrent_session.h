@@ -66,6 +66,7 @@ template <typename PeerHandlerConfigurationType, // socket-
           typename PeerUserDataType,
           typename TrackerUserDataType,
           ////////////////////////////////
+          typename ControllerInterfaceType, // derived from BitTorrent_IControl_T
           typename CBDataType> // ui feedback data type
 class BitTorrent_Session_T
  : public Net_SessionBase_T<ACE_INET_Addr,
@@ -97,6 +98,7 @@ class BitTorrent_Session_T
   typedef typename TrackerConnectionType::ICONNECTION_T ITRACKER_CONNECTION_T;
   typedef typename PeerConnectionType::ISTREAM_CONNECTION_T ISTREAM_CONNECTION_T;
   typedef typename TrackerConnectionType::ISTREAM_CONNECTION_T ITRACKER_STREAM_CONNECTION_T;
+  typedef ControllerInterfaceType ICONTROLLER_T;
 
   BitTorrent_Session_T ();
   virtual ~BitTorrent_Session_T ();
@@ -190,9 +192,10 @@ class BitTorrent_Session_T
                                             typename inherited::ISESSION_T,
                                             CBDataType> TRACKER_HANDLER_T;
 
-  // implement (part of) BitTorrent_ISession_T
+  // implement/override (part of) BitTorrent_ISession_T
+  virtual void disconnect (Net_ConnectionId_t);
   inline virtual void trackerConnect (Net_ConnectionId_t id_in) { inherited::connect (id_in); };
-  inline virtual void trackerDisconnect (Net_ConnectionId_t id_in) { inherited::disconnect (id_in); };
+  virtual void trackerDisconnect (Net_ConnectionId_t);
   virtual void notify (const struct HTTP_Record&); // tracker message record
   virtual void notify (const struct BitTorrent_Record&, // message record
                        ACE_Message_Block* = NULL);      // data piece (if applicable)
@@ -201,6 +204,7 @@ class BitTorrent_Session_T
   void log (const struct BitTorrent_Record&);
 
   bool                             logToFile_;
+  std::string                      metaInfoFileName_;
   PEER_MESSAGEHANDLER_MODULE_T*    peerHandlerModule_;
   PEER_HANDLER_T                   peerStreamHandler_;
   TRACKER_MESSAGEHANDLER_MODULE_T* trackerHandlerModule_;

@@ -129,7 +129,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-n        : use (PD|n)curses library [")
-            << TEST_I_SESSION_USE_CURSES
+            << BITTORRENT_CLIENT_DEFAULT_USE_CURSES
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-r        : use reactor [")
@@ -189,7 +189,7 @@ do_processArguments (int argc_in,
       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
 
   logToFile_out                  = TEST_I_DEFAULT_SESSION_LOG;
-  useCursesLibrary_out           = TEST_I_SESSION_USE_CURSES;
+  useCursesLibrary_out           = BITTORRENT_CLIENT_DEFAULT_USE_CURSES;
   useReactor_out                 = NET_EVENT_USE_REACTOR;
   statisticReportingInterval_out =
       TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL;
@@ -432,11 +432,6 @@ session_setup_curses_function (void* arg_in)
     goto error;
   }
 
-  // *NOTE*: signal main thread (resumes dispatching)
-  Common_Tools::finalizeEventDispatch (data_p->useReactor,
-                                       !data_p->useReactor,
-                                       -1);
-
   // step2: run curses event dispatch ?
   if (data_p->cursesState)
   {
@@ -572,10 +567,28 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
   configuration_in.trackerSocketHandlerConfiguration.userData =
     &configuration_in.trackerUserData;
 
+  configuration_in.peerConnectionConfiguration.socketHandlerConfiguration =
+    &configuration_in.peerSocketHandlerConfiguration;
+  configuration_in.peerConnectionConfiguration.streamConfiguration =
+    &configuration_in.peerStreamConfiguration;
+  configuration_in.peerConnectionConfiguration.userData =
+    &configuration_in.peerUserData;
+
+  configuration_in.trackerConnectionConfiguration.socketHandlerConfiguration =
+    &configuration_in.trackerSocketHandlerConfiguration;
+  configuration_in.trackerConnectionConfiguration.streamConfiguration =
+    &configuration_in.trackerStreamConfiguration;
+  configuration_in.trackerConnectionConfiguration.userData =
+    &configuration_in.trackerUserData;
+
+  configuration_in.sessionConfiguration.controller =
+      &bittorrent_control;
   configuration_in.sessionConfiguration.connectionManager =
       peer_connection_manager_p;
   configuration_in.sessionConfiguration.trackerConnectionManager =
       tracker_connection_manager_p;
+  configuration_in.sessionConfiguration.metaInfoFileName =
+      metaInfoFileName_in;
   configuration_in.sessionConfiguration.socketHandlerConfiguration =
       &configuration_in.peerSocketHandlerConfiguration;
   configuration_in.sessionConfiguration.traceScanning =
@@ -587,7 +600,8 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
   configuration_in.sessionConfiguration.useReactor =
       configuration_in.useReactor;
 
-  configuration_in.signalHandlerConfiguration.cursesState = &curses_state;
+  if (useCursesLibrary_in)
+    configuration_in.signalHandlerConfiguration.cursesState = &curses_state;
 
   configuration_in.peerUserData.configuration =
       &configuration_in.peerConnectionConfiguration;
@@ -630,10 +644,11 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
                                      NULL);
 
   // event loop(s):
-  // - catch SIGINT/SIGQUIT/SIGTERM/... signals (connect / perform orderly shutdown)
+  // - catch SIGINT/SIGQUIT/SIGTERM/... signals (connect / perform orderly
+  //   shutdown)
   // [- signal timer expiration to perform server queries] (see above)
 
-  // step6a: initialize worker(s)
+  // step6a: initialize dispatch thread(s)
   if (!Common_Tools::startEventDispatch (dispatch_thread_data,
                                          configuration_in.groupID))
   {
@@ -698,46 +713,36 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
     goto clean;
   } // end IF
 
-  // dispatch connection attempt
+  // step6c: dispatch connection attempt, wait for the session to finish
   Common_Tools::dispatchEvents (configuration_in.useReactor,
                                 configuration_in.groupID);
-
-  // *NOTE*: awoken by the worker thread (see above)...
-
-  if (tracker_connection_manager_p->count () < 1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to start session, returning\n")));
-
-    // clean up
-    result = thread_manager_p->wait_grp (group_id_2);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", continuing\n"),
-                  group_id_2));
-
-    goto clean;
-  } // end IF
-
-  ACE_DEBUG ((LM_ERROR,
-              ACE_TEXT ("started session...\n")));
-
-  // *NOTE*: from this point, clean up any remote connections
-
-  Common_Tools::dispatchEvents (configuration_in.useReactor,
-                                configuration_in.groupID);
-
-  // step7: clean up
-  peer_connection_manager_p->abort ();
-  tracker_connection_manager_p->abort ();
-  peer_connection_manager_p->wait ();
-  tracker_connection_manager_p->wait ();
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
 
+  // step7: clean up
 clean:
+  peer_connection_manager_p->wait ();
+  tracker_connection_manager_p->wait ();
+  result = thread_manager_p->wait_grp (group_id_2);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", continuing\n"),
+                group_id_2));
+
   return;
+
+error:
+  bittorrent_control.stop (true); // wait ?
+  peer_connection_manager_p->abort ();
+  tracker_connection_manager_p->abort ();
+  peer_connection_manager_p->wait ();
+  tracker_connection_manager_p->wait ();
+  result = thread_manager_p->wait_grp (group_id_2);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", continuing\n"),
+                group_id_2));
 }
 
 void
@@ -835,7 +840,8 @@ ACE_TMAIN (int argc_in,
       ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_DEFAULT_TORRENT_FILE);
 
   bool log_to_file                           = TEST_I_DEFAULT_SESSION_LOG;
-  bool use_curses_library                    = TEST_I_SESSION_USE_CURSES;
+  bool use_curses_library                    =
+      BITTORRENT_CLIENT_DEFAULT_USE_CURSES;
   bool use_reactor                           = NET_EVENT_USE_REACTOR;
   unsigned int statistic_reporting_interval  =
       TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL;
@@ -1003,6 +1009,23 @@ ACE_TMAIN (int argc_in,
   configuration.trackerModuleHandlerConfiguration.traceScanning = debug_parser;
   ///////////////////////////////////////
   configuration.useReactor = use_reactor;
+
+  if (!heap_allocator.initialize (configuration.allocatorConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize allocator, aborting\n")));
+
+    Common_Tools::finalizeLogging ();
+//    // *PORTABILITY*: on Windows, fini ACE...
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    result = ACE::fini ();
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+//#endif
+
+    return EXIT_FAILURE;
+  } // end IF
 
   // step8: do work
   ACE_High_Res_Timer timer;

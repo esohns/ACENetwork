@@ -835,8 +835,10 @@ namespace yy {
                     element_p->string = (yystack_[0].value.sval);
                     Bencoding_Dictionary_t& dictionary_r =
                       parser->getDictionary ();
-                    dictionary_r.insert (std::make_pair (key_string_p,
-                                                         element_p)); }
+/*                    dictionary_r.insert (std::make_pair (key_string_p,
+                                                         element_p)); }*/
+                    dictionary_r.push_back (std::make_pair (key_string_p,
+                                                            element_p)); }
 
     break;
 
@@ -853,8 +855,10 @@ namespace yy {
                     element_p->integer = (yystack_[0].value.ival);
                     Bencoding_Dictionary_t& dictionary_r =
                       parser->getDictionary ();
-                    dictionary_r.insert (std::make_pair (key_string_p,
-                                                         element_p)); }
+/*                    dictionary_r.insert (std::make_pair (key_string_p,
+                                                         element_p)); }*/
+                    dictionary_r.push_back (std::make_pair (key_string_p,
+                                                            element_p)); }
 
     break;
 
@@ -879,8 +883,10 @@ namespace yy {
                     parser->popList ();
                     Bencoding_Dictionary_t& dictionary_r =
                       parser->getDictionary ();
-                    dictionary_r.insert (std::make_pair (key_string_p,
-                                                         element_p)); }
+/*                    dictionary_r.insert (std::make_pair (key_string_p,
+                                                         element_p)); }*/
+                    dictionary_r.push_back (std::make_pair (key_string_p,
+                                                            element_p)); }
 
     break;
 
@@ -906,8 +912,10 @@ namespace yy {
                     parser->popDictionary ();
                     Bencoding_Dictionary_t& dictionary_r =
                       parser->getDictionary ();
-                    dictionary_r.insert (std::make_pair (key_string_p,
-                                                         element_p)); }
+/*                    dictionary_r.insert (std::make_pair (key_string_p,
+                                                         element_p)); }*/
+                    dictionary_r.push_back (std::make_pair (key_string_p,
+                                                            element_p)); }
 
     break;
 
@@ -1263,8 +1271,8 @@ namespace yy {
   BitTorrent_MetaInfo_Parser::yyrline_[] =
   {
        0,   221,   221,   221,   232,   233,   234,   243,   252,   252,
-     264,   264,   277,   278,   279,   279,   282,   300,   318,   318,
-     339,   339
+     264,   264,   277,   278,   279,   279,   282,   302,   322,   322,
+     345,   345
   };
 
   // Print the state stack on the debug stream.

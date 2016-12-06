@@ -36,14 +36,9 @@
 
 // sessions
 #define TEST_I_SESSION_LOG_FILENAME_PREFIX          "bittorrent_client_session"
-#define TEST_I_SESSION_USE_CURSES                   true // use (PD|N)curses ?
+#define TEST_I_SESSION_USE_CURSES                   true // use (PD|N)curses library ?
 
 #define TEST_I_DEFAULT_SESSION_LOG                  false // log to file ? : stdout
-
-// curses UI
-#define TEST_I_CURSES_COLOR_LOG                     1
-#define TEST_I_CURSES_COLOR_STATUS                  2
-#define TEST_I_CURSES_CURSOR_MODE                   2 // highlighted
 
 // statistic
 #define TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds: 0 --> OFF

@@ -503,16 +503,27 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              struct HTTP_Record& record_r =
                                iparser_p->current ();
                              HTTP_HeadersIterator_t iterator =
-                                 record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING));
-                             if ((iterator != record_r.headers.end ()) &&
-                                 ((*iterator).second == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING)))
-                             {
-//                               ACE_DEBUG ((LM_DEBUG,
-//                                           ACE_TEXT ("entity uses chunked transfer...\n")));
-                               BEGIN (chunked_body);
-                             } // end IF
-                             else
+                                 record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
+                             if (iterator != record_r.headers.end ())
                                BEGIN (body);
+                             else
+                             {
+                               iterator =
+                                   record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING));
+                               if (iterator != record_r.headers.end ())
+                               {
+                                 std::string value_string = (*iterator).second;
+                                 std::transform (value_string.begin (), value_string.end (),
+                                                 value_string.begin (),
+                                                 [](unsigned char c) { return std::tolower (c); });
+                                 if (value_string == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING))
+                                   BEGIN (chunked_body);
+                                 else
+                                   ACE_DEBUG ((LM_ERROR,
+                                               ACE_TEXT ("invalid/unknown transfer encoding (was: \"%s\"), continuing\n"),
+                                               ACE_TEXT ((*iterator).second.c_str ())));
+                               } // end IF
+                             } // end ELSE
                              yylval->ival = 2;
 //                             return yytokentype::DELIMITER;
                              return yy::HTTP_Parser::token::DELIMITER; }

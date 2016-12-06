@@ -37,7 +37,7 @@
 # define YYDEBUG 1
 #endif
 #if YYDEBUG
-//extern int bittorrent_debug;
+extern int bittorrent_debug;
 #endif
 /* "%code requires" blocks.  */
 
@@ -85,7 +85,7 @@ typedef void* yyscan_t;
 //         header manually; apparently, there is no easy way to add the export
 //         symbol to the declaration
 #define YYDEBUG 1
-extern int BitTorrent_Export bittorrent_debug;
+extern int BitTorrent_Export yydebug;
 #define YYERROR_VERBOSE 1
 
 #undef YYTOKENTYPE
@@ -153,7 +153,7 @@ int bittorrent_parse (BitTorrent_IParser_t* iparser_p, yyscan_t yyscanner);
 
 void BitTorrent_Export yysetdebug (int);
 void BitTorrent_Export yyerror (YYLTYPE*, BitTorrent_IParser_t*, yyscan_t, const char*);
-//int BitTorrent_Export yyparse (BitTorrent_IParser_t*, yyscan_t);
+int BitTorrent_Export yyparse (BitTorrent_IParser_t*, yyscan_t);
 void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);
 
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2

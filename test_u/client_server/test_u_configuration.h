@@ -88,6 +88,7 @@ struct Test_U_ModuleHandlerConfiguration
    , printProgressDot (false)
    , pushStatisticMessages (true)
    , sessionData (NULL)
+   , subscriber (NULL)
    , subscribers (NULL)
   {};
 
@@ -98,6 +99,7 @@ struct Test_U_ModuleHandlerConfiguration
   // *TODO*: remove this (--> session message data)
   struct Test_U_StreamSessionData* sessionData;
 
+  Test_U_ISessionNotify_t*         subscriber;
   Test_U_Subscribers_t*            subscribers;
 };
 

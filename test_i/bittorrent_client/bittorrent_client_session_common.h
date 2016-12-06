@@ -59,18 +59,23 @@ struct BitTorrent_Client_SessionState;
 //                              struct BitTorrent_Client_SessionConfiguration,
 //                              struct BitTorrent_Client_SessionState> BitTorrent_Client_ISession_t;
 
+template <typename SessionInterfaceType>
+class BitTorrent_IControl_T;
+typedef BitTorrent_IControl_T<BitTorrent_Client_ISession_t> BitTorrent_Client_IControl_t;
 struct BitTorrent_Client_SessionConfiguration
  : BitTorrent_SessionConfiguration
 {
   inline BitTorrent_Client_SessionConfiguration ()
    : BitTorrent_SessionConfiguration ()
    , connectionManager (NULL)
+   , controller (NULL)
    , trackerConnectionManager (NULL)
    , socketHandlerConfiguration (NULL)
    , trackerSocketHandlerConfiguration (NULL)
   {};
 
   BitTorrent_Client_PeerConnection_Manager_t*                 connectionManager;
+  BitTorrent_Client_IControl_t*                               controller;
   BitTorrent_Client_TrackerConnection_Manager_t*              trackerConnectionManager;
   struct BitTorrent_Client_PeerSocketHandlerConfiguration*    socketHandlerConfiguration;
   struct BitTorrent_Client_TrackerSocketHandlerConfiguration* trackerSocketHandlerConfiguration;
@@ -78,9 +83,6 @@ struct BitTorrent_Client_SessionConfiguration
 
 //typedef std::map<std::string, BitTorrent_Client_Connections_t> BitTorrent_Client_SessionConnections_t;
 //typedef BitTorrent_Client_SessionConnections_t::iterator BitTorrent_Client_SessionConnectionsIterator_t;
-template <typename SessionInterfaceType>
-class BitTorrent_IControl_T;
-typedef BitTorrent_IControl_T<BitTorrent_Client_ISession_t> BitTorrent_Client_IControl_t;
 struct BitTorrent_Client_SessionState
  : BitTorrent_SessionState
 {
@@ -113,6 +115,7 @@ typedef BitTorrent_Session_T<struct BitTorrent_Client_PeerSocketHandlerConfigura
                              struct BitTorrent_Client_SessionState,
                              struct BitTorrent_Client_PeerUserData,
                              struct BitTorrent_Client_TrackerUserData,
+                             BitTorrent_Client_IControl_t,
                              struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_Session_t;
 typedef BitTorrent_Session_T<struct BitTorrent_Client_PeerSocketHandlerConfiguration,
                              struct BitTorrent_Client_TrackerSocketHandlerConfiguration,
@@ -134,6 +137,7 @@ typedef BitTorrent_Session_T<struct BitTorrent_Client_PeerSocketHandlerConfigura
                              struct BitTorrent_Client_SessionState,
                              struct BitTorrent_Client_PeerUserData,
                              struct BitTorrent_Client_TrackerUserData,
+                             BitTorrent_Client_IControl_t,
                              struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_AsynchSession_t;
 
 //////////////////////////////////////////

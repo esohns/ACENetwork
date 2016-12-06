@@ -109,42 +109,76 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
     buffer = HTTP_Tools::Method2String (record_r.method);
     buffer += ACE_TEXT_ALWAYS_CHAR (" ");
     buffer += record_r.URI;
-    buffer += ACE_TEXT_ALWAYS_CHAR (" ");
-    buffer += ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_VERSION_STRING_PREFIX);
-    buffer += HTTP_Tools::Version2String (record_r.version);
-    buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
 
-    // prepare content ?
-    if (record_r.method == HTTP_Codes::HTTP_METHOD_POST)
+    // process form data, if any
+    switch (record_r.method)
     {
-      for (HTTP_FormIterator_t iterator_2 = record_r.form.begin ();
-           iterator_2 != record_r.form.end ();
-           ++iterator_2)
+      case HTTP_Codes::HTTP_METHOD_GET:
       {
-        content_buffer += (*iterator_2).first;
-        content_buffer += ACE_TEXT_ALWAYS_CHAR ("=");
-        content_buffer += (*iterator_2).second;
-        content_buffer += ACE_TEXT_ALWAYS_CHAR ("&");
-      } // end FOR
-      content_buffer.erase (--content_buffer.end ());
-      converter << content_buffer.size ();
+        if (!record_r.form.empty ())
+          buffer += ACE_TEXT_ALWAYS_CHAR ("?");
+        for (HTTP_FormIterator_t iterator_2 = record_r.form.begin ();
+             iterator_2 != record_r.form.end ();
+             ++iterator_2)
+        {
+          buffer += (*iterator_2).first;
+          buffer += ACE_TEXT_ALWAYS_CHAR ("=");
+          buffer += (*iterator_2).second;
+          buffer += ACE_TEXT_ALWAYS_CHAR ("&");
+        } // end FOR
+        buffer.erase (--buffer.end ());
 
-      iterator =
-        record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
-      if (iterator == record_r.headers.end ())
-        record_r.headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING),
-                                                 converter.str ()));
-      else
-        (*iterator).second = converter.str ();
-      iterator =
-        record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING));
-      if (iterator == record_r.headers.end ())
-        record_r.headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING),
-                                                 ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_WWWURLENCODING_STRING)));
-      else
-        (*iterator).second =
-          ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_WWWURLENCODING_STRING);
-    } // end IF
+        buffer += ACE_TEXT_ALWAYS_CHAR (" ");
+        buffer += ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_VERSION_STRING_PREFIX);
+        buffer += HTTP_Tools::Version2String (record_r.version);
+
+        break;
+      }
+      case HTTP_Codes::HTTP_METHOD_POST:
+      {
+        buffer += ACE_TEXT_ALWAYS_CHAR (" ");
+        buffer += ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_VERSION_STRING_PREFIX);
+        buffer += HTTP_Tools::Version2String (record_r.version);
+
+        for (HTTP_FormIterator_t iterator_2 = record_r.form.begin ();
+             iterator_2 != record_r.form.end ();
+             ++iterator_2)
+        {
+          content_buffer += (*iterator_2).first;
+          content_buffer += ACE_TEXT_ALWAYS_CHAR ("=");
+          content_buffer += (*iterator_2).second;
+          content_buffer += ACE_TEXT_ALWAYS_CHAR ("&");
+        } // end FOR
+        content_buffer.erase (--content_buffer.end ());
+        converter << content_buffer.size ();
+
+        iterator =
+            record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
+        if (iterator == record_r.headers.end ())
+          record_r.headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING),
+                                                   converter.str ()));
+        else
+          (*iterator).second = converter.str ();
+        iterator =
+            record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING));
+        if (iterator == record_r.headers.end ())
+          record_r.headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_TYPE_STRING),
+                                                   ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_WWWURLENCODING_STRING)));
+        else
+          (*iterator).second =
+            ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_MIMETYPE_WWWURLENCODING_STRING);
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown HTTP method (was: \"%s\"), continuing\n"),
+                    ACE_TEXT (HTTP_Tools::Method2String (record_r.method).c_str ())));
+        break;
+      }
+    } // end SWITCH
+
+    buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
   } // end IF
   else
   {

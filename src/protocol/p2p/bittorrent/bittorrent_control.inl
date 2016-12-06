@@ -27,6 +27,10 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
+#ifdef HAVE_CONFIG_H
+#include "libACENetwork_config.h"
+#endif
+
 #include "http_codes.h"
 #include "http_common.h"
 #include "http_tools.h"
@@ -35,6 +39,7 @@
 #include "bittorrent_network.h"
 #include "bittorrent_stream_common.h"
 #include "bittorrent_tools.h"
+
 
 template <typename SessionAsynchType,
           typename SessionType,
@@ -46,7 +51,8 @@ BitTorrent_Control_T<SessionAsynchType,
                      SessionConfigurationType,
                      SessionInterfaceType,
                      SessionStateType>::BitTorrent_Control_T (SessionConfigurationType* configuration_in)
- : configuration_ (configuration_in)
+ : condition_ (lock_)
+ , configuration_ (configuration_in)
  , lock_ ()
  , sessions_ ()
 {
@@ -67,15 +73,7 @@ BitTorrent_Control_T<SessionAsynchType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Control_T::~BitTorrent_Control_T"));
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-
-  for (SESSIONS_ITERATOR_T iterator = sessions_.begin ();
-       iterator != sessions_.end ();
-       ++iterator)
-  {
-    (*iterator).second->close (true); // wait
-    delete (*iterator).second;
-  } // end FOR
+  stop (true);
 }
 
 template <typename SessionAsynchType,
@@ -100,7 +98,7 @@ BitTorrent_Control_T<SessionAsynchType,
     if (iterator == sessions_.end ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to retrieve session handle (filename was: \"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to retrieve session handle (metainfo filename was: \"%s\"), aborting\n"),
                   ACE_TEXT (metaInfoFileName_in.c_str ())));
       return NULL;
     } // end IF
@@ -131,7 +129,7 @@ BitTorrent_Control_T<SessionAsynchType,
   typename SessionType::ISESSION_T* isession_p = NULL;
   SessionStateType* session_state_p = NULL;
   Bencoding_DictionaryIterator_t iterator;
-  std::string URI_string;
+  std::string URI_string, host_name_string;
   ACE_INET_Addr tracker_address, external_ip_address;
   ACE_Time_Value deadline;
   ACE_Time_Value one_second (1, 0);
@@ -148,6 +146,7 @@ BitTorrent_Control_T<SessionAsynchType,
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T::DATA_T* data_container_p =
       NULL;
   std::string key = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_ANNOUNCE_KEY);
+  std::string user_agent;
 
   // step1: parse metainfo
   ACE_ASSERT (!configuration_->metaInfo);
@@ -186,8 +185,13 @@ BitTorrent_Control_T<SessionAsynchType,
                 ACE_TEXT ("failed to initialize session, returning\n")));
     goto error;
   } // end IF
-
   session_state_p = &const_cast<SessionStateType&> (isession_p->state ());
+
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+
+    sessions_.insert (std::make_pair (metaInfoFileName_in,
+                                      isession_p));
+  } // end lock scope
 
   // step3: connect to the tracker
   ACE_NEW_NORETURN (record_p,
@@ -199,11 +203,17 @@ BitTorrent_Control_T<SessionAsynchType,
     goto error;
   } // end IF
 
-  iterator = configuration_->metaInfo->find (&key);
+//  iterator = configuration_->metaInfo->find (&key);
+  iterator = configuration_->metaInfo->begin ();
+  for (;
+       iterator != configuration_->metaInfo->end ();
+       ++iterator)
+    if (*(*iterator).first == key) break;
   ACE_ASSERT (iterator != configuration_->metaInfo->end ());
   ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
   if (!HTTP_Tools::parseURL (*(*iterator).second->string,
-                             tracker_address,
+                             host_name_string,
+//                             tracker_address,
                              record_p->URI))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -211,81 +221,45 @@ BitTorrent_Control_T<SessionAsynchType,
                 ACE_TEXT (*(*iterator).second->string->c_str ())));
     goto error;
   } // end IF
-
-  isession_p->trackerConnect (tracker_address);
-  // *TODO*: find a better way to do this
-  deadline =
-      (COMMON_TIME_NOW +
-       ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT, 0));
-  do
-  {
-    result = ACE_OS::sleep (one_second);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
-                  &one_second));
-
-    // *TODO*: this does not work...
-    iconnection_p =
-        configuration_->trackerConnectionManager->get (tracker_address);
-    if (iconnection_p)
-      break; // done
-  } while (COMMON_TIME_NOW < deadline);
-  if (!iconnection_p)
-  {
-    // debug info
-    result = tracker_address.addr_to_string (buffer,
-                                             sizeof (buffer));
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to the tracker (\"%s\"), aborting\n"),
-                buffer));
-
-    goto error;
-  } // end IF
-  istream_connection_p =
-      dynamic_cast<typename SessionType::ITRACKER_STREAM_CONNECTION_T*> (iconnection_p);
-  if (!istream_connection_p)
+  result = tracker_address.set (host_name_string.c_str (),
+                                AF_INET);
+  if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<Net_IStreamConnection_T>(0x%@), returning\n"),
-                iconnection_p));
+                ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"), aborting\n"),
+                ACE_TEXT (host_name_string.c_str ())));
     goto error;
   } // end IF
 
   // step4: send request to the tracker
-
   record_p->method = HTTP_Codes::HTTP_METHOD_GET;
   record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
 
-  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_INFO_HASH_HEADER),
-                                            HTTP_Tools::URLEncode (BitTorrent_Tools::MetaInfo2InfoHash (*configuration_->metaInfo))));
-  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PEER_ID_HEADER),
-                                            HTTP_Tools::URLEncode (BitTorrent_Tools::generatePeerId ())));
+  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_INFO_HASH_HEADER),
+                                         HTTP_Tools::URLEncode (BitTorrent_Tools::MetaInfo2InfoHash (*configuration_->metaInfo))));
+  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PEER_ID_HEADER),
+                                         HTTP_Tools::URLEncode (BitTorrent_Tools::generatePeerId ())));
   converter << BITTORRENT_DEFAULT_PORT;
-  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PORT_HEADER),
-                                           converter.str ()));
+  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PORT_HEADER),
+                                            converter.str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << 0;
-  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_UPLOADED_HEADER),
-                                           converter.str ()));
+  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_UPLOADED_HEADER),
+                                         converter.str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << BitTorrent_Tools::MetaInfo2Length (*configuration_->metaInfo);
-  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_LEFT_HEADER),
-                                           converter.str ()));
+  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_LEFT_HEADER),
+                                         converter.str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << 1;
-  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_COMPACT_HEADER),
-                                           converter.str ()));
-  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_HEADER),
-                                           ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_STARTED_STRING)));
-  if (!Net_Common_Tools::interface2ExternalIPAddress (ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET),
+  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_COMPACT_HEADER),
+                                         converter.str ()));
+  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_HEADER),
+                                         ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_STARTED_STRING)));
+  if (!Net_Common_Tools::interface2ExternalIPAddress (Net_Common_Tools::getInterface (),
                                                       external_ip_address))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -293,27 +267,35 @@ BitTorrent_Control_T<SessionAsynchType,
                 ACE_TEXT (NET_INTERFACE_DEFAULT_ETHERNET)));
     goto error;
   } // end IF
-  result = external_ip_address.addr_to_string (buffer,
-                                               sizeof (buffer));
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", returning\n")));
-    goto error;
-  } // end IF
-  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_IP_HEADER),
-                                           ACE_TEXT_ALWAYS_CHAR (buffer)));
+  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_IP_HEADER),
+                                         Net_Common_Tools::IPAddress2String (external_ip_address).c_str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << 0;
-  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_NUMWANT_HEADER),
-                                           converter.str ()));
+  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_NUMWANT_HEADER),
+                                         converter.str ()));
   if (session_state_p->key.empty ())
     session_state_p->key = BitTorrent_Tools::generateKey ();
-  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_KEY_HEADER),
-                                           session_state_p->key));
-  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_TRACKERID_HEADER),
-                                           session_state_p->trackerId));
+  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_KEY_HEADER),
+                                         session_state_p->key));
+  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_TRACKERID_HEADER),
+                                         session_state_p->trackerId));
+
+#ifdef HAVE_CONFIG_H
+  user_agent  = ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME);
+  user_agent += ACE_TEXT_ALWAYS_CHAR ("/");
+  user_agent += ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_VERSION);
+#endif
+  if (!user_agent.empty ())
+    record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING),
+                                              user_agent));
+  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_HOST_STRING),
+                                            host_name_string));
+//                                            HTTP_Tools::IPAddress2HostName (tracker_address).c_str ()));
+  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_STRING),
+                                            ACE_TEXT_ALWAYS_CHAR ("*/*")));
+  record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_ACCEPT_ENCODING_STRING),
+                                            ACE_TEXT_ALWAYS_CHAR ("gzip;q=1.0, deflate, identity")));
 
   // *IMPORTANT NOTE*: fire-and-forget API (message_data_p)
   ACE_NEW_NORETURN (data_container_p,
@@ -348,6 +330,50 @@ allocate:
   message_p->initialize (data_container_p,
                          NULL);
 
+  isession_p->trackerConnect (tracker_address);
+  // *TODO*: find a better way to do this
+  deadline =
+      (COMMON_TIME_NOW +
+       ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT, 0));
+  do
+  {
+    // *TODO*: this does not work...
+    iconnection_p =
+        configuration_->trackerConnectionManager->get (tracker_address);
+    if (iconnection_p)
+      break; // done
+
+    result = ACE_OS::sleep (one_second);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
+                  &one_second));
+  } while (COMMON_TIME_NOW < deadline);
+  if (!iconnection_p)
+  {
+    // debug info
+    result = tracker_address.addr_to_string (buffer,
+                                             sizeof (buffer));
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to connect to the tracker (\"%s\"), aborting\n"),
+                buffer));
+
+    goto error;
+  } // end IF
+  istream_connection_p =
+      dynamic_cast<typename SessionType::ITRACKER_STREAM_CONNECTION_T*> (iconnection_p);
+  if (!istream_connection_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dynamic_cast<Net_IStreamConnection_T>(0x%@), returning\n"),
+                iconnection_p));
+    goto error;
+  } // end IF
+
   // *IMPORTANT NOTE*: fire-and-forget API (message_p)
   message_block_p = message_p;
   try {
@@ -357,6 +383,7 @@ allocate:
                 ACE_TEXT ("caught exception in Net_IStreamConnection_T::send(), returning\n")));
     goto error;
   }
+  message_p = NULL;
 
   // step5: clean up
   iconnection_p->decrease ();
@@ -364,12 +391,20 @@ allocate:
   return;
 
 error:
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+
+    SESSIONS_ITERATOR_T iterator = sessions_.find (metaInfoFileName_in);
+    if (iterator != sessions_.end ())
+      sessions_.erase (iterator);
+  } // end lock scope
   if (iconnection_p)
     iconnection_p->decrease ();
   if (isession_p)
     delete isession_p;
   if (record_p)
     delete record_p;
+  if (message_p)
+    delete message_p;
 }
 
 template <typename SessionAsynchType,
@@ -386,6 +421,35 @@ BitTorrent_Control_T<SessionAsynchType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Control_T::stop"));
 
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+
+    for (SESSIONS_ITERATOR_T iterator = sessions_.begin ();
+         iterator != sessions_.end ();
+         ++iterator)
+    {
+      try {
+        (*iterator).second->close (false); // wait ?
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("caught exception in Net_ISession_T::close(), continuing\n")));
+      }
+    } // end FOR
+  } // end lock scope
+
+  if (waitForCompletion_in)
+    wait ();
+
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+
+    if (sessions_.size ())
+    {
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("cancelled %d session(s)\n"),
+                  sessions_.size ()));
+
+      sessions_.clear ();
+    } // end IF
+  } // end lock scope
 }
 
 template <typename SessionAsynchType,
@@ -402,6 +466,23 @@ BitTorrent_Control_T<SessionAsynchType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Control_T::wait"));
 
+  int result = -1;
+
+  // synch access
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+
+    while (!sessions_.empty ())
+    {
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("waiting (session count: %u)...\n"),
+                  sessions_.size ()));
+
+      result = condition_.wait ();
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Condition::wait(): \"%m\", continuing\n")));
+    } // end WHILE
+  } // end lock scope
 }
 
 template <typename SessionAsynchType,
@@ -419,4 +500,36 @@ BitTorrent_Control_T<SessionAsynchType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Control_T::notify"));
 
+  int result = -1;
+
+  switch (event_in)
+  {
+    case BITTORRENT_EVENT_CANCELLED:
+    case BITTORRENT_EVENT_COMPLETE:
+    {
+      SESSIONS_ITERATOR_T iterator;
+
+      // synch access
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
+
+        iterator = sessions_.find (metaInfoFileName_in);
+        ACE_ASSERT (iterator != sessions_.end ());
+        sessions_.erase (iterator);
+
+        // awaken any waiter(s)
+        result = condition_.broadcast ();
+        if (result == -1)
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_SYNCH_CONDITION::broadcast(): \"%m\", continuing\n")));
+      } // end lock scope
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown event (type was: %d), returning\n"),
+                  event_in));
+      break;
+    }
+  } // end SWITCH
 }

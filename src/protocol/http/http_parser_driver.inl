@@ -252,7 +252,7 @@ HTTP_ParserDriver_T<SessionMessageType>::parse (ACE_Message_Block* data_in)
 
   // parse data fragment
   try {
-    parser_.parse ();
+    result = parser_.parse ();
 //    result = ::yyparse (this, scannerState_);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,

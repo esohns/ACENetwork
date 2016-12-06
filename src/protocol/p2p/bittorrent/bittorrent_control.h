@@ -62,6 +62,7 @@ class BitTorrent_Control_T
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Control_T (const BitTorrent_Control_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Control_T& operator= (const BitTorrent_Control_T&))
 
+  ACE_SYNCH_CONDITION       condition_;
   SessionConfigurationType* configuration_;
   ACE_SYNCH_MUTEX           lock_;
   SESSIONS_T                sessions_;

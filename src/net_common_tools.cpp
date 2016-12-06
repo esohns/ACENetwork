@@ -49,7 +49,7 @@
 
 std::string
 Net_Common_Tools::IPAddress2String (unsigned short port_in,
-                                    unsigned int IPAddress_in)
+                                    ACE_UINT32 IPAddress_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::IPAddress2String"));
 
@@ -101,9 +101,17 @@ Net_Common_Tools::string2IPAddress (std::string& address_in)
 {
   NETWORK_TRACE ("Net_Common_Tools::string2IPAddress");
 
+  // *NOTE*: ACE_INET_Addr::string_to_address() needs a trailing port number to
+  //         function properly (see: ace/INET_Addr.h:237)
+  //         --> append one if necessary
+  std::string ip_address_string = address_in;
+  std::string::size_type position = ip_address_string.find (':', 0);
+  if (position == std::string::npos)
+    ip_address_string += ACE_TEXT_ALWAYS_CHAR (":0");
+
   int result = -1;
   ACE_INET_Addr inet_addr;
-  result = inet_addr.string_to_addr (address_in.c_str (),
+  result = inet_addr.string_to_addr (ip_address_string.c_str (),
                                      AF_INET);
   if (result == -1)
   {
@@ -493,18 +501,34 @@ Net_Common_Tools::interface2ExternalIPAddress (const std::string& interfaceIdent
   // initialize return value(s)
   IPAddress_out.reset ();
 
+  std::string interface_identifier_string = interfaceIdentifier_in;
+  if (interface_identifier_string.empty ())
+    interface_identifier_string = Net_Common_Tools::getInterface ();
+
   // step1: determine the 'internal' IP address
   ACE_INET_Addr internal_ip_address;
-  if (!Net_Common_Tools::interface2IPAddress (interfaceIdentifier_in,
+  if (!Net_Common_Tools::interface2IPAddress (interface_identifier_string,
                                               internal_ip_address))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interface2IPAddress(\"%s\"), aborting\n"),
-                ACE_TEXT (interfaceIdentifier_in.c_str ())));
+                ACE_TEXT (interface_identifier_string.c_str ())));
     return false;
   } // end IF
 
   int result = -1;
+  ACE_TCHAR buffer_2[BUFSIZ];
+  ACE_OS::memset (buffer_2, 0, sizeof (buffer_2));
+  result = internal_ip_address.addr_to_string (buffer_2,
+                                               sizeof (buffer_2),
+                                               1);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_ASSERT (false);
   ACE_NOTSUP_RETURN (false);
@@ -517,20 +541,22 @@ Net_Common_Tools::interface2ExternalIPAddress (const std::string& interfaceIdent
   //         - temporary files
   //         - system(3) call
   //         --> extremely inefficient; remove ASAP
-  std::string filename_string = Common_File_Tools::getTempDirectory ();
-  filename_string += ACE_DIRECTORY_SEPARATOR_STR;
-  filename_string +=
+  std::string filename_string =
       Common_File_Tools::getTempFilename (ACE_TEXT_ALWAYS_CHAR (""));
   std::string command_line_string =
       ACE_TEXT_ALWAYS_CHAR ("nslookup myip.opendns.com. resolver1.opendns.com >> ");
   command_line_string += filename_string;
 
   result = ACE_OS::system (ACE_TEXT (command_line_string.c_str ()));
-  if (result)
+//  result = execl ("/bin/sh", "sh", "-c", command, (char *) 0);
+  if ((result == -1)      ||
+      !WIFEXITED (result) ||
+      WEXITSTATUS (result))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::system(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (command_line_string.c_str ())));
+                ACE_TEXT ("failed to ACE_OS::system(\"%s\"): \"%m\" (result was: %d), aborting\n"),
+                ACE_TEXT (command_line_string.c_str ()),
+                WEXITSTATUS (result)));
     return false;
   } // end IF
   unsigned char* data_p = NULL;
@@ -547,28 +573,61 @@ Net_Common_Tools::interface2ExternalIPAddress (const std::string& interfaceIdent
                 ACE_TEXT ("failed to Common_File_Tools::deleteFile(\"%s\"), continuing\n"),
                 ACE_TEXT (filename_string.c_str ())));
 
-  std::string external_ip_address = reinterpret_cast<char*> (data_p);
+  std::string resolution_record_string = reinterpret_cast<char*> (data_p);
   delete [] data_p;
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("nslookup data: \"%s\"\n"),
+//              ACE_TEXT (resolution_record_string.c_str ())));
+
+  std::string external_ip_address;
+  std::istringstream converter;
+  char buffer [BUFSIZ];
+  std::string regex_string =
+      ACE_TEXT_ALWAYS_CHAR ("^(.*):(?:[[:space:]]*)(.*)$");
+  std::regex regex (regex_string);
+  std::smatch match_results;
+  converter.str (resolution_record_string);
+  bool is_first = true;
+  do {
+    converter.getline (buffer, sizeof (buffer));
+    if (!std::regex_match (std::string (buffer),
+                           match_results,
+                           regex,
+                           std::regex_constants::match_default))
+      continue;
+    ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+    if (match_results[1].matched &&
+        (ACE_OS::strcmp (match_results[1].str ().c_str (),
+                         ACE_TEXT_ALWAYS_CHAR (NET_ADDRESS_NSLOOKUP_RESULT_ADDRESS_KEY_STRING)) == 0))
+    {
+      if (is_first)
+      {
+        is_first = false;
+        continue;
+      } // end IF
+
+      ACE_ASSERT (match_results[2].matched);
+      external_ip_address = match_results[2];
+      break;
+    } // end IF
+  } while (!converter.fail ());
+  if (external_ip_address.empty ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to resolve IP address (was: \"%s\"), aborting\n"),
+                ACE_TEXT (buffer_2)));
+    return false;
+  } // end IF
 
   IPAddress_out = Net_Common_Tools::string2IPAddress (external_ip_address);
 #endif
 
   // debug info
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  result = internal_ip_address.addr_to_string (buffer,
-                                               sizeof (buffer),
-                                               1);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
-  ACE_TCHAR buffer_2[BUFSIZ];
-  ACE_OS::memset (buffer_2, 0, sizeof (buffer_2));
-  result = IPAddress_out.addr_to_string (buffer_2,
-                                         sizeof (buffer_2),
+  ACE_TCHAR buffer_3[BUFSIZ];
+  ACE_OS::memset (buffer_3, 0, sizeof (buffer_3));
+  result = IPAddress_out.addr_to_string (buffer_3,
+                                         sizeof (buffer_3),
                                          1);
   if (result == -1)
   {
@@ -580,8 +639,8 @@ Net_Common_Tools::interface2ExternalIPAddress (const std::string& interfaceIdent
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("interface \"%s\" --> \"%s\" --> \"%s\"\n"),
               ACE_TEXT (interfaceIdentifier_in.c_str ()),
-              buffer,
-              buffer_2));
+              buffer_2,
+              buffer_3));
 
   return true;
 }
@@ -717,6 +776,10 @@ Net_Common_Tools::interface2IPAddress (const std::string& interfaceIdentifier_in
   // initialize return value(s)
   IPAddress_out.reset ();
 
+  std::string interface_identifier_string = interfaceIdentifier_in;
+  if (interface_identifier_string.empty ())
+    interface_identifier_string = Net_Common_Tools::getInterface ();
+
 //  ACE_TCHAR buffer[BUFSIZ];
 //  ACE_OS::memset (buffer, 0, sizeof (buffer));
 
@@ -776,7 +839,7 @@ Net_Common_Tools::interface2IPAddress (const std::string& interfaceIdentifier_in
 //    if ((ip_adapter_addresses_2->OperStatus != IfOperStatusUp) ||
 //        (!ip_adapter_addresses_2->FirstUnicastAddress))
 //      continue;
-    if (ACE_OS::strcmp (interfaceIdentifier_in.c_str (),
+    if (ACE_OS::strcmp (interface_identifier_string.c_str (),
                         ip_adapter_addresses_2->AdapterName))
       goto continue_;
 
@@ -845,12 +908,15 @@ continue_:
     if (((ifaddrs_2->ifa_flags & IFF_UP) == 0) ||
         (!ifaddrs_2->ifa_addr))
       continue;
-    if (ACE_OS::strcmp (interfaceIdentifier_in.c_str (),
+    if (ACE_OS::strcmp (interface_identifier_string.c_str (),
                         ifaddrs_2->ifa_name))
       continue;
 
-    if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
+    if ((ifaddrs_2->ifa_addr->sa_family != AF_INET) &&
+        (ifaddrs_2->ifa_addr->sa_family != AF_PACKET)) // support ppp
       continue;
+    if (ifaddrs_2->ifa_addr->sa_family == AF_PACKET) // support ppp
+      ifaddrs_2->ifa_addr->sa_family = AF_INET;
 
     sockaddr_in_p = (struct sockaddr_in*)ifaddrs_2->ifa_addr;
     result = IPAddress_out.set (sockaddr_in_p,
@@ -892,6 +958,100 @@ continue_:
 //              buffer));
 
   return true;
+}
+
+std::string
+Net_Common_Tools::getInterface ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getInterface"));
+
+  std::string result;
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (result);
+  ACE_NOTREACHED (return result;)
+#else
+  // *TODO*: this should work on most Linux systems, but is really a bad idea:
+  //         - relies on local 'ip'
+  //         - temporary files
+  //         - system(3) call
+  //         --> extremely inefficient; remove ASAP
+  std::string filename_string =
+      Common_File_Tools::getTempFilename (ACE_TEXT_ALWAYS_CHAR (""));
+  std::string command_line_string = ACE_TEXT_ALWAYS_CHAR ("ip route >> ");
+  command_line_string += filename_string;
+
+  int result_2 = ACE_OS::system (ACE_TEXT (command_line_string.c_str ()));
+//  result = execl ("/bin/sh", "sh", "-c", command, (char *) 0);
+  if ((result_2 == -1)      ||
+      !WIFEXITED (result_2) ||
+      WEXITSTATUS (result_2))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::system(\"%s\"): \"%m\" (result was: %d), aborting\n"),
+                ACE_TEXT (command_line_string.c_str ()),
+                WEXITSTATUS (result_2)));
+    return result;
+  } // end IF
+  unsigned char* data_p = NULL;
+  if (!Common_File_Tools::load (filename_string,
+                                data_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_File_Tools::load(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (filename_string.c_str ())));
+    return result;
+  } // end IF
+  if (!Common_File_Tools::deleteFile (filename_string))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_File_Tools::deleteFile(\"%s\"), continuing\n"),
+                ACE_TEXT (filename_string.c_str ())));
+
+  std::string route_record_string = reinterpret_cast<char*> (data_p);
+  delete [] data_p;
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("ip data: \"%s\"\n"),
+//              ACE_TEXT (route_record_string.c_str ())));
+
+  std::istringstream converter;
+  char buffer [BUFSIZ];
+  std::string regex_string =
+      ACE_TEXT_ALWAYS_CHAR ("^default via ([[:digit:].]+) dev ([[:alnum:]]+)(?:.*)$");
+  std::regex regex (regex_string);
+  std::smatch match_results;
+  converter.str (route_record_string);
+  do {
+    converter.getline (buffer, sizeof (buffer));
+    if (!std::regex_match (std::string (buffer),
+                           match_results,
+                           regex,
+                           std::regex_constants::match_default))
+      continue;
+    ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+    ACE_ASSERT (match_results[1].matched);
+    ACE_ASSERT (match_results[2].matched);
+    result = match_results[2];
+
+    break;
+  } while (!converter.fail ());
+  if (result.empty ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to retrieve default interface from route data (was: \"%s\"), aborting\n"),
+                ACE_TEXT (route_record_string.c_str ())));
+    return result;
+  } // end IF
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("default interface: \"%s\" (gateway: %s)\n"),
+              ACE_TEXT (result.c_str ()),
+              ACE_TEXT (match_results[1].str ().c_str ())));
+
+#endif
+
+  return result;
 }
 
 bool

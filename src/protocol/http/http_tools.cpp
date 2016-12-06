@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <iomanip>
 #include <locale>
 #include <regex>
 #include <sstream>
@@ -30,6 +31,7 @@
 #include <ace/Log_Msg.h>
 
 #include "common_defines.h"
+#include "common_tools.h"
 
 #include "net_macros.h"
 
@@ -390,13 +392,19 @@ HTTP_Tools::Encoding2CompressionFormat (const std::string& encoding_in)
 
 bool
 HTTP_Tools::parseURL (const std::string& URL_in,
-                      ACE_INET_Addr& address_out,
+                      std::string& hostName_out,
+//                      ACE_INET_Addr& hostName_out,
                       std::string& URI_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::parseURL"));
 
+  // intialize return value(s)
+  hostName_out.clear ();
+//  hostName_out.reset ();
+  URI_out.clear ();
+
   bool use_SSL = false;
-  std::string hostname;
+//  std::string hostname;
   unsigned short port = HTTP_DEFAULT_SERVER_PORT;
   std::istringstream converter;
   //std::string dotted_decimal_string;
@@ -423,13 +431,17 @@ HTTP_Tools::parseURL (const std::string& URL_in,
     use_SSL = true;
   ACE_UNUSED_ARG (use_SSL);
   ACE_ASSERT (match_results[2].matched);
-  hostname = match_results[2];
+//  hostname = match_results[2];
+  hostName_out = match_results[2];
   if (match_results[3].matched)
   {
     converter.clear ();
     converter.str (ACE_TEXT_ALWAYS_CHAR (""));
     converter.str (match_results[3].str ());
     converter >> port;
+
+    hostName_out += ':';
+    hostName_out += match_results[3];
   } // end IF
   ACE_ASSERT (match_results[4].matched);
   URI_out = match_results[4];
@@ -451,16 +463,16 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   //              match_results_2[1].matched);
   //  dotted_decimal_string = hostname;
   //} // end IF
-  result = address_out.set (port,
-                            hostname.c_str (),
-                            1,
-                            ACE_ADDRESS_FAMILY_INET);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::set (): \"%m\", aborting\n")));
-    return false;
-  } // end IF
+//  result = address_out.set (port,
+//                            hostname.c_str (),
+//                            1,
+//                            ACE_ADDRESS_FAMILY_INET);
+//  if (result == -1)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_INET_Addr::set (): \"%m\", aborting\n")));
+//    return false;
+//  } // end IF
 
   // step3: validate URI
   regex_string =
@@ -493,34 +505,92 @@ HTTP_Tools::URLEncode (const std::string& string_in)
 
   std::string result;
 
-  std::locale locale (ACE_TEXT_ALWAYS_CHAR (COMMON_LOCALE_EN_US_STRING));
+  // *NOTE*: the default locale is the 'C' locale (as in:
+  //         'std::setlocale(LC_ALL, "C")')
+  //         --> replace with (C++-)US-ASCII
+  std::locale locale;
+//  std::locale locale (ACE_TEXT_ALWAYS_CHAR (""));
+  try {
+    std::locale us_ascii_locale (ACE_TEXT_ALWAYS_CHAR (COMMON_LOCALE_EN_US_STRING));
+    locale = us_ascii_locale;
+  } catch (std::runtime_error exception_in) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in std::locale(\"%s\"): \"%s\", aborting\n"),
+                ACE_TEXT (COMMON_LOCALE_EN_US_STRING),
+                ACE_TEXT (exception_in.what ())));
+
+    Common_Tools::printLocales ();
+
+    return result;
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in std::locale(\"%s\"), aborting\n"),
+                ACE_TEXT (COMMON_LOCALE_EN_US_STRING)));
+
+    Common_Tools::printLocales ();
+
+    return result;
+  }
   std::ostringstream converter;
-  converter << std::hex;
+  converter << std::hex << std::setfill ('0');
   std::string converted_string;
   for (std::string::const_iterator iterator = string_in.begin ();
        iterator != string_in.end ();
        ++iterator)
-  {
+  { // 'unreserved' characters (see also: RFC 3986)
     if (!std::isdigit (*iterator, locale) &&
         !std::isalpha (*iterator, locale) &&
-        !((*iterator == '.') ||
-          (*iterator == '-') ||
-          (*iterator == '_') ||
-          (*iterator == '~')))
+        !((*iterator == '.') || (*iterator == '-') || (*iterator == '_') ||
+          (*iterator == '~')))//             &&
+//    // 'reserved' characters (see also: RFC 3986)
+//        !((*iterator == '!')  || (*iterator == '*')  || (*iterator == '\'') ||
+//          (*iterator == '(')  || (*iterator == ')')  || (*iterator == ';') ||
+//          (*iterator == ':')  || (*iterator == '@')  || (*iterator == '&') ||
+//          (*iterator == '=')  || (*iterator == '+')  || (*iterator == '$') ||
+//          (*iterator == '/')  || (*iterator == '?')  || (*iterator == '#') ||
+//          (*iterator == '[')  || (*iterator == ']')))
     {
       result += '%';
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
-      converter << *iterator;
+      // *TODO*: there is probably a better way to do this...
+      converter << setw (2)
+                << static_cast<unsigned short> (*iterator);
       converted_string = converter.str ();
-      std::transform (converted_string.begin (), converted_string.end (),
-                      converted_string.begin (),
-                      [](unsigned char c) { return std::toupper (c); });
-      result += converted_string;
+//      std::transform (converted_string.begin (), converted_string.end (),
+//                      converted_string.begin (),
+//                      [](unsigned char c) { return std::toupper (c); });
+      result +=
+          ((converted_string.size () == 2) ? converted_string
+                                           : converted_string.substr (2, std::string::npos));
     } // end IF
     else
       result += *iterator;
   } // end FOR
+
+  return result;
+}
+
+std::string
+HTTP_Tools::IPAddress2HostName (const ACE_INET_Addr& address_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::IPAddress2HostName"));
+
+  std::string result;
+
+  int result_2 = -1;
+  ACE_TCHAR buffer[32];
+  ACE_OS::memset (&buffer, 0, sizeof (buffer));
+  result_2 = address_in.addr_to_string (buffer,
+                                        sizeof (buffer),
+                                        0); // want hostname !
+  if (result_2 == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Inet_Addr::addr_to_string: \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  result = ACE_TEXT_ALWAYS_CHAR (buffer);
 
   return result;
 }

@@ -54,11 +54,14 @@ class HTTP_Export HTTP_Tools
   static enum Stream_Decoder_CompressionFormatType Encoding2CompressionFormat (const std::string&);
 
   static bool parseURL (const std::string&, // URL
-                        ACE_INET_Addr&,     // return value: host address
+                        std::string&,       // return value: host name
+//                        ACE_INET_Addr&,     // return value: host address
                         std::string&);      // return value: URI
   // *NOTE*: this 'escapes' the input so it can be sent in an URL
   //         (see also: RFC 1738)
   static std::string URLEncode (const std::string&);
+
+  static std::string IPAddress2HostName (const ACE_INET_Addr&); // host address
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_Tools ())

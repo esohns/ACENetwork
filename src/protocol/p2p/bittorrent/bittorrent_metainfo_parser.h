@@ -176,7 +176,7 @@ namespace yy {
     {
     
 
-  int                     ival;
+  ACE_INT64               ival;
   std::string*            sval;
   Bencoding_Element*      eval;
   Bencoding_List_t*       lval;

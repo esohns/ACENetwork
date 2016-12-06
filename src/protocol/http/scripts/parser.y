@@ -183,7 +183,7 @@ using namespace std;
 %token <ival> END 0           "end"
 
 %type  <ival> message head body
-%type  <ival> regular_body chunked_body chunks
+%type  <ival> chunked_body chunks
 %type  <ival> head_rest1 head_rest2 headers
 %type  <ival> request_line_rest1 request_line_rest2
 %type  <ival> status_line_rest1 status_line_rest2
@@ -355,9 +355,9 @@ headers:            headers "header"                 { /* NOTE*: use right-recur
                     | "end_of_fragment"              { $$ = $1;
                                                        yyclearin;
                                                        YYACCEPT; };
-                    |                                { $$ = 0; };
-//                    | %empty                         { $$ = 0; };
-body:               "body" regular_body              { $$ = $1 + $2;
+//                    |                                { $$ = 0; };
+                    | %empty                         { $$ = 0; };
+body:               "body"                           { $$ = $1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        HTTP_HeadersIterator_t iterator =
@@ -367,7 +367,7 @@ body:               "body" regular_body              { $$ = $1 + $2;
                                                        converter.str ((*iterator).second);
                                                        unsigned int content_length = 0;
                                                        converter >> content_length;
-                                                       if ($1 == content_length)
+                                                       if ($1 == static_cast<int> (content_length))
                                                        {
                                                          struct HTTP_Record* record_p =
                                                            &record_r;
@@ -383,45 +383,6 @@ body:               "body" regular_body              { $$ = $1 + $2;
                     | "end_of_fragment"              { $$ = $1;
                                                        yyclearin;
                                                        YYACCEPT; };
-regular_body:       "body" regular_body              { $$ = $1 + $2;
-                                                       struct HTTP_Record& record_r =
-                                                         iparser_p->current ();
-                                                       HTTP_HeadersIterator_t iterator =
-                                                         record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_LENGTH_STRING));
-                                                       ACE_ASSERT (iterator != record_r.headers.end ());
-                                                       std::istringstream converter;
-                                                       converter.str ((*iterator).second);
-                                                       unsigned int content_length = 0;
-                                                       converter >> content_length;
-                                                       if ($1 == content_length)
-                                                       {
-                                                         struct HTTP_Record* record_p =
-                                                           &record_r;
-                                                         try {
-                                                           iparser_p->record (record_p);
-                                                         } catch (...) {
-                                                           ACE_DEBUG ((LM_ERROR,
-                                                                       ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
-                                                         }
-                                                         YYACCEPT;
-                                                       } };
-                    | "end_of_fragment"              { $$ = $1;
-                                                       yyclearin;
-                                                       YYACCEPT; };
-                    |                                { $$ = 0;
-                                                       struct HTTP_Record& record_r =
-                                                         iparser_p->current ();
-                                                       struct HTTP_Record* record_p =
-                                                           &record_r;
-                                                       try {
-                                                         iparser_p->record (record_p);
-                                                       } catch (...) {
-                                                         ACE_DEBUG ((LM_ERROR,
-                                                                     ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
-                                                       }
-                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
-//                    | %empty                         { $$ = 0;
-//                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
 chunked_body:       chunks headers "delimiter"     { $$ = $1 + $2 + $3; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
                                                      struct HTTP_Record& record_r =
                                                        iparser_p->current ();
@@ -437,13 +398,13 @@ chunked_body:       chunks headers "delimiter"     { $$ = $1 + $2 + $3; // *TODO
                     | "end_of_fragment"              { $$ = $1;
                                                        yyclearin;
                                                        YYACCEPT; };
-                    |                                { $$ = 0;
+/*                    |                                { $$ = 0;
+                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)*/
+                    | %empty                         { $$ = 0;
                                                        YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
-//                    | %empty                         { $$ = 0;
-//                                                       YYACCEPT; }; // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
 chunks:             "chunk" chunks                   { $$ = $1 + $2; };
-                    |                                { $$ = 0; };
-//                    | %empty                         { $$ = 0; };
+/*                    |                                { $$ = 0; };*/
+                    | %empty                         { $$ = 0; };
 %%
 
 void
