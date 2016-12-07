@@ -28,34 +28,34 @@
 #include "bittorrent_tools.h"
 
 template <typename SessionMessageType>
-BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::BitTorrent_MetaInfo_ParserDriver_T (bool traceScanning_in,
-                                                                                            bool traceParsing_in)
+BitTorrent_Bencoding_ParserDriver_T<SessionMessageType>::BitTorrent_Bencoding_ParserDriver_T (bool traceScanning_in,
+                                                                                              bool traceParsing_in)
  : inherited (traceScanning_in,
               traceParsing_in)
- , metaInfo_ (NULL)
+ , bencoding_ (NULL)
  , dictionaries_ ()
  , lists_ ()
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::BitTorrent_MetaInfo_ParserDriver_T"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::BitTorrent_Bencoding_ParserDriver_T"));
 
 //  inherited::parser_.set (this);
 }
 
 template <typename SessionMessageType>
-BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::~BitTorrent_MetaInfo_ParserDriver_T ()
+BitTorrent_Bencoding_ParserDriver_T<SessionMessageType>::~BitTorrent_Bencoding_ParserDriver_T ()
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::~BitTorrent_MetaInfo_ParserDriver_T"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::~BitTorrent_Bencoding_ParserDriver_T"));
 
 }
 
 template <typename SessionMessageType>
 void
-//BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::error (const YYLTYPE& location_in,
-BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::error (const yy::location& location_in,
-                                                               const std::string& message_in)
-//BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
+//BitTorrent_Bencoding_ParserDriver_T<SessionMessageType>::error (const YYLTYPE& location_in,
+BitTorrent_Bencoding_ParserDriver_T<SessionMessageType>::error (const yy::location& location_in,
+                                                                const std::string& message_in)
+//BitTorrent_Bencoding_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::error"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::error"));
 
   std::ostringstream converter;
   converter << location_in;
@@ -93,9 +93,9 @@ BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::error (const yy::locatio
 }
 //template <typename SessionMessageType>
 //void
-//BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
+//BitTorrent_Bencoding_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
 //{
-//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::error"));
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::error"));
 
 //  // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
 //  ACE_DEBUG ((LM_ERROR,
@@ -111,13 +111,13 @@ BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::error (const yy::locatio
 
 template <typename SessionMessageType>
 void
-BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::record (Bencoding_Dictionary_t*& metaInfo_in)
+BitTorrent_Bencoding_ParserDriver_T<SessionMessageType>::record (Bencoding_Dictionary_t*& bencoding_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::record"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::record"));
 
   // sanity check(s)
-  ACE_ASSERT (metaInfo_in);
-  ACE_ASSERT (metaInfo_in == metaInfo_);
+  ACE_ASSERT (bencoding_in);
+  ACE_ASSERT (bencoding_in == bencoding_);
 
 //#if defined (_DEBUG)
 //  dump_state ();
@@ -126,27 +126,27 @@ BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::record (Bencoding_Dictio
 
 template <typename SessionMessageType>
 void
-//BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::set (Bencoding_Dictionary_t* dictionary_in)
-BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::pushDictionary (Bencoding_Dictionary_t* dictionary_in)
+//BitTorrent_Bencoding_ParserDriver_T<SessionMessageType>::set (Bencoding_Dictionary_t* dictionary_in)
+BitTorrent_Bencoding_ParserDriver_T<SessionMessageType>::pushDictionary (Bencoding_Dictionary_t* dictionary_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::pushDictionary"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::pushDictionary"));
 
   dictionaries_.push (dictionary_in);
 
-  if (!metaInfo_)
-    metaInfo_ = dictionary_in;
+  if (!bencoding_)
+    bencoding_ = dictionary_in;
 }
 
 template <typename SessionMessageType>
 void
-BitTorrent_MetaInfo_ParserDriver_T<SessionMessageType>::dump_state () const
+BitTorrent_Bencoding_ParserDriver_T<SessionMessageType>::dump_state () const
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_ParserDriver_T::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::dump_state"));
 
   // sanity check(s)
-  ACE_ASSERT (metaInfo_);
+  ACE_ASSERT (bencoding_);
 
   ACE_DEBUG ((LM_INFO,
               ACE_TEXT ("%s\n"),
-              ACE_TEXT (BitTorrent_Tools::MetaInfo2String (*metaInfo_).c_str ())));
+              ACE_TEXT (BitTorrent_Tools::MetaInfo2String (*bencoding_).c_str ())));
 }

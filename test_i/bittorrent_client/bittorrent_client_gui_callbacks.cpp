@@ -33,6 +33,8 @@
 
 #include "net_macros.h"
 
+#include "http_scanner.h"
+
 #include "bittorrent_common.h"
 #include "bittorrent_icontrol.h"
 #include "bittorrent_tools.h"

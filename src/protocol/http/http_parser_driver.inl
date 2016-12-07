@@ -27,7 +27,6 @@
 #include "http_common.h"
 #include "http_defines.h"
 #include "http_message.h"
-#include "http_parser.h"
 #include "http_scanner.h"
 
 template <typename SessionMessageType>

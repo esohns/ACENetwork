@@ -28,13 +28,13 @@
 #include "bittorrent_common.h"
 #include "bittorrent_stream_common.h"
 
-class BitTorrent_MetaInfo_IParser
+class BitTorrent_Bencoding_IParser
  : public Net_IRecordParser_T<Bencoding_Dictionary_t>
 // , public Common_IGet_T<Bencoding_Dictionary_t>
 // , public Common_IGet_T<Bencoding_List_t>
 {
  public:
-  virtual ~BitTorrent_MetaInfo_IParser () {};
+  virtual ~BitTorrent_Bencoding_IParser () {};
 
   virtual Bencoding_Dictionary_t& getDictionary () = 0;
   virtual std::string& getKey () = 0;
@@ -62,8 +62,9 @@ class BitTorrent_IParser_T
 
 //////////////////////////////////////////
 
-typedef Net_IScanner_T<BitTorrent_MetaInfo_IParser> BitTorrent_MetaInfo_IScanner_t;
+typedef Net_IScanner_T<BitTorrent_Bencoding_IParser> BitTorrent_Bencoding_IScanner_t;
 
 typedef BitTorrent_IParser_T<struct BitTorrent_Record> BitTorrent_IParser_t;
+typedef Net_IScanner_T<BitTorrent_IParser_t> BitTorrent_IScanner_t;
 
 #endif

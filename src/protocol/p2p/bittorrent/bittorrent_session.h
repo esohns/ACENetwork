@@ -196,7 +196,7 @@ class BitTorrent_Session_T
   virtual void disconnect (Net_ConnectionId_t);
   inline virtual void trackerConnect (Net_ConnectionId_t id_in) { inherited::connect (id_in); };
   virtual void trackerDisconnect (Net_ConnectionId_t);
-  virtual void notify (const struct HTTP_Record&); // tracker message record
+  virtual void notify (const Bencoding_Dictionary_t&); // tracker message record
   virtual void notify (const struct BitTorrent_Record&, // message record
                        ACE_Message_Block* = NULL);      // data piece (if applicable)
 

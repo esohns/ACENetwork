@@ -1,84 +1,69 @@
 %top{
-#include "bittorrent_common.h"
-#include <ace/Synch.h>
-#include "bittorrent_iparser.h"
-#undef YYTOKENTYPE
-#include "bittorrent_parser.h"
+  #include "bittorrent_common.h"
+  #include <ace/Synch.h>
+  #include "bittorrent_iparser.h"
+//  #include "bittorrent_scanner.h"
 
-/*
-#define YY_DECL                                                     \
-yy::BitTorrent_Parser::token_type                                   \
-bittorrent_lex (yy::BitTorrent_Parser::semantic_type* yylval_param, \
-                yy::BitTorrent_Parser::location_type* yylloc_param, \
-                BitTorrent_IParser* iparser_p,                      \
-                yyscan_t yyscanner)
- */
-#define YY_DECL                                          \
-yytokentype                                              \
-BitTorrent_Scanner_lex (YYSTYPE* yylval_param,           \
-                        YYLTYPE* yylloc_param,           \
-                        BitTorrent_IParser_t* iparser_p, \
-                        yyscan_t yyscanner)
+/* This disables inclusion of unistd.h, which is not available using MSVC. The
+ * C++ scanner uses STL streams instead. */
+/*#define YY_NO_UNISTD_H*/
+
+class BitTorrent_Scanner;
+
+//yy::BitTorrent_Parser::symbol_type
+#define YY_DECL                                                          \
+yy::BitTorrent_Parser::token_type                                        \
+BitTorrent_Scanner::yylex (yy::BitTorrent_Parser::semantic_type* yylval, \
+                           yy::location* location,                       \
+                           BitTorrent_IParser_t* parser)
 // ... and declare it for the parser's sake
-YY_DECL;
+//YY_DECL;
 
-//using namespace yy;
-//#define YYLTYPE BitTorrent_Parser::location_type
-//#define YYSTYPE BitTorrent_Parser::semantic_type
+//#define YYLTYPE yy::location
+//#define YYSTYPE yy::BitTorrent_Parser::semantic_type
 
-void BitTorrent_Scanner_set_column (int, yyscan_t);
-
-//#define FLEXINT_H
+//#define YY_EXTRA_TYPE
 }
 
 %{
-#include <regex>
-#include <sstream>
-#include <string>
+  // *WORKAROUND*
+  #include <iostream>
+  //using namespace std;
+  //// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
+  ////                   a problem in conjunction with the standard include headers
+  ////                   when ACE_USES_OLD_IOSTREAMS is defined
+  ////                   --> include the necessary headers manually (see above), and
+  ////                       prevent ace/iosfwd.h from causing any harm
+  //#define ACE_IOSFWD_H
 
-#include <ace/ace_wchar.h>
-#include <ace/Log_Msg.h>
-#include <ace/Message_Block.h>
-#include <ace/OS_Memory.h>
+  #include <ace/Synch.h>
+  #include "bittorrent_parser.h"
+  #include "bittorrent_scanner.h"
 
-#include "net_macros.h"
+  // the original yyterminate() macro returns int. Since this uses Bison 3
+  // variants as tokens, redefine it to change type to `Parser::semantic_type`
+//  #define yyterminate() yy::BitTorrent_Bencoding_Parser::make_END (location_)
+  #define yyterminate() return yy::BitTorrent_Parser::token::END
 
-#include "bittorrent_common.h"
-#include "bittorrent_defines.h"
-
-/* *NOTE*: instead of the default (int), this yylex returns token_type.
-           Unfortunately, yyterminate by default returns 0, which is not of
-           token_type. This %define solves that issue. */
-//#define yyterminate() return yy::HTTP_Parser::token::END
-#define yyterminate() return yytokentype::END
-
-/* *NOTE*: YY_DECL is defined elsewhere (needed so the scanner can support
-           extra arguments) */
-//#define YY_DECL
+  // this tracks the current scanner location. Action is called when length of
+  // the token is known
+  #define YY_USER_ACTION location_.columns (yyleng);
 %}
 
-%option header-file="bittorrent_scanner.h" outfile="bittorrent_scanner.cpp"
 %option yylineno yywrap
 %option nomain nounput noyymore noreject nodefault nostdinit
-%option nostack noline nounistd
-/* %option c++ yyclass="HTTP_Scanner" */
-/* %option ansi-definitions ansi-prototypes bison-bridge */
-/* *NOTE*: the 'line' directives confuse gdb */
-/* *NOTE*: 'noline' not supported (on Linux, flex 2.5.39)
-           --> use --noline and (manually) remove '#line's introduced by %top */
-/* %option ansi-definitions ansi-prototypes bison-bridge */
-%option bison-locations
-/* *IMPORTANT NOTE*: 'read' requires 'unistd'(.h) */
-%option 8bit batch never-interactive
-%option reentrant pointer prefix="BitTorrent_Scanner_"
+%option noline nounistd
+
+%option 8bit batch never-interactive stack
 /* *TODO*: find out why 'read' does not compile (on Linux, flex 2.5.39) */
 %option align read full
+
 %option backup debug perf-report perf-report verbose warn
-/* *IMPORTANT NOTE*: flex 2.5.4 does not recognize 'reentrant, nounistd,
-                     ansi-definitions, ansi-prototypes, header-file extra-type'
-*/
-%option extra-type="BitTorrent_IParser_t*"
-/* %option nounput */
+
+%option c++
+%option header-file="bittorrent_scanner.h" outfile="bittorrent_scanner.cpp"
+%option prefix="BitTorrent_Scanner_"
+%option yyclass="BitTorrent_Scanner"
 
 /* *NOTE*: for protcol specification, see:
            - http://bittorrent.org/beps/bep_0003.html
@@ -170,27 +155,35 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 /*#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; \
                        yylloc.first_column = yycolumn; yylloc.last_column = yycolumn+yyleng-1; \
                        yycolumn += yyleng; */
-#define YY_USER_ACTION yylloc->first_line = yylloc->last_line = yylineno; \
-                       yylloc->first_column = yycolumn; yylloc->last_column = yycolumn+yyleng-1; \
-                       yycolumn += yyleng;
 //#define YY_USER_ACTION yylloc->columns (yyleng);
 %}
 
 %% /* end of definitions */
 
 %{
-  //yylloc->step ();
-  //yy_flex_debug = HTTP_Scanner_get_debug (yyscanner);
+  /* code to place at the beginning of yylex() */
+
+  // reset location
+  location_.step ();
 
   unsigned int bitfield_counter = 0;
 
-  ACE_Message_Block* message_block_p = iparser_p->buffer ();
+  std::stringstream converter;
+//  std::string regex_string;
+//  std::regex regex;
+//  std::smatch match_results;
+
+  // sanity check(s)
+  ACE_ASSERT (parser);
+  ACE_Message_Block* message_block_p = parser->buffer ();
   ACE_ASSERT (message_block_p);
+
+//  location_.columns (yyleng);
 %}
 
 <INITIAL>{
 {PEER_HANDSHAKE_PREFIX}   { ACE_ASSERT (yyleng == 19);
-                            iparser_p->offset (yyleng);
+                            parser->offset (yyleng);
                             /* *TODO*: error handling */
                             ACE_NEW_NORETURN (yylval->handshake,
                                               struct BitTorrent_PeerHandshake ());
@@ -201,28 +194,28 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 <state_reserved>{
 {PEER_HANDSHAKE_RESERVED} { ACE_ASSERT (yyleng == 8);
                             ACE_ASSERT (yylval->handshake);
-                            iparser_p->offset (yyleng);
+                            parser->offset (yyleng);
                             ACE_OS::memcpy (yylval->handshake->reserved, yytext, 8);
                             BEGIN (state_hash); }
 } // end <state_reserved>
 <state_hash>{
 {PEER_HANDSHAKE_HASH}     { ACE_ASSERT (yyleng == 20);
                             ACE_ASSERT (yylval->handshake);
-                            iparser_p->offset (yyleng);
+                            parser->offset (yyleng);
                             yylval->handshake->hash.append (yytext, 20);
                             BEGIN (state_peer_id); }
 } // end <state_hash>
 <state_peer_id>{
 {PEER_HANDSHAKE_PEER_ID}  { ACE_ASSERT (yyleng == 20);
                             ACE_ASSERT (yylval->handshake);
-                            iparser_p->offset (yyleng);
+                            parser->offset (yyleng);
                             yylval->handshake->peer_id.append (yytext, 20);
                             BEGIN (state_length);
-                            return yytokentype::HANDSHAKE; }
+                            return yy::BitTorrent_Parser::token::HANDSHAKE; }
 } // end <state_peer_id>
 <state_length>{
 {LENGTH}                  { ACE_ASSERT (yyleng == 4);
-                            iparser_p->offset (yyleng);
+                            parser->offset (yyleng);
                             /* *TODO*: error handling */
                             ACE_NEW_NORETURN (yylval->record,
                                               struct BitTorrent_Record ());
@@ -231,28 +224,28 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
                             if (!yylval->record->length)
-                              return yytokentype::KEEP_ALIVE;
+                              return yy::BitTorrent_Parser::token::KEEP_ALIVE;
                             BEGIN (state_type); }
 } // end <state_length>
 <state_type>{
 {TYPE}                    { ACE_ASSERT (yyleng == 1);
-                            iparser_p->offset (yyleng);
+                            parser->offset (yyleng);
                             yylval->record->type =
                               static_cast<enum BitTorrent_MessageType> (*reinterpret_cast<ACE_UINT8*> (yytext));
                             switch (yylval->record->type)
                             {
                               case BITTORRENT_MESSAGETYPE_CHOKE:
                                 BEGIN (state_length);
-                                return yytokentype::CHOKE;
+                                return yy::BitTorrent_Parser::token::CHOKE;
                               case BITTORRENT_MESSAGETYPE_UNCHOKE:
                                 BEGIN (state_length);
-                                return yytokentype::UNCHOKE;
+                                return yy::BitTorrent_Parser::token::UNCHOKE;
                               case BITTORRENT_MESSAGETYPE_INTERESTED:
                                 BEGIN (state_length);
-                                return yytokentype::INTERESTED;
+                                return yy::BitTorrent_Parser::token::INTERESTED;
                               case BITTORRENT_MESSAGETYPE_NOT_INTERESTED:
                                 BEGIN (state_length);
-                                return yytokentype::NOT_INTERESTED;
+                                return yy::BitTorrent_Parser::token::NOT_INTERESTED;
                               case BITTORRENT_MESSAGETYPE_HAVE:
                                 BEGIN (state_have_payload);
                                 break;
@@ -281,28 +274,28 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_type>
 <state_have_payload>{
 {HAVE_PAYLOAD}            { ACE_ASSERT (yyleng == 4);
-                            iparser_p->offset (yyleng);
+                            parser->offset (yyleng);
                             yylval->record->have =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
                             BEGIN (state_length);
-                            return yytokentype::HAVE; }
+                            return yy::BitTorrent_Parser::token::HAVE; }
 } // end <state_have_payload>
 <state_bitfield_payload>{
 {BITFIELD_PAYLOAD}        { ACE_ASSERT (yyleng == 1);
                             ACE_ASSERT (bitfield_counter);
-                            iparser_p->offset (yyleng);
+                            parser->offset (yyleng);
                             yylval->record->bitfield.push_back (*reinterpret_cast<ACE_UINT8*> (yytext));
                             --bitfield_counter;
                             if (!bitfield_counter)
                             {
                               BEGIN (state_length);
-                              return yytokentype::BITFIELD;
+                              return yy::BitTorrent_Parser::token::BITFIELD;
                             } }
 } // end <state_bitfield_payload>
 <state_request_payload>{
 {REQUEST_PAYLOAD}         { ACE_ASSERT (yyleng == 12);
-                            iparser_p->offset (yyleng);
+                            parser->offset (yyleng);
                             yylval->record->request.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -313,11 +306,11 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext + 8))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext + 8));
                             BEGIN (state_length);
-                            return yytokentype::REQUEST; }
+                            return yy::BitTorrent_Parser::token::REQUEST; }
 } // end <state_request_payload>
 <state_cancel_payload>{
 {CANCEL_PAYLOAD}          { ACE_ASSERT (yyleng == 12);
-                            iparser_p->offset (yyleng);
+                            parser->offset (yyleng);
                             yylval->record->cancel.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -328,11 +321,11 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext + 8))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext + 8));
                             BEGIN (state_length);
-                            return yytokentype::CANCEL; }
+                            return yy::BitTorrent_Parser::token::CANCEL; }
 } // end <state_cancel_payload>
 <state_piece_payload>{
 {PIECE_PAYLOAD}           { ACE_ASSERT (yyleng == 8);
-                            iparser_p->offset (yyleng);
+                            parser->offset (yyleng);
                             yylval->record->piece.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -344,10 +337,10 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 <state_piece>{
 {OCTET}{1}                { ACE_ASSERT (yyleng == 1);
                             /* undo the effects of YY_DO_BEFORE_ACTION */
-                            *yy_cp = yyg->yy_hold_char;
+                            *yy_cp = (yy_hold_char);
 
                             // (frame and) skip over piece data
-                            message_block_p->rd_ptr (iparser_p->offset ());
+                            message_block_p->rd_ptr (parser->offset ());
 
                             unsigned int bytes_to_skip =
                               yylval->record->length - 9;
@@ -376,13 +369,13 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                               unsigned int skipped_bytes = 0;
                               while (skipped_bytes <= bytes_to_skip)
                               {
-                                if (!iparser_p->switchBuffer ())
+                                if (!parser->switchBuffer ())
                                 {
                                   ACE_DEBUG ((LM_ERROR,
                                               ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
                                   yyterminate ();
                                 } // end IF
-                                message_block_p = iparser_p->buffer ();
+                                message_block_p = parser->buffer ();
                                 skipped_bytes += message_block_p->length ();
                               } // end WHILE
                               remainder = (skipped_bytes - bytes_to_skip);
@@ -399,36 +392,36 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                               message_block_p->wr_ptr (message_block_p->rd_ptr () + remainder);
                               ACE_ASSERT (message_block_p->length () == remainder);
                             } // end ELSE
-                            if (!iparser_p->switchBuffer (true))
+                            if (!parser->switchBuffer (true))
                             {
                               ACE_DEBUG ((LM_ERROR,
                                           ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
                               yyterminate ();
                             } // end IF
-                            iparser_p->buffer ()->rd_ptr (remainder);
-                            iparser_p->offset (remainder);
+                            parser->buffer ()->rd_ptr (remainder);
+                            parser->offset (remainder);
 
                             // gobble initial bytes (if any)
                             char c = 0;
                             for (unsigned int i = 0; i < remainder; ++i)
-                              c = yyinput (yyscanner);
+                              c = yyinput ();
                             ACE_UNUSED_ARG (c);
 
                             BEGIN (state_length);
-                            return yytokentype::PIECE; }
+                            return yy::BitTorrent_Parser::token::PIECE; }
 } // end <state_piece>
 <<EOF>>                   { yyterminate(); } // *NOTE*: yywrap returned non-zero
 <*>{OCTET}                { /* *TODO*: use (?s:.) ? */
-                            if (!iparser_p->isBlocking ())
-                              return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+                            if (!parser->isBlocking ())
+                              return yy::BitTorrent_Parser::token::END_OF_FRAGMENT; // not enough data, cannot proceed
 
                             // wait for more data fragment(s)
-                            if (!iparser_p->switchBuffer ())
+                            if (!parser->switchBuffer ())
                             { // *NOTE*: most probable reason: connection has
                               //         been closed --> session end
                               ACE_DEBUG ((LM_DEBUG,
                                           ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
-                              return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+                              return yy::BitTorrent_Parser::token::END_OF_FRAGMENT; // not enough data, cannot proceed
                             } // end IF
                             yyless (0); }
 %%
@@ -437,17 +430,23 @@ extern "C"
 {
 #endif /* __cplusplus */
 int
-bittorrent_wrap (yyscan_t yyscanner)
+yyFlexLexer::yywrap ()
 {
-  NETWORK_TRACE (ACE_TEXT ("::bittorrent_wrap"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Scanner_FlexLexer::yywrap"));
 
-  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
-  BitTorrent_IParser_t* iparser_p =
-      BitTorrent_Scanner_get_extra (yyscanner);
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (-1);
+
+  ACE_NOTREACHED (return -1;)
+}
+int
+BitTorrent_Scanner::yywrap ()
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Scanner::yywrap"));
 
   // sanity check(s)
-  ACE_ASSERT (iparser_p);
-  if (!iparser_p->isBlocking ())
+  ACE_ASSERT (parser_);
+  if (!parser_->isBlocking ())
     return 1; // not enough data, cannot proceed
 
   // *NOTE*: there is more data
@@ -471,7 +470,7 @@ bittorrent_wrap (yyscan_t yyscanner)
   //              the_rest.size ()));
 
   // step2
-  if (!iparser_p->switchBuffer ())
+  if (!parser_->switchBuffer ())
   {
     // *NOTE*: most probable reason: received session end message
     ACE_DEBUG ((LM_DEBUG,

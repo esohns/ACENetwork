@@ -2,7 +2,7 @@
 // Report bugs to <bug-bison@gnu.org>.
 // Home page: <http://www.gnu.org/software/bison/>.
 
-digraph "/mnt/win_d/projects/libACENetwork/src/protocol/p2p/bittorrent/scripts/parser.y"
+digraph "/mnt/win_d/projects/libACENetwork/src/protocol/p2p/bittorrent/scripts/parser.yy"
 {
   node [fontname = courier, shape = box, colorscheme = paired6]
   edge [fontname = courier]

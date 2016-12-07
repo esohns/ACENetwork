@@ -271,7 +271,7 @@ BitTorrent_Control_T<SessionAsynchType,
                                          Net_Common_Tools::IPAddress2String (external_ip_address).c_str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
-  converter << 0;
+  converter << BITTORRENT_DEFAULT_TRACKER_REQUEST_NUMWANT_PEERS;
   record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_NUMWANT_HEADER),
                                          converter.str ()));
   if (session_state_p->key.empty ())

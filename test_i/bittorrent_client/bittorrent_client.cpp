@@ -70,9 +70,11 @@ using namespace std;
 
 #include "net_defines.h"
 
+#include "bittorrent_bencoding_scanner.h"
 #include "bittorrent_common.h"
 #include "bittorrent_control.h"
 #include "bittorrent_defines.h"
+#include "bittorrent_scanner.h"
 #include "bittorrent_tools.h"
 
 #include "bittorrent_client_configuration.h"

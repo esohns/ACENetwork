@@ -383,18 +383,23 @@ struct BitTorrent_SessionState
   inline BitTorrent_SessionState ()
    : connections ()
    , controller (NULL)
+   , filename ()
    , key ()
-   , session (NULL)
+   , metaInfo (NULL)
    , trackerId ()
 //   , userData (NULL)
+   , trackerResponse (NULL)
   {};
 
 //  struct BitTorrent_Configuration* configuration;
   Net_Connections_t           connections;
   BitTorrent_IControl_t*      controller;
+  std::string                 filename; // .torrent file
   std::string                 key; // tracker-
-  BitTorrent_ISession_t*      session;
+  Bencoding_Dictionary_t*     metaInfo;
   std::string                 trackerId;
+  Bencoding_Dictionary_t*     trackerResponse;
+
 //  struct BitTorrent_UserData* userData;
 };
 

@@ -17,6 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+
+#include <vector>
+
+#include <ace/INET_Addr.h>
 #include <ace/Log_Msg.h>
 
 #include "net_defines.h"
@@ -706,15 +710,74 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      PeerUserDataType,
                      TrackerUserDataType,
                      ControllerInterfaceType,
-                     CBDataType>::notify (const struct HTTP_Record& record_in)
+                     CBDataType>::notify (const Bencoding_Dictionary_t& record_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::notify"));
 
-#if defined (_DEBUG)
+//#if defined (_DEBUG)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("%s\n"),
+//              ACE_TEXT (BitTorrent_Tools::Dictionary2String (record_in).c_str ())));
+//#endif
+
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+
+    if (inherited::state_.trackerResponse)
+      BitTorrent_Tools::free (inherited::state_.trackerResponse);
+    inherited::state_.trackerResponse =
+        &const_cast<Bencoding_Dictionary_t&> (record_in);
+  } // end lock scope
+
+  // (try to) connect to all peers
+  Bencoding_DictionaryIterator_t iterator;
+  std::string key =
+      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_RESPONSE_PEERS_HEADER);
+  std::vector<ACE_INET_Addr> peer_addresses;
+  int result = -1;
+
+//    iterator = record_in.find (key);
+  iterator = record_in.begin ();
+  for (;
+       iterator != record_in.end ();
+       ++iterator)
+    if (*(*iterator).first == key) break;
+  ACE_ASSERT (iterator != record_in.end ());
+  // can be 'dictionary' or 'binary' model
+  if ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY)
+  {
+    ACE_ASSERT (false);
+    ACE_NOTSUP;
+    ACE_NOTREACHED (return;)
+  } // end IF
+  else
+  { ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
+    ACE_INET_Addr inet_address;
+    const char* char_p = (*iterator).second->string->c_str ();
+    for (unsigned int i = 0;
+         i < ((*iterator).second->string->size () / 6);
+         ++i)
+    {
+      result = inet_address.set (*reinterpret_cast<const u_short*> (char_p + 4),
+                                 *reinterpret_cast<const ACE_UINT32*> (char_p),
+                                 0,
+                                 0);
+      if (result == -1)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
+        return;
+      } // end IF
+      peer_addresses.push_back (inet_address);
+      char_p += 6;
+    } // end FOR
+  } // end ELSE
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%s\n"),
-              ACE_TEXT (HTTP_Tools::dump (record_in).c_str ())));
-#endif
+              ACE_TEXT ("connecting to %u peer(s)...\n"),
+              peer_addresses.size ()));
+  for (std::vector<ACE_INET_Addr>::const_iterator iterator_2 = peer_addresses.begin ();
+       iterator_2 != peer_addresses.end ();
+       ++iterator_2)
+    connect (*iterator_2);
 }
 template <typename PeerHandlerConfigurationType,
           typename TrackerHandlerConfigurationType,

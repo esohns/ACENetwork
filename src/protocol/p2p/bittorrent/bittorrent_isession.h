@@ -70,7 +70,7 @@ class BitTorrent_ISession_T
 
   //--------------------------------------
 
-  virtual void notify (const struct HTTP_Record&) = 0; // tracker message record
+  virtual void notify (const Bencoding_Dictionary_t&) = 0; // tracker message record
   virtual void notify (const struct BitTorrent_Record&, // message record
                        ACE_Message_Block* = NULL) = 0;  // data piece (if applicable)
 };

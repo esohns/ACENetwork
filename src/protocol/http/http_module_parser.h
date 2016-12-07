@@ -89,7 +89,7 @@ class HTTP_Module_Parser_T
 
   // implement (part of) HTTP_IParser
   virtual void record (struct HTTP_Record*&); // data record
-  virtual void encoding (const std::string&); // encoding
+  inline virtual void encoding (const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   // convenient types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
@@ -196,7 +196,7 @@ class HTTP_Module_ParserH_T
 
   // implement (part of) HTTP_IParser
   virtual void record (struct HTTP_Record*&); // data record
-  virtual void encoding (const std::string&); // encoding
+  inline virtual void encoding (const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   // convenience types
   typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;

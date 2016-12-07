@@ -2,7 +2,7 @@
 
 <bison-xml-report version="3.0.2" bug-report="bug-bison@gnu.org" url="http://www.gnu.org/software/bison/">
 
-  <filename>/mnt/win_d/projects/libACENetwork/src/protocol/p2p/bittorrent/scripts/parser.y</filename>
+  <filename>/mnt/win_d/projects/libACENetwork/src/protocol/p2p/bittorrent/scripts/parser.yy</filename>
 
   <grammar>
     <rules>

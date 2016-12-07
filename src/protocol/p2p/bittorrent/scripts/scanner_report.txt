@@ -1,6 +1,6 @@
 %option yylineno entails a performance penalty ONLY on rules that can match newline characters
-flex version 2.5.39 usage statistics:
-  scanner options: -bdpps--reentrant--bison-bridge--bison-locationsvBL8 -Cafr -obittorrent_scanner.cpp -Pbittorrent_
+flex version 2.6.3 usage statistics:
+  scanner options: -+bdppsvBL8 -Cafr -obittorrent_scanner.cpp -PBitTorrent_Scanner_
   218/2000 NFA states
   140/1000 DFA states (253 words)
   14 rules

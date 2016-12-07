@@ -10,10 +10,10 @@
 %verbose
 /* %yacc */
 
-%defines                          "bittorrent_metainfo_parser.h"
-%output                           "bittorrent_metainfo_parser.cpp"
+%defines                          "bittorrent_bencoding_parser.h"
+%output                           "bittorrent_bencoding_parser.cpp"
 
-/*%name-prefix                      "bittorrent_metainfo_"*/
+/*%name-prefix                      "bittorrent_bencoding_"*/
 /*%pure-parser*/
 /*%token-table*/
 /*%error-verbose*/
@@ -23,7 +23,7 @@
 #include "stdafx.h"
 
 #include <ace/Synch.h>
-#include "bittorrent_metainfo_parser.h"
+#include "bittorrent_bencoding_parser.h"
 }
 
 /* %define location_type */
@@ -47,7 +47,7 @@
 %define parse.error               verbose
 /* %define parse.lac                 {full} */
 /* %define parse.lac                 {none} */
-%define parser_class_name         {BitTorrent_MetaInfo_Parser}
+%define parser_class_name         {BitTorrent_Bencoding_Parser}
 /* *NOTE*: enabling debugging functionality implies inclusion of <iostream> (see
            below). This interferes with ACE (version 6.2.3), when compiled with
            support for traditional iostreams */
@@ -62,7 +62,7 @@
 /*#include <cstdio>
 #include <string>*/
 
-/*#include "bencoding_scanner.h"*/
+/*#include "bittorrent_bencoding_scanner.h"*/
 /*#include "bittorrent_exports.h"*/
 #include "bittorrent_iparser.h"
 
@@ -81,7 +81,7 @@
 /*#undef YYTOKENTYPE*/
 /* enum yytokentype; */
 //struct YYLTYPE;
-class BitTorrent_MetaInfoScanner;
+class BitTorrent_Bencoding_Scanner;
 
 /* #define YYSTYPE
 typedef union YYSTYPE
@@ -103,15 +103,15 @@ typedef union YYSTYPE
 }
 
 // calling conventions / parameter passing
-%parse-param              { BitTorrent_MetaInfo_IParser* parser }
-%parse-param              { BitTorrent_MetaInfoScanner* scanner }
+%parse-param              { BitTorrent_Bencoding_IParser* parser }
+%parse-param              { BitTorrent_Bencoding_Scanner* scanner }
 // *NOTE*: cannot use %initial-action, as it is scoped
 // *TODO*: find a better way to do this
 /*%parse-param              { std::string* dictionary_key }*/
 /*%parse-param              { yyscan_t yyscanner }*/
 /*%lex-param                { YYSTYPE* yylval }
 %lex-param                { YYLTYPE* yylloc } */
-%lex-param                { BitTorrent_MetaInfo_IParser* parser }
+%lex-param                { BitTorrent_Bencoding_IParser* parser }
 /*%lex-param                { BitTorrent_MetaInfoScanner* scanner }*/
 /*%lex-param                { yyscan_t yyscanner }*/
 /* %param                    { BitTorrent_MetaInfo_IParser* parser }
@@ -147,7 +147,7 @@ typedef union YYSTYPE
 
 // *WORKAROUND*
 /*using namespace std;*/
-// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
+// *IMPORTANT NOTE*: several ACE headers include ace/iosfwd.h, which introduces
 //                   a problem in conjunction with the standard include headers
 //                   when ACE_USES_OLD_IOSTREAMS is defined
 //                   --> include the necessary headers manually (see above), and
@@ -162,8 +162,8 @@ typedef union YYSTYPE
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"
 /*#include <ace/Synch.h>*/
-#include "bittorrent_metainfo_parser_driver.h"
-#include "bittorrent_metainfo_scanner.h"
+#include "bittorrent_bencoding_parser_driver.h"
+#include "bittorrent_bencoding_scanner.h"
 #include "bittorrent_tools.h"
 
 // *TODO*: this shouldn't be necessary
@@ -185,7 +185,7 @@ typedef union YYSTYPE
 %token <lval> LIST       "list"
 %token <dval> DICTIONARY "dictionary"
 // non-terminals
-%type  <dval> metainfo dictionary_items
+%type  <dval> bencoding dictionary_items
 %type  <lval> list_items
 %type  <eval> dictionary_item dictionary_value list_item
 
@@ -217,8 +217,8 @@ void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
 %printer    { yyoutput << BitTorrent_Tools::Dictionary2String (*$$); } <dval>
 
 %%
-%start            metainfo;
-metainfo:         "dictionary" {
+%start            bencoding;
+bencoding:        "dictionary" {
                     parser->pushDictionary ($1); }
                   dictionary_items "dictionary_end" {
                     Bencoding_Dictionary_t& dictionary_r = parser->current ();
@@ -227,7 +227,7 @@ metainfo:         "dictionary" {
                       parser->record (dictionary_p);
                     } catch (...) {
                       ACE_DEBUG ((LM_ERROR,
-                                  ACE_TEXT ("caught exception in BitTorrent_MetaInfo_IParser::record(), continuing\n")));
+                                  ACE_TEXT ("caught exception in BitTorrent_Bencoding_IParser::record(), continuing\n")));
                     } }
 list_items:       list_items list_item { }
                   | %empty             { }
@@ -369,23 +369,23 @@ dictionary_value: "string" {
 %%
 
 void
-yy::BitTorrent_MetaInfo_Parser::error (const location_type& location_in,
-                                       const std::string& message_in)
+yy::BitTorrent_Bencoding_Parser::error (const location_type& location_in,
+                                        const std::string& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_Parser::error"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_Parser::error"));
 
   try {
     parser->error (location_in, message_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in BitTorrent_MetaInfo_IParser::error(), continuing\n")));
+                ACE_TEXT ("caught exception in BitTorrent_Bencoding_IParser::error(), continuing\n")));
   }
 }
 
 /*void
-yy::BitTorrent_MetaInfo_Parser::set (yyscan_t context_in)
+yy::BitTorrent_Bencoding_Parser::set (yyscan_t context_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_Parser::set"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_Parser::set"));
 
   yyscanner = context_in;
 } */
@@ -417,7 +417,7 @@ yyerror (YYLTYPE* location_in,
     iparser_p->error (message_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in BitTorrent_MetaInfo_IParser::error(), continuing\n")));
+                ACE_TEXT ("caught exception in BitTorrent_Bencoding_IParser::error(), continuing\n")));
   }
 }
 

@@ -294,6 +294,7 @@ target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
 if (UNIX)
  target_link_libraries (${EXECUTABLE_GUI} rt)
  target_link_libraries (${EXECUTABLE_GUI} ${PKG_CAP_LIBRARIES})
+ target_link_libraries (${EXECUTABLE_GUI} ${FLEX_LIBRARY})
  if (GTK3_SUPPORT)
   target_link_libraries (${EXECUTABLE_GUI} ${PKG_GTK3_LIBRARIES})
  else ()
@@ -335,4 +336,3 @@ install (FILES
          bittorrent_client_main.glade
          bittorrent_client_session.glade
          DESTINATION etc/lib${PROJECT_NAME}/test_i COMPONENT config)
-

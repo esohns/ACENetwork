@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef BITTORRENT_METAINFO_PARSER_DRIVER_T_H
-#define BITTORRENT_METAINFO_PARSER_DRIVER_T_H
+#ifndef BITTORRENT_BENCODING_PARSER_DRIVER_T_H
+#define BITTORRENT_BENCODING_PARSER_DRIVER_T_H
 
 #include <stack>
 #include <string>
@@ -30,30 +30,29 @@
 
 #include "net_parser_base.h"
 
-#include "bittorrent_metainfo_parser.h"
-#include "bittorrent_metainfo_scanner.h"
+#include "bittorrent_bencoding_parser.h"
 
 template <typename SessionMessageType>
-class BitTorrent_MetaInfo_ParserDriver_T
- : public Net_ParserBase_T<BitTorrent_MetaInfoScanner,
-                           yy::BitTorrent_MetaInfo_Parser,
-                           BitTorrent_MetaInfo_IParser,
+class BitTorrent_Bencoding_ParserDriver_T
+ : public Net_ParserBase_T<BitTorrent_Bencoding_Scanner,
+                           yy::BitTorrent_Bencoding_Parser,
+                           BitTorrent_Bencoding_IParser,
                            std::string,
                            SessionMessageType>
 {
  public:
-  BitTorrent_MetaInfo_ParserDriver_T (bool,  // debug scanning ?
-                                      bool); // debug parsing ?
-  virtual ~BitTorrent_MetaInfo_ParserDriver_T ();
+  BitTorrent_Bencoding_ParserDriver_T (bool,  // debug scanning ?
+                                       bool); // debug parsing ?
+  virtual ~BitTorrent_Bencoding_ParserDriver_T ();
 
   // convenient types
-  typedef Net_ParserBase_T<BitTorrent_MetaInfoScanner,
-                           yy::BitTorrent_MetaInfo_Parser,
-                           BitTorrent_MetaInfo_IParser,
+  typedef Net_ParserBase_T<BitTorrent_Bencoding_Scanner,
+                           yy::BitTorrent_Bencoding_Parser,
+                           BitTorrent_Bencoding_IParser,
                            std::string,
                            SessionMessageType> PARSER_BASE_T;
 
-  // implement (part of) BitTorrent_MetaInfo_IParser
+  // implement (part of) BitTorrent_Bencoding_IParser
   using PARSER_BASE_T::initialize;
   using PARSER_BASE_T::buffer;
   using PARSER_BASE_T::debugScanner;
@@ -66,7 +65,7 @@ class BitTorrent_MetaInfo_ParserDriver_T
   virtual void error (const yy::location&, // location
                       const std::string&); // message
 //  virtual void error (const std::string&); // message
-  inline virtual Bencoding_Dictionary_t& current () { ACE_ASSERT (metaInfo_); return *metaInfo_; };
+  inline virtual Bencoding_Dictionary_t& current () { ACE_ASSERT (bencoding_); return *bencoding_; };
   inline virtual bool hasFinished () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
   virtual void record (Bencoding_Dictionary_t*&); // data record
   inline virtual Bencoding_Dictionary_t& getDictionary () { return *dictionaries_.top (); };
@@ -84,18 +83,18 @@ class BitTorrent_MetaInfo_ParserDriver_T
 
   virtual void dump_state () const;
 
-  Bencoding_Dictionary_t*             metaInfo_;
+  Bencoding_Dictionary_t*             bencoding_;
 
  private:
-  typedef Net_ParserBase_T<BitTorrent_MetaInfoScanner,
-                           yy::BitTorrent_MetaInfo_Parser,
-                           BitTorrent_MetaInfo_IParser,
+  typedef Net_ParserBase_T<BitTorrent_Bencoding_Scanner,
+                           yy::BitTorrent_Bencoding_Parser,
+                           BitTorrent_Bencoding_IParser,
                            std::string,
                            SessionMessageType> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_MetaInfo_ParserDriver_T ())
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_MetaInfo_ParserDriver_T (const BitTorrent_MetaInfo_ParserDriver_T&))
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_MetaInfo_ParserDriver_T& operator= (const BitTorrent_MetaInfo_ParserDriver_T&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_ParserDriver_T ())
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_ParserDriver_T (const BitTorrent_Bencoding_ParserDriver_T&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_ParserDriver_T& operator= (const BitTorrent_Bencoding_ParserDriver_T&))
 
   std::stack<Bencoding_Dictionary_t*> dictionaries_;
   std::stack<std::string*>            keys_;
@@ -103,6 +102,6 @@ class BitTorrent_MetaInfo_ParserDriver_T
 };
 
 // include template definition
-#include "bittorrent_metainfo_parser_driver.inl"
+#include "bittorrent_bencoding_parser_driver.inl"
 
 #endif

@@ -432,25 +432,6 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   inherited2::finished_ = true;
 }
 
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
-void
-HTTP_Module_Parser_T<ACE_SYNCH_USE,
-                     TimePolicyType,
-                     ConfigurationType,
-                     ControlMessageType,
-                     DataMessageType,
-                     SessionMessageType>::encoding (const std::string& encoding_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::encoding"));
-
-  ACE_UNUSED_ARG (encoding_in);
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 template <ACE_SYNCH_DECL,
@@ -1030,35 +1011,4 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                              NULL);
 
   inherited2::finished_ = true;
-}
-
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename ConfigurationType,
-          typename StreamControlType,
-          typename StreamNotificationType,
-          typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType>
-void
-HTTP_Module_ParserH_T<ACE_SYNCH_USE,
-                      TimePolicyType,
-                      ControlMessageType,
-                      DataMessageType,
-                      SessionMessageType,
-                      ConfigurationType,
-                      StreamControlType,
-                      StreamNotificationType,
-                      StreamStateType,
-                      SessionDataType,
-                      SessionDataContainerType,
-                      StatisticContainerType>::encoding (const std::string& encoding_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::encoding"));
-
-  ACE_UNUSED_ARG (encoding_in);
 }

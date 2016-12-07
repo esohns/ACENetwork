@@ -68,6 +68,11 @@
 #define BITTORRENT_TRACKER_REQUEST_KEY_HEADER             "key"
 #define BITTORRENT_TRACKER_REQUEST_TRACKERID_HEADER       "trackerid"
 
+#define BITTORRENT_DEFAULT_TRACKER_REQUEST_NUMWANT_PEERS  50
+
+#define BITTORRENT_TRACKER_RESPONSE_INTERVAL_HEADER       "interval"
+#define BITTORRENT_TRACKER_RESPONSE_PEERS_HEADER          "peers"
+
 // session
 #define BITTORRENT_SESSION_LOG_FILENAME_PREFIX            "bittorrent_session"
 #define BITTORRENT_DEFAULT_SESSION_LOG                    false // log to file ? : stdout

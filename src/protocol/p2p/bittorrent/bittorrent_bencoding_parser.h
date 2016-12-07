@@ -31,14 +31,14 @@
 // version 2.2 of Bison.
 
 /**
- ** \file bittorrent_metainfo_parser.h
+ ** \file bittorrent_bencoding_parser.h
  ** Define the yy::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
 
-#ifndef YY_YY_BITTORRENT_METAINFO_PARSER_H_INCLUDED
-# define YY_YY_BITTORRENT_METAINFO_PARSER_H_INCLUDED
+#ifndef YY_YY_BITTORRENT_BENCODING_PARSER_H_INCLUDED
+# define YY_YY_BITTORRENT_BENCODING_PARSER_H_INCLUDED
 // //                    "%code requires" blocks.
 
 
@@ -50,7 +50,7 @@
 /*#include <cstdio>
 #include <string>*/
 
-/*#include "bencoding_scanner.h"*/
+/*#include "bittorrent_bencoding_scanner.h"*/
 /*#include "bittorrent_exports.h"*/
 #include "bittorrent_iparser.h"
 
@@ -69,7 +69,7 @@
 /*#undef YYTOKENTYPE*/
 /* enum yytokentype; */
 //struct YYLTYPE;
-class BitTorrent_MetaInfoScanner;
+class BitTorrent_Bencoding_Scanner;
 
 /* #define YYSTYPE
 typedef union YYSTYPE
@@ -167,7 +167,7 @@ namespace yy {
 
 
   /// A Bison parser.
-  class BitTorrent_MetaInfo_Parser
+  class BitTorrent_Bencoding_Parser
   {
   public:
 #ifndef YYSTYPE
@@ -302,8 +302,8 @@ namespace yy {
 
 
     /// Build a parser object.
-    BitTorrent_MetaInfo_Parser (BitTorrent_MetaInfo_IParser* parser_yyarg, BitTorrent_MetaInfoScanner* scanner_yyarg);
-    virtual ~BitTorrent_MetaInfo_Parser ();
+    BitTorrent_Bencoding_Parser (BitTorrent_Bencoding_IParser* parser_yyarg, BitTorrent_Bencoding_Scanner* scanner_yyarg);
+    virtual ~BitTorrent_Bencoding_Parser ();
 
     /// Parse.
     /// \returns  0 iff parsing succeeded.
@@ -333,8 +333,8 @@ namespace yy {
 
   private:
     /// This class is not copyable.
-    BitTorrent_MetaInfo_Parser (const BitTorrent_MetaInfo_Parser&);
-    BitTorrent_MetaInfo_Parser& operator= (const BitTorrent_MetaInfo_Parser&);
+    BitTorrent_Bencoding_Parser (const BitTorrent_Bencoding_Parser&);
+    BitTorrent_Bencoding_Parser& operator= (const BitTorrent_Bencoding_Parser&);
 
     /// State numbers.
     typedef int state_type;
@@ -511,8 +511,8 @@ namespace yy {
 
 
     // User arguments.
-    BitTorrent_MetaInfo_IParser* parser;
-    BitTorrent_MetaInfoScanner* scanner;
+    BitTorrent_Bencoding_IParser* parser;
+    BitTorrent_Bencoding_Scanner* scanner;
   };
 
 
@@ -536,4 +536,4 @@ void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
 
 
 
-#endif // !YY_YY_BITTORRENT_METAINFO_PARSER_H_INCLUDED
+#endif // !YY_YY_BITTORRENT_BENCODING_PARSER_H_INCLUDED

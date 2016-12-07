@@ -19,4 +19,6 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include "http_scanner.h"
+
 #include "http_parser_driver.h"

@@ -38,6 +38,8 @@ class BitTorrent_Message_T;
 template <typename SessionDataType,
           typename UserDataType>
 class BitTorrent_SessionMessage_T;
+template <typename SessionMessageType>
+class BitTorrent_Bencoding_ParserDriver_T;
 
 template <typename SessionDataType,
           typename UserDataType,
@@ -125,8 +127,14 @@ class BitTorrent_TrackerStreamHandler_T
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStreamHandler_T (const BitTorrent_TrackerStreamHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStreamHandler_T& operator= (const BitTorrent_TrackerStreamHandler_T&))
 
+  // convenient types
   typedef std::map<Stream_SessionId_t, SessionDataType*> SESSION_DATA_T;
   typedef typename SESSION_DATA_T::iterator SESSION_DATA_ITERATOR_T;
+  typedef BitTorrent_TrackerMessage_T<Stream_SessionData_T<SessionDataType>,
+                                                           UserDataType> MESSAGE_T;
+  typedef BitTorrent_SessionMessage_T<SessionDataType,
+                                      UserDataType> SESSION_MESSAGE_T;
+  typedef BitTorrent_Bencoding_ParserDriver_T<SESSION_MESSAGE_T> PARSER_T;
 
   CBDataType*           CBData_;
   SessionInterfaceType* session_;

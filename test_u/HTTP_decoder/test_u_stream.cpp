@@ -20,6 +20,9 @@
 #include "stdafx.h"
 
 #include <ace/Synch.h>
+
+//#include "http_scanner.h"
+
 #include "test_u_stream.h"
 
 #include <ace/Log_Msg.h>

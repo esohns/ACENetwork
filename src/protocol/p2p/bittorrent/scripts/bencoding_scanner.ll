@@ -1,70 +1,34 @@
 %top{
   #include <ace/Synch.h>
   #include "bittorrent_iparser.h"
-  #include "bittorrent_metainfo_parser.h"
+//  #include "bittorrent_bencoding_scanner.h"
 
-#if defined (BitTorrent_MetaInfoScanner_IN_HEADER)
 /* This disables inclusion of unistd.h, which is not available using MSVC. The
  * C++ scanner uses STL streams instead. */
-#define YY_NO_UNISTD_H
+/*#define YY_NO_UNISTD_H*/
 
-  #include <FlexLexer.h>
+class BitTorrent_Bencoding_Scanner;
 
-  #include "location.hh"
-
-  class BitTorrent_MetaInfoScanner
-   : public yyFlexLexer
-   , public BitTorrent_MetaInfo_IScanner_t
-  {
-   public:
-    BitTorrent_MetaInfoScanner (std::istream* in = NULL,
-                                std::ostream* out = NULL)
-     : yyFlexLexer (in, out)
-     , location_ ()
-     , parser_ (NULL)
-    {};
-    virtual ~BitTorrent_MetaInfoScanner () {};
-
-    // implement BitTorrent_MetaInfo_IScanner
-    inline virtual void set (BitTorrent_MetaInfo_IParser* parser_in) { parser_ = parser_in; };
-
-    // override yyFlexLexer::yylex()
-//    virtual int yylex ();
-    virtual yy::BitTorrent_MetaInfo_Parser::token_type yylex (yy::BitTorrent_MetaInfo_Parser::semantic_type*,
-                                                              yy::location*,
-                                                              BitTorrent_MetaInfo_IParser*);
-
-    yy::location                 location_;
-
-   private:
-    BitTorrent_MetaInfo_IParser* parser_;
-  };
-#else
-#define YY_STRUCT_YY_BUFFER_STATE
-  #include "bittorrent_metainfo_scanner.h"
-#undef YY_STRUCT_YY_BUFFER_STATE
-#endif
-
-//yy::BitTorrent_MetaInfo_Parser::symbol_type
-#define YY_DECL                                                                           \
-yy::BitTorrent_MetaInfo_Parser::token_type                                                \
-BitTorrent_MetaInfoScanner::yylex (yy::BitTorrent_MetaInfo_Parser::semantic_type* yylval, \
-                                   yy::location* location,                                \
-                                   BitTorrent_MetaInfo_IParser* parser)
+//yy::BitTorrent_Bencoding_Parser::symbol_type
+#define YY_DECL                                                                              \
+yy::BitTorrent_Bencoding_Parser::token_type                                                  \
+BitTorrent_Bencoding_Scanner::yylex (yy::BitTorrent_Bencoding_Parser::semantic_type* yylval, \
+                                     yy::location* location,                                 \
+                                     BitTorrent_Bencoding_IParser* parser)
 // ... and declare it for the parser's sake
 //YY_DECL;
 
 //#define YYLTYPE yy::location
-//#define YYSTYPE yy::BitTorrent_MetaInfo_Parser::semantic_type
+//#define YYSTYPE yy::BitTorrent_Bencoding_Parser::semantic_type
 
-#define YY_EXTRA_TYPE
+//#define YY_EXTRA_TYPE
 }
 
 %{
   // *WORKAROUND*
   #include <iostream>
   //using namespace std;
-  //// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
+  //// *IMPORTANT NOTE*: several ACE headers include ace/iosfwd.h, which introduces
   ////                   a problem in conjunction with the standard include headers
   ////                   when ACE_USES_OLD_IOSTREAMS is defined
   ////                   --> include the necessary headers manually (see above), and
@@ -72,41 +36,34 @@ BitTorrent_MetaInfoScanner::yylex (yy::BitTorrent_MetaInfo_Parser::semantic_type
   //#define ACE_IOSFWD_H
 
   #include <ace/Synch.h>
-  #include "bittorrent_metainfo_parser.h"
-  #include "bittorrent_metainfo_scanner.h"
+  #include "bittorrent_bencoding_parser.h"
+  #include "bittorrent_bencoding_scanner.h"
 
   // the original yyterminate() macro returns int. Since this uses Bison 3
   // variants as tokens, redefine it to change type to `Parser::semantic_type`
-//  #define yyterminate() yy::BitTorrent_MetaInfo_Parser::make_END (location_)
-  #define yyterminate() return yy::BitTorrent_MetaInfo_Parser::token::END
+//  #define yyterminate() yy::BitTorrent_Bencoding_Parser::make_END (location_)
+  #define yyterminate() return yy::BitTorrent_Bencoding_Parser::token::END
 
   // this tracks the current scanner location. Action is called when length of
   // the token is known
   #define YY_USER_ACTION location_.columns (yyleng);
 %}
 
-%option backup
-%option batch
-%option never-interactive
-%option stack
+%option yylineno yywrap
+%option nomain nounput noyymore noreject nodefault nostdinit
+%option noline nounistd
 
-%option nodefault
-%option nomain
-%option nostdinit
-%option nounput
-%option noyywrap
-
-%option 8bit
+%option 8bit batch never-interactive stack
 /* *TODO*: find out why 'read' does not compile (on Linux, flex 2.5.39) */
 %option align read full
 
-%option debug perf-report verbose warn yylineno
+%option backup debug perf-report perf-report verbose warn
 
-%option ansi-definitions ansi-prototypes
 %option c++
-%option header-file="bittorrent_metainfo_scanner.h" outfile="bittorrent_metainfo_scanner.cpp"
-%option prefix="BitTorrent_MetaInfoScanner_"
-%option yyclass="BitTorrent_MetaInfoScanner"
+/*%option header-file="bittorrent_bencoding_scanner.h" outfile="bittorrent_bencoding_scanner.cpp"*/
+%option outfile="bittorrent_bencoding_scanner.cpp"
+%option prefix="BitTorrent_Bencoding_Scanner_"
+%option yyclass="BitTorrent_Bencoding_Scanner"
 
 /* *NOTE*: for protcol specification, see:
            - http://bittorrent.org/beps/bep_0003.html
@@ -189,7 +146,7 @@ METAINFO_FILE                     {DICTIONARY}
                          ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
                          ACE_ASSERT (yylval->dval);
-                         return yy::BitTorrent_MetaInfo_Parser::token::DICTIONARY; }
+                         return yy::BitTorrent_Bencoding_Parser::token::DICTIONARY; }
 } // end <INITIAL>
 <state_string>{
 {DIGIT}+               {
@@ -202,8 +159,11 @@ METAINFO_FILE                     {DICTIONARY}
                          parser->offset (1);
                          if (!string_length)
                          { // --> found an empty string
+                           ACE_NEW_NORETURN (yylval->sval,
+                                             std::string ());
+                           ACE_ASSERT (yylval->sval);
                            yy_pop_state ();
-                           return yy::BitTorrent_MetaInfo_Parser::token::STRING;
+                           return yy::BitTorrent_Bencoding_Parser::token::STRING;
                          } }
 {OCTET}{1}             { ACE_ASSERT (string_length != 0);
                          parser->offset (string_length);
@@ -214,7 +174,7 @@ METAINFO_FILE                     {DICTIONARY}
                          for (unsigned int i = 0; i < (string_length - 1); ++i)
                            yylval->sval->push_back (yyinput ());
                          yy_pop_state ();
-                         return yy::BitTorrent_MetaInfo_Parser::token::STRING; }
+                         return yy::BitTorrent_Bencoding_Parser::token::STRING; }
 } // end <state_string>
 <state_integer>{
 "e"                    { ACE_ASSERT (yyleng == 1);
@@ -226,7 +186,7 @@ METAINFO_FILE                     {DICTIONARY}
                          converter.clear ();
                          converter << yytext;
                          converter >> yylval->ival;
-                         return yy::BitTorrent_MetaInfo_Parser::token::INTEGER; }
+                         return yy::BitTorrent_Bencoding_Parser::token::INTEGER; }
 "i"                    { ACE_ASSERT (yyleng == 1);
                          parser->offset (1); }
 } // end <state_integer>
@@ -234,7 +194,7 @@ METAINFO_FILE                     {DICTIONARY}
 "e"                    { ACE_ASSERT (yyleng == 1);
                          parser->offset (1);
                          yy_pop_state ();
-                         return yy::BitTorrent_MetaInfo_Parser::token::END_OF_LIST; }
+                         return yy::BitTorrent_Bencoding_Parser::token::END_OF_LIST; }
 {DIGIT}{1}             { yyless (0);
                          yy_push_state (state_string); }
 "i"                    { ACE_ASSERT (yyleng == 1);
@@ -244,19 +204,19 @@ METAINFO_FILE                     {DICTIONARY}
                          ACE_NEW_NORETURN (yylval->lval,
                                            Bencoding_List_t ());
                          ACE_ASSERT (yylval->lval);
-                         return yy::BitTorrent_MetaInfo_Parser::token::LIST; }
+                         return yy::BitTorrent_Bencoding_Parser::token::LIST; }
 "d"                    { ACE_ASSERT (yyleng == 1);
                          yy_push_state (state_dictionary_key);
                          ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
                          ACE_ASSERT (yylval->dval);
-                         return yy::BitTorrent_MetaInfo_Parser::token::DICTIONARY; }
+                         return yy::BitTorrent_Bencoding_Parser::token::DICTIONARY; }
 } // end <state_list>
 <state_dictionary_key>{
 "e"                    { ACE_ASSERT (yyleng == 1);
                          parser->offset (1);
                          yy_pop_state ();
-                         return yy::BitTorrent_MetaInfo_Parser::token::END_OF_DICTIONARY; }
+                         return yy::BitTorrent_Bencoding_Parser::token::END_OF_DICTIONARY; }
 {DIGIT}{1}             { yyless (0);
                          BEGIN(state_dictionary_value);
                          yy_push_state (state_string); }
@@ -275,16 +235,16 @@ METAINFO_FILE                     {DICTIONARY}
                          ACE_NEW_NORETURN (yylval->lval,
                                            Bencoding_List_t ());
                          ACE_ASSERT (yylval->lval);
-                         return yy::BitTorrent_MetaInfo_Parser::token::LIST; }
+                         return yy::BitTorrent_Bencoding_Parser::token::LIST; }
 "d"                    { ACE_ASSERT (yyleng == 1);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_dictionary_key);
                          ACE_NEW_NORETURN (yylval->dval,
                                            Bencoding_Dictionary_t ());
                          ACE_ASSERT (yylval->dval);
-                         return yy::BitTorrent_MetaInfo_Parser::token::DICTIONARY; }
+                         return yy::BitTorrent_Bencoding_Parser::token::DICTIONARY; }
 } // end <state_dictionary_value>
-<<EOF>>                { return yy::BitTorrent_MetaInfo_Parser::token::END; }
+<<EOF>>                { return yy::BitTorrent_Bencoding_Parser::token::END; }
 <*>{OCTET}             { /* *TODO*: use (?s:.) ? */
                          if (!parser->isBlocking ())
                            yyterminate(); // not enough data, cannot proceed
@@ -300,3 +260,71 @@ METAINFO_FILE                     {DICTIONARY}
                          yyless (0); }
 
 %% /* end of rules */
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+int
+yyFlexLexer::yywrap ()
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_Scanner_FlexLexer::yywrap"));
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (-1);
+
+  ACE_NOTREACHED (return -1;)
+}
+/*int
+BitTorrent_Bencoding_Scanner::yywrap ()
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_Scanner::yywrap"));
+
+  // sanity check(s)
+  ACE_ASSERT (parser_);
+  if (!parser_->isBlocking ())
+    return 1; // not enough data, cannot proceed
+
+  // *NOTE*: there is more data
+  // 1. gobble/save the rest
+  // 2. switch buffers
+  // 3. unput the rest
+  // 4. continue scanning
+
+  // step1
+  //std::string the_rest;
+  //the_rest.append (yytext, yyleng);
+//  for (char c = yyinput (yyscanner);
+//       c != EOF;
+//       c = yyinput (yyscanner));
+  //yyg->yy_c_buf_p += yyleng;
+  //yyg->yy_hold_char = *yyg->yy_c_buf_p;
+  //if (yy_flex_debug)
+  //  ACE_DEBUG ((LM_DEBUG,
+  //              ACE_TEXT ("the rest: \"%s\" (%d byte(s))\n"),
+  //              ACE_TEXT (the_rest.c_str ()),
+  //              the_rest.size ()));
+
+  // step2
+  if (!parser_->switchBuffer ())
+  {
+    // *NOTE*: most probable reason: received session end message
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
+    return 1;
+  } // end IF
+
+  // step3
+  //for (std::string::reverse_iterator iterator = the_rest.rbegin ();
+  //     iterator != the_rest.rend ();
+  //     ++iterator)
+  //  unput (*iterator);
+
+  // step4
+  //yyg->yy_did_buffer_switch_on_eof = 1;
+  // yymore ();
+
+  return 0;
+}*/
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */

@@ -24,7 +24,7 @@ command -v sed >/dev/null 2>&1 || { echo "sed is not installed, aborting" >&2; e
 PROJECT_ROOT=$(readlink -e $(dirname $0)/../../../../..)
 SCRIPTS_DIRECTORY=${PROJECT_ROOT}/src/protocol/p2p/bittorrent/scripts
 
-SOURCE_FILES="${SCRIPTS_DIRECTORY}/metainfo_parser.yy ${SCRIPTS_DIRECTORY}/parser.y"
+SOURCE_FILES="${SCRIPTS_DIRECTORY}/bencoding_parser.yy ${SCRIPTS_DIRECTORY}/parser.yy"
 for FILE in ${SOURCE_FILES}
 do
  if [ ! -f ${FILE} ]; then
@@ -65,7 +65,7 @@ done
 #rm -f ${SOURCE_FILE}
 #[ $? -ne 0 ] && echo "ERROR: failed to rm \"${SOURCE_FILE}\", aborting" && exit 1
 
-FILES="bittorrent_metainfo_parser.h bittorrent_metainfo_parser.cpp
+FILES="bittorrent_bencoding_parser.h bittorrent_bencoding_parser.cpp
 bittorrent_parser.h bittorrent_parser.cpp
 location.hh position.hh stack.hh"
 # move the files into the project directory

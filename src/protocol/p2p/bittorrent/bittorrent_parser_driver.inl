@@ -36,37 +36,14 @@ template <typename MessageType,
 BitTorrent_ParserDriver_T<MessageType,
                           SessionMessageType>::BitTorrent_ParserDriver_T (bool traceScanning_in,
                                                                           bool traceParsing_in)
- : fragment_ (NULL)
- , offset_ (0)
- , trace_ (traceParsing_in)
- , blockInParse_ (false)
- , isFirst_ (true)
-//, parser_ (this,               // driver
-//           &numberOfMessages_, // counter
-//           scannerState_)      // scanner
- , scannerState_ (NULL)
- , bufferState_ (NULL)
- , messageQueue_ (NULL)
- , useYYScanBuffer_ (BITTORRENT_DEFAULT_USE_YY_SCAN_BUFFER)
- , isInitialized_ (false)
+ : inherited (traceScanning_in,
+              traceParsing_in)
+ , handShake_ (NULL)
+ , record_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::BitTorrent_ParserDriver_T"));
 
-  if (bittorrent_lex_init_extra (this, &scannerState_))
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to yylex_init_extra: \"%m\", continuing\n")));
-  ACE_ASSERT (scannerState_);
-  //parser_.set (scannerState_);
-
-  // trace ?
-  bittorrent_set_debug ((traceScanning_in ? 1 : 0),
-                        scannerState_);
-#if YYDEBUG
-  //parser_.set_debug_level (traceParsing_in ? 1
-  //                                         : 0); // binary (see bison manual)
-  //yydebug = (trace_ ? 1 : 0);
-  yysetdebug (trace_ ? 1 : 0);
-#endif
+//  inherited::parser_.set (this);
 }
 
 template <typename MessageType,
@@ -76,70 +53,6 @@ BitTorrent_ParserDriver_T<MessageType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::~BitTorrent_ParserDriver_T"));
 
-  // finalize lex scanner
-  if (bittorrent_lex_destroy (scannerState_))
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to yylex_destroy: \"%m\", continuing\n")));
-}
-
-template <typename MessageType,
-          typename SessionMessageType>
-void
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::initialize (bool traceScanning_in,
-                                                           bool traceParsing_in,
-                                                           ACE_Message_Queue_Base* messageQueue_in,
-//                                                           bool useYYScanBuffer_in,
-                                                           bool blockInParse_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::initialize"));
-
-  if (isInitialized_)
-  {
-    fragment_ = NULL;
-    offset_ = 0;
-
-    blockInParse_ = false;
-    isFirst_ = true;
-    trace_ = STREAM_DEFAULT_YACC_TRACE;
-
-    if (bufferState_)
-    {
-      ACE_ASSERT (scannerState_);
-      bittorrent__delete_buffer (bufferState_,
-                                 scannerState_);
-      bufferState_ = NULL;
-    } // end IF
-    //if (scannerState_)
-    //{
-    //  if (bittorrent_lex_destroy (scannerState_))
-    //    ACE_DEBUG ((LM_ERROR,
-    //                ACE_TEXT ("failed to yylex_destroy: \"%m\", continuing\n")));
-    //  scannerState_ = NULL;
-    //} // end IF
-
-    messageQueue_ = NULL;
-    useYYScanBuffer_ = BITTORRENT_DEFAULT_USE_YY_SCAN_BUFFER;
-
-    isInitialized_ = false;
-  } // end IF
-
-  blockInParse_ = blockInParse_in;
-  trace_ = traceParsing_in;
-  messageQueue_ = messageQueue_in;
-//  useYYScanBuffer_ = useYYScanBuffer_in;
-
-  bittorrent_set_debug ((traceScanning_in ? 1 : 0),
-                        scannerState_);
-#if YYDEBUG
-  //parser_.set_debug_level (traceParsing_in ? 1
-  //                                         : 0); // binary (see bison manual)
-  //yydebug = (trace_ ? 1 : 0);
-  yysetdebug (trace_ ? 1 : 0);
-#endif
-
-  // OK
-  isInitialized_ = true;
 }
 
 template <typename MessageType,
@@ -170,7 +83,7 @@ BitTorrent_ParserDriver_T<MessageType,
 //              message_in.c_str ()));
 
   // dump message
-  ACE_Message_Block* message_block_p = fragment_;
+  ACE_Message_Block* message_block_p = inherited::fragment_;
   while (message_block_p->prev ()) message_block_p = message_block_p->prev ();
   ACE_ASSERT (message_block_p);
   Common_IDumpState* idump_state_p =
@@ -205,237 +118,33 @@ BitTorrent_ParserDriver_T<MessageType,
 
 template <typename MessageType,
           typename SessionMessageType>
-bool
+void
 BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::parse (ACE_Message_Block* data_in)
+                          SessionMessageType>::record (struct BitTorrent_Record*& record_inout)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::parse"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::record"));
 
   // sanity check(s)
-  ACE_ASSERT (isInitialized_);
-  ACE_ASSERT (data_in);
+  ACE_ASSERT (record_inout);
 
-  // retain a handle to the 'current' fragment
-  fragment_ = data_in;
-  offset_ = 0;
 
-  int result = -1;
-  bool do_scan_end = false;
-  if (!scan_begin ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to BitTorrent_ParserDriver_T::scan_begin(), aborting\n")));
-    goto error;
-  } // end IF
-  do_scan_end = true;
 
-  // initialize scanner ?
-  if (isFirst_)
-  {
-    isFirst_ = false;
-    bittorrent_set_column (1, scannerState_);
-    bittorrent_set_lineno (1, scannerState_);
-  } // end IF
-
-  // parse data fragment
-  try {
-    result = ::bittorrent_parse (this, scannerState_);
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in ::bittorrent_parse(), continuing\n")));
-    result = 1;
-  }
-  switch (result)
-  {
-    case 0:
-      break; // done/need more data
-    case 1:
-    default:
-    { // *NOTE*: most probable reason: connection
-      //         has been closed --> session end
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("failed to parse BitTorrent PDU (result was: %d), aborting\n"),
-                  result));
-      goto error;
-    }
-  } // end SWITCH
-
-  // finalize buffer/scanner
-  scan_end ();
-  do_scan_end = false;
-
-  goto continue_;
-
-error:
-  if (do_scan_end)
-    scan_end ();
-  fragment_ = NULL;
-
-continue_:
-  return (result == 0);
+  record_inout = NULL;
 }
-
-template <typename MessageType,
-          typename SessionMessageType>
-bool
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::switchBuffer (bool unlink_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::switchBuffer"));
-
-  // sanity check(s)
-  ACE_ASSERT (fragment_);
-  ACE_ASSERT (scannerState_);
-
-  ACE_Message_Block* message_block_p = fragment_;
-  if (!fragment_->cont ())
-  {
-    // sanity check(s)
-    if (!blockInParse_)
-      return false; // not enough data, cannot proceed
-
-    wait (); // <-- wait for data
-    if (!fragment_->cont ())
-    {
-      // *NOTE*: most probable reason: received session end
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("no data after BitTorrent_ParserDriver_T::wait(), aborting\n")));
-      return false;
-    } // end IF
-  } // end IF
-  fragment_ = fragment_->cont ();
-  offset_ = 0;
-
-  // unlink ?
-  if (unlink_in)
-    message_block_p->cont (NULL);
-
-  // switch to the next fragment
-
-  // clean state
-  scan_end ();
-
-  // initialize next buffer
-
-  // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT (fragment_->capacity () - fragment_->length () >=
-              NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE);
-  *(fragment_->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
-  *(fragment_->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
-  // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
-
-  if (!scan_begin ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to BitTorrent_ParserDriver_T::scan_begin(), aborting\n")));
-    return false;
-  } // end IF
-
-  //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("switched input buffers...\n")));
-
-  return true;
-}
-
 template <typename MessageType,
           typename SessionMessageType>
 void
 BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::wait ()
+                          SessionMessageType>::handshake (struct BitTorrent_PeerHandshake*& handShake_inout)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::wait"));
-
-  int result = -1;
-  ACE_Message_Block* message_block_p = NULL;
-  bool done = false;
-  SessionMessageType* session_message_p = NULL;
-  Stream_SessionMessageType session_message_type =
-      STREAM_SESSION_MESSAGE_INVALID;
-  bool is_data = false;
-
-  // *IMPORTANT NOTE*: 'this' is the parser thread currently blocked in yylex()
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::handshake"));
 
   // sanity check(s)
-  ACE_ASSERT (blockInParse_);
-  ACE_ASSERT (messageQueue_);
+  ACE_ASSERT (handShake_inout);
 
-  // 1. wait for data
-  do
-  {
-    result = messageQueue_->dequeue_head (message_block_p,
-                                          NULL);
-    if (result == -1)
-    {
-      int error = ACE_OS::last_error ();
-      if (error != ESHUTDOWN)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Message_Queue::dequeue_head(): \"%m\", returning\n")));
-      return;
-    } // end IF
-    ACE_ASSERT (message_block_p);
 
-    switch (message_block_p->msg_type ())
-    {
-      case ACE_Message_Block::MB_DATA:
-      case ACE_Message_Block::MB_PROTO:
-        is_data = true; break;
-      case ACE_Message_Block::MB_USER:
-      {
-        session_message_p = dynamic_cast<SessionMessageType*> (message_block_p);
-        if (session_message_p)
-        {
-          session_message_type = session_message_p->type ();
-          if (session_message_type == STREAM_SESSION_MESSAGE_END)
-            done = true; // session has finished --> abort
-        } // end IF
-        break;
-      }
-      default:
-        break;
-    } // end SWITCH
-    if (is_data) break;
 
-    // requeue message
-    result = messageQueue_->enqueue_tail (message_block_p, NULL);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Message_Queue::enqueue_tail(): \"%m\", returning\n")));
-      return;
-    } // end IF
-
-    message_block_p = NULL;
-  } while (!done);
-
-  // 2. append data ?
-  if (message_block_p)
-  {
-    // sanity check(s)
-    ACE_ASSERT (fragment_);
-
-    ACE_Message_Block* message_block_2 = fragment_;
-    for (;
-         message_block_2->cont ();
-         message_block_2 = message_block_2->cont ());
-    message_block_2->cont (message_block_p);
-  } // end IF
-}
-
-template <typename MessageType,
-          typename SessionMessageType>
-BitTorrent_Record&
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::current ()
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::current"));
-
-  // sanity check(s)
-  ACE_ASSERT (fragment_);
-
-  const typename MessageType::DATA_T& data_container_r =
-      dynamic_cast<MessageType*> (fragment_)->get ();
-
-  return const_cast<struct BitTorrent_Record&> (data_container_r.get ());
+  handShake_inout = NULL;
 }
 
 template <typename MessageType,
@@ -450,70 +159,4 @@ BitTorrent_ParserDriver_T<MessageType,
   ACE_NOTSUP;
 
   ACE_NOTREACHED (return;)
-}
-
-template <typename MessageType,
-          typename SessionMessageType>
-bool
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::scan_begin ()
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::scan_begin"));
-
-//  static int counter = 1;
-
-  // sanity check(s)
-  ACE_ASSERT (!bufferState_);
-  ACE_ASSERT (fragment_);
-
-  // create/initialize a new buffer state
-  if (useYYScanBuffer_)
-  {
-    bufferState_ =
-      bittorrent__scan_buffer (fragment_->rd_ptr (),
-                               fragment_->length () + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE,
-                               scannerState_);
-  } // end IF
-  else
-  {
-    bufferState_ =
-      bittorrent__scan_bytes (fragment_->rd_ptr (),
-                              fragment_->length (),
-                              scannerState_);
-  } // end ELSE
-  if (!bufferState_)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to yy_scan_buffer/bytes(0x%@, %d), aborting\n"),
-                fragment_->rd_ptr (),
-                fragment_->length ()));
-    return false;
-  } // end IF
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("parsing fragment #%d --> %d byte(s)...\n"),
-//              counter++,
-//              fragment_->length ()));
-
-//  // *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
-//  bittorrent__switch_to_buffer (bufferState_,
-//                                scannerState_);
-
-  return true;
-}
-
-template <typename MessageType,
-          typename SessionMessageType>
-void
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::scan_end ()
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::scan_end"));
-
-  // sanity check(s)
-  ACE_ASSERT (bufferState_);
-
-  // clean state
-  bittorrent__delete_buffer (bufferState_,
-                             scannerState_);
-  bufferState_ = NULL;
 }

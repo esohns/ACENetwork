@@ -56,6 +56,7 @@
 #include "net_common_tools.h"
 
 #include "http_defines.h"
+#include "http_scanner.h"
 
 #include "test_u_common.h"
 #include "test_u_connection_common.h"

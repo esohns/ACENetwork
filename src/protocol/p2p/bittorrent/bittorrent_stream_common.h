@@ -277,9 +277,7 @@ struct BitTorrent_TrackerSessionData
   inline BitTorrent_TrackerSessionData ()
    : Stream_SessionData ()
    , connectionState (NULL)
-   , filename ()
    , format (STREAM_COMPRESSION_FORMAT_INVALID)
-   , metaInfo (NULL)
 //   , userData (NULL)
   {};
   inline BitTorrent_TrackerSessionData& operator+= (const BitTorrent_TrackerSessionData& rhs_in)
@@ -295,9 +293,7 @@ struct BitTorrent_TrackerSessionData
   }
 
   struct BitTorrent_ConnectionState*        connectionState;
-  std::string                               filename; // .torrent file
   enum Stream_Decoder_CompressionFormatType format;
-  Bencoding_Dictionary_t*                   metaInfo;
 //  struct BitTorrent_UserData*               userData;
 };
 

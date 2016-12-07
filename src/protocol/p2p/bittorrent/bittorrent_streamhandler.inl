@@ -25,7 +25,9 @@
 #include "net_macros.h"
 
 #include "bittorrent_message.h"
+#include "bittorrent_bencoding_parser_driver.h"
 #include "bittorrent_sessionmessage.h"
+#include "bittorrent_tools.h"
 
 template <typename SessionDataType,
           typename UserDataType,
@@ -445,12 +447,36 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   // sanity check(s)
   ACE_ASSERT (session_);
 
-  const typename BitTorrent_TrackerMessage_T<Stream_SessionData_T<SessionDataType>,
-                                             UserDataType>::DATA_T& data_container_r =
-      message_in.get ();
+#if defined (_DEBUG)
+  const typename MESSAGE_T::DATA_T& data_container_r = message_in.get ();
   const struct HTTP_Record& record_r = data_container_r.get ();
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s\n"),
+              ACE_TEXT (HTTP_Tools::dump (record_r).c_str ())));
+#endif
+
+  // parse bencoded record
+  PARSER_T parser (NET_PROTOCOL_DEFAULT_LEX_TRACE,
+                   NET_PROTOCOL_DEFAULT_YACC_TRACE);
+  parser.initialize (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace flex scanner ?
+                     NET_PROTOCOL_DEFAULT_YACC_TRACE, // trace bison parser ?
+                     NULL,                            // data buffer queue (yywrap)
+                     false);                          // block in parse ?
+  if (!parser.parse (&const_cast<MESSAGE_T&> (message_in)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ParserBase_T::parse(), returning\n")));
+    return;
+  } // end IF
+  ACE_ASSERT (parser.bencoding_);
+#if defined (_DEBUG)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s\n"),
+              ACE_TEXT (BitTorrent_Tools::Dictionary2String (*parser.bencoding_).c_str ())));
+#endif
+
   try {
-    session_->notify (record_r);
+    session_->notify (*parser.bencoding_);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::notify(), continuing\n")));

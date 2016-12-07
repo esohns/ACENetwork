@@ -1,65 +1,70 @@
-%defines                          "bittorrent_parser.h"
+/*%require                          "2.4.1"*/
+%require                          "3.0"
 /* %file-prefix                      "" */
-/* %language                         "c++" */
-%language                         "C"
+%language                         "c++"
+/*%language                         "C"*/
 %locations
 %no-lines
-%output                           "bittorrent_parser.cpp"
-%require                          "2.4.1"
-%skeleton                         "glr.c"
-/* %skeleton                         "lalr1.cc" */
+/*%skeleton                         "glr.c"*/
+%skeleton                         "lalr1.cc"
 %verbose
 /* %yacc */
+
+%defines                          "bittorrent_parser.h"
+%output                           "bittorrent_parser.cpp"
+
+/*%name-prefix                      "bittorrent_"*/
+/*%pure-parser*/
+/*%token-table*/
+/*%error-verbose*/
+/*%debug*/
 
 %code top {
 #include "stdafx.h"
 
 #include <ace/Synch.h>
+#include "bittorrent_parser.h"
 }
 
 /* %define location_type */
 /* %define api.location.type         {} */
 /* %define namespace                 {yy} */
-/*%define api.namespace             {yy}*/
-%name-prefix                      "bittorrent_"
+%define api.namespace             {yy}
 /* %define api.prefix                {yy} */
-%pure-parser
 /* %define api.pure                  true */
 /* *TODO*: implement a push parser */
 /* %define api.push-pull             push */
-/* %define api.token.constructor */
+/*%define api.token.constructor*/
 /* %define api.token.prefix          {} */
-%token-table
-/* %define api.value.type            variant */
+/*%define api.value.type            variant*/
 /* %define api.value.union.name      YYSTYPE */
 /* %define lr.default-reduction      most */
 /* %define lr.default-reduction      accepting */
 /* %define lr.keep-unreachable-state false */
 /* %define lr.type                   lalr */
 
-/* %define parse.assert              {true} */
-%error-verbose
-/* %define parse.error               verbose */
+%define parse.assert              {true}
+%define parse.error               verbose
 /* %define parse.lac                 {full} */
 /* %define parse.lac                 {none} */
-/*%define parser_class_name         {BitTorrent_Parser}*/
+%define parser_class_name         {BitTorrent_Parser}
 /* *NOTE*: enabling debugging functionality implies inclusion of <iostream> (see
            below). This interferes with ACE (version 6.2.3), when compiled with
            support for traditional iostreams */
-%debug
-/* %define parse.trace               {true} */
+%define parse.trace               {true}
 
 %code requires {
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2
 // *TODO*: remove this ASAP
-//#ifndef BITTORRENT_PARSER_H
-//#define BITTORRENT_PARSER_H
+//#ifndef BitTorrent_MetaInfo_Parser_H
+//#define BitTorrent_MetaInfo_Parser_H
 
-#include <cstdio>
-#include <string>
+/*#include <cstdio>
+#include <string>*/
 
-#include "bittorrent_exports.h"
+/*#include "bittorrent_exports.h"*/
 #include "bittorrent_iparser.h"
+/*#include "bittorrent_scanner.h"*/
 
 /* enum yytokentype
 {
@@ -75,8 +80,8 @@
 //#define YYTOKENTYPE
 /*#undef YYTOKENTYPE*/
 /* enum yytokentype; */
-//class BitTorrent_Scanner;
 //struct YYLTYPE;
+class BitTorrent_Scanner;
 
 /* #define YYSTYPE
 typedef union YYSTYPE
@@ -84,41 +89,38 @@ typedef union YYSTYPE
   int          ival;
   std::string* sval;
 } YYSTYPE; */
-#undef YYSTYPE
+/*#undef YYSTYPE*/
 //union YYSTYPE;
 
-typedef void* yyscan_t;
+/*typedef void* yyscan_t;*/
 
 // *NOTE*: on current versions of bison, this needs to be inserted into the
 //         header manually; apparently, there is no easy way to add the export
 //         symbol to the declaration
 #define YYDEBUG 1
-extern int BitTorrent_Export yydebug;
+/*extern int BitTorrent_Export yydebug;*/
 #define YYERROR_VERBOSE 1
-
-#undef YYTOKENTYPE
 }
 
 // calling conventions / parameter passing
-%parse-param              { BitTorrent_IParser_t* iparser_p }
-%parse-param              { yyscan_t yyscanner }
+%parse-param              { BitTorrent_IParser_t* parser }
+%parse-param              { BitTorrent_Scanner* scanner }
+// *NOTE*: cannot use %initial-action, as it is scoped
+// *TODO*: find a better way to do this
+/*%parse-param              { std::string* dictionary_key }*/
+/*%parse-param              { yyscan_t yyscanner }*/
 /*%lex-param                { YYSTYPE* yylval }
 %lex-param                { YYLTYPE* yylloc } */
-%lex-param                { BitTorrent_IParser_t* iparser_p }
-%lex-param                { yyscan_t yyscanner }
-/* %param                    { BitTorrent_IParser* iparser_p }
+%lex-param                { BitTorrent_IParser_t* parser }
+/*%lex-param                { BitTorrent_MetaInfoScanner* scanner }*/
+/*%lex-param                { yyscan_t yyscanner }*/
+/* %param                    { BitTorrent_MetaInfo_IParser* parser }
 %param                    { yyscan_t yyscanner } */
 
 %initial-action
 {
   // initialize the location
-  //@$.initialize (YY_NULLPTR, 1, 1);
-  ACE_OS::memset (&@$, 0, sizeof (YYLTYPE));
-
-  // initialize the token value container
-  $$.handshake = NULL;
-  $$.record = NULL;
-  $$.size = 0;
+  @$.initialize (YY_NULLPTR, 1, 1);
 }
 
 // symbols
@@ -134,21 +136,21 @@ extern int BitTorrent_Export yydebug;
 
 %code {
 // *NOTE*: necessary only if %debug is set in the definition file (see: parser.y)
-#if defined (YYDEBUG)
+/*#if defined (YYDEBUG)
 #include <iostream>
-#endif
-#include <regex>
+#endif*/
+/*#include <regex>*/
 #include <sstream>
 #include <string>
 
 // *WORKAROUND*
-using namespace std;
-// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
+/*using namespace std;*/
+// *IMPORTANT NOTE*: several ACE headers include ace/iosfwd.h, which introduces
 //                   a problem in conjunction with the standard include headers
 //                   when ACE_USES_OLD_IOSTREAMS is defined
 //                   --> include the necessary headers manually (see above), and
 //                       prevent ace/iosfwd.h from causing any harm
-#define ACE_IOSFWD_H
+/*#define ACE_IOSFWD_H*/
 
 #include <ace/Log_Msg.h>
 #include <ace/OS.h>
@@ -157,12 +159,14 @@ using namespace std;
 
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"
+/*#include <ace/Synch.h>*/
 #include "bittorrent_parser_driver.h"
 #include "bittorrent_scanner.h"
 #include "bittorrent_tools.h"
 
 // *TODO*: this shouldn't be necessary
-/*#define yylex bittorrent_lex*/
+/*#define yylex bencoding_lex*/
+#define yylex scanner->yylex
 
 //#define YYPRINT(file, type, value) yyprint (file, type, value)
 }
@@ -185,22 +189,25 @@ using namespace std;
 %type  <size>      session messages message
 
 %code provides {
-void BitTorrent_Export yysetdebug (int);
-void BitTorrent_Export yyerror (YYLTYPE*, BitTorrent_IParser_t*, yyscan_t, const char*);
-int BitTorrent_Export yyparse (BitTorrent_IParser_t*, yyscan_t);
-void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);
+/*void BitTorrent_Export yysetdebug (int);
+void BitTorrent_Export yyerror (YYLTYPE*, BitTorrent_MetaInfo_IParser*, yyscan_t, const char*);
+int BitTorrent_Export yyparse (BitTorrent_MetaInfo_IParser*, yyscan_t);
+void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
 
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2
 // *TODO*: remove this ASAP
-//#endif // BITTORRENT_PARSER_H
+//#endif // BitTorrent_MetaInfo_Parser_H
 }
 
 /* %printer                  { yyoutput << $$; } <*>; */
 /* %printer                  { yyoutput << *$$; } <sval>
 %printer                  { debug_stream () << $$; }  <ival> */
-%printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), $$->version.c_str ()); } <handshake>
+/*%printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), $$->version.c_str ()); } <handshake>
 %printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), BitTorrent_Tools::Type2String ($$->type).c_str ()); } <record>
-%printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), $$); } <size>
+%printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), $$); } <size>*/
+%printer    { yyoutput << $$->version; } <handshake>
+%printer    { yyoutput << BitTorrent_Tools::Type2String ($$->type); } <record>
+%printer    { yyoutput << $$; } <size>
 /*%destructor { delete $$; $$ = NULL; } <handshake>*/
 /*%destructor { delete $$; $$ = NULL; } <record>*/
 %destructor { $$ = NULL; } <handshake>
@@ -216,7 +223,7 @@ session:  "handshake" messages { $$ = 67 + $2; // 19 + 8 + 20 + 20
                                  struct BitTorrent_PeerHandshake* handshake_p =
                                    const_cast<struct BitTorrent_PeerHandshake*> ($1);
                                  try {
-                                   iparser_p->handshake (handshake_p);
+                                   parser->handshake (handshake_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::handshake(), continuing\n")));
@@ -228,7 +235,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  struct BitTorrent_Record* record_p =
                                    const_cast<struct BitTorrent_Record*> ($1);
                                  try {
-                                   iparser_p->record (record_p);
+                                   parser->record (record_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
@@ -238,7 +245,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  struct BitTorrent_Record* record_p =
                                    const_cast<struct BitTorrent_Record*> ($1);
                                  try {
-                                   iparser_p->record (record_p);
+                                   parser->record (record_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
@@ -248,7 +255,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  struct BitTorrent_Record* record_p =
                                    const_cast<struct BitTorrent_Record*> ($1);
                                  try {
-                                   iparser_p->record (record_p);
+                                   parser->record (record_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
@@ -258,7 +265,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  struct BitTorrent_Record* record_p =
                                    const_cast<struct BitTorrent_Record*> ($1);
                                  try {
-                                   iparser_p->record (record_p);
+                                   parser->record (record_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
@@ -268,7 +275,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  struct BitTorrent_Record* record_p =
                                    const_cast<struct BitTorrent_Record*> ($1);
                                  try {
-                                   iparser_p->record (record_p);
+                                   parser->record (record_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
@@ -278,7 +285,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  struct BitTorrent_Record* record_p =
                                    const_cast<struct BitTorrent_Record*> ($1);
                                  try {
-                                   iparser_p->record (record_p);
+                                   parser->record (record_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
@@ -288,7 +295,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  struct BitTorrent_Record* record_p =
                                    const_cast<struct BitTorrent_Record*> ($1);
                                  try {
-                                   iparser_p->record (record_p);
+                                   parser->record (record_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
@@ -298,7 +305,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  struct BitTorrent_Record* record_p =
                                    const_cast<struct BitTorrent_Record*> ($1);
                                  try {
-                                   iparser_p->record (record_p);
+                                   parser->record (record_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
@@ -308,7 +315,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  struct BitTorrent_Record* record_p =
                                    const_cast<struct BitTorrent_Record*> ($1);
                                  try {
-                                   iparser_p->record (record_p);
+                                   parser->record (record_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
@@ -318,7 +325,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  struct BitTorrent_Record* record_p =
                                    const_cast<struct BitTorrent_Record*> ($1);
                                  try {
-                                   iparser_p->record (record_p);
+                                   parser->record (record_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
@@ -328,7 +335,7 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  struct BitTorrent_Record* record_p =
                                    const_cast<struct BitTorrent_Record*> ($1);
                                  try {
-                                   iparser_p->record (record_p);
+                                   parser->record (record_p);
                                  } catch (...) {
                                    ACE_DEBUG ((LM_ERROR,
                                                ACE_TEXT ("caught exception in BitTorrent_IParser_T::record(), continuing\n")));
@@ -337,22 +344,27 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  YYACCEPT; };
 %%
 
-/* void
+void
 yy::BitTorrent_Parser::error (const location_type& location_in,
                               const std::string& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Parser::error"));
 
-  driver->error (location_in, message_in);
+  try {
+    parser->error (location_in, message_in);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in BitTorrent_IParser::error(), continuing\n")));
+  }
 }
 
-void
+/*void
 yy::BitTorrent_Parser::set (yyscan_t context_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Parser::set"));
 
   yyscanner = context_in;
-} */
+}
 
 void
 yysetdebug (int debug_in)
@@ -370,7 +382,7 @@ yyerror (YYLTYPE* location_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::yyerror"));
 
-/*  ACE_UNUSED_ARG (location_in);*/
+//  ACE_UNUSED_ARG (location_in);
   ACE_UNUSED_ARG (context_in);
 
   // sanity check(s)
@@ -384,7 +396,7 @@ yyerror (YYLTYPE* location_in,
   location.columns (location_in->last_column - location_in->first_column);
 
   iparser_in->error (location, std::string (message_in));
-/*  iparser_in->error (std::string (message_in));*/
+//  iparser_in->error (std::string (message_in));
 }
 
 void
@@ -436,4 +448,4 @@ yyprint (FILE* file_in,
   if (result < 0)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::fprintf(): \"%m\", returning\n")));
-}
+}*/

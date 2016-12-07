@@ -37,9 +37,10 @@
 #include "libACENetwork_config.h"
 #endif
 
-#include "bittorrent_defines.h"
 #include <ace/Synch.h>
-#include "bittorrent_metainfo_parser_driver.h"
+#include "bittorrent_bencoding_scanner.h"
+#include "bittorrent_defines.h"
+#include "bittorrent_bencoding_parser_driver.h"
 
 std::string
 BitTorrent_Tools::Handshake2String (const struct BitTorrent_PeerHandshake& peerHandshake_in)
@@ -215,7 +216,7 @@ BitTorrent_Tools::parseMetaInfoFile (const std::string& metaInfoFileName_in,
   // sanity check(s)
   ACE_ASSERT (!metaInfo_out);
 
-  BitTorrent_MetaInfo_ParserDriver_T<BitTorrent_TrackerSessionMessage_t> parser (traceScanning_in,
+  BitTorrent_Bencoding_ParserDriver_T<BitTorrent_TrackerSessionMessage_t> parser (traceScanning_in,
                                                                                  traceParsing_in);
   parser.initialize (traceScanning_in, // trace flex scanner ?
                      traceParsing_in,  // trace bison parser ?
@@ -255,7 +256,7 @@ BitTorrent_Tools::parseMetaInfoFile (const std::string& metaInfoFileName_in,
 //              ACE_TEXT ("parsed meta-info file \"%s\"...\n"),
 //              ACE_TEXT (metaInfoFileName_in.c_str ())));
 
-  metaInfo_out = parser.metaInfo_;
+  metaInfo_out = parser.bencoding_;
 
   result = true;
 

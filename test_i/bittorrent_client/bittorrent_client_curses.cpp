@@ -30,6 +30,9 @@ using namespace std;
 #define ACE_IOSFWD_H
 
 #include <ace/Synch.h>
+
+#include "http_scanner.h"
+
 #include "bittorrent_client_curses.h"
 
 #include <string>

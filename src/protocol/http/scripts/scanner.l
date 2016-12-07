@@ -1,7 +1,8 @@
 %top{
 #include "http_common.h"
+#include <ace/Synch.h>
 #include "http_iparser.h"
-//#undef YYTOKENTYPE
+#undef YYTOKENTYPE
 #include "http_parser.h"
 
 
@@ -11,12 +12,12 @@ HTTP_Scanner_lex (yy::HTTP_Parser::semantic_type* yylval_param, \
                   yy::HTTP_Parser::location_type* yylloc_param, \
                   HTTP_IParser* iparser_p,                      \
                   yyscan_t yyscanner)
-//#define YY_DECL                            \
-//yy::HTTP_Parser::token_type                \
-//HTTP_Scanner_lex (YYSTYPE* yylval_param,   \
-//                  YYLTYPE* yylloc_param,   \
-//                  HTTP_IParser* iparser_p, \
-//                  yyscan_t yyscanner)
+/*#define YY_DECL                            \
+yy::HTTP_Parser::token_type                \
+HTTP_Scanner_lex (YYSTYPE* yylval_param,   \
+                  YYLTYPE* yylloc_param,   \
+                  HTTP_IParser* iparser_p, \
+                  yyscan_t yyscanner)*/
 // ... and declare it for the parser's sake
 YY_DECL;
 
@@ -56,20 +57,24 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 %}
 
 %option header-file="http_scanner.h" outfile="http_scanner.cpp"
-%option batch 8bit nodefault never-interactive nostdinit yylineno yywrap
+%option yylineno yywrap
+%option nomain nounput noyymore noreject nodefault nostdinit
+%option nostack noline nounistd
 /* %option c++ yyclass="HTTP_Scanner" */
 /* %option ansi-definitions ansi-prototypes bison-bridge */
 /* *NOTE*: the 'line' directives confuse gdb */
 /* *NOTE*: 'noline' not supported (on Linux, flex 2.5.39)
            --> use --noline and (manually) remove '#line's introduced by %top */
-%option ansi-definitions ansi-prototypes bison-locations
+/* %option ansi-definitions ansi-prototypes bison-bridge */
+%option bison-locations
 /* *IMPORTANT NOTE*: 'read' requires 'unistd'(.h) */
-%option reentrant pointer prefix="HTTP_Scanner_" nomain
+%option 8bit batch never-interactive
+%option reentrant pointer prefix="HTTP_Scanner_"
 /* *TODO*: find out why 'read' does not compile (on Linux, flex 2.5.39) */
 %option align read full
 %option backup debug perf-report perf-report verbose warn
 /* *IMPORTANT NOTE*: flex 2.5.4 does not recognize 'reentrant, nounistd,
-                     ansi-definitions, ansi-prototypes, header-file extra-type'
+                     ansi-definitions, ansi-prototypes, trace header-file extra-type'
 */
 %option extra-type="HTTP_IParser*"
 /* %option nounput */
@@ -203,7 +208,7 @@ DATE           ({RFC1123_DATE}|{RFC850_DATE}|{ASCTIME_DATE})
 CHARSET_TOKEN  {TOKEN}+
 /* *NOTE*: "When no explicit charset parameter is provided by the sender, media
            subtypes of the "text" type are defined to have a default charset
-           value of "ISO-8859-1" when received via HTTP"
+           value of "ISO-8859-1" when received via HTTP" */
 CHARSET        (US-ASCII|ISO-8859-1|ISO-8859-2|ISO-8859-3|ISO-8859-4|ISO-8859-5|ISO-8859-6|ISO-8859-7|ISO-8859-8|ISO-8859-9|ISO-2022-JP|ISO-2022-JP-2|ISO-2022-KR|UNICODE-1-1|UNICODE-1-1-UTF-7|UNICODE-1-1-UTF-8|{CHARSET_TOKEN})
 
 

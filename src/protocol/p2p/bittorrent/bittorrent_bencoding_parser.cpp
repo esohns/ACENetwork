@@ -35,7 +35,7 @@
 #include "stdafx.h"
 
 #include <ace/Synch.h>
-#include "bittorrent_metainfo_parser.h"
+#include "bittorrent_bencoding_parser.h"
 
 
 
@@ -52,7 +52,7 @@
 #  endif
 # endif
 
-#include "bittorrent_metainfo_parser.h"
+#include "bittorrent_bencoding_parser.h"
 
 // User implementation prologue.
 
@@ -70,7 +70,7 @@
 
 // *WORKAROUND*
 /*using namespace std;*/
-// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
+// *IMPORTANT NOTE*: several ACE headers include ace/iosfwd.h, which introduces
 //                   a problem in conjunction with the standard include headers
 //                   when ACE_USES_OLD_IOSTREAMS is defined
 //                   --> include the necessary headers manually (see above), and
@@ -85,8 +85,8 @@
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"
 /*#include <ace/Synch.h>*/
-#include "bittorrent_metainfo_parser_driver.h"
-#include "bittorrent_metainfo_scanner.h"
+#include "bittorrent_bencoding_parser_driver.h"
+#include "bittorrent_bencoding_scanner.h"
 #include "bittorrent_tools.h"
 
 // *TODO*: this shouldn't be necessary
@@ -189,7 +189,7 @@ namespace yy {
      apostrophe, a comma, or backslash (other than backslash-backslash).
      YYSTR is taken from yytname.  */
   std::string
-  BitTorrent_MetaInfo_Parser::yytnamerr_ (const char *yystr)
+  BitTorrent_Bencoding_Parser::yytnamerr_ (const char *yystr)
   {
     if (*yystr == '"')
       {
@@ -222,7 +222,7 @@ namespace yy {
 
 
   /// Build a parser object.
-  BitTorrent_MetaInfo_Parser::BitTorrent_MetaInfo_Parser (BitTorrent_MetaInfo_IParser* parser_yyarg, BitTorrent_MetaInfoScanner* scanner_yyarg)
+  BitTorrent_Bencoding_Parser::BitTorrent_Bencoding_Parser (BitTorrent_Bencoding_IParser* parser_yyarg, BitTorrent_Bencoding_Scanner* scanner_yyarg)
     :
 #if YYDEBUG
       yydebug_ (false),
@@ -232,7 +232,7 @@ namespace yy {
       scanner (scanner_yyarg)
   {}
 
-  BitTorrent_MetaInfo_Parser::~BitTorrent_MetaInfo_Parser ()
+  BitTorrent_Bencoding_Parser::~BitTorrent_Bencoding_Parser ()
   {}
 
 
@@ -241,7 +241,7 @@ namespace yy {
   `---------------*/
 
   inline
-  BitTorrent_MetaInfo_Parser::syntax_error::syntax_error (const location_type& l, const std::string& m)
+  BitTorrent_Bencoding_Parser::syntax_error::syntax_error (const location_type& l, const std::string& m)
     : std::runtime_error (m)
     , location (l)
   {}
@@ -249,13 +249,13 @@ namespace yy {
   // basic_symbol.
   template <typename Base>
   inline
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol ()
+  BitTorrent_Bencoding_Parser::basic_symbol<Base>::basic_symbol ()
     : value ()
   {}
 
   template <typename Base>
   inline
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
+  BitTorrent_Bencoding_Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
     : Base (other)
     , value ()
     , location (other.location)
@@ -266,7 +266,7 @@ namespace yy {
 
   template <typename Base>
   inline
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v, const location_type& l)
+  BitTorrent_Bencoding_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v, const location_type& l)
     : Base (t)
     , value (v)
     , location (l)
@@ -276,7 +276,7 @@ namespace yy {
   /// Constructor for valueless symbols.
   template <typename Base>
   inline
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
+  BitTorrent_Bencoding_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
     : Base (t)
     , value ()
     , location (l)
@@ -284,14 +284,14 @@ namespace yy {
 
   template <typename Base>
   inline
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::~basic_symbol ()
+  BitTorrent_Bencoding_Parser::basic_symbol<Base>::~basic_symbol ()
   {
   }
 
   template <typename Base>
   inline
   void
-  BitTorrent_MetaInfo_Parser::basic_symbol<Base>::move (basic_symbol& s)
+  BitTorrent_Bencoding_Parser::basic_symbol<Base>::move (basic_symbol& s)
   {
     super_type::move(s);
     value = s.value;
@@ -300,23 +300,23 @@ namespace yy {
 
   // by_type.
   inline
-  BitTorrent_MetaInfo_Parser::by_type::by_type ()
+  BitTorrent_Bencoding_Parser::by_type::by_type ()
      : type (empty)
   {}
 
   inline
-  BitTorrent_MetaInfo_Parser::by_type::by_type (const by_type& other)
+  BitTorrent_Bencoding_Parser::by_type::by_type (const by_type& other)
     : type (other.type)
   {}
 
   inline
-  BitTorrent_MetaInfo_Parser::by_type::by_type (token_type t)
+  BitTorrent_Bencoding_Parser::by_type::by_type (token_type t)
     : type (yytranslate_ (t))
   {}
 
   inline
   void
-  BitTorrent_MetaInfo_Parser::by_type::move (by_type& that)
+  BitTorrent_Bencoding_Parser::by_type::move (by_type& that)
   {
     type = that.type;
     that.type = empty;
@@ -324,7 +324,7 @@ namespace yy {
 
   inline
   int
-  BitTorrent_MetaInfo_Parser::by_type::type_get () const
+  BitTorrent_Bencoding_Parser::by_type::type_get () const
   {
     return type;
   }
@@ -332,42 +332,42 @@ namespace yy {
 
   // by_state.
   inline
-  BitTorrent_MetaInfo_Parser::by_state::by_state ()
+  BitTorrent_Bencoding_Parser::by_state::by_state ()
     : state (empty)
   {}
 
   inline
-  BitTorrent_MetaInfo_Parser::by_state::by_state (const by_state& other)
+  BitTorrent_Bencoding_Parser::by_state::by_state (const by_state& other)
     : state (other.state)
   {}
 
   inline
   void
-  BitTorrent_MetaInfo_Parser::by_state::move (by_state& that)
+  BitTorrent_Bencoding_Parser::by_state::move (by_state& that)
   {
     state = that.state;
     that.state = empty;
   }
 
   inline
-  BitTorrent_MetaInfo_Parser::by_state::by_state (state_type s)
+  BitTorrent_Bencoding_Parser::by_state::by_state (state_type s)
     : state (s)
   {}
 
   inline
-  BitTorrent_MetaInfo_Parser::symbol_number_type
-  BitTorrent_MetaInfo_Parser::by_state::type_get () const
+  BitTorrent_Bencoding_Parser::symbol_number_type
+  BitTorrent_Bencoding_Parser::by_state::type_get () const
   {
     return state == empty ? 0 : yystos_[state];
   }
 
   inline
-  BitTorrent_MetaInfo_Parser::stack_symbol_type::stack_symbol_type ()
+  BitTorrent_Bencoding_Parser::stack_symbol_type::stack_symbol_type ()
   {}
 
 
   inline
-  BitTorrent_MetaInfo_Parser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
+  BitTorrent_Bencoding_Parser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
     : super_type (s, that.location)
   {
     value = that.value;
@@ -376,8 +376,8 @@ namespace yy {
   }
 
   inline
-  BitTorrent_MetaInfo_Parser::stack_symbol_type&
-  BitTorrent_MetaInfo_Parser::stack_symbol_type::operator= (const stack_symbol_type& that)
+  BitTorrent_Bencoding_Parser::stack_symbol_type&
+  BitTorrent_Bencoding_Parser::stack_symbol_type::operator= (const stack_symbol_type& that)
   {
     state = that.state;
     value = that.value;
@@ -389,7 +389,7 @@ namespace yy {
   template <typename Base>
   inline
   void
-  BitTorrent_MetaInfo_Parser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
+  BitTorrent_Bencoding_Parser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
   {
     if (yymsg)
       YY_SYMBOL_PRINT (yymsg, yysym);
@@ -401,7 +401,7 @@ namespace yy {
 #if YYDEBUG
   template <typename Base>
   void
-  BitTorrent_MetaInfo_Parser::yy_print_ (std::ostream& yyo,
+  BitTorrent_Bencoding_Parser::yy_print_ (std::ostream& yyo,
                                      const basic_symbol<Base>& yysym) const
   {
     std::ostream& yyoutput = yyo;
@@ -440,7 +440,7 @@ namespace yy {
 
         break;
 
-      case 11: // metainfo
+      case 11: // bencoding
 
 
         { yyoutput << BitTorrent_Tools::Dictionary2String (*(yysym.value.dval)); }
@@ -471,7 +471,7 @@ namespace yy {
 
   inline
   void
-  BitTorrent_MetaInfo_Parser::yypush_ (const char* m, state_type s, symbol_type& sym)
+  BitTorrent_Bencoding_Parser::yypush_ (const char* m, state_type s, symbol_type& sym)
   {
     stack_symbol_type t (s, sym);
     yypush_ (m, t);
@@ -479,7 +479,7 @@ namespace yy {
 
   inline
   void
-  BitTorrent_MetaInfo_Parser::yypush_ (const char* m, stack_symbol_type& s)
+  BitTorrent_Bencoding_Parser::yypush_ (const char* m, stack_symbol_type& s)
   {
     if (m)
       YY_SYMBOL_PRINT (m, s);
@@ -488,40 +488,40 @@ namespace yy {
 
   inline
   void
-  BitTorrent_MetaInfo_Parser::yypop_ (unsigned int n)
+  BitTorrent_Bencoding_Parser::yypop_ (unsigned int n)
   {
     yystack_.pop (n);
   }
 
 #if YYDEBUG
   std::ostream&
-  BitTorrent_MetaInfo_Parser::debug_stream () const
+  BitTorrent_Bencoding_Parser::debug_stream () const
   {
     return *yycdebug_;
   }
 
   void
-  BitTorrent_MetaInfo_Parser::set_debug_stream (std::ostream& o)
+  BitTorrent_Bencoding_Parser::set_debug_stream (std::ostream& o)
   {
     yycdebug_ = &o;
   }
 
 
-  BitTorrent_MetaInfo_Parser::debug_level_type
-  BitTorrent_MetaInfo_Parser::debug_level () const
+  BitTorrent_Bencoding_Parser::debug_level_type
+  BitTorrent_Bencoding_Parser::debug_level () const
   {
     return yydebug_;
   }
 
   void
-  BitTorrent_MetaInfo_Parser::set_debug_level (debug_level_type l)
+  BitTorrent_Bencoding_Parser::set_debug_level (debug_level_type l)
   {
     yydebug_ = l;
   }
 #endif // YYDEBUG
 
-  inline BitTorrent_MetaInfo_Parser::state_type
-  BitTorrent_MetaInfo_Parser::yy_lr_goto_state_ (state_type yystate, int yysym)
+  inline BitTorrent_Bencoding_Parser::state_type
+  BitTorrent_Bencoding_Parser::yy_lr_goto_state_ (state_type yystate, int yysym)
   {
     int yyr = yypgoto_[yysym - yyntokens_] + yystate;
     if (0 <= yyr && yyr <= yylast_ && yycheck_[yyr] == yystate)
@@ -531,19 +531,19 @@ namespace yy {
   }
 
   inline bool
-  BitTorrent_MetaInfo_Parser::yy_pact_value_is_default_ (int yyvalue)
+  BitTorrent_Bencoding_Parser::yy_pact_value_is_default_ (int yyvalue)
   {
     return yyvalue == yypact_ninf_;
   }
 
   inline bool
-  BitTorrent_MetaInfo_Parser::yy_table_value_is_error_ (int yyvalue)
+  BitTorrent_Bencoding_Parser::yy_table_value_is_error_ (int yyvalue)
   {
     return yyvalue == yytable_ninf_;
   }
 
   int
-  BitTorrent_MetaInfo_Parser::parse ()
+  BitTorrent_Bencoding_Parser::parse ()
   {
     /// Whether yyla contains a lookahead.
     bool yyempty = true;
@@ -707,7 +707,7 @@ namespace yy {
                       parser->record (dictionary_p);
                     } catch (...) {
                       ACE_DEBUG ((LM_ERROR,
-                                  ACE_TEXT ("caught exception in BitTorrent_MetaInfo_IParser::record(), continuing\n")));
+                                  ACE_TEXT ("caught exception in BitTorrent_Bencoding_IParser::record(), continuing\n")));
                     } }
 
     break;
@@ -1074,14 +1074,14 @@ namespace yy {
   }
 
   void
-  BitTorrent_MetaInfo_Parser::error (const syntax_error& yyexc)
+  BitTorrent_Bencoding_Parser::error (const syntax_error& yyexc)
   {
     error (yyexc.location, yyexc.what());
   }
 
   // Generate an error message.
   std::string
-  BitTorrent_MetaInfo_Parser::yysyntax_error_ (state_type yystate, symbol_number_type yytoken) const
+  BitTorrent_Bencoding_Parser::yysyntax_error_ (state_type yystate, symbol_number_type yytoken) const
   {
     std::string yyres;
     // Number of reported tokens (one for the "unexpected", one per
@@ -1175,12 +1175,12 @@ namespace yy {
   }
 
 
-  const signed char BitTorrent_MetaInfo_Parser::yypact_ninf_ = -19;
+  const signed char BitTorrent_Bencoding_Parser::yypact_ninf_ = -19;
 
-  const signed char BitTorrent_MetaInfo_Parser::yytable_ninf_ = -1;
+  const signed char BitTorrent_Bencoding_Parser::yytable_ninf_ = -1;
 
   const signed char
-  BitTorrent_MetaInfo_Parser::yypact_[] =
+  BitTorrent_Bencoding_Parser::yypact_[] =
   {
       -7,   -19,     7,   -19,   -19,    13,   -19,   -19,   -19,    17,
      -19,   -19,   -19,   -19,   -19,   -19,   -19,    -3,    14,   -19,
@@ -1189,7 +1189,7 @@ namespace yy {
   };
 
   const unsigned char
-  BitTorrent_MetaInfo_Parser::yydefact_[] =
+  BitTorrent_Bencoding_Parser::yydefact_[] =
   {
        0,     2,     0,    13,     1,     0,     3,    14,    12,     0,
       17,    16,    18,    20,    15,     5,    13,     0,     0,    19,
@@ -1198,21 +1198,21 @@ namespace yy {
   };
 
   const signed char
-  BitTorrent_MetaInfo_Parser::yypgoto_[] =
+  BitTorrent_Bencoding_Parser::yypgoto_[] =
   {
      -19,   -19,   -19,   -18,   -19,   -19,   -19,   -16,   -19,   -19,
      -19,   -19,   -19
   };
 
   const signed char
-  BitTorrent_MetaInfo_Parser::yydefgoto_[] =
+  BitTorrent_Bencoding_Parser::yydefgoto_[] =
   {
       -1,     2,     3,    17,    24,    26,    27,     5,     8,     9,
       14,    15,    16
   };
 
   const unsigned char
-  BitTorrent_MetaInfo_Parser::yytable_[] =
+  BitTorrent_Bencoding_Parser::yytable_[] =
   {
       18,    19,     1,    20,    21,    22,    23,     4,    28,     0,
       30,    29,    20,    21,    22,    23,     6,    25,    31,     0,
@@ -1220,7 +1220,7 @@ namespace yy {
   };
 
   const signed char
-  BitTorrent_MetaInfo_Parser::yycheck_[] =
+  BitTorrent_Bencoding_Parser::yycheck_[] =
   {
       16,     4,     9,     6,     7,     8,     9,     0,    26,    -1,
        4,    27,     6,     7,     8,     9,     3,     3,     3,    -1,
@@ -1228,7 +1228,7 @@ namespace yy {
   };
 
   const unsigned char
-  BitTorrent_MetaInfo_Parser::yystos_[] =
+  BitTorrent_Bencoding_Parser::yystos_[] =
   {
        0,     9,    11,    12,     0,    17,     3,     7,    18,    19,
        6,     7,     8,     9,    20,    21,    22,    13,    17,     4,
@@ -1237,7 +1237,7 @@ namespace yy {
   };
 
   const unsigned char
-  BitTorrent_MetaInfo_Parser::yyr1_[] =
+  BitTorrent_Bencoding_Parser::yyr1_[] =
   {
        0,    10,    12,    11,    13,    13,    14,    14,    15,    14,
       16,    14,    17,    17,    19,    18,    20,    20,    21,    20,
@@ -1245,7 +1245,7 @@ namespace yy {
   };
 
   const unsigned char
-  BitTorrent_MetaInfo_Parser::yyr2_[] =
+  BitTorrent_Bencoding_Parser::yyr2_[] =
   {
        0,     2,     0,     4,     2,     0,     1,     1,     0,     4,
        0,     4,     2,     0,     0,     3,     1,     1,     0,     4,
@@ -1257,18 +1257,18 @@ namespace yy {
   // YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
   // First, the terminals, then, starting at \a yyntokens_, nonterminals.
   const char*
-  const BitTorrent_MetaInfo_Parser::yytname_[] =
+  const BitTorrent_Bencoding_Parser::yytname_[] =
   {
   "\"end\"", "error", "$undefined", "\"dictionary_end\"", "\"list_end\"",
   "\"end_of_fragment\"", "\"integer\"", "\"string\"", "\"list\"",
-  "\"dictionary\"", "$accept", "metainfo", "$@1", "list_items",
+  "\"dictionary\"", "$accept", "bencoding", "$@1", "list_items",
   "list_item", "$@2", "$@3", "dictionary_items", "dictionary_item", "$@4",
   "dictionary_value", "$@5", "$@6", YY_NULLPTR
   };
 
 #if YYDEBUG
   const unsigned short int
-  BitTorrent_MetaInfo_Parser::yyrline_[] =
+  BitTorrent_Bencoding_Parser::yyrline_[] =
   {
        0,   221,   221,   221,   232,   233,   234,   243,   252,   252,
      264,   264,   277,   278,   279,   279,   282,   302,   322,   322,
@@ -1277,7 +1277,7 @@ namespace yy {
 
   // Print the state stack on the debug stream.
   void
-  BitTorrent_MetaInfo_Parser::yystack_print_ ()
+  BitTorrent_Bencoding_Parser::yystack_print_ ()
   {
     *yycdebug_ << "Stack now";
     for (stack_type::const_iterator
@@ -1290,7 +1290,7 @@ namespace yy {
 
   // Report on the debug stream that the rule \a yyrule is going to be reduced.
   void
-  BitTorrent_MetaInfo_Parser::yy_reduce_print_ (int yyrule)
+  BitTorrent_Bencoding_Parser::yy_reduce_print_ (int yyrule)
   {
     unsigned int yylno = yyrline_[yyrule];
     int yynrhs = yyr2_[yyrule];
@@ -1306,8 +1306,8 @@ namespace yy {
 
   // Symbol number corresponding to token number t.
   inline
-  BitTorrent_MetaInfo_Parser::token_number_type
-  BitTorrent_MetaInfo_Parser::yytranslate_ (int t)
+  BitTorrent_Bencoding_Parser::token_number_type
+  BitTorrent_Bencoding_Parser::yytranslate_ (int t)
   {
     static
     const token_number_type
@@ -1359,23 +1359,23 @@ namespace yy {
 
 
 void
-yy::BitTorrent_MetaInfo_Parser::error (const location_type& location_in,
-                                       const std::string& message_in)
+yy::BitTorrent_Bencoding_Parser::error (const location_type& location_in,
+                                        const std::string& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_Parser::error"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_Parser::error"));
 
   try {
     parser->error (location_in, message_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in BitTorrent_MetaInfo_IParser::error(), continuing\n")));
+                ACE_TEXT ("caught exception in BitTorrent_Bencoding_IParser::error(), continuing\n")));
   }
 }
 
 /*void
-yy::BitTorrent_MetaInfo_Parser::set (yyscan_t context_in)
+yy::BitTorrent_Bencoding_Parser::set (yyscan_t context_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_MetaInfo_Parser::set"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_Parser::set"));
 
   yyscanner = context_in;
 } */
@@ -1407,7 +1407,7 @@ yyerror (YYLTYPE* location_in,
     iparser_p->error (message_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in BitTorrent_MetaInfo_IParser::error(), continuing\n")));
+                ACE_TEXT ("caught exception in BitTorrent_Bencoding_IParser::error(), continuing\n")));
   }
 }
 

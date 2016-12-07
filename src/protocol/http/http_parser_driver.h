@@ -26,7 +26,7 @@
 #include <ace/Global_Macros.h>
 
 #include "http_iparser.h"
-#include "http_scanner.h"
+#include "http_parser.h"
 
 #include "location.hh"
 
@@ -36,6 +36,7 @@ class ACE_Message_Queue_Base;
 typedef void* yyscan_t;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
 //struct YYLTYPE;
+int HTTP_Scanner_get_debug  (yyscan_t);
 
 template <typename SessionMessageType>
 class HTTP_ParserDriver_T

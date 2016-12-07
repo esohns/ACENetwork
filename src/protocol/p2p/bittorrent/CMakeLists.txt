@@ -12,20 +12,20 @@ else ()
 # endif ()
 endif ()
 
-#set (FLEX_LIB_FILE libfl.so)
-#if (UNIX)
-# find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
-#               DOC "searching for ${FLEX_LIB_FILE} (system paths)")
-#elseif (WIN32)
-# unset (FLEX_LIB_FILE)
-# set (FLEX_LIB_FILE libfl.lib)
-# find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
-#               DOC "searching for ${FLEX_LIB_FILE} (system paths)")
-#endif ()
-##if (NOT EXISTS ACE_LIBRARY)
-#if (NOT FLEX_LIBRARY)
-# message (FATAL_ERROR "could not find ${FLEX_LIB_FILE} (was: \"${FLEX_LIBRARY}\"), aborting")
-#endif ()
+set (FLEX_LIB_FILE libfl.so)
+if (UNIX)
+ find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
+               DOC "searching for ${FLEX_LIB_FILE} (system paths)")
+elseif (WIN32)
+ unset (FLEX_LIB_FILE)
+ set (FLEX_LIB_FILE libfl.lib)
+ find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
+               DOC "searching for ${FLEX_LIB_FILE} (system paths)")
+endif ()
+#if (NOT EXISTS ACE_LIBRARY)
+if (NOT FLEX_LIBRARY)
+ message (FATAL_ERROR "could not find ${FLEX_LIB_FILE} (was: \"${FLEX_LIBRARY}\"), aborting")
+endif ()
 
 set (PROJECTS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../../../..)
 set (OPENSSL_LIB_FILE libeay32.lib)
@@ -113,6 +113,13 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../http)
 set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      stdafx.cpp
      stdafx.h
+     bittorrent_bencoding_parser.cpp
+     bittorrent_bencoding_parser.h
+     bittorrent_bencoding_parser_driver.cpp
+     bittorrent_bencoding_parser_driver.h
+     bittorrent_bencoding_parser_driver.inl
+     bittorrent_bencoding_scanner.cpp
+     bittorrent_bencoding_scanner.h
      bittorrent_common.h
      bittorrent_control.cpp
      bittorrent_control.h
@@ -123,13 +130,6 @@ set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      bittorrent_message.cpp
      bittorrent_message.h
      bittorrent_message.inl
-     bittorrent_metainfo_parser.cpp
-     bittorrent_metainfo_parser.h
-     bittorrent_metainfo_parser_driver.cpp
-     bittorrent_metainfo_parser_driver.h
-     bittorrent_metainfo_parser_driver.inl
-     bittorrent_metainfo_scanner.cpp
-     bittorrent_metainfo_scanner.h
      bittorrent_module_parser.cpp
      bittorrent_module_parser.h
      bittorrent_module_parser.inl
@@ -163,10 +163,10 @@ set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      position.hh
      stack.hh)
 set (${PROJECT_NAME}_Protocol_BitTorrent_SCRIPTS
-     scripts/metainfo_scanner.ll
-     scripts/metainfo_parser.yy
-     scripts/scanner.l
-     scripts/parser.y)
+     scripts/bencoding_scanner.ll
+     scripts/bencoding_parser.yy
+     scripts/scanner.ll
+     scripts/parser.yy)
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_BitTorrent_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_BitTorrent_SRCS PROPERTIES COMPILE_DEFINITIONS -Dbittorrent_BUILD_DLL)
@@ -216,6 +216,10 @@ export (TARGETS ${PROJECT_NAME}_Protocol_BitTorrent
 
 ############### install files ################
 install (FILES
+         bittorrent_bencoding_parser.h
+         bittorrent_bencoding_parser_driver.h
+         bittorrent_bencoding_parser_driver.inl
+         bittorrent_bencoding_scanner.h
          bittorrent_common.h
          bittorrent_control.h
          bittorrent_control.inl
@@ -224,10 +228,6 @@ install (FILES
          bittorrent_iparser.h
          bittorrent_message.h
          bittorrent_message.inl
-         bittorrent_metainfo_parser.h
-         bittorrent_metainfo_parser_driver.h
-         bittorrent_metainfo_parser_driver.inl
-         bittorrent_metainfo_scanner.h
          bittorrent_module_parser.h
          bittorrent_module_parser.inl
          bittorrent_module_streamer.h

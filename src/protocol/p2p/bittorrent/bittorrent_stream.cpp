@@ -20,6 +20,9 @@
 #include "stdafx.h"
 
 #include <ace/Synch.h>
+
+//#include "http_scanner.h"
+
 #include "bittorrent_stream.h"
 
 #include "bittorrent_message.h"
