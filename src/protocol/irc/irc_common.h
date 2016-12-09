@@ -41,7 +41,7 @@ class IRC_Record;
 class IRC_Message;
 class IRC_SessionMessage;
 struct IRC_Stream_SessionData;
-struct IRC_Stream_UserData;
+struct IRC_UserData;
 
 typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
                                 struct Stream_AllocatorConfiguration,
@@ -195,27 +195,22 @@ struct IRC_LoginOptions
 typedef Stream_Statistic IRC_RuntimeStatistic_t;
 
 struct IRC_ConnectionState
+ : Net_ConnectionState
 {
   inline IRC_ConnectionState ()
-   : configuration (NULL)
+   : Net_ConnectionState ()
+   , configuration (NULL)
    , controller (NULL)
    , currentStatistic ()
-   , lastCollectionTimestamp (ACE_Time_Value::zero)
-   , lock ()
-   , status (NET_CONNECTION_STATUS_INVALID)
    , userData (NULL)
   {};
 
-  struct IRC_Configuration*   configuration;
-  IRC_IControl*               controller;
+  struct IRC_Configuration*  configuration;
+  IRC_IControl*              controller;
 
-  IRC_RuntimeStatistic_t      currentStatistic;
-  ACE_Time_Value              lastCollectionTimestamp;
-  ACE_SYNCH_MUTEX             lock;
+  IRC_RuntimeStatistic_t     currentStatistic;
 
-  enum Net_Connection_Status  status;
-
-  struct IRC_Stream_UserData* userData;
+  struct IRC_UserData*       userData;
 };
 
 struct IRC_SessionState

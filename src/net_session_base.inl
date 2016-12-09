@@ -101,7 +101,12 @@ Net_SessionBase_T<AddressType,
          iterator != state_.connections.end ();
          ++iterator)
     {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      iconnection_p =
+        connectionManager_->get (reinterpret_cast<ACE_HANDLE> (*iterator));
+#else
       iconnection_p = connectionManager_->get (*iterator);
+#endif
       if (!iconnection_p)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -392,7 +397,12 @@ Net_SessionBase_T<AddressType,
          iterator != state_.connections.end ();
          ++iterator)
     {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      iconnection_p =
+        connectionManager_->get (reinterpret_cast<ACE_HANDLE> (*iterator));
+#else
       iconnection_p = connectionManager_->get (*iterator);
+#endif
       if (!iconnection_p)
       {
         ACE_DEBUG ((LM_ERROR,

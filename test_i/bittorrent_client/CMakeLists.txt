@@ -142,8 +142,9 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/dev)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/misc)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/flex)
 endif ()
-#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/bison)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/client_server)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/http)
@@ -191,6 +192,10 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_BitTorrent)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
+if (WIN32)
+ set_target_properties (${EXECUTABLE} PROPERTIES COMPILE_FLAGS "/wd4503")
+endif ()
+
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (UNIX)
@@ -199,6 +204,7 @@ if (UNIX)
  target_link_libraries (${EXECUTABLE} ${FLEX_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
 elseif (WIN32)
+ target_link_libraries (${EXECUTABLE} ntdll.lib)
  target_link_libraries (${EXECUTABLE} ${CURSES_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${PANEL_LIBRARY})
 endif ()
@@ -281,6 +287,10 @@ set (bittorrent_client_gui_SRCS
 set (EXECUTABLE_GUI bittorrent_client_gui)
 add_executable (${EXECUTABLE_GUI} ${bittorrent_client_gui_SRCS})
 
+if (CMAKE_BUILD_TYPE STREQUAL Debug AND WIN32)
+ set_target_properties (${EXECUTABLE_GUI} PROPERTIES COMPILE_FLAGS "/wd4503")
+endif ()
+
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE_GUI} Common)
 add_dependencies (${EXECUTABLE_GUI} CommonUI)
@@ -336,3 +346,41 @@ install (FILES
          bittorrent_client_main.glade
          bittorrent_client_session.glade
          DESTINATION etc/lib${PROJECT_NAME}/test_i COMPONENT config)
+
+##########################################
+
+if (UNIX)
+ create_target_launcher (${EXECUTABLE}
+                         ARGS "-l -t"
+#                         FORWARD_ARGS
+                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
+                                              ${PROJECT_SOURCE_DIR}/../gtk-win32/gtk/Win32/debug/bin
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/ui/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
+                                              /usr/local/lib
+                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_i/bittorrent_client
+                         ENVIRONMENT foo=bar)
+elseif (WIN32)
+ create_target_launcher (${EXECUTABLE}
+                         ARGS "-l -t"
+#                        FORWARD_ARGS
+                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
+                                              ${PROJECT_SOURCE_DIR}/../openssl/bin
+                                              ${PROJECT_SOURCE_DIR}/../pdcurses/win32
+                                              ${PROJECT_SOURCE_DIR}/../gtk-win32/gtk/Win32/debug/bin
+                                              G:/software/Development/dll
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/err/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/image/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/math/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/ui/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/modules/dec/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/protocol/p2p/bittorrent/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/protocol/http/Debug
+                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_i/bittorrent_client
+                         ENVIRONMENT foo=bar)
+endif ()

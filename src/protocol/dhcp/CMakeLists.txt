@@ -107,6 +107,7 @@ set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES VERSION ${VERSIO
 
 #target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${CMAKE_THREAD_LIBS_INIT})
 if (WIN32)
+ target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ntdll.lib)
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${ACE_LIBRARY})
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP Common)
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACEStream)

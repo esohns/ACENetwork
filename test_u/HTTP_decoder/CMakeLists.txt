@@ -48,28 +48,31 @@ find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
-add_definitions (-DCommon_HAS_DLL)
+add_definitions (-DCOMMON_HAS_DLL)
 
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
-              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
+              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../../..
               PATH_SUFFIXES libACEStream/cmake
               NO_DEFAULT_PATH)
 if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
 add_definitions (-DSTREAM_HAS_DLL)
+add_definitions (-DSTREAM_DEC_HAS_DLL)
 
-find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+find_package (${PROJECT_NAME} ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
-              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/..
+              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../..
               PATH_SUFFIXES cmake
               NO_DEFAULT_PATH)
 if (NOT EXISTS ${ACENetwork_DIR})
- message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
+ message (FATAL_ERROR "could not find package \"${PROJECT_NAME}\", aborting")
 endif ()
+add_definitions (-DNET_HAS_DLL)
+add_definitions (-DHTTP_HAS_DLL)
 
 add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
@@ -88,6 +91,7 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/flex)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
@@ -131,6 +135,7 @@ add_executable (${EXECUTABLE} ${ACENetwork_Protocol_EXE_SRCS})
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)
 add_dependencies (${EXECUTABLE} ACEStream)
+add_dependencies (${EXECUTABLE} ACEStream_Decoder)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
@@ -141,6 +146,7 @@ if (UNIX)
 elseif (WIN32)
 # *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
+ target_link_libraries (${EXECUTABLE} ntdll.lib)
 endif ()
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 target_link_libraries (${EXECUTABLE} Common)

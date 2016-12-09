@@ -1,29 +1,24 @@
 %top{
 #include "http_common.h"
+#include "http_exports.h"
 #include <ace/Synch.h>
 #include "http_iparser.h"
 #undef YYTOKENTYPE
 #include "http_parser.h"
 
-
-#define YY_DECL                                                 \
-yy::HTTP_Parser::token_type                                     \
-HTTP_Scanner_lex (yy::HTTP_Parser::semantic_type* yylval_param, \
-                  yy::HTTP_Parser::location_type* yylloc_param, \
-                  HTTP_IParser* iparser_p,                      \
+#if !defined (YY_DECL)
+#define YY_DECL                                           \
+yy::HTTP_Parser::token_type                               \
+HTTP_Scanner_lex (yy::HTTP_Parser::semantic_type* yylval, \
+                  yy::HTTP_Parser::location_type* yylloc, \
+                  HTTP_IParser* iparser_p,                \
                   yyscan_t yyscanner)
-/*#define YY_DECL                            \
-yy::HTTP_Parser::token_type                \
-HTTP_Scanner_lex (YYSTYPE* yylval_param,   \
-                  YYLTYPE* yylloc_param,   \
-                  HTTP_IParser* iparser_p, \
-                  yyscan_t yyscanner)*/
-// ... and declare it for the parser's sake
 YY_DECL;
+#endif
 
 //using namespace yy;
-#define YYLTYPE yy::location
-#define YYSTYPE yy::HTTP_Parser::semantic_type
+/*#define YYLTYPE yy::location
+#define YYSTYPE yy::HTTP_Parser::semantic_type*/
 
 void HTTP_Scanner_set_column (int, yyscan_t);
 
@@ -31,6 +26,7 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 }
 
 %{
+#include <locale>
 #include <regex>
 #include <sstream>
 #include <string>
@@ -56,20 +52,23 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 //#define YY_DECL
 %}
 
+%option prefix="HTTP_Scanner_"
+
 %option header-file="http_scanner.h" outfile="http_scanner.cpp"
 %option yylineno yywrap
 %option nomain nounput noyymore noreject nodefault nostdinit
-%option nostack noline nounistd
+/* %option nostack noline nounistd */
+%option nostack nounistd
 /* %option c++ yyclass="HTTP_Scanner" */
-/* %option ansi-definitions ansi-prototypes bison-bridge */
-/* *NOTE*: the 'line' directives confuse gdb */
+/* *NOTE*: the '#line' directives confuse gdb */
 /* *NOTE*: 'noline' not supported (on Linux, flex 2.5.39)
            --> use --noline and (manually) remove '#line's introduced by %top */
-/* %option ansi-definitions ansi-prototypes bison-bridge */
-%option bison-locations
-/* *IMPORTANT NOTE*: 'read' requires 'unistd'(.h) */
+/* %option ansi-definitions ansi-prototypes */
+/* *IMPORTANT NOTE*: do NOT mess with these (it's broken)
+/* %option bison-bridge bison-locations */
 %option 8bit batch never-interactive
-%option reentrant pointer prefix="HTTP_Scanner_"
+%option reentrant pointer
+/* *IMPORTANT NOTE*: 'read' requires 'unistd'(.h) */
 /* *TODO*: find out why 'read' does not compile (on Linux, flex 2.5.39) */
 %option align read full
 %option backup debug perf-report perf-report verbose warn
@@ -77,7 +76,7 @@ void HTTP_Scanner_set_column (int, yyscan_t);
                      ansi-definitions, ansi-prototypes, trace header-file extra-type'
 */
 %option extra-type="HTTP_IParser*"
-/* %option nounput */
+%option tables-file="http_scanner.tab"
 
 /* *NOTE*: see RFC 1945 page 10 */
 OCTET          [\x00-\xFF]
@@ -516,11 +515,11 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                iterator =
                                    record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING));
                                if (iterator != record_r.headers.end ())
-                               {
+                               { std::locale locale;
                                  std::string value_string = (*iterator).second;
                                  std::transform (value_string.begin (), value_string.end (),
                                                  value_string.begin (),
-                                                 [](unsigned char c) { return std::tolower (c); });
+                                                 [&locale](unsigned char c) { return std::tolower (c, locale); });
                                  if (value_string == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING))
                                    BEGIN (chunked_body);
                                  else

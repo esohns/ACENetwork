@@ -625,7 +625,7 @@ yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvalue
 
     case 14: /* "chaddr"  */
 
-      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), Net_Common_Tools::MACAddress2String (((*yyvaluep).aval)).c_str ()); }
+      { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), Net_Common_Tools::LinkLayerAddress2String (((*yyvaluep).aval)).c_str ()); }
 
         break;
 

@@ -21,10 +21,16 @@
 #ifndef BITTORRENT_BENCODING_SCANNER_H
 #define BITTORRENT_BENCODING_SCANNER_H
 
-#include <ace/Global_Macros.h>
+// Flex expects the signature of yylex to be defined in the macro YY_DECL, and
+// the C++ parser expects it to be declared. We can factor both as follows.
+#ifndef YY_DECL
+#define YY_DECL                                                                              \
+yy::BitTorrent_Bencoding_Parser::token_type                                                  \
+BitTorrent_Bencoding_Scanner::yylex (yy::BitTorrent_Bencoding_Parser::semantic_type* yylval, \
+                                     yy::location* yylloc)
+#endif
 
-#include "bittorrent_iparser.h"
-#include "bittorrent_bencoding_parser.h"
+#include <ace/Global_Macros.h>
 
 #ifndef yyFlexLexer
 #define yyFlexLexer BitTorrent_Bencoding_Scanner_FlexLexer
@@ -34,34 +40,44 @@
 
 #include "location.hh"
 
-class BitTorrent_Bencoding_Scanner
+#include "bittorrent_exports.h"
+#include "bittorrent_iparser.h"
+#include "bittorrent_bencoding_parser.h"
+
+class BitTorrent_Export BitTorrent_Bencoding_Scanner
  : public BitTorrent_Bencoding_Scanner_FlexLexer
  , public BitTorrent_Bencoding_IScanner_t
 {
  public:
   BitTorrent_Bencoding_Scanner ()
    : BitTorrent_Bencoding_Scanner_FlexLexer (NULL, NULL)
-   , location_ ()
    , parser_ (NULL)
   {};
   virtual ~BitTorrent_Bencoding_Scanner () {};
 
-  // implement BitTorrent_Bencoding_IScanner
+  // implement Net_IScanner_T
   inline virtual void set (BitTorrent_Bencoding_IParser* parser_in) { parser_ = parser_in; };
 
   // override (part of) yyFlexLexer
-//    virtual int yylex ();
   virtual yy::BitTorrent_Bencoding_Parser::token_type yylex (yy::BitTorrent_Bencoding_Parser::semantic_type*,
-                                                             yy::location*,
-                                                             BitTorrent_Bencoding_IParser*);
+                                                             yy::location*);
 //    virtual int yywrap ();
-
-  yy::location                  location_;
 
  private:
 //  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_Scanner ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_Scanner (const BitTorrent_Bencoding_Scanner&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_Scanner& operator= (const BitTorrent_Bencoding_Scanner&))
+
+    // *NOTE*: this is the C interface (not needed by C++ scanners)
+  inline virtual void debug (yyscan_t,
+                             bool) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual bool initialize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
+  inline virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual struct yy_buffer_state* create (yyscan_t,
+                                                 char*,
+                                                 size_t) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
+  inline virtual void destroy (yyscan_t,
+                               struct yy_buffer_state*&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   BitTorrent_Bencoding_IParser* parser_;
 };

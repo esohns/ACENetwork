@@ -23,7 +23,7 @@ SCANNER_L=scanner.l
 [ ! -f ${SCRIPTS_DIRECTORY}/${SCANNER_L} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${SCANNER_L}), aborting" && exit 1
 
 # generate a scanner for bisecting HTTP messages from the input stream
-flex ${SCRIPTS_DIRECTORY}/${BISECT_L} 2>&1 | tee ${SCRIPTS_DIRECTORY}/bisector_report.txt
+flex --noline ${SCRIPTS_DIRECTORY}/${BISECT_L} 2>&1 | tee ${SCRIPTS_DIRECTORY}/bisector_report.txt
 [ $? -ne 0 ] && echo "ERROR: failed to flex \"${BISECT_L}\", aborting" && exit 1
 
 # list generated files
@@ -40,6 +40,18 @@ FILES="${FILES} http_scanner.cpp http_scanner.h"
 for FILE in $FILES
 do
 mv -f $FILE ${SCRIPTS_DIRECTORY}/..
+if [ $? -ne 0 ]; then
+ echo "ERROR: failed to mv \"$FILE\", aborting"
+ exit 1
+fi
+echo "moved \"$FILE\"..."
+done
+
+# append to list
+FILES="http_scanner.tab"
+for FILE in $FILES
+do
+mv -f $FILE ${SCRIPTS_DIRECTORY}/../etc
 if [ $? -ne 0 ]; then
  echo "ERROR: failed to mv \"$FILE\", aborting"
  exit 1

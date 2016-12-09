@@ -38,7 +38,6 @@ BitTorrent_Bencoding_ParserDriver_T<SessionMessageType>::BitTorrent_Bencoding_Pa
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Bencoding_ParserDriver_T::BitTorrent_Bencoding_ParserDriver_T"));
 
-//  inherited::parser_.set (this);
 }
 
 template <typename SessionMessageType>

@@ -21,6 +21,9 @@
 #include <ace/Log_Msg.h>
 #include <ace/Message_Block.h>
 #include <ace/Message_Queue.h>
+#include <ace/OS.h>
+
+#include "common_file_tools.h"
 
 #include "net_macros.h"
 
@@ -30,7 +33,8 @@
 #include "http_scanner.h"
 
 template <typename SessionMessageType>
-HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (bool traceScanning_in,
+HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (const std::string& scannerTables_in,
+                                                              bool traceScanning_in,
                                                               bool traceParsing_in)
  : finished_ (false)
  , fragment_ (NULL)
@@ -42,6 +46,7 @@ HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (bool traceScanning
  , parser_ (this,          // driver
             scannerState_) // scanner
  , scannerState_ (NULL)
+ , scannerTables_ (scannerTables_in)
  , bufferState_ (NULL)
  , messageQueue_ (NULL)
  , useYYScanBuffer_ (HTTP_DEFAULT_USE_YY_SCAN_BUFFER)
@@ -49,10 +54,61 @@ HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (bool traceScanning
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::HTTP_ParserDriver_T"));
 
-  if (HTTP_Scanner_lex_init_extra (this, &scannerState_))
+  int result = -1;
+
+  // step1: initialize flex state
+  result = HTTP_Scanner_lex_init_extra (this,
+                                        &scannerState_);
+  if (result)
+  {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to yylex_init_extra: \"%m\", continuing\n")));
+                ACE_TEXT ("failed to yylex_init_extra: \"%m\", returning\n")));
+    return;
+  } // end IF
   ACE_ASSERT (scannerState_);
+
+  // step2: load tables ?
+  FILE* file_p = NULL;
+  if (!scannerTables_.empty ())
+  {
+    file_p = ACE_OS::fopen (scannerTables_.c_str (),
+                            ACE_TEXT_ALWAYS_CHAR ("rb"));
+    if (!file_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::fopen(\"%s\"): \"%m\", returning\n"),
+                  ACE_TEXT (scannerTables_.c_str ())));
+      return;
+    } // end IF
+    result = HTTP_Scanner_tables_fload (file_p,
+                                        scannerState_);
+    if (result)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to yy_tables_fload(\"%s\"): \"%m\", returning\n"),
+                  ACE_TEXT (scannerTables_.c_str ())));
+
+      // clean up
+      result = ACE_OS::fclose (file_p);
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::fclose(\"%s\"): \"%m\", continuing\n"),
+                    ACE_TEXT (scannerTables_.c_str ())));
+
+      return;
+    } // end IF
+    result = ACE_OS::fclose (file_p);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::fclose(\"%s\"): \"%m\", continuing\n"),
+                  ACE_TEXT (scannerTables_.c_str ())));
+
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("loaded \"%s\"...\n"),
+                ACE::basename (ACE_TEXT (scannerTables_.c_str ()),
+                               ACE_DIRECTORY_SEPARATOR_CHAR)));
+  } // end IF
+
   parser_.set (scannerState_);
 
   // trace ?
@@ -71,10 +127,20 @@ HTTP_ParserDriver_T<SessionMessageType>::~HTTP_ParserDriver_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::~HTTP_ParserDriver_T"));
 
+  int result = -1;
+
   // finalize lex scanner
+  if (!scannerTables_.empty ())
+  {
+    result = HTTP_Scanner_tables_destroy (scannerState_);
+    if (result)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to yy_tables_destroy(): \"%m\", continuing\n")));
+  } // end IF
+
   if (HTTP_Scanner_lex_destroy (scannerState_))
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to yylex_destroy: \"%m\", continuing\n")));
+                ACE_TEXT ("failed to yylex_destroy(): \"%m\", continuing\n")));
 
   if (record_)
     delete record_;
@@ -82,13 +148,16 @@ HTTP_ParserDriver_T<SessionMessageType>::~HTTP_ParserDriver_T ()
 
 template <typename SessionMessageType>
 void
-HTTP_ParserDriver_T<SessionMessageType>::initialize (bool traceScanning_in,
+HTTP_ParserDriver_T<SessionMessageType>::initialize (//const std::string& scannerTables_in,
+                                                     bool traceScanning_in,
                                                      bool traceParsing_in,
                                                      ACE_Message_Queue_Base* messageQueue_in,
-//                                                     bool useYYScanBuffer_in,
-                                                     bool blockInParse_in)
+                                                     bool blockInParse_in,
+                                                     bool useYYScanBuffer_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::initialize"));
+
+  //int result = -1;
 
   if (isInitialized_)
   {
@@ -102,6 +171,15 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (bool traceScanning_in,
     blockInParse_ = false;
     isFirst_ = true;
     trace_ = STREAM_DEFAULT_YACC_TRACE;
+
+    //if (!scannerTables_.empty ())
+    //{
+    //  result = HTTP_Scanner_tables_destroy (scannerState_);
+    //  if (result)
+    //    ACE_DEBUG ((LM_ERROR,
+    //                ACE_TEXT ("failed to yy_tables_destroy(): \"%m\", continuing\n")));
+    //  scannerTables_ = scannerTables_in;
+    //} // end IF
 
     if (bufferState_)
     {
@@ -127,8 +205,7 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (bool traceScanning_in,
   blockInParse_ = blockInParse_in;
   trace_ = traceParsing_in;
   messageQueue_ = messageQueue_in;
-//  useYYScanBuffer_ = useYYScanBuffer_in;
-  useYYScanBuffer_ = HTTP_DEFAULT_USE_YY_SCAN_BUFFER;
+  useYYScanBuffer_ = useYYScanBuffer_in;
 
   HTTP_Scanner_set_debug ((traceScanning_in ? 1 : 0),
                           scannerState_);

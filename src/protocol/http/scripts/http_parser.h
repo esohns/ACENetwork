@@ -32,8 +32,8 @@
 
 /* C++ LALR(1) parser skeleton written by Akim Demaille.  */
 
-#ifndef HTTP_PARSER_HEADER_H
-# define HTTP_PARSER_HEADER_H
+#ifndef PARSER_HEADER_H
+# define PARSER_HEADER_H
 
 /* "%code requires" blocks.  */
 
@@ -148,7 +148,7 @@ namespace yy {
 
 
   /// A Bison parser.
-  class HTTP_Export HTTP_Parser
+  class HTTP_Parser
   {
   public:
     /// Symbol semantic values.

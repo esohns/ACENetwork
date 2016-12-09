@@ -33,6 +33,39 @@ template <typename ConfigurationType>
 class Net_ITransportLayer_T;
 struct Net_SocketConfiguration;
 
+enum Net_LinkLayerType
+{
+  NET_LINKLAYER_ATM    = 0x01,
+  NET_LINKLAYER_802_3  = 0x02, // i.e. "Ethernet"
+  NET_LINKLAYER_FDDI   = 0x04,
+  NET_LINKLAYER_PPP    = 0x08,
+  NET_LINKLAYER_802_11 = 0x10, // i.e. "WLAN"
+  ////////////////////////////////////////
+  NET_LINKLAYER_MAX,
+  NET_LINKLAYER_INVALID = -1,
+};
+
+enum Net_NetworkLayerType
+{
+  NET_NETWORKLAYER_IP_UNICAST   = 0x0001, // i.e. "routable" IP
+  NET_NETWORKLAYER_IP_BROADCAST = 0x0002,
+  NET_NETWORKLAYER_IP_MULTICAST = 0x0004,
+  ////////////////////////////////////////
+  NET_NETWORKLAYER_MAX,
+  NET_NETWORKLAYER_INVALID = -1,
+};
+
+enum Net_TransportLayerType
+{
+  NET_TRANSPORTLAYER_INVALID = -1,
+  NET_TRANSPORTLAYER_IP_CAST = 0, // 'pseudo' (LAN-only, no flow control)
+  NET_TRANSPORTLAYER_NETLINK, // 'pseudo' ((Linux-)host only, no flow control) kernel<->user space protocol
+  NET_TRANSPORTLAYER_TCP,
+  NET_TRANSPORTLAYER_UDP,
+  ////////////////////////////////////////
+  NET_TRANSPORTLAYER_MAX
+};
+
 enum Net_ClientServerRole
 {
   NET_ROLE_INVALID = -1,
@@ -40,18 +73,6 @@ enum Net_ClientServerRole
   NET_ROLE_SERVER,
   ////////////////////////////////////////
   NET_ROLE_MAX
-};
-
-enum Net_TransportLayerType
-{
-  NET_TRANSPORTLAYER_INVALID = -1,
-  NET_TRANSPORTLAYER_IP_BROADCAST = 0,
-  NET_TRANSPORTLAYER_IP_MULTICAST,
-  NET_TRANSPORTLAYER_NETLINK,
-  NET_TRANSPORTLAYER_TCP,
-  NET_TRANSPORTLAYER_UDP,
-  ////////////////////////////////////////
-  NET_TRANSPORTLAYER_MAX
 };
 
 //enum Net_Stream_ControlMessageType : int

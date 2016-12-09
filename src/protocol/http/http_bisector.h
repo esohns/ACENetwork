@@ -2,9 +2,9 @@
 #define HTTP_Bisector_HEADER_H 1
 #define HTTP_Bisector_IN_HEADER 1
 
-#line 5 "http_bisector.h"
+#line 6 "http_bisector.h"
 
-#line 7 "http_bisector.h"
+#line 8 "http_bisector.h"
 
 #define  YY_INT_ALIGNED long int
 
@@ -14,8 +14,8 @@
 
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
-#define YY_FLEX_MINOR_VERSION 6
-#define YY_FLEX_SUBMINOR_VERSION 3
+#define YY_FLEX_MINOR_VERSION 5
+#define YY_FLEX_SUBMINOR_VERSION 35
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -24,77 +24,8 @@
 /* %endif */
 
 /* %if-c-only */
-    #define yy_create_buffer HTTP_Bisector__create_buffer
-
-    #define yy_delete_buffer HTTP_Bisector__delete_buffer
-
-    #define yy_scan_buffer HTTP_Bisector__scan_buffer
-
-    #define yy_scan_string HTTP_Bisector__scan_string
-
-    #define yy_scan_bytes HTTP_Bisector__scan_bytes
-
-    #define yy_init_buffer HTTP_Bisector__init_buffer
-
-    #define yy_flush_buffer HTTP_Bisector__flush_buffer
-
-    #define yy_load_buffer_state HTTP_Bisector__load_buffer_state
-
-    #define yy_switch_to_buffer HTTP_Bisector__switch_to_buffer
-
-    #define yypush_buffer_state HTTP_Bisector_push_buffer_state
-
-    #define yypop_buffer_state HTTP_Bisector_pop_buffer_state
-
-    #define yyensure_buffer_stack HTTP_Bisector_ensure_buffer_stack
-
-    #define yylex HTTP_Bisector_lex
-
-    #define yyrestart HTTP_Bisector_restart
-
-    #define yylex_init HTTP_Bisector_lex_init
-
-    #define yylex_init_extra HTTP_Bisector_lex_init_extra
-
-    #define yylex_destroy HTTP_Bisector_lex_destroy
-
-    #define yyget_debug HTTP_Bisector_get_debug
-
-    #define yyset_debug HTTP_Bisector_set_debug
-
-    #define yyget_extra HTTP_Bisector_get_extra
-
-    #define yyset_extra HTTP_Bisector_set_extra
-
-    #define yyget_in HTTP_Bisector_get_in
-
-    #define yyset_in HTTP_Bisector_set_in
-
-    #define yyget_out HTTP_Bisector_get_out
-
-    #define yyset_out HTTP_Bisector_set_out
-
-    #define yyget_leng HTTP_Bisector_get_leng
-
-    #define yyget_text HTTP_Bisector_get_text
-
-    #define yyget_lineno HTTP_Bisector_get_lineno
-
-    #define yyset_lineno HTTP_Bisector_set_lineno
-
-        #define yyget_column HTTP_Bisector_get_column
-
-        #define yyset_column HTTP_Bisector_set_column
-
-    #define yywrap HTTP_Bisector_wrap
-
+    
 /* %endif */
-
-    #define yyalloc HTTP_Bisector_alloc
-
-    #define yyrealloc HTTP_Bisector_realloc
-
-    #define yyfree HTTP_Bisector_free
 
 /* %if-c-only */
 
@@ -184,13 +115,25 @@ typedef unsigned int flex_uint32_t;
 /* %if-c++-only */
 /* %endif */
 
-/* TODO: this is always defined, so inline it */
-#define yyconst const
+#ifdef __cplusplus
 
-#if defined(__GNUC__) && __GNUC__ >= 3
-#define yynoreturn __attribute__((__noreturn__))
+/* The "const" storage-class-modifier is valid. */
+#define YY_USE_CONST
+
+#else	/* ! __cplusplus */
+
+/* C99 requires __STDC__ to be defined as 1. */
+#if defined (__STDC__)
+
+#define YY_USE_CONST
+
+#endif	/* defined (__STDC__) */
+#endif	/* ! __cplusplus */
+
+#ifdef YY_USE_CONST
+#define yyconst const
 #else
-#define yynoreturn
+#define yyconst
 #endif
 
 /* %not-for-header */
@@ -207,14 +150,14 @@ typedef void* yyscan_t;
 
 /* For convenience, these vars (plus the bison vars far below)
    are macros in the reentrant scanner. */
-#define yyin yyg->yyin_r
-#define yyout yyg->yyout_r
-#define yyextra yyg->yyextra_r
-#define yyleng yyg->yyleng_r
-#define yytext yyg->yytext_r
-#define yylineno (YY_CURRENT_BUFFER_LVALUE->yy_bs_lineno)
-#define yycolumn (YY_CURRENT_BUFFER_LVALUE->yy_bs_column)
-#define yy_flex_debug yyg->yy_flex_debug_r
+//#define yyin yyg->yyin_r
+//#define yyout yyg->yyout_r
+//#define yyextra yyg->yyextra_r
+//#define yyleng yyg->yyleng_r
+//#define yytext yyg->yytext_r
+//#define yylineno (YY_CURRENT_BUFFER_LVALUE->yy_bs_lineno)
+//#define yycolumn (YY_CURRENT_BUFFER_LVALUE->yy_bs_column)
+//#define yy_flex_debug yyg->yy_flex_debug_r
 
 /* %endif */
 
@@ -239,11 +182,6 @@ typedef void* yyscan_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
-#ifndef YY_TYPEDEF_YY_SIZE_T
-#define YY_TYPEDEF_YY_SIZE_T
-typedef size_t yy_size_t;
-#endif
-
 /* %if-not-reentrant */
 /* %endif */
 
@@ -251,6 +189,11 @@ typedef size_t yy_size_t;
 /* %if-not-reentrant */
 /* %endif */
 /* %endif */
+
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
@@ -269,7 +212,7 @@ struct yy_buffer_state
 	/* Size of input buffer in bytes, not including room for EOB
 	 * characters.
 	 */
-	int yy_buf_size;
+	yy_size_t yy_buf_size;
 
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
@@ -320,28 +263,28 @@ struct yy_buffer_state
 
 /* %endif */
 
-void HTTP_Bisector_restart ( FILE *input_file , yyscan_t yyscanner );
-void HTTP_Bisector__switch_to_buffer ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
-YY_BUFFER_STATE HTTP_Bisector__create_buffer ( FILE *file, int size , yyscan_t yyscanner );
-void HTTP_Bisector__delete_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
-void HTTP_Bisector__flush_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
-void HTTP_Bisector_push_buffer_state ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
-void HTTP_Bisector_pop_buffer_state ( yyscan_t yyscanner );
+void HTTP_Bisector_restart (FILE *input_file ,yyscan_t yyscanner );
+void HTTP_Bisector__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Bisector__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void HTTP_Bisector__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void HTTP_Bisector__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void HTTP_Bisector_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void HTTP_Bisector_pop_buffer_state (yyscan_t yyscanner );
 
-YY_BUFFER_STATE HTTP_Bisector__scan_buffer ( char *base, yy_size_t size , yyscan_t yyscanner );
-YY_BUFFER_STATE HTTP_Bisector__scan_string ( const char *yy_str , yyscan_t yyscanner );
-YY_BUFFER_STATE HTTP_Bisector__scan_bytes ( const char *bytes, int len , yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Bisector__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Bisector__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Bisector__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
 
 /* %endif */
 
-void *HTTP_Bisector_alloc ( yy_size_t , yyscan_t yyscanner );
-void *HTTP_Bisector_realloc ( void *, yy_size_t , yyscan_t yyscanner );
-void HTTP_Bisector_free ( void * , yyscan_t yyscanner );
+void *HTTP_Bisector_alloc (yy_size_t ,yyscan_t yyscanner );
+void *HTTP_Bisector_realloc (void *,yy_size_t ,yyscan_t yyscanner );
+void HTTP_Bisector_free (void * ,yyscan_t yyscanner );
 
 /* %% [1.0] yytext/yyin/yyout/yy_state_type/yylineno etc. def's & init go here */
 /* Begin user sect3 */
 
-#define HTTP_Bisector_wrap(yyscanner) (/*CONSTCOND*/1)
+#define HTTP_Bisector_wrap(n) 1
 #define YY_SKIP_YYWRAP
 
 #define FLEX_DEBUG
@@ -385,7 +328,7 @@ void HTTP_Bisector_free ( void * , yyscan_t yyscanner );
 
 int HTTP_Bisector_lex_init (yyscan_t* scanner);
 
-int HTTP_Bisector_lex_init_extra ( YY_EXTRA_TYPE user_defined, yyscan_t* scanner);
+int HTTP_Bisector_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 
 /* %endif */
 
@@ -394,35 +337,31 @@ int HTTP_Bisector_lex_init_extra ( YY_EXTRA_TYPE user_defined, yyscan_t* scanner
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int HTTP_Bisector_lex_destroy ( yyscan_t yyscanner );
+int HTTP_Bisector_lex_destroy (yyscan_t yyscanner );
 
-int HTTP_Bisector_get_debug ( yyscan_t yyscanner );
+int HTTP_Bisector_get_debug (yyscan_t yyscanner );
 
-void HTTP_Bisector_set_debug ( int debug_flag , yyscan_t yyscanner );
+void HTTP_Bisector_set_debug (int debug_flag ,yyscan_t yyscanner );
 
-YY_EXTRA_TYPE HTTP_Bisector_get_extra ( yyscan_t yyscanner );
+YY_EXTRA_TYPE HTTP_Bisector_get_extra (yyscan_t yyscanner );
 
-void HTTP_Bisector_set_extra ( YY_EXTRA_TYPE user_defined , yyscan_t yyscanner );
+void HTTP_Bisector_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
 
-FILE *HTTP_Bisector_get_in ( yyscan_t yyscanner );
+FILE *HTTP_Bisector_get_in (yyscan_t yyscanner );
 
-void HTTP_Bisector_set_in  ( FILE * _in_str , yyscan_t yyscanner );
+void HTTP_Bisector_set_in  (FILE * in_str ,yyscan_t yyscanner );
 
-FILE *HTTP_Bisector_get_out ( yyscan_t yyscanner );
+FILE *HTTP_Bisector_get_out (yyscan_t yyscanner );
 
-void HTTP_Bisector_set_out  ( FILE * _out_str , yyscan_t yyscanner );
+void HTTP_Bisector_set_out  (FILE * out_str ,yyscan_t yyscanner );
 
-			int HTTP_Bisector_get_leng ( yyscan_t yyscanner );
+int HTTP_Bisector_get_leng (yyscan_t yyscanner );
 
-char *HTTP_Bisector_get_text ( yyscan_t yyscanner );
+char *HTTP_Bisector_get_text (yyscan_t yyscanner );
 
-int HTTP_Bisector_get_lineno ( yyscan_t yyscanner );
+int HTTP_Bisector_get_lineno (yyscan_t yyscanner );
 
-void HTTP_Bisector_set_lineno ( int _line_number , yyscan_t yyscanner );
-
-int HTTP_Bisector_get_column  ( yyscan_t yyscanner );
-
-void HTTP_Bisector_set_column ( int _column_no , yyscan_t yyscanner );
+void HTTP_Bisector_set_lineno (int line_number ,yyscan_t yyscanner );
 
 /* %if-bison-bridge */
 /* %endif */
@@ -433,9 +372,9 @@ void HTTP_Bisector_set_column ( int _column_no , yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int HTTP_Bisector_wrap ( yyscan_t yyscanner );
+extern "C" int HTTP_Bisector_wrap (yyscan_t yyscanner );
 #else
-extern int HTTP_Bisector_wrap ( yyscan_t yyscanner );
+extern int HTTP_Bisector_wrap (yyscan_t yyscanner );
 #endif
 #endif
 
@@ -444,11 +383,11 @@ extern int HTTP_Bisector_wrap ( yyscan_t yyscanner );
 /* %endif */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy ( char *, const char *, int , yyscan_t yyscanner);
+static void yy_flex_strncpy (char *,yyconst char *,int ,yyscan_t yyscanner);
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen ( const char * , yyscan_t yyscanner);
+static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #endif
 
 #ifndef YY_NO_INPUT
@@ -524,6 +463,6 @@ extern int HTTP_Bisector_lex (yyscan_t yyscanner);
 #line 69 "./../scripts/bisector.l"
 
 
-#line 527 "http_bisector.h"
+#line 467 "http_bisector.h"
 #undef HTTP_Bisector_IN_HEADER
 #endif /* HTTP_Bisector_HEADER_H */

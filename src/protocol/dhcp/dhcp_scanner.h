@@ -177,14 +177,14 @@ typedef void* yyscan_t;
 
 /* For convenience, these vars (plus the bison vars far below)
    are macros in the reentrant scanner. */
-#define yyin yyg->yyin_r
-#define yyout yyg->yyout_r
-#define yyextra yyg->yyextra_r
-#define yyleng yyg->yyleng_r
-#define yytext yyg->yytext_r
-#define yylineno (YY_CURRENT_BUFFER_LVALUE->yy_bs_lineno)
-#define yycolumn (YY_CURRENT_BUFFER_LVALUE->yy_bs_column)
-#define yy_flex_debug yyg->yy_flex_debug_r
+//#define yyin yyg->yyin_r
+//#define yyout yyg->yyout_r
+//#define yyextra yyg->yyextra_r
+//#define yyleng yyg->yyleng_r
+//#define yytext yyg->yytext_r
+//#define yylineno (YY_CURRENT_BUFFER_LVALUE->yy_bs_lineno)
+//#define yycolumn (YY_CURRENT_BUFFER_LVALUE->yy_bs_column)
+//#define yy_flex_debug yyg->yy_flex_debug_r
 
 /* %endif */
 

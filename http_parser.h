@@ -20,8 +20,7 @@
 /* %define api.location.type         {} */
 /* %define namespace                 {yy} */
 /* %define api.namespace             {yy} */
-/* *IMPORTANT NOTE*: do NOT mess with this (it's broken)
-%name-prefix                      "yy"
+/*%name-prefix                      "http"*/
 /* %define api.prefix                {yy} */
 /*%pure-parser*/
 /* %define api.pure                  true */
@@ -114,9 +113,9 @@ extern int HTTP_Export yydebug;
 %initial-action
 {
   // initialize the location
-  @$.initialize (NULL);
+  //@$.initialize (YY_NULLPTR, 1, 1);
   //@$.begin.filename = @$.end.filename = &iparser_p->file;
-  //ACE_OS::memset (&@$, 0, sizeof (@$));
+  ACE_OS::memset (&@$, 0, sizeof (YYLTYPE));
 
   // initialize the token value container
   $$.ival = 0;

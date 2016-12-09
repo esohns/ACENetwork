@@ -19,12 +19,14 @@ if (UNIX)
 elseif (WIN32)
  unset (FLEX_LIB_FILE)
  set (FLEX_LIB_FILE libfl.lib)
- find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
-               DOC "searching for ${FLEX_LIB_FILE} (system paths)")
+# find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
+#               PATHS ${PROJECTS_DIRECTORY}/flex
+#               PATH_SUFFIXES lib
+#               DOC "searching for ${FLEX_LIB_FILE}")
 endif ()
 #if (NOT EXISTS ACE_LIBRARY)
 if (NOT FLEX_LIBRARY)
- message (FATAL_ERROR "could not find ${FLEX_LIB_FILE} (was: \"${FLEX_LIBRARY}\"), aborting")
+# message (FATAL_ERROR "could not find ${FLEX_LIB_FILE} (was: \"${FLEX_LIBRARY}\"), aborting")
 endif ()
 
 set (PROJECTS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../../../..)
@@ -150,31 +152,32 @@ set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      bittorrent_sessionmessage.cpp
      bittorrent_sessionmessage.h
      bittorrent_sessionmessage.inl
-     bittorrent_stream.cpp
-     bittorrent_stream.h
-     bittorrent_stream.inl
+     bittorrent_stream_peer.cpp
+     bittorrent_stream_peer.h
+     bittorrent_stream_peer.inl
+     bittorrent_stream_tracker.cpp
+     bittorrent_stream_tracker.h
+     bittorrent_stream_tracker.inl
      bittorrent_stream_common.h
      bittorrent_streamhandler.cpp
      bittorrent_streamhandler.h
      bittorrent_streamhandler.inl
      bittorrent_tools.cpp
-     bittorrent_tools.h
-     location.hh
-     position.hh
-     stack.hh)
+     bittorrent_tools.h)
 set (${PROJECT_NAME}_Protocol_BitTorrent_SCRIPTS
      scripts/bencoding_scanner.ll
      scripts/bencoding_parser.yy
-     scripts/scanner.ll
+     scripts/scanner.l
      scripts/parser.yy)
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_BitTorrent_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_BitTorrent_SRCS PROPERTIES COMPILE_DEFINITIONS -Dbittorrent_BUILD_DLL)
 
-# *NOTE*: generate .def file and export all symbols on Windows
 if (WIN32)
- set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+# *NOTE*: generate .def file and export all symbols on Windows
+# set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
  source_group (scripts FILES ${PROJECT_NAME}_Protocol_BitTorrent_SCRIPTS)
+ source_group (exports FILES etc/exports.def)
 endif ()
 
 # *NOTE*: this is needed to export yydebug, so it can be imported from template
@@ -194,6 +197,9 @@ add_dependencies (${PROJECT_NAME}_Protocol_BitTorrent ACEStream)
 
 set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES DEFINE_SYMBOL BITTORRENT_BUILD_DLL)
 set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
+if (WIN32 AND MSVC)
+ set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/etc/exports.def\"")
+endif ()
 
 #target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
@@ -204,6 +210,7 @@ elseif (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${OPENSSL_LIBRARY})
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent Common)
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ACEStream)
+# target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${PROJECT_NAME}_Protocol_HTTP)
 endif ()
 
 # add PCH
@@ -241,15 +248,14 @@ install (FILES
          bittorrent_session.inl
          bittorrent_sessionmessage.h
          bittorrent_sessionmessage.inl
-         bittorrent_stream.h
-         bittorrent_stream.inl
+         bittorrent_stream_peer.h
+         bittorrent_stream_peer.inl
+         bittorrent_stream_tracker.h
+         bittorrent_stream_tracker.inl
          bittorrent_streamhandler.h
          bittorrent_streamhandler.inl
          bittorrent_stream_common.h
          bittorrent_tools.h
-         location.hh
-         position.hh
-         stack.hh
          DESTINATION include)
 install (TARGETS ${PROJECT_NAME}_Protocol_BitTorrent
          EXPORT ${PROJECT_NAME}Targets

@@ -42,7 +42,7 @@ class Net_IConnectorBase_T
 //////////////////////////////////////////
 
 template <typename AddressType,
-          typename ConfigurationType>
+          typename ConfigurationType> // socket handler-
 class Net_IConnector_T
  : public Net_IConnectorBase_T<AddressType>
  , public Common_IGet_T<ConfigurationType>

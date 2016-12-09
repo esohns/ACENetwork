@@ -19,26 +19,25 @@ SCRIPTS_DIRECTORY=${PROJECT_ROOT}/scripts
 [ ! -d ${SCRIPTS_DIRECTORY} ] && echo "ERROR: invalid directory (was: ${SCRIPTS_DIRECTORY}), aborting" && exit 1
 BENCODING_LL=bencoding_scanner.ll
 [ ! -f ${SCRIPTS_DIRECTORY}/${BENCODING_LL} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${BENCODING_LL}), aborting" && exit 1
-SCANNER_LL=scanner.ll
-[ ! -f ${SCRIPTS_DIRECTORY}/${SCANNER_LL} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${SCANNER_LL}), aborting" && exit 1
+SCANNER_L=scanner.l
+[ ! -f ${SCRIPTS_DIRECTORY}/${SCANNER_L} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${SCANNER_L}), aborting" && exit 1
 
 # generate a scanner for use by the bittorrent metainfo file parser
-flex --noline ${SCRIPTS_DIRECTORY}/${BENCODING_LL} 2>&1 | tee ${SCRIPTS_DIRECTORY}/bencoding_report.txt
-[ $? -ne 0 ] && echo "ERROR: failed to flex \"${BENCODING_LL}\", aborting" && exit 1
+#flex --noline ${SCRIPTS_DIRECTORY}/${BENCODING_LL} 2>&1 | tee ${SCRIPTS_DIRECTORY}/bencoding_report.txt
+#[ $? -ne 0 ] && echo "ERROR: failed to flex \"${BENCODING_LL}\", aborting" && exit 1
 
 # list generated files
 #FILES="bittorrent_bencoding_scanner.cpp bittorrent_bencoding_scanner.h"
-FILES="bittorrent_bencoding_scanner.cpp"
+#FILES="bittorrent_bencoding_scanner.cpp"
 
 # -------------------------------------------------------------------
 
 # generate a scanner for use by the bittorrent message parser
-flex --noline ${SCRIPTS_DIRECTORY}/${SCANNER_LL} 2>&1 | tee ${SCRIPTS_DIRECTORY}/scanner_report.txt
-[ $? -ne 0 ] && echo "ERROR: failed to flex \"${SCANNER_LL}\", aborting" && exit 1
+flex --noline ${SCRIPTS_DIRECTORY}/${SCANNER_L} 2>&1 | tee ${SCRIPTS_DIRECTORY}/scanner_report.txt
+[ $? -ne 0 ] && echo "ERROR: failed to flex \"${SCANNER_L}\", aborting" && exit 1
 
 # append to list
-#FILES="${FILES} bittorrent_scanner.cpp bittorrent_scanner.h"
-FILES="${FILES} bittorrent_scanner.cpp"
+FILES="${FILES} bittorrent_scanner.cpp bittorrent_scanner.h"
 
 # move the files into the project directory
 for FILE in $FILES
@@ -50,4 +49,3 @@ if [ $? -ne 0 ]; then
 fi
 echo "moved \"$FILE\"..."
 done
-

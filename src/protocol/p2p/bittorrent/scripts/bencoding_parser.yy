@@ -1,5 +1,5 @@
-/*%require                          "2.4.1"*/
-%require                          "3.0"
+%require                          "2.4.1"
+/*%require                          "3.0"*/
 /* %file-prefix                      "" */
 %language                         "c++"
 /*%language                         "C"*/
@@ -13,11 +13,13 @@
 %defines                          "bittorrent_bencoding_parser.h"
 %output                           "bittorrent_bencoding_parser.cpp"
 
-/*%name-prefix                      "bittorrent_bencoding_"*/
+%define "parser_class_name"       "BitTorrent_Bencoding_Parser"
+/* *NOTE*: this is the namespace AND the (f)lex prefix */
+%name-prefix                      "yy"
 /*%pure-parser*/
 /*%token-table*/
-/*%error-verbose*/
-/*%debug*/
+%error-verbose
+%debug
 
 %code top {
 #include "stdafx.h"
@@ -28,8 +30,7 @@
 
 /* %define location_type */
 /* %define api.location.type         {} */
-/* %define namespace                 {yy} */
-%define api.namespace             {yy}
+/* %define api.namespace             {yy} */
 /* %define api.prefix                {yy} */
 /* %define api.pure                  true */
 /* *TODO*: implement a push parser */
@@ -43,15 +44,15 @@
 /* %define lr.keep-unreachable-state false */
 /* %define lr.type                   lalr */
 
-%define parse.assert              {true}
-%define parse.error               verbose
+/*%define parse.assert              {true}*/
+/*%define parse.error               verbose*/
 /* %define parse.lac                 {full} */
 /* %define parse.lac                 {none} */
-%define parser_class_name         {BitTorrent_Bencoding_Parser}
+/*%define parser_class_name         {BitTorrent_Bencoding_Parser}*/
 /* *NOTE*: enabling debugging functionality implies inclusion of <iostream> (see
            below). This interferes with ACE (version 6.2.3), when compiled with
            support for traditional iostreams */
-%define parse.trace               {true}
+/*%define parse.trace               {true}*/
 
 %code requires {
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2
@@ -63,7 +64,7 @@
 #include <string>*/
 
 /*#include "bittorrent_bencoding_scanner.h"*/
-/*#include "bittorrent_exports.h"*/
+#include "bittorrent_exports.h"
 #include "bittorrent_iparser.h"
 
 /* enum yytokentype
@@ -111,7 +112,7 @@ typedef union YYSTYPE
 /*%parse-param              { yyscan_t yyscanner }*/
 /*%lex-param                { YYSTYPE* yylval }
 %lex-param                { YYLTYPE* yylloc } */
-%lex-param                { BitTorrent_Bencoding_IParser* parser }
+/*%lex-param                { BitTorrent_Bencoding_IParser* parser }*/
 /*%lex-param                { BitTorrent_MetaInfoScanner* scanner }*/
 /*%lex-param                { yyscan_t yyscanner }*/
 /* %param                    { BitTorrent_MetaInfo_IParser* parser }
@@ -120,7 +121,7 @@ typedef union YYSTYPE
 %initial-action
 {
   // initialize the location
-  @$.initialize (YY_NULLPTR, 1, 1);
+  @$.initialize (NULL);
 }
 
 // symbols
@@ -210,11 +211,11 @@ void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
 /* %destructor               { ACE_DEBUG ((LM_DEBUG,
                                         ACE_TEXT ("discarding tagless symbol...\n"))); } <> */
 /*%printer    { yyoutput << $$; } <*>;*/
-%printer    { yyoutput << $$; } <ival>
-%printer    { yyoutput << *$$; } <sval>
+%printer    { debug_stream () << $$; } <ival>
+%printer    { debug_stream () << *$$; } <sval>
 /*%printer    { yyoutput << BitTorrent_Tools::List2String (*$$); } <eval>*/
-%printer    { yyoutput << BitTorrent_Tools::List2String (*$$); } <lval>
-%printer    { yyoutput << BitTorrent_Tools::Dictionary2String (*$$); } <dval>
+%printer    { debug_stream () << BitTorrent_Tools::List2String (*$$); } <lval>
+%printer    { debug_stream () << BitTorrent_Tools::Dictionary2String (*$$); } <dval>
 
 %%
 %start            bencoding;
@@ -230,7 +231,8 @@ bencoding:        "dictionary" {
                                   ACE_TEXT ("caught exception in BitTorrent_Bencoding_IParser::record(), continuing\n")));
                     } }
 list_items:       list_items list_item { }
-                  | %empty             { }
+                  |                    { }
+/*                  | %empty             { }*/
 list_item:        "string" {
                     Bencoding_List_t& list_r = parser->getList ();
                     Bencoding_Element* element_p = NULL;
@@ -275,7 +277,8 @@ list_item:        "string" {
                     Bencoding_List_t& list_r = parser->getList ();
                     list_r.push_back (element_p); }
 dictionary_items: dictionary_items dictionary_item { }
-                  | %empty { }
+                  |                                { }
+/*                  | %empty { } */
 dictionary_item:  "string" {
                     parser->pushKey ($1); }
                   dictionary_value { }

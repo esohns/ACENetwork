@@ -160,3 +160,90 @@ BitTorrent_ParserDriver_T<MessageType,
 
   ACE_NOTREACHED (return;)
 }
+
+template <typename MessageType,
+          typename SessionMessageType>
+void
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::debug (yyscan_t state_in,
+                                                      bool toggle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::debug"));
+
+  BitTorrent_Scanner_set_debug ((toggle_in ? 1 : 0),
+                                state_in);
+}
+template <typename MessageType,
+          typename SessionMessageType>
+bool
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::initialize (yyscan_t& state_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::initialize"));
+
+  // sanity check(s)
+  ACE_ASSERT (!state_out);
+
+  int result = BitTorrent_Scanner_lex_init (&state_out);
+  if (result)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to BitTorrent_Scanner_lex_init(): \"%m\", continuing\n")));
+
+  return (result == 0);
+}
+template <typename MessageType,
+          typename SessionMessageType>
+void
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::finalize (yyscan_t& state_inout)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::finalize"));
+
+  // sanity check(s)
+  ACE_ASSERT (state_inout);
+
+  int result = BitTorrent_Scanner_lex_destroy (state_inout);
+  if (result)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to BitTorrent_Scanner_lex_init(): \"%m\", continuing\n")));
+  state_inout = NULL;
+}
+template <typename MessageType,
+          typename SessionMessageType>
+yy_buffer_state*
+BitTorrent_ParserDriver_T<MessageType,
+                          SessionMessageType>::create (yyscan_t state_in,
+                                                       char* buffer_in,
+                                                       size_t size_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::create"));
+
+  // sanity check(s)
+  ACE_ASSERT (state_in);
+
+  struct yy_buffer_state* result_p = NULL;
+
+  if (inherited::useYYScanBuffer_)
+    result_p =
+      BitTorrent_Scanner__scan_buffer (buffer_in,
+                                       size_in + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE,
+                                       state_);
+  else
+    result_p = BitTorrent_Scanner__scan_bytes (buffer_in,
+                                               size_in,
+                                               state_);
+  if (!result_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to yy_scan_buffer/bytes(0x%@, %d), aborting\n"),
+                fragment_->rd_ptr (),
+                fragment_->length ()));
+    return NULL;
+  } // end IF
+
+  // *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
+  BitTorrent_Scanner__switch_to_buffer (result_p,
+                                        state_);
+
+  return result_p;
+}

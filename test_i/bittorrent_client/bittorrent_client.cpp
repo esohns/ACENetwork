@@ -734,17 +734,17 @@ clean:
 
   return;
 
-error:
-  bittorrent_control.stop (true); // wait ?
-  peer_connection_manager_p->abort ();
-  tracker_connection_manager_p->abort ();
-  peer_connection_manager_p->wait ();
-  tracker_connection_manager_p->wait ();
-  result = thread_manager_p->wait_grp (group_id_2);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", continuing\n"),
-                group_id_2));
+//error:
+//  bittorrent_control.stop (true); // wait ?
+//  peer_connection_manager_p->abort ();
+//  tracker_connection_manager_p->abort ();
+//  peer_connection_manager_p->wait ();
+//  tracker_connection_manager_p->wait ();
+//  result = thread_manager_p->wait_grp (group_id_2);
+//  if (result == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", continuing\n"),
+//                group_id_2));
 }
 
 void

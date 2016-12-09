@@ -35,6 +35,7 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src/modules/dev)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/flex)
 endif ()
 #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../..)
@@ -82,21 +83,23 @@ set (${PROJECT_NAME}_Protocol_HTTP_SRCS
      http_stream.inl
      http_stream_common.h
      http_tools.cpp
-     http_tools.h
-     location.hh
-     position.hh
-     stack.hh)
+     http_tools.h)
 set (${PROJECT_NAME}_Protocol_HTTP_SCRIPTS
+     scripts/bisector.l
      scripts/scanner.l
      scripts/parser.y)
+set (${PROJECT_NAME}_Protocol_HTTP_TABLES
+     etc/http_scanner.tab)
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_HTTP_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_HTTP_SRCS PROPERTIES COMPILE_DEFINITIONS -DHTTP_BUILD_DLL)
 
-# *NOTE*: generate .def file and export all symbols on Windows
 if (WIN32)
- set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+## *NOTE*: generate .def file and export all symbols on Windows
+# set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
  source_group (scripts FILES ${PROJECT_NAME}_Protocol_HTTP_SCRIPTS)
+ source_group (lex_tables FILES ${PROJECT_NAME}_Protocol_HTTP_TABLES)
+ source_group (exports FILES etc/exports.def)
 endif ()
 
 # *NOTE*: this is needed to export yydebug, so it can be imported from template
@@ -116,6 +119,9 @@ add_dependencies (${PROJECT_NAME}_Protocol_HTTP ACEStream)
 
 set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES DEFINE_SYMBOL HTTP_BUILD_DLL)
 set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
+if (WIN32 AND MSVC)
+ set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/etc/exports.def\"")
+endif ()
 
 #target_link_libraries (${PROJECT_NAME}_Protocol_HTTP ${CMAKE_THREAD_LIBS_INIT})
 if (WIN32)
@@ -145,6 +151,7 @@ install (FILES
          http_parser_driver.h
          http_parser_driver.inl
          http_scanner.h
+         http_scanner.tab
          http_message.h
          http_message.inl
          http_module_bisector.h
@@ -160,9 +167,6 @@ install (FILES
          http_stream.inl
          http_stream_common.h
          http_tools.h
-         location.hh
-         position.hh
-         stack.hh
          DESTINATION include)
 install (TARGETS ${PROJECT_NAME}_Protocol_HTTP
          EXPORT ${PROJECT_NAME}Targets

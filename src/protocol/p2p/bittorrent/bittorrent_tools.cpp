@@ -39,8 +39,9 @@
 
 #include <ace/Synch.h>
 #include "bittorrent_bencoding_scanner.h"
-#include "bittorrent_defines.h"
 #include "bittorrent_bencoding_parser_driver.h"
+#include "bittorrent_defines.h"
+#include "bittorrent_stream_common.h"
 
 std::string
 BitTorrent_Tools::Handshake2String (const struct BitTorrent_PeerHandshake& peerHandshake_in)

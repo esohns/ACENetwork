@@ -56,7 +56,7 @@
 #endif
 #include "net_defines.h"
 
-#include "http_scanner.h"
+//#include "http_scanner.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"

@@ -11,11 +11,11 @@
 class BitTorrent_Scanner;
 
 //yy::BitTorrent_Parser::symbol_type
-#define YY_DECL                                                          \
+/*#define YY_DECL                                                          \
 yy::BitTorrent_Parser::token_type                                        \
 BitTorrent_Scanner::yylex (yy::BitTorrent_Parser::semantic_type* yylval, \
                            yy::location* location,                       \
-                           BitTorrent_IParser_t* parser)
+                           BitTorrent_IParser_t* parser)*/
 // ... and declare it for the parser's sake
 //YY_DECL;
 
@@ -36,7 +36,11 @@ BitTorrent_Scanner::yylex (yy::BitTorrent_Parser::semantic_type* yylval, \
   ////                       prevent ace/iosfwd.h from causing any harm
   //#define ACE_IOSFWD_H
 
+  #include <sstream>
+
+  #include <ace/Message_Block.h>
   #include <ace/Synch.h>
+
   #include "bittorrent_parser.h"
   #include "bittorrent_scanner.h"
 
@@ -47,12 +51,13 @@ BitTorrent_Scanner::yylex (yy::BitTorrent_Parser::semantic_type* yylval, \
 
   // this tracks the current scanner location. Action is called when length of
   // the token is known
-  #define YY_USER_ACTION location_.columns (yyleng);
+  #define YY_USER_ACTION yylloc->columns (yyleng);
 %}
 
 %option yylineno yywrap
 %option nomain nounput noyymore noreject nodefault nostdinit
-%option noline nounistd
+/* %option noline nounistd */
+%option nounistd
 
 %option 8bit batch never-interactive stack
 /* *TODO*: find out why 'read' does not compile (on Linux, flex 2.5.39) */
@@ -61,7 +66,8 @@ BitTorrent_Scanner::yylex (yy::BitTorrent_Parser::semantic_type* yylval, \
 %option backup debug perf-report perf-report verbose warn
 
 %option c++
-%option header-file="bittorrent_scanner.h" outfile="bittorrent_scanner.cpp"
+/* %option header-file="bittorrent_scanner.h" outfile="bittorrent_scanner.cpp" */
+%option outfile="bittorrent_scanner.cpp"
 %option prefix="BitTorrent_Scanner_"
 %option yyclass="BitTorrent_Scanner"
 
@@ -163,27 +169,22 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 %{
   /* code to place at the beginning of yylex() */
 
+  // sanity check(s)
+  ACE_ASSERT (parser_);
+  ACE_ASSERT (yylloc);
+
   // reset location
-  location_.step ();
+  yylloc->step ();
 
   unsigned int bitfield_counter = 0;
-
   std::stringstream converter;
-//  std::string regex_string;
-//  std::regex regex;
-//  std::smatch match_results;
-
-  // sanity check(s)
-  ACE_ASSERT (parser);
-  ACE_Message_Block* message_block_p = parser->buffer ();
+  ACE_Message_Block* message_block_p = parser_->buffer ();
   ACE_ASSERT (message_block_p);
-
-//  location_.columns (yyleng);
 %}
 
 <INITIAL>{
 {PEER_HANDSHAKE_PREFIX}   { ACE_ASSERT (yyleng == 19);
-                            parser->offset (yyleng);
+                            parser_->offset (yyleng);
                             /* *TODO*: error handling */
                             ACE_NEW_NORETURN (yylval->handshake,
                                               struct BitTorrent_PeerHandshake ());
@@ -194,28 +195,28 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 <state_reserved>{
 {PEER_HANDSHAKE_RESERVED} { ACE_ASSERT (yyleng == 8);
                             ACE_ASSERT (yylval->handshake);
-                            parser->offset (yyleng);
+                            parser_->offset (yyleng);
                             ACE_OS::memcpy (yylval->handshake->reserved, yytext, 8);
                             BEGIN (state_hash); }
 } // end <state_reserved>
 <state_hash>{
 {PEER_HANDSHAKE_HASH}     { ACE_ASSERT (yyleng == 20);
                             ACE_ASSERT (yylval->handshake);
-                            parser->offset (yyleng);
+                            parser_->offset (yyleng);
                             yylval->handshake->hash.append (yytext, 20);
                             BEGIN (state_peer_id); }
 } // end <state_hash>
 <state_peer_id>{
 {PEER_HANDSHAKE_PEER_ID}  { ACE_ASSERT (yyleng == 20);
                             ACE_ASSERT (yylval->handshake);
-                            parser->offset (yyleng);
+                            parser_->offset (yyleng);
                             yylval->handshake->peer_id.append (yytext, 20);
                             BEGIN (state_length);
                             return yy::BitTorrent_Parser::token::HANDSHAKE; }
 } // end <state_peer_id>
 <state_length>{
 {LENGTH}                  { ACE_ASSERT (yyleng == 4);
-                            parser->offset (yyleng);
+                            parser_->offset (yyleng);
                             /* *TODO*: error handling */
                             ACE_NEW_NORETURN (yylval->record,
                                               struct BitTorrent_Record ());
@@ -229,7 +230,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_length>
 <state_type>{
 {TYPE}                    { ACE_ASSERT (yyleng == 1);
-                            parser->offset (yyleng);
+                            parser_->offset (yyleng);
                             yylval->record->type =
                               static_cast<enum BitTorrent_MessageType> (*reinterpret_cast<ACE_UINT8*> (yytext));
                             switch (yylval->record->type)
@@ -274,7 +275,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_type>
 <state_have_payload>{
 {HAVE_PAYLOAD}            { ACE_ASSERT (yyleng == 4);
-                            parser->offset (yyleng);
+                            parser_->offset (yyleng);
                             yylval->record->have =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -284,7 +285,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 <state_bitfield_payload>{
 {BITFIELD_PAYLOAD}        { ACE_ASSERT (yyleng == 1);
                             ACE_ASSERT (bitfield_counter);
-                            parser->offset (yyleng);
+                            parser_->offset (yyleng);
                             yylval->record->bitfield.push_back (*reinterpret_cast<ACE_UINT8*> (yytext));
                             --bitfield_counter;
                             if (!bitfield_counter)
@@ -295,7 +296,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_bitfield_payload>
 <state_request_payload>{
 {REQUEST_PAYLOAD}         { ACE_ASSERT (yyleng == 12);
-                            parser->offset (yyleng);
+                            parser_->offset (yyleng);
                             yylval->record->request.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -310,7 +311,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_request_payload>
 <state_cancel_payload>{
 {CANCEL_PAYLOAD}          { ACE_ASSERT (yyleng == 12);
-                            parser->offset (yyleng);
+                            parser_->offset (yyleng);
                             yylval->record->cancel.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -325,7 +326,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_cancel_payload>
 <state_piece_payload>{
 {PIECE_PAYLOAD}           { ACE_ASSERT (yyleng == 8);
-                            parser->offset (yyleng);
+                            parser_->offset (yyleng);
                             yylval->record->piece.index =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))
                                                                      : *reinterpret_cast<ACE_UINT32*> (yytext));
@@ -340,7 +341,7 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                             *yy_cp = (yy_hold_char);
 
                             // (frame and) skip over piece data
-                            message_block_p->rd_ptr (parser->offset ());
+                            message_block_p->rd_ptr (parser_->offset ());
 
                             unsigned int bytes_to_skip =
                               yylval->record->length - 9;
@@ -369,13 +370,13 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                               unsigned int skipped_bytes = 0;
                               while (skipped_bytes <= bytes_to_skip)
                               {
-                                if (!parser->switchBuffer ())
+                                if (!parser_->switchBuffer ())
                                 {
                                   ACE_DEBUG ((LM_ERROR,
                                               ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
                                   yyterminate ();
                                 } // end IF
-                                message_block_p = parser->buffer ();
+                                message_block_p = parser_->buffer ();
                                 skipped_bytes += message_block_p->length ();
                               } // end WHILE
                               remainder = (skipped_bytes - bytes_to_skip);
@@ -392,14 +393,14 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
                               message_block_p->wr_ptr (message_block_p->rd_ptr () + remainder);
                               ACE_ASSERT (message_block_p->length () == remainder);
                             } // end ELSE
-                            if (!parser->switchBuffer (true))
+                            if (!parser_->switchBuffer (true))
                             {
                               ACE_DEBUG ((LM_ERROR,
                                           ACE_TEXT ("failed to Net_IParser::switchBuffer(), aborting\n")));
                               yyterminate ();
                             } // end IF
-                            parser->buffer ()->rd_ptr (remainder);
-                            parser->offset (remainder);
+                            parser_->buffer ()->rd_ptr (remainder);
+                            parser_->offset (remainder);
 
                             // gobble initial bytes (if any)
                             char c = 0;
@@ -412,11 +413,11 @@ MESSAGE                           {LENGTH}{TYPE}{0-1}{PAYLOAD}{0-1}
 } // end <state_piece>
 <<EOF>>                   { yyterminate(); } // *NOTE*: yywrap returned non-zero
 <*>{OCTET}                { /* *TODO*: use (?s:.) ? */
-                            if (!parser->isBlocking ())
+                            if (!parser_->isBlocking ())
                               return yy::BitTorrent_Parser::token::END_OF_FRAGMENT; // not enough data, cannot proceed
 
                             // wait for more data fragment(s)
-                            if (!parser->switchBuffer ())
+                            if (!parser_->switchBuffer ())
                             { // *NOTE*: most probable reason: connection has
                               //         been closed --> session end
                               ACE_DEBUG ((LM_DEBUG,

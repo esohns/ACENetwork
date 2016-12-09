@@ -22,7 +22,6 @@
 #define NET_IPARSER_H
 
 #include <string>
-#include <vector>
 
 #include "location.hh"
 
@@ -32,13 +31,13 @@
 #include "net_defines.h"
 
 // forward declarations
-//struct YYLTYPE;
+struct yy_buffer_state;
 class ACE_Message_Block;
 class ACE_Message_Queue_Base;
+typedef void* yyscan_t;
 
 //////////////////////////////////////////
 
-// *NOTE*: needed by C++ lexers
 // *NOTE*: the template parameter ought to derive from Net_IParser
 template <typename ParserInterfaceType>
 class Net_IScanner_T
@@ -46,6 +45,19 @@ class Net_IScanner_T
 {
  public:
   inline virtual ~Net_IScanner_T () {};
+
+  // *NOTE*: this is the C interface (not needed by C++ scanners)
+  virtual void debug (yyscan_t,  // state handle
+                      bool) = 0; // toggle
+
+  virtual bool initialize (yyscan_t&) = 0; // return value: state handle
+  virtual void finalize (yyscan_t&) = 0; // state handle
+
+  virtual struct yy_buffer_state* create (yyscan_t,    // state handle
+                                          char*,       // buffer handle
+                                          size_t) = 0; // buffer size
+  virtual void destroy (yyscan_t,                      // state handle
+                        struct yy_buffer_state*&) = 0; // buffer handle
 };
 
 //////////////////////////////////////////
@@ -57,11 +69,13 @@ class Net_IParser
   inline virtual ~Net_IParser () {};
 
   // needs to be set before invoking parse() !
-  virtual void initialize (bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,          // debug scanner ?
-                           bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,         // debug parser ?
-                           ACE_Message_Queue_Base* = NULL,                 // data buffer queue (yywrap)
-//                           bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER, // yy_scan_buffer() ? : yy_scan_bytes()
-                           bool = false) = 0;                              // block in parse() ?
+  virtual void initialize (//const std::string&,                                  // scanner tables file (if any)
+                           bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,               // debug scanner ?
+                           bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,              // debug parser ?
+                           ACE_Message_Queue_Base* = NULL,                      // data buffer queue (yywrap)
+                           bool = false,                                        // block in parse() ?
+                           ///////////////
+                           bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER) = 0; // yy_scan_buffer() ? : yy_scan_bytes()
 
   virtual ACE_Message_Block* buffer () = 0;
   virtual bool debugScanner () const = 0;

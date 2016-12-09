@@ -31,8 +31,6 @@ using namespace std;
 
 #include <ace/Synch.h>
 
-#include "http_scanner.h"
-
 #include "bittorrent_client_curses.h"
 
 #include <string>

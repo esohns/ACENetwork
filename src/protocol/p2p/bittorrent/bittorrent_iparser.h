@@ -21,12 +21,13 @@
 #ifndef BITTORRENT_IPARSER_T_H
 #define BITTORRENT_IPARSER_T_H
 
-#include "common_iget.h"
+#include <string>
+
+//#include "common_iget.h"
 
 #include "net_iparser.h"
 
 #include "bittorrent_common.h"
-#include "bittorrent_stream_common.h"
 
 class BitTorrent_Bencoding_IParser
  : public Net_IRecordParser_T<Bencoding_Dictionary_t>

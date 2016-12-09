@@ -39,6 +39,9 @@
 #endif
 
 // addresses
+// *TODO*: use platform macros wherever possible
+#define NET_ADDRESS_LINK_ETHERNET_ADDRESS_STRING_SIZE   (ETH_ALEN * 2) + (ETH_ALEN - 1) + 1 // "ab:cd:ef:gh:ij:kl\0"
+
 #if defined (ACE_LINUX)
 // *NOTE*: binding to these ports requires the CAP_NET_BIND_SERVICE capability
 #define NET_ADDRESS_MAXIMUM_PRIVILEDGED_PORT            1023

@@ -34,8 +34,9 @@
 #include "bittorrent_isession.h"
 #include "bittorrent_message.h"
 #include "bittorrent_sessionmessage.h"
-#include "bittorrent_stream.h"
 #include "bittorrent_stream_common.h"
+#include "bittorrent_stream_peer.h"
+#include "bittorrent_stream_tracker.h"
 #include "bittorrent_streamhandler.h"
 
 #include "test_i_gtk_common.h"

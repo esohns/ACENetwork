@@ -26,7 +26,7 @@
 #include "common_itask.h"
 
 template <typename ConfigurationType,
-          typename HandlerConfigurationType>
+          typename HandlerConfigurationType> // socket-
 class Net_IListener_T
  : public Common_ITaskControl_T<ACE_MT_SYNCH>
  , public Common_IGet_T<HandlerConfigurationType>

@@ -26,8 +26,6 @@
 
 #include <ace/Global_Macros.h>
 
-//#include "location.hh"
-
 #include "net_defines.h"
 #include "net_iparser.h"
 
@@ -35,29 +33,27 @@
 struct yy_buffer_state;
 class ACE_Message_Block;
 class ACE_Message_Queue_Base;
-//typedef void* yyscan_t;
-//typedef struct yy_buffer_state* YY_BUFFER_STATE;
-//struct YYLTYPE;
+typedef void* yyscan_t;
 
 template <typename ScannerType, // (f/)lex-
           typename ParserType, // yacc/bison-
           typename ParserInterfaceType, // derived from Net_IParser
           typename ArgumentType, // yacc/bison-
           typename SessionMessageType>
-class Net_ParserBase_T
+class Net_CppParserBase_T
  : public ParserInterfaceType
 {
  public:
-  Net_ParserBase_T (bool,  // debug scanning ?
-                    bool); // debug parsing ?
-  virtual ~Net_ParserBase_T ();
+  Net_CppParserBase_T (bool,  // debug scanning ?
+                       bool); // debug parsing ?
+  virtual ~Net_CppParserBase_T ();
 
   // implement (part of) ParserInterfaceType
-  virtual void initialize (bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,          // debug scanner ?
-                           bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,         // debug parser ?
-                           ACE_Message_Queue_Base* = NULL,                 // data buffer queue (yywrap)
-//                           bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER, // yy_scan_buffer() ? : yy_scan_bytes()
-                           bool = false);                                  // block in parse() ?
+  virtual void initialize (bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,           // debug scanner ?
+                           bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,          // debug parser ?
+                           ACE_Message_Queue_Base* = NULL,                  // data buffer queue (yywrap)
+                           bool = false,                                    // block in parse() ?
+                           bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER); // [N/A]
   inline virtual ACE_Message_Block* buffer () { return fragment_; };
 //  inline virtual bool debugScanner () const { return bittorrent_get_debug (scannerState_); };
   inline virtual bool debugScanner () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
@@ -87,9 +83,9 @@ class Net_ParserBase_T
   ScannerType             scanner_;
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Net_ParserBase_T ())
-  ACE_UNIMPLEMENTED_FUNC (Net_ParserBase_T (const Net_ParserBase_T&))
-  ACE_UNIMPLEMENTED_FUNC (Net_ParserBase_T& operator= (const Net_ParserBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_CppParserBase_T ())
+  ACE_UNIMPLEMENTED_FUNC (Net_CppParserBase_T (const Net_CppParserBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_CppParserBase_T& operator= (const Net_CppParserBase_T&))
 
   // helper methods
   bool scan_begin ();
@@ -107,13 +103,87 @@ class Net_ParserBase_T
   bool                    blockInParse_;
   bool                    isFirst_;
 
-//  yyscan_t                state_;
   struct yy_buffer_state* buffer_;
   MEMORY_BUFFER_T         streamBuffer_;
   std::istream            stream_;
 
   ACE_Message_Queue_Base* messageQueue_;
-//  bool                    useYYScanBuffer_;
+
+  bool                    isInitialized_;
+};
+
+//////////////////////////////////////////
+
+template <typename ParserType, // yacc/bison-
+          typename ParserInterfaceType, // derived from Net_IParser
+          typename ArgumentType, // yacc/bison-
+          typename SessionMessageType>
+class Net_ParserBase_T
+ : public ParserInterfaceType
+ , public Net_IScanner_T<ParserInterfaceType>
+{
+ public:
+  Net_ParserBase_T (bool,  // debug scanning ?
+                    bool); // debug parsing ?
+  virtual ~Net_ParserBase_T ();
+
+  // implement (part of) ParserInterfaceType
+  virtual void initialize (bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,           // debug scanner ?
+                           bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,          // debug parser ?
+                           ACE_Message_Queue_Base* = NULL,                  // data buffer queue (yywrap)
+                           bool = false,                                    // block in parse() ?
+                           bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER); // yy_scan_buffer() ? : yy_scan_bytes()
+
+  inline virtual ACE_Message_Block* buffer () { return fragment_; };
+//  inline virtual bool debugScanner () const { return bittorrent_get_debug (scannerState_); };
+  inline virtual bool debugScanner () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
+  inline virtual bool isBlocking () const { return blockInParse_; };
+//  virtual void error (const YYLTYPE&,      // location
+//                      const std::string&); // message
+  virtual void error (const std::string&); // message
+  inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }; // offset (increment)
+  inline virtual unsigned int offset () const { return offset_; };
+  virtual bool parse (ACE_Message_Block*); // data buffer handle
+  virtual bool switchBuffer (bool = false); // unlink current fragment ?
+  // *NOTE*: (waits for and) appends the next data chunk to fragment_;
+  virtual void wait ();
+
+  inline virtual void dump_state () const { ACE_ASSERT (false); ACE_NOTSUP; };
+
+ protected:
+  ACE_Message_Block*      fragment_;
+  unsigned int            offset_; // parsed fragment bytes
+  bool                    trace_;
+
+  // parser
+  ParserType              parser_;
+//  ArgumentType            argument_;
+
+  // scanner
+  yyscan_t                state_;
+  bool                    useYYScanBuffer_;
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Net_ParserBase_T ())
+  ACE_UNIMPLEMENTED_FUNC (Net_ParserBase_T (const Net_ParserBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_ParserBase_T& operator= (const Net_ParserBase_T&))
+
+  // implement (part of) Net_IScanner_T
+  inline virtual void debug (yyscan_t,
+                             bool) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void destroy (yyscan_t,
+                               struct yy_buffer_state*&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+
+  // helper methods
+  bool scan_begin ();
+  void scan_end ();
+
+  bool                    blockInParse_;
+  bool                    isFirst_;
+
+  struct yy_buffer_state* buffer_;
+  ACE_Message_Queue_Base* messageQueue_;
 
   bool                    isInitialized_;
 };

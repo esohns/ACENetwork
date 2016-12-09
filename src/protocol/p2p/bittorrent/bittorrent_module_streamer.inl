@@ -134,7 +134,7 @@ BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
 //    return;
 //  } // end IF
 
-continue_:
+//continue_:
 //   ACE_DEBUG ((LM_DEBUG,
 //               ACE_TEXT ("[%u]: streamed [%u byte(s)]...\n"),
 //               message_inout->id (),

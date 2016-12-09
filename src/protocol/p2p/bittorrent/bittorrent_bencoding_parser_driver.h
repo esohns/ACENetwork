@@ -31,14 +31,16 @@
 #include "net_parser_base.h"
 
 #include "bittorrent_bencoding_parser.h"
+#include "bittorrent_bencoding_scanner.h"
+#include "bittorrent_iparser.h"
 
 template <typename SessionMessageType>
 class BitTorrent_Bencoding_ParserDriver_T
- : public Net_ParserBase_T<BitTorrent_Bencoding_Scanner,
-                           yy::BitTorrent_Bencoding_Parser,
-                           BitTorrent_Bencoding_IParser,
-                           std::string,
-                           SessionMessageType>
+ : public Net_CppParserBase_T<BitTorrent_Bencoding_Scanner,
+                              yy::BitTorrent_Bencoding_Parser,
+                              BitTorrent_Bencoding_IParser,
+                              std::string,
+                              SessionMessageType>
 {
  public:
   BitTorrent_Bencoding_ParserDriver_T (bool,  // debug scanning ?
@@ -46,11 +48,11 @@ class BitTorrent_Bencoding_ParserDriver_T
   virtual ~BitTorrent_Bencoding_ParserDriver_T ();
 
   // convenient types
-  typedef Net_ParserBase_T<BitTorrent_Bencoding_Scanner,
-                           yy::BitTorrent_Bencoding_Parser,
-                           BitTorrent_Bencoding_IParser,
-                           std::string,
-                           SessionMessageType> PARSER_BASE_T;
+  typedef Net_CppParserBase_T<BitTorrent_Bencoding_Scanner,
+                              yy::BitTorrent_Bencoding_Parser,
+                              BitTorrent_Bencoding_IParser,
+                              std::string,
+                              SessionMessageType> PARSER_BASE_T;
 
   // implement (part of) BitTorrent_Bencoding_IParser
   using PARSER_BASE_T::initialize;
@@ -86,11 +88,11 @@ class BitTorrent_Bencoding_ParserDriver_T
   Bencoding_Dictionary_t*             bencoding_;
 
  private:
-  typedef Net_ParserBase_T<BitTorrent_Bencoding_Scanner,
-                           yy::BitTorrent_Bencoding_Parser,
-                           BitTorrent_Bencoding_IParser,
-                           std::string,
-                           SessionMessageType> inherited;
+  typedef Net_CppParserBase_T<BitTorrent_Bencoding_Scanner,
+                              yy::BitTorrent_Bencoding_Parser,
+                              BitTorrent_Bencoding_IParser,
+                              std::string,
+                              SessionMessageType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_ParserDriver_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_ParserDriver_T (const BitTorrent_Bencoding_ParserDriver_T&))

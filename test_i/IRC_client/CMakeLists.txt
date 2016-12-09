@@ -187,6 +187,7 @@ if (UNIX)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
  target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
 elseif (WIN32)
+ target_link_libraries (${EXECUTABLE} ntdll.lib)
  target_link_libraries (${EXECUTABLE} ${CURSES_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${PANEL_LIBRARY})
 endif ()
@@ -289,6 +290,7 @@ if (UNIX)
   target_link_libraries (${EXECUTABLE_GUI} ${PKG_GTK2_LIBRARIES})
  endif ()
 elseif (WIN32)
+ target_link_libraries (${EXECUTABLE_GUI} ntdll.lib)
 # *TODO*: repair WIN32 pkgconfig support
  target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/lib/gio-2.0.lib)
  target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/lib/glib-2.0.lib)
@@ -325,3 +327,41 @@ install (FILES
          IRC_client_server_page.glade
          servers.ini
          DESTINATION etc/lib${PROJECT_NAME}/test_i COMPONENT config)
+
+##########################################
+
+if (UNIX)
+ create_target_launcher (${EXECUTABLE}
+                         ARGS "-l -t"
+#                         FORWARD_ARGS
+                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
+                                              ${PROJECT_SOURCE_DIR}/../gtk-win32/gtk/Win32/debug/bin
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/ui/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
+                                              /usr/local/lib
+                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_i/IRC_client
+                         ENVIRONMENT foo=bar)
+elseif (WIN32)
+ create_target_launcher (${EXECUTABLE}
+                         ARGS "-l -t"
+#                        FORWARD_ARGS
+                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
+                                              ${PROJECT_SOURCE_DIR}/../gtk-win32/gtk/Win32/debug/bin
+#                                              ${PROJECT_SOURCE_DIR}/../libav-11.7/libavcodec
+#                                              ${PROJECT_SOURCE_DIR}/../libav-11.7/libavresample
+#                                              ${PROJECT_SOURCE_DIR}/../libav-11.7/libavutil
+                                              G:/software/Development/dll
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/err/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/image/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/math/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/ui/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dec/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/vis/Debug
+                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_i/IRC_client
+                         ENVIRONMENT foo=bar)
+endif ()

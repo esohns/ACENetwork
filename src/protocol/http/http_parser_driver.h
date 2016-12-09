@@ -25,6 +25,7 @@
 
 #include <ace/Global_Macros.h>
 
+#include "http_exports.h"
 #include "http_iparser.h"
 #include "http_parser.h"
 
@@ -43,16 +44,18 @@ class HTTP_ParserDriver_T
  : public HTTP_IParser
 {
  public:
-  HTTP_ParserDriver_T (bool,  // debug scanning ?
-                       bool); // debug parsing ?
+  HTTP_ParserDriver_T (const std::string&,                      // scanner tables file (if any)
+                       bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,   // debug scanning ?
+                       bool = NET_PROTOCOL_DEFAULT_YACC_TRACE); // debug parsing ?
   virtual ~HTTP_ParserDriver_T ();
 
   // implement (part of) HTTP_IParser
-  virtual void initialize (bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,          // debug scanner ?
-                           bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,         // debug parser ?
-                           ACE_Message_Queue_Base* = NULL,                 // data buffer queue (yywrap)
-//                           bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER, // yy_scan_buffer() ? : yy_scan_bytes()
-                           bool = false);                                  // block in parse() ?
+  virtual void initialize (//const std::string&,                             // scanner tables file (if any)
+                           bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,           // debug scanner ?
+                           bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,          // debug parser ?
+                           ACE_Message_Queue_Base* = NULL,                  // data buffer queue (yywrap)
+                           bool = false,                                    // block in parse() ?
+                           bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER); // yy_scan_buffer() ? : yy_scan_bytes()
   inline virtual ACE_Message_Block* buffer () { return fragment_; };
   inline virtual bool debugScanner () const { return HTTP_Scanner_get_debug (scannerState_); };
   inline virtual bool isBlocking () const { return blockInParse_; };
@@ -96,6 +99,7 @@ class HTTP_ParserDriver_T
 
   // scanner
   yyscan_t                scannerState_;
+  std::string             scannerTables_;
   YY_BUFFER_STATE         bufferState_;
   ACE_Message_Queue_Base* messageQueue_;
   bool                    useYYScanBuffer_;

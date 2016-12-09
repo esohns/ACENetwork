@@ -262,7 +262,7 @@ header:             "op" "htype" "hlen" "hops" "xid" "secs" "flags" "ciaddr" "yi
                                                        ACE_OS::memcpy (driver->record_->chaddr, $12, DHCP_CHADDR_SIZE);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set chaddr: %s\n"),
-//                                                                   ACE_TEXT (Net_Common_Tools::MACAddress2String (driver->record_->chaddr).c_str ())));
+//                                                                   ACE_TEXT (Net_Common_Tools::LinkLayerAddress2String (driver->record_->chaddr).c_str ())));
                                                        ACE_ASSERT ($13);
                                                        driver->record_->sname = *$13;
 //                                                       ACE_DEBUG ((LM_DEBUG,

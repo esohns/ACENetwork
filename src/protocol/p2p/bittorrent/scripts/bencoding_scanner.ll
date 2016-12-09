@@ -10,11 +10,11 @@
 class BitTorrent_Bencoding_Scanner;
 
 //yy::BitTorrent_Bencoding_Parser::symbol_type
-#define YY_DECL                                                                              \
+/*#define YY_DECL                                                                              \
 yy::BitTorrent_Bencoding_Parser::token_type                                                  \
 BitTorrent_Bencoding_Scanner::yylex (yy::BitTorrent_Bencoding_Parser::semantic_type* yylval, \
                                      yy::location* location,                                 \
-                                     BitTorrent_Bencoding_IParser* parser)
+                                     BitTorrent_Bencoding_IParser* parser)*/
 // ... and declare it for the parser's sake
 //YY_DECL;
 
@@ -35,6 +35,8 @@ BitTorrent_Bencoding_Scanner::yylex (yy::BitTorrent_Bencoding_Parser::semantic_t
   ////                       prevent ace/iosfwd.h from causing any harm
   //#define ACE_IOSFWD_H
 
+  #include <sstream>
+
   #include <ace/Synch.h>
   #include "bittorrent_bencoding_parser.h"
   #include "bittorrent_bencoding_scanner.h"
@@ -46,12 +48,13 @@ BitTorrent_Bencoding_Scanner::yylex (yy::BitTorrent_Bencoding_Parser::semantic_t
 
   // this tracks the current scanner location. Action is called when length of
   // the token is known
-  #define YY_USER_ACTION location_.columns (yyleng);
+  #define YY_USER_ACTION yylloc->columns (yyleng);
 %}
 
 %option yylineno yywrap
 %option nomain nounput noyymore noreject nodefault nostdinit
-%option noline nounistd
+/* %option noline nounistd */
+%option nounistd
 
 %option 8bit batch never-interactive stack
 /* *TODO*: find out why 'read' does not compile (on Linux, flex 2.5.39) */
@@ -120,27 +123,23 @@ METAINFO_FILE                     {DICTIONARY}
 %{
   /* code to place at the beginning of yylex() */
 
+  // sanity check(s)
+  ACE_ASSERT (parser_);
+  ACE_ASSERT (yylloc);
+
   // reset location
-  location_.step ();
+  yylloc->step ();
 
   unsigned int string_length = 0;
-
   std::stringstream converter;
-//  std::string regex_string;
-//  std::regex regex;
-//  std::smatch match_results;
 
-  // sanity check(s)
-  ACE_ASSERT (parser);
-  ACE_Message_Block* message_block_p = parser->buffer ();
+  ACE_Message_Block* message_block_p = parser_->buffer ();
   ACE_ASSERT (message_block_p);
-
-//  location_.columns (yyleng);
 %}
 
 <INITIAL>{
 "d"                    { ACE_ASSERT (yyleng == 1);
-                         parser->offset (1);
+                         parser_->offset (1);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_dictionary_key);
                          ACE_NEW_NORETURN (yylval->dval,
@@ -150,13 +149,13 @@ METAINFO_FILE                     {DICTIONARY}
 } // end <INITIAL>
 <state_string>{
 {DIGIT}+               {
-                         parser->offset (yyleng);
+                         parser_->offset (yyleng);
                          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                          converter.clear ();
                          converter << yytext;
                          converter >> string_length; }
 ":"                    { ACE_ASSERT (yyleng == 1);
-                         parser->offset (1);
+                         parser_->offset (1);
                          if (!string_length)
                          { // --> found an empty string
                            ACE_NEW_NORETURN (yylval->sval,
@@ -166,7 +165,7 @@ METAINFO_FILE                     {DICTIONARY}
                            return yy::BitTorrent_Bencoding_Parser::token::STRING;
                          } }
 {OCTET}{1}             { ACE_ASSERT (string_length != 0);
-                         parser->offset (string_length);
+                         parser_->offset (string_length);
                          ACE_NEW_NORETURN (yylval->sval,
                                            std::string ());
                          ACE_ASSERT (yylval->sval);
@@ -178,21 +177,21 @@ METAINFO_FILE                     {DICTIONARY}
 } // end <state_string>
 <state_integer>{
 "e"                    { ACE_ASSERT (yyleng == 1);
-                         parser->offset (1);
+                         parser_->offset (1);
                          yy_pop_state (); }
 {DIGIT}+               {
-                         parser->offset (yyleng);
+                         parser_->offset (yyleng);
                          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                          converter.clear ();
                          converter << yytext;
                          converter >> yylval->ival;
                          return yy::BitTorrent_Bencoding_Parser::token::INTEGER; }
 "i"                    { ACE_ASSERT (yyleng == 1);
-                         parser->offset (1); }
+                         parser_->offset (1); }
 } // end <state_integer>
 <state_list>{
 "e"                    { ACE_ASSERT (yyleng == 1);
-                         parser->offset (1);
+                         parser_->offset (1);
                          yy_pop_state ();
                          return yy::BitTorrent_Bencoding_Parser::token::END_OF_LIST; }
 {DIGIT}{1}             { yyless (0);
@@ -214,7 +213,7 @@ METAINFO_FILE                     {DICTIONARY}
 } // end <state_list>
 <state_dictionary_key>{
 "e"                    { ACE_ASSERT (yyleng == 1);
-                         parser->offset (1);
+                         parser_->offset (1);
                          yy_pop_state ();
                          return yy::BitTorrent_Bencoding_Parser::token::END_OF_DICTIONARY; }
 {DIGIT}{1}             { yyless (0);
@@ -246,11 +245,11 @@ METAINFO_FILE                     {DICTIONARY}
 } // end <state_dictionary_value>
 <<EOF>>                { return yy::BitTorrent_Bencoding_Parser::token::END; }
 <*>{OCTET}             { /* *TODO*: use (?s:.) ? */
-                         if (!parser->isBlocking ())
+                         if (!parser_->isBlocking ())
                            yyterminate(); // not enough data, cannot proceed
 
                          // wait for more data fragment(s)
-                         if (!parser->switchBuffer ())
+                         if (!parser_->switchBuffer ())
                          { // *NOTE*: most probable reason: connection
                            //         has been closed --> session end
                            ACE_DEBUG ((LM_DEBUG,

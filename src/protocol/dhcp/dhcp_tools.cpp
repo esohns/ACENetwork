@@ -91,7 +91,9 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
   string_buffer += Net_Common_Tools::IPAddress2String (0, record_in.giaddr);
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("chaddr: \t");
-  string_buffer += Net_Common_Tools::MACAddress2String (record_in.chaddr);
+  string_buffer +=
+    Net_Common_Tools::LinkLayerAddress2String (record_in.chaddr,
+                                               NET_LINKLAYER_802_3); // *TODO*: support other link layers
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("sname: \t\"");
   string_buffer += record_in.sname;

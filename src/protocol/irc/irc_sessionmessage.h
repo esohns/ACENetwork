@@ -46,30 +46,30 @@ template <ACE_SYNCH_DECL,
 class Stream_CachedMessageAllocator_T;
 
 class IRC_Export IRC_SessionMessage
- : public Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      Stream_SessionMessageType,
+ : public Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
                                       IRC_Stream_SessionData_t,
-                                      IRC_Stream_UserData,
+                                      struct IRC_UserData,
                                       IRC_ControlMessage_t,
                                       IRC_Message>
 {
  // enable access to specific private ctors
  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                Stream_AllocatorConfiguration,
+                                                struct Stream_AllocatorConfiguration,
                                                 IRC_ControlMessage_t,
                                                 IRC_Message,
                                                 IRC_SessionMessage>;
  friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
-                                              Stream_AllocatorConfiguration,
+                                              struct Stream_AllocatorConfiguration,
                                               IRC_ControlMessage_t,
                                               IRC_Message,
                                               IRC_SessionMessage>;
 
  public:
   // *NOTE*: assume lifetime responsibility for the second argument !
-  IRC_SessionMessage (Stream_SessionMessageType,  // session message type
-                      IRC_Stream_SessionData_t*&, // session data container handle
-                      IRC_Stream_UserData*);      // user data handle
+  IRC_SessionMessage (enum Stream_SessionMessageType, // session message type
+                      IRC_Stream_SessionData_t*&,     // session data container handle
+                      struct IRC_UserData*);          // user data handle
     // *NOTE*: to be used by message allocators
   IRC_SessionMessage (ACE_Allocator*); // message allocator
   IRC_SessionMessage (ACE_Data_Block*, // data block
@@ -81,10 +81,10 @@ class IRC_Export IRC_SessionMessage
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      Stream_SessionMessageType,
+  typedef Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
                                       IRC_Stream_SessionData_t,
-                                      IRC_Stream_UserData,
+                                      struct IRC_UserData,
                                       IRC_ControlMessage_t,
                                       IRC_Message> inherited;
 

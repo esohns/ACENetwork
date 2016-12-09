@@ -259,7 +259,7 @@ BitTorrent_Control_T<SessionAsynchType,
                                          converter.str ()));
   record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_HEADER),
                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_STARTED_STRING)));
-  if (!Net_Common_Tools::interface2ExternalIPAddress (Net_Common_Tools::getInterface (),
+  if (!Net_Common_Tools::interface2ExternalIPAddress (Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3),
                                                       external_ip_address))
   {
     ACE_DEBUG ((LM_ERROR,

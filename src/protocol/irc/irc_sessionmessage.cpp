@@ -27,9 +27,9 @@
 
 #include "net_macros.h"
 
-IRC_SessionMessage::IRC_SessionMessage (Stream_SessionMessageType messageType_in,
+IRC_SessionMessage::IRC_SessionMessage (enum Stream_SessionMessageType messageType_in,
                                         IRC_Stream_SessionData_t*& sessionData_inout,
-                                        IRC_Stream_UserData* userData_in)
+                                        struct IRC_UserData* userData_in)
  : inherited (messageType_in,
               sessionData_inout,
               userData_in)

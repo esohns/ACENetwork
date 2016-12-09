@@ -18,9 +18,20 @@ if [ $? -eq 0 ]; then
 else
  echo "graphviz is not installed, continuing" >&2
 fi
-command -v readlink >/dev/null 2>&1 || { echo "readlink is not installed, aborting" >&2; exit 1; }
+# *NOTE*: readlink is not available on MinGW
+HAS_READLINK=0
+command -v readlink >/dev/null 2>&1
+if [ $? -eq 0 ]; then
+ HAS_READLINK=1
+else
+ echo "readlink is not installed, continuing" >&2
+fi
 
-PROJECT_ROOT=$(readlink -e $(dirname $0)/../../../..)
+if [ ${HAS_READLINK} -ne 0 ]; then
+ PROJECT_ROOT=$(readlink -e $(dirname $0)/../../../..)
+else
+ PROJECT_ROOT=$(cd ${0%/*}/../../../.. && echo $PWD)
+fi
 SCRIPTS_DIRECTORY=${PROJECT_ROOT}/src/protocol/http/scripts
 
 SOURCE_FILE=${SCRIPTS_DIRECTORY}/parser.y
@@ -43,7 +54,8 @@ fi
 # *NOTE*: a specific method needs to be added to the parser class
 # --> copy a pre-patched version (back) into the project directory instead
 # *TODO*: needs to be updated after every change
-TARGET_DIRECTORY=${PROJECT_ROOT}
+TARGET_DIRECTORY=${SCRIPTS_DIRECTORY}/..
+SOURCE_FILE=${SCRIPTS_DIRECTORY}/http_parser_patched.h
 TARGET_FILE=${TARGET_DIRECTORY}/http_parser.h
 [ ! -f ${SOURCE_FILE} ] && echo "ERROR: file ${SOURCE_FILE} not found, aborting" && exit 1
 cp -f ${SOURCE_FILE} ${TARGET_FILE}
@@ -68,7 +80,7 @@ done
 
 # move generated file(s) into the project directory
 # --> these files are static (*CHECK*) and included by default
-#TARGET_DIRECTORY=${PROJECT_ROOT}/3rd_party/bison
+TARGET_DIRECTORY=${PROJECT_ROOT}/3rd_party/bison
 FILES="location.hh position.hh stack.hh"
 # move the files into the 3rd_party include directory
 for FILE in $FILES

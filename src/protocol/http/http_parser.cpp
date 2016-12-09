@@ -1,35 +1,35 @@
-// A Bison parser, made by GNU Bison 3.0.2.
+/* A Bison parser, made by GNU Bison 2.4.2.  */
 
-// Skeleton implementation for Bison LALR(1) parsers in C++
+/* Skeleton implementation for Bison LALR(1) parsers in C++
+   
+      Copyright (C) 2002-2010 Free Software Foundation, Inc.
+   
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+   
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-// Copyright (C) 2002-2013 Free Software Foundation, Inc.
-
-// This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License
-// along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-// As a special exception, you may create a larger work that contains
-// part or all of the Bison parser skeleton and distribute that work
-// under terms of your choice, so long as that work isn't itself a
-// parser generator using the skeleton or a modified version thereof
-// as a parser skeleton.  Alternatively, if you modify or redistribute
-// the parser skeleton itself, you may (at your option) remove this
-// special exception, which will cause the skeleton and the resulting
-// Bison output files to be licensed under the GNU General Public
-// License without this special exception.
-
-// This special exception was added by the Free Software Foundation in
-// version 2.2 of Bison.
-// //                    "%code top" blocks.
+/* As a special exception, you may create a larger work that contains
+   part or all of the Bison parser skeleton and distribute that work
+   under terms of your choice, so long as that work isn't itself a
+   parser generator using the skeleton or a modified version thereof
+   as a parser skeleton.  Alternatively, if you modify or redistribute
+   the parser skeleton itself, you may (at your option) remove this
+   special exception, which will cause the skeleton and the resulting
+   Bison output files to be licensed under the GNU General Public
+   License without this special exception.
+   
+   This special exception was added by the Free Software Foundation in
+   version 2.2 of Bison.  */
+/* "%code top" blocks.  */
 
 
 #include "stdafx.h"
@@ -37,24 +37,18 @@
 
 
 
-// First part of user declarations.
+
+/* First part of user declarations.  */
 
 
 
-# ifndef YY_NULLPTR
-#  if defined __cplusplus && 201103L <= __cplusplus
-#   define YY_NULLPTR nullptr
-#  else
-#   define YY_NULLPTR 0
-#  endif
-# endif
 
 #include "http_parser.h"
 
-// User implementation prologue.
+/* User implementation prologue.  */
 
 
-// Unqualified %code blocks.
+/* Unqualified %code blocks.  */
 
 
 // *NOTE*: necessary only if %debug is set in the definition file (see: parser.y)
@@ -96,7 +90,7 @@ using namespace std;
 #ifndef YY_
 # if defined YYENABLE_NLS && YYENABLE_NLS
 #  if ENABLE_NLS
-#   include <libintl.h> // FIXME: INFRINGES ON USER NAME SPACE.
+#   include <libintl.h> /* FIXME: INFRINGES ON USER NAME SPACE */
 #   define YY_(msgid) dgettext ("bison-runtime", msgid)
 #  endif
 # endif
@@ -105,78 +99,58 @@ using namespace std;
 # endif
 #endif
 
-#define YYRHSLOC(Rhs, K) ((Rhs)[K].location)
-/* YYLLOC_DEFAULT -- Set CURRENT to span from RHS[1] to RHS[N].
-   If N is 0, then set CURRENT to the empty location which ends
-   the previous symbol: RHS[0] (always defined).  */
+/* Suppress unused-variable warnings by "using" E.  */
+#define YYUSE(e) ((void) (e))
 
-# ifndef YYLLOC_DEFAULT
-#  define YYLLOC_DEFAULT(Current, Rhs, N)                               \
-    do                                                                  \
-      if (N)                                                            \
-        {                                                               \
-          (Current).begin  = YYRHSLOC (Rhs, 1).begin;                   \
-          (Current).end    = YYRHSLOC (Rhs, N).end;                     \
-        }                                                               \
-      else                                                              \
-        {                                                               \
-          (Current).begin = (Current).end = YYRHSLOC (Rhs, 0).end;      \
-        }                                                               \
-    while (/*CONSTCOND*/ false)
-# endif
-
-
-// Suppress unused-variable warnings by "using" E.
-#define YYUSE(E) ((void) (E))
-
-// Enable debugging if requested.
+/* Enable debugging if requested.  */
 #if YYDEBUG
 
-// A pseudo ostream that takes yydebug_ into account.
+/* A pseudo ostream that takes yydebug_ into account.  */
 # define YYCDEBUG if (yydebug_) (*yycdebug_)
 
-# define YY_SYMBOL_PRINT(Title, Symbol)         \
-  do {                                          \
-    if (yydebug_)                               \
-    {                                           \
-      *yycdebug_ << Title << ' ';               \
-      yy_print_ (*yycdebug_, Symbol);           \
-      *yycdebug_ << std::endl;                  \
-    }                                           \
-  } while (false)
+# define YY_SYMBOL_PRINT(Title, Type, Value, Location)	\
+do {							\
+  if (yydebug_)						\
+    {							\
+      *yycdebug_ << Title << ' ';			\
+      yy_symbol_print_ ((Type), (Value), (Location));	\
+      *yycdebug_ << std::endl;				\
+    }							\
+} while (false)
 
-# define YY_REDUCE_PRINT(Rule)          \
-  do {                                  \
-    if (yydebug_)                       \
-      yy_reduce_print_ (Rule);          \
-  } while (false)
+# define YY_REDUCE_PRINT(Rule)		\
+do {					\
+  if (yydebug_)				\
+    yy_reduce_print_ (Rule);		\
+} while (false)
 
-# define YY_STACK_PRINT()               \
-  do {                                  \
-    if (yydebug_)                       \
-      yystack_print_ ();                \
-  } while (false)
+# define YY_STACK_PRINT()		\
+do {					\
+  if (yydebug_)				\
+    yystack_print_ ();			\
+} while (false)
 
-#else // !YYDEBUG
+#else /* !YYDEBUG */
 
 # define YYCDEBUG if (false) std::cerr
-# define YY_SYMBOL_PRINT(Title, Symbol)  YYUSE(Symbol)
-# define YY_REDUCE_PRINT(Rule)           static_cast<void>(0)
-# define YY_STACK_PRINT()                static_cast<void>(0)
+# define YY_SYMBOL_PRINT(Title, Type, Value, Location)
+# define YY_REDUCE_PRINT(Rule)
+# define YY_STACK_PRINT()
 
-#endif // !YYDEBUG
+#endif /* !YYDEBUG */
 
-#define yyerrok         (yyerrstatus_ = 0)
-#define yyclearin       (yyempty = true)
+#define yyerrok		(yyerrstatus_ = 0)
+#define yyclearin	(yychar = yyempty_)
 
-#define YYACCEPT        goto yyacceptlab
-#define YYABORT         goto yyabortlab
-#define YYERROR         goto yyerrorlab
+#define YYACCEPT	goto yyacceptlab
+#define YYABORT		goto yyabortlab
+#define YYERROR		goto yyerrorlab
 #define YYRECOVERING()  (!!yyerrstatus_)
 
 
 namespace yy {
 
+#if YYERROR_VERBOSE
 
   /* Return YYSTR after stripping away unnecessary quotes and
      backslashes, so that it's suitable for yyerror.  The heuristic is
@@ -201,7 +175,7 @@ namespace yy {
             case '\\':
               if (*++yyp != '\\')
                 goto do_not_strip_quotes;
-              // Fall through.
+              /* Fall through.  */
             default:
               yyr += *yyp;
               break;
@@ -215,6 +189,7 @@ namespace yy {
     return yystr;
   }
 
+#endif
 
   /// Build a parser object.
   HTTP_Parser::HTTP_Parser (HTTP_IParser* iparser_p_yyarg, yyscan_t yyscanner_yyarg)
@@ -225,545 +200,298 @@ namespace yy {
 #endif
       iparser_p (iparser_p_yyarg),
       yyscanner (yyscanner_yyarg)
-  {}
+  {
+  }
 
   HTTP_Parser::~HTTP_Parser ()
-  {}
-
-
-  /*---------------.
-  | Symbol types.  |
-  `---------------*/
-
-  inline
-  HTTP_Parser::syntax_error::syntax_error (const location_type& l, const std::string& m)
-    : std::runtime_error (m)
-    , location (l)
-  {}
-
-  // basic_symbol.
-  template <typename Base>
-  inline
-  HTTP_Parser::basic_symbol<Base>::basic_symbol ()
-    : value ()
-  {}
-
-  template <typename Base>
-  inline
-  HTTP_Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
-    : Base (other)
-    , value ()
-    , location (other.location)
   {
-    value = other.value;
-  }
-
-
-  template <typename Base>
-  inline
-  HTTP_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v, const location_type& l)
-    : Base (t)
-    , value (v)
-    , location (l)
-  {}
-
-
-  /// Constructor for valueless symbols.
-  template <typename Base>
-  inline
-  HTTP_Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
-    : Base (t)
-    , value ()
-    , location (l)
-  {}
-
-  template <typename Base>
-  inline
-  HTTP_Parser::basic_symbol<Base>::~basic_symbol ()
-  {
-  }
-
-  template <typename Base>
-  inline
-  void
-  HTTP_Parser::basic_symbol<Base>::move (basic_symbol& s)
-  {
-    super_type::move(s);
-    value = s.value;
-    location = s.location;
-  }
-
-  // by_type.
-  inline
-  HTTP_Parser::by_type::by_type ()
-     : type (empty)
-  {}
-
-  inline
-  HTTP_Parser::by_type::by_type (const by_type& other)
-    : type (other.type)
-  {}
-
-  inline
-  HTTP_Parser::by_type::by_type (token_type t)
-    : type (yytranslate_ (t))
-  {}
-
-  inline
-  void
-  HTTP_Parser::by_type::move (by_type& that)
-  {
-    type = that.type;
-    that.type = empty;
-  }
-
-  inline
-  int
-  HTTP_Parser::by_type::type_get () const
-  {
-    return type;
-  }
-
-
-  // by_state.
-  inline
-  HTTP_Parser::by_state::by_state ()
-    : state (empty)
-  {}
-
-  inline
-  HTTP_Parser::by_state::by_state (const by_state& other)
-    : state (other.state)
-  {}
-
-  inline
-  void
-  HTTP_Parser::by_state::move (by_state& that)
-  {
-    state = that.state;
-    that.state = empty;
-  }
-
-  inline
-  HTTP_Parser::by_state::by_state (state_type s)
-    : state (s)
-  {}
-
-  inline
-  HTTP_Parser::symbol_number_type
-  HTTP_Parser::by_state::type_get () const
-  {
-    return state == empty ? 0 : yystos_[state];
-  }
-
-  inline
-  HTTP_Parser::stack_symbol_type::stack_symbol_type ()
-  {}
-
-
-  inline
-  HTTP_Parser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
-    : super_type (s, that.location)
-  {
-    value = that.value;
-    // that is emptied.
-    that.type = empty;
-  }
-
-  inline
-  HTTP_Parser::stack_symbol_type&
-  HTTP_Parser::stack_symbol_type::operator= (const stack_symbol_type& that)
-  {
-    state = that.state;
-    value = that.value;
-    location = that.location;
-    return *this;
-  }
-
-
-  template <typename Base>
-  inline
-  void
-  HTTP_Parser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
-  {
-    if (yymsg)
-      YY_SYMBOL_PRINT (yymsg, yysym);
-
-    // User destructor.
-    switch (yysym.type_get ())
-    {
-            case 0: // "end"
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 3: // "method"
-
-
-        { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
-
-        break;
-
-      case 4: // "uri"
-
-
-        { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
-
-        break;
-
-      case 5: // "version"
-
-
-        { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
-
-        break;
-
-      case 6: // "header"
-
-
-        { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
-
-        break;
-
-      case 7: // "delimiter"
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 8: // "status"
-
-
-        { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
-
-        break;
-
-      case 9: // "reason"
-
-
-        { delete (yysym.value.sval); (yysym.value.sval) = NULL; }
-
-        break;
-
-      case 10: // "body"
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 11: // "chunk"
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 12: // "end_of_fragment"
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 14: // message
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 15: // head
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 16: // head_rest1
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 17: // request_line_rest1
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 18: // request_line_rest2
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 19: // head_rest2
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 20: // status_line_rest1
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 21: // status_line_rest2
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 22: // headers
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 23: // body
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 24: // chunked_body
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-      case 25: // chunks
-
-
-        { (yysym.value.ival) = 0; }
-
-        break;
-
-
-      default:
-        break;
-    }
   }
 
 #if YYDEBUG
-  template <typename Base>
-  void
-  HTTP_Parser::yy_print_ (std::ostream& yyo,
-                                     const basic_symbol<Base>& yysym) const
+  /*--------------------------------.
+  | Print this symbol on YYOUTPUT.  |
+  `--------------------------------*/
+
+  inline void
+  HTTP_Parser::yy_symbol_value_print_ (int yytype,
+			   const semantic_type* yyvaluep, const location_type* yylocationp)
   {
-    std::ostream& yyoutput = yyo;
-    YYUSE (yyoutput);
-    symbol_number_type yytype = yysym.type_get ();
-    yyo << (yytype < yyntokens_ ? "token" : "nterm")
-        << ' ' << yytname_[yytype] << " ("
-        << yysym.location << ": ";
+    YYUSE (yylocationp);
+    YYUSE (yyvaluep);
     switch (yytype)
-    {
-            case 0: // "end"
+      {
+        case 0: /* "\"end\"" */
 
+	{ debug_stream () << (yyvaluep->ival); };
 
-        { debug_stream () << (yysym.value.ival); }
+	break;
+      case 3: /* "\"method\"" */
 
-        break;
+	{ debug_stream () << *(yyvaluep->sval); };
 
-      case 3: // "method"
+	break;
+      case 4: /* "\"uri\"" */
 
+	{ debug_stream () << *(yyvaluep->sval); };
 
-        { debug_stream () << *(yysym.value.sval); }
+	break;
+      case 5: /* "\"version\"" */
 
-        break;
+	{ debug_stream () << *(yyvaluep->sval); };
 
-      case 4: // "uri"
+	break;
+      case 6: /* "\"header\"" */
 
+	{ debug_stream () << *(yyvaluep->sval); };
 
-        { debug_stream () << *(yysym.value.sval); }
+	break;
+      case 7: /* "\"delimiter\"" */
 
-        break;
+	{ debug_stream () << (yyvaluep->ival); };
 
-      case 5: // "version"
+	break;
+      case 8: /* "\"status\"" */
 
+	{ debug_stream () << *(yyvaluep->sval); };
 
-        { debug_stream () << *(yysym.value.sval); }
+	break;
+      case 9: /* "\"reason\"" */
 
-        break;
+	{ debug_stream () << *(yyvaluep->sval); };
 
-      case 6: // "header"
+	break;
+      case 10: /* "\"body\"" */
 
+	{ debug_stream () << (yyvaluep->ival); };
 
-        { debug_stream () << *(yysym.value.sval); }
+	break;
+      case 11: /* "\"chunk\"" */
 
-        break;
+	{ debug_stream () << (yyvaluep->ival); };
 
-      case 7: // "delimiter"
+	break;
+      case 12: /* "\"end_of_fragment\"" */
 
+	{ debug_stream () << (yyvaluep->ival); };
 
-        { debug_stream () << (yysym.value.ival); }
+	break;
+      case 14: /* "message" */
 
-        break;
+	{ debug_stream () << (yyvaluep->ival); };
 
-      case 8: // "status"
+	break;
+      case 15: /* "head" */
 
+	{ debug_stream () << (yyvaluep->ival); };
 
-        { debug_stream () << *(yysym.value.sval); }
+	break;
+      case 16: /* "head_rest1" */
 
-        break;
+	{ debug_stream () << (yyvaluep->ival); };
 
-      case 9: // "reason"
+	break;
+      case 17: /* "request_line_rest1" */
 
+	{ debug_stream () << (yyvaluep->ival); };
 
-        { debug_stream () << *(yysym.value.sval); }
+	break;
+      case 18: /* "request_line_rest2" */
 
-        break;
+	{ debug_stream () << (yyvaluep->ival); };
 
-      case 10: // "body"
+	break;
+      case 19: /* "head_rest2" */
 
+	{ debug_stream () << (yyvaluep->ival); };
 
-        { debug_stream () << (yysym.value.ival); }
+	break;
+      case 20: /* "status_line_rest1" */
 
-        break;
+	{ debug_stream () << (yyvaluep->ival); };
 
-      case 11: // "chunk"
+	break;
+      case 21: /* "status_line_rest2" */
 
+	{ debug_stream () << (yyvaluep->ival); };
 
-        { debug_stream () << (yysym.value.ival); }
+	break;
+      case 22: /* "headers" */
 
-        break;
+	{ debug_stream () << (yyvaluep->ival); };
 
-      case 12: // "end_of_fragment"
+	break;
+      case 23: /* "body" */
 
+	{ debug_stream () << (yyvaluep->ival); };
 
-        { debug_stream () << (yysym.value.ival); }
+	break;
+      case 24: /* "chunked_body" */
 
-        break;
+	{ debug_stream () << (yyvaluep->ival); };
 
-      case 14: // message
+	break;
+      case 25: /* "chunks" */
 
+	{ debug_stream () << (yyvaluep->ival); };
 
-        { debug_stream () << (yysym.value.ival); }
+	break;
+       default:
+	  break;
+      }
+  }
 
-        break;
 
-      case 15: // head
-
-
-        { debug_stream () << (yysym.value.ival); }
-
-        break;
-
-      case 16: // head_rest1
-
-
-        { debug_stream () << (yysym.value.ival); }
-
-        break;
-
-      case 17: // request_line_rest1
-
-
-        { debug_stream () << (yysym.value.ival); }
-
-        break;
-
-      case 18: // request_line_rest2
-
-
-        { debug_stream () << (yysym.value.ival); }
-
-        break;
-
-      case 19: // head_rest2
-
-
-        { debug_stream () << (yysym.value.ival); }
-
-        break;
-
-      case 20: // status_line_rest1
-
-
-        { debug_stream () << (yysym.value.ival); }
-
-        break;
-
-      case 21: // status_line_rest2
-
-
-        { debug_stream () << (yysym.value.ival); }
-
-        break;
-
-      case 22: // headers
-
-
-        { debug_stream () << (yysym.value.ival); }
-
-        break;
-
-      case 23: // body
-
-
-        { debug_stream () << (yysym.value.ival); }
-
-        break;
-
-      case 24: // chunked_body
-
-
-        { debug_stream () << (yysym.value.ival); }
-
-        break;
-
-      case 25: // chunks
-
-
-        { debug_stream () << (yysym.value.ival); }
-
-        break;
-
-
-      default:
-        break;
-    }
-    yyo << ')';
+  void
+  HTTP_Parser::yy_symbol_print_ (int yytype,
+			   const semantic_type* yyvaluep, const location_type* yylocationp)
+  {
+    *yycdebug_ << (yytype < yyntokens_ ? "token" : "nterm")
+	       << ' ' << yytname_[yytype] << " ("
+	       << *yylocationp << ": ";
+    yy_symbol_value_print_ (yytype, yyvaluep, yylocationp);
+    *yycdebug_ << ')';
   }
 #endif
 
-  inline
   void
-  HTTP_Parser::yypush_ (const char* m, state_type s, symbol_type& sym)
+  HTTP_Parser::yydestruct_ (const char* yymsg,
+			   int yytype, semantic_type* yyvaluep, location_type* yylocationp)
   {
-    stack_symbol_type t (s, sym);
-    yypush_ (m, t);
+    YYUSE (yylocationp);
+    YYUSE (yymsg);
+    YYUSE (yyvaluep);
+
+    YY_SYMBOL_PRINT (yymsg, yytype, yyvaluep, yylocationp);
+
+    switch (yytype)
+      {
+        case 0: /* "\"end\"" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 3: /* "\"method\"" */
+
+	{ delete (yyvaluep->sval); (yyvaluep->sval) = NULL; };
+
+	break;
+      case 4: /* "\"uri\"" */
+
+	{ delete (yyvaluep->sval); (yyvaluep->sval) = NULL; };
+
+	break;
+      case 5: /* "\"version\"" */
+
+	{ delete (yyvaluep->sval); (yyvaluep->sval) = NULL; };
+
+	break;
+      case 6: /* "\"header\"" */
+
+	{ delete (yyvaluep->sval); (yyvaluep->sval) = NULL; };
+
+	break;
+      case 7: /* "\"delimiter\"" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 8: /* "\"status\"" */
+
+	{ delete (yyvaluep->sval); (yyvaluep->sval) = NULL; };
+
+	break;
+      case 9: /* "\"reason\"" */
+
+	{ delete (yyvaluep->sval); (yyvaluep->sval) = NULL; };
+
+	break;
+      case 10: /* "\"body\"" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 11: /* "\"chunk\"" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 12: /* "\"end_of_fragment\"" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 14: /* "message" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 15: /* "head" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 16: /* "head_rest1" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 17: /* "request_line_rest1" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 18: /* "request_line_rest2" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 19: /* "head_rest2" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 20: /* "status_line_rest1" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 21: /* "status_line_rest2" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 22: /* "headers" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 23: /* "body" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 24: /* "chunked_body" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+      case 25: /* "chunks" */
+
+	{ (yyvaluep->ival) = 0; };
+
+	break;
+
+	default:
+	  break;
+      }
   }
 
-  inline
-  void
-  HTTP_Parser::yypush_ (const char* m, stack_symbol_type& s)
-  {
-    if (m)
-      YY_SYMBOL_PRINT (m, s);
-    yystack_.push (s);
-  }
-
-  inline
   void
   HTTP_Parser::yypop_ (unsigned int n)
   {
-    yystack_.pop (n);
+    yystate_stack_.pop (n);
+    yysemantic_stack_.pop (n);
+    yylocation_stack_.pop (n);
   }
 
 #if YYDEBUG
@@ -791,150 +519,142 @@ namespace yy {
   {
     yydebug_ = l;
   }
-#endif // YYDEBUG
-
-  inline HTTP_Parser::state_type
-  HTTP_Parser::yy_lr_goto_state_ (state_type yystate, int yysym)
-  {
-    int yyr = yypgoto_[yysym - yyntokens_] + yystate;
-    if (0 <= yyr && yyr <= yylast_ && yycheck_[yyr] == yystate)
-      return yytable_[yyr];
-    else
-      return yydefgoto_[yysym - yyntokens_];
-  }
-
-  inline bool
-  HTTP_Parser::yy_pact_value_is_default_ (int yyvalue)
-  {
-    return yyvalue == yypact_ninf_;
-  }
-
-  inline bool
-  HTTP_Parser::yy_table_value_is_error_ (int yyvalue)
-  {
-    return yyvalue == yytable_ninf_;
-  }
+#endif
 
   int
   HTTP_Parser::parse ()
   {
-    /// Whether yyla contains a lookahead.
-    bool yyempty = true;
+    /// Lookahead and lookahead in internal form.
+    int yychar = yyempty_;
+    int yytoken = 0;
 
-    // State.
+    /* State.  */
     int yyn;
-    /// Length of the RHS of the rule being reduced.
     int yylen = 0;
+    int yystate = 0;
 
-    // Error handling.
+    /* Error handling.  */
     int yynerrs_ = 0;
     int yyerrstatus_ = 0;
 
-    /// The lookahead symbol.
-    symbol_type yyla;
-
+    /// Semantic value of the lookahead.
+    semantic_type yylval;
+    /// Location of the lookahead.
+    location_type yylloc;
     /// The locations where the error started and ended.
-    stack_symbol_type yyerror_range[3];
+    location_type yyerror_range[2];
 
-    /// The return value of parse ().
+    /// $$.
+    semantic_type yyval;
+    /// @$.
+    location_type yyloc;
+
     int yyresult;
 
-    // FIXME: This shoud be completely indented.  It is not yet to
-    // avoid gratuitous conflicts when merging into the master branch.
-    try
-      {
     YYCDEBUG << "Starting parse" << std::endl;
 
 
-    // User initialization code.
+    /* User initialization code.  */
     
 {
   // initialize the location
-  //@$.initialize (YY_NULLPTR, 1, 1);
+  yylloc.initialize (NULL);
   //@$.begin.filename = @$.end.filename = &iparser_p->file;
-  ACE_OS::memset (&yyla.location, 0, sizeof (YYLTYPE));
+  //ACE_OS::memset (&@$, 0, sizeof (@$));
 
   // initialize the token value container
-  (yyla.value).ival = 0;
-  (yyla.value).sval = NULL;
+  yylval.ival = 0;
+  yylval.sval = NULL;
 }
 
 
-
-    /* Initialize the stack.  The initial state will be set in
+    /* Initialize the stacks.  The initial state will be pushed in
        yynewstate, since the latter expects the semantical and the
        location values to have been already stored, initialize these
        stacks with a primary value.  */
-    yystack_.clear ();
-    yypush_ (YY_NULLPTR, 0, yyla);
+    yystate_stack_ = state_stack_type (0);
+    yysemantic_stack_ = semantic_stack_type (0);
+    yylocation_stack_ = location_stack_type (0);
+    yysemantic_stack_.push (yylval);
+    yylocation_stack_.push (yylloc);
 
-    // A new symbol was pushed on the stack.
+    /* New state.  */
   yynewstate:
-    YYCDEBUG << "Entering state " << yystack_[0].state << std::endl;
+    yystate_stack_.push (yystate);
+    YYCDEBUG << "Entering state " << yystate << std::endl;
 
-    // Accept?
-    if (yystack_[0].state == yyfinal_)
+    /* Accept?  */
+    if (yystate == yyfinal_)
       goto yyacceptlab;
 
     goto yybackup;
 
-    // Backup.
+    /* Backup.  */
   yybackup:
 
-    // Try to take a decision without lookahead.
-    yyn = yypact_[yystack_[0].state];
-    if (yy_pact_value_is_default_ (yyn))
+    /* Try to take a decision without lookahead.  */
+    yyn = yypact_[yystate];
+    if (yyn == yypact_ninf_)
       goto yydefault;
 
-    // Read a lookahead token.
-    if (yyempty)
+    /* Read a lookahead token.  */
+    if (yychar == yyempty_)
       {
-        YYCDEBUG << "Reading a token: ";
-        try
-          {
-            yyla.type = yytranslate_ (yylex (&yyla.value, &yyla.location, iparser_p, yyscanner));
-          }
-        catch (const syntax_error& yyexc)
-          {
-            error (yyexc);
-            goto yyerrlab1;
-          }
-        yyempty = false;
+	YYCDEBUG << "Reading a token: ";
+	yychar = yylex (&yylval, &yylloc, iparser_p, yyscanner);
       }
-    YY_SYMBOL_PRINT ("Next token is", yyla);
 
-    /* If the proper action on seeing token YYLA.TYPE is to reduce or
-       to detect an error, take that action.  */
-    yyn += yyla.type_get ();
-    if (yyn < 0 || yylast_ < yyn || yycheck_[yyn] != yyla.type_get ())
+
+    /* Convert token to internal form.  */
+    if (yychar <= yyeof_)
+      {
+	yychar = yytoken = yyeof_;
+	YYCDEBUG << "Now at end of input." << std::endl;
+      }
+    else
+      {
+	yytoken = yytranslate_ (yychar);
+	YY_SYMBOL_PRINT ("Next token is", yytoken, &yylval, &yylloc);
+      }
+
+    /* If the proper action on seeing token YYTOKEN is to reduce or to
+       detect an error, take that action.  */
+    yyn += yytoken;
+    if (yyn < 0 || yylast_ < yyn || yycheck_[yyn] != yytoken)
       goto yydefault;
 
-    // Reduce or error.
+    /* Reduce or error.  */
     yyn = yytable_[yyn];
     if (yyn <= 0)
       {
-        if (yy_table_value_is_error_ (yyn))
-          goto yyerrlab;
-        yyn = -yyn;
-        goto yyreduce;
+	if (yyn == 0 || yyn == yytable_ninf_)
+	goto yyerrlab;
+	yyn = -yyn;
+	goto yyreduce;
       }
 
-    // Discard the token being shifted.
-    yyempty = true;
+    /* Shift the lookahead token.  */
+    YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
 
-    // Count tokens shifted since error; after three, turn off error status.
+    /* Discard the token being shifted.  */
+    yychar = yyempty_;
+
+    yysemantic_stack_.push (yylval);
+    yylocation_stack_.push (yylloc);
+
+    /* Count tokens shifted since error; after three, turn off error
+       status.  */
     if (yyerrstatus_)
       --yyerrstatus_;
 
-    // Shift the lookahead token.
-    yypush_ ("Shifting", yyn, yyla);
+    yystate = yyn;
     goto yynewstate;
 
   /*-----------------------------------------------------------.
   | yydefault -- do the default action for the current state.  |
   `-----------------------------------------------------------*/
   yydefault:
-    yyn = yydefact_[yystack_[0].state];
+    yyn = yydefact_[yystate];
     if (yyn == 0)
       goto yyerrlab;
     goto yyreduce;
@@ -944,55 +664,45 @@ namespace yy {
   `-----------------------------*/
   yyreduce:
     yylen = yyr2_[yyn];
+    /* If YYLEN is nonzero, implement the default value of the action:
+       `$$ = $1'.  Otherwise, use the top of the stack.
+
+       Otherwise, the following line sets YYVAL to garbage.
+       This behavior is undocumented and Bison
+       users should not rely upon it.  */
+    if (yylen)
+      yyval = yysemantic_stack_[yylen - 1];
+    else
+      yyval = yysemantic_stack_[0];
+
     {
-      stack_symbol_type yylhs;
-      yylhs.state = yy_lr_goto_state_(yystack_[yylen].state, yyr1_[yyn]);
-      /* If YYLEN is nonzero, implement the default value of the
-         action: '$$ = $1'.  Otherwise, use the top of the stack.
-
-         Otherwise, the following line sets YYLHS.VALUE to garbage.
-         This behavior is undocumented and Bison users should not rely
-         upon it.  */
-      if (yylen)
-        yylhs.value = yystack_[yylen - 1].value;
-      else
-        yylhs.value = yystack_[0].value;
-
-      // Compute the default @$.
+      slice<location_type, location_stack_type> slice (yylocation_stack_, yylen);
+      YYLLOC_DEFAULT (yyloc, slice, yylen);
+    }
+    YY_REDUCE_PRINT (yyn);
+    switch (yyn)
       {
-        slice<stack_symbol_type, stack_type> slice (yystack_, yylen);
-        YYLLOC_DEFAULT (yylhs.location, slice, yylen);
-      }
+	  case 2:
 
-      // Perform the reduction.
-      YY_REDUCE_PRINT (yyn);
-      try
-        {
-          switch (yyn)
-            {
-  case 2:
-
-    { (yylhs.value.ival) = (yystack_[2].value.ival) + (yystack_[1].value.ival) + (yystack_[0].value.ival); }
-
+    { (yyval.ival) = (yysemantic_stack_[(3) - (1)].ival) + (yysemantic_stack_[(3) - (2)].ival) + (yysemantic_stack_[(3) - (3)].ival); }
     break;
 
   case 3:
 
-    { (yylhs.value.ival) = (yystack_[1].value.sval)->size () + (yystack_[0].value.ival) + 1;
+    { (yyval.ival) = (yysemantic_stack_[(2) - (1)].sval)->size () + (yysemantic_stack_[(2) - (2)].ival) + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.method =
-                                                         HTTP_Tools::Method2Type (*(yystack_[1].value.sval));
+                                                         HTTP_Tools::Method2Type (*(yysemantic_stack_[(2) - (1)].sval));
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set method: \"%s\"\n"),
 //                                                                   ACE_TEXT ($1->c_str ())));
                                                      }
-
     break;
 
   case 4:
 
-    { (yylhs.value.ival) = (yystack_[1].value.sval)->size () + (yystack_[0].value.ival) + 1;
+    { (yyval.ival) = (yysemantic_stack_[(2) - (1)].sval)->size () + (yysemantic_stack_[(2) - (2)].ival) + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        std::string regex_string =
@@ -1003,14 +713,14 @@ namespace yy {
                                                          ACE_TEXT_ALWAYS_CHAR ("([[:digit:]]{1}\\.[[:digit:]]{1})$");
                                                        std::regex regex (regex_string);
                                                        std::smatch match_results;
-                                                       if (!std::regex_match (*(yystack_[1].value.sval),
+                                                       if (!std::regex_match (*(yysemantic_stack_[(2) - (1)].sval),
                                                                               match_results,
                                                                               regex,
                                                                               std::regex_constants::match_default))
                                                        {
                                                          ACE_DEBUG ((LM_ERROR,
                                                                      ACE_TEXT ("invalid HTTP version (was: \"%s\"), aborting\n"),
-                                                                     ACE_TEXT ((yystack_[1].value.sval)->c_str ())));
+                                                                     ACE_TEXT ((yysemantic_stack_[(2) - (1)].sval)->c_str ())));
                                                          YYABORT;
                                                        } // end IF
                                                        ACE_ASSERT (match_results.ready () && !match_results.empty ());
@@ -1022,76 +732,68 @@ namespace yy {
 //                                                                     ACE_TEXT ("set version: \"%s\"\n"),
 //                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
                                                      }
-
     break;
 
   case 5:
 
-    { (yylhs.value.ival) = (yystack_[0].value.ival);
+    { (yyval.ival) = (yysemantic_stack_[(1) - (1)].ival);
                                                        YYACCEPT; }
-
     break;
 
   case 6:
 
-    { (yylhs.value.ival) = (yystack_[1].value.ival) + (yystack_[0].value.ival); }
-
+    { (yyval.ival) = (yysemantic_stack_[(2) - (1)].ival) + (yysemantic_stack_[(2) - (2)].ival); }
     break;
 
   case 7:
 
-    { (yylhs.value.ival) = (yystack_[1].value.sval)->size () + (yystack_[0].value.ival) + 1;
+    { (yyval.ival) = (yysemantic_stack_[(2) - (1)].sval)->size () + (yysemantic_stack_[(2) - (2)].ival) + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
-                                                       record_r.URI = *(yystack_[1].value.sval);
+                                                       record_r.URI = *(yysemantic_stack_[(2) - (1)].sval);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set URI: \"%s\"\n"),
 //                                                                   ACE_TEXT ($1->c_str ())));
                                                      }
-
     break;
 
   case 8:
 
-    { (yylhs.value.ival) = (yystack_[0].value.ival);
+    { (yyval.ival) = (yysemantic_stack_[(1) - (1)].ival);
                                                        YYACCEPT; }
-
     break;
 
   case 9:
 
-    { (yylhs.value.ival) = (yystack_[0].value.sval)->size () + 2;
+    { (yyval.ival) = (yysemantic_stack_[(1) - (1)].sval)->size () + 2;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.version =
-                                                         HTTP_Tools::Version2Type (*(yystack_[0].value.sval));
+                                                         HTTP_Tools::Version2Type (*(yysemantic_stack_[(1) - (1)].sval));
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set version: \"%s\"\n"),
 //                                                                   ACE_TEXT ((*$1).c_str ())));
                                                      }
-
     break;
 
   case 10:
 
-    { (yylhs.value.ival) = (yystack_[0].value.ival);
+    { (yyval.ival) = (yysemantic_stack_[(1) - (1)].ival);
                                                        YYACCEPT; }
-
     break;
 
   case 11:
 
-    { (yylhs.value.ival) = (yystack_[1].value.ival) + (yystack_[0].value.ival); }
-
+    { (yyval.ival) = (yysemantic_stack_[(2) - (1)].ival) + (yysemantic_stack_[(2) - (2)].ival); }
     break;
 
   case 12:
 
-    { (yylhs.value.ival) = (yystack_[1].value.sval)->size () + (yystack_[0].value.ival) + 1;
+    { (yyval.ival) = (yysemantic_stack_[(2) - (1)].sval)->size () + (yysemantic_stack_[(2) - (2)].ival) + 1;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        std::istringstream converter;
-                                                       converter.str (*(yystack_[1].value.sval));
+                                                       converter.str (*(yysemantic_stack_[(2) - (1)].sval));
                                                        int status = -1;
                                                        converter >> status;
                                                        record_r.status =
@@ -1100,34 +802,30 @@ namespace yy {
 //                                                                   ACE_TEXT ("set status: %d\n"),
 //                                                                   status));
                                                      }
-
     break;
 
   case 13:
 
-    { (yylhs.value.ival) = (yystack_[0].value.ival);
+    { (yyval.ival) = (yysemantic_stack_[(1) - (1)].ival);
                                                        YYACCEPT; }
-
     break;
 
   case 14:
 
-    { (yylhs.value.ival) = (yystack_[0].value.sval)->size () + 2;
+    { (yyval.ival) = (yysemantic_stack_[(1) - (1)].sval)->size () + 2;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
-                                                       record_r.reason = *(yystack_[0].value.sval);
+                                                       record_r.reason = *(yysemantic_stack_[(1) - (1)].sval);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set reason: \"%s\"\n"),
 //                                                                   ACE_TEXT ($1->c_str ())));
                                                      }
-
     break;
 
   case 15:
 
-    { (yylhs.value.ival) = (yystack_[0].value.ival);
+    { (yyval.ival) = (yysemantic_stack_[(1) - (1)].ival);
                                                        YYACCEPT; }
-
     break;
 
   case 16:
@@ -1135,20 +833,20 @@ namespace yy {
     { /* NOTE*: use right-recursion here to force early state reductions
                                                                  (i.e. parse headers). This is required so the scanner can
                                                                  act on any set transfer encoding. */
-                                                       (yylhs.value.ival) = (yystack_[1].value.ival) + (yystack_[0].value.sval)->size ();
+                                                       (yyval.ival) = (yysemantic_stack_[(2) - (1)].ival) + (yysemantic_stack_[(2) - (2)].sval)->size ();
                                                        /* *TODO*: modify the scanner so it emits the proper fields itself */
                                                        std::string regex_string =
                                                          ACE_TEXT_ALWAYS_CHAR ("^([^:]+):\\s(.+)$");
                                                        std::regex regex (regex_string);
                                                        std::smatch match_results;
-                                                       if (!std::regex_match (*(yystack_[0].value.sval),
+                                                       if (!std::regex_match (*(yysemantic_stack_[(2) - (2)].sval),
                                                                               match_results,
                                                                               regex,
                                                                               std::regex_constants::match_default))
                                                        {
                                                          ACE_DEBUG ((LM_ERROR,
                                                                      ACE_TEXT ("invalid HTTP header (was: \"%s\"), returning\n"),
-                                                                     ACE_TEXT ((yystack_[0].value.sval)->c_str ())));
+                                                                     ACE_TEXT ((yysemantic_stack_[(2) - (2)].sval)->c_str ())));
                                                          break;
                                                        } // end IF
                                                        ACE_ASSERT (match_results.ready () && !match_results.empty ());
@@ -1182,26 +880,23 @@ namespace yy {
                                                                        ACE_TEXT ("caught exception in HTTP_IParser::encoding(), continuing\n")));
                                                          }
                                                        } }
-
     break;
 
   case 17:
 
-    { (yylhs.value.ival) = (yystack_[0].value.ival);
+    { (yyval.ival) = (yysemantic_stack_[(1) - (1)].ival);
                                                        yyclearin;
                                                        YYACCEPT; }
-
     break;
 
   case 18:
 
-    { (yylhs.value.ival) = 0; }
-
+    { (yyval.ival) = 0; }
     break;
 
   case 19:
 
-    { (yylhs.value.ival) = (yystack_[0].value.ival);
+    { (yyval.ival) = (yysemantic_stack_[(1) - (1)].ival);
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        HTTP_HeadersIterator_t iterator =
@@ -1211,7 +906,7 @@ namespace yy {
                                                        converter.str ((*iterator).second);
                                                        unsigned int content_length = 0;
                                                        converter >> content_length;
-                                                       if ((yystack_[0].value.ival) == static_cast<int> (content_length))
+                                                       if ((yysemantic_stack_[(1) - (1)].ival) == static_cast<int> (content_length))
                                                        {
                                                          struct HTTP_Record* record_p =
                                                            &record_r;
@@ -1223,26 +918,23 @@ namespace yy {
                                                          }
                                                          YYACCEPT;
                                                        } }
-
     break;
 
   case 20:
 
-    { (yylhs.value.ival) = (yystack_[1].value.ival) + (yystack_[0].value.ival); }
-
+    { (yyval.ival) = (yysemantic_stack_[(2) - (1)].ival) + (yysemantic_stack_[(2) - (2)].ival); }
     break;
 
   case 21:
 
-    { (yylhs.value.ival) = (yystack_[0].value.ival);
+    { (yyval.ival) = (yysemantic_stack_[(1) - (1)].ival);
                                                        yyclearin;
                                                        YYACCEPT; }
-
     break;
 
   case 22:
 
-    { (yylhs.value.ival) = (yystack_[2].value.ival) + (yystack_[1].value.ival) + (yystack_[0].value.ival); // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
+    { (yyval.ival) = (yysemantic_stack_[(3) - (1)].ival) + (yysemantic_stack_[(3) - (2)].ival) + (yysemantic_stack_[(3) - (3)].ival); // *TODO*: potential conflict here (i.e. incomplete chunk may be accepted)
                                                      struct HTTP_Record& record_r =
                                                        iparser_p->current ();
                                                      struct HTTP_Record* record_p =
@@ -1254,87 +946,87 @@ namespace yy {
                                                                    ACE_TEXT ("caught exception in HTTP_IParser::record(), continuing\n")));
                                                      }
                                                      YYACCEPT; }
-
     break;
 
   case 23:
 
-    { (yylhs.value.ival) = (yystack_[0].value.ival);
+    { (yyval.ival) = (yysemantic_stack_[(1) - (1)].ival);
                                                        yyclearin;
                                                        YYACCEPT; }
-
     break;
 
   case 24:
 
-    { (yylhs.value.ival) = 0;
+    { (yyval.ival) = 0;
                                                        YYACCEPT; }
-
     break;
 
   case 25:
 
-    { (yylhs.value.ival) = (yystack_[1].value.ival) + (yystack_[0].value.ival); }
-
+    { (yyval.ival) = (yysemantic_stack_[(2) - (1)].ival) + (yysemantic_stack_[(2) - (2)].ival); }
     break;
 
   case 26:
 
-    { (yylhs.value.ival) = 0; }
-
+    { (yyval.ival) = 0; }
     break;
 
 
 
-            default:
-              break;
-            }
-        }
-      catch (const syntax_error& yyexc)
-        {
-          error (yyexc);
-          YYERROR;
-        }
-      YY_SYMBOL_PRINT ("-> $$ =", yylhs);
-      yypop_ (yylen);
-      yylen = 0;
-      YY_STACK_PRINT ();
+	default:
+          break;
+      }
+    YY_SYMBOL_PRINT ("-> $$ =", yyr1_[yyn], &yyval, &yyloc);
 
-      // Shift the result of the reduction.
-      yypush_ (YY_NULLPTR, yylhs);
-    }
+    yypop_ (yylen);
+    yylen = 0;
+    YY_STACK_PRINT ();
+
+    yysemantic_stack_.push (yyval);
+    yylocation_stack_.push (yyloc);
+
+    /* Shift the result of the reduction.  */
+    yyn = yyr1_[yyn];
+    yystate = yypgoto_[yyn - yyntokens_] + yystate_stack_[0];
+    if (0 <= yystate && yystate <= yylast_
+	&& yycheck_[yystate] == yystate_stack_[0])
+      yystate = yytable_[yystate];
+    else
+      yystate = yydefgoto_[yyn - yyntokens_];
     goto yynewstate;
 
-  /*--------------------------------------.
-  | yyerrlab -- here on detecting error.  |
-  `--------------------------------------*/
+  /*------------------------------------.
+  | yyerrlab -- here on detecting error |
+  `------------------------------------*/
   yyerrlab:
-    // If not already recovering from an error, report this error.
+    /* If not already recovering from an error, report this error.  */
     if (!yyerrstatus_)
       {
-        ++yynerrs_;
-        error (yyla.location, yysyntax_error_ (yystack_[0].state,
-                                           yyempty ? yyempty_ : yyla.type_get ()));
+	++yynerrs_;
+	error (yylloc, yysyntax_error_ (yystate, yytoken));
       }
 
-
-    yyerror_range[1].location = yyla.location;
+    yyerror_range[0] = yylloc;
     if (yyerrstatus_ == 3)
       {
-        /* If just tried and failed to reuse lookahead token after an
-           error, discard it.  */
+	/* If just tried and failed to reuse lookahead token after an
+	 error, discard it.  */
 
-        // Return failure if at end of input.
-        if (yyla.type_get () == yyeof_)
-          YYABORT;
-        else if (!yyempty)
-          {
-            yy_destroy_ ("Error: discarding", yyla);
-            yyempty = true;
-          }
+	if (yychar <= yyeof_)
+	  {
+	  /* Return failure if at end of input.  */
+	  if (yychar == yyeof_)
+	    YYABORT;
+	  }
+	else
+	  {
+	    yydestruct_ ("Error: discarding", yytoken, &yylval, &yylloc);
+	    yychar = yyempty_;
+	  }
       }
 
-    // Else will try to reuse lookahead token after shifting the error token.
+    /* Else will try to reuse lookahead token after shifting the error
+       token.  */
     goto yyerrlab1;
 
 
@@ -1348,299 +1040,290 @@ namespace yy {
        code.  */
     if (false)
       goto yyerrorlab;
-    yyerror_range[1].location = yystack_[yylen - 1].location;
-    /* Do not reclaim the symbols of the rule whose action triggered
+
+    yyerror_range[0] = yylocation_stack_[yylen - 1];
+    /* Do not reclaim the symbols of the rule which action triggered
        this YYERROR.  */
     yypop_ (yylen);
     yylen = 0;
+    yystate = yystate_stack_[0];
     goto yyerrlab1;
 
   /*-------------------------------------------------------------.
   | yyerrlab1 -- common code for both syntax error and YYERROR.  |
   `-------------------------------------------------------------*/
   yyerrlab1:
-    yyerrstatus_ = 3;   // Each real token shifted decrements this.
-    {
-      stack_symbol_type error_token;
-      for (;;)
-        {
-          yyn = yypact_[yystack_[0].state];
-          if (!yy_pact_value_is_default_ (yyn))
-            {
-              yyn += yyterror_;
-              if (0 <= yyn && yyn <= yylast_ && yycheck_[yyn] == yyterror_)
-                {
-                  yyn = yytable_[yyn];
-                  if (0 < yyn)
-                    break;
-                }
-            }
+    yyerrstatus_ = 3;	/* Each real token shifted decrements this.  */
 
-          // Pop the current state because it cannot handle the error token.
-          if (yystack_.size () == 1)
-            YYABORT;
+    for (;;)
+      {
+	yyn = yypact_[yystate];
+	if (yyn != yypact_ninf_)
+	{
+	  yyn += yyterror_;
+	  if (0 <= yyn && yyn <= yylast_ && yycheck_[yyn] == yyterror_)
+	    {
+	      yyn = yytable_[yyn];
+	      if (0 < yyn)
+		break;
+	    }
+	}
 
-          yyerror_range[1].location = yystack_[0].location;
-          yy_destroy_ ("Error: popping", yystack_[0]);
-          yypop_ ();
-          YY_STACK_PRINT ();
-        }
+	/* Pop the current state because it cannot handle the error token.  */
+	if (yystate_stack_.height () == 1)
+	YYABORT;
 
-      yyerror_range[2].location = yyla.location;
-      YYLLOC_DEFAULT (error_token.location, yyerror_range, 2);
+	yyerror_range[0] = yylocation_stack_[0];
+	yydestruct_ ("Error: popping",
+		     yystos_[yystate],
+		     &yysemantic_stack_[0], &yylocation_stack_[0]);
+	yypop_ ();
+	yystate = yystate_stack_[0];
+	YY_STACK_PRINT ();
+      }
 
-      // Shift the error token.
-      error_token.state = yyn;
-      yypush_ ("Shifting", error_token);
-    }
+    yyerror_range[1] = yylloc;
+    // Using YYLLOC is tempting, but would change the location of
+    // the lookahead.  YYLOC is available though.
+    YYLLOC_DEFAULT (yyloc, (yyerror_range - 1), 2);
+    yysemantic_stack_.push (yylval);
+    yylocation_stack_.push (yyloc);
+
+    /* Shift the error token.  */
+    YY_SYMBOL_PRINT ("Shifting", yystos_[yyn],
+		     &yysemantic_stack_[0], &yylocation_stack_[0]);
+
+    yystate = yyn;
     goto yynewstate;
 
-    // Accept.
+    /* Accept.  */
   yyacceptlab:
     yyresult = 0;
     goto yyreturn;
 
-    // Abort.
+    /* Abort.  */
   yyabortlab:
     yyresult = 1;
     goto yyreturn;
 
   yyreturn:
-    if (!yyempty)
-      yy_destroy_ ("Cleanup: discarding lookahead", yyla);
+    if (yychar != yyempty_)
+      yydestruct_ ("Cleanup: discarding lookahead", yytoken, &yylval, &yylloc);
 
-    /* Do not reclaim the symbols of the rule whose action triggered
+    /* Do not reclaim the symbols of the rule which action triggered
        this YYABORT or YYACCEPT.  */
     yypop_ (yylen);
-    while (1 < yystack_.size ())
+    while (yystate_stack_.height () != 1)
       {
-        yy_destroy_ ("Cleanup: popping", yystack_[0]);
-        yypop_ ();
+	yydestruct_ ("Cleanup: popping",
+		   yystos_[yystate_stack_[0]],
+		   &yysemantic_stack_[0],
+		   &yylocation_stack_[0]);
+	yypop_ ();
       }
 
     return yyresult;
   }
-    catch (...)
-      {
-        YYCDEBUG << "Exception caught: cleaning lookahead and stack"
-                 << std::endl;
-        // Do not try to display the values of the reclaimed symbols,
-        // as their printer might throw an exception.
-        if (!yyempty)
-          yy_destroy_ (YY_NULLPTR, yyla);
-
-        while (1 < yystack_.size ())
-          {
-            yy_destroy_ (YY_NULLPTR, yystack_[0]);
-            yypop_ ();
-          }
-        throw;
-      }
-  }
-
-  void
-  HTTP_Parser::error (const syntax_error& yyexc)
-  {
-    error (yyexc.location, yyexc.what());
-  }
 
   // Generate an error message.
   std::string
-  HTTP_Parser::yysyntax_error_ (state_type yystate, symbol_number_type yytoken) const
+  HTTP_Parser::yysyntax_error_ (int yystate, int tok)
   {
-    std::string yyres;
-    // Number of reported tokens (one for the "unexpected", one per
-    // "expected").
-    size_t yycount = 0;
-    // Its maximum.
-    enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
-    // Arguments of yyformat.
-    char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
-
-    /* There are many possibilities here to consider:
-       - If this state is a consistent state with a default action, then
-         the only way this function was invoked is if the default action
-         is an error action.  In that case, don't check for expected
-         tokens because there are none.
-       - The only way there can be no lookahead present (in yytoken) is
-         if this state is a consistent state with a default action.
-         Thus, detecting the absence of a lookahead is sufficient to
-         determine that there is no unexpected or expected token to
-         report.  In that case, just report a simple "syntax error".
-       - Don't assume there isn't a lookahead just because this state is
-         a consistent state with a default action.  There might have
-         been a previous inconsistent state, consistent state with a
-         non-default action, or user semantic action that manipulated
-         yyla.  (However, yyla is currently not documented for users.)
-       - Of course, the expected token list depends on states to have
-         correct lookahead information, and it depends on the parser not
-         to perform extra reductions after fetching a lookahead from the
-         scanner and before detecting a syntax error.  Thus, state
-         merging (from LALR or IELR) and default reductions corrupt the
-         expected token list.  However, the list is correct for
-         canonical LR with one exception: it will still contain any
-         token that will not be accepted due to an error action in a
-         later state.
-    */
-    if (yytoken != yyempty_)
+    std::string res;
+    YYUSE (yystate);
+#if YYERROR_VERBOSE
+    int yyn = yypact_[yystate];
+    if (yypact_ninf_ < yyn && yyn <= yylast_)
       {
-        yyarg[yycount++] = yytname_[yytoken];
-        int yyn = yypact_[yystate];
-        if (!yy_pact_value_is_default_ (yyn))
-          {
-            /* Start YYX at -YYN if negative to avoid negative indexes in
-               YYCHECK.  In other words, skip the first -YYN actions for
-               this state because they are default actions.  */
-            int yyxbegin = yyn < 0 ? -yyn : 0;
-            // Stay within bounds of both yycheck and yytname.
-            int yychecklim = yylast_ - yyn + 1;
-            int yyxend = yychecklim < yyntokens_ ? yychecklim : yyntokens_;
-            for (int yyx = yyxbegin; yyx < yyxend; ++yyx)
-              if (yycheck_[yyx + yyn] == yyx && yyx != yyterror_
-                  && !yy_table_value_is_error_ (yytable_[yyx + yyn]))
-                {
-                  if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
-                    {
-                      yycount = 1;
-                      break;
-                    }
-                  else
-                    yyarg[yycount++] = yytname_[yyx];
-                }
-          }
-      }
+	/* Start YYX at -YYN if negative to avoid negative indexes in
+	   YYCHECK.  */
+	int yyxbegin = yyn < 0 ? -yyn : 0;
 
-    char const* yyformat = YY_NULLPTR;
-    switch (yycount)
-      {
-#define YYCASE_(N, S)                         \
-        case N:                               \
-          yyformat = S;                       \
-        break
-        YYCASE_(0, YY_("syntax error"));
-        YYCASE_(1, YY_("syntax error, unexpected %s"));
-        YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
-        YYCASE_(3, YY_("syntax error, unexpected %s, expecting %s or %s"));
-        YYCASE_(4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
-        YYCASE_(5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
-#undef YYCASE_
-      }
+	/* Stay within bounds of both yycheck and yytname.  */
+	int yychecklim = yylast_ - yyn + 1;
+	int yyxend = yychecklim < yyntokens_ ? yychecklim : yyntokens_;
+	int count = 0;
+	for (int x = yyxbegin; x < yyxend; ++x)
+	  if (yycheck_[x + yyn] == x && x != yyterror_)
+	    ++count;
 
-    // Argument number.
-    size_t yyi = 0;
-    for (char const* yyp = yyformat; *yyp; ++yyp)
-      if (yyp[0] == '%' && yyp[1] == 's' && yyi < yycount)
-        {
-          yyres += yytnamerr_ (yyarg[yyi++]);
-          ++yyp;
-        }
-      else
-        yyres += *yyp;
-    return yyres;
+	// FIXME: This method of building the message is not compatible
+	// with internationalization.  It should work like yacc.c does it.
+	// That is, first build a string that looks like this:
+	// "syntax error, unexpected %s or %s or %s"
+	// Then, invoke YY_ on this string.
+	// Finally, use the string as a format to output
+	// yytname_[tok], etc.
+	// Until this gets fixed, this message appears in English only.
+	res = "syntax error, unexpected ";
+	res += yytnamerr_ (yytname_[tok]);
+	if (count < 5)
+	  {
+	    count = 0;
+	    for (int x = yyxbegin; x < yyxend; ++x)
+	      if (yycheck_[x + yyn] == x && x != yyterror_)
+		{
+		  res += (!count++) ? ", expecting " : " or ";
+		  res += yytnamerr_ (yytname_[x]);
+		}
+	  }
+      }
+    else
+#endif
+      res = YY_("syntax error");
+    return res;
   }
 
 
+  /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
+     STATE-NUM.  */
   const signed char HTTP_Parser::yypact_ninf_ = -14;
-
-  const signed char HTTP_Parser::yytable_ninf_ = -25;
-
   const signed char
   HTTP_Parser::yypact_[] =
   {
-      -1,     2,    -3,   -14,     7,    12,    -2,   -14,   -14,    -4,
+        -1,     2,    -3,   -14,     7,    12,    -2,   -14,   -14,    -4,
        6,   -14,   -14,    -4,   -14,    11,   -14,   -14,   -14,   -14,
       18,   -14,   -14,   -14,    18,   -14,     1,   -14,   -14,   -14,
       14,   -14,   -14,    -4,   -14,    10,   -14
   };
 
+  /* YYDEFACT[S] -- default rule to reduce with in state S when YYTABLE
+     doesn't specify something else to do.  Zero means the default is an
+     error.  */
   const unsigned char
   HTTP_Parser::yydefact_[] =
   {
-       0,     0,     0,     5,     0,     0,     0,     8,     3,    18,
+         0,     0,     0,     5,     0,     0,     0,     8,     3,    18,
        0,    13,     4,    18,     1,     0,     9,    10,     7,    17,
        6,    14,    15,    12,    11,    19,    26,    21,     2,    16,
       26,    23,    20,    18,    25,     0,    22
   };
 
+  /* YYPGOTO[NTERM-NUM].  */
   const signed char
   HTTP_Parser::yypgoto_[] =
   {
-     -14,   -14,   -14,   -14,   -14,   -14,   -14,   -14,   -14,   -13,
+       -14,   -14,   -14,   -14,   -14,   -14,   -14,   -14,   -14,   -13,
      -14,   -14,     0
   };
 
+  /* YYDEFGOTO[NTERM-NUM].  */
   const signed char
   HTTP_Parser::yydefgoto_[] =
   {
-      -1,     4,     5,     8,     9,    18,    12,    13,    23,    20,
+        -1,     4,     5,     8,     9,    18,    12,    13,    23,    20,
       28,    32,    33
   };
 
+  /* YYTABLE[YYPACT[STATE-NUM]].  What to do in state STATE-NUM.  If
+     positive, shift that token.  If negative, reduce the rule which
+     number is the opposite.  If zero, do what YYDEFACT says.  */
+  const signed char HTTP_Parser::yytable_ninf_ = -25;
   const signed char
   HTTP_Parser::yytable_[] =
   {
-      24,   -24,     1,    16,     2,    10,     6,    14,    19,    11,
+        24,   -24,     1,    16,     2,    10,     6,    14,    19,    11,
       17,     3,    30,    31,     7,    21,    29,    36,    22,    15,
       35,    25,    26,    27,    29,    30,     0,     0,     0,     0,
       34
   };
 
+  /* YYCHECK.  */
   const signed char
   HTTP_Parser::yycheck_[] =
   {
-      13,     0,     3,     5,     5,     8,     4,     0,    12,    12,
+        13,     0,     3,     5,     5,     8,     4,     0,    12,    12,
       12,    12,    11,    12,    12,     9,     6,     7,    12,     7,
       33,    10,    11,    12,     6,    11,    -1,    -1,    -1,    -1,
       30
   };
 
+  /* STOS_[STATE-NUM] -- The (internal number of the) accessing
+     symbol of state STATE-NUM.  */
   const unsigned char
   HTTP_Parser::yystos_[] =
   {
-       0,     3,     5,    12,    14,    15,     4,    12,    16,    17,
+         0,     3,     5,    12,    14,    15,     4,    12,    16,    17,
        8,    12,    19,    20,     0,     7,     5,    12,    18,    12,
       22,     9,    12,    21,    22,    10,    11,    12,    23,     6,
       11,    12,    24,    25,    25,    22,     7
   };
 
+#if YYDEBUG
+  /* TOKEN_NUMBER_[YYLEX-NUM] -- Internal symbol number corresponding
+     to YYLEX-NUM.  */
+  const unsigned short int
+  HTTP_Parser::yytoken_number_[] =
+  {
+         0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
+     265,   266,   267
+  };
+#endif
+
+  /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
   const unsigned char
   HTTP_Parser::yyr1_[] =
   {
-       0,    13,    14,    15,    15,    15,    16,    17,    17,    18,
+         0,    13,    14,    15,    15,    15,    16,    17,    17,    18,
       18,    19,    20,    20,    21,    21,    22,    22,    22,    23,
       23,    23,    24,    24,    24,    25,    25
   };
 
+  /* YYR2[YYN] -- Number of symbols composing right hand side of rule YYN.  */
   const unsigned char
   HTTP_Parser::yyr2_[] =
   {
-       0,     2,     3,     2,     2,     1,     2,     2,     1,     1,
+         0,     2,     3,     2,     2,     1,     2,     2,     1,     1,
        1,     2,     2,     1,     1,     1,     2,     1,     0,     1,
        2,     1,     3,     1,     0,     2,     0
   };
 
-
-
-  // YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
-  // First, the terminals, then, starting at \a yyntokens_, nonterminals.
+#if YYDEBUG || YYERROR_VERBOSE || YYTOKEN_TABLE
+  /* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
+     First, the terminals, then, starting at \a yyntokens_, nonterminals.  */
   const char*
   const HTTP_Parser::yytname_[] =
   {
-  "\"end\"", "error", "$undefined", "\"method\"", "\"uri\"",
+    "\"end\"", "error", "$undefined", "\"method\"", "\"uri\"",
   "\"version\"", "\"header\"", "\"delimiter\"", "\"status\"", "\"reason\"",
   "\"body\"", "\"chunk\"", "\"end_of_fragment\"", "$accept", "message",
   "head", "head_rest1", "request_line_rest1", "request_line_rest2",
   "head_rest2", "status_line_rest1", "status_line_rest2", "headers",
-  "body", "chunked_body", "chunks", YY_NULLPTR
+  "body", "chunked_body", "chunks", 0
   };
+#endif
 
 #if YYDEBUG
+  /* YYRHS -- A `-1'-separated list of the rules' RHS.  */
+  const HTTP_Parser::rhs_number_type
+  HTTP_Parser::yyrhs_[] =
+  {
+        14,     0,    -1,    15,     7,    23,    -1,     3,    16,    -1,
+       5,    19,    -1,    12,    -1,    17,    22,    -1,     4,    18,
+      -1,    12,    -1,     5,    -1,    12,    -1,    20,    22,    -1,
+       8,    21,    -1,    12,    -1,     9,    -1,    12,    -1,    22,
+       6,    -1,    12,    -1,    -1,    10,    -1,    11,    24,    -1,
+      12,    -1,    25,    22,     7,    -1,    12,    -1,    -1,    11,
+      25,    -1,    -1
+  };
+
+  /* YYPRHS[YYN] -- Index of the first RHS symbol of rule number YYN in
+     YYRHS.  */
+  const unsigned char
+  HTTP_Parser::yyprhs_[] =
+  {
+         0,     0,     3,     7,    10,    13,    15,    18,    21,    23,
+      25,    27,    30,    33,    35,    37,    39,    42,    44,    45,
+      47,    50,    52,    56,    58,    59,    62
+  };
+
+  /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
   const unsigned short int
   HTTP_Parser::yyrline_[] =
   {
-       0,   215,   215,   216,   225,   255,   257,   258,   266,   268,
-     277,   279,   280,   293,   295,   303,   305,   355,   359,   360,
-     382,   383,   386,   398,   403,   405,   407
+         0,   217,   217,   218,   227,   257,   259,   260,   268,   270,
+     279,   281,   282,   295,   297,   305,   307,   357,   360,   362,
+     384,   385,   388,   400,   403,   407,   408
   };
 
   // Print the state stack on the debug stream.
@@ -1648,11 +1331,9 @@ namespace yy {
   HTTP_Parser::yystack_print_ ()
   {
     *yycdebug_ << "Stack now";
-    for (stack_type::const_iterator
-           i = yystack_.begin (),
-           i_end = yystack_.end ();
-         i != i_end; ++i)
-      *yycdebug_ << ' ' << i->state;
+    for (state_stack_type::const_iterator i = yystate_stack_.begin ();
+	 i != yystate_stack_.end (); ++i)
+      *yycdebug_ << ' ' << *i;
     *yycdebug_ << std::endl;
   }
 
@@ -1662,18 +1343,19 @@ namespace yy {
   {
     unsigned int yylno = yyrline_[yyrule];
     int yynrhs = yyr2_[yyrule];
-    // Print the symbols being reduced, and their result.
+    /* Print the symbols being reduced, and their result.  */
     *yycdebug_ << "Reducing stack by rule " << yyrule - 1
-               << " (line " << yylno << "):" << std::endl;
-    // The symbols being reduced.
+	       << " (line " << yylno << "):" << std::endl;
+    /* The symbols being reduced.  */
     for (int yyi = 0; yyi < yynrhs; yyi++)
       YY_SYMBOL_PRINT ("   $" << yyi + 1 << " =",
-                       yystack_[(yynrhs) - (yyi + 1)]);
+		       yyrhs_[yyprhs_[yyrule] + yyi],
+		       &(yysemantic_stack_[(yynrhs) - (yyi + 1)]),
+		       &(yylocation_stack_[(yynrhs) - (yyi + 1)]));
   }
 #endif // YYDEBUG
 
-  // Symbol number corresponding to token number t.
-  inline
+  /* YYTRANSLATE(YYLEX) -- Bison symbol number corresponding to YYLEX.  */
   HTTP_Parser::token_number_type
   HTTP_Parser::yytranslate_ (int t)
   {
@@ -1681,7 +1363,7 @@ namespace yy {
     const token_number_type
     translate_table[] =
     {
-     0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+           0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -1709,19 +1391,27 @@ namespace yy {
        2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12
     };
-    const unsigned int user_token_number_max_ = 267;
-    const token_number_type undef_token_ = 2;
-
-    if (static_cast<int>(t) <= yyeof_)
-      return yyeof_;
-    else if (static_cast<unsigned int> (t) <= user_token_number_max_)
+    if ((unsigned int) t <= yyuser_token_number_max_)
       return translate_table[t];
     else
-      return undef_token_;
+      return yyundef_token_;
   }
+
+  const int HTTP_Parser::yyeof_ = 0;
+  const int HTTP_Parser::yylast_ = 30;
+  const int HTTP_Parser::yynnts_ = 13;
+  const int HTTP_Parser::yyempty_ = -2;
+  const int HTTP_Parser::yyfinal_ = 14;
+  const int HTTP_Parser::yyterror_ = 1;
+  const int HTTP_Parser::yyerrcode_ = 256;
+  const int HTTP_Parser::yyntokens_ = 13;
+
+  const unsigned int HTTP_Parser::yyuser_token_number_max_ = 267;
+  const HTTP_Parser::token_number_type HTTP_Parser::yyundef_token_ = 2;
 
 
 } // yy
+
 
 
 
@@ -1821,3 +1511,4 @@ yyprint (FILE* file_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::fprintf(): \"%m\", returning\n")));
 }*/
+

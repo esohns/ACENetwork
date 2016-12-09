@@ -27,7 +27,7 @@
 #include "net_macros.h"
 
 Net_TransportLayer_IP_Broadcast::Net_TransportLayer_IP_Broadcast ()
- : inherited (NET_TRANSPORTLAYER_IP_BROADCAST)
+ : inherited (NET_TRANSPORTLAYER_IP_CAST)
 // , inherited2 ()
 // , myAddress ()
 {
@@ -55,7 +55,7 @@ Net_TransportLayer_IP_Broadcast::~Net_TransportLayer_IP_Broadcast ()
 /////////////////////////////////////////
 
 Net_TransportLayer_IP_Multicast::Net_TransportLayer_IP_Multicast ()
- : inherited (NET_TRANSPORTLAYER_IP_MULTICAST)
+ : inherited (NET_TRANSPORTLAYER_IP_CAST)
 // , inherited2 (ACE_SOCK_Dgram_Mcast::DEFOPTS)
 // , joined_ (false)
 // , address_ ()

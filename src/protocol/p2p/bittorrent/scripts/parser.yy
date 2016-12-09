@@ -1,5 +1,5 @@
-/*%require                          "2.4.1"*/
-%require                          "3.0"
+%require                          "2.4.1"
+/*%require                          "3.0"*/
 /* %file-prefix                      "" */
 %language                         "c++"
 /*%language                         "C"*/
@@ -13,11 +13,13 @@
 %defines                          "bittorrent_parser.h"
 %output                           "bittorrent_parser.cpp"
 
-/*%name-prefix                      "bittorrent_"*/
+%define "parser_class_name"       "BitTorrent_Parser"
+/* *NOTE*: this is the namespace AND the (f)lex prefix */
+/*%name-prefix                      "yy"*/
 /*%pure-parser*/
 /*%token-table*/
-/*%error-verbose*/
-/*%debug*/
+%error-verbose
+%debug
 
 %code top {
 #include "stdafx.h"
@@ -28,8 +30,7 @@
 
 /* %define location_type */
 /* %define api.location.type         {} */
-/* %define namespace                 {yy} */
-%define api.namespace             {yy}
+/* %define api.namespace             {yy} */
 /* %define api.prefix                {yy} */
 /* %define api.pure                  true */
 /* *TODO*: implement a push parser */
@@ -43,15 +44,15 @@
 /* %define lr.keep-unreachable-state false */
 /* %define lr.type                   lalr */
 
-%define parse.assert              {true}
-%define parse.error               verbose
+/* %define parse.assert              {true} */
+/* %define parse.error               verbose */
 /* %define parse.lac                 {full} */
 /* %define parse.lac                 {none} */
-%define parser_class_name         {BitTorrent_Parser}
+/* %define parser_class_name         {BitTorrent_Parser} */
 /* *NOTE*: enabling debugging functionality implies inclusion of <iostream> (see
            below). This interferes with ACE (version 6.2.3), when compiled with
            support for traditional iostreams */
-%define parse.trace               {true}
+/* %define parse.trace               {true} */
 
 %code requires {
 // *NOTE*: add double include protection, required for GNU Bison 2.4.2
@@ -62,7 +63,7 @@
 /*#include <cstdio>
 #include <string>*/
 
-/*#include "bittorrent_exports.h"*/
+#include "bittorrent_exports.h"
 #include "bittorrent_iparser.h"
 /*#include "bittorrent_scanner.h"*/
 
@@ -92,7 +93,8 @@ typedef union YYSTYPE
 /*#undef YYSTYPE*/
 //union YYSTYPE;
 
-/*typedef void* yyscan_t;*/
+typedef void* yyscan_t;
+#define YY_TYPEDEF_YY_SCANNER_T
 
 // *NOTE*: on current versions of bison, this needs to be inserted into the
 //         header manually; apparently, there is no easy way to add the export
@@ -104,23 +106,22 @@ typedef union YYSTYPE
 
 // calling conventions / parameter passing
 %parse-param              { BitTorrent_IParser_t* parser }
-%parse-param              { BitTorrent_Scanner* scanner }
+%parse-param              { yyscan_t scanner }
 // *NOTE*: cannot use %initial-action, as it is scoped
 // *TODO*: find a better way to do this
 /*%parse-param              { std::string* dictionary_key }*/
-/*%parse-param              { yyscan_t yyscanner }*/
+/*%parse-param              { yyscan_t scanner }*/
 /*%lex-param                { YYSTYPE* yylval }
 %lex-param                { YYLTYPE* yylloc } */
 %lex-param                { BitTorrent_IParser_t* parser }
-/*%lex-param                { BitTorrent_MetaInfoScanner* scanner }*/
-/*%lex-param                { yyscan_t yyscanner }*/
+%lex-param                { yyscan_t scanner }
 /* %param                    { BitTorrent_MetaInfo_IParser* parser }
-%param                    { yyscan_t yyscanner } */
+%param                    { yyscan_t scanner } */
 
 %initial-action
 {
   // initialize the location
-  @$.initialize (YY_NULLPTR, 1, 1);
+  @$.initialize (NULL);
 }
 
 // symbols
@@ -165,8 +166,8 @@ typedef union YYSTYPE
 #include "bittorrent_tools.h"
 
 // *TODO*: this shouldn't be necessary
-/*#define yylex bencoding_lex*/
-#define yylex scanner->yylex
+/* #define yylex scanner->yylex */
+#define yylex BitTorrent_Scanner_lex
 
 //#define YYPRINT(file, type, value) yyprint (file, type, value)
 }
@@ -205,9 +206,9 @@ void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
 /*%printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), $$->version.c_str ()); } <handshake>
 %printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), BitTorrent_Tools::Type2String ($$->type).c_str ()); } <record>
 %printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), $$); } <size>*/
-%printer    { yyoutput << $$->version; } <handshake>
-%printer    { yyoutput << BitTorrent_Tools::Type2String ($$->type); } <record>
-%printer    { yyoutput << $$; } <size>
+%printer    { debug_stream () << $$->version; } <handshake>
+%printer    { debug_stream () << BitTorrent_Tools::Type2String ($$->type); } <record>
+%printer    { debug_stream () << $$; } <size>
 /*%destructor { delete $$; $$ = NULL; } <handshake>*/
 /*%destructor { delete $$; $$ = NULL; } <record>*/
 %destructor { $$ = NULL; } <handshake>
@@ -229,7 +230,8 @@ session:  "handshake" messages { $$ = 67 + $2; // 19 + 8 + 20 + 20
                                                ACE_TEXT ("caught exception in BitTorrent_IParser::handshake(), continuing\n")));
                                  } };
 messages: messages message     { $$ = $1 + $2; };
-          | %empty             { $$ = 0; };
+          |                    { $$ = 0; };
+/*          | %empty             { $$ = 0; }; */
 message:  "bitfield"           { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
                                  struct BitTorrent_Record* record_p =
@@ -358,15 +360,15 @@ yy::BitTorrent_Parser::error (const location_type& location_in,
   }
 }
 
-/*void
+void
 yy::BitTorrent_Parser::set (yyscan_t context_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Parser::set"));
 
-  yyscanner = context_in;
+  scanner = context_in;
 }
 
-void
+/*void
 yysetdebug (int debug_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::yysetdebug"));
