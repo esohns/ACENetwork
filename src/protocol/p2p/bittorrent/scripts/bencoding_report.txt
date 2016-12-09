@@ -1,0 +1,16 @@
+%option yylineno entails a performance penalty ONLY on rules that can match newline characters
+flex version 2.6.3 usage statistics:
+  scanner options: -+bdppsvBL8 -Cafr -obittorrent_bencoding_scanner.cpp -PBitTorrent_Bencoding_Scanner_
+  100/2000 NFA states
+  34/1000 DFA states (136 words)
+  20 rules
+  No backing up
+  6/40 start conditions
+  80 epsilon states, 36 double epsilon states
+  8/100 character classes needed 567/750 words of storage, 0 reused
+  3116 state/nextstate pairs created
+  50/3066 unique/duplicate transitions
+  8704 table entries
+  0 (2 saved) hash collisions, 29 DFAs equal
+  1 sets of reallocations needed
+  8704 total table entries needed

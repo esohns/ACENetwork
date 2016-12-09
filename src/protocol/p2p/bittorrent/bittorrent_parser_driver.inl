@@ -227,23 +227,23 @@ BitTorrent_ParserDriver_T<MessageType,
     result_p =
       BitTorrent_Scanner__scan_buffer (buffer_in,
                                        size_in + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE,
-                                       state_);
+                                       state_in);
   else
     result_p = BitTorrent_Scanner__scan_bytes (buffer_in,
                                                size_in,
-                                               state_);
+                                               state_in);
   if (!result_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to yy_scan_buffer/bytes(0x%@, %d), aborting\n"),
-                fragment_->rd_ptr (),
-                fragment_->length ()));
+                buffer_in,
+                size_in));
     return NULL;
   } // end IF
 
   // *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
   BitTorrent_Scanner__switch_to_buffer (result_p,
-                                        state_);
+                                        state_in);
 
   return result_p;
 }

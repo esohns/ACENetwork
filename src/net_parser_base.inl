@@ -959,9 +959,9 @@ Net_ParserBase_T<ParserType,
 
   // create/initialize a new buffer state
   try {
-    buffer_ = create (state_,
-                      fragment_->rd_ptr (),
-                      fragment_->length ());
+    buffer_ = this->create (state_,
+                            fragment_->rd_ptr (),
+                            fragment_->length ());
   }
   catch (...) {
     ACE_DEBUG ((LM_ERROR,

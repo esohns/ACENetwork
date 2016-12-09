@@ -99,7 +99,7 @@ class BitTorrent_ParserDriver_T
                                           char*,    // buffer handle
                                           size_t);  // buffer size
   inline virtual void destroy (yyscan_t state_in,
-                               struct yy_buffer_state*& buffer_inout) { BitTorrent_Scanner__delete_buffer (buffer_inout, state_); buffer_inout = NULL; };
+                               struct yy_buffer_state*& buffer_inout) { BitTorrent_Scanner__delete_buffer (buffer_inout, state_in); buffer_inout = NULL; };
 };
 
 // include template definition

@@ -23,12 +23,12 @@ SCANNER_L=scanner.l
 [ ! -f ${SCRIPTS_DIRECTORY}/${SCANNER_L} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIRECTORY}/${SCANNER_L}), aborting" && exit 1
 
 # generate a scanner for use by the bittorrent metainfo file parser
-#flex --noline ${SCRIPTS_DIRECTORY}/${BENCODING_LL} 2>&1 | tee ${SCRIPTS_DIRECTORY}/bencoding_report.txt
-#[ $? -ne 0 ] && echo "ERROR: failed to flex \"${BENCODING_LL}\", aborting" && exit 1
+flex --noline ${SCRIPTS_DIRECTORY}/${BENCODING_LL} 2>&1 | tee ${SCRIPTS_DIRECTORY}/bencoding_report.txt
+[ $? -ne 0 ] && echo "ERROR: failed to flex \"${BENCODING_LL}\", aborting" && exit 1
 
 # list generated files
 #FILES="bittorrent_bencoding_scanner.cpp bittorrent_bencoding_scanner.h"
-#FILES="bittorrent_bencoding_scanner.cpp"
+FILES="bittorrent_bencoding_scanner.cpp"
 
 # -------------------------------------------------------------------
 

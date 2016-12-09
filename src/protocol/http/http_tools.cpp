@@ -408,7 +408,7 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   unsigned short port = HTTP_DEFAULT_SERVER_PORT;
   std::istringstream converter;
   //std::string dotted_decimal_string;
-  int result = -1;
+//  int result = -1;
 
   // step1: split protocol/hostname/port
   std::string regex_string =
