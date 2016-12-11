@@ -56,7 +56,7 @@ struct BitTorrent_AllocatorConfiguration
   };
 };
 
-typedef Stream_DataBase_T<struct BitTorrent_Record> BitTorrent_MessageData_t;
+typedef Stream_DataBase_T<struct BitTorrent_PeerMessageData> BitTorrent_PeerMessageData_t;
 
 template <typename StreamStateType,
           typename ConfigurationType,
@@ -251,7 +251,7 @@ struct BitTorrent_PeerSessionData
    , connectionState (NULL)
 //   , currentStatistic ()
    , filename ()
-   , handshake (NULL)
+   , handShake (NULL)
   {};
   inline BitTorrent_PeerSessionData& operator+= (const BitTorrent_PeerSessionData& rhs_in)
   {
@@ -268,7 +268,7 @@ struct BitTorrent_PeerSessionData
   struct BitTorrent_ConnectionState* connectionState;
 //  BitTorrent_RuntimeStatistic_t      currentStatistic;
   std::string                        filename; // .torrent file
-  struct BitTorrent_PeerHandshake*   handshake;
+  struct BitTorrent_PeerHandShake*   handShake;
 };
 
 struct BitTorrent_TrackerSessionData

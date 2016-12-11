@@ -44,6 +44,9 @@
 #define BITTORRENT_DEFAULT_PORT                           6881
 
 // protocol
+#define BITTORRENT_PRT_PEER_ID_LENGTH                     20 // bytes
+#define BITTORRENT_PRT_INFO_HASH_SIZE                     20 // bytes
+
 #define BITTORRENT_METAINFO_ANNOUNCE_KEY                  "announce"
 #define BITTORRENT_METAINFO_INFO_KEY                      "info"
 #define BITTORRENT_METAINFO_INFO_LENGTH_KEY               "length"
@@ -51,7 +54,6 @@
 
 #define BITTORRENT_TRACKER_REQUEST_INFO_HASH_HEADER       "info_hash"
 #define BITTORRENT_TRACKER_REQUEST_PEER_ID_HEADER         "peer_id"
-#define BITTORRENT_TRACKER_REQUEST_PEER_ID_LENGTH         20 // bytes
 #define BITTORRENT_TRACKER_REQUEST_PEER_ID_CLIENT_ID      "LN"
 #define BITTORRENT_TRACKER_REQUEST_PORT_HEADER            "port"
 #define BITTORRENT_TRACKER_REQUEST_UPLOADED_HEADER        "uploaded"
@@ -70,8 +72,16 @@
 
 #define BITTORRENT_DEFAULT_TRACKER_REQUEST_NUMWANT_PEERS  50
 
+// response
 #define BITTORRENT_TRACKER_RESPONSE_INTERVAL_HEADER       "interval"
 #define BITTORRENT_TRACKER_RESPONSE_PEERS_HEADER          "peers"
+// scrape
+#define BITTORRENT_TRACKER_SCRAPE_URI_PREFIX              "scrape"
+#define BITTORRENT_TRACKER_SCRAPE_RESPONSE_FILES_HEADER   "files"
+
+#define BITTORRENT_PEER_HANDSHAKE_PSTR_STRING             "BitTorrent protocol"
+#define BITTORRENT_PEER_HANDSHAKE_RESERVED_SIZE           8 // bytes
+
 
 // session
 #define BITTORRENT_SESSION_LOG_FILENAME_PREFIX            "bittorrent_session"

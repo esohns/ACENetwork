@@ -83,8 +83,6 @@ class DHCP_Module_Parser_T
 //  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
 
   // driver
-  bool              debugScanner_;
-  bool              debugParser_;
   DHCP_ParserDriver driver_;
   bool              isDriverInitialized_;
 
@@ -186,8 +184,6 @@ class DHCP_Module_ParserH_T
   //bool putStatisticMessage (const StatisticContainerType&) const;
 
   // driver
-  bool               debugScanner_;
-  bool               debugParser_;
   DHCP_ParserDriver  driver_;
   bool               isDriverInitialized_;
 };

@@ -22,6 +22,7 @@
 
 #include "common_timer_manager_common.h"
 
+#include "net_defines.h"
 #include "net_macros.h"
 
 #include "dhcp_common.h"
@@ -40,10 +41,8 @@ DHCP_Module_Parser_T<ACE_SYNCH_USE,
                      DataMessageType,
                      SessionMessageType>::DHCP_Module_Parser_T ()
  : inherited ()
- , debugScanner_ (DHCP_DEFAULT_LEX_TRACE) // trace scanning ?
- , debugParser_ (DHCP_DEFAULT_YACC_TRACE) // trace parsing ?
- , driver_ (DHCP_DEFAULT_LEX_TRACE,  // trace scanning ?
-            DHCP_DEFAULT_YACC_TRACE) // trace parsing ?
+ , driver_ (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
+            NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
  , isDriverInitialized_ (false)
  , initialized_ (false)
 {
@@ -84,22 +83,29 @@ DHCP_Module_Parser_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Parser_T::initialize"));
 
+  // sanity check(s)
+  ACE_ASSERT (configuration_in.parserConfiguration);
+
   if (initialized_)
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("re-initializing...\n")));
 
-    debugScanner_ = DHCP_DEFAULT_LEX_TRACE;
-    debugParser_ = DHCP_DEFAULT_YACC_TRACE;
     isDriverInitialized_ = false;
 
     initialized_ = false;
   } // end IF
 
-  // *NOTE*: need to clean up timer beyond this point !
-
-  debugScanner_ = configuration_in.traceScanning;
-  debugParser_ = configuration_in.traceParsing;
+  // initialize driver
+  isDriverInitialized_ =
+      driver_.initialize (*configuration_in.parserConfiguration);
+  if (!isDriverInitialized_)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to initialize parser driver, aborting\n"),
+                inherited::mod_->name ()));
+    return false;
+  } // end IF
 
   initialized_ = inherited::initialize (configuration_in);
 
@@ -149,18 +155,11 @@ DHCP_Module_Parser_T<ACE_SYNCH_USE,
 //  record_p = data_r.DHCPRecord;
   record_p = &data_r;
 
-  // initialize driver ?
-  if (!isDriverInitialized_)
-  {
-    driver_.initialize (*record_p,
-                        debugScanner_,
-                        debugParser_,
-                        NULL,
-                        DHCP_DEFAULT_USE_YY_SCAN_BUFFER);
-    isDriverInitialized_ = true;
-  } // end IF
+  // set target record
+  driver_.record_ = record_p;
 
   // OK: parse this message
+  ACE_ASSERT (isDriverInitialized_);
 
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
@@ -241,10 +240,8 @@ DHCP_Module_ParserH_T<ACE_SYNCH_USE,
  : inherited (lock_in,
               autoStart_in,
               generateSessionMessages_in)
- , debugScanner_ (DHCP_DEFAULT_LEX_TRACE) // trace scanning ?
- , debugParser_ (DHCP_DEFAULT_YACC_TRACE) // trace parsing ?
- , driver_ (DHCP_DEFAULT_LEX_TRACE,  // trace scanning ?
-            DHCP_DEFAULT_YACC_TRACE) // trace parsing ?
+ , driver_ (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
+            NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
  , isDriverInitialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::DHCP_Module_ParserH_T"));
@@ -310,20 +307,26 @@ DHCP_Module_ParserH_T<ACE_SYNCH_USE,
 
   bool result = false;
 
+  // sanity check(s)
+  ACE_ASSERT (configuration_in.parserConfiguration);
+
   if (inherited::initialized_)
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("re-initializing...\n")));
 
-    debugScanner_ = DHCP_DEFAULT_LEX_TRACE;
-    debugParser_ = DHCP_DEFAULT_YACC_TRACE;
     isDriverInitialized_ = false;
   } // end IF
 
-  debugScanner_ = configuration_in.traceScanning;
-  debugParser_ = configuration_in.traceParsing;
+  isDriverInitialized_ =
+      driver_.initialize (configuration_in.parserConfiguration);
+  if (!isDriverInitialized_)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize parser driver: \"%m\", aborting\n")));
+    return false;
+  } // end IF
 
-  // OK: all's well...
   result = inherited::initialize (configuration_in);
   if (!result)
   {
@@ -390,21 +393,16 @@ DHCP_Module_ParserH_T<ACE_SYNCH_USE,
   } // end IF
   record_p = data_r.DHCPRecord;
 
-  // initialize driver ?
-  if (!isDriverInitialized_)
-  {
-    driver_.initialize (*record_p,
-                        debugScanner_,
-                        debugParser_);
-    isDriverInitialized_ = true;
-  } // end IF
+  // set target record
+  driver_.record_ = record_p;
 
-    // OK: parse this message
+  // OK: parse this message
+  ACE_ASSERT (isDriverInitialized_);
 
-    //  ACE_DEBUG ((LM_DEBUG,
-    //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
-    //              message_p->id (),
-    //              message_p->length ()));
+  //  ACE_DEBUG ((LM_DEBUG,
+  //              ACE_TEXT ("parsing message (ID:%u,%u byte(s))...\n"),
+  //              message_p->id (),
+  //              message_p->length ()));
 
   if (!driver_.parse (message_inout))
   {

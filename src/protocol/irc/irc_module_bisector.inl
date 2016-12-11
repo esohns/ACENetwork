@@ -145,6 +145,7 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
   bool result = false;
 
   // sanity check(s)
+  ACE_ASSERT (configuration_in.parserConfiguration);
   ACE_ASSERT (configuration_in.streamConfiguration);
 
   if (inherited::isInitialized_)
@@ -181,7 +182,7 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
 
   //  return false;
   //} // end IF
-  IRC_Bisector_set_debug ((configuration_in.traceScanning ? 1 : 0),
+  IRC_Bisector_set_debug ((configuration_in.parserConfiguration->debugScanner ? 1 : 0),
                           context_);
 
   result = inherited::initialize (configuration_in);

@@ -28,6 +28,10 @@
 
 #include "location.hh"
 
+#include "common.h"
+
+#include "net_defines.h"
+
 #include "dhcp_defines.h"
 #include "dhcp_exports.h"
 //#include "dhcp_scanner.h"
@@ -50,11 +54,7 @@ class NET_PROTOCOL_DHCP_Export DHCP_ParserDriver
   virtual ~DHCP_ParserDriver ();
 
   // target data, needs to be set before invoking parse() !
-  void initialize (DHCP_Record&,                            // target data
-                   bool = DHCP_DEFAULT_LEX_TRACE,           // debug scanner ?
-                   bool = DHCP_DEFAULT_YACC_TRACE,          // debug parser ?
-                   ACE_Message_Queue_Base* = NULL,          // data buffer queue (yywrap)
-                   bool = DHCP_DEFAULT_USE_YY_SCAN_BUFFER); // yy_scan_buffer() ? : yy_scan_bytes()
+  bool initialize (const struct Common_ParserConfiguration&);
 
   bool parse (ACE_Message_Block*); // data
 
@@ -69,11 +69,11 @@ class NET_PROTOCOL_DHCP_Export DHCP_ParserDriver
   bool getDebugScanner () const;
 
   // *NOTE*: current (unscanned) data fragment
-  ACE_Message_Block*      fragment_;
-  unsigned int            offset_; // parsed entity bytes
+  ACE_Message_Block*                 fragment_;
+  unsigned int                       offset_; // parsed entity bytes
 
   // target
-  DHCP_Record*            record_;
+  DHCP_Record*                       record_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (DHCP_ParserDriver ())
@@ -87,19 +87,21 @@ class NET_PROTOCOL_DHCP_Export DHCP_ParserDriver
   bool scan_begin ();
   void scan_end ();
 
+  struct Common_ParserConfiguration* configuration_;
+
   // context
-  bool                    trace_;
+  bool                               trace_;
 
   //// parser
   //yy::DHCP_Parser    parser_;
 
   // scanner
-  yyscan_t                scannerState_;
-  YY_BUFFER_STATE         bufferState_;
-  ACE_Message_Queue_Base* messageQueue_;
-  bool                    useYYScanBuffer_;
+  yyscan_t                           scannerState_;
+  YY_BUFFER_STATE                    bufferState_;
+  ACE_Message_Queue_Base*            messageQueue_;
+  bool                               useYYScanBuffer_;
 
-  bool                    initialized_;
+  bool                               initialized_;
 };
 
 #endif

@@ -109,19 +109,15 @@ struct HTTP_ModuleHandlerConfiguration
   inline HTTP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    //////////////////////////////////////
-   , printFinalReport (true)
    , printProgressDot (false)
    , pushStatisticMessages (true)
    , protocolConfiguration (NULL)
    , streamConfiguration (NULL)
   {
     crunchMessages = HTTP_DEFAULT_CRUNCH_MESSAGES; // http parser module
-
-    traceParsing = NET_PROTOCOL_DEFAULT_YACC_TRACE; // http parser module
-    traceScanning = NET_PROTOCOL_DEFAULT_LEX_TRACE; // http parser module
+    printFinalReport = true;
   };
 
-  bool                        printFinalReport;
   bool                        printProgressDot; // file writer module
   bool                        pushStatisticMessages;
 

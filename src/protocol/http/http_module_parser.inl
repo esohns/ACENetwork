@@ -24,6 +24,7 @@
 
 #include "stream_dec_tools.h"
 
+#include "net_defines.h"
 #include "net_macros.h"
 
 #include "http_common.h"
@@ -43,12 +44,11 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      DataMessageType,
                      SessionMessageType>::HTTP_Module_Parser_T ()
  : inherited ()
- , inherited2 (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
-               NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
+ , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME), // scanner tables file (if any)
+               NET_PROTOCOL_DEFAULT_LEX_TRACE,                            // trace scanning ?
+               NET_PROTOCOL_DEFAULT_YACC_TRACE)                           // trace parsing ?
  , headFragment_ (NULL)
  , crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
- , debugScanner_ (NET_PROTOCOL_DEFAULT_LEX_TRACE) // trace scanning ?
- , debugParser_ (NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
  //, lock_ ()
 //, condtion_ (lock_)
 {
@@ -94,6 +94,9 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   int result = -1;
 
+  // sanity check(s)
+  ACE_ASSERT (configuration_in.parserConfiguration);
+
   if (inherited::isInitialized_)
   {
     ACE_DEBUG ((LM_DEBUG,
@@ -107,8 +110,6 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
     crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
 
-    debugScanner_ = NET_PROTOCOL_DEFAULT_LEX_TRACE;
-    debugParser_ = NET_PROTOCOL_DEFAULT_YACC_TRACE;
     if (headFragment_)
     {
       headFragment_->release ();
@@ -118,14 +119,15 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   crunch_ = configuration_in.crunchMessages;
 
-  debugScanner_ = configuration_in.traceScanning;
-  debugParser_ = configuration_in.traceParsing;
-
-  inherited2::initialize (debugScanner_,
-                          debugParser_,
-                          inherited::msg_queue_,
-//                          true,
-                          true);
+  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+      inherited::msg_queue_;
+  if (!inherited2::initialize (*configuration_in.parserConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to HTTP_ParserDriver_T::initialize(), aborting\n"),
+                inherited::mod_->name ()));
+    return false;
+  } // end IF
 
   return inherited::initialize (configuration_in,
                                 allocator_in);
@@ -461,12 +463,11 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
  : inherited (NULL,  // lock handle
               false, // auto-start ?
               true)  // generate sesssion messages ?
- , inherited2 (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
-               NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
+ , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME), // scanner tables file (if any)
+               NET_PROTOCOL_DEFAULT_LEX_TRACE,                            // trace scanning ?
+               NET_PROTOCOL_DEFAULT_YACC_TRACE)                           // trace parsing ?
  , headFragment_ (NULL)
  , crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
- , debugScanner_ (NET_PROTOCOL_DEFAULT_LEX_TRACE) // trace scanning ?
- , debugParser_ (NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::HTTP_Module_ParserH_T"));
 
@@ -533,7 +534,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::initialize"));
 
   // sanity check(s)
-  ACE_ASSERT (configuration_in.streamConfiguration);
+  ACE_ASSERT (configuration_in.parserConfiguration);
 
   if (inherited::isInitialized_)
   {
@@ -542,8 +543,6 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
     crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
 
-    debugScanner_ = NET_PROTOCOL_DEFAULT_LEX_TRACE;
-    debugParser_ = NET_PROTOCOL_DEFAULT_YACC_TRACE;
     if (headFragment_)
     {
       headFragment_->release ();
@@ -554,15 +553,15 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   } // end IF
 
   crunch_ = configuration_in.crunchMessages;
-
-  debugScanner_ = configuration_in.traceScanning;
-  debugParser_ = configuration_in.traceParsing;
-
-  inherited2::initialize (debugScanner_,
-                          debugParser_,
-                          inherited::msg_queue_,
-//                          true,
-                          true);
+  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+      inherited::msg_queue_;
+  if (!inherited2::initialize (*configuration_in.parserConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to initialize parser driver: \"%m\", aborting\n"),
+                inherited::mod_->name ()));
+    return false;
+  } // end IF
 
   return inherited::initialize (configuration_in,
                                 allocator_in);

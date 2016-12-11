@@ -25,6 +25,9 @@
 
 #include <ace/Global_Macros.h>
 
+#include "common.h"
+#include "common_iinitialize.h"
+
 #include "stream_common.h"
 #include "stream_isessionnotify.h"
 
@@ -102,6 +105,7 @@ class BitTorrent_TrackerStreamHandler_T
                                                                   UserDataType>,
                                       BitTorrent_SessionMessage_T<SessionDataType,
                                                                   UserDataType> >
+ , public Common_IInitialize_T<struct Common_ParserConfiguration>
 {
  public:
   BitTorrent_TrackerStreamHandler_T (SessionInterfaceType*, // session handle
@@ -122,6 +126,9 @@ class BitTorrent_TrackerStreamHandler_T
                        const BitTorrent_SessionMessage_T<SessionDataType,
                                                          UserDataType>&); // session message
 
+  // implement Common_IInitialize_T
+  inline virtual bool initialize (const struct Common_ParserConfiguration& configuration_in) { configuration_ = &const_cast<struct Common_ParserConfiguration&> (configuration_in); return true; };
+
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStreamHandler_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStreamHandler_T (const BitTorrent_TrackerStreamHandler_T&))
@@ -136,9 +143,10 @@ class BitTorrent_TrackerStreamHandler_T
                                       UserDataType> SESSION_MESSAGE_T;
   typedef BitTorrent_Bencoding_ParserDriver_T<SESSION_MESSAGE_T> PARSER_T;
 
-  CBDataType*           CBData_;
-  SessionInterfaceType* session_;
-  SESSION_DATA_T        sessionData_;
+  struct Common_ParserConfiguration* configuration_;
+  CBDataType*                        CBData_;
+  SessionInterfaceType*              session_;
+  SESSION_DATA_T                     sessionData_;
 };
 
 // include template definition

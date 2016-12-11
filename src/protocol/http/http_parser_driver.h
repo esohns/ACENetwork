@@ -50,12 +50,7 @@ class HTTP_ParserDriver_T
   virtual ~HTTP_ParserDriver_T ();
 
   // implement (part of) HTTP_IParser
-  virtual void initialize (//const std::string&,                             // scanner tables file (if any)
-                           bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,           // debug scanner ?
-                           bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,          // debug parser ?
-                           ACE_Message_Queue_Base* = NULL,                  // data buffer queue (yywrap)
-                           bool = false,                                    // block in parse() ?
-                           bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER); // yy_scan_buffer() ? : yy_scan_bytes()
+  virtual bool initialize (const struct Common_ParserConfiguration&);
   inline virtual ACE_Message_Block* buffer () { return fragment_; };
   inline virtual bool debugScanner () const { return HTTP_Scanner_get_debug (scannerState_); };
   inline virtual bool isBlocking () const { return blockInParse_; };
@@ -76,11 +71,12 @@ class HTTP_ParserDriver_T
   virtual void dump_state () const;
 
  protected:
-  bool                    finished_; // processed the whole entity ?
-  ACE_Message_Block*      fragment_;
-  unsigned int            offset_; // parsed entity bytes
-  struct HTTP_Record*     record_;
-  bool                    trace_;
+  struct Common_ParserConfiguration* configuration_;
+  bool                               finished_; // processed the whole entity ?
+  ACE_Message_Block*                 fragment_;
+  unsigned int                       offset_; // parsed entity bytes
+  struct HTTP_Record*                record_;
+  bool                               trace_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T ())
@@ -91,20 +87,20 @@ class HTTP_ParserDriver_T
   bool scan_begin ();
   void scan_end ();
 
-  bool                    blockInParse_;
-  bool                    isFirst_;
+  bool                               blockInParse_;
+  bool                               isFirst_;
 
   //// parser
-  yy::HTTP_Parser         parser_;
+  yy::HTTP_Parser                    parser_;
 
   // scanner
-  yyscan_t                scannerState_;
-  std::string             scannerTables_;
-  YY_BUFFER_STATE         bufferState_;
-  ACE_Message_Queue_Base* messageQueue_;
-  bool                    useYYScanBuffer_;
+  yyscan_t                           scannerState_;
+  std::string                        scannerTables_;
+  YY_BUFFER_STATE                    bufferState_;
+  ACE_Message_Queue_Base*            messageQueue_;
+  bool                               useYYScanBuffer_;
 
-  bool                    isInitialized_;
+  bool                               isInitialized_;
 };
 
 // include template definition

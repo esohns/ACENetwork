@@ -494,7 +494,11 @@ do_work (unsigned int bufferSize_in,
     TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
 
-  // *********************** socket configuration data ************************
+  // *********************** parser configuration data *************************
+  configuration.parserConfiguration.debugParser = debugParser_in;
+  if (debugParser_in)
+    configuration.parserConfiguration.debugScanner = true;
+  // *********************** socket configuration data *************************
   int result =
     configuration.socketConfiguration.address.set (port_in,
                                                    hostName_in.c_str (),
@@ -511,7 +515,7 @@ do_work (unsigned int bufferSize_in,
   configuration.socketConfiguration.useLoopBackDevice =
     configuration.socketConfiguration.address.is_loopback ();
   configuration.socketConfiguration.writeOnly = true;
-  // ******************** socket handler configuration data *******************
+  // ******************** socket handler configuration data ********************
   configuration.socketHandlerConfiguration.messageAllocator =
     &message_allocator;
   configuration.socketHandlerConfiguration.PDUSize = bufferSize_in;
@@ -543,17 +547,16 @@ do_work (unsigned int bufferSize_in,
       ACE_DIRECTORY_SEPARATOR_CHAR_A;;
   configuration.moduleHandlerConfiguration.dumpFileName +=
       ACE_TEXT_ALWAYS_CHAR ("dump.txt");
-  configuration.moduleHandlerConfiguration.traceParsing = debugParser_in;
-  if (debugParser_in)
-    configuration.moduleHandlerConfiguration.traceScanning = true;
-  configuration.moduleHandlerConfiguration.targetFileName = fileName_in;
   configuration.moduleHandlerConfiguration.hostName = hostName_in;
-  configuration.moduleHandlerConfiguration.URL = URL_in;
+  configuration.moduleHandlerConfiguration.parserConfiguration =
+      &configuration.parserConfiguration;
   configuration.moduleHandlerConfiguration.socketConfiguration =
     &configuration.socketConfiguration;
   configuration.moduleHandlerConfiguration.socketHandlerConfiguration =
     &configuration.socketHandlerConfiguration;
-  // ******************** (sub-)stream configuration data *********************
+  configuration.moduleHandlerConfiguration.targetFileName = fileName_in;
+  configuration.moduleHandlerConfiguration.URL = URL_in;
+  // ******************** (sub-)stream configuration data **********************
   if (bufferSize_in)
     configuration.streamConfiguration.bufferSize = bufferSize_in;
   configuration.streamConfiguration.messageAllocator = &message_allocator;

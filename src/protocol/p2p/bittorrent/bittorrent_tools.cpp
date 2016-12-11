@@ -44,9 +44,9 @@
 #include "bittorrent_stream_common.h"
 
 std::string
-BitTorrent_Tools::Handshake2String (const struct BitTorrent_PeerHandshake& peerHandshake_in)
+BitTorrent_Tools::HandShake2String (const struct BitTorrent_PeerHandShake& peerHandshake_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::Handshake2String"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::HandShake2String"));
 
   std::string result;
   std::ostringstream converter;
@@ -54,7 +54,7 @@ BitTorrent_Tools::Handshake2String (const struct BitTorrent_PeerHandshake& peerH
   return result;
 }
 std::string
-BitTorrent_Tools::Record2String (const struct BitTorrent_Record& record_in)
+BitTorrent_Tools::Record2String (const struct BitTorrent_PeerRecord& peerRecord_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::Record2String"));
 
@@ -203,10 +203,9 @@ BitTorrent_Tools::MetaInfo2Length (const Bencoding_Dictionary_t& metaInfo_in)
 }
 
 bool
-BitTorrent_Tools::parseMetaInfoFile (const std::string& metaInfoFileName_in,
-                                     Bencoding_Dictionary_t*& metaInfo_out,
-                                     bool traceScanning_in,
-                                     bool traceParsing_in)
+BitTorrent_Tools::parseMetaInfoFile (const struct Common_ParserConfiguration& configuration_in,
+                                     const std::string& metaInfoFileName_in,
+                                     Bencoding_Dictionary_t*& metaInfo_out)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::parseMetaInfoFile"));
 
@@ -217,12 +216,21 @@ BitTorrent_Tools::parseMetaInfoFile (const std::string& metaInfoFileName_in,
   // sanity check(s)
   ACE_ASSERT (!metaInfo_out);
 
-  BitTorrent_Bencoding_ParserDriver_T<BitTorrent_TrackerSessionMessage_t> parser (traceScanning_in,
-                                                                                 traceParsing_in);
-  parser.initialize (traceScanning_in, // trace flex scanner ?
-                     traceParsing_in,  // trace bison parser ?
-                     NULL,             // data buffer queue (yywrap)
-                     false);           // block in parse ?
+  bool block_in_parse = configuration_in.block;
+  BitTorrent_Bencoding_ParserDriver_T<BitTorrent_TrackerSessionMessage_t> parser (configuration_in.debugScanner,
+                                                                                  configuration_in.debugParser);
+
+
+  const_cast<struct Common_ParserConfiguration&> (configuration_in).block =
+      false;
+  if (!parser.initialize (configuration_in))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize parser, aborting\n")));
+    return false;
+  } // end IF
+  const_cast<struct Common_ParserConfiguration&> (configuration_in).block =
+      block_in_parse;
 
   // slurp the whole file
   bool result = false;
@@ -362,7 +370,7 @@ BitTorrent_Tools::generatePeerId ()
         random_hash);
   random_hash[SHA_DIGEST_LENGTH] = '\0';
   result += reinterpret_cast<char*> (random_hash);
-  result.resize (BITTORRENT_TRACKER_REQUEST_PEER_ID_LENGTH);
+  result.resize (BITTORRENT_PRT_PEER_ID_LENGTH);
 
   return result;
 }
@@ -387,6 +395,49 @@ BitTorrent_Tools::generateKey ()
   random_hash[SHA_DIGEST_LENGTH] = '\0';
   result += reinterpret_cast<char*> (random_hash);
   result.resize (20);
+
+  return result;
+}
+
+bool
+BitTorrent_Tools::torrentSupportsScrape (const std::string& announceURL_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::torrentSupportsScrape"));
+
+  std::string::size_type position =
+      announceURL_in.find_last_of ('/',
+                                   std::string::npos);
+  if (position == std::string::npos)
+    return false;
+
+  return (announceURL_in.find (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_ANNOUNCE_KEY),
+                               ++position) == position);
+}
+std::string
+BitTorrent_Tools::AnnounceURL2ScrapeURL (const std::string& announceURL_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::AnnounceURL2ScrapeURL"));
+
+  std::string result;
+
+  // sanity check(s)
+  if (!BitTorrent_Tools::torrentSupportsScrape (announceURL_in))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("tracker does not support scraping this torrent (announce URL was: \"%s\"), aborting\n"),
+                ACE_TEXT (announceURL_in.c_str ())));
+    return result;
+  } // end IF
+
+  std::string::size_type position =
+      announceURL_in.find_last_of ('/',
+                                   std::string::npos);
+  ACE_ASSERT (position != std::string::npos);
+
+  result = announceURL_in;
+  result.replace (position,
+                  ACE_OS::strlen (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_ANNOUNCE_KEY)),
+                  ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_SCRAPE_URI_PREFIX));
 
   return result;
 }

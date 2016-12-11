@@ -117,7 +117,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-d          : debug parser [")
-            << DHCP_DEFAULT_YACC_TRACE
+            << NET_PROTOCOL_DEFAULT_YACC_TRACE
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
   std::string configuration_path = path;
@@ -224,7 +224,7 @@ do_processArguments (int argc_in,
 
   // initialize results
   requestBroadcastReplies_out = DHCP_DEFAULT_FLAGS_BROADCAST;
-  debugParser_out = DHCP_DEFAULT_YACC_TRACE;
+  debugParser_out = NET_PROTOCOL_DEFAULT_YACC_TRACE;
   std::string configuration_path = path;
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
@@ -568,7 +568,11 @@ do_work (bool requestBroadcastReplies_in,
     TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
 
-  // *********************** socket configuration data ************************
+  // *********************** parser configuration data *************************
+  configuration.parserConfiguration.debugParser = debugParser_in;
+  if (debugParser_in)
+    configuration.parserConfiguration.debugScanner = true;
+  // *********************** socket configuration data *************************
   // *IMPORTANT NOTE*: (global) UDP broadcast appears to be broken on
   //                   Windows 7 and above (see e.g.:
   //                   - http://serverfault.com/questions/72112/how-to-alter-the-global-broadcast-address-255-255-255-255-behavior-on-windows
@@ -591,7 +595,7 @@ do_work (bool requestBroadcastReplies_in,
   configuration.socketConfiguration.networkInterface = networkInterface_in;
   configuration.socketConfiguration.useLoopBackDevice = useLoopback_in;
   configuration.socketConfiguration.writeOnly = true;
-  // ******************** socket handler configuration data *******************
+  // ******************** socket handler configuration data ********************
   configuration.socketHandlerConfiguration.listenerConfiguration =
     &configuration.listenerConfiguration;
   configuration.socketHandlerConfiguration.messageAllocator =
@@ -631,9 +635,8 @@ do_work (bool requestBroadcastReplies_in,
   configuration.moduleHandlerConfiguration.streamConfiguration =
     &configuration.streamConfiguration;
   configuration.moduleHandlerConfiguration.configuration = &configuration;
-  configuration.moduleHandlerConfiguration.traceParsing = debugParser_in;
-  if (debugParser_in)
-    configuration.moduleHandlerConfiguration.traceScanning = true;
+  configuration.moduleHandlerConfiguration.parserConfiguration =
+      &configuration.parserConfiguration;
   configuration.moduleHandlerConfiguration.targetFileName = fileName_in;
   configuration.moduleHandlerConfiguration.socketConfiguration =
     &configuration.socketConfiguration;
@@ -646,7 +649,7 @@ do_work (bool requestBroadcastReplies_in,
   configuration.protocolConfiguration.sendRequestOnOffer =
       sendRequestOnOffer_in;
 
-  // ********************* listener configuration data ************************
+  // ********************* listener configuration data *************************
   if (useLoopback_in)
     result =
         configuration.listenerConfiguration.address.set (DHCP_DEFAULT_CLIENT_PORT,
@@ -1331,7 +1334,7 @@ ACE_TMAIN (int argc_in,
 
   // step1a set defaults
   bool request_broadcast_replies = DHCP_DEFAULT_FLAGS_BROADCAST;
-  bool debug_parser = DHCP_DEFAULT_YACC_TRACE;
+  bool debug_parser = NET_PROTOCOL_DEFAULT_YACC_TRACE;
   std::string configuration_path = path;
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=

@@ -151,6 +151,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/http)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/p2p/bittorrent)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
+#message (STATUS "CMAKE_CURRENT_BINARY_DIR: \"${CMAKE_CURRENT_BINARY_DIR}/../..\"")
 
 ########### next target ###############
 set (bittorrent_client_SRCS

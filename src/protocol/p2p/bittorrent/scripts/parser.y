@@ -125,7 +125,7 @@ extern int BitTorrent_Export yydebug;
 %union
 {
   struct BitTorrent_PeerHandshake* handshake;
-  struct BitTorrent_Record*        record;
+  struct BitTorrent_PeerRecord*        record;
   unsigned int                     size;
 }
 
@@ -198,8 +198,8 @@ void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);
 /* %printer                  { yyoutput << $$; } <*>; */
 /* %printer                  { yyoutput << *$$; } <sval>
 %printer                  { debug_stream () << $$; }  <ival> */
-%printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), $$->version.c_str ()); } <handshake>
-%printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), BitTorrent_Tools::Type2String ($$->type).c_str ()); } <record>
+%printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), BitTorrent_Tools::HandShake2String (*$$).c_str ()); } <handshake>
+%printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), BitTorrent_Tools::Record2String (*$$).c_str ()); } <record>
 %printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), $$); } <size>
 /*%destructor { delete $$; $$ = NULL; } <handshake>*/
 /*%destructor { delete $$; $$ = NULL; } <record>*/
@@ -225,8 +225,8 @@ messages: messages message     { $$ = $1 + $2; };
           | %empty             { $$ = 0; };
 message:  "bitfield"           { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
-                                 struct BitTorrent_Record* record_p =
-                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 struct BitTorrent_PeerRecord* record_p =
+                                   const_cast<struct BitTorrent_PeerRecord*> ($1);
                                  try {
                                    iparser_p->record (record_p);
                                  } catch (...) {
@@ -235,8 +235,8 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } };
           | "cancel"           { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
-                                 struct BitTorrent_Record* record_p =
-                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 struct BitTorrent_PeerRecord* record_p =
+                                   const_cast<struct BitTorrent_PeerRecord*> ($1);
                                  try {
                                    iparser_p->record (record_p);
                                  } catch (...) {
@@ -245,8 +245,8 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } };
           | "choke"            { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
-                                 struct BitTorrent_Record* record_p =
-                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 struct BitTorrent_PeerRecord* record_p =
+                                   const_cast<struct BitTorrent_PeerRecord*> ($1);
                                  try {
                                    iparser_p->record (record_p);
                                  } catch (...) {
@@ -255,8 +255,8 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } };
           | "have"             { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
-                                 struct BitTorrent_Record* record_p =
-                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 struct BitTorrent_PeerRecord* record_p =
+                                   const_cast<struct BitTorrent_PeerRecord*> ($1);
                                  try {
                                    iparser_p->record (record_p);
                                  } catch (...) {
@@ -265,8 +265,8 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } };
           | "interested"       { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
-                                 struct BitTorrent_Record* record_p =
-                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 struct BitTorrent_PeerRecord* record_p =
+                                   const_cast<struct BitTorrent_PeerRecord*> ($1);
                                  try {
                                    iparser_p->record (record_p);
                                  } catch (...) {
@@ -275,8 +275,8 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } };
           | "keep-alive"       { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
-                                 struct BitTorrent_Record* record_p =
-                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 struct BitTorrent_PeerRecord* record_p =
+                                   const_cast<struct BitTorrent_PeerRecord*> ($1);
                                  try {
                                    iparser_p->record (record_p);
                                  } catch (...) {
@@ -285,8 +285,8 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } };
           | "not_interested"   { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
-                                 struct BitTorrent_Record* record_p =
-                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 struct BitTorrent_PeerRecord* record_p =
+                                   const_cast<struct BitTorrent_PeerRecord*> ($1);
                                  try {
                                    iparser_p->record (record_p);
                                  } catch (...) {
@@ -295,8 +295,8 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } };
           | "piece"            { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
-                                 struct BitTorrent_Record* record_p =
-                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 struct BitTorrent_PeerRecord* record_p =
+                                   const_cast<struct BitTorrent_PeerRecord*> ($1);
                                  try {
                                    iparser_p->record (record_p);
                                  } catch (...) {
@@ -305,8 +305,8 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } };
           | "port"             { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
-                                 struct BitTorrent_Record* record_p =
-                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 struct BitTorrent_PeerRecord* record_p =
+                                   const_cast<struct BitTorrent_PeerRecord*> ($1);
                                  try {
                                    iparser_p->record (record_p);
                                  } catch (...) {
@@ -315,8 +315,8 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } };
           | "request"          { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
-                                 struct BitTorrent_Record* record_p =
-                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 struct BitTorrent_PeerRecord* record_p =
+                                   const_cast<struct BitTorrent_PeerRecord*> ($1);
                                  try {
                                    iparser_p->record (record_p);
                                  } catch (...) {
@@ -325,8 +325,8 @@ message:  "bitfield"           { $$ = $1->length + 4;
                                  } };
           | "unchoke"          { $$ = $1->length + 4;
                                  ACE_ASSERT ($1);
-                                 struct BitTorrent_Record* record_p =
-                                   const_cast<struct BitTorrent_Record*> ($1);
+                                 struct BitTorrent_PeerRecord* record_p =
+                                   const_cast<struct BitTorrent_PeerRecord*> ($1);
                                  try {
                                    iparser_p->record (record_p);
                                  } catch (...) {

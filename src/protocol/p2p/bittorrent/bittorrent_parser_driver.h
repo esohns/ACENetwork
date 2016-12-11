@@ -36,7 +36,8 @@
 template <typename MessageType,
           typename SessionMessageType>
 class BitTorrent_ParserDriver_T
- : public Net_ParserBase_T<yy::BitTorrent_Parser,
+ : public Net_ParserBase_T<struct Common_ParserConfiguration,
+                           yy::BitTorrent_Parser,
                            BitTorrent_IParser_t,
                            std::string,
                            SessionMessageType>
@@ -47,7 +48,8 @@ class BitTorrent_ParserDriver_T
   virtual ~BitTorrent_ParserDriver_T ();
 
   // convenient types
-  typedef Net_ParserBase_T<yy::BitTorrent_Parser,
+  typedef Net_ParserBase_T<struct Common_ParserConfiguration,
+                           yy::BitTorrent_Parser,
                            BitTorrent_IParser_t,
                            std::string,
                            SessionMessageType> PARSER_BASE_T;
@@ -66,21 +68,22 @@ class BitTorrent_ParserDriver_T
   virtual void error (const yy::location&, // location
                       const std::string&); // message
 //  virtual void error (const std::string&); // message
-  inline virtual struct BitTorrent_Record& current () { ACE_ASSERT (record_); return *record_; };
+  inline virtual struct BitTorrent_PeerRecord& current () { ACE_ASSERT (record_); return *record_; };
 
   ////////////////////////////////////////
   // callbacks
   // *IMPORTANT NOTE*: fire-and-forget API
-  virtual void record (struct BitTorrent_Record*&); // data record
-  virtual void handshake (struct BitTorrent_PeerHandshake*&); // handshake
+  virtual void record (struct BitTorrent_PeerRecord*&); // data record
+  virtual void handshake (struct BitTorrent_PeerHandShake*&); // handshake
 
   virtual void dump_state () const;
 
-  struct BitTorrent_PeerHandshake* handShake_;
-  struct BitTorrent_Record*        record_;
+  struct BitTorrent_PeerHandShake* handShake_;
+  struct BitTorrent_PeerRecord*    record_;
 
  private:
-  typedef Net_ParserBase_T<yy::BitTorrent_Parser,
+  typedef Net_ParserBase_T<struct Common_ParserConfiguration,
+                           yy::BitTorrent_Parser,
                            BitTorrent_IParser_t,
                            std::string,
                            SessionMessageType> inherited;

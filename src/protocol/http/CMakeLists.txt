@@ -40,7 +40,7 @@ endif ()
 #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../..)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../client_server)
-#include_directories (${CMAKE_CURRENT_BINARY_DIR}/..)
+include_directories (${CMAKE_CURRENT_BINARY_DIR}/../../..)
 
 ########### next target ###############
 set (${PROJECT_NAME}_Protocol_HTTP_SRCS

@@ -53,6 +53,30 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
+struct BitTorrent_PeerMessageData
+{
+  inline BitTorrent_PeerMessageData ()
+   : handShakeRecord (NULL)
+   , peerRecord (NULL)
+  {};
+  inline ~BitTorrent_PeerMessageData ()
+  {
+    if (handShakeRecord)
+      delete handShakeRecord;
+    if (peerRecord)
+      delete peerRecord;
+  };
+  inline void operator+= (BitTorrent_PeerMessageData rhs_in)
+  { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); };
+  inline operator struct BitTorrent_PeerHandShake& () const
+  { ACE_ASSERT (handShakeRecord); return *handShakeRecord; };
+  inline operator struct BitTorrent_PeerRecord& () const
+  { ACE_ASSERT (peerRecord); return *peerRecord; };
+
+  struct BitTorrent_PeerHandShake* handShakeRecord;
+  struct BitTorrent_PeerRecord*    peerRecord;
+};
+
 template <typename SessionDataType, // *NOTE*: this implements Common_IReferenceCount !
           typename UserDataType>
 class BitTorrent_Message_T
@@ -65,7 +89,7 @@ class BitTorrent_Message_T
                                                                                        UserDataType> >,
                                    BitTorrent_SessionMessage_T<typename SessionDataType::DATA_T,
                                                                UserDataType>,
-                                   Stream_DataBase_T<struct BitTorrent_Record>,
+                                   Stream_DataBase_T<struct BitTorrent_PeerMessageData>,
                                    enum BitTorrent_MessageType>
 {
   // enable access to specific private ctors
@@ -130,7 +154,7 @@ class BitTorrent_Message_T
                                                                                        UserDataType> >,
                                    BitTorrent_SessionMessage_T<typename SessionDataType::DATA_T,
                                                                UserDataType>,
-                                   Stream_DataBase_T<struct BitTorrent_Record>,
+                                   Stream_DataBase_T<struct BitTorrent_PeerMessageData>,
                                    enum BitTorrent_MessageType> inherited;
 
   // convenient types

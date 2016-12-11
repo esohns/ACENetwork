@@ -120,7 +120,7 @@ template <typename MessageType,
           typename SessionMessageType>
 void
 BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::record (struct BitTorrent_Record*& record_inout)
+                          SessionMessageType>::record (struct BitTorrent_PeerRecord*& record_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::record"));
 
@@ -135,7 +135,7 @@ template <typename MessageType,
           typename SessionMessageType>
 void
 BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::handshake (struct BitTorrent_PeerHandshake*& handShake_inout)
+                          SessionMessageType>::handshake (struct BitTorrent_PeerHandShake*& handShake_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::handshake"));
 

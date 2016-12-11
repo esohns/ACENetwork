@@ -48,13 +48,13 @@ echo "moved \"$FILE\"..."
 done
 
 # append to list
-FILES="http_scanner.tab"
-for FILE in $FILES
-do
-mv -f $FILE ${SCRIPTS_DIRECTORY}/../etc
-if [ $? -ne 0 ]; then
- echo "ERROR: failed to mv \"$FILE\", aborting"
- exit 1
-fi
-echo "moved \"$FILE\"..."
-done
+#FILES="http_scanner.tab"
+#for FILE in $FILES
+#do
+#mv -f $FILE ${SCRIPTS_DIRECTORY}/../etc
+#if [ $? -ne 0 ]; then
+# echo "ERROR: failed to mv \"$FILE\", aborting"
+# exit 1
+#fi
+#echo "moved \"$FILE\"..."
+#done

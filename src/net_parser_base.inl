@@ -24,19 +24,22 @@
 
 #include "stream_common.h"
 
+#include "net_defines.h"
 #include "net_macros.h"
 
-template <typename ScannerType,
+template <typename ConfigurationType,
+          typename ScannerType,
           typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
-Net_CppParserBase_T<ScannerType,
-                 ParserType,
-                 ParserInterfaceType,
-                 ArgumentType,
-                 SessionMessageType>::Net_CppParserBase_T (bool traceScanning_in,
-                                                           bool traceParsing_in)
+Net_CppParserBase_T<ConfigurationType,
+                    ScannerType,
+                    ParserType,
+                    ParserInterfaceType,
+                    ArgumentType,
+                    SessionMessageType>::Net_CppParserBase_T (bool traceScanning_in,
+                                                              bool traceParsing_in)
  : fragment_ (NULL)
  , offset_ (0)
  , trace_ (traceParsing_in)
@@ -64,16 +67,18 @@ Net_CppParserBase_T<ScannerType,
 #endif
 }
 
-template <typename ScannerType,
+template <typename ConfigurationType,
+          typename ScannerType,
           typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
-Net_CppParserBase_T<ScannerType,
-                 ParserType,
-                 ParserInterfaceType,
-                 ArgumentType,
-                 SessionMessageType>::~Net_CppParserBase_T ()
+Net_CppParserBase_T<ConfigurationType,
+                    ScannerType,
+                    ParserType,
+                    ParserInterfaceType,
+                    ArgumentType,
+                    SessionMessageType>::~Net_CppParserBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_CppParserBase_T::~Net_CppParserBase_T"));
 
@@ -82,26 +87,25 @@ Net_CppParserBase_T<ScannerType,
     scanner_.yy_delete_buffer (buffer_);
 }
 
-template <typename ScannerType,
+template <typename ConfigurationType,
+          typename ScannerType,
           typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
-void
-Net_CppParserBase_T<ScannerType,
-                 ParserType,
-                 ParserInterfaceType,
-                 ArgumentType,
-                 SessionMessageType>::initialize (bool traceScanning_in,
-                                                  bool traceParsing_in,
-                                                  ACE_Message_Queue_Base* messageQueue_in,
-                                                  bool blockInParse_in,
-                                                  bool)
+bool
+Net_CppParserBase_T<ConfigurationType,
+                    ScannerType,
+                    ParserType,
+                    ParserInterfaceType,
+                    ArgumentType,
+                    SessionMessageType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_CppParserBase_T::initialize"));
 
   if (isInitialized_)
   {
+    configuration_ = NULL;
     fragment_ = NULL;
     offset_ = 0;
     trace_ = NET_PROTOCOL_DEFAULT_YACC_TRACE;
@@ -120,23 +124,27 @@ Net_CppParserBase_T<ScannerType,
     isInitialized_ = false;
   } // end IF
 
-  trace_ = traceParsing_in;
+  configuration_ = &const_cast<ConfigurationType&> (configuration_in);
+  trace_ = configuration_->debugParser;
 
-  blockInParse_ = blockInParse_in;
+  blockInParse_ = configuration_->block;
 
-  messageQueue_ = messageQueue_in;
+  messageQueue_ = configuration_->messageQueue;
 
-  scanner_.set_debug (traceScanning_in ? 1 : 0);
+  scanner_.set_debug (configuration_->debugScanner ? 1 : 0);
 #if defined (YYDEBUG)
-  parser_.set_debug_level (traceParsing_in ? 1 : 0);
+  parser_.set_debug_level (configuration_->debugParser ? 1 : 0);
 //  yydebug = (trace_ ? 1 : 0);
 //  yysetdebug (trace_ ? 1 : 0);
 #endif
 
   isInitialized_ = true;
+
+  return true;
 }
 
-template <typename ScannerType,
+template <typename ConfigurationType,
+          typename ScannerType,
           typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
@@ -144,11 +152,12 @@ template <typename ScannerType,
 void
 //Net_CppParserBase_T<SessionMessageType>::error (const YYLTYPE& location_in,
 //                                                      const std::string& message_in)
-Net_CppParserBase_T<ScannerType,
-                 ParserType,
-                 ParserInterfaceType,
-                 ArgumentType,
-                 SessionMessageType>::error (const std::string& message_in)
+Net_CppParserBase_T<ConfigurationType,
+                    ScannerType,
+                    ParserType,
+                    ParserInterfaceType,
+                    ArgumentType,
+                    SessionMessageType>::error (const std::string& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_CppParserBase_T::error"));
 
@@ -185,17 +194,19 @@ Net_CppParserBase_T<ScannerType,
   //std::clog << location_in << ": " << message_in << std::endl;
 }
 
-template <typename ScannerType,
+template <typename ConfigurationType,
+          typename ScannerType,
           typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
 bool
-Net_CppParserBase_T<ScannerType,
-                 ParserType,
-                 ParserInterfaceType,
-                 ArgumentType,
-                 SessionMessageType>::parse (ACE_Message_Block* data_in)
+Net_CppParserBase_T<ConfigurationType,
+                    ScannerType,
+                    ParserType,
+                    ParserInterfaceType,
+                    ArgumentType,
+                    SessionMessageType>::parse (ACE_Message_Block* data_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_CppParserBase_T::parse"));
 
@@ -228,11 +239,9 @@ Net_CppParserBase_T<ScannerType,
 
   // parse data fragment
   try {
-//    result = ::yyparse (this, state_);
     result = parser_.parse ();
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
                 ACE_TEXT ("caught exception in ParserType::parse(), continuing\n")));
     result = 1;
   }
@@ -266,17 +275,19 @@ continue_:
   return (result == 0);
 }
 
-template <typename ScannerType,
+template <typename ConfigurationType,
+          typename ScannerType,
           typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
 bool
-Net_CppParserBase_T<ScannerType,
-                 ParserType,
-                 ParserInterfaceType,
-                 ArgumentType,
-                 SessionMessageType>::switchBuffer (bool unlink_in)
+Net_CppParserBase_T<ConfigurationType,
+                    ScannerType,
+                    ParserType,
+                    ParserInterfaceType,
+                    ArgumentType,
+                    SessionMessageType>::switchBuffer (bool unlink_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_CppParserBase_T::switchBuffer"));
 
@@ -333,17 +344,19 @@ Net_CppParserBase_T<ScannerType,
   return true;
 }
 
-template <typename ScannerType,
+template <typename ConfigurationType,
+          typename ScannerType,
           typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
 void
-Net_CppParserBase_T<ScannerType,
-                 ParserType,
-                 ParserInterfaceType,
-                 ArgumentType,
-                 SessionMessageType>::wait ()
+Net_CppParserBase_T<ConfigurationType,
+                    ScannerType,
+                    ParserType,
+                    ParserInterfaceType,
+                    ArgumentType,
+                    SessionMessageType>::wait ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_CppParserBase_T::wait"));
 
@@ -428,17 +441,19 @@ Net_CppParserBase_T<ScannerType,
   } // end IF
 }
 
-template <typename ScannerType,
+template <typename ConfigurationType,
+          typename ScannerType,
           typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
 bool
-Net_CppParserBase_T<ScannerType,
-                 ParserType,
-                 ParserInterfaceType,
-                 ArgumentType,
-                 SessionMessageType>::scan_begin ()
+Net_CppParserBase_T<ConfigurationType,
+                    ScannerType,
+                    ParserType,
+                    ParserInterfaceType,
+                    ArgumentType,
+                    SessionMessageType>::scan_begin ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_CppParserBase_T::scan_begin"));
 
@@ -462,17 +477,19 @@ Net_CppParserBase_T<ScannerType,
   return true;
 }
 
-template <typename ScannerType,
+template <typename ConfigurationType,
+          typename ScannerType,
           typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
 void
-Net_CppParserBase_T<ScannerType,
-                 ParserType,
-                 ParserInterfaceType,
-                 ArgumentType,
-                 SessionMessageType>::scan_end ()
+Net_CppParserBase_T<ConfigurationType,
+                    ScannerType,
+                    ParserType,
+                    ParserInterfaceType,
+                    ArgumentType,
+                    SessionMessageType>::scan_end ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_CppParserBase_T::scan_end"));
 
@@ -487,11 +504,13 @@ Net_CppParserBase_T<ScannerType,
 
 //////////////////////////////////////////
 
-template <typename ParserType,
+template <typename ConfigurationType,
+          typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
-Net_ParserBase_T<ParserType,
+Net_ParserBase_T<ConfigurationType,
+                 ParserType,
                  ParserInterfaceType,
                  ArgumentType,
                  SessionMessageType>::Net_ParserBase_T (bool traceScanning_in,
@@ -512,42 +531,16 @@ Net_ParserBase_T<ParserType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ParserBase_T::Net_ParserBase_T"));
 
-  bool result = false;
-  try {
-    initialize (state_);
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IScanner_T::initialize(): \"%m\", continuing\n")));
-  }
-  if (!result)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_IScanner_T::initialize(): \"%m\", returning\n")));
-    return;
-  } // end IF
-  ACE_ASSERT (state_);
-  parser_.set (state_);
-
-  // trace ?
-  try {
-    debug (state_,
-           traceScanning_in);
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IScanner_T::debug(): \"%m\", continuing\n")));
-  }
-#if YYDEBUG
-  parser_.set_debug_level (traceParsing_in ? 1 : 0);
-  //  yydebug = (trace_ ? 1 : 0);
-//  yysetdebug (trace_ ? 1 : 0);
-#endif
+  ACE_UNUSED_ARG (traceScanning_in);
 }
 
-template <typename ParserType,
+template <typename ConfigurationType,
+          typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
-Net_ParserBase_T<ParserType,
+Net_ParserBase_T<ConfigurationType,
+                 ParserType,
                  ParserInterfaceType,
                  ArgumentType,
                  SessionMessageType>::~Net_ParserBase_T ()
@@ -578,24 +571,23 @@ Net_ParserBase_T<ParserType,
   } // end IF
 }
 
-template <typename ParserType,
+template <typename ConfigurationType,
+          typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
-void
-Net_ParserBase_T<ParserType,
+bool
+Net_ParserBase_T<ConfigurationType,
+                 ParserType,
                  ParserInterfaceType,
                  ArgumentType,
-                 SessionMessageType>::initialize (bool traceScanning_in,
-                                                  bool traceParsing_in,
-                                                  ACE_Message_Queue_Base* messageQueue_in,
-                                                  bool blockInParse_in,
-                                                  bool useYYScanBuffer_in)
+                 SessionMessageType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ParserBase_T::initialize"));
 
   if (isInitialized_)
   {
+    configuration_ = NULL;
     fragment_ = NULL;
     offset_ = 0;
     trace_ = NET_PROTOCOL_DEFAULT_YACC_TRACE;
@@ -632,37 +624,59 @@ Net_ParserBase_T<ParserType,
     isInitialized_ = false;
   } // end IF
 
-  trace_ = traceParsing_in;
+  configuration_ = &const_cast<ConfigurationType&> (configuration_in);
+  trace_ = configuration_->debugParser;
 
-  blockInParse_ = blockInParse_in;
+  blockInParse_ = configuration_->block;
 
-  messageQueue_ = messageQueue_in;
-  useYYScanBuffer_ = useYYScanBuffer_in;
+  messageQueue_ = configuration_->messageQueue;
+  useYYScanBuffer_ = configuration_->useYYScanBuffer;
 
+  bool result = false;
+  try {
+    result = initialize (state_);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IScanner_T::initialize(): \"%m\", continuing\n")));
+  }
+  if (!result)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_IScanner_T::initialize(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+  ACE_ASSERT (state_);
+  parser_.set (state_);
+
+  // trace ?
   try {
     debug (state_,
-           traceScanning_in);
+           configuration_->debugScanner);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_IScanner_T::debug(): \"%m\", continuing\n")));
   }
-#if defined (YYDEBUG)
-  parser_.set_debug_level (traceParsing_in ? 1 : 0);
-//  yydebug = (trace_ ? 1 : 0);
+#if YYDEBUG
+  parser_.set_debug_level (trace_ ? 1 : 0);
+  //  yydebug = (trace_ ? 1 : 0);
 //  yysetdebug (trace_ ? 1 : 0);
 #endif
 
   isInitialized_ = true;
+
+  return true;
 }
 
-template <typename ParserType,
+template <typename ConfigurationType,
+          typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
 void
 //Net_ParserBase_T<SessionMessageType>::error (const YYLTYPE& location_in,
 //                                                      const std::string& message_in)
-Net_ParserBase_T<ParserType,
+Net_ParserBase_T<ConfigurationType,
+                 ParserType,
                  ParserInterfaceType,
                  ArgumentType,
                  SessionMessageType>::error (const std::string& message_in)
@@ -702,12 +716,14 @@ Net_ParserBase_T<ParserType,
   //std::clog << location_in << ": " << message_in << std::endl;
 }
 
-template <typename ParserType,
+template <typename ConfigurationType,
+          typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
 bool
-Net_ParserBase_T<ParserType,
+Net_ParserBase_T<ConfigurationType,
+                 ParserType,
                  ParserInterfaceType,
                  ArgumentType,
                  SessionMessageType>::parse (ACE_Message_Block* data_in)
@@ -743,11 +759,9 @@ Net_ParserBase_T<ParserType,
 
   // parse data fragment
   try {
-//    result = ::yyparse (this, state_);
     result = parser_.parse ();
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
                 ACE_TEXT ("caught exception in ParserType::parse(), continuing\n")));
     result = 1;
   }
@@ -781,12 +795,14 @@ continue_:
   return (result == 0);
 }
 
-template <typename ParserType,
+template <typename ConfigurationType,
+          typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
 bool
-Net_ParserBase_T<ParserType,
+Net_ParserBase_T<ConfigurationType,
+                 ParserType,
                  ParserInterfaceType,
                  ArgumentType,
                  SessionMessageType>::switchBuffer (bool unlink_in)
@@ -846,12 +862,14 @@ Net_ParserBase_T<ParserType,
   return true;
 }
 
-template <typename ParserType,
+template <typename ConfigurationType,
+          typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
 void
-Net_ParserBase_T<ParserType,
+Net_ParserBase_T<ConfigurationType,
+                 ParserType,
                  ParserInterfaceType,
                  ArgumentType,
                  SessionMessageType>::wait ()
@@ -939,12 +957,14 @@ Net_ParserBase_T<ParserType,
   } // end IF
 }
 
-template <typename ParserType,
+template <typename ConfigurationType,
+          typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
 bool
-Net_ParserBase_T<ParserType,
+Net_ParserBase_T<ConfigurationType,
+                 ParserType,
                  ParserInterfaceType,
                  ArgumentType,
                  SessionMessageType>::scan_begin ()
@@ -979,12 +999,14 @@ Net_ParserBase_T<ParserType,
   return (buffer_ != NULL);
 }
 
-template <typename ParserType,
+template <typename ConfigurationType,
+          typename ParserType,
           typename ParserInterfaceType,
           typename ArgumentType,
           typename SessionMessageType>
 void
-Net_ParserBase_T<ParserType,
+Net_ParserBase_T<ConfigurationType,
+                 ParserType,
                  ParserInterfaceType,
                  ArgumentType,
                  SessionMessageType>::scan_end ()

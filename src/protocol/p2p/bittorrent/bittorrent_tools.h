@@ -25,7 +25,7 @@
 
 #include <ace/Global_Macros.h>
 
-#include "net_defines.h"
+#include "common.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_exports.h"
@@ -40,8 +40,8 @@ class BitTorrent_Export BitTorrent_Tools
   static std::string List2String (const Bencoding_List_t&);
   static std::string MetaInfo2String (const Bencoding_Dictionary_t&);
 
-  static std::string Handshake2String (const struct BitTorrent_PeerHandshake&);
-  static std::string Record2String (const struct BitTorrent_Record&);
+  static std::string HandShake2String (const struct BitTorrent_PeerHandShake&);
+  static std::string Record2String (const struct BitTorrent_PeerRecord&);
 
   static std::string Type2String (enum BitTorrent_MessageType&);
 
@@ -50,11 +50,11 @@ class BitTorrent_Export BitTorrent_Tools
   static unsigned int MetaInfo2Length (const Bencoding_Dictionary_t&); // metainfo
 
   // *IMPORTANT NOTE*: caller needs to free the return value (second argument)
-  static bool parseMetaInfoFile (const std::string&,       // metainfo (aka .bittorrent) file
-                                 Bencoding_Dictionary_t*&, // return value: metainfo
-                                 bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,
-                                 bool = NET_PROTOCOL_DEFAULT_YACC_TRACE);
+  static bool parseMetaInfoFile (const struct Common_ParserConfiguration&, // parser configuration
+                                 const std::string&,                       // metainfo (aka .bittorrent) file
+                                 Bencoding_Dictionary_t*&);                // return value: metainfo
   static void free (Bencoding_Dictionary_t*&); // metainfo
+
   // *NOTE*: this follows the Azureus style (encode client and version
   //         information)
   //         (see also: https://wiki.theory.org/BitTorrentSpecification#peer_id)
@@ -62,6 +62,10 @@ class BitTorrent_Export BitTorrent_Tools
   // *NOTE*: the key length is not specified, so this generates 20 bytes, which
   //         makes it somewhat consistent with the other request values
   static std::string generateKey ();
+
+  // *NOTE*: see also: https://wiki.theory.org/BitTorrentSpecification#Overview
+  static bool torrentSupportsScrape (const std::string&); // announce URI
+  static std::string AnnounceURL2ScrapeURL (const std::string&); // announce URI
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools ())

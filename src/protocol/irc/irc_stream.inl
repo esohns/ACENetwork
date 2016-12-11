@@ -257,10 +257,11 @@ IRC_Stream_T<StreamStateType,
                 ACE_TEXT ("dynamic_cast<IRC_Module_Parser_T*> failed, aborting\n")));
     return false;
   } // end IF
-  if (!parser_impl_p->initialize (configuration_in.messageAllocator,                            // message allocator
-                                  configuration_in.moduleHandlerConfiguration->crunchMessages, // "crunch" messages ?
-                                  configuration_in.moduleHandlerConfiguration->traceScanning,  // debug scanner ?
-                                  configuration_in.moduleHandlerConfiguration->traceParsing))  // debug parser ?
+  ACE_ASSERT (configuration_in.moduleHandlerConfiguration->parserConfiguration);
+  if (!parser_impl_p->initialize (configuration_in.messageAllocator,                                               // message allocator
+                                  configuration_in.moduleHandlerConfiguration->crunchMessages,                     // "crunch" messages ?
+                                  configuration_in.moduleHandlerConfiguration->parserConfiguration->debugScanner,  // debug scanner ?
+                                  configuration_in.moduleHandlerConfiguration->parserConfiguration->debugParser))  // debug parser ?
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),

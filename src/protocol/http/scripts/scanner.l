@@ -64,7 +64,7 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 /* *NOTE*: 'noline' not supported (on Linux, flex 2.5.39)
            --> use --noline and (manually) remove '#line's introduced by %top */
 /* %option ansi-definitions ansi-prototypes */
-/* *IMPORTANT NOTE*: do NOT mess with these (it's broken)
+/* *IMPORTANT NOTE*: do NOT mess with these (it's broken) */
 /* %option bison-bridge bison-locations */
 %option 8bit batch never-interactive
 %option reentrant pointer
@@ -76,7 +76,10 @@ void HTTP_Scanner_set_column (int, yyscan_t);
                      ansi-definitions, ansi-prototypes, trace header-file extra-type'
 */
 %option extra-type="HTTP_IParser*"
-%option tables-file="http_scanner.tab"
+/* *NOTE*: option 'tables-file' breaks 'yylineno' (flex 2.6.3), which crashes
+           the lexer when 'debug' is set (apparently, array yy_rule_linenum is
+           not initialized in this case) */
+/* %option tables-file="http_scanner.tab" */
 
 /* *NOTE*: see RFC 1945 page 10 */
 OCTET          [\x00-\xFF]
@@ -557,16 +560,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              else
                                missing_chunk_bytes -= yyleng;
                              if (!missing_chunk_bytes)
-                             {
-                               try {
-//                                 iparser_p->finished ();
-                               } catch (...) {
-                                 ACE_DEBUG ((LM_ERROR,
-                                             ACE_TEXT ("caught exception in HTTP_IParser::finished(), continuing\n")));
-                               }
-                             } // end IF
-//                             return yytokentype::BODY;
-                             return yy::HTTP_Parser::token::BODY; }
+                               return yy::HTTP_Parser::token::BODY; }
 } // end <body>
 <chunked_body>{
 {CHUNK_LINE}{CRLF}         { // *TODO*: let the scanner parse this (it does it anyway)

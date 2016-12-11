@@ -27,6 +27,7 @@
 
 #include "common_idumpstate.h"
 #include "common_iget.h"
+#include "common_iinitialize.h"
 
 #include "net_defines.h"
 
@@ -62,20 +63,13 @@ class Net_IScanner_T
 
 //////////////////////////////////////////
 
-class Net_IParser
- : public Common_IDumpState
+template <typename ConfigurationType>
+class Net_IParser_T
+ : public Common_IInitialize_T<ConfigurationType>
+ , public Common_IDumpState
 {
  public:
-  inline virtual ~Net_IParser () {};
-
-  // needs to be set before invoking parse() !
-  virtual void initialize (//const std::string&,                                  // scanner tables file (if any)
-                           bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,               // debug scanner ?
-                           bool = NET_PROTOCOL_DEFAULT_YACC_TRACE,              // debug parser ?
-                           ACE_Message_Queue_Base* = NULL,                      // data buffer queue (yywrap)
-                           bool = false,                                        // block in parse() ?
-                           ///////////////
-                           bool = NET_PROTOCOL_DEFAULT_USE_YY_SCAN_BUFFER) = 0; // yy_scan_buffer() ? : yy_scan_bytes()
+  inline virtual ~Net_IParser_T () {};
 
   virtual ACE_Message_Block* buffer () = 0;
   virtual bool debugScanner () const = 0;
@@ -100,9 +94,10 @@ class Net_IParser
 
 //////////////////////////////////////////
 
-template <typename RecordType>
+template <typename ConfigurationType,
+          typename RecordType>
 class Net_IRecordParser_T
- : public Net_IParser
+ : public Net_IParser_T<ConfigurationType>
 {
  public:
   inline virtual ~Net_IRecordParser_T () {};
@@ -119,9 +114,10 @@ class Net_IRecordParser_T
 
 //////////////////////////////////////////
 
-template <typename RecordType>
+template <typename ConfigurationType,
+          typename RecordType>
 class Net_IStreamParser_T
- : public Net_IParser
+ : public Net_IParser_T<ConfigurationType>
 {
  public:
   inline virtual ~Net_IStreamParser_T () {};

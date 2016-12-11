@@ -81,7 +81,7 @@ BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Streamer_T::handleDataMessage"));
 
-//  int result = -1;
+  int result = -1;
 
   // don't care (implies yes per default, if part of a stream)
   // *NOTE*: as this is an "upstream" module, the "wording" is wrong
@@ -98,41 +98,79 @@ BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
   const typename DataMessageType::DATA_T::DATA_T& record_r =
         data_container_r.get ();
 
+  // sanity check(s)
+  ACE_ASSERT ((record_r.handShakeRecord || record_r.peerRecord) &&
+              !(record_r.handShakeRecord && record_r.peerRecord));
+
   std::ostringstream converter;
-  // *TODO*: remove type inferences
 
-  ACE_ASSERT (false);
+  if (record_r.handShakeRecord)
+  {
+//    // sanity check
+//    if (message_inout->space () < (49 + record_r.handShakeRecord->pstr.size ()))
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("[%u]: not enough buffer space (was: %d/%d), aborting\n"),
+//                  message_inout->id (),
+//                  message_inout->space (),
+//                  (49 + record_r.handShakeRecord->pstr.size ())));
+//      goto error;
+//    } // end IF
 
-//  // sanity check
-//  if (message_inout->space () < buffer.size ())
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("[%u]: not enough buffer space (was: %d/%d), aborting\n"),
-//                message_inout->id (),
-//                message_inout->space (), buffer.size ()));
+    unsigned char pstrlen =
+        static_cast<unsigned char> (record_r.handShakeRecord->pstr.size ());
+    result = message_inout->copy (reinterpret_cast<char*> (&pstrlen),
+                                  1);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+      goto error;
+    } // end IF
+    result =
+        message_inout->copy (record_r.handShakeRecord->pstr.c_str (),
+                             pstrlen);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+      goto error;
+    } // end IF
+    result =
+        message_inout->copy (reinterpret_cast<char*> (record_r.handShakeRecord->reserved),
+                             BITTORRENT_PEER_HANDSHAKE_RESERVED_SIZE);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+      goto error;
+    } // end IF
+    result =
+        message_inout->copy (record_r.handShakeRecord->info_hash.c_str (),
+                             BITTORRENT_PRT_INFO_HASH_SIZE);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+      goto error;
+    } // end IF
+    result =
+        message_inout->copy (record_r.handShakeRecord->peer_id.c_str (),
+                             BITTORRENT_PRT_PEER_ID_LENGTH);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+      goto error;
+    } // end IF
+  } // end IF
+  else
+  {
+    ACE_ASSERT (false);
+    ACE_NOTSUP;
 
-//    // clean up
-//    passMessageDownstream_out = false;
-//    message_inout->release ();
-//    message_inout = NULL;
-
-//    return;
-//  } // end IF
-
-//  result = message_inout->copy (buffer.c_str (),
-//                                buffer.size ());
-//  if (result == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
-
-//    // clean up
-//    passMessageDownstream_out = false;
-//    message_inout->release ();
-//    message_inout = NULL;
-
-//    return;
-//  } // end IF
+    ACE_NOTREACHED (return;)
+  } // end ELSE
 
 //continue_:
 //   ACE_DEBUG ((LM_DEBUG,
@@ -141,4 +179,9 @@ BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
 //               message_inout->length ()));
 
   return;
+
+error:
+  passMessageDownstream_out = false;
+  message_inout->release ();
+  message_inout = NULL;
 }

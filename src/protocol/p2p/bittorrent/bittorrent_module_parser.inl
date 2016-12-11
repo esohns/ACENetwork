@@ -45,8 +45,6 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
                NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
  , headFragment_ (NULL)
  , crunch_ (true) // strip protocol data ?
- , debugScanner_ (NET_PROTOCOL_DEFAULT_LEX_TRACE) // trace scanning ?
- , debugParser_ (NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Parser_T::BitTorrent_Module_Parser_T"));
 
@@ -89,6 +87,9 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
 
   int result = -1;
 
+  // sanity check(s)
+  ACE_ASSERT (configuration_in.parserConfiguration);
+
   if (inherited::isInitialized_)
   {
     ACE_DEBUG ((LM_DEBUG,
@@ -102,8 +103,6 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
 
     crunch_ = true;
 
-    debugScanner_ = NET_PROTOCOL_DEFAULT_LEX_TRACE;
-    debugParser_ = NET_PROTOCOL_DEFAULT_YACC_TRACE;
     if (headFragment_)
     {
       headFragment_->release ();
@@ -112,15 +111,14 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
   } // end IF
 
 //  crunch_ = configuration_in.crunchMessages;
-
-  debugScanner_ = configuration_in.traceScanning;
-  debugParser_ = configuration_in.traceParsing;
-
-  inherited2::initialize (debugScanner_,
-                          debugParser_,
-                          inherited::msg_queue_,
-                          true,
-                          true);
+  const_cast<const ConfigurationType&> (configuration_in)->parserConfiguration.messageQueue =
+      inherited::msg_queue_;
+  if (!inherited2::initialize (configuration_in.parserConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize parser driver: \"%m\", aborting\n")));
+    return false;
+  } // end IF
 
   return inherited::initialize (configuration_in);
 }
@@ -309,7 +307,7 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
                            ConfigurationType,
                            ControlMessageType,
                            DataMessageType,
-                           SessionMessageType>::record (struct BitTorrent_Record*& record_inout)
+                           SessionMessageType>::record (struct BitTorrent_PeerRecord*& record_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Parser_T::record"));
 
@@ -322,7 +320,7 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
   data_container_r.set (record_inout);
   record_inout = NULL;
 
-  const struct BitTorrent_Record& record_r = data_container_r.get ();
+  const struct BitTorrent_PeerRecord& record_r = data_container_r.get ();
 
   // debug info
   if (inherited2::trace_)
@@ -386,7 +384,7 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
                            ConfigurationType,
                            ControlMessageType,
                            DataMessageType,
-                           SessionMessageType>::handshake (struct BitTorrent_PeerHandshake*& handshake_inout)
+                           SessionMessageType>::handshake (struct BitTorrent_PeerHandShake*& handshake_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Parser_T::handshake"));
 
@@ -398,7 +396,7 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
   if (inherited2::trace_)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
-                ACE_TEXT (BitTorrent_Tools::Handshake2String (*handshake_inout).c_str ())));
+                ACE_TEXT (BitTorrent_Tools::HandShake2String (*handshake_inout).c_str ())));
 
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
       const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
@@ -445,8 +443,6 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
  , headFragment_ (NULL)
  , crunch_ (true) // strip protocol data ?
- , debugScanner_ (NET_PROTOCOL_DEFAULT_LEX_TRACE) // trace scanning ?
- , debugParser_ (NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::BitTorrent_Module_ParserH_T"));
 
@@ -512,7 +508,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::initialize"));
 
   // sanity check(s)
-  ACE_ASSERT (configuration_in.streamConfiguration);
+  ACE_ASSERT (configuration_in.parserConfiguration);
 
   if (inherited::isInitialized_)
   {
@@ -521,8 +517,6 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
 
     crunch_ = true;
 
-    debugScanner_ = NET_PROTOCOL_DEFAULT_LEX_TRACE;
-    debugParser_ = NET_PROTOCOL_DEFAULT_YACC_TRACE;
     if (headFragment_)
     {
       headFragment_->release ();
@@ -531,15 +525,15 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
   } // end IF
 
 //  crunch_ = configuration_in.crunchMessages;
-
-  debugScanner_ = configuration_in.traceScanning;
-  debugParser_ = configuration_in.traceParsing;
-
-  inherited2::initialize (debugScanner_,
-                          debugParser_,
-                          inherited::msg_queue_,
-//                          true,
-                          true);
+  const_cast<const ConfigurationType&> (configuration_in).parserConfiguration->messageQueue =
+      inherited::msg_queue_;
+  if (!inherited2::initialize (*configuration_in.parserConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to initialize parser driver: \"%m\", aborting\n"),
+                inherited::mod_->name ()));
+    return false;
+  } // end IF
 
   return inherited::initialize (configuration_in);
 }
@@ -954,7 +948,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             StreamStateType,
                             SessionDataType,
                             SessionDataContainerType,
-                            StatisticContainerType>::record (struct BitTorrent_Record*& record_inout)
+                            StatisticContainerType>::record (struct BitTorrent_PeerRecord*& record_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::record"));
 
@@ -964,16 +958,16 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
 
   DATA_CONTAINER_T& data_container_r =
       const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
-  data_container_r.set (record_inout);
+  DATA_T& data_r = const_cast<DATA_T&> (data_container_r.get ());
+  ACE_ASSERT (!data_r.peerRecord);
+  data_r.peerRecord = record_inout;
   record_inout = NULL;
-
-  const struct BitTorrent_Record& record_r = data_container_r.get ();
 
   // debug info
   if (inherited2::trace_)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
-                ACE_TEXT (BitTorrent_Tools::Record2String (record_r).c_str ())));
+                ACE_TEXT (BitTorrent_Tools::Record2String (*data_r.peerRecord).c_str ())));
 
   // set new head fragment ?
   ACE_Message_Block* message_block_p = headFragment_;
@@ -1043,28 +1037,89 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             StreamStateType,
                             SessionDataType,
                             SessionDataContainerType,
-                            StatisticContainerType>::handshake (struct BitTorrent_PeerHandshake*& handshake_inout)
+                            StatisticContainerType>::handshake (struct BitTorrent_PeerHandShake*& handShake_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::handshake"));
 
   // sanity check(s)
-  ACE_ASSERT (handshake_inout);
   ACE_ASSERT (inherited::sessionData_);
+  ACE_ASSERT (headFragment_);
+  ACE_ASSERT (handShake_inout);
+
+  DATA_CONTAINER_T& data_container_r =
+      const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
+  DATA_T& data_r = const_cast<DATA_T&> (data_container_r.get ());
+  ACE_ASSERT (!data_r.handShakeRecord);
+  data_r.handShakeRecord = handShake_inout;
+  handShake_inout = NULL;
 
   // debug info
   if (inherited2::trace_)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
-                ACE_TEXT (BitTorrent_Tools::Handshake2String (*handshake_inout).c_str ())));
+                ACE_TEXT (BitTorrent_Tools::HandShake2String (*data_r.handShakeRecord).c_str ())));
 
+  // step1: set session data
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
       const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
 
   // sanity check(s)
-  ACE_ASSERT (session_data_r.handshake == NULL);
-
   // *TODO*: remove type inference
-  session_data_r.handshake = handshake_inout;
+  ACE_ASSERT (!session_data_r.handShake);
 
-  handshake_inout = NULL;
+  ACE_NEW_NORETURN (session_data_r.handShake,
+                    struct BitTorrent_PeerHandShake ());
+  if (!session_data_r.handShake)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("%s: failed to allocate memory: \"%m\", returning\n"),
+                inherited::mod_->name ()));
+    return;
+  } // end IF
+  *session_data_r.handShake = *data_r.handShakeRecord;
+
+  // step2: set new head fragment ?
+  ACE_Message_Block* message_block_p = headFragment_;
+  do
+  {
+    if (!message_block_p->cont ()) break;
+    message_block_p = message_block_p->cont ();
+  } while (true);
+  if (message_block_p != inherited2::fragment_)
+  {
+    message_block_p = headFragment_;
+    // *IMPORTANT NOTE*: the fragment has already been unlinked in the previous
+    //                   call to switchBuffer()
+    headFragment_ = dynamic_cast<DataMessageType*> (inherited2::fragment_);
+    ACE_ASSERT (headFragment_);
+  } // end IF
+  else
+  {
+    message_block_p = headFragment_;
+    headFragment_ = NULL;
+  } // end ELSE
+
+  // make sure the whole fragment chain references the same data record
+  DataMessageType* message_p =
+      dynamic_cast<DataMessageType*> (headFragment_->cont ());
+  while (message_p)
+  {
+    data_container_r.increase ();
+    DATA_CONTAINER_T* data_container_2 = &data_container_r;
+    message_p->initialize (data_container_2,
+                           NULL);
+    message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
+  } // end WHILE
+
+  // step3: push message (chain)
+  int result = inherited::put_next (message_block_p, NULL);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", continuing\n"),
+                inherited::mod_->name ()));
+
+    // clean up
+    message_block_p->release ();
+  } // end IF
 }

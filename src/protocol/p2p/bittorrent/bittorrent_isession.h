@@ -59,6 +59,8 @@ class BitTorrent_ISession_T
  public:
   inline virtual ~BitTorrent_ISession_T () {};
 
+  virtual void scrape () = 0;
+
   virtual void trackerConnect (const AddressType&) = 0; // tracker address
   virtual void trackerDisconnect (const AddressType&) = 0; // tracker address
 
@@ -70,9 +72,10 @@ class BitTorrent_ISession_T
 
   //--------------------------------------
 
-  virtual void notify (const Bencoding_Dictionary_t&) = 0; // tracker message record
-  virtual void notify (const struct BitTorrent_Record&, // message record
-                       ACE_Message_Block* = NULL) = 0;  // data piece (if applicable)
+  virtual void notify (const Bencoding_Dictionary_t&) = 0; // tracker (scrape-/)response record
+  virtual void notify (const struct BitTorrent_PeerHandShake&) = 0; // peer handshake record
+  virtual void notify (const struct BitTorrent_PeerRecord&, // message record
+                       ACE_Message_Block* = NULL) = 0;      // data piece (if applicable)
 };
 
 #endif

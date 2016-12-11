@@ -69,7 +69,7 @@ template <typename StreamStateType,
 class BitTorrent_PeerStream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        int,
+                        enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
                         StreamStateType,
@@ -105,7 +105,7 @@ class BitTorrent_PeerStream_T
  private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        int,
+                        enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
                         StreamStateType,
@@ -156,8 +156,8 @@ class BitTorrent_PeerStream_T
                                       DataMessageType,
                                       SessionMessageType,
                                       ModuleHandlerConfigurationType,
-                                      int,
-                                      Stream_SessionMessageType,
+                                      enum Stream_ControlType,
+                                      enum Stream_SessionMessageType,
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
@@ -166,7 +166,7 @@ class BitTorrent_PeerStream_T
                                 Common_TimePolicy_t,
                                 Stream_SessionId_t,             // session id type
                                 SessionDataType,                // session data type
-                                Stream_SessionMessageType,      // session event type
+                                enum Stream_SessionMessageType, // session event type
                                 Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
                                 BitTorrent_INotify_t,           // stream notification interface type

@@ -53,11 +53,16 @@
 enum Net_LinkLayerType&
 operator++ (enum Net_LinkLayerType& lhs) // prefix-
 {
+  // roll over ?
+  if (lhs == NET_LINKLAYER_MAX)
+  {
+    lhs = NET_LINKLAYER_ATM;
+    return lhs;
+  } // end IF
+
   int result = lhs << 1;
   lhs = static_cast<enum Net_LinkLayerType> (result);
-
-  // roll over
-  if (lhs >= NET_LINKLAYER_MAX) lhs = NET_LINKLAYER_ATM;
+  if (lhs >= NET_LINKLAYER_MAX) lhs = NET_LINKLAYER_MAX;
 
   return lhs;
 }
@@ -960,22 +965,23 @@ continue_:
   ACE_ASSERT (ifaddrs_p);
 
   struct sockaddr_in* sockaddr_in_p = NULL;
+//  struct sockaddr_ll* sockaddr_ll_p = NULL;
   for (struct ifaddrs* ifaddrs_2 = ifaddrs_p;
        ifaddrs_2;
        ifaddrs_2 = ifaddrs_2->ifa_next)
   {
-    if (((ifaddrs_2->ifa_flags & IFF_UP) == 0) ||
-        (!ifaddrs_2->ifa_addr))
-      continue;
+//    if (((ifaddrs_2->ifa_flags & IFF_UP) == 0) ||
+//        (!ifaddrs_2->ifa_addr))
+//      continue;
     if (ACE_OS::strcmp (interface_identifier_string.c_str (),
                         ifaddrs_2->ifa_name))
       continue;
 
-    if ((ifaddrs_2->ifa_addr->sa_family != AF_INET) &&
-        (ifaddrs_2->ifa_addr->sa_family != AF_PACKET)) // support ppp
+    if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
+//        (ifaddrs_2->ifa_addr->sa_family != AF_PACKET)) // support ppp
       continue;
-    if (ifaddrs_2->ifa_addr->sa_family == AF_PACKET) // support ppp
-      ifaddrs_2->ifa_addr->sa_family = AF_INET;
+//    if (ifaddrs_2->ifa_addr->sa_family == AF_PACKET) // support ppp
+//      ifaddrs_2->ifa_addr->sa_family = AF_INET;
 
     sockaddr_in_p = (struct sockaddr_in*)ifaddrs_2->ifa_addr;
     result = IPAddress_out.set (sockaddr_in_p,
@@ -1029,6 +1035,7 @@ Net_Common_Tools::getDefaultDeviceIdentifier (enum Net_LinkLayerType type_in)
   switch (type_in)
   {
     case NET_LINKLAYER_802_3:
+    case NET_LINKLAYER_PPP:
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       struct _IP_ADAPTER_ADDRESSES_LH* ip_adapter_addresses_p = NULL;
@@ -1079,8 +1086,13 @@ Net_Common_Tools::getDefaultDeviceIdentifier (enum Net_LinkLayerType type_in)
         ip_adapter_addresses_p;
       do
       {
-        if ((ip_adapter_addresses_2->IfType != IF_TYPE_ETHERNET_CSMACD) ||
-            (ip_adapter_addresses_2->IfType != IF_TYPE_IS088023_CSMACD))
+        if (type_in == NET_LINKLAYER_802_3)
+        {
+          if ((ip_adapter_addresses_2->IfType != IF_TYPE_ETHERNET_CSMACD) ||
+              (ip_adapter_addresses_2->IfType != IF_TYPE_IS088023_CSMACD))
+            goto continue_;
+        } // end IF
+        else if (ip_adapter_addresses_2->IfType != IF_TYPE_PPP)
           goto continue_;
         if (ip_adapter_addresses_2->OperStatus == IfOperStatusUp)
           connected_interfaces.insert (std::make_pair (ip_adapter_addresses_2->Ipv4Metric,
@@ -1199,7 +1211,6 @@ continue_:
     }
     case NET_LINKLAYER_ATM:
     case NET_LINKLAYER_FDDI:
-    case NET_LINKLAYER_PPP:
     case NET_LINKLAYER_802_11:
     {
       ACE_ASSERT (false);
@@ -1231,7 +1242,7 @@ Net_Common_Tools::getDefaultInterface (int linkLayerType_in)
   for (enum Net_LinkLayerType i = NET_LINKLAYER_ATM;
        i < NET_LINKLAYER_MAX;
        ++i)
-    if (i & linkLayerType_in)
+    if (linkLayerType_in & i)
     {
       interface_identifier =
         Net_Common_Tools::getDefaultDeviceIdentifier (i);

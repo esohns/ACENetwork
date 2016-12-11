@@ -35,7 +35,9 @@ class BitTorrent_IControl_T
  public:
   inline virtual ~BitTorrent_IControl_T () {};
 
-  virtual void download (const std::string&) = 0; // metainfo (aka '.torrent') file URI
+  // *NOTE*: sending a request to the tracker allocates a session and initiates
+  //         communication with the swarm of registered peers
+  virtual void request (const std::string&) = 0; // metainfo (aka '.torrent') file URI
   virtual SessionInterfaceType* get (const std::string&) = 0; // metainfo (aka '.torrent') file URI
 
   virtual void stop (bool = false) = 0; // wait ?

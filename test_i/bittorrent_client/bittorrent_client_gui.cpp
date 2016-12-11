@@ -1305,19 +1305,29 @@ ACE_TMAIN (int argc_in,
   configuration.trackerSocketHandlerConfiguration.userData =
     &configuration.trackerUserData;
   ////////////////////////// stream configuration //////////////////////////////
+  configuration.parserConfiguration.debugScanner = debug;
+  if (debug)
+    configuration.parserConfiguration.debugScanner = true;
+
   configuration.peerStreamConfiguration.messageAllocator = &peer_message_allocator;
   configuration.peerStreamConfiguration.moduleConfiguration->streamConfiguration =
       &configuration.peerStreamConfiguration;
   configuration.peerStreamConfiguration.statisticReportingInterval =
       reporting_interval;
-  configuration.peerModuleHandlerConfiguration.traceParsing = debug;
+  configuration.peerModuleHandlerConfiguration.parserConfiguration =
+      &configuration.parserConfiguration;
+
   configuration.trackerStreamConfiguration.moduleConfiguration->streamConfiguration =
       &configuration.trackerStreamConfiguration;
   configuration.trackerStreamConfiguration.statisticReportingInterval =
       reporting_interval;
-  configuration.trackerModuleHandlerConfiguration.traceParsing = debug;
+  configuration.trackerModuleHandlerConfiguration.parserConfiguration =
+      &configuration.parserConfiguration;
   configuration.trackerStreamConfiguration.messageAllocator =
       &tracker_message_allocator;
+
+  configuration.sessionConfiguration.parserConfiguration =
+      &configuration.parserConfiguration;
 
   configuration.peerUserData.configuration =
       &configuration.peerConnectionConfiguration;

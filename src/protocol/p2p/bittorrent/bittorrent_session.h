@@ -95,6 +95,7 @@ class BitTorrent_Session_T
 {
  public:
   // convenient types
+  typedef typename PeerConnectionType::ICONNECTION_T ICONNECTION_T;
   typedef typename TrackerConnectionType::ICONNECTION_T ITRACKER_CONNECTION_T;
   typedef typename PeerConnectionType::ISTREAM_CONNECTION_T ISTREAM_CONNECTION_T;
   typedef typename TrackerConnectionType::ISTREAM_CONNECTION_T ITRACKER_STREAM_CONNECTION_T;
@@ -193,15 +194,18 @@ class BitTorrent_Session_T
                                             CBDataType> TRACKER_HANDLER_T;
 
   // implement/override (part of) BitTorrent_ISession_T
+  virtual void connect (Net_ConnectionId_t);
   virtual void disconnect (Net_ConnectionId_t);
-  inline virtual void trackerConnect (Net_ConnectionId_t id_in) { inherited::connect (id_in); };
+  virtual void scrape ();
+  virtual void trackerConnect (Net_ConnectionId_t);
   virtual void trackerDisconnect (Net_ConnectionId_t);
   virtual void notify (const Bencoding_Dictionary_t&); // tracker message record
-  virtual void notify (const struct BitTorrent_Record&, // message record
-                       ACE_Message_Block* = NULL);      // data piece (if applicable)
+  virtual void notify (const struct BitTorrent_PeerHandShake&); // peer handshake record
+  virtual void notify (const struct BitTorrent_PeerRecord&, // message record
+                       ACE_Message_Block* = NULL);          // data piece (if applicable)
 
-  void error (const struct BitTorrent_Record&);
-  void log (const struct BitTorrent_Record&);
+  void error (const struct BitTorrent_PeerRecord&);
+  void log (const struct BitTorrent_PeerRecord&);
 
   bool                             logToFile_;
   std::string                      metaInfoFileName_;

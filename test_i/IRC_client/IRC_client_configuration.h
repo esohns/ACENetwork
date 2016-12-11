@@ -141,7 +141,8 @@ struct IRC_Client_InputHandlerConfiguration
 struct IRC_Client_Configuration
 {
   inline IRC_Client_Configuration ()
-   : socketConfiguration ()
+   : parserConfiguration ()
+   , socketConfiguration ()
    , socketHandlerConfiguration ()
    , connectionConfiguration ()
    ///////////////////////////////////////
@@ -157,6 +158,8 @@ struct IRC_Client_Configuration
    , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
+  // ****************************** parser *************************************
+  struct Common_ParserConfiguration            parserConfiguration;
   // ****************************** socket *************************************
   struct Net_SocketConfiguration               socketConfiguration;
   struct IRC_Client_SocketHandlerConfiguration socketHandlerConfiguration;

@@ -36,7 +36,8 @@
 
 template <typename SessionMessageType>
 class BitTorrent_Bencoding_ParserDriver_T
- : public Net_CppParserBase_T<BitTorrent_Bencoding_Scanner,
+ : public Net_CppParserBase_T<struct Common_ParserConfiguration,
+                              BitTorrent_Bencoding_Scanner,
                               yy::BitTorrent_Bencoding_Parser,
                               BitTorrent_Bencoding_IParser,
                               std::string,
@@ -48,7 +49,8 @@ class BitTorrent_Bencoding_ParserDriver_T
   virtual ~BitTorrent_Bencoding_ParserDriver_T ();
 
   // convenient types
-  typedef Net_CppParserBase_T<BitTorrent_Bencoding_Scanner,
+  typedef Net_CppParserBase_T<struct Common_ParserConfiguration,
+                              BitTorrent_Bencoding_Scanner,
                               yy::BitTorrent_Bencoding_Parser,
                               BitTorrent_Bencoding_IParser,
                               std::string,
@@ -88,7 +90,8 @@ class BitTorrent_Bencoding_ParserDriver_T
   Bencoding_Dictionary_t*             bencoding_;
 
  private:
-  typedef Net_CppParserBase_T<BitTorrent_Bencoding_Scanner,
+  typedef Net_CppParserBase_T<struct Common_ParserConfiguration,
+                              BitTorrent_Bencoding_Scanner,
                               yy::BitTorrent_Bencoding_Parser,
                               BitTorrent_Bencoding_IParser,
                               std::string,

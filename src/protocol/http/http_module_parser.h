@@ -100,9 +100,9 @@ class HTTP_Module_Parser_T
   //         only from the HTTP_Record (i.e. DATA_T)
   bool             crunch_;
 
-  // driver
-  bool             debugScanner_;
-  bool             debugParser_;
+//  // driver
+//  bool             debugScanner_;
+//  bool             debugParser_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -207,9 +207,9 @@ class HTTP_Module_ParserH_T
   //         only from the HTTP_Record (i.e. DATA_T)
   bool             crunch_;
 
-  // driver
-  bool             debugScanner_;
-  bool             debugParser_;
+//  // driver
+//  bool             debugScanner_;
+//  bool             debugParser_;
 };
 
 // include template definition

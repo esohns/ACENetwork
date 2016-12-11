@@ -51,8 +51,11 @@ extern void DHCP_Scanner_set_column (int, yyscan_t);
 //#define YY_DECL
 %}
 
+%option prefix="DHCP_Scanner_"
+
 %option header-file="dhcp_scanner.h" outfile="dhcp_scanner.cpp"
-%option batch 8bit nodefault never-interactive nostdinit yylineno noyywrap
+%option batch 8bit never-interactive yylineno
+%option nodefault nostdinit noyywrap nomain nounput
 /* %option c++ yyclass="DHCP_Scanner" */
 /* %option ansi-definitions ansi-prototypes bison-bridge */
 /* *NOTE*: the 'line' directives confuse gdb */
@@ -60,7 +63,7 @@ extern void DHCP_Scanner_set_column (int, yyscan_t);
            --> use --noline and (manually) remove '#line's introduced by %top */
 %option ansi-definitions ansi-prototypes bison-locations
 /* *IMPORTANT NOTE*: 'read' requires 'unistd'(.h) */
-%option reentrant pointer prefix="DHCP_Scanner_" nomain
+%option reentrant pointer
 /* *TODO*: find out why 'read' does not compile (on Linux, flex 2.5.39) */
 %option align read full
 %option backup debug perf-report perf-report verbose warn

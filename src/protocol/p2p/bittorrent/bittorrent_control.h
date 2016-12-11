@@ -48,8 +48,8 @@ class BitTorrent_Control_T
 
   // implement BitTorrent_IControl_T
   inline virtual const SESSIONS_T& get () const { return sessions_; };
+  virtual void request (const std::string&); // metainfo (aka '.torrent') file URI
   virtual SessionInterfaceType* get (const std::string&); // metainfo (aka '.torrent') file URI
-  virtual void download (const std::string&); // metainfo (aka '.torrent') file URI
   virtual void stop (bool = false); // wait ?
   virtual void wait ();
   ////////////////////////////////////////

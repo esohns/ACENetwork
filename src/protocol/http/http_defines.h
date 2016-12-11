@@ -68,7 +68,8 @@
 
 #define HTTP_PRT_MIMETYPE_WWWURLENCODING_STRING   "application/x-www-form-urlencoded"
 
-// regular expressions
+// parser
+#define HTTP_PRT_LEXER_DFA_TABLES_FILENAME        "http_scanner.tab"
 #define HTTP_PRT_REGEX_CHUNK_LINE                 "^([[:xdigit:]]+)(?:(;.+)*)(?:\\r\\n)$"
 
 #endif

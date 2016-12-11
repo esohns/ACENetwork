@@ -25,6 +25,10 @@
 
 #include "common_file_tools.h"
 
+#ifdef HAVE_CONFIG_H
+#include "libACENetwork_config.h"
+#endif
+
 #include "net_macros.h"
 
 #include "http_common.h"
@@ -36,7 +40,8 @@ template <typename SessionMessageType>
 HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (const std::string& scannerTables_in,
                                                               bool traceScanning_in,
                                                               bool traceParsing_in)
- : finished_ (false)
+ : configuration_ (NULL)
+ , finished_ (false)
  , fragment_ (NULL)
  , offset_ (0)
  , record_ (NULL)
@@ -67,47 +72,67 @@ HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (const std::string&
   } // end IF
   ACE_ASSERT (scannerState_);
 
-  // step2: load tables ?
-  FILE* file_p = NULL;
-  if (!scannerTables_.empty ())
-  {
-    file_p = ACE_OS::fopen (scannerTables_.c_str (),
-                            ACE_TEXT_ALWAYS_CHAR ("rb"));
-    if (!file_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::fopen(\"%s\"): \"%m\", returning\n"),
-                  ACE_TEXT (scannerTables_.c_str ())));
-      return;
-    } // end IF
-    result = HTTP_Scanner_tables_fload (file_p,
-                                        scannerState_);
-    if (result)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to yy_tables_fload(\"%s\"): \"%m\", returning\n"),
-                  ACE_TEXT (scannerTables_.c_str ())));
+//  // step2: load tables ?
+//  FILE* file_p = NULL;
+//  if (!scannerTables_.empty ())
+//  {
+//    std::string filename_string;
+//    std::string package_name;
+//#ifdef HAVE_CONFIG_H
+//    package_name = ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME);
+//#else
+//#error "package name not available, set HAVE_CONFIG_H"
+//#endif
+//#if defined (DEBUG_DEBUGGER)
+//  filename_string = Common_File_Tools::getWorkingDirectory ();
+//  filename_string += ACE_DIRECTORY_SEPARATOR_STR;
+//  filename_string += ACE_TEXT_ALWAYS_CHAR ("../../src/protocol/http");
+//#else
+//    filename_string =
+//        Common_File_Tools::getConfigurationDataDirectory (package_name,
+//                                                          true);
+//#endif // #ifdef DEBUG_DEBUGGER
+//    filename_string += ACE_DIRECTORY_SEPARATOR_STR;
+//    filename_string +=
+//        ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
+//    filename_string += ACE_DIRECTORY_SEPARATOR_STR;
+//    filename_string += scannerTables_;
+//    file_p = ACE_OS::fopen (filename_string.c_str (),
+//                            ACE_TEXT_ALWAYS_CHAR ("rb"));
+//    if (!file_p)
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_OS::fopen(\"%s\"): \"%m\", returning\n"),
+//                  ACE_TEXT (filename_string.c_str ())));
+//      return;
+//    } // end IF
+//    result = HTTP_Scanner_tables_fload (file_p,
+//                                        scannerState_);
+//    if (result)
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to yy_tables_fload(\"%s\"): \"%m\", returning\n"),
+//                  ACE_TEXT (filename_string.c_str ())));
 
-      // clean up
-      result = ACE_OS::fclose (file_p);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::fclose(\"%s\"): \"%m\", continuing\n"),
-                    ACE_TEXT (scannerTables_.c_str ())));
+//      // clean up
+//      result = ACE_OS::fclose (file_p);
+//      if (result == -1)
+//        ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("failed to ACE_OS::fclose(\"%s\"): \"%m\", continuing\n"),
+//                    ACE_TEXT (filename_string.c_str ())));
 
-      return;
-    } // end IF
-    result = ACE_OS::fclose (file_p);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::fclose(\"%s\"): \"%m\", continuing\n"),
-                  ACE_TEXT (scannerTables_.c_str ())));
+//      return;
+//    } // end IF
+//    result = ACE_OS::fclose (file_p);
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_OS::fclose(\"%s\"): \"%m\", continuing\n"),
+//                  ACE_TEXT (filename_string.c_str ())));
 
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("loaded \"%s\"...\n"),
-                ACE::basename (ACE_TEXT (scannerTables_.c_str ()),
-                               ACE_DIRECTORY_SEPARATOR_CHAR)));
-  } // end IF
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("loaded \"%s\"...\n"),
+//                ACE_TEXT (scannerTables_.c_str ())));
+//  } // end IF
 
   parser_.set (scannerState_);
 
@@ -129,14 +154,14 @@ HTTP_ParserDriver_T<SessionMessageType>::~HTTP_ParserDriver_T ()
 
   int result = -1;
 
-  // finalize lex scanner
-  if (!scannerTables_.empty ())
-  {
-    result = HTTP_Scanner_tables_destroy (scannerState_);
-    if (result)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to yy_tables_destroy(): \"%m\", continuing\n")));
-  } // end IF
+//  // finalize lex scanner
+//  if (!scannerTables_.empty ())
+//  {
+//    result = HTTP_Scanner_tables_destroy (scannerState_);
+//    if (result)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to yy_tables_destroy(): \"%m\", continuing\n")));
+//  } // end IF
 
   if (HTTP_Scanner_lex_destroy (scannerState_))
     ACE_DEBUG ((LM_ERROR,
@@ -147,13 +172,8 @@ HTTP_ParserDriver_T<SessionMessageType>::~HTTP_ParserDriver_T ()
 }
 
 template <typename SessionMessageType>
-void
-HTTP_ParserDriver_T<SessionMessageType>::initialize (//const std::string& scannerTables_in,
-                                                     bool traceScanning_in,
-                                                     bool traceParsing_in,
-                                                     ACE_Message_Queue_Base* messageQueue_in,
-                                                     bool blockInParse_in,
-                                                     bool useYYScanBuffer_in)
+bool
+HTTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_ParserConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::initialize"));
 
@@ -161,6 +181,7 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (//const std::string& scanne
 
   if (isInitialized_)
   {
+    configuration_ = NULL;
     finished_ = false;
     fragment_ = NULL;
     offset_ = 0;
@@ -170,7 +191,7 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (//const std::string& scanne
 
     blockInParse_ = false;
     isFirst_ = true;
-    trace_ = STREAM_DEFAULT_YACC_TRACE;
+    trace_ = NET_PROTOCOL_DEFAULT_YACC_TRACE;
 
     //if (!scannerTables_.empty ())
     //{
@@ -202,22 +223,26 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (//const std::string& scanne
     isInitialized_ = false;
   } // end IF
 
-  blockInParse_ = blockInParse_in;
-  trace_ = traceParsing_in;
-  messageQueue_ = messageQueue_in;
-  useYYScanBuffer_ = useYYScanBuffer_in;
+  configuration_ =
+      &const_cast<struct Common_ParserConfiguration&> (configuration_in);
+  blockInParse_ = configuration_->block;
+  trace_ = configuration_->debugParser;
+  messageQueue_ = configuration_->messageQueue;
+  useYYScanBuffer_ = configuration_->useYYScanBuffer;
 
-  HTTP_Scanner_set_debug ((traceScanning_in ? 1 : 0),
+  HTTP_Scanner_set_debug ((configuration_->debugScanner ? 1 : 0),
                           scannerState_);
 #if YYDEBUG
-  parser_.set_debug_level (traceParsing_in ? 1
-                                           : 0); // binary (see bison manual)
+  parser_.set_debug_level (trace_ ? 1
+                                  : 0); // binary (see bison manual)
   yydebug = (trace_ ? 1 : 0);
 //  yysetdebug (trace_ ? 1 : 0);
 #endif
 
   // OK
   isInitialized_ = true;
+
+  return true;
 }
 
 template <typename SessionMessageType>
@@ -329,10 +354,9 @@ HTTP_ParserDriver_T<SessionMessageType>::parse (ACE_Message_Block* data_in)
   // parse data fragment
   try {
     result = parser_.parse ();
-//    result = ::yyparse (this, scannerState_);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in ::yyparse(), continuing\n")));
+                ACE_TEXT ("caught exception in yy::HTTP_Parser::parse(), continuing\n")));
     result = 1;
   }
   switch (result)

@@ -58,7 +58,7 @@ template <typename StreamStateType,
 class HTTP_Stream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        int,
+                        enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
                         StreamStateType,
@@ -94,7 +94,7 @@ class HTTP_Stream_T
  private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        int,
+                        enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
                         StreamStateType,
@@ -130,7 +130,7 @@ class HTTP_Stream_T
                                 DataMessageType,
                                 SessionMessageType,
                                 ModuleHandlerConfigurationType,
-                                int,
+                                enum Stream_ControlType,
                                 enum Stream_SessionMessageType,
                                 StreamStateType,
                                 SessionDataType,
@@ -144,12 +144,12 @@ class HTTP_Stream_T
   //                              BISECTOR_T> MODULE_MARSHAL_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                Stream_SessionId_t,             // session id type
-                                SessionDataType,                // session data type
-                                enum Stream_SessionMessageType, // session event type
+                                Stream_SessionId_t,
+                                SessionDataType,
+                                enum Stream_SessionMessageType,
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
-                                HTTP_Stream_INotify_t,          // stream notification interface type
+                                HTTP_Stream_INotify_t,
                                 STREAMER_T,
                                 PARSER_T> MODULE_MARSHAL_T;
 
@@ -181,12 +181,12 @@ class HTTP_Stream_T
                                             HTTP_RuntimeStatistic_t> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                Stream_SessionId_t,             // session id type
-                                SessionDataType,                // session data type
-                                enum Stream_SessionMessageType, // session event type
+                                Stream_SessionId_t,
+                                SessionDataType,
+                                enum Stream_SessionMessageType,
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
-                                HTTP_Stream_INotify_t,          // stream notification interface type
+                                HTTP_Stream_INotify_t,
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;
 

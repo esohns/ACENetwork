@@ -360,9 +360,8 @@ struct BitTorrent_SessionConfiguration
    , metaInfo (NULL)
    , metaInfoFileName ()
    , socketHandlerConfiguration (NULL)
-   , traceParsing (NET_PROTOCOL_DEFAULT_YACC_TRACE)
-   , traceScanning (NET_PROTOCOL_DEFAULT_LEX_TRACE)
    , trackerSocketHandlerConfiguration (NULL)
+   , parserConfiguration (NULL)
    , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
@@ -372,12 +371,28 @@ struct BitTorrent_SessionConfiguration
   Bencoding_Dictionary_t*                 metaInfo;
   std::string                             metaInfoFileName;
   struct Net_SocketHandlerConfiguration*  socketHandlerConfiguration;
-  bool                                    traceParsing;
-  bool                                    traceScanning;
   struct Net_SocketHandlerConfiguration*  trackerSocketHandlerConfiguration;
+  struct Common_ParserConfiguration*      parserConfiguration;
   bool                                    useReactor;
 };
 
+// *NOTE*: see also: https://wiki.theory.org/BitTorrentSpecification#Overview
+struct BitTorrent_PeerStatus
+{
+  inline BitTorrent_PeerStatus ()
+   : am_choking (true)
+   , am_interested (false)
+   , peer_choking (true)
+   , peer_interested (false)
+  {};
+
+  bool am_choking;
+  bool am_interested;
+  bool peer_choking;
+  bool peer_interested;
+};
+typedef std::map<Net_ConnectionId_t, struct BitTorrent_PeerStatus> BitTorrent_PeerStatus_t;
+typedef BitTorrent_PeerStatus_t::iterator BitTorrent_PeerStatusIterator_t;
 struct BitTorrent_SessionState
 {
   inline BitTorrent_SessionState ()
@@ -386,21 +401,25 @@ struct BitTorrent_SessionState
    , filename ()
    , key ()
    , metaInfo (NULL)
+   , peerId ()
+   , peerStatus ()
+   , trackerConnectionId (0)
    , trackerId ()
-//   , userData (NULL)
-   , trackerResponse (NULL)
+   , trackerRequestResponse (NULL)
+   , trackerScrapeResponse (NULL)
   {};
 
-//  struct BitTorrent_Configuration* configuration;
-  Net_Connections_t           connections;
-  BitTorrent_IControl_t*      controller;
-  std::string                 filename; // .torrent file
-  std::string                 key; // tracker-
-  Bencoding_Dictionary_t*     metaInfo;
-  std::string                 trackerId;
-  Bencoding_Dictionary_t*     trackerResponse;
-
-//  struct BitTorrent_UserData* userData;
+  Net_Connections_t       connections;
+  BitTorrent_IControl_t*  controller;
+  std::string             filename; // .torrent file
+  std::string             key; // tracker-
+  Bencoding_Dictionary_t* metaInfo;
+  std::string             peerId;
+  BitTorrent_PeerStatus_t peerStatus;
+  Net_ConnectionId_t      trackerConnectionId;
+  std::string             trackerId;
+  Bencoding_Dictionary_t* trackerRequestResponse;
+  Bencoding_Dictionary_t* trackerScrapeResponse;
 };
 
 typedef BitTorrent_Session_T<struct Net_SocketHandlerConfiguration,

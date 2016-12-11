@@ -79,13 +79,12 @@ struct BitTorrent_Client_Configuration
    , trackerConnectionConfiguration ()
    ///////////////////////////////////////
    , allocatorConfiguration ()
+   , parserConfiguration ()
    , moduleConfiguration ()
    , peerModuleHandlerConfiguration ()
    , peerStreamConfiguration ()
    , trackerModuleHandlerConfiguration ()
    , trackerStreamConfiguration ()
-   , peerUserData ()
-   , trackerUserData ()
    ///////////////////////////////////////
 //   , protocolConfiguration ()
    , sessionConfiguration ()
@@ -94,6 +93,8 @@ struct BitTorrent_Client_Configuration
    , groupID (COMMON_EVENT_THREAD_GROUP_ID)
    , logToFile (TEST_I_DEFAULT_SESSION_LOG)
    , useReactor (NET_EVENT_USE_REACTOR)
+   , peerUserData ()
+   , trackerUserData ()
   {};
 
   // ****************************** signal *************************************
@@ -108,13 +109,12 @@ struct BitTorrent_Client_Configuration
   struct BitTorrent_Client_TrackerConnectionConfiguration    trackerConnectionConfiguration;
   // ****************************** stream *************************************
   struct BitTorrent_AllocatorConfiguration                   allocatorConfiguration;
+  struct Common_ParserConfiguration                          parserConfiguration;
   struct Stream_ModuleConfiguration                          moduleConfiguration;
   struct BitTorrent_Client_PeerModuleHandlerConfiguration    peerModuleHandlerConfiguration;
   struct BitTorrent_Client_PeerStreamConfiguration           peerStreamConfiguration;
   struct BitTorrent_Client_TrackerModuleHandlerConfiguration trackerModuleHandlerConfiguration;
   struct BitTorrent_Client_TrackerStreamConfiguration        trackerStreamConfiguration;
-  struct BitTorrent_Client_PeerUserData                      peerUserData;
-  struct BitTorrent_Client_TrackerUserData                   trackerUserData;
   // ***************************** protocol ************************************
 //  struct BitTorrent_ProtocolConfiguration             protocolConfiguration;
   struct BitTorrent_Client_SessionConfiguration              sessionConfiguration;
@@ -124,6 +124,9 @@ struct BitTorrent_Client_Configuration
   int                                                        groupID;
   bool                                                       logToFile;
   bool                                                       useReactor;
+
+  struct BitTorrent_Client_PeerUserData                      peerUserData;
+  struct BitTorrent_Client_TrackerUserData                   trackerUserData;
 };
 
 #endif

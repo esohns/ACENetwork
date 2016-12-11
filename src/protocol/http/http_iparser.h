@@ -23,12 +23,15 @@
 
 #include <string>
 
+#include "common.h"
+
 #include "net_iparser.h"
 
 #include "http_common.h"
 
 class HTTP_IParser
- : public Net_IRecordParser_T<struct HTTP_Record>
+ : public Net_IRecordParser_T<struct Common_ParserConfiguration,
+                              struct HTTP_Record>
 {
  public:
   inline virtual ~HTTP_IParser () {};

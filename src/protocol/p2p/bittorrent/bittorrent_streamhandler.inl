@@ -198,7 +198,7 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
   const typename BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
                                       UserDataType>::DATA_T& data_container_r =
       message_in.get ();
-  const struct BitTorrent_Record& record_r = data_container_r.get ();
+  const struct BitTorrent_PeerRecord& record_r = data_container_r.get ();
   try {
     session_->notify (record_r,
                       (record_r.type == BITTORRENT_MESSAGETYPE_PIECE) ? &const_cast<BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
@@ -445,6 +445,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   ACE_UNUSED_ARG (sessionID_in);
 
   // sanity check(s)
+  ACE_ASSERT (configuration_);
   ACE_ASSERT (session_);
 
 #if defined (_DEBUG)
@@ -455,13 +456,20 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
               ACE_TEXT (HTTP_Tools::dump (record_r).c_str ())));
 #endif
 
+  struct Common_ParserConfiguration parser_configuration = *configuration_;
+  parser_configuration.block = false;
+  parser_configuration.messageQueue = NULL;
+
   // parse bencoded record
-  PARSER_T parser (NET_PROTOCOL_DEFAULT_LEX_TRACE,
-                   NET_PROTOCOL_DEFAULT_YACC_TRACE);
-  parser.initialize (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace flex scanner ?
-                     NET_PROTOCOL_DEFAULT_YACC_TRACE, // trace bison parser ?
-                     NULL,                            // data buffer queue (yywrap)
-                     false);                          // block in parse ?
+  PARSER_T parser (parser_configuration.debugScanner,
+                   parser_configuration.debugParser);
+  if (!parser.initialize (parser_configuration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to BitTorrent_Bencoding_ParserDriver_T::initialize(), returning\n")));
+    return;
+  } // end IF
+
   if (!parser.parse (&const_cast<MESSAGE_T&> (message_in)))
   {
     ACE_DEBUG ((LM_ERROR,

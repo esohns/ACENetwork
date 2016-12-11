@@ -1316,6 +1316,9 @@ ACE_TMAIN (int argc_in,
 
   user_data.configuration = &configuration.connectionConfiguration;
 
+  configuration.parserConfiguration.debugParser = debug;
+  if (debug)
+    configuration.parserConfiguration.debugScanner = debug;
   ////////////////////// socket handler configuration //////////////////////////
   configuration.socketHandlerConfiguration.socketConfiguration =
       &configuration.socketConfiguration;
@@ -1323,9 +1326,10 @@ ACE_TMAIN (int argc_in,
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.moduleConfiguration->streamConfiguration =
       &configuration.streamConfiguration;
-  configuration.moduleHandlerConfiguration.traceParsing = debug;
   configuration.streamConfiguration.statisticReportingInterval =
       reporting_interval;
+  configuration.moduleHandlerConfiguration.parserConfiguration =
+      &configuration.parserConfiguration;
   configuration.userData = &user_data;
 
   IRC_Client_GTK_CBData cb_user_data;

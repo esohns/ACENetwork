@@ -111,21 +111,17 @@ struct DHCP_ModuleHandlerConfiguration
    : Stream_ModuleHandlerConfiguration ()
    ///////////////////////////////////////
 //   , connection (NULL)
-   , printFinalReport (true)
    , printProgressDot (DHCP_DEFAULT_PRINT_PROGRESSDOT)
    , pushStatisticMessages (true)
    , protocolConfiguration (NULL)
    , streamConfiguration (NULL)
   {
     crunchMessages = DHCP_DEFAULT_CRUNCH_MESSAGES; // dhcp parser module
-
-    traceParsing = DHCP_DEFAULT_YACC_TRACE; // dhcp parser module
-    traceScanning = DHCP_DEFAULT_LEX_TRACE; // dhcp parser module
+    printFinalReport = true;
   };
 
 //  Test_U_IConnection_t*       connection; // UDP target/net IO module
 
-  bool                               printFinalReport;
   bool                               printProgressDot; // file writer module
   bool                               pushStatisticMessages;
 

@@ -95,17 +95,13 @@ class BitTorrent_Module_Parser_T
   ////////////////////////////////////////
   // callbacks
   // *IMPORTANT NOTE*: fire-and-forget API
-  virtual void record (struct BitTorrent_Record*&); // data record
-  virtual void handshake (struct BitTorrent_PeerHandshake*&); // handshake
+  virtual void record (struct BitTorrent_PeerRecord*&); // data record
+  virtual void handshake (struct BitTorrent_PeerHandShake*&); // handshake
 
   // *NOTE*: strips the protocol data from the message buffer, leaving the
   //         'piece' content. This data is then available only from the message
   //         record (i.e. DATA_T)
-  bool               crunch_;
-
-  // driver
-  bool               debugScanner_;
-  bool               debugParser_;
+  bool             crunch_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -206,17 +202,13 @@ class BitTorrent_Module_ParserH_T
   ////////////////////////////////////////
   // callbacks
   // *IMPORTANT NOTE*: fire-and-forget API
-  virtual void record (struct BitTorrent_Record*&); // data record
-  virtual void handshake (struct BitTorrent_PeerHandshake*&); // handshake
+  virtual void record (struct BitTorrent_PeerRecord*&); // data record
+  virtual void handshake (struct BitTorrent_PeerHandShake*&); // handshake
 
   // *NOTE*: strips the protocol data from the message buffer, leaving the
   //         'piece' content. This data is then available only from the message
   //         record (i.e. DATA_T)
-  bool               crunch_;
-
-  // driver
-  bool               debugScanner_;
-  bool               debugParser_;
+  bool             crunch_;
 };
 
 // include template definition

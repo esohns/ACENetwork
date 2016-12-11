@@ -51,10 +51,6 @@
 //             length() + 2)
 #define DHCP_DEFAULT_USE_YY_SCAN_BUFFER           true
 
-// output more debugging information
-#define DHCP_DEFAULT_LEX_TRACE                    false
-#define DHCP_DEFAULT_YACC_TRACE                   false
-
 #define DHCP_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds {0: off}
 #define DHCP_DEFAULT_PRINT_PROGRESSDOT            false
 

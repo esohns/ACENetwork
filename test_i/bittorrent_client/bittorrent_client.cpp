@@ -425,10 +425,10 @@ session_setup_curses_function (void* arg_in)
 
   // step1: start a download session
   try {
-    data_p->controller->download (data_p->filename);
+    data_p->controller->request (data_p->filename);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in BitTorrent_IControl_T::download(\"%s\"), aborting\n"),
+                ACE_TEXT ("caught exception in BitTorrent_IControl_T::request(\"%s\"), aborting\n"),
                 ACE_TEXT (data_p->filename.c_str ())));
     goto error;
   }
@@ -483,6 +483,7 @@ error:
 
 void
 do_work (BitTorrent_Client_Configuration& configuration_in,
+         bool debugParser_in,
          bool useCursesLibrary_in,
          const std::string& metaInfoFileName_in,
          const ACE_Sig_Set& signalSet_in,
@@ -517,6 +518,12 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
   if (useCursesLibrary_in)
     configuration_in.cursesState = &curses_state;
 
+  configuration_in.parserConfiguration.debugParser = debugParser_in;
+  if (debugParser_in)
+    configuration_in.parserConfiguration.debugScanner = true;
+
+  configuration_in.peerModuleHandlerConfiguration.parserConfiguration =
+      &configuration_in.parserConfiguration;
   configuration_in.peerModuleHandlerConfiguration.streamConfiguration =
       &configuration_in.peerStreamConfiguration;
 //  configuration_in.moduleHandlerConfiguration.protocolConfiguration =
@@ -524,6 +531,9 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
       &configuration_in.peerModuleHandlerConfiguration;
   configuration_in.peerStreamConfiguration.moduleConfiguration =
       &configuration_in.moduleConfiguration;
+
+  configuration_in.trackerModuleHandlerConfiguration.parserConfiguration =
+      &configuration_in.parserConfiguration;
   configuration_in.trackerModuleHandlerConfiguration.streamConfiguration =
       &configuration_in.trackerStreamConfiguration;
   configuration_in.trackerStreamConfiguration.moduleHandlerConfiguration =
@@ -592,12 +602,10 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
       metaInfoFileName_in;
   configuration_in.sessionConfiguration.socketHandlerConfiguration =
       &configuration_in.peerSocketHandlerConfiguration;
-  configuration_in.sessionConfiguration.traceScanning =
-      configuration_in.peerModuleHandlerConfiguration.traceScanning;
-  configuration_in.sessionConfiguration.traceParsing =
-      configuration_in.peerModuleHandlerConfiguration.traceParsing;
   configuration_in.sessionConfiguration.trackerSocketHandlerConfiguration =
       &configuration_in.trackerSocketHandlerConfiguration;
+  configuration_in.sessionConfiguration.parserConfiguration =
+      &configuration_in.parserConfiguration;
   configuration_in.sessionConfiguration.useReactor =
       configuration_in.useReactor;
 
@@ -1004,11 +1012,6 @@ ACE_TMAIN (int argc_in,
   configuration.trackerStreamConfiguration.statisticReportingInterval =
       statistic_reporting_interval;
   ////////////////////////////////////////
-  configuration.peerModuleHandlerConfiguration.traceParsing = debug_parser;
-  configuration.peerModuleHandlerConfiguration.traceScanning = debug_parser;
-  configuration.trackerModuleHandlerConfiguration.traceParsing = debug_parser;
-  configuration.trackerModuleHandlerConfiguration.traceScanning = debug_parser;
-  ///////////////////////////////////////
   configuration.useReactor = use_reactor;
 
   if (!heap_allocator.initialize (configuration.allocatorConfiguration))
@@ -1032,6 +1035,7 @@ ACE_TMAIN (int argc_in,
   ACE_High_Res_Timer timer;
   timer.start ();
   do_work (configuration,
+           debug_parser,
            use_curses_library,
            meta_info_file_name,
            signal_set,

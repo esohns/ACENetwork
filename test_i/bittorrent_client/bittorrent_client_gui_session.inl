@@ -185,10 +185,10 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   // start session
   ACE_ASSERT (CBData_.controller);
   try {
-    CBData_.controller->download (metaInfoFileName_in);
+    CBData_.controller->request (metaInfoFileName_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in BitTorrent_IControl_T::download(\"%s\"), returning\n"),
+                ACE_TEXT ("caught exception in BitTorrent_IControl_T::request(\"%s\"), returning\n"),
                 ACE_TEXT (metaInfoFileName_in.c_str ())));
 
     // clean up

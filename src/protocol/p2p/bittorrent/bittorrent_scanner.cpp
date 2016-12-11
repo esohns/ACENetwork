@@ -5166,7 +5166,7 @@ static const flex_int32_t yy_rule_linenum[14] =
 /* *NOTE*: 'noline' not supported (on Linux, flex 2.5.39)
            --> use --noline and (manually) remove '#line's introduced by %top */
 /* %option ansi-definitions ansi-prototypes */
-/* *IMPORTANT NOTE*: do NOT mess with these (it's broken)
+/* *IMPORTANT NOTE*: do NOT mess with these (it's broken) */
 /* %option bison-bridge bison-locations */
 /* *IMPORTANT NOTE*: 'read' requires 'unistd'(.h) */
 /* *TODO*: find out why 'read' does not compile (on Linux, flex 2.5.39) */
@@ -5728,9 +5728,9 @@ YY_RULE_SETUP
                             iparser_p->offset (yyleng);
                             /* *TODO*: error handling */
                             ACE_NEW_NORETURN (yylval->handshake,
-                                              struct BitTorrent_PeerHandshake ());
+                                              struct BitTorrent_PeerHandShake ());
                             ACE_ASSERT (yylval->handshake);
-                            yylval->handshake->version.append (yytext, 19);
+                            yylval->handshake->pstr.append (yytext, 19);
                             BEGIN (state_reserved); }
   YY_BREAK
 // end <INITIAL>
@@ -5751,7 +5751,7 @@ YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 20);
                             ACE_ASSERT (yylval->handshake);
                             iparser_p->offset (yyleng);
-                            yylval->handshake->hash.append (yytext, 20);
+                            yylval->handshake->info_hash.append (yytext, 20);
                             BEGIN (state_peer_id); }
   YY_BREAK
 // end <state_hash>
@@ -5775,7 +5775,7 @@ YY_RULE_SETUP
                             iparser_p->offset (yyleng);
                             /* *TODO*: error handling */
                             ACE_NEW_NORETURN (yylval->record,
-                                              struct BitTorrent_Record ());
+                                              struct BitTorrent_PeerRecord ());
                             ACE_ASSERT (yylval->record);
                             yylval->record->length =
                               ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (*reinterpret_cast<ACE_UINT32*> (yytext))

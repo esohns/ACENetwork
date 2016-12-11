@@ -76,12 +76,8 @@ DHCP_ParserDriver::~DHCP_ParserDriver ()
                 ACE_TEXT ("failed to yylex_destroy: \"%m\", continuing\n")));
 }
 
-void
-DHCP_ParserDriver::initialize (DHCP_Record& record_in,
-                               bool traceScanning_in,
-                               bool traceParsing_in,
-                               ACE_Message_Queue_Base* messageQueue_in,
-                               bool useYYScanBuffer_in)
+bool
+DHCP_ParserDriver::initialize (const struct Common_ParserConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_ParserDriver::initialize"));
 
@@ -90,26 +86,44 @@ DHCP_ParserDriver::initialize (DHCP_Record& record_in,
     if (fragment_)
       fragment_ = NULL;
     offset_ = 0;
+    record_ = NULL;
+
+    configuration_ = NULL;
+    trace_ = NET_PROTOCOL_DEFAULT_YACC_TRACE;
+
+    if (bufferState_)
+    {
+      DHCP_Scanner__delete_buffer (bufferState_,
+                                   scannerState_);
+      bufferState_ = NULL;
+    } // end IF
+
+    messageQueue_ = NULL;
+    useYYScanBuffer_ = DHCP_DEFAULT_USE_YY_SCAN_BUFFER;
 
     initialized_ = false;
   } // end IF
 
-  // set parse target
-  record_ = &record_in;
+  configuration_ =
+      &const_cast<struct Common_ParserConfiguration&> (configuration_in);
+  trace_ = configuration_->debugScanner;
+
+  messageQueue_ = configuration_->messageQueue;
+  useYYScanBuffer_ = configuration_->useYYScanBuffer;
 
   // trace ?
-  DHCP_Scanner_set_debug ((traceScanning_in ? 1 : 0),
+  DHCP_Scanner_set_debug ((configuration_->debugScanner ? 1 : 0),
                           scannerState_);
 #if YYDEBUG
   //parser_.set_debug_level (traceParsing_in ? 1
   //                                         : 0); // binary (see bison manual)
-  yydebug = (traceParsing_in ? 1 : 0);
+  yydebug = (trace_ ? 1 : 0);
 #endif
-  messageQueue_ = messageQueue_in;
-  useYYScanBuffer_ = useYYScanBuffer_in;
 
   // OK
   initialized_ = true;
+
+  return true;
 }
 
 bool

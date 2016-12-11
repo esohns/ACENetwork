@@ -312,6 +312,7 @@ struct Test_U_Configuration
    , socketConfiguration ()
    , socketHandlerConfiguration ()
    , connectionConfiguration ()
+   , parserConfiguration ()
    , moduleConfiguration ()
    , moduleHandlerConfiguration ()
    , streamConfiguration ()
@@ -326,6 +327,8 @@ struct Test_U_Configuration
   struct Net_SocketConfiguration                 socketConfiguration;
   struct Test_U_SocketHandlerConfiguration       socketHandlerConfiguration;
   struct Test_U_ConnectionConfiguration          connectionConfiguration;
+  // **************************** parser data **********************************
+  struct Common_ParserConfiguration              parserConfiguration;
   // **************************** stream data **********************************
   struct Stream_ModuleConfiguration              moduleConfiguration;
   struct Test_U_StreamModuleHandlerConfiguration moduleHandlerConfiguration;
