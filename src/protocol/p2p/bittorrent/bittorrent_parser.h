@@ -169,7 +169,7 @@ namespace yy {
 
 
   /// A Bison parser.
-  class BitTorrent_Parser
+  class BitTorrent_Export BitTorrent_Parser
   {
   public:
 #ifndef YYSTYPE

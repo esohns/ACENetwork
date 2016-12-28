@@ -35,11 +35,11 @@ struct Net_SocketConfiguration;
 
 enum Net_LinkLayerType
 {
-  NET_LINKLAYER_ATM    = 0x01,
-  NET_LINKLAYER_802_3  = 0x02, // i.e. "Ethernet"
-  NET_LINKLAYER_FDDI   = 0x04,
-  NET_LINKLAYER_PPP    = 0x08,
-  NET_LINKLAYER_802_11 = 0x10, // i.e. "WLAN"
+  NET_LINKLAYER_802_3  = 0x01, // i.e. CSMA/CD, aka 'Ethernet'
+  NET_LINKLAYER_802_11 = 0x02, // i.e. Wireless LAN aka 'WLAN' (EU; US: 'WiFi')
+  NET_LINKLAYER_ATM    = 0x04,
+  NET_LINKLAYER_FDDI   = 0x08,
+  NET_LINKLAYER_PPP    = 0x10,
   ////////////////////////////////////////
   NET_LINKLAYER_MAX,
   NET_LINKLAYER_INVALID = -1,

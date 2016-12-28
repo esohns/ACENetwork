@@ -49,10 +49,7 @@
 #define NET_ADDRESS_DEFAULT_PORT                        10001
 #define NET_ADDRESS_DEFAULT_IP_MULTICAST                "224.0.0.1"
 #define NET_ADDRESS_DEFAULT_IP_BROADCAST                "255.255.255.255"
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
 #define NET_ADDRESS_NSLOOKUP_RESULT_ADDRESS_KEY_STRING  "Address"
-#endif
 
 // protocols
 // *IMPORTANT NOTE*: must match with the kernel module implementation !

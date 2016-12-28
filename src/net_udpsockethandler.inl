@@ -169,15 +169,6 @@ Net_UDPSocketHandler_T<SocketType,
     local_SAP = configuration_p->listenerConfiguration->address;
   } // end IF
 
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  result = local_SAP.addr_to_string (buffer,
-                                     sizeof (buffer),
-                                     1);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-
 #if defined (ACE_LINUX)
   // (temporarily) elevate priviledges to open system sockets
   if (local_SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEDGED_PORT)
@@ -196,7 +187,7 @@ Net_UDPSocketHandler_T<SocketType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
-                buffer));
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (local_SAP).c_str ())));
     goto error;
   } // end IF
 #if defined (ACE_LINUX)
@@ -214,15 +205,6 @@ Net_UDPSocketHandler_T<SocketType,
         (writeOnly_ ? configuration_p->socketConfiguration->address
                     : local_SAP);
 
-    ACE_TCHAR buffer_2[BUFSIZ];
-    ACE_OS::memset (buffer_2, 0, sizeof (buffer_2));
-    result = associated_address.addr_to_string (buffer_2,
-                                                sizeof (buffer_2),
-                                                1);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-
     struct sockaddr* sockaddr_p =
         reinterpret_cast<struct sockaddr*> (associated_address.get_addr ());
     result = ACE_OS::connect (handle,
@@ -234,12 +216,12 @@ Net_UDPSocketHandler_T<SocketType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::connect(0x%@,\"%s\"): \"%m\", aborting\n"),
                   handle,
-                  buffer_2));
+                  ACE_TEXT (Net_Common_Tools::IPAddress2String (associated_address).c_str ())));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::connect(%d,\"%s\"): \"%m\", aborting\n"),
                   handle,
-                  buffer_2));
+                  ACE_TEXT (Net_Common_Tools::IPAddress2String (associated_address).c_str ())));
 #endif
       goto error;
     } // end IF
@@ -247,12 +229,12 @@ Net_UDPSocketHandler_T<SocketType,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("0x%@: associated to \"%s\"\n"),
                 handle,
-                buffer_2));
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (associated_address).c_str ())));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: associated to \"%s\"\n"),
                 handle,
-                buffer_2));
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (associated_address).c_str ())));
 #endif
 
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)

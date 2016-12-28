@@ -158,8 +158,8 @@
 //  // *PORTABILITY*: this isn't entirely portable...
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)\n"),
-//              this, reinterpret_cast<unsigned int> (handle),
+//              ACE_TEXT ("registered connection [0x%@/0x%@]: (\"%s\") <--> (\"%s\") (total: %d)\n"),
+//              this, handle,
 //              ACE_TEXT (localAddress.c_str ()),
 //              ACE_TEXT (buffer),
 //              (inherited::manager_ ? inherited::manager_->numConnections ()
@@ -212,8 +212,8 @@
 //  // *PORTABILITY*
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
-//              this, reinterpret_cast<unsigned int> (handle),
+//              ACE_TEXT ("deregistered connection [0x%@/0x%@] (total: %u)\n"),
+//              this, handle,
 //              (inherited::manager_ ? inherited::manager_->numConnections ()
 //                                   : -1)));
 //#else
@@ -636,8 +636,8 @@
 //  // *PORTABILITY*: this isn't entirely portable...
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)\n"),
-//              this, reinterpret_cast<unsigned int> (handle),
+//              ACE_TEXT ("registered connection [0x%@/0x%@]: (\"%s\") <--> (\"%s\") (total: %d)\n"),
+//              this, handle,
 //              ACE_TEXT (localAddress.c_str ()),
 //              ACE_TEXT (buffer),
 //              (inherited::manager_ ? inherited::manager_->numConnections ()
@@ -695,8 +695,8 @@
 //  // *PORTABILITY*
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
-//              this, reinterpret_cast<unsigned int> (handle_in),
+//              ACE_TEXT ("deregistered connection [0x%@/0x%@] (total: %u)\n"),
+//              this, handle_in,
 //              (inherited::manager_ ? inherited::manager_->numConnections ()
 //                                   : -1)));
 //#else

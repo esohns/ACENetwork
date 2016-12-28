@@ -169,7 +169,7 @@ namespace yy {
 
 
   /// A Bison parser.
-  class HTTP_Parser
+  class HTTP_Export HTTP_Parser
   {
   public:
 #ifndef YYSTYPE

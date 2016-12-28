@@ -162,17 +162,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                       1);                       // reuse_addr
   if (result == -1)
   {
-    ACE_TCHAR buffer[BUFSIZ];
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
-    int result_2 = local_SAP.addr_to_string (buffer,
-                                             sizeof (buffer),
-                                             1);
-    if (result_2 == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (buffer)));
+                ACE_TEXT ("failed to SocketType::open(%s): \"%m\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (local_SAP).c_str ())));
     goto error;
   } // end IF
 #if defined (ACE_LINUX)
@@ -1152,7 +1144,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 //                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     local_address = buffer;
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to SocketType::open(%s): \"%m\", aborting\n"),
                 ACE_TEXT (local_address.c_str ())));
     goto close;
   } // end IF

@@ -736,7 +736,8 @@ do_work (unsigned int bufferSize_in,
     goto clean_up;
   } // end IF
   if (iconnector_p->useReactor ())
-    connection_p = connection_manager_p->get (handle);
+    connection_p =
+      connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
   else
   {
     // step1: wait for the connection to register with the manager

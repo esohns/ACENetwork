@@ -77,8 +77,12 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
   SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionID_in);
 
   // sanity check(s)
-  ACE_ASSERT (iterator == sessionData_.end ());
   ACE_ASSERT (session_);
+  // *NOTE*: on Linux systems, file descriptors are reused immediately, so
+  //         collisions can occur here (i.e. the original connection may not
+  //         have finalized at this stage
+  if (iterator != sessionData_.end ())
+    sessionData_.erase (iterator);
 
   sessionData_.insert (std::make_pair (sessionID_in,
                                        &const_cast<SessionDataType&> (sessionData_in)));
@@ -146,10 +150,9 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
   SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionID_in);
 
   // sanity check(s)
-  ACE_ASSERT (iterator != sessionData_.end ());
   ACE_ASSERT (session_);
-
-  sessionData_.erase (iterator);
+  if (iterator != sessionData_.end ())
+    sessionData_.erase (iterator);
 
   try {
     session_->disconnect (sessionID_in);
@@ -235,7 +238,11 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
   int result = -1;
 
   // sanity check(s)
-  ACE_ASSERT (iterator != sessionData_.end ());
+  // *NOTE*: the current implementation isn't fully synchronized in the sense
+  //         that messages may arrive 'out-of-session' (e.g.
+  //         STREAM_SESSION_MESSAGE_DISCONNECT after STREAM_SESSION_MESSAGE_END)
+  if (iterator == sessionData_.end ())
+    return;
 
   if (CBData_)
   {

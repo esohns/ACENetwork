@@ -114,19 +114,22 @@ public:
 	// arg_yyin and arg_yyout default to the cin and cout, but we
 	// only make that assignment when initializing in yylex().
 	yyFlexLexer( FLEX_STD istream* arg_yyin = 0, FLEX_STD ostream* arg_yyout = 0 );
-
+  yyFlexLexer( FLEX_STD istream& arg_yyin, FLEX_STD ostream& arg_yyout);
 	virtual ~yyFlexLexer();
 
 	void yy_switch_to_buffer( struct yy_buffer_state* new_buffer );
 	struct yy_buffer_state* yy_create_buffer( FLEX_STD istream* s, int size );
+  struct yy_buffer_state* yy_create_buffer (FLEX_STD istream& file, int size);
 	void yy_delete_buffer( struct yy_buffer_state* b );
 	void yyrestart( FLEX_STD istream* s );
+  void yyrestart( FLEX_STD istream& input_file);
 
 	void yypush_buffer_state( struct yy_buffer_state* new_buffer );
 	void yypop_buffer_state();
 
 	virtual int yylex();
 	virtual void switch_streams( FLEX_STD istream* new_in, FLEX_STD ostream* new_out = 0 );
+  virtual void switch_streams( FLEX_STD istream& new_in, FLEX_STD ostream& new_out);
 	virtual int yywrap();
 
 protected:
@@ -139,6 +142,7 @@ protected:
 
 	void yy_load_buffer_state();
 	void yy_init_buffer( struct yy_buffer_state* b, FLEX_STD istream* s );
+  //void yy_init_buffer( struct yy_buffer_state* b, FLEX_STD istream& file);
 	void yy_flush_buffer( struct yy_buffer_state* b );
 
 	int yy_start_stack_ptr;
@@ -198,6 +202,9 @@ protected:
 	int yy_more_len;
 	int yy_more_offset;
 	int yy_prev_more_offset;
+
+private:
+  void ctor_common ();
 };
 
 }

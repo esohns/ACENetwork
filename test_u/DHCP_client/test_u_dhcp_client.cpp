@@ -52,7 +52,7 @@
 
 #include "common_ui_defines.h"
 #include "common_ui_gtk_builder_definition.h"
-#include "common_ui_gtk_manager.h"
+#include "common_ui_gtk_manager_common.h"
 
 #include "stream_allocatorheap.h"
 #include "stream_macros.h"
@@ -866,7 +866,7 @@ do_work (bool requestBroadcastReplies_in,
   } // end IF
   if (iconnector_p->useReactor ())
     configuration.moduleHandlerConfiguration.broadcastConnection =
-        connection_manager_p->get (handle);
+        connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
   else
   {
     // step1: wait for the connection to register with the manager
@@ -923,7 +923,7 @@ do_work (bool requestBroadcastReplies_in,
   istream_connection_p->wait (STREAM_STATE_RUNNING,
                               NULL); // <-- block
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%d: connected to \"%s\"...\n"),
+              ACE_TEXT ("%u: connected to \"%s\"...\n"),
               configuration.moduleHandlerConfiguration.broadcastConnection->id (),
               buffer));
 
@@ -983,7 +983,8 @@ do_work (bool requestBroadcastReplies_in,
       return;
     } // end IF
     if (useReactor_in)
-      iconnection_p = connection_manager_p->get (configuration.handle);
+      iconnection_p =
+        connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (configuration.handle));
     else
     {
       configuration.handle = ACE_INVALID_HANDLE;

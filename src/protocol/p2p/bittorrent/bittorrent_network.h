@@ -21,8 +21,8 @@
 #ifndef BITTORRENT_NETWORK_H
 #define BITTORRENT_NETWORK_H
 
-//#include <map>
 #include <string>
+#include <vector>
 
 #include <ace/INET_Addr.h>
 #include <ace/Singleton.h>
@@ -348,6 +348,21 @@ struct BitTorrent_TrackerConnectionConfiguration
   struct BitTorrent_UserData*                   userData;
 };
 
+typedef std::vector<ACE_INET_Addr> BitTorrent_PeerAddresses_t;
+typedef BitTorrent_PeerAddresses_t::const_iterator BitTorrent_PeerAddressesIterator_t;
+struct BitTorrent_SessionInitiationThreadData
+{
+  inline BitTorrent_SessionInitiationThreadData ()
+   : addresses (NULL)
+   , lock (NULL)
+   , session (NULL)
+  {};
+
+  BitTorrent_PeerAddresses_t* addresses;
+  ACE_SYNCH_MUTEX*            lock;
+  Net_IInetSession_t*         session;
+};
+
 template <typename SessionInterfaceType>
 class BitTorrent_IControl_T;
 typedef BitTorrent_IControl_T<BitTorrent_ISession_t> BitTorrent_IControl_t;
@@ -398,7 +413,7 @@ struct BitTorrent_SessionState
   inline BitTorrent_SessionState ()
    : connections ()
    , controller (NULL)
-   , filename ()
+   , fileName ()
    , key ()
    , metaInfo (NULL)
    , peerId ()
@@ -411,7 +426,7 @@ struct BitTorrent_SessionState
 
   Net_Connections_t       connections;
   BitTorrent_IControl_t*  controller;
-  std::string             filename; // .torrent file
+  std::string             fileName; // .torrent file
   std::string             key; // tracker-
   Bencoding_Dictionary_t* metaInfo;
   std::string             peerId;

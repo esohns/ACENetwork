@@ -27,7 +27,7 @@
 
 #include "common_ui_common.h"
 #include "common_ui_defines.h"
-#include "common_ui_gtk_manager.h"
+#include "common_ui_gtk_manager_common.h"
 #include "common_ui_tools.h"
 
 #include "net_macros.h"
@@ -308,7 +308,7 @@ connection_failed:
                     ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
                     &delay));
 
-      // *TODO*: this does not work...
+      // *TODO*: this does not work
       connection_2 =
         connection_manager_p->get (configuration_p->socketHandlerConfiguration->socketConfiguration->address);
       if (connection_2)
@@ -316,7 +316,8 @@ connection_failed:
     } while (COMMON_TIME_NOW < deadline);
   } // end IF
   else
-    connection_2 = connection_manager_p->get (handle);
+    connection_2 =
+      connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
   if (!connection_2)
     goto connection_failed;
   istream_connection_p =

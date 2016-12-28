@@ -85,6 +85,7 @@
 
 // session
 #define BITTORRENT_SESSION_LOG_FILENAME_PREFIX            "bittorrent_session"
+#define BITTORRENT_SESSION_THREAD_NAME                    "bittorrent_session"
 #define BITTORRENT_DEFAULT_SESSION_LOG                    false // log to file ? : stdout
 
 // client

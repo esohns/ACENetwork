@@ -130,15 +130,11 @@ BitTorrent_Control_T<SessionAsynchType,
   typename SessionType::ISESSION_T* isession_p = NULL;
   SessionStateType* session_state_p = NULL;
   Bencoding_DictionaryIterator_t iterator;
-  std::string host_name_string;
+  std::string interface_string, host_name_string;
   ACE_INET_Addr tracker_address, external_ip_address;
-  ACE_Time_Value deadline;
-  ACE_Time_Value one_second (1, 0);
   int result = -1;
   typename SessionType::ITRACKER_CONNECTION_T* iconnection_p = NULL;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T* istream_connection_p = NULL;
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
   struct HTTP_Record* record_p = NULL;
   std::ostringstream converter;
   typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T* message_p =
@@ -263,16 +259,15 @@ BitTorrent_Control_T<SessionAsynchType,
                                          converter.str ()));
   record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_HEADER),
                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_STARTED_STRING)));
-  if (!Net_Common_Tools::interface2ExternalIPAddress (Net_Common_Tools::getDefaultInterface (link_layers),
+  interface_string = Net_Common_Tools::getDefaultInterface (link_layers);
+  if (!Net_Common_Tools::interface2ExternalIPAddress (interface_string,
                                                       external_ip_address))
-  {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interface2ExternalIPAddress(\"%s\"), returning\n"),
-                ACE_TEXT (NET_INTERFACE_DEFAULT_ETHERNET)));
-    goto error;
-  } // end IF
-  record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_IP_HEADER),
-                                         Net_Common_Tools::IPAddress2String (external_ip_address).c_str ()));
+                ACE_TEXT ("failed to Net_Common_Tools::interface2ExternalIPAddress(\"%s\"), continuing\n"),
+                ACE_TEXT (interface_string.c_str ())));
+  else
+    record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_IP_HEADER),
+                                           Net_Common_Tools::IPAddress2String (external_ip_address).c_str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << BITTORRENT_DEFAULT_TRACKER_REQUEST_NUMWANT_PEERS;
@@ -311,7 +306,7 @@ BitTorrent_Control_T<SessionAsynchType,
                 ACE_TEXT ("failed to allocate memory, returning\n")));
     goto error;
   } // end IF
-  record_p = NULL;
+  ACE_ASSERT (!record_p);
 allocate:
   message_p =
     static_cast<typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (configuration_->trackerSocketHandlerConfiguration->messageAllocator->malloc (configuration_->trackerSocketHandlerConfiguration->PDUSize));
@@ -332,40 +327,16 @@ allocate:
   // *IMPORTANT NOTE*: fire-and-forget API (data_container_p)
   message_p->initialize (data_container_p,
                          NULL);
-  data_container_p = NULL;
+  ACE_ASSERT (!data_container_p);
 
   isession_p->trackerConnect (tracker_address);
-  // *TODO*: find a better way to do this
-  deadline =
-      (COMMON_TIME_NOW +
-       ACE_Time_Value (NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT, 0));
-  do
-  {
-    // *TODO*: this does not work...
-    iconnection_p =
-        configuration_->trackerConnectionManager->get (tracker_address);
-    if (iconnection_p)
-      break; // done
-
-    result = ACE_OS::sleep (one_second);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
-                  &one_second));
-  } while (COMMON_TIME_NOW < deadline);
+  iconnection_p =
+    configuration_->trackerConnectionManager->get (tracker_address);
   if (!iconnection_p)
   {
-    // debug info
-    result = tracker_address.addr_to_string (buffer,
-                                             sizeof (buffer));
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to the tracker (\"%s\"), aborting\n"),
-                buffer));
-
+                ACE_TEXT ("failed to connect to the tracker (was: %s), returning\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (tracker_address).c_str ())));
     goto error;
   } // end IF
   remove_session = false;
@@ -412,7 +383,7 @@ error:
   if (data_container_p)
     data_container_p->decrease ();
   if (message_p)
-    delete message_p;
+    message_p->release ();
 }
 
 template <typename SessionAsynchType,

@@ -76587,9 +76587,9 @@ static const yy_state_type yy_NUL_trans[2387] =
 
 static const flex_int32_t yy_rule_linenum[23] =
     {   0,
-      350,  354,  360,  373,  386,  399,  409,  419,  429,  437,
-      450,  463,  476,  486,  496,  506,  537,  564,  592,  602,
-      616,  755
+      355,  359,  365,  378,  391,  404,  414,  424,  434,  442,
+      455,  468,  481,  491,  501,  511,  570,  597,  625,  635,
+      649,  788
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -76600,7 +76600,7 @@ static const flex_int32_t yy_rule_linenum[23] =
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 
-#include <locale>
+#include <cctype>
 #include <regex>
 #include <sstream>
 #include <string>
@@ -76609,6 +76609,8 @@ static const flex_int32_t yy_rule_linenum[23] =
 #include <ace/Log_Msg.h>
 #include <ace/Message_Block.h>
 #include <ace/OS_Memory.h>
+
+#include "common_tools.h"
 
 #include "net_macros.h"
 
@@ -76638,6 +76640,9 @@ static const flex_int32_t yy_rule_linenum[23] =
 /* *IMPORTANT NOTE*: flex 2.5.4 does not recognize 'reentrant, nounistd,
                      ansi-definitions, ansi-prototypes, trace header-file extra-type'
 */
+/* *NOTE*: option 'tables-file' breaks 'yylineno' (flex 2.6.3), which crashes
+           the lexer when 'debug' is set (apparently, array yy_rule_linenum is
+           not initialized in this case) */
 /* %option tables-file="http_scanner.tab" */
 /* *NOTE*: see RFC 1945 page 10 */
 /* *NOTE*: (US-)ASCII */
@@ -77467,11 +77472,39 @@ YY_RULE_SETUP
                                iterator =
                                    record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING));
                                if (iterator != record_r.headers.end ())
-                               { std::locale locale;
+                               {
+                                 // *NOTE*: the default locale is the 'C' locale (as in:
+                                 //         'std::setlocale(LC_ALL, "C")')
+                                 //         --> replace with (C++-)US-ASCII
+//                                 std::locale locale;
+//                                 //  std::locale locale (ACE_TEXT_ALWAYS_CHAR (""));
+//                                 try {
+//                                   std::locale us_ascii_locale (ACE_TEXT_ALWAYS_CHAR (COMMON_LOCALE_EN_US_STRING));
+//                                   locale = us_ascii_locale;
+//                                 } catch (std::runtime_error exception_in) {
+//                                   ACE_DEBUG ((LM_ERROR,
+//                                               ACE_TEXT ("caught exception in std::locale(\"%s\"): \"%s\", aborting\n"),
+//                                               ACE_TEXT (COMMON_LOCALE_EN_US_STRING),
+//                                               ACE_TEXT (exception_in.what ())));
+
+//                                   Common_Tools::printLocales ();
+
+//                                   yyterminate ();
+//                                 } catch (...) {
+//                                   ACE_DEBUG ((LM_ERROR,
+//                                               ACE_TEXT ("caught exception in std::locale(\"%s\"), aborting\n"),
+//                                               ACE_TEXT (COMMON_LOCALE_EN_US_STRING)));
+
+//                                   Common_Tools::printLocales ();
+
+//                                   yyterminate ();
+//                                 }
+//                                 ACE_ASSERT (std::has_facet<std::ctype<char> >(locale));
                                  std::string value_string = (*iterator).second;
                                  std::transform (value_string.begin (), value_string.end (),
                                                  value_string.begin (),
-                                                 [&locale](unsigned char c) { return std::tolower (c, locale); });
+                                                 [](unsigned char c) { return std::tolower (c); });
+//                                                 [&locale](unsigned char c) { return std::tolower (c, locale); });
                                  if (value_string == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING))
                                    BEGIN (chunked_body);
                                  else

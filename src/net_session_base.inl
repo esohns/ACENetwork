@@ -102,8 +102,7 @@ Net_SessionBase_T<AddressType,
          ++iterator)
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      iconnection_p =
-        connectionManager_->get (reinterpret_cast<ACE_HANDLE> (*iterator));
+      iconnection_p = connectionManager_->get (*iterator);
 #else
       iconnection_p = connectionManager_->get (*iterator);
 #endif
@@ -193,15 +192,6 @@ Net_SessionBase_T<AddressType,
                            ACE_Time_Value::zero);
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
 
-  // debug info
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  int result = address_in.addr_to_string (buffer,
-                                          sizeof (buffer));
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-
   // step1: initialize connector
   typename ConnectorType::ICONNECTOR_T* iconnector_p = &connector;
   ACE_ASSERT (handlerConfiguration_);
@@ -214,14 +204,15 @@ Net_SessionBase_T<AddressType,
 
   ACE_Time_Value deadline;
   typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
+  int result = -1;
 
   // step2: try to connect
   handle = iconnector_p->connect (address_in);
   if (handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to \"%s\": \"%m\", returning\n"),
-                buffer));
+                ACE_TEXT ("failed to connect to %s: \"%m\", returning\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
     return;
   } // end IF
   if (isAsynch_)
@@ -245,12 +236,13 @@ Net_SessionBase_T<AddressType,
     } while (COMMON_TIME_NOW < deadline);
   } // end ELSE
   else
-    iconnection_p = connectionManager_->get (handle);
+    iconnection_p =
+      connectionManager_->get (reinterpret_cast<Net_ConnectionId_t> (handle));
   if (!iconnection_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to \"%s\": \"%m\", returning\n"),
-                buffer));
+                ACE_TEXT ("failed to connect to %s: \"%m\", returning\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
     return;
   } // end IF
 
@@ -269,8 +261,8 @@ Net_SessionBase_T<AddressType,
   if (status != NET_CONNECTION_STATUS_OK)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("connection (to: \"%s\") failed to initialize (status was: %d), returning\n"),
-                buffer,
+                ACE_TEXT ("connection (to: %s) failed to initialize (status was: %d), returning\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ()),
                 status));
     goto error;
   } // end IF
@@ -287,10 +279,10 @@ Net_SessionBase_T<AddressType,
   istream_connection_p->wait (STREAM_STATE_RUNNING,
                               NULL); // <-- block
 
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connected to \"%s\": %d...\n"),
-              buffer,
-              iconnection_p->id ()));
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("connected to %s: %u...\n"),
+  //            ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ()),
+  //            iconnection_p->id ()));
 
   iconnection_p->decrease ();
 
@@ -398,8 +390,7 @@ Net_SessionBase_T<AddressType,
          ++iterator)
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      iconnection_p =
-        connectionManager_->get (reinterpret_cast<ACE_HANDLE> (*iterator));
+      iconnection_p = connectionManager_->get (*iterator);
 #else
       iconnection_p = connectionManager_->get (*iterator);
 #endif
@@ -462,12 +453,12 @@ Net_SessionBase_T<AddressType,
 
     std::pair<Net_ConnectionsIterator_t, bool> result =
         state_.connections.insert (id_in);
-    ACE_ASSERT (result.second);
+//    ACE_ASSERT (result.second);
   } // end lock scope
 
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("new connection (id was: %d)...\n"),
-              id_in));
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("new connection (id: %d)...\n"),
+  //            id_in));
 }
 
 template <typename AddressType,
@@ -498,15 +489,15 @@ Net_SessionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::disconnect"));
 
+  Net_ConnectionsIterator_t iterator;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
-    Net_ConnectionsIterator_t iterator = state_.connections.find (id_in);
-    ACE_ASSERT (iterator != state_.connections.end ());
-
-    state_.connections.erase (iterator);
+    iterator = state_.connections.find (id_in);
+    if (iterator != state_.connections.end ())
+      state_.connections.erase (iterator);
   } // end lock scope
 
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connection lost (id was: %d)...\n"),
-              id_in));
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("connection lost (id was: %d)...\n"),
+  //            id_in));
 }

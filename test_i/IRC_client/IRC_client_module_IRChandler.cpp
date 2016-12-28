@@ -135,12 +135,9 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
   ACE_ASSERT (inherited::configuration_->protocolConfiguration);
 
   const IRC_Record& data_r = message_inout->get ();
-//   try
-//   {
+//   try {
 //     data_r.dump_state ();
-//   }
-//   catch (...)
-//   {
+//   } catch (...) {
 //     ACE_DEBUG((LM_ERROR,
 //                ACE_TEXT("caught exception in Common_IDumpState::dump_state(), continuing\n")));
 //   }

@@ -55,7 +55,7 @@
 #include "common_ui_defines.h"
 //#include "common_ui_glade_definition.h"
 #include "common_ui_gtk_builder_definition.h"
-#include "common_ui_gtk_manager.h"
+#include "common_ui_gtk_manager_common.h"
 
 #include "stream_allocatorheap.h"
 

@@ -26,7 +26,7 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 }
 
 %{
-#include <locale>
+#include <cctype>
 #include <regex>
 #include <sstream>
 #include <string>
@@ -35,6 +35,8 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 #include <ace/Log_Msg.h>
 #include <ace/Message_Block.h>
 #include <ace/OS_Memory.h>
+
+#include "common_tools.h"
 
 #include "net_macros.h"
 
@@ -518,11 +520,39 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                iterator =
                                    record_r.headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_TRANSFER_ENCODING_STRING));
                                if (iterator != record_r.headers.end ())
-                               { std::locale locale;
+                               {
+                                 // *NOTE*: the default locale is the 'C' locale (as in:
+                                 //         'std::setlocale(LC_ALL, "C")')
+                                 //         --> replace with (C++-)US-ASCII
+//                                 std::locale locale;
+//                                 //  std::locale locale (ACE_TEXT_ALWAYS_CHAR (""));
+//                                 try {
+//                                   std::locale us_ascii_locale (ACE_TEXT_ALWAYS_CHAR (COMMON_LOCALE_EN_US_STRING));
+//                                   locale = us_ascii_locale;
+//                                 } catch (std::runtime_error exception_in) {
+//                                   ACE_DEBUG ((LM_ERROR,
+//                                               ACE_TEXT ("caught exception in std::locale(\"%s\"): \"%s\", aborting\n"),
+//                                               ACE_TEXT (COMMON_LOCALE_EN_US_STRING),
+//                                               ACE_TEXT (exception_in.what ())));
+
+//                                   Common_Tools::printLocales ();
+
+//                                   yyterminate ();
+//                                 } catch (...) {
+//                                   ACE_DEBUG ((LM_ERROR,
+//                                               ACE_TEXT ("caught exception in std::locale(\"%s\"), aborting\n"),
+//                                               ACE_TEXT (COMMON_LOCALE_EN_US_STRING)));
+
+//                                   Common_Tools::printLocales ();
+
+//                                   yyterminate ();
+//                                 }
+//                                 ACE_ASSERT (std::has_facet<std::ctype<char> >(locale));
                                  std::string value_string = (*iterator).second;
                                  std::transform (value_string.begin (), value_string.end (),
                                                  value_string.begin (),
-                                                 [&locale](unsigned char c) { return std::tolower (c, locale); });
+                                                 [](unsigned char c) { return std::tolower (c); });
+//                                                 [&locale](unsigned char c) { return std::tolower (c, locale); });
                                  if (value_string == ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_TRANSFER_ENCODING_CHUNKED_STRING))
                                    BEGIN (chunked_body);
                                  else

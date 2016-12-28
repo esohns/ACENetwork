@@ -28,7 +28,7 @@
 
 #include "common_ui_common.h"
 #include "common_ui_defines.h"
-#include "common_ui_gtk_manager.h"
+#include "common_ui_gtk_manager_common.h"
 #include "common_ui_tools.h"
 
 #include "net_macros.h"
@@ -52,9 +52,9 @@
 #include "bittorrent_client_gui_tools.h"
 
 ACE_THR_FUNC_RETURN
-session_setup_function (void* arg_in)
+session_handler_cb (void* arg_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::session_setup_function"));
+  NETWORK_TRACE (ACE_TEXT ("::session_handler_cb"));
 
   ACE_THR_FUNC_RETURN result;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -798,7 +798,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
   ACE_ASSERT (thread_manager_p);
   result =
-    thread_manager_p->spawn (::session_setup_function,         // function
+    thread_manager_p->spawn (::session_handler_cb,             // function
                              session_thread_data_p,            // argument
                              (THR_NEW_LWP      |
                               THR_JOINABLE     |

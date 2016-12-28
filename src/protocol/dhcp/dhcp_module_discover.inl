@@ -351,7 +351,8 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     goto error;
   } // end IF
   if (use_reactor)
-    session_data_r.connection = connection_manager_p->get (connectionHandle_);
+    session_data_r.connection =
+      connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (connectionHandle_));
   else
     session_data_r.connection =
         connection_manager_p->get (session_data_r.serverAddress);
@@ -581,11 +582,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
           {
             if (!session_data_r.broadcastConnection)
               session_data_r.broadcastConnection =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-              connection_manager_p->get (reinterpret_cast<ACE_HANDLE> (inherited::configuration_->streamConfiguration->sessionID));
-#else
-              connection_manager_p->get (static_cast<ACE_HANDLE> (inherited::configuration_->streamConfiguration->sessionID));
-#endif
+                connection_manager_p->get (static_cast<Net_ConnectionId_t> (inherited::configuration_->streamConfiguration->sessionID));
             if (!session_data_r.broadcastConnection)
               continue;
 
@@ -662,7 +659,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
       } // end IF
       if (use_reactor)
         session_data_r.broadcastConnection =
-            connection_manager_p->get (broadcastConnectionHandle_);
+            connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (broadcastConnectionHandle_));
       else
         session_data_r.broadcastConnection =
             connection_manager_p->get (inherited::configuration_->socketConfiguration->address);
@@ -951,7 +948,8 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     goto error;
   } // end IF
   if (iconnector_p->useReactor ())
-    iconnection_p = connection_manager_p->get (result);
+    iconnection_p =
+      connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (result));
   else
   {
     // step2: wait for the connection to register with the manager
@@ -1025,7 +1023,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                                 NULL); // <-- block
   } // end ELSE
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connected to \"%s\" (id: %d)...\n"),
+              ACE_TEXT ("connected to \"%s\" (id: %u)...\n"),
               buffer,
               iconnection_p->id ()));
 

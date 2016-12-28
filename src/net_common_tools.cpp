@@ -259,11 +259,12 @@ Net_Common_Tools::LinkLayerAddress2String (const unsigned char* const addressDat
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::LinkLayerAddress2String"));
 
   // initialize return value(s)
-  std::string result;
+  std::string result = ACE_TEXT_ALWAYS_CHAR ("NET_LINKLAYER_INVALID");
 
   switch (type_in)
   {
     case NET_LINKLAYER_802_3:
+    case NET_LINKLAYER_802_11:
     {
       char buffer[NET_ADDRESS_LINK_ETHERNET_ADDRESS_STRING_SIZE];
       ACE_OS::memset (&buffer, 0, sizeof (buffer));
@@ -308,6 +309,16 @@ Net_Common_Tools::LinkLayerAddress2String (const unsigned char* const addressDat
 
       break;
     }
+    case NET_LINKLAYER_PPP:
+    {
+      // *NOTE*: being point-to-point in nature, PPP does not support (link
+      //         layer-) addressing
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("link layer type \"%s\" does not support addressing, continuing\n"),
+                  ACE_TEXT (Net_Common_Tools::LinkLayerType2String (type_in).c_str ())));
+      return ACE_TEXT_ALWAYS_CHAR ("");
+    }
+    case NET_LINKLAYER_ATM:
     case NET_LINKLAYER_FDDI:
     {
       ACE_ASSERT (false);
@@ -315,6 +326,37 @@ Net_Common_Tools::LinkLayerAddress2String (const unsigned char* const addressDat
 
       ACE_NOTREACHED (break;)
     }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown link layer type (was: \"%s\"), aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::LinkLayerType2String (type_in).c_str ())));
+      break;
+    }
+  } // end SWITCH
+
+  return result;
+}
+std::string
+Net_Common_Tools::LinkLayerType2String (enum Net_LinkLayerType type_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::LinkLayerType2String"));
+
+  // initialize return value(s)
+  std::string result = ACE_TEXT_ALWAYS_CHAR ("NET_LINKLAYER_INVALID");
+
+  switch (type_in)
+  {
+    case NET_LINKLAYER_ATM:
+      return ACE_TEXT_ALWAYS_CHAR ("NET_LINKLAYER_ATM");
+    case NET_LINKLAYER_802_3:
+      return ACE_TEXT_ALWAYS_CHAR ("NET_LINKLAYER_802_3");
+    case NET_LINKLAYER_FDDI:
+      return ACE_TEXT_ALWAYS_CHAR ("NET_LINKLAYER_FDDI");
+    case NET_LINKLAYER_PPP:
+      return ACE_TEXT_ALWAYS_CHAR ("NET_LINKLAYER_PPP");
+    case NET_LINKLAYER_802_11:
+      return ACE_TEXT_ALWAYS_CHAR ("NET_LINKLAYER_802_11");
     default:
     {
       ACE_DEBUG ((LM_ERROR,
@@ -579,26 +621,9 @@ Net_Common_Tools::interface2ExternalIPAddress (const std::string& interfaceIdent
   } // end IF
 
   int result = -1;
-  ACE_TCHAR buffer_2[BUFSIZ];
-  ACE_OS::memset (buffer_2, 0, sizeof (buffer_2));
-  result = internal_ip_address.addr_to_string (buffer_2,
-                                               sizeof (buffer_2),
-                                               1);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (false);
-
-  ACE_NOTREACHED (return false;)
-#else
-  // *TODO*: this should work on most Linux systems, but is really a bad idea:
-  //         - relies on local 'nslookup'
+  // *TODO*: this should work on most Linux/Windows systems, but is really a bad
+  //         idea:
+  //         - relies on local 'nslookup' tool
   //         - the 'opendns.com' domain resolution scheme
   //         - temporary files
   //         - system(3) call
@@ -645,14 +670,21 @@ Net_Common_Tools::interface2ExternalIPAddress (const std::string& interfaceIdent
   std::istringstream converter;
   char buffer [BUFSIZ];
   std::string regex_string =
-      ACE_TEXT_ALWAYS_CHAR ("^(.*):(?:[[:space:]]*)(.*)$");
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_TEXT_ALWAYS_CHAR ("^([^:]+)(?::[[:blank:]]*)(.+)(?:\r)$");
+#else
+    ACE_TEXT_ALWAYS_CHAR ("^([^:]+)(?::[[:blank:]]*)(.+)$");
+#endif
   std::regex regex (regex_string);
   std::smatch match_results;
   converter.str (resolution_record_string);
   bool is_first = true;
-  do {
+  std::string buffer_string;
+  do
+  {
     converter.getline (buffer, sizeof (buffer));
-    if (!std::regex_match (std::string (buffer),
+    buffer_string = buffer;
+    if (!std::regex_match (buffer_string,
                            match_results,
                            regex,
                            std::regex_constants::match_default))
@@ -677,33 +709,18 @@ Net_Common_Tools::interface2ExternalIPAddress (const std::string& interfaceIdent
   if (external_ip_address.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to resolve IP address (was: \"%s\"), aborting\n"),
-                ACE_TEXT (buffer_2)));
+                ACE_TEXT ("failed to resolve IP address (was: %s), aborting\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (internal_ip_address).c_str ())));
     return false;
   } // end IF
-
   IPAddress_out = Net_Common_Tools::string2IPAddress (external_ip_address);
-#endif
-
-  // debug info
-  ACE_TCHAR buffer_3[BUFSIZ];
-  ACE_OS::memset (buffer_3, 0, sizeof (buffer_3));
-  result = IPAddress_out.addr_to_string (buffer_3,
-                                         sizeof (buffer_3),
-                                         1);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
 
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("interface \"%s\" --> \"%s\" --> \"%s\"\n"),
+              ACE_TEXT ("interface \"%s\" --> %s (--> %s)\n"),
               ACE_TEXT (interfaceIdentifier_in.c_str ()),
-              buffer_2,
-              buffer_3));
-
+              ACE_TEXT (Net_Common_Tools::IPAddress2String (internal_ip_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddress2String (IPAddress_out).c_str ())));
+  
   return true;
 }
 
@@ -977,11 +994,8 @@ continue_:
                         ifaddrs_2->ifa_name))
       continue;
 
-    if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
-//        (ifaddrs_2->ifa_addr->sa_family != AF_PACKET)) // support ppp
-      continue;
-//    if (ifaddrs_2->ifa_addr->sa_family == AF_PACKET) // support ppp
-//      ifaddrs_2->ifa_addr->sa_family = AF_INET;
+    if (!ifaddrs_2->ifa_addr) continue;
+    if (ifaddrs_2->ifa_addr->sa_family != AF_INET) continue;
 
     sockaddr_in_p = (struct sockaddr_in*)ifaddrs_2->ifa_addr;
     result = IPAddress_out.set (sockaddr_in_p,
@@ -1018,7 +1032,7 @@ continue_:
 //    return false;
 //  } // end IF
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("interface \"%s\" --> \"%s\"\n"),
+//              ACE_TEXT ("interface \"%s\" --> %s\n"),
 //              ACE_TEXT (interfaceIdentifier_in.c_str ()),
 //              buffer));
 
@@ -1104,18 +1118,17 @@ Net_Common_Tools::getDefaultDeviceIdentifier (enum Net_LinkLayerType type_in)
           ACE_INET_Addr inet_address;
           Net_Common_Tools::interface2IPAddress (ip_adapter_addresses_2->AdapterName,
                                                  inet_address);
-          ACE_TCHAR buffer[BUFSIZ];
-          ACE_OS::memset (buffer, 0, sizeof (buffer));
-          inet_address.addr_to_string (buffer,
-                                       sizeof (buffer),
-                                       1);
-          ACE_ASSERT (ip_adapter_addresses_2->PhysicalAddressLength >= ETH_ALEN);
+          if (type_in == NET_LINKLAYER_802_3)
+          {
+            ACE_ASSERT (ip_adapter_addresses_2->PhysicalAddressLength >= ETH_ALEN);
+          } // end IF
           ACE_DEBUG ((LM_DEBUG,
-                      ACE_TEXT ("found network interface: \"%s\": MAC: \"%s\"; IP: \"%s\"...\n"),
+                      ACE_TEXT ("found network interface \"%s\"[%s]: IP#: %s; MAC#: %s...\n"),
                       ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->FriendlyName),
+                      ACE_TEXT (ip_adapter_addresses_2->AdapterName),
+                      ACE_TEXT (Net_Common_Tools::IPAddress2String (inet_address).c_str ()),
                       ACE_TEXT (Net_Common_Tools::LinkLayerAddress2String (ip_adapter_addresses_2->PhysicalAddress,
-                                                                           NET_LINKLAYER_802_3).c_str ()),
-                      buffer));
+                                                                           type_in).c_str ())));
         } // end IF
 
 continue_:
@@ -1244,13 +1257,12 @@ Net_Common_Tools::getDefaultInterface (int linkLayerType_in)
        ++i)
     if (linkLayerType_in & i)
     {
-      interface_identifier =
-        Net_Common_Tools::getDefaultDeviceIdentifier (i);
+      interface_identifier = Net_Common_Tools::getDefaultDeviceIdentifier (i);
       if (interface_identifier.empty ())
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::getDefaultDeviceIdentifier() (type was: %d), continuing\n"),
-                    i));
+                    ACE_TEXT ("failed to Net_Common_Tools::getDefaultDeviceIdentifier() (type was: \"%s\"), continuing\n"),
+                    ACE_TEXT (Net_Common_Tools::LinkLayerType2String (i).c_str ())));
         continue;
       } // end IF
       interfaces.push_back (interface_identifier);

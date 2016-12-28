@@ -23,3 +23,42 @@
 #include "stream_misc_messagehandler.h"
 
 #include "bittorrent_session.h"
+
+ACE_THR_FUNC_RETURN
+session_setup_function (void* arg_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::session_setup_function"));
+
+  ACE_THR_FUNC_RETURN result;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  result = -1;
+#else
+  result = arg_in;
+#endif
+
+  struct BitTorrent_SessionInitiationThreadData* data_p =
+    static_cast<struct BitTorrent_SessionInitiationThreadData*> (arg_in);
+
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->addresses);
+  ACE_ASSERT (data_p->lock);
+  ACE_ASSERT (data_p->session);
+
+  ACE_INET_Addr peer_address;
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, *data_p->lock, result);
+
+    peer_address = data_p->addresses->back ();
+    data_p->addresses->pop_back ();
+  } // end lock scope
+
+  data_p->session->connect (peer_address);
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  result = 0;
+#else
+  result = NULL;
+#endif
+
+  return result;
+}

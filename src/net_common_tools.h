@@ -78,6 +78,7 @@ class Net_Common_Tools
   // *NOTE*: make sure the argument points at at least 6 (!) bytes of allocated memory
   static std::string LinkLayerAddress2String (const unsigned char* const, // pointer to physical address data (i.e. START of ethernet header address field !)
                                               enum Net_LinkLayerType = NET_LINKLAYER_802_3);
+  static std::string LinkLayerType2String (enum Net_LinkLayerType);
   static std::string EthernetProtocolTypeID2String (unsigned short); // ethernet frame type (network (== big-endian) byte order !)
 
     // *WARNING*: ensure that the array argument can hold at least 6 bytes !
@@ -95,9 +96,10 @@ class Net_Common_Tools
   static bool interface2IPAddress (const std::string&, // interface identifier
                                    ACE_INET_Addr&);    // return value: (first) IP address
 
+  inline static std::string IPAddress2String (const ACE_INET_Addr& address_in,
+                                              bool addressOnly_in = false) { return Net_Common_Tools::IPAddress2String ((addressOnly_in ? 0 : ACE_HTONS (address_in.get_port_number ())), ACE_HTONL (address_in.get_ip_address ())); };
   // *NOTE*: if (the first argument is '0'), the trailing ":0" will be cropped
   //         from the return value
-  inline static std::string IPAddress2String (const ACE_INET_Addr& address_in) { return Net_Common_Tools::IPAddress2String (0, ACE_HTONL (address_in.get_ip_address ())); };
   static std::string IPAddress2String (unsigned short, // port (network byte order !)
                                        ACE_UINT32);    // IP address (network byte order !)
   static std::string IPProtocol2String (unsigned char); // protocol

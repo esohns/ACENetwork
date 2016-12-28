@@ -1919,14 +1919,14 @@ YY_DECL
 /* %if-c-only */
 /* %endif */
 /* %if-c++-only */
-      yyin.rdbuf(std::cin.rdbuf());
+      yyin->rdbuf(std::cin.rdbuf());
 /* %endif */
 
     if ( ! yyout )
 /* %if-c-only */
 /* %endif */
 /* %if-c++-only */
-      yyout.rdbuf(std::cout.rdbuf());
+      yyout->rdbuf(std::cout.rdbuf());
 /* %endif */
 
     if ( ! YY_CURRENT_BUFFER ) {
@@ -2236,7 +2236,7 @@ YY_FATAL_ERROR( "flex scanner jammed" );
 /* %if-c-only */
 /* %endif */
 /* %if-c++-only */
-      YY_CURRENT_BUFFER_LVALUE->yy_input_file = yyin.rdbuf();
+      YY_CURRENT_BUFFER_LVALUE->yy_input_file = yyin->rdbuf();
 /* %endif */
       YY_CURRENT_BUFFER_LVALUE->yy_buffer_status = YY_BUFFER_NORMAL;
       }
@@ -2356,19 +2356,19 @@ YY_FATAL_ERROR( "flex scanner jammed" );
  * DEPRECATED
  */
 yyFlexLexer::yyFlexLexer( std::istream* arg_yyin, std::ostream* arg_yyout ):
-  yyin(arg_yyin ? arg_yyin->rdbuf() : std::cin.rdbuf()),
-  yyout(arg_yyout ? arg_yyout->rdbuf() : std::cout.rdbuf())
+  yyin(arg_yyin ? arg_yyin : &std::cin),
+  yyout(arg_yyout ? arg_yyout : &std::cout)
 {
-  ctor_common();
+  this->ctor_common();
 }
 
 /* The contents of this function are C++ specific, so the () macro is not used.
  */
 yyFlexLexer::yyFlexLexer( std::istream& arg_yyin, std::ostream& arg_yyout ):
-  yyin(arg_yyin.rdbuf()),
-  yyout(arg_yyout.rdbuf())
+  yyin(&arg_yyin),
+  yyout(&arg_yyout)
 {
-  ctor_common();
+  this->ctor_common();
 }
 
 /* The contents of this function are C++ specific, so the () macro is not used.
@@ -2417,10 +2417,10 @@ void yyFlexLexer::switch_streams( std::istream& new_in, std::ostream& new_out )
 {
   // was if( new_in )
   yy_delete_buffer( YY_CURRENT_BUFFER );
-  yy_switch_to_buffer( yy_create_buffer( new_in, YY_BUF_SIZE  ) );
+  yy_switch_to_buffer( yy_create_buffer( &new_in, YY_BUF_SIZE  ) );
 
   // was if( new_out )
-  yyout.rdbuf(new_out.rdbuf());
+  yyout->rdbuf(new_out.rdbuf());
 }
 
 /* The contents of this function are C++ specific, so the () macro is not used.
@@ -2428,11 +2428,11 @@ void yyFlexLexer::switch_streams( std::istream& new_in, std::ostream& new_out )
 void yyFlexLexer::switch_streams( std::istream* new_in, std::ostream* new_out )
 {
   if( ! new_in ) {
-    new_in = &yyin;
+    new_in = yyin;
   }
 
   if ( ! new_out ) {
-    new_out = &yyout;
+    new_out = yyout;
   }
 
   switch_streams(*new_in, *new_out);
@@ -2444,33 +2444,33 @@ int yyFlexLexer::LexerInput( char* buf, int /* max_size */ )
 int yyFlexLexer::LexerInput( char* buf, int max_size )
 #endif
 {
-  if ( yyin.eof() || yyin.fail() )
+  if ( yyin->eof() || yyin->fail() )
     return 0;
 
 #ifdef YY_INTERACTIVE
-  yyin.get( buf[0] );
+  yyin->get( buf[0] );
 
-  if ( yyin.eof() )
+  if ( yyin->eof() )
     return 0;
 
-  if ( yyin.bad() )
+  if ( yyin->bad() )
     return -1;
 
   return 1;
 
 #else
-  (void) yyin.read( buf, max_size );
+  (void) yyin->read( buf, max_size );
 
-  if ( yyin.bad() )
+  if ( yyin->bad() )
     return -1;
   else
-    return yyin.gcount();
+    return yyin->gcount();
 #endif
 }
 
 void yyFlexLexer::LexerOutput( const char* buf, int size )
 {
-  (void) yyout.write( buf, size );
+  (void) yyout->write( buf, size );
 }
 /* %ok-for-header */
 
@@ -2821,7 +2821,7 @@ int yyFlexLexer::yy_get_next_buffer()
             yy_create_buffer( yyin, YY_BUF_SIZE );
   }
 
-  yy_init_buffer( YY_CURRENT_BUFFER, input_file );
+  yy_init_buffer( YY_CURRENT_BUFFER, &input_file );
   yy_load_buffer_state(  );
 }
 
@@ -2888,7 +2888,7 @@ void yyFlexLexer::yyrestart( std::istream* input_file )
 /* %if-c-only */
 /* %endif */
 /* %if-c++-only */
-  yyin.rdbuf(YY_CURRENT_BUFFER_LVALUE->yy_input_file);
+  yyin->rdbuf(YY_CURRENT_BUFFER_LVALUE->yy_input_file);
 /* %endif */
   (yy_hold_char) = *(yy_c_buf_p);
 }
@@ -2922,7 +2922,7 @@ void yyFlexLexer::yyrestart( std::istream* input_file )
 
   b->yy_is_our_buffer = 1;
 
-  yy_init_buffer( b, file );
+  yy_init_buffer( b, &file );
 
   return b;
 }
@@ -2971,7 +2971,7 @@ void yyFlexLexer::yyrestart( std::istream* input_file )
 /* %if-c-only */
 /* %endif */
 /* %if-c++-only */
-    void yyFlexLexer::yy_init_buffer( YY_BUFFER_STATE b, std::istream& file )
+    void yyFlexLexer::yy_init_buffer( YY_BUFFER_STATE b, std::istream* file )
 /* %endif */
 
 {
@@ -2982,7 +2982,7 @@ void yyFlexLexer::yyrestart( std::istream* input_file )
 /* %if-c-only */
 /* %endif */
 /* %if-c++-only */
-  b->yy_input_file = (&file == 0) ? NULL : file.rdbuf();
+  b->yy_input_file = (file == 0) ? NULL : file->rdbuf();
 /* %endif */
   b->yy_fill_buffer = 1;
 

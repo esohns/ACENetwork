@@ -85,12 +85,13 @@ if (UNIX)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src)
-else ()
+elseif (WIN32)
  include_directories ($ENV{ACE_ROOT})
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../openssl/include)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/ui)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src)
 endif ()
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../3rd_party/bison)

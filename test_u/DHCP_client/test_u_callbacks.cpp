@@ -40,7 +40,7 @@
 
 #include "common_ui_common.h"
 #include "common_ui_defines.h"
-#include "common_ui_gtk_manager.h"
+#include "common_ui_gtk_manager_common.h"
 #include "common_ui_tools.h"
 
 #include "net_macros.h"
@@ -1116,7 +1116,7 @@ allocate:
     TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   Test_U_IConnection_t* iconnection_p =
-      iconnection_manager_p->get (data_p->configuration->handle);
+      iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
   if (!iconnection_p)
   {
     // *NOTE*: most probable reason, the interface IP address has changed
@@ -1198,7 +1198,7 @@ action_inform_activate_cb (GtkAction* action_in,
     TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   Test_U_IConnection_t* iconnection_p =
-    iconnection_manager_p->get (data_p->configuration->handle);
+    iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
   ACE_ASSERT (iconnection_p);
   Test_U_IInboundStreamConnection_t* istream_connection_2 =
     dynamic_cast<Test_U_IInboundStreamConnection_t*> (iconnection_p);
@@ -1322,7 +1322,7 @@ action_request_activate_cb (GtkAction* action_in,
     TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   Test_U_IConnection_t* iconnection_p =
-    iconnection_manager_p->get (data_p->configuration->handle);
+    iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
   ACE_ASSERT (iconnection_p);
   Test_U_IInboundStreamConnection_t* istream_connection_2 =
     dynamic_cast<Test_U_IInboundStreamConnection_t*> (iconnection_p);
@@ -1430,7 +1430,7 @@ action_release_activate_cb (GtkAction* action_in,
     TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   Test_U_IConnection_t* iconnection_p =
-    iconnection_manager_p->get (data_p->configuration->handle);
+    iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
   ACE_ASSERT (iconnection_p);
   Test_U_IInboundStreamConnection_t* istream_connection_2 =
     dynamic_cast<Test_U_IInboundStreamConnection_t*> (iconnection_p);
@@ -1687,7 +1687,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     if (data_p->configuration->broadcastHandle != ACE_INVALID_HANDLE)
     {
       Test_U_ConnectionManager_t::ICONNECTION_T* iconnection_p =
-          connection_manager_p->get (data_p->configuration->broadcastHandle);
+          connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->broadcastHandle));
       if (iconnection_p)
       {
         iconnection_p->close ();
@@ -1698,7 +1698,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     if (data_p->configuration->handle != ACE_INVALID_HANDLE)
     {
       Test_U_ConnectionManager_t::ICONNECTION_T* iconnection_p =
-          connection_manager_p->get (data_p->configuration->handle);
+          connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
       if (iconnection_p)
       {
         iconnection_p->close ();
@@ -2016,7 +2016,7 @@ continue_:
     if (data_p->configuration->broadcastHandle != ACE_INVALID_HANDLE)
     {
       Test_U_ConnectionManager_t::ICONNECTION_T* iconnection_p =
-        connection_manager_p->get (data_p->configuration->broadcastHandle);
+        connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->broadcastHandle));
       if (iconnection_p)
       {
         iconnection_p->close ();
@@ -2027,7 +2027,7 @@ continue_:
     if (data_p->configuration->handle != ACE_INVALID_HANDLE)
     {
       Test_U_ConnectionManager_t::ICONNECTION_T* iconnection_p =
-        connection_manager_p->get (data_p->configuration->handle);
+        connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
       if (iconnection_p)
       {
         iconnection_p->close ();

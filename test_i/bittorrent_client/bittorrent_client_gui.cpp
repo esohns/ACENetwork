@@ -47,7 +47,7 @@
 
 #include "common_ui_defines.h"
 #include "common_ui_gtk_builder_definition.h"
-#include "common_ui_gtk_manager.h"
+#include "common_ui_gtk_manager_common.h"
 
 #include "stream_cachedallocatorheap.h"
 
@@ -535,7 +535,7 @@ do_work (bool useThreadPool_in,
     std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
   CBData_in.userData = &CBData_in;
 
-  Common_UI_GTK_Manager* gtk_manager_p =
+  Common_UI_GTK_Manager_T<struct Common_UI_GTKState>* gtk_manager_p =
       COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   gtk_manager_p->start ();
   ACE_Time_Value one_second (1, 0);

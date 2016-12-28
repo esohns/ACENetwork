@@ -167,16 +167,16 @@ struct BitTorrent_PeerModuleHandlerConfiguration
 {
   inline BitTorrent_PeerModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
-//   , CBData (NULL)
    , destination ()
    , protocolConfiguration (NULL)
    , session (NULL)
 //   , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
-  {};
+  {
+    demultiplex = true;
+  };
 
-//  struct Common_UI_GTKState*               CBData;
   std::string                              destination; // folder
   struct BitTorrent_ProtocolConfiguration* protocolConfiguration;
   BitTorrent_ISession_t*                   session;

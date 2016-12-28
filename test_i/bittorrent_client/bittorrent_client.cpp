@@ -416,8 +416,8 @@ session_setup_curses_function (void* arg_in)
   return_value = arg_in;
 #endif
 
-  BitTorrent_Client_ThreadData* data_p =
-    static_cast<BitTorrent_Client_ThreadData*> (arg_in);
+  struct BitTorrent_Client_ThreadData* data_p =
+    static_cast<struct BitTorrent_Client_ThreadData*> (arg_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -446,7 +446,7 @@ session_setup_curses_function (void* arg_in)
       goto error;
     } // end IF
     data_p->cursesState->sessionState =
-      &const_cast<BitTorrent_Client_SessionState&> (session_p->state ());
+      &const_cast<struct BitTorrent_Client_SessionState&> (session_p->state ());
 
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("running curses dispatch loop...\n")));
@@ -482,7 +482,7 @@ error:
 }
 
 void
-do_work (BitTorrent_Client_Configuration& configuration_in,
+do_work (struct BitTorrent_Client_Configuration& configuration_in,
          bool debugParser_in,
          bool useCursesLibrary_in,
          const std::string& metaInfoFileName_in,
@@ -496,8 +496,8 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
 
   int result = -1;
   // *TODO*: clean this up
-  BitTorrent_Client_CursesState curses_state;
-  BitTorrent_Client_ThreadData curses_thread_data;
+  struct BitTorrent_Client_CursesState curses_state;
+  struct BitTorrent_Client_ThreadData curses_thread_data;
   ACE_thread_t thread_id = -1;
   ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
   //char thread_name[BUFSIZ];
@@ -723,8 +723,27 @@ do_work (BitTorrent_Client_Configuration& configuration_in,
   } // end IF
 
   // step6c: dispatch connection attempt, wait for the session to finish
-  Common_Tools::dispatchEvents (configuration_in.useReactor,
-                                configuration_in.groupID);
+  if (!numberOfDispatchThreads_in)
+    Common_Tools::dispatchEvents (configuration_in.useReactor,
+                                  configuration_in.groupID);
+  else
+  {
+    // wait for the download to complete
+    try {
+      bittorrent_control.wait ();
+    }
+    catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in BitTorrent_IControl_T::wait(), returning\n")));
+      goto clean;
+    }
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("session complete...\n")));
+
+    Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
+                                         !configuration_in.useReactor,
+                                         configuration_in.groupID);
+  } // end ELSE
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -738,20 +757,6 @@ clean:
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", continuing\n"),
                 group_id_2));
-
-  return;
-
-//error:
-//  bittorrent_control.stop (true); // wait ?
-//  peer_connection_manager_p->abort ();
-//  tracker_connection_manager_p->abort ();
-//  peer_connection_manager_p->wait ();
-//  tracker_connection_manager_p->wait ();
-//  result = thread_manager_p->wait_grp (group_id_2);
-//  if (result == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", continuing\n"),
-//                group_id_2));
 }
 
 void

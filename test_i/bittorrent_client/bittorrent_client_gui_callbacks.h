@@ -25,8 +25,6 @@
 
 #include <gtk/gtk.h>
 
-ACE_THR_FUNC_RETURN session_setup_function (void*);
-
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus

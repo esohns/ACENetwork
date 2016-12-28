@@ -254,9 +254,36 @@ Net_Connection_Manager_T<AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
+                         UserDataType>::get (Net_ConnectionId_t id_in) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  return get (reinterpret_cast<ACE_HANDLE> (id_in));
+#else
+  return get (static_cast<ACE_HANDLE> (id_in));
+#endif
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename UserDataType>
+Net_IConnection_T<AddressType,
+                  ConfigurationType,
+                  StateType,
+                  StatisticContainerType>*
+Net_Connection_Manager_T<AddressType,
+                         ConfigurationType,
+                         StateType,
+                         StatisticContainerType,
                          UserDataType>::get (ACE_HANDLE handle_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
+
+  // sanity check(s)
+  ACE_ASSERT (handle_in != ACE_INVALID_HANDLE);
 
   ICONNECTION_T* connection_p = NULL;
 

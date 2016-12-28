@@ -62,5 +62,5 @@ EXPORTS
 	HTTP_Scanner_set_in
 	HTTP_Scanner_set_lineno
 	HTTP_Scanner_set_out
-	HTTP_Scanner_tables_fload
-	HTTP_Scanner_tables_destroy
+;	HTTP_Scanner_tables_fload
+;	HTTP_Scanner_tables_destroy

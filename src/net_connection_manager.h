@@ -88,7 +88,7 @@ class Net_Connection_Manager_T
                     UserDataType*&);     // return value: (stream) user data
 
   virtual ICONNECTION_T* operator[] (unsigned int) const; // index
-  virtual ICONNECTION_T* get (ACE_HANDLE) const; // socket handle
+  virtual ICONNECTION_T* get (Net_ConnectionId_t) const; // id
   virtual ICONNECTION_T* get (const AddressType&, // address
                               bool = true) const; // peer ?
 
@@ -122,6 +122,9 @@ class Net_Connection_Manager_T
 
   // implement Common_IDumpState
   virtual void dump_state () const;
+
+ protected:
+  virtual ICONNECTION_T* get (ACE_HANDLE) const; // socket handle
 
  private:
   Net_Connection_Manager_T ();

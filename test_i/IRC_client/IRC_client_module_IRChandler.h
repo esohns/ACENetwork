@@ -140,10 +140,10 @@ class IRC_Client_Module_IRCHandler
 
   // helper methods
   IRC_Message* allocateMessage (unsigned int); // requested size
-  struct IRC_Record* allocateMessage (IRC_Record::CommandType); // command
+  IRC_Record* allocateMessage (IRC_Record::CommandType); // command
 
   // *NOTE*: "fire-and-forget" - the argument is consumed
-  void sendMessage (struct IRC_Record*&); // command handle
+  void sendMessage (IRC_Record*&); // command handle
 
   // convenient types
   typedef typename inherited::SUBSCRIBERS_T::iterator SUBSCRIBERS_ITERATOR_T;

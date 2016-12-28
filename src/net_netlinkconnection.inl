@@ -147,8 +147,8 @@ Net_NetlinkConnection_T<HandlerType,
 //  // *PORTABILITY*: this isn't entirely portable...
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)\n"),
-//              this, reinterpret_cast<unsigned int> (handle),
+//              ACE_TEXT ("registered connection [0x%@/0x%@]: (\"%s\") <--> (\"%s\") (total: %d)\n"),
+//              this, handle,
 //              ACE_TEXT (localAddress.c_str ()),
 //              ACE_TEXT (buffer),
 //              (inherited::manager_ ? inherited::manager_->numConnections ()
@@ -203,8 +203,8 @@ Net_NetlinkConnection_T<HandlerType,
 //  // *PORTABILITY*
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("deregistered connection [%@/%u] (total: %u)\n"),
-//              this, reinterpret_cast<unsigned int> (handle),
+//              ACE_TEXT ("deregistered connection [0x%@/0x%@] (total: %u)\n"),
+//              this, handle,
 //              (inherited::manager_ ? inherited::manager_->numConnections ()
 //                                   : -1)));
 //#else
@@ -924,8 +924,8 @@ Net_AsynchNetlinkConnection_T<HandlerType,
 //  // *PORTABILITY*: this isn't entirely portable...
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("registered connection [%@/%u]: (\"%s\") <--> (\"%s\") (total: %d)\n"),
-//              this, reinterpret_cast<unsigned int> (handle),
+//              ACE_TEXT ("registered connection [0x%@/0x%@]: (\"%s\") <--> (\"%s\") (total: %d)\n"),
+//              this, handle,
 //              ACE_TEXT (local_address.c_str ()),
 //              buffer,
 //              (inherited::manager_ ? inherited::manager_->numConnections ()

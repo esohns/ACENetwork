@@ -217,42 +217,6 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
     if (!this->hasFinished ())
       goto continue_; // --> wait for more data to arrive
-
-    // set session data format
-    // sanity check(s)
-    ACE_ASSERT (inherited::sessionData_);
-    ACE_ASSERT (inherited2::record_);
-
-    typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
-
-    HTTP_HeadersIterator_t iterator =
-      inherited2::record_->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
-    if (iterator != inherited2::record_->headers.end ())
-    {
-      session_data_r.format =
-        HTTP_Tools::Encoding2CompressionFormat ((*iterator).second);
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%s: set compression format: \"%s\"\n"),
-                  inherited::mod_->name (),
-                  ACE_TEXT (Stream_Module_Decoder_Tools::compressionFormatToString (session_data_r.format).c_str ())));
-    } // end IF
-
-    // make sure the whole fragment chain references the same data record
-    // sanity check(s)
-    ACE_ASSERT (headFragment_->isInitialized ());
-    DATA_CONTAINER_T* data_container_p =
-        &const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
-    DATA_CONTAINER_T* data_container_2 = NULL;
-    message_p = dynamic_cast<DataMessageType*> (headFragment_->cont ());
-    while (message_p)
-    {
-      data_container_p->increase ();
-      data_container_2 = data_container_p;
-      message_p->initialize (data_container_2,
-                             NULL);
-      message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
-    } // end WHILE
   } // end lock scope
 
   // *NOTE*: the message has been parsed successfully
@@ -418,6 +382,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (record_inout);
   ACE_ASSERT (record_inout == inherited2::record_);
+  ACE_ASSERT (inherited::sessionData_);
   ACE_ASSERT (!headFragment_->isInitialized ());
 
   // debug info
@@ -426,12 +391,58 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                 ACE_TEXT ("%s"),
                 ACE_TEXT (HTTP_Tools::dump (*record_inout).c_str ())));
 
-  DATA_CONTAINER_T& data_container_r =
-      const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
-  data_container_r.set (record_inout);
+  // set session data format
+  typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
+
+  HTTP_HeadersIterator_t iterator =
+      record_inout->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
+  if (iterator != record_inout->headers.end ())
+  {
+    session_data_r.format =
+        HTTP_Tools::Encoding2CompressionFormat ((*iterator).second);
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%s: set compression format: \"%s\"\n"),
+                inherited::mod_->name (),
+                ACE_TEXT (Stream_Module_Decoder_Tools::compressionFormatToString (session_data_r.format).c_str ())));
+  } // end IF
+
+  const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
+  DATA_CONTAINER_T* data_container_p, *data_container_2 = NULL;
+  DataMessageType* message_p = NULL;
+
+  ACE_NEW_NORETURN (data_container_p,
+                    DATA_CONTAINER_T ());
+  if (!data_container_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+
+    delete record_inout;
+    record_inout = NULL;
+
+    goto error;
+  } // end IF
+  data_container_p->set (record_inout);
   record_inout = NULL;
+  headFragment_->initialize (data_container_p,
+                             NULL);
+
+  // make sure the whole fragment chain references the same data record
+  // sanity check(s)
+  message_p = dynamic_cast<DataMessageType*> (headFragment_->cont ());
+  while (message_p)
+  {
+    data_container_p->increase ();
+    data_container_2 = data_container_p;
+    message_p->initialize (data_container_2,
+                           NULL);
+    message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
+  } // end WHILE
 
   inherited2::finished_ = true;
+error:
+  inherited2::record_ = NULL;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -663,42 +674,6 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
     if (!this->hasFinished ())
       goto continue_; // --> wait for more data to arrive
-
-    // set session data format
-    // sanity check(s)
-    ACE_ASSERT (inherited::sessionData_);
-    ACE_ASSERT (inherited2::record_);
-
-    typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
-
-    HTTP_HeadersIterator_t iterator =
-      inherited2::record_->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
-    if (iterator != inherited2::record_->headers.end ())
-    {
-      session_data_r.format =
-        HTTP_Tools::Encoding2CompressionFormat ((*iterator).second);
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("%s: set compression format: \"%s\"\n"),
-                  inherited::mod_->name (),
-                  ACE_TEXT (Stream_Module_Decoder_Tools::compressionFormatToString (session_data_r.format).c_str ())));
-    } // end IF
-
-    // make sure the whole fragment chain references the same data record
-    // sanity check(s)
-    ACE_ASSERT (headFragment_->isInitialized ());
-    DATA_CONTAINER_T* data_container_p =
-        &const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
-    DATA_CONTAINER_T* data_container_2 = NULL;
-    message_p = dynamic_cast<DataMessageType*> (headFragment_->cont ());
-    while (message_p)
-    {
-      data_container_p->increase ();
-      data_container_2 = data_container_p;
-      message_p->initialize (data_container_2,
-                             NULL);
-      message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
-    } // end WHILE
   } // end lock scope
 
   // *NOTE*: the message has been parsed successfully
@@ -991,23 +966,55 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                 ACE_TEXT ("%s"),
                 ACE_TEXT (HTTP_Tools::dump (*record_inout).c_str ())));
 
-  DATA_CONTAINER_T* data_container_p = NULL;
+  // set session data format
+  typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
+
+  HTTP_HeadersIterator_t iterator =
+      record_inout->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
+  if (iterator != record_inout->headers.end ())
+  {
+    session_data_r.format =
+        HTTP_Tools::Encoding2CompressionFormat ((*iterator).second);
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%s: set compression format: \"%s\"\n"),
+                inherited::mod_->name (),
+                ACE_TEXT (Stream_Module_Decoder_Tools::compressionFormatToString (session_data_r.format).c_str ())));
+  } // end IF
+
+  DATA_CONTAINER_T* data_container_p, *data_container_2 = NULL;
+  DataMessageType* message_p = NULL;
+
   ACE_NEW_NORETURN (data_container_p,
                     DATA_CONTAINER_T ());
   if (!data_container_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate DATA_CONTAINER_T: \"%m\", returning\n")));
+                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
 
+    delete record_inout;
     record_inout = NULL;
 
-    return;
+    goto error;
   } // end IF
   data_container_p->set (record_inout);
   record_inout = NULL;
-
   headFragment_->initialize (data_container_p,
                              NULL);
 
+  // make sure the whole fragment chain references the same data record
+  // sanity check(s)
+  message_p = dynamic_cast<DataMessageType*> (headFragment_->cont ());
+  while (message_p)
+  {
+    data_container_p->increase ();
+    data_container_2 = data_container_p;
+    message_p->initialize (data_container_2,
+                           NULL);
+    message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
+  } // end WHILE
+
   inherited2::finished_ = true;
+error:
+  inherited2::record_ = NULL;
 }

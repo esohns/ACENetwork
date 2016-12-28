@@ -47,7 +47,7 @@
 
 #include "common_ui_defines.h"
 #include "common_ui_gtk_builder_definition.h"
-#include "common_ui_gtk_manager.h"
+#include "common_ui_gtk_manager_common.h"
 
 #include "stream_cachedallocatorheap.h"
 
@@ -468,21 +468,21 @@ do_work (bool useThreadPool_in,
   IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
                                                    NULL,
                                                    true);
-  IRC_Client_Module_IRCHandler* IRCHandler_impl_p = NULL;
-  IRCHandler_impl_p =
-    dynamic_cast<IRC_Client_Module_IRCHandler*> (IRC_handler.writer ());
-  if (!IRCHandler_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
-    return;
-  } // end IF
-  if (!IRCHandler_impl_p->initialize (CBData_in.configuration->moduleHandlerConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::initialize(), returning\n")));
-    return;
-  } // end IF
+  //IRC_Client_Module_IRCHandler* IRCHandler_impl_p = NULL;
+  //IRCHandler_impl_p =
+  //  dynamic_cast<IRC_Client_Module_IRCHandler*> (IRC_handler.writer ());
+  //if (!IRCHandler_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
+  //  return;
+  //} // end IF
+  //if (!IRCHandler_impl_p->initialize (CBData_in.configuration->moduleHandlerConfiguration))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::initialize(), returning\n")));
+  //  return;
+  //} // end IF
   CBData_in.configuration->streamConfiguration.module = &IRC_handler;
   CBData_in.configuration->streamConfiguration.cloneModule = true;
 

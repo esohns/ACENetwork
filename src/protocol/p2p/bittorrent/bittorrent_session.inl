@@ -18,6 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <functional>
+#include <random>
 #include <vector>
 
 #include <ace/INET_Addr.h>
@@ -225,12 +227,15 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::initialize"));
 
   // sanity check(s)
+  ACE_ASSERT (configuration_in.controller);
   ACE_ASSERT (configuration_in.parserConfiguration);
+  ACE_ASSERT (configuration_in.metaInfo);
 
   // *TODO*: remove type inferences
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::lock_, false);
 
     inherited::state_.controller = configuration_in.controller;
+    inherited::state_.metaInfo = configuration_in.metaInfo;
   } // end lock scope
   trackerConnectionManager_ = configuration_in.trackerConnectionManager;
   trackerHandlerConfiguration_ =
@@ -319,14 +324,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
     subscriber_p =
         configuration_p->streamConfiguration->moduleHandlerConfiguration->subscriber;
-    ACE_ASSERT (!subscriber_p);
     configuration_p->streamConfiguration->moduleHandlerConfiguration->subscriber =
         &peerStreamHandler_;
 
     clone_module = configuration_p->streamConfiguration->cloneModule;
     delete_module = configuration_p->streamConfiguration->deleteModule;
     module_p = configuration_p->streamConfiguration->module;
-    ACE_ASSERT (!module_p);
 
     configuration_p->streamConfiguration->cloneModule = false;
     configuration_p->streamConfiguration->deleteModule = false;
@@ -581,8 +584,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
     BitTorrent_PeerStatusIterator_t iterator =
         inherited::state_.peerStatus.find (id_in);
-    ACE_ASSERT (iterator != inherited::state_.peerStatus.end ());
-    inherited::state_.peerStatus.erase (iterator);
+    if (iterator != inherited::state_.peerStatus.end ())
+      inherited::state_.peerStatus.erase (iterator);
 
     if (inherited::state_.connections.empty () &&
         inherited::state_.controller)
@@ -757,8 +760,7 @@ allocate:
     ACE_ASSERT (inherited::state_.trackerConnectionId);
     tracker_connection_id = inherited::state_.trackerConnectionId;
   } // end lock scope
-  iconnection_p =
-      trackerConnectionManager_->get (tracker_connection_id);
+  iconnection_p = trackerConnectionManager_->get (tracker_connection_id);
   if (!iconnection_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -854,15 +856,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                                   ACE_Time_Value::zero);
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
 
-  // debug info
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  int result = address_in.addr_to_string (buffer,
-                                          sizeof (buffer));
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-
   // step0: subscribe to notifications
   TrackerConnectionConfigurationType* configuration_p = NULL;
   TrackerUserDataType* user_data_p = NULL;
@@ -912,6 +905,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   // step1: initialize connector
   typename TrackerConnectorType::ICONNECTOR_T* iconnector_p = &connector;
   typename TrackerConnectorType::ICONNECTION_T* iconnection_p = NULL;
+  int result = -1;
   ACE_ASSERT (trackerHandlerConfiguration_);
   if (!iconnector_p->initialize (*trackerHandlerConfiguration_))
   {
@@ -925,8 +919,10 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   if (handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to \"%s\": \"%m\", returning\n"),
-                buffer));
+                ACE_TEXT ("%s: failed to connect to tracker %s: \"%m\", returning\n"),
+                ACE::basename (metaInfoFileName_.c_str (),
+                               ACE_DIRECTORY_SEPARATOR_CHAR),
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
     goto error;
   } // end IF
   if (inherited::isAsynch_)
@@ -951,12 +947,15 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     } while (COMMON_TIME_NOW < deadline);
   } // end ELSE
   else
-    iconnection_p = trackerConnectionManager_->get (handle);
+    iconnection_p =
+      trackerConnectionManager_->get (reinterpret_cast<Net_ConnectionId_t> (handle));
   if (!iconnection_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to \"%s\": \"%m\", returning\n"),
-                buffer));
+                ACE_TEXT ("%s: failed to connect to tracker %s: \"%m\", returning\n"),
+                ACE::basename (metaInfoFileName_.c_str (),
+                               ACE_DIRECTORY_SEPARATOR_CHAR),
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
     goto error;
   } // end IF
 
@@ -971,8 +970,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   if (status != NET_CONNECTION_STATUS_OK)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("connection (to: \"%s\") failed to initialize (status was: %d), returning\n"),
-                buffer,
+                ACE_TEXT ("connection (to tracker: %s) failed to initialize (status was: %d), returning\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ()),
                 status));
     goto error;
   } // end IF
@@ -989,10 +988,10 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   istream_connection_p->wait (STREAM_STATE_RUNNING,
                               NULL); // <-- block
 
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connected to \"%s\": %d...\n"),
-              buffer,
-              iconnection_p->id ()));
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("connected to tracker %s: %u...\n"),
+  //            ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ()),
+  //            iconnection_p->id ()));
 
   iconnection_p->decrease ();
 
@@ -1064,6 +1063,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   } // end lock scope
 
   inherited::connect (id_in);
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: new tracker connection (id: %d)...\n"),
+              ACE::basename (metaInfoFileName_.c_str (),
+                             ACE_DIRECTORY_SEPARATOR_CHAR),
+              id_in));
 }
 template <typename PeerHandlerConfigurationType,
           typename TrackerHandlerConfigurationType,
@@ -1114,6 +1119,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::trackerDisconnect"));
 
   inherited::disconnect (id_in);
+
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: tracker connection closed (id was: %d)...\n"),
+              ACE::basename (metaInfoFileName_.c_str (),
+                             ACE_DIRECTORY_SEPARATOR_CHAR),
+              id_in));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
 
@@ -1219,10 +1230,10 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
         &const_cast<Bencoding_Dictionary_t&> (record_in);
   } // end lock scope
 
-  key =
-      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_RESPONSE_PEERS_HEADER);
-  std::vector<ACE_INET_Addr> peer_addresses;
+  key = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_RESPONSE_PEERS_HEADER);
+  BitTorrent_PeerAddresses_t peer_addresses;
   int result = -1;
+  ACE_INET_Addr inet_address;
 
 //    iterator = record_in.find (key);
   iterator = record_in.begin ();
@@ -1240,7 +1251,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   } // end IF
   else
   { ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
-    ACE_INET_Addr inet_address;
     const char* char_p = (*iterator).second->string->c_str ();
     for (unsigned int i = 0;
          i < ((*iterator).second->string->size () / 6);
@@ -1263,12 +1273,144 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connecting to %u peer(s)...\n"),
               peer_addresses.size ()));
-  // *TODO*: connect to all peers in parallel (asynchronous connection attempts
-  //         time out slowly)
-  for (std::vector<ACE_INET_Addr>::const_iterator iterator_2 = peer_addresses.begin ();
-       iterator_2 != peer_addresses.end ();
-       ++iterator_2)
-    connect (*iterator_2);
+
+  std::uniform_int_distribution<int> random_distribution (1, peer_addresses.size ());
+  std::default_random_engine         random_engine;
+  std::function<int ()>              random_generator =
+      std::bind (random_distribution, random_engine);
+  int random_number = random_generator ();
+  BitTorrent_PeerAddressesIterator_t iterator_2 = peer_addresses.begin ();
+  iterator_2 += random_number;
+  inet_address = *iterator_2;
+  peer_addresses.clear ();
+  peer_addresses.push_back (inet_address);
+
+  struct BitTorrent_SessionInitiationThreadData thread_data;
+  thread_data.addresses = &peer_addresses;
+  thread_data.lock = &(inherited::lock_);
+  thread_data.session = this;
+  ACE_Thread_Manager* thread_manager_p = NULL;
+  const char** thread_names_p = NULL;
+  char* thread_name_p = NULL;
+  std::string buffer;
+  std::ostringstream converter;
+  ACE_THR_FUNC function_p =
+      static_cast<ACE_THR_FUNC> (::session_setup_function);
+  void* arg_p = &thread_data;
+  int group_id = (COMMON_EVENT_THREAD_GROUP_ID + 1); // *TODO*
+  ACE_thread_t* thread_ids_p = NULL;
+  ACE_hthread_t* thread_handles_p = NULL;
+  // *TODO*: use ACE_NEW_MALLOC_ARRAY (as soon as the NORETURN variant becomes
+  //         available)
+  ACE_NEW_NORETURN (thread_ids_p,
+                    ACE_thread_t[thread_data.addresses->size ()]);
+  if (!thread_ids_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory(%u), aborting\n"),
+                (sizeof (ACE_thread_t) * thread_data.addresses->size ())));
+    goto error;
+  } // end IF
+  ACE_NEW_NORETURN (thread_handles_p,
+                    ACE_hthread_t[thread_data.addresses->size ()]);
+  if (!thread_handles_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory(%u), aborting\n"),
+                (sizeof (ACE_hthread_t) * thread_data.addresses->size ())));
+    goto error;
+  } // end IF
+//  ACE_OS::memset (thread_handles_p, 0, sizeof (thread_handles_p));
+  // *TODO*: use ACE_NEW_MALLOC_ARRAY (as soon as the NORETURN variant becomes
+  //         available)
+  ACE_NEW_NORETURN (thread_names_p,
+                    const char*[thread_data.addresses->size ()]);
+  if (!thread_names_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory(%u), aborting\n"),
+                (sizeof (char*) * thread_data.addresses->size ())));
+    goto error;
+  } // end IF
+  ACE_OS::memset (thread_names_p, 0, sizeof (thread_names_p));
+  for (unsigned int i = 0;
+       i < thread_data.addresses->size ();
+       i++)
+  {
+    thread_name_p = NULL;
+    // *TODO*: use ACE_NEW_MALLOC_ARRAY (as soon as the NORETURN variant becomes
+    //         available)
+    ACE_NEW_NORETURN (thread_name_p,
+                      char[BUFSIZ]);
+    if (!thread_name_p)
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory, aborting\n")));
+      goto error;
+    } // end IF
+    ACE_OS::memset (thread_name_p, 0, sizeof (thread_name_p));
+    converter.clear ();
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter << (i + 1);
+    buffer = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_SESSION_THREAD_NAME);
+    buffer += ACE_TEXT_ALWAYS_CHAR (" #");
+    buffer += converter.str ();
+    ACE_OS::strcpy (thread_name_p, buffer.c_str ());
+    thread_names_p[i] = thread_name_p;
+  } // end FOR
+  thread_manager_p = ACE_Thread_Manager::instance ();
+  ACE_ASSERT (thread_manager_p);
+  group_id =
+    thread_manager_p->spawn_n (thread_ids_p,                   // id(s)
+                               thread_data.addresses->size (), // # threads
+                               function_p,                     // function
+                               arg_p,                          // argument
+                               (THR_NEW_LWP      |
+                                THR_JOINABLE     |
+                                THR_INHERIT_SCHED),            // flags
+                               ACE_DEFAULT_THREAD_PRIORITY,    // priority
+                               group_id,                       // group id
+                               NULL,                           // stack(s)
+                               NULL,                           // stack size(s)
+                               thread_handles_p,               // handle(s)
+                               NULL,                           // task
+                               thread_names_p);                // name(s)
+  if (group_id == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Thread_Manager::spawn_n(%u): \"%m\", aborting\n"),
+                thread_data.addresses->size ()));
+    goto error;
+  } // end IF
+
+  // clean up
+  if (thread_ids_p)
+    delete [] thread_ids_p;
+  delete [] thread_handles_p;
+  for (unsigned int i = 0; i < thread_data.addresses->size (); i++)
+    delete [] thread_names_p[i];
+  delete [] thread_names_p;
+
+  result = thread_manager_p->wait_grp (group_id); // name(s)
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", aborting\n"),
+                thread_data.addresses->size ()));
+    goto error;
+  } // end IF
+
+  return;
+
+error:
+  if (thread_ids_p)
+    delete [] thread_ids_p;
+  if (thread_handles_p)
+    delete [] thread_handles_p;
+  for (unsigned int j = 0; j < thread_data.addresses->size (); j++)
+    delete [] thread_names_p[j];
+  if (thread_names_p)
+    delete [] thread_names_p;
 }
 
 template <typename PeerHandlerConfigurationType,

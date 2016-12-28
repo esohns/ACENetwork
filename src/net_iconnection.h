@@ -22,6 +22,7 @@
 #define NET_ICONNECTION_H
 
 #include <ace/config-macros.h>
+#include <ace/INET_Addr.h>
 #include <ace/Message_Block.h>
 
 #include "common_idumpstate.h"
@@ -173,6 +174,26 @@ class Net_IStreamConnection_T
 
 //////////////////////////////////////////
 
+template <typename AddressType>
+class Net_ISessionBase_T
+{
+ public:
+  virtual ~Net_ISessionBase_T () {};
+
+  virtual void connect (const AddressType&) = 0; // peer address
+  virtual void disconnect (const AddressType&) = 0; // peer address
+
+  virtual void close (bool = false) = 0; // wait ?
+
+  ////////////////////////////////////////
+  // callbacks
+  // *TODO*: remove ASAP
+  virtual void connect (Net_ConnectionId_t) = 0;    // connection id
+  virtual void disconnect (Net_ConnectionId_t) = 0; // connection id
+};
+
+typedef Net_ISessionBase_T<ACE_INET_Addr> Net_IInetSession_t;
+
 template <typename AddressType,
           typename ConnectionConfigurationType,
           typename ConnectionStateType,
@@ -187,24 +208,14 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType>
 class Net_ISession_T
- : public Common_IInitialize_T<ConfigurationType>
+ : public Net_ISessionBase_T<AddressType>
+ , public Common_IInitialize_T<ConfigurationType>
 // : public typename StreamType::IDATA_NOTIFY_T
 {
  public:
   virtual ~Net_ISession_T () {};
 
   virtual const StateType& state () const = 0;
-
-  virtual void connect (const AddressType&) = 0; // peer address
-  virtual void disconnect (const AddressType&) = 0; // peer address
-
-  virtual void close (bool = false) = 0; // wait ?
-
-  ////////////////////////////////////////
-  // callbacks
-  // *TODO*: remove ASAP
-  virtual void connect (Net_ConnectionId_t) = 0;    // connection id
-  virtual void disconnect (Net_ConnectionId_t) = 0; // connection id
 
 //  // convenient types
 //  typedef Net_IConnection_T<AddressType,
