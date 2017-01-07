@@ -37,24 +37,25 @@
 #include "IRC_client_stream_common.h"
 
 class IRC_Client_Stream
- : public IRC_Stream_T<IRC_Client_StreamState,
-                       IRC_Client_StreamConfiguration,
+ : public IRC_Stream_T<struct IRC_Client_StreamState,
+                       struct IRC_Client_StreamConfiguration,
                        IRC_RuntimeStatistic_t,
-                       IRC_Client_ModuleHandlerConfiguration,
-                       IRC_Client_SessionData,
+                       struct IRC_Client_ModuleHandlerConfiguration,
+                       struct IRC_Client_SessionData,
                        IRC_Client_SessionData_t,
                        ACE_Message_Block,
                        IRC_Message,
-                       IRC_Client_SessionMessage>
+                       IRC_Client_SessionMessage,
+                       struct IRC_Client_UserData>
 {
  public:
   IRC_Client_Stream (const std::string&); // name
   virtual ~IRC_Client_Stream ();
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const IRC_Client_StreamConfiguration&, // configuration
-                           bool = true,                           // setup pipeline ?
-                           bool = true);                          // reset session data ?
+  virtual bool initialize (const struct IRC_Client_StreamConfiguration&, // configuration
+                           bool = true,                                  // setup pipeline ?
+                           bool = true);                                 // reset session data ?
 
   //// implement Common_IStatistic_T
   //// *NOTE*: delegate this to rntimeStatistic_
@@ -66,15 +67,16 @@ class IRC_Client_Stream
   void ping ();
 
  private:
-  typedef IRC_Stream_T<IRC_Client_StreamState,
-                       IRC_Client_StreamConfiguration,
+  typedef IRC_Stream_T<struct IRC_Client_StreamState,
+                       struct IRC_Client_StreamConfiguration,
                        IRC_RuntimeStatistic_t,
-                       IRC_Client_ModuleHandlerConfiguration,
-                       IRC_Client_SessionData,
+                       struct IRC_Client_ModuleHandlerConfiguration,
+                       struct IRC_Client_SessionData,
                        IRC_Client_SessionData_t,
                        ACE_Message_Block,
                        IRC_Message,
-                       IRC_Client_SessionMessage> inherited;
+                       IRC_Client_SessionMessage,
+                       struct IRC_Client_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream (const IRC_Client_Stream&))

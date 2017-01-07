@@ -76,32 +76,33 @@ class Net_Server_AsynchListener_T
   virtual int validate_connection (const ACE_Asynch_Accept::Result&, // result
                                    const ACE_INET_Addr&,             // remote address
                                    const ACE_INET_Addr&);            // local address
-  virtual int should_reissue_accept (void);
+  // default behavior: delegate to baseclass
+  inline virtual int should_reissue_accept (void) { return inherited::should_reissue_accept (); };
 
   // implement Net_IListener_T
   // *WARNING*: this API is NOT re-entrant !
   virtual void start ();
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
-  virtual bool isRunning () const;
+  inline virtual bool isRunning () const { return isListening_; };
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  virtual const HandlerConfigurationType& get () const;
+  virtual const HandlerConfigurationType& get () const; // return value: socket handler configuration
   //virtual bool initialize (const HandlerConfigurationType&);
-  virtual bool initialize (const ConfigurationType&);
-  virtual bool useReactor () const;
+  virtual bool initialize (const ConfigurationType&); // configuration
+  inline virtual bool useReactor () const { return false; };
 
-  bool isInitialized () const;
+  inline bool isInitialized () const { return isInitialized_; };
 
   // implement Common_IDumpState
-  virtual void dump_state () const;
+  inline virtual void dump_state () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
  protected:
   // override default accept strategy
-  virtual void handle_accept (const ACE_Asynch_Accept::Result&);
+  virtual void handle_accept (const ACE_Asynch_Accept::Result&); // result
   // override default creation strategy
-  virtual HandlerType* make_handler (void);
+  virtual HandlerType* make_handler (void); // return value: socket handler handle
 
  private:
   typedef ACE_Asynch_Acceptor<HandlerType> inherited;
@@ -115,7 +116,7 @@ class Net_Server_AsynchListener_T
   virtual ~Net_Server_AsynchListener_T ();
 
   // implement (part of) Common_IControl_T
-  virtual void initialize ();
+  inline virtual void initialize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   // override default listen strategy
   // *TODO*: currently tailored for TCP only (see implementation)
@@ -128,10 +129,11 @@ class Net_Server_AsynchListener_T
                     bool = false,                     // validate_connection()s ?
                     int = 1,                          // reissue accept()s ?
                     int = -1);                        // #initial accept()s
-//  // override default accept strategy
-//  // *NOTE*: ACE doesn't properly handle cancellation (dangling bound port on listen socket) -->
-//  // fix this here... --> *TODO*: send patch to ACE maintainers
-//  virtual void handle_accept(const ACE_Asynch_Accept::Result&); // result
+  //// override default accept strategy
+  //// *NOTE*: ACE doesn't properly handle cancellation (dangling bound port on
+  ////         listen socket) --> fix this here... -->
+  //// *TODO*: send patch to ACE maintainers
+  //virtual void handle_accept(const ACE_Asynch_Accept::Result&); // result
 
   //int                      addressFamily_;
   ConfigurationType*        configuration_;

@@ -41,17 +41,14 @@ class Test_U_SessionMessage
  : public Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       Test_U_StreamSessionData_t,
-                                      struct Test_U_UserData,
-                                      Test_U_ControlMessage_t,
-                                      Test_U_Message>
+                                      struct Test_U_UserData>
 {
 //  // enable access to private ctor(s)
-//  friend class Net_StreamMessageAllocator;
-  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Stream_AllocatorConfiguration,
-                                                 Test_U_ControlMessage_t,
-                                                 Test_U_Message,
-                                                 Test_U_SessionMessage>;
+  //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+  //                                               struct Stream_AllocatorConfiguration,
+  //                                               Test_U_ControlMessage_t,
+  //                                               Test_U_Message,
+  //                                               Test_U_SessionMessage>;
 
  public:
   // *NOTE*: assumes responsibility for the second argument !
@@ -72,9 +69,7 @@ class Test_U_SessionMessage
   typedef Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       Test_U_StreamSessionData_t,
-                                      struct Test_U_UserData,
-                                      Test_U_ControlMessage_t,
-                                      Test_U_Message> inherited;
+                                      struct Test_U_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_SessionMessage ())
   // copy ctor (to be used by duplicate())

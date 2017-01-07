@@ -125,6 +125,63 @@ Net_Common_Tools::IPAddress2String (unsigned short port_in,
   return return_value;
 }
 
+bool
+Net_Common_Tools::matchIPAddress (std::string& address_in)
+{
+  NETWORK_TRACE ("Net_Common_Tools::matchIPAddress");
+
+  std::string regex_string =
+    //ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]{0,3})(\\.[[:digit:]]{0,3}){0,3}$");
+    ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]{0,3})(\\.[[:digit:]]{0,3})?(\\.[[:digit:]]{0,3})?(\\.[[:digit:]]{0,3})?$");
+  std::regex::flag_type flags = std::regex_constants::ECMAScript;
+  std::regex regex;
+  std::smatch match_results;
+  //try {
+    regex.assign (regex_string, flags);
+  //} catch (std::regex_error exception_in) {
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("caught regex exception (was: \"%s\"), returning\n"),
+  //              ACE_TEXT (exception_in.what ())));
+  //  goto refuse;
+  //}
+  if (!std::regex_match (address_in,
+                         match_results,
+                         regex,
+                         std::regex_constants::match_default))
+  {
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("invalid address (was: \"%s\"), aborting\n"),
+    //            ACE_TEXT (address_in.c_str ())));
+    return false;
+  } // end IF
+  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+  // validate all groups
+  std::stringstream converter;
+  std::string group_string;
+  unsigned int group = 0;
+  std::string::size_type start_position;
+  for (unsigned int i = 1; i < match_results.size (); ++i)
+  {
+    if (!match_results[i].matched) return false;
+
+    group_string = match_results[i].str ();
+    if (i > 1) group_string.erase (0, 1);
+
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.clear ();
+    converter << group_string;
+    converter >> group;
+    if (group > 255) return false; // refuse groups > 255
+
+    start_position = group_string.find ('0', 0);
+    if ((start_position == 0) &&
+        (group_string.size () > 1)) return false; // refuse leading 0s
+  } // end FOR
+
+  return true;
+}
+
 ACE_INET_Addr
 Net_Common_Tools::string2IPAddress (std::string& address_in)
 {

@@ -66,7 +66,6 @@ class Net_Server_SSL_Listener_T
   //                                 StateType,
   //                                 Stream_Statistic,
   //                                 StreamType,
-  //                                 //////
   //                                 UserDataType> ICONNECTION_MANAGER_T;
 
   bool isInitialized () const;
@@ -81,12 +80,12 @@ class Net_Server_SSL_Listener_T
   virtual void start ();
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
-  virtual bool isRunning () const;
+  inline virtual bool isRunning () const { return isListening_; };
 
   virtual const HandlerConfigurationType& get () const;
   //virtual bool initialize (const HandlerConfigurationType&);
   virtual bool initialize (const ConfigurationType&);
-  virtual bool useReactor () const;
+  inline virtual bool useReactor () const { return true; };
 
   // implement Common_IDumpState
   virtual void dump_state () const;
@@ -112,10 +111,11 @@ class Net_Server_SSL_Listener_T
   virtual ~Net_Server_SSL_Listener_T ();
 
   // implement (part of) Common_IControl_T
-  virtual void initialize ();
+  inline virtual void initialize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   ConfigurationType*        configuration_;
   HandlerConfigurationType* handlerConfiguration_;
+  bool                      hasChanged_;
   bool                      isInitialized_;
   bool                      isListening_;
   bool                      isOpen_;

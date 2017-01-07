@@ -30,7 +30,8 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename UserDataType>
 HTTP_Stream_T<StreamStateType,
               ConfigurationType,
               StatisticContainerType,
@@ -39,7 +40,8 @@ HTTP_Stream_T<StreamStateType,
               SessionDataContainerType,
               ControlMessageType,
               DataMessageType,
-              SessionMessageType>::HTTP_Stream_T (const std::string& name_in)
+              SessionMessageType,
+              UserDataType>::HTTP_Stream_T (const std::string& name_in)
  : inherited (name_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::HTTP_Stream_T"));
@@ -54,7 +56,8 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename UserDataType>
 HTTP_Stream_T<StreamStateType,
               ConfigurationType,
               StatisticContainerType,
@@ -63,7 +66,8 @@ HTTP_Stream_T<StreamStateType,
               SessionDataContainerType,
               ControlMessageType,
               DataMessageType,
-              SessionMessageType>::~HTTP_Stream_T ()
+              SessionMessageType,
+              UserDataType>::~HTTP_Stream_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::~HTTP_Stream_T"));
 
@@ -79,7 +83,8 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename UserDataType>
 bool
 HTTP_Stream_T<StreamStateType,
               ConfigurationType,
@@ -89,8 +94,9 @@ HTTP_Stream_T<StreamStateType,
               SessionDataContainerType,
               ControlMessageType,
               DataMessageType,
-              SessionMessageType>::load (Stream_ModuleList_t& modules_out,
-                                         bool& deleteModules_out)
+              SessionMessageType,
+              UserDataType>::load (Stream_ModuleList_t& modules_out,
+                                   bool& deleteModules_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::load"));
 
@@ -123,7 +129,8 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename UserDataType>
 bool
 HTTP_Stream_T<StreamStateType,
               ConfigurationType,
@@ -133,9 +140,10 @@ HTTP_Stream_T<StreamStateType,
               SessionDataContainerType,
               ControlMessageType,
               DataMessageType,
-              SessionMessageType>::initialize (const ConfigurationType& configuration_in,
-                                               bool setupPipeline_in,
-                                               bool resetSessionData_in)
+              SessionMessageType,
+              UserDataType>::initialize (const ConfigurationType& configuration_in,
+                                         bool setupPipeline_in,
+                                         bool resetSessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::initialize"));
 
@@ -286,7 +294,8 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename UserDataType>
 bool
 HTTP_Stream_T<StreamStateType,
               ConfigurationType,
@@ -296,7 +305,8 @@ HTTP_Stream_T<StreamStateType,
               SessionDataContainerType,
               ControlMessageType,
               DataMessageType,
-              SessionMessageType>::collect (StatisticContainerType& data_out)
+              SessionMessageType,
+              UserDataType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::collect"));
 

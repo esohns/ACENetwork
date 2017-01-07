@@ -24,10 +24,14 @@
 #include <list>
 
 #include <ace/INET_Addr.h>
+#include <ace/Singleton.h>
 #include <ace/Synch_Traits.h>
 
 #include "common_istatistic.h"
 #include "common_isubscribe.h"
+
+#include "common_ui_gtk_builder_definition.h"
+#include "common_ui_gtk_manager.h"
 
 #include "stream_common.h"
 #include "stream_control_message.h"
@@ -108,9 +112,7 @@ struct Test_U_Server_Configuration
 };
 
 typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
-                                struct Stream_AllocatorConfiguration,
-                                Test_U_Message,
-                                Test_U_SessionMessage> Test_U_ControlMessage_t;
+                                struct Stream_AllocatorConfiguration> Test_U_ControlMessage_t;
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                           struct Stream_AllocatorConfiguration,
@@ -141,5 +143,11 @@ struct Test_U_Server_GTK_CBData
 
   Test_U_Subscribers_t                subscribers;
 };
+
+typedef Common_UI_GtkBuilderDefinition_T<struct Test_U_Server_GTK_CBData> Test_U_Server_GtkBuilderDefinition_t;
+
+typedef Common_UI_GTK_Manager_T<struct Test_U_Server_GTK_CBData> Test_U_Server_GTK_Manager_t;
+typedef ACE_Singleton<Test_U_Server_GTK_Manager_t,
+                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> SERVER_UI_GTK_MANAGER_SINGLETON;
 
 #endif

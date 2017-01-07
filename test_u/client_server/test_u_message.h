@@ -40,9 +40,8 @@ class ACE_Message_Block;
 class Test_U_SessionMessage;
 
 class Test_U_Message
- : public Stream_MessageBase_2<Stream_AllocatorConfiguration,
-                               Test_U_ControlMessage_t,
-                               Test_U_SessionMessage,
+ : public Stream_MessageBase_2<struct Stream_AllocatorConfiguration,
+                               enum Stream_MessageType,
                                Net_Remote_Comm::MessageHeader,
                                Net_MessageType_t>
 {
@@ -75,8 +74,7 @@ class Test_U_Message
 
  private:
   typedef Stream_MessageBase_2<struct Stream_AllocatorConfiguration,
-                               Test_U_ControlMessage_t,
-                               Test_U_SessionMessage,
+                               enum Stream_MessageType,
                                Net_Remote_Comm::MessageHeader,
                                Net_MessageType_t> inherited;
 

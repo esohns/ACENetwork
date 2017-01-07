@@ -30,8 +30,8 @@ template <typename SessionDataType,
           typename UserDataType>
 BitTorrent_SessionMessage_T<SessionDataType,
                             UserDataType>::BitTorrent_SessionMessage_T (enum Stream_SessionMessageType messageType_in,
-                                                                           Stream_SessionData_T<SessionDataType>*& sessionData_inout,
-                                                                           UserDataType* userData_in)
+                                                                        Stream_SessionData_T<SessionDataType>*& sessionData_inout,
+                                                                        UserDataType* userData_in)
  : inherited (messageType_in,
               sessionData_inout,
               userData_in)
@@ -43,7 +43,8 @@ BitTorrent_SessionMessage_T<SessionDataType,
 template <typename SessionDataType,
           typename UserDataType>
 BitTorrent_SessionMessage_T<SessionDataType,
-                            UserDataType>::BitTorrent_SessionMessage_T (const BitTorrent_SessionMessage_T& message_in)
+                            UserDataType>::BitTorrent_SessionMessage_T (const BitTorrent_SessionMessage_T<SessionDataType,
+                                                                                                          UserDataType>& message_in)
  : inherited (message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_SessionMessage_T::BitTorrent_SessionMessage_T"));

@@ -33,56 +33,57 @@
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
-template <ACE_SYNCH_DECL,
-          typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
-class Stream_MessageAllocatorHeapBase_T;
-template <ACE_SYNCH_DECL,
-          typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
-class Stream_CachedMessageAllocator_T;
+//template <ACE_SYNCH_DECL,
+//          typename AllocatorConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType>
+//class Stream_MessageAllocatorHeapBase_T;
+//template <ACE_SYNCH_DECL,
+//          typename AllocatorConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType>
+//class Stream_CachedMessageAllocator_T;
 
-template <typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionDataType>
+template <typename AllocatorType,
+          ////////////////////////////////
+          typename SessionDataType, // reference-counted
+          ////////////////////////////////
+          typename UserDataType>
 class DHCP_SessionMessage_T
- : public Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      Stream_SessionMessageType,
+ : public Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
                                       SessionDataType,
-                                      DHCP_Stream_UserData,
-                                      ControlMessageType,
-                                      DataMessageType>
+                                      UserDataType>
 {
- // enable access to specific private ctors
- friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                Stream_AllocatorConfiguration,
-                                                ControlMessageType,
-                                                DataMessageType,
-                                                DHCP_SessionMessage_T<ControlMessageType,
-                                                                      DataMessageType,
-                                                                      SessionDataType> >;
- friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
-                                              Stream_AllocatorConfiguration,
-                                              ControlMessageType,
-                                              DataMessageType,
-                                              DHCP_SessionMessage_T<ControlMessageType,
-                                                                    DataMessageType,
-                                                                    SessionDataType> >;
+  // enable access to specific private ctors
+  friend AllocatorType;
+ //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+ //                                               Stream_AllocatorConfiguration,
+ //                                               ControlMessageType,
+ //                                               DataMessageType,
+ //                                               DHCP_SessionMessage_T<ControlMessageType,
+ //                                                                     DataMessageType,
+ //                                                                     SessionDataType> >;
+ //friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
+ //                                             Stream_AllocatorConfiguration,
+ //                                             ControlMessageType,
+ //                                             DataMessageType,
+ //                                             DHCP_SessionMessage_T<ControlMessageType,
+ //                                                                   DataMessageType,
+ //                                                                   SessionDataType> >;
 
  public:
   // convenient types
-  typedef DHCP_SessionMessage_T<ControlMessageType,
-                                DataMessageType,
-                                SessionDataType> OWN_TYPE_T;
+  typedef DHCP_SessionMessage_T<AllocatorType,
+                                SessionDataType,
+                                UserDataType> OWN_TYPE_T;
 
   // *NOTE*: assume lifetime responsibility for the second argument !
-  DHCP_SessionMessage_T (Stream_SessionMessageType, // session message type
-                         SessionDataType*&,         // session data container handle
-                         DHCP_Stream_UserData*);    // user data handle
+  DHCP_SessionMessage_T (enum Stream_SessionMessageType, // session message type
+                         SessionDataType*&,              // session data container handle
+                         UserDataType*);                 // user data handle
   // *NOTE*: to be used by message allocators
   DHCP_SessionMessage_T (ACE_Allocator*); // message allocator
   DHCP_SessionMessage_T (ACE_Data_Block*, // data block
@@ -94,12 +95,10 @@ class DHCP_SessionMessage_T
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      Stream_SessionMessageType,
+  typedef Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
                                       SessionDataType,
-                                      DHCP_Stream_UserData,
-                                      ControlMessageType,
-                                      DataMessageType> inherited;
+                                      UserDataType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (DHCP_SessionMessage_T ())
   // copy ctor (to be used by duplicate())

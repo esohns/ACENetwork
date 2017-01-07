@@ -96,7 +96,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+  path += ACE_TEXT (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [FILENAME]   : configuration file [\"")
@@ -109,7 +109,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+  path += ACE_TEXT (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-g [FILENAME]   : GTK rc file [\"")
@@ -126,7 +126,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+  path += ACE_TEXT (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-p[FILENAME]    : phonebook file [\"")
@@ -147,7 +147,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-u [DIRECTORY]  : UI file directory [\"")
             << path
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
@@ -196,7 +196,7 @@ do_processArguments (int argc_in,
   configurationFile_out          = configuration_path;
   configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configurationFile_out         +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configurationFile_out         +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
@@ -207,7 +207,7 @@ do_processArguments (int argc_in,
   UIRCFile_out                   = configuration_path;
   UIRCFile_out                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIRCFile_out                  +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   UIRCFile_out                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIRCFile_out                  +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
@@ -220,7 +220,7 @@ do_processArguments (int argc_in,
   phonebookFile_out              = configuration_path;
   phonebookFile_out             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebookFile_out             +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   phonebookFile_out             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebookFile_out             +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
@@ -235,7 +235,7 @@ do_processArguments (int argc_in,
   UIDefinitionFileDirectory_out  = configuration_path;
   UIDefinitionFileDirectory_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIDefinitionFileDirectory_out +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
 
   printVersionAndExit_out        = false;
   numThreadPoolThreads_out       = IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS;
@@ -549,19 +549,19 @@ do_work (bool useThreadPool_in,
   // [- signal timer expiration to perform server queries] (see above)
 
   // step5: start GTK event loop
-  CBData_in.GTKState.initializationHook = idle_initialize_UI_cb;
-  CBData_in.GTKState.finalizationHook = idle_finalize_UI_cb;
-  CBData_in.GTKState.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
+  CBData_in.initializationHook = idle_initialize_UI_cb;
+  CBData_in.finalizationHook = idle_finalize_UI_cb;
+  CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
     std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
-  CBData_in.GTKState.userData = &CBData_in;
+  CBData_in.userData = &CBData_in;
 
-  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
+  IRC_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
   ACE_Time_Value one_second (1, 0);
   int result = ACE_OS::sleep (one_second);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::sleep(): \"%m\", continuing\n")));
-  if (!COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
+  if (!IRC_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
@@ -582,7 +582,7 @@ do_work (bool useThreadPool_in,
 
     // clean up
     timer_manager_p->stop ();
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+    IRC_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
 
     return;
   } // end IF
@@ -594,7 +594,7 @@ do_work (bool useThreadPool_in,
                                 group_id);
 
   // step8: clean up
-  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->wait ();
+  IRC_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->wait ();
   timer_manager_p->stop ();
 
   // wait for connection processing to complete
@@ -1111,7 +1111,7 @@ ACE_TMAIN (int argc_in,
   std::string configuration_file_name        = configuration_path;
   configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file_name                   +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file_name                   +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
@@ -1122,7 +1122,7 @@ ACE_TMAIN (int argc_in,
   std::string UIRC_file_name                 = configuration_path;
   UIRC_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIRC_file_name                            +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   UIRC_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIRC_file_name                            +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
@@ -1134,7 +1134,7 @@ ACE_TMAIN (int argc_in,
   std::string phonebook_file_name            = configuration_path;
   phonebook_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebook_file_name                       +=
-      ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   phonebook_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebook_file_name                       +=
       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
@@ -1149,7 +1149,7 @@ ACE_TMAIN (int argc_in,
   std::string UIDefinitionFile_directory     = configuration_path;
   UIDefinitionFile_directory                += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIDefinitionFile_directory                +=
-    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_FILE_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
 
   bool print_version_and_exit                = false;
   unsigned int number_of_thread_pool_threads =
@@ -1383,7 +1383,7 @@ ACE_TMAIN (int argc_in,
   Common_Tools::getCurrentUserName (configuration.protocolConfiguration.loginOptions.user.userName,
                                     configuration.protocolConfiguration.loginOptions.user.realName);
 
-  cb_user_data.GTKState.RCFiles.push_back (UIRC_file_name);
+  cb_user_data.RCFiles.push_back (UIRC_file_name);
 
   // step7: parse configuration file(s) (if any)
   if (load_phonebook)
@@ -1415,15 +1415,15 @@ ACE_TMAIN (int argc_in,
 
   configuration.useReactor = use_reactor;
 
-  cb_user_data.progressData.GTKState = &cb_user_data.GTKState;
+  cb_user_data.progressData.GTKState = &cb_user_data;
 
   // step8: initialize GTK UI
-  Common_UI_GtkBuilderDefinition ui_definition (argc_in,
-                                                argv_in);
-  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                            argv_in,
-                                                            &cb_user_data.GTKState,
-                                                            &ui_definition);
+  IRC_Client_GtkBuilderDefinition_t ui_definition (argc_in,
+                                                   argv_in);
+  IRC_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
+                                                                argv_in,
+                                                                &cb_user_data,
+                                                                &ui_definition);
 
   // step9: do work
   ACE_High_Res_Timer timer;

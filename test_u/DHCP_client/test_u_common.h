@@ -31,6 +31,7 @@
 
 #include <ace/INET_Addr.h>
 #include <ace/Synch_Traits.h>
+#include <ace/Singleton.h>
 #include <ace/Time_Value.h>
 
 #include <gtk/gtk.h>
@@ -40,7 +41,9 @@
 #include "common_isubscribe.h"
 #include "common_time_common.h"
 
+#include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
+#include "common_ui_gtk_manager.h"
 
 #include "stream_base.h"
 #include "stream_common.h"
@@ -412,5 +415,11 @@ struct Test_U_ThreadData
   struct Test_U_GTK_CBData* CBData;
   guint                     eventSourceID;
 };
+
+typedef Common_UI_GtkBuilderDefinition_T<struct Test_U_GTK_CBData> Test_U_GtkBuilderDefinition_t;
+
+typedef Common_UI_GTK_Manager_T<struct Test_U_GTK_CBData> Test_U_GTK_Manager_t;
+typedef ACE_Singleton<Test_U_GTK_Manager_t,
+                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> TEST_U_UI_GTK_MANAGER_SINGLETON;
 
 #endif

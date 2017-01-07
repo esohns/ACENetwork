@@ -49,16 +49,18 @@ Test_U_Stream::~Test_U_Stream ()
 }
 
 bool
-Test_U_Stream::load (Stream_ModuleList_t& modules_out)
+Test_U_Stream::load (Stream_ModuleList_t& modules_out,
+                     bool& delete_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::load"));
 
   // initialize return value(s)
-  for (Stream_ModuleListIterator_t iterator = modules_out.begin ();
-       iterator != modules_out.end ();
-       iterator++)
-    delete *iterator;
-  modules_out.clear ();
+  ACE_ASSERT (modules_out.empty ());
+  //for (Stream_ModuleListIterator_t iterator = modules_out.begin ();
+  //     iterator != modules_out.end ();
+  //     iterator++)
+  //  delete *iterator;
+  //modules_out.clear ();
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
@@ -88,11 +90,13 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out)
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_SocketHandler_Module (ACE_TEXT_ALWAYS_CHAR ("SocketHandler"),
-                                                      NULL,
-                                                      false),
+                  Test_U_Module_TCPSocketHandler_Module (ACE_TEXT_ALWAYS_CHAR ("SocketHandler"),
+                                                         NULL,
+                                                         false),
                   false);
   modules_out.push_back (module_p);
+
+  delete_out = true;
 
   return true;
 }
@@ -138,12 +142,12 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
     return false;
   } // end IF
   //  socketHandler_.initialize (configuration_in.moduleConfiguration_2);
-  Test_U_Module_SocketHandler* socketHandler_impl_p =
-    dynamic_cast<Test_U_Module_SocketHandler*> (module_p->writer ());
+  Test_U_Module_TCPSocketHandler* socketHandler_impl_p =
+    dynamic_cast<Test_U_Module_TCPSocketHandler*> (module_p->writer ());
   if (!socketHandler_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_SocketHandler> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<Test_U_Module_TCPSocketHandler> failed, aborting\n")));
     return false;
   } // end IF
 //  if (!socketHandler_impl_p->initialize (configuration_in.moduleHandlerConfiguration_2))

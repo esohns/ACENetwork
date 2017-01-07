@@ -43,7 +43,9 @@ template <ACE_SYNCH_DECL,
           ////////////////////////////////
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          ////////////////////////////////
+          typename UserDataType>
 class BitTorrent_Module_Parser_T
  : public Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
                                   TimePolicyType,
@@ -52,7 +54,9 @@ class BitTorrent_Module_Parser_T
                                   DataMessageType,
                                   SessionMessageType,
                                   Stream_SessionId_t,
-                                  Stream_SessionMessageType>
+                                  enum Stream_ControlType,
+                                  enum Stream_SessionMessageType,
+                                  UserDataType>
  , public BitTorrent_ParserDriver_T<DataMessageType,
                                     SessionMessageType>
 {
@@ -80,7 +84,9 @@ class BitTorrent_Module_Parser_T
                                   DataMessageType,
                                   SessionMessageType,
                                   Stream_SessionId_t,
-                                  Stream_SessionMessageType> inherited;
+                                  enum Stream_ControlType,
+                                  enum Stream_SessionMessageType,
+                                  UserDataType> inherited;
   typedef BitTorrent_ParserDriver_T<DataMessageType,
                                     SessionMessageType> inherited2;
 
@@ -122,7 +128,9 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,          // session data
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          ////////////////////////////////
+          typename UserDataType>
 class BitTorrent_Module_ParserH_T
  : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
@@ -135,7 +143,8 @@ class BitTorrent_Module_ParserH_T
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      StatisticContainerType>
+                                      StatisticContainerType,
+                                      UserDataType>
  , public BitTorrent_ParserDriver_T<DataMessageType,
                                     SessionMessageType>
 {
@@ -156,7 +165,8 @@ class BitTorrent_Module_ParserH_T
                                     StreamStateType,
                                     SessionDataType,
                                     SessionDataContainerType,
-                                    StatisticContainerType>::initialize;
+                                    StatisticContainerType,
+                                    UserDataType>::initialize;
 
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const ConfigurationType&);
@@ -187,7 +197,8 @@ class BitTorrent_Module_ParserH_T
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      StatisticContainerType> inherited;
+                                      StatisticContainerType,
+                                      UserDataType> inherited;
   typedef BitTorrent_ParserDriver_T<DataMessageType,
                                     SessionMessageType> inherited2;
 

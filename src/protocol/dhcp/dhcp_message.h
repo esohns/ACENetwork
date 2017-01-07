@@ -48,37 +48,37 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType>
 class Stream_CachedMessageAllocator_T;
 
-template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+template <typename AllocatorType,
+          typename AllocatorConfigurationType,
+          typename MessageType>
 class DHCP_Message_T
  : public Stream_DataMessageBase_T<AllocatorConfigurationType,
-                                   ControlMessageType,
-                                   SessionMessageType,
-                                   DHCP_Record,
+                                   MessageType,
+                                   struct DHCP_Record,
                                    DHCP_MessageType_t>
 {
   // enable access to specific private ctors
-  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 AllocatorConfigurationType,
-                                                 ControlMessageType,
-                                                 DHCP_Message_T<AllocatorConfigurationType,
-                                                                ControlMessageType,
-                                                                SessionMessageType>,
-                                                 SessionMessageType>;
-  friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
-                                               AllocatorConfigurationType,
-                                               ControlMessageType,
-                                               DHCP_Message_T<AllocatorConfigurationType,
-                                                              ControlMessageType,
-                                                              SessionMessageType>,
-                                               SessionMessageType>;
+  friend AllocatorType;
+  //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+  //                                               AllocatorConfigurationType,
+  //                                               ControlMessageType,
+  //                                               DHCP_Message_T<AllocatorConfigurationType,
+  //                                                              ControlMessageType,
+  //                                                              SessionMessageType>,
+  //                                               SessionMessageType>;
+  //friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
+  //                                             AllocatorConfigurationType,
+  //                                             ControlMessageType,
+  //                                             DHCP_Message_T<AllocatorConfigurationType,
+  //                                                            ControlMessageType,
+  //                                                            SessionMessageType>,
+  //                                             SessionMessageType>;
 
  public:
   // convenient types
-  typedef DHCP_Message_T<AllocatorConfigurationType,
-                         ControlMessageType,
-                         SessionMessageType> OWN_TYPE_T;
+  typedef DHCP_Message_T<AllocatorType,
+                         AllocatorConfigurationType,
+                         MessageType> OWN_TYPE_T;
 
   DHCP_Message_T (unsigned int); // size
   virtual ~DHCP_Message_T ();
@@ -107,9 +107,8 @@ class DHCP_Message_T
 
  private:
   typedef Stream_DataMessageBase_T<AllocatorConfigurationType,
-                                   ControlMessageType,
-                                   SessionMessageType,
-                                   DHCP_Record,
+                                   MessageType,
+                                   struct DHCP_Record,
                                    DHCP_MessageType_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (DHCP_Message_T ())

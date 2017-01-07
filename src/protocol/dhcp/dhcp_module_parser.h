@@ -49,7 +49,9 @@ class DHCP_Module_Parser_T
                                  DataMessageType,
                                  SessionMessageType,
                                  Stream_SessionId_t,
-                                 Stream_SessionMessageType>
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 Stream_UserData>
 {
  public:
   DHCP_Module_Parser_T ();
@@ -72,7 +74,9 @@ class DHCP_Module_Parser_T
                                  DataMessageType,
                                  SessionMessageType,
                                  Stream_SessionId_t,
-                                 Stream_SessionMessageType> inherited;
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 Stream_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Parser_T (const DHCP_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Parser_T& operator= (const DHCP_Module_Parser_T&))
@@ -119,7 +123,8 @@ class DHCP_Module_ParserH_T
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      StatisticContainerType>
+                                      StatisticContainerType,
+                                      Stream_UserData>
 {
  public:
   DHCP_Module_ParserH_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
@@ -140,7 +145,8 @@ class DHCP_Module_ParserH_T
                                     StreamStateType,
                                     SessionDataType,
                                     SessionDataContainerType,
-                                    StatisticContainerType>::initialize;
+                                    StatisticContainerType,
+                                    Stream_UserData>::initialize;
 
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const ConfigurationType&);
@@ -168,7 +174,8 @@ class DHCP_Module_ParserH_T
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      StatisticContainerType> inherited;
+                                      StatisticContainerType,
+                                      Stream_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_ParserH_T ())
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_ParserH_T (const DHCP_Module_ParserH_T&))

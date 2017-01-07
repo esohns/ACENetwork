@@ -535,8 +535,8 @@ do_work (bool useThreadPool_in,
     std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
   CBData_in.userData = &CBData_in;
 
-  Common_UI_GTK_Manager_T<struct Common_UI_GTKState>* gtk_manager_p =
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  BitTorrent_Client_GTK_Manager_t* gtk_manager_p =
+      BITTORRENT_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ();
   gtk_manager_p->start ();
   ACE_Time_Value one_second (1, 0);
   int result = ACE_OS::sleep (one_second);
@@ -1358,12 +1358,12 @@ ACE_TMAIN (int argc_in,
   cb_user_data.progressData.GTKState = &cb_user_data;
 
   // step8: initialize GTK UI
-  Common_UI_GtkBuilderDefinition ui_definition (argc_in,
-                                                argv_in);
-  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                            argv_in,
-                                                            &cb_user_data,
-                                                            &ui_definition);
+  BitTorrent_Client_GtkBuilderDefinition_t ui_definition (argc_in,
+                                                          argv_in);
+  BITTORRENT_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
+                                                                       argv_in,
+                                                                       &cb_user_data,
+                                                                       &ui_definition);
 
   // step9: do work
   ACE_High_Res_Timer timer;

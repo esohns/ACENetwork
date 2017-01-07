@@ -39,20 +39,20 @@ template <ACE_SYNCH_DECL,
           typename SessionDataContainerType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
-Net_Module_SocketHandler_T<ACE_SYNCH_USE,
-                           ControlMessageType,
-                           DataMessageType,
-                           SessionMessageType,
-                           ConfigurationType,
-                           StreamControlType,
-                           StreamNotificationType,
-                           StreamStateType,
-                           SessionDataType,
-                           SessionDataContainerType,
-                           StatisticContainerType,
-                           ProtocolHeaderType>::Net_Module_SocketHandler_T (ACE_SYNCH_MUTEX_T* lock_in,
-                                                                            bool autoStart_in,
-                                                                            bool generateSessionMessages_in)
+Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
+                              ControlMessageType,
+                              DataMessageType,
+                              SessionMessageType,
+                              ConfigurationType,
+                              StreamControlType,
+                              StreamNotificationType,
+                              StreamStateType,
+                              SessionDataType,
+                              SessionDataContainerType,
+                              StatisticContainerType,
+                              ProtocolHeaderType>::Net_Module_TCPSocketHandler_T (ACE_SYNCH_MUTEX_T* lock_in,
+                                                                                  bool autoStart_in,
+                                                                                  bool generateSessionMessages_in)
  : inherited (lock_in,
               autoStart_in,
               generateSessionMessages_in)
@@ -60,7 +60,7 @@ Net_Module_SocketHandler_T<ACE_SYNCH_USE,
  , currentMessage_ (NULL)
  , currentMessageLength_ (0)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::Net_Module_SocketHandler_T"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_TCPSocketHandler_T::Net_Module_TCPSocketHandler_T"));
 
 }
 
@@ -76,20 +76,20 @@ template <ACE_SYNCH_DECL,
           typename SessionDataContainerType,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
-Net_Module_SocketHandler_T<ACE_SYNCH_USE,
-                           ControlMessageType,
-                           DataMessageType,
-                           SessionMessageType,
-                           ConfigurationType,
-                           StreamControlType,
-                           StreamNotificationType,
-                           StreamStateType,
-                           SessionDataType,
-                           SessionDataContainerType,
-                           StatisticContainerType,
-                           ProtocolHeaderType>::~Net_Module_SocketHandler_T ()
+Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
+                              ControlMessageType,
+                              DataMessageType,
+                              SessionMessageType,
+                              ConfigurationType,
+                              StreamControlType,
+                              StreamNotificationType,
+                              StreamStateType,
+                              SessionDataType,
+                              SessionDataContainerType,
+                              StatisticContainerType,
+                              ProtocolHeaderType>::~Net_Module_TCPSocketHandler_T ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::~Net_Module_SocketHandler_T"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_TCPSocketHandler_T::~Net_Module_TCPSocketHandler_T"));
 
   if (currentMessage_)
     currentMessage_->release ();
@@ -108,20 +108,20 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 bool
-Net_Module_SocketHandler_T<ACE_SYNCH_USE,
-                           ControlMessageType,
-                           DataMessageType,
-                           SessionMessageType,
-                           ConfigurationType,
-                           StreamControlType,
-                           StreamNotificationType,
-                           StreamStateType,
-                           SessionDataType,
-                           SessionDataContainerType,
-                           StatisticContainerType,
-                           ProtocolHeaderType>::initialize (const ConfigurationType& configuration_in)
+Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
+                              ControlMessageType,
+                              DataMessageType,
+                              SessionMessageType,
+                              ConfigurationType,
+                              StreamControlType,
+                              StreamNotificationType,
+                              StreamStateType,
+                              SessionDataType,
+                              SessionDataContainerType,
+                              StatisticContainerType,
+                              ProtocolHeaderType>::initialize (const ConfigurationType& configuration_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_TCPSocketHandler_T::initialize"));
 
   bool result = false;
 
@@ -163,21 +163,21 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 void
-Net_Module_SocketHandler_T<ACE_SYNCH_USE,
-                           ControlMessageType,
-                           DataMessageType,
-                           SessionMessageType,
-                           ConfigurationType,
-                           StreamControlType,
-                           StreamNotificationType,
-                           StreamStateType,
-                           SessionDataType,
-                           SessionDataContainerType,
-                           StatisticContainerType,
-                           ProtocolHeaderType>::handleDataMessage (DataMessageType*& message_inout,
-                                                                   bool& passMessageDownstream_out)
+Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
+                              ControlMessageType,
+                              DataMessageType,
+                              SessionMessageType,
+                              ConfigurationType,
+                              StreamControlType,
+                              StreamNotificationType,
+                              StreamStateType,
+                              SessionDataType,
+                              SessionDataContainerType,
+                              StatisticContainerType,
+                              ProtocolHeaderType>::handleDataMessage (DataMessageType*& message_inout,
+                                                                      bool& passMessageDownstream_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::handleDataMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_TCPSocketHandler_T::handleDataMessage"));
 
   int result = -1;
 
@@ -229,21 +229,21 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 void
-Net_Module_SocketHandler_T<ACE_SYNCH_USE,
-                           ControlMessageType,
-                           DataMessageType,
-                           SessionMessageType,
-                           ConfigurationType,
-                           StreamControlType,
-                           StreamNotificationType,
-                           StreamStateType,
-                           SessionDataType,
-                           SessionDataContainerType,
-                           StatisticContainerType,
-                           ProtocolHeaderType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                      bool& passMessageDownstream_out)
+Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
+                              ControlMessageType,
+                              DataMessageType,
+                              SessionMessageType,
+                              ConfigurationType,
+                              StreamControlType,
+                              StreamNotificationType,
+                              StreamStateType,
+                              SessionDataType,
+                              SessionDataContainerType,
+                              StatisticContainerType,
+                              ProtocolHeaderType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                         bool& passMessageDownstream_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::handleSessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_TCPSocketHandler_T::handleSessionMessage"));
 
   int result = -1;
 
@@ -323,20 +323,20 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 bool
-Net_Module_SocketHandler_T<ACE_SYNCH_USE,
-                           ControlMessageType,
-                           DataMessageType,
-                           SessionMessageType,
-                           ConfigurationType,
-                           StreamControlType,
-                           StreamNotificationType,
-                           StreamStateType,
-                           SessionDataType,
-                           SessionDataContainerType,
-                           StatisticContainerType,
-                           ProtocolHeaderType>::collect (StatisticContainerType& data_out)
+Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
+                              ControlMessageType,
+                              DataMessageType,
+                              SessionMessageType,
+                              ConfigurationType,
+                              StreamControlType,
+                              StreamNotificationType,
+                              StreamStateType,
+                              SessionDataType,
+                              SessionDataContainerType,
+                              StatisticContainerType,
+                              ProtocolHeaderType>::collect (StatisticContainerType& data_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::collect"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_TCPSocketHandler_T::collect"));
 
   // sanity check(s)
   ACE_ASSERT (inherited::isInitialized_);
@@ -354,7 +354,7 @@ Net_Module_SocketHandler_T<ACE_SYNCH_USE,
   if (!inherited::putStatisticMessage (data_out)) // data container
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Module_SocketHandler_T::putStatisticMessage(), aborting\n")));
+                ACE_TEXT ("failed to Net_Module_TCPSocketHandler_T::putStatisticMessage(), aborting\n")));
     return false;
   } // end IF
 
@@ -371,7 +371,7 @@ Net_Module_SocketHandler_T<ACE_SYNCH_USE,
 //          typename StatisticContainerType,
 //          typename ProtocolHeaderType>
 //void
-//Net_Module_SocketHandler_T<ACE_SYNCH_USE,
+//Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
 //                           SessionMessageType,
 //                           DataMessageType,
 //                           ConfigurationType,
@@ -381,7 +381,7 @@ Net_Module_SocketHandler_T<ACE_SYNCH_USE,
 //                           StatisticContainerType,
 //                           ProtocolHeaderType>::report () const
 //{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::report"));
+//  NETWORK_TRACE (ACE_TEXT ("Net_Module_TCPSocketHandler_T::report"));
 //
 //  ACE_ASSERT (false);
 //  ACE_NOTSUP;
@@ -401,20 +401,20 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           typename ProtocolHeaderType>
 bool
-Net_Module_SocketHandler_T<ACE_SYNCH_USE,
-                           ControlMessageType,
-                           DataMessageType,
-                           SessionMessageType,
-                           ConfigurationType,
-                           StreamControlType,
-                           StreamNotificationType,
-                           StreamStateType,
-                           SessionDataType,
-                           SessionDataContainerType,
-                           StatisticContainerType,
-                           ProtocolHeaderType>::bisectMessages (DataMessageType*& message_out)
+Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
+                              ControlMessageType,
+                              DataMessageType,
+                              SessionMessageType,
+                              ConfigurationType,
+                              StreamControlType,
+                              StreamNotificationType,
+                              StreamStateType,
+                              SessionDataType,
+                              SessionDataContainerType,
+                              StatisticContainerType,
+                              ProtocolHeaderType>::bisectMessages (DataMessageType*& message_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::bisectMessages"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Module_TCPSocketHandler_T::bisectMessages"));
 
   // initialize result
   message_out = NULL;
@@ -543,9 +543,9 @@ Net_Module_SocketHandler_T<ACE_SYNCH_USE,
 //          typename SessionMessageType,
 //          typename DataMessageType>
 // Net_Message*
-// Net_Module_SocketHandler_T::allocateMessage (unsigned int requestedSize_in)
+// Net_Module_TCPSocketHandler_T::allocateMessage (unsigned int requestedSize_in)
 // {
-//NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::allocateMessage"));
+//NETWORK_TRACE (ACE_TEXT ("Net_Module_TCPSocketHandler_T::allocateMessage"));
 //
 //   // init return value(s)
 //   Net_Message* message_out = NULL;
@@ -580,7 +580,7 @@ Net_Module_SocketHandler_T<ACE_SYNCH_USE,
 //          typename StatisticContainerType,
 //          typename ProtocolHeaderType>
 //bool
-//Net_Module_SocketHandler_T<ACE_SYNCH_USE,
+//Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
 //                           SessionMessageType,
 //                           DataMessageType,
 //                           ConfigurationType,
@@ -590,7 +590,7 @@ Net_Module_SocketHandler_T<ACE_SYNCH_USE,
 //                           StatisticContainerType,
 //                           ProtocolHeaderType>::putStatisticMessage (const StatisticContainerType& statisticData_in) const
 //{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Module_SocketHandler_T::putStatisticMessage"));
+//  NETWORK_TRACE (ACE_TEXT ("Net_Module_TCPSocketHandler_T::putStatisticMessage"));
 //
 //  // sanity check(s)
 //  ACE_ASSERT (inherited::sessionData_);

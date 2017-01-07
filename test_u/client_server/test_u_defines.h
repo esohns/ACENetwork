@@ -22,7 +22,7 @@
 #define TEST_U_NET_DEFINES_H
 
 // glade/GTKBuilder definitions
-#define NET_UI_GTK_UI_FILE_DIRECTORY                    "etc"
+//#define NET_UI_GTK_UI_FILE_DIRECTORY                    "etc"
 
 #define NET_UI_GTKEVENT_RESOLUTION                      200 // ms --> 5 FPS
 #define NET_UI_GTK_PROGRESSBAR_NAME                     "progressbar"

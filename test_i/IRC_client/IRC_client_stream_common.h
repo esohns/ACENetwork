@@ -21,16 +21,22 @@
 #ifndef IRC_CLIENT_STREAM_COMMON_H
 #define IRC_CLIENT_STREAM_COMMON_H
 
+#include <list>
+
 #include <ace/Synch_Traits.h>
 
 #include "common_inotify.h"
 #include "common_time_common.h"
 
+#include "stream_cachedmessageallocator.h"
 #include "stream_common.h"
 #include "stream_imodule.h"
+#include "stream_inotify.h"
+#include "stream_isessionnotify.h"
 #include "stream_session_data.h"
 
 #include "irc_icontrol.h"
+//#include "irc_message.h"
 #include "irc_record.h"
 #include "irc_stream_common.h"
 
@@ -63,6 +69,24 @@ struct IRC_Client_StreamState
 };
 
 typedef Stream_SessionData_T<struct IRC_Client_SessionData> IRC_Client_SessionData_t;
+
+typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
+                                struct Stream_AllocatorConfiguration> IRC_Client_ControlMessage_t;
+
+typedef Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
+                                        struct Stream_AllocatorConfiguration,
+                                        IRC_Client_ControlMessage_t,
+                                        IRC_Message,
+                                        IRC_Client_SessionMessage> IRC_Client_MessageAllocator_t;
+
+typedef Stream_INotify_T<enum Stream_SessionMessageType> IRC_Client_IStreamNotify_t;
+typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
+                                    struct IRC_Client_SessionData,
+                                    enum Stream_SessionMessageType,
+                                    IRC_Message,
+                                    IRC_Client_SessionMessage> IRC_Client_ISessionNotify_t;
+typedef std::list<IRC_Client_ISessionNotify_t*> IRC_Client_ISubscribers_t;
+typedef IRC_Client_ISubscribers_t::const_iterator IRC_Client_ISubscribersIterator_t;
 
 //typedef Common_INotify_T<unsigned int,
 //                         struct IRC_Client_SessionData,

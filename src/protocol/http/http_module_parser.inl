@@ -458,7 +458,8 @@ template <ACE_SYNCH_DECL,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename UserDataType>
 HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
@@ -470,7 +471,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType>::HTTP_Module_ParserH_T ()
+                      StatisticContainerType,
+                      UserDataType>::HTTP_Module_ParserH_T ()
  : inherited (NULL,  // lock handle
               false, // auto-start ?
               true)  // generate sesssion messages ?
@@ -495,7 +497,8 @@ template <ACE_SYNCH_DECL,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename UserDataType>
 HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ControlMessageType,
@@ -507,7 +510,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType>::~HTTP_Module_ParserH_T ()
+                      StatisticContainerType,
+                      UserDataType>::~HTTP_Module_ParserH_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::~HTTP_Module_ParserH_T"));
 
@@ -526,7 +530,8 @@ template <ACE_SYNCH_DECL,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename UserDataType>
 bool
 HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
@@ -539,8 +544,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType>::initialize (const ConfigurationType& configuration_in,
-                                                           Stream_IAllocator* allocator_in)
+                      StatisticContainerType,
+                      UserDataType>::initialize (const ConfigurationType& configuration_in,
+                                                 Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::initialize"));
 
@@ -589,7 +595,8 @@ template <ACE_SYNCH_DECL,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename UserDataType>
 void
 HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
@@ -602,8 +609,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType>::handleDataMessage (DataMessageType*& message_inout,
-                                                                  bool& passMessageDownstream_out)
+                      StatisticContainerType,
+                      UserDataType>::handleDataMessage (DataMessageType*& message_inout,
+                                                        bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::handleDataMessage"));
 
@@ -728,7 +736,8 @@ template <ACE_SYNCH_DECL,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename UserDataType>
 void
 HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
@@ -741,8 +750,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                     bool& passMessageDownstream_out)
+                      StatisticContainerType,
+                      UserDataType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                           bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::handleSessionMessage"));
 
@@ -890,7 +900,8 @@ template <ACE_SYNCH_DECL,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename UserDataType>
 bool
 HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
@@ -903,7 +914,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType>::collect (StatisticContainerType& data_out)
+                      StatisticContainerType,
+                      UserDataType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::collect"));
 
@@ -938,7 +950,8 @@ template <ACE_SYNCH_DECL,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename UserDataType>
 void
 HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       TimePolicyType,
@@ -951,7 +964,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType>::record (struct HTTP_Record*& record_inout)
+                      StatisticContainerType,
+                      UserDataType>::record (struct HTTP_Record*& record_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::record"));
 

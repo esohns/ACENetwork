@@ -1159,13 +1159,13 @@ allocate:
 
     //CBData_in.stream = stream_p;
 
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
+    TEST_U_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
     ACE_Time_Value one_second (1, 0);
     result = ACE_OS::sleep (one_second);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::sleep(): \"%m\", continuing\n")));
-    if (!COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
+    if (!TEST_U_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
@@ -1188,7 +1188,7 @@ allocate:
     //ACE_UNUSED_ARG (was_visible_b);
 #endif
 
-    result = COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->wait ();
+    result = TEST_U_UI_GTK_MANAGER_SINGLETON::instance ()->wait ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to ACE_Task_Base::wait (): \"%m\", continuing\n")));
@@ -1219,7 +1219,7 @@ allocate:
   } // end IF
 
   if (!UIDefinitionFileName_in.empty ())
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);
+    TEST_U_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);
   //		{ // synch access
   //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -1581,10 +1581,10 @@ ACE_TMAIN (int argc_in,
     gtk_cb_user_data.RCFiles.push_back (gtk_rc_file);
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
-  Common_UI_GtkBuilderDefinition ui_definition (argc_in,
-                                                argv_in);
+  Test_U_GtkBuilderDefinition_t ui_definition (argc_in,
+                                               argv_in);
   if (!ui_definition_file.empty ())
-    if (!COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
+    if (!TEST_U_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                                    argv_in,
                                                                    &gtk_cb_user_data,
                                                                    &ui_definition))

@@ -43,23 +43,23 @@ class Test_U_Message;
 class Test_U_SessionMessage;
 
 // declare module(s)
-typedef Net_Module_SocketHandler_T<ACE_MT_SYNCH,
-                                   Test_U_ControlMessage_t,
-                                   Test_U_Message,
-                                   Test_U_SessionMessage,
-                                   struct Test_U_ModuleHandlerConfiguration,
-                                   enum Stream_ControlType,
-                                   enum Stream_SessionMessageType,
-                                   struct Test_U_StreamState,
-                                   struct Test_U_StreamSessionData,
-                                   Test_U_StreamSessionData_t,
-                                   Net_RuntimeStatistic_t,
-                                   Net_Remote_Comm::MessageHeader> Test_U_Module_SocketHandler;
+typedef Net_Module_TCPSocketHandler_T<ACE_MT_SYNCH,
+                                      Test_U_ControlMessage_t,
+                                      Test_U_Message,
+                                      Test_U_SessionMessage,
+                                      struct Test_U_ModuleHandlerConfiguration,
+                                      enum Stream_ControlType,
+                                      enum Stream_SessionMessageType,
+                                      struct Test_U_StreamState,
+                                      struct Test_U_StreamSessionData,
+                                      Test_U_StreamSessionData_t,
+                                      Net_RuntimeStatistic_t,
+                                      Net_Remote_Comm::MessageHeader> Test_U_Module_TCPSocketHandler;
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
                               enum Stream_SessionMessageType,           // session event type
                               struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
                               Test_U_IStreamNotify_t,                   // stream notification interface type
-                              Test_U_Module_SocketHandler);             // writer type
+                              Test_U_Module_TCPSocketHandler);          // writer type
 
 typedef Stream_Module_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                    Common_TimePolicy_t,

@@ -37,7 +37,8 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType>
+          typename CBDataType,
+          typename UserDataType>
 BitTorrent_PeerStream_T<StreamStateType,
                         ConfigurationType,
                         StatisticContainerType,
@@ -51,7 +52,8 @@ BitTorrent_PeerStream_T<StreamStateType,
                         ConnectionStateType,
                         HandlerConfigurationType,
                         SessionStateType,
-                        CBDataType>::BitTorrent_PeerStream_T (const std::string& name_in)
+                        CBDataType,
+                        UserDataType>::BitTorrent_PeerStream_T (const std::string& name_in)
  : inherited (name_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStream_T::BitTorrent_PeerStream_T"));
@@ -71,42 +73,8 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType>
-BitTorrent_PeerStream_T<StreamStateType,
-                        ConfigurationType,
-                        StatisticContainerType,
-                        ModuleHandlerConfigurationType,
-                        SessionDataType,
-                        SessionDataContainerType,
-                        ControlMessageType,
-                        DataMessageType,
-                        SessionMessageType,
-                        ConnectionConfigurationType,
-                        ConnectionStateType,
-                        HandlerConfigurationType,
-                        SessionStateType,
-                        CBDataType>::~BitTorrent_PeerStream_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStream_T::~BitTorrent_PeerStream_T"));
-
-  // *NOTE*: this implements an ordered shutdown on destruction
-  inherited::shutdown ();
-}
-
-template <typename StreamStateType,
-          typename ConfigurationType,
-          typename StatisticContainerType,
-          typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename ConnectionConfigurationType,
-          typename ConnectionStateType,
-          typename HandlerConfigurationType,
-          typename SessionStateType,
-          typename CBDataType>
+          typename CBDataType,
+          typename UserDataType>
 bool
 BitTorrent_PeerStream_T<StreamStateType,
                         ConfigurationType,
@@ -121,8 +89,9 @@ BitTorrent_PeerStream_T<StreamStateType,
                         ConnectionStateType,
                         HandlerConfigurationType,
                         SessionStateType,
-                        CBDataType>::load (Stream_ModuleList_t& modules_out,
-                                           bool& deleteModules_out)
+                        CBDataType,
+                        UserDataType>::load (Stream_ModuleList_t& modules_out,
+                                             bool& deleteModules_out)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStream_T::load"));
 
@@ -167,7 +136,8 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType>
+          typename CBDataType,
+          typename UserDataType>
 bool
 BitTorrent_PeerStream_T<StreamStateType,
                         ConfigurationType,
@@ -182,9 +152,10 @@ BitTorrent_PeerStream_T<StreamStateType,
                         ConnectionStateType,
                         HandlerConfigurationType,
                         SessionStateType,
-                        CBDataType>::initialize (const ConfigurationType& configuration_in,
-                                                 bool setupPipeline_in,
-                                                 bool resetSessionData_in)
+                        CBDataType,
+                        UserDataType>::initialize (const ConfigurationType& configuration_in,
+                                                   bool setupPipeline_in,
+                                                   bool resetSessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStream_T::initialize"));
 
@@ -342,7 +313,8 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType>
+          typename CBDataType,
+          typename UserDataType>
 bool
 BitTorrent_PeerStream_T<StreamStateType,
                         ConfigurationType,
@@ -357,7 +329,8 @@ BitTorrent_PeerStream_T<StreamStateType,
                         ConnectionStateType,
                         HandlerConfigurationType,
                         SessionStateType,
-                        CBDataType>::collect (StatisticContainerType& data_out)
+                        CBDataType,
+                        UserDataType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStream_T::collect"));
 

@@ -44,7 +44,8 @@ BitTorrent_Message_T<SessionDataType,
 template <typename SessionDataType,
           typename UserDataType>
 BitTorrent_Message_T<SessionDataType,
-                     UserDataType>::BitTorrent_Message_T (const BitTorrent_Message_T& message_in)
+                     UserDataType>::BitTorrent_Message_T (const BitTorrent_Message_T<SessionDataType,
+                                                                                     UserDataType>& message_in)
  : inherited (message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::BitTorrent_Message_T"));
@@ -65,12 +66,12 @@ BitTorrent_Message_T<SessionDataType,
 
 }
 
-// BitTorrent_Message_T::BitTorrent_Message_T(ACE_Allocator* messageAllocator_in)
-//  : inherited(messageAllocator_in,
-//              true), // usually, we want to increment the running message counter
-//    myIsInitialized(false) // not initialized --> call init() !
+// BitTorrent_Message_T::BitTorrent_Message_T (ACE_Allocator* messageAllocator_in)
+//  : inherited (messageAllocator_in,
+//               true), // usually, we want to increment the running message counter
+//    isInitialized (false) // not initialized --> call init() !
 // {
-//   NETWORK_TRACE(ACE_TEXT("BitTorrent_Message_T::BitTorrent_Message_T"));
+//   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::BitTorrent_Message_T"));
 //
 // }
 
@@ -168,12 +169,12 @@ allocate:
       // allocates a datablock anyway, only to immediately release it again...
       ACE_NEW_MALLOC_NORETURN (message_p,
                                //static_cast<BitTorrent_Message_T*>(message_block_allocator_->malloc(capacity())),
-                               static_cast<OWN_TYPE_T*> (inherited::message_block_allocator_->calloc (sizeof (BitTorrent_Message_T))),
+                               static_cast<OWN_TYPE_T*> (inherited::message_block_allocator_->calloc (sizeof (OWN_TYPE_T))),
                                OWN_TYPE_T (*this));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::calloc(%u), aborting\n"),
-                  sizeof (BitTorrent_Message_T)));
+                  sizeof (OWN_TYPE_T)));
       return NULL;
     }
 

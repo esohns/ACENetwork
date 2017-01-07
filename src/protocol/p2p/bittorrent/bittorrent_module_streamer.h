@@ -41,7 +41,9 @@ class BitTorrent_Module_Streamer_T
                                  DataMessageType,
                                  SessionMessageType,
                                  Stream_SessionId_t,
-                                 Stream_SessionMessageType>
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 Stream_UserData>
 {
  public:
   BitTorrent_Module_Streamer_T ();
@@ -59,7 +61,9 @@ class BitTorrent_Module_Streamer_T
                                  DataMessageType,
                                  SessionMessageType,
                                  Stream_SessionId_t,
-                                 Stream_SessionMessageType> inherited;
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 Stream_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_Streamer_T (const BitTorrent_Module_Streamer_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_Streamer_T& operator= (const BitTorrent_Module_Streamer_T&))

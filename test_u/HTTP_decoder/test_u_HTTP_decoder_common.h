@@ -75,9 +75,7 @@ struct Test_U_AllocatorConfiguration
 };
 
 typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
-                                struct Test_U_AllocatorConfiguration,
-                                Test_U_Message,
-                                Test_U_SessionMessage> Test_U_ControlMessage_t;
+                                struct Test_U_AllocatorConfiguration> Test_U_ControlMessage_t;
 
 //typedef Stream_IModuleHandler_T<Test_U_ModuleHandlerConfiguration> Test_U_IModuleHandler_t;
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,

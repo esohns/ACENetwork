@@ -44,9 +44,7 @@ class Test_U_SessionMessage
  : public Stream_SessionMessageBase_T<struct Test_U_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       Test_U_HTTPDecoder_SessionData_t,
-                                      struct Test_U_UserData,
-                                      Test_U_ControlMessage_t,
-                                      Test_U_Message>
+                                      struct Test_U_UserData>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -70,9 +68,7 @@ class Test_U_SessionMessage
   typedef Stream_SessionMessageBase_T<struct Test_U_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       Test_U_HTTPDecoder_SessionData_t,
-                                      struct Test_U_UserData,
-                                      Test_U_ControlMessage_t,
-                                      Test_U_Message> inherited;
+                                      struct Test_U_UserData> inherited;
 
   // copy ctor to be used by duplicate()
   Test_U_SessionMessage (const Test_U_SessionMessage&);

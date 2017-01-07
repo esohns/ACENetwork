@@ -76,8 +76,7 @@ IRC_Client_Module_IRCHandler::initialize (const struct IRC_Client_ModuleHandlerC
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("re-initializing...\n")));
 
-    {
-      ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, conditionLock_, false);
+    { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, conditionLock_, false);
 
       connectionIsAlive_ = false;
     } // end lock scope
@@ -104,8 +103,7 @@ IRC_Client_Module_IRCHandler::initialize (const struct IRC_Client_ModuleHandlerC
 //                ACE_TEXT("auto-answering ping messages...\n")));
 
   if (configuration_in.subscriber)
-  {
-    ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
+  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
 
     subscribers_.push_back (configuration_in.subscriber);
   } // end IF
@@ -494,8 +492,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
       } // end lock scope
 
       // step1: remember connection has been opened...
-      {
-        ACE_Guard<ACE_SYNCH_MUTEX> aGuard (conditionLock_);
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, conditionLock_);
 
         connectionIsAlive_ = true;
 
@@ -518,8 +515,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
                                        passMessageDownstream_out);
 
       // remember connection has been closed
-      {
-        ACE_Guard<ACE_SYNCH_MUTEX> aGuard (conditionLock_);
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, conditionLock_);
 
         connectionIsAlive_ = false;
 
@@ -543,7 +539,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
 }
 
 bool
-IRC_Client_Module_IRCHandler::registerc (const IRC_LoginOptions& loginOptions_in)
+IRC_Client_Module_IRCHandler::registerc (const struct IRC_LoginOptions& loginOptions_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::registerc"));
 
@@ -560,8 +556,7 @@ IRC_Client_Module_IRCHandler::registerc (const IRC_LoginOptions& loginOptions_in
   // sanity check(s)
   ACE_ASSERT (isInitialized_);
   // step1: ...is done ?
-  {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (conditionLock_);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, conditionLock_, false);
 
     if (!connectionIsAlive_)
     {
@@ -633,8 +628,7 @@ IRC_Client_Module_IRCHandler::registerc (const IRC_LoginOptions& loginOptions_in
 //   } // end IF
 
   // step3a: initialize PASS
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::PASS);
+  IRC_Record* message_p = allocateMessage (IRC_Record::PASS);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -719,7 +713,7 @@ IRC_Client_Module_IRCHandler::wait (const ACE_Time_Value* timeout_in)
 
   int result = -1;
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (conditionLock_);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, conditionLock_, false);
 
   result = condition_.wait (timeout_in);
   if (result == -1)
@@ -785,8 +779,7 @@ IRC_Client_Module_IRCHandler::nick (const std::string& nickName_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::nick"));
 
   // step1: initialize NICK
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::NICK);
+  IRC_Record* message_p = allocateMessage (IRC_Record::NICK);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -806,8 +799,7 @@ IRC_Client_Module_IRCHandler::quit (const std::string& reason_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::quit"));
 
   // step1: initialize QUIT
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::QUIT);
+  IRC_Record* message_p = allocateMessage (IRC_Record::QUIT);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -829,8 +821,7 @@ IRC_Client_Module_IRCHandler::join (const string_list_t& channels_in,
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::join"));
 
   // step1: initialize JOIN
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::JOIN);
+  IRC_Record* message_p = allocateMessage (IRC_Record::JOIN);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -872,8 +863,7 @@ IRC_Client_Module_IRCHandler::part (const string_list_t& channels_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::part"));
 
   // step1: initialize PART
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::PART);
+  IRC_Record* message_p = allocateMessage (IRC_Record::PART);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -896,8 +886,7 @@ IRC_Client_Module_IRCHandler::mode (const std::string& target_in,
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::mode"));
 
   // step1: initialize MODE
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::MODE);
+  IRC_Record* message_p = allocateMessage (IRC_Record::MODE);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -931,8 +920,7 @@ IRC_Client_Module_IRCHandler::topic (const std::string& channel_in,
   ACE_ASSERT (!topic_in.empty ());
 
   // step1: initialize TOPIC
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::TOPIC);
+  IRC_Record* message_p = allocateMessage (IRC_Record::TOPIC);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -953,8 +941,7 @@ IRC_Client_Module_IRCHandler::names (const string_list_t& channels_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::names"));
 
   // step1: initialize NAMES
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::NAMES);
+  IRC_Record* message_p = allocateMessage (IRC_Record::NAMES);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -982,8 +969,7 @@ IRC_Client_Module_IRCHandler::list (const string_list_t& channels_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::list"));
 
   // step1: initialize LIST
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::LIST);
+  IRC_Record* message_p = allocateMessage (IRC_Record::LIST);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1012,8 +998,7 @@ IRC_Client_Module_IRCHandler::invite (const std::string& nick_in,
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::invite"));
 
   // step1: initialize INVITE
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::INVITE);
+  IRC_Record* message_p = allocateMessage (IRC_Record::INVITE);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1036,8 +1021,7 @@ IRC_Client_Module_IRCHandler::kick (const std::string& channel_in,
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::kick"));
 
   // step1: initialize KICK
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::KICK);
+  IRC_Record* message_p = allocateMessage (IRC_Record::KICK);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1065,8 +1049,7 @@ IRC_Client_Module_IRCHandler::send (const string_list_t& receivers_in,
     return; // nothing to do...
 
   // step1: initialize PRIVMSG
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::PRIVMSG);
+  IRC_Record* message_p = allocateMessage (IRC_Record::PRIVMSG);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1096,8 +1079,7 @@ IRC_Client_Module_IRCHandler::who (const std::string& name_in,
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::who"));
 
   // step1: initialize WHO
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::WHO);
+  IRC_Record* message_p = allocateMessage (IRC_Record::WHO);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1120,8 +1102,7 @@ IRC_Client_Module_IRCHandler::whois (const std::string& servername_in,
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::whois"));
 
   // step1: initialize WHOIS
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::WHOIS);
+  IRC_Record* message_p = allocateMessage (IRC_Record::WHOIS);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1145,8 +1126,7 @@ IRC_Client_Module_IRCHandler::whowas (const std::string& nick_in,
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::whowas"));
 
   // step1: initialize WHOWAS
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::WHOWAS);
+  IRC_Record* message_p = allocateMessage (IRC_Record::WHOWAS);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1176,8 +1156,7 @@ IRC_Client_Module_IRCHandler::away (const std::string& message_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::away"));
 
   // step1: initialize AWAY
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::AWAY);
+  IRC_Record* message_p = allocateMessage (IRC_Record::AWAY);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1200,8 +1179,7 @@ IRC_Client_Module_IRCHandler::users (const std::string& server_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::users"));
 
   // step1: initialize USERS
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::USERS);
+  IRC_Record* message_p = allocateMessage (IRC_Record::USERS);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1222,8 +1200,7 @@ IRC_Client_Module_IRCHandler::userhost (const string_list_t& nicknames_in)
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::userhost"));
 
   // step1: initialize USERHOST
-  IRC_Record* message_p =
-    allocateMessage (IRC_Record::USERHOST);
+  IRC_Record* message_p = allocateMessage (IRC_Record::USERHOST);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1260,7 +1237,7 @@ IRC_Client_Module_IRCHandler::onChange (IRC_RegistrationState newState_in)
 
   if (newState_in == REGISTRATION_STATE_FINISHED)
   {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (conditionLock_);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, conditionLock_);
 
     result = condition_.broadcast ();
     if (result == -1)
@@ -1284,13 +1261,10 @@ IRC_Client_Module_IRCHandler::allocateMessage (unsigned int requestedSize_in)
   if (inherited::configuration_->streamConfiguration->messageAllocator)
   {
 allocate:
-    try
-    {
+    try {
       message_p =
         static_cast<IRC_Message*> (inherited::configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
-    }
-    catch (...)
-    {
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
                   requestedSize_in));
@@ -1395,7 +1369,7 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
   //         this protect against closure of the stream while the message is
   //         propagated... (see line 614)
   //         --> grab lock and check connectionIsAlive_
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (conditionLock_);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, conditionLock_);
   // sanity check
   if (!connectionIsAlive_)
   {

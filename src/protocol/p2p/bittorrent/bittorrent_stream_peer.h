@@ -65,7 +65,9 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType, // socket-
           typename SessionStateType,
-          typename CBDataType>
+          typename CBDataType,
+          ////////////////////////////////
+          typename UserDataType>
 class BitTorrent_PeerStream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
@@ -85,7 +87,7 @@ class BitTorrent_PeerStream_T
 {
  public:
   BitTorrent_PeerStream_T (const std::string&); // name
-  virtual ~BitTorrent_PeerStream_T ();
+  inline virtual ~BitTorrent_PeerStream_T () { inherited::shutdown (); };
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ModuleList_t&, // return value: module list
@@ -132,7 +134,8 @@ class BitTorrent_PeerStream_T
                                   ConnectionStateType,
                                   HandlerConfigurationType, // socket-
                                   SessionStateType,
-                                  CBDataType> OWN_TYPE_T;
+                                  CBDataType,
+                                  UserDataType> OWN_TYPE_T;
 
   typedef BitTorrent_Module_Streamer_T<ACE_MT_SYNCH,
                                        Common_TimePolicy_t,
@@ -161,7 +164,8 @@ class BitTorrent_PeerStream_T
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      StatisticContainerType> PARSER_T;
+                                      StatisticContainerType,
+                                      UserDataType> PARSER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 Stream_SessionId_t,             // session id type

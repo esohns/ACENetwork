@@ -19,9 +19,8 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
 endif ()
 
 set (${PROJECT_NAME}_Test_U_SRCS
-     http_common_modules.h
-     http_configuration.h
      test_u_common.h
+     test_u_defines.h
      test_u_gtk_common.h
      test_u_stream_common.h)
 #install (FILES
@@ -30,5 +29,6 @@ set (${PROJECT_NAME}_Test_U_SRCS
 
 add_subdirectory (client_server)
 add_subdirectory (DHCP_client)
+add_subdirectory (file_server)
 add_subdirectory (HTTP_decoder)
 

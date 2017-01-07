@@ -101,9 +101,12 @@ DHCP_Stream_T<StreamStateType,
               SessionDataContainerType,
               ControlMessageType,
               DataMessageType,
-              SessionMessageType>::load (Stream_ModuleList_t& modules_out)
+              SessionMessageType>::load (Stream_ModuleList_t& modules_out,
+                                         bool& deleteModules_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Stream_T::load"));
+
+  deleteModules_out = false;
 
   modules_out.push_back (&runtimeStatistic_);
   //modules_out.push_back (&parser_);

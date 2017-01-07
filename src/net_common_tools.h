@@ -104,6 +104,7 @@ class Net_Common_Tools
                                        ACE_UINT32);    // IP address (network byte order !)
   static std::string IPProtocol2String (unsigned char); // protocol
 
+  static bool matchIPAddress (std::string&); // dotted-decimal
   // *NOTE*: (see also: ace/INET_Addr.h:237)
   static ACE_INET_Addr string2IPAddress (std::string&); // host name (DNS name or dotted-decimal)
 

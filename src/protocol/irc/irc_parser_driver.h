@@ -24,6 +24,7 @@
 #include <string>
 
 #include <ace/Global_Macros.h>
+#include <ace/Message_Block.h>
 
 #include "location.hh"
 
@@ -31,9 +32,9 @@
 #include "irc_parser.h"
 
 // forward declaration(s)
+struct yy_buffer_state;
 typedef void* yyscan_t;
-typedef struct yy_buffer_state* YY_BUFFER_STATE;
-class ACE_Message_Block;
+int IRC_Scanner_get_debug (yyscan_t);
 class IRC_Record;
 
 class IRC_Export IRC_ParserDriver
@@ -62,8 +63,8 @@ class IRC_Export IRC_ParserDriver
 
   // invoked by the scanner ONLY !!!
   bool switchBuffer ();
-  bool moreData ();
-  bool getDebugScanner () const;
+  inline bool moreData () { return (fragment_->cont () != NULL); };
+  inline bool getDebugScanner () const { return (IRC_Scanner_get_debug (scannerState_) != 0); };
 
   // error-handling
   void error (const yy::location&, // location
@@ -83,23 +84,23 @@ class IRC_Export IRC_ParserDriver
   void scan_end ();
 
   // context
-  bool               trace_;
-  unsigned int       numberOfMessages_;
+  bool                    trace_;
+  unsigned int            numberOfMessages_;
 
   // scanner
-  yyscan_t           scannerState_;
-  YY_BUFFER_STATE    bufferState_;
+  yyscan_t                scannerState_;
+  struct yy_buffer_state* bufferState_;
 
   // *NOTE*: stores unscanned data, enabling transitions between continuations
-  ACE_Message_Block* fragment_;
-  bool               fragmentIsResized_;
+  ACE_Message_Block*      fragment_;
+  bool                    fragmentIsResized_;
 
   // parser
-  yy::IRC_Parser     parser_;
+  yy::IRC_Parser          parser_;
 
   // target
-  IRC_Record*        record_;
-  bool               isInitialized_;
+  IRC_Record*             record_;
+  bool                    isInitialized_;
 };
 
 #endif

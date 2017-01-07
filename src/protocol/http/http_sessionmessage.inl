@@ -23,12 +23,14 @@
 
 #include "net_macros.h"
 
-template <typename ControlMessageType,
-          typename DataMessageType>
-HTTP_SessionMessage_T<ControlMessageType,
-                      DataMessageType>::HTTP_SessionMessage_T (Stream_SessionMessageType messageType_in,
-                                                               HTTP_Stream_SessionData_t*& sessionData_inout,
-                                                               HTTP_Stream_UserData* userData_in)
+template <typename AllocatorType,
+          typename SessionDataType,
+          typename UserDataType>
+HTTP_SessionMessage_T<AllocatorType,
+                      SessionDataType,
+                      UserDataType>::HTTP_SessionMessage_T (enum Stream_SessionMessageType messageType_in,
+                                                            SessionDataType*& sessionData_inout,
+                                                            UserDataType* userData_in)
  : inherited (messageType_in,
               sessionData_inout,
               userData_in)
@@ -37,32 +39,39 @@ HTTP_SessionMessage_T<ControlMessageType,
 
 }
 
-template <typename ControlMessageType,
-          typename DataMessageType>
-HTTP_SessionMessage_T<ControlMessageType,
-                      DataMessageType>::HTTP_SessionMessage_T (const HTTP_SessionMessage_T<ControlMessageType,
-                                                                                           DataMessageType>& message_in)
+template <typename AllocatorType,
+          typename SessionDataType,
+          typename UserDataType>
+HTTP_SessionMessage_T<AllocatorType,
+                      SessionDataType,
+                      UserDataType>::HTTP_SessionMessage_T (const HTTP_SessionMessage_T<AllocatorType,
+                                                                                        SessionDataType,
+                                                                                        UserDataType>& message_in)
  : inherited (message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_SessionMessage_T::HTTP_SessionMessage_T"));
 
 }
 
-template <typename ControlMessageType,
-          typename DataMessageType>
-HTTP_SessionMessage_T<ControlMessageType,
-                      DataMessageType>::HTTP_SessionMessage_T (ACE_Allocator* messageAllocator_in)
+template <typename AllocatorType,
+          typename SessionDataType,
+          typename UserDataType>
+HTTP_SessionMessage_T<AllocatorType,
+                      SessionDataType,
+                      UserDataType>::HTTP_SessionMessage_T (ACE_Allocator* messageAllocator_in)
  : inherited (messageAllocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_SessionMessage_T::HTTP_SessionMessage_T"));
 
 }
 
-template <typename ControlMessageType,
-          typename DataMessageType>
-HTTP_SessionMessage_T<ControlMessageType,
-                      DataMessageType>::HTTP_SessionMessage_T (ACE_Data_Block* dataBlock_in,
-                                                               ACE_Allocator* messageAllocator_in)
+template <typename AllocatorType,
+          typename SessionDataType,
+          typename UserDataType>
+HTTP_SessionMessage_T<AllocatorType,
+                      SessionDataType,
+                      UserDataType>::HTTP_SessionMessage_T (ACE_Data_Block* dataBlock_in,
+                                                            ACE_Allocator* messageAllocator_in)
  : inherited (dataBlock_in,
               messageAllocator_in)
 {
@@ -70,20 +79,24 @@ HTTP_SessionMessage_T<ControlMessageType,
 
 }
 
-template <typename ControlMessageType,
-          typename DataMessageType>
-HTTP_SessionMessage_T<ControlMessageType,
-                      DataMessageType>::~HTTP_SessionMessage_T ()
+template <typename AllocatorType,
+          typename SessionDataType,
+          typename UserDataType>
+HTTP_SessionMessage_T<AllocatorType,
+                      SessionDataType,
+                      UserDataType>::~HTTP_SessionMessage_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_SessionMessage_T::~HTTP_SessionMessage_T"));
 
 }
 
-template <typename ControlMessageType,
-          typename DataMessageType>
+template <typename AllocatorType,
+          typename SessionDataType,
+          typename UserDataType>
 ACE_Message_Block*
-HTTP_SessionMessage_T<ControlMessageType,
-                      DataMessageType>::duplicate (void) const
+HTTP_SessionMessage_T<AllocatorType,
+                      SessionDataType,
+                      UserDataType>::duplicate (void) const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_SessionMessage_T::duplicate"));
 

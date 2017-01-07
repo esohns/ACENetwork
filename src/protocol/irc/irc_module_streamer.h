@@ -41,7 +41,9 @@ class IRC_Module_Streamer_T
                                  DataMessageType,
                                  SessionMessageType,
                                  Stream_SessionId_t,
-                                 Stream_SessionMessageType>
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 Stream_UserData>
 {
  public:
   IRC_Module_Streamer_T ();
@@ -59,7 +61,9 @@ class IRC_Module_Streamer_T
                                  DataMessageType,
                                  SessionMessageType,
                                  Stream_SessionId_t,
-                                 Stream_SessionMessageType> inherited;
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 Stream_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Streamer_T (const IRC_Module_Streamer_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Streamer_T& operator= (const IRC_Module_Streamer_T&))

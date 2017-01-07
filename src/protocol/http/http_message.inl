@@ -29,11 +29,9 @@
 #include "http_tools.h"
 
 template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+          typename MessageType>
 HTTP_Message_T<AllocatorConfigurationType,
-               ControlMessageType,
-               SessionMessageType>::HTTP_Message_T (unsigned int requestedSize_in)
+               MessageType>::HTTP_Message_T (unsigned int requestedSize_in)
  : inherited (requestedSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::HTTP_Message_T"));
@@ -41,11 +39,10 @@ HTTP_Message_T<AllocatorConfigurationType,
 }
 
 template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+          typename MessageType>
 HTTP_Message_T<AllocatorConfigurationType,
-               ControlMessageType,
-               SessionMessageType>::HTTP_Message_T (const HTTP_Message_T& message_in)
+               MessageType>::HTTP_Message_T (const HTTP_Message_T<AllocatorConfigurationType,
+                                                                  MessageType>& message_in)
  : inherited (message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::HTTP_Message_T"));
@@ -53,13 +50,11 @@ HTTP_Message_T<AllocatorConfigurationType,
 }
 
 template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+          typename MessageType>
 HTTP_Message_T<AllocatorConfigurationType,
-               ControlMessageType,
-               SessionMessageType>::HTTP_Message_T (ACE_Data_Block* dataBlock_in,
-                                                    ACE_Allocator* messageAllocator_in,
-                                                    bool incrementMessageCounter_in)
+               MessageType>::HTTP_Message_T (ACE_Data_Block* dataBlock_in,
+                                             ACE_Allocator* messageAllocator_in,
+                                             bool incrementMessageCounter_in)
  : inherited (dataBlock_in,               // use (don't own !) this data block
               messageAllocator_in,        // allocator
               incrementMessageCounter_in) // increment message counter ?
@@ -68,21 +63,19 @@ HTTP_Message_T<AllocatorConfigurationType,
 
 }
 
-// HTTP_Message_T::HTTP_Message_T(ACE_Allocator* messageAllocator_in)
-//  : inherited(messageAllocator_in,
-//              true), // usually, we want to increment the running message counter
-//    myIsInitialized(false) // not initialized --> call init() !
+// HTTP_Message_T::HTTP_Message_T (ACE_Allocator* messageAllocator_in)
+//  : inherited (messageAllocator_in,
+//               true), // usually, we want to increment the running message counter
+//    isInitialized_ (false) // not initialized --> call init() !
 // {
-//   NETWORK_TRACE(ACE_TEXT("HTTP_Message_T::HTTP_Message_T"));
+//   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::HTTP_Message_T"));
 //
 // }
 
 template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+          typename MessageType>
 HTTP_Message_T<AllocatorConfigurationType,
-               ControlMessageType,
-               SessionMessageType>::~HTTP_Message_T ()
+               MessageType>::~HTTP_Message_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::~HTTP_Message_T"));
 
@@ -90,12 +83,10 @@ HTTP_Message_T<AllocatorConfigurationType,
 }
 
 template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+          typename MessageType>
 HTTP_Method_t
 HTTP_Message_T<AllocatorConfigurationType,
-               ControlMessageType,
-               SessionMessageType>::command () const
+               MessageType>::command () const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::command"));
 
@@ -110,12 +101,10 @@ HTTP_Message_T<AllocatorConfigurationType,
 }
 
 template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+          typename MessageType>
 std::string
 HTTP_Message_T<AllocatorConfigurationType,
-               ControlMessageType,
-               SessionMessageType>::Command2String (HTTP_Method_t method_in)
+               MessageType>::Command2String (HTTP_Method_t method_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::Command2String"));
 
@@ -124,12 +113,10 @@ HTTP_Message_T<AllocatorConfigurationType,
 }
 
 template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+          typename MessageType>
 void
 HTTP_Message_T<AllocatorConfigurationType,
-               ControlMessageType,
-               SessionMessageType>::dump_state () const
+               MessageType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::dump_state"));
 
@@ -167,12 +154,10 @@ HTTP_Message_T<AllocatorConfigurationType,
 }
 
 template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+          typename MessageType>
 void
 HTTP_Message_T<AllocatorConfigurationType,
-               ControlMessageType,
-               SessionMessageType>::crunch ()
+               MessageType>::crunch ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::crunch"));
 
@@ -240,16 +225,14 @@ HTTP_Message_T<AllocatorConfigurationType,
 }
 
 template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+          typename MessageType>
 ACE_Message_Block*
 HTTP_Message_T<AllocatorConfigurationType,
-               ControlMessageType,
-               SessionMessageType>::duplicate (void) const
+               MessageType>::duplicate (void) const
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::duplicate"));
 
-  HTTP_Message_T* message_p = NULL;
+  OWN_TYPE_T* message_p = NULL;
 
   // create a new HTTP_Message_T that contains unique copies of
   // the message block fields, but a (reference counted) shallow duplicate of
@@ -258,7 +241,7 @@ HTTP_Message_T<AllocatorConfigurationType,
   // if there is no allocator, use the standard new and delete calls.
   if (!inherited::message_block_allocator_)
     ACE_NEW_NORETURN (message_p,
-                      HTTP_Message_T (*this)); // invoke copy ctor
+                      OWN_TYPE_T (*this)); // invoke copy ctor
   else // otherwise, use the existing message_block_allocator
   {
     Stream_IAllocator* allocator_p =
@@ -274,12 +257,12 @@ allocate:
       // allocates a datablock anyway, only to immediately release it again...
       ACE_NEW_MALLOC_NORETURN (message_p,
                                //static_cast<HTTP_Message_T*>(message_block_allocator_->malloc(capacity())),
-                               static_cast<HTTP_Message_T*> (inherited::message_block_allocator_->calloc (sizeof (HTTP_Message_T))),
-                               HTTP_Message_T (*this));
+                               static_cast<OWN_TYPE_T*> (inherited::message_block_allocator_->calloc (sizeof (OWN_TYPE_T))),
+                               OWN_TYPE_T (*this));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::calloc(%u), aborting\n"),
-                  sizeof (HTTP_Message_T)));
+                  sizeof (OWN_TYPE_T)));
       return NULL;
     }
 

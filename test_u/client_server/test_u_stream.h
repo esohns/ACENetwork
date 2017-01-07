@@ -61,7 +61,8 @@ class Test_U_Stream
   virtual ~Test_U_Stream ();
 
   // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&); // return value: module list
+  virtual bool load (Stream_ModuleList_t&, // return value: module list
+                     bool&);               // return value: delete ?
 
   // implement Common_IInitialize_T
   virtual bool initialize (const struct Test_U_StreamConfiguration&, // configuration

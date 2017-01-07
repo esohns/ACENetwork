@@ -76,6 +76,7 @@ set (${PROJECT_NAME}_Protocol_IRC_SRCS
      irc_session.inl
      irc_sessionmessage.cpp
      irc_sessionmessage.h
+     irc_sessionmessage.inl
      irc_statemachine_registration.cpp
      irc_statemachine_registration.h
      irc_stream.cpp
@@ -87,6 +88,10 @@ set (${PROJECT_NAME}_Protocol_IRC_SRCS
      location.hh
      position.hh
      stack.hh)
+set (${PROJECT_NAME}_Protocol_IRC_SCRIPTS
+     scripts/bisector.l
+     scripts/scanner.l
+     scripts/parser.y)
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/libACENetwork/protocol/irc")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS -DIRC_BUILD_DLL)
@@ -94,9 +99,12 @@ set (${PROJECT_NAME}_Protocol_IRC_SRCS
 # *NOTE*: generate .def file and export all symbols on Windows
 if (WIN32)
  set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ source_group (scripts FILES ${PROJECT_NAME}_Protocol_IRC_SCRIPTS)
 endif ()
 
-add_library (${PROJECT_NAME}_Protocol_IRC SHARED ${ACENetwork_Protocol_IRC_SRCS})
+add_library (${PROJECT_NAME}_Protocol_IRC SHARED
+             ${ACENetwork_Protocol_IRC_SRCS}
+             ${ACENetwork_Protocol_IRC_SCRIPTS})
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${PROJECT_NAME}_Protocol_IRC Common)
@@ -146,6 +154,7 @@ install (FILES
          irc_session.h
          irc_session.inl
          irc_sessionmessage.h
+         irc_sessionmessage.inl
          irc_statemachine_registration.h
          irc_stream.h
          irc_stream.inl

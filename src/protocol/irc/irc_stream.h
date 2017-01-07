@@ -55,7 +55,9 @@ template <typename StreamStateType,
           ////////////////////////////////
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          ////////////////////////////////
+          typename UserDataType>
 class IRC_Stream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
@@ -78,7 +80,8 @@ class IRC_Stream_T
   virtual ~IRC_Stream_T ();
 
   // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&); // return value: module list
+  virtual bool load (Stream_ModuleList_t&, // return value: module list
+                     bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
   virtual bool initialize (const ConfigurationType&, // configuration
@@ -125,7 +128,8 @@ class IRC_Stream_T
                                 StreamStateType,
                                 SessionDataType,
                                 SessionDataContainerType,
-                                StatisticContainerType> BISECTOR_T;
+                                StatisticContainerType,
+                                UserDataType> BISECTOR_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 Stream_SessionId_t,             // session id type
@@ -188,8 +192,8 @@ class IRC_Stream_T
   ACE_UNIMPLEMENTED_FUNC (IRC_Stream_T (const IRC_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Stream_T& operator= (const IRC_Stream_T&))
 
-  // *TODO*: remove this API
-  void ping ();
+  //// *TODO*: remove this API
+  //void ping ();
 
   // modules
   MODULE_MARSHAL_T   marshal_;

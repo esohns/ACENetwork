@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <ace/Synch.h>
 #include "irc_parser_driver.h"
 
 #include <sstream>
@@ -29,7 +30,6 @@
 #include "net_macros.h"
 
 #include "irc_defines.h"
-#include <ace/Synch.h>
 #include "irc_record.h"
 #include "irc_parser.h"
 #include "irc_scanner.h"
@@ -204,22 +204,6 @@ IRC_ParserDriver::switchBuffer ()
   return true;
 }
 
-bool
-IRC_ParserDriver::moreData ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_ParserDriver::moreData"));
-
-  return (fragment_->cont () != NULL);
-}
-
-bool
-IRC_ParserDriver::getDebugScanner () const
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_ParserDriver::getDebugScanner"));
-
-  return (IRC_Scanner_get_debug (scannerState_) != 0);
-}
-
 void
 IRC_ParserDriver::error (const yy::location& location_in,
                          const std::string& message_in)
@@ -244,15 +228,17 @@ IRC_ParserDriver::error (const yy::location& location_in,
   while (head->prev ())
     head = head->prev ();
   ACE_ASSERT (head);
-  IRC_Message* message = NULL;
-  message = dynamic_cast<IRC_Message*> (head);
-  ACE_ASSERT (message);
-  try
+  Common_IDumpState* idump_state_p = dynamic_cast<Common_IDumpState*> (head);
+  if (!idump_state_p)
   {
-    message->dump_state ();
-  }
-  catch (...)
-  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dynamic_cast<Common_IDumpState*>(0x%@), returning\n"),
+                head));
+    return;
+  } // end IF
+  try {
+    idump_state_p->dump_state ();
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IDumpState::dump_state(), continuing\n")));
   }
@@ -343,3 +329,4 @@ IRC_ParserDriver::scan_end ()
 //   // switch to the next fragment (if any)
 //   fragment_ = fragment_->cont();
 }
+

@@ -26,10 +26,14 @@
 #include <vector>
 
 #include <ace/OS.h>
+#include <ace/Synch_Traits.h>
+#include <ace/Singleton.h>
 
 #include <gtk/gtk.h>
 
+#include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
+#include "common_ui_gtk_manager.h"
 
 #include "irc_message.h"
 
@@ -65,12 +69,13 @@ struct IRC_Client_GTK_ProgressData
 };
 
 struct IRC_Client_GTK_CBData
+ : Common_UI_GTKState
 {
   inline IRC_Client_GTK_CBData ()
-   : configuration (NULL)
+   : Common_UI_GTKState ()
+   , configuration (NULL)
    , connections ()
    , contextID (0)
-   , GTKState ()
    , phoneBook ()
    , progressData ()
    , UIFileDirectory ()
@@ -79,7 +84,6 @@ struct IRC_Client_GTK_CBData
   IRC_Client_Configuration*    configuration;
   IRC_Client_GUI_Connections_t connections;
   guint                        contextID;
-  Common_UI_GTKState           GTKState;
   IRC_Client_PhoneBook         phoneBook;
   IRC_Client_GTK_ProgressData  progressData;
   std::string                  UIFileDirectory;
@@ -147,7 +151,7 @@ struct IRC_Client_GTK_HandlerCBData
   IRC_Client_GUI_Connection*     connection;
   IRC_IControl*                  controller;
   guint                          eventSourceID;
-  Common_UI_GTKState*            GTKState;
+  struct Common_UI_GTKState*     GTKState;
   IRC_Client_GUI_MessageHandler* handler;
   // *TODO*: remove this
   std::string                    id;
@@ -155,5 +159,11 @@ struct IRC_Client_GTK_HandlerCBData
   bool                           pending;
   std::string                    timeStamp;
 };
+
+typedef Common_UI_GtkBuilderDefinition_T<struct IRC_Client_GTK_CBData> IRC_Client_GtkBuilderDefinition_t;
+
+typedef Common_UI_GTK_Manager_T<struct IRC_Client_GTK_CBData> IRC_Client_GTK_Manager_t;
+typedef ACE_Singleton<IRC_Client_GTK_Manager_t,
+                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> IRC_CLIENT_UI_GTK_MANAGER_SINGLETON;
 
 #endif

@@ -65,7 +65,8 @@ class HTTP_Module_Bisector_T
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      StatisticContainerType>
+                                      StatisticContainerType,
+                                      Stream_UserData>
 {
  public:
   HTTP_Module_Bisector_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
@@ -108,7 +109,8 @@ class HTTP_Module_Bisector_T
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      StatisticContainerType> inherited;
+                                      StatisticContainerType,
+                                      Stream_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Bisector_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Bisector_T (const HTTP_Module_Bisector_T&))

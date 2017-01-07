@@ -50,7 +50,7 @@ template <ACE_SYNCH_DECL,
           typename StatisticContainerType,
           ////////////////////////////////
           typename ProtocolHeaderType>
-class Net_Module_SocketHandler_T
+class Net_Module_TCPSocketHandler_T
  : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       Common_TimePolicy_t,
                                       ControlMessageType,
@@ -62,13 +62,14 @@ class Net_Module_SocketHandler_T
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      StatisticContainerType>
+                                      StatisticContainerType,
+                                      Stream_UserData>
 {
  public:
-  Net_Module_SocketHandler_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
-                              bool = false,              // auto-start ?
-                              bool = true);              // generate session messages ?
-  virtual ~Net_Module_SocketHandler_T ();
+  Net_Module_TCPSocketHandler_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
+                                 bool = false,              // auto-start ?
+                                 bool = true);              // generate session messages ?
+  virtual ~Net_Module_TCPSocketHandler_T ();
 
 #if defined (__GNUG__) || defined (_MSC_VER)
   // *NOTE*: for some obscure reason, these base class members are not exposed
@@ -84,7 +85,8 @@ class Net_Module_SocketHandler_T
                                     StreamStateType,
                                     SessionDataType,
                                     SessionDataContainerType,
-                                    StatisticContainerType>::initialize;
+                                    StatisticContainerType,
+                                    Stream_UserData>::initialize;
   using Stream_StateMachine_Control_T<ACE_SYNCH_USE>::initialize;
 #endif
 
@@ -118,11 +120,12 @@ class Net_Module_SocketHandler_T
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      StatisticContainerType> inherited;
+                                      StatisticContainerType,
+                                      Stream_UserData> inherited;
 
-//  ACE_UNIMPLEMENTED_FUNC (Net_Module_SocketHandler_T ())
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_SocketHandler_T (const Net_Module_SocketHandler_T&))
-  ACE_UNIMPLEMENTED_FUNC (Net_Module_SocketHandler_T& operator= (const Net_Module_SocketHandler_T&))
+//  ACE_UNIMPLEMENTED_FUNC (Net_Module_TCPSocketHandler_T ())
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_TCPSocketHandler_T (const Net_Module_TCPSocketHandler_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_TCPSocketHandler_T& operator= (const Net_Module_TCPSocketHandler_T&))
 
   // helper methods
   bool bisectMessages (DataMessageType*&); // return value: complete message (chain)
@@ -165,7 +168,8 @@ class Net_Module_UDPSocketHandler_T
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      StatisticContainerType>
+                                      StatisticContainerType,
+                                      Stream_UserData>
 {
  public:
   Net_Module_UDPSocketHandler_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
@@ -203,7 +207,8 @@ class Net_Module_UDPSocketHandler_T
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      StatisticContainerType> inherited;
+                                      StatisticContainerType,
+                                      Stream_UserData> inherited;
 
 //  ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T (const Net_Module_UDPSocketHandler_T&))

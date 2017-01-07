@@ -23,7 +23,6 @@
 
 #include <bitset>
 #include <deque>
-#include <list>
 #include <map>
 #include <set>
 #include <string>
@@ -36,10 +35,7 @@
 
 #include "common_inotify.h"
 
-#include "stream_cachedmessageallocator.h"
 #include "stream_common.h"
-#include "stream_inotify.h"
-#include "stream_isessionnotify.h"
 
 #include "net_configuration.h"
 #include "net_defines.h"
@@ -64,15 +60,6 @@ class IRC_Client_SessionMessage;
 struct IRC_Client_SessionState;
 struct IRC_Client_SocketHandlerConfiguration;
 class IRC_Record;
-
-typedef Stream_INotify_T<enum Stream_SessionMessageType> IRC_Client_IStreamNotify_t;
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct IRC_Client_SessionData,
-                                    enum Stream_SessionMessageType,
-                                    IRC_Message,
-                                    IRC_Client_SessionMessage> IRC_Client_ISessionNotify_t;
-typedef std::list<IRC_Client_ISessionNotify_t*> IRC_Client_ISubscribers_t;
-typedef IRC_Client_ISubscribers_t::const_iterator IRC_Client_ISubscribersIterator_t;
 
 // phonebook
 typedef std::set<std::string> IRC_Client_Networks_t;
@@ -254,11 +241,5 @@ struct IRC_Client_SignalHandlerConfiguration
   struct IRC_Client_CursesState* cursesState;
   ACE_INET_Addr                  peerAddress;
 };
-
-typedef Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
-                                        struct Stream_AllocatorConfiguration,
-                                        IRC_ControlMessage_t,
-                                        IRC_Message,
-                                        IRC_SessionMessage> IRC_Client_MessageAllocator_t;
 
 #endif

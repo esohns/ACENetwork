@@ -18,14 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_MESSAGE_H
-#define IRC_MESSAGE_H
+#ifndef IRC_Message_H
+#define IRC_Message_H
 
 #include <ace/Global_Macros.h>
 
 #include "stream_data_message_base.h"
 
-#include "irc_common.h"
 #include "irc_exports.h"
 #include "irc_record.h"
 
@@ -33,42 +32,45 @@
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
-class IRC_SessionMessage;
-template <ACE_SYNCH_DECL,
-          typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
-class Stream_MessageAllocatorHeapBase_T;
-template <ACE_SYNCH_DECL,
-          typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
-class Stream_CachedMessageAllocator_T;
+//template <ACE_SYNCH_DECL,
+//          typename AllocatorConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType>
+//class Stream_MessageAllocatorHeapBase_T;
+//template <ACE_SYNCH_DECL,
+//          typename AllocatorConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType>
+//class Stream_CachedMessageAllocator_T;
 
 class IRC_Export IRC_Message
- : public Stream_DataMessageBase_T<Stream_AllocatorConfiguration,
-                                   IRC_ControlMessage_t,
-                                   IRC_SessionMessage,
+ : public Stream_DataMessageBase_T<struct Stream_AllocatorConfiguration,
+                                   enum Stream_MessageType,
                                    IRC_Record,
                                    IRC_CommandType_t>
 {
   // enable access to specific private ctors
-  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 Stream_AllocatorConfiguration,
-                                                 IRC_ControlMessage_t,
-                                                 IRC_Message,
-                                                 IRC_SessionMessage>;
-  friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
-                                               Stream_AllocatorConfiguration,
-                                               IRC_ControlMessage_t,
-                                               IRC_Message,
-                                               IRC_SessionMessage>;
+  //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+  //                                               struct Stream_AllocatorConfiguration,
+  //                                               ControlMessageType,
+  //                                               OWN_TYPE_T,
+  //                                               SessionMessageType>;
+  //friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
+  //                                             struct Stream_AllocatorConfiguration,
+  //                                             ControlMessageType,
+  //                                             OWN_TYPE_T,
+  //                                             SessionMessageType>;
 
  public:
   IRC_Message (unsigned int); // size
-  virtual ~IRC_Message ();
+   // *NOTE*: to be used by allocators
+   IRC_Message (ACE_Data_Block*, // data block to use
+                ACE_Allocator*,  // message allocator
+                bool = true);    // increment running message counter ?
+   //IRC_Message(ACE_Allocator*); // message allocator
+  virtual ~IRC_Message();
 
   virtual IRC_CommandType_t command () const; // return value: message type
 
@@ -83,20 +85,13 @@ class IRC_Export IRC_Message
   static std::string CommandType2String (const IRC_CommandType_t&);
 
  protected:
-   // *NOTE*: to be used by allocators
-   IRC_Message (ACE_Data_Block*, // data block to use
-                ACE_Allocator*,  // message allocator
-                bool = true);    // increment running message counter ?
-   //   IRC_Client_Message(ACE_Allocator*); // message allocator
-
   // copy ctor to be used by duplicate() and child classes
   // --> uses an (incremented refcount of) the same datablock ("shallow copy")
   IRC_Message (const IRC_Message&);
 
  private:
-  typedef Stream_DataMessageBase_T<Stream_AllocatorConfiguration,
-                                   IRC_ControlMessage_t,
-                                   IRC_SessionMessage,
+  typedef Stream_DataMessageBase_T<struct Stream_AllocatorConfiguration,
+                                   enum Stream_MessageType,
                                    IRC_Record,
                                    IRC_CommandType_t> inherited;
 

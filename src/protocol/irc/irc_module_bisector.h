@@ -53,7 +53,9 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,          // session data
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          ////////////////////////////////
+          typename UserDataType>
 class IRC_Module_Bisector_T
  : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
@@ -66,7 +68,8 @@ class IRC_Module_Bisector_T
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      StatisticContainerType>
+                                      StatisticContainerType,
+                                      UserDataType>
 {
  public:
   IRC_Module_Bisector_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
@@ -87,7 +90,8 @@ class IRC_Module_Bisector_T
                                     StreamStateType,
                                     SessionDataType,
                                     SessionDataContainerType,
-                                    StatisticContainerType>::initialize;
+                                    StatisticContainerType,
+                                    UserDataType>::initialize;
 
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const ConfigurationType&);
@@ -115,7 +119,8 @@ class IRC_Module_Bisector_T
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      StatisticContainerType> inherited;
+                                      StatisticContainerType,
+                                      UserDataType> inherited;
 
 //  ACE_UNIMPLEMENTED_FUNC (IRC_Module_Bisector_T ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Bisector_T (const IRC_Module_Bisector_T&))

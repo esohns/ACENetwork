@@ -30,7 +30,8 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename UserDataType>
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
              StatisticContainerType,
@@ -39,7 +40,8 @@ IRC_Stream_T<StreamStateType,
              SessionDataContainerType,
              ControlMessageType,
              DataMessageType,
-             SessionMessageType>::IRC_Stream_T (const std::string& name_in)
+             SessionMessageType,
+             UserDataType>::IRC_Stream_T (const std::string& name_in)
  : inherited (name_in)
  , marshal_ (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
              NULL,
@@ -66,7 +68,8 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename UserDataType>
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
              StatisticContainerType,
@@ -75,7 +78,8 @@ IRC_Stream_T<StreamStateType,
              SessionDataContainerType,
              ControlMessageType,
              DataMessageType,
-             SessionMessageType>::~IRC_Stream_T ()
+             SessionMessageType,
+             UserDataType>::~IRC_Stream_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::~IRC_Stream_T"));
 
@@ -91,7 +95,8 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename UserDataType>
 bool
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
@@ -101,9 +106,13 @@ IRC_Stream_T<StreamStateType,
              SessionDataContainerType,
              ControlMessageType,
              DataMessageType,
-             SessionMessageType>::load (Stream_ModuleList_t& modules_out)
+             SessionMessageType,
+             UserDataType>::load (Stream_ModuleList_t& modules_out,
+                                  bool& deleteModules_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::load"));
+
+  deleteModules_out = false;
 
   modules_out.push_back (&runtimeStatistic_);
   modules_out.push_back (&parser_);
@@ -120,7 +129,8 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename UserDataType>
 bool
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
@@ -130,9 +140,10 @@ IRC_Stream_T<StreamStateType,
              SessionDataContainerType,
              ControlMessageType,
              DataMessageType,
-             SessionMessageType>::initialize (const ConfigurationType& configuration_in,
-                                              bool setupPipeline_in,
-                                              bool resetSessionData_in)
+             SessionMessageType,
+             UserDataType>::initialize (const ConfigurationType& configuration_in,
+                                         bool setupPipeline_in,
+                                         bool resetSessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::initialize"));
 
@@ -328,7 +339,8 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename UserDataType>
 bool
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
@@ -338,7 +350,8 @@ IRC_Stream_T<StreamStateType,
              SessionDataContainerType,
              ControlMessageType,
              DataMessageType,
-             SessionMessageType>::collect (StatisticContainerType& data_out)
+             SessionMessageType,
+             UserDataType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::collect"));
 
@@ -364,7 +377,8 @@ template <typename StreamStateType,
           typename SessionDataContainerType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename UserDataType>
 void
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
@@ -374,7 +388,8 @@ IRC_Stream_T<StreamStateType,
              SessionDataContainerType,
              ControlMessageType,
              DataMessageType,
-             SessionMessageType>::report () const
+             SessionMessageType,
+             UserDataType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::report"));
 
@@ -397,70 +412,72 @@ IRC_Stream_T<StreamStateType,
   ACE_NOTREACHED (return;)
 }
 
-template <typename StreamStateType,
-          typename ConfigurationType,
-          typename StatisticContainerType,
-          typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
-void
-IRC_Stream_T<StreamStateType,
-             ConfigurationType,
-             StatisticContainerType,
-             ModuleHandlerConfigurationType,
-             SessionDataType,
-             SessionDataContainerType,
-             ControlMessageType,
-             DataMessageType,
-             SessionMessageType>::ping ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::ping"));
-
-  // delegate to the head module, skip over ACE_Stream_Head...
-  typename inherited::MODULE_T* module_p = inherited::head ();
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("no head module found, returning\n")));
-    return;
-  } // end IF
-  module_p = module_p->next ();
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("no head module found, returning\n")));
-    return;
-  } // end IF
-
-  // sanity check: head == tail ? --> no modules have been push()ed (yet) !
-  if (module_p == inherited::tail ())
-  {
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("no modules have been enqueued yet --> nothing to do !, returning\n")));
-    return;
-  } // end IF
-
-  typename inherited::ISTREAM_CONTROL_T* control_impl = NULL;
-  control_impl =
-      dynamic_cast<typename inherited::ISTREAM_CONTROL_T*> (module_p->reader ());
-  if (!control_impl)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<Stream_IStreamControl> failed, returning\n"),
-                module_p->name ()));
-    return;
-  } // end IF
-
-  // *TODO*
-  try {
-//    control_impl->stop ();
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Stream_IStreamControl::stop (module: \"%s\"), returning\n"),
-                module_p->name ()));
-    return;
-  }
-}
+//template <typename StreamStateType,
+//          typename ConfigurationType,
+//          typename StatisticContainerType,
+//          typename ModuleHandlerConfigurationType,
+//          typename SessionDataType,
+//          typename SessionDataContainerType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType,
+//          typename UserDataType>
+//void
+//IRC_Stream_T<StreamStateType,
+//             ConfigurationType,
+//             StatisticContainerType,
+//             ModuleHandlerConfigurationType,
+//             SessionDataType,
+//             SessionDataContainerType,
+//             ControlMessageType,
+//             DataMessageType,
+//             SessionMessageType,
+//             UserDataType>::ping ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::ping"));
+//
+//  // delegate to the head module, skip over ACE_Stream_Head...
+//  typename inherited::MODULE_T* module_p = inherited::head ();
+//  if (!module_p)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("no head module found, returning\n")));
+//    return;
+//  } // end IF
+//  module_p = module_p->next ();
+//  if (!module_p)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("no head module found, returning\n")));
+//    return;
+//  } // end IF
+//
+//  // sanity check: head == tail ? --> no modules have been push()ed (yet) !
+//  if (module_p == inherited::tail ())
+//  {
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("no modules have been enqueued yet --> nothing to do !, returning\n")));
+//    return;
+//  } // end IF
+//
+//  typename inherited::ISTREAM_CONTROL_T* control_impl = NULL;
+//  control_impl =
+//      dynamic_cast<typename inherited::ISTREAM_CONTROL_T*> (module_p->reader ());
+//  if (!control_impl)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("%s: dynamic_cast<Stream_IStreamControl> failed, returning\n"),
+//                module_p->name ()));
+//    return;
+//  } // end IF
+//
+//  // *TODO*
+//  try {
+////    control_impl->stop ();
+//  } catch (...) {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("caught exception in Stream_IStreamControl::stop (module: \"%s\"), returning\n"),
+//                module_p->name ()));
+//    return;
+//  }
+//}

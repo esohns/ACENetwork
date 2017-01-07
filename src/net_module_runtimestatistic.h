@@ -105,7 +105,9 @@ class Net_Module_Statistic_WriterTask_T
                                  DataMessageType,
                                  SessionMessageType,
                                  Stream_SessionId_t,
-                                 Stream_SessionMessageType>
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 Stream_UserData>
  , public Common_ICounter
  , public Common_IStatistic_T<StatisticContainerType>
 {
@@ -149,7 +151,9 @@ class Net_Module_Statistic_WriterTask_T
                                  DataMessageType,
                                  SessionMessageType,
                                  Stream_SessionId_t,
-                                 Stream_SessionMessageType> inherited;
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 Stream_UserData> inherited;
 
   // message type counters
 //  typedef std::set<ProtocolCommandType> Net_Messages_t;

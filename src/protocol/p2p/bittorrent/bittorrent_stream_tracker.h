@@ -66,7 +66,9 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType, // socket-
           typename SessionStateType,
-          typename CBDataType>
+          typename CBDataType,
+          ////////////////////////////////
+          typename UserDataType>
 class BitTorrent_TrackerStream_T
  : public HTTP_Stream_T<StreamStateType,
                         ConfigurationType,
@@ -76,7 +78,8 @@ class BitTorrent_TrackerStream_T
                         SessionDataContainerType,
                         ControlMessageType,
                         DataMessageType,
-                        SessionMessageType>
+                        SessionMessageType,
+                        UserDataType>
 {
  public:
   BitTorrent_TrackerStream_T (const std::string&); // name
@@ -106,7 +109,8 @@ class BitTorrent_TrackerStream_T
                         SessionDataContainerType,
                         ControlMessageType,
                         DataMessageType,
-                        SessionMessageType> inherited;
+                        SessionMessageType,
+                        UserDataType> inherited;
 
   typedef BitTorrent_TrackerStream_T<StreamStateType,
                                      ConfigurationType,
@@ -122,7 +126,8 @@ class BitTorrent_TrackerStream_T
                                      ConnectionStateType,
                                      HandlerConfigurationType, // socket-
                                      SessionStateType,
-                                     CBDataType> OWN_TYPE_T;
+                                     CBDataType,
+                                     UserDataType> OWN_TYPE_T;
 
 //  typedef BitTorrent_Module_TrackerHandler_T<ACE_INET_Addr,
 //                                             ModuleHandlerConfigurationType,

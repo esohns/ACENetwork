@@ -47,12 +47,12 @@ class IRC_Client_GUI_MessageHandler;
 */
 class IRC_Client_GUI_Connection
  : public IRC_Client_ISessionNotify_t
- , public Common_IGet_T<IRC_Client_GTK_ConnectionCBData>
+ , public Common_IGet_T<struct IRC_Client_GTK_ConnectionCBData>
 {
   friend class IRC_Client_GUI_MessageHandler;
 
  public:
-  IRC_Client_GUI_Connection (Common_UI_GTKState*,           // GTK state handle
+  IRC_Client_GUI_Connection (struct Common_UI_GTKState*,    // GTK state handle
                              IRC_Client_GUI_Connections_t*, // connections handle
                              guint,                         // (statusbar) context ID
                              const std::string&,            // (server tab) label
@@ -69,9 +69,9 @@ class IRC_Client_GUI_Connection
 
   // implement IRC_Client_ISessionNotify_t
   virtual void start (Stream_SessionId_t,
-                      const IRC_Client_SessionData&);
+                      const struct IRC_Client_SessionData&);
   virtual void notify (Stream_SessionId_t,
-                       const Stream_SessionMessageType&);
+                       const enum Stream_SessionMessageType&);
   virtual void end (Stream_SessionId_t);
   virtual void notify (Stream_SessionId_t,
                        const IRC_Message&);
@@ -91,7 +91,7 @@ class IRC_Client_GUI_Connection
   //            - the event dispatch thread(s) (reactor/proactor)
   //void current (std::string&,        // return value: nickname
   //              std::string&) const; // return value: channel / nickname
-  const IRC_Client_SessionState& state () const;
+  const struct IRC_Client_SessionState& state () const;
   IRC_Client_GUI_MessageHandler* getActiveHandler (bool = true,        // locked access ?
                                                    bool = true) const; // locked access (GDK) ?
   void createMessageHandler (const std::string&, // channel/nickname

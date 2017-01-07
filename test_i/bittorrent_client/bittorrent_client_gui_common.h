@@ -25,10 +25,15 @@
 #include <set>
 #include <string>
 
-#include <ace/os_include/os_pthread.h>
 #include <ace/INET_Addr.h>
+#include <ace/os_include/os_pthread.h>
+#include <ace/Synch_Traits.h>
+#include <ace/Singleton.h>
 
 #include <gtk/gtk.h>
+
+#include "common_ui_gtk_builder_definition.h"
+#include "common_ui_gtk_manager.h"
 
 #include "net_common.h"
 #include "net_iconnection.h"
@@ -144,5 +149,11 @@ struct BitTorrent_Client_GTK_SessionCBData
   std::string                             label;
   BitTorrent_Client_ISession_t*           session;
 };
+
+typedef Common_UI_GtkBuilderDefinition_T<struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_GtkBuilderDefinition_t;
+
+typedef Common_UI_GTK_Manager_T<struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_GTK_Manager_t;
+typedef ACE_Singleton<BitTorrent_Client_GTK_Manager_t,
+                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> BITTORRENT_CLIENT_UI_GTK_MANAGER_SINGLETON;
 
 #endif

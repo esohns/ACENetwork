@@ -45,9 +45,9 @@ struct IRC_ConnectionConfiguration;
 struct IRC_ConnectionState;
 class IRC_Record;
 struct IRC_ModuleHandlerConfiguration;
-class IRC_SessionMessage;
+//class IRC_SessionMessage;
 struct IRC_Stream_SessionData;
-struct IRC_UserData;
+//struct IRC_UserData;
 
 //typedef Net_IConnection_T<ACE_INET_Addr,
 //                          struct IRC_Configuration,
@@ -58,7 +58,7 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct IRC_ConnectionConfiguration,
                                  struct IRC_ConnectionState,
                                  IRC_RuntimeStatistic_t,
-                                 struct IRC_UserData> IRC_IConnection_Manager_t;
+                                 struct Stream_UserData> IRC_IConnection_Manager_t;
 
 //typedef Common_INotify_T<unsigned int,
 //                         struct IRC_Stream_SessionData,
@@ -72,12 +72,12 @@ struct IRC_SocketHandlerConfiguration
   inline IRC_SocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
    //////////////////////////////////////
-   , userData (NULL)
+   //, userData (NULL)
   {
     PDUSize = IRC_BUFFER_SIZE;
   };
 
-  struct IRC_UserData* userData;
+  //struct IRC_UserData* userData;
 };
 
 //struct IRC_ConnectorConfiguration

@@ -34,8 +34,6 @@
 
 #include "stream_misc_messagehandler.h"
 
-#include "irc_message.h"
-#include "irc_sessionmessage.h"
 #include "irc_statemachine_registration.h"
 
 #include "IRC_client_common.h"
@@ -46,6 +44,7 @@
 // forward declaration(s)
 class ACE_Time_Value;
 class Stream_IAllocator;
+class IRC_Message;
 class IRC_Record;
 
 class IRC_Client_Module_IRCHandler
@@ -136,7 +135,7 @@ class IRC_Client_Module_IRCHandler
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler& operator= (const IRC_Client_Module_IRCHandler&))
 
   // implement (part of) Common_IStateMachine_T
-  virtual void onChange (IRC_RegistrationState); // new state
+  virtual void onChange (enum IRC_RegistrationState); // new state
 
   // helper methods
   IRC_Message* allocateMessage (unsigned int); // requested size

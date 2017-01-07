@@ -27,32 +27,14 @@
 #include <ace/Synch_Traits.h>
 #include <ace/Time_Value.h>
 
-//#include "stream_common.h"
-#include "stream_control_message.h"
-#include "stream_isessionnotify.h"
-
 #include "net_common.h"
 
 #include "irc_icontrol.h"
 
 // forward declarations
 struct IRC_Configuration;
-class IRC_Record;
-class IRC_Message;
-class IRC_SessionMessage;
-struct IRC_Stream_SessionData;
-struct IRC_UserData;
+//struct IRC_UserData;
 
-typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
-                                struct Stream_AllocatorConfiguration,
-                                IRC_Message,
-                                IRC_SessionMessage> IRC_ControlMessage_t;
-
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct IRC_Stream_SessionData,
-                                    enum Stream_SessionMessageType,
-                                    IRC_Record,
-                                    IRC_SessionMessage> IRC_ISessionNotify_t;
 //typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
 
 enum IRC_CharacterEncoding
@@ -202,7 +184,7 @@ struct IRC_ConnectionState
    , configuration (NULL)
    , controller (NULL)
    , currentStatistic ()
-   , userData (NULL)
+   //, userData (NULL)
   {};
 
   struct IRC_Configuration*  configuration;
@@ -210,7 +192,7 @@ struct IRC_ConnectionState
 
   IRC_RuntimeStatistic_t     currentStatistic;
 
-  struct IRC_UserData*       userData;
+  //struct IRC_UserData*       userData;
 };
 
 struct IRC_SessionState

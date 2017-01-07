@@ -48,6 +48,7 @@ Net_Server_SSL_Listener_T<HandlerType,
               1)    // always accept ALL pending connections
  , configuration_ (NULL)
  , handlerConfiguration_ (NULL)
+ , hasChanged_ (false)
  , isInitialized_ (false)
  , isListening_ (false)
  , isOpen_ (false)
@@ -103,29 +104,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
-bool
-Net_Server_SSL_Listener_T<HandlerType,
-                          AcceptorType,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          HandlerConfigurationType,
-                          StreamType,
-                          UserDataType>::isInitialized () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::isInitialized"));
-
-  return isInitialized_;
-}
-
-template <typename HandlerType,
-          typename AcceptorType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
 int
 Net_Server_SSL_Listener_T<HandlerType,
                           AcceptorType,
@@ -138,38 +116,15 @@ Net_Server_SSL_Listener_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::handle_accept_error"));
 
-//  ACE_DEBUG((LM_ERROR,
-//             ACE_TEXT("failed to accept connection...\n")));
+  ACE_DEBUG ((LM_WARNING,
+              ACE_TEXT ("failed to accept connection...\n")));
 
+#if defined (_DEBUG)
   inherited::dump ();
+#endif
 
   // *NOTE*: remain registered with the reactor
   return 0;
-}
-
-template <typename HandlerType,
-          typename AcceptorType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-void
-Net_Server_SSL_Listener_T<HandlerType,
-                          AcceptorType,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          HandlerConfigurationType,
-                          StreamType,
-                          UserDataType>::initialize ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::initialize"));
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-  ACE_NOTREACHED (return;)
 }
 
 template <typename HandlerType,
@@ -195,8 +150,38 @@ Net_Server_SSL_Listener_T<HandlerType,
   int result = -1;
 
   // sanity check(s)
-  if (isListening_)
-    return; // nothing to do...
+  if (!isInitialized_)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("not initialized, returning\n")));
+    return;
+  } // end IF
+  if (isListening_) return; // nothing to do
+
+  if (hasChanged_)
+  {
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("configuration has changed, stopping...\n")));
+    hasChanged_ = false;
+
+    if (isSuspended_) stop ();
+
+    if (isOpen_)
+    {
+      result = inherited::close ();
+      if (result == -1)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Acceptor::close(): \"%m\", returning\n")));
+
+        isOpen_ = false;
+        isListening_ = false;
+
+        return;
+      } // end IF
+      isOpen_ = false;
+    } // end IF
+  } // end IF
 
   if (isOpen_)
   {
@@ -221,17 +206,7 @@ Net_Server_SSL_Listener_T<HandlerType,
     return;
   } // end IF
 
-  // sanity check: configured ?
-  if (!isInitialized_)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("not initialized, returning\n")));
-    return;
-  } // end IF
-
   // not running --> start listening
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
   // *TODO*: remove type inferences
   // sanity check(s)
   ACE_ASSERT (configuration_);
@@ -253,12 +228,6 @@ Net_Server_SSL_Listener_T<HandlerType,
       return;
     } // end IF
   } // end IF
-  result = configuration_->address.addr_to_string (buffer,
-                                                   sizeof (buffer),
-                                                   1);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
   result =
       inherited::open (configuration_->address,  // local address
                        ACE_Reactor::instance (), // corresp. reactor
@@ -275,14 +244,14 @@ Net_Server_SSL_Listener_T<HandlerType,
   isOpen_ = true;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("0x%@: started listening (\"%s\")...\n"),
+              ACE_TEXT ("0x%@: started listening: %s...\n"),
               inherited::get_handle (),
-              buffer));
+              ACE_TEXT (Net_Common_Tools::IPAddress2String (configuration_->address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%d: started listening (\"%s\")...\n"),
+              ACE_TEXT ("%d: started listening: %s...\n"),
               inherited::get_handle (),
-              buffer));
+              ACE_TEXT (Net_Common_Tools::IPAddress2String (configuration_->address).c_str ())));
 #endif
 
   isListening_ = true;
@@ -312,13 +281,11 @@ Net_Server_SSL_Listener_T<HandlerType,
   ACE_UNUSED_ARG (waitForCompletion_in);
   ACE_UNUSED_ARG (lockedAccess_in);
 
-  int result = -1;
-
   // sanity check(s)
-  if (!isListening_)
-    return; // nothing to do...
+  if (!isListening_) return; // nothing to do
+  ACE_ASSERT (isOpen_);
 
-  result = inherited::suspend ();
+  int result = inherited::suspend ();
   if (result == -1)
   {
     ACE_DEBUG((LM_ERROR,
@@ -327,47 +294,10 @@ Net_Server_SSL_Listener_T<HandlerType,
   } // end IF
   isSuspended_ = true;
 
-//  result = inherited::close ();
-//  if (result == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Acceptor::close(): \"%m\", returning\n")));
-
-//    isOpen_ = false;
-//    isListening_ = false;
-
-//    return;
-//  } // end IF
-//  isOpen_ = false;
-  isListening_ = false;
-
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("stopped listening...\n")));
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("suspended listening...\n")));
-}
 
-template <typename HandlerType,
-          typename AcceptorType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-bool
-Net_Server_SSL_Listener_T<HandlerType,
-                          AcceptorType,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          HandlerConfigurationType,
-                          StreamType,
-                          UserDataType>::isRunning () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::isRunning"));
-
-  return isListening_;
+  isListening_ = false;
 }
 
 template <typename HandlerType,
@@ -396,52 +326,6 @@ Net_Server_SSL_Listener_T<HandlerType,
   return *handlerConfiguration_;
 }
 
-//template <typename HandlerType,
-//          typename AddressType,
-//          typename ConfigurationType,
-//          typename StateType,
-//          typename StreamType,
-//          typename HandlerConfigurationType,
-//          typename UserDataType>
-//bool
-//Net_Server_SSL_Listener_T<HandlerType,
-//                      AddressType,
-//                      ConfigurationType,
-//                      StateType,
-//                      StreamType,
-//                      HandlerConfigurationType,
-//                      UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::initialize"));
-//
-//  handlerConfiguration_ = configuration_in;
-//
-//  return true;
-//}
-
-template <typename HandlerType,
-          typename AcceptorType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-bool
-Net_Server_SSL_Listener_T<HandlerType,
-                          AcceptorType,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          HandlerConfigurationType,
-                          StreamType,
-                          UserDataType>::useReactor () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::useReactor"));
-
-  return true;
-}
-
 template <typename HandlerType,
           typename AcceptorType,
           typename AddressType,
@@ -467,6 +351,7 @@ Net_Server_SSL_Listener_T<HandlerType,
 
   configuration_ = &const_cast<ConfigurationType&> (configuration_in);
   handlerConfiguration_ = configuration_in.socketHandlerConfiguration;
+  hasChanged_ = true;
   isInitialized_ = true;
 
   return true;

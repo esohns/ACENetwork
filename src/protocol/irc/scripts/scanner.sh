@@ -23,7 +23,7 @@ SCANNER_L=scanner.l
 [ ! -f ${SCRIPTS_DIR}/${SCANNER_L} ] && echo "ERROR: invalid file (was: ${SCRIPTS_DIR}/${SCANNER_L}), aborting" && exit 1
 
 # generate a scanner for bisecting IRC messages from the input stream
-flex ${SCRIPTS_DIR}/${BISECT_L} 2>&1 | tee ${SCRIPTS_DIR}/bisector_report.txt
+flex --noline ${SCRIPTS_DIR}/${BISECT_L} 2>&1 | tee ${SCRIPTS_DIR}/bisector_report.txt
 [ $? -ne 0 ] && echo "ERROR: failed to flex \"${BISECT_L}\", aborting" && exit 1
 
 # list generated files
@@ -32,7 +32,7 @@ FILES="irc_bisector.cpp irc_bisector.h"
 # -------------------------------------------------------------------
 
 # generate a scanner for use by the IRC message parser
-flex ${SCRIPTS_DIR}/${SCANNER_L} 2>&1 | tee ${SCRIPTS_DIR}/scanner_report.txt
+flex --noline ${SCRIPTS_DIR}/${SCANNER_L} 2>&1 | tee ${SCRIPTS_DIR}/scanner_report.txt
 [ $? -ne 0 ] && echo "ERROR: failed to flex \"${SCANNER_L}\", aborting" && exit 1
 
 # append to list

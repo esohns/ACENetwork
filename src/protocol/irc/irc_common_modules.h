@@ -38,8 +38,12 @@
 //#include "irc_stream_common.h"
 
 // forward declarations
-class IRC_SessionMessage;
 class IRC_Message;
+template <typename SessionDataType,
+          typename UserDataType>
+class IRC_SessionMessage_T;
+typedef IRC_SessionMessage_T<IRC_Stream_SessionData_t,
+                             struct Stream_UserData> IRC_SessionMessage_t;
 //struct IRC_Stream_SessionData;
 //struct IRC_StreamState;
 
@@ -48,14 +52,14 @@ typedef IRC_Module_Parser_T<ACE_MT_SYNCH,
                             struct IRC_ModuleHandlerConfiguration,
                             ACE_Message_Block,
                             IRC_Message,
-                            IRC_SessionMessage> IRC_Module_Parser;
+                            IRC_SessionMessage_t> IRC_Module_Parser;
 
 typedef Stream_Module_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                    Common_TimePolicy_t,
                                                    struct IRC_ModuleHandlerConfiguration,
                                                    ACE_Message_Block,
                                                    IRC_Message,
-                                                   IRC_SessionMessage,
+                                                   IRC_SessionMessage_t,
                                                    IRC_CommandType_t,
                                                    IRC_RuntimeStatistic_t,
                                                    struct IRC_Stream_SessionData,
@@ -65,7 +69,7 @@ typedef Stream_Module_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                    struct IRC_ModuleHandlerConfiguration,
                                                    ACE_Message_Block,
                                                    IRC_Message,
-                                                   IRC_SessionMessage,
+                                                   IRC_SessionMessage_t,
                                                    IRC_CommandType_t,
                                                    IRC_RuntimeStatistic_t,
                                                    struct IRC_Stream_SessionData,
@@ -76,11 +80,11 @@ typedef IRC_Module_Streamer_T<ACE_MT_SYNCH,
                               struct IRC_ModuleHandlerConfiguration,
                               ACE_Message_Block,
                               IRC_Message,
-                              IRC_SessionMessage> IRC_Module_Streamer_t;
+                              IRC_SessionMessage_t> IRC_Module_Streamer_t;
 //typedef IRC_Module_Bisector_T<ACE_SYNCH_MUTEX,
 //                              ACE_MT_SYNCH,
 //                              Common_TimePolicy_t,
-//                              IRC_SessionMessage,
+//                              IRC_SessionMessage_t,
 //                              IRC_Message,
 //                              struct IRC_ModuleHandlerConfiguration,
 //                              IRC_StreamState,

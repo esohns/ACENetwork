@@ -47,7 +47,6 @@ struct IRC_Client_CursesState;
 struct IRC_Client_SessionState;
 class IRC_Record;
 struct IRC_ModuleHandlerConfiguration;
-class IRC_SessionMessage;
 //class IRC_Client_Stream;
 struct IRC_Stream_SessionData;
 struct IRC_Client_UserData;

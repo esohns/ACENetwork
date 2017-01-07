@@ -30,49 +30,46 @@
 
 #include "http_codes.h"
 #include "http_common.h"
-#include "http_exports.h"
 
 // forward declaration(s)
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
 //class HTTP_SessionMessage;
-template <ACE_SYNCH_DECL,
-          typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
-template <ACE_SYNCH_DECL,
-          typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType> class Stream_CachedMessageAllocator_T;
+//template <ACE_SYNCH_DECL,
+//          typename AllocatorConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
+//template <ACE_SYNCH_DECL,
+//          typename AllocatorConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
 template <typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename SessionMessageType>
+          typename MessageType>
 class HTTP_Message_T
  : public Stream_DataMessageBase_2<AllocatorConfigurationType,
-                                   ControlMessageType,
-                                   SessionMessageType,
+                                   MessageType,
                                    Stream_DataBase_T<struct HTTP_Record>,
                                    HTTP_Method_t>
 {
   // enable access to specific private ctors
-  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 AllocatorConfigurationType,
-                                                 ControlMessageType,
-                                                 HTTP_Message_T<AllocatorConfigurationType,
-                                                                ControlMessageType,
-                                                                SessionMessageType>,
-                                                 SessionMessageType>;
-  friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
-                                               AllocatorConfigurationType,
-                                               ControlMessageType,
-                                               HTTP_Message_T<AllocatorConfigurationType,
-                                                              ControlMessageType,
-                                                              SessionMessageType>,
-                                               SessionMessageType>;
+  //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+  //                                               AllocatorConfigurationType,
+  //                                               ControlMessageType,
+  //                                               HTTP_Message_T<AllocatorConfigurationType,
+  //                                                              ControlMessageType,
+  //                                                              SessionMessageType>,
+  //                                               SessionMessageType>;
+  //friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
+  //                                             AllocatorConfigurationType,
+  //                                             ControlMessageType,
+  //                                             HTTP_Message_T<AllocatorConfigurationType,
+  //                                                            ControlMessageType,
+  //                                                            SessionMessageType>,
+  //                                             SessionMessageType>;
 
  public:
   HTTP_Message_T (unsigned int); // size
@@ -120,13 +117,16 @@ class HTTP_Message_T
 
  private:
   typedef Stream_DataMessageBase_2<AllocatorConfigurationType,
-                                   ControlMessageType,
-                                   SessionMessageType,
+                                   MessageType,
                                    Stream_DataBase_T<struct HTTP_Record>,
                                    HTTP_Method_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Message_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Message_T& operator= (const HTTP_Message_T&))
+
+  // convenient types
+  typedef HTTP_Message_T<AllocatorConfigurationType,
+                         MessageType> OWN_TYPE_T;
 };
 
 // include template definition

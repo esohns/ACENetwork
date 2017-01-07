@@ -44,11 +44,11 @@ class BitTorrent_SessionMessage_T;
 template <typename SessionMessageType>
 class BitTorrent_Bencoding_ParserDriver_T;
 
-template <typename SessionDataType,
+template <typename SessionDataType,      // not (!) reference-counted
           typename UserDataType,
           typename SessionInterfaceType, // derived from Net_ISession_T
           ////////////////////////////////
-          typename CBDataType> // ui feedback data type
+          typename CBDataType>           // ui feedback data type
 class BitTorrent_PeerStreamHandler_T
  : public Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                       SessionDataType,
@@ -73,9 +73,9 @@ class BitTorrent_PeerStreamHandler_T
   virtual void notify (Stream_SessionId_t,                         // session id
                        const BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
                                                   UserDataType>&); // (protocol) message
-  virtual void notify (Stream_SessionId_t,                                  // session id
+  virtual void notify (Stream_SessionId_t,                                // session id
                        const BitTorrent_SessionMessage_T<SessionDataType,
-                                                           UserDataType>&); // session message
+                                                         UserDataType>&); // session message
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_PeerStreamHandler_T ())
@@ -92,11 +92,11 @@ class BitTorrent_PeerStreamHandler_T
 
 //////////////////////////////////////////
 
-template <typename SessionDataType,
+template <typename SessionDataType,      // not (!) reference-counted
           typename UserDataType,
           typename SessionInterfaceType, // derived from Net_ISession_T
           ////////////////////////////////
-          typename CBDataType> // ui feedback data type
+          typename CBDataType>           // ui feedback data type
 class BitTorrent_TrackerStreamHandler_T
  : public Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                       SessionDataType,
@@ -138,7 +138,7 @@ class BitTorrent_TrackerStreamHandler_T
   typedef std::map<Stream_SessionId_t, SessionDataType*> SESSION_DATA_T;
   typedef typename SESSION_DATA_T::iterator SESSION_DATA_ITERATOR_T;
   typedef BitTorrent_TrackerMessage_T<Stream_SessionData_T<SessionDataType>,
-                                                           UserDataType> MESSAGE_T;
+                                      UserDataType> MESSAGE_T;
   typedef BitTorrent_SessionMessage_T<SessionDataType,
                                       UserDataType> SESSION_MESSAGE_T;
   typedef BitTorrent_Bencoding_ParserDriver_T<SESSION_MESSAGE_T> PARSER_T;

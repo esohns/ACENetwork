@@ -116,7 +116,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_UI_FILE_DIRECTORY);
+  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   std::string UI_file = path;
   UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
@@ -210,7 +210,7 @@ do_processArguments (const int& argc_in,
     NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_UI_FILE_DIRECTORY);
+  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   UIFile_out = path;
   UIFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
@@ -662,12 +662,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
     CBData_in.userData = &CBData_in;
 
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
+    SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
     result = ACE_OS::sleep (ACE_Time_Value (1, 0));
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::sleep(): \"%m\", continuing\n")));
-    if (!COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
+    if (!SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
@@ -687,7 +687,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
       // clean up
       timer_manager_p->stop ();
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);
+      SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);
 
       return;
     } // end IF
@@ -713,7 +713,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     //				g_source_remove(*iterator);
     //		} // end lock scope
     if (!UIDefinitionFile_in.empty ())
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+      SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
     timer_manager_p->stop ();
 
     return;
@@ -741,7 +741,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       //				g_source_remove(*iterator);
       //		} // end lock scope
       if (!UIDefinitionFile_in.empty ())
-        COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+        SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
       timer_manager_p->stop ();
 
       return;
@@ -773,7 +773,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     //				g_source_remove(*iterator);
     //		} // end lock scope
     if (!UIDefinitionFile_in.empty ())
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+      SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
     timer_manager_p->stop ();
 
     return;
@@ -798,7 +798,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     //				g_source_remove(*iterator);
     //		} // end lock scope
     if (!UIDefinitionFile_in.empty ())
-      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+      SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
     timer_manager_p->stop ();
 
     return;
@@ -821,7 +821,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   //				g_source_remove(*iterator);
   //		} // end lock scope
   if (!UIDefinitionFile_in.empty ())
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+    SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
   timer_manager_p->stop ();
 
   //// wait for connection processing to complete
@@ -957,7 +957,7 @@ ACE_TMAIN (int argc_in,
     NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_UI_FILE_DIRECTORY);
+  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   std::string UI_file = path;
   UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
@@ -1190,10 +1190,10 @@ ACE_TMAIN (int argc_in,
   // step1h: init GLIB / G(D|T)K[+] / GNOME ?
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
-  Common_UI_GtkBuilderDefinition ui_definition (argc_in,
-                                                argv_in);
+  Test_U_Server_GtkBuilderDefinition_t ui_definition (argc_in,
+                                                      argv_in);
   if (!UI_file.empty ())
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
+    SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                               argv_in,
                                                               &gtk_cb_user_data,
                                                               &ui_definition);

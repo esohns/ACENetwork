@@ -23,7 +23,7 @@
 
 #include <ace/Global_Macros.h>
 
-#include "stream_session_message_base.h"
+#include "irc_sessionmessage.h"
 
 #include "IRC_client_common.h"
 #include "IRC_client_stream_common.h"
@@ -34,12 +34,8 @@ class ACE_Data_Block;
 class ACE_Message_Block;
 
 class IRC_Client_SessionMessage
- : public Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      Stream_SessionMessageType,
-                                      IRC_Client_SessionData_t,
-                                      IRC_Client_UserData,
-                                      IRC_ControlMessage_t,
-                                      IRC_Message>
+ : public IRC_SessionMessage_T<IRC_Client_SessionData_t,
+                               struct IRC_Client_UserData>
 {
 //  // enable access to private ctor(s)
 //  friend class Net_StreamMessageAllocator;
@@ -47,9 +43,9 @@ class IRC_Client_SessionMessage
 
  public:
   // *NOTE*: assume lifetime responsibility for the second argument !
-  IRC_Client_SessionMessage (Stream_SessionMessageType,  // session message type
-                             IRC_Client_SessionData_t*&, // session data container handle
-                             IRC_Client_UserData*);      // user data handle
+  IRC_Client_SessionMessage (enum Stream_SessionMessageType, // session message type
+                             IRC_Client_SessionData_t*&,     // session data container handle
+                             struct IRC_Client_UserData*);   // user data handle
   // *NOTE*: to be used by message allocators
   IRC_Client_SessionMessage (ACE_Allocator*); // message allocator
   IRC_Client_SessionMessage (ACE_Data_Block*, // data block
@@ -61,12 +57,8 @@ class IRC_Client_SessionMessage
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<Stream_AllocatorConfiguration,
-                                      Stream_SessionMessageType,
-                                      IRC_Client_SessionData_t,
-                                      IRC_Client_UserData,
-                                      IRC_ControlMessage_t,
-                                      IRC_Message> inherited;
+  typedef IRC_SessionMessage_T<IRC_Client_SessionData_t,
+                               struct IRC_Client_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_SessionMessage ())
   // copy ctor (to be used by duplicate())

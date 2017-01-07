@@ -23,14 +23,14 @@
 
 #include "net_macros.h"
 
-template <typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionDataType>
-DHCP_SessionMessage_T<ControlMessageType,
-                      DataMessageType,
-                      SessionDataType>::DHCP_SessionMessage_T (Stream_SessionMessageType messageType_in,
-                                                               SessionDataType*& sessionData_inout,
-                                                               DHCP_Stream_UserData* userData_in)
+template <typename AllocatorType,
+          typename SessionDataType,
+          typename UserDataType>
+DHCP_SessionMessage_T<AllocatorType,
+                      SessionDataType,
+                      UserDataType>::DHCP_SessionMessage_T (enum Stream_SessionMessageType messageType_in,
+                                                            SessionDataType*& sessionData_inout,
+                                                            UserDataType* userData_in)
  : inherited (messageType_in,
               sessionData_inout,
               userData_in)
@@ -39,37 +39,37 @@ DHCP_SessionMessage_T<ControlMessageType,
 
 }
 
-template <typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionDataType>
-DHCP_SessionMessage_T<ControlMessageType,
-                      DataMessageType,
-                      SessionDataType>::DHCP_SessionMessage_T (const DHCP_SessionMessage_T& message_in)
+template <typename AllocatorType,
+          typename SessionDataType,
+          typename UserDataType>
+DHCP_SessionMessage_T<AllocatorType,
+                      SessionDataType,
+                      UserDataType>::DHCP_SessionMessage_T (const DHCP_SessionMessage_T& message_in)
  : inherited (message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_SessionMessage_T::DHCP_SessionMessage_T"));
 
 }
 
-template <typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionDataType>
-DHCP_SessionMessage_T<ControlMessageType,
-                      DataMessageType,
-                      SessionDataType>::DHCP_SessionMessage_T (ACE_Allocator* messageAllocator_in)
+template <typename AllocatorType,
+          typename SessionDataType,
+          typename UserDataType>
+DHCP_SessionMessage_T<AllocatorType,
+                      SessionDataType,
+                      UserDataType>::DHCP_SessionMessage_T (ACE_Allocator* messageAllocator_in)
  : inherited (messageAllocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_SessionMessage_T::DHCP_SessionMessage_T"));
 
 }
 
-template <typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionDataType>
-DHCP_SessionMessage_T<ControlMessageType,
-                      DataMessageType,
-                      SessionDataType>::DHCP_SessionMessage_T (ACE_Data_Block* dataBlock_in,
-                                                               ACE_Allocator* messageAllocator_in)
+template <typename AllocatorType,
+          typename SessionDataType,
+          typename UserDataType>
+DHCP_SessionMessage_T<AllocatorType,
+                      SessionDataType,
+                      UserDataType>::DHCP_SessionMessage_T (ACE_Data_Block* dataBlock_in,
+                                                            ACE_Allocator* messageAllocator_in)
  : inherited (dataBlock_in,
               messageAllocator_in)
 {
@@ -77,24 +77,24 @@ DHCP_SessionMessage_T<ControlMessageType,
 
 }
 
-template <typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionDataType>
-DHCP_SessionMessage_T<ControlMessageType,
-                      DataMessageType,
-                      SessionDataType>::~DHCP_SessionMessage_T ()
+template <typename AllocatorType,
+          typename SessionDataType,
+          typename UserDataType>
+DHCP_SessionMessage_T<AllocatorType,
+                      SessionDataType,
+                      UserDataType>::~DHCP_SessionMessage_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_SessionMessage_T::~DHCP_SessionMessage_T"));
 
 }
 
-template <typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionDataType>
+template <typename AllocatorType,
+          typename SessionDataType,
+          typename UserDataType>
 ACE_Message_Block*
-DHCP_SessionMessage_T<ControlMessageType,
-                      DataMessageType,
-                      SessionDataType>::duplicate (void) const
+DHCP_SessionMessage_T<AllocatorType,
+                      SessionDataType,
+                      UserDataType>::duplicate (void) const
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_SessionMessage_T::duplicate"));
 

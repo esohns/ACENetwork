@@ -1827,12 +1827,12 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("0x%@: started listening (UDP) (\"%s\")...\n"),
+                ACE_TEXT ("0x%@: opened UDP socket: %s...\n"),
                 data_p->configuration->broadcastHandle,
                 buffer));
 #else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%d: started listening (UDP) (\"%s\")...\n"),
+                ACE_TEXT ("%d: opened UDP socket: %s...\n"),
                 data_p->configuration->broadcastHandle,
                 buffer));
 #endif
@@ -1955,12 +1955,12 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("0x%@: started listening (UDP) (\"%s\")...\n"),
+                ACE_TEXT ("0x%@: opened UDP socket: %s...\n"),
                 data_p->configuration->handle,
                 buffer));
 #else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%d: started listening (UDP) (\"%s\")...\n"),
+                ACE_TEXT ("%d: opened UDP socket: %s...\n"),
                 data_p->configuration->handle,
                 buffer));
 #endif

@@ -38,7 +38,8 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType>
+          typename CBDataType,
+          typename UserDataType>
 BitTorrent_TrackerStream_T<StreamStateType,
                            ConfigurationType,
                            StatisticContainerType,
@@ -53,7 +54,8 @@ BitTorrent_TrackerStream_T<StreamStateType,
                            ConnectionStateType,
                            HandlerConfigurationType,
                            SessionStateType,
-                           CBDataType>::BitTorrent_TrackerStream_T (const std::string& name_in)
+                           CBDataType,
+                           UserDataType>::BitTorrent_TrackerStream_T (const std::string& name_in)
  : inherited (name_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::BitTorrent_TrackerStream_T"));
@@ -74,7 +76,8 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType>
+          typename CBDataType,
+          typename UserDataType>
 BitTorrent_TrackerStream_T<StreamStateType,
                            ConfigurationType,
                            StatisticContainerType,
@@ -89,7 +92,8 @@ BitTorrent_TrackerStream_T<StreamStateType,
                            ConnectionStateType,
                            HandlerConfigurationType,
                            SessionStateType,
-                           CBDataType>::~BitTorrent_TrackerStream_T ()
+                           CBDataType,
+                           UserDataType>::~BitTorrent_TrackerStream_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::~BitTorrent_TrackerStream_T"));
 
@@ -111,7 +115,8 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType>
+          typename CBDataType,
+          typename UserDataType>
 bool
 BitTorrent_TrackerStream_T<StreamStateType,
                            ConfigurationType,
@@ -127,8 +132,9 @@ BitTorrent_TrackerStream_T<StreamStateType,
                            ConnectionStateType,
                            HandlerConfigurationType,
                            SessionStateType,
-                           CBDataType>::load (Stream_ModuleList_t& modules_out,
-                                              bool& deleteModules_out)
+                           CBDataType,
+                           UserDataType>::load (Stream_ModuleList_t& modules_out,
+                                                bool& deleteModules_out)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::load"));
 
@@ -161,7 +167,8 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType>
+          typename CBDataType,
+          typename UserDataType>
 bool
 BitTorrent_TrackerStream_T<StreamStateType,
                            ConfigurationType,
@@ -177,9 +184,10 @@ BitTorrent_TrackerStream_T<StreamStateType,
                            ConnectionStateType,
                            HandlerConfigurationType,
                            SessionStateType,
-                           CBDataType>::initialize (const ConfigurationType& configuration_in,
-                                                    bool setupPipeline_in,
-                                                    bool resetSessionData_in)
+                           CBDataType,
+                           UserDataType>::initialize (const ConfigurationType& configuration_in,
+                                                      bool setupPipeline_in,
+                                                      bool resetSessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::initialize"));
 

@@ -18,80 +18,88 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_SESSIONMESSAGE_H
-#define IRC_SESSIONMESSAGE_H
+#ifndef IRC_SessionMessage_T_H
+#define IRC_SessionMessage_T_H
 
 #include <ace/Global_Macros.h>
 
+#include "stream_common.h"
 #include "stream_session_message_base.h"
 
-#include "irc_exports.h"
-#include "irc_stream_common.h"
+//#include "irc_stream_common.h"
 
 // forward declarations
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
-template <ACE_SYNCH_DECL,
-          typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
-class Stream_MessageAllocatorHeapBase_T;
-template <ACE_SYNCH_DECL,
-          typename AllocatorConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
-class Stream_CachedMessageAllocator_T;
+//template <ACE_SYNCH_DECL,
+//          typename AllocatorConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType>
+//class Stream_MessageAllocatorHeapBase_T;
+//template <ACE_SYNCH_DECL,
+//          typename AllocatorConfigurationType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType>
+//class Stream_CachedMessageAllocator_T;
 
-class IRC_Export IRC_SessionMessage
+template <typename SessionDataType, // reference-counted
+          ////////////////////////////////
+          typename UserDataType>
+class IRC_SessionMessage_T
  : public Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
-                                      IRC_Stream_SessionData_t,
-                                      struct IRC_UserData,
-                                      IRC_ControlMessage_t,
-                                      IRC_Message>
+                                      SessionDataType,
+                                      UserDataType>
 {
+  // convenient types
+  typedef IRC_SessionMessage_T<SessionDataType,
+                               UserDataType> OWN_TYPE_T;
+
  // enable access to specific private ctors
- friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                struct Stream_AllocatorConfiguration,
-                                                IRC_ControlMessage_t,
-                                                IRC_Message,
-                                                IRC_SessionMessage>;
- friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
-                                              struct Stream_AllocatorConfiguration,
-                                              IRC_ControlMessage_t,
-                                              IRC_Message,
-                                              IRC_SessionMessage>;
+ //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+ //                                               struct Stream_AllocatorConfiguration,
+ //                                               ControlMessageType,
+ //                                               DataMessageType,
+ //                                               OWN_TYPE_T>;
+ //friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
+ //                                             struct Stream_AllocatorConfiguration,
+ //                                             ControlMessageType,
+ //                                             DataMessageType,
+ //                                             OWN_TYPE_T>;
 
  public:
   // *NOTE*: assume lifetime responsibility for the second argument !
-  IRC_SessionMessage (enum Stream_SessionMessageType, // session message type
-                      IRC_Stream_SessionData_t*&,     // session data container handle
-                      struct IRC_UserData*);          // user data handle
+  IRC_SessionMessage_T (enum Stream_SessionMessageType, // session message type
+                        SessionDataType*&,              // session data container handle
+                        UserDataType*);                 // user data handle
     // *NOTE*: to be used by message allocators
-  IRC_SessionMessage (ACE_Allocator*); // message allocator
-  IRC_SessionMessage (ACE_Data_Block*, // data block
-                      ACE_Allocator*); // message allocator
-  virtual ~IRC_SessionMessage ();
+  IRC_SessionMessage_T (ACE_Allocator*); // message allocator
+  IRC_SessionMessage_T (ACE_Data_Block*, // data block
+                        ACE_Allocator*); // message allocator
+  virtual ~IRC_SessionMessage_T ();
 
   // override from ACE_Message_Block
   // *WARNING*: any children need to override this as well
   virtual ACE_Message_Block* duplicate (void) const;
 
+ protected:
+  // copy ctor (to be used by duplicate())
+  IRC_SessionMessage_T (const IRC_SessionMessage_T&);
+
  private:
   typedef Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
-                                      IRC_Stream_SessionData_t,
-                                      struct IRC_UserData,
-                                      IRC_ControlMessage_t,
-                                      IRC_Message> inherited;
+                                      SessionDataType,
+                                      UserDataType> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_SessionMessage ())
-  // copy ctor (to be used by duplicate())
-  IRC_SessionMessage (const IRC_SessionMessage&);
-  ACE_UNIMPLEMENTED_FUNC (IRC_SessionMessage& operator= (const IRC_SessionMessage&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_SessionMessage_T ())
+  ACE_UNIMPLEMENTED_FUNC (IRC_SessionMessage_T& operator= (const IRC_SessionMessage_T&))
 };
+
+// include template definition
+#include "irc_sessionmessage.inl"
 
 #endif

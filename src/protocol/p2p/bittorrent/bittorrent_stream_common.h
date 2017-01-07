@@ -71,7 +71,8 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType>
+          typename CBDataType,
+          typename UserDataType>
 class BitTorrent_PeerStream_T;
 struct BitTorrent_StreamState;
 struct BitTorrent_StreamConfiguration;
@@ -91,13 +92,9 @@ typedef BitTorrent_TrackerMessage_T<BitTorrent_TrackerSessionData_t,
 typedef BitTorrent_SessionMessage_T<struct BitTorrent_TrackerSessionData,
                                     struct Stream_UserData> BitTorrent_TrackerSessionMessage_t;
 typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
-                                struct BitTorrent_AllocatorConfiguration,
-                                BitTorrent_Message_t,
-                                BitTorrent_PeerSessionMessage_t> BitTorrent_PeerControlMessage_t;
+                                struct BitTorrent_AllocatorConfiguration> BitTorrent_PeerControlMessage_t;
 typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
-                                struct BitTorrent_AllocatorConfiguration,
-                                BitTorrent_TrackerMessage_t,
-                                BitTorrent_TrackerSessionMessage_t> BitTorrent_TrackerControlMessage_t;
+                                struct BitTorrent_AllocatorConfiguration> BitTorrent_TrackerControlMessage_t;
 
 struct BitTorrent_Configuration;
 struct BitTorrent_ConnectionState;
@@ -117,7 +114,8 @@ typedef BitTorrent_PeerStream_T<struct BitTorrent_StreamState,
                                 struct BitTorrent_ConnectionState,
                                 struct Net_SocketHandlerConfiguration,
                                 struct BitTorrent_SessionState,
-                                struct Common_UI_State> BitTorrent_PeerStream_t;
+                                struct Common_UI_State,
+                                struct Stream_UserData> BitTorrent_PeerStream_t;
 
 struct BitTorrent_SessionConfiguration;
 struct BitTorrent_ProtocolConfiguration;
@@ -322,7 +320,7 @@ struct BitTorrent_TrackerStreamState
   struct BitTorrent_UserData*           userData;
 };
 
-typedef Stream_INotify_T<Stream_SessionMessageType> BitTorrent_INotify_t;
+typedef Stream_INotify_T<enum Stream_SessionMessageType> BitTorrent_INotify_t;
 
 //////////////////////////////////////////
 
@@ -349,7 +347,8 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType>
+          typename CBDataType,
+          typename UserDataType>
 class BitTorrent_TrackerStream_T;
 typedef BitTorrent_TrackerStream_T<struct BitTorrent_TrackerStreamState,
                                    struct BitTorrent_TrackerStreamConfiguration,
@@ -365,7 +364,8 @@ typedef BitTorrent_TrackerStream_T<struct BitTorrent_TrackerStreamState,
                                    struct BitTorrent_ConnectionState,
                                    struct Net_SocketHandlerConfiguration,
                                    struct BitTorrent_SessionState,
-                                   struct Common_UI_State> BitTorrent_TrackerStream_t;
+                                   struct Common_UI_State,
+                                   struct BitTorrent_UserData> BitTorrent_TrackerStream_t;
 
 //////////////////////////////////////////
 

@@ -53,7 +53,9 @@ class HTTP_Module_Parser_T
                                   DataMessageType,
                                   SessionMessageType,
                                   Stream_SessionId_t,
-                                  Stream_SessionMessageType>
+                                  enum Stream_ControlType,
+                                  enum Stream_SessionMessageType,
+                                  Stream_UserData>
  , public HTTP_ParserDriver_T<SessionMessageType>
 {
  public:
@@ -81,7 +83,9 @@ class HTTP_Module_Parser_T
                                   DataMessageType,
                                   SessionMessageType,
                                   Stream_SessionId_t,
-                                  Stream_SessionMessageType> inherited;
+                                  enum Stream_ControlType,
+                                  enum Stream_SessionMessageType,
+                                  Stream_UserData> inherited;
   typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T (const HTTP_Module_Parser_T&))
@@ -123,7 +127,9 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,          // session data
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          ////////////////////////////////
+          typename UserDataType>
 class HTTP_Module_ParserH_T
  : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
@@ -136,7 +142,8 @@ class HTTP_Module_ParserH_T
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      StatisticContainerType>
+                                      StatisticContainerType,
+                                      UserDataType>
  , public HTTP_ParserDriver_T<SessionMessageType>
 {
  public:
@@ -156,7 +163,8 @@ class HTTP_Module_ParserH_T
                                     StreamStateType,
                                     SessionDataType,
                                     SessionDataContainerType,
-                                    StatisticContainerType>::initialize;
+                                    StatisticContainerType,
+                                    UserDataType>::initialize;
 
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const ConfigurationType&,
@@ -188,7 +196,8 @@ class HTTP_Module_ParserH_T
                                       StreamStateType,
                                       SessionDataType,
                                       SessionDataContainerType,
-                                      StatisticContainerType> inherited;
+                                      StatisticContainerType,
+                                      UserDataType> inherited;
   typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T (const HTTP_Module_ParserH_T&))

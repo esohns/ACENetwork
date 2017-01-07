@@ -54,7 +54,9 @@ template <typename StreamStateType,
           ////////////////////////////////
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          ////////////////////////////////
+          typename UserDataType>
 class HTTP_Stream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
@@ -135,7 +137,8 @@ class HTTP_Stream_T
                                 StreamStateType,
                                 SessionDataType,
                                 SessionDataContainerType,
-                                StatisticContainerType> PARSER_T;
+                                StatisticContainerType,
+                                UserDataType> PARSER_T;
   //typedef Stream_StreamModule_T<ACE_MT_SYNCH,
   //                              Common_TimePolicy_t,
   //                              Stream_ModuleConfiguration,
