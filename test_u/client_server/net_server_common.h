@@ -111,7 +111,8 @@ struct Test_U_Server_Configuration
   struct Test_U_Server_SignalHandlerConfiguration signalHandlerConfiguration;
 };
 
-typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
+typedef Stream_ControlMessage_T<enum Stream_ControlType,
+                                enum Stream_ControlMessageType,
                                 struct Stream_AllocatorConfiguration> Test_U_ControlMessage_t;
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,

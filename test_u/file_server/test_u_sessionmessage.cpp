@@ -29,7 +29,7 @@
 #include "net_macros.h"
 
 Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionMessageType messageType_in,
-                                              Test_U_StreamSessionData_t*& sessionData_inout,
+                                              Test_U_FileServer_SessionData_t*& sessionData_inout,
                                               Test_U_UserData* userData_in)
  : inherited (messageType_in,
               sessionData_inout,

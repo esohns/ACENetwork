@@ -45,7 +45,7 @@ Test_U_EventHandler::~Test_U_EventHandler ()
 
 void
 Test_U_EventHandler::start (Stream_SessionId_t sessionID_in,
-                            const Test_U_StreamSessionData& sessionData_in)
+                            const Test_U_FileServer_SessionData& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::start"));
 

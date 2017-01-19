@@ -537,7 +537,8 @@ do_work (unsigned int bufferSize_in,
   // *NOTE*: yyparse() does not currently return until the whole entity has been
   //         processed --> use (a) dedicated thread(s) so the event dispatch
   //         does not deadlock in single-threaded reactor/proactor scenarios
-  configuration.moduleHandlerConfiguration.active = true;
+  configuration.moduleHandlerConfiguration.concurrency =
+    STREAM_HEADMODULECONCURRENCY_ACTIVE;
   configuration.moduleHandlerConfiguration.configuration = &configuration;
   configuration.moduleHandlerConfiguration.connectionManager =
     connection_manager_p;

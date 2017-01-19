@@ -32,6 +32,7 @@
 #include "test_u_connection_common.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
+#include "test_u_sessionmessage.h"
 
 Test_U_Client_TimeoutHandler::Test_U_Client_TimeoutHandler (ActionMode_t mode_in,
                                                             unsigned int maximumNumberOfConnections_in,

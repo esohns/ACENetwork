@@ -70,7 +70,8 @@ struct IRC_Client_StreamState
 
 typedef Stream_SessionData_T<struct IRC_Client_SessionData> IRC_Client_SessionData_t;
 
-typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
+typedef Stream_ControlMessage_T<enum Stream_ControlType,
+                                enum Stream_ControlMessageType,
                                 struct Stream_AllocatorConfiguration> IRC_Client_ControlMessage_t;
 
 typedef Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,

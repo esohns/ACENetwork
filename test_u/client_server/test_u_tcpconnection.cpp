@@ -25,6 +25,8 @@
 
 #include <ace/Log_Msg.h>
 
+#include "test_u_sessionmessage.h"
+
 #include "net_defines.h"
 #include "net_macros.h"
 

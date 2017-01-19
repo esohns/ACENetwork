@@ -473,9 +473,10 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       SessionDataContainerType,
                       StatisticContainerType,
                       UserDataType>::HTTP_Module_ParserH_T ()
- : inherited (NULL,  // lock handle
-              false, // auto-start ?
-              true)  // generate sesssion messages ?
+ : inherited (NULL,                                    // lock handle (state machine)
+              false,                                   // auto-start ? (active mode only)
+              STREAM_HEADMODULECONCURRENCY_CONCURRENT, // concurrency mode
+              true)                                    // generate sesssion messages ?
  , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME), // scanner tables file (if any)
                NET_PROTOCOL_DEFAULT_LEX_TRACE,                            // trace scanning ?
                NET_PROTOCOL_DEFAULT_YACC_TRACE)                           // trace parsing ?
@@ -808,13 +809,10 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
         headFragment_ = NULL;
       } // end IF
 
-      // *NOTE*: in passive 'concurrent' scenarios, there is no 'worker' thread
-      //         running svc()
-      //         --> do not signal completion in this case
       // *TODO*: remove type inference
-      if (inherited::thr_count_ || inherited::runSvcOnStart_)
-        this->inherited::TASK_BASE_T::stop (false, // wait ?
-                                            true); // locked access ?
+      if (inherited::concurrency_ != STREAM_HEADMODULECONCURRENCY_CONCURRENT)
+        this->inherited::TASK_BASE_T::stop (false,  // wait for completion ?
+                                            false); // N/A
 
       break;
     }

@@ -45,6 +45,8 @@
 
 #include "test_u_connection_common.h"
 
+#include "file_server_defines.h"
+
 // forward declarations
 class Stream_IMessageQueue;
 struct Test_U_ConnectionState;
@@ -72,8 +74,9 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 //  bool           printPongMessages;
 //};
 
+struct Test_U_FileServer_SessionData;
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct Test_U_StreamSessionData,
+                                    struct Test_U_FileServer_SessionData,
                                     enum Stream_SessionMessageType,
                                     Test_U_Message,
                                     Test_U_SessionMessage> Test_U_ISessionNotify_t;
@@ -88,24 +91,17 @@ struct Test_U_ModuleHandlerConfiguration
    , fileName ()
    , inbound (false)
    , outboundQueue (NULL)
-   , printProgressDot (false)
    , pushStatisticMessages (true)
-   , sessionData (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
   {};
 
-  std::string                      fileName; // file reader(/writer) module(s)
-  bool                             inbound; // statistic/IO module
-  Stream_IMessageQueue*            outboundQueue; // event handler module
-  bool                             printProgressDot; // file writer module
-  bool                             pushStatisticMessages; // statistic module
-
-  // *TODO*: remove this (--> session message data)
-  struct Test_U_StreamSessionData* sessionData;
-
-  Test_U_ISessionNotify_t*         subscriber;
-  Test_U_Subscribers_t*            subscribers;
+  std::string              fileName;              // file reader module
+  bool                     inbound;               // statistic/IO module
+  Stream_IMessageQueue*    outboundQueue;         // event handler module
+  bool                     pushStatisticMessages; // statistic module
+  Test_U_ISessionNotify_t* subscriber;            // event handler module
+  Test_U_Subscribers_t*    subscribers;           // event handler module
 };
 
 struct Test_U_StreamConfiguration
@@ -118,7 +114,7 @@ struct Test_U_StreamConfiguration
    , moduleHandlerConfiguration_2 ()
    , userData (NULL)
   {
-    bufferSize = NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
+    bufferSize = FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE;
   };
 
   struct Stream_ModuleConfiguration         moduleConfiguration_2;        // module configuration

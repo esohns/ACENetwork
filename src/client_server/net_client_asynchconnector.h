@@ -104,10 +104,10 @@ class Net_Client_AsynchConnector_T
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  virtual const HandlerConfigurationType& get () const;
-  virtual bool initialize (const HandlerConfigurationType&);
+  inline virtual const HandlerConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = &const_cast<HandlerConfigurationType&> (configuration_in); return true; };
 
-  virtual bool useReactor () const; // ? : uses proactor
+  inline virtual bool useReactor () const { return false; };
 
   virtual void abort ();
   // *WARNING*: returns the 'connect' handle
@@ -237,10 +237,10 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  virtual const HandlerConfigurationType& get () const;
-  virtual bool initialize (const HandlerConfigurationType&);
+  inline virtual const HandlerConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = &const_cast<HandlerConfigurationType&> (configuration_in); return true; };
 
-  virtual bool useReactor () const; // ? : uses proactor
+  inline virtual bool useReactor () const { return false; };
 
   virtual void abort ();
   virtual ACE_HANDLE connect (const ACE_INET_Addr&);
@@ -350,10 +350,10 @@ class Net_Client_AsynchConnector_T<HandlerType,
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  virtual const HandlerConfigurationType& get () const;
-  virtual bool initialize (const HandlerConfigurationType&);
+  inline virtual const HandlerConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = &const_cast<HandlerConfigurationType&> (configuration_in); return true; };
 
-  virtual bool useReactor () const; // ? : uses proactor
+  inline virtual bool useReactor () const { return false; };
 
   virtual void abort ();
   virtual ACE_HANDLE connect (const Net_Netlink_Addr&);

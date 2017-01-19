@@ -62,7 +62,8 @@ struct BitTorrent_Client_PeerSessionData;
 template <typename DataType>
 class Stream_SessionData_T;
 typedef Stream_SessionData_T<struct BitTorrent_Client_PeerSessionData> BitTorrent_Client_PeerSessionData_t;
-template <typename ControlMessageType,
+template <typename ControlType,
+          typename MessageType,
           typename AllocatorConfigurationType>
 class Stream_ControlMessage_T;
 struct BitTorrent_Client_PeerUserData;
@@ -77,8 +78,9 @@ template <typename SessionDataType,
 class BitTorrent_SessionMessage_T;
 typedef BitTorrent_SessionMessage_T<struct BitTorrent_Client_PeerSessionData,
                                     struct BitTorrent_Client_PeerUserData> BitTorrent_Client_PeerSessionMessage_t;
-typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
-                                struct BitTorrent_AllocatorConfiguration> BitTorrent_Client_PeerControlMessage_t;
+typedef Stream_ControlMessage_T<enum Stream_ControlType,
+                                enum Stream_ControlMessageType,
+                                struct BitTorrent_AllocatorConfiguration> BitTorrent_Client_ControlMessage_t;
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
@@ -101,7 +103,7 @@ typedef BitTorrent_PeerStream_T<struct BitTorrent_Client_PeerStreamState,
                                 struct BitTorrent_Client_PeerModuleHandlerConfiguration,
                                 struct BitTorrent_Client_PeerSessionData,
                                 BitTorrent_Client_PeerSessionData_t,
-                                BitTorrent_Client_PeerControlMessage_t,
+                                BitTorrent_Client_ControlMessage_t,
                                 BitTorrent_Client_PeerMessage_t,
                                 BitTorrent_Client_PeerSessionMessage_t,
                                 struct BitTorrent_Client_PeerConnectionConfiguration,

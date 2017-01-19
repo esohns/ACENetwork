@@ -53,7 +53,7 @@ class Test_U_Message
   Test_U_Message (unsigned int); // size
   virtual ~Test_U_Message ();
 
-  inline virtual int command () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) };
+  inline virtual int command () const { return ACE_Message_Block::MB_DATA; };
   inline static std::string CommandType2String (int) { return ACE_TEXT_ALWAYS_CHAR ("DATA"); };
 
   // overrides from ACE_Message_Block

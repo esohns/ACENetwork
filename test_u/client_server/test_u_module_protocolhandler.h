@@ -43,12 +43,14 @@ class Test_U_SessionMessage;
 class Test_U_Module_ProtocolHandler
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 Stream_ModuleHandlerConfiguration,
-                                 ACE_Message_Block,
+                                 struct Stream_ModuleHandlerConfiguration,
+                                 Test_U_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
                                  Stream_SessionId_t,
-                                 Test_U_StreamSessionData>
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 struct Test_U_UserData>
  , public Common_ITimerHandler
 {
  public:
@@ -76,12 +78,14 @@ class Test_U_Module_ProtocolHandler
  private:
   typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 Stream_ModuleHandlerConfiguration,
-                                 ACE_Message_Block,
+                                 struct Stream_ModuleHandlerConfiguration,
+                                 Test_U_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
                                  Stream_SessionId_t,
-                                 Test_U_StreamSessionData> inherited;
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 struct Test_U_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler (const Test_U_Module_ProtocolHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler& operator= (const Test_U_Module_ProtocolHandler&))
@@ -103,10 +107,10 @@ class Test_U_Module_ProtocolHandler
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (Test_U_StreamSessionData,          // session data type
-                              Stream_SessionMessageType,         // session event type
-                              Stream_ModuleHandlerConfiguration, // module handler configuration type
-                              Test_U_IStreamNotify_t,            // stream notification interface type
-                              Test_U_Module_ProtocolHandler);    // writer type
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
+                              enum Stream_SessionMessageType,           // session event type
+                              struct Stream_ModuleHandlerConfiguration, // module handler configuration type
+                              Test_U_IStreamNotify_t,                   // stream notification interface type
+                              Test_U_Module_ProtocolHandler);           // writer type
 
 #endif

@@ -31,9 +31,10 @@
 
 #include "stream_misc_messagehandler.h"
 
+#include "file_server_connection_common.h"
+#include "file_server_stream_common.h"
 #include "test_u_message.h"
 #include "test_u_sessionmessage.h"
-#include "test_u_stream_common.h"
 
 // forward declarations
 class Stream_IMessageQueue;
@@ -42,11 +43,11 @@ class Test_U_Module_EventHandler
  : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
                                          struct Test_U_ModuleHandlerConfiguration,
-                                         ACE_Message_Block,
+                                         Test_U_ControlMessage_t,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
                                          Stream_SessionId_t,
-                                         struct Test_U_StreamSessionData>
+                                         struct Test_U_FileServer_SessionData>
 {
  public:
   Test_U_Module_EventHandler ();
@@ -57,7 +58,9 @@ class Test_U_Module_EventHandler
                            Stream_IAllocator* = NULL); // report cache usage ?
 
   // implement (part of) Stream_ITaskBase_T
-  virtual void handleControlMessage (ACE_Message_Block&);
+  virtual void handleControlMessage (Test_U_ControlMessage_t&);
+  virtual void handleSessionMessage (Test_U_SessionMessage*&, // session message handle
+                                     bool&);                  // return value: pass message downstream ?
 
   // implement Common_IClone_T
   virtual ACE_Task<ACE_MT_SYNCH,
@@ -67,20 +70,21 @@ class Test_U_Module_EventHandler
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
                                          struct Test_U_ModuleHandlerConfiguration,
-                                         ACE_Message_Block,
+                                         Test_U_ControlMessage_t,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
                                          Stream_SessionId_t,
-                                         struct Test_U_StreamSessionData> inherited;
+                                         struct Test_U_FileServer_SessionData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler (const Test_U_Module_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler& operator= (const Test_U_Module_EventHandler&))
 
-  Stream_IMessageQueue* outboundQueue_;
+  Test_U_IStreamConnection_t* connection_;
+  Stream_IMessageQueue*       outboundQueue_;
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_FileServer_SessionData,     // session data type
                               enum Stream_SessionMessageType,           // session event type
                               struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
                               Test_U_IStreamNotify_t,                   // stream notification interface type

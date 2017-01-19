@@ -33,8 +33,9 @@
 
 #include "net_tcpconnection_base.h"
 
-#include "test_u_configuration.h"
 #include "test_u_connection_common.h"
+
+#include "test_u_configuration.h"
 #include "test_u_socket_common.h"
 
 // forward declarations

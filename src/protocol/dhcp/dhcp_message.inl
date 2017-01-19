@@ -28,11 +28,9 @@
 #include "dhcp_defines.h"
 #include "dhcp_tools.h"
 
-template <typename AllocatorType,
-          typename AllocatorConfigurationType,
+template <typename AllocatorConfigurationType,
           typename MessageType>
-DHCP_Message_T<AllocatorType,
-               AllocatorConfigurationType,
+DHCP_Message_T<AllocatorConfigurationType,
                MessageType>::DHCP_Message_T (unsigned int requestedSize_in)
  : inherited (requestedSize_in)
 {
@@ -40,13 +38,10 @@ DHCP_Message_T<AllocatorType,
 
 }
 
-template <typename AllocatorType,
-          typename AllocatorConfigurationType,
+template <typename AllocatorConfigurationType,
           typename MessageType>
-DHCP_Message_T<AllocatorType,
-               AllocatorConfigurationType,
-               MessageType>::DHCP_Message_T (const DHCP_Message_T<AllocatorType,
-                                                                  AllocatorConfigurationType,
+DHCP_Message_T<AllocatorConfigurationType,
+               MessageType>::DHCP_Message_T (const DHCP_Message_T<AllocatorConfigurationType,
                                                                   MessageType>& message_in)
  : inherited (message_in)
 {
@@ -54,11 +49,9 @@ DHCP_Message_T<AllocatorType,
 
 }
 
-template <typename AllocatorType,
-          typename AllocatorConfigurationType,
+template <typename AllocatorConfigurationType,
           typename MessageType>
-DHCP_Message_T<AllocatorType,
-               AllocatorConfigurationType,
+DHCP_Message_T<AllocatorConfigurationType,
                MessageType>::DHCP_Message_T (ACE_Data_Block* dataBlock_in,
                                              ACE_Allocator* messageAllocator_in,
                                              bool incrementMessageCounter_in)
@@ -79,11 +72,9 @@ DHCP_Message_T<AllocatorType,
 //
 // }
 
-template <typename AllocatorType,
-          typename AllocatorConfigurationType,
+template <typename AllocatorConfigurationType,
           typename MessageType>
-DHCP_Message_T<AllocatorType,
-               AllocatorConfigurationType,
+DHCP_Message_T<AllocatorConfigurationType,
                MessageType>::~DHCP_Message_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::~DHCP_Message_T"));
@@ -91,12 +82,10 @@ DHCP_Message_T<AllocatorType,
   // *NOTE*: will be called just BEFORE this is passed back to the allocator
 }
 
-template <typename AllocatorType,
-          typename AllocatorConfigurationType,
+template <typename AllocatorConfigurationType,
           typename MessageType>
 DHCP_MessageType_t
-DHCP_Message_T<AllocatorType,
-               AllocatorConfigurationType,
+DHCP_Message_T<AllocatorConfigurationType,
                MessageType>::command () const
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::command"));
@@ -112,12 +101,10 @@ DHCP_Message_T<AllocatorType,
   return DHCP_Tools::MessageType2Type ((*iterator).second);
 }
 
-template <typename AllocatorType,
-          typename AllocatorConfigurationType,
+template <typename AllocatorConfigurationType,
           typename MessageType>
 std::string
-DHCP_Message_T<AllocatorType,
-               AllocatorConfigurationType,
+DHCP_Message_T<AllocatorConfigurationType,
                MessageType>::Command2String (DHCP_MessageType_t type_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::Command2String"));
@@ -125,12 +112,10 @@ DHCP_Message_T<AllocatorType,
   return DHCP_Tools::MessageType2String (type_in);
 }
 
-template <typename AllocatorType,
-          typename AllocatorConfigurationType,
+template <typename AllocatorConfigurationType,
           typename MessageType>
 void
-DHCP_Message_T<AllocatorType,
-               AllocatorConfigurationType,
+DHCP_Message_T<AllocatorConfigurationType,
                MessageType>::dump_state () const
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::dump_state"));
@@ -163,12 +148,10 @@ DHCP_Message_T<AllocatorType,
               ACE_TEXT (DHCP_Tools::dump (inherited::data_).c_str ())));
 }
 
-template <typename AllocatorType,
-          typename AllocatorConfigurationType,
+template <typename AllocatorConfigurationType,
           typename MessageType>
 ACE_Message_Block*
-DHCP_Message_T<AllocatorType,
-               AllocatorConfigurationType,
+DHCP_Message_T<AllocatorConfigurationType,
                MessageType>::duplicate (void) const
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::duplicate"));

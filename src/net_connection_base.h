@@ -61,11 +61,10 @@ class Net_ConnectionBase_T
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   // implement (part of) Net_IConnection_T
-  virtual const ConfigurationType& get () const; // return value: type
+  inline virtual const ConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
   virtual bool initialize (const ConfigurationType&); // configuration
-  virtual const StateType& state () const;
-  virtual Net_Connection_Status status () const;
-
+  inline virtual const StateType& state () const { return state_; };
+  inline virtual Net_Connection_Status status () const { return state_.status; };
 
  protected:
   Net_ConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle

@@ -28,6 +28,8 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
+#include "test_u_sessionmessage.h"
+
 Test_U_TCPConnection::Test_U_TCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                             const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,

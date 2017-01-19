@@ -289,11 +289,14 @@ struct Test_U_StreamConfiguration
   inline Test_U_StreamConfiguration ()
    : DHCP_StreamConfiguration ()
    , moduleHandlerConfiguration (NULL)
+   , userData (NULL)
   {
     bufferSize = DHCP_MESSAGE_SIZE;
   };
 
   struct Test_U_StreamModuleHandlerConfiguration* moduleHandlerConfiguration; // stream module handler configuration
+
+  struct Test_U_UserData*                         userData;
 };
 
 struct Test_U_DHCPClient_StreamState

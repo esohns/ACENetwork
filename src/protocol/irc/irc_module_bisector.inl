@@ -58,10 +58,10 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       SessionDataContainerType,
                       StatisticContainerType,
                       UserDataType>::IRC_Module_Bisector_T (ACE_SYNCH_MUTEX_T* lock_in,
-                                                            bool autoStart_in,
                                                             bool generateSessionMessages_in)
  : inherited (lock_in,
-              autoStart_in,
+              false,
+              STREAM_HEADMODULECONCURRENCY_CONCURRENT,
               generateSessionMessages_in)
  , bufferState_ (NULL)
  , context_ (NULL)
@@ -198,9 +198,6 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                 ACE_TEXT ("failed to Stream_HeadModuleTaskBase_T::initialize(): \"%m\", aborting\n")));
     return false;
   } // end IF
-  // *NOTE*: data is fed into the stream from outside, as it arrives
-  //         --> do not run svc() on start()
-  inherited::runSvcOnStart_ = false;
 
   return result;
 }

@@ -49,7 +49,9 @@ template <ACE_SYNCH_DECL,
           ////////////////////////////////
           typename StatisticContainerType,
           ////////////////////////////////
-          typename ProtocolHeaderType>
+          typename ProtocolHeaderType,
+          ////////////////////////////////
+          typename UserDataType>
 class Net_Module_TCPSocketHandler_T
  : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       Common_TimePolicy_t,
@@ -63,11 +65,10 @@ class Net_Module_TCPSocketHandler_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
-                                      Stream_UserData>
+                                      UserDataType>
 {
  public:
   Net_Module_TCPSocketHandler_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
-                                 bool = false,              // auto-start ?
                                  bool = true);              // generate session messages ?
   virtual ~Net_Module_TCPSocketHandler_T ();
 
@@ -86,7 +87,7 @@ class Net_Module_TCPSocketHandler_T
                                     SessionDataType,
                                     SessionDataContainerType,
                                     StatisticContainerType,
-                                    Stream_UserData>::initialize;
+                                    UserDataType>::initialize;
   using Stream_StateMachine_Control_T<ACE_SYNCH_USE>::initialize;
 #endif
 
@@ -121,7 +122,7 @@ class Net_Module_TCPSocketHandler_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
-                                      Stream_UserData> inherited;
+                                      UserDataType> inherited;
 
 //  ACE_UNIMPLEMENTED_FUNC (Net_Module_TCPSocketHandler_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Module_TCPSocketHandler_T (const Net_Module_TCPSocketHandler_T&))
@@ -155,7 +156,9 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,          // session data
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          ////////////////////////////////
+          typename UserDataType>
 class Net_Module_UDPSocketHandler_T
  : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       Common_TimePolicy_t,
@@ -169,7 +172,7 @@ class Net_Module_UDPSocketHandler_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
-                                      Stream_UserData>
+                                      UserDataType>
 {
  public:
   Net_Module_UDPSocketHandler_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
@@ -208,7 +211,7 @@ class Net_Module_UDPSocketHandler_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
-                                      Stream_UserData> inherited;
+                                      UserDataType> inherited;
 
 //  ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T (const Net_Module_UDPSocketHandler_T&))

@@ -26,6 +26,9 @@
 
 #define FILE_SERVER_DEFAULT_FILE                          "test.mp4"
 
+ // stream
+#define FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE      65536 // bytes
+
 //////////////////////////////////////////
 
 #define FILE_SERVER_UI_FILE                               "file_server.glade"

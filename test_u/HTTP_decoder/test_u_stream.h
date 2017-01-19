@@ -58,7 +58,7 @@ class Test_U_Stream
                         struct Test_U_ModuleHandlerConfiguration,
                         struct Test_U_HTTPDecoder_SessionData,
                         Test_U_HTTPDecoder_SessionData_t,
-                        ACE_Message_Block,
+                        Test_U_ControlMessage_t,
                         Test_U_Message,
                         Test_U_SessionMessage>
 {
@@ -96,12 +96,12 @@ class Test_U_Stream
                         struct Test_U_ModuleHandlerConfiguration,
                         struct Test_U_HTTPDecoder_SessionData,
                         Test_U_HTTPDecoder_SessionData_t,
-                        ACE_Message_Block,
+                        Test_U_ControlMessage_t,
                         Test_U_Message,
                         Test_U_SessionMessage> inherited;
 
   typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
-                                       ACE_Message_Block,
+                                       Test_U_ControlMessage_t,
                                        Test_U_Message,
                                        Test_U_SessionMessage,
                                        struct Test_U_ModuleHandlerConfiguration,
@@ -112,17 +112,22 @@ class Test_U_Stream
                                        Test_U_HTTPDecoder_SessionData_t,
                                        HTTP_RuntimeStatistic_t,
                                        ACE_INET_Addr,
-                                       Test_U_ConnectionManager_t> WRITER_T;
+                                       Test_U_ConnectionManager_t,
+                                       struct Test_U_UserData> WRITER_T;
   typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
-                                       Common_TimePolicy_t,
-                                       struct Test_U_ModuleHandlerConfiguration,
-                                       ACE_Message_Block,
+                                       Test_U_ControlMessage_t,
                                        Test_U_Message,
                                        Test_U_SessionMessage,
+                                       struct Test_U_ModuleHandlerConfiguration,
+                                       enum Stream_ControlType,
+                                       enum Stream_SessionMessageType,
+                                       struct Test_U_HTTPDecoder_StreamState,
                                        struct Test_U_HTTPDecoder_SessionData,
                                        Test_U_HTTPDecoder_SessionData_t,
+                                       HTTP_RuntimeStatistic_t,
                                        ACE_INET_Addr,
-                                       Test_U_ConnectionManager_t> READER_T;
+                                       Test_U_ConnectionManager_t,
+                                       struct Test_U_UserData> READER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,                             // task synch type
                                 Common_TimePolicy_t,                      // time policy
                                 Stream_SessionId_t,                       // session id type

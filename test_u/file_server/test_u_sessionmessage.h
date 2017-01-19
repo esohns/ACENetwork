@@ -27,9 +27,8 @@
 #include "stream_messageallocatorheap_base.h"
 #include "stream_session_message_base.h"
 
-#include "test_u_common.h"
-
 #include "file_server_common.h"
+#include "file_server_stream_common.h"
 
 // forward declarations
 class ACE_Allocator;
@@ -40,7 +39,7 @@ class Test_U_Message;
 class Test_U_SessionMessage
  : public Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
-                                      Test_U_StreamSessionData_t,
+                                      Test_U_FileServer_SessionData_t,
                                       struct Test_U_UserData>
 {
 //  // enable access to private ctor(s)
@@ -53,9 +52,9 @@ class Test_U_SessionMessage
 
  public:
   // *NOTE*: assumes responsibility for the second argument !
-  Test_U_SessionMessage (enum Stream_SessionMessageType, // session message type
-                         Test_U_StreamSessionData_t*&,   // session data handle
-                         struct Test_U_UserData*);       // user data handle
+  Test_U_SessionMessage (enum Stream_SessionMessageType,    // session message type
+                         Test_U_FileServer_SessionData_t*&, // session data handle
+                         struct Test_U_UserData*);          // user data handle
     // *NOTE*: to be used by message allocators
   Test_U_SessionMessage (ACE_Allocator*); // message allocator
   Test_U_SessionMessage (ACE_Data_Block*, // data block
@@ -69,7 +68,7 @@ class Test_U_SessionMessage
  private:
   typedef Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
-                                      Test_U_StreamSessionData_t,
+                                      Test_U_FileServer_SessionData_t,
                                       struct Test_U_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_SessionMessage ())

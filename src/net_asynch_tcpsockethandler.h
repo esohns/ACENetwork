@@ -49,6 +49,7 @@ class Net_AsynchTCPSocketHandler_T
   //virtual void act (const void*); // act
 
   virtual int handle_output (ACE_HANDLE) = 0; // (socket) handle
+  // *NOTE*: this cancels all outstanding asynchronous operations
   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
@@ -65,15 +66,15 @@ class Net_AsynchTCPSocketHandler_T
   bool initiate_read_stream ();
 
   // the number of open write (i.e. send) requests
-  Common_ReferenceCounterBase counter_;
-  ACE_Asynch_Read_Stream      inputStream_;
-  ACE_Asynch_Write_Stream     outputStream_;
-  bool                        partialWrite_;
-  ACE_INET_Addr               localSAP_;
-  ACE_INET_Addr               remoteSAP_;
+  mutable Common_ReferenceCounterBase counter_;
+  ACE_Asynch_Read_Stream              inputStream_;
+  ACE_Asynch_Write_Stream             outputStream_;
+  bool                                partialWrite_;
+  ACE_INET_Addr                       localSAP_;
+  ACE_INET_Addr                       remoteSAP_;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  ACE_HANDLE                  writeHandle_;
+  ACE_HANDLE                          writeHandle_;
 #endif
 
  private:

@@ -53,10 +53,9 @@ struct Test_U_DHCPClient_Configuration
   ACE_HANDLE handle;          // listen handle (unicast)
 };
 
-typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
-                                struct Test_U_AllocatorConfiguration,
-                                Test_U_Message,
-                                Test_U_SessionMessage> Test_U_ControlMessage_t;
+typedef Stream_ControlMessage_T<enum Stream_ControlType,
+                                enum Stream_ControlMessageType,
+                                struct Test_U_AllocatorConfiguration> Test_U_ControlMessage_t;
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
                                           struct Test_U_AllocatorConfiguration,

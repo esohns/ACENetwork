@@ -18,42 +18,35 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_EVENTHANDLER_H
-#define TEST_U_EVENTHANDLER_H
+#ifndef FILE_SERVER_STREAM_COMMON_H
+#define FILE_SERVER_STREAM_COMMON_H
 
-#include <ace/Global_Macros.h>
+#include "stream_session_data.h"
 
-#include "stream_common.h"
+#include "test_u_connection_common.h"
+#include "test_u_stream_common.h"
 
-#include "test_u_message.h"
-#include "test_u_sessionmessage.h"
-
-#include "file_server_common.h"
-
-class Test_U_EventHandler
- : public Test_U_ISessionNotify_t
+struct Test_U_FileServer_SessionData
+ : Test_U_StreamSessionData
 {
- public:
-  Test_U_EventHandler (Test_U_GTK_CBData*); // GTK state
-  virtual ~Test_U_EventHandler ();
+  inline Test_U_FileServer_SessionData ()
+   : Test_U_StreamSessionData ()
+   , connection (NULL)
+  {};
 
-  // implement Common_INotify_T
-  virtual void start (Stream_SessionId_t,
-                      const Test_U_FileServer_SessionData&);
-  virtual void notify (Stream_SessionId_t,
-                       const Stream_SessionMessageType&);
-  virtual void end (Stream_SessionId_t);
-  virtual void notify (Stream_SessionId_t,
-                       const Test_U_Message&);
-  virtual void notify (Stream_SessionId_t,
-                       const Test_U_SessionMessage&);
+  Test_U_IConnection_t* connection;
+};
+typedef Stream_SessionData_T<struct Test_U_FileServer_SessionData> Test_U_FileServer_SessionData_t;
 
- private:
-  ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler ())
-  ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler (const Test_U_EventHandler&))
-  ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler& operator=(const Test_U_EventHandler&))
+struct Test_U_FileServer_StreamState
+ : Test_U_StreamState
+{
+  inline Test_U_FileServer_StreamState ()
+   : Test_U_StreamState ()
+   , currentSessionData (NULL)
+  {};
 
-  Test_U_GTK_CBData* CBData_;
+  struct Test_U_FileServer_SessionData* currentSessionData;
 };
 
 #endif

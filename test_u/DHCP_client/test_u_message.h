@@ -42,8 +42,7 @@ template <ACE_SYNCH_DECL,
 
 class Test_U_Message
  : public DHCP_Message_T<struct Test_U_AllocatorConfiguration,
-                         Test_U_ControlMessage_t,
-                         Test_U_SessionMessage>
+                         enum Stream_MessageType>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -68,8 +67,7 @@ class Test_U_Message
 
  private:
   typedef DHCP_Message_T<struct Test_U_AllocatorConfiguration,
-                         Test_U_ControlMessage_t,
-                         Test_U_SessionMessage> inherited;
+                         enum Stream_MessageType> inherited;
 //  typedef Stream_DataMessageBase_2<Test_U_AllocatorConfiguration,
 //                                   Test_U_MessageData_t,
 //                                   DHCP_MessageType_t> inherited;

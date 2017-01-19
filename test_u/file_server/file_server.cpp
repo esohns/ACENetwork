@@ -266,7 +266,8 @@ do_processArguments (const int& argc_in,
 #endif
       case 'f':
       {
-        fileName_out = ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
+        fileName_out =
+          Common_File_Tools::realPath (ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ()));
         break;
       }
       case 'g':
@@ -523,11 +524,10 @@ do_work (
 
   // ******************** protocol configuration data **************************
   // ********************** stream configuration data **************************
-  configuration.streamConfiguration.cloneModule = !(UIDefinitionFile_in.empty ());
+  configuration.streamConfiguration.cloneModule =
+    !(UIDefinitionFile_in.empty ());
   configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.module =
-    (!UIDefinitionFile_in.empty () ? &event_handler
-                                   : NULL);
+  configuration.streamConfiguration.module = &event_handler;
   configuration.streamConfiguration.moduleConfiguration =
     &configuration.streamConfiguration.moduleConfiguration_2;
   configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
@@ -549,12 +549,15 @@ do_work (
     fileName_in;
   configuration.streamConfiguration.moduleHandlerConfiguration_2.printFinalReport =
       true;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribersLock =
+  if (!UIDefinitionFile_in.empty ())
+  {
+    configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribersLock =
       &CBData_in.subscribersLock;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscriber =
-    &ui_event_handler;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribers =
+    configuration.streamConfiguration.moduleHandlerConfiguration_2.subscriber =
+      &ui_event_handler;
+    configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribers =
       &CBData_in.subscribers;
+  } // end IF
 
   // ********************** socket configuration data **************************
   // ****************** socket handler configuration data **********************
@@ -600,7 +603,7 @@ do_work (
   Common_Timer_Manager_t* timer_manager_p =
     COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
-  Common_TimerConfiguration timer_configuration;
+  struct Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
 

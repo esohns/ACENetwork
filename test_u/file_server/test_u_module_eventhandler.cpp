@@ -31,6 +31,7 @@
 
 Test_U_Module_EventHandler::Test_U_Module_EventHandler ()
  : inherited ()
+ , connection_ (NULL)
  , outboundQueue_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_EventHandler::Test_U_Module_EventHandler"));
@@ -57,30 +58,49 @@ Test_U_Module_EventHandler::initialize (const struct Test_U_ModuleHandlerConfigu
 }
 
 void
-Test_U_Module_EventHandler::handleControlMessage (ACE_Message_Block& messageBlock_in)
+Test_U_Module_EventHandler::handleControlMessage (Test_U_ControlMessage_t& controlMessage_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_EventHandler::handleControlMessage"));
 
-  switch (messageBlock_in.msg_type ())
+  switch (controlMessage_in.type ())
   {
-    case STREAM_CONTROL_STEP:
+    case STREAM_CONTROL_MESSAGE_STEP:
     {
       // finished reading the source file
-      // step1: wait for upstream to process the outbound data
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%s: finished reading source file, scheduling disconnect...\n"),
+                  inherited::mod_->name ()));
+
+      // step1: wait for upstream to dispatch the outbound data
       if (outboundQueue_)
       {
-        try { // *NOTE*: wait for the queue to idle
+        try { // *NOTE*: wait for the upstream head module queue to idle
           outboundQueue_->waitForIdleState ();
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_Message_Queue::waitForIdleState(), returning\n")));
+                      ACE_TEXT ("%s: failed to Stream_IMessageQueue::waitForIdleState(), returning\n"),
+                      inherited::mod_->name ()));
           return;
         }
       } // end IF
 
-      // step2: send a disconnect command upstream to sever the connection
+      // step2: wait for the connection to schedule all outbound data
+      if (connection_)
+      {
+        try {
+          connection_->waitForIdleState ();
+        } catch (...) {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("%s: failed to Net_IStreamConnection_T::waitForIdleState() (id was: %u), returning\n"),
+                      inherited::mod_->name (),
+                      connection_->id ()));
+          return;
+        }
+      } // end IF
+
+      // step3: send a 'disconnect' command upstream to sever the connection
       if (!inherited::putControlMessage (STREAM_CONTROL_DISCONNECT,
-                                         false))
+                                         true))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Stream_TaskBase_T::putControlMessage(%d), returning\n"),
@@ -88,17 +108,88 @@ Test_U_Module_EventHandler::handleControlMessage (ACE_Message_Block& messageBloc
         return;
       } // end IF
 
-      // step2: wait for 
-
       break;
     }
     default:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: invalid/unknown control message type (was: %d), aborting\n"),
-                  messageBlock_in.msg_type ()));
+                  inherited::mod_->name (),
+                  controlMessage_in.type ()));
       break;
     }
+  } // end SWITCH
+}
+
+void
+Test_U_Module_EventHandler::handleSessionMessage (Test_U_SessionMessage*& message_inout,
+                                                  bool& passMessageDownstream_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_EventHandler::handleSessionMessage"));
+
+  // don't care (implies yes per default, when part of a stream)
+  ACE_UNUSED_ARG (passMessageDownstream_out);
+
+  // sanity check(s)
+  ACE_ASSERT (message_inout);
+
+  switch (message_inout->type ())
+  {
+    case STREAM_SESSION_MESSAGE_BEGIN:
+    {
+      const Test_U_FileServer_SessionData_t& session_data_container_r =
+          message_inout->get ();
+      const Test_U_FileServer_SessionData& session_data_r =
+          session_data_container_r.get ();
+
+      // sanity check(s)
+      ACE_ASSERT (!connection_);
+
+      Net_ConnectionId_t connection_id =
+        static_cast<Net_ConnectionId_t> (session_data_r.sessionID);
+      Test_U_IConnection_t* connection_p =
+        TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->get (connection_id);
+      if (!connection_p)
+      { // *TODO*: remove type inference
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to retrieve connection handle (id was: %u), aborting\n"),
+                    inherited::mod_->name (),
+                    connection_id));
+        goto error;
+      } // end IF
+      connection_ = dynamic_cast<Test_U_IStreamConnection_t*> (connection_p);
+      if (!connection_)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%s: failed to dynamic_cast<Net_IStreamConnection_T*>(0x%@), aborting\n"),
+                    inherited::mod_->name (),
+                    connection_p));
+        goto error;
+      } // end IF
+
+      break;
+
+error:
+      this->notify (STREAM_SESSION_MESSAGE_ABORT);
+
+      if (connection_p)
+        connection_p->decrease ();
+
+      break;
+    }
+    case STREAM_SESSION_MESSAGE_END:
+    {
+      // clean up
+      if (connection_)
+      {
+        connection_->decrease ();
+        connection_ = NULL;
+      } // end IF
+
+      break;
+    }
+    default:
+      break;
   } // end SWITCH
 }
 
@@ -109,23 +200,34 @@ Test_U_Module_EventHandler::clone ()
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_EventHandler::clone"));
 
   // initialize return value(s)
-  ACE_Task<ACE_MT_SYNCH,
-           Common_TimePolicy_t>* task_p = NULL;
+  Test_U_Module_EventHandler* module_handler_p = NULL;
 
-  ACE_NEW_NORETURN (task_p,
+  ACE_NEW_NORETURN (module_handler_p,
                     Test_U_Module_EventHandler ());
-  if (!task_p)
+  if (!module_handler_p)
+  {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("%s: failed to allocate memory: \"%m\", aborting\n"),
                 inherited::mod_->name ()));
-  else
-  {
-    inherited* inherited_p = dynamic_cast<inherited*> (task_p);
-    ACE_ASSERT (!inherited_p);
-    ACE_ASSERT (inherited::configuration_);
-    inherited_p->initialize (*inherited::configuration_,
-                             inherited::allocator_);
-  } // end ELSE
+    return NULL;
+  } // end IF
 
-  return task_p;
+  // sanity check(s)
+  if (!inherited::configuration_) goto continue_;
+  
+  if (!module_handler_p->initialize (*inherited::configuration_,
+                                     inherited::allocator_))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to Test_U_Module_EventHandler::initialize(): \"%m\", aborting\n"),
+                inherited::mod_->name ()));
+
+    // clean up
+    delete module_handler_p;
+
+    return NULL;
+  } // end IF
+
+continue_:
+  return module_handler_p;
 }

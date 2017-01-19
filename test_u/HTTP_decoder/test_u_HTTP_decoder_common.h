@@ -74,7 +74,8 @@ struct Test_U_AllocatorConfiguration
   };
 };
 
-typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
+typedef Stream_ControlMessage_T<enum Stream_ControlType,
+                                enum Stream_ControlMessageType,
                                 struct Test_U_AllocatorConfiguration> Test_U_ControlMessage_t;
 
 //typedef Stream_IModuleHandler_T<Test_U_ModuleHandlerConfiguration> Test_U_IModuleHandler_t;
@@ -169,9 +170,12 @@ struct Test_U_StreamConfiguration
   inline Test_U_StreamConfiguration ()
    : HTTP_StreamConfiguration ()
    , moduleHandlerConfiguration (NULL)
+   , userData (NULL)
   {};
 
   struct Test_U_ModuleHandlerConfiguration* moduleHandlerConfiguration; // stream module handler configuration
+
+  struct Test_U_UserData*                   userData;
 };
 
 struct Test_U_HTTPDecoder_StreamState

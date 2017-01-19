@@ -73,7 +73,6 @@ class IRC_Module_Bisector_T
 {
  public:
   IRC_Module_Bisector_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
-                         bool = false,              // auto-start ?
                          bool = true);              // generate session messages ?
   virtual ~IRC_Module_Bisector_T ();
 

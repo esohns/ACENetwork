@@ -54,14 +54,6 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::load"));
 
-  // initialize return value(s)
-  ACE_ASSERT (modules_out.empty ());
-  //for (Stream_ModuleListIterator_t iterator = modules_out.begin ();
-  //     iterator != modules_out.end ();
-  //     iterator++)
-  //  delete *iterator;
-  //modules_out.clear ();
-
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
   // *TODO*: remove type inference
@@ -104,6 +96,15 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   // sanity check(s)
   ACE_ASSERT (!inherited::isInitialized_);
 
+  // update configuration
+  typename inherited::MODULE_T* module_p = inherited::head ();
+  ACE_ASSERT (module_p);
+  typename inherited::TASK_T* task_p = module_p->reader ();
+  ACE_ASSERT (task_p);
+  const_cast<Test_U_StreamConfiguration&> (configuration_in).moduleHandlerConfiguration_2.outboundQueue =
+    dynamic_cast<Stream_IMessageQueue*> (task_p->msg_queue ());
+  ACE_ASSERT (configuration_in.moduleHandlerConfiguration_2.outboundQueue);
+
   // allocate a new session state, reset stream
   if (!inherited::initialize (configuration_in,
                               false,
@@ -115,22 +116,13 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   } // end IF
   ACE_ASSERT (inherited::sessionData_);
 
-  Test_U_StreamSessionData& session_data_r =
-      const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
+  Test_U_FileServer_SessionData& session_data_r =
+      const_cast<Test_U_FileServer_SessionData&> (inherited::sessionData_->get ());
   session_data_r.sessionID = configuration_in.sessionID;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;
 
   // ---------------------------------------------------------------------------
-
-  // ******************* head module ***************************
-  Stream_Module_t* module_p = inherited::head ();
-  ACE_ASSERT (module_p);
-  Stream_Task_t* task_p = module_p->reader ();
-  ACE_ASSERT (task_p);
-  const_cast<Test_U_StreamConfiguration&> (configuration_in).moduleHandlerConfiguration_2.outboundQueue =
-    dynamic_cast<Stream_IMessageQueue*> (task_p->msg_queue ());
-  ACE_ASSERT (configuration_in.moduleHandlerConfiguration_2.outboundQueue);
 
   // ******************* Socket Handler ************************
   module_p =
@@ -210,8 +202,8 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
   } // end IF
 
   // synch access
-  Test_U_StreamSessionData& session_data_r =
-      const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
+  Test_U_FileServer_SessionData& session_data_r =
+      const_cast<Test_U_FileServer_SessionData&> (inherited::sessionData_->get ());
   if (session_data_r.lock)
   {
     result = session_data_r.lock->acquire ();

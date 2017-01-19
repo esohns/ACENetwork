@@ -48,8 +48,7 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType>
 class Stream_CachedMessageAllocator_T;
 
-template <typename AllocatorType,
-          typename AllocatorConfigurationType,
+template <typename AllocatorConfigurationType,
           typename MessageType>
 class DHCP_Message_T
  : public Stream_DataMessageBase_T<AllocatorConfigurationType,
@@ -58,7 +57,6 @@ class DHCP_Message_T
                                    DHCP_MessageType_t>
 {
   // enable access to specific private ctors
-  friend AllocatorType;
   //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
   //                                               AllocatorConfigurationType,
   //                                               ControlMessageType,
@@ -76,8 +74,7 @@ class DHCP_Message_T
 
  public:
   // convenient types
-  typedef DHCP_Message_T<AllocatorType,
-                         AllocatorConfigurationType,
+  typedef DHCP_Message_T<AllocatorConfigurationType,
                          MessageType> OWN_TYPE_T;
 
   DHCP_Message_T (unsigned int); // size

@@ -82,7 +82,7 @@ class Net_StreamAsynchTCPSocketBase_T
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
   virtual Net_ConnectionId_t id () const;
-  virtual ACE_Notification_Strategy* notification ();
+  inline virtual ACE_Notification_Strategy* notification () { return this; };
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
                                                 // thread(s) ?
@@ -98,9 +98,9 @@ class Net_StreamAsynchTCPSocketBase_T
                                    StateType,
                                    StatisticContainerType,
                                    UserDataType> ICONNECTION_MANAGER_T;
-  typedef Stream_IModule_T</*Stream_SessionId_t,
+  typedef Stream_IModule_T<Stream_SessionId_t,
                            typename StreamType::SESSION_DATA_T,
-                           Stream_SessionMessageType,*/
+                           Stream_SessionMessageType,
                            ACE_MT_SYNCH,
                            Common_TimePolicy_t,
                            ModuleConfigurationType,

@@ -134,14 +134,16 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
   // *TODO*: remove type inference
   bool reset_configuration = false;
-  bool is_active, is_passive;
+  enum Stream_HeadModuleConcurrency concurrency_mode;
+  bool is_concurrent;
   if (!configuration_in.moduleHandlerConfiguration->inbound)
   {
-    is_active = configuration_in.moduleHandlerConfiguration->active;
-    is_passive = configuration_in.moduleHandlerConfiguration->passive;
+    concurrency_mode = configuration_in.moduleHandlerConfiguration->concurrency;
+    is_concurrent = configuration_in.moduleHandlerConfiguration->concurrent;
 
-    configuration_in.moduleHandlerConfiguration->active = false;
-    configuration_in.moduleHandlerConfiguration->passive = false;
+    configuration_in.moduleHandlerConfiguration->concurrency =
+      STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+    configuration_in.moduleHandlerConfiguration->concurrent = true;
 
     reset_configuration = true;
   } // end IF
@@ -222,8 +224,8 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
 error:
   if (reset_configuration)
   {
-    configuration_in.moduleHandlerConfiguration->active = is_active;
-    configuration_in.moduleHandlerConfiguration->passive = is_passive;
+    configuration_in.moduleHandlerConfiguration->concurrency = concurrency_mode;
+    configuration_in.moduleHandlerConfiguration->concurrent = is_concurrent;
   } // end IF
 
   return result;

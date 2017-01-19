@@ -111,7 +111,8 @@ struct Test_U_FileServer_Configuration
   struct Test_U_FileServer_SignalHandlerConfiguration signalHandlerConfiguration;
 };
 
-typedef Stream_ControlMessage_T<enum Stream_ControlMessageType,
+typedef Stream_ControlMessage_T<enum Stream_ControlType,
+                                enum Stream_ControlMessageType,
                                 struct Stream_AllocatorConfiguration> Test_U_ControlMessage_t;
 
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -122,8 +123,9 @@ typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
 
 //////////////////////////////////////////
 
+struct Test_U_FileServer_SessionData;
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct Test_U_StreamSessionData,
+                                    struct Test_U_FileServer_SessionData,
                                     enum Stream_SessionMessageType,
                                     Test_U_Message,
                                     Test_U_SessionMessage> Test_U_ISessionNotify_t;

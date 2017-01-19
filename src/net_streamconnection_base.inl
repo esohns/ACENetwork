@@ -119,6 +119,46 @@ Net_StreamConnectionBase_T<HandlerType,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
+                           UserDataType>::set (Net_ClientServerRole role_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::set"));
+
+  // sanity check(s)
+  SocketConfigurationType socket_configuration;
+  //// *TODO*: remove type inference
+  //if (configuration_.socketConfiguration)
+  //  socket_configuration = *configuration_.socketConfiguration;
+
+  ITRANSPORTLAYER_T* itransportlayer_p = this;
+  ACE_ASSERT (itransportlayer_p);
+
+  if (!itransportlayer_p->initialize (this->dispatch (),
+                                      role_in,
+                                      socket_configuration))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_ITransportLayer_T::initialize(), continuing\n")));
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename StreamStatusType,
+          typename UserDataType>
+void
+Net_StreamConnectionBase_T<HandlerType,
+                           AddressType,
+                           ConfigurationType,
+                           StateType,
+                           StatisticContainerType,
+                           SocketConfigurationType,
+                           HandlerConfigurationType,
+                           StreamType,
+                           StreamStatusType,
                            UserDataType>::send (ACE_Message_Block*& message_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::send"));
@@ -159,34 +199,6 @@ Net_StreamConnectionBase_T<HandlerType,
 clean_up:
   message_inout->release ();
   message_inout = NULL;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename StreamStatusType,
-          typename UserDataType>
-const StreamType&
-Net_StreamConnectionBase_T<HandlerType,
-                           AddressType,
-                           ConfigurationType,
-                           StateType,
-                           StatisticContainerType,
-                           SocketConfigurationType,
-                           HandlerConfigurationType,
-                           StreamType,
-                           StreamStatusType,
-                           //UserDataType>::get () const
-                           UserDataType>::stream () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::stream"));
-
-  return inherited::stream_;
 }
 
 template <typename HandlerType,
@@ -263,62 +275,6 @@ template <typename HandlerType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
-const HandlerConfigurationType&
-Net_StreamConnectionBase_T<HandlerType,
-                           AddressType,
-                           ConfigurationType,
-                           StateType,
-                           StatisticContainerType,
-                           SocketConfigurationType,
-                           HandlerConfigurationType,
-                           StreamType,
-                           StreamStatusType,
-                           //UserDataType>::get () const
-                           UserDataType>::get ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::get"));
-
-  return configuration_;
-}
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename StreamStatusType,
-          typename UserDataType>
-bool
-Net_StreamConnectionBase_T<HandlerType,
-                           AddressType,
-                           ConfigurationType,
-                           StateType,
-                           StatisticContainerType,
-                           SocketConfigurationType,
-                           HandlerConfigurationType,
-                           StreamType,
-                           StreamStatusType,
-                           UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::initialize"));
-
-  configuration_ = configuration_in;
-
-  return true;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename StreamStatusType,
-          typename UserDataType>
 void
 Net_StreamConnectionBase_T<HandlerType,
                            AddressType,
@@ -329,24 +285,42 @@ Net_StreamConnectionBase_T<HandlerType,
                            HandlerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           UserDataType>::set (Net_ClientServerRole role_in)
+                           UserDataType>::waitForIdleState () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::set"));
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::waitForIdleState"));
 
-  // sanity check(s)
-  SocketConfigurationType socket_configuration;
-  //// *TODO*: remove type inference
-  //if (configuration_.socketConfiguration)
-  //  socket_configuration = *configuration_.socketConfiguration;
-
-  ITRANSPORTLAYER_T* itransportlayer_p = this;
-  ACE_ASSERT (itransportlayer_p);
-
-  if (!itransportlayer_p->initialize (this->dispatch (),
-                                      role_in,
-                                      socket_configuration))
+  Stream_Module_t* module_p =
+    const_cast<Stream_Module_t*> (inherited::stream_.find (ACE_TEXT_ALWAYS_CHAR (STREAM_MODULE_HEAD_NAME)));
+  if (!module_p)
+  {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ITransportLayer_T::initialize(), continuing\n")));
+                ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, returning\n"),
+                ACE_TEXT (inherited::stream_.name ().c_str ()),
+                ACE_TEXT (STREAM_MODULE_HEAD_NAME)));
+    return;
+  } // end IF
+  Stream_Task_t* task_p = module_p->reader ();
+  ACE_ASSERT (task_p);
+  Stream_IMessageQueue* imessage_queue_p =
+    dynamic_cast<Stream_IMessageQueue*> (task_p->msg_queue ());
+  if (!imessage_queue_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s/%s: failed to dynamic_cast<Stream_IMessageQueue*>(0x%@), returning\n"),
+                ACE_TEXT (inherited::stream_.name ().c_str ()),
+                module_p->name (),
+                task_p->msg_queue ()));
+    return;
+  } // end IF
+  try {
+    imessage_queue_p->waitForIdleState ();
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s/%s: caught exception in Stream_IMessageQueue::waitForIdleState(), returning\n"),
+                ACE_TEXT (inherited::stream_.name ().c_str ()),
+                module_p->name ()));
+    return;
+  }
 }
 
 template <typename HandlerType,
@@ -799,63 +773,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  HandlerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::initialize"));
-
-  configuration_ = configuration_in;
-
-  return true;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename StreamStatusType,
-          typename UserDataType>
-const StreamType&
-Net_AsynchStreamConnectionBase_T<HandlerType,
-                                 AddressType,
-                                 ConfigurationType,
-                                 StateType,
-                                 StatisticContainerType,
-                                 SocketConfigurationType,
-                                 HandlerConfigurationType,
-                                 StreamType,
-                                 StreamStatusType,
-                                 //UserDataType>::get () const
-                                 UserDataType>::stream () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::stream"));
-
-  return inherited::stream_;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename StreamStatusType,
-          typename UserDataType>
-bool
-Net_AsynchStreamConnectionBase_T<HandlerType,
-                                 AddressType,
-                                 ConfigurationType,
-                                 StateType,
-                                 StatisticContainerType,
-                                 SocketConfigurationType,
-                                 HandlerConfigurationType,
-                                 StreamType,
-                                 StreamStatusType,
                                  //UserDataType>::get () const
                                  UserDataType>::wait (StreamStatusType state_in,
                                                       const ACE_Time_Value* timeValue_in)
@@ -910,34 +827,6 @@ template <typename HandlerType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
-const HandlerConfigurationType&
-Net_AsynchStreamConnectionBase_T<HandlerType,
-                                 AddressType,
-                                 ConfigurationType,
-                                 StateType,
-                                 StatisticContainerType,
-                                 SocketConfigurationType,
-                                 HandlerConfigurationType,
-                                 StreamType,
-                                 StreamStatusType,
-                                 //UserDataType>::get () const
-                                 UserDataType>::get ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::get"));
-
-  return configuration_;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename StreamStatusType,
-          typename UserDataType>
 void
 Net_AsynchStreamConnectionBase_T<HandlerType,
                                  AddressType,
@@ -966,6 +855,109 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                       *configuration_.socketConfiguration))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ITransportLayer_T::initialize(), continuing\n")));
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename StreamStatusType,
+          typename UserDataType>
+unsigned int
+Net_AsynchStreamConnectionBase_T<HandlerType,
+                                 AddressType,
+                                 ConfigurationType,
+                                 StateType,
+                                 StatisticContainerType,
+                                 SocketConfigurationType,
+                                 HandlerConfigurationType,
+                                 StreamType,
+                                 StreamStatusType,
+                                 UserDataType>::flush (bool flushSessionMessages_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::flush"));
+
+  // step1: flush all outbound data
+  inherited::stream_.flush (false,                   // flush inbound data ?
+                            flushSessionMessages_in, // flush session messages ?
+                            false);                  // flush upstream (if any) ?
+
+  // step2: cancel all outstanding asynchronous operations
+  int result_2 = inherited::handle_close (ACE_INVALID_HANDLE,
+                                          ACE_Event_Handler::ALL_EVENTS_MASK);
+  if (result_2 == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_close(): \"%m\", continuing\n")));
+
+  return 0;
+}
+
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename StreamStatusType,
+          typename UserDataType>
+void
+Net_AsynchStreamConnectionBase_T<HandlerType,
+                                 AddressType,
+                                 ConfigurationType,
+                                 StateType,
+                                 StatisticContainerType,
+                                 SocketConfigurationType,
+                                 HandlerConfigurationType,
+                                 StreamType,
+                                 StreamStatusType,
+                                 UserDataType>::waitForIdleState () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::waitForIdleState"));
+
+  // step1: wait for the stream outbound queue to become idle
+  Stream_Module_t* module_p =
+    const_cast<Stream_Module_t*> (inherited::stream_.find (ACE_TEXT_ALWAYS_CHAR (STREAM_MODULE_HEAD_NAME)));
+  if (!module_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, returning\n"),
+                ACE_TEXT (inherited::stream_.name ().c_str ()),
+                ACE_TEXT (STREAM_MODULE_HEAD_NAME)));
+    return;
+  } // end IF
+  Stream_Task_t* task_p = module_p->reader ();
+  ACE_ASSERT (task_p);
+  Stream_IMessageQueue* imessage_queue_p =
+    dynamic_cast<Stream_IMessageQueue*> (task_p->msg_queue ());
+  if (!imessage_queue_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s/%s: failed to dynamic_cast<Stream_IMessageQueue*>(0x%@), returning\n"),
+                ACE_TEXT (inherited::stream_.name ().c_str ()),
+                module_p->name (),
+                task_p->msg_queue ()));
+    return;
+  } // end IF
+  try {
+    imessage_queue_p->waitForIdleState ();
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s/%s: caught exception in Stream_IMessageQueue::waitForIdleState(), returning\n"),
+                ACE_TEXT (inherited::stream_.name ().c_str ()),
+                module_p->name ()));
+    return;
+  }
+  // --> stream data has been processed
+
+  // step2: wait for any asynchronous operations to complete
+  inherited::counter_.wait (0);
+  // --> all data has been dispatched to the kernel (socket)
 }
 
 template <typename HandlerType,

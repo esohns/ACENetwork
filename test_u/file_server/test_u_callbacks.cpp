@@ -36,6 +36,7 @@
 #include "net_macros.h"
 
 #include "test_u_connection_manager_common.h"
+#include "test_u_sessionmessage.h"
 #include "test_u_stream.h"
 
 #include "file_server_common.h"
@@ -261,8 +262,8 @@ idle_initialize_ui_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_ui_cb"));
 
-  Test_U_FileServer_GTK_CBData* data_p =
-    static_cast<Test_U_FileServer_GTK_CBData*> (userData_in);
+  struct Test_U_FileServer_GTK_CBData* data_p =
+    static_cast<struct Test_U_FileServer_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -611,6 +612,44 @@ idle_initialize_ui_cb (gpointer userData_in)
   // step8: draw main dialog
   gtk_widget_show_all (dialog_p);
 
+  // step9: initialize updates
+  guint event_source_id = 0;
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
+
+    // schedule asynchronous updates of the log view
+    event_source_id = g_timeout_add_seconds (1,
+                                             idle_update_log_display_cb,
+                                             data_p);
+    if (event_source_id > 0)
+      data_p->eventSourceIds.insert (event_source_id);
+    else
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_timeout_add_seconds(): \"%m\", aborting\n")));
+      return G_SOURCE_REMOVE;
+    } // end ELSE
+    // schedule asynchronous updates of the info view
+    event_source_id = g_timeout_add (COMMON_UI_GTK_WIDGET_UPDATE_INTERVAL,
+                                     idle_update_info_display_cb,
+                                     data_p);
+    if (event_source_id > 0)
+      data_p->eventSourceIds.insert (event_source_id);
+    else
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_timeout_add(): \"%m\", aborting\n")));
+      return G_SOURCE_REMOVE;
+    } // end ELSE
+  } // end lock scope
+
+  // step10: activate some widgets
+  GtkToggleButton* toggle_button_p =
+      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                  ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_GTK_BUTTON_LISTEN_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  gtk_toggle_button_set_active (toggle_button_p,
+                                true);
+
   return G_SOURCE_REMOVE;
 }
 
@@ -709,8 +748,8 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::togglebutton_listen_toggled_cb"));
 
-  Test_U_FileServer_GTK_CBData* data_p =
-    static_cast<Test_U_FileServer_GTK_CBData*> (userData_in);
+  struct Test_U_FileServer_GTK_CBData* data_p =
+    static_cast<struct Test_U_FileServer_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);

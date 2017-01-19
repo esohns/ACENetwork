@@ -92,80 +92,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
-bool
-Net_Client_AsynchConnector_T<HandlerType,
-                             AddressType,
-                             ConfigurationType,
-                             StateType,
-                             StatisticContainerType,
-                             HandlerConfigurationType,
-                             StreamType,
-                             UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::initialize"));
-
-  configuration_ = &const_cast<HandlerConfigurationType&> (configuration_in);
-
-  return true;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-const HandlerConfigurationType&
-Net_Client_AsynchConnector_T<HandlerType,
-                             AddressType,
-                             ConfigurationType,
-                             StateType,
-                             StatisticContainerType,
-                             HandlerConfigurationType,
-                             StreamType,
-                             UserDataType>::get () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::get"));
-
-  // sanity check(s)
-  ACE_ASSERT (configuration_);
-
-  return *configuration_;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-bool
-Net_Client_AsynchConnector_T<HandlerType,
-                             AddressType,
-                             ConfigurationType,
-                             StateType,
-                             StatisticContainerType,
-                             HandlerConfigurationType,
-                             StreamType,
-                             UserDataType>::useReactor () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::useReactor"));
-
-  return false;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
 ACE_HANDLE
 Net_Client_AsynchConnector_T<HandlerType,
                              AddressType,
@@ -654,95 +580,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
-bool
-Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
-                                                           ConfigurationType,
-                                                           StateType,
-                                                           StatisticContainerType,
-                                                           HandlerConfigurationType,
-                                                           StreamType,
-                                                           UserDataType>,
-                             ACE_INET_Addr,
-                             ConfigurationType,
-                             StateType,
-                             StatisticContainerType,
-                             HandlerConfigurationType,
-                             StreamType,
-                             UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::initialize"));
-
-  configuration_ = &const_cast<HandlerConfigurationType&> (configuration_in);
-
-  return true;
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-const HandlerConfigurationType&
-Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
-                                                           ConfigurationType,
-                                                           StateType,
-                                                           StatisticContainerType,
-                                                           HandlerConfigurationType,
-                                                           StreamType,
-                                                           UserDataType>,
-                             ACE_INET_Addr,
-                             ConfigurationType,
-                             StateType,
-                             StatisticContainerType,
-                             HandlerConfigurationType,
-                             StreamType,
-                             UserDataType>::get () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::get"));
-
-  // sanity check(s)
-  ACE_ASSERT (configuration_);
-
-  return *configuration_;
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-bool
-Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
-                                                           ConfigurationType,
-                                                           StateType,
-                                                           StatisticContainerType,
-                                                           HandlerConfigurationType,
-                                                           StreamType,
-                                                           UserDataType>,
-                             ACE_INET_Addr,
-                             ConfigurationType,
-                             StateType,
-                             StatisticContainerType,
-                             HandlerConfigurationType,
-                             StreamType,
-                             UserDataType>::useReactor () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::useReactor"));
-
-  return false;
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
 void
 Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                                            ConfigurationType,
@@ -809,27 +646,29 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
   {
     error = result_in.error ();
 
-    // *TODO*: in case of errors, addresses are not supplied
-    ACE_TCHAR buffer[BUFSIZ];
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
-    int result_2 = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
-    if (result_2 == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
+    ACE_INET_Addr peer_address = remoteSAP_in;
+    // *NOTE*: in case of errors, addresses are not supplied
+    if (error)
+    { // sanity check(s)
+      ACE_ASSERT (remoteSAP_in.is_any ());
+      ACE_ASSERT (configuration_);
+      ACE_ASSERT (configuration_->socketConfiguration);
+      peer_address = configuration_->socketConfiguration->address;
+    } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
-                buffer,
+                ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (peer_address).c_str ()),
                 ACE::sock_error (static_cast<int> (error))));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
-                buffer,
+                ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (peer_address).c_str ()),
                 ACE_TEXT (ACE_OS::strerror (error))));
 #endif
   } // end IF
 
-  return ((result == 0) ? -1 : 0);
+  return ((result == 1) ? 0 : -1);
 }
 
 template <typename HandlerType,
@@ -990,77 +829,6 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::~Net_Client_AsynchConnector_T"));
 
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-bool
-Net_Client_AsynchConnector_T<HandlerType,
-                             Net_Netlink_Addr,
-                             ConfigurationType,
-                             StateType,
-                             StatisticContainerType,
-                             HandlerConfigurationType,
-                             StreamType,
-                             UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::initialize"));
-
-  configuration_ = &const_cast<HandlerConfigurationType&> (configuration_in);
-
-  return true;
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-const HandlerConfigurationType&
-Net_Client_AsynchConnector_T<HandlerType,
-                             Net_Netlink_Addr,
-                             ConfigurationType,
-                             StateType,
-                             StatisticContainerType,
-                             HandlerConfigurationType,
-                             StreamType,
-                             UserDataType>::get () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::get"));
-
-  // sanity check(s)
-  ACE_ASSERT (configuration_);
-
-  return *configuration_;
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-bool
-Net_Client_AsynchConnector_T<HandlerType,
-                             Net_Netlink_Addr,
-                             ConfigurationType,
-                             StateType,
-                             StatisticContainerType,
-                             HandlerConfigurationType,
-                             StreamType,
-                             UserDataType>::useReactor () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::useReactor"));
-
-  return false;
 }
 
 template <typename HandlerType,

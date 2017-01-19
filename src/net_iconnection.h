@@ -31,6 +31,8 @@
 #include "common_ireferencecount.h"
 #include "common_istatistic.h"
 
+#include "stream_imessagequeue.h"
+
 #include "net_common.h"
 #include "net_itransportlayer.h"
 
@@ -159,6 +161,7 @@ class Net_IStreamConnection_T
                                           StatisticContainerType,
                                           SocketConfigurationType,
                                           HandlerConfigurationType>
+ , public Stream_IMessageQueue
 {
  public:
   // convenience types

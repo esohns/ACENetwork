@@ -329,6 +329,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     if ((error != ENOENT)                  && // 2   : *TODO*
         (error != ENOMEM)                  && // 12  : [server: local close()] *TODO*: ?
+        (error != ERROR_OPERATION_ABORTED) && // 995 : [server: local close()] *TODO*: ?
         (error != ERROR_IO_PENDING)        && // 997 :
         (error != ERROR_CONNECTION_ABORTED))  // 1236: [client: local close()]
 #else

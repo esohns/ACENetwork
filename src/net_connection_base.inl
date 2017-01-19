@@ -297,26 +297,6 @@ template <typename AddressType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
-const ConfigurationType&
-Net_ConnectionBase_T<AddressType,
-                     ConfigurationType,
-                     StateType,
-                     StatisticContainerType,
-                     UserDataType>::get () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::get"));
-
-  // sanity check(s)
-  ACE_ASSERT (configuration_);
-
-  return *configuration_;
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename UserDataType>
 bool
 Net_ConnectionBase_T<AddressType,
                      ConfigurationType,
@@ -331,39 +311,4 @@ Net_ConnectionBase_T<AddressType,
   configuration_ = &const_cast<ConfigurationType&> (configuration_in);
 
   return true;
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename UserDataType>
-const StateType&
-Net_ConnectionBase_T<AddressType,
-                     ConfigurationType,
-                     StateType,
-                     StatisticContainerType,
-                     UserDataType>::state () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::state"));
-
-  return state_;
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename UserDataType>
-Net_Connection_Status
-Net_ConnectionBase_T<AddressType,
-                     ConfigurationType,
-                     StateType,
-                     StatisticContainerType,
-                     UserDataType>::status () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::status"));
-
-  // *TODO*: remove type inference
-  return state_.status;
 }

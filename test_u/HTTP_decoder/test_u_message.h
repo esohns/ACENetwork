@@ -32,32 +32,32 @@ class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
 class Test_U_SessionMessage;
-//template <ACE_SYNCH_DECL,
-//          typename AllocatorConfigurationType,
-//          typename ControlMessageType,
-//          typename DataMessageType,
-//          typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
-//template <ACE_SYNCH_DECL,
-//          typename AllocatorConfigurationType,
-//          typename ControlMessageType,
-//          typename DataMessageType,
-//          typename SessionMessageType> class Stream_CachedMessageAllocator_T;
+template <ACE_SYNCH_DECL,
+          typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
+template <ACE_SYNCH_DECL,
+          typename AllocatorConfigurationType,
+          typename ControlMessageType,
+          typename DataMessageType,
+          typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
 class Test_U_Message
  : public HTTP_Message_T<struct Test_U_AllocatorConfiguration,
                          enum Stream_MessageType>
 {
-  //// grant access to specific private ctors
-  //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-  //                                               struct Test_U_AllocatorConfiguration,
-  //                                               Test_U_ControlMessage_t,
-  //                                               Test_U_Message,
-  //                                               Test_U_SessionMessage>;
-  //friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
-  //                                             struct Test_U_AllocatorConfiguration,
-  //                                             Test_U_ControlMessage_t,
-  //                                             Test_U_Message,
-  //                                             Test_U_SessionMessage>;
+  // grant access to specific private ctors
+  friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                                 struct Test_U_AllocatorConfiguration,
+                                                 Test_U_ControlMessage_t,
+                                                 Test_U_Message,
+                                                 Test_U_SessionMessage>;
+  friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
+                                               struct Test_U_AllocatorConfiguration,
+                                               Test_U_ControlMessage_t,
+                                               Test_U_Message,
+                                               Test_U_SessionMessage>;
 
  public:
   Test_U_Message (unsigned int); // size

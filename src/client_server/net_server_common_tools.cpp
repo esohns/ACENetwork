@@ -89,7 +89,7 @@ fallback:
                                                   fallback_level);
   if (directory.empty ())
   {
-    ACE_DEBUG ((LM_DEBUG,
+    ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("failed to Common_File_Tools::getLogDirectory(\"%s\",%d), falling back\n"),
                 ACE_TEXT (packageName_in.c_str ()),
                 fallback_level));
@@ -304,7 +304,7 @@ fallback:
   // sanity check(s)
   if (!Common_File_Tools::create (result))
   {
-    ACE_DEBUG ((LM_DEBUG,
+    ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("failed to Common_File_Tools::create(\"%s\"), falling back\n"),
                 ACE_TEXT (result.c_str ())));
 

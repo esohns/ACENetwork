@@ -38,6 +38,7 @@
 #include "test_u_configuration.h"
 
 #include "file_server_common.h"
+#include "file_server_stream_common.h"
 
 // forward declarations
 class Test_U_Message;
@@ -49,27 +50,30 @@ typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                      Test_U_Message,
                                      Test_U_SessionMessage,
                                      struct Test_U_ModuleHandlerConfiguration,
-                                     int,
+                                     enum Stream_ControlType,
                                      enum Stream_SessionMessageType,
                                      struct Test_U_StreamState,
-                                     struct Test_U_StreamSessionData,
-                                     Test_U_StreamSessionData_t,
+                                     struct Test_U_FileServer_SessionData,
+                                     Test_U_FileServer_SessionData_t,
                                      Net_RuntimeStatistic_t,
                                      ACE_INET_Addr,
                                      Test_U_InetConnectionManager_t,
                                      struct Test_U_UserData> Test_U_Module_Net_Writer_t;
 typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
-                                     Common_TimePolicy_t,
-                                     struct Test_U_ModuleHandlerConfiguration,
                                      Test_U_ControlMessage_t,
                                      Test_U_Message,
                                      Test_U_SessionMessage,
-                                     struct Test_U_StreamSessionData,
-                                     Test_U_StreamSessionData_t,
+                                     struct Test_U_ModuleHandlerConfiguration,
+                                     enum Stream_ControlType,
+                                     enum Stream_SessionMessageType,
+                                     struct Test_U_StreamState,
+                                     struct Test_U_FileServer_SessionData,
+                                     Test_U_FileServer_SessionData_t,
+                                     Net_RuntimeStatistic_t,
                                      ACE_INET_Addr,
                                      Test_U_InetConnectionManager_t,
                                      struct Test_U_UserData> Test_U_Module_Net_Reader_t;
-DATASTREAM_MODULE_DUPLEX (struct Test_U_StreamSessionData,          // session data type
+DATASTREAM_MODULE_DUPLEX (struct Test_U_FileServer_SessionData,     // session data type
                           enum Stream_SessionMessageType,           // session event type
                           struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
                           Test_U_IStreamNotify_t,                   // stream notification interface type
@@ -85,8 +89,8 @@ typedef Stream_Module_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                    Test_U_SessionMessage,
                                                    int,
                                                    Net_RuntimeStatistic_t,
-                                                   struct Test_U_StreamSessionData,
-                                                   Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_ReaderTask_t;
+                                                   struct Test_U_FileServer_SessionData,
+                                                   Test_U_FileServer_SessionData_t> Test_U_Module_StatisticReport_ReaderTask_t;
 typedef Stream_Module_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                    Common_TimePolicy_t,
                                                    struct Test_U_ModuleHandlerConfiguration,
@@ -95,9 +99,9 @@ typedef Stream_Module_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                    Test_U_SessionMessage,
                                                    int,
                                                    Net_RuntimeStatistic_t,
-                                                   struct Test_U_StreamSessionData,
-                                                   Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_WriterTask_t;
-DATASTREAM_MODULE_DUPLEX (struct Test_U_StreamSessionData,            // session data type
+                                                   struct Test_U_FileServer_SessionData,
+                                                   Test_U_FileServer_SessionData_t> Test_U_Module_StatisticReport_WriterTask_t;
+DATASTREAM_MODULE_DUPLEX (struct Test_U_FileServer_SessionData,       // session data type
                           enum Stream_SessionMessageType,             // session event type
                           struct Test_U_ModuleHandlerConfiguration,   // module handler configuration type
                           Test_U_IStreamNotify_t,                     // stream notification interface type
@@ -111,8 +115,9 @@ typedef Stream_Module_FileReader_Writer_T<ACE_MT_SYNCH,
                                           Test_U_ControlMessage_t,
                                           Test_U_Message,
                                           Test_U_SessionMessage,
-                                          struct Test_U_StreamSessionData> Test_U_FileReader;
-DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
+                                          struct Test_U_FileServer_SessionData,
+                                          struct Test_U_UserData> Test_U_FileReader;
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_FileServer_SessionData,     // session data type
                               enum Stream_SessionMessageType,           // session event type
                               struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
                               Test_U_IStreamNotify_t,                   // stream notification interface type

@@ -54,7 +54,8 @@ typedef Net_Module_TCPSocketHandler_T<ACE_MT_SYNCH,
                                       struct Test_U_StreamSessionData,
                                       Test_U_StreamSessionData_t,
                                       Net_RuntimeStatistic_t,
-                                      Net_Remote_Comm::MessageHeader> Test_U_Module_TCPSocketHandler;
+                                      Net_Remote_Comm::MessageHeader,
+                                      struct Test_U_UserData> Test_U_Module_TCPSocketHandler;
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
                               enum Stream_SessionMessageType,           // session event type
                               struct Test_U_ModuleHandlerConfiguration, // module handler configuration type

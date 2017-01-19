@@ -336,11 +336,10 @@ Net_Connection_Manager_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::get"));
 
   ICONNECTION_T* connection_p = NULL;
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  AddressType local_address, peer_address;
 
   { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, NULL);
-
-    ACE_HANDLE handle = ACE_INVALID_HANDLE;
-    AddressType local_address, peer_address;
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
          iterator.next (connection_p);
          iterator.advance ())
@@ -356,20 +355,12 @@ Net_Connection_Manager_T<AddressType,
     } // end FOR
     if (connection_p)
       connection_p->increase (); // increase reference count
-    else
-    {
-      ACE_TCHAR buffer[BUFSIZ];
-      ACE_OS::memset (buffer, 0, sizeof (buffer));
-      int result_2 = address_in.addr_to_string (buffer,
-                                                sizeof (buffer),
-                                                1);
-      if (result_2 == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("connection not found (address was: \"%s\"), aborting\n"),
-//                  buffer));
-    } // end ELSE
+    //else
+    //{
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("connection not found (address was: \"%s\"), aborting\n"),
+    //              ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
+    //} // end ELSE
   } // end lock scope
 
   return connection_p;

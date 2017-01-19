@@ -126,15 +126,16 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 set (file_server_SRCS
      file_server.cpp
      file_server_common.h
+     file_server_connection_common.h
      file_server_defines.h
      file_server_listener_common.h
      file_server_signalhandler.cpp
      file_server_signalhandler.h
+     file_server_stream_common.h
      test_u_callbacks.cpp
      test_u_callbacks.h
      test_u_common_modules.h
      test_u_configuration.h
-     test_u_connection_common.h
      test_u_connection_manager_common.h
      test_u_message.cpp
      test_u_message.h
@@ -150,7 +151,6 @@ set (file_server_SRCS
      test_u_sessionmessage.h
      test_u_stream.cpp
      test_u_stream.h
-     test_u_socket_common.h
      test_u_tcpconnection.cpp
      test_u_tcpconnection.h
      stdafx.cpp
@@ -225,7 +225,7 @@ if (UNIX)
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-f ./etc/test.mp4 -l -p 5555 -t"
+                         ARGS "-f D:/temp/H264_720p.ts -l -p 5555 -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../openssl/bin

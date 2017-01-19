@@ -573,31 +573,6 @@ template <typename HandlerType,
           typename UserDataType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType>
-ACE_Notification_Strategy*
-Net_StreamAsynchTCPSocketBase_T<HandlerType,
-                                AddressType,
-                                ConfigurationType,
-                                StateType,
-                                StatisticContainerType,
-                                StreamType,
-                                UserDataType,
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::notification ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::notification"));
-
-  return this;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
 int
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,
@@ -982,6 +957,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
             (error != EFAULT)                && // 14   : *TODO*: happens on Win32
             (error != ERROR_UNEXP_NET_ERR)   && // 59   : *TODO*: happens on Win32
             (error != ERROR_NETNAME_DELETED) && // 64   : happens on Win32
+            (error != ENOTSOCK)              && // 10038: (asynchronous) local close
             (error != ECONNRESET))              // 10054: reset by peer
 #else
         if (error != ECONNRESET) // 104: reset by peer

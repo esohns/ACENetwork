@@ -52,6 +52,7 @@
 #include "test_u_connection_stream.h"
 #include "test_u_defines.h"
 #include "test_u_message.h"
+#include "test_u_session_message.h"
 
 #include "test_u_dhcp_client_common.h"
 

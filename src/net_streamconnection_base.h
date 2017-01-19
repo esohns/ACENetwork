@@ -77,18 +77,18 @@ class Net_StreamConnectionBase_T
 //  virtual int svc (void);
 
   // implement (part of) Net_ISocketConnection_T
+  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = configuration_in; return true; };
   //virtual const HandlerConfigurationType& get () const;
-  virtual const StreamType& stream () const;
+  virtual void set (Net_ClientServerRole);
   // *IMPORTANT NOTE*: fire-and-forget API
-  //virtual bool send (ACE_Message_Block*&);
   virtual void send (ACE_Message_Block*&);
+  inline virtual const HandlerConfigurationType& get () { return configuration_; };
+  inline virtual const StreamType& stream () const { return inherited::stream_; };
   virtual bool wait (StreamStatusType,
                      const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
-  virtual const HandlerConfigurationType& get ();
-  virtual bool initialize (const HandlerConfigurationType&); // handler configuration
-
-  virtual void set (Net_ClientServerRole);
-  //virtual void finalize ();
+  inline virtual unsigned int flush (bool flushSessionMessages_in = false) { inherited::stream_.flush (false, flushSessionMessages_in, false); return 0; };
+  // *NOTE*: this waits for outbound (!) data only
+  virtual void waitForIdleState () const;
 
 //  // *NOTE*: enqueue any received data onto our stream for further processing
 //  virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
@@ -183,17 +183,18 @@ class Net_AsynchStreamConnectionBase_T
   virtual void act (const void*); // act
 
   // implement (part of) Net_IStreamConnection_T
+  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = configuration_in; return true; };
   //virtual const HandlerConfigurationType& get () const;
-  virtual const StreamType& stream () const;
+  virtual void set (Net_ClientServerRole);
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&);
+  inline virtual const HandlerConfigurationType& get () { return configuration_; };
+  inline virtual const StreamType& stream () const { return inherited::stream_; };
   virtual bool wait (StreamStatusType,
                      const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
-  virtual const HandlerConfigurationType& get ();
-  virtual bool initialize (const HandlerConfigurationType&); // handler configuration
-
-  virtual void set (Net_ClientServerRole);
-  //virtual void finalize ();
+  virtual unsigned int flush (bool = false); // N/A
+  // *NOTE*: this waits for outbound (!) data only
+  virtual void waitForIdleState () const;
 
   // convenient typedefs
   typedef Net_ITransportLayer_T<SocketConfigurationType> ITRANSPORTLAYER_T;
