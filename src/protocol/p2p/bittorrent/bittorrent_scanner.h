@@ -713,7 +713,5 @@ extern int BitTorrent_Scanner_lex (yyscan_t yyscanner);
 #undef YY_DECL
 #endif
 
-
-
 #undef BitTorrent_Scanner_IN_HEADER
 #endif /* BitTorrent_Scanner_HEADER_H */

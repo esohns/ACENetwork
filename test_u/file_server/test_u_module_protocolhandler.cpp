@@ -58,7 +58,7 @@ Test_U_Module_ProtocolHandler::initialize (const struct Stream_ModuleHandlerConf
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::initialize"));
 
-  int result = -1;
+//  int result = -1;
 
   if (inherited::isInitialized_)
   {
@@ -101,7 +101,7 @@ Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& mes
   ACE_ASSERT (message_inout);
   ACE_ASSERT (isInitialized_);
 
-  int result = -1;
+//  int result = -1;
   switch (message_inout->type ())
   {
     case STREAM_SESSION_MESSAGE_BEGIN:

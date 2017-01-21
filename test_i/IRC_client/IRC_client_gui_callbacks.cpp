@@ -317,7 +317,11 @@ connection_failed:
   } // end IF
   else
     connection_2 =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
+#else
+      connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle));
+#endif
   if (!connection_2)
     goto connection_failed;
   istream_connection_p =

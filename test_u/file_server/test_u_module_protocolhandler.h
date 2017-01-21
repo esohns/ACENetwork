@@ -45,9 +45,9 @@ class Test_U_Module_ProtocolHandler
                                  Test_U_Message,
                                  Test_U_SessionMessage,
                                  Stream_SessionId_t,
-                                 Stream_ControlType,
-                                 struct Test_U_StreamSessionData,
-                                 Stream_UserData>
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_UserData>
 {
  public:
   Test_U_Module_ProtocolHandler ();
@@ -74,9 +74,9 @@ class Test_U_Module_ProtocolHandler
                                  Test_U_Message,
                                  Test_U_SessionMessage,
                                  Stream_SessionId_t,
-                                 Stream_ControlType,
-                                 struct Test_U_StreamSessionData,
-                                 Stream_UserData> inherited;
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler (const Test_U_Module_ProtocolHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler& operator= (const Test_U_Module_ProtocolHandler&))

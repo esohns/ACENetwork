@@ -152,7 +152,7 @@ HTTP_ParserDriver_T<SessionMessageType>::~HTTP_ParserDriver_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::~HTTP_ParserDriver_T"));
 
-  int result = -1;
+//  int result = -1;
 
 //  // finalize lex scanner
 //  if (!scannerTables_.empty ())

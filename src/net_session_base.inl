@@ -20,6 +20,7 @@
 
 #include <ace/Log_Msg.h>
 
+#include "net_common_tools.h"
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -237,7 +238,11 @@ Net_SessionBase_T<AddressType,
   } // end ELSE
   else
     iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       connectionManager_->get (reinterpret_cast<Net_ConnectionId_t> (handle));
+#else
+      connectionManager_->get (static_cast<Net_ConnectionId_t> (handle));
+#endif
   if (!iconnection_p)
   {
     ACE_DEBUG ((LM_ERROR,

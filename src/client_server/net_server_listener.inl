@@ -24,6 +24,7 @@
 #include <ace/Reactor.h>
 
 #include "net_common.h"
+#include "net_common_tools.h"
 #include "net_macros.h"
 
 #include "net_server_defines.h"

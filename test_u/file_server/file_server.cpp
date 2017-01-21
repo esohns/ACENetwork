@@ -679,7 +679,29 @@ do_work (
   iconnection_manager_p->set (configuration.connectionConfiguration,
                               &user_data);
 
-  // step4: handle events (signals, incoming connections/data, timers, ...)
+  // step4: initialize listener
+  //if (networkInterface_in.empty ()); // *TODO*
+  if (useLoopBack_in)
+  {
+    result =
+      configuration.listenerConfiguration.address.set (listeningPortNumber_in,
+                                                       INADDR_LOOPBACK);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+      goto error;
+    } // end IF
+  } // end IF
+  else
+    configuration.listenerConfiguration.address.set_port_number (listeningPortNumber_in,
+                                                                 1);
+  configuration.listenerConfiguration.connectionManager = connection_manager_p;
+  configuration.listenerConfiguration.socketHandlerConfiguration =
+    &configuration.socketHandlerConfiguration;
+  //configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;
+
+  // step5: handle events (signals, incoming connections/data, timers, ...)
   // reactor/proactor event loop:
   // - dispatch connection attempts to acceptor
   // - dispatch socket events
@@ -688,7 +710,7 @@ do_work (
   // [GTK events:]
   // - dispatch UI events (if any)
 
-  // step4a: start GTK event loop ?
+  // step5a: start GTK event loop ?
   gtk_manager_p =
     FILE_SERVER_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
@@ -735,36 +757,16 @@ do_work (
   } // end IF
   stop_event_dispatch = true;
 
-  // step4c: start listening
-  //if (networkInterface_in.empty ()); // *TODO*
-  if (useLoopBack_in)
-  {
-    result =
-      configuration.listenerConfiguration.address.set (listeningPortNumber_in,
-                                                       INADDR_LOOPBACK);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
-      goto error;
-    } // end IF
-  } // end IF
-  else
-    configuration.listenerConfiguration.address.set_port_number (listeningPortNumber_in,
-                                                                 1);
-  configuration.listenerConfiguration.connectionManager = connection_manager_p;
-  configuration.listenerConfiguration.socketHandlerConfiguration =
-    &configuration.socketHandlerConfiguration;
-  //configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;
-
-  if (!CBData_in.configuration->listener->initialize (configuration.listenerConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize listener, aborting\n")));
-    goto error;
-  } // end IF
+  // step4c: start listening ?
   if (UIDefinitionFile_in.empty ())
   {
+    if (!CBData_in.configuration->listener->initialize (configuration.listenerConfiguration))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to initialize listener, aborting\n")));
+      goto error;
+    } // end IF
+
     CBData_in.configuration->listener->start ();
     if (!CBData_in.configuration->listener->isRunning ())
     {

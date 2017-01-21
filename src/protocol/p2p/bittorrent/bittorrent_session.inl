@@ -948,7 +948,11 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   } // end ELSE
   else
     iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       trackerConnectionManager_->get (reinterpret_cast<Net_ConnectionId_t> (handle));
+#else
+      trackerConnectionManager_->get (static_cast<Net_ConnectionId_t> (handle));
+#endif
   if (!iconnection_p)
   {
     ACE_DEBUG ((LM_ERROR,

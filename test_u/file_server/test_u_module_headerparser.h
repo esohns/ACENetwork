@@ -44,7 +44,7 @@ class Test_U_Module_HeaderParser
                                  Test_U_SessionMessage,
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
-                                 struct Test_U_StreamSessionData,
+                                 enum Stream_SessionMessageType,
                                  struct Test_U_UserData>
 {
  public:
@@ -67,7 +67,7 @@ class Test_U_Module_HeaderParser
                                  Test_U_SessionMessage,
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
-                                 struct Test_U_StreamSessionData,
+                                 enum Stream_SessionMessageType,
                                  struct Test_U_UserData> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_HeaderParser (const Test_U_Module_HeaderParser&));

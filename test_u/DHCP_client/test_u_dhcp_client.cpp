@@ -866,7 +866,11 @@ do_work (bool requestBroadcastReplies_in,
   } // end IF
   if (iconnector_p->useReactor ())
     configuration.moduleHandlerConfiguration.broadcastConnection =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
+#else
+        connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle));
+#endif
   else
   {
     // step1: wait for the connection to register with the manager
@@ -984,7 +988,11 @@ do_work (bool requestBroadcastReplies_in,
     } // end IF
     if (useReactor_in)
       iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (configuration.handle));
+#else
+        connection_manager_p->get (static_cast<Net_ConnectionId_t> (configuration.handle));
+#endif
     else
     {
       configuration.handle = ACE_INVALID_HANDLE;

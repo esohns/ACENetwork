@@ -352,7 +352,11 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   } // end IF
   if (use_reactor)
     session_data_r.connection =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (connectionHandle_));
+#else
+      connection_manager_p->get (static_cast<Net_ConnectionId_t> (connectionHandle_));
+#endif
   else
     session_data_r.connection =
         connection_manager_p->get (session_data_r.serverAddress);
@@ -659,7 +663,11 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
       } // end IF
       if (use_reactor)
         session_data_r.broadcastConnection =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
             connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (broadcastConnectionHandle_));
+#else
+            connection_manager_p->get (static_cast<Net_ConnectionId_t> (broadcastConnectionHandle_));
+#endif
       else
         session_data_r.broadcastConnection =
             connection_manager_p->get (inherited::configuration_->socketConfiguration->address);
@@ -949,7 +957,11 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   } // end IF
   if (iconnector_p->useReactor ())
     iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (result));
+#else
+      connection_manager_p->get (static_cast<Net_ConnectionId_t> (result));
+#endif
   else
   {
     // step2: wait for the connection to register with the manager

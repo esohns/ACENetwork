@@ -1117,7 +1117,11 @@ allocate:
     TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   Test_U_IConnection_t* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#else
+      iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#endif
   if (!iconnection_p)
   {
     // *NOTE*: most probable reason, the interface IP address has changed
@@ -1199,7 +1203,11 @@ action_inform_activate_cb (GtkAction* action_in,
     TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   Test_U_IConnection_t* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#else
+    iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#endif
   ACE_ASSERT (iconnection_p);
   Test_U_IInboundStreamConnection_t* istream_connection_2 =
     dynamic_cast<Test_U_IInboundStreamConnection_t*> (iconnection_p);
@@ -1323,7 +1331,11 @@ action_request_activate_cb (GtkAction* action_in,
     TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   Test_U_IConnection_t* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#else
+    iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#endif
   ACE_ASSERT (iconnection_p);
   Test_U_IInboundStreamConnection_t* istream_connection_2 =
     dynamic_cast<Test_U_IInboundStreamConnection_t*> (iconnection_p);
@@ -1431,7 +1443,11 @@ action_release_activate_cb (GtkAction* action_in,
     TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
   Test_U_IConnection_t* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#else
+    iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#endif
   ACE_ASSERT (iconnection_p);
   Test_U_IInboundStreamConnection_t* istream_connection_2 =
     dynamic_cast<Test_U_IInboundStreamConnection_t*> (iconnection_p);
@@ -1688,7 +1704,11 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     if (data_p->configuration->broadcastHandle != ACE_INVALID_HANDLE)
     {
       Test_U_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
           connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->broadcastHandle));
+#else
+          connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->broadcastHandle));
+#endif
       if (iconnection_p)
       {
         iconnection_p->close ();
@@ -1699,7 +1719,11 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     if (data_p->configuration->handle != ACE_INVALID_HANDLE)
     {
       Test_U_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
           connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#else
+          connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#endif
       if (iconnection_p)
       {
         iconnection_p->close ();
@@ -2017,7 +2041,11 @@ continue_:
     if (data_p->configuration->broadcastHandle != ACE_INVALID_HANDLE)
     {
       Test_U_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->broadcastHandle));
+#else
+        connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->broadcastHandle));
+#endif
       if (iconnection_p)
       {
         iconnection_p->close ();
@@ -2028,7 +2056,11 @@ continue_:
     if (data_p->configuration->handle != ACE_INVALID_HANDLE)
     {
       Test_U_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#else
+        connection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
+#endif
       if (iconnection_p)
       {
         iconnection_p->close ();

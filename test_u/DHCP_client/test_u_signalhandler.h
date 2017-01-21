@@ -29,7 +29,7 @@
 #include "test_u_common.h"
 
 class Test_U_SignalHandler
- : public Common_SignalHandler_T<Test_U_SignalHandlerConfiguration>
+ : public Common_SignalHandler_T<struct Test_U_SignalHandlerConfiguration>
  , public Common_ISignal
 {
  public:
@@ -40,7 +40,7 @@ class Test_U_SignalHandler
   virtual void handle (int); // signal
 
  private:
-  typedef Common_SignalHandler_T<Test_U_SignalHandlerConfiguration> inherited;
+  typedef Common_SignalHandler_T<struct Test_U_SignalHandlerConfiguration> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler (const Test_U_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler& operator= (const Test_U_SignalHandler&))
