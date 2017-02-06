@@ -59,8 +59,8 @@ class Test_U_Module_EventHandler
 
   // implement (part of) Stream_ITaskBase_T
   virtual void handleControlMessage (Test_U_ControlMessage_t&);
-  virtual void handleSessionMessage (Test_U_SessionMessage*&, // session message handle
-                                     bool&);                  // return value: pass message downstream ?
+  //virtual void handleSessionMessage (Test_U_SessionMessage*&, // session message handle
+  //                                   bool&);                  // return value: pass message downstream ?
 
   // implement Common_IClone_T
   virtual ACE_Task<ACE_MT_SYNCH,
@@ -79,8 +79,8 @@ class Test_U_Module_EventHandler
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler (const Test_U_Module_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler& operator= (const Test_U_Module_EventHandler&))
 
-  Test_U_IStreamConnection_t* connection_;
-  Stream_IMessageQueue*       outboundQueue_;
+  //Test_U_IStreamConnection_t* connection_;
+  //Stream_IMessageQueue*       outboundQueue_;
 };
 
 // declare module

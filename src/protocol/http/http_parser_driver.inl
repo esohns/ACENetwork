@@ -286,23 +286,23 @@ HTTP_ParserDriver_T<SessionMessageType>::error (const yy::location& location_in,
 
   //std::clog << location_in << ": " << message_in << std::endl;
 }
-//template <typename SessionMessageType>
-//void
-//HTTP_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::error"));
+template <typename SessionMessageType>
+void
+HTTP_ParserDriver_T<SessionMessageType>::error (const std::string& message_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::error"));
 
-//  // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
-//  ACE_DEBUG ((LM_ERROR,
-//              ACE_TEXT ("\": \"%s\"...\n"),
-//              ACE_TEXT (message_in.c_str ())));
-////   ACE_DEBUG((LM_ERROR,
-////              ACE_TEXT("failed to parse \"%s\": \"%s\"...\n"),
-////              std::string(fragment_->rd_ptr(), fragment_->length()).c_str(),
-////              message_in.c_str()));
+  // *NOTE*: the output format has been "adjusted" to fit in with bison error-reporting
+  ACE_DEBUG ((LM_ERROR,
+              ACE_TEXT ("\": \"%s\"...\n"),
+              ACE_TEXT (message_in.c_str ())));
+//   ACE_DEBUG((LM_ERROR,
+//              ACE_TEXT("failed to parse \"%s\": \"%s\"...\n"),
+//              std::string(fragment_->rd_ptr(), fragment_->length()).c_str(),
+//              message_in.c_str()));
 
-////   std::clog << message_in << std::endl;
-//}
+//   std::clog << message_in << std::endl;
+}
 
 template <typename SessionMessageType>
 bool
@@ -407,12 +407,12 @@ HTTP_ParserDriver_T<SessionMessageType>::switchBuffer (bool unlink_in)
     if (!blockInParse_)
       return false; // not enough data, cannot proceed
 
-    wait (); // <-- wait for data
+    waitBuffer (); // <-- wait for data
     if (!fragment_->cont ())
     {
       // *NOTE*: most probable reason: received session end
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("no data after HTTP_ParserDriver_T::wait(), aborting\n")));
+                  ACE_TEXT ("no data after HTTP_ParserDriver_T::waitBuffer(), aborting\n")));
       return false;
     } // end IF
   } // end IF
@@ -447,9 +447,9 @@ HTTP_ParserDriver_T<SessionMessageType>::switchBuffer (bool unlink_in)
 
 template <typename SessionMessageType>
 void
-HTTP_ParserDriver_T<SessionMessageType>::wait ()
+HTTP_ParserDriver_T<SessionMessageType>::waitBuffer ()
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::wait"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::waitBuffer"));
 
   int result = -1;
   ACE_Message_Block* message_block_p = NULL;

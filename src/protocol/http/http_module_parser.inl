@@ -99,9 +99,6 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   if (inherited::isInitialized_)
   {
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("re-initializing...\n")));
-
     ACE_ASSERT (inherited::msg_queue_);
     result = inherited::msg_queue_->activate ();
     if (result == -1)

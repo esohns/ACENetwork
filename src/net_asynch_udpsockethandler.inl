@@ -416,15 +416,18 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
   if (result_in.success () == 0)
   {
     // connection closed/reset (by peer) ? --> not an error
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     if ((error != ECONNRESET) &&
         (error != EPIPE)      &&
-        (error != EBADF)) // 9 happens on Linux (local close())
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        (error != ERROR_INVALID_NETNAME)) // 1214: happens on Win32 (local socket)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: 0x%@): \"%s\", aborting\n"),
                   result_in.handle (),
                   ACE::sock_error (static_cast<int> (error))));
 #else
+    if ((error != ECONNRESET) &&
+        (error != EPIPE)      &&
+        (error != EBADF)) // 9 happens on Linux (local close())
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: %d): \"%s\", aborting\n"),
                   result_in.handle (),

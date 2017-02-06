@@ -346,8 +346,9 @@ send:
     error = ACE_OS::last_error ();
     // *WARNING*: this could fail on multi-threaded proactors
     if (error == EAGAIN) goto send; // 11   : happens on Linux
-    if ((error != ENOTSOCK)   &&    // 10038: happens on Win32
-        (error != ECONNRESET) &&    // 10054: happens on Win32
+    if ((error != ENOTSOCK)     &&  // 10038: happens on Win32
+        (error != ECONNABORTED) &&  // 10053: happens on Win32
+        (error != ECONNRESET)   &&  // 10054: happens on Win32
         (error != ENOTCONN))        // 10057: happens on Win32
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Write_Stream::writev(%u): \"%m\", aborting\n"),

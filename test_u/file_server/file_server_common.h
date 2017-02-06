@@ -99,12 +99,14 @@ struct Test_U_FileServer_Configuration
 {
   inline Test_U_FileServer_Configuration ()
    : Test_U_Configuration ()
+   , handle (ACE_INVALID_HANDLE)
    , listener (NULL)
    , listenerConfiguration ()
    , signalHandlerConfiguration ()
    //, socketHandlerConfiguration ()
   {};
 
+  ACE_HANDLE                                          handle;
   Test_U_IListener_t*                                 listener;
   struct Test_U_FileServer_ListenerConfiguration      listenerConfiguration;
 

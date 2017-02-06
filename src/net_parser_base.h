@@ -40,11 +40,12 @@ typedef void* yyscan_t;
 template <typename ConfigurationType,
           typename ScannerType, // (f/)lex-
           typename ParserType, // yacc/bison-
-          typename ParserInterfaceType, // derived from Net_IParser
+          typename ParserInterfaceType, // derived from Net_IParser_T
           typename ArgumentType, // yacc/bison-
           typename SessionMessageType>
 class Net_CppParserBase_T
  : public ParserInterfaceType
+ , public Net_IScanner_T<ParserInterfaceType>
 {
  public:
   Net_CppParserBase_T (bool,  // debug scanning ?
@@ -65,7 +66,16 @@ class Net_CppParserBase_T
   virtual bool parse (ACE_Message_Block*); // data buffer handle
   virtual bool switchBuffer (bool = false); // unlink current fragment ?
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
-  virtual void wait ();
+  virtual void waitBuffer ();
+
+  inline virtual void debug (yyscan_t state_in, bool toggle_in) { scanner_ .debug (state_in, toggle_in); };
+
+  inline virtual bool initialize (yyscan_t& state_in) { return scanner_.initialize (state_in); };
+  virtual void finalize (yyscan_t& state_in) { scanner_.finalize (state_in); };
+
+  inline virtual struct yy_buffer_state* create (yyscan_t state_in, char* buffer_in, size_t size_in) { return scanner_.create (state_in, buffer_in, size_in); };
+  inline virtual void destroy (yyscan_t state_in, struct yy_buffer_state*& buffer_inout) { scanner_.destroy (state_in, buffer_inout); };
+  inline virtual void set (ParserInterfaceType* interfaceHandle_in) { scanner_.set (interfaceHandle_in); };
 
   inline virtual void dump_state () const { ACE_ASSERT (false); ACE_NOTSUP; };
 
@@ -116,12 +126,11 @@ class Net_CppParserBase_T
 
 template <typename ConfigurationType,
           typename ParserType, // yacc/bison-
-          typename ParserInterfaceType, // derived from Net_IParser
+          typename ParserInterfaceType, // derived from Net_IParser_T
           typename ArgumentType, // yacc/bison-
           typename SessionMessageType>
 class Net_ParserBase_T
  : public ParserInterfaceType
- , public Net_IScanner_T<ParserInterfaceType>
 {
  public:
   Net_ParserBase_T (bool,  // debug scanning ?
@@ -130,24 +139,25 @@ class Net_ParserBase_T
 
   // implement (part of) ParserInterfaceType
   virtual bool initialize (const ConfigurationType&);
-  inline virtual ACE_Message_Block* buffer () { return fragment_; };
-//  inline virtual bool debugScanner () const { return bittorrent_get_debug (scannerState_); };
-  inline virtual bool debugScanner () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
-  inline virtual bool isBlocking () const { return blockInParse_; };
-//  virtual void error (const YYLTYPE&,      // location
-//                      const std::string&); // message
-  virtual void error (const std::string&); // message
-  inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }; // offset (increment)
-  inline virtual unsigned int offset () const { return offset_; };
+  //virtual void error (const yy::location&, // location
+  //                    const std::string&); // message
   virtual bool parse (ACE_Message_Block*); // data buffer handle
-  virtual bool switchBuffer (bool = false); // unlink current fragment ?
-  // *NOTE*: (waits for and) appends the next data chunk to fragment_;
-  virtual void wait ();
 
   inline virtual void dump_state () const { ACE_ASSERT (false); ACE_NOTSUP; };
 
  protected:
   // implement (part of) Net_IScanner_T
+  inline virtual ACE_Message_Block* buffer () { return fragment_; };
+  //  inline virtual bool debugScanner () const { return bittorrent_get_debug (scannerState_); };
+  inline virtual bool debugScanner () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
+  inline virtual bool isBlocking () const { return blockInParse_; };
+  virtual void error (const std::string&); // message
+  inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }; // offset (increment)
+  inline virtual unsigned int offset () const { return offset_; };
+  virtual bool switchBuffer (bool = false); // unlink current fragment ?
+                                            // *NOTE*: (waits for and) appends the next data chunk to fragment_;
+  virtual void waitBuffer ();
+
   inline virtual void debug (yyscan_t,
                              bool) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
   inline virtual bool initialize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };

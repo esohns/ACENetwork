@@ -99,11 +99,14 @@ struct Test_U_Server_Configuration
 {
   inline Test_U_Server_Configuration ()
    : Test_U_Configuration ()
+   , allocatorConfiguration ()
    , listener (NULL)
    , listenerConfiguration ()
    , signalHandlerConfiguration ()
    //, socketHandlerConfiguration ()
   {};
+
+  struct Stream_AllocatorConfiguration            allocatorConfiguration;
 
   Test_U_IListener_t*                             listener;
   struct Test_U_Server_ListenerConfiguration      listenerConfiguration;

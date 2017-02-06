@@ -105,4 +105,66 @@ class Test_U_Stream
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream& operator= (const Test_U_Stream&))
 };
 
+//////////////////////////////////////////
+
+class Test_U_UDPStream
+ : public Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_U_StreamState,
+                        struct Test_U_StreamConfiguration,
+                        Net_RuntimeStatistic_t,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_U_ModuleHandlerConfiguration,
+                        struct Test_U_FileServer_SessionData,
+                        Test_U_FileServer_SessionData_t,
+                        Test_U_ControlMessage_t,
+                        Test_U_Message,
+                        Test_U_SessionMessage>
+{
+ public:
+  Test_U_UDPStream (const std::string&); // name
+  virtual ~Test_U_UDPStream ();
+
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ModuleList_t&, // return value: module list
+                     bool&);               // return value: delete ?
+
+  // implement Common_IInitialize_T
+  virtual bool initialize (const struct Test_U_StreamConfiguration&, // configuration
+                           bool = true,                              // setup pipeline ?
+                           bool = true);                             // reset session data ?
+
+  // *TODO*: re-consider this API
+  //void ping ();
+
+  // implement Common_IStatistic_T
+  // *NOTE*: these delegate to the statistic report module
+  virtual bool collect (Net_RuntimeStatistic_t&); // return value: statistic data
+  virtual void report () const;
+
+ private:
+  typedef Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_U_StreamState,
+                        struct Test_U_StreamConfiguration,
+                        Net_RuntimeStatistic_t,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_U_ModuleHandlerConfiguration,
+                        struct Test_U_FileServer_SessionData,
+                        Test_U_FileServer_SessionData_t,
+                        Test_U_ControlMessage_t,
+                        Test_U_Message,
+                        Test_U_SessionMessage> inherited;
+
+  ACE_UNIMPLEMENTED_FUNC (Test_U_UDPStream ())
+  ACE_UNIMPLEMENTED_FUNC (Test_U_UDPStream (const Test_U_UDPStream&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_UDPStream& operator= (const Test_U_UDPStream&))
+};
+
 #endif

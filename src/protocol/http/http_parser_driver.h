@@ -57,13 +57,13 @@ class HTTP_ParserDriver_T
 //  virtual void error (const struct YYLTYPE&, // location
   virtual void error (const yy::location&, // location
                       const std::string&); // message
-//  virtual void error (const std::string&); // message
+  virtual void error (const std::string&); // message
   inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }; // offset (increment)
   inline virtual unsigned int offset () const { return offset_; };
   virtual bool parse (ACE_Message_Block*); // data buffer handle
   virtual bool switchBuffer (bool = false); // unlink current fragment ?
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
-  virtual void wait ();
+  virtual void waitBuffer ();
   inline virtual struct HTTP_Record& current () { ACE_ASSERT (record_); return *record_; };
 //  inline virtual void finished () { finished_ = true; };
   inline virtual bool hasFinished () const { return finished_; };
@@ -82,6 +82,15 @@ class HTTP_ParserDriver_T
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T (const HTTP_ParserDriver_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T& operator= (const HTTP_ParserDriver_T&))
+
+  inline virtual void debug (yyscan_t state_in, bool toggle_in) { HTTP_Scanner_set_debug ((toggle_in ? 1 : 0), state_in); };
+
+  inline virtual bool initialize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
+  virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+
+  inline virtual YY_BUFFER_STATE create (yyscan_t, char*, size_t) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) };
+  inline virtual void destroy (yyscan_t, struct yy_buffer_state*&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void set (HTTP_IParser*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   // helper methods
   bool scan_begin ();

@@ -53,7 +53,8 @@ class Test_U_EventHandler
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler (const Test_U_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler& operator=(const Test_U_EventHandler&))
 
-  Test_U_GTK_CBData* CBData_;
+  struct Test_U_GTK_CBData*             CBData_;
+  struct Test_U_FileServer_SessionData* sessionData_;
 };
 
 #endif

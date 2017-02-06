@@ -64,7 +64,7 @@ class BitTorrent_Bencoding_ParserDriver_T
   using PARSER_BASE_T::offset;
   using PARSER_BASE_T::parse;
   using PARSER_BASE_T::switchBuffer;
-  using PARSER_BASE_T::wait;
+  using PARSER_BASE_T::waitBuffer;
 //  virtual void error (const YYLTYPE&,      // location
   virtual void error (const yy::location&, // location
                       const std::string&); // message

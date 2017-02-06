@@ -28,6 +28,7 @@
 #include "common_idumpstate.h"
 #include "common_iget.h"
 #include "common_iinitialize.h"
+#include "common_iscanner.h"
 
 #include "net_defines.h"
 
@@ -39,10 +40,11 @@ typedef void* yyscan_t;
 
 //////////////////////////////////////////
 
-// *NOTE*: the template parameter ought to derive from Net_IParser
+// *NOTE*: the template parameter ought to derive from Net_IParser_T
 template <typename ParserInterfaceType>
 class Net_IScanner_T
- : public Common_ISetP_T<ParserInterfaceType>
+ : public Common_IScanner
+ , public Common_ISetP_T<ParserInterfaceType>
 {
  public:
   inline virtual ~Net_IScanner_T () {};
@@ -71,25 +73,24 @@ class Net_IParser_T
  public:
   inline virtual ~Net_IParser_T () {};
 
-  virtual ACE_Message_Block* buffer () = 0;
-  virtual bool debugScanner () const = 0;
-  virtual bool isBlocking () const = 0;
+  //virtual ACE_Message_Block* buffer () = 0;
+  //virtual bool debugScanner () const = 0;
+  //virtual bool isBlocking () const = 0;
 
 //  virtual void error (const struct YYLTYPE&,
   virtual void error (const yy::location&,
                       const std::string&) = 0;
-//  virtual void error (const std::string&) = 0;
 
   // *NOTE*: to be invoked by the scanner (ONLY !)
-  virtual void offset (unsigned int) = 0; // offset (increment)
-  virtual unsigned int offset () const = 0;
+  //virtual void offset (unsigned int) = 0; // offset (increment)
+  //virtual unsigned int offset () const = 0;
 
   virtual bool parse (ACE_Message_Block*) = 0; // data buffer handle
   // *IMPORTANT NOTE*: when the parser detects a frame end, it inserts a new
   //                   buffer to the continuation and passes 'true'
   //                   --> separate the current frame from the next
-  virtual bool switchBuffer (bool = false) = 0; // unlink current buffer ?
-  virtual void wait () = 0;
+  //virtual bool switchBuffer (bool = false) = 0; // unlink current buffer ?
+  //virtual void wait () = 0;
 };
 
 //////////////////////////////////////////
@@ -100,6 +101,9 @@ class Net_IRecordParser_T
  : public Net_IParser_T<ConfigurationType>
 {
  public:
+  // convenient types
+  typedef Net_IParser_T<ConfigurationType> IPARSER_T;
+
   inline virtual ~Net_IRecordParser_T () {};
 
   virtual RecordType& current () = 0;

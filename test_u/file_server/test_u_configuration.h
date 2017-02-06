@@ -32,7 +32,6 @@
 #include "stream_common.h"
 #include "stream_iallocator.h"
 //#include "stream_imessagequeue.h"
-#include "stream_isessionnotify.h"
 
 #include "net_configuration.h"
 #include "net_defines.h"
@@ -46,6 +45,7 @@
 #include "test_u_connection_common.h"
 
 #include "file_server_defines.h"
+#include "file_server_stream_common.h"
 
 // forward declarations
 class Stream_IMessageQueue;
@@ -73,56 +73,6 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 //  bool           pingAutoAnswer;
 //  bool           printPongMessages;
 //};
-
-struct Test_U_FileServer_SessionData;
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct Test_U_FileServer_SessionData,
-                                    enum Stream_SessionMessageType,
-                                    Test_U_Message,
-                                    Test_U_SessionMessage> Test_U_ISessionNotify_t;
-typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
-typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
-
-struct Test_U_ModuleHandlerConfiguration
- : Stream_ModuleHandlerConfiguration
-{
-  inline Test_U_ModuleHandlerConfiguration ()
-   : Stream_ModuleHandlerConfiguration ()
-   , fileName ()
-   , inbound (false)
-   , outboundQueue (NULL)
-   , pushStatisticMessages (true)
-   , subscriber (NULL)
-   , subscribers (NULL)
-  {};
-
-  std::string              fileName;              // file reader module
-  bool                     inbound;               // statistic/IO module
-  Stream_IMessageQueue*    outboundQueue;         // event handler module
-  bool                     pushStatisticMessages; // statistic module
-  Test_U_ISessionNotify_t* subscriber;            // event handler module
-  Test_U_Subscribers_t*    subscribers;           // event handler module
-};
-
-struct Test_U_StreamConfiguration
- : Stream_Configuration
-{
-  inline Test_U_StreamConfiguration ()
-   : Stream_Configuration ()
-   , moduleConfiguration_2 ()
-   , moduleHandlerConfiguration (NULL)
-   , moduleHandlerConfiguration_2 ()
-   , userData (NULL)
-  {
-    bufferSize = FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE;
-  };
-
-  struct Stream_ModuleConfiguration         moduleConfiguration_2;        // module configuration
-  struct Test_U_ModuleHandlerConfiguration* moduleHandlerConfiguration;   // module handler configuration
-  struct Test_U_ModuleHandlerConfiguration  moduleHandlerConfiguration_2; // module handler configuration
-
-  struct Test_U_UserData*                   userData;                     // user data
-};
 
 //struct Test_U_ConnectionConfiguration;
 struct Test_U_Configuration

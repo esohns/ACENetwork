@@ -97,12 +97,6 @@ do_printUsage (const std::string& programName_in)
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("client_server");
-#endif // #ifdef DEBUG_DEBUGGER
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -198,12 +192,6 @@ do_processArguments (const int& argc_in,
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("client_server");
-#endif // #ifdef DEBUG_DEBUGGER
 
   // initialize results
   maximumNumberOfConnections_out =
@@ -474,7 +462,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   int result = -1;
 
   // step0a: initialize configuration
-  Test_U_Server_Configuration configuration;
+  struct Test_U_Server_Configuration configuration;
   CBData_in.configuration = &configuration;
 
   Test_U_EventHandler ui_event_handler (&CBData_in);
@@ -489,9 +477,14 @@ do_work (unsigned int maximumNumberOfConnections_in,
                 ACE_TEXT ("dynamic_cast<Test_U_Module_EventHandler> failed, returning\n")));
     return;
   } // end IF
-  event_handler_p->subscribe (&ui_event_handler);
 
-  Stream_AllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator;
+  Stream_AllocatorHeap_T<struct Stream_AllocatorConfiguration> heap_allocator;
+  if (!heap_allocator.initialize (configuration.allocatorConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize allocator, returning\n")));
+    return;
+  } // end IF
   Test_U_StreamMessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
                                                      &heap_allocator,         // heap allocator handle
                                                      true);                   // block ?
@@ -523,10 +516,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   configuration.streamConfiguration.moduleHandlerConfiguration_2.printFinalReport =
       true;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribersLock =
-      &CBData_in.subscribersLock;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscriber =
+    &ui_event_handler;
   configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribers =
       &CBData_in.subscribers;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribersLock =
+    &CBData_in.subscribersLock;
 
   // ********************** socket configuration data **************************
   // ****************** socket handler configuration data **********************
@@ -945,12 +940,6 @@ ACE_TMAIN (int argc_in,
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_u");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("client_server");
-#endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
   unsigned int maximum_number_of_connections =
@@ -1034,7 +1023,6 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid arguments, aborting\n")));
 
-    // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
     // *PORTABILITY*: on Windows, finalize ACE...

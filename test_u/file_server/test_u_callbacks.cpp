@@ -58,8 +58,8 @@ idle_update_log_display_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_log_display_cb"));
 
-  Test_U_FileServer_GTK_CBData* data_p =
-    static_cast<Test_U_FileServer_GTK_CBData*> (userData_in);
+  struct Test_U_FileServer_GTK_CBData* data_p =
+    static_cast<struct Test_U_FileServer_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -143,12 +143,51 @@ idle_update_log_display_cb (gpointer userData_in)
 }
 
 gboolean
+idle_session_start_cb (gpointer userData_in)
+{
+  STREAM_TRACE (ACE_TEXT ("::idle_session_start_cb"));
+
+  struct Test_U_FileServer_GTK_CBData* data_p =
+    static_cast<struct Test_U_FileServer_GTK_CBData*> (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+
+  Common_UI_GTKBuildersIterator_t iterator =
+    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  // sanity check(s)
+  ACE_ASSERT (iterator != data_p->builders.end ());
+
+  GtkSpinButton* spin_button_p =
+    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                             ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_GTK_SPINBUTTON_DATA_NAME)));
+  ACE_ASSERT (spin_button_p);
+  gtk_spin_button_set_value (spin_button_p, 0.0);
+  spin_button_p =
+    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                             ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_GTK_SPINBUTTON_NUMMESSAGES_NAME)));
+  ACE_ASSERT (spin_button_p);
+  gtk_spin_button_set_value (spin_button_p, 0.0);
+  spin_button_p =
+    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                             ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_GTK_SPINBUTTON_NUMSESSIONMESSAGES_NAME)));
+  ACE_ASSERT (spin_button_p);
+  gtk_spin_button_set_value (spin_button_p, 0.0);
+
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
+
+  ACE_OS::memset (&data_p->progressData.statistic, 0, sizeof (Stream_Statistic));
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
 idle_update_info_display_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_info_display_cb"));
 
-  Test_U_FileServer_GTK_CBData* data_p =
-    static_cast<Test_U_FileServer_GTK_CBData*> (userData_in);
+  struct Test_U_FileServer_GTK_CBData* data_p =
+    static_cast<struct Test_U_FileServer_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);

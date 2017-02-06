@@ -61,6 +61,8 @@
 #include "net_common_tools.h"
 #include "net_macros.h"
 
+#include "net_client_defines.h"
+
 #include "net_server_common_tools.h"
 
 #ifdef HAVE_CONFIG_H
@@ -147,10 +149,6 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  //std::cout << ACE_TEXT_ALWAYS_CHAR ("-m           : receive uni/multi/broadcast UDP [")
-  //          << false
-  //          << ACE_TEXT_ALWAYS_CHAR ("]")
-  //          << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [VALUE]   : maximum number of (concurrent) connections [")
             << NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -174,6 +172,10 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-t           : trace information")
             << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-u           : use UDP [")
+            << false
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-v           : print version information and exit")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-x [VALUE]   : #dispatch threads [")
@@ -194,13 +196,13 @@ do_processArguments (const int& argc_in,
                      std::string& networkInterface_out,
                      //unsigned int& keepAliveTimeout_out,
                      bool& logToFile_out,
-                     bool& useUDP_out,
                      unsigned int& maximumNumberOfConnections_out,
                      bool& useLoopBack_out,
                      unsigned short& listeningPortNumber_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
+                     bool& useUDP_out,
                      bool& printVersionAndExit_out,
                      unsigned int& numberOfDispatchThreads_out)
 {
@@ -231,7 +233,6 @@ do_processArguments (const int& argc_in,
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
 //  keepAliveTimeout_out = NET_SERVER_DEF_CLIENT_KEEPALIVE;
   logToFile_out = false;
-  useUDP_out = false;
   maximumNumberOfConnections_out =
     NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
   useLoopBack_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
@@ -240,6 +241,7 @@ do_processArguments (const int& argc_in,
   statisticReportingInterval_out =
       NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out = false;
+  useUDP_out = false;
   printVersionAndExit_out = false;
   numberOfDispatchThreads_out =
     NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
@@ -247,9 +249,9 @@ do_processArguments (const int& argc_in,
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                              ACE_TEXT ("cf:g::hi:k:lmn:op:rs:tvx:"));
+                              ACE_TEXT ("cf:g::hi:k:ln:op:rs:tuvx:"));
 #else
-                              ACE_TEXT ("f:g::hi:k:lmn:op:rs:tvx:"));
+                              ACE_TEXT ("f:g::hi:k:ln:op:rs:tuvx:"));
 #endif
   int option = 0;
   std::stringstream converter;
@@ -303,11 +305,6 @@ do_processArguments (const int& argc_in,
         logToFile_out = true;
         break;
       }
-      case 'm':
-      {
-        useUDP_out = true;
-        break;
-      }
       case 'n':
       {
         converter.clear ();
@@ -345,6 +342,11 @@ do_processArguments (const int& argc_in,
       case 't':
       {
         traceInformation_out = true;
+        break;
+      }
+      case 'u':
+      {
+        useUDP_out = true;
         break;
       }
       case 'v':
@@ -477,12 +479,12 @@ do_work (
          bool useThreadPool_in,
          const std::string& networkInterface_in,
          //unsigned int keepAliveTimeout_in,
-         bool useUDP_in,
          unsigned int maximumNumberOfConnections_in,
          bool useLoopBack_in,
          unsigned short listeningPortNumber_in,
          bool useReactor_in,
          unsigned int statisticReportingInterval_in,
+         bool useUDP_in,
          unsigned int numberOfDispatchThreads_in,
          struct Test_U_FileServer_GTK_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
@@ -493,10 +495,36 @@ do_work (
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   int result = -1;
+  struct Common_DispatchThreadData thread_data;
+  struct Common_TimerConfiguration timer_configuration;
+  struct Test_U_FileServer_SignalHandlerConfiguration signal_handler_configuration;
+  struct Test_U_UserData user_data;
+  Test_U_FileServer_GTK_Manager_t* gtk_manager_p = NULL;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  HWND window_p = NULL;
+  BOOL was_visible_b = true;
+#endif
+  long timer_id = -1;
+  int group_id = -1;
+  bool stop_event_dispatch = false;
 
   // step0a: initialize configuration
   struct Test_U_FileServer_Configuration configuration;
   CBData_in.configuration = &configuration;
+
+  Common_Timer_Manager_t* timer_manager_p =
+    COMMON_TIMERMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (timer_manager_p);
+
+  Test_U_InetConnectionManager_t* connection_manager_p =
+    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  Test_U_IInetConnectionManager_t* iconnection_manager_p =
+    connection_manager_p;
+  ACE_ASSERT (iconnection_manager_p);
+
+  Stream_StatisticHandler_Reactor_t statistic_handler (ACTION_REPORT,
+                                                       connection_manager_p,
+                                                       false);
 
   Test_U_EventHandler ui_event_handler (&CBData_in);
   Test_U_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
@@ -534,21 +562,37 @@ do_work (
     &configuration.streamConfiguration;
   configuration.streamConfiguration.moduleHandlerConfiguration =
     &configuration.streamConfiguration.moduleHandlerConfiguration_2;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.connectionManager =
+    connection_manager_p;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.socketConfiguration =
+    &configuration.socketConfiguration;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.socketHandlerConfiguration =
+    &configuration.socketHandlerConfiguration;
   configuration.streamConfiguration.moduleHandlerConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
+
   //configuration.streamConfiguration.protocolConfiguration =
   //  &configuration.protocolConfiguration;
   // *TODO*: is this correct ?
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;
   configuration.streamConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
+  configuration.streamConfiguration.useReactor = useReactor_in;
   configuration.streamConfiguration.userData = &configuration.userData;
   configuration.userData.configuration = &configuration.connectionConfiguration;
 
   configuration.streamConfiguration.moduleHandlerConfiguration_2.fileName =
     fileName_in;
+  if (useUDP_in)
+    configuration.streamConfiguration.moduleHandlerConfiguration_2.inbound =
+      false;
   configuration.streamConfiguration.moduleHandlerConfiguration_2.printFinalReport =
-      true;
+    true;
+  //configuration.streamConfiguration.moduleHandlerConfiguration_2.program =
+  //  FILE_SERVER_DEFAULT_MPEG_TS_PROGRAM_NUMBER;
+  //configuration.streamConfiguration.moduleHandlerConfiguration_2.streamType =
+  //  FILE_SERVER_DEFAULT_MPEG_TS_STREAM_TYPE;
+
   if (!UIDefinitionFile_in.empty ())
   {
     configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribersLock =
@@ -560,6 +604,19 @@ do_work (
   } // end IF
 
   // ********************** socket configuration data **************************
+  if (useUDP_in)
+  {
+    result =
+      configuration.socketConfiguration.address.set (listeningPortNumber_in,
+                                                     INADDR_LOOPBACK);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+      goto error;
+    } // end IF
+    configuration.socketConfiguration.writeOnly = true;
+  } // end IF
   // ****************** socket handler configuration data **********************
   configuration.socketHandlerConfiguration.messageAllocator =
     &message_allocator;
@@ -585,7 +642,6 @@ do_work (
   //	config.lastCollectionTimestamp = ACE_Time_Value::zero;
 
   // step0b: initialize event dispatch
-  struct Common_DispatchThreadData thread_data;
   thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
   thread_data.useReactor = useReactor_in;
   if (!Common_Tools::initializeEventDispatch (thread_data.useReactor,
@@ -597,37 +653,13 @@ do_work (
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
-    return;
+    goto error;
   } // end IF
 
-  Common_Timer_Manager_t* timer_manager_p =
-    COMMON_TIMERMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (timer_manager_p);
-  struct Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
 
-  Test_U_InetConnectionManager_t* connection_manager_p =
-    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
-  Test_U_IInetConnectionManager_t* iconnection_manager_p =
-    connection_manager_p;
-  ACE_ASSERT (iconnection_manager_p);
-
-  struct Test_U_FileServer_SignalHandlerConfiguration signal_handler_configuration;
-  struct Test_U_UserData user_data;
-  Test_U_FileServer_GTK_Manager_t* gtk_manager_p = NULL;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  HWND window_p = NULL;
-  BOOL was_visible_b = true;
-#endif
-  long timer_id = -1;
-  int group_id = -1;
-  bool stop_event_dispatch = false;
-
-  // step1: initialize regular (global) statistics reporting
-  Stream_StatisticHandler_Reactor_t statistic_handler (ACTION_REPORT,
-                                                       connection_manager_p,
-                                                       false);
+  // step1: initialize regular (global) statistic reporting
   if (statisticReportingInterval_in)
   {
     ACE_Event_Handler* handler_p = &statistic_handler;
@@ -767,20 +799,115 @@ do_work (
       goto error;
     } // end IF
 
-    CBData_in.configuration->listener->start ();
-    if (!CBData_in.configuration->listener->isRunning ())
+    if (useUDP_in)
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to start listener (port: %u), aborting\n"),
-                  listeningPortNumber_in));
-      goto error;
+      //Test_U_IInetConnector_t* iconnector_p = NULL;
+
+      //if (useReactor_in)
+      //  ACE_NEW_NORETURN (iconnector_p,
+      //                    Test_U_UDPConnector_t (connection_manager_p,
+      //                                           configuration.streamConfiguration.statisticReportingInterval));
+      //else
+      //  ACE_NEW_NORETURN (iconnector_p,
+      //                    Test_U_UDPAsynchConnector_t (connection_manager_p,
+      //                                                 configuration.streamConfiguration.statisticReportingInterval));
+      //bool result_2 =
+      //  iconnector_p->initialize (configuration.socketHandlerConfiguration);
+      //if (!iconnector_p)
+      //{
+      //  ACE_DEBUG ((LM_CRITICAL,
+      //              ACE_TEXT ("failed to allocate memory, returning\n")));
+      //  goto error;
+      //} // end IF
+      ////  Stream_IInetConnector_t* iconnector_p = &connector;
+      //if (!result_2)
+      //{
+      //  ACE_DEBUG ((LM_ERROR,
+      //              ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
+      //  goto error;
+      //} // end IF
+
+      //// connect
+      //// *TODO*: support one-thread operation by scheduling a signal and manually
+      ////         running the dispatch loop for a limited time...
+      //configuration.handle =
+      //  iconnector_p->connect (configuration.socketConfiguration.address);
+      //if (!useReactor_in)
+      //{
+      //  // *TODO*: avoid tight loop here
+      //  ACE_Time_Value timeout (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT, 0);
+      //  //result = ACE_OS::sleep (timeout);
+      //  //if (result == -1)
+      //  //  ACE_DEBUG ((LM_ERROR,
+      //  //              ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
+      //  //              &timeout));
+      //  ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
+      //  Test_U_UDPAsynchConnector_t::ICONNECTION_T* connection_p = NULL;
+      //  do
+      //  {
+      //    connection_p =
+      //      connection_manager_p->get (configuration.socketConfiguration.address);
+      //    if (connection_p)
+      //    {
+      //      configuration.handle =
+      //          reinterpret_cast<ACE_HANDLE> (connection_p->id ());
+      //      connection_p->decrease ();
+      //      break;
+      //    } // end IF
+      //  } while (COMMON_TIME_NOW < deadline);
+      //} // end IF
+      //result_2 = !(configuration.handle == ACE_INVALID_HANDLE);
+      //if (!result_2)
+      //{
+      //  ACE_DEBUG ((LM_ERROR,
+      //              ACE_TEXT ("failed to connect to \"%s\", returning\n"),
+      //              ACE_TEXT (Net_Common_Tools::IPAddress2String (configuration.socketConfiguration.address).c_str ())));
+      //  goto error;
+      //} // end IF
+      //ACE_DEBUG ((LM_DEBUG,
+      //            ACE_TEXT ("listening to UDP \"%s\"...\n"),
+      //            ACE_TEXT (Net_Common_Tools::IPAddress2String (configuration.socketConfiguration.address).c_str ())));
+
+      //// clean up
+      //delete iconnector_p;
+
+      Test_U_UDPStream stream (ACE_TEXT_ALWAYS_CHAR ("UPDStream"));
+      if (!stream.initialize (configuration.streamConfiguration))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to initialize stream, aborting\n")));
+        goto error;
+      } // end IF
+
+      stream.start ();
+      if (!stream.isRunning ())
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to start stream, aborting\n")));
+        goto error;
+      } // end IF
+      stream.wait (true,  // wait for thread(s)
+                   false, // wait for upstream ?
+                   true); // wait for downstream ?
     } // end IF
+    else
+    {
+      CBData_in.configuration->listener->start ();
+      if (!CBData_in.configuration->listener->isRunning ())
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to start listener (port: %u), aborting\n"),
+                    listeningPortNumber_in));
+        goto error;
+      } // end IF
+    } // end ELSE
   } // end IF
 
   // *NOTE*: from this point on, clean up any remote connections !
 
-  Common_Tools::dispatchEvents (useReactor_in,
-                                group_id);
+  if (!useUDP_in)
+    Common_Tools::dispatchEvents (useReactor_in,
+                                  group_id);
   stop_event_dispatch = false;
 
   // clean up
@@ -816,7 +943,8 @@ error:
     Common_Tools::finalizeEventDispatch (useReactor_in,
                                           !useReactor_in,
                                           group_id);
-  if (CBData_in.configuration->listener)
+  if (CBData_in.configuration->listener &&
+      !useUDP_in)
     CBData_in.configuration->listener->stop (true,
                                              true);
 }
@@ -951,7 +1079,6 @@ ACE_TMAIN (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
   bool log_to_file = false;
-  bool use_udp = false;
   unsigned int maximum_number_of_connections =
     NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
   bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
@@ -960,6 +1087,7 @@ ACE_TMAIN (int argc_in,
   unsigned int statistic_reporting_interval =
     NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information = false;
+  bool use_udp = false;
   bool print_version_and_exit = false;
   unsigned int number_of_dispatch_threads =
     NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
@@ -976,13 +1104,13 @@ ACE_TMAIN (int argc_in,
                             network_interface,
                             //keep_alive_timeout,
                             log_to_file,
-                            use_udp,
                             maximum_number_of_connections,
                             use_loopback,
                             listening_port_number,
                             use_reactor,
                             statistic_reporting_interval,
                             trace_information,
+                            use_udp,
                             print_version_and_exit,
                             number_of_dispatch_threads))
   {
@@ -1025,7 +1153,7 @@ ACE_TMAIN (int argc_in,
 
     do_printUsage (ACE::basename (argv_in[0]));
 
-    // *PORTABILITY*: on Windows, finalize ACE...
+    // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
     if (result == -1)
@@ -1063,7 +1191,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeLogging(), aborting\n")));
 
-    // *PORTABILITY*: on Windows, finalize ACE...
+    // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
     if (result == -1)
@@ -1092,7 +1220,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ACE_OS::sigemptyset(): \"%m\", aborting\n")));
 
     Common_Tools::finalizeLogging ();
-    // *PORTABILITY*: on Windows, finalize ACE...
+    // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
     if (result == -1)
@@ -1132,7 +1260,7 @@ ACE_TMAIN (int argc_in,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
-    // *PORTABILITY*: on Windows, finalize ACE...
+    // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
     if (result == -1)
@@ -1198,12 +1326,12 @@ ACE_TMAIN (int argc_in,
            use_thread_pool,
            network_interface,
            //keep_alive_timeout,
-           use_udp,
            maximum_number_of_connections,
            use_loopback,
            listening_port_number,
            use_reactor,
            statistic_reporting_interval,
+           use_udp,
            number_of_dispatch_threads,
            gtk_cb_user_data,
            signal_set,
