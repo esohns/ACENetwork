@@ -526,7 +526,8 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // *TODO*: is this correct ?
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;
   configuration.streamConfiguration.userData = &configuration.userData;
-  configuration.userData.configuration = &configuration.connectionConfiguration;
+  configuration.userData.connectionConfiguration =
+      &configuration.connectionConfiguration;
 
   configuration.streamConfiguration.moduleHandlerConfiguration_2.printFinalReport =
       true;

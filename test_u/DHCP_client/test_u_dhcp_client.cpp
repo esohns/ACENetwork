@@ -520,7 +520,8 @@ do_work (bool requestBroadcastReplies_in,
 
   // step0c: initialize configuration and stream
   Test_U_DHCPClient_Configuration configuration;
-  configuration.userData.configuration = &configuration.connectionConfiguration;
+  configuration.userData.connectionConfiguration =
+      &configuration.connectionConfiguration;
   configuration.userData.streamConfiguration =
       &configuration.streamConfiguration;
   configuration.useReactor = useReactor_in;

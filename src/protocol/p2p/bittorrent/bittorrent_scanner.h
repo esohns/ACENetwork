@@ -284,8 +284,8 @@ typedef void* yyscan_t;
 
 
 
-/* For convenience, these vars (plus the bison vars far below)
-   are macros in the reentrant scanner. */
+///* For convenience, these vars (plus the bison vars far below)
+//   are macros in the reentrant scanner. */
 //#define yyin yyg->yyin_r
 //#define yyout yyg->yyout_r
 //#define yyextra yyg->yyextra_r
@@ -712,6 +712,8 @@ extern int BitTorrent_Scanner_lex (yyscan_t yyscanner);
 #undef YY_DECL_IS_OURS
 #undef YY_DECL
 #endif
+
+
 
 #undef BitTorrent_Scanner_IN_HEADER
 #endif /* BitTorrent_Scanner_HEADER_H */

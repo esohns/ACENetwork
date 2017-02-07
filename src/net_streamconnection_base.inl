@@ -379,7 +379,7 @@ Net_StreamConnectionBase_T<HandlerType,
   // *TODO*: remove type inference
   ACE_ASSERT (handler_configuration_p->userData);
   ConfigurationType* configuration_p =
-    handler_configuration_p->userData->configuration;
+    handler_configuration_p->userData->connectionConfiguration;
   ACE_ASSERT (configuration_p);
   if (!inherited::CONNECTION_BASE_T::initialize (*configuration_p))
   {
@@ -686,7 +686,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   // *TODO*: remove type inference
   ACE_ASSERT (handler_configuration_p->userData);
   ConfigurationType* configuration_p =
-    handler_configuration_p->userData->configuration;
+    handler_configuration_p->userData->connectionConfiguration;
   ACE_ASSERT (configuration_p);
   if (!inherited::CONNECTION_BASE_T::initialize (*configuration_p))
   {

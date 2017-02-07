@@ -512,7 +512,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   configuration.streamConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
   configuration.streamConfiguration.userData = &configuration.userData;
-  configuration.userData.configuration = &configuration.connectionConfiguration;
+  configuration.userData.connectionConfiguration =
+      &configuration.connectionConfiguration;
 
   configuration.streamConfiguration.moduleHandlerConfiguration_2.printFinalReport =
       true;

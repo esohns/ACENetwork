@@ -1329,13 +1329,13 @@ ACE_TMAIN (int argc_in,
   configuration.sessionConfiguration.parserConfiguration =
       &configuration.parserConfiguration;
 
-  configuration.peerUserData.configuration =
+  configuration.peerUserData.connectionConfiguration =
       &configuration.peerConnectionConfiguration;
   configuration.peerUserData.moduleConfiguration =
       &configuration.moduleConfiguration;
   configuration.peerUserData.moduleHandlerConfiguration =
       &configuration.peerModuleHandlerConfiguration;
-  configuration.trackerUserData.configuration =
+  configuration.trackerUserData.connectionConfiguration =
       &configuration.trackerConnectionConfiguration;
   configuration.trackerUserData.moduleConfiguration =
       &configuration.moduleConfiguration;

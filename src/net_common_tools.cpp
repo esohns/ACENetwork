@@ -777,7 +777,7 @@ Net_Common_Tools::interface2ExternalIPAddress (const std::string& interfaceIdent
               ACE_TEXT (interfaceIdentifier_in.c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddress2String (internal_ip_address).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddress2String (IPAddress_out).c_str ())));
-  
+
   return true;
 }
 

@@ -89,11 +89,11 @@ struct Test_U_UserData
 {
   inline Test_U_UserData ()
    : Stream_UserData ()
-   , configuration (NULL)
+   , connectionConfiguration (NULL)
    , streamConfiguration (NULL)
   {};
 
-  struct Test_U_ConnectionConfiguration* configuration;
+  struct Test_U_ConnectionConfiguration* connectionConfiguration;
   struct Test_U_StreamConfiguration*     streamConfiguration;
 };
 

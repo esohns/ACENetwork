@@ -38,12 +38,12 @@ struct BitTorrent_Client_PeerModuleHandlerConfiguration;
 struct BitTorrent_Client_PeerUserData
 {
   inline BitTorrent_Client_PeerUserData ()
-   : configuration (NULL)
+   : connectionConfiguration (NULL)
    , moduleConfiguration (NULL)
    , moduleHandlerConfiguration (NULL)
   {};
 
-  struct BitTorrent_Client_PeerConnectionConfiguration*    configuration;
+  struct BitTorrent_Client_PeerConnectionConfiguration*    connectionConfiguration;
 
   // *TODO*: remove these ASAP
   struct Stream_ModuleConfiguration*                       moduleConfiguration;
@@ -54,12 +54,12 @@ struct BitTorrent_Client_TrackerModuleHandlerConfiguration;
 struct BitTorrent_Client_TrackerUserData
 {
   inline BitTorrent_Client_TrackerUserData ()
-   : configuration (NULL)
+   : connectionConfiguration (NULL)
    , moduleConfiguration (NULL)
    , moduleHandlerConfiguration (NULL)
   {};
 
-  struct BitTorrent_Client_TrackerConnectionConfiguration*    configuration;
+  struct BitTorrent_Client_TrackerConnectionConfiguration*    connectionConfiguration;
 
   // *TODO*: remove these ASAP
   struct Stream_ModuleConfiguration*                          moduleConfiguration;

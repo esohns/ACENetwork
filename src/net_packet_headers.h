@@ -27,7 +27,6 @@
 #pragma pack(push, 1)
 #endif
 
-// *IMPORTANT NOTE*: this header doesn't exist on the Windows platform...
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
 #include <netinet/tcp.h>
 #else

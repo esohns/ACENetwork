@@ -612,13 +612,13 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   if (useCursesLibrary_in)
     configuration_in.signalHandlerConfiguration.cursesState = &curses_state;
 
-  configuration_in.peerUserData.configuration =
+  configuration_in.peerUserData.connectionConfiguration =
       &configuration_in.peerConnectionConfiguration;
   configuration_in.peerUserData.moduleConfiguration =
       &configuration_in.moduleConfiguration;
   configuration_in.peerUserData.moduleHandlerConfiguration =
       &configuration_in.peerModuleHandlerConfiguration;
-  configuration_in.trackerUserData.configuration =
+  configuration_in.trackerUserData.connectionConfiguration =
       &configuration_in.trackerConnectionConfiguration;
   configuration_in.trackerUserData.moduleConfiguration =
       &configuration_in.moduleConfiguration;

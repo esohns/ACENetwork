@@ -125,12 +125,12 @@ struct IRC_Client_InputThreadData
 struct IRC_Client_UserData
 {
   inline IRC_Client_UserData ()
-   : configuration (NULL)
+   : connectionConfiguration (NULL)
    , moduleConfiguration (NULL)
    , moduleHandlerConfiguration (NULL)
   {};
 
-  struct IRC_Client_ConnectionConfiguration*    configuration;
+  struct IRC_Client_ConnectionConfiguration*    connectionConfiguration;
 
   // *TODO*: remove these ASAP
   struct Stream_ModuleConfiguration*            moduleConfiguration;

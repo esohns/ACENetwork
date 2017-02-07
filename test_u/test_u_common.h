@@ -42,10 +42,10 @@ struct Test_U_UserData
 {
   inline Test_U_UserData ()
    : Net_UserData ()
-   , configuration (NULL)
+   , connectionConfiguration (NULL)
   {};
 
-  struct Test_U_ConnectionConfiguration* configuration;
+  struct Test_U_ConnectionConfiguration* connectionConfiguration;
 };
 
 struct Test_U_SocketHandlerConfiguration

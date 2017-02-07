@@ -28,6 +28,7 @@
 #include "http_exports.h"
 #include "http_iparser.h"
 #include "http_parser.h"
+#include "http_scanner.h"
 
 #include "location.hh"
 

@@ -480,7 +480,8 @@ do_work (unsigned int bufferSize_in,
 
   // step0a: initialize configuration and stream
   Test_U_Configuration configuration;
-  configuration.userData.configuration = &configuration.connectionConfiguration;
+  configuration.userData.connectionConfiguration =
+      &configuration.connectionConfiguration;
 //  configuration.userData.streamConfiguration =
 //      &configuration.streamConfiguration;
   configuration.useReactor = useReactor_in;

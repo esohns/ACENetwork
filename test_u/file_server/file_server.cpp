@@ -119,7 +119,7 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
 #endif
   std::string path = configuration_path;
-  std::string source_file = path;
+  std::string source_file = Common_File_Tools::getTempDirectory ();
   source_file += ACE_DIRECTORY_SEPARATOR_STR;
   source_file += ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_DEFAULT_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-f [FILE]    : source file [")
@@ -130,7 +130,7 @@ do_printUsage (const std::string& programName_in)
   UI_file += ACE_DIRECTORY_SEPARATOR_STR;
   UI_file += ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_UI_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-g[[STRING]] : UI definition file [\"")
-            << path
+            << UI_file
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-h           : use thread-pool [")
@@ -222,7 +222,7 @@ do_processArguments (const int& argc_in,
   showConsole_out = false;
 #endif
   std::string path = configuration_path;
-  fileName_out = path;
+  fileName_out = Common_File_Tools::getTempDirectory ();
   fileName_out += ACE_DIRECTORY_SEPARATOR_STR;
   fileName_out += ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_DEFAULT_FILE);
   UIFile_out = path;
@@ -579,7 +579,8 @@ do_work (
     statisticReportingInterval_in;
   configuration.streamConfiguration.useReactor = useReactor_in;
   configuration.streamConfiguration.userData = &configuration.userData;
-  configuration.userData.configuration = &configuration.connectionConfiguration;
+  configuration.userData.connectionConfiguration =
+      &configuration.connectionConfiguration;
 
   configuration.streamConfiguration.moduleHandlerConfiguration_2.fileName =
     fileName_in;
@@ -1068,7 +1069,7 @@ ACE_TMAIN (int argc_in,
   bool show_console = false;
 #endif
   std::string path = configuration_path;
-  std::string source_file = path;
+  std::string source_file = Common_File_Tools::getTempDirectory ();
   source_file += ACE_DIRECTORY_SEPARATOR_STR;
   source_file += ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_DEFAULT_FILE);
   std::string UI_file = path;

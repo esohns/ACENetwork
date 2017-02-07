@@ -1170,7 +1170,6 @@ ACE_TMAIN (int argc_in,
                             print_version_and_exit,
                             number_of_thread_pool_threads))
   {
-    // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
     // *PORTABILITY*: on Windows, fini ACE...
@@ -1306,15 +1305,15 @@ ACE_TMAIN (int argc_in,
   // step6: initialize configuration objects
 
   // initialize protocol configuration
-  Stream_CachedAllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                              IRC_BUFFER_SIZE);
+  Stream_CachedAllocatorHeap_T<struct Stream_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                                     IRC_BUFFER_SIZE);
   IRC_Client_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES,
                                                    &heap_allocator);
 
-  IRC_Client_Configuration configuration;
-  IRC_Client_UserData user_data;
+  struct IRC_Client_Configuration configuration;
+  struct IRC_Client_UserData user_data;
 
-  user_data.configuration = &configuration.connectionConfiguration;
+  user_data.connectionConfiguration = &configuration.connectionConfiguration;
 
   configuration.parserConfiguration.debugParser = debug;
   if (debug)
@@ -1332,7 +1331,7 @@ ACE_TMAIN (int argc_in,
       &configuration.parserConfiguration;
   configuration.userData = &user_data;
 
-  IRC_Client_GTK_CBData cb_user_data;
+  struct IRC_Client_GTK_CBData cb_user_data;
   cb_user_data.configuration = &configuration;
   cb_user_data.UIFileDirectory = UIDefinitionFile_directory;
 //   userData.phoneBook;
