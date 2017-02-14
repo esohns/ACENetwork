@@ -95,7 +95,7 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
+Test_U_Stream::initialize (const FileServer_StreamConfiguration& configuration_in,
                            bool setupPipeline_in,
                            bool resetSessionData_in)
 {
@@ -109,7 +109,7 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   ACE_ASSERT (module_p);
   typename inherited::TASK_T* task_p = module_p->reader ();
   ACE_ASSERT (task_p);
-  const_cast<Test_U_StreamConfiguration&> (configuration_in).moduleHandlerConfiguration_2.outboundQueue =
+  const_cast<struct FileServer_StreamConfiguration&> (configuration_in).moduleHandlerConfiguration_2.outboundQueue =
     dynamic_cast<Stream_IMessageQueue*> (task_p->msg_queue ());
   ACE_ASSERT (configuration_in.moduleHandlerConfiguration_2.outboundQueue);
 
@@ -124,8 +124,8 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   } // end IF
   ACE_ASSERT (inherited::sessionData_);
 
-  Test_U_FileServer_SessionData& session_data_r =
-      const_cast<Test_U_FileServer_SessionData&> (inherited::sessionData_->get ());
+  struct FileServer_SessionData& session_data_r =
+      const_cast<struct FileServer_SessionData&> (inherited::sessionData_->get ());
   session_data_r.sessionID = configuration_in.sessionID;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;
@@ -210,8 +210,8 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
   } // end IF
 
   // synch access
-  Test_U_FileServer_SessionData& session_data_r =
-      const_cast<Test_U_FileServer_SessionData&> (inherited::sessionData_->get ());
+  struct FileServer_SessionData& session_data_r =
+      const_cast<struct FileServer_SessionData&> (inherited::sessionData_->get ());
   if (session_data_r.lock)
   {
     result = session_data_r.lock->acquire ();
@@ -344,7 +344,7 @@ Test_U_UDPStream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_U_UDPStream::initialize (const Test_U_StreamConfiguration& configuration_in,
+Test_U_UDPStream::initialize (const struct FileServer_StreamConfiguration& configuration_in,
                               bool setupPipeline_in,
                               bool resetSessionData_in)
 {
@@ -354,7 +354,7 @@ Test_U_UDPStream::initialize (const Test_U_StreamConfiguration& configuration_in
   ACE_ASSERT (!inherited::isInitialized_);
 
   // update configuration
-  const_cast<Test_U_StreamConfiguration&> (configuration_in).moduleHandlerConfiguration_2.stream =
+  const_cast<struct FileServer_StreamConfiguration&> (configuration_in).moduleHandlerConfiguration_2.stream =
     this;
 
   // allocate a new session state, reset stream
@@ -368,8 +368,8 @@ Test_U_UDPStream::initialize (const Test_U_StreamConfiguration& configuration_in
   } // end IF
   ACE_ASSERT (inherited::sessionData_);
 
-  Test_U_FileServer_SessionData& session_data_r =
-      const_cast<Test_U_FileServer_SessionData&> (inherited::sessionData_->get ());
+  struct FileServer_SessionData& session_data_r =
+      const_cast<struct FileServer_SessionData&> (inherited::sessionData_->get ());
   session_data_r.sessionID = configuration_in.sessionID;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;
@@ -454,8 +454,8 @@ Test_U_UDPStream::collect (Net_RuntimeStatistic_t& data_out)
   } // end IF
 
   // synch access
-  Test_U_FileServer_SessionData& session_data_r =
-      const_cast<Test_U_FileServer_SessionData&> (inherited::sessionData_->get ());
+  struct FileServer_SessionData& session_data_r =
+      const_cast<struct FileServer_SessionData&> (inherited::sessionData_->get ());
   if (session_data_r.lock)
   {
     result = session_data_r.lock->acquire ();

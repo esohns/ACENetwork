@@ -113,9 +113,7 @@ struct Test_U_StreamConfiguration
    , moduleHandlerConfiguration_2 ()
    , protocolConfiguration (NULL)
    , userData (NULL)
-  {
-    bufferSize = NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
-  };
+  {};
 
   struct Stream_ModuleConfiguration         moduleConfiguration_2;        // module configuration
   struct Test_U_ModuleHandlerConfiguration* moduleHandlerConfiguration;   // module handler configuration

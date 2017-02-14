@@ -29,3 +29,8 @@ set (${PROJECT_NAME}_Test_I_SRCS
 
 add_subdirectory (bittorrent_client)
 add_subdirectory (IRC_client)
+
+add_custom_target (test_i
+                   COMMAND echo building test_i...)
+add_dependencies (test_i bittorrent_client bittorrent_client_gui IRC_client IRC_client_gui)
+

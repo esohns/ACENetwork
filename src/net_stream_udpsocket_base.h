@@ -82,7 +82,7 @@ class Net_StreamUDPSocketBase_T
 
   // *NOTE*: enqueue any received data onto our stream for further processing
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
-  // *NOTE*: send any enqueued data back to the client...
+  // *NOTE*: send any enqueued data back to the client
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: this is called when:
   // - handle_xxx() returns -1
@@ -93,9 +93,13 @@ class Net_StreamUDPSocketBase_T
   virtual void info (ACE_HANDLE&,         // return value: handle
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
-  virtual Net_ConnectionId_t id () const;
-  virtual ACE_Notification_Strategy* notification ();
-  virtual const StreamType& stream () const;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  inline virtual Net_ConnectionId_t id () const { return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
+#else
+  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
+#endif
+  inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); };
+  inline virtual const StreamType& stream () const { return stream_; };
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
                                                 // thread(s) ?
@@ -232,9 +236,13 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   virtual void info (ACE_HANDLE&,         // return value: handle
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
-  virtual Net_ConnectionId_t id () const;
-  virtual ACE_Notification_Strategy* notification ();
-  virtual const StreamType& stream () const;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  inline virtual Net_ConnectionId_t id () const { return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
+#else
+  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
+#endif
+  inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); };
+  inline virtual const StreamType& stream () const { return stream_; };
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
                                                 // thread(s) ?
@@ -365,9 +373,13 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
   virtual void info (ACE_HANDLE&,         // return value: handle
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
-  virtual Net_ConnectionId_t id () const;
-  virtual ACE_Notification_Strategy* notification ();
-  virtual const StreamType& stream () const;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  inline virtual Net_ConnectionId_t id () const { return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
+#else
+  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
+#endif
+  inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); };
+  inline virtual const StreamType& stream () const { return stream_; };
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
                                                 // thread(s) ?

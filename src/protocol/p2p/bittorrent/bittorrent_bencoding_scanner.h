@@ -61,7 +61,7 @@ class BitTorrent_Export BitTorrent_Bencoding_Scanner
   inline virtual bool debugScanner () const { ACE_ASSERT (parser_); return parser_->debugScanner (); };
   inline virtual bool isBlocking () const { ACE_ASSERT (parser_); return parser_->isBlocking (); };
 
-  inline virtual void error (const std::string& errorString_in) { ACE_ASSERT (parser_); parser_->error (errorString_in); };
+  inline virtual void error (const std::string& errorString_in) { ACE_ASSERT (parser_); parser_->error (yy::location (), errorString_in); };
 
   // *NOTE*: to be invoked by the scanner (ONLY !)
   inline virtual void offset (unsigned int offset_in) { ACE_ASSERT (parser_); parser_->offset (offset_in); };
@@ -70,7 +70,7 @@ class BitTorrent_Export BitTorrent_Bencoding_Scanner
   // *IMPORTANT NOTE*: when the parser detects a frame end, it inserts a new
   //                   buffer to the continuation and passes 'true'
   //                   --> separate the current frame from the next
-  inline virtual bool switchBuffer (bool unlink_in) { ACE_ASSERT (parser_); return parser_->switchBuffer (unlink_in); };
+  inline virtual bool switchBuffer (bool unlink_in = false) { ACE_ASSERT (parser_); return parser_->switchBuffer (unlink_in); };
   inline virtual void waitBuffer () { ACE_ASSERT (parser_); return parser_->waitBuffer (); };
 
   // *NOTE*: this is the C interface (not needed by C++ scanners)

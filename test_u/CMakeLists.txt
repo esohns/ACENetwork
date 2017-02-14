@@ -34,3 +34,7 @@ add_subdirectory (DHCP_client)
 add_subdirectory (file_server)
 add_subdirectory (HTTP_decoder)
 
+add_custom_target (test_u
+                   COMMAND echo building test_u...)
+add_dependencies (test_u client server DHCP_client file_server httpdecoder)
+

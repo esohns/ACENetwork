@@ -80,7 +80,7 @@ struct Test_U_AllocatorConfiguration
   {
     // *NOTE*: this facilitates (message block) data buffers to be scanned with
     //         'flex's yy_scan_buffer() method
-    buffer = DHCP_FLEX_BUFFER_BOUNDARY_SIZE;
+    paddingBytes = NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE;
   };
 };
 
@@ -168,15 +168,13 @@ typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
 typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 
 struct Test_U_SocketHandlerConfiguration
- : Net_SocketHandlerConfiguration
+ : DHCP_SocketHandlerConfiguration
 {
   inline Test_U_SocketHandlerConfiguration ()
-   : Net_SocketHandlerConfiguration ()
+   : DHCP_SocketHandlerConfiguration ()
    ///////////////////////////////////////
    , userData (NULL)
-  {
-    PDUSize = DHCP_MESSAGE_SIZE;
-  };
+  {};
 
   struct Test_U_UserData* userData;
 };
@@ -211,7 +209,7 @@ struct Test_U_StreamModuleHandlerConfiguration
   inline Test_U_StreamModuleHandlerConfiguration ()
    : DHCP_ModuleHandlerConfiguration ()
    , broadcastConnection (NULL)
-   , configuration (NULL)
+   , connectionConfiguration (NULL)
    , contextID (0)
    , inbound (true)
    , passive (false)
@@ -222,8 +220,9 @@ struct Test_U_StreamModuleHandlerConfiguration
    , targetFileName ()
   {};
 
+  struct Test_U_ConnectionConfiguration*    connectionConfiguration;
   Test_U_IConnection_t*                     broadcastConnection; // UDP target/net IO module
-  struct Test_U_Configuration*              configuration;
+  //struct Test_U_Configuration*              configuration;
   guint                                     contextID;
   bool                                      inbound; // net IO module
   bool                                      passive; // UDP target module
@@ -290,9 +289,7 @@ struct Test_U_StreamConfiguration
    : DHCP_StreamConfiguration ()
    , moduleHandlerConfiguration (NULL)
    , userData (NULL)
-  {
-    bufferSize = DHCP_MESSAGE_SIZE;
-  };
+  {};
 
   struct Test_U_StreamModuleHandlerConfiguration* moduleHandlerConfiguration; // stream module handler configuration
 

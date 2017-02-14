@@ -1649,8 +1649,8 @@ static const yy_state_type yy_NUL_trans[35] =
 
 static const flex_int32_t yy_rule_linenum[20] =
     {   0,
-      142,  152,  158,  168,  180,  183,  190,  194,  198,  200,
-      203,  208,  216,  220,  225,  228,  232,  239,  248
+      146,  155,  160,  169,  181,  183,  189,  192,  195,  197,
+      200,  205,  213,  216,  221,  224,  228,  235,  244
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -1688,6 +1688,10 @@ static const flex_int32_t yy_rule_linenum[20] =
 /* %option noline nounistd */
 #define YY_NO_UNISTD_H 1
 /* *TODO*: find out why 'read' does not compile (on Linux, flex 2.5.39) */
+/* *IMPORTANT NOTE*: flex 2.5.4 does not recognize 'reentrant, nounistd,
+                     ansi-definitions, ansi-prototypes, header-file extra-type'
+*/
+/*%option extra-type="Common_IScanner*"*/
 /*%option header-file="bittorrent_bencoding_scanner.h" outfile="bittorrent_bencoding_scanner.cpp"*/
 /* *NOTE*: for protcol specification, see:
            - http://bittorrent.org/beps/bep_0003.html
@@ -1955,8 +1959,8 @@ YY_DECL
   unsigned int string_length = 0;
   std::stringstream converter;
 
-  ACE_Message_Block* message_block_p = parser_->buffer ();
-  ACE_ASSERT (message_block_p);
+/*  ACE_Message_Block* message_block_p = parser_->buffer ();
+  ACE_ASSERT (message_block_p);*/
 
 
 
@@ -2025,7 +2029,6 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
-                         parser_->offset (1);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_dictionary_key);
                          ACE_NEW_NORETURN (yylval->dval,
@@ -2038,7 +2041,6 @@ YY_RULE_SETUP
 case 2:
 YY_RULE_SETUP
 {
-                         parser_->offset (yyleng);
                          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                          converter.clear ();
                          converter << yytext;
@@ -2047,7 +2049,6 @@ YY_RULE_SETUP
 case 3:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
-                         parser_->offset (1);
                          if (!string_length)
                          { // --> found an empty string
                            ACE_NEW_NORETURN (yylval->sval,
@@ -2061,7 +2062,7 @@ case 4:
 /* rule 4 can match eol */
 YY_RULE_SETUP
 { ACE_ASSERT (string_length != 0);
-                         parser_->offset (string_length);
+//                         yylloc->columns (string_length);
                          ACE_NEW_NORETURN (yylval->sval,
                                            std::string ());
                          ACE_ASSERT (yylval->sval);
@@ -2076,13 +2077,11 @@ YY_RULE_SETUP
 case 5:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
-                         parser_->offset (1);
                          yy_pop_state (); }
   YY_BREAK
 case 6:
 YY_RULE_SETUP
 {
-                         parser_->offset (yyleng);
                          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                          converter.clear ();
                          converter << yytext;
@@ -2091,15 +2090,13 @@ YY_RULE_SETUP
   YY_BREAK
 case 7:
 YY_RULE_SETUP
-{ ACE_ASSERT (yyleng == 1);
-                         parser_->offset (1); }
+{ ACE_ASSERT (yyleng == 1); }
   YY_BREAK
 // end <state_integer>
 
 case 8:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
-                         parser_->offset (1);
                          yy_pop_state ();
                          return yy::BitTorrent_Bencoding_Parser::token::END_OF_LIST; }
   YY_BREAK
@@ -2136,7 +2133,6 @@ YY_RULE_SETUP
 case 13:
 YY_RULE_SETUP
 { ACE_ASSERT (yyleng == 1);
-                         parser_->offset (1);
                          yy_pop_state ();
                          return yy::BitTorrent_Bencoding_Parser::token::END_OF_DICTIONARY; }
   YY_BREAK
@@ -2194,15 +2190,15 @@ case 19:
 /* rule 19 can match eol */
 YY_RULE_SETUP
 { /* *TODO*: use (?s:.) ? */
-                         if (!parser_->isBlocking ())
+                         if (!isBlocking ())
                            yyterminate(); // not enough data, cannot proceed
 
                          // wait for more data fragment(s)
-                         if (!parser_->switchBuffer ())
+                         if (!switchBuffer ())
                          { // *NOTE*: most probable reason: connection
                            //         has been closed --> session end
                            ACE_DEBUG ((LM_DEBUG,
-                                       ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
+                                       ACE_TEXT ("failed to Common_IScanner::switchBuffer(), returning\n")));
                            yyterminate(); // not enough data, cannot proceed
                          } // end IF
                          yyless (0); }

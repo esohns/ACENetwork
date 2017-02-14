@@ -31,17 +31,17 @@
 #include "file_server_common.h"
 
 class Test_U_EventHandler
- : public Test_U_ISessionNotify_t
+ : public FileServer_ISessionNotify_t
 {
  public:
-  Test_U_EventHandler (Test_U_GTK_CBData*); // GTK state
+  Test_U_EventHandler (struct FileServer_GTK_CBData*); // GTK state
   virtual ~Test_U_EventHandler ();
 
   // implement Common_INotify_T
   virtual void start (Stream_SessionId_t,
-                      const Test_U_FileServer_SessionData&);
+                      const struct FileServer_SessionData&);
   virtual void notify (Stream_SessionId_t,
-                       const Stream_SessionMessageType&);
+                       const enum Stream_SessionMessageType&);
   virtual void end (Stream_SessionId_t);
   virtual void notify (Stream_SessionId_t,
                        const Test_U_Message&);
@@ -53,8 +53,8 @@ class Test_U_EventHandler
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler (const Test_U_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler& operator=(const Test_U_EventHandler&))
 
-  struct Test_U_GTK_CBData*             CBData_;
-  struct Test_U_FileServer_SessionData* sessionData_;
+  struct FileServer_GTK_CBData*  CBData_;
+  struct FileServer_SessionData* sessionData_;
 };
 
 #endif

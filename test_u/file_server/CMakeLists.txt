@@ -102,6 +102,8 @@ if (UNIX)
 elseif (WIN32)
  include_directories ($ENV{ACE_ROOT})
  # *TODO*: repair pkgconfig support
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
+
 # gtk
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/atk-1.0)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/gdk-pixbuf-2.0)
@@ -162,7 +164,11 @@ set (file_server_SRCS
      stdafx.h)
 
 set (EXECUTABLE file_server)
-add_executable (${EXECUTABLE} ${file_server_SRCS} etc/file_server.glade)
+add_executable (${EXECUTABLE}
+                EXCLUDE_FROM_ALL
+                ${file_server_SRCS}
+                etc/file_server.glade)
+set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)
@@ -231,7 +237,7 @@ if (UNIX)
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-f D:/temp/H264_720p.ts -l -p 5555 -t"
+                         ARGS "-c -f D:/temp/H264_720p.ts -g -l -p 5555 -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../openssl/bin

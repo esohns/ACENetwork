@@ -51,13 +51,13 @@ class Test_U_Stream
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
-                        struct Test_U_StreamState,
-                        struct Test_U_StreamConfiguration,
+                        struct FileServer_StreamState,
+                        struct FileServer_StreamConfiguration,
                         Net_RuntimeStatistic_t,
                         struct Stream_ModuleConfiguration,
                         struct Test_U_ModuleHandlerConfiguration,
-                        struct Test_U_FileServer_SessionData,
-                        Test_U_FileServer_SessionData_t,
+                        struct FileServer_SessionData,
+                        FileServer_SessionData_t,
                         Test_U_ControlMessage_t,
                         Test_U_Message,
                         Test_U_SessionMessage>
@@ -71,9 +71,9 @@ class Test_U_Stream
                      bool&);               // return value: delete ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const struct Test_U_StreamConfiguration&, // configuration
-                           bool = true,                              // setup pipeline ?
-                           bool = true);                             // reset session data ?
+  virtual bool initialize (const struct FileServer_StreamConfiguration&, // configuration
+                           bool = true,                                  // setup pipeline ?
+                           bool = true);                                 // reset session data ?
 
   // *TODO*: re-consider this API
   //void ping ();
@@ -89,13 +89,13 @@ class Test_U_Stream
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
-                        struct Test_U_StreamState,
-                        struct Test_U_StreamConfiguration,
+                        struct FileServer_StreamState,
+                        struct FileServer_StreamConfiguration,
                         Net_RuntimeStatistic_t,
                         struct Stream_ModuleConfiguration,
                         struct Test_U_ModuleHandlerConfiguration,
-                        struct Test_U_FileServer_SessionData,
-                        Test_U_FileServer_SessionData_t,
+                        struct FileServer_SessionData,
+                        FileServer_SessionData_t,
                         Test_U_ControlMessage_t,
                         Test_U_Message,
                         Test_U_SessionMessage> inherited;
@@ -113,13 +113,13 @@ class Test_U_UDPStream
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
-                        struct Test_U_StreamState,
-                        struct Test_U_StreamConfiguration,
+                        struct FileServer_StreamState,
+                        struct FileServer_StreamConfiguration,
                         Net_RuntimeStatistic_t,
                         struct Stream_ModuleConfiguration,
                         struct Test_U_ModuleHandlerConfiguration,
-                        struct Test_U_FileServer_SessionData,
-                        Test_U_FileServer_SessionData_t,
+                        struct FileServer_SessionData,
+                        FileServer_SessionData_t,
                         Test_U_ControlMessage_t,
                         Test_U_Message,
                         Test_U_SessionMessage>
@@ -133,9 +133,9 @@ class Test_U_UDPStream
                      bool&);               // return value: delete ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const struct Test_U_StreamConfiguration&, // configuration
-                           bool = true,                              // setup pipeline ?
-                           bool = true);                             // reset session data ?
+  virtual bool initialize (const struct FileServer_StreamConfiguration&, // configuration
+                           bool = true,                                  // setup pipeline ?
+                           bool = true);                                 // reset session data ?
 
   // *TODO*: re-consider this API
   //void ping ();
@@ -151,13 +151,13 @@ class Test_U_UDPStream
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
-                        struct Test_U_StreamState,
-                        struct Test_U_StreamConfiguration,
+                        struct FileServer_StreamState,
+                        struct FileServer_StreamConfiguration,
                         Net_RuntimeStatistic_t,
                         struct Stream_ModuleConfiguration,
                         struct Test_U_ModuleHandlerConfiguration,
-                        struct Test_U_FileServer_SessionData,
-                        Test_U_FileServer_SessionData_t,
+                        struct FileServer_SessionData,
+                        FileServer_SessionData_t,
                         Test_U_ControlMessage_t,
                         Test_U_Message,
                         Test_U_SessionMessage> inherited;

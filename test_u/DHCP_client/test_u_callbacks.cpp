@@ -300,7 +300,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                              0.0,
                              std::numeric_limits<double>::max ());
   gtk_spin_button_set_value (spin_button_p,
-                              static_cast<double> (data_p->configuration->streamConfiguration.bufferSize));
+                             static_cast<double> (data_p->configuration->connectionConfiguration.PDUSize));
 
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -1068,15 +1068,15 @@ action_discover_activate_cb (GtkAction* action_in,
     GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME)));
   ACE_ASSERT (spin_button_p);
-  data_p->configuration->streamConfiguration.bufferSize =
+  data_p->configuration->connectionConfiguration.PDUSize =
     static_cast<unsigned int> (gtk_spin_button_get_value_as_int (spin_button_p));
 
   Test_U_Message* message_p = NULL;
 allocate:
   message_p =
-    static_cast<Test_U_Message*> (data_p->configuration->streamConfiguration.messageAllocator->malloc (data_p->configuration->streamConfiguration.bufferSize));
+    static_cast<Test_U_Message*> (data_p->configuration->connectionConfiguration.messageAllocator->malloc (data_p->configuration->connectionConfiguration.PDUSize));
   // keep retrying ?
-  if (!message_p && !data_p->configuration->streamConfiguration.messageAllocator->block ())
+  if (!message_p && !data_p->configuration->connectionConfiguration.messageAllocator->block ())
     goto allocate;
   if (!message_p)
   {
@@ -1241,9 +1241,9 @@ action_inform_activate_cb (GtkAction* action_in,
 
 allocate:
   Test_U_Message* message_p =
-    static_cast<Test_U_Message*> (data_p->configuration->streamConfiguration.messageAllocator->malloc (data_p->configuration->streamConfiguration.bufferSize));
+    static_cast<Test_U_Message*> (data_p->configuration->connectionConfiguration.messageAllocator->malloc (data_p->configuration->connectionConfiguration.PDUSize));
   // keep retrying ?
-  if (!message_p && !data_p->configuration->streamConfiguration.messageAllocator->block ())
+  if (!message_p && !data_p->configuration->connectionConfiguration.messageAllocator->block ())
     goto allocate;
   if (!message_p)
   {
@@ -1360,9 +1360,9 @@ action_request_activate_cb (GtkAction* action_in,
 
 allocate:
   Test_U_Message* message_p =
-    static_cast<Test_U_Message*> (data_p->configuration->streamConfiguration.messageAllocator->malloc (data_p->configuration->streamConfiguration.bufferSize));
+    static_cast<Test_U_Message*> (data_p->configuration->connectionConfiguration.messageAllocator->malloc (data_p->configuration->connectionConfiguration.PDUSize));
   // keep retrying ?
-  if (!message_p && !data_p->configuration->streamConfiguration.messageAllocator->block ())
+  if (!message_p && !data_p->configuration->connectionConfiguration.messageAllocator->block ())
     goto allocate;
   if (!message_p)
   {
@@ -1481,9 +1481,9 @@ action_release_activate_cb (GtkAction* action_in,
 
 allocate:
   Test_U_Message* message_p =
-    static_cast<Test_U_Message*> (data_p->configuration->streamConfiguration.messageAllocator->malloc (data_p->configuration->streamConfiguration.bufferSize));
+    static_cast<Test_U_Message*> (data_p->configuration->connectionConfiguration.messageAllocator->malloc (data_p->configuration->connectionConfiguration.PDUSize));
   // keep retrying ?
-  if (!message_p && !data_p->configuration->streamConfiguration.messageAllocator->block ())
+  if (!message_p && !data_p->configuration->connectionConfiguration.messageAllocator->block ())
     goto allocate;
   if (!message_p)
   {

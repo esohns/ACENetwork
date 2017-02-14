@@ -1337,17 +1337,17 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited::configuration_->connectionConfiguration);
   ACE_ASSERT (record_inout);
 
-  // step1: get a message buffer
+  // step1: allocate a message buffer
   IRC_Message* message_p =
-      allocateMessage (inherited::configuration_->streamConfiguration->bufferSize);
+      allocateMessage (inherited::configuration_->connectionConfiguration->PDUSize);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::allocateMessage(%u), returning\n"),
-                inherited::configuration_->streamConfiguration->bufferSize));
+                inherited::configuration_->connectionConfiguration->PDUSize));
 
     // clean up
     record_inout->decrease ();

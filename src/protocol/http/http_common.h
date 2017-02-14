@@ -53,9 +53,9 @@ struct HTTP_Stream_UserData;
 //                                HTTP_SessionMessage> HTTP_ControlMessage_t;
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    HTTP_Stream_SessionData,
-                                    Stream_SessionMessageType,
-                                    HTTP_Record,
+                                    struct HTTP_Stream_SessionData,
+                                    enum Stream_SessionMessageType,
+                                    struct HTTP_Record,
                                     HTTP_SessionMessage> IRC_ISessionNotify_t;
 
 typedef Stream_Statistic HTTP_RuntimeStatistic_t;
@@ -87,7 +87,7 @@ struct HTTP_Record
   std::string             URI;
   HTTP_Codes::VersionType version;
 };
-typedef Stream_DataBase_T<HTTP_Record> HTTP_MessageData_t;
+typedef Stream_DataBase_T<struct HTTP_Record> HTTP_MessageData_t;
 
 struct HTTP_ConnectionState
  : Net_ConnectionState
@@ -98,9 +98,9 @@ struct HTTP_ConnectionState
    , userData (NULL)
   {};
 
-  struct HTTP_Configuration*   configuration;
+  struct HTTP_ConnectionConfiguration* configuration;
 
-  struct HTTP_Stream_UserData* userData;
+  struct HTTP_Stream_UserData*         userData;
 };
 
 #endif

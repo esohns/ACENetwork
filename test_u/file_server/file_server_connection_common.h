@@ -25,6 +25,8 @@
 #include <ace/INET_Addr.h>
 #include <ace/SOCK_Dgram_Mcast.h>
 
+#include "stream_common.h"
+#include "stream_control_message.h"
 #include "stream_module_io_stream.h"
 
 #include "net_asynch_udpsockethandler.h"
@@ -41,62 +43,91 @@
 #include "net_client_connector.h"
 
 #include "test_u_common.h"
-//#include "test_u_connection_common.h"
-#include "test_u_connection_manager_common.h"
+#include "test_u_connection_common.h"
+//#include "test_u_connection_manager_common.h"
 //#include "test_u_socket_common.h"
-#include "test_u_stream.h"
+//#include "test_u_stream.h"
 
-//struct Test_U_StreamConfiguration;
-//struct Test_U_ConnectionConfiguration
-// : Net_ConnectionConfiguration
-//{
-//  inline Test_U_ConnectionConfiguration ()
-//   : Net_ConnectionConfiguration ()
-//   ///////////////////////////////////////
-//   , socketHandlerConfiguration (NULL)
-//   , streamConfiguration (NULL)
-//   , userData (NULL)
-//  {};
-//
-//  struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
-//  struct Test_U_StreamConfiguration*        streamConfiguration;
-//
-//  struct Test_U_UserData*                   userData;
-//};
-//
-//struct Test_U_ConnectionState
-// : Net_ConnectionState
-//{
-//  inline Test_U_ConnectionState ()
-//   : Net_ConnectionState ()
-//   , userData (NULL)
-//  {};
-//
-//  struct Test_U_UserData* userData;
-//};
+#include "file_server_defines.h"
+#include "file_server_stream_common.h"
+
+// forward declarations
+typedef Stream_ControlMessage_T<enum Stream_ControlType,
+                                enum Stream_ControlMessageType,
+                                struct Stream_AllocatorConfiguration> Test_U_ControlMessage_t;
+class Test_U_Stream;
+class Test_U_UDPStream;
+struct FileServer_UserData;
+
+struct FileServer_SocketHandlerConfiguration;
+struct FileServer_StreamConfiguration;
+struct FileServer_ConnectionConfiguration
+ : Test_U_ConnectionConfiguration
+{
+  inline FileServer_ConnectionConfiguration ()
+   : Test_U_ConnectionConfiguration ()
+   ///////////////////////////////////////
+   , streamConfiguration (NULL)
+   , userData (NULL)
+  {
+    PDUSize = FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE;
+  };
+
+  struct FileServer_SocketHandlerConfiguration* socketHandlerConfiguration;
+  struct FileServer_StreamConfiguration*        streamConfiguration;
+
+  struct FileServer_UserData*                   userData;
+};
+
+struct FileServer_SocketHandlerConfiguration
+ : Net_SocketHandlerConfiguration
+{
+  inline FileServer_SocketHandlerConfiguration ()
+   : Net_SocketHandlerConfiguration ()
+   , userData (NULL)
+  {};
+
+  struct FileServer_UserData* userData;
+};
+
+struct FileServer_ConnectionState
+ : Net_ConnectionState
+{
+  inline FileServer_ConnectionState ()
+   : Net_ConnectionState ()
+   , userData (NULL)
+  {};
+
+  struct FileServer_UserData* userData;
+};
 
 //////////////////////////////////////////
 
-//typedef Net_IConnection_T<ACE_INET_Addr,
-//                          struct Test_U_ConnectionConfiguration,
-//                          struct Test_U_ConnectionState,
-//                          Net_RuntimeStatistic_t> Test_U_IConnection_t;
+typedef Net_IConnection_T<ACE_INET_Addr,
+                          struct FileServer_ConnectionConfiguration,
+                          struct FileServer_ConnectionState,
+                          Net_RuntimeStatistic_t> FileServer_IConnection_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,
-                                struct Test_U_ConnectionConfiguration,
-                                struct Test_U_ConnectionState,
+                                struct FileServer_ConnectionConfiguration,
+                                struct FileServer_ConnectionState,
                                 Net_RuntimeStatistic_t,
                                 struct Net_SocketConfiguration,
-                                struct Test_U_SocketHandlerConfiguration,
+                                struct FileServer_SocketHandlerConfiguration,
                                 Test_U_Stream,
-                                enum Stream_StateMachine_ControlState> Test_U_IStreamConnection_t;
+                                enum Stream_StateMachine_ControlState> FileServer_IStreamConnection_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,
-                                struct Test_U_ConnectionConfiguration,
-                                struct Test_U_ConnectionState,
+                                struct FileServer_ConnectionConfiguration,
+                                struct FileServer_ConnectionState,
                                 Net_RuntimeStatistic_t,
                                 struct Net_SocketConfiguration,
-                                struct Test_U_SocketHandlerConfiguration,
+                                struct FileServer_SocketHandlerConfiguration,
                                 Test_U_UDPStream,
-                                enum Stream_StateMachine_ControlState> Test_U_UDPIStreamConnection_t;
+                                enum Stream_StateMachine_ControlState> FileServer_UDPIStreamConnection_t;
+typedef Net_Connection_Manager_T<ACE_INET_Addr,
+                                 struct FileServer_ConnectionConfiguration,
+                                 struct FileServer_ConnectionState,
+                                 Net_RuntimeStatistic_t,
+                                 struct FileServer_UserData> FileServer_InetConnectionManager_t;
 
 //////////////////////////////////////////
 
@@ -105,124 +136,124 @@ typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       enum Stream_ControlType,
                                       enum Stream_SessionMessageType,
                                       enum Stream_StateMachine_ControlState,
-                                      struct Test_U_StreamState,
-                                      struct Test_U_StreamConfiguration,
+                                      struct FileServer_StreamState,
+                                      struct FileServer_StreamConfiguration,
                                       Net_RuntimeStatistic_t,
                                       struct Stream_ModuleConfiguration,
                                       struct Test_U_ModuleHandlerConfiguration,
-                                      struct Test_U_FileServer_SessionData,
-                                      Test_U_FileServer_SessionData_t,
+                                      struct FileServer_SessionData,
+                                      FileServer_SessionData_t,
                                       Test_U_ControlMessage_t,
                                       Test_U_Message,
                                       Test_U_SessionMessage,
                                       ACE_INET_Addr,
-                                      Test_U_InetConnectionManager_t,
-                                      struct Test_U_UserData> Test_U_NetStream_t;
+                                      FileServer_InetConnectionManager_t,
+                                      struct FileServer_UserData> Test_U_NetStream_t;
 
 typedef Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_Dgram,
-                                                         struct Test_U_SocketHandlerConfiguration>,
+                                                         struct FileServer_SocketHandlerConfiguration>,
                                   ACE_INET_Addr,
-                                  struct Test_U_ConnectionConfiguration,
-                                  struct Test_U_ConnectionState,
+                                  struct FileServer_ConnectionConfiguration,
+                                  struct FileServer_ConnectionState,
                                   Net_RuntimeStatistic_t,
-                                  struct Test_U_SocketHandlerConfiguration,
+                                  struct FileServer_SocketHandlerConfiguration,
                                   Test_U_NetStream_t,
-                                  struct Test_U_UserData,
+                                  struct FileServer_UserData,
                                   struct Stream_ModuleConfiguration,
                                   struct Test_U_ModuleHandlerConfiguration> Test_U_UDPHandler_2;
 typedef Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_SOCK_DGRAM_MCAST,
-                                                         struct Test_U_SocketHandlerConfiguration>,
+                                                         struct FileServer_SocketHandlerConfiguration>,
                                   ACE_INET_Addr,
-                                  struct Test_U_ConnectionConfiguration,
-                                  struct Test_U_ConnectionState,
+                                  struct FileServer_ConnectionConfiguration,
+                                  struct FileServer_ConnectionState,
                                   Net_RuntimeStatistic_t,
-                                  struct Test_U_SocketHandlerConfiguration,
+                                  struct FileServer_SocketHandlerConfiguration,
                                   Test_U_NetStream_t,
-                                  struct Test_U_UserData,
+                                  struct FileServer_UserData,
                                   struct Stream_ModuleConfiguration,
                                   struct Test_U_ModuleHandlerConfiguration> Test_U_UDPIPMulticastHandler_t;
 typedef Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_SOCK_DGRAM_BCAST,
-                                                         struct Test_U_SocketHandlerConfiguration>,
+                                                         struct FileServer_SocketHandlerConfiguration>,
                                   ACE_INET_Addr,
-                                  struct Test_U_ConnectionConfiguration,
-                                  struct Test_U_ConnectionState,
+                                  struct FileServer_ConnectionConfiguration,
+                                  struct FileServer_ConnectionState,
                                   Net_RuntimeStatistic_t,
-                                  struct Test_U_SocketHandlerConfiguration,
+                                  struct FileServer_SocketHandlerConfiguration,
                                   Test_U_NetStream_t,
-                                  struct Test_U_UserData,
+                                  struct FileServer_UserData,
                                   struct Stream_ModuleConfiguration,
                                   struct Test_U_ModuleHandlerConfiguration> Test_U_UDPIPBroadcastHandler_t;
 
-typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<struct Test_U_SocketHandlerConfiguration>,
+typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<struct FileServer_SocketHandlerConfiguration>,
                                         Net_SOCK_Dgram,
                                         ACE_INET_Addr,
-                                        struct Test_U_ConnectionConfiguration,
-                                        struct Test_U_ConnectionState,
+                                        struct FileServer_ConnectionConfiguration,
+                                        struct FileServer_ConnectionState,
                                         Net_RuntimeStatistic_t,
-                                        struct Test_U_SocketHandlerConfiguration,
+                                        struct FileServer_SocketHandlerConfiguration,
                                         Test_U_NetStream_t,
-                                        struct Test_U_UserData,
+                                        struct FileServer_UserData,
                                         struct Stream_ModuleConfiguration,
                                         struct Test_U_ModuleHandlerConfiguration> Test_U_UDPAsynchHandler_t;
-typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<struct Test_U_SocketHandlerConfiguration>,
+typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<struct FileServer_SocketHandlerConfiguration>,
                                         ACE_SOCK_DGRAM_MCAST,
                                         ACE_INET_Addr,
-                                        struct Test_U_ConnectionConfiguration,
-                                        struct Test_U_ConnectionState,
+                                        struct FileServer_ConnectionConfiguration,
+                                        struct FileServer_ConnectionState,
                                         Net_RuntimeStatistic_t,
-                                        struct Test_U_SocketHandlerConfiguration,
+                                        struct FileServer_SocketHandlerConfiguration,
                                         Test_U_NetStream_t,
-                                        struct Test_U_UserData,
+                                        struct FileServer_UserData,
                                         struct Stream_ModuleConfiguration,
                                         struct Test_U_ModuleHandlerConfiguration> Test_U_UDPAsynchIPMulticastHandler_t;
-typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<struct Test_U_SocketHandlerConfiguration>,
+typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<struct FileServer_SocketHandlerConfiguration>,
                                         ACE_SOCK_DGRAM_BCAST,
                                         ACE_INET_Addr,
-                                        struct Test_U_ConnectionConfiguration,
-                                        struct Test_U_ConnectionState,
+                                        struct FileServer_ConnectionConfiguration,
+                                        struct FileServer_ConnectionState,
                                         Net_RuntimeStatistic_t,
-                                        struct Test_U_SocketHandlerConfiguration,
+                                        struct FileServer_SocketHandlerConfiguration,
                                         Test_U_NetStream_t,
-                                        struct Test_U_UserData,
+                                        struct FileServer_UserData,
                                         struct Stream_ModuleConfiguration,
                                         struct Test_U_ModuleHandlerConfiguration> Test_U_UDPAsynchIPBroadcastHandler_t;
 
 typedef Net_UDPConnectionBase_T<Test_U_UDPHandler_2,
-                                struct Test_U_ConnectionConfiguration,
-                                struct Test_U_ConnectionState,
+                                struct FileServer_ConnectionConfiguration,
+                                struct FileServer_ConnectionState,
                                 Net_RuntimeStatistic_t,
-                                struct Test_U_SocketHandlerConfiguration,
+                                struct FileServer_SocketHandlerConfiguration,
                                 Test_U_NetStream_t,
-                                struct Test_U_UserData> Test_U_UDPConnection_t;
+                                struct FileServer_UserData> Test_U_UDPConnection_t;
 typedef Net_AsynchUDPConnectionBase_T<Test_U_UDPAsynchHandler_t,
-                                      struct Test_U_ConnectionConfiguration,
-                                      struct Test_U_ConnectionState,
+                                      struct FileServer_ConnectionConfiguration,
+                                      struct FileServer_ConnectionState,
                                       Net_RuntimeStatistic_t,
-                                      struct Test_U_SocketHandlerConfiguration,
+                                      struct FileServer_SocketHandlerConfiguration,
                                       Test_U_NetStream_t,
-                                      struct Test_U_UserData> Test_U_AsynchUDPConnection_t;
+                                      struct FileServer_UserData> Test_U_AsynchUDPConnection_t;
 
 //////////////////////////////////////////
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         struct Test_U_SocketHandlerConfiguration> Test_U_IInetConnector_t;
+                         struct FileServer_SocketHandlerConfiguration> Test_U_IInetConnector_t;
 
 typedef Net_Client_AsynchConnector_T<Test_U_AsynchUDPConnection_t,
                                      ACE_INET_Addr,
-                                     struct Test_U_ConnectionConfiguration,
-                                     struct Test_U_ConnectionState,
+                                     struct FileServer_ConnectionConfiguration,
+                                     struct FileServer_ConnectionState,
                                      Net_RuntimeStatistic_t,
-                                     struct Test_U_SocketHandlerConfiguration,
+                                     struct FileServer_SocketHandlerConfiguration,
                                      Test_U_NetStream_t,
-                                     struct Test_U_UserData> Test_U_UDPAsynchConnector_t;
+                                     struct FileServer_UserData> Test_U_UDPAsynchConnector_t;
 typedef Net_Client_Connector_T<Test_U_UDPConnection_t,
                                ACE_SOCK_CONNECTOR,
                                ACE_INET_Addr,
-                               struct Test_U_ConnectionConfiguration,
-                               struct Test_U_ConnectionState,
+                               struct FileServer_ConnectionConfiguration,
+                               struct FileServer_ConnectionState,
                                Net_RuntimeStatistic_t,
-                               struct Test_U_SocketHandlerConfiguration,
+                               struct FileServer_SocketHandlerConfiguration,
                                Test_U_NetStream_t,
-                               struct Test_U_UserData> Test_U_UDPConnector_t;
+                               struct FileServer_UserData> Test_U_UDPConnector_t;
 
 #endif

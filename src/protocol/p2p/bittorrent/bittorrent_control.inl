@@ -123,8 +123,8 @@ BitTorrent_Control_T<SessionAsynchType,
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
-  ACE_ASSERT (configuration_->trackerSocketHandlerConfiguration);
-  ACE_ASSERT (configuration_->trackerSocketHandlerConfiguration->messageAllocator);
+  ACE_ASSERT (configuration_->trackerConnectionConfiguration);
+  ACE_ASSERT (configuration_->trackerConnectionConfiguration->messageAllocator);
 
   bool remove_session = false;
   typename SessionType::ISESSION_T* isession_p = NULL;
@@ -309,10 +309,10 @@ BitTorrent_Control_T<SessionAsynchType,
   ACE_ASSERT (!record_p);
 allocate:
   message_p =
-    static_cast<typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (configuration_->trackerSocketHandlerConfiguration->messageAllocator->malloc (configuration_->trackerSocketHandlerConfiguration->PDUSize));
+    static_cast<typename SessionType::ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (configuration_->trackerConnectionConfiguration->messageAllocator->malloc (configuration_->trackerConnectionConfiguration->PDUSize));
   // keep retrying ?
   if (!message_p &&
-      !configuration_->trackerSocketHandlerConfiguration->messageAllocator->block ())
+      !configuration_->trackerConnectionConfiguration->messageAllocator->block ())
     goto allocate;
   if (!message_p)
   {

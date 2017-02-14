@@ -132,7 +132,8 @@ DHCP_Module_Parser_T<ACE_SYNCH_USE,
   DHCP_Record* record_p = NULL;
 
   // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT (message_inout->capacity () - message_inout->length () >= DHCP_FLEX_BUFFER_BOUNDARY_SIZE);
+  ACE_ASSERT ((message_inout->capacity () -
+               message_inout->length ()) >= NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE);
   *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
@@ -368,10 +369,11 @@ DHCP_Module_ParserH_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::handleDataMessage"));
 
   int result = -1;
-  DHCP_Record* record_p = NULL;
+  struct DHCP_Record* record_p = NULL;
 
   // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT (message_inout->capacity () - message_inout->length () >= DHCP_FLEX_BUFFER_BOUNDARY_SIZE);
+  ACE_ASSERT ((message_inout->capacity () -
+               message_inout->length ()) >= NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE);
   *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
@@ -383,7 +385,7 @@ DHCP_Module_ParserH_T<ACE_SYNCH_USE,
   if (!data_r.DHCPRecord)
   {
     ACE_NEW_NORETURN (data_r.DHCPRecord,
-                      DHCP_Record ());
+                      struct DHCP_Record ());
     if (!data_r.DHCPRecord)
     {
       ACE_DEBUG ((LM_CRITICAL,

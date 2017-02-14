@@ -70,7 +70,7 @@ struct Test_U_AllocatorConfiguration
   {
     // *NOTE*: this facilitates (message block) data buffers to be scanned with
     //         'flex's yy_scan_buffer() method
-    buffer = NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE;
+    paddingBytes = NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE;
   };
 };
 

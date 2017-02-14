@@ -36,6 +36,47 @@
 
 //////////////////////////////////////////
 
+struct IRC_Client_ConnectionState
+ : IRC_ConnectionState
+{
+  inline IRC_Client_ConnectionState ()
+   : IRC_ConnectionState ()
+   , configuration (NULL)
+   , controller (NULL)
+   , userData (NULL)
+  {};
+
+  struct IRC_Client_ConnectionConfiguration* configuration;
+  IRC_IControl*                              controller;
+
+  struct IRC_Client_UserData*                userData;
+};
+
+// *TODO*: remove this ASAP
+struct IRC_Client_SessionState
+ : IRC_Client_ConnectionState
+{
+  inline IRC_Client_SessionState ()
+   : IRC_Client_ConnectionState ()
+   , away (false)
+   , channel ()
+   , channelModes ()
+   , isFirstMessage (false)
+   , nickName ()
+   , userModes ()
+  {};
+
+  // *TODO*: remove this
+  bool               away;
+  std::string        channel;
+  IRC_ChannelModes_t channelModes;
+  bool               isFirstMessage;
+  std::string        nickName;
+  IRC_UserModes_t    userModes;
+};
+
+//////////////////////////////////////////
+
 typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct IRC_Client_SocketHandlerConfiguration,
                                                          ACE_SOCK_STREAM>,
                                   ACE_INET_Addr,

@@ -118,7 +118,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   ACE_ASSERT (inherited3::configuration_->streamConfiguration);
 
   // *TODO*: remove type inferences
-  if (!inherited::initialize (*inherited3::configuration_->socketHandlerConfiguration))
+  if (unlikely (!inherited::initialize (*inherited3::configuration_->socketHandlerConfiguration)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to HandlerType::initialize(), aborting\n")));
@@ -131,7 +131,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  if (!inherited3::registerc ())
 //#else
-  if (!inherited3::registerc (this))
+  if (unlikely (!inherited3::registerc (this)))
 //#endif
   {
     // *NOTE*: (most probably) maximum number of connections has been reached
@@ -143,7 +143,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   // step2: initialize/start stream
   // step2a: connect the stream head message queue with this handler ?
-  if (!inherited3::configuration_->streamConfiguration->useThreadPerConnection)
+  if (unlikely (!inherited3::configuration_->socketHandlerConfiguration->useThreadPerConnection))
     inherited3::configuration_->streamConfiguration->notificationStrategy =
         this;
 
@@ -154,9 +154,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 #else
     static_cast<size_t> (handle_in); // (== socket handle)
 #endif
-  if (!stream_.initialize (*inherited3::configuration_->streamConfiguration,
-                           true,
-                           true))
+  if (unlikely (!stream_.initialize (*inherited3::configuration_->streamConfiguration,
+                                     true,
+                                     true)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
@@ -172,7 +172,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   // step2d: start stream
   stream_.start ();
-  if (!stream_.isRunning ())
+  if (unlikely (!stream_.isRunning ()))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start processing stream, aborting\n")));
@@ -180,9 +180,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   } // end IF
 
   // step3: start reading (need to pass any data ?)
-  if (messageBlock_in.length () == 0)
+  if (likely (!messageBlock_in.length ()))
   {
-    if (!inherited::initiate_read_stream ())
+    if (unlikely (!inherited::initiate_read_stream ()))
     {
       int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -209,7 +209,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                   ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
       goto error;
     } // end IF
-    // fake a result to emulate regular behavior...
+    // fake a result to emulate regular behavior
     ACE_Proactor* proactor_p = inherited::proactor ();
     ACE_ASSERT (proactor_p);
     ACE_Asynch_Read_Stream_Result_Impl* fake_result_p =
@@ -248,7 +248,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   return;
 
 error:
-  stream_.stop (true); // <-- wait for completion
+  stream_.stop (true,  // wait for completion ?
+                true); // locked access ?
 
   if (handle_socket)
   {
@@ -295,7 +296,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   ACE_Message_Block* message_block_p = NULL;
 
   // sanity check(s)
-  if (!stream_p) stream_p = &stream_;
+  if (likely (!stream_p))
+    stream_p = &stream_;
   ACE_ASSERT (stream_p);
 
 //  if (!inherited::buffer_)
@@ -304,7 +306,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     //                   been notified
 //    result = stream_p->get (inherited::buffer_, NULL);
     result = stream_p->get (message_block_p, NULL);
-    if (result == -1)
+    if (unlikely (result == -1))
     { // *NOTE*: most probable reason: socket has been closed by the peer, which
       //         close()s the processing stream (see: handle_close()),
       //         shutting down the message queue
@@ -341,7 +343,7 @@ send:
                                       0,                                    // priority
                                       COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
 #endif
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     error = ACE_OS::last_error ();
     // *WARNING*: this could fail on multi-threaded proactors

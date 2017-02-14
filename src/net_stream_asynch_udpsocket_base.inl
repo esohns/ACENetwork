@@ -201,7 +201,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // step3: initialize/start stream
 
   // step3a: connect stream head message queue with a notification pipe/queue ?
-  if (!inherited4::configuration_->streamConfiguration->useThreadPerConnection)
+  if (!inherited4::configuration_->socketHandlerConfiguration->useThreadPerConnection)
     inherited4::configuration_->streamConfiguration->notificationStrategy =
       this;
 
@@ -432,11 +432,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   ACE_UNUSED_ARG (handle_in);
 
-  int result = -1;
-
   // sanity check(s)
   ACE_ASSERT (inherited4::configuration_);
-  ACE_ASSERT (inherited4::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration);
 
   // step1: wait for all workers within the stream (if any)
   stream_.stop (true,  // <-- wait for completion
@@ -444,7 +442,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   // step2: purge any pending notifications ?
   // *WARNING: do this here, while still holding on to the current write buffer
-  if (!inherited4::configuration_->streamConfiguration->useThreadPerConnection)
+  int result = -1;
+  if (unlikely (!inherited4::configuration_->socketHandlerConfiguration->useThreadPerConnection))
   {
     Stream_Iterator_t iterator (stream_);
     const Stream_Module_t* module_p = NULL;
@@ -478,7 +477,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   } // end IF
 
   // step4: deregister with the connection manager (if any)
-  if (inherited4::isRegistered_)
+  if (likely (inherited4::isRegistered_))
     inherited4::deregister ();
 
   return result;

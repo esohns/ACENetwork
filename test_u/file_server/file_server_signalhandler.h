@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_FILESERVER_SIGNALHANDLER_H
-#define TEST_U_FILESERVER_SIGNALHANDLER_H
+#ifndef FileServer_SignalHandler_H
+#define FileServer_SignalHandler_H
 
 #include <ace/Global_Macros.h>
 
@@ -33,22 +33,22 @@
 
 #include "file_server_common.h"
 
-class Test_U_FileServer_SignalHandler
- : public Common_SignalHandler_T<Test_U_FileServer_SignalHandlerConfiguration>
+class FileServer_SignalHandler
+ : public Common_SignalHandler_T<struct FileServer_SignalHandlerConfiguration>
  , public Common_ISignal
 {
  public:
-  Test_U_FileServer_SignalHandler ();
-  virtual ~Test_U_FileServer_SignalHandler ();
+  FileServer_SignalHandler ();
+  virtual ~FileServer_SignalHandler ();
 
   // implement Common_ISignal
   virtual void handle (int); // signal
 
  private:
-  typedef Common_SignalHandler_T<Test_U_FileServer_SignalHandlerConfiguration> inherited;
+  typedef Common_SignalHandler_T<struct FileServer_SignalHandlerConfiguration> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Test_U_FileServer_SignalHandler (const Test_U_FileServer_SignalHandler&))
-  ACE_UNIMPLEMENTED_FUNC (Test_U_FileServer_SignalHandler& operator= (const Test_U_FileServer_SignalHandler&))
+  ACE_UNIMPLEMENTED_FUNC (FileServer_SignalHandler (const FileServer_SignalHandler&))
+  ACE_UNIMPLEMENTED_FUNC (FileServer_SignalHandler& operator= (const FileServer_SignalHandler&))
 };
 
 #endif

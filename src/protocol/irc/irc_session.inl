@@ -312,8 +312,9 @@ IRC_Session_T<ConnectionType,
     } // end IF
     InputHandlerConfigurationType input_handler_configuration;
     //input_handler_configuration. = &state_;
-    input_handler_configuration.streamConfiguration =
-      configuration_p->streamConfiguration;
+    // *TODO*: remove type inference
+    input_handler_configuration.connectionConfiguration =
+      configuration_p;
     if (!inputHandler_->initialize (input_handler_configuration))
     {
       ACE_DEBUG ((LM_ERROR,

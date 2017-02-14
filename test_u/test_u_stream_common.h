@@ -63,6 +63,7 @@ struct Test_U_StreamState
   {};
 
   struct Test_U_StreamSessionData* currentSessionData;
+
   struct Test_U_UserData*          userData;
 };
 

@@ -41,12 +41,12 @@ class IRC_Client_InputHandler
  , public Common_IInitialize_T<IRC_Client_InputHandlerConfiguration>
 {
  public:
-  IRC_Client_InputHandler (IRC_Client_SessionState*,      // state handle
-                           bool = NET_EVENT_USE_REACTOR); // use reactor ?
+  IRC_Client_InputHandler (struct IRC_Client_SessionState*, // state handle
+                           bool = NET_EVENT_USE_REACTOR);   // use reactor ?
   virtual ~IRC_Client_InputHandler ();
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const IRC_Client_InputHandlerConfiguration&); // configuration
+  virtual bool initialize (const struct IRC_Client_InputHandlerConfiguration&); // configuration
 
   // implement (part of) ACE_Event_Handler
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE); // handle
@@ -64,11 +64,11 @@ class IRC_Client_InputHandler
 
   ACE_Message_Block* allocateMessage (unsigned int = IRC_BUFFER_SIZE); // size
 
-  IRC_Client_InputHandlerConfiguration configuration_;
-  ACE_Message_Block*                   currentReadBuffer_;
-  bool                                 registered_;
-  IRC_Client_SessionState*             state_;
-  bool                                 useReactor_;
+  struct IRC_Client_InputHandlerConfiguration* configuration_;
+  ACE_Message_Block*                           currentReadBuffer_;
+  bool                                         registered_;
+  struct IRC_Client_SessionState*              state_;
+  bool                                         useReactor_;
 };
 
 #endif

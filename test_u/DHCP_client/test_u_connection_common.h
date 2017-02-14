@@ -72,10 +72,10 @@ struct Test_U_SocketHandlerConfiguration;
 
 struct Test_U_StreamConfiguration;
 struct Test_U_ConnectionConfiguration
- : Net_ConnectionConfiguration
+ : DHCP_ConnectionConfiguration
 {
   inline Test_U_ConnectionConfiguration ()
-   : Net_ConnectionConfiguration ()
+   : DHCP_ConnectionConfiguration ()
    ///////////////////////////////////////
    , socketHandlerConfiguration (NULL)
    , streamConfiguration (NULL)

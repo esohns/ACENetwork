@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef HTTP_NETWORK_H
-#define HTTP_NETWORK_H
+#ifndef DHCP_NETWORK_H
+#define DHCP_NETWORK_H
 
 #include <string>
 
@@ -31,6 +31,7 @@
 #include "stream_common.h"
 
 #include "net_asynch_tcpsockethandler.h"
+#include "net_configuration.h"
 #include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
@@ -42,105 +43,105 @@
 #include "net_client_asynchconnector.h"
 #include "net_client_connector.h"
 
-#include "http_common.h"
-#include "http_configuration.h"
-//#include "http_stream.h"
-#include "http_stream_common.h"
+#include "dhcp_common.h"
+#include "dhcp_configuration.h"
+//#include "dhcp_stream.h"
+#include "dhcp_stream_common.h"
 
 /////////////////////////////////////////
 
-typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<HTTP_SocketHandlerConfiguration>,
+typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct DHCP_SocketHandlerConfiguration>,
                                   ACE_INET_Addr,
-                                  struct HTTP_Configuration,
-                                  struct HTTP_ConnectionState,
-                                  HTTP_RuntimeStatistic_t,
-                                  HTTP_Stream_t,
-                                  struct HTTP_Stream_UserData,
+                                  struct DHCP_ConnectionConfiguration,
+                                  struct DHCP_ConnectionState,
+                                  DHCP_RuntimeStatistic_t,
+                                  DHCP_Stream_t,
+                                  struct DHCP_Stream_UserData,
                                   struct Stream_ModuleConfiguration,
-                                  struct HTTP_ModuleHandlerConfiguration> HTTP_TCPHandler_t;
-typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<struct HTTP_SocketHandlerConfiguration>,
+                                  struct DHCP_ModuleHandlerConfiguration> DHCP_TCPHandler_t;
+typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<struct DHCP_SocketHandlerConfiguration>,
                                         ACE_INET_Addr,
-                                        struct HTTP_Configuration,
-                                        struct HTTP_ConnectionState,
-                                        HTTP_RuntimeStatistic_t,
-                                        HTTP_Stream_t,
-                                        struct HTTP_Stream_UserData,
+                                        struct DHCP_ConnectionConfiguration,
+                                        struct DHCP_ConnectionState,
+                                        DHCP_RuntimeStatistic_t,
+                                        DHCP_Stream_t,
+                                        struct DHCP_Stream_UserData,
                                         struct Stream_ModuleConfiguration,
-                                        struct HTTP_ModuleHandlerConfiguration> HTTP_AsynchTCPHandler_t;
-typedef Net_TCPConnectionBase_T<HTTP_TCPHandler_t,
-                                struct HTTP_Configuration,
-                                struct HTTP_ConnectionState,
-                                HTTP_RuntimeStatistic_t,
-                                HTTP_Stream_t,
-                                struct HTTP_SocketHandlerConfiguration,
-                                struct HTTP_Stream_UserData> HTTP_TCPConnection_t;
-typedef Net_AsynchTCPConnectionBase_T<HTTP_AsynchTCPHandler_t,
-                                      struct HTTP_Configuration,
-                                      struct HTTP_ConnectionState,
-                                      HTTP_RuntimeStatistic_t,
-                                      HTTP_Stream_t,
-                                      struct HTTP_SocketHandlerConfiguration,
-                                      struct HTTP_Stream_UserData> HTTP_AsynchTCPConnection_t;
+                                        struct DHCP_ModuleHandlerConfiguration> DHCP_AsynchTCPHandler_t;
+typedef Net_TCPConnectionBase_T<DHCP_TCPHandler_t,
+                                struct DHCP_ConnectionConfiguration,
+                                struct DHCP_ConnectionState,
+                                DHCP_RuntimeStatistic_t,
+                                DHCP_Stream_t,
+                                struct DHCP_SocketHandlerConfiguration,
+                                struct DHCP_Stream_UserData> DHCP_TCPConnection_t;
+typedef Net_AsynchTCPConnectionBase_T<DHCP_AsynchTCPHandler_t,
+                                      struct DHCP_ConnectionConfiguration,
+                                      struct DHCP_ConnectionState,
+                                      DHCP_RuntimeStatistic_t,
+                                      DHCP_Stream_t,
+                                      struct DHCP_SocketHandlerConfiguration,
+                                      struct DHCP_Stream_UserData> DHCP_AsynchTCPConnection_t;
 
 /////////////////////////////////////////
 
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          struct HTTP_Configuration,
-                          struct HTTP_ConnectionState,
-                          HTTP_RuntimeStatistic_t> HTTP_IConnection_t;
+                          struct DHCP_ConnectionConfiguration,
+                          struct DHCP_ConnectionState,
+                          DHCP_RuntimeStatistic_t> DHCP_IConnection_t;
 typedef Net_ISocketConnection_T<ACE_INET_Addr,
-                                struct HTTP_Configuration,
-                                struct HTTP_ConnectionState,
-                                HTTP_RuntimeStatistic_t,
-                                HTTP_Stream_t,
+                                struct DHCP_ConnectionConfiguration,
+                                struct DHCP_ConnectionState,
+                                DHCP_RuntimeStatistic_t,
+                                DHCP_Stream_t,
                                 enum Stream_StateMachine_ControlState,
                                 struct Net_SocketConfiguration,
-                                struct HTTP_SocketHandlerConfiguration> HTTP_ISocketConnection_t;
+                                struct DHCP_SocketHandlerConfiguration> DHCP_ISocketConnection_t;
 //typedef Net_ISession_T<ACE_INET_Addr,
 //                       struct Net_SocketConfiguration,
-//                       struct HTTP_Configuration,
-//                       struct HTTP_ConnectionState,
-//                       HTTP_RuntimeStatistic_t,
-//                       HTTP_Stream> HTTP_ISession_t;
+//                       struct DHCP_ConnectionConfiguration,
+//                       struct DHCP_ConnectionState,
+//                       DHCP_RuntimeStatistic_t,
+//                       DHCP_Stream> DHCP_ISession_t;
 
 /////////////////////////////////////////
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         struct HTTP_SocketHandlerConfiguration> HTTP_IConnector_t;
+                         struct DHCP_SocketHandlerConfiguration> DHCP_IConnector_t;
 //typedef Net_IConnector_T<ACE_INET_Addr,
-//                         struct HTTP_ConnectorConfiguration> HTTP_IConnector_t;
-typedef Net_Client_Connector_T<HTTP_TCPConnection_t,
+//                         struct DHCP_ConnectorConfiguration> DHCP_IConnector_t;
+typedef Net_Client_Connector_T<DHCP_TCPConnection_t,
                                ACE_SOCK_CONNECTOR,
                                ACE_INET_Addr,
-                               struct HTTP_Configuration,
-                               struct HTTP_ConnectionState,
-                               HTTP_RuntimeStatistic_t,
-                               HTTP_Stream_t,
-                               struct HTTP_SocketHandlerConfiguration,
-                               struct HTTP_Stream_UserData> HTTP__Connector_t;
-typedef Net_Client_AsynchConnector_T<HTTP_AsynchTCPConnection_t,
+                               struct DHCP_ConnectionConfiguration,
+                               struct DHCP_ConnectionState,
+                               DHCP_RuntimeStatistic_t,
+                               DHCP_Stream_t,
+                               struct DHCP_SocketHandlerConfiguration,
+                               struct DHCP_Stream_UserData> DHCP__Connector_t;
+typedef Net_Client_AsynchConnector_T<DHCP_AsynchTCPConnection_t,
                                      ACE_INET_Addr,
-                                     struct HTTP_Configuration,
-                                     struct HTTP_ConnectionState,
-                                     HTTP_RuntimeStatistic_t,
-                                     HTTP_Stream_t,
-                                     struct HTTP_SocketHandlerConfiguration,
-                                     struct HTTP_Stream_UserData> HTTP_AsynchConnector_t;
+                                     struct DHCP_ConnectionConfiguration,
+                                     struct DHCP_ConnectionState,
+                                     DHCP_RuntimeStatistic_t,
+                                     DHCP_Stream_t,
+                                     struct DHCP_SocketHandlerConfiguration,
+                                     struct DHCP_Stream_UserData> DHCP_AsynchConnector_t;
 
 /////////////////////////////////////////
 
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 struct HTTP_Configuration,
-                                 struct HTTP_ConnectionState,
-                                 HTTP_RuntimeStatistic_t,
-                                 struct HTTP_Stream_UserData> HTTP_IConnection_Manager_t;
+                                 struct DHCP_ConnectionConfiguration,
+                                 struct DHCP_ConnectionState,
+                                 DHCP_RuntimeStatistic_t,
+                                 struct DHCP_Stream_UserData> DHCP_IConnection_Manager_t;
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
-                                 struct HTTP_Configuration,
-                                 struct HTTP_ConnectionState,
-                                 HTTP_RuntimeStatistic_t,
-                                 struct HTTP_Stream_UserData> HTTP_Connection_Manager_t;
+                                 struct DHCP_ConnectionConfiguration,
+                                 struct DHCP_ConnectionState,
+                                 DHCP_RuntimeStatistic_t,
+                                 struct DHCP_Stream_UserData> DHCP_Connection_Manager_t;
 
-typedef ACE_Singleton<HTTP_Connection_Manager_t,
-                      ACE_SYNCH_MUTEX> HTTP_CONNECTIONMANAGER_SINGLETON;
+typedef ACE_Singleton<DHCP_Connection_Manager_t,
+                      ACE_SYNCH_MUTEX> DHCP_CONNECTIONMANAGER_SINGLETON;
 
 #endif

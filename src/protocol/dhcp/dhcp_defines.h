@@ -21,10 +21,10 @@
 #ifndef DHCP_DEFINES_H
 #define DHCP_DEFINES_H
 
-// parser
-// "\0\0"
-#define YY_END_OF_BUFFER_CHAR                     0
-#define DHCP_FLEX_BUFFER_BOUNDARY_SIZE            2
+//// parser
+//// "\0\0"
+//#define YY_END_OF_BUFFER_CHAR                     0
+//#define DHCP_FLEX_BUFFER_BOUNDARY_SIZE            2
 
 // stream
 #define DHCP_BUFFER_SIZE                          1024

@@ -76,6 +76,38 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 //  unsigned int                           statisticCollectionInterval; // statistics collecting interval (second(s)) [0: off]
 //};
 
+struct IRC_Client_SocketHandlerConfiguration;
+struct IRC_StreamConfiguration;
+struct IRC_UserData;
+struct IRC_Client_ConnectionConfiguration
+ : IRC_ConnectionConfiguration
+{
+  inline IRC_Client_ConnectionConfiguration ()
+   : IRC_ConnectionConfiguration ()
+   ///////////////////////////////////////
+   , socketHandlerConfiguration (NULL)
+   , moduleHandlerConfiguration (NULL)
+   , streamConfiguration (NULL)
+   , protocolConfiguration (NULL)
+   , cursesState (NULL)
+   , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
+   , userData (NULL)
+   , useReactor (NET_EVENT_USE_REACTOR)
+  {};
+
+  struct IRC_Client_SocketHandlerConfiguration* socketHandlerConfiguration;
+
+  struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
+  struct IRC_Client_StreamConfiguration*        streamConfiguration;
+
+  struct IRC_ProtocolConfiguration*             protocolConfiguration;
+
+  struct IRC_Client_CursesState*                cursesState;
+  bool                                          logToFile;
+  struct IRC_Client_UserData*                   userData;
+  bool                                          useReactor;
+};
+
 struct IRC_Client_SocketHandlerConfiguration
  : IRC_SocketHandlerConfiguration
 {
@@ -88,53 +120,17 @@ struct IRC_Client_SocketHandlerConfiguration
   struct IRC_Client_UserData* userData;
 };
 
-struct IRC_Client_ModuleHandlerConfiguration
- : IRC_ModuleHandlerConfiguration
-{
-  inline IRC_Client_ModuleHandlerConfiguration ()
-   : IRC_ModuleHandlerConfiguration ()
-   ///////////////////////////////////////
-   , subscriber (NULL)
-   , subscribers (NULL)
-   , userData (NULL)
-  {};
-
-  /* handler */
-  IRC_Client_ISessionNotify_t* subscriber; // (initial) subscriber
-  IRC_Client_ISubscribers_t*   subscribers;
-
-  struct IRC_Client_UserData*  userData;
-};
-
-struct IRC_Client_StreamConfiguration
- : Stream_Configuration
-{
-  inline IRC_Client_StreamConfiguration ()
-   : Stream_Configuration ()
-   , moduleConfiguration (NULL)
-   , moduleHandlerConfiguration (NULL)
-   , protocolConfiguration (NULL)
-   , userData (NULL)
-  {
-    bufferSize = IRC_BUFFER_SIZE;
-  };
-
-  struct Stream_ModuleConfiguration*            moduleConfiguration;        // stream module configuration
-  struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration; // module handler configuration
-  struct IRC_ProtocolConfiguration*             protocolConfiguration;      // protocol configuration
-
-  struct IRC_Client_UserData*                   userData;
-};
-
+struct IRC_Client_ConnectionConfiguration;
 struct IRC_Client_InputHandlerConfiguration
 {
   inline IRC_Client_InputHandlerConfiguration ()
    : controller (NULL)
-   , streamConfiguration (NULL)
+   , connectionConfiguration (NULL)
   {};
 
-  IRC_IControl*                controller;
-  struct Stream_Configuration* streamConfiguration;
+  IRC_IControl*                              controller;
+
+  struct IRC_Client_ConnectionConfiguration* connectionConfiguration;
 };
 
 struct IRC_Client_Configuration

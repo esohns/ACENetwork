@@ -631,18 +631,17 @@ do_work (bool requestBroadcastReplies_in,
   configuration.moduleConfiguration.streamConfiguration =
     &configuration.streamConfiguration;
 
+  configuration.moduleHandlerConfiguration.connectionConfiguration =
+    &configuration.connectionConfiguration;
+  configuration.moduleHandlerConfiguration.parserConfiguration =
+    &configuration.parserConfiguration;
   configuration.moduleHandlerConfiguration.protocolConfiguration =
     &configuration.protocolConfiguration;
-  configuration.moduleHandlerConfiguration.streamConfiguration =
-    &configuration.streamConfiguration;
-  configuration.moduleHandlerConfiguration.configuration = &configuration;
-  configuration.moduleHandlerConfiguration.parserConfiguration =
-      &configuration.parserConfiguration;
-  configuration.moduleHandlerConfiguration.targetFileName = fileName_in;
   configuration.moduleHandlerConfiguration.socketConfiguration =
     &configuration.socketConfiguration;
-  configuration.moduleHandlerConfiguration.socketHandlerConfiguration =
-    &configuration.socketHandlerConfiguration;
+  configuration.moduleHandlerConfiguration.streamConfiguration =
+    &configuration.streamConfiguration;
+  configuration.moduleHandlerConfiguration.targetFileName = fileName_in;
 
   // ********************** protocol configuration data ************************
   configuration.protocolConfiguration.requestBroadcastReplies =
@@ -1079,7 +1078,7 @@ do_work (bool requestBroadcastReplies_in,
 //    } // end IF
 allocate:
     message_p =
-        static_cast<Test_U_Message*> (message_allocator.malloc (configuration.socketHandlerConfiguration.PDUSize));
+        static_cast<Test_U_Message*> (message_allocator.malloc (configuration.connectionConfiguration.PDUSize));
     // keep retrying ?
     if (!message_p && !message_allocator.block ())
       goto allocate;

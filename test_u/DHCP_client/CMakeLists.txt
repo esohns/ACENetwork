@@ -188,7 +188,11 @@ set (${PROJECT_NAME}_DHCPClient_EXE_CFG
 
 #string (TOLOWER "${PROJECT_NAME}_DHCPClient" EXECUTABLE)
 set (EXECUTABLE DHCP_client)
-add_executable (${EXECUTABLE} ${ACENetwork_DHCPClient_EXE_SRCS} etc/test_u.glade)
+add_executable (${EXECUTABLE}
+                EXCLUDE_FROM_ALL
+                ${ACENetwork_DHCPClient_EXE_SRCS}
+                etc/test_u.glade)
+set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)

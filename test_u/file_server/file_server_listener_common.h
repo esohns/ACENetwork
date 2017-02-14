@@ -30,34 +30,34 @@
 #include "net_server_asynchlistener.h"
 #include "net_server_listener.h"
 
-#include "test_u_connection_common.h"
 #include "test_u_stream_common.h"
 #include "test_u_tcpconnection.h"
 
 #include "file_server_common.h"
+#include "file_server_connection_common.h"
 
 // foward declarations
 class Test_U_Stream;
 
 typedef Net_Server_AsynchListener_T<Test_U_AsynchTCPConnection,
                                     ACE_INET_Addr,
-                                    struct Test_U_FileServer_ListenerConfiguration,
-                                    struct Test_U_ConnectionState,
-                                    struct Test_U_SocketHandlerConfiguration,
+                                    struct FileServer_ListenerConfiguration,
+                                    struct FileServer_ConnectionState,
+                                    struct FileServer_SocketHandlerConfiguration,
                                     Test_U_Stream,
-                                    struct Test_U_UserData> Test_U_FileServer_AsynchListener_t;
+                                    struct FileServer_UserData> FileServer_AsynchListener_t;
 typedef Net_Server_Listener_T<Test_U_TCPConnection,
                               ACE_SOCK_ACCEPTOR,
                               ACE_INET_Addr,
-                              struct Test_U_FileServer_ListenerConfiguration,
-                              struct Test_U_ConnectionState,
-                              struct Test_U_SocketHandlerConfiguration,
+                              struct FileServer_ListenerConfiguration,
+                              struct FileServer_ConnectionState,
+                              struct FileServer_SocketHandlerConfiguration,
                               Test_U_Stream,
-                              struct Test_U_UserData> Test_U_FileServer_Listener_t;
+                              struct FileServer_UserData> FileServer_Listener_t;
 
-typedef ACE_Singleton<Test_U_FileServer_AsynchListener_t,
-                      ACE_SYNCH_RECURSIVE_MUTEX> TEST_U_FILESERVER_ASYNCHLISTENER_SINGLETON;
-typedef ACE_Singleton<Test_U_FileServer_Listener_t,
-                      ACE_SYNCH_RECURSIVE_MUTEX> TEST_U_FILESERVER_LISTENER_SINGLETON;
+typedef ACE_Singleton<FileServer_AsynchListener_t,
+                      ACE_SYNCH_RECURSIVE_MUTEX> FILESERVER_ASYNCHLISTENER_SINGLETON;
+typedef ACE_Singleton<FileServer_Listener_t,
+                      ACE_SYNCH_RECURSIVE_MUTEX> FILESERVER_LISTENER_SINGLETON;
 
 #endif

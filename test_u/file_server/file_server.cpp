@@ -486,20 +486,20 @@ do_work (
          unsigned int statisticReportingInterval_in,
          bool useUDP_in,
          unsigned int numberOfDispatchThreads_in,
-         struct Test_U_FileServer_GTK_CBData& CBData_in,
+         struct FileServer_GTK_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
-         Test_U_FileServer_SignalHandler& signalHandler_in)
+         FileServer_SignalHandler& signalHandler_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   int result = -1;
   struct Common_DispatchThreadData thread_data;
   struct Common_TimerConfiguration timer_configuration;
-  struct Test_U_FileServer_SignalHandlerConfiguration signal_handler_configuration;
-  struct Test_U_UserData user_data;
-  Test_U_FileServer_GTK_Manager_t* gtk_manager_p = NULL;
+  struct FileServer_SignalHandlerConfiguration signal_handler_configuration;
+  struct FileServer_UserData user_data;
+  FileServer_GTK_Manager_t* gtk_manager_p = NULL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HWND window_p = NULL;
   BOOL was_visible_b = true;
@@ -509,16 +509,16 @@ do_work (
   bool stop_event_dispatch = false;
 
   // step0a: initialize configuration
-  struct Test_U_FileServer_Configuration configuration;
+  struct FileServer_Configuration configuration;
   CBData_in.configuration = &configuration;
 
   Common_Timer_Manager_t* timer_manager_p =
     COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
 
-  Test_U_InetConnectionManager_t* connection_manager_p =
-    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
-  Test_U_IInetConnectionManager_t* iconnection_manager_p =
+  FileServer_InetConnectionManager_t* connection_manager_p =
+    FILESERVER_CONNECTIONMANAGER_SINGLETON::instance ();
+  FileServer_IInetConnectionManager_t* iconnection_manager_p =
     connection_manager_p;
   ACE_ASSERT (iconnection_manager_p);
 
@@ -552,6 +552,11 @@ do_work (
 
   // ******************** protocol configuration data **************************
   // ********************** stream configuration data **************************
+//  configuration.allocatorConfiguration.defaultBufferSize =
+//    bufferSize_in;
+
+  configuration.streamConfiguration.allocatorConfiguration =
+    &configuration.allocatorConfiguration;
   configuration.streamConfiguration.cloneModule =
     !(UIDefinitionFile_in.empty ());
   configuration.streamConfiguration.messageAllocator = &message_allocator;
@@ -682,10 +687,10 @@ do_work (
   // step2: signal handling
   if (useReactor_in)
     CBData_in.configuration->listener =
-      TEST_U_FILESERVER_LISTENER_SINGLETON::instance ();
+      FILESERVER_LISTENER_SINGLETON::instance ();
   else
     CBData_in.configuration->listener =
-      TEST_U_FILESERVER_ASYNCHLISTENER_SINGLETON::instance ();
+      FILESERVER_ASYNCHLISTENER_SINGLETON::instance ();
   signal_handler_configuration.listener =
     CBData_in.configuration->listener;
   signal_handler_configuration.statisticReportingHandler = connection_manager_p;
@@ -745,7 +750,7 @@ do_work (
 
   // step5a: start GTK event loop ?
   gtk_manager_p =
-    FILE_SERVER_UI_GTK_MANAGER_SINGLETON::instance ();
+    FILESERVER_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   if (!UIDefinitionFile_in.empty ())
   {
@@ -1166,7 +1171,7 @@ ACE_TMAIN (int argc_in,
   } // end IF
   if (number_of_dispatch_threads == 0) number_of_dispatch_threads = 1;
 
-  struct Test_U_FileServer_GTK_CBData gtk_cb_user_data;
+  struct FileServer_GTK_CBData gtk_cb_user_data;
   gtk_cb_user_data.allowUserRuntimeStatistic =
     (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
                                          // iff regular reporting
@@ -1250,7 +1255,7 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  Test_U_FileServer_SignalHandler signal_handler;
+  FileServer_SignalHandler signal_handler;
 
   // step1f: handle specific program modes
   if (print_version_and_exit)
@@ -1307,13 +1312,13 @@ ACE_TMAIN (int argc_in,
   // step1h: init GLIB / G(D|T)K[+] / GNOME ?
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
-  Test_U_FileServer_GtkBuilderDefinition_t ui_definition (argc_in,
-                                                          argv_in);
+  FileServer_GtkBuilderDefinition_t ui_definition (argc_in,
+                                                   argv_in);
   if (!UI_file.empty ())
-    FILE_SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                                   argv_in,
-                                                                   &gtk_cb_user_data,
-                                                                   &ui_definition);
+    FILESERVER_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
+                                                                  argv_in,
+                                                                  &gtk_cb_user_data,
+                                                                  &ui_definition);
 
   ACE_High_Res_Timer timer;
   timer.start ();

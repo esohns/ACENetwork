@@ -401,8 +401,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::configuration_->socketHandlerConfiguration);
-  ACE_ASSERT (inherited::configuration_->socketHandlerConfiguration->messageAllocator);
+  ACE_ASSERT (inherited::configuration_->peerConnectionConfiguration);
+  ACE_ASSERT (inherited::configuration_->peerConnectionConfiguration->messageAllocator);
   ACE_ASSERT (inherited::connectionManager_);
 
   inherited::connect (id_in);
@@ -465,7 +465,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   data_p = NULL;
 allocate:
   message_p =
-    static_cast<typename PeerStreamType::MESSAGE_T*> (inherited::configuration_->socketHandlerConfiguration->messageAllocator->malloc (inherited::configuration_->socketHandlerConfiguration->PDUSize));
+    static_cast<typename PeerStreamType::MESSAGE_T*> (inherited::configuration_->peerConnectionConfiguration->messageAllocator->malloc (inherited::configuration_->peerConnectionConfiguration->PDUSize));
   // keep retrying ?
   if (!message_p &&
       !inherited::configuration_->socketHandlerConfiguration->messageAllocator->block ())
@@ -653,8 +653,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->metaInfo);
-  ACE_ASSERT (inherited::configuration_->trackerSocketHandlerConfiguration);
-  ACE_ASSERT (inherited::configuration_->trackerSocketHandlerConfiguration->messageAllocator);
+  ACE_ASSERT (inherited::configuration_->trackerConnectionConfiguration);
+  ACE_ASSERT (inherited::configuration_->trackerConnectionConfiguration->messageAllocator);
   ACE_ASSERT (trackerConnectionManager_);
 
   struct HTTP_Record* record_p = NULL;
@@ -735,10 +735,10 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   record_p = NULL;
 allocate:
   message_p =
-    static_cast<typename ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (inherited::configuration_->trackerSocketHandlerConfiguration->messageAllocator->malloc (inherited::configuration_->trackerSocketHandlerConfiguration->PDUSize));
+    static_cast<typename ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (inherited::configuration_->trackerSocketHandlerConfiguration->messageAllocator->malloc (inherited::configuration_->trackerConnectionConfiguration->PDUSize));
   // keep retrying ?
   if (!message_p &&
-      !inherited::configuration_->trackerSocketHandlerConfiguration->messageAllocator->block ())
+      !inherited::configuration_->trackerConnectionConfiguration->messageAllocator->block ())
     goto allocate;
   if (!message_p)
   {

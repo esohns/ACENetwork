@@ -22,8 +22,8 @@
 #define NET_DEFINES_H
 
 // interface
-// *PORTABILITY*: nic device names are not portable
-//                --> (on Windows) let the user choose the interface from a list
+// *PORTABILITY*: NIC device names are not portable
+//                Win32: let the user choose the device identifier from a list
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #define NET_INTERFACE_DEFAULT_ETHERNET                  ""
 #define NET_INTERFACE_DEFAULT_PPP                       ""

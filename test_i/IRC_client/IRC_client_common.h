@@ -43,7 +43,9 @@
 #include "net_iconnector.h"
 
 #include "irc_common.h"
+#include "irc_configuration.h"
 #include "irc_icontrol.h"
+//#include "irc_network.h"
 #include "irc_stream_common.h"
 
 #include "FILE_Stream.h"
@@ -152,77 +154,6 @@ struct IRC_Client_SessionData
 };
 
 typedef Stream_Statistic IRC_RuntimeStatistic_t;
-
-struct IRC_Client_SocketHandlerConfiguration;
-struct IRC_StreamConfiguration;
-struct IRC_UserData;
-struct IRC_Client_ConnectionConfiguration
- : Net_ConnectionConfiguration
-{
-  inline IRC_Client_ConnectionConfiguration ()
-   : Net_ConnectionConfiguration ()
-   ///////////////////////////////////////
-   , socketHandlerConfiguration (NULL)
-   , moduleHandlerConfiguration (NULL)
-   , streamConfiguration (NULL)
-   , protocolConfiguration (NULL)
-   , cursesState (NULL)
-   , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
-   , userData (NULL)
-   , useReactor (NET_EVENT_USE_REACTOR)
-  {};
-
-  struct IRC_Client_SocketHandlerConfiguration* socketHandlerConfiguration;
-
-  struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
-  struct IRC_Client_StreamConfiguration*        streamConfiguration;
-
-  struct IRC_ProtocolConfiguration*             protocolConfiguration;
-
-  struct IRC_Client_CursesState*                cursesState;
-  bool                                          logToFile;
-  struct IRC_Client_UserData*                   userData;
-  bool                                          useReactor;
-};
-
-struct IRC_Client_ConnectionState
- : IRC_ConnectionState
-{
-  inline IRC_Client_ConnectionState ()
-   : IRC_ConnectionState ()
-   , configuration (NULL)
-   , controller (NULL)
-   , userData (NULL)
-  {};
-
-  struct IRC_Client_ConnectionConfiguration* configuration;
-  IRC_IControl*                              controller;
-
-  struct IRC_Client_UserData*                userData;
-};
-
-// *TODO*: remove this ASAP
-struct IRC_Client_SessionState
- : IRC_Client_ConnectionState
-{
-  inline IRC_Client_SessionState ()
-   : IRC_Client_ConnectionState ()
-   , away (false)
-   , channel ()
-   , channelModes ()
-   , isFirstMessage (false)
-   , nickName ()
-   , userModes ()
-  {};
-
-  // *TODO*: remove this
-  bool               away;
-  std::string        channel;
-  IRC_ChannelModes_t channelModes;
-  bool               isFirstMessage;
-  std::string        nickName;
-  IRC_UserModes_t    userModes;
-};
 
 typedef Net_IConnector_T<ACE_INET_Addr,
                          struct IRC_Client_SocketHandlerConfiguration> IRC_Client_IConnector_t;

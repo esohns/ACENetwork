@@ -200,7 +200,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // step2a: connect stream head message queue with the reactor notification
   //         pipe ?
   // *TODO*: remove type inferences
-  if (!inherited2::configuration_->streamConfiguration->useThreadPerConnection)
+  if (!inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection)
     inherited2::configuration_->streamConfiguration->notificationStrategy =
       &(inherited::notificationStrategy_);
 
@@ -463,26 +463,25 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // sanity check
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
   ACE_ASSERT (!currentReadBuffer_);
 
   // read some data from the socket
   // *TODO*: remove type inference
   currentReadBuffer_ =
-    allocateMessage (inherited2::configuration_->streamConfiguration->bufferSize);
-  if (!currentReadBuffer_)
+    allocateMessage (inherited2::configuration_->PDUSize);
+  if (likely (!currentReadBuffer_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                inherited2::configuration_->streamConfiguration->bufferSize));
-    return -1;
+                inherited2::configuration_->PDUSize));
+    return -1; // <-- remove 'this' from dispatch
   } // end IF
 
   // read some data from the socket
   ssize_t bytes_received =
-      inherited::peer_.recv (currentReadBuffer_->wr_ptr (), // buffer
-                             currentReadBuffer_->size (),   // #bytes to read
-                             0);                            // flags
+      inherited::peer_.recv (currentReadBuffer_->wr_ptr (),       // buffer
+                             inherited2::configuration_->PDUSize, // #bytes to read
+                             0);                                  // flags
   switch (bytes_received)
   {
     case -1:
@@ -515,7 +514,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
       if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
         inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
 
-      return -1;
+      return -1; // <-- remove 'this' from dispatch
     }
     // *** GOOD CASES ***
     case 0:
@@ -538,7 +537,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
       if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
         inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
 
-      return -1;
+      return -1; // <-- remove 'this' from dispatch
     }
     default:
     {
@@ -557,7 +556,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // push the buffer onto the stream for processing
   // *NOTE*: the stream assumes ownership of the buffer
   result = stream_.put (currentReadBuffer_);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     int error = ACE_OS::last_error ();
     if (error != ESHUTDOWN) // 10058: queue has been deactivate()d
@@ -568,7 +567,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
     //currentReadBuffer_->release ();
     currentReadBuffer_ = NULL;
 
-    return -1;
+    return -1; // <-- remove 'this' from dispatch
   } // end IF
   currentReadBuffer_ = NULL;
 
@@ -601,7 +600,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
 
   int result = -1;
   ssize_t bytes_sent = 0;
@@ -612,32 +611,31 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // *IMPORTANT NOTE*: the ACE documentation (books) explicitly claims that
   //                   measures are in place to prevent concurrent dispatch of
   //                   the same handler for a specific handle by different
-  //                   threads (find reference). If this is indeed true, this
-  //                   check may be removed (make sure this holds for the
-  //                   reactor implementation, AND the specific dispatch
-  //                   mechanism of (piped) reactor notifications)
+  //                   threads (*TODO*: find reference). If this is indeed true,
+  //                   this test may be removed (just make sure this holds for
+  //                   the reactor implementation in general AND the specific
+  //                   dispatch mechanism of (piped) reactor notifications)
   // *TODO*: remove type inferences
-  if (serializeOutput_)
+  if (unlikely (serializeOutput_))
   {
     result = sendLock_.acquire ();
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", aborting\n")));
-      return -1;
+      return -1; // <-- remove 'this' from dispatch
     } // end IF
   } // end IF
 
-  if (currentWriteBuffer_ == NULL)
+  if (likely (!currentWriteBuffer_))
   {
     // send next data chunk from the stream
     // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
     //                   been notified to the reactor
-    if (!inherited2::configuration_->streamConfiguration->useThreadPerConnection)
-      result = stream_.get (currentWriteBuffer_, NULL);
-    else
-      result = inherited::getq (currentWriteBuffer_, NULL);
-    if (result == -1)
+    result =
+      (unlikely (inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection) ? inherited::getq (currentWriteBuffer_, NULL)
+                                                                                                 : stream_.get (currentWriteBuffer_, NULL));
+    if (unlikely (result == -1))
     {
       // *NOTE*: a number of issues can occur here:
       //         - connection has been closed in the meantime
@@ -646,8 +644,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
       if ((error != EAGAIN)   && // 11   : connection has been closed
           (error != ESHUTDOWN))  // 10058: queue has been deactivated
         ACE_DEBUG ((LM_ERROR,
-                    (inherited2::configuration_->streamConfiguration->useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
-                                                                                             : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
+                    (inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
+                                                                                                    : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
       goto release;
     } // end IF
   } // end IF
@@ -655,23 +653,23 @@ Net_StreamTCPSocketBase_T<HandlerType,
   result = 0;
 
   // finished ?
-  if (inherited2::configuration_->streamConfiguration->useThreadPerConnection &&
-      currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
-  {
-    //       ACE_DEBUG ((LM_DEBUG,
-    //                   ACE_TEXT ("[%u]: finished sending...\n"),
-    //                   peer_.get_handle ()));
+  if (unlikely (inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection))
+    if (currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
+    {
+      //       ACE_DEBUG ((LM_DEBUG,
+      //                   ACE_TEXT ("[%u]: finished sending...\n"),
+      //                   peer_.get_handle ()));
 
-    // clean up
-    currentWriteBuffer_->release ();
-    currentWriteBuffer_ = NULL;
+      // clean up
+      currentWriteBuffer_->release ();
+      currentWriteBuffer_ = NULL;
 
-    result = -1;
+      result = -1; // <-- remove 'this' from dispatch
 
-    goto release;
-  } // end IF
+      goto release;
+    } // end IF
 
-  // put some data into the socket...
+  // put some data into the socket
   // *TODO*: the iovec-based implementation kept blocking in
   //         ACE::handle_write_ready(), i.e. obviously currently does not work
   //         with multi-threaded (thread pool) reactors...
@@ -716,7 +714,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
       if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
         inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
 
-      result = -1;
+      result = -1; // <-- remove 'this' from dispatch
 
       break;
     }
@@ -738,10 +736,10 @@ Net_StreamTCPSocketBase_T<HandlerType,
       currentWriteBuffer_ = NULL;
 
       // *TODO*: remove type inference
-      if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
+      if (likely (inherited2::state_.status == NET_CONNECTION_STATUS_OK))
         inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
 
-      result = -1;
+      result = -1; // <-- remove 'this' from dispatch
 
       break;
     }
@@ -754,7 +752,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
       // finished with this buffer ?
       currentWriteBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
-      if (currentWriteBuffer_->length () > 0)
+      if (unlikely (currentWriteBuffer_->length () > 0))
         break; // there's more data
 
       // clean up
@@ -766,11 +764,11 @@ Net_StreamTCPSocketBase_T<HandlerType,
   } // end SWITCH
 
   // immediately reschedule handler ?
-  if (currentWriteBuffer_)
-    result = 1; // <-- reschedule immediately
+  if (unlikely (currentWriteBuffer_))
+    result = 1; // <-- reschedule 'this' immediately
 
 release:
-  if (serializeOutput_)
+  if (unlikely (serializeOutput_))
   {
     int result_2 = sendLock_.release ();
     if (result_2 == -1)
@@ -808,7 +806,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
 
   switch (mask_in)
   {
@@ -834,7 +832,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
-      if (!inherited2::configuration_->streamConfiguration->useThreadPerConnection)
+      if (likely (!inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection))
       { // *IMPORTANT NOTE*: in a multithreaded environment, in particular when
         //                   using a multithreaded reactor, there may still be
         //                   in-flight notifications being dispatched at this
@@ -853,7 +851,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                       this));
         //else if (result > 0)
         //  ACE_DEBUG ((LM_DEBUG,
-        //              ACE_TEXT ("flushed %d outbound messages (handle was: %u)\n"),
+        //              ACE_TEXT ("flushed %d notifications (handle was: %u)\n"),
         //              result,
         //              handle_in));
       } // end IF
@@ -861,19 +859,20 @@ Net_StreamTCPSocketBase_T<HandlerType,
       break;
     }
     default:
-      // *PORTABILITY*: this isn't entirely portable...
+    {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("handle_close called for unknown reasons (handle: %@, mask: %u) --> check implementation !, continuing\n"),
+                  ACE_TEXT ("Net_StreamTCPSocketBase_T::handle_close() called for unknown reasons (handle: 0x%@, mask: %u) --> check implementation !, continuing\n"),
                   handle_in,
                   mask_in));
 #else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("handle_close called for unknown reasons (handle: %d, mask: %u) --> check implementation !, continuing\n"),
+                  ACE_TEXT ("Net_StreamTCPSocketBase_T::handle_close() called for unknown reasons (handle: %d, mask: %u) --> check implementation !, continuing\n"),
                   handle_in,
                   mask_in));
 #endif
       break;
+    }
   } // end SWITCH
 
   // step3: invoke base class maintenance
@@ -885,13 +884,21 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // *IMPORTANT NOTE*: may delete 'this'
   result = inherited::handle_close (handle,
                                     mask_in);
-  if (result == -1)
-    ACE_DEBUG ((LM_DEBUG,
+  if (unlikely (result == -1))
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HandlerType::handle_close(0x%@, %d): \"%m\", continuing\n"),
+                handle, mask_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to HandlerType::handle_close(%d, %d): \"%m\", continuing\n"),
                 handle, mask_in));
+#endif
+  } // end IF
 
   // step4: deregister with the connection manager (if any)
-  if (deregister)
+  if (likely (deregister))
     inherited2::deregister ();
 
 //  // step5: clean up

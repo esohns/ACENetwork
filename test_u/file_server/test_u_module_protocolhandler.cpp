@@ -107,9 +107,9 @@ Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& mes
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
       // retain session ID for reporting
-      const Test_U_FileServer_SessionData_t& session_data_container_r =
+      const FileServer_SessionData_t& session_data_container_r =
           message_inout->get ();
-      const Test_U_FileServer_SessionData& session_data_r =
+      const struct FileServer_SessionData& session_data_r =
           session_data_container_r.get ();
       sessionID_ = session_data_r.sessionID;
 

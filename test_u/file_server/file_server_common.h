@@ -43,74 +43,101 @@
 #include "net_iconnectionmanager.h"
 #include "net_ilistener.h"
 
-#include "test_u_connection_common.h"
 #include "test_u_configuration.h"
-#include "test_u_connection_manager_common.h"
 #include "test_u_gtk_common.h"
 
-typedef Common_IStatistic_T<Net_RuntimeStatistic_t> Test_U_FileServer_StatisticReportingHandler_t;
+#include "file_server_connection_common.h"
+#include "file_server_stream_common.h"
+
+typedef Common_IStatistic_T<Net_RuntimeStatistic_t> FileServer_StatisticReportingHandler_t;
 
 // forward declarations
+struct FileServer_ConnectionConfiguration;
+struct FileServer_StreamConfiguration;
+struct FileServer_UserData;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 struct Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
+                                 struct FileServer_ConnectionConfiguration,
+                                 struct FileServer_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 struct Test_U_UserData> Test_U_IInetConnectionManager_t;
+                                 struct FileServer_UserData> FileServer_IInetConnectionManager_t;
 class Test_U_SessionMessage;
 class Test_U_Message;
-struct Test_U_FileServer_ListenerConfiguration;
-typedef Net_IListener_T<struct Test_U_FileServer_ListenerConfiguration,
-                        struct Test_U_SocketHandlerConfiguration> Test_U_IListener_t;
+struct FileServer_ListenerConfiguration;
+typedef Net_IListener_T<struct FileServer_ListenerConfiguration,
+                        struct FileServer_SocketHandlerConfiguration> Test_U_IListener_t;
 
 //////////////////////////////////////////
 
-struct Test_U_FileServer_SignalHandlerConfiguration
+struct FileServer_ConnectionConfiguration;
+struct FileServer_UserData
+ : Net_UserData
+{
+  inline FileServer_UserData ()
+   : Net_UserData ()
+   , connectionConfiguration (NULL)
+  {};
+
+  struct FileServer_ConnectionConfiguration* connectionConfiguration;
+};
+
+struct FileServer_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
-  inline Test_U_FileServer_SignalHandlerConfiguration ()
+  inline FileServer_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    , listener (NULL)
    , statisticReportingHandler (NULL)
    , statisticReportingTimerID (-1)
   {};
 
-  Test_U_IListener_t*                            listener;
-  Test_U_FileServer_StatisticReportingHandler_t* statisticReportingHandler;
-  long                                           statisticReportingTimerID;
+  Test_U_IListener_t*                     listener;
+  FileServer_StatisticReportingHandler_t* statisticReportingHandler;
+  long                                    statisticReportingTimerID;
 };
 
-struct Test_U_FileServer_ListenerConfiguration
+struct FileServer_SocketHandlerConfiguration;
+struct FileServer_ListenerConfiguration
  : Net_ListenerConfiguration
 {
-  inline Test_U_FileServer_ListenerConfiguration ()
+  inline FileServer_ListenerConfiguration ()
    : Net_ListenerConfiguration ()
    , connectionManager (NULL)
    , socketHandlerConfiguration (NULL)
 //   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {};
 
-  Test_U_IInetConnectionManager_t*          connectionManager;
-  struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
+  FileServer_IInetConnectionManager_t*          connectionManager;
+  struct FileServer_SocketHandlerConfiguration* socketHandlerConfiguration;
 //  bool                                    useLoopBackDevice;
 };
 
-struct Test_U_FileServer_Configuration
+struct FileServer_Configuration
  : Test_U_Configuration
 {
-  inline Test_U_FileServer_Configuration ()
+  inline FileServer_Configuration ()
    : Test_U_Configuration ()
+   , streamConfiguration ()
+   , socketHandlerConfiguration ()
+   , connectionConfiguration ()
    , handle (ACE_INVALID_HANDLE)
    , listener (NULL)
    , listenerConfiguration ()
    , signalHandlerConfiguration ()
-   //, socketHandlerConfiguration ()
+   , userData ()
   {};
 
-  ACE_HANDLE                                          handle;
-  Test_U_IListener_t*                                 listener;
-  struct Test_U_FileServer_ListenerConfiguration      listenerConfiguration;
+  struct FileServer_StreamConfiguration        streamConfiguration;
 
-  struct Test_U_FileServer_SignalHandlerConfiguration signalHandlerConfiguration;
+  struct FileServer_SocketHandlerConfiguration socketHandlerConfiguration;
+  struct FileServer_ConnectionConfiguration    connectionConfiguration;
+
+  ACE_HANDLE                                   handle;
+  Test_U_IListener_t*                          listener;
+  struct FileServer_ListenerConfiguration      listenerConfiguration;
+
+  struct FileServer_SignalHandlerConfiguration signalHandlerConfiguration;
+
+  struct FileServer_UserData                   userData;
 };
 
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
@@ -125,33 +152,33 @@ typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
 
 //////////////////////////////////////////
 
-struct Test_U_FileServer_SessionData;
+struct FileServer_SessionData;
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct Test_U_FileServer_SessionData,
+                                    struct FileServer_SessionData,
                                     enum Stream_SessionMessageType,
                                     Test_U_Message,
-                                    Test_U_SessionMessage> Test_U_ISessionNotify_t;
-typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
-typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
+                                    Test_U_SessionMessage> FileServer_ISessionNotify_t;
+typedef std::list<FileServer_ISessionNotify_t*> FileServer_Subscribers_t;
+typedef FileServer_Subscribers_t::const_iterator FileServer_SubscribersIterator_t;
 
-struct Test_U_FileServer_GTK_CBData
+struct FileServer_GTK_CBData
  : Test_U_GTK_CBData
 {
-  inline Test_U_FileServer_GTK_CBData ()
+  inline FileServer_GTK_CBData ()
    : Test_U_GTK_CBData ()
    , configuration (NULL)
    , subscribers ()
   {};
 
-  struct Test_U_FileServer_Configuration* configuration;
+  struct FileServer_Configuration* configuration;
 
-  Test_U_Subscribers_t                    subscribers;
+  FileServer_Subscribers_t         subscribers;
 };
 
-typedef Common_UI_GtkBuilderDefinition_T<struct Test_U_FileServer_GTK_CBData> Test_U_FileServer_GtkBuilderDefinition_t;
+typedef Common_UI_GtkBuilderDefinition_T<struct FileServer_GTK_CBData> FileServer_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<struct Test_U_FileServer_GTK_CBData> Test_U_FileServer_GTK_Manager_t;
-typedef ACE_Singleton<Test_U_FileServer_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> FILE_SERVER_UI_GTK_MANAGER_SINGLETON;
+typedef Common_UI_GTK_Manager_T<struct FileServer_GTK_CBData> FileServer_GTK_Manager_t;
+typedef ACE_Singleton<FileServer_GTK_Manager_t,
+                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> FILESERVER_UI_GTK_MANAGER_SINGLETON;
 
 #endif

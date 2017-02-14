@@ -326,7 +326,9 @@ struct BitTorrent_PeerConnectionConfiguration
    ///////////////////////////////////////
    , streamConfiguration (NULL)
    , userData (NULL)
-  {};
+  {
+    PDUSize = BITTORRENT_BUFFER_SIZE;
+  };
 
   struct BitTorrent_PeerStreamConfiguration* streamConfiguration;
 
@@ -341,7 +343,9 @@ struct BitTorrent_TrackerConnectionConfiguration
    ///////////////////////////////////////
    , streamConfiguration (NULL)
    , userData (NULL)
-  {};
+  {
+    PDUSize = BITTORRENT_BUFFER_SIZE;
+  };
 
   struct BitTorrent_TrackerStreamConfiguration* streamConfiguration;
 
@@ -367,28 +371,30 @@ template <typename SessionInterfaceType>
 class BitTorrent_IControl_T;
 typedef BitTorrent_IControl_T<BitTorrent_ISession_t> BitTorrent_IControl_t;
 struct BitTorrent_SessionConfiguration
+ : Net_SessionConfiguration
 {
   inline BitTorrent_SessionConfiguration ()
-   : connectionManager (NULL)
+   : Net_SessionConfiguration ()
+   , connectionManager (NULL)
    , controller_ (NULL)
    , trackerConnectionManager (NULL)
    , metaInfo (NULL)
    , metaInfoFileName ()
-   , socketHandlerConfiguration (NULL)
-   , trackerSocketHandlerConfiguration (NULL)
-   , parserConfiguration (NULL)
-   , useReactor (NET_EVENT_USE_REACTOR)
+   //, socketHandlerConfiguration (NULL)
+   //, trackerSocketHandlerConfiguration (NULL)
+   , peerConnectionConfiguration (NULL)
+   , trackerConnectionConfiguration (NULL)
   {};
 
-  BitTorrent_PeerConnection_Manager_t*    connectionManager;
-  BitTorrent_IControl_t*                  controller_;
-  BitTorrent_TrackerConnection_Manager_t* trackerConnectionManager;
-  Bencoding_Dictionary_t*                 metaInfo;
-  std::string                             metaInfoFileName;
-  struct Net_SocketHandlerConfiguration*  socketHandlerConfiguration;
-  struct Net_SocketHandlerConfiguration*  trackerSocketHandlerConfiguration;
-  struct Common_ParserConfiguration*      parserConfiguration;
-  bool                                    useReactor;
+  BitTorrent_PeerConnection_Manager_t*              connectionManager;
+  BitTorrent_IControl_t*                            controller_;
+  BitTorrent_TrackerConnection_Manager_t*           trackerConnectionManager;
+  Bencoding_Dictionary_t*                           metaInfo;
+  std::string                                       metaInfoFileName;
+  //struct Net_SocketHandlerConfiguration*  socketHandlerConfiguration;
+  //struct Net_SocketHandlerConfiguration*  trackerSocketHandlerConfiguration;
+  struct BitTorrent_PeerConnectionConfiguration*    peerConnectionConfiguration;
+  struct BitTorrent_TrackerConnectionConfiguration* trackerConnectionConfiguration;
 };
 
 // *NOTE*: see also: https://wiki.theory.org/BitTorrentSpecification#Overview

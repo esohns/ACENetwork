@@ -58,8 +58,8 @@ idle_update_log_display_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_log_display_cb"));
 
-  struct Test_U_FileServer_GTK_CBData* data_p =
-    static_cast<struct Test_U_FileServer_GTK_CBData*> (userData_in);
+  struct FileServer_GTK_CBData* data_p =
+    static_cast<struct FileServer_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -147,8 +147,8 @@ idle_session_start_cb (gpointer userData_in)
 {
   STREAM_TRACE (ACE_TEXT ("::idle_session_start_cb"));
 
-  struct Test_U_FileServer_GTK_CBData* data_p =
-    static_cast<struct Test_U_FileServer_GTK_CBData*> (userData_in);
+  struct FileServer_GTK_CBData* data_p =
+    static_cast<struct FileServer_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -186,8 +186,8 @@ idle_update_info_display_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_info_display_cb"));
 
-  struct Test_U_FileServer_GTK_CBData* data_p =
-    static_cast<struct Test_U_FileServer_GTK_CBData*> (userData_in);
+  struct FileServer_GTK_CBData* data_p =
+    static_cast<struct FileServer_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -301,8 +301,8 @@ idle_initialize_ui_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_ui_cb"));
 
-  struct Test_U_FileServer_GTK_CBData* data_p =
-    static_cast<struct Test_U_FileServer_GTK_CBData*> (userData_in);
+  struct FileServer_GTK_CBData* data_p =
+    static_cast<struct FileServer_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -778,7 +778,7 @@ button_close_all_clicked_cb (GtkButton* button_in,
   ACE_UNUSED_ARG (button_in);
   ACE_UNUSED_ARG (userData_in);
 
-  TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
+  FILESERVER_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
 } // button_close_all_clicked_cb
 
 G_MODULE_EXPORT void
@@ -787,8 +787,8 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::togglebutton_listen_toggled_cb"));
 
-  struct Test_U_FileServer_GTK_CBData* data_p =
-    static_cast<struct Test_U_FileServer_GTK_CBData*> (userData_in);
+  struct FileServer_GTK_CBData* data_p =
+    static_cast<struct FileServer_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -921,8 +921,8 @@ button_clear_clicked_cb (GtkButton* button_in,
 
   ACE_UNUSED_ARG (button_in);
 
-  Test_U_FileServer_GTK_CBData* data_p =
-    static_cast<Test_U_FileServer_GTK_CBData*> (userData_in);
+  FileServer_GTK_CBData* data_p =
+    static_cast<FileServer_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -952,8 +952,8 @@ button_about_clicked_cb (GtkButton* button_in,
 
   ACE_UNUSED_ARG (button_in);
 
-  Test_U_FileServer_GTK_CBData* data_p =
-    static_cast<Test_U_FileServer_GTK_CBData*> (userData_in);
+  FileServer_GTK_CBData* data_p =
+    static_cast<FileServer_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -998,7 +998,7 @@ button_quit_clicked_cb (GtkButton* button_in,
 
   int result = -1;
 
-  //Test_U_FileServer_GTK_CBData* data_p = static_cast<Test_U_FileServer_GTK_CBData*> (userData_in);
+  //FileServer_GTK_CBData* data_p = static_cast<FileServer_GTK_CBData*> (userData_in);
   //// sanity check(s)
   //ACE_ASSERT (data_p);
 

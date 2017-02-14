@@ -172,7 +172,10 @@ set (IRC_client_SRCS
 #set_source_files_properties(${IRC_client_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
 set (EXECUTABLE IRC_client)
-add_executable(${EXECUTABLE} ${IRC_client_SRCS})
+add_executable (${EXECUTABLE}
+                EXCLUDE_FROM_ALL
+                ${IRC_client_SRCS})
+set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_i")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)
@@ -270,7 +273,10 @@ set (IRC_client_gui_SRCS
 #set_source_files_properties (${IRC_client_gui_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
 set (EXECUTABLE_GUI IRC_client_gui)
-add_executable (${EXECUTABLE_GUI} ${IRC_client_gui_SRCS})
+add_executable (${EXECUTABLE_GUI}
+                EXCLUDE_FROM_ALL
+                ${IRC_client_gui_SRCS})
+set_property (TARGET ${EXECUTABLE_GUI} PROPERTY FOLDER "test_i")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE_GUI} Common)

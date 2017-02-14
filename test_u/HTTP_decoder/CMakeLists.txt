@@ -90,6 +90,8 @@ if (UNIX)
 elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/flex)
 
@@ -132,7 +134,10 @@ set (${PROJECT_NAME}_Protocol_EXE_SRCS
 
 #string (TOLOWER "${PROJECT_NAME}_Protocol" EXECUTABLE)
 set (EXECUTABLE httpdecoder)
-add_executable (${EXECUTABLE} ${ACENetwork_Protocol_EXE_SRCS})
+add_executable (${EXECUTABLE}
+                EXCLUDE_FROM_ALL
+                ${ACENetwork_Protocol_EXE_SRCS})
+set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)

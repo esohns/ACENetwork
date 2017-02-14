@@ -61,6 +61,10 @@ BitTorrent_Bencoding_Scanner::yylex (yy::BitTorrent_Bencoding_Parser::semantic_t
 %option align read full
 
 %option backup debug perf-report perf-report verbose warn
+/* *IMPORTANT NOTE*: flex 2.5.4 does not recognize 'reentrant, nounistd,
+                     ansi-definitions, ansi-prototypes, header-file extra-type'
+*/
+/*%option extra-type="Common_IScanner*"*/
 
 %option c++
 /*%option header-file="bittorrent_bencoding_scanner.h" outfile="bittorrent_bencoding_scanner.cpp"*/
@@ -133,13 +137,12 @@ METAINFO_FILE                     {DICTIONARY}
   unsigned int string_length = 0;
   std::stringstream converter;
 
-  ACE_Message_Block* message_block_p = parser_->buffer ();
-  ACE_ASSERT (message_block_p);
+/*  ACE_Message_Block* message_block_p = parser_->buffer ();
+  ACE_ASSERT (message_block_p);*/
 %}
 
 <INITIAL>{
 "d"                    { ACE_ASSERT (yyleng == 1);
-                         parser_->offset (1);
                          BEGIN(state_dictionary_key);
                          yy_push_state (state_dictionary_key);
                          ACE_NEW_NORETURN (yylval->dval,
@@ -149,13 +152,11 @@ METAINFO_FILE                     {DICTIONARY}
 } // end <INITIAL>
 <state_string>{
 {DIGIT}+               {
-                         parser_->offset (yyleng);
                          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                          converter.clear ();
                          converter << yytext;
                          converter >> string_length; }
 ":"                    { ACE_ASSERT (yyleng == 1);
-                         parser_->offset (1);
                          if (!string_length)
                          { // --> found an empty string
                            ACE_NEW_NORETURN (yylval->sval,
@@ -165,7 +166,7 @@ METAINFO_FILE                     {DICTIONARY}
                            return yy::BitTorrent_Bencoding_Parser::token::STRING;
                          } }
 {OCTET}{1}             { ACE_ASSERT (string_length != 0);
-                         parser_->offset (string_length);
+//                         yylloc->columns (string_length);
                          ACE_NEW_NORETURN (yylval->sval,
                                            std::string ());
                          ACE_ASSERT (yylval->sval);
@@ -177,21 +178,17 @@ METAINFO_FILE                     {DICTIONARY}
 } // end <state_string>
 <state_integer>{
 "e"                    { ACE_ASSERT (yyleng == 1);
-                         parser_->offset (1);
                          yy_pop_state (); }
 {DIGIT}+               {
-                         parser_->offset (yyleng);
                          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
                          converter.clear ();
                          converter << yytext;
                          converter >> yylval->ival;
                          return yy::BitTorrent_Bencoding_Parser::token::INTEGER; }
-"i"                    { ACE_ASSERT (yyleng == 1);
-                         parser_->offset (1); }
+"i"                    { ACE_ASSERT (yyleng == 1); }
 } // end <state_integer>
 <state_list>{
 "e"                    { ACE_ASSERT (yyleng == 1);
-                         parser_->offset (1);
                          yy_pop_state ();
                          return yy::BitTorrent_Bencoding_Parser::token::END_OF_LIST; }
 {DIGIT}{1}             { yyless (0);
@@ -213,7 +210,6 @@ METAINFO_FILE                     {DICTIONARY}
 } // end <state_list>
 <state_dictionary_key>{
 "e"                    { ACE_ASSERT (yyleng == 1);
-                         parser_->offset (1);
                          yy_pop_state ();
                          return yy::BitTorrent_Bencoding_Parser::token::END_OF_DICTIONARY; }
 {DIGIT}{1}             { yyless (0);
@@ -245,15 +241,15 @@ METAINFO_FILE                     {DICTIONARY}
 } // end <state_dictionary_value>
 <<EOF>>                { return yy::BitTorrent_Bencoding_Parser::token::END; }
 <*>{OCTET}             { /* *TODO*: use (?s:.) ? */
-                         if (!parser_->isBlocking ())
+                         if (!isBlocking ())
                            yyterminate(); // not enough data, cannot proceed
 
                          // wait for more data fragment(s)
-                         if (!parser_->switchBuffer ())
+                         if (!switchBuffer ())
                          { // *NOTE*: most probable reason: connection
                            //         has been closed --> session end
                            ACE_DEBUG ((LM_DEBUG,
-                                       ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
+                                       ACE_TEXT ("failed to Common_IScanner::switchBuffer(), returning\n")));
                            yyterminate(); // not enough data, cannot proceed
                          } // end IF
                          yyless (0); }

@@ -7406,7 +7406,7 @@ BitTorrent_Scanner_wrap (yyscan_t yyscanner)
 {
   NETWORK_TRACE (ACE_TEXT ("::BitTorrent_Scanner_wrap"));
 
-  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
+//  struct yyguts_t* yyg = static_cast<struct yyguts_t*> (yyscanner);
   BitTorrent_IParser_t* iparser_p =
       BitTorrent_Scanner_get_extra (yyscanner);
 

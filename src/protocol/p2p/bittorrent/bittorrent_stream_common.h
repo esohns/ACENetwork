@@ -23,8 +23,6 @@
 
 #include <ace/INET_Addr.h>
 
-#include "common_ui_common.h"
-
 #include "stream_common.h"
 #include "stream_control_message.h"
 #include "stream_data_base.h"
@@ -52,7 +50,7 @@ struct BitTorrent_AllocatorConfiguration
   {
     // *NOTE*: this facilitates (message block) data buffers to be scanned with
     //         'flex's yy_scan_buffer() method
-    buffer = NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE;
+    paddingBytes = NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE;
   };
 };
 
@@ -212,9 +210,7 @@ struct BitTorrent_PeerStreamConfiguration
    , filename ()
    , metaInfo (NULL)
    , moduleHandlerConfiguration (NULL)
-  {
-    bufferSize = BITTORRENT_BUFFER_SIZE;
-  };
+  {};
 
   std::string                                       filename; // .torrent file
   Bencoding_Dictionary_t*                           metaInfo;
@@ -229,9 +225,7 @@ struct BitTorrent_TrackerStreamConfiguration
    , filename ()
    , metaInfo (NULL)
    , moduleHandlerConfiguration (NULL)
-  {
-    bufferSize = BITTORRENT_BUFFER_SIZE;
-  };
+  {};
 
   std::string                                          filename; // .torrent file
   Bencoding_Dictionary_t*                              metaInfo;

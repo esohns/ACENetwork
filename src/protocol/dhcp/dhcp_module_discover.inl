@@ -240,12 +240,12 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // sanity check(s)
-  ACE_ASSERT (message_inout->isInitialized ());
-  ACE_ASSERT (sessionData_);
   ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->connectionConfiguration);
   ACE_ASSERT (inherited::configuration_->protocolConfiguration);
   ACE_ASSERT (inherited::configuration_->socketConfiguration);
-  ACE_ASSERT (inherited::configuration_->socketHandlerConfiguration);
+  ACE_ASSERT (sessionData_);
+  ACE_ASSERT (message_inout->isInitialized ());
 
   const typename DataMessageType::DATA_T& data_r = message_inout->get ();
 
@@ -255,7 +255,6 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (session_data_r.broadcastConnection);
 
-  ACE_TCHAR buffer[BUFSIZ];
   u_short port_number = DHCP_DEFAULT_SERVER_PORT;
   ACE_INET_Addr address;
   bool clone_module, delete_module;
@@ -287,19 +286,10 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                 ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
     return;
   } // end IF
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  result = session_data_r.serverAddress.addr_to_string (buffer,
-                                                        sizeof (buffer),
-                                                        1);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string: \"%m\", returning\n")));
-    return;
-  } // end IF
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("server identifier: \"%s\"\n"),
-//              buffer));
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("%s: DHCP server address: \"%s\"\n"),
+  //            inherited::mod_->name (),
+  //            ACE_TEXT (Net_Common_Tools::IPAddress2String (session_data_r.serverAddress).c_str ())));
 
   // step2a: set up the (broadcast) connection configuration
   // step2aa: set up the socket configuration
@@ -347,7 +337,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to connect to \"%s\", returning\n"),
                 inherited::mod_->name (),
-                buffer));
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (session_data_r.serverAddress).c_str ())));
     goto error;
   } // end IF
   if (use_reactor)
@@ -365,7 +355,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to connect to \"%s\", returning\n"),
                 inherited::mod_->name (),
-                buffer));
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (session_data_r.serverAddress).c_str ())));
     goto error;
   } // end IF
 
@@ -408,12 +398,12 @@ continue_:
     return; // done
 
   DataMessageType* message_p =
-      allocateMessage (inherited::configuration_->socketHandlerConfiguration->PDUSize);
+      allocateMessage (inherited::configuration_->connectionConfiguration->PDUSize);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to DHCP_Module_Discover_T::allocateMessage(%u): \"%m\", returning\n"),
-                inherited::configuration_->socketHandlerConfiguration->PDUSize));
+                inherited::configuration_->connectionConfiguration->PDUSize));
     return;
   } // end IF
   DHCP_Record DHCP_record;
@@ -624,7 +614,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
       //         --> to be removed ASAP
       // *TODO*: remove type inferences
       // sanity check(s)
-      ACE_ASSERT (inherited::configuration_->socketHandlerConfiguration);
+      //ACE_ASSERT (inherited::configuration_->connectionConfiguration);
       ACE_ASSERT (inherited::configuration_->streamConfiguration);
 
       // *TODO*: remove type inferences
@@ -900,18 +890,6 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->socketHandlerConfiguration);
 
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  int result_2 = address_in.addr_to_string (buffer,
-                                            sizeof (buffer),
-                                            1);
-  if (result_2 == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string: \"%m\", aborting\n")));
-    return ACE_INVALID_HANDLE;
-  } // end IF
-
   // step0: set up a connector
   ConnectionManagerType* connection_manager_p =
     ConnectionManagerType::SINGLETON_T::instance ();
@@ -951,8 +929,9 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   if (result == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to \"%s\", aborting\n"),
-                buffer));
+                ACE_TEXT ("%s: failed to connect to \"%s\", aborting\n"),
+                inherited::mod_->name (),
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
     goto error;
   } // end IF
   if (iconnector_p->useReactor ())
@@ -983,8 +962,9 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   if (!iconnection_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to \"%s\", aborting\n"),
-                buffer));
+                ACE_TEXT ("%s: failed to connect to \"%s\", aborting\n"),
+                inherited::mod_->name (),
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
     goto error;
   } // end IF
   // step3: wait for the connection to finish initializing
@@ -998,8 +978,9 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   if (status != NET_CONNECTION_STATUS_OK)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize connection to \"%s\" (status was: %d), aborting\n"),
-                buffer,
+                ACE_TEXT ("%s: failed to initialize connection to \"%s\" (status was: %d), aborting\n"),
+                inherited::mod_->name (),
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ()),
                 status));
     goto error;
   } // end IF
@@ -1035,8 +1016,9 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                                 NULL); // <-- block
   } // end ELSE
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connected to \"%s\" (id: %u)...\n"),
-              buffer,
+              ACE_TEXT ("%s: connected to \"%s\" (id: %u)...\n"),
+              inherited::mod_->name (),
+              ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ()),
               iconnection_p->id ()));
 
   useReactor_out = iconnector_p->useReactor ();

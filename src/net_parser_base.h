@@ -45,7 +45,7 @@ template <typename ConfigurationType,
           typename SessionMessageType>
 class Net_CppParserBase_T
  : public ParserInterfaceType
- , public Net_IScanner_T<ParserInterfaceType>
+ , virtual public Net_IScanner_T<ParserInterfaceType>
 {
  public:
   Net_CppParserBase_T (bool,  // debug scanning ?

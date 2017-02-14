@@ -28,9 +28,9 @@
 
 #include "net_macros.h"
 
-Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionMessageType messageType_in,
-                                              Test_U_FileServer_SessionData_t*& sessionData_inout,
-                                              Test_U_UserData* userData_in)
+Test_U_SessionMessage::Test_U_SessionMessage (enum Stream_SessionMessageType messageType_in,
+                                              FileServer_SessionData_t*& sessionData_inout,
+                                              struct FileServer_UserData* userData_in)
  : inherited (messageType_in,
               sessionData_inout,
               userData_in)

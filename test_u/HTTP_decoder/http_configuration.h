@@ -48,21 +48,30 @@ struct HTTP_Stream_SessionData;
 struct HTTP_Stream_UserData;
 
 //typedef Net_IConnection_T<ACE_INET_Addr,
-//                          HTTP_Configuration,
-//                          HTTP_ConnectionState,
+//                          struct Net_ConnectionConfiguration,
+//                          struct HTTP_ConnectionState,
 //                          HTTP_RuntimeStatistic_t,
 //                          HTTP_Stream> HTTP_IConnection_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 HTTP_Configuration,
-                                 HTTP_ConnectionState,
+                                 struct Net_ConnectionConfiguration,
+                                 struct HTTP_ConnectionState,
                                  HTTP_RuntimeStatistic_t,
-                                 ////////
-                                 HTTP_Stream_UserData> HTTP_IConnection_Manager_t;
+                                 /////////
+                                 struct HTTP_Stream_UserData> HTTP_IConnection_Manager_t;
 
 //typedef Common_INotify_T<unsigned int,
 //                         HTTP_Stream_SessionData,
 //                         HTTP_Record,
 //                         HTTP_SessionMessage> HTTP_IStreamNotify_t;
+
+//struct Net_ConnectionConfiguration
+// : Net_ConnectionConfiguration
+//{
+//  inline Net_ConnectionConfiguration ()
+//   : Net_ConnectionConfiguration ()
+//   //////////////////////////////////////
+//  {};
+//};
 
 struct HTTP_SocketHandlerConfiguration
  : Net_SocketHandlerConfiguration
@@ -71,11 +80,9 @@ struct HTTP_SocketHandlerConfiguration
    : Net_SocketHandlerConfiguration ()
    //////////////////////////////////////
    , userData (NULL)
-  {
-    PDUSize = HTTP_BUFFER_SIZE;
-  };
+  {};
 
-  HTTP_Stream_UserData* userData;
+  struct HTTP_Stream_UserData* userData;
 };
 
 //struct HTTP_ConnectorConfiguration
@@ -87,10 +94,10 @@ struct HTTP_SocketHandlerConfiguration
 //   //, statisticCollectionInterval (0)
 //  {};
 //
-//  //HTTP_Configuration*              configuration;
-//  HTTP_IConnection_Manager_t*      connectionManager;
-//  HTTP_SocketHandlerConfiguration* socketHandlerConfiguration;
-//  unsigned int                    statisticCollectionInterval; // statistic collecting interval (second(s)) [0: off]
+//  //HTTP_Configuration*                   configuration;
+//  HTTP_IConnection_Manager_t*             connectionManager;
+//  struct HTTP_SocketHandlerConfiguration* socketHandlerConfiguration;
+//  unsigned int                            statisticCollectionInterval; // statistic collecting interval (second(s)) [0: off]
 //};
 
 struct HTTP_ProtocolConfiguration
@@ -112,17 +119,17 @@ struct HTTP_ModuleHandlerConfiguration
    , printProgressDot (false)
    , pushStatisticMessages (true)
    , protocolConfiguration (NULL)
-   , streamConfiguration (NULL)
+   //, streamConfiguration (NULL)
   {
     crunchMessages = HTTP_DEFAULT_CRUNCH_MESSAGES; // http parser module
     printFinalReport = true;
   };
 
-  bool                        printProgressDot; // file writer module
-  bool                        pushStatisticMessages;
+  bool                               printProgressDot; // file writer module
+  bool                               pushStatisticMessages;
 
-  HTTP_ProtocolConfiguration* protocolConfiguration;
-  HTTP_StreamConfiguration*   streamConfiguration;
+  struct HTTP_ProtocolConfiguration* protocolConfiguration;
+  //struct HTTP_StreamConfiguration*   streamConfiguration;
 };
 
 struct HTTP_StreamConfiguration
@@ -134,15 +141,13 @@ struct HTTP_StreamConfiguration
    , moduleHandlerConfiguration ()
    , protocolConfiguration (NULL)
    //, userData (NULL)
-  {
-    bufferSize = HTTP_BUFFER_SIZE;
-  };
+  {};
 
-  Stream_ModuleConfiguration*      moduleConfiguration;        // stream module configuration
-  HTTP_ModuleHandlerConfiguration* moduleHandlerConfiguration; // module handler configuration
-  HTTP_ProtocolConfiguration*      protocolConfiguration;      // protocol configuration
+  struct Stream_ModuleConfiguration*      moduleConfiguration;        // stream module configuration
+  struct HTTP_ModuleHandlerConfiguration* moduleHandlerConfiguration; // module handler configuration
+  struct HTTP_ProtocolConfiguration*      protocolConfiguration;      // protocol configuration
 
-  //HTTP_Stream_UserData*           userData;
+  //struct HTTP_Stream_UserData*           userData;
 };
 
 #endif

@@ -135,20 +135,28 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/misc)
 elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
+
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/dec)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/dev)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/misc)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/flex)
 endif ()
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/bison)
+
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/client_server)
+
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/http)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/p2p/bittorrent)
+
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 #message (STATUS "CMAKE_CURRENT_BINARY_DIR: \"${CMAKE_CURRENT_BINARY_DIR}/../..\"")
@@ -183,7 +191,10 @@ set (bittorrent_client_SRCS
 #set_source_files_properties(${bittorrent_client_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
 set (EXECUTABLE bittorrent_client)
-add_executable(${EXECUTABLE} ${bittorrent_client_SRCS})
+add_executable (${EXECUTABLE} 
+                EXCLUDE_FROM_ALL
+                ${bittorrent_client_SRCS})
+set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_i")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)
@@ -286,7 +297,10 @@ set (bittorrent_client_gui_SRCS
 #set_source_files_properties (${bittorrent_client_gui_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
 set (EXECUTABLE_GUI bittorrent_client_gui)
-add_executable (${EXECUTABLE_GUI} ${bittorrent_client_gui_SRCS})
+add_executable (${EXECUTABLE_GUI}
+                EXCLUDE_FROM_ALL
+                ${bittorrent_client_gui_SRCS})
+set_property (TARGET ${EXECUTABLE_GUI} PROPERTY FOLDER "test_i")
 
 if (CMAKE_BUILD_TYPE STREQUAL Debug AND WIN32)
  set_target_properties (${EXECUTABLE_GUI} PROPERTIES COMPILE_FLAGS "/wd4503")

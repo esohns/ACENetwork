@@ -87,7 +87,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::~Net_StreamUDPSocketBase_T"));
 
-  if (currentWriteBuffer_)
+  if (unlikely (currentWriteBuffer_))
     currentWriteBuffer_->release ();
 }
 
@@ -118,6 +118,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   ConfigurationType* configuration_p =
     static_cast<ConfigurationType*> (arg_in);
   ACE_ASSERT (configuration_p);
+  ACE_ASSERT (configuration_p->socketHandlerConfiguration);
   ACE_ASSERT (configuration_p->streamConfiguration);
 
   int result = -1;
@@ -159,7 +160,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   // step1: open / tweak socket, ...
   // *TODO*: remove type inferences
   result = inherited::open (configuration_p->socketHandlerConfiguration);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
@@ -171,7 +172,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   // *IMPORTANT NOTE*: register with the connection manager FIRST, otherwise
   //                   a race condition might occur when using multi-threaded
   //                   proactors/reactors
-  if (!inherited2::registerc ())
+  if (unlikely (!inherited2::registerc ()))
   {
     // *NOTE*: perhaps max# connections has been reached
     //ACE_DEBUG ((LM_ERROR,
@@ -185,7 +186,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   // step3a: connect stream head message queue with the reactor notification
   //         pipe ?
   // *TODO*: remove type inferences
-  if (!configuration_p->streamConfiguration->useThreadPerConnection)
+  if (likely (!configuration_p->socketHandlerConfiguration->useThreadPerConnection))
     configuration_p->streamConfiguration->notificationStrategy =
         &(inherited::notificationStrategy_);
 
@@ -201,7 +202,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
 #else
     static_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #endif
-  if (!stream_.initialize (*configuration_p->streamConfiguration))
+  if (unlikely (!stream_.initialize (*configuration_p->streamConfiguration)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
@@ -217,7 +218,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   // step3d: start stream
   stream_.start ();
-  if (!stream_.isRunning ())
+  if (unlikely (!stream_.isRunning ()))
   {
     // *NOTE*: most likely, this happened because the stream failed to
     //         initialize
@@ -227,7 +228,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   } // end IF
 
   // step4: register with the reactor ?
-  if (!inherited::writeOnly_)
+  if (likely (!inherited::writeOnly_))
   {
     result = reactor_p->register_handler (this,
                                           ACE_Event_Handler::READ_MASK);
@@ -254,7 +255,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   // *NOTE*: let the reactor manage this handler
   // *WARNING*: this has some implications (see close() below)
   // *TODO*: remove type inference
-  if (!configuration_p->streamConfiguration->useThreadPerConnection)
+  if (likely (!configuration_p->socketHandlerConfiguration->useThreadPerConnection))
     inherited2::decrease ();
 
   inherited2::initialize (*configuration_p);
@@ -334,10 +335,10 @@ Net_StreamUDPSocketBase_T<HandlerType,
     //   returned -1)
     case NORMAL_CLOSE_OPERATION:
     {
-      // check specifically for the first case...
+      // check specifically for the first case
       result = ACE_OS::thr_equal (ACE_Thread::self (),
                                   inherited::last_thread ());
-      if (result)
+      if (unlikely (result))
       {
 //       if (inherited::module ())
 //         ACE_DEBUG ((LM_DEBUG,
@@ -405,7 +406,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
     }
   } // end SWITCH
 
-  if (close)
+  if (likely (close))
   {
     //ACE_HANDLE handle =
     //  ((arg_in == NET_CLOSE_REASON_INITIALIZATION) ? ACE_INVALID_HANDLE
@@ -414,7 +415,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
     // *NOTE*: may 'delete this'
     result = handle_close (handle,
                            ACE_Event_Handler::ALL_EVENTS_MASK);
-    if (result == -1)
+    if (unlikely (result == -1))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -459,27 +460,27 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited2::configuration_->messageAllocator);
 
   // read a datagram from the socket
   bool enqueue = true;
   // *TODO*: remove type inferences
   ACE_Message_Block* buffer_p =
-    allocateMessage (inherited2::configuration_->streamConfiguration->bufferSize);
-  if (!buffer_p)
+    allocateMessage (inherited2::configuration_->PDUSize);
+  if (unlikely (!buffer_p))
   {
-    if (inherited2::configuration_->streamConfiguration->messageAllocator->block ())
+    if (inherited2::configuration_->messageAllocator->block ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                  inherited2::configuration_->streamConfiguration->bufferSize));
+                  inherited2::configuration_->PDUSize));
       return -1;
     } // end IF
 
     // no buffer available --> drop datagram and continue
     enqueue = false;
     ACE_NEW_NORETURN (buffer_p,
-                      ACE_Message_Block (inherited2::configuration_->streamConfiguration->bufferSize,
+                      ACE_Message_Block (inherited2::configuration_->PDUSize,
                                          ACE_Message_Block::MB_DATA,
                                          NULL,
                                          NULL,
@@ -494,23 +495,24 @@ Net_StreamUDPSocketBase_T<HandlerType,
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate ACE_Message_Block(%u), aborting\n"),
-                  inherited2::configuration_->streamConfiguration->bufferSize));
+                  inherited2::configuration_->PDUSize));
       return -1;
     } // end IF
   } // end IF
   ACE_ASSERT (buffer_p);
 
-  // read a datagram from the socket...
+  // read a datagram from the socket
   ssize_t bytes_received = -1;
   ACE_INET_Addr peer_address;
-  bytes_received = inherited::peer_.recv (buffer_p->wr_ptr (), // buf
-                                          buffer_p->size (),   // n
-                                          peer_address,        // addr
-                                          0);                  // flags
-  //bytes_received = inherited::peer_.recv (buffer_p->wr_ptr (), // buf
-  //                                        buffer_p->size (),   // n
-  //                                        0,                   // flags
-  //                                        NULL);               // timeout
+  bytes_received =
+    inherited::peer_.recv (buffer_p->wr_ptr (),                 // buf
+                           inherited2::configuration_->PDUSize, // n
+                           peer_address,                        // addr
+                           0);                                  // flags
+  //bytes_received = inherited::peer_.recv (buffer_p->wr_ptr (),                 // buf
+  //                                        inherited2::configuration_->PDUSize, // n
+  //                                        0,                                   // flags
+  //                                        NULL);                               // timeout
   switch (bytes_received)
   {
     case -1:
@@ -520,10 +522,10 @@ Net_StreamUDPSocketBase_T<HandlerType,
       // - connection abort()ed locally
       int error = ACE_OS::last_error ();
       if ((error != ECONNRESET) &&
-          (error != EPIPE) &&      // <-- connection reset by peer
+          (error != EPIPE)      &&      // <-- connection reset by peer
           // -------------------------------------------------------------------
-          (error != EBADF) &&
-          (error != ENOTSOCK) &&
+          (error != EBADF)      &&
+          (error != ENOTSOCK)   &&
           (error != ECONNABORTED)) // <-- connection abort()ed locally
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to SocketType::recv(): \"%m\", returning\n")));
@@ -562,7 +564,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   // push the buffer onto the stream for processing
   // *NOTE*: the stream assumes ownership of the buffer
   int result = -1;
-  if (enqueue)
+  if (likely (enqueue))
     result = stream_.put (buffer_p);
   else
   {
@@ -593,7 +595,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
     result = 0;
   } // end ELSE
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", aborting\n")));
@@ -645,7 +647,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   // *IMPORTANT NOTE*: in a threaded environment, workers MAY be dispatching the
   //                   reactor notification queue concurrently (most notably,
   //                   ACE_TP_Reactor) --> enforce proper serialization
-  if (serializeOutput_)
+  if (unlikely (serializeOutput_))
   {
     result = sendLock_.acquire ();
     if (result == -1)
@@ -656,20 +658,21 @@ Net_StreamUDPSocketBase_T<HandlerType,
     } // end IF
   } // end IF
 
-  if (!currentWriteBuffer_)
+  if (likely (!currentWriteBuffer_))
   {
     // send next data chunk from the stream
-    ACE_Message_Block* message_block_p = NULL;
+    //ACE_Message_Block* message_block_p = NULL;
     // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
     // been notified to the reactor
     //if (!inherited::myUserData.useThreadPerConnection)
     result =
-        stream_.get (message_block_p,
-                     const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
+        //stream_.get (message_block_p,
+      stream_.get (currentWriteBuffer_,
+                   const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
     //else
     //  result = inherited2::getq (inherited::currentWriteBuffer_,
     //                             const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       // *IMPORTANT NOTE*: a number of issues can occur here:
       // - connection has been closed in the meantime
@@ -685,38 +688,38 @@ Net_StreamUDPSocketBase_T<HandlerType,
       goto clean;
     } // end IF
 
-    currentWriteBuffer_ =
-        dynamic_cast<typename StreamType::MESSAGE_T*> (message_block_p);
-    if (!currentWriteBuffer_)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to dynamic_cast<typename StreamType::MESSAGE_T*>(%@): \"%m\", aborting\n"),
-                  message_block_p));
-      goto clean;
-    } // end IF
+    //currentWriteBuffer_ =
+    //    dynamic_cast<typename StreamType::MESSAGE_T*> (message_block_p);
+    //if (!currentWriteBuffer_)
+    //{
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("failed to dynamic_cast<typename StreamType::MESSAGE_T*>(%@): \"%m\", aborting\n"),
+    //              message_block_p));
+    //  goto clean;
+    //} // end IF
   } // end IF
   ACE_ASSERT (currentWriteBuffer_);
 
   // finished ?
   // *TODO*: remove type inferences
-  if (inherited2::configuration_->streamConfiguration->useThreadPerConnection &&
-      currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
-  {
-    currentWriteBuffer_->release ();
-    currentWriteBuffer_ = NULL;
+  if (unlikely (inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection))
+    if (currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
+    {
+      currentWriteBuffer_->release ();
+      currentWriteBuffer_ = NULL;
 
-    //       ACE_DEBUG ((LM_DEBUG,
-    //                   ACE_TEXT ("[%u]: finished sending...\n"),
-    //                   peer_.get_handle ()));
+      //       ACE_DEBUG ((LM_DEBUG,
+      //                   ACE_TEXT ("[%u]: finished sending...\n"),
+      //                   peer_.get_handle ()));
 
-    goto clean;
-  } // end IF
+      goto clean;
+    } // end IF
 
   bytes_sent =
-      inherited::peer_.send (currentWriteBuffer_->rd_ptr (), // data
-                             currentWriteBuffer_->length (), // bytes to send
+      inherited::peer_.send (currentWriteBuffer_->rd_ptr (),                                                       // data handle
+                             currentWriteBuffer_->length (),                                                       // bytes to send
                              inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->address, // peer address
-                             0);//,                                                    // flags
+                             0);//,                                                                                // flags
                              //NULL);                                                  // timeout
   switch (bytes_sent)
   {
@@ -733,25 +736,15 @@ Net_StreamUDPSocketBase_T<HandlerType,
           (error != ENOTSOCK)     &&
           (error != EBADF))          // <-- connection abort()ed locally
       {
-        ACE_TCHAR buffer[BUFSIZ];
-        ACE_OS::memset (buffer, 0, sizeof (buffer));
-        result =
-            inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->address.addr_to_string (buffer,
-                                                                                                                 sizeof (buffer),
-                                                                                                                 1);
-        if (result == -1)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%t: failed to ACE_SOCK_Dgram::send(\"%s\") (handle was: 0x%@): \"%m\", aborting\n"),
-                    buffer,
+                    ACE_TEXT (Net_Common_Tools::IPAddress2String (inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->address).c_str ()),
                     inherited::peer_.get_handle ()));
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%t: failed to ACE_SOCK_Dgram::send(\"%s\") (handle was: %d): \"%m\", aborting\n"),
-                    buffer,
+                    ACE_TEXT (Net_Common_Tools::IPAddress2String (inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->address).c_str ()),
                     inherited::peer_.get_handle ()));
 #endif
       } // end IF
@@ -790,7 +783,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
       // finished with this buffer ?
       currentWriteBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
-      if (currentWriteBuffer_->length () > 0)
+      if (unlikely (currentWriteBuffer_->length ()))
         break; // there's more data
 
       // clean up
@@ -810,7 +803,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   //                  ACE_TEXT ("failed to ACE_Reactor::cancel_wakeup(): \"%m\", continuing\n")));
   //  } // end IF
   //  else
-  if (currentWriteBuffer_)
+  if (unlikely (currentWriteBuffer_))
   {
     result = 1;
     goto clean;
@@ -821,7 +814,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   //              ACE_TEXT ("failed to ACE_Reactor::schedule_wakeup(): \"%m\", continuing\n")));
 
 clean:
-  if (serializeOutput_)
+  if (unlikely (serializeOutput_))
   {
     int result_2 = sendLock_.release ();
     if (result_2 == -1)
@@ -859,7 +852,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
 
   int result = -1;
   ACE_Reactor* reactor_p = inherited::reactor ();
@@ -881,7 +874,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
-      if (!inherited2::configuration_->streamConfiguration->useThreadPerConnection)
+      if (unlikely (!inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection))
       {
         // *IMPORTANT NOTE*: in a multithreaded environment, in particular when
         //                   using a multithreaded reactor, there may still be
@@ -902,30 +895,32 @@ Net_StreamUDPSocketBase_T<HandlerType,
       break;
     }
     default:
-      // *PORTABILITY*: this isn't entirely portable...
+    {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("handle_close called for unknown reasons (handle: 0x%@, mask: %u) --> check implementation !, continuing\n"),
+                  ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_close() called for unknown reasons (handle: 0x%@, mask: %u) --> check implementation !, continuing\n"),
                   handle_in,
                   mask_in));
 #else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("handle_close called for unknown reasons (handle: %d, mask: %u) --> check implementation !, continuing\n"),
+                  ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_close() called for unknown reasons (handle: %d, mask: %u) --> check implementation !, continuing\n"),
                   handle_in,
                   mask_in));
 #endif
+
       break;
+    }
   } // end SWITCH
 
   // step3: deregister from the reactor ?
-  if (!inherited::writeOnly_ &&
-      (handle_in != ACE_INVALID_HANDLE))
+  if (likely (!inherited::writeOnly_ &&
+              (handle_in != ACE_INVALID_HANDLE)))
   {
     result =
         reactor_p->remove_handler (handle_in,
                                    (mask_in |
                                     ACE_Event_Handler::DONT_CALL));
-    if (result == -1)
+    if (unlikely (result == -1))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -949,14 +944,14 @@ Net_StreamUDPSocketBase_T<HandlerType,
   ACE_HANDLE handle = inherited::get_handle ();
   result = inherited::handle_close (handle_in,
                                     mask_in);
-  if (result == -1)
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
                 handle_in, mask_in));
   inherited::set_handle (handle); // used for debugging purposes only
 
   // step5: deregister with the connection manager (if any)
-  if (deregister)
+  if (likely (deregister))
     inherited2::deregister ();
 
   return result;
@@ -1000,7 +995,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   remoteSAP_out =
       inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->address;
 
-  if (!inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly)
+  if (likely (!inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly))
   {
     result = inherited::peer_.get_local_addr (localSAP_out);
     if (result == -1)
@@ -1009,90 +1004,36 @@ Net_StreamUDPSocketBase_T<HandlerType,
   } // end IF
 }
 
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-Net_ConnectionId_t
-Net_StreamUDPSocketBase_T<HandlerType,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          StatisticContainerType,
-                          HandlerConfigurationType,
-                          StreamType,
-                          UserDataType,
-                          ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::id () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::id"));
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ());
-#else
-  return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ());
-#endif
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-ACE_Notification_Strategy*
-Net_StreamUDPSocketBase_T<HandlerType,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          StatisticContainerType,
-                          HandlerConfigurationType,
-                          StreamType,
-                          UserDataType,
-                          ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::notification ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::notification"));
-
-  return &(inherited::notificationStrategy_);
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-const StreamType&
-Net_StreamUDPSocketBase_T<HandlerType,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          StatisticContainerType,
-                          HandlerConfigurationType,
-                          StreamType,
-                          UserDataType,
-                          ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::stream () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::stream"));
-
-  return stream_;
-}
+//template <typename HandlerType,
+//          typename AddressType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename HandlerConfigurationType,
+//          typename StreamType,
+//          typename UserDataType,
+//          typename ModuleConfigurationType,
+//          typename ModuleHandlerConfigurationType>
+//Net_ConnectionId_t
+//Net_StreamUDPSocketBase_T<HandlerType,
+//                          AddressType,
+//                          ConfigurationType,
+//                          StateType,
+//                          StatisticContainerType,
+//                          HandlerConfigurationType,
+//                          StreamType,
+//                          UserDataType,
+//                          ModuleConfigurationType,
+//                          ModuleHandlerConfigurationType>::id () const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::id"));
+//
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ());
+//#else
+//  return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ());
+//#endif
+//}
 
 template <typename HandlerType,
           typename AddressType,
@@ -1121,7 +1062,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   int result = -1;
 
   result = this->close (NET_CONNECTION_CLOSE_REASON_USER_ABORT);
-  if (result == -1)
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_StreamUDPSocketBase_T::close(NET_CONNECTION_CLOSE_REASON_USER_ABORT): \"%m\", continuing\n")));
 
@@ -1250,38 +1191,17 @@ Net_StreamUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::dump_state"));
 
-  int result = -1;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   ACE_INET_Addr local_inet_address, peer_inet_address;
   info (handle,
         local_inet_address,
         peer_inet_address);
 
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address;
-  result = local_inet_address.addr_to_string (buffer,
-                                              sizeof (buffer));
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    local_address = buffer;
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string peer_address;
-  result = peer_inet_address.addr_to_string (buffer,
-                                             sizeof (buffer));
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    peer_address = buffer;
-
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
               id (), handle,
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (peer_address.c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddress2String (local_inet_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddress2String (peer_inet_address).c_str ())));
 }
 
 template <typename HandlerType,
@@ -1316,7 +1236,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   // *TODO*: remove type inferences
-  if (inherited2::configuration_->streamConfiguration->messageAllocator)
+  if (likely (inherited2::configuration_->streamConfiguration->messageAllocator))
   {
 allocate:
     try {
@@ -1329,8 +1249,8 @@ allocate:
     }
 
     // keep retrying ?
-    if (!message_block_p &&
-        !inherited2::configuration_->streamConfiguration->messageAllocator->block ())
+    if (unlikely (!message_block_p &&
+                  !inherited2::configuration_->streamConfiguration->messageAllocator->block ()))
       goto allocate;
   } // end IF
   else
@@ -1346,7 +1266,7 @@ allocate:
                                          ACE_Time_Value::max_time,
                                          NULL,
                                          NULL));
-  if (!message_block_p)
+  if (unlikely (!message_block_p))
   {
     if (inherited2::configuration_->streamConfiguration->messageAllocator)
     {
@@ -1551,7 +1471,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::~Net_StreamUDPSocketBase_T"));
 
-  if (currentWriteBuffer_)
+  if (unlikely (currentWriteBuffer_))
     currentWriteBuffer_->release ();
 }
 
@@ -1624,7 +1544,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
   // step1: open / tweak socket, ...
   result = inherited::open (configuration_p->socketHandlerConfiguration);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
@@ -1636,7 +1556,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   // *IMPORTANT NOTE*: register with the connection manager FIRST, otherwise
   //                   a race condition might occur when using multi-threaded
   //                   proactors/reactors
-  if (!inherited2::registerc ())
+  if (unlikely (!inherited2::registerc ()))
   {
     // *NOTE*: perhaps max# connections has been reached
     //ACE_DEBUG ((LM_ERROR,
@@ -1650,7 +1570,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   // step3a: connect stream head message queue with the reactor notification
   //         pipe ?
   // *TODO*: remove type inferences
-  if (!configuration_p->streamConfiguration->useThreadPerConnection)
+  if (likely (!configuration_p->socketHandlerConfiguration->useThreadPerConnection))
     configuration_p->streamConfiguration->notificationStrategy =
         &(inherited::notificationStrategy_);
 
@@ -1666,7 +1586,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 #else
     static_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #endif
-  if (!stream_.initialize (*configuration_p->streamConfiguration))
+  if (unlikely (!stream_.initialize (*configuration_p->streamConfiguration)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
@@ -1682,7 +1602,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
   // step3d: start stream
   stream_.start ();
-  if (!stream_.isRunning ())
+  if (unlikely (!stream_.isRunning ()))
   {
     // *NOTE*: most likely, this happened because the stream failed to
     //         initialize
@@ -1692,7 +1612,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   } // end IF
 
   // step4: register with the reactor ?
-  if (!inherited::writeOnly_)
+  if (likely (!inherited::writeOnly_))
   {
     result = reactor_p->register_handler (this,
                                           ACE_Event_Handler::READ_MASK);
@@ -1718,7 +1638,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
   // *NOTE*: let the reactor manage this handler...
   // *WARNING*: this has some implications (see close() below)
-  if (!configuration_p->streamConfiguration->useThreadPerConnection)
+  if (likely (!configuration_p->socketHandlerConfiguration->useThreadPerConnection))
     inherited2::decrease ();
 
   inherited2::initialize (*configuration_p);
@@ -1799,10 +1719,10 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
     //   returned -1)
     case NORMAL_CLOSE_OPERATION:
     {
-      // check specifically for the first case...
+      // check specifically for the first case
       result = ACE_OS::thr_equal (ACE_Thread::self (),
                                   inherited::last_thread ());
-      if (result)
+      if (unlikely (result))
       {
 //       if (inherited::module ())
 //         ACE_DEBUG ((LM_DEBUG,
@@ -1867,7 +1787,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
     }
   } // end SWITCH
 
-  if (close)
+  if (likely (close))
   {
     //ACE_HANDLE handle =
     //  ((arg_in == NET_CLOSE_REASON_INITIALIZATION) ? ACE_INVALID_HANDLE
@@ -1876,7 +1796,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
     // *NOTE*: may 'delete this'
     result = handle_close (handle,
                            ACE_Event_Handler::ALL_EVENTS_MASK);
-    if (result == -1)
+    if (unlikely (result == -1))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -1921,27 +1841,26 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   // read a datagram from the socket
   bool enqueue = true;
   // *TODO*: remove type inferences
   ACE_Message_Block* buffer_p =
-    allocateMessage (inherited2::configuration_->streamConfiguration->bufferSize);
-  if (!buffer_p)
+    allocateMessage (inherited2::configuration_->PDUSize);
+  if (unlikely (!buffer_p))
   {
-    if (inherited2::configuration_->streamConfiguration->messageAllocator->block ())
+    if (inherited2::configuration_->messageAllocator->block ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                  inherited2::configuration_->streamConfiguration->bufferSize));
+                  inherited2::configuration_->PDUSize));
       return -1;
     } // end IF
 
     // no buffer available --> drop datagram and continue
     enqueue = false;
     ACE_NEW_NORETURN (buffer_p,
-                      ACE_Message_Block (inherited2::configuration_->streamConfiguration->bufferSize,
+                      ACE_Message_Block (inherited2::configuration_->PDUSize,
                                          ACE_Message_Block::MB_DATA,
                                          NULL,
                                          NULL,
@@ -1956,7 +1875,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate ACE_Message_Block(%u), aborting\n"),
-                  inherited2::configuration_->streamConfiguration->bufferSize));
+                  inherited2::configuration_->PDUSize));
       return -1;
     } // end IF
   } // end IF
@@ -1964,10 +1883,11 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
   // read a datagram from the socket
   ssize_t bytes_received = -1;
-  bytes_received = inherited::peer_.recv (buffer_p->wr_ptr (), // data buffer
-                                          buffer_p->size (),   // space
-                                          0,                   // flags
-                                          NULL);               // timeout
+  bytes_received =
+    inherited::peer_.recv (buffer_p->wr_ptr (),                 // data buffer
+                           inherited2::configuration_->PDUSize, // space
+                           0,                                   // flags
+                           NULL);                               // timeout
   switch (bytes_received)
   {
     case -1:
@@ -2019,7 +1939,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   // push the buffer onto our stream for processing
   // *NOTE*: the stream assumes ownership of the buffer
   int result = -1;
-  if (enqueue)
+  if (likely (enqueue))
     result = stream_.put (buffer_p);
   else
   {
@@ -2050,7 +1970,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
     result = 0;
   } // end ELSE
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", aborting\n")));
@@ -2101,7 +2021,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   // *IMPORTANT NOTE*: in a threaded environment, workers MAY be dispatching the
   //                   reactor notification queue concurrently (most notably,
   //                   ACE_TP_Reactor) --> enforce proper serialization
-  if (serializeOutput_)
+  if (unlikely (serializeOutput_))
   {
     result = sendLock_.acquire ();
     if (result == -1)
@@ -2112,20 +2032,20 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
     } // end IF
   } // end IF
 
-  if (!currentWriteBuffer_)
+  if (likely (!currentWriteBuffer_))
   {
     // send next data chunk from the stream
-    ACE_Message_Block* message_block_p = NULL;
+    //ACE_Message_Block* message_block_p = NULL;
     // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
     // been notified to the reactor
     //if (!inherited::myUserData.useThreadPerConnection)
     result =
-        stream_.get (message_block_p,
+        stream_.get (currentWriteBuffer_,
                      const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
     //else
     //  result = inherited2::getq (inherited::currentWriteBuffer_,
     //                             const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       // *IMPORTANT NOTE*: a number of issues can occur here:
       // - connection has been closed in the meantime
@@ -2141,31 +2061,31 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
       goto clean;
     } // end IF
 
-    currentWriteBuffer_ =
-        dynamic_cast<typename StreamType::MESSAGE_T*> (message_block_p);
-    if (!currentWriteBuffer_)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to dynamic_cast<typename StreamType::MESSAGE_T*>(%@): \"%m\", aborting\n"),
-                  message_block_p));
-      goto clean;
-    } // end IF
+    //currentWriteBuffer_ =
+    //    dynamic_cast<typename StreamType::MESSAGE_T*> (message_block_p);
+    //if (!currentWriteBuffer_)
+    //{
+    //  ACE_DEBUG ((LM_ERROR,
+    //              ACE_TEXT ("failed to dynamic_cast<typename StreamType::MESSAGE_T*>(%@): \"%m\", aborting\n"),
+    //              message_block_p));
+    //  goto clean;
+    //} // end IF
   } // end IF
   ACE_ASSERT (currentWriteBuffer_);
 
   // finished ?
-  if (inherited2::configuration_->streamConfiguration->useThreadPerConnection &&
-      currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
-  {
-    currentWriteBuffer_->release ();
-    currentWriteBuffer_ = NULL;
+  if (unlikely (inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection))
+    if (currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
+    {
+      currentWriteBuffer_->release ();
+      currentWriteBuffer_ = NULL;
 
-    //       ACE_DEBUG ((LM_DEBUG,
-    //                   ACE_TEXT ("[%u]: finished sending...\n"),
-    //                   peer_.get_handle ()));
+      //       ACE_DEBUG ((LM_DEBUG,
+      //                   ACE_TEXT ("[%u]: finished sending...\n"),
+      //                   peer_.get_handle ()));
 
-    goto clean;
-  } // end IF
+      goto clean;
+    } // end IF
 
   bytes_sent =
       inherited::peer_.send (currentWriteBuffer_->rd_ptr (), // data
@@ -2245,7 +2165,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
       // finished with this buffer ?
       currentWriteBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
-      if (currentWriteBuffer_->length () > 0)
+      if (unlikely (currentWriteBuffer_->length ()))
         break; // there's more data
 
       // clean up
@@ -2265,7 +2185,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   //                  ACE_TEXT ("failed to ACE_Reactor::cancel_wakeup(): \"%m\", continuing\n")));
   //  } // end IF
   //  else
-  if (currentWriteBuffer_)
+  if (unlikely (currentWriteBuffer_))
   {
     result = 1;
     goto clean;
@@ -2276,7 +2196,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   //              ACE_TEXT ("failed to ACE_Reactor::schedule_wakeup(): \"%m\", continuing\n")));
 
 clean:
-  if (serializeOutput_)
+  if (unlikely (serializeOutput_))
   {
     int result_2 = sendLock_.release ();
     if (result_2 == -1)
@@ -2338,7 +2258,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
-      if (!inherited2::configuration_->streamConfiguration->useThreadPerConnection)
+      if (likely (!inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection))
       {
         // *IMPORTANT NOTE*: in a multithreaded environment, in particular when
         //                   using a multithreaded reactor, there may still be
@@ -2375,14 +2295,14 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   } // end SWITCH
 
   // step3: deregister from the reactor ?
-  if ((!inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly) &&
-      (handle_in != ACE_INVALID_HANDLE))
+  if (likely ((!inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly) &&
+              (handle_in != ACE_INVALID_HANDLE)))
   {
     result =
         reactor_p->remove_handler (handle_in,
                                    (mask_in |
                                     ACE_Event_Handler::DONT_CALL));
-    if (result == -1)
+    if (unlikely (result == -1))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -2406,14 +2326,14 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   ACE_HANDLE handle = inherited::get_handle ();
   result = inherited::handle_close (handle_in,
                                     mask_in);
-  if (result == -1)
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
                 handle_in, mask_in));
   inherited::set_handle (handle); // used for debugging purposes only
 
   // step5: deregister with the connection manager (if any)
-  if (deregister)
+  if (likely (deregister))
     inherited2::deregister ();
 
   return result;
@@ -2457,99 +2377,45 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   remoteSAP_out =
       inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->address;
 
-  if (!inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly)
+  if (likely (!inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly))
   {
     result = inherited::peer_.get_local_addr (localSAP_out);
-    if (result == -1)
+    if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
   } // end IF
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-Net_ConnectionId_t
-Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
-                                                 HandlerConfigurationType>,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          StatisticContainerType,
-                          HandlerConfigurationType,
-                          StreamType,
-                          UserDataType,
-                          ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::id () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::id"));
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ());
-#else
-  return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ());
-#endif
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-ACE_Notification_Strategy*
-Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
-                                                 HandlerConfigurationType>,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          StatisticContainerType,
-                          HandlerConfigurationType,
-                          StreamType,
-                          UserDataType,
-                          ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::notification ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::notification"));
-
-  return &(inherited::notificationStrategy_);
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-const StreamType&
-Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
-                                                 HandlerConfigurationType>,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          StatisticContainerType,
-                          HandlerConfigurationType,
-                          StreamType,
-                          UserDataType,
-                          ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::stream () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::stream"));
-
-  return stream_;
-}
+//template <typename AddressType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename HandlerConfigurationType,
+//          typename StreamType,
+//          typename UserDataType,
+//          typename ModuleConfigurationType,
+//          typename ModuleHandlerConfigurationType>
+//Net_ConnectionId_t
+//Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
+//                                                 HandlerConfigurationType>,
+//                          AddressType,
+//                          ConfigurationType,
+//                          StateType,
+//                          StatisticContainerType,
+//                          HandlerConfigurationType,
+//                          StreamType,
+//                          UserDataType,
+//                          ModuleConfigurationType,
+//                          ModuleHandlerConfigurationType>::id () const
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::id"));
+//
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ());
+//#else
+//  return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ());
+//#endif
+//}
 
 template <typename AddressType,
           typename ConfigurationType,
@@ -2578,7 +2444,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   int result = -1;
 
   result = this->close (NET_CONNECTION_CLOSE_REASON_USER_ABORT);
-  if (result == -1)
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_StreamUDPSocketBase_T::close(NET_CONNECTION_CLOSE_REASON_USER_ABORT): \"%m\", continuing\n")));
 
@@ -2707,38 +2573,17 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::dump_state"));
 
-  int result = -1;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   ACE_INET_Addr local_inet_address, peer_inet_address;
   info (handle,
         local_inet_address,
         peer_inet_address);
 
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address;
-  result = local_inet_address.addr_to_string (buffer,
-                                              sizeof (buffer));
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    local_address = buffer;
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string peer_address;
-  result = peer_inet_address.addr_to_string (buffer,
-                                             sizeof (buffer));
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    peer_address = buffer;
-
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
               id (), handle,
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (peer_address.c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddress2String (local_inet_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddress2String (peer_inet_address).c_str ())));
 }
 
 template <typename AddressType,
@@ -2773,7 +2618,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   // *TODO*: remove type inferences
-  if (inherited2::configuration_->streamConfiguration->messageAllocator)
+  if (likely (inherited2::configuration_->streamConfiguration->messageAllocator))
   {
 allocate:
     try {
@@ -2786,8 +2631,8 @@ allocate:
     }
 
     // keep retrying ?
-    if (!message_block_p &&
-        !inherited2::configuration_->streamConfiguration->messageAllocator->block ())
+    if (unlikely (!message_block_p &&
+                  !inherited2::configuration_->streamConfiguration->messageAllocator->block ()))
       goto allocate;
   } // end IF
   else
@@ -2803,7 +2648,7 @@ allocate:
                                          ACE_Time_Value::max_time,
                                          NULL,
                                          NULL));
-  if (!message_block_p)
+  if (unlikely (!message_block_p))
   {
     if (inherited2::configuration_->streamConfiguration->messageAllocator)
     {
@@ -3007,7 +2852,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::~Net_StreamUDPSocketBase_T"));
 
-  if (currentWriteBuffer_)
+  if (unlikely (currentWriteBuffer_))
     currentWriteBuffer_->release ();
 }
 
@@ -3077,7 +2922,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   // step1: open / tweak socket, ...
   // *TODO*: remove type inferences
   result = inherited::open (configuration_p->socketHandlerConfiguration);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketHandlerType::open(): \"%m\", aborting\n")));
@@ -3090,7 +2935,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   // step2a: connect stream head message queue with the reactor notification
   //         pipe ?
   // *TODO*: remove type inferences
-  if (!configuration_p->streamConfiguration->useThreadPerConnection)
+  if (likely (!configuration_p->socketHandlerConfiguration->useThreadPerConnection))
     configuration_p->streamConfiguration->notificationStrategy =
         &(inherited::notificationStrategy_);
 
@@ -3103,7 +2948,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   configuration_p->streamConfiguration->sessionID =
     static_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #endif
-  if (!stream_.initialize (*configuration_p->streamConfiguration))
+  if (unlikely (!stream_.initialize (*configuration_p->streamConfiguration)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
@@ -3117,7 +2962,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 
   // step2d: start stream
   stream_.start ();
-  if (!stream_.isRunning ())
+  if (unlikely (!stream_.isRunning ()))
   {
     // *NOTE*: most likely, this happened because the stream failed to
     //         initialize
@@ -3130,7 +2975,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   // *IMPORTANT NOTE*: register with the connection manager FIRST, otherwise
   //                   a race condition might occur when using multi-threaded
   //                   proactors/reactors
-  if (!inherited2::registerc ())
+  if (unlikely (!inherited2::registerc ()))
   {
     // *NOTE*: perhaps max# connections has been reached
     //ACE_DEBUG ((LM_ERROR,
@@ -3142,7 +2987,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   // step4: register with the reactor ?
   result = reactor_p->register_handler (this,
                                         ACE_Event_Handler::READ_MASK);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Reactor::register_handler(READ_MASK): \"%m\", aborting\n")));
@@ -3163,7 +3008,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 
   // *NOTE*: let the reactor manage this handler...
   // *WARNING*: this has some implications (see close() below)
-  if (!inherited2::configuration_.streamConfiguration->useThreadPerConnection)
+  if (likely (!inherited2::configuration_.streamConfiguration->useThreadPerConnection))
     inherited2::decrease ();
 
   inherited2::initialize (*configuration_p);
@@ -3243,9 +3088,9 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
     //   returned -1)
     case NORMAL_CLOSE_OPERATION:
     {
-      // check specifically for the first case...
-      if (ACE_OS::thr_equal (ACE_Thread::self (),
-                             inherited::last_thread ()))
+      // check specifically for the first case
+      if (unlikely (ACE_OS::thr_equal (ACE_Thread::self (),
+                                       inherited::last_thread ())))
       {
 //       if (inherited::module ())
 //         ACE_DEBUG ((LM_DEBUG,
@@ -3270,13 +3115,13 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
     case NET_CONNECTION_CLOSE_REASON_INITIALIZATION:
     {
       // step1: stop processing in/outbound data
-      if (stream_.isRunning ())
+      if (likely (stream_.isRunning ()))
         stream_.stop ();
       stream_.waitForCompletion ();
 
       // step2: close socket, deregister I/O handle with the reactor, ...
       result = inherited::close (arg_in);
-      if (result == -1)
+      if (unlikely (result == -1))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_NetlinkSocketHandler_T::close(): \"%m\", aborting\n")));
 
@@ -3289,7 +3134,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
       // *NOTE*: may 'delete this'
       result = handle_close (handle,
                              ACE_Event_Handler::ALL_EVENTS_MASK);
-      if (result == -1)
+      if (unlikely (result == -1))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_StreamUDPSocketBase_T::handle_close(): \"%m\", aborting\n")));
 
@@ -3344,25 +3189,26 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize);
 
   // read a datagram from the socket
   bool enqueue = true;
   ACE_Message_Block* buffer_p =
-      allocateMessage (inherited2::configuration_->streamConfiguration->bufferSize);
-  if (!buffer_p)
+      allocateMessage (inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize);
+  if (unlikely (!buffer_p))
   {
     if (inherited2::configuration_.streamConfiguration->messageAllocator->block ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                  inherited2::configuration_->streamConfiguration->bufferSize));
+                  inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize));
       return -1;
     } // end IF
 
     // no buffer available --> drop datagram and continue
     enqueue = false;
     ACE_NEW_NORETURN (buffer_p,
-                      ACE_Message_Block (inherited2::configuration_->streamConfiguration->bufferSize,
+                      ACE_Message_Block (inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize,
                                          ACE_Message_Block::MB_DATA,
                                          NULL,
                                          NULL,
@@ -3377,7 +3223,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate ACE_Message_Block(%u), aborting\n"),
-                  inherited2::configuration_->streamConfiguration->bufferSize));
+                  inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize));
       return -1;
     } // end IF
   } // end IF
@@ -3385,9 +3231,10 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 
   // read a datagram from the socket
   ssize_t bytes_received = -1;
-  bytes_received = inherited::peer_.recv (buffer_p->wr_ptr (), // buf
-                                          buffer_p->size (),   // n
-                                          0);                  // flags
+  bytes_received =
+    inherited::peer_.recv (buffer_p->wr_ptr (),                                                                        // buf
+                           inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize, // n
+                           0);                                                                                         // flags
   switch (bytes_received)
   {
     case -1:
@@ -3439,7 +3286,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   // push the buffer onto our stream for processing
   // *NOTE*: the stream assumes ownership of the buffer
   int result = -1;
-  if (enqueue)
+  if (likely (enqueue))
     result = stream_.put (buffer_p);
   else
   {
@@ -3453,7 +3300,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 
     result = 0;
   } // end ELSE
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", aborting\n")));
@@ -3503,7 +3350,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   //                   reactor notification queue concurrently (most notably,
   //                   ACE_TP_Reactor)
   //                   --> enforce proper serialization
-  if (serializeOutput_)
+  if (unlikely (serializeOutput_))
   {
     result = sendLock_.acquire ();
     if (result == -1)
@@ -3514,7 +3361,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
     } // end IF
   } // end IF
 
-  if (!currentWriteBuffer_)
+  if (likely (!currentWriteBuffer_))
   {
     // send next data chunk from the stream...
     // *IMPORTANT NOTE*: should NEVER block, as available outbound data has been
@@ -3526,7 +3373,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
     //else
     //  result = inherited2::getq (inherited::currentWriteBuffer_,
     //                             const_cast<ACE_Time_Value*> (&ACE_Time_Value::zero));
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       // *IMPORTANT NOTE*: a number of issues can occur here:
       // - connection has been closed in the meantime
@@ -3546,20 +3393,20 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   ACE_ASSERT (currentWriteBuffer_);
 
   // finished ?
-  if (inherited2::configuration_->streamConfiguration->useThreadPerConnection &&
-      currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
-  {
-    // clean up
-    currentWriteBuffer_->release ();
-    currentWriteBuffer_ = NULL;
+  if (unlikely (inherited2::configuration_->streamConfiguration->useThreadPerConnection))
+    if (currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
+    {
+      // clean up
+      currentWriteBuffer_->release ();
+      currentWriteBuffer_ = NULL;
 
-    //       ACE_DEBUG ((LM_DEBUG,
-    //                   ACE_TEXT ("[%u]: finished sending...\n"),
-    //                   peer_.get_handle ()));
+      //       ACE_DEBUG ((LM_DEBUG,
+      //                   ACE_TEXT ("[%u]: finished sending...\n"),
+      //                   peer_.get_handle ()));
 
-    result = -1; // <-- deregister
-    goto release;
-  } // end IF
+      result = -1; // <-- deregister
+      goto release;
+    } // end IF
 
   bytes_sent =
       inherited::peer_.send (currentWriteBuffer_->rd_ptr (), // data
@@ -3612,7 +3459,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 
       // finished with this buffer ?
       currentWriteBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
-      if (currentWriteBuffer_->length () > 0)
+      if (unlikely (currentWriteBuffer_->length ()))
         break; // there's more data
 
       // clean up
@@ -3624,11 +3471,11 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   } // end SWITCH
 
   // immediately re-schedule handler ?
-  if (currentWriteBuffer_)
+  if (unlikely (currentWriteBuffer_))
     result = 1; // <-- re-schedule
 
 release:
-  if (serializeOutput_)
+  if (unlikely (serializeOutput_))
   {
     int result_2 = sendLock_.release ();
     if (result_2 == -1)
@@ -3686,14 +3533,14 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
       // a multithreaded reactor, there may still be in-flight notifications
       // being dispatched at this stage, so this just speeds things up a little
       // *TODO*: remove type inference
-      if (!inherited2::configuration_.streamConfiguration->useThreadPerConnection)
+      if (likely (!inherited2::configuration_.streamConfiguration->useThreadPerConnection))
       {
         ACE_Reactor* reactor_p = inherited::reactor ();
         ACE_ASSERT (reactor_p);
         result =
             reactor_p->purge_pending_notifications (this,
                                                     ACE_Event_Handler::ALL_EVENTS_MASK);
-        if (result == -1)
+        if (unlikely (result == -1))
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(%@): \"%m\", continuing\n"),
                       this));
@@ -3710,12 +3557,12 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
       // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("handle_close called for unknown reasons (handle: %@, mask: %u) --> check implementation !, continuing\n"),
+                  ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_close() called for unknown reasons (handle: %@, mask: %u) --> check implementation !, continuing\n"),
                   handle_in,
                   mask_in));
 #else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("handle_close called for unknown reasons (handle: %d, mask: %u) --> check implementation !, continuing\n"),
+                  ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_close() called for unknown reasons (handle: %d, mask: %u) --> check implementation !, continuing\n"),
                   handle_in,
                   mask_in));
 #endif
@@ -3725,7 +3572,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   // invoke base-class maintenance
   result = inherited::handle_close (handle_in,
                                     mask_in);
-  if (result == -1)
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to Net_NetlinkSocketHandler_T::handle_close(%d,%d): \"%m\", continuing\n"),
                 handle_in, mask_in));
@@ -3780,93 +3627,15 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 //                ACE_TEXT ("failed to ACE_INET_Addr::set(0, %d): \"%m\", continuing\n"),
 //                INADDR_NONE));
   localSAP_out = ACE_Addr::sap_any;
-  if (!inherited::writeOnly_)
+  if (likely (!inherited::writeOnly_))
   {
     result = inherited::peer_.get_local_addr (localSAP_out);
-    if (result == -1)
+    if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
   } // end IF
   remoteSAP_out =
       inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->address;
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-Net_ConnectionId_t
-Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          StatisticContainerType,
-                          HandlerConfigurationType,
-                          StreamType,
-                          UserDataType,
-                          ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::id () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::id"));
-
-  return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ());
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-ACE_Notification_Strategy*
-Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          StatisticContainerType,
-                          HandlerConfigurationType,
-                          StreamType,
-                          UserDataType,
-                          ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::notification ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::notification"));
-
-  return &(inherited::notificationStrategy_);
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-const StreamType&
-Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                          AddressType,
-                          ConfigurationType,
-                          StateType,
-                          StatisticContainerType,
-                          HandlerConfigurationType,
-                          StreamType,
-                          UserDataType,
-                          ModuleConfigurationType,
-                          ModuleHandlerConfigurationType>::stream () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::stream"));
-
-  return stream_;
 }
 
 template <typename AddressType,
@@ -3895,7 +3664,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   int result = -1;
 
   result = this->close (NET_CONNECTION_CLOSE_REASON_USER_ABORT);
-  if (result == -1)
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_StreamUDPSocketBase_T::close(NET_CONNECTION_CLOSE_REASON_USER_ABORT): \"%m\", continuing\n")));
 }
@@ -4015,37 +3784,18 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::dump_state"));
 
-  int result = -1;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   AddressType local_address, peer_address;
+
   info (handle,
         local_address,
         peer_address);
 
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address_string;
-  result = local_address.addr_to_string (buffer,
-                                         sizeof (buffer),
-                                         1);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
-  else
-    local_address_string = buffer;
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  result = peer_address.addr_to_string (buffer,
-                                        sizeof (buffer),
-                                        1);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
-
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
               id (), handle,
-              ACE_TEXT (local_address_string.c_str ()),
-              buffer));
+              ACE_TEXT (Net_Common_Tools::IPAddress2String (local_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddress2String (peer_address).c_str ())));
 }
 
 template <typename AddressType,
@@ -4079,7 +3829,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   // *TODO*: remove type inferences
-  if (inherited2::configuration_->streamConfiguration->messageAllocator)
+  if (likely (inherited2::configuration_->streamConfiguration->messageAllocator))
   {
 allocate:
     try {
@@ -4093,8 +3843,8 @@ allocate:
     }
 
     // keep retrying ?
-    if (!message_block_p &&
-        !inherited2::configuration_->streamConfiguration->messageAllocator->block ())
+    if (unlikely (!message_block_p &&
+                  !inherited2::configuration_->streamConfiguration->messageAllocator->block ()))
       goto allocate;
   } // end IF
   else
@@ -4110,7 +3860,7 @@ allocate:
                        ACE_Time_Value::max_time,
                        NULL,
                        NULL));
-  if (!message_block_p)
+  if (unlikely (!message_block_p))
   {
     if (inherited2::configuration_->streamConfiguration->messageAllocator)
     {

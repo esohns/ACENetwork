@@ -21,43 +21,44 @@
 #ifndef TEST_U_CONFIGURATION_H
 #define TEST_U_CONFIGURATION_H
 
-#include <list>
+//#include <list>
 
-#include <ace/INET_Addr.h>
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include <ace/Netlink_Addr.h>
-#endif
-#include <ace/Time_Value.h>
+//#include <ace/INET_Addr.h>
+//#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+//#include <ace/Netlink_Addr.h>
+//#endif
+//#include <ace/Time_Value.h>
 
 #include "stream_common.h"
-#include "stream_iallocator.h"
+//#include "stream_iallocator.h"
 //#include "stream_imessagequeue.h"
 
 #include "net_configuration.h"
-#include "net_defines.h"
-#include "net_iconnectionmanager.h"
+//#include "net_defines.h"
+//#include "net_iconnectionmanager.h"
 
-#include "net_server_defines.h"
+//#include "net_server_defines.h"
 
-#include "test_u_common.h"
-#include "test_u_stream_common.h"
+//#include "test_u_common.h"
+//#include "test_u_stream_common.h"
 
-#include "test_u_connection_common.h"
+//#include "test_u_connection_common.h"
 
-#include "file_server_defines.h"
-#include "file_server_stream_common.h"
+//#include "file_server_common.h"
+//#include "file_server_connection_common.h"
+//#include "file_server_defines.h"
+//#include "file_server_stream_common.h"
 
 // forward declarations
-class Stream_IMessageQueue;
-struct Test_U_ConnectionState;
-class Test_U_Message;
-class Test_U_SessionMessage;
+//struct Test_U_ConnectionState;
+//struct FileServer_ConnectionConfiguration;
+//struct FileServer_UserData;
 
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 struct Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
-                                 Net_RuntimeStatistic_t,
-                                 struct Test_U_UserData> Test_U_IInetConnectionManager_t;
+//typedef Net_IConnectionManager_T<ACE_INET_Addr,
+//                                 struct FileServer_ConnectionConfiguration,
+//                                 struct Test_U_ConnectionState,
+//                                 Net_RuntimeStatistic_t,
+//                                 struct FileServer_UserData> FileServer_IInetConnectionManager_t;
 
 //struct Test_U_ProtocolConfiguration
 //{
@@ -79,25 +80,16 @@ struct Test_U_Configuration
 {
   inline Test_U_Configuration ()
    : socketConfiguration ()
-   , socketHandlerConfiguration ()
-   , connectionConfiguration ()
    , allocatorConfiguration ()
-   , streamConfiguration ()
    //, protocolConfiguration ()
-   , userData ()
   {};
 
   // **************************** socket data **********************************
-  struct Net_SocketConfiguration           socketConfiguration;
-  struct Test_U_SocketHandlerConfiguration socketHandlerConfiguration;
-  struct Test_U_ConnectionConfiguration    connectionConfiguration;
+  struct Net_SocketConfiguration       socketConfiguration;
   // **************************** stream data **********************************
-  struct Stream_AllocatorConfiguration     allocatorConfiguration;
-  struct Test_U_StreamConfiguration        streamConfiguration;
+  struct Stream_AllocatorConfiguration allocatorConfiguration;
   // *************************** protocol data *********************************
   //struct Test_U_ProtocolConfiguration      protocolConfiguration;
-
-  struct Test_U_UserData                   userData;
 };
 
 #endif

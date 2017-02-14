@@ -22,6 +22,8 @@
 #include <ace/Log_Msg.h>
 #include <ace/Synch_Traits.h>
 
+#include "common_ui_common.h"
+
 #include "net_macros.h"
 
 #include "bittorrent_message.h"

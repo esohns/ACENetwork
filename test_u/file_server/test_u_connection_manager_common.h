@@ -34,46 +34,25 @@
 #endif
 
 #include "test_u_connection_common.h"
+#include "file_server_connection_common.h"
 
 // forward declarations
-//struct Test_U_ConnectionConfiguration;
-//struct Test_U_ConnectionState;
-struct Test_U_UserData;
+//struct FileServer_ConnectionConfiguration;
+//struct FileServer_ConnectionState;
+struct FileServer_UserData;
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-typedef Net_IConnectionManager_T<Net_Netlink_Addr,
-                                 struct Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
-                                 Net_RuntimeStatistic_t,
-                                 struct Test_U_UserData> Test_U_INetlinkConnectionManager_t;
-#endif
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 struct Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
+                                 struct FileServer_ConnectionConfiguration,
+                                 struct FileServer_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 struct Test_U_UserData> Test_U_IInetConnectionManager_t;
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-typedef Net_Connection_Manager_T<Net_Netlink_Addr,
-                                 struct Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
-                                 Net_RuntimeStatistic_t,
-                                 struct Test_U_UserData> Test_U_NetlinkConnectionManager_t;
-#endif
+                                 struct FileServer_UserData> FileServer_IInetConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
-                                 struct Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
+                                 struct FileServer_ConnectionConfiguration,
+                                 struct FileServer_ConnectionState,
                                  Net_RuntimeStatistic_t,
-                                 struct Test_U_UserData> Test_U_InetConnectionManager_t;
+                                 struct FileServer_UserData> FileServer_InetConnectionManager_t;
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-typedef ACE_Singleton<Test_U_NetlinkConnectionManager_t,
-                      ACE_SYNCH_MUTEX> TEST_U_NETLINKCONNECTIONMANAGER_SINGLETON;
-#endif
-typedef ACE_Singleton<Test_U_InetConnectionManager_t,
-                      ACE_SYNCH_MUTEX> TEST_U_CONNECTIONMANAGER_SINGLETON;
+typedef ACE_Singleton<FileServer_InetConnectionManager_t,
+                      ACE_SYNCH_MUTEX> FILESERVER_CONNECTIONMANAGER_SINGLETON;
 
 #endif

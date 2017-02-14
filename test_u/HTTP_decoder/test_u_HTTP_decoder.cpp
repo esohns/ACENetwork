@@ -519,13 +519,14 @@ do_work (unsigned int bufferSize_in,
   // ******************** socket handler configuration data ********************
   configuration.socketHandlerConfiguration.messageAllocator =
     &message_allocator;
-  configuration.socketHandlerConfiguration.PDUSize = bufferSize_in;
   configuration.socketHandlerConfiguration.socketConfiguration =
     &configuration.socketConfiguration;
   configuration.socketHandlerConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
   configuration.socketHandlerConfiguration.userData =
     &configuration.userData;
+
+  configuration.connectionConfiguration.PDUSize = bufferSize_in;
 
   // ********************** stream configuration data **************************
   // ********************** module configuration data **************************
@@ -559,8 +560,8 @@ do_work (unsigned int bufferSize_in,
   configuration.moduleHandlerConfiguration.targetFileName = fileName_in;
   configuration.moduleHandlerConfiguration.URL = URL_in;
   // ******************** (sub-)stream configuration data **********************
-  if (bufferSize_in)
-    configuration.streamConfiguration.bufferSize = bufferSize_in;
+  //if (bufferSize_in)
+  //  configuration.streamConfiguration.bufferSize = bufferSize_in;
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.moduleConfiguration =
     &configuration.moduleConfiguration;
@@ -866,7 +867,7 @@ do_work (unsigned int bufferSize_in,
   } // end IF
 allocate:
   message_p =
-    static_cast<Test_U_Message*> (message_allocator.malloc (configuration.socketHandlerConfiguration.PDUSize));
+    static_cast<Test_U_Message*> (message_allocator.malloc (configuration.connectionConfiguration.PDUSize));
   // keep retrying ?
   if (!message_p && !message_allocator.block ())
     goto allocate;

@@ -105,11 +105,18 @@ struct Net_ListenerConfiguration
 struct Net_ConnectionConfiguration
 {
   inline Net_ConnectionConfiguration ()
-   : socketHandlerConfiguration (NULL)
+   : messageAllocator (NULL)
+   , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
+   , socketHandlerConfiguration (NULL)
    , streamConfiguration (NULL)
    , userData (NULL)
   {};
 
+  Stream_IAllocator*                     messageAllocator;
+  // *NOTE*: applies to the corresponding protocol, if it has fixed size
+  //         datagrams; otherwise, this is the size of the individual (opaque)
+  //         stream buffers
+  unsigned int                           PDUSize; // package data unit size
   struct Net_SocketHandlerConfiguration* socketHandlerConfiguration;
   struct Stream_Configuration*           streamConfiguration;
 
@@ -125,20 +132,30 @@ struct Net_SocketHandlerConfiguration
    , socketConfiguration (NULL)
    , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
                                  0)
+   , useThreadPerConnection (false)
    ///////////////////////////////////////
    , userData (NULL)
   {};
 
   struct Net_ListenerConfiguration* listenerConfiguration;
   Stream_IAllocator*                messageAllocator;
-  // *NOTE*: applies to the corresponding protocol, if it has fixed size
-  //         datagrams; otherwise, this is the size of the individual (opaque)
-  //         stream buffers
-  unsigned int                      PDUSize; // package data unit size
+  unsigned int                      PDUSize;
   struct Net_SocketConfiguration*   socketConfiguration;
   ACE_Time_Value                    statisticReportingInterval; // [ACE_Time_Value::zero: off]
+  bool                              useThreadPerConnection;
 
   struct Net_UserData*              userData;
+};
+
+struct Net_SessionConfiguration
+{
+  inline Net_SessionConfiguration ()
+   : parserConfiguration (NULL)
+   , useReactor (NET_EVENT_USE_REACTOR)
+  {};
+
+  struct Common_ParserConfiguration* parserConfiguration;
+  bool                               useReactor;
 };
 
 #endif

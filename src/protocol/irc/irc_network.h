@@ -48,22 +48,6 @@
 //#include "irc_stream.h"
 #include "irc_stream_common.h"
 
-struct IRC_StreamConfiguration;
-struct IRC_ConnectionConfiguration
- : Net_ConnectionConfiguration
-{
-  inline IRC_ConnectionConfiguration ()
-   : Net_ConnectionConfiguration ()
-   ///////////////////////////////////////
-   , streamConfiguration (NULL)
-   //, userData (NULL)
-  {};
-
-  struct IRC_StreamConfiguration* streamConfiguration;
-
-  //struct IRC_UserData*            userData;
-};
-
 //////////////////////////////////////////
 
 typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct IRC_SocketHandlerConfiguration,

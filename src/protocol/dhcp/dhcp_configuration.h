@@ -64,17 +64,36 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 //                         DHCP_SessionMessage> DHCP_IStreamNotify_t;
 
 struct DHCP_SocketHandlerConfiguration
- : Net_SocketHandlerConfiguration
+  : Net_SocketHandlerConfiguration
 {
   inline DHCP_SocketHandlerConfiguration ()
-   : Net_SocketHandlerConfiguration ()
-   ///////////////////////////////////////
-   , userData (NULL)
-  {
-    PDUSize = DHCP_BUFFER_SIZE;
-  };
+    : Net_SocketHandlerConfiguration ()
+    ///////////////////////////////////////
+    , userData (NULL)
+  {};
 
   struct DHCP_Stream_UserData* userData;
+};
+
+struct DHCP_StreamConfiguration;
+struct DHCP_ConnectionConfiguration
+ : Net_ConnectionConfiguration
+{
+  inline DHCP_ConnectionConfiguration ()
+   : Net_ConnectionConfiguration ()
+   ///////////////////////////////////////
+   , socketHandlerConfiguration (NULL)
+   , streamConfiguration (NULL)
+   , userData (NULL)
+  {
+    PDUSize = DHCP_MESSAGE_SIZE;
+    //PDUSize = DHCP_BUFFER_SIZE;
+  };
+
+  struct DHCP_SocketHandlerConfiguration* socketHandlerConfiguration;
+  struct DHCP_StreamConfiguration*        streamConfiguration;
+
+  struct DHCP_Stream_UserData*            userData;
 };
 
 //struct DHCP_ConnectorConfiguration
@@ -114,7 +133,7 @@ struct DHCP_ModuleHandlerConfiguration
    , printProgressDot (DHCP_DEFAULT_PRINT_PROGRESSDOT)
    , pushStatisticMessages (true)
    , protocolConfiguration (NULL)
-   , streamConfiguration (NULL)
+   , socketHandlerConfiguration (NULL)
   {
     crunchMessages = DHCP_DEFAULT_CRUNCH_MESSAGES; // dhcp parser module
     printFinalReport = true;
@@ -122,11 +141,11 @@ struct DHCP_ModuleHandlerConfiguration
 
 //  Test_U_IConnection_t*       connection; // UDP target/net IO module
 
-  bool                               printProgressDot; // file writer module
-  bool                               pushStatisticMessages;
+  bool                                    printProgressDot; // file writer module
+  bool                                    pushStatisticMessages;
 
-  struct DHCP_ProtocolConfiguration* protocolConfiguration;
-  struct DHCP_StreamConfiguration*   streamConfiguration;
+  struct DHCP_ProtocolConfiguration*      protocolConfiguration;
+  struct DHCP_SocketHandlerConfiguration* socketHandlerConfiguration;
 };
 
 struct DHCP_StreamConfiguration
@@ -138,9 +157,7 @@ struct DHCP_StreamConfiguration
    , moduleHandlerConfiguration ()
    , protocolConfiguration (NULL)
    //, userData (NULL)
-  {
-    bufferSize = DHCP_BUFFER_SIZE;
-  };
+  {};
 
   struct Stream_ModuleConfiguration*      moduleConfiguration;        // stream module configuration
   struct DHCP_ModuleHandlerConfiguration* moduleHandlerConfiguration; // module handler configuration

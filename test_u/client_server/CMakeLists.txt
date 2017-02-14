@@ -155,7 +155,11 @@ set (client_SRCS
      test_u_tcpconnection.h)
 
 set (EXECUTABLE_SOURCE client)
-add_executable (${EXECUTABLE_SOURCE} ${client_SRCS} etc/net_client.glade)
+add_executable (${EXECUTABLE_SOURCE}
+                EXCLUDE_FROM_ALL
+                ${client_SRCS}
+                etc/net_client.glade)
+set_property (TARGET ${EXECUTABLE_SOURCE} PROPERTY FOLDER "test_u")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE_SOURCE} Common)
@@ -243,7 +247,11 @@ set (server_SRCS
      stdafx.h)
 
 set (EXECUTABLE_TARGET server)
-add_executable (${EXECUTABLE_TARGET} ${server_SRCS} etc/net_server.glade)
+add_executable (${EXECUTABLE_TARGET}
+                EXCLUDE_FROM_ALL
+                ${server_SRCS}
+                etc/net_server.glade)
+set_property (TARGET ${EXECUTABLE_TARGET} PROPERTY FOLDER "test_u")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE_TARGET} Common)

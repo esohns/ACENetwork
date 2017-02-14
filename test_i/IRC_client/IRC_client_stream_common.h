@@ -43,7 +43,6 @@
 #include "IRC_client_common.h"
 
 // forward declaration(s)
-struct IRC_Client_ModuleHandlerConfiguration;
 struct IRC_Client_SessionData;
 class IRC_Client_SessionMessage;
 struct IRC_Client_UserData;
@@ -68,6 +67,53 @@ struct IRC_Client_StreamState
   struct IRC_Client_UserData*    userData;
 };
 
+typedef Stream_INotify_T<enum Stream_SessionMessageType> IRC_Client_IStreamNotify_t;
+typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
+                                    struct IRC_Client_SessionData,
+                                    enum Stream_SessionMessageType,
+                                    IRC_Message,
+                                    IRC_Client_SessionMessage> IRC_Client_ISessionNotify_t;
+typedef std::list<IRC_Client_ISessionNotify_t*> IRC_Client_ISubscribers_t;
+typedef IRC_Client_ISubscribers_t::const_iterator IRC_Client_ISubscribersIterator_t;
+struct IRC_Client_ModuleHandlerConfiguration
+ : IRC_ModuleHandlerConfiguration
+{
+  inline IRC_Client_ModuleHandlerConfiguration ()
+   : IRC_ModuleHandlerConfiguration ()
+   ///////////////////////////////////////
+   , subscriber (NULL)
+   , subscribers (NULL)
+   , connectionConfiguration (NULL)
+   , userData (NULL)
+  {};
+
+  /* handler */
+  IRC_Client_ISessionNotify_t*               subscriber; // (initial) subscriber
+  IRC_Client_ISubscribers_t*                 subscribers;
+
+  struct IRC_Client_ConnectionConfiguration* connectionConfiguration;
+
+  struct IRC_Client_UserData*                userData;
+};
+
+struct IRC_Client_StreamConfiguration
+ : Stream_Configuration
+{
+  inline IRC_Client_StreamConfiguration ()
+   : Stream_Configuration ()
+   , moduleConfiguration (NULL)
+   , moduleHandlerConfiguration (NULL)
+   , protocolConfiguration (NULL)
+   , userData (NULL)
+  {};
+
+  struct Stream_ModuleConfiguration*            moduleConfiguration;        // stream module configuration
+  struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration; // module handler configuration
+  struct IRC_ProtocolConfiguration*             protocolConfiguration;      // protocol configuration
+
+  struct IRC_Client_UserData*                   userData;
+};
+
 typedef Stream_SessionData_T<struct IRC_Client_SessionData> IRC_Client_SessionData_t;
 
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
@@ -79,15 +125,6 @@ typedef Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
                                         IRC_Client_ControlMessage_t,
                                         IRC_Message,
                                         IRC_Client_SessionMessage> IRC_Client_MessageAllocator_t;
-
-typedef Stream_INotify_T<enum Stream_SessionMessageType> IRC_Client_IStreamNotify_t;
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct IRC_Client_SessionData,
-                                    enum Stream_SessionMessageType,
-                                    IRC_Message,
-                                    IRC_Client_SessionMessage> IRC_Client_ISessionNotify_t;
-typedef std::list<IRC_Client_ISessionNotify_t*> IRC_Client_ISubscribers_t;
-typedef IRC_Client_ISubscribers_t::const_iterator IRC_Client_ISubscribersIterator_t;
 
 //typedef Common_INotify_T<unsigned int,
 //                         struct IRC_Client_SessionData,

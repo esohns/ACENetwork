@@ -40,28 +40,28 @@
 
 #include "test_u_connection_manager_common.h"
 
-Test_U_FileServer_SignalHandler::Test_U_FileServer_SignalHandler ()
+FileServer_SignalHandler::FileServer_SignalHandler ()
  : inherited (this) // event handler handle
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_FileServer_SignalHandler::Test_U_FileServer_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("FileServer_SignalHandler::FileServer_SignalHandler"));
 
 //  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
 }
 
-Test_U_FileServer_SignalHandler::~Test_U_FileServer_SignalHandler ()
+FileServer_SignalHandler::~FileServer_SignalHandler ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_FileServer_SignalHandler::~Test_U_FileServer_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("FileServer_SignalHandler::~FileServer_SignalHandler"));
 
 }
 
 void
-Test_U_FileServer_SignalHandler::handle (int signal_in)
+FileServer_SignalHandler::handle (int signal_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_FileServer_SignalHandler::handle"));
+  NETWORK_TRACE (ACE_TEXT ("FileServer_SignalHandler::handle"));
 
   int result = -1;
-  Test_U_IInetConnectionManager_t* iconnection_manager_p =
-      TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  FileServer_IInetConnectionManager_t* iconnection_manager_p =
+      FILESERVER_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
 
   bool shutdown = false;

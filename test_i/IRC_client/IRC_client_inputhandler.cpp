@@ -41,11 +41,11 @@ using namespace std;
 
 #include "IRC_client_network.h"
 
-IRC_Client_InputHandler::IRC_Client_InputHandler (IRC_Client_SessionState* state_in,
+IRC_Client_InputHandler::IRC_Client_InputHandler (struct IRC_Client_SessionState* state_in,
                                                   bool useReactor_in)
  : inherited (NULL,                           // reactor
               ACE_Event_Handler::LO_PRIORITY) // priority
- , configuration_ ()
+ , configuration_ (NULL)
  , currentReadBuffer_ (NULL)
  , registered_ (false)
  , state_ (state_in)
@@ -77,13 +77,14 @@ IRC_Client_InputHandler::~IRC_Client_InputHandler ()
 }
 
 bool
-IRC_Client_InputHandler::initialize (const IRC_Client_InputHandlerConfiguration& configuration_in)
+IRC_Client_InputHandler::initialize (const struct IRC_Client_InputHandlerConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_InputHandler::initialize"));
 
   int result = 0;
 
-  configuration_ = configuration_in;
+  configuration_ =
+    &const_cast<struct IRC_Client_InputHandlerConfiguration&> (configuration_in);
 
   // sanity check(s)
   ACE_ASSERT (state_);
@@ -119,24 +120,30 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
 
   int result = -1;
 
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (configuration_->connectionConfiguration);
+  ACE_ASSERT (configuration_->controller);
+
   if (!currentReadBuffer_)
   { // allocate a message buffer
     currentReadBuffer_ =
-      allocateMessage (configuration_.streamConfiguration->bufferSize);
+      allocateMessage (configuration_->connectionConfiguration->PDUSize);
     if (!currentReadBuffer_)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                  configuration_.streamConfiguration->bufferSize));
+                  configuration_->connectionConfiguration->PDUSize));
       return -1;
     } // end IF
   } // end IF
   ACE_ASSERT (currentReadBuffer_);
 
   // read some data from STDIN
-  ssize_t bytes_received = ACE_OS::read (handle_in,
-                                         currentReadBuffer_->wr_ptr (),
-                                         currentReadBuffer_->size () - 1); // \0
+  ssize_t bytes_received =
+    ACE_OS::read (handle_in,
+                  currentReadBuffer_->wr_ptr (),
+                  configuration_->connectionConfiguration->PDUSize - 1); // \0
   switch (bytes_received)
   {
     case -1:
@@ -207,11 +214,9 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
     message_text.clear (); // all newline
 
   // send the message
-  ACE_ASSERT (configuration_.controller);
   string_list_t receivers;
   ACE_ASSERT (state_);
-  {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_->lock);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_->lock, -1);
 
     // sanity check (s)
     if (state_->channel.empty ())
@@ -223,12 +228,9 @@ IRC_Client_InputHandler::handle_input (ACE_HANDLE handle_in)
 
     receivers.push_front (state_->channel);
   } // end lock scope
-  try
-  {
-    configuration_.controller->send (receivers, message_text);
-  }
-  catch (...)
-  {
+  try {
+    configuration_->controller->send (receivers, message_text);
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::send(), aborting\n")));
     return -1;
@@ -288,16 +290,17 @@ IRC_Client_InputHandler::allocateMessage (unsigned int requestedSize_in)
   // initialize return value(s)
   ACE_Message_Block* message_block_p = NULL;
 
-  if (configuration_.streamConfiguration->messageAllocator)
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (configuration_->connectionConfiguration);
+
+  if (configuration_->connectionConfiguration->messageAllocator)
   {
 allocate:
-    try
-    {
+    try {
       message_block_p =
-        static_cast<ACE_Message_Block*> (configuration_.streamConfiguration->messageAllocator->malloc (requestedSize_in));
-    }
-    catch (...)
-    {
+        static_cast<ACE_Message_Block*> (configuration_->connectionConfiguration->messageAllocator->malloc (requestedSize_in));
+    } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
                   requestedSize_in));
@@ -306,7 +309,7 @@ allocate:
 
     // keep retrying ?
     if (!message_block_p &&
-        !configuration_.streamConfiguration->messageAllocator->block ())
+        !configuration_->connectionConfiguration->messageAllocator->block ())
       goto allocate;
   } // end IF
   else
@@ -324,9 +327,9 @@ allocate:
                                          NULL));
   if (!message_block_p)
   {
-    if (configuration_.streamConfiguration->messageAllocator)
+    if (configuration_->connectionConfiguration->messageAllocator)
     {
-      if (configuration_.streamConfiguration->messageAllocator->block ())
+      if (configuration_->connectionConfiguration->messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     } // end IF

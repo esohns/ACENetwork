@@ -31,7 +31,7 @@
 #include "test_u_callbacks.h"
 #include "test_u_stream.h"
 
-Test_U_EventHandler::Test_U_EventHandler (Test_U_GTK_CBData* CBData_in)
+Test_U_EventHandler::Test_U_EventHandler (struct FileServer_GTK_CBData* CBData_in)
  : CBData_ (CBData_in)
  , sessionData_ (NULL)
 {
@@ -47,14 +47,14 @@ Test_U_EventHandler::~Test_U_EventHandler ()
 
 void
 Test_U_EventHandler::start (Stream_SessionId_t sessionID_in,
-                            const Test_U_FileServer_SessionData& sessionData_in)
+                            const struct FileServer_SessionData& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::start"));
 
   ACE_UNUSED_ARG (sessionID_in);
 
   sessionData_ =
-    &const_cast<struct Test_U_FileServer_SessionData&> (sessionData_in);
+    &const_cast<struct FileServer_SessionData&> (sessionData_in);
 
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
@@ -73,7 +73,7 @@ Test_U_EventHandler::start (Stream_SessionId_t sessionID_in,
 
 void
 Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
-                             const Stream_SessionMessageType& sessionEvent_in)
+                             const enum Stream_SessionMessageType& sessionEvent_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
 

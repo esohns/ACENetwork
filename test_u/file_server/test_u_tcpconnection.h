@@ -33,32 +33,32 @@
 
 #include "net_tcpconnection_base.h"
 
-#include "test_u_connection_common.h"
-
 #include "test_u_configuration.h"
 #include "test_u_socket_common.h"
+
+#include "file_server_connection_common.h"
 
 // forward declarations
 class Test_U_Stream;
 
 class Test_U_TCPConnection
  : public Net_TCPConnectionBase_T<Test_U_TCPHandler_t,
-                                  struct Test_U_ConnectionConfiguration,
-                                  struct Test_U_ConnectionState,
+                                  struct FileServer_ConnectionConfiguration,
+                                  struct FileServer_ConnectionState,
                                   Net_RuntimeStatistic_t,
-                                  struct Test_U_SocketHandlerConfiguration,
+                                  struct FileServer_SocketHandlerConfiguration,
                                   Test_U_Stream,
-                                  struct Test_U_UserData>
+                                  struct FileServer_UserData>
 {
   friend class ACE_Acceptor<Test_U_TCPConnection, ACE_SOCK_ACCEPTOR>;
   friend class ACE_Connector<Test_U_TCPConnection, ACE_SOCK_CONNECTOR>;
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   struct Test_U_ConnectionConfiguration,
-                                   struct Test_U_ConnectionState,
+                                   struct FileServer_ConnectionConfiguration,
+                                   struct FileServer_ConnectionState,
                                    Net_RuntimeStatistic_t,
-                                   struct Test_U_UserData> ICONNECTION_MANAGER_T;
+                                   struct FileServer_UserData> ICONNECTION_MANAGER_T;
 
   Test_U_TCPConnection (ICONNECTION_MANAGER_T*,                        // connection manager handle
                         const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
@@ -69,12 +69,12 @@ class Test_U_TCPConnection
 
  private:
   typedef Net_TCPConnectionBase_T<Test_U_TCPHandler_t,
-                                  struct Test_U_ConnectionConfiguration,
-                                  struct Test_U_ConnectionState,
+                                  struct FileServer_ConnectionConfiguration,
+                                  struct FileServer_ConnectionState,
                                   Net_RuntimeStatistic_t,
-                                  struct Test_U_SocketHandlerConfiguration,
+                                  struct FileServer_SocketHandlerConfiguration,
                                   Test_U_Stream,
-                                  struct Test_U_UserData> inherited;
+                                  struct FileServer_UserData> inherited;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
   //         For some reason, the compiler will not accept the overloaded
@@ -88,22 +88,22 @@ class Test_U_TCPConnection
 
 class Test_U_AsynchTCPConnection
  : public Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPHandler_t,
-                                        struct Test_U_ConnectionConfiguration,
-                                        struct Test_U_ConnectionState,
+                                        struct FileServer_ConnectionConfiguration,
+                                        struct FileServer_ConnectionState,
                                         Net_RuntimeStatistic_t,
-                                        struct Test_U_SocketHandlerConfiguration,
+                                        struct FileServer_SocketHandlerConfiguration,
                                         Test_U_Stream,
-                                        struct Test_U_UserData>
+                                        struct FileServer_UserData>
 {
  friend class ACE_Asynch_Acceptor<Test_U_AsynchTCPConnection>;
  friend class ACE_Asynch_Connector<Test_U_AsynchTCPConnection>;
 
  public:
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                   struct Test_U_ConnectionConfiguration,
-                                   struct Test_U_ConnectionState,
+                                   struct FileServer_ConnectionConfiguration,
+                                   struct FileServer_ConnectionState,
                                    Net_RuntimeStatistic_t,
-                                   struct Test_U_UserData> ICONNECTION_MANAGER_T;
+                                   struct FileServer_UserData> ICONNECTION_MANAGER_T;
 
   Test_U_AsynchTCPConnection (ICONNECTION_MANAGER_T*,                        // connection manager handle
                               const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
@@ -114,12 +114,12 @@ class Test_U_AsynchTCPConnection
 
  private:
   typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPHandler_t,
-                                        struct Test_U_ConnectionConfiguration,
-                                        struct Test_U_ConnectionState,
+                                        struct FileServer_ConnectionConfiguration,
+                                        struct FileServer_ConnectionState,
                                         Net_RuntimeStatistic_t,
-                                        struct Test_U_SocketHandlerConfiguration,
+                                        struct FileServer_SocketHandlerConfiguration,
                                         Test_U_Stream,
-                                        struct Test_U_UserData> inherited;
+                                        struct FileServer_UserData> inherited;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
   //         For some reason, the compiler will not accept the overloaded

@@ -66,6 +66,24 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 //                         IRC_SessionMessage> IRC_IStreamNotify_t;
 //typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
 
+struct IRC_StreamConfiguration;
+struct IRC_ConnectionConfiguration
+  : Net_ConnectionConfiguration
+{
+  inline IRC_ConnectionConfiguration ()
+    : Net_ConnectionConfiguration ()
+    ///////////////////////////////////////
+    , streamConfiguration (NULL)
+    //, userData (NULL)
+  {
+    PDUSize = IRC_BUFFER_SIZE;
+  };
+
+  struct IRC_StreamConfiguration* streamConfiguration;
+
+  //struct IRC_UserData*            userData;
+};
+
 struct IRC_SocketHandlerConfiguration
  : Net_SocketHandlerConfiguration
 {
@@ -73,9 +91,7 @@ struct IRC_SocketHandlerConfiguration
    : Net_SocketHandlerConfiguration ()
    //////////////////////////////////////
    //, userData (NULL)
-  {
-    PDUSize = IRC_BUFFER_SIZE;
-  };
+  {};
 
   //struct IRC_UserData* userData;
 };
@@ -113,27 +129,26 @@ struct IRC_ModuleHandlerConfiguration
 {
   inline IRC_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
-   , crunchMessages (IRC_DEFAULT_CRUNCH_MESSAGES)
    , inbound (false)
    , printProgressDot (false)
    , pushStatisticMessages (true)
+   , connectionConfiguration (NULL)
    , protocolConfiguration (NULL)
-//   , streamConfiguration (NULL)
-  {};
+  {
+    // *NOTE*: this option may be useful for (downstream) parsers that only work
+    //         on CONTIGUOUS buffers (i.e. cannot parse chained message blocks)
+    // *WARNING*: currently, this does NOT work with multithreaded streams
+    //            --> USE WITH CAUTION !
+    crunchMessages = IRC_DEFAULT_CRUNCH_MESSAGES;
+  };
 
-  // *NOTE*: this option may be useful for (downstream) parsers that only work
-  //         on CONTIGUOUS buffers (i.e. cannot parse chained message blocks)
-  // *WARNING*: currently, this does NOT work with multithreaded streams
-  //            --> USE WITH CAUTION !
-  bool                              crunchMessages; // parser module(s)
+  bool                                inbound; // statistic/IO module
 
-  bool                              inbound; // statistic/IO module
+  bool                                printProgressDot; // file writer module
+  bool                                pushStatisticMessages; // statistic module
 
-  bool                              printProgressDot; // file writer module
-  bool                              pushStatisticMessages; // statistic module
-
-  struct IRC_ProtocolConfiguration* protocolConfiguration;
-//  struct Stream_Configuration*      streamConfiguration;
+  struct IRC_ConnectionConfiguration* connectionConfiguration;
+  struct IRC_ProtocolConfiguration*   protocolConfiguration;
 };
 
 struct IRC_StreamConfiguration
@@ -145,9 +160,7 @@ struct IRC_StreamConfiguration
    , moduleHandlerConfiguration_2 ()
    , protocolConfiguration (NULL)
    //, userData (NULL)
-  {
-    bufferSize = IRC_BUFFER_SIZE;
-  };
+  {};
 
   struct Stream_ModuleConfiguration     moduleConfiguration_2;        // stream module configuration
   struct IRC_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration

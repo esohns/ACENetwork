@@ -33,7 +33,7 @@
 class BitTorrent_Bencoding_IParser
  : public Net_IRecordParser_T<struct Common_ParserConfiguration,
                               Bencoding_Dictionary_t>
- , public Net_IScanner_T<BitTorrent_Bencoding_IParser>
+ , virtual public Net_IScanner_T<BitTorrent_Bencoding_IParser>
 // , public Common_IGet_T<Bencoding_Dictionary_t>
 // , public Common_IGet_T<Bencoding_List_t>
 {
@@ -41,7 +41,7 @@ class BitTorrent_Bencoding_IParser
   virtual ~BitTorrent_Bencoding_IParser () {};
 
   using IPARSER_T::error;
-  using Common_IScanner::error;
+//  using Common_IScanner::error;
 
   virtual Bencoding_Dictionary_t& getDictionary () = 0;
   virtual std::string& getKey () = 0;
@@ -58,7 +58,7 @@ template <typename RecordType>
 class BitTorrent_IParser_T
  : public Net_IStreamParser_T<struct Common_ParserConfiguration,
                               RecordType>
- , public Net_IScanner_T<BitTorrent_IParser_T<RecordType> >
+ , virtual public Net_IScanner_T<BitTorrent_IParser_T<RecordType> >
 {
  public:
   // convenient types
