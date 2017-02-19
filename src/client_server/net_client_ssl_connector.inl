@@ -45,7 +45,7 @@ Net_Client_SSL_Connector_T<HandlerType,
                            UserDataType>::Net_Client_SSL_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                                       const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited ()
- , configuration_ (NULL)
+ , configuration_ ()
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
@@ -87,7 +87,7 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
-bool
+Net_TransportLayerType
 Net_Client_SSL_Connector_T<HandlerType,
                            ConnectorType,
                            AddressType,
@@ -96,67 +96,30 @@ Net_Client_SSL_Connector_T<HandlerType,
                            StatisticContainerType,
                            HandlerConfigurationType,
                            StreamType,
-                           UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
+                           UserDataType>::transportLayer () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_SSL_Connector_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_SSL_Connector_T::transportLayer"));
 
-  configuration_ =
-    &const_cast<HandlerConfigurationType&> (configuration_in);
+  enum Net_TransportLayerType result = NET_TRANSPORTLAYER_INVALID;
 
-  return true;
-}
+  // *TODO*: find a better way to do this
+  HandlerType* handler_p = NULL;
+  int result_2 = const_cast<OWN_TYPE_T*> (this)->make_svc_handler (handler_p);
+  if (result_2 == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Client_Connector_T<Net_UDPConnection_T>::make_svc_handler(): \"%m\", aborting\n")));
+    return NET_TRANSPORTLAYER_INVALID;
+  } // end IF
+  ACE_ASSERT (handler_p);
 
-template <typename HandlerType,
-          typename ConnectorType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-const HandlerConfigurationType&
-Net_Client_SSL_Connector_T<HandlerType,
-                           ConnectorType,
-                           AddressType,
-                           ConfigurationType,
-                           StateType,
-                           StatisticContainerType,
-                           HandlerConfigurationType,
-                           StreamType,
-                           UserDataType>::get () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_SSL_Connector_T::get"));
+  Net_ITransportLayer_t* itransportlayer_p = handler_p;
+  result = itransportlayer_p->transportLayer ();
+  
+  // clean up
+  delete handler_p;
 
-  // sanity check(s)
-  ACE_ASSERT (configuration_);
-
-  return *configuration_;
-}
-
-template <typename HandlerType,
-          typename ConnectorType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-bool
-Net_Client_SSL_Connector_T<HandlerType,
-                           ConnectorType,
-                           AddressType,
-                           ConfigurationType,
-                           StateType,
-                           StatisticContainerType,
-                           HandlerConfigurationType,
-                           StreamType,
-                           UserDataType>::useReactor () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_SSL_Connector_T::useReactor"));
-
-  return true;
+  return result;
 }
 
 template <typename HandlerType,

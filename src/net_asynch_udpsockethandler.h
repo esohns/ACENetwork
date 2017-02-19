@@ -64,6 +64,7 @@ class Net_AsynchUDPSocketHandler_T
 
   virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 
+  ACE_INET_Addr               address_;
   //ACE_Message_Block*          buffer_;
   // the number of open write (i.e. send) requests
   Common_ReferenceCounterBase counter_;
@@ -83,7 +84,7 @@ class Net_AsynchUDPSocketHandler_T
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
 };
 
-// include template implementation
+// include template definiton
 #include "net_asynch_udpsockethandler.inl"
 
 #endif

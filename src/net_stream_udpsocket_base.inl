@@ -641,7 +641,6 @@ Net_StreamUDPSocketBase_T<HandlerType,
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
-  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration->socketConfiguration);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   // *IMPORTANT NOTE*: in a threaded environment, workers MAY be dispatching the
@@ -716,10 +715,10 @@ Net_StreamUDPSocketBase_T<HandlerType,
     } // end IF
 
   bytes_sent =
-      inherited::peer_.send (currentWriteBuffer_->rd_ptr (),                                                       // data handle
-                             currentWriteBuffer_->length (),                                                       // bytes to send
-                             inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->address, // peer address
-                             0);//,                                                                                // flags
+      inherited::peer_.send (currentWriteBuffer_->rd_ptr (),                                                      // data handle
+                             currentWriteBuffer_->length (),                                                      // bytes to send
+                             inherited2::configuration_->socketHandlerConfiguration->socketConfiguration.address, // peer address
+                             0);//,                                                                               // flags
                              //NULL);                                                  // timeout
   switch (bytes_sent)
   {
@@ -739,12 +738,12 @@ Net_StreamUDPSocketBase_T<HandlerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%t: failed to ACE_SOCK_Dgram::send(\"%s\") (handle was: 0x%@): \"%m\", aborting\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddress2String (inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->address).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::IPAddress2String (inherited2::configuration_->socketHandlerConfiguration->socketConfiguration.address).c_str ()),
                     inherited::peer_.get_handle ()));
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%t: failed to ACE_SOCK_Dgram::send(\"%s\") (handle was: %d): \"%m\", aborting\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddress2String (inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->address).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::IPAddress2String (inherited2::configuration_->socketHandlerConfiguration->socketConfiguration.address).c_str ()),
                     inherited::peer_.get_handle ()));
 #endif
       } // end IF
@@ -986,16 +985,15 @@ Net_StreamUDPSocketBase_T<HandlerType,
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
-  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration->socketConfiguration);
 
   int result = -1;
 
   handle_out = inherited::SVC_HANDLER_T::get_handle ();
   localSAP_out.reset ();
   remoteSAP_out =
-      inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->address;
+      inherited2::configuration_->socketHandlerConfiguration->socketConfiguration.address;
 
-  if (likely (!inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly))
+  if (likely (!inherited2::configuration_->socketHandlerConfiguration->socketConfiguration.writeOnly))
   {
     result = inherited::peer_.get_local_addr (localSAP_out);
     if (result == -1)
@@ -2016,7 +2014,6 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
-  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration->socketConfiguration);
 
   // *IMPORTANT NOTE*: in a threaded environment, workers MAY be dispatching the
   //                   reactor notification queue concurrently (most notably,
@@ -2107,26 +2104,15 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
           (error != ENOTSOCK)     &&
           (error != EBADF))          // <-- connection abort()ed locally
       {
-        ACE_TCHAR buffer[BUFSIZ];
-        ACE_OS::memset (buffer, 0, sizeof (buffer));
-        result =
-            inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->address.addr_to_string (buffer,
-                                                                                                                 sizeof (buffer),
-                                                                                                                 1);
-        if (result == -1)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%t: failed to ACE_SOCK_IO::send(\"%s\") (handle was: 0x%@): \"%m\", aborting\n"),
-                    buffer,
+                    ACE_TEXT (Net_Common_Tools::IPAddress2String (inherited2::configuration_->socketHandlerConfiguration->socketConfiguration.address).c_str ()),
                     inherited::peer_.get_handle ()));
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%t: failed to ACE_SOCK_IO::send(\"%s\") (handle was: %d): \"%m\", aborting\n"),
-                    buffer,
+                    ACE_TEXT (Net_Common_Tools::IPAddress2String (inherited2::configuration_->socketHandlerConfiguration->socketConfiguration.address).c_str ()),
                     inherited::peer_.get_handle ()));
 #endif
       } // end IF
@@ -2235,7 +2221,6 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
-  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration->socketConfiguration);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   int result = -1;
@@ -2295,7 +2280,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   } // end SWITCH
 
   // step3: deregister from the reactor ?
-  if (likely ((!inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly) &&
+  if (likely ((!inherited2::configuration_->socketHandlerConfiguration->socketConfiguration.writeOnly) &&
               (handle_in != ACE_INVALID_HANDLE)))
   {
     result =
@@ -2368,16 +2353,15 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
-  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration->socketConfiguration);
 
   int result = -1;
 
   handle_out = inherited::SVC_HANDLER_T::get_handle ();
   localSAP_out.reset ();
   remoteSAP_out =
-      inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->address;
+      inherited2::configuration_->socketHandlerConfiguration->socketConfiguration.address;
 
-  if (likely (!inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly))
+  if (likely (!inherited2::configuration_->socketHandlerConfiguration->socketConfiguration.writeOnly))
   {
     result = inherited::peer_.get_local_addr (localSAP_out);
     if (unlikely (result == -1))

@@ -95,6 +95,8 @@ class Net_Common_Tools
                                            ACE_INET_Addr&);    // return value: external IP address
   static bool interface2IPAddress (const std::string&, // interface identifier
                                    ACE_INET_Addr&);    // return value: (first) IP address
+  static bool IPAddress2Interface (const ACE_INET_Addr&, // IP address
+                                   std::string&);        // return value: interface identifier
 
   inline static std::string IPAddress2String (const ACE_INET_Addr& address_in,
                                               bool addressOnly_in = false) { return Net_Common_Tools::IPAddress2String ((addressOnly_in ? 0 : ACE_HTONS (address_in.get_port_number ())), ACE_HTONL (address_in.get_ip_address ())); };

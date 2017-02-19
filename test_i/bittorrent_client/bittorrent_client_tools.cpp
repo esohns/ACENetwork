@@ -71,19 +71,17 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
   // *TODO*: remove type inferences
   ACE_ASSERT (peer_configuration_p);
   ACE_ASSERT (peer_configuration_p->socketHandlerConfiguration);
-  ACE_ASSERT (peer_configuration_p->socketHandlerConfiguration->socketConfiguration);
   ACE_ASSERT (peer_configuration_p->streamConfiguration);
   ACE_ASSERT (tracker_configuration_p);
   ACE_ASSERT (tracker_configuration_p->socketHandlerConfiguration);
-  ACE_ASSERT (tracker_configuration_p->socketHandlerConfiguration->socketConfiguration);
   ACE_ASSERT (tracker_configuration_p->streamConfiguration);
 
   // step1: set up configuration
   if (isPeer_in)
-    peer_configuration_p->socketHandlerConfiguration->socketConfiguration->address =
+    peer_configuration_p->socketHandlerConfiguration->socketConfiguration.address =
         address_in;
   else
-    tracker_configuration_p->socketHandlerConfiguration->socketConfiguration->address =
+    tracker_configuration_p->socketHandlerConfiguration->socketConfiguration.address =
         address_in;
   if (finalModule_inout)
   {

@@ -519,8 +519,6 @@ do_work (unsigned int bufferSize_in,
   // ******************** socket handler configuration data ********************
   configuration.socketHandlerConfiguration.messageAllocator =
     &message_allocator;
-  configuration.socketHandlerConfiguration.socketConfiguration =
-    &configuration.socketConfiguration;
   configuration.socketHandlerConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
   configuration.socketHandlerConfiguration.userData =

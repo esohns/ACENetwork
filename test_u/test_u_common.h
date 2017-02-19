@@ -53,10 +53,13 @@ struct Test_U_SocketHandlerConfiguration
 {
   inline Test_U_SocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
+   , connectionConfiguration (NULL)
    , userData (NULL)
   {};
 
-  struct Test_U_UserData* userData;
+  struct Test_U_ConnectionConfiguration* connectionConfiguration;
+
+  struct Test_U_UserData*                userData;
 };
 
 #endif

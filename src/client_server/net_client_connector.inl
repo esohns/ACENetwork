@@ -49,7 +49,7 @@ Net_Client_Connector_T<HandlerType,
               //                   "synch options" (see line 200 below)
               ACE_NONBLOCK)             // flags: non-blocking I/O
               //0)                       // flags
- , configuration_ (NULL)
+ , configuration_ ()
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
@@ -91,7 +91,7 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
-bool
+Net_TransportLayerType
 Net_Client_Connector_T<HandlerType,
                        ConnectorType,
                        AddressType,
@@ -100,67 +100,30 @@ Net_Client_Connector_T<HandlerType,
                        StatisticContainerType,
                        HandlerConfigurationType,
                        StreamType,
-                       UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
+                       UserDataType>::transportLayer () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::transportLayer"));
 
-  configuration_ =
-    &const_cast<HandlerConfigurationType&> (configuration_in);
+  enum Net_TransportLayerType result = NET_TRANSPORTLAYER_INVALID;
 
-  return true;
-}
+  // *TODO*: find a better way to do this
+  HandlerType* handler_p = NULL;
+  int result_2 = const_cast<OWN_TYPE_T*> (this)->make_svc_handler (handler_p);
+  if (result_2 == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Client_Connector_T<Net_UDPConnection_T>::make_svc_handler(): \"%m\", aborting\n")));
+    return NET_TRANSPORTLAYER_INVALID;
+  } // end IF
+  ACE_ASSERT (handler_p);
 
-template <typename HandlerType,
-          typename ConnectorType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-const HandlerConfigurationType&
-Net_Client_Connector_T<HandlerType,
-                       ConnectorType,
-                       AddressType,
-                       ConfigurationType,
-                       StateType,
-                       StatisticContainerType,
-                       HandlerConfigurationType,
-                       StreamType,
-                       UserDataType>::get () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::get"));
+  Net_ITransportLayer_t* itransportlayer_p = handler_p;
+  result = itransportlayer_p->transportLayer ();
+  
+  // clean up
+  delete handler_p;
 
-  // sanity check(s)
-  ACE_ASSERT (configuration_);
-
-  return *configuration_;
-}
-
-template <typename HandlerType,
-          typename ConnectorType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-bool
-Net_Client_Connector_T<HandlerType,
-                       ConnectorType,
-                       AddressType,
-                       ConfigurationType,
-                       StateType,
-                       StatisticContainerType,
-                       HandlerConfigurationType,
-                       StreamType,
-                       UserDataType>::useReactor () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
-
-  return true;
+  return result;
 }
 
 template <typename HandlerType,
@@ -230,17 +193,9 @@ Net_Client_Connector_T<HandlerType,
                           0);                              // perms
   if (result == -1)
   {
-    ACE_TCHAR buffer[BUFSIZ];
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result = address_in.addr_to_string (buffer,
-                                        sizeof (buffer),
-                                        1);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Connector::connect(\"%s\"): \"%m\", aborting\n"),
-                buffer));
+                ACE_TEXT ("failed to ACE_Connector::connect(%s): \"%m\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
     return ACE_INVALID_HANDLE;
   } // end IF
   ACE_ASSERT (handler_p);
@@ -366,7 +321,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                        StreamType,
                        UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                               const ACE_Time_Value& statisticCollectionInterval_in)
- : configuration_ (NULL)
+ : configuration_ ()
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
@@ -404,133 +359,37 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 
 }
 
-template <typename HandlerType,
-          typename ConnectorType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-bool
-Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
-                                               ConfigurationType,
-                                               StateType,
-                                               StatisticContainerType,
-                                               HandlerConfigurationType,
-                                               StreamType,
-                                               UserDataType>,
-                       ConnectorType,
-                       ACE_INET_Addr,
-                       ConfigurationType,
-                       StateType,
-                       StatisticContainerType,
-                       HandlerConfigurationType,
-                       StreamType,
-                       UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::initialize"));
-
-  configuration_ =
-    &const_cast<HandlerConfigurationType&> (configuration_in);
-
-  return true;
-}
-
-template <typename HandlerType,
-          typename ConnectorType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-const HandlerConfigurationType&
-Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
-                                               ConfigurationType,
-                                               StateType,
-                                               StatisticContainerType,
-                                               HandlerConfigurationType,
-                                               StreamType,
-                                               UserDataType>,
-                       ConnectorType,
-                       ACE_INET_Addr,
-                       ConfigurationType,
-                       StateType,
-                       StatisticContainerType,
-                       HandlerConfigurationType,
-                       StreamType,
-                       UserDataType>::get () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::get"));
-
-  // sanity check(s)
-  ACE_ASSERT (configuration_);
-
-  return *configuration_;
-}
-
-template <typename HandlerType,
-          typename ConnectorType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-bool
-Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
-                                               ConfigurationType,
-                                               StateType,
-                                               StatisticContainerType,
-                                               HandlerConfigurationType,
-                                               StreamType,
-                                               UserDataType>,
-                       ConnectorType,
-                       ACE_INET_Addr,
-                       ConfigurationType,
-                       StateType,
-                       StatisticContainerType,
-                       HandlerConfigurationType,
-                       StreamType,
-                       UserDataType>::useReactor () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
-
-  return true;
-}
-
-template <typename HandlerType,
-          typename ConnectorType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-void
-Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
-                                               ConfigurationType,
-                                               StateType,
-                                               StatisticContainerType,
-                                               HandlerConfigurationType,
-                                               StreamType,
-                                               UserDataType>,
-                       ConnectorType,
-                       ACE_INET_Addr,
-                       ConfigurationType,
-                       StateType,
-                       StatisticContainerType,
-                       HandlerConfigurationType,
-                       StreamType,
-                       UserDataType>::abort ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-  ACE_NOTREACHED (return;)
-}
+//template <typename HandlerType,
+//          typename ConnectorType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename HandlerConfigurationType,
+//          typename StreamType,
+//          typename UserDataType>
+//void
+//Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
+//                                               ConfigurationType,
+//                                               StateType,
+//                                               StatisticContainerType,
+//                                               HandlerConfigurationType,
+//                                               StreamType,
+//                                               UserDataType>,
+//                       ConnectorType,
+//                       ACE_INET_Addr,
+//                       ConfigurationType,
+//                       StateType,
+//                       StatisticContainerType,
+//                       HandlerConfigurationType,
+//                       StreamType,
+//                       UserDataType>::abort ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
+//
+//  ACE_ASSERT (false);
+//  ACE_NOTSUP;
+//  ACE_NOTREACHED (return;)
+//}
 
 template <typename HandlerType,
           typename ConnectorType,
@@ -801,7 +660,7 @@ Net_Client_Connector_T<HandlerType,
                        StreamType,
                        UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                               const ACE_Time_Value& statisticCollectionInterval_in)
- : configuration_ (NULL)
+ : configuration_ ()
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
@@ -833,109 +692,32 @@ Net_Client_Connector_T<HandlerType,
 
 }
 
-template <typename HandlerType,
-          typename ConnectorType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-bool
-Net_Client_Connector_T<HandlerType,
-                       ConnectorType,
-                       Net_Netlink_Addr,
-                       ConfigurationType,
-                       StateType,
-                       StatisticContainerType,
-                       HandlerConfigurationType,
-                       StreamType,
-                       UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::initialize"));
+//template <typename HandlerType,
+//          typename ConnectorType,
+//          typename ConfigurationType,
+//          typename StateType,
+//          typename StatisticContainerType,
+//          typename HandlerConfigurationType,
+//          typename StreamType,
+//          typename UserDataType>
+//void
+//Net_Client_Connector_T<HandlerType,
+//                       ConnectorType,
+//                       Net_Netlink_Addr,
+//                       ConfigurationType,
+//                       StateType,
+//                       StatisticContainerType,
+//                       HandlerConfigurationType,
+//                       StreamType,
+//                       UserDataType>::abort ()
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
+//
+//  ACE_ASSERT (false);
 
-  configuration_ =
-    &const_cast<HandlerConfigurationType&> (configuration_in);
-
-  return true;
-}
-
-template <typename HandlerType,
-          typename ConnectorType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-const HandlerConfigurationType&
-Net_Client_Connector_T<HandlerType,
-                       ConnectorType,
-                       Net_Netlink_Addr,
-                       ConfigurationType,
-                       StateType,
-                       StatisticContainerType,
-                       HandlerConfigurationType,
-                       StreamType,
-                       UserDataType>::get () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::get"));
-
-  // sanity check(s)
-  ACE_ASSERT (configuration_);
-
-  return *configuration_;
-}
-
-template <typename HandlerType,
-          typename ConnectorType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-bool
-Net_Client_Connector_T<HandlerType,
-                       ConnectorType,
-                       Net_Netlink_Addr,
-                       ConfigurationType,
-                       StateType,
-                       StatisticContainerType,
-                       HandlerConfigurationType,
-                       StreamType,
-                       UserDataType>::useReactor () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::useReactor"));
-
-  return true;
-}
-
-template <typename HandlerType,
-          typename ConnectorType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-void
-Net_Client_Connector_T<HandlerType,
-                       ConnectorType,
-                       Net_Netlink_Addr,
-                       ConfigurationType,
-                       StateType,
-                       StatisticContainerType,
-                       HandlerConfigurationType,
-                       StreamType,
-                       UserDataType>::abort ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-  ACE_NOTREACHED (return;)
-}
+//  ACE_NOTSUP;
+//  ACE_NOTREACHED (return;)
+//}
 
 template <typename HandlerType,
           typename ConnectorType,

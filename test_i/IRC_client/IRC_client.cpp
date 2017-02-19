@@ -720,8 +720,6 @@ do_work (IRC_Client_Configuration& configuration_in,
   //  IRC_CLIENT_BUFFER_SIZE;
   configuration_in.socketHandlerConfiguration.messageAllocator =
     configuration_in.streamConfiguration.messageAllocator;
-  configuration_in.socketHandlerConfiguration.socketConfiguration =
-    &configuration_in.socketConfiguration;
   configuration_in.socketHandlerConfiguration.statisticReportingInterval =
     configuration_in.streamConfiguration.statisticReportingInterval;
   configuration_in.connectionConfiguration.moduleHandlerConfiguration =

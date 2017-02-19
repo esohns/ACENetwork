@@ -684,9 +684,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   } // end SWITCH
   ACE_ASSERT (handler_configuration_p);
   // *TODO*: remove type inference
-  ACE_ASSERT (handler_configuration_p->userData);
+  ACE_ASSERT (handler_configuration_p->connectionConfiguration);
   ConfigurationType* configuration_p =
-    handler_configuration_p->userData->connectionConfiguration;
+    handler_configuration_p->connectionConfiguration;
   ACE_ASSERT (configuration_p);
   if (!inherited::CONNECTION_BASE_T::initialize (*configuration_p))
   {
@@ -841,18 +841,12 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::set"));
 
-  // sanity check(s)
-  SocketConfigurationType socket_configuration;
-  //// *TODO*: remove type inference
-  //if (configuration_.socketConfiguration)
-  //  socket_configuration = *configuration_.socketConfiguration;
-
   ITRANSPORTLAYER_T* itransportlayer_p = this;
   ACE_ASSERT (itransportlayer_p);
 
   if (!itransportlayer_p->initialize (this->dispatch (),
                                       role_in,
-                                      *configuration_.socketConfiguration))
+                                      configuration_.socketConfiguration))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ITransportLayer_T::initialize(), continuing\n")));
 }

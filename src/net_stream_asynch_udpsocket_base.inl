@@ -118,7 +118,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // sanity check(s)
   ACE_ASSERT (inherited4::configuration_);
   ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration);
-  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration);
   ACE_ASSERT (inherited4::configuration_->streamConfiguration);
 
   int result = -1;
@@ -136,14 +135,14 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // *NOTE*: even when this is a write-only connection
   //         (inherited4::configuration_.socketConfiguration.writeOnly), the
   //         base class still requires a valid handle to open the output stream
-  ACE_INET_Addr SAP_any (static_cast<u_short> (0),
-                         static_cast<ACE_UINT32> (INADDR_ANY));
-  ACE_INET_Addr local_SAP =
-    (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly ? SAP_any
-                                                                                            : inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->address);
+  AddressType SAP_any (static_cast<u_short> (0),
+                       static_cast<ACE_UINT32> (INADDR_ANY));
+  AddressType local_SAP =
+    (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.writeOnly ? SAP_any
+                                                                                           : inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.address);
 #if defined (ACE_LINUX)
   // (temporarily) elevate priviledges to open system sockets
-  if (!inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly &&
+  if (!inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.writeOnly &&
       (local_SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEDGED_PORT))
   {
     if (!Common_Tools::setRootPriviledges ())
@@ -239,7 +238,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   } // end IF
 
   // step4: start reading (need to pass any data ?)
-  if (!inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly)
+  if (!inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.writeOnly)
   {
     if (messageBlock_in.length () == 0)
       inherited::initiate_read_dgram ();
@@ -288,7 +287,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     // *NOTE*: registered with the proactor at this point
     //         --> data may start arriving at handle_input ()
   } // end IF
-  if (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly)
+  if (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.writeOnly)
     this->decrease (); // float the connection (connection manager)
                        //ACE_ASSERT (this->count () == 2); // connection manager & read operation
                        //                                     (+ stream module(s))
@@ -351,7 +350,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // sanity check(s)
   ACE_ASSERT (inherited4::configuration_);
   ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration);
-  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration);
 
   int result = -1;
   Stream_Base_t* stream_p = (stream_.upStream () ? stream_.upStream ()
@@ -378,7 +376,7 @@ send:
     inherited::outputStream_.send (message_block_p,                      // data
                                    bytes_to_send,                        // #bytes to send
                                    0,                                    // flags
-                                   inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->address, // remote address (ignored)
+                                   inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.address, // remote address (ignored)
                                    NULL,                                 // ACT
                                    0,                                    // priority
                                    COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
@@ -516,7 +514,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // sanity check(s)
   ACE_ASSERT (inherited4::configuration_);
   ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration);
-  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration);
 
   handle_out = inherited2::get_handle ();
   localSAP_out.reset ();
@@ -526,9 +523,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
-  if (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly)
+  if (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.writeOnly)
     remoteSAP_out =
-        inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->address;
+      inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.address;
 }
 
 template <typename HandlerType,
@@ -752,38 +749,17 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::dump_state"));
 
-  int result = -1;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   AddressType local_address, peer_address;
   info (handle,
         local_address,
         peer_address);
 
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address_string;
-  result = local_address.addr_to_string (buffer,
-                                         sizeof (buffer));
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    local_address_string = ACE_TEXT_ALWAYS_CHAR (buffer);
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string peer_address_string;
-  result = peer_address.addr_to_string (buffer,
-                                        sizeof (buffer));
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    peer_address_string = ACE_TEXT_ALWAYS_CHAR (buffer);
-
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [id: %u [%d]]: \"%s\" <--> \"%s\"\n"),
               id (), handle,
-              ACE_TEXT (local_address_string.c_str ()),
-              ACE_TEXT (peer_address_string.c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddress2String (local_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddress2String (peer_address).c_str ())));
 }
 
 template <typename HandlerType,
@@ -911,10 +887,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 #endif
   } // end IF
 
-  switch (result_in.bytes_transferred ())
+  switch (static_cast<int> (result_in.bytes_transferred ()))
   {
-    //case -1:
-    case std::numeric_limits<size_t>::max ():
+    case -1:
     {
       // connection closed/reset (by peer) ? --> not an error
       error = result_in.error ();
@@ -941,9 +916,16 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     // *** GOOD CASES ***
     case 0:
     {
-//       ACE_DEBUG ((LM_DEBUG,
-//                   ACE_TEXT ("[%u]: socket was closed by the peer...\n"),
-//                   handle_));
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("0x%@: socket was closed\n"),
+                  result_in.handle ()));
+#else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%d: socket was closed\n"),
+                  result_in.handle ()));
+#endif
+
       break;
     }
     default:

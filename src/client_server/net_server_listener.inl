@@ -212,8 +212,7 @@ Net_Server_Listener_T<HandlerType,
   // sanity check(s)
   ACE_ASSERT (configuration_);
   ACE_ASSERT (handlerConfiguration_);
-  ACE_ASSERT (handlerConfiguration_->socketConfiguration);
-  if (handlerConfiguration_->socketConfiguration->useLoopBackDevice)
+  if (handlerConfiguration_->socketConfiguration.useLoopBackDevice)
   {
     result =
       configuration_->address.set (configuration_->address.get_port_number (), // port

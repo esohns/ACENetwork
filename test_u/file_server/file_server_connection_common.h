@@ -84,10 +84,13 @@ struct FileServer_SocketHandlerConfiguration
 {
   inline FileServer_SocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
+   , connectionConfiguration (NULL)
    , userData (NULL)
   {};
 
-  struct FileServer_UserData* userData;
+  struct FileServer_ConnectionConfiguration* connectionConfiguration;
+
+  struct FileServer_UserData*                userData;
 };
 
 struct FileServer_ConnectionState

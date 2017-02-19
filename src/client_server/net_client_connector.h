@@ -98,11 +98,12 @@ class Net_Client_Connector_T
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
-  virtual bool useReactor () const; // ? : uses proactor
+  virtual enum Net_TransportLayerType transportLayer () const;
+  inline virtual bool useReactor () const { return true; };
 
   // *NOTE*: handlers retrieve the configuration object with get ()
-  virtual bool initialize (const HandlerConfigurationType&);
-  virtual const HandlerConfigurationType& get () const;
+  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = const_cast<HandlerConfigurationType&> (configuration_in); return true; };
+  inline virtual const HandlerConfigurationType& get () const { return configuration_; };
 
   virtual void abort ();
   virtual ACE_HANDLE connect (const AddressType&);
@@ -117,14 +118,24 @@ class Net_Client_Connector_T
   typedef ACE_Connector<HandlerType,
                         ConnectorType> inherited;
 
+  typedef Net_Client_Connector_T<HandlerType,
+                                 ConnectorType,
+                                 AddressType,
+                                 ConfigurationType,
+                                 StateType,
+                                 StatisticContainerType,
+                                 HandlerConfigurationType,
+                                 StreamType,
+                                 UserDataType> OWN_TYPE_T;
+
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  HandlerConfigurationType* configuration_;
+  HandlerConfigurationType configuration_;
 
-  ICONNECTION_MANAGER_T*    connectionManager_;
-  ACE_Time_Value            statisticCollectionInterval_;
+  ICONNECTION_MANAGER_T*   connectionManager_;
+  ACE_Time_Value           statisticCollectionInterval_;
 };
 
 //////////////////////////////////////////
@@ -208,16 +219,15 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
-  virtual bool useReactor () const; // ? : uses proactor
+  inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_UDP; };
+  inline virtual bool useReactor () const { return true; };
 
   // *NOTE*: handlers retrieve the configuration object with get ()
-  virtual bool initialize (const HandlerConfigurationType&);
-  // *TODO*: why is it necessary to provide an implementation when there is (a
-  //         more generic) one available ? (gcc complains about abort() and
-  //         gets())
-  virtual const HandlerConfigurationType& get () const;
+  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = const_cast<HandlerConfigurationType&> (configuration_in); return true; };
+  inline virtual const HandlerConfigurationType& get () const { return configuration_; };
+
   // *NOTE*: this is just a stub
-  virtual void abort ();
+  inline virtual void abort () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
   // specialize (part of) Net_Client_IConnector_T
   virtual ACE_HANDLE connect (const ACE_INET_Addr&);
 
@@ -252,10 +262,10 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  HandlerConfigurationType* configuration_;
+  HandlerConfigurationType configuration_;
 
-  ICONNECTION_MANAGER_T*    connectionManager_;
-  ACE_Time_Value            statisticCollectionInterval_;
+  ICONNECTION_MANAGER_T*   connectionManager_;
+  ACE_Time_Value           statisticCollectionInterval_;
 };
 
 //////////////////////////////////////////
@@ -328,13 +338,15 @@ class Net_Client_Connector_T<HandlerType,
   virtual ~Net_Client_Connector_T ();
 
   // implement Net_Client_IConnector_T
-  virtual bool useReactor () const; // ? : uses proactor
+  inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_NETLINK; };
+  inline virtual bool useReactor () const { return true; };
 
   // *NOTE*: handlers retrieve the configuration object with get ()
-  virtual bool initialize (const HandlerConfigurationType&);
-  virtual const HandlerConfigurationType& get () const;
+  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = const_cast<HandlerConfigurationType&> (configuration_in); return true; };
+  inline virtual const HandlerConfigurationType& get () const { return configuration_; };
+
   // *NOTE*: this is just a stub
-  virtual void abort ();
+  inline virtual void abort () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
   virtual ACE_HANDLE connect (const Net_Netlink_Addr&);
 
  protected:
@@ -346,10 +358,10 @@ class Net_Client_Connector_T<HandlerType,
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  HandlerConfigurationType* configuration_;
+  HandlerConfigurationType configuration_;
 
-  ICONNECTION_MANAGER_T*    connectionManager_;
-  ACE_Time_Value            statisticCollectionInterval_;
+  ICONNECTION_MANAGER_T*   connectionManager_;
+  ACE_Time_Value           statisticCollectionInterval_;
 };
 #endif
 

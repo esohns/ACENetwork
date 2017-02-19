@@ -601,8 +601,6 @@ do_work (bool requestBroadcastReplies_in,
     &configuration.listenerConfiguration;
   configuration.socketHandlerConfiguration.messageAllocator =
     &message_allocator;
-  configuration.socketHandlerConfiguration.socketConfiguration =
-    &configuration.socketConfiguration;
   configuration.socketHandlerConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
   configuration.socketHandlerConfiguration.userData =

@@ -312,14 +312,13 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                                         user_data_p);
     ACE_ASSERT (configuration_p);
     ACE_ASSERT (configuration_p->socketHandlerConfiguration);
-    ACE_ASSERT (configuration_p->socketHandlerConfiguration->socketConfiguration);
     ACE_ASSERT (configuration_p->streamConfiguration);
     ACE_ASSERT (configuration_p->streamConfiguration->moduleHandlerConfiguration);
 
     // *TODO*: remove type inferences
 
     // step1: set up configuration
-    configuration_p->socketHandlerConfiguration->socketConfiguration->address =
+    configuration_p->socketHandlerConfiguration->socketConfiguration.address =
         address_in;
 
     subscriber_p =
@@ -869,14 +868,13 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                                     user_data_p);
     ACE_ASSERT (configuration_p);
     ACE_ASSERT (configuration_p->socketHandlerConfiguration);
-    ACE_ASSERT (configuration_p->socketHandlerConfiguration->socketConfiguration);
     ACE_ASSERT (configuration_p->streamConfiguration);
     ACE_ASSERT (configuration_p->streamConfiguration->moduleHandlerConfiguration);
 
     // *TODO*: remove type inferences
 
     // step1: set up configuration
-    configuration_p->socketHandlerConfiguration->socketConfiguration->address =
+    configuration_p->socketHandlerConfiguration->socketConfiguration.address =
         address_in;
 
     subscriber_p =

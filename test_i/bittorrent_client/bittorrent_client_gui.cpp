@@ -1287,8 +1287,6 @@ ACE_TMAIN (int argc_in,
   BitTorrent_Client_Configuration configuration;
 
   ////////////////////// socket handler configuration //////////////////////////
-  configuration.peerSocketHandlerConfiguration.socketConfiguration =
-      &configuration.socketConfiguration;
   configuration.peerSocketHandlerConfiguration.messageAllocator =
       &peer_message_allocator;
   configuration.peerSocketHandlerConfiguration.statisticReportingInterval =
@@ -1296,8 +1294,6 @@ ACE_TMAIN (int argc_in,
   configuration.peerSocketHandlerConfiguration.userData =
     &configuration.peerUserData;
 
-  configuration.trackerSocketHandlerConfiguration.socketConfiguration =
-      &configuration.socketConfiguration;
   configuration.trackerSocketHandlerConfiguration.messageAllocator =
       &tracker_message_allocator;
   configuration.trackerSocketHandlerConfiguration.statisticReportingInterval =

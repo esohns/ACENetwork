@@ -562,8 +562,6 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   //  BITTORRENT_CLIENT_BUFFER_SIZE;
   configuration_in.peerSocketHandlerConfiguration.messageAllocator =
     configuration_in.peerStreamConfiguration.messageAllocator;
-  configuration_in.peerSocketHandlerConfiguration.socketConfiguration =
-    &configuration_in.socketConfiguration;
   configuration_in.peerSocketHandlerConfiguration.statisticReportingInterval =
     configuration_in.peerStreamConfiguration.statisticReportingInterval;
   configuration_in.peerSocketHandlerConfiguration.userData =
@@ -571,8 +569,6 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   configuration_in.trackerSocketHandlerConfiguration.messageAllocator =
     configuration_in.trackerStreamConfiguration.messageAllocator;
-  configuration_in.trackerSocketHandlerConfiguration.socketConfiguration =
-    &configuration_in.socketConfiguration;
   configuration_in.trackerSocketHandlerConfiguration.statisticReportingInterval =
     configuration_in.trackerStreamConfiguration.statisticReportingInterval;
   configuration_in.trackerSocketHandlerConfiguration.userData =

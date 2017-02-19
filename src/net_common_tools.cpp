@@ -903,6 +903,7 @@ continue_:
 
   return true;
 }
+
 bool
 Net_Common_Tools::interface2IPAddress (const std::string& interfaceIdentifier_in,
                                        ACE_INET_Addr& IPAddress_out)
@@ -1018,6 +1019,190 @@ Net_Common_Tools::interface2IPAddress (const std::string& interfaceIdentifier_in
 
       return false;
     } // end IF
+    break;
+
+continue_:
+    ip_adapter_addresses_2 = ip_adapter_addresses_2->Next;
+  } while (ip_adapter_addresses_2);
+
+  // clean up
+  ACE_FREE_FUNC (ip_adapter_addresses_p);
+#else
+#if defined (ACE_HAS_GETIFADDRS)
+  struct ifaddrs* ifaddrs_p = NULL;
+  int result = ::getifaddrs (&ifaddrs_p);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to ::getifaddrs(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+  ACE_ASSERT (ifaddrs_p);
+
+  struct sockaddr_in* sockaddr_in_p = NULL;
+//  struct sockaddr_ll* sockaddr_ll_p = NULL;
+  for (struct ifaddrs* ifaddrs_2 = ifaddrs_p;
+       ifaddrs_2;
+       ifaddrs_2 = ifaddrs_2->ifa_next)
+  {
+//    if (((ifaddrs_2->ifa_flags & IFF_UP) == 0) ||
+//        (!ifaddrs_2->ifa_addr))
+//      continue;
+    if (ACE_OS::strcmp (interface_identifier_string.c_str (),
+                        ifaddrs_2->ifa_name))
+      continue;
+
+    if (!ifaddrs_2->ifa_addr) continue;
+    if (ifaddrs_2->ifa_addr->sa_family != AF_INET) continue;
+
+    sockaddr_in_p = (struct sockaddr_in*)ifaddrs_2->ifa_addr;
+    result = IPAddress_out.set (sockaddr_in_p,
+                                sizeof (struct sockaddr_in));
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+
+      // clean up
+      ::freeifaddrs (ifaddrs_p);
+
+      return false;
+    } // end IF
+    break;
+  } // end FOR
+
+  // clean up
+  ::freeifaddrs (ifaddrs_p);
+#else
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (false);
+  ACE_NOTREACHED (return false;)
+#endif /* ACE_HAS_GETIFADDRS */
+#endif
+
+//  result = IPAddress_out.addr_to_string (buffer,
+//                                         sizeof (buffer),
+//                                         1);
+//  if (result == -1)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", aborting\n")));
+//    return false;
+//  } // end IF
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("interface \"%s\" --> %s\n"),
+//              ACE_TEXT (interfaceIdentifier_in.c_str ()),
+//              buffer));
+
+  return true;
+}
+
+bool
+Net_Common_Tools::IPAddress2Interface (const ACE_INET_Addr& IPAddress_in,
+                                       std::string& interfaceIdentifier_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::IPAddress2Interface"));
+
+  // initialize return value(s)
+  interfaceIdentifier_out.clear ();
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _IP_ADAPTER_ADDRESSES_LH* ip_adapter_addresses_p = NULL;
+  ULONG buffer_length = 0;
+  ULONG result =
+    GetAdaptersAddresses (AF_UNSPEC,              // Family
+                          0,                      // Flags
+                          NULL,                   // Reserved
+                          ip_adapter_addresses_p, // AdapterAddresses
+                          &buffer_length);        // SizePointer
+  if (result != ERROR_BUFFER_OVERFLOW)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Tools::error2String (result).c_str ())));
+    return false;
+  } // end IF
+  ACE_ASSERT (buffer_length);
+  ip_adapter_addresses_p =
+    static_cast<struct _IP_ADAPTER_ADDRESSES_LH*> (ACE_MALLOC_FUNC (buffer_length));
+  if (!ip_adapter_addresses_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+    return false;
+  } // end IF
+  result =
+    GetAdaptersAddresses (AF_UNSPEC,              // Family
+                          0,                      // Flags
+                          NULL,                   // Reserved
+                          ip_adapter_addresses_p, // AdapterAddresses
+                          &buffer_length);        // SizePointer
+  if (result != NO_ERROR)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Tools::error2String (result).c_str ())));
+
+    // clean up
+    ACE_FREE_FUNC (ip_adapter_addresses_p);
+
+    return false;
+  } // end IF
+
+  struct _IP_ADAPTER_ADDRESSES_LH* ip_adapter_addresses_2 =
+    ip_adapter_addresses_p;
+  struct _IP_ADAPTER_UNICAST_ADDRESS_LH* unicast_address_p = NULL;
+  struct _SOCKET_ADDRESS* socket_address_p = NULL;
+  struct sockaddr_in* sockaddr_in_p, *sockaddr_in_2 = NULL;
+  ULONG network_mask = 0;
+  sockaddr_in_2 = (struct sockaddr_in*)IPAddress_in.get_addr ();
+  do
+  {
+    unicast_address_p = ip_adapter_addresses_2->FirstUnicastAddress;
+    ACE_ASSERT (unicast_address_p);
+    do
+    {
+      socket_address_p = &unicast_address_p->Address;
+      ACE_ASSERT (socket_address_p->lpSockaddr);
+      if (socket_address_p->lpSockaddr->sa_family == AF_INET)
+        break;
+
+      unicast_address_p = unicast_address_p->Next;
+    } while (unicast_address_p);
+    if (!unicast_address_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("adapter \"%s:\"\"%s\" does not currently have any unicast IPv4 address, aborting\n"),
+                  ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->FriendlyName),
+                  ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->Description)));
+
+      // clean up
+      ACE_FREE_FUNC (ip_adapter_addresses_p);
+
+      return false;
+    } // end IF
+
+    // *NOTE*: this works for IPv4 addresses only
+    ACE_ASSERT (unicast_address_p->OnLinkPrefixLength <= 32);
+    network_mask = ~((1 << (32 - unicast_address_p->OnLinkPrefixLength)) - 1);
+    sockaddr_in_p = (struct sockaddr_in*)socket_address_p->lpSockaddr;
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("found adapter \"%s\": \"%s\" on network %s...\n"),
+    //            ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->FriendlyName),
+    //            ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->Description),
+    //            ACE_TEXT (Net_Common_Tools::IPAddress2String (ACE_INET_Addr (static_cast<u_short> (0),
+    //                                                                         static_cast<ACE_UINT32> ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (sockaddr_in_p->sin_addr.S_un.S_addr) & network_mask
+    //                                                                                                                                        : sockaddr_in_p->sin_addr.S_un.S_addr & network_mask)),
+    //                                                          true).c_str ())));
+
+    if (((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (sockaddr_in_p->sin_addr.S_un.S_addr) & network_mask
+                                               : sockaddr_in_p->sin_addr.S_un.S_addr & network_mask) !=
+        ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (sockaddr_in_2->sin_addr.S_un.S_addr) & network_mask
+                                               : sockaddr_in_2->sin_addr.S_un.S_addr & network_mask))
+      goto continue_;
+    
+    interfaceIdentifier_out = ip_adapter_addresses_2->AdapterName;
+
     break;
 
 continue_:

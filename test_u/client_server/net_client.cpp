@@ -540,8 +540,6 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // ****************** socket handler configuration data **********************
   configuration.socketHandlerConfiguration.messageAllocator =
     &message_allocator;
-  configuration.socketHandlerConfiguration.socketConfiguration =
-    &configuration.socketConfiguration;
   configuration.socketHandlerConfiguration.statisticReportingInterval =
     configuration.streamConfiguration.statisticReportingInterval;
   configuration.socketHandlerConfiguration.userData =

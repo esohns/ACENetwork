@@ -114,10 +114,13 @@ struct IRC_Client_SocketHandlerConfiguration
   inline IRC_Client_SocketHandlerConfiguration ()
    : IRC_SocketHandlerConfiguration ()
    ///////////////////////////////////////
+   , connectionConfiguration (NULL)
    , userData (NULL)
   {};
 
-  struct IRC_Client_UserData* userData;
+  struct IRC_Client_ConnectionConfiguration* connectionConfiguration;
+
+  struct IRC_Client_UserData*                userData;
 };
 
 struct IRC_Client_ConnectionConfiguration;

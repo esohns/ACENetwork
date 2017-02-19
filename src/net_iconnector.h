@@ -27,12 +27,15 @@
 #include "common_iget.h"
 #include "common_iinitialize.h"
 
+#include "net_common.h"
+
 template <typename AddressType>
 class Net_IConnectorBase_T
 {
  public:
   virtual ~Net_IConnectorBase_T () {};
 
+  virtual enum Net_TransportLayerType transportLayer () const = 0;
   virtual bool useReactor () const = 0; // ? : uses proactor
 
   virtual void abort () = 0; // shutdown

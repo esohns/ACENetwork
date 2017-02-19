@@ -123,13 +123,15 @@ struct Net_ConnectionConfiguration
   struct Net_UserData*                   userData;
 };
 
+struct Net_ConnectionConfiguration;
 struct Net_SocketHandlerConfiguration
 {
   inline Net_SocketHandlerConfiguration ()
-   : listenerConfiguration (NULL)
+   : connectionConfiguration (NULL)
+   , listenerConfiguration (NULL)
    , messageAllocator (NULL)
    , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
-   , socketConfiguration (NULL)
+   , socketConfiguration ()
    , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
                                  0)
    , useThreadPerConnection (false)
@@ -137,14 +139,15 @@ struct Net_SocketHandlerConfiguration
    , userData (NULL)
   {};
 
-  struct Net_ListenerConfiguration* listenerConfiguration;
-  Stream_IAllocator*                messageAllocator;
-  unsigned int                      PDUSize;
-  struct Net_SocketConfiguration*   socketConfiguration;
-  ACE_Time_Value                    statisticReportingInterval; // [ACE_Time_Value::zero: off]
-  bool                              useThreadPerConnection;
+  struct Net_ConnectionConfiguration* connectionConfiguration;
+  struct Net_ListenerConfiguration*   listenerConfiguration;
+  Stream_IAllocator*                  messageAllocator;
+  unsigned int                        PDUSize;
+  struct Net_SocketConfiguration      socketConfiguration;
+  ACE_Time_Value                      statisticReportingInterval; // [ACE_Time_Value::zero: off]
+  bool                                useThreadPerConnection;
 
-  struct Net_UserData*              userData;
+  struct Net_UserData*                userData;
 };
 
 struct Net_SessionConfiguration

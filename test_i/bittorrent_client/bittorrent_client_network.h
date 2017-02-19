@@ -102,10 +102,13 @@ struct BitTorrent_Client_PeerSocketHandlerConfiguration
   inline BitTorrent_Client_PeerSocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
    ///////////////////////////////////////
+   , connectionConfiguration (NULL)
    , userData (NULL)
   {};
 
-  struct BitTorrent_Client_PeerUserData* userData;
+  struct BitTorrent_Client_PeerConnectionConfiguration* connectionConfiguration;
+
+  struct BitTorrent_Client_PeerUserData*                userData;
 };
 struct BitTorrent_Client_TrackerSocketHandlerConfiguration
  : Net_SocketHandlerConfiguration
@@ -113,10 +116,13 @@ struct BitTorrent_Client_TrackerSocketHandlerConfiguration
   inline BitTorrent_Client_TrackerSocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
    ///////////////////////////////////////
+   , connectionConfiguration (NULL)
    , userData (NULL)
   {};
 
-  struct BitTorrent_Client_TrackerUserData* userData;
+  struct BitTorrent_Client_TrackerConnectionConfiguration* connectionConfiguration;
+
+  struct BitTorrent_Client_TrackerUserData*                userData;
 };
 
 struct BitTorrent_Client_PeerStreamConfiguration;

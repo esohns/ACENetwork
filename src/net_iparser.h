@@ -49,7 +49,7 @@ class Net_IScanner_T
  public:
   inline virtual ~Net_IScanner_T () {};
 
-  // *NOTE*: this is the C interface (not needed by C++ scanners)
+  // *NOTE*: this is the C-ish interface (not needed by C++ scanners)
   virtual void debug (yyscan_t,  // state handle
                       bool) = 0; // toggle
 

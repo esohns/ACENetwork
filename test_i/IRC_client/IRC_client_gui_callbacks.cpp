@@ -235,10 +235,10 @@ connection_setup_function (void* arg_in)
       g_free (string_p);
 
       result_3 =
-        configuration_p->socketHandlerConfiguration->socketConfiguration->address.set (current_port,
-                                                                                       data_p->phonebookEntry.hostName.c_str (),
-                                                                                       1,
-                                                                                       ACE_ADDRESS_FAMILY_INET);
+        configuration_p->socketHandlerConfiguration->socketConfiguration.address.set (current_port,
+                                                                                      data_p->phonebookEntry.hostName.c_str (),
+                                                                                      1,
+                                                                                      ACE_ADDRESS_FAMILY_INET);
       if (result_3 == -1)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -248,22 +248,11 @@ connection_setup_function (void* arg_in)
 
       // step3: (try to) connect to the server
       handle =
-        connector_p->connect (configuration_p->socketHandlerConfiguration->socketConfiguration->address);
+        connector_p->connect (configuration_p->socketHandlerConfiguration->socketConfiguration.address);
       if (handle == ACE_INVALID_HANDLE)
-      {
-        // debug info
-        ACE_TCHAR buffer[BUFSIZ];
-        ACE_OS::memset (buffer, 0, sizeof (buffer));
-        result_3 =
-          configuration_p->socketHandlerConfiguration->socketConfiguration->address.addr_to_string (buffer,
-                                                                                                    sizeof (buffer));
-        if (result_3 == -1)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("failed to connect(\"%s\"): \"%m\", continuing\n"),
-                    buffer));
-      } // end IF
+                    ACE_TEXT (Net_Common_Tools::IPAddress2String (configuration_p->socketHandlerConfiguration->socketConfiguration.address).c_str ())));
       else
         done = true;
     } // end FOR
@@ -310,7 +299,7 @@ connection_failed:
 
       // *TODO*: this does not work
       connection_2 =
-        connection_manager_p->get (configuration_p->socketHandlerConfiguration->socketConfiguration->address);
+        connection_manager_p->get (configuration_p->socketHandlerConfiguration->socketConfiguration.address);
       if (connection_2)
         break; // done
     } while (COMMON_TIME_NOW < deadline);
@@ -353,7 +342,8 @@ connection_failed:
   if (!icontrol_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<IRC_IControl> failed, returning\n")));
+                ACE_TEXT ("dynamic_cast<IRC_IControl*>(0x%@) failed, returning\n"),
+                const_cast<Stream_Module_t*> (module_p)->writer ()));
 
     // clean up
     connection_2->close ();

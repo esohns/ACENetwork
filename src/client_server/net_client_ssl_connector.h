@@ -91,11 +91,12 @@ class Net_Client_SSL_Connector_T
   virtual ~Net_Client_SSL_Connector_T ();
 
   // implement Net_Client_IConnector_T
-  virtual bool useReactor () const; // ? : uses proactor
+  virtual enum Net_TransportLayerType transportLayer () const;
+  inline virtual bool useReactor () const { return true; };
 
   // *NOTE*: handlers retrieve the configuration object with get ()
-  virtual bool initialize (const HandlerConfigurationType&);
-  virtual const HandlerConfigurationType& get () const;
+  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = const_cast<HandlerConfigurationType&> (configuration_in); return true; };
+  inline virtual const HandlerConfigurationType& get () const { return configuration_; };
 
   virtual void abort ();
   virtual ACE_HANDLE connect (const AddressType&);
@@ -113,10 +114,20 @@ class Net_Client_SSL_Connector_T
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SSL_Connector_T (const Net_Client_SSL_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SSL_Connector_T& operator= (const Net_Client_SSL_Connector_T&))
 
-  HandlerConfigurationType* configuration_;
+  typedef Net_Client_SSL_Connector_T<HandlerType,
+                                     ConnectorType,
+                                     AddressType,
+                                     ConfigurationType,
+                                     StateType,
+                                     StatisticContainerType,
+                                     HandlerConfigurationType,
+                                     StreamType,
+                                     UserDataType> OWN_TYPE_T;
 
-  ICONNECTION_MANAGER_T*    connectionManager_;
-  ACE_Time_Value            statisticCollectionInterval_;
+  HandlerConfigurationType configuration_;
+
+  ICONNECTION_MANAGER_T*   connectionManager_;
+  ACE_Time_Value           statisticCollectionInterval_;
 };
 
 // include template definition

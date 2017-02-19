@@ -173,10 +173,13 @@ struct Test_U_SocketHandlerConfiguration
   inline Test_U_SocketHandlerConfiguration ()
    : DHCP_SocketHandlerConfiguration ()
    ///////////////////////////////////////
+   , connectionConfiguration (NULL)
    , userData (NULL)
   {};
 
-  struct Test_U_UserData* userData;
+  struct Test_U_ConnectionConfiguration* connectionConfiguration;
+
+  struct Test_U_UserData*                userData;
 };
 
 //typedef Net_IConnectionManager_T<ACE_INET_Addr,

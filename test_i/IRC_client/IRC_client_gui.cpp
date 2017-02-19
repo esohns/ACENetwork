@@ -1319,8 +1319,12 @@ ACE_TMAIN (int argc_in,
   if (debug)
     configuration.parserConfiguration.debugScanner = debug;
   ////////////////////// socket handler configuration //////////////////////////
-  configuration.socketHandlerConfiguration.socketConfiguration =
-      &configuration.socketConfiguration;
+  configuration.socketHandlerConfiguration.messageAllocator =
+    configuration.streamConfiguration.messageAllocator;
+  configuration.socketHandlerConfiguration.statisticReportingInterval =
+    configuration.streamConfiguration.statisticReportingInterval;
+  configuration.socketHandlerConfiguration.userData =
+    configuration.userData;
   ////////////////////////// stream configuration //////////////////////////////
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.moduleConfiguration->streamConfiguration =
@@ -1402,15 +1406,6 @@ ACE_TMAIN (int argc_in,
       cb_user_data.phoneBook.servers.insert (std::make_pair ((*iterator).hostName,
                                                              *iterator));
   } // end IF
-
-  configuration.socketHandlerConfiguration.messageAllocator =
-    configuration.streamConfiguration.messageAllocator;
-  configuration.socketHandlerConfiguration.socketConfiguration =
-    &configuration.socketConfiguration;
-  configuration.socketHandlerConfiguration.statisticReportingInterval =
-    configuration.streamConfiguration.statisticReportingInterval;
-  configuration.socketHandlerConfiguration.userData =
-    configuration.userData;
 
   configuration.useReactor = use_reactor;
 

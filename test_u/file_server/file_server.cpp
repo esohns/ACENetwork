@@ -626,8 +626,6 @@ do_work (
   // ****************** socket handler configuration data **********************
   configuration.socketHandlerConfiguration.messageAllocator =
     &message_allocator;
-  configuration.socketHandlerConfiguration.socketConfiguration =
-    &configuration.socketConfiguration;
   configuration.socketHandlerConfiguration.userData =
     &configuration.userData;
   // ****************** connection configuration data **********************
