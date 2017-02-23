@@ -36,10 +36,13 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::Net_AsynchUDPSocketHandler_T ()
  , inherited2 ()
  , inherited3 (NULL,                          // event handler handle
                ACE_Event_Handler::WRITE_MASK) // mask
+ , address_ ()
+ , allocator_ (NULL)
  //, buffer_ (NULL)
  , counter_ (0) // initial count
  , inputStream_ ()
  , outputStream_ ()
+ , PDUSize_ (NET_PROTOCOL_DEFAULT_UDP_BUFFER_SIZE)
  , writeOnly_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::Net_AsynchUDPSocketHandler_T"));
@@ -76,6 +79,14 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   if (handle_in != ACE_INVALID_HANDLE)
     inherited2::handle (handle_in);
 
+  address_ = inherited::configuration_->socketConfiguration.address;
+  allocator_ = inherited::configuration_->messageAllocator;
+  PDUSize_ =
+    ((handle_in != ACE_INVALID_HANDLE) ? NET_PROTOCOL_DEFAULT_UDP_BUFFER_SIZE
+                                       : Net_Common_Tools::getMTU (handle_in));
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("maximum message size: %u...\n"),
+  //            PDUSize_));
   writeOnly_ =
     inherited::configuration_->socketConfiguration.writeOnly;
   if (!writeOnly_)
@@ -344,29 +355,24 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::initiate_read_dgram ()
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::initiate_read_dgram"));
 
   ssize_t result = -1;
-  size_t bytes_to_read = 0;
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
+  size_t bytes_received = 0;
 
   // step1: allocate a data buffer
-  ACE_Message_Block* message_block_p =
-      allocateMessage (inherited::configuration_->PDUSize);
+  ACE_Message_Block* message_block_p = allocateMessage (PDUSize_);
   if (!message_block_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::allocateMessage(%u), aborting\n"),
-                inherited::configuration_->PDUSize));
+                PDUSize_));
     return false;
   } // end IF
 
   // step2: start (asynchronous) read
-  bytes_to_read = message_block_p->size ();
   int error = 0;
 receive:
   result =
     inputStream_.recv (message_block_p,                      // buffer
-                       bytes_to_read,                        // #bytes to read
+                       bytes_received,                       // #bytes received
                        0,                                    // flags
                        ACE_PROTOCOL_FAMILY_INET,             // protocol family
                        NULL,                                 // ACT
@@ -387,7 +393,7 @@ receive:
 #endif
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::recv(%u): \"%m\", aborting\n"),
-                bytes_to_read));
+                PDUSize_));
 
     // clean up
     message_block_p->release ();
@@ -419,7 +425,8 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     if ((error != ECONNRESET) &&
         (error != EPIPE)      &&
-        (error != ERROR_INVALID_NETNAME)) // 1214: happens on Win32 (local socket)
+        (error != ERROR_INVALID_NETNAME))   // 1214: happens on Win32 (local socket)
+        //(error != ERROR_INVALID_USER_BUFFER)) // 1784: happens on Win32 (invalid buffer)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: 0x%@): \"%s\", aborting\n"),
                   result_in.handle (),
@@ -435,10 +442,9 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
 #endif
   } // end IF
 
-  switch (bytes_transferred)
+  switch (static_cast<int> (bytes_transferred))
   {
-    //case -1:
-    case std::numeric_limits<size_t>::max ():
+    case -1:
     case 0:
     {
       // connection closed/reset (by peer) ? --> not an error
@@ -528,15 +534,12 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::allocateMessage (unsigned int r
   // initialize return value(s)
   ACE_Message_Block* message_block_p = NULL;
 
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
-
-  if (inherited::configuration_->messageAllocator)
+  if (allocator_)
   {
 allocate:
     try {
       message_block_p =
-        static_cast<ACE_Message_Block*> (inherited::configuration_->messageAllocator->malloc (requestedSize_in));
+        static_cast<ACE_Message_Block*> (allocator_->malloc (requestedSize_in));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(0), aborting\n")));
@@ -545,27 +548,27 @@ allocate:
 
     // keep retrying ?
     if (!message_block_p &&
-        !inherited::configuration_->messageAllocator->block ())
+        !allocator_->block ())
       goto allocate;
   } // end IF
   else
     ACE_NEW_NORETURN (message_block_p,
                       ACE_Message_Block (requestedSize_in,
-                      ACE_Message_Block::MB_DATA,
-                      NULL,
-                      NULL,
-                      NULL,
-                      NULL,
-                      ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                      ACE_Time_Value::zero,
-                      ACE_Time_Value::max_time,
-                      NULL,
-                      NULL));
+                                         ACE_Message_Block::MB_DATA,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                         ACE_Time_Value::zero,
+                                         ACE_Time_Value::max_time,
+                                         NULL,
+                                         NULL));
   if (!message_block_p)
   {
-    if (inherited::configuration_->messageAllocator)
+    if (allocator_)
     {
-      if (inherited::configuration_->messageAllocator->block ())
+      if (allocator_->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     } // end IF

@@ -89,7 +89,7 @@ class Net_StreamAsynchUDPSocketBase_T
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
   virtual Net_ConnectionId_t id () const;
-  virtual ACE_Notification_Strategy* notification ();
+  inline virtual ACE_Notification_Strategy* notification () { return this; };
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
                                                 // thread(s) ?
@@ -123,6 +123,7 @@ class Net_StreamAsynchUDPSocketBase_T
 //  // *TODO*: handle short writes (more) gracefully...
 //  ACE_Message_Block* buffer_;
   StreamType         stream_;
+  bool               useThreadPerConnection_;
 
  private:
   typedef HandlerType inherited;
@@ -199,7 +200,7 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
   virtual Net_ConnectionId_t id () const;
-  virtual ACE_Notification_Strategy* notification ();
+  inline virtual ACE_Notification_Strategy* notification () { return this; };
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
                                                 // thread(s) ?
@@ -225,6 +226,7 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
 //  // *TODO*: handle short writes (more) gracefully...
 //  ACE_Message_Block* buffer_;
   StreamType         stream_;
+  bool               useThreadPerConnection_;
 
  private:
   typedef Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>  inherited;

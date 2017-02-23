@@ -30,19 +30,23 @@
 
 #include "stream_base.h"
 #include "stream_common.h"
+#include "stream_control_message.h"
 #include "stream_statemachine_control.h"
 
 #include "test_u_common.h"
 #include "test_u_configuration.h"
 
 // forward declarations
+typedef Stream_ControlMessage_T<enum Stream_ControlType,
+                                enum Stream_ControlMessageType,
+                                struct Stream_AllocatorConfiguration> Test_U_ControlMessage_t;
 class Test_U_Message;
 class Test_U_SessionMessage;
 
 class Test_U_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        int,
+                        enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
                         struct Test_U_StreamState,
@@ -52,7 +56,7 @@ class Test_U_Stream
                         struct Test_U_ModuleHandlerConfiguration,
                         struct Test_U_StreamSessionData, // session data
                         Test_U_StreamSessionData_t,      // session data container (reference counted)
-                        ACE_Message_Block,
+                        Test_U_ControlMessage_t,
                         Test_U_Message,
                         Test_U_SessionMessage>
 {
@@ -80,7 +84,7 @@ class Test_U_Stream
  private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        int,
+                        enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
                         struct Test_U_StreamState,
@@ -90,7 +94,7 @@ class Test_U_Stream
                         struct Test_U_ModuleHandlerConfiguration,
                         struct Test_U_StreamSessionData,
                         Test_U_StreamSessionData_t,
-                        ACE_Message_Block,
+                        Test_U_ControlMessage_t,
                         Test_U_Message,
                         Test_U_SessionMessage> inherited;
 

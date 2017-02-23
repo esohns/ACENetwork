@@ -503,10 +503,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
     &configuration.streamConfiguration;
   configuration.streamConfiguration.moduleHandlerConfiguration =
     &configuration.streamConfiguration.moduleHandlerConfiguration_2;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.protocolConfiguration =
+    &configuration.protocolConfiguration;
   configuration.streamConfiguration.moduleHandlerConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
-  configuration.streamConfiguration.protocolConfiguration =
-    &configuration.protocolConfiguration;
   // *TODO*: is this correct ?
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;
   configuration.streamConfiguration.statisticReportingInterval =
@@ -524,8 +524,15 @@ do_work (unsigned int maximumNumberOfConnections_in,
   configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribersLock =
     &CBData_in.subscribersLock;
 
+  // ********************** connection configuration data **********************
+  configuration.connectionConfiguration.socketHandlerConfiguration =
+    &configuration.socketHandlerConfiguration;
+  configuration.connectionConfiguration.streamConfiguration =
+    &configuration.streamConfiguration;
   // ********************** socket configuration data **************************
   // ****************** socket handler configuration data **********************
+  configuration.socketHandlerConfiguration.connectionConfiguration =
+    &configuration.connectionConfiguration;
   configuration.socketHandlerConfiguration.messageAllocator =
     &message_allocator;
   configuration.socketHandlerConfiguration.userData =

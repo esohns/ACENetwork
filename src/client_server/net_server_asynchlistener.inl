@@ -757,24 +757,24 @@ Net_Server_AsynchListener_T<HandlerType,
   // socket correctly.
   if (!error &&
       ACE_OS::setsockopt (result.accept_handle (),
-      SOL_SOCKET,
-      SO_UPDATE_ACCEPT_CONTEXT,
-      (char *)&listen_handle,
-      sizeof (listen_handle)) == -1)
+                          SOL_SOCKET,
+                          SO_UPDATE_ACCEPT_CONTEXT,
+                          (char *)&listen_handle,
+                          sizeof (listen_handle)) == -1)
   {
     error = 1;
   }
 #endif /* ACE_WIN32 */
 
   // Parse address.
-  ACE_INET_Addr local_address;
-  ACE_INET_Addr remote_address;
+  AddressType local_address;
+  AddressType remote_address;
   if (!error &&
       (this->validate_new_connection () || this->pass_addresses ()))
       // Parse the addresses.
       this->parse_address (result,
-      remote_address,
-      local_address);
+                           remote_address,
+                           local_address);
 
   // Validate remote address
   if (!error &&

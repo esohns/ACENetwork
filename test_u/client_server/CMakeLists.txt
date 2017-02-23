@@ -306,6 +306,18 @@ install (FILES etc/net_server.glade
 ##########################################
 
 if (UNIX)
+ create_target_launcher (${EXECUTABLE_SOURCE}
+                         ARGS "-l -t"
+#                         FORWARD_ARGS
+                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
+                                              ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/ui/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
+                                              /usr/local/lib
+                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/client_server
+                         ENVIRONMENT foo=bar)
  create_target_launcher (${EXECUTABLE_TARGET}
                          ARGS "-l -t"
 #                         FORWARD_ARGS
@@ -319,6 +331,24 @@ if (UNIX)
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/client_server
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
+ create_target_launcher (${EXECUTABLE_SOURCE}
+                         ARGS "-l -t"
+#                        FORWARD_ARGS
+                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
+                                              ${PROJECT_SOURCE_DIR}/../openssl/bin
+                                              ${PROJECT_SOURCE_DIR}/../pdcurses/win32
+                                              ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug/bin
+                                              G:/software/Development/dll
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/err/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/image/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/math/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/ui/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/modules/dec/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
+                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/client_server
+                         ENVIRONMENT foo=bar)
  create_target_launcher (${EXECUTABLE_TARGET}
                          ARGS "-l -t"
 #                        FORWARD_ARGS

@@ -32,6 +32,9 @@
 
 #include "net_sockethandler_base.h"
 
+// forward declarations
+class Stream_IAllocator;
+
 template <typename ConfigurationType>
 class Net_AsynchUDPSocketHandler_T
  : public Net_SocketHandlerBase_T<ConfigurationType>
@@ -65,11 +68,13 @@ class Net_AsynchUDPSocketHandler_T
   virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 
   ACE_INET_Addr               address_;
+  Stream_IAllocator*          allocator_;
   //ACE_Message_Block*          buffer_;
   // the number of open write (i.e. send) requests
   Common_ReferenceCounterBase counter_;
   ACE_Asynch_Read_Dgram       inputStream_;
   ACE_Asynch_Write_Dgram      outputStream_;
+  unsigned int                PDUSize_;
   bool                        writeOnly_;
 
  private:

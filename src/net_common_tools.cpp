@@ -1171,15 +1171,11 @@ Net_Common_Tools::IPAddress2Interface (const ACE_INET_Addr& IPAddress_in,
     } while (unicast_address_p);
     if (!unicast_address_p)
     {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("adapter \"%s:\"\"%s\" does not currently have any unicast IPv4 address, aborting\n"),
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("adapter \"%s:\"\"%s\" does not currently have any unicast IPv4 address, continuing\n"),
                   ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->FriendlyName),
                   ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->Description)));
-
-      // clean up
-      ACE_FREE_FUNC (ip_adapter_addresses_p);
-
-      return false;
+      goto continue_;
     } // end IF
 
     // *NOTE*: this works for IPv4 addresses only

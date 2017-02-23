@@ -32,6 +32,9 @@
 
 #include "net_sockethandler_base.h"
 
+// forward declarations
+class Stream_IAllocator;
+
 template <typename ConfigurationType>
 class Net_AsynchTCPSocketHandler_T
  : public Net_SocketHandlerBase_T<ConfigurationType>
@@ -65,11 +68,13 @@ class Net_AsynchTCPSocketHandler_T
   // helper method(s)
   bool initiate_read_stream ();
 
+  Stream_IAllocator*                  allocator_;
   // the number of open write (i.e. send) requests
   mutable Common_ReferenceCounterBase counter_;
   ACE_Asynch_Read_Stream              inputStream_;
   ACE_Asynch_Write_Stream             outputStream_;
   bool                                partialWrite_;
+  unsigned int                        PDUSize_;
   ACE_INET_Addr                       localSAP_;
   ACE_INET_Addr                       remoteSAP_;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -93,7 +98,7 @@ class Net_AsynchTCPSocketHandler_T
   ACE_Message_Block* allocateMessage (unsigned int); // requested size
 };
 
-// include template implementation
+// include template definition
 #include "net_asynch_tcpsockethandler.inl"
 
 #endif

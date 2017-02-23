@@ -55,7 +55,6 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::load"));
 
   // initialize return value(s)
-  ACE_ASSERT (modules_out.empty ());
   //for (Stream_ModuleListIterator_t iterator = modules_out.begin ();
   //     iterator != modules_out.end ();
   //     iterator++)
@@ -109,7 +108,6 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::initialize"));
 
   // sanity check(s)
-  ACE_ASSERT (configuration_in.protocolConfiguration);
   ACE_ASSERT (!inherited::isInitialized_);
 
   // allocate a new session state, reset stream
@@ -123,8 +121,8 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   } // end IF
   ACE_ASSERT (inherited::sessionData_);
 
-  Test_U_StreamSessionData& session_data_r =
-      const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
+  struct Test_U_StreamSessionData& session_data_r =
+      const_cast<struct Test_U_StreamSessionData&> (inherited::sessionData_->get ());
   session_data_r.sessionID = configuration_in.sessionID;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;

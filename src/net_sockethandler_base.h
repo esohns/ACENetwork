@@ -38,6 +38,7 @@ class Net_SocketHandlerBase_T
  protected:
   Net_SocketHandlerBase_T ();
 
+  // *TODO*: remove this ASAP
   ConfigurationType* configuration_;
   bool               isInitialized_;
 
@@ -46,7 +47,7 @@ class Net_SocketHandlerBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase_T& operator= (const Net_SocketHandlerBase_T&))
 };
 
-// include template implementation
+// include template definition
 #include "net_sockethandler_base.inl"
 
 #endif

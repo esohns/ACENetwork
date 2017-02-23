@@ -43,7 +43,7 @@ class Test_U_SessionMessage;
 class Test_U_Module_ProtocolHandler
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 struct Stream_ModuleHandlerConfiguration,
+                                 struct Test_U_ModuleHandlerConfiguration,
                                  Test_U_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
@@ -58,10 +58,8 @@ class Test_U_Module_ProtocolHandler
   virtual ~Test_U_Module_ProtocolHandler ();
 
   // initialization
-  bool initialize (Stream_IAllocator*,                           // allocator
-                   const ACE_Time_Value& = ACE_Time_Value::zero, // "ping" interval {0: OFF}
-                   bool = true,                                  // auto-"pong" ?
-                   bool = false);                                // '.' to stdout for every received "pong" ?
+  virtual bool initialize (const struct Test_U_ModuleHandlerConfiguration&, // configuration
+                           Stream_IAllocator*);                             // allocator
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (Test_U_Message*&, // data message handle
@@ -78,7 +76,7 @@ class Test_U_Module_ProtocolHandler
  private:
   typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 struct Stream_ModuleHandlerConfiguration,
+                                 struct Test_U_ModuleHandlerConfiguration,
                                  Test_U_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
@@ -101,7 +99,6 @@ class Test_U_Module_ProtocolHandler
   Stream_IAllocator*  allocator_;
   bool                automaticPong_;
   unsigned int        counter_;
-  bool                isInitialized_;
   bool                printPongDot_;
   unsigned int        sessionID_;
 };
@@ -109,7 +106,7 @@ class Test_U_Module_ProtocolHandler
 // declare module
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
                               enum Stream_SessionMessageType,           // session event type
-                              struct Stream_ModuleHandlerConfiguration, // module handler configuration type
+                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
                               Test_U_IStreamNotify_t,                   // stream notification interface type
                               Test_U_Module_ProtocolHandler);           // writer type
 

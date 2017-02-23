@@ -35,10 +35,12 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::Net_AsynchTCPSocketHandler_T ()
  , inherited2 ()
  , inherited3 (NULL,                          // event handler handle
                ACE_Event_Handler::WRITE_MASK) // mask
+ , allocator_ (NULL)
  , counter_ (0) // initial count
  , inputStream_ ()
  , outputStream_ ()
  , partialWrite_ (false)
+ , PDUSize_ (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
  , localSAP_ ()
  , remoteSAP_ ()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -106,6 +108,9 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
     goto close;
   } // end IF
 #endif
+
+  allocator_ = inherited::configuration_->messageAllocator;
+  PDUSize_ = inherited::configuration_->PDUSize;
 
   // step1: tweak socket
   // *TODO*: remove type inference
@@ -457,15 +462,12 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::allocateMessage (unsigned int r
   // initialize return value(s)
   ACE_Message_Block* message_block_p = NULL;
 
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
-
-  if (likely (inherited::configuration_->messageAllocator))
+  if (likely (allocator_))
   {
 allocate:
     try {
       message_block_p =
-        static_cast<ACE_Message_Block*> (inherited::configuration_->messageAllocator->malloc (requestedSize_in));
+        static_cast<ACE_Message_Block*> (allocator_->malloc (requestedSize_in));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(0), aborting\n")));
@@ -474,7 +476,7 @@ allocate:
 
     // keep retrying ?
     if (unlikely (!message_block_p &&
-                  !inherited::configuration_->messageAllocator->block ()))
+                  !allocator_->block ()))
       goto allocate;
   } // end IF
   else
@@ -492,9 +494,9 @@ allocate:
                                          NULL));
   if (unlikely (!message_block_p))
   {
-    if (inherited::configuration_->messageAllocator)
+    if (allocator_)
     {
-      if (inherited::configuration_->messageAllocator->block ())
+      if (allocator_->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     } // end IF
@@ -654,17 +656,13 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read_stream ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::initiate_read_stream"));
 
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
-
   // allocate a data buffer
-  ACE_Message_Block* message_block_p =
-      allocateMessage (inherited::configuration_->PDUSize);
+  ACE_Message_Block* message_block_p = allocateMessage (PDUSize_);
   if (unlikely (!message_block_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::allocateMessage(%u), aborting\n"),
-                inherited::configuration_->PDUSize));
+                PDUSize_));
     return false;
   } // end IF
 
@@ -673,14 +671,14 @@ receive:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   int result =
     inputStream_.readv (*message_block_p,                     // buffer
-                        inherited::configuration_->PDUSize,   // bytes to read
+                        PDUSize_,                             // bytes to read
                         NULL,                                 // ACT
                         0,                                    // priority
                         COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
 #else
   int result =
     inputStream_.read (*message_block_p,                     // buffer
-                       inherited::configuration_->PDUSize,   // bytes to read
+                       PDUSize_,                             // bytes to read
                        NULL,                                 // ACT
                        0,                                    // priority
                        COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
@@ -702,7 +700,7 @@ receive:
 #endif
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Read_Stream::readv(%u): \"%m\", aborting\n"),
-                  inherited::configuration_->PDUSize));
+                  PDUSize_));
 
     // clean up
     message_block_p->release ();

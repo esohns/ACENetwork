@@ -54,6 +54,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
  : inherited4 (interfaceHandle_in,
                statisticCollectionInterval_in)
  , stream_ (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_DEFAULT_NAME))
+ , useThreadPerConnection_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::Net_StreamAsynchUDPSocketBase_T"));
 
@@ -198,9 +199,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   handle_manager = true;
 
   // step3: initialize/start stream
+  useThreadPerConnection_ =
+    inherited4::configuration_->socketHandlerConfiguration->useThreadPerConnection;
 
   // step3a: connect stream head message queue with a notification pipe/queue ?
-  if (!inherited4::configuration_->socketHandlerConfiguration->useThreadPerConnection)
+  if (!useThreadPerConnection_)
     inherited4::configuration_->streamConfiguration->notificationStrategy =
       this;
 
@@ -347,14 +350,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   ACE_UNUSED_ARG (handle_in);
 
-  // sanity check(s)
-  ACE_ASSERT (inherited4::configuration_);
-  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration);
-
   int result = -1;
   Stream_Base_t* stream_p = (stream_.upStream () ? stream_.upStream ()
                                                  : &stream_);
-  ACE_Message_Block* message_block_p = NULL;
+  ACE_Message_Block* message_block_p, *message_block_2 = NULL;
+  size_t bytes_sent = 0;
 
   // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
   //                   been notified
@@ -367,36 +367,87 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   } // end IF
   ACE_ASSERT (message_block_p);
 
-  // start (asynchronous) write
-  this->increase ();
-  inherited::counter_.increase ();
-  size_t bytes_to_send = message_block_p->length ();
-send:
-  ssize_t result_2 =
-    inherited::outputStream_.send (message_block_p,                      // data
-                                   bytes_to_send,                        // #bytes to send
-                                   0,                                    // flags
-                                   inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.address, // remote address (ignored)
-                                   NULL,                                 // ACT
-                                   0,                                    // priority
-                                   COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
-  if (result_2 == -1)
+  // fragment the data ?
+  message_block_2 = message_block_p;
+  unsigned int length = 0;
+  do
   {
-    int error = ACE_OS::last_error ();
-    // *WARNING*: this could fail on multi-threaded proactors
-    if (error == EAGAIN) goto send; // 11: happens on Linux
+    length = message_block_2->length ();
+    if (length > inherited::PDUSize_)
+    {
+      ACE_Message_Block* message_block_3 = message_block_2->duplicate ();
+      if (!message_block_3)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
 
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::send(%u): \"%m\", aborting\n"),
-                message_block_p->length ()));
+        // clean up
+        message_block_p->release ();
 
-    // clean up
-    message_block_p->release ();
-    this->decrease ();
-    inherited::counter_.decrease ();
+        return -1;
+      } // end IF
+      message_block_2->cont (message_block_3);
 
-    return -1;
-  } // end IF
+      message_block_2->length (inherited::PDUSize_);
+      message_block_3->rd_ptr (inherited::PDUSize_);
+
+      message_block_2 = message_block_3;
+      continue;
+    } // end IF
+
+    message_block_2 = message_block_2->cont ();
+  } while (message_block_2);
+
+  // start (asynchronous) write(s)
+  do
+  {
+    length = 0;
+    message_block_2 = message_block_p;
+    while (length < inherited::PDUSize_)
+    {
+      length += message_block_2->length ();
+      message_block_2 = message_block_2->cont ();
+      if (!message_block_2)
+        break;
+    } // end WHILE
+    if (message_block_2)
+    {
+      ACE_Message_Block* message_block_3 = message_block_p;
+      while (message_block_3->cont () != message_block_2)
+        message_block_3 = message_block_3->cont ();
+      message_block_3->cont (NULL);
+    } // end IF
+
+    this->increase ();
+    inherited::counter_.increase ();
+send:
+    ssize_t result_2 =
+      inherited::outputStream_.send (message_block_p,                      // data
+                                     bytes_sent,                           // #bytes sent
+                                     0,                                    // flags
+                                     inherited::address_,                  // remote address (ignored)
+                                     NULL,                                 // ACT
+                                     0,                                    // priority
+                                     COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
+    if (result_2 == -1)
+    {
+      int error = ACE_OS::last_error ();
+      // *WARNING*: this could fail on multi-threaded proactors
+      if (error == EAGAIN) goto send; // 11: happens on Linux
+
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::send(%u): \"%m\", aborting\n"),
+                  message_block_p->total_length ()));
+
+      // clean up
+      message_block_p->release ();
+      this->decrease ();
+      inherited::counter_.decrease ();
+
+      return -1;
+    } // end IF
+    message_block_p = message_block_2;
+  } while (message_block_p);
 
   return 0;
 }
@@ -430,10 +481,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   ACE_UNUSED_ARG (handle_in);
 
-  // sanity check(s)
-  ACE_ASSERT (inherited4::configuration_);
-  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration);
-
   // step1: wait for all workers within the stream (if any)
   stream_.stop (true,  // <-- wait for completion
                 true); // locked access ?
@@ -441,12 +488,12 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // step2: purge any pending notifications ?
   // *WARNING: do this here, while still holding on to the current write buffer
   int result = -1;
-  if (unlikely (!inherited4::configuration_->socketHandlerConfiguration->useThreadPerConnection))
+  if (likely (!useThreadPerConnection_))
   {
     Stream_Iterator_t iterator (stream_);
     const Stream_Module_t* module_p = NULL;
     result = iterator.next (module_p);
-    if (result == 1)
+    if (unlikely (result == 1))
     {
       ACE_ASSERT (module_p);
       Stream_Task_t* task_p =
@@ -465,7 +512,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // step3: invoke base-class maintenance ?
   // *NOTE*: if the connection has been close()d locally, the socket is already
   //         closed at this point
-  if (inherited4::state_.status != NET_CONNECTION_STATUS_CLOSED)
+  if (unlikely (inherited4::state_.status != NET_CONNECTION_STATUS_CLOSED))
   {
     result = inherited::handle_close (inherited::handle (),
                                       mask_in);
@@ -511,10 +558,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   int result = -1;
 
-  // sanity check(s)
-  ACE_ASSERT (inherited4::configuration_);
-  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration);
-
   handle_out = inherited2::get_handle ();
   localSAP_out.reset ();
   remoteSAP_out.reset ();
@@ -523,9 +566,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
-  if (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.writeOnly)
-    remoteSAP_out =
-      inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.address;
+  if (inherited::writeOnly_)
+    remoteSAP_out = inherited::address_;
 }
 
 template <typename HandlerType,
@@ -559,35 +601,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 #else
   return static_cast<Net_ConnectionId_t> (inherited::handle ());
 #endif
-}
-
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-ACE_Notification_Strategy*
-Net_StreamAsynchUDPSocketBase_T<HandlerType,
-                                SocketType,
-                                AddressType,
-                                ConfigurationType,
-                                StateType,
-                                StatisticContainerType,
-                                HandlerConfigurationType,
-                                StreamType,
-                                UserDataType,
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::notification ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::notification"));
-
-  return this;
 }
 
 template <typename HandlerType,
@@ -1036,7 +1049,8 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                statisticCollectionInterval_in)
 // , buffer_ (NULL)
  //, userData_ ()
- //, stream_ ()
+ , stream_ ()
+ , useThreadPerConnection_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::Net_StreamAsynchUDPSocketBase_T"));
 
@@ -1142,8 +1156,10 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   inherited::open (inherited2::get_handle (), messageBlock_in);
 
   // step3: initialize/start stream
+  useThreadPerConnection_ =
+    inherited4::configuration_->streamConfiguration->useThreadPerConnection;
   // step3a: connect stream head message queue with a notification pipe/queue ?
-  if (!inherited4::configuration_->streamConfiguration->useThreadPerConnection)
+  if (!useThreadPerConnection_)
     inherited4::configuration_->streamConfiguration->notificationStrategy =
         this;
 
@@ -1343,22 +1359,18 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   int result = -1;
 
-  // sanity check(s)
-  ACE_ASSERT (inherited4::configuration_);
-  ACE_ASSERT (inherited4::configuration_->streamConfiguration);
-
   // step1: wait for all workers within the stream (if any)
   if (stream_.isRunning ())
     stream_.stop (true); // <-- wait for completion
 
   // step2: purge any pending notifications ?
   // *WARNING: do this here, while still holding on to the current write buffer
-  if (!inherited4::configuration_->streamConfiguration->useThreadPerConnection)
+  if (likely (!useThreadPerConnection_))
   {
     Stream_Iterator_t iterator (stream_);
     const Stream_Module_t* module_p = NULL;
     result = iterator.next (module_p);
-    if (result == 1)
+    if (unlikely (result == 1))
     {
       ACE_ASSERT (module_p);
       Stream_Task_t* task_p =
@@ -1416,11 +1428,6 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   int result = -1;
 
-  // sanity check(s)
-  ACE_ASSERT (inherited4::configuration_);
-  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration);
-  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration);
-
   handle_out = inherited2::get_handle ();
 //  result = localSAP_out.set (static_cast<u_short> (0),
 //                             static_cast<ACE_UINT32> (INADDR_NONE));
@@ -1429,15 +1436,14 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 //                ACE_TEXT ("failed to ACE_INET_Addr::set(0, %d): \"%m\", continuing\n"),
 //                INADDR_NONE));
   localSAP_out = ACE_Addr::sap_any;
-  if (!inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly)
+  if (!inherited4::writeOnly_)
   {
     result = inherited2::get_local_addr (localSAP_out);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
   } // end IF
-  remoteSAP_out =
-      inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->peerAddress;
+  remoteSAP_out = inherited4::address_;
 }
 
 template <typename AddressType,
@@ -1465,33 +1471,6 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::id"));
 
   return static_cast<Net_ConnectionId_t> (inherited::handle ());
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-ACE_Notification_Strategy*
-Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
-                                Net_SOCK_Netlink,
-                                AddressType,
-                                ConfigurationType,
-                                StateType,
-                                StatisticContainerType,
-                                HandlerConfigurationType,
-                                StreamType,
-                                UserDataType,
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::notification ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::notification"));
-
-  return this;
 }
 
 template <typename AddressType,

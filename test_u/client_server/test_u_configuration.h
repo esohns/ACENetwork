@@ -85,22 +85,24 @@ struct Test_U_ModuleHandlerConfiguration
   inline Test_U_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    , inbound (false)
-   , printProgressDot (false)
+   //, printProgressDot (false)
+   , protocolConfiguration (NULL)
    , pushStatisticMessages (true)
    , sessionData (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
   {};
 
-  bool                             inbound; // statistic/IO module
-  bool                             printProgressDot; // file writer module
-  bool                             pushStatisticMessages; // statistic module
+  bool                                 inbound; // statistic/IO module
+  //bool                             printProgressDot; // file writer module
+  struct Test_U_ProtocolConfiguration* protocolConfiguration; // protocol handler
+  bool                                 pushStatisticMessages; // statistic module
 
   // *TODO*: remove this (--> session message data)
-  struct Test_U_StreamSessionData* sessionData;
+  struct Test_U_StreamSessionData*     sessionData;
 
-  Test_U_ISessionNotify_t*         subscriber;
-  Test_U_Subscribers_t*            subscribers;
+  Test_U_ISessionNotify_t*             subscriber;
+  Test_U_Subscribers_t*                subscribers;
 };
 
 struct Test_U_StreamConfiguration
@@ -111,14 +113,12 @@ struct Test_U_StreamConfiguration
    , moduleConfiguration_2 ()
    , moduleHandlerConfiguration (NULL)
    , moduleHandlerConfiguration_2 ()
-   , protocolConfiguration (NULL)
    , userData (NULL)
   {};
 
   struct Stream_ModuleConfiguration         moduleConfiguration_2;        // module configuration
   struct Test_U_ModuleHandlerConfiguration* moduleHandlerConfiguration;   // module handler configuration
   struct Test_U_ModuleHandlerConfiguration  moduleHandlerConfiguration_2; // module handler configuration
-  struct Test_U_ProtocolConfiguration*      protocolConfiguration;        // protocol configuration
 
   struct Test_U_UserData*                   userData;                     // user data
 };
@@ -130,6 +130,7 @@ struct Test_U_Configuration
    : socketConfiguration ()
    , socketHandlerConfiguration ()
    , connectionConfiguration ()
+   , allocatorConfiguration ()
    , streamConfiguration ()
    , protocolConfiguration ()
    , userData ()
@@ -140,6 +141,7 @@ struct Test_U_Configuration
   struct Test_U_SocketHandlerConfiguration socketHandlerConfiguration;
   struct Test_U_ConnectionConfiguration    connectionConfiguration;
   // **************************** stream data **********************************
+  struct Stream_AllocatorConfiguration     allocatorConfiguration;
   struct Test_U_StreamConfiguration        streamConfiguration;
   // *************************** protocol data *********************************
   struct Test_U_ProtocolConfiguration      protocolConfiguration;

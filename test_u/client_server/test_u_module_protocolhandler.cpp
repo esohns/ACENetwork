@@ -45,7 +45,6 @@ Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler ()
  , allocator_ (NULL)
  , automaticPong_ (true)
  , counter_ (1)
- , isInitialized_ (false)
  , printPongDot_ (false)
  , sessionID_ (0)
 {
@@ -80,20 +79,19 @@ Test_U_Module_ProtocolHandler::~Test_U_Module_ProtocolHandler ()
 }
 
 bool
-Test_U_Module_ProtocolHandler::initialize (Stream_IAllocator* allocator_in,
-                                        const ACE_Time_Value& pingInterval_in,
-                                        bool autoAnswerPings_in,
-                                        bool printPongDot_in)
+Test_U_Module_ProtocolHandler::initialize (const struct Test_U_ModuleHandlerConfiguration& configuration_in,
+                                           Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::initialize"));
 
   int result = -1;
 
-  if (isInitialized_)
-  {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("re-initializing...\n")));
+  // sanity check(s)
+  // *TODO*: remove type inference
+  ACE_ASSERT (configuration_in.protocolConfiguration);
 
+  if (inherited::isInitialized_)
+  {
     // reset state
     if (pingTimerID_ != -1)
     {
@@ -118,22 +116,21 @@ Test_U_Module_ProtocolHandler::initialize (Stream_IAllocator* allocator_in,
     counter_ = 1;
     printPongDot_ = false;
     sessionID_ = 0;
-
-    isInitialized_ = false;
   } // end IF
 
-  pingInterval_ = pingInterval_in;
+  // *TODO*: remove type inferences
+  pingInterval_ = configuration_in.protocolConfiguration->pingInterval;
 
   allocator_ = allocator_in;
-  automaticPong_ = autoAnswerPings_in;
+  automaticPong_ = configuration_in.protocolConfiguration->pingAutoAnswer;
   //if (automaticPong)
   //   ACE_DEBUG ((LM_DEBUG,
   //               ACE_TEXT ("auto-answering \"ping\" messages\n")));
-  printPongDot_ = printPongDot_in;
+  //printPongDot_ = configuration_in.printProgressDot;
+  printPongDot_ = configuration_in.protocolConfiguration->printPongMessages;
 
-  isInitialized_ = true;
-
-  return isInitialized_;
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 void
@@ -231,7 +228,7 @@ Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& mes
 
   // sanity check(s)
   ACE_ASSERT (message_inout);
-  ACE_ASSERT (isInitialized_);
+  ACE_ASSERT (inherited::isInitialized_);
 
   int result = -1;
   switch (message_inout->type ())

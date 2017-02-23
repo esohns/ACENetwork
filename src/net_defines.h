@@ -56,6 +56,9 @@
 #define NET_PROTOCOL_DEFAULT_NETLINK                    NETLINK_GENERIC
 #define NET_PROTOCOL_DEFAULT_NETLINK_GROUP              1
 
+// *NOTE*: see also: SO_MAX_MSG_SIZE
+#define NET_PROTOCOL_DEFAULT_UDP_BUFFER_SIZE            65507
+
 // protocol parsers
 #define YY_END_OF_BUFFER_CHAR                           0 // "\0\0"
 #define NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE          2
