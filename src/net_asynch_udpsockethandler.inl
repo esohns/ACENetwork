@@ -26,6 +26,8 @@
 #include "common_defines.h"
 #include "common_tools.h"
 
+#include "stream_iallocator.h"
+
 #include "net_common_tools.h"
 #include "net_defines.h"
 #include "net_macros.h"

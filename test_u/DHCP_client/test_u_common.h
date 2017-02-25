@@ -223,8 +223,8 @@ struct Test_U_StreamModuleHandlerConfiguration
    , targetFileName ()
   {};
 
-  struct Test_U_ConnectionConfiguration*    connectionConfiguration;
   Test_U_IConnection_t*                     broadcastConnection; // UDP target/net IO module
+  struct Test_U_ConnectionConfiguration*    connectionConfiguration;
   //struct Test_U_Configuration*              configuration;
   guint                                     contextID;
   bool                                      inbound; // net IO module

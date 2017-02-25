@@ -1196,7 +1196,7 @@ Net_Common_Tools::IPAddress2Interface (const ACE_INET_Addr& IPAddress_in,
         ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (sockaddr_in_2->sin_addr.S_un.S_addr) & network_mask
                                                : sockaddr_in_2->sin_addr.S_un.S_addr & network_mask))
       goto continue_;
-    
+
     interfaceIdentifier_out = ip_adapter_addresses_2->AdapterName;
 
     break;
@@ -1221,33 +1221,22 @@ continue_:
 
   struct sockaddr_in* sockaddr_in_p = NULL;
 //  struct sockaddr_ll* sockaddr_ll_p = NULL;
+  ACE_INET_Addr inet_address;
   for (struct ifaddrs* ifaddrs_2 = ifaddrs_p;
        ifaddrs_2;
        ifaddrs_2 = ifaddrs_2->ifa_next)
   {
-//    if (((ifaddrs_2->ifa_flags & IFF_UP) == 0) ||
-//        (!ifaddrs_2->ifa_addr))
-//      continue;
-    if (ACE_OS::strcmp (interface_identifier_string.c_str (),
-                        ifaddrs_2->ifa_name))
+    if (!ifaddrs_2->ifa_addr)
+      continue;
+    if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
       continue;
 
-    if (!ifaddrs_2->ifa_addr) continue;
-    if (ifaddrs_2->ifa_addr->sa_family != AF_INET) continue;
-
     sockaddr_in_p = (struct sockaddr_in*)ifaddrs_2->ifa_addr;
-    result = IPAddress_out.set (sockaddr_in_p,
-                                sizeof (struct sockaddr_in));
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+    inet_address.set_addr (sockaddr_in_p, sizeof (struct sockaddr_in));
+    if (inet_address != IPAddress_in)
+      continue;
 
-      // clean up
-      ::freeifaddrs (ifaddrs_p);
-
-      return false;
-    } // end IF
+    interfaceIdentifier_out = ifaddrs_2->ifa_name;
     break;
   } // end FOR
 
@@ -1259,20 +1248,6 @@ continue_:
   ACE_NOTREACHED (return false;)
 #endif /* ACE_HAS_GETIFADDRS */
 #endif
-
-//  result = IPAddress_out.addr_to_string (buffer,
-//                                         sizeof (buffer),
-//                                         1);
-//  if (result == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", aborting\n")));
-//    return false;
-//  } // end IF
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("interface \"%s\" --> %s\n"),
-//              ACE_TEXT (interfaceIdentifier_in.c_str ()),
-//              buffer));
 
   return true;
 }
