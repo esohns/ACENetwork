@@ -248,7 +248,7 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
   inline virtual const HandlerConfigurationType& get () const { return configuration_; };
-  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = const_cast<HandlerConfigurationType&> (configuration_in); return true; };
+  virtual bool initialize (const HandlerConfigurationType&);
 
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_UDP; };
   inline virtual bool useReactor () const { return false; };

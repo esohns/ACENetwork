@@ -85,6 +85,7 @@ class Net_UDPSocketHandler_T
   Net_UDPSocketHandler_T ();
   virtual ~Net_UDPSocketHandler_T ();
 
+  ACE_INET_Addr                     address_;
 #if defined (ACE_LINUX)
   bool                              errorQueue_;
 #endif
@@ -133,6 +134,7 @@ class Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   Net_UDPSocketHandler_T ();
   virtual ~Net_UDPSocketHandler_T ();
 
+  ACE_INET_Addr                     address_;
 #if defined (ACE_LINUX)
   bool                              errorQueue_;
 #endif
@@ -148,7 +150,7 @@ class Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T& operator= (const Net_UDPSocketHandler_T&))
 };
 
-// include template implementation
+// include template definition
 #include "net_udpsockethandler.inl"
 
 #endif

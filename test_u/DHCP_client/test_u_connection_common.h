@@ -61,11 +61,11 @@ class Test_U_InboundConnectionStream;
 //typedef Stream_SessionData_T<Test_U_StreamSessionData> Test_U_StreamSessionData_t;
 //struct Test_U_StreamState;
 //struct Test_U_UserData;
-typedef Net_Connection_Manager_T<ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
                                  DHCP_RuntimeStatistic_t,
-                                 struct Test_U_UserData> Test_U_ConnectionManager_t;
+                                 struct Test_U_UserData> Test_U_IConnectionManager_t;
 struct Test_U_SocketHandlerConfiguration;
 
 //////////////////////////////////////////
@@ -77,11 +77,13 @@ struct Test_U_ConnectionConfiguration
   inline Test_U_ConnectionConfiguration ()
    : DHCP_ConnectionConfiguration ()
    ///////////////////////////////////////
+   , connectionManager (NULL)
    , socketHandlerConfiguration (NULL)
    , streamConfiguration (NULL)
    , userData (NULL)
   {};
 
+  Test_U_IConnectionManager_t*              connectionManager;
   struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
   struct Test_U_StreamConfiguration*        streamConfiguration;
 

@@ -94,6 +94,7 @@ typedef Stream_Module_Net_Target_T<ACE_MT_SYNCH,
                                    Test_U_Message,
                                    Test_U_SessionMessage,
                                    FileServer_SessionData_t,
+                                   struct FileServer_SocketHandlerConfiguration,
                                    FileServer_InetConnectionManager_t,
                                    Test_U_UDPConnector_t> Test_U_Module_Net_UDPTarget;
 typedef Stream_Module_Net_Target_T<ACE_MT_SYNCH,
@@ -103,6 +104,7 @@ typedef Stream_Module_Net_Target_T<ACE_MT_SYNCH,
                                    Test_U_Message,
                                    Test_U_SessionMessage,
                                    FileServer_SessionData_t,
+                                   struct FileServer_SocketHandlerConfiguration,
                                    FileServer_InetConnectionManager_t,
                                    Test_U_UDPAsynchConnector_t> Test_U_Module_Net_AsynchUDPTarget;
 DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type

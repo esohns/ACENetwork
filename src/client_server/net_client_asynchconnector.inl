@@ -118,7 +118,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   Net_ITransportLayer_t* itransportlayer_p = handler_p;
   result = itransportlayer_p->transportLayer ();
-  
+
   // clean up
   delete handler_p;
 
@@ -360,7 +360,9 @@ Net_Client_AsynchConnector_T<HandlerType,
 
     ACE_INET_Addr peer_address = remoteSAP_in;
     if (error)
-      peer_address = configuration_.socketConfiguration.address;
+    { ACE_ASSERT (configuration_.socketConfiguration);
+      peer_address = configuration_.socketConfiguration->address;
+    } // end IF
     //if (error != ECONNREFUSED) // happens intermittently on Win32
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
@@ -671,7 +673,8 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
     if (error)
     { // sanity check(s)
       ACE_ASSERT (remoteSAP_in.is_any ());
-      peer_address = configuration_.socketConfiguration.address;
+      ACE_ASSERT (configuration_.socketConfiguration);
+      peer_address = configuration_.socketConfiguration->address;
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
@@ -687,6 +690,40 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
   } // end IF
 
   return ((result == 1) ? 0 : -1);
+}
+
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename UserDataType>
+bool
+Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
+                                                           ConfigurationType,
+                                                           StateType,
+                                                           StatisticContainerType,
+                                                           HandlerConfigurationType,
+                                                           StreamType,
+                                                           UserDataType>,
+                             ACE_INET_Addr,
+                             ConfigurationType,
+                             StateType,
+                             StatisticContainerType,
+                             HandlerConfigurationType,
+                             StreamType,
+                             UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::initialize"));
+
+  configuration_ = const_cast<HandlerConfigurationType&> (configuration_in);
+  // *TODO*: remove type inference
+  ACE_ASSERT (configuration_.connectionConfiguration);
+  connectionManager_ =
+    configuration_.connectionConfiguration->connectionManager;
+
+  return true;
 }
 
 template <typename HandlerType,
@@ -714,8 +751,12 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
 
-  // *TODO*: remove type inference
-  configuration_.socketConfiguration.address = address_in;
+  // sanity check(s)
+  ACE_ASSERT (configuration_.socketConfiguration);
+  ACE_ASSERT (configuration_.connectionConfiguration);
+
+  // *TODO*: remove type inferences
+  configuration_.socketConfiguration->address = address_in;
   configuration_.connectionConfiguration->socketHandlerConfiguration =
     &configuration_;
 

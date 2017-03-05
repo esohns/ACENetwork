@@ -57,7 +57,14 @@ typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 struct Stream_AllocatorConfiguration> Test_U_ControlMessage_t;
 class Test_U_Stream;
 class Test_U_UDPStream;
+struct FileServer_ConnectionConfiguration;
+struct FileServer_ConnectionState;
 struct FileServer_UserData;
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                 struct FileServer_ConnectionConfiguration,
+                                 struct FileServer_ConnectionState,
+                                 Net_RuntimeStatistic_t,
+                                 struct FileServer_UserData> FileServer_IConnectionManager_t;
 
 struct FileServer_SocketHandlerConfiguration;
 struct FileServer_StreamConfiguration;
@@ -67,12 +74,14 @@ struct FileServer_ConnectionConfiguration
   inline FileServer_ConnectionConfiguration ()
    : Test_U_ConnectionConfiguration ()
    ///////////////////////////////////////
+   , connectionManager (NULL)
    , streamConfiguration (NULL)
    , userData (NULL)
   {
     PDUSize = FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE;
   };
 
+  FileServer_IConnectionManager_t*              connectionManager;
   struct FileServer_SocketHandlerConfiguration* socketHandlerConfiguration;
   struct FileServer_StreamConfiguration*        streamConfiguration;
 

@@ -22,10 +22,13 @@
 #define NET_CONFIGURATION_H
 
 #include <string>
+#include <vector>
 
 #include <ace/INET_Addr.h>
+#include <ace/Log_Msg.h>
 #include <ace/Time_Value.h>
 
+#include "net_iconnectionmanager.h"
 #include "net_defines.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -35,7 +38,14 @@
 // forward declarations
 struct Net_UserData;
 class Stream_IAllocator;
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                 struct Net_ConnectionConfiguration,
+                                 struct Net_ConnectionState,
+                                 Net_RuntimeStatistic_t,
+                                 struct Net_UserData> Net_IInetConnectionManager_t;
 
+//typedef std::deque<ACE_INET_Addr> Net_InetAddressStack_t;
+//typedef Net_InetAddressStack_t::iterator Net_InetAddressStackIterator_t;
 struct Net_SocketConfiguration
 {
   inline Net_SocketConfiguration ()
@@ -80,6 +90,8 @@ struct Net_SocketConfiguration
   bool             useLoopBackDevice;
   bool             writeOnly; // UDP
 };
+typedef std::vector<struct Net_SocketConfiguration> Net_SocketConfigurationStack_t;
+typedef Net_SocketConfigurationStack_t::iterator Net_SocketConfigurationIterator_t;
 
 struct Net_SocketHandlerConfiguration;
 struct Net_ListenerConfiguration
@@ -105,13 +117,15 @@ struct Net_ListenerConfiguration
 struct Net_ConnectionConfiguration
 {
   inline Net_ConnectionConfiguration ()
-   : messageAllocator (NULL)
+   : connectionManager (NULL)
+   , messageAllocator (NULL)
    , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , socketHandlerConfiguration (NULL)
    , streamConfiguration (NULL)
    , userData (NULL)
   {};
 
+  Net_IInetConnectionManager_t*          connectionManager;
   Stream_IAllocator*                     messageAllocator;
   // *NOTE*: applies to the corresponding protocol, if it has fixed size
   //         datagrams; otherwise, this is the size of the individual (opaque)
@@ -131,7 +145,7 @@ struct Net_SocketHandlerConfiguration
    , listenerConfiguration (NULL)
    , messageAllocator (NULL)
    , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
-   , socketConfiguration ()
+   , socketConfiguration (NULL)
    , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
                                  0)
    , useThreadPerConnection (false)
@@ -143,7 +157,7 @@ struct Net_SocketHandlerConfiguration
   struct Net_ListenerConfiguration*   listenerConfiguration;
   Stream_IAllocator*                  messageAllocator;
   unsigned int                        PDUSize;
-  struct Net_SocketConfiguration      socketConfiguration;
+  struct Net_SocketConfiguration*     socketConfiguration;
   ACE_Time_Value                      statisticReportingInterval; // [ACE_Time_Value::zero: off]
   bool                                useThreadPerConnection;
 

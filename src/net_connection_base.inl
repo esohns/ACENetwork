@@ -291,24 +291,3 @@ Net_ConnectionBase_T<AddressType,
 #endif
   } // end IF
 }
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename UserDataType>
-bool
-Net_ConnectionBase_T<AddressType,
-                     ConfigurationType,
-                     StateType,
-                     StatisticContainerType,
-                     UserDataType>::initialize (const ConfigurationType& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::initialize"));
-
-  // *NOTE*: when using a connection manager, the (default) configuration is
-  //         retrieved in the ctor
-  configuration_ = &const_cast<ConfigurationType&> (configuration_in);
-
-  return true;
-}

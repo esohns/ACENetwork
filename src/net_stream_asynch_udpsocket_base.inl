@@ -119,11 +119,12 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // sanity check(s)
   ACE_ASSERT (inherited4::configuration_);
   ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration);
+  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration);
   ACE_ASSERT (inherited4::configuration_->streamConfiguration);
 
   int result = -1;
 #if defined (ACE_LINUX)
-  bool handle_priviledges = false;
+  bool handle_privileges = false;
 #endif
   bool handle_manager = false;
   bool handle_socket = false;
@@ -139,20 +140,20 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   AddressType SAP_any (static_cast<u_short> (0),
                        static_cast<ACE_UINT32> (INADDR_ANY));
   AddressType local_SAP =
-    (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.writeOnly ? SAP_any
-                                                                                           : inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.address);
+    (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly ? SAP_any
+                                                                                            : inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->address);
 #if defined (ACE_LINUX)
   // (temporarily) elevate priviledges to open system sockets
-  if (!inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.writeOnly &&
+  if (!inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly &&
       (local_SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEDGED_PORT))
   {
-    if (!Common_Tools::setRootPriviledges ())
+    if (!Common_Tools::setRootPrivileges ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Tools::setRootPriviledges(): \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to Common_Tools::setRootPrivileges(): \"%m\", aborting\n")));
       goto error;
     } // end IF
-    handle_priviledges = true;
+    handle_privileges = true;
   } // end IF
 #endif
   result =
@@ -168,8 +169,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     goto error;
   } // end IF
 #if defined (ACE_LINUX)
-  if (handle_priviledges)
-    Common_Tools::dropRootPriviledges ();
+  if (handle_privileges)
+    Common_Tools::dropRootPrivileges ();
 #endif
   handle_socket = true;
   inherited::handle (inherited2::get_handle ());
@@ -241,7 +242,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   } // end IF
 
   // step4: start reading (need to pass any data ?)
-  if (!inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.writeOnly)
+  if (!inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly)
   {
     if (messageBlock_in.length () == 0)
       inherited::initiate_read_dgram ();
@@ -290,7 +291,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     // *NOTE*: registered with the proactor at this point
     //         --> data may start arriving at handle_input ()
   } // end IF
-  if (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration.writeOnly)
+  if (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly)
     this->decrease (); // float the connection (connection manager)
                        //ACE_ASSERT (this->count () == 2); // connection manager & read operation
                        //                                     (+ stream module(s))
@@ -303,8 +304,8 @@ error:
   stream_.stop (true); // <-- wait for completion
 
 #if defined (ACE_LINUX)
-  if (handle_priviledges)
-    Common_Tools::dropRootPriviledges ();
+  if (handle_privileges)
+    Common_Tools::dropRootPrivileges ();
 #endif
 
   if (handle_socket)

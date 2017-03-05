@@ -73,6 +73,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->socketConfiguration);
 
   // step0: initialize base class
   ACE_Proactor* proactor_p = ACE_Proactor::instance ();
@@ -81,7 +82,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   if (handle_in != ACE_INVALID_HANDLE)
     inherited2::handle (handle_in);
 
-  address_ = inherited::configuration_->socketConfiguration.address;
+  address_ = inherited::configuration_->socketConfiguration->address;
   allocator_ = inherited::configuration_->messageAllocator;
   PDUSize_ =
     ((handle_in != ACE_INVALID_HANDLE) ? NET_PROTOCOL_DEFAULT_UDP_BUFFER_SIZE
@@ -90,25 +91,25 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   //            ACE_TEXT ("maximum message size: %u...\n"),
   //            PDUSize_));
   writeOnly_ =
-    inherited::configuration_->socketConfiguration.writeOnly;
+    inherited::configuration_->socketConfiguration->writeOnly;
   if (!writeOnly_)
   {
     // step1: tweak socket
-    if (inherited::configuration_->socketConfiguration.bufferSize)
+    if (inherited::configuration_->socketConfiguration->bufferSize)
       if (!Net_Common_Tools::setSocketBuffer (handle_in,
                                               SO_RCVBUF,
-                                              inherited::configuration_->socketConfiguration.bufferSize))
+                                              inherited::configuration_->socketConfiguration->bufferSize))
       {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                     handle_in,
-                    inherited::configuration_->socketConfiguration.bufferSize));
+                    inherited::configuration_->socketConfiguration->bufferSize));
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
                     handle_in,
-                    inherited::configuration_->socketConfiguration.bufferSize));
+                    inherited::configuration_->socketConfiguration->bufferSize));
 #endif
       } // end IF
 
@@ -117,14 +118,14 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
     if (!Net_Common_Tools::setLinger (handle_in,
-                                      inherited::configuration_->socketConfiguration.linger,
+                                      inherited::configuration_->socketConfiguration->linger,
                                       -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setLinger(%d,%s,-1), aborting\n"),
                   handle_in,
-                  (inherited::configuration_->socketConfiguration.linger ? ACE_TEXT ("true")
-                                                                         : ACE_TEXT ("false"))));
+                  (inherited::configuration_->socketConfiguration->linger ? ACE_TEXT ("true")
+                                                                          : ACE_TEXT ("false"))));
       return;
     } // end IF
 #endif

@@ -604,7 +604,8 @@ Net_Server_AsynchListener_T<HandlerType,
   ACE_ASSERT (configuration_);
   ACE_ASSERT (handlerConfiguration_);
   // *TODO*: remove type inferences
-  if (handlerConfiguration_->socketConfiguration.useLoopBackDevice)
+  ACE_ASSERT (handlerConfiguration_->socketConfiguration);
+  if (handlerConfiguration_->socketConfiguration->useLoopBackDevice)
   {
     result =
       configuration_->address.set (configuration_->address.get_port_number (), // port

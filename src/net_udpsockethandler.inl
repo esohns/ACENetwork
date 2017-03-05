@@ -33,11 +33,12 @@
 template <typename SocketType,
           typename ConfigurationType>
 Net_UDPSocketHandler_T<SocketType,
-                       ConfigurationType>::Net_UDPSocketHandler_T ()//MANAGER_T* manager_in)
+                       ConfigurationType>::Net_UDPSocketHandler_T ()
  : inherited ()
  , inherited2 (NULL,                     // no specific thread manager
                NULL,                     // no specific message queue
                ACE_Reactor::instance ()) // default reactor
+ , address_ ()
 #if defined (ACE_LINUX)
  , errorQueue_ (NET_SOCKET_DEFAULT_ERRORQUEUE)
 #endif
@@ -48,26 +49,6 @@ Net_UDPSocketHandler_T<SocketType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::Net_UDPSocketHandler_T"));
 
-  // sanity check(s)
-//  ACE_ASSERT (manager_);
-
-  //  // register notification strategy ?
-  //  inherited::msg_queue ()->notification_strategy (&notificationStrategy_);
-
-  // init user data
-  //ACE_OS::memset (&userData_, 0, sizeof (userData_));
-//  if (manager_)
-//  {
-//    try
-//    { // (try to) get user data from the connection manager
-//      manager_->getConfiguration (userData_);
-//    }
-//    catch (...)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("caught exception in Net_IConnectionManager::getConfiguration(), continuing\n")));
-//    }
-//  } // end IF
 }
 
 template <typename SocketType,
@@ -77,57 +58,7 @@ Net_UDPSocketHandler_T<SocketType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::~Net_UDPSocketHandler_T"));
 
-  //if (manager_ && isRegistered_)
-  //{ // (try to) de-register with connection manager
-  //  try
-  //  {
-  //    manager_->deregisterConnection (this);
-  //  }
-  //  catch (...)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("caught exception in Net_IConnectionManager::deregisterConnection(), continuing\n")));
-  //  }
-  //} // end IF
-
-//  // *IMPORTANT NOTE*: the streamed socket handler uses the stream head modules' queue
-//  // --> this happens too late, as the stream/queue will have been deleted by now...
-//  if (reactor ()->purge_pending_notifications (this, ACE_Event_Handler::ALL_EVENTS_MASK) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(%@): \"%m\", continuing\n"),
-//                this));
-
-  //// need to close the socket (see handle_close() below) ?
-  //if (inherited::reference_counting_policy ().value () ==
-  //    ACE_Event_Handler::Reference_Counting_Policy::ENABLED)
-  //  if (inherited::peer_.close () == -1)
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to ACE_SOCK_IO::close(): \"%m\", continuing\n")));
 }
-
-//ACE_Event_Handler::Reference_Count
-//Net_UDPSocketHandler_T::add_reference (void)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::add_reference"));
-//
-//  inherited2::increase ();
-//
-//  //return inherited::add_reference ();
-//  return 0;
-//}
-//
-//ACE_Event_Handler::Reference_Count
-//Net_UDPSocketHandler_T::remove_reference (void)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::remove_reference"));
-//
-//  // *NOTE*: may "delete this"
-//  inherited2::decrease ();
-//
-//  //// *NOTE*: may "delete this"
-//  //return inherited::remove_reference ();
-//  return 0;
-//}
 
 template <typename SocketType,
           typename ConfigurationType>
@@ -148,17 +79,19 @@ Net_UDPSocketHandler_T<SocketType,
   ConfigurationType* configuration_p =
     reinterpret_cast<ConfigurationType*> (arg_in);
   ACE_ASSERT (configuration_p);
-
   // *TODO*: remove type inference
-  writeOnly_ = configuration_p->socketConfiguration.writeOnly;
+  ACE_ASSERT (configuration_p->socketConfiguration);
+
+  // *TODO*: remove type inferences
+  address_ = configuration_p->socketConfiguration->address;
+  writeOnly_ = configuration_p->socketConfiguration->writeOnly;
 
   // step1: open socket ?
   // *NOTE*: even when this is a write-only connection
   //         (configuration_p->socketConfiguration->writeOnly), the base class
   //         still requires a valid handle to open the output stream
-  ACE_INET_Addr SAP_any (static_cast<u_short> (0),
-                         static_cast<ACE_UINT32> (INADDR_ANY));
-  ACE_INET_Addr local_SAP = SAP_any;
+  ACE_INET_Addr local_SAP (static_cast<u_short> (0),
+                           static_cast<ACE_UINT32> (INADDR_ANY));
   if (!writeOnly_)
   {
     // sanity check(s)
@@ -172,9 +105,9 @@ Net_UDPSocketHandler_T<SocketType,
   // (temporarily) elevate priviledges to open system sockets
   if (local_SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEDGED_PORT)
   {
-    if (!Common_Tools::setRootPriviledges ())
+    if (!Common_Tools::setRootPrivileges ())
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Tools::setRootPriviledges(): \"%m\", continuing\n")));
+                  ACE_TEXT ("failed to Common_Tools::setRootPrivileges(): \"%m\", continuing\n")));
     handle_priviledges = true;
   } // end IF
 #endif
@@ -191,18 +124,17 @@ Net_UDPSocketHandler_T<SocketType,
   } // end IF
 #if defined (ACE_LINUX)
   if (handle_priviledges)
-    Common_Tools::dropRootPriviledges ();
+    Common_Tools::dropRootPrivileges ();
 #endif
   handle = inherited2::get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
 
   // step2: connect ?
   // *TODO*: remove type inference
-  if (configuration_p->socketConfiguration.connect)
+  if (configuration_p->socketConfiguration->connect)
   {
-    ACE_INET_Addr associated_address =
-        (writeOnly_ ? configuration_p->socketConfiguration.address
-                    : local_SAP);
+    ACE_INET_Addr associated_address = (writeOnly_ ? address_
+                                                   : local_SAP);
 
     struct sockaddr* sockaddr_p =
         reinterpret_cast<struct sockaddr*> (associated_address.get_addr ());
@@ -255,40 +187,40 @@ Net_UDPSocketHandler_T<SocketType,
   // *NOTE*: recvfrom()-ing datagrams larger than SO_RCVBUF will truncate the
   //         inbound datagram (MSG_TRUNC flag will be set)
   // *TODO*: remove type inferences
-  if (configuration_p->socketConfiguration.bufferSize)
+  if (configuration_p->socketConfiguration->bufferSize)
   {
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_RCVBUF,
-                                            configuration_p->socketConfiguration.bufferSize))
+                                            configuration_p->socketConfiguration->bufferSize))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  configuration_p->socketConfiguration->bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  configuration_p->socketConfiguration->bufferSize));
 #endif
     } // end IF
     // *NOTE*: sendto()-ing datagrams larger than SO_SNDBUF will trigger errno
     //         EMSGSIZE (90)
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_SNDBUF,
-                                            configuration_p->socketConfiguration.bufferSize))
+                                            configuration_p->socketConfiguration->bufferSize))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  configuration_p->socketConfiguration->bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  configuration_p->socketConfiguration->bufferSize));
 #endif
     } // end IF
   } // end IF
@@ -298,14 +230,14 @@ Net_UDPSocketHandler_T<SocketType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   if (!Net_Common_Tools::setLinger (handle,
-                                    configuration_p->socketConfiguration.linger,
+                                    configuration_p->socketConfiguration->linger,
                                     -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%d,%s,-1), aborting\n"),
                 handle,
-                (configuration_p->socketConfiguration.linger ? ACE_TEXT ("true")
-                                                             : ACE_TEXT ("false"))));
+                (configuration_p->socketConfiguration->linger ? ACE_TEXT ("true")
+                                                              : ACE_TEXT ("false"))));
     goto error;
   } // end IF
 #endif
@@ -356,7 +288,7 @@ Net_UDPSocketHandler_T<SocketType,
 error:
 #if defined (ACE_LINUX)
   if (handle_priviledges)
-    Common_Tools::dropRootPriviledges ();
+    Common_Tools::dropRootPrivileges ();
 #endif
 
   return -1;
@@ -485,11 +417,12 @@ Net_UDPSocketHandler_T<SocketType,
 
 template <typename ConfigurationType>
 Net_UDPSocketHandler_T<Net_SOCK_CODgram,
-                       ConfigurationType>::Net_UDPSocketHandler_T ()//MANAGER_T* manager_in)
+                       ConfigurationType>::Net_UDPSocketHandler_T ()
  : inherited ()
  , inherited2 (NULL,                     // no specific thread manager
                NULL,                     // no specific message queue
                ACE_Reactor::instance ()) // default reactor
+ , address_ ()
 #if defined (ACE_LINUX)
  , errorQueue_ (NET_SOCKET_DEFAULT_ERRORQUEUE)
 #endif
@@ -500,26 +433,6 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::Net_UDPSocketHandler_T"));
 
-  // sanity check(s)
-//  ACE_ASSERT (manager_);
-
-  //  // register notification strategy ?
-  //  inherited::msg_queue ()->notification_strategy (&notificationStrategy_);
-
-  // init user data
-  //ACE_OS::memset (&userData_, 0, sizeof (userData_));
-//  if (manager_)
-//  {
-//    try
-//    { // (try to) get user data from the connection manager
-//      manager_->getConfiguration (userData_);
-//    }
-//    catch (...)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("caught exception in Net_IConnectionManager::getConfiguration(), continuing\n")));
-//    }
-//  } // end IF
 }
 
 template <typename ConfigurationType>
@@ -528,57 +441,7 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::~Net_UDPSocketHandler_T"));
 
-  //if (manager_ && isRegistered_)
-  //{ // (try to) de-register with connection manager
-  //  try
-  //  {
-  //    manager_->deregisterConnection (this);
-  //  }
-  //  catch (...)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("caught exception in Net_IConnectionManager::deregisterConnection(), continuing\n")));
-  //  }
-  //} // end IF
-
-//  // *IMPORTANT NOTE*: the streamed socket handler uses the stream head modules' queue
-//  // --> this happens too late, as the stream/queue will have been deleted by now...
-//  if (reactor ()->purge_pending_notifications (this, ACE_Event_Handler::ALL_EVENTS_MASK) == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(%@): \"%m\", continuing\n"),
-//                this));
-
-  //// need to close the socket (see handle_close() below) ?
-  //if (inherited::reference_counting_policy ().value () ==
-  //    ACE_Event_Handler::Reference_Counting_Policy::ENABLED)
-  //  if (inherited::peer_.close () == -1)
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to ACE_SOCK_IO::close(): \"%m\", continuing\n")));
 }
-
-//ACE_Event_Handler::Reference_Count
-//Net_UDPSocketHandler_T::add_reference (void)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::add_reference"));
-//
-//  inherited2::increase ();
-//
-//  //return inherited::add_reference ();
-//  return 0;
-//}
-//
-//ACE_Event_Handler::Reference_Count
-//Net_UDPSocketHandler_T::remove_reference (void)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::remove_reference"));
-//
-//  // *NOTE*: may "delete this"
-//  inherited2::decrease ();
-//
-//  //// *NOTE*: may "delete this"
-//  //return inherited::remove_reference ();
-//  return 0;
-//}
 
 template <typename ConfigurationType>
 int
@@ -589,7 +452,7 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
   int result = -1;
 #if defined (ACE_LINUX)
-  bool handle_priviledges = false;
+  bool handle_privileges = false;
 #endif
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
 
@@ -598,9 +461,12 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   ConfigurationType* configuration_p =
     reinterpret_cast<ConfigurationType*> (arg_in);
   ACE_ASSERT (configuration_p);
-
   // *TODO*: remove type inference
-  writeOnly_ = configuration_p->socketConfiguration.writeOnly;
+  ACE_ASSERT (configuration_p->socketConfiguration);
+
+  // *TODO*: remove type inferences
+  address_ = configuration_p->socketConfiguration->address;
+  writeOnly_ = configuration_p->socketConfiguration->writeOnly;
 
   // step1: open socket ?
   // *NOTE*: even when this is a write-only connection
@@ -623,7 +489,7 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                             static_cast<ACE_UINT32> (INADDR_ANY));
   // *TODO*: remove type inference
   if (writeOnly_)
-    remote_SAP = configuration_p->socketConfiguration.address;
+    remote_SAP = address_;
 
 #if defined (ACE_LINUX)
   // (temporarily) elevate priviledges to open system sockets
@@ -631,10 +497,10 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   if (port_number &&
       (port_number <= NET_ADDRESS_MAXIMUM_PRIVILEDGED_PORT))
   {
-    if (!Common_Tools::setRootPriviledges ())
+    if (!Common_Tools::setRootPrivileges ())
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Tools::setRootPriviledges(): \"%m\", continuing\n")));
-    handle_priviledges = true;
+                  ACE_TEXT ("failed to Common_Tools::setRootPrivileges(): \"%m\", continuing\n")));
+    handle_privileges = true;
   } // end IF
 #endif
 
@@ -652,8 +518,8 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
     goto error;
   } // end IF
 #if defined (ACE_LINUX)
-  if (handle_priviledges)
-    Common_Tools::dropRootPriviledges ();
+  if (handle_privileges)
+    Common_Tools::dropRootPrivileges ();
 #endif
   handle = inherited2::get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
@@ -662,40 +528,40 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   // *NOTE*: recvfrom()-ing datagrams larger than SO_RCVBUF will truncate the
   //         inbound datagram (MSG_TRUNC flag will be set)
   // *TODO*: remove type inferences
-  if (configuration_p->socketConfiguration.bufferSize)
+  if (configuration_p->socketConfiguration->bufferSize)
   {
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_RCVBUF,
-                                            configuration_p->socketConfiguration.bufferSize))
+                                            configuration_p->socketConfiguration->bufferSize))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  configuration_p->socketConfiguration->bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  configuration_p->socketConfiguration->bufferSize));
 #endif
     } // end IF
     // *NOTE*: sendto()-ing datagrams larger than SO_SNDBUF will trigger errno
     //         EMSGSIZE (90)
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_SNDBUF,
-                                            configuration_p->socketConfiguration.bufferSize))
+                                            configuration_p->socketConfiguration->bufferSize))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  configuration_p->socketConfiguration->bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  configuration_p->socketConfiguration->bufferSize));
 #endif
     } // end IF
   } // end IF
@@ -705,14 +571,14 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   if (!Net_Common_Tools::setLinger (handle,
-                                    configuration_p->socketConfiguration.linger,
+                                    configuration_p->socketConfiguration->linger,
                                     -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%d,%s,-1), aborting\n"),
                 handle,
-                (configuration_p->socketConfiguration.linger ? ACE_TEXT ("true")
-                                                             : ACE_TEXT ("false"))));
+                (configuration_p->socketConfiguration->linger ? ACE_TEXT ("true")
+                                                              : ACE_TEXT ("false"))));
     goto error;
   } // end IF
 #endif
@@ -762,8 +628,8 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
 error:
 #if defined (ACE_LINUX)
-  if (handle_priviledges)
-    Common_Tools::dropRootPriviledges ();
+  if (handle_privileges)
+    Common_Tools::dropRootPrivileges ();
 #endif
 
   return -1;

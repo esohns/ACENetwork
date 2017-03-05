@@ -208,19 +208,18 @@ Net_Server_Listener_T<HandlerType,
   } // end IF
 
   // not running --> start listening
-  // *TODO*: remove type inferences
   // sanity check(s)
   ACE_ASSERT (configuration_);
   ACE_ASSERT (handlerConfiguration_);
-  if (handlerConfiguration_->socketConfiguration.useLoopBackDevice)
+  // *TODO*: remove type inferences
+  ACE_ASSERT (handlerConfiguration_->socketConfiguration);
+  if (handlerConfiguration_->socketConfiguration->useLoopBackDevice)
   {
     result =
       configuration_->address.set (configuration_->address.get_port_number (), // port
-                                   // *PORTABILITY*: disambiguate this under Windows
-                                   // *TODO*: bind to specific interface/address ?
-                                   ACE_LOCALHOST,                              // hostname
+                                   INADDR_LOOPBACK,                            // IP address
                                    1,                                          // encode ?
-                                   AF_INET);                                   // address family
+                                   0);                                         // map ?
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,

@@ -843,10 +843,24 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   ITRANSPORTLAYER_T* itransportlayer_p = this;
   ACE_ASSERT (itransportlayer_p);
+  bool result = false;
 
-  if (!itransportlayer_p->initialize (this->dispatch (),
-                                      role_in,
-                                      configuration_.socketConfiguration))
+  // sanity check(s)
+  SocketConfigurationType socket_configuration;
+  //// *TODO*: remove type inference
+  //if (configuration_.socketConfiguration)
+  //  socket_configuration = *configuration_.socketConfiguration;
+
+  try {
+    result = itransportlayer_p->initialize (this->dispatch (),
+                                            role_in,
+                                            socket_configuration);
+//                                            *configuration_.socketConfiguration);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_ITransportLayer_T::initialize(), continuing\n")));
+  }
+  if (!result)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ITransportLayer_T::initialize(), continuing\n")));
 }

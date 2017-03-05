@@ -97,6 +97,7 @@ Net_TCPSocketHandler_T<ConfigurationType,
   ConfigurationType* configuration_p =
     static_cast<ConfigurationType*> (arg_in);
   ACE_ASSERT (configuration_p);
+  ACE_ASSERT (configuration_p->socketConfiguration);
 
   // initialize return value
   int result = -1;
@@ -108,38 +109,38 @@ Net_TCPSocketHandler_T<ConfigurationType,
   // *TODO*: remove type inferences
   ACE_HANDLE handle = inherited2::get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
-  if (configuration_p->socketConfiguration.bufferSize)
+  if (configuration_p->socketConfiguration->bufferSize)
   {
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_RCVBUF,
-                                            configuration_p->socketConfiguration.bufferSize))
+                                            configuration_p->socketConfiguration->bufferSize))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  configuration_p->socketConfiguration->bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  configuration_p->socketConfiguration->bufferSize));
 #endif
     } // end IF
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_SNDBUF,
-                                            configuration_p->socketConfiguration.bufferSize))
+                                            configuration_p->socketConfiguration->bufferSize))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  configuration_p->socketConfiguration->bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  configuration_p->socketConfiguration->bufferSize));
 #endif
     } // end IF
   } // end IF
@@ -165,13 +166,13 @@ Net_TCPSocketHandler_T<ConfigurationType,
     return -1;
   } // end IF
   if (!Net_Common_Tools::setLinger (handle,
-                                    configuration_p->socketConfiguration.linger,
+                                    configuration_p->socketConfiguration->linger,
                                     std::numeric_limits<unsigned short>::max ()))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
-                (configuration_p->socketConfiguration.linger ? ACE_TEXT ("true")
-                                                             : ACE_TEXT ("false")),
+                (configuration_p->socketConfiguration->linger ? ACE_TEXT ("true")
+                                                              : ACE_TEXT ("false")),
                 handle));
     return -1;
   } // end IF

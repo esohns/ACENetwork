@@ -34,7 +34,7 @@
 
 #include "stream_module_io.h"
 
-//#include "net_connection_manager.h"
+#include "net_connection_manager.h"
 
 #include "dhcp_common.h"
 #include "dhcp_configuration.h"
@@ -50,11 +50,11 @@
 // forward declarations
 class Test_U_SessionMessage;
 class Test_U_Message;
-//typedef Net_Connection_Manager_T<ACE_INET_Addr,
-//                                 struct Test_U_Configuration,
-//                                 struct Test_U_ConnectionState,
-//                                 DHCP_RuntimeStatistic_t,
-//                                 struct Test_U_UserData> Test_U_ConnectionManager_t;
+typedef Net_Connection_Manager_T<ACE_INET_Addr,
+                                 struct Test_U_ConnectionConfiguration,
+                                 struct Test_U_ConnectionState,
+                                 DHCP_RuntimeStatistic_t,
+                                 struct Test_U_UserData> Test_U_ConnectionManager_t;
 
 // declare module(s)
 typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,

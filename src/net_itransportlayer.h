@@ -25,7 +25,7 @@
 
 #include "net_common.h"
 
-template <typename ConfigurationType>
+template <typename ConfigurationType> // socket-
 class Net_ITransportLayer_T
 {
  public:
@@ -42,7 +42,6 @@ class Net_ITransportLayer_T
   virtual void set (enum Net_ClientServerRole) = 0;
   virtual enum Net_TransportLayerType transportLayer () = 0;
 
- //protected:
   virtual bool initialize (enum Common_DispatchType,
                            enum Net_ClientServerRole,
                            const ConfigurationType&) = 0;

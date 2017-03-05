@@ -1219,9 +1219,12 @@ continue_:
   } // end IF
   ACE_ASSERT (ifaddrs_p);
 
-  struct sockaddr_in* sockaddr_in_p = NULL;
+  struct sockaddr_in* sockaddr_in_p =
+      static_cast<struct sockaddr_in*> (IPAddress_in.get_addr ());
 //  struct sockaddr_ll* sockaddr_ll_p = NULL;
-  ACE_INET_Addr inet_address;
+  struct sockaddr_in* sockaddr_in_2 = NULL;
+  struct sockaddr_in* sockaddr_in_3 = NULL;
+  in_addr_t inet_address_network = 0;
   for (struct ifaddrs* ifaddrs_2 = ifaddrs_p;
        ifaddrs_2;
        ifaddrs_2 = ifaddrs_2->ifa_next)
@@ -1231,9 +1234,13 @@ continue_:
     if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
       continue;
 
-    sockaddr_in_p = (struct sockaddr_in*)ifaddrs_2->ifa_addr;
-    inet_address.set_addr (sockaddr_in_p, sizeof (struct sockaddr_in));
-    if (inet_address != IPAddress_in)
+    sockaddr_in_2 = reinterpret_cast<struct sockaddr_in*> (ifaddrs_2->ifa_addr);
+    sockaddr_in_3 =
+        reinterpret_cast<struct sockaddr_in*> (ifaddrs_2->ifa_netmask);
+    inet_address_network =
+        sockaddr_in_2->sin_addr.s_addr & sockaddr_in_3->sin_addr.s_addr;
+    if (inet_address_network !=
+        (sockaddr_in_p->sin_addr.s_addr & sockaddr_in_3->sin_addr.s_addr))
       continue;
 
     interfaceIdentifier_out = ifaddrs_2->ifa_name;
@@ -1249,7 +1256,7 @@ continue_:
 #endif /* ACE_HAS_GETIFADDRS */
 #endif
 
-  return true;
+  return (!interfaceIdentifier_out.empty ());
 }
 
 std::string
