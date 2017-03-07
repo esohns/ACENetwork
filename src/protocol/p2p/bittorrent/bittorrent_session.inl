@@ -318,7 +318,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     // *TODO*: remove type inferences
 
     // step1: set up configuration
-    configuration_p->socketHandlerConfiguration->socketConfiguration.address =
+    configuration_p->socketHandlerConfiguration->socketConfiguration->address =
         address_in;
 
     subscriber_p =
@@ -874,7 +874,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     // *TODO*: remove type inferences
 
     // step1: set up configuration
-    configuration_p->socketHandlerConfiguration->socketConfiguration.address =
+    configuration_p->socketHandlerConfiguration->socketConfiguration->address =
         address_in;
 
     subscriber_p =

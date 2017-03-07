@@ -187,8 +187,10 @@ connection_setup_function (void* arg_in)
   // load defaults
   connection_manager_p->get (configuration_p,
                              user_data_p);
+  // sanity check(s)
   ACE_ASSERT (configuration_p);
   ACE_ASSERT (configuration_p->socketHandlerConfiguration);
+  ACE_ASSERT (configuration_p->socketHandlerConfiguration->socketConfiguration);
 
   // step2c: initialize connector
   if (!connector_p->initialize (*configuration_p->socketHandlerConfiguration))
@@ -235,10 +237,10 @@ connection_setup_function (void* arg_in)
       g_free (string_p);
 
       result_3 =
-        configuration_p->socketHandlerConfiguration->socketConfiguration.address.set (current_port,
-                                                                                      data_p->phonebookEntry.hostName.c_str (),
-                                                                                      1,
-                                                                                      ACE_ADDRESS_FAMILY_INET);
+        configuration_p->socketHandlerConfiguration->socketConfiguration->address.set (current_port,
+                                                                                       data_p->phonebookEntry.hostName.c_str (),
+                                                                                       1,
+                                                                                       ACE_ADDRESS_FAMILY_INET);
       if (result_3 == -1)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -248,11 +250,11 @@ connection_setup_function (void* arg_in)
 
       // step3: (try to) connect to the server
       handle =
-        connector_p->connect (configuration_p->socketHandlerConfiguration->socketConfiguration.address);
+        connector_p->connect (configuration_p->socketHandlerConfiguration->socketConfiguration->address);
       if (handle == ACE_INVALID_HANDLE)
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("failed to connect(\"%s\"): \"%m\", continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddress2String (configuration_p->socketHandlerConfiguration->socketConfiguration.address).c_str ())));
+                    ACE_TEXT (Net_Common_Tools::IPAddress2String (configuration_p->socketHandlerConfiguration->socketConfiguration->address).c_str ())));
       else
         done = true;
     } // end FOR
@@ -299,7 +301,7 @@ connection_failed:
 
       // *TODO*: this does not work
       connection_2 =
-        connection_manager_p->get (configuration_p->socketHandlerConfiguration->socketConfiguration.address);
+        connection_manager_p->get (configuration_p->socketHandlerConfiguration->socketConfiguration->address);
       if (connection_2)
         break; // done
     } while (COMMON_TIME_NOW < deadline);
