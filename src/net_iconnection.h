@@ -47,7 +47,7 @@ template <typename AddressType,
           typename StateType,
           typename StatisticContainerType>
 class Net_IConnection_T
- : public Common_IGet_T<ConfigurationType>
+ : public Common_IGetR_T<ConfigurationType>
  , public Common_IInitialize_T<ConfigurationType>
  , public Common_IStatistic_T<StatisticContainerType>
  , virtual public Common_IReferenceCount

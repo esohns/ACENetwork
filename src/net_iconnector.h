@@ -48,7 +48,7 @@ template <typename AddressType,
           typename ConfigurationType> // socket handler-
 class Net_IConnector_T
  : public Net_IConnectorBase_T<AddressType>
- , public Common_IGet_T<ConfigurationType>
+ , public Common_IGetR_T<ConfigurationType>
  , public Common_IInitialize_T<ConfigurationType>
 {
  public:

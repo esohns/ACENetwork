@@ -30,7 +30,7 @@
 
 template <typename SessionInterfaceType>
 class BitTorrent_IControl_T
- : public Common_IGet_T<std::map<std::string, SessionInterfaceType*> >
+ : public Common_IGetR_T<std::map<std::string, SessionInterfaceType*> >
 {
  public:
   inline virtual ~BitTorrent_IControl_T () {};

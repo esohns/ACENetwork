@@ -47,7 +47,7 @@ template <typename SessionInterfaceType,
           typename ConnectionType,
           typename ConnectionCBDataType>
 class BitTorrent_Client_GUI_Session_T
- : public Common_IGet_T<ConnectionCBDataType>
+ : public Common_IGetR_T<ConnectionCBDataType>
 {
  public:
   BitTorrent_Client_GUI_Session_T (const struct BitTorrent_Client_Configuration&, // configuration

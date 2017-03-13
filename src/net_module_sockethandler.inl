@@ -206,7 +206,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
     // full message available ?
     if (message_p)
     {
-      // --> push it downstream...
+      // --> push it downstream
       result = inherited::put_next (message_p, NULL);
       if (result == -1)
       {

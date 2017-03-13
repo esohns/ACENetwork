@@ -47,7 +47,7 @@ class IRC_Client_GUI_MessageHandler;
 */
 class IRC_Client_GUI_Connection
  : public IRC_Client_ISessionNotify_t
- , public Common_IGet_T<struct IRC_Client_GTK_ConnectionCBData>
+ , public Common_IGetR_T<struct IRC_Client_GTK_ConnectionCBData>
 {
   friend class IRC_Client_GUI_MessageHandler;
 

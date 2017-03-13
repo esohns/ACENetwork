@@ -40,18 +40,18 @@ struct Common_UI_GTKState;
 class IRC_Client_GUI_Connection;
 
 class IRC_Client_GUI_MessageHandler
- : public Common_IGet_T<IRC_Client_GTK_HandlerCBData>
+ : public Common_IGetR_T<struct IRC_Client_GTK_HandlerCBData>
 {
  public:
   // ctor for default handler (== server log)
-  IRC_Client_GUI_MessageHandler (Common_UI_GTKState*,        // GTK state handle
+  IRC_Client_GUI_MessageHandler (struct Common_UI_GTKState*, // GTK state handle
                                  IRC_Client_GUI_Connection*, // connection handle
                                  const std::string&);        // connection timestamp
                                                              // *NOTE*: used to lookup the corresponding builder
   // ctor for regular channel handler
   // *WARNING*: must be called with
   //            IRC_Client_GTK_CBData::Common_UI_GTKState::lock held !
-  IRC_Client_GUI_MessageHandler (Common_UI_GTKState*,        // GTK state handle
+  IRC_Client_GUI_MessageHandler (struct Common_UI_GTKState*, // GTK state handle
                                  IRC_Client_GUI_Connection*, // connection handle
                                  IRC_IControl*,              // controller handle
                                  const std::string&,         // identifier (channel/nick)
@@ -124,12 +124,12 @@ class IRC_Client_GUI_MessageHandler
   // helper methods
   void clearMembers (bool = true); // locked access ?
 
-  IRC_Client_GTK_HandlerCBData CBData_;
-  bool                         isFirstMemberListMsg_;
-  bool                         isPrivateDialog_;
-  IRC_Client_MessageQueue_t    messageQueue_;
-  ACE_SYNCH_MUTEX              messageQueueLock_;
-  GtkTextView*                 view_; // --> server log
+  struct IRC_Client_GTK_HandlerCBData CBData_;
+  bool                                isFirstMemberListMsg_;
+  bool                                isPrivateDialog_;
+  IRC_Client_MessageQueue_t           messageQueue_;
+  ACE_SYNCH_MUTEX                     messageQueueLock_;
+  GtkTextView*                        view_; // --> server log
 };
 
 #endif
