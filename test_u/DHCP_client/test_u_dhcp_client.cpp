@@ -41,10 +41,6 @@
 #include <ace/Synch.h>
 #include <ace/Version.h>
 
-#ifdef LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
-#include <valgrind/valgrind.h>
-#endif
-
 #include "common.h"
 #include "common_file_tools.h"
 #include "common_logger.h"

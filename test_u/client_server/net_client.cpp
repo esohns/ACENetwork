@@ -43,10 +43,6 @@
 #include <ace/Signal.h>
 #include <ace/Version.h>
 
-#ifdef LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
-#include <valgrind/valgrind.h>
-#endif
-
 #include "common_file_tools.h"
 #include "common_logger.h"
 #include "common_timer_manager.h"

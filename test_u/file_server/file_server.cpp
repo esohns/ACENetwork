@@ -44,10 +44,6 @@
 #include <ace/Signal.h>
 #include <ace/Version.h>
 
-#ifdef LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
-#include <valgrind/valgrind.h>
-#endif
-
 #include "common_file_tools.h"
 #include "common_logger.h"
 #include "common_tools.h"
@@ -626,6 +622,8 @@ do_work (
   // ****************** socket handler configuration data **********************
   configuration.socketHandlerConfiguration.messageAllocator =
     &message_allocator;
+  configuration.socketHandlerConfiguration.socketConfiguration =
+    &configuration.socketConfiguration;
   configuration.socketHandlerConfiguration.userData =
     &configuration.userData;
   // ****************** connection configuration data **********************

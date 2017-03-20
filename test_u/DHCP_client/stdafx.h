@@ -37,6 +37,10 @@
 //#include "ace/Synch.h"
 //#include "ace/Task.h"
 
+#ifdef LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
+#include <valgrind/valgrind.h>
+#endif
+
 // Local Header Files
 #include "net_macros.h"
 
