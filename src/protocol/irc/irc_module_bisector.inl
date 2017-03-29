@@ -489,11 +489,16 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
           message_inout->get ();
       const SessionDataType& session_data_r =
           session_data_container_r.get ();
+      // sanity check(s)
       ACE_ASSERT (inherited::streamState_);
       ACE_ASSERT (inherited::streamState_->currentSessionData);
-      ACE_Guard<ACE_SYNCH_MUTEX> aGuard (*(inherited::streamState_->currentSessionData->lock));
-      inherited::streamState_->currentSessionData->sessionID =
+      ACE_ASSERT (inherited::streamState_->currentSessionData->lock);
+
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *(inherited::streamState_->currentSessionData->lock));
+
+        inherited::streamState_->currentSessionData->sessionID =
           session_data_r.sessionID;
+      } // end lock scope
 
       // start profile timer...
       //profile_.start ();
@@ -501,10 +506,7 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
       break;
     }
     default:
-    {
-      // don't do anything...
       break;
-    }
   } // end SWITCH
 }
 

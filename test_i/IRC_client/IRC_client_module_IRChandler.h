@@ -144,27 +144,15 @@ class IRC_Client_Module_IRCHandler
   // *NOTE*: "fire-and-forget" - the argument is consumed
   void sendMessage (IRC_Record*&); // command handle
 
-  // convenient types
-  typedef typename inherited::SUBSCRIBERS_T::iterator SUBSCRIBERS_ITERATOR_T;
-
-  // *NOTE*: lock subscribers_ and connectionIsAlive_
-//  // *NOTE*: this lock needs to be recursive to prevent deadlocks when users
-//  //         unsubscribe from within the notification callbacks
-  ACE_SYNCH_RECURSIVE_MUTEX         lock_;
-  typename inherited::SUBSCRIBERS_T subscribers_;
-
-//  IRC_Client_ModuleHandlerConfiguration configuration_;
-  bool                              isInitialized_;
-
   // *NOTE*: obviously, there is a delay between connection establishment and
   //         reception of the welcome NOTICE; let clients wait for it so they
   //         can start registering connections in accordance with the IRC
   //         protocol (*TODO*: reference)
-  ACE_SYNCH_MUTEX                   conditionLock_;
-  ACE_SYNCH_CONDITION               condition_;
-  bool                              connectionIsAlive_;
-  bool                              initialRegistration_;
-  bool                              receivedInitialNotice_;
+  ACE_SYNCH_MUTEX     conditionLock_;
+  ACE_SYNCH_CONDITION condition_;
+  bool                connectionIsAlive_;
+  bool                initialRegistration_;
+  bool                receivedInitialNotice_;
 };
 
 // declare module

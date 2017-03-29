@@ -63,8 +63,8 @@ connection_setup_function (void* arg_in)
   result = arg_in;
 #endif
 
-  IRC_Client_ConnectionThreadData* data_p =
-    static_cast<IRC_Client_ConnectionThreadData*> (arg_in);
+  struct IRC_Client_ConnectionThreadData* data_p =
+    static_cast<struct IRC_Client_ConnectionThreadData*> (arg_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -182,8 +182,8 @@ connection_setup_function (void* arg_in)
   //IRC_Client_ConnectorConfiguration connector_configuration;
 
   // step2b: set up configuration passed to processing stream
-  IRC_Client_ConnectionConfiguration* configuration_p = NULL;
-  IRC_Client_UserData* user_data_p = NULL;
+  struct IRC_Client_ConnectionConfiguration* configuration_p = NULL;
+  struct IRC_Client_UserData* user_data_p = NULL;
   // load defaults
   connection_manager_p->get (configuration_p,
                              user_data_p);
@@ -256,7 +256,10 @@ connection_setup_function (void* arg_in)
                     ACE_TEXT ("failed to connect(\"%s\"): \"%m\", continuing\n"),
                     ACE_TEXT (Net_Common_Tools::IPAddress2String (configuration_p->socketHandlerConfiguration->socketConfiguration->address).c_str ())));
       else
+      {
         done = true;
+        break;
+      } // end ELSE
     } // end FOR
   } // end FOR
   if (handle == ACE_INVALID_HANDLE)
@@ -344,7 +347,7 @@ connection_failed:
   if (!icontrol_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<IRC_IControl*>(0x%@) failed, returning\n"),
+                ACE_TEXT ("dynamic_cast<IRC_IControl>(0x%@) failed, returning\n"),
                 const_cast<Stream_Module_t*> (module_p)->writer ()));
 
     // clean up
@@ -368,8 +371,8 @@ connection_failed:
                                                         connection_p));
   } // end lock scope
 
-  //   ACE_DEBUG((LM_DEBUG,
-  //              ACE_TEXT("registering...\n")));
+  //   ACE_DEBUG ((LM_DEBUG,
+  //               ACE_TEXT ("registering...\n")));
 
   // step4: register connection with the server
   try {
@@ -743,7 +746,7 @@ idle_finalize_UI_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_finalize_UI_cb"));
 
   struct IRC_Client_GTK_CBData* data_p =
-    static_cast<IRC_Client_GTK_CBData*> (userData_in);
+    static_cast<struct IRC_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -773,7 +776,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_UI_cb"));
 
   struct IRC_Client_GTK_CBData* data_p =
-    static_cast<IRC_Client_GTK_CBData*> (userData_in);
+    static_cast<struct IRC_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1672,7 +1675,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   //   gtk_entry_set_width_chars(main_entry_entry,
   //                             -1); // reset to default
   gtk_entry_set_text (entry_p,
-                      login_options.nickName.c_str ());
+                      login_options.nickname.c_str ());
   gtk_editable_select_region (GTK_EDITABLE (entry_p),
                               0, -1);
   // retrieve entry dialog handle
@@ -1700,7 +1703,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
     const gchar* string_p = gtk_entry_get_text (entry_p);
     if (!string_p)
       continue; // empty --> try again
-    login_options.nickName = string_p;
+    login_options.nickname = string_p;
     //login_options.nickname = Common_UI_Tools::UTF82Locale (string_p, -1);
     //if (login_options.nickname.empty ())
     //{
@@ -1718,8 +1721,8 @@ button_connect_clicked_cb (GtkWidget* widget_in,
 
     // sanity check: <= IRC_CLIENT_CNF_IRC_MAX_NICK_LENGTH characters ?
     // *TODO*: support the NICKLEN=xxx "feature" of the server...
-    if (login_options.nickName.size () > IRC_PRT_MAXIMUM_NICKNAME_LENGTH)
-      login_options.nickName.resize (IRC_PRT_MAXIMUM_NICKNAME_LENGTH);
+    if (login_options.nickname.size () > IRC_PRT_MAXIMUM_NICKNAME_LENGTH)
+      login_options.nickname.resize (IRC_PRT_MAXIMUM_NICKNAME_LENGTH);
 
     // sanity check: nickname already in use ?
     nick_name_taken = false;
@@ -1737,7 +1740,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
         // *TODO*: the structure of the tab (label) is an implementation detail
         //         and should be encapsulated by the connection...
         if ((connection_data_r.label == server_name_string) &&
-            (connection_state_r.nickName == login_options.nickName))
+            (connection_state_r.nickName == login_options.nickname))
         {
           nick_name_taken = true;
           break;

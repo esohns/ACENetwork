@@ -37,6 +37,7 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 
 
 /* %not-for-header */
+
 /* %if-c-only */
 /* %if-not-reentrant */
 /* %endif */
@@ -47,7 +48,7 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 6
-#define YY_FLEX_SUBMINOR_VERSION 3
+#define YY_FLEX_SUBMINOR_VERSION 1
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -68,72 +69,40 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 /* %endif */
 
 /* %if-c-only */
-    #define yy_create_buffer HTTP_Scanner__create_buffer
-
-    #define yy_delete_buffer HTTP_Scanner__delete_buffer
-
-    #define yy_scan_buffer HTTP_Scanner__scan_buffer
-
-    #define yy_scan_string HTTP_Scanner__scan_string
-
-    #define yy_scan_bytes HTTP_Scanner__scan_bytes
-
-    #define yy_init_buffer HTTP_Scanner__init_buffer
-
-    #define yy_flush_buffer HTTP_Scanner__flush_buffer
-
-    #define yy_load_buffer_state HTTP_Scanner__load_buffer_state
-
-    #define yy_switch_to_buffer HTTP_Scanner__switch_to_buffer
-
-    #define yypush_buffer_state HTTP_Scanner_push_buffer_state
-
-    #define yypop_buffer_state HTTP_Scanner_pop_buffer_state
-
-    #define yyensure_buffer_stack HTTP_Scanner_ensure_buffer_stack
-
-    #define yylex HTTP_Scanner_lex
-
-    #define yyrestart HTTP_Scanner_restart
-
-    #define yylex_init HTTP_Scanner_lex_init
-
-    #define yylex_init_extra HTTP_Scanner_lex_init_extra
-
-    #define yylex_destroy HTTP_Scanner_lex_destroy
-
-    #define yyget_debug HTTP_Scanner_get_debug
-
-    #define yyset_debug HTTP_Scanner_set_debug
-
-    #define yyget_extra HTTP_Scanner_get_extra
-
-    #define yyset_extra HTTP_Scanner_set_extra
-
-    #define yyget_in HTTP_Scanner_get_in
-
-    #define yyset_in HTTP_Scanner_set_in
-
-    #define yyget_out HTTP_Scanner_get_out
-
-    #define yyset_out HTTP_Scanner_set_out
-
-    #define yyget_leng HTTP_Scanner_get_leng
-
-    #define yyget_text HTTP_Scanner_get_text
-
-    #define yyget_lineno HTTP_Scanner_get_lineno
-
-    #define yyset_lineno HTTP_Scanner_set_lineno
-
-
-        #define yyget_column HTTP_Scanner_get_column
-
-        #define yyset_column HTTP_Scanner_set_column
-
-
-    #define yywrap HTTP_Scanner_wrap
-
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
 /* %endif */
 
 
@@ -141,12 +110,9 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 
 
 
-    #define yyalloc HTTP_Scanner_alloc
-
-    #define yyrealloc HTTP_Scanner_realloc
-
-    #define yyfree HTTP_Scanner_free
-
+    
+    
+    
 
 /* %if-c-only */
 
@@ -180,7 +146,7 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
- * if you want the limit (max/min) macros for int types.
+ * if you want the limit (max/min) macros for int types. 
  */
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS 1
@@ -197,7 +163,7 @@ typedef uint32_t flex_uint32_t;
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
 typedef int flex_int32_t;
-typedef unsigned char flex_uint8_t;
+typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
 
@@ -248,17 +214,25 @@ typedef unsigned int flex_uint32_t;
 #define yynoreturn
 #endif
 
+
+    
+
+
 /* %not-for-header */
+
 /* Returned upon end-of-file. */
 #define YY_NULL 0
 /* %ok-for-header */
 
 
 /* %not-for-header */
-/* Promotes a possibly negative, possibly signed char to an
- *   integer in range [0..255] for use as an array index.
+
+/* Promotes a possibly negative, possibly signed char to an unsigned
+ * integer for use as an array index.  If the signed char is negative,
+ * we want to instead treat it as an 8-bit unsigned char, hence the
+ * double cast.
  */
-#define YY_SC_TO_UI(c) ((YY_CHAR) (c))
+#define YY_SC_TO_UI(c) ((unsigned int) (unsigned char) c)
 /* %ok-for-header */
 
 
@@ -280,6 +254,8 @@ typedef void* yyscan_t;
 
 
 
+    
+    
 
 
 
@@ -310,7 +286,10 @@ typedef void* yyscan_t;
 
 
 
-
+    
+    
+    
+    
 
 
 
@@ -319,16 +298,28 @@ typedef void* yyscan_t;
  * definition of BEGIN.
  */
 #define BEGIN yyg->yy_start = 1 + 2 *
+
+
+
 /* Translate the current start state into a value that can be later handed
  * to BEGIN to return to the state.  The YYSTATE alias is for lex
  * compatibility.
  */
 #define YY_START ((yyg->yy_start - 1) / 2)
 #define YYSTATE YY_START
+
+
+
 /* Action number for EOF rule of a given start state. */
 #define YY_STATE_EOF(state) (YY_END_OF_BUFFER + state + 1)
+
+
+
 /* Special action meaning "start processing a new file". */
 #define YY_NEW_FILE HTTP_Scanner_restart(yyin ,yyscanner )
+
+
+
 #define YY_END_OF_BUFFER_CHAR 0
 
 
@@ -375,9 +366,12 @@ typedef size_t yy_size_t;
 #define EOB_ACT_END_OF_FILE 1
 #define EOB_ACT_LAST_MATCH 2
 
+
+
+    
     /* Note: We specifically omit the test for yy_rule_can_match_eol because it requires
      *       access to the local variable yy_act. Since yyless() is a macro, it would break
-     *       existing scanners that call yyless() from OUTSIDE HTTP_Scanner_lex.
+     *       existing scanners that call yyless() from OUTSIDE HTTP_Scanner_lex. 
      *       One obvious solution it to make yy_act a global. I tried that, and saw
      *       a 5% performance hit in a non-yylineno scanner, because yy_act is
      *       normally declared as a register variable-- so it is not worth it.
@@ -396,97 +390,104 @@ typedef size_t yy_size_t;
                     if ( *p == '\n' )\
                         --yylineno;\
             }while(0)
+    
+
+
 
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
-  do \
-    { \
-    /* Undo effects of setting up yytext. */ \
+	do \
+		{ \
+		/* Undo effects of setting up yytext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
-    *yy_cp = yyg->yy_hold_char; \
-    YY_RESTORE_YY_MORE_OFFSET \
-    yyg->yy_c_buf_p = yy_cp = yy_bp + yyless_macro_arg - YY_MORE_ADJ; \
-    YY_DO_BEFORE_ACTION; /* set up yytext again */ \
-    } \
-  while ( 0 )
+		*yy_cp = yyg->yy_hold_char; \
+		YY_RESTORE_YY_MORE_OFFSET \
+		yyg->yy_c_buf_p = yy_cp = yy_bp + yyless_macro_arg - YY_MORE_ADJ; \
+		YY_DO_BEFORE_ACTION; /* set up yytext again */ \
+		} \
+	while ( 0 )
+
+
+
 #define unput(c) yyunput( c, yyg->yytext_ptr , yyscanner )
 
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
 struct yy_buffer_state
-  {
+	{
 /* %if-c-only */
-  FILE *yy_input_file;
+	FILE *yy_input_file;
 /* %endif */
 
 /* %if-c++-only */
 /* %endif */
 
 
-  char *yy_ch_buf;		/* input buffer */
-  char *yy_buf_pos;		/* current position in input buffer */
+	char *yy_ch_buf;		/* input buffer */
+	char *yy_buf_pos;		/* current position in input buffer */
 
-  /* Size of input buffer in bytes, not including room for EOB
-   * characters.
-   */
-  int yy_buf_size;
+	/* Size of input buffer in bytes, not including room for EOB
+	 * characters.
+	 */
+	int yy_buf_size;
 
-  /* Number of characters read into yy_ch_buf, not including EOB
-   * characters.
-   */
-  int yy_n_chars;
+	/* Number of characters read into yy_ch_buf, not including EOB
+	 * characters.
+	 */
+	int yy_n_chars;
 
-  /* Whether we "own" the buffer - i.e., we know we created it,
-   * and can realloc() it to grow it, and should free() it to
-   * delete it.
-   */
-  int yy_is_our_buffer;
+	/* Whether we "own" the buffer - i.e., we know we created it,
+	 * and can realloc() it to grow it, and should free() it to
+	 * delete it.
+	 */
+	int yy_is_our_buffer;
 
-  /* Whether this is an "interactive" input source; if so, and
-   * if we're using stdio for input, then we want to use getc()
-   * instead of fread(), to make sure we stop fetching input after
-   * each newline.
-   */
-  int yy_is_interactive;
+	/* Whether this is an "interactive" input source; if so, and
+	 * if we're using stdio for input, then we want to use getc()
+	 * instead of fread(), to make sure we stop fetching input after
+	 * each newline.
+	 */
+	int yy_is_interactive;
 
-  /* Whether we're considered to be at the beginning of a line.
-   * If so, '^' rules will be active on the next match, otherwise
-   * not.
-   */
-  int yy_at_bol;
+	/* Whether we're considered to be at the beginning of a line.
+	 * If so, '^' rules will be active on the next match, otherwise
+	 * not.
+	 */
+	int yy_at_bol;
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
+    
 
+	/* Whether to try to fill the input buffer when we reach the
+	 * end of it.
+	 */
+	int yy_fill_buffer;
 
-  /* Whether to try to fill the input buffer when we reach the
-   * end of it.
-   */
-  int yy_fill_buffer;
-
-  int yy_buffer_status;
+	int yy_buffer_status;
 
 #define YY_BUFFER_NEW 0
 #define YY_BUFFER_NORMAL 1
-  /* When an EOF's been seen but there's still some text to process
-   * then we mark the buffer as YY_EOF_PENDING, to indicate that we
-   * shouldn't try reading from the input source any more.  We might
-   * still have a bunch of tokens to match, though, because of
-   * possible backing-up.
-   *
-   * When we actually see the EOF, we change the status to "new"
-   * (via HTTP_Scanner_restart()), so that the user can continue scanning by
-   * just pointing yyin at a new input file.
-   */
+	/* When an EOF's been seen but there's still some text to process
+	 * then we mark the buffer as YY_EOF_PENDING, to indicate that we
+	 * shouldn't try reading from the input source any more.  We might
+	 * still have a bunch of tokens to match, though, because of
+	 * possible backing-up.
+	 *
+	 * When we actually see the EOF, we change the status to "new"
+	 * (via HTTP_Scanner_restart()), so that the user can continue scanning by
+	 * just pointing yyin at a new input file.
+	 */
 #define YY_BUFFER_EOF_PENDING 2
 
-  };
+	};
 #endif /* !YY_STRUCT_YY_BUFFER_STATE */
 
 /* %if-c-only Standard (non-C++) definition */
 /* %not-for-header */
+
 /* %if-not-reentrant */
 /* %endif */
 /* %ok-for-header */
@@ -503,6 +504,9 @@ struct yy_buffer_state
 #define YY_CURRENT_BUFFER ( yyg->yy_buffer_stack \
                           ? yyg->yy_buffer_stack[yyg->yy_buffer_stack_top] \
                           : NULL)
+
+
+
 /* Same as previous macro, but useful when we know that the buffer stack is not
  * NULL or when we need an lvalue. For internal use only.
  */
@@ -513,55 +517,68 @@ struct yy_buffer_state
 
 /* %if-not-reentrant */
 /* %not-for-header */
+
 /* %ok-for-header */
 
 /* %endif */
 
-void HTTP_Scanner_restart ( FILE *input_file , yyscan_t yyscanner );
-void HTTP_Scanner__switch_to_buffer ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
-YY_BUFFER_STATE HTTP_Scanner__create_buffer ( FILE *file, int size , yyscan_t yyscanner );
-void HTTP_Scanner__delete_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
-void HTTP_Scanner__flush_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
-void HTTP_Scanner_push_buffer_state ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
-void HTTP_Scanner_pop_buffer_state ( yyscan_t yyscanner );
+void HTTP_Scanner_restart (FILE *input_file ,yyscan_t yyscanner );
+void HTTP_Scanner__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Scanner__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void HTTP_Scanner__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void HTTP_Scanner__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void HTTP_Scanner_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void HTTP_Scanner_pop_buffer_state (yyscan_t yyscanner );
 
 
-static void HTTP_Scanner_ensure_buffer_stack ( yyscan_t yyscanner );
-static void HTTP_Scanner__load_buffer_state ( yyscan_t yyscanner );
-static void HTTP_Scanner__init_buffer ( YY_BUFFER_STATE b, FILE *file , yyscan_t yyscanner );
+static void HTTP_Scanner_ensure_buffer_stack (yyscan_t yyscanner );
+static void HTTP_Scanner__load_buffer_state (yyscan_t yyscanner );
+static void HTTP_Scanner__init_buffer (YY_BUFFER_STATE b,FILE *file ,yyscan_t yyscanner );
+
+
+
 #define YY_FLUSH_BUFFER HTTP_Scanner__flush_buffer(YY_CURRENT_BUFFER ,yyscanner)
 
 
-YY_BUFFER_STATE HTTP_Scanner__scan_buffer ( char *base, yy_size_t size , yyscan_t yyscanner );
-YY_BUFFER_STATE HTTP_Scanner__scan_string ( const char *yy_str , yyscan_t yyscanner );
-YY_BUFFER_STATE HTTP_Scanner__scan_bytes ( const char *bytes, int len , yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Scanner__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Scanner__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Scanner__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
 
 /* %endif */
 
-void *HTTP_Scanner_alloc ( yy_size_t , yyscan_t yyscanner );
-void *HTTP_Scanner_realloc ( void *, yy_size_t , yyscan_t yyscanner );
-void HTTP_Scanner_free ( void * , yyscan_t yyscanner );
+void *HTTP_Scanner_alloc (yy_size_t ,yyscan_t yyscanner );
+void *HTTP_Scanner_realloc (void *,yy_size_t ,yyscan_t yyscanner );
+void HTTP_Scanner_free (void * ,yyscan_t yyscanner );
 
 
 #define yy_new_buffer HTTP_Scanner__create_buffer
+
+
+
 #define yy_set_interactive(is_interactive) \
-  { \
-  if ( ! YY_CURRENT_BUFFER ){ \
+	{ \
+	if ( ! YY_CURRENT_BUFFER ){ \
         HTTP_Scanner_ensure_buffer_stack (yyscanner); \
-    YY_CURRENT_BUFFER_LVALUE =    \
+		YY_CURRENT_BUFFER_LVALUE =    \
             HTTP_Scanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
-  } \
-  YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
-  }
+	} \
+	YY_CURRENT_BUFFER_LVALUE->yy_is_interactive = is_interactive; \
+	}
+
+
+
 #define yy_set_bol(at_bol) \
-  { \
-  if ( ! YY_CURRENT_BUFFER ){\
+	{ \
+	if ( ! YY_CURRENT_BUFFER ){\
         HTTP_Scanner_ensure_buffer_stack (yyscanner); \
-    YY_CURRENT_BUFFER_LVALUE =    \
+		YY_CURRENT_BUFFER_LVALUE =    \
             HTTP_Scanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner); \
-  } \
-  YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
-  }
+	} \
+	YY_CURRENT_BUFFER_LVALUE->yy_at_bol = at_bol; \
+	}
+
+
+
 #define YY_AT_BOL() (YY_CURRENT_BUFFER_LVALUE->yy_at_bol)
 
 
@@ -569,7 +586,10 @@ void HTTP_Scanner_free ( void * , yyscan_t yyscanner );
 /* Begin user sect3 */
 
 #define FLEX_DEBUG
-typedef flex_uint8_t YY_CHAR;
+
+typedef unsigned char YY_CHAR;
+
+
 
 
 typedef int yy_state_type;
@@ -578,7 +598,7 @@ typedef int yy_state_type;
 
 
 /* %% [1.5] DFA */
-static const flex_int32_t yy_nxt[][256] =
+static yyconst flex_int32_t yy_nxt[][256] =
     {
     {
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -76016,10 +76036,10 @@ static const flex_int32_t yy_nxt[][256] =
 /* %if-c-only Standard (non-C++) definition */
 
 
-static yy_state_type yy_get_previous_state ( yyscan_t yyscanner );
-static yy_state_type yy_try_NUL_trans ( yy_state_type current_state  , yyscan_t yyscanner);
-static int yy_get_next_buffer ( yyscan_t yyscanner );
-static void yynoreturn yy_fatal_error ( const char* msg , yyscan_t yyscanner );
+static yy_state_type yy_get_previous_state (yyscan_t yyscanner );
+static yy_state_type yy_try_NUL_trans (yy_state_type current_state  ,yyscan_t yyscanner);
+static int yy_get_next_buffer (yyscan_t yyscanner );
+static void yynoreturn yy_fatal_error (yyconst char* msg ,yyscan_t yyscanner );
 
 
 /* %endif */
@@ -76029,24 +76049,27 @@ static void yynoreturn yy_fatal_error ( const char* msg , yyscan_t yyscanner );
  * corresponding action - sets up yytext.
  */
 #define YY_DO_BEFORE_ACTION \
-  yyg->yytext_ptr = yy_bp; \
+	yyg->yytext_ptr = yy_bp; \
 /* %% [2.0] code to fiddle yytext and yyleng for yymore() goes here \ */\
-  yyleng = (int) (yy_cp - yy_bp); \
-  yyg->yy_hold_char = *yy_cp; \
-  *yy_cp = '\0'; \
+	yyleng = (int) (yy_cp - yy_bp); \
+	yyg->yy_hold_char = *yy_cp; \
+	*yy_cp = '\0'; \
 /* %% [3.0] code to copy yytext_ptr to yytext[] goes here, if %array \ */\
-  yyg->yy_c_buf_p = yy_cp;
+	yyg->yy_c_buf_p = yy_cp;
+
+
+
 /* %% [4.0] data tables for the DFA and the user's section 1 definitions go here */
 #define YY_NUM_RULES 23
 #define YY_END_OF_BUFFER 24
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
-  {
-  flex_int32_t yy_verify;
-  flex_int32_t yy_nxt;
-  };
-static const flex_int32_t yy_accept[2387] =
+	{
+	flex_int32_t yy_verify;
+	flex_int32_t yy_nxt;
+	};
+static yyconst flex_int32_t yy_accept[2387] =
     {   0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
@@ -76314,12 +76337,12 @@ static const flex_int32_t yy_accept[2387] =
 
 
 /* Table of booleans, true if rule could match eol. */
-static const flex_int32_t yy_rule_can_match_eol[24] =
+static yyconst flex_int32_t yy_rule_can_match_eol[24] =
     {   0,
-0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 
     1, 1, 1, 0,     };
 
-static const yy_state_type yy_NUL_trans[2387] =
+static yyconst yy_state_type yy_NUL_trans[2387] =
     {   0,
        28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
        28,   28,   28,   28,   28,   28,   28,   28,   28,   28,
@@ -76585,11 +76608,11 @@ static const yy_state_type yy_NUL_trans[2387] =
         0,    0,    0,    0,    0,    0
     } ;
 
-static const flex_int32_t yy_rule_linenum[23] =
+static yyconst flex_int32_t yy_rule_linenum[23] =
     {   0,
-      355,  359,  365,  378,  391,  404,  414,  424,  434,  442,
-      455,  468,  481,  491,  501,  511,  570,  597,  625,  635,
-      649,  788
+      354,  358,  364,  377,  390,  403,  413,  423,  433,  441,
+      454,  467,  480,  490,  500,  510,  569,  596,  625,  635,
+      649,  767
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -76617,7 +76640,7 @@ static const flex_int32_t yy_rule_linenum[23] =
 #include "http_common.h"
 #include "http_defines.h"
 
-/* *NOTE*: instead of the default (int), this yylex returns token_type.
+/* *NOTE*: instead of the default (int), this HTTP_Scanner_lex returns token_type.
            Unfortunately, yyterminate by default returns 0, which is not of
            token_type. This %define solves that issue. */
 #define yyterminate() return yy::HTTP_Parser::token::END
@@ -76821,21 +76844,21 @@ struct yyguts_t
 
 /* %if-c-only */
 
-static int yy_init_globals ( yyscan_t yyscanner );
+static int yy_init_globals (yyscan_t yyscanner );
 
 /* %endif */
 
 /* %if-reentrant */
 
 
+    
 
-
-
+    
 
 
 int HTTP_Scanner_lex_init (yyscan_t* scanner);
 
-int HTTP_Scanner_lex_init_extra ( YY_EXTRA_TYPE user_defined, yyscan_t* scanner);
+int HTTP_Scanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 
 /* %endif */
 
@@ -76845,66 +76868,66 @@ int HTTP_Scanner_lex_init_extra ( YY_EXTRA_TYPE user_defined, yyscan_t* scanner)
    These are made visible to non-reentrant scanners for convenience. */
 
 
-int HTTP_Scanner_lex_destroy ( yyscan_t yyscanner );
+int HTTP_Scanner_lex_destroy (yyscan_t yyscanner );
 
 
 
-int HTTP_Scanner_get_debug ( yyscan_t yyscanner );
+int HTTP_Scanner_get_debug (yyscan_t yyscanner );
 
 
 
-void HTTP_Scanner_set_debug ( int debug_flag , yyscan_t yyscanner );
+void HTTP_Scanner_set_debug (int debug_flag ,yyscan_t yyscanner );
 
 
 
-YY_EXTRA_TYPE HTTP_Scanner_get_extra ( yyscan_t yyscanner );
+YY_EXTRA_TYPE HTTP_Scanner_get_extra (yyscan_t yyscanner );
 
 
 
-void HTTP_Scanner_set_extra ( YY_EXTRA_TYPE user_defined , yyscan_t yyscanner );
+void HTTP_Scanner_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
 
 
 
-FILE *HTTP_Scanner_get_in ( yyscan_t yyscanner );
+FILE *HTTP_Scanner_get_in (yyscan_t yyscanner );
 
 
 
-void HTTP_Scanner_set_in  ( FILE * _in_str , yyscan_t yyscanner );
+void HTTP_Scanner_set_in  (FILE * _in_str ,yyscan_t yyscanner );
 
 
 
-FILE *HTTP_Scanner_get_out ( yyscan_t yyscanner );
+FILE *HTTP_Scanner_get_out (yyscan_t yyscanner );
 
 
 
-void HTTP_Scanner_set_out  ( FILE * _out_str , yyscan_t yyscanner );
+void HTTP_Scanner_set_out  (FILE * _out_str ,yyscan_t yyscanner );
 
 
 
-      int HTTP_Scanner_get_leng ( yyscan_t yyscanner );
+			int HTTP_Scanner_get_leng (yyscan_t yyscanner );
 
 
 
-char *HTTP_Scanner_get_text ( yyscan_t yyscanner );
+char *HTTP_Scanner_get_text (yyscan_t yyscanner );
 
 
 
-int HTTP_Scanner_get_lineno ( yyscan_t yyscanner );
+int HTTP_Scanner_get_lineno (yyscan_t yyscanner );
 
 
 
-void HTTP_Scanner_set_lineno ( int _line_number , yyscan_t yyscanner );
-
-
-
-
-int HTTP_Scanner_get_column  ( yyscan_t yyscanner );
+void HTTP_Scanner_set_lineno (int _line_number ,yyscan_t yyscanner );
 
 
 
 
+int HTTP_Scanner_get_column  (yyscan_t yyscanner );
 
-void HTTP_Scanner_set_column ( int _column_no , yyscan_t yyscanner );
+
+
+
+
+void HTTP_Scanner_set_column (int _column_no ,yyscan_t yyscanner );
 
 
 
@@ -76917,35 +76940,37 @@ void HTTP_Scanner_set_column ( int _column_no , yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int HTTP_Scanner_wrap ( yyscan_t yyscanner );
+extern "C" int HTTP_Scanner_wrap (yyscan_t yyscanner );
 #else
-extern int HTTP_Scanner_wrap ( yyscan_t yyscanner );
+extern int HTTP_Scanner_wrap (yyscan_t yyscanner );
 #endif
 #endif
 
 /* %not-for-header */
-#ifndef YY_NO_UNPUT
 
+#ifndef YY_NO_UNPUT
+    
 #endif
 /* %ok-for-header */
 
 /* %endif */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy ( char *, const char *, int , yyscan_t yyscanner);
+static void yy_flex_strncpy (char *,yyconst char *,int ,yyscan_t yyscanner);
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen ( const char * , yyscan_t yyscanner);
+static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #endif
 
 #ifndef YY_NO_INPUT
 /* %if-c-only Standard (non-C++) definition */
 /* %not-for-header */
+
 #ifdef __cplusplus
-static int yyinput ( yyscan_t yyscanner );
+static int yyinput (yyscan_t yyscanner );
 #else
-static int input ( yyscan_t yyscanner );
+static int input (yyscan_t yyscanner );
 #endif
 /* %ok-for-header */
 
@@ -76992,17 +77017,17 @@ static int input ( yyscan_t yyscanner );
 #ifndef YY_INPUT
 #define YY_INPUT(buf,result,max_size) \
 /* %% [5.0] fread()/read() definition of YY_INPUT goes here unless we're doing C++ \ */\
-  errno=0; \
-  while ( (result = (int) read( fileno(yyin), buf, (yy_size_t) max_size )) < 0 ) \
-  { \
-    if( errno != EINTR) \
-    { \
-      YY_FATAL_ERROR( "input in flex scanner failed" ); \
-      break; \
-    } \
-    errno=0; \
-    clearerr(yyin); \
-  }\
+	errno=0; \
+	while ( (result = (int) read( fileno(yyin), buf, max_size )) < 0 ) \
+	{ \
+		if( errno != EINTR) \
+		{ \
+			YY_FATAL_ERROR( "input in flex scanner failed" ); \
+			break; \
+		} \
+		errno=0; \
+		clearerr(yyin); \
+	}\
 \
 /* %if-c++-only C++ definition \ */\
 /* %endif */
@@ -77038,9 +77063,11 @@ static int input ( yyscan_t yyscanner );
 
 /* %if-tables-serialization structures and prototypes */
 /* %not-for-header */
+
 /* %ok-for-header */
 
 /* %not-for-header */
+
 /* %tables-yydmap generated elements */
 /* %endif */
 /* end tables serialization structures and prototypes */
@@ -77090,17 +77117,18 @@ extern int HTTP_Scanner_lex (yyscan_t yyscanner);
 
 /* %% [6.0] YY_RULE_SETUP definition goes here */
 #define YY_RULE_SETUP \
-  YY_USER_ACTION
+	YY_USER_ACTION
 
 
 /* %not-for-header */
+
 /** The main scanner function which does all the work.
  */
 YY_DECL
 {
-  yy_state_type yy_current_state;
-  char *yy_cp, *yy_bp;
-  int yy_act;
+	yy_state_type yy_current_state;
+	char *yy_cp, *yy_bp;
+	int yy_act;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 
@@ -77109,43 +77137,43 @@ YY_DECL
 
 
 
-  if ( !yyg->yy_init )
-    {
-    yyg->yy_init = 1;
+	if ( !yyg->yy_init )
+		{
+		yyg->yy_init = 1;
 
 #ifdef YY_USER_INIT
-    YY_USER_INIT;
+		YY_USER_INIT;
 #endif
 
 
 
-    if ( ! yyg->yy_start )
-      yyg->yy_start = 1;	/* first start state */
+		if ( ! yyg->yy_start )
+			yyg->yy_start = 1;	/* first start state */
 
-    if ( ! yyin )
+		if ( ! yyin )
 /* %if-c-only */
-      yyin = stdin;
+			yyin = stdin;
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 
-    if ( ! yyout )
+		if ( ! yyout )
 /* %if-c-only */
-      yyout = stdout;
+			yyout = stdout;
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 
-    if ( ! YY_CURRENT_BUFFER ) {
-      HTTP_Scanner_ensure_buffer_stack (yyscanner);
-      YY_CURRENT_BUFFER_LVALUE =
-        HTTP_Scanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
-    }
+		if ( ! YY_CURRENT_BUFFER ) {
+			HTTP_Scanner_ensure_buffer_stack (yyscanner);
+			YY_CURRENT_BUFFER_LVALUE =
+				HTTP_Scanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
+		}
 
-    HTTP_Scanner__load_buffer_state(yyscanner );
-    }
+		HTTP_Scanner__load_buffer_state(yyscanner );
+		}
 
-  {
+	{
 /* %% [7.0] user's declarations go here */
 
 
@@ -77165,84 +77193,84 @@ YY_DECL
 
 
 
-  while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
-    {
+	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
+		{
 /* %% [8.0] yymore()-related code goes here */
-    yy_cp = yyg->yy_c_buf_p;
+		yy_cp = yyg->yy_c_buf_p;
 
-    /* Support of yytext. */
-    *yy_cp = yyg->yy_hold_char;
+		/* Support of yytext. */
+		*yy_cp = yyg->yy_hold_char;
 
-    /* yy_bp points to the position in yy_ch_buf of the start of
-     * the current run.
-     */
-    yy_bp = yy_cp;
+		/* yy_bp points to the position in yy_ch_buf of the start of
+		 * the current run.
+		 */
+		yy_bp = yy_cp;
 
 /* %% [9.0] code to set up and find next match goes here */
-    yy_current_state = yyg->yy_start;
+		yy_current_state = yyg->yy_start;
 yy_match:
-    while ( (yy_current_state = yy_nxt[yy_current_state][ YY_SC_TO_UI(*yy_cp) ]) > 0 )
-      {
-      if ( yy_accept[yy_current_state] )
-        {
-        yyg->yy_last_accepting_state = yy_current_state;
-        yyg->yy_last_accepting_cpos = yy_cp;
-        }
+		while ( (yy_current_state = yy_nxt[yy_current_state][ YY_SC_TO_UI(*yy_cp) ]) > 0 )
+			{
+			if ( yy_accept[yy_current_state] )
+				{
+				yyg->yy_last_accepting_state = yy_current_state;
+				yyg->yy_last_accepting_cpos = yy_cp;
+				}
 
-      ++yy_cp;
-      }
+			++yy_cp;
+			}
 
-    yy_current_state = -yy_current_state;
+		yy_current_state = -yy_current_state;
 
 yy_find_action:
 /* %% [10.0] code to find the action number goes here */
-    yy_act = yy_accept[yy_current_state];
+		yy_act = yy_accept[yy_current_state];
 
-    YY_DO_BEFORE_ACTION;
+		YY_DO_BEFORE_ACTION;
 
 /* %% [11.0] code for yylineno update goes here */
 
-    if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
-      {
-      int yyl;
-      for ( yyl = 0; yyl < yyleng; ++yyl )
-        if ( yytext[yyl] == '\n' )
-
+		if ( yy_act != YY_END_OF_BUFFER && yy_rule_can_match_eol[yy_act] )
+			{
+			yy_size_t yyl;
+			for ( yyl = 0; yyl < yyleng; ++yyl )
+				if ( yytext[yyl] == '\n' )
+					   
     do{ yylineno++;
         yycolumn=0;
     }while(0)
 ;
-      }
+			}
 
 
 do_action:	/* This label is used only to access EOF actions. */
 
 /* %% [12.0] debug code goes here */
-    if ( yy_flex_debug )
-      {
-      if ( yy_act == 0 )
-        fprintf( stderr, "--scanner backing up\n" );
-      else if ( yy_act < 23 )
-        fprintf( stderr, "--accepting rule at line %ld (\"%s\")\n",
-                 (long)yy_rule_linenum[yy_act], yytext );
-      else if ( yy_act == 23 )
-        fprintf( stderr, "--accepting default rule (\"%s\")\n",
-                 yytext );
-      else if ( yy_act == 24 )
-        fprintf( stderr, "--(end of buffer or a NUL)\n" );
-      else
-        fprintf( stderr, "--EOF (start condition %d)\n", YY_START );
-      }
+		if ( yy_flex_debug )
+			{
+			if ( yy_act == 0 )
+				fprintf( stderr, "--scanner backing up\n" );
+			else if ( yy_act < 23 )
+				fprintf( stderr, "--accepting rule at line %ld (\"%s\")\n",
+				         (long)yy_rule_linenum[yy_act], yytext );
+			else if ( yy_act == 23 )
+				fprintf( stderr, "--accepting default rule (\"%s\")\n",
+				         yytext );
+			else if ( yy_act == 24 )
+				fprintf( stderr, "--(end of buffer or a NUL)\n" );
+			else
+				fprintf( stderr, "--EOF (start condition %d)\n", YY_START );
+			}
 
-    switch ( yy_act )
-  { /* beginning of action switch */
+		switch ( yy_act )
+	{ /* beginning of action switch */
 /* %% [13.0] actions go here */
-      case 0: /* must back up */
-      /* undo the effects of YY_DO_BEFORE_ACTION */
-      *yy_cp = yyg->yy_hold_char;
-      yy_cp = yyg->yy_last_accepting_cpos + 1;
-      yy_current_state = yyg->yy_last_accepting_state;
-      goto yy_find_action;
+			case 0: /* must back up */
+			/* undo the effects of YY_DO_BEFORE_ACTION */
+			*yy_cp = yyg->yy_hold_char;
+			yy_cp = yyg->yy_last_accepting_cpos + 1;
+			yy_current_state = yyg->yy_last_accepting_state;
+			goto yy_find_action;
 
 
 case 1:
@@ -77251,14 +77279,14 @@ YY_RULE_SETUP
                              BEGIN (response);
                              yycolumn -= yyleng;
                              /* yymore (); */ yyless (0); }
-  YY_BREAK
+	YY_BREAK
 case 2:
 YY_RULE_SETUP
 {
                              BEGIN (request);
                              yycolumn -= yyleng;
                              /* yymore (); */ yyless (0); }
-  YY_BREAK
+	YY_BREAK
 // end <INITIAL>
 
 case 3:
@@ -77274,7 +77302,7 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 1);
 //                             return yytokentype::METHOD;
                              return yy::HTTP_Parser::token::METHOD; }
-  YY_BREAK
+	YY_BREAK
 // end <request>
 
 case 4:
@@ -77291,7 +77319,7 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 1);
 //                             return yytokentype::URI;
                              return yy::HTTP_Parser::token::URI; }
-  YY_BREAK
+	YY_BREAK
 // end <uri>
 
 case 5:
@@ -77308,7 +77336,7 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
 //                             return yytokentype::VERSION;
                              return yy::HTTP_Parser::token::VERSION; }
-  YY_BREAK
+	YY_BREAK
 // end <version>
 
 case 6:
@@ -77324,7 +77352,7 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
 //                             return yytokentype::HEADER;
                              return yy::HTTP_Parser::token::HEADER; }
-  YY_BREAK
+	YY_BREAK
 case 7:
 /* rule 7 can match eol */
 YY_RULE_SETUP
@@ -77338,7 +77366,7 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
 //                             return yytokentype::HEADER;
                              return yy::HTTP_Parser::token::HEADER; }
-  YY_BREAK
+	YY_BREAK
 case 8:
 /* rule 8 can match eol */
 YY_RULE_SETUP
@@ -77352,7 +77380,7 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
 //                             return yytokentype::HEADER;
                              return yy::HTTP_Parser::token::HEADER; }
-  YY_BREAK
+	YY_BREAK
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
@@ -77362,7 +77390,7 @@ YY_RULE_SETUP
                              yylval->ival = 2;
 //                             return yytokentype::DELIMITER;
                              return yy::HTTP_Parser::token::DELIMITER; }
-  YY_BREAK
+	YY_BREAK
 // end <request_headers>
 
 case 10:
@@ -77378,7 +77406,7 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 1);
 //                             return yytokentype::VERSION;
                              return yy::HTTP_Parser::token::VERSION; }
-  YY_BREAK
+	YY_BREAK
 // end <response>
 
 case 11:
@@ -77394,7 +77422,7 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 1);
 //                             return yytokentype::STATUS;
                              return yy::HTTP_Parser::token::STATUS; }
-  YY_BREAK
+	YY_BREAK
 // end <status>
 
 case 12:
@@ -77411,7 +77439,7 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
 //                             return yytokentype::REASON;
                              return yy::HTTP_Parser::token::REASON; }
-  YY_BREAK
+	YY_BREAK
 // end <reason>
 
 case 13:
@@ -77427,7 +77455,7 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
 //                             return yytokentype::HEADER;
                              return yy::HTTP_Parser::token::HEADER; }
-  YY_BREAK
+	YY_BREAK
 case 14:
 /* rule 14 can match eol */
 YY_RULE_SETUP
@@ -77441,7 +77469,7 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
 //                             return yytokentype::HEADER;
                              return yy::HTTP_Parser::token::HEADER; }
-  YY_BREAK
+	YY_BREAK
 case 15:
 /* rule 15 can match eol */
 YY_RULE_SETUP
@@ -77455,7 +77483,7 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
 //                             return yytokentype::HEADER;
                              return yy::HTTP_Parser::token::HEADER; }
-  YY_BREAK
+	YY_BREAK
 case 16:
 /* rule 16 can match eol */
 YY_RULE_SETUP
@@ -77516,7 +77544,7 @@ YY_RULE_SETUP
                              yylval->ival = 2;
 //                             return yytokentype::DELIMITER;
                              return yy::HTTP_Parser::token::DELIMITER; }
-  YY_BREAK
+	YY_BREAK
 // end <response_headers>
 
 case 17:
@@ -77540,23 +77568,23 @@ YY_RULE_SETUP
                                  ACE_DEBUG ((LM_DEBUG,
                                              ACE_TEXT ("found entity @%d[fragment offset: %d]: %d/%d byte(s)\n"),
                                              iparser_p->offset () - yyleng,
-                                             (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng,
+                                             (message_block_p->rd_ptr () - message_block_p->base ()),
                                              yyleng, chunk_size));
                              } // end IF
                              else
                                missing_chunk_bytes -= yyleng;
                              if (!missing_chunk_bytes)
                                return yy::HTTP_Parser::token::BODY; }
-  YY_BREAK
+	YY_BREAK
 // end <body>
 
 case 18:
 /* rule 18 can match eol */
 YY_RULE_SETUP
-{ // *TODO*: let the scanner parse this (it does it anyway)
-                             regex_string =
-                                 ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_REGEX_CHUNK_LINE);
-                             regex.assign (regex_string, regex_flags);
+{
+                             // *TODO*: let the scanner parse this (it does it anyway)
+                             regex.assign (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_REGEX_CHUNK_LINE),
+                                           regex_flags);
                              std::string input_string = yytext;
                              if (!std::regex_match (input_string,
                                                     match_results,
@@ -77578,10 +77606,11 @@ YY_RULE_SETUP
                              missing_chunk_bytes = chunk_size;
                              converter.setf (std::ios::dec,
                                              std::ios::basefield);
+
                              BEGIN (chunk);
                              yycolumn -= yyleng;
                              /* yymore (); */ yyless (0); }
-  YY_BREAK
+	YY_BREAK
 case 19:
 /* rule 19 can match eol */
 YY_RULE_SETUP
@@ -77595,7 +77624,7 @@ YY_RULE_SETUP
                              yylval->sval->append (yytext, yyleng - 2);
 //                             return yytokentype::HEADER;
                              return yy::HTTP_Parser::token::HEADER; }
-  YY_BREAK
+	YY_BREAK
 case 20:
 /* rule 20 can match eol */
 YY_RULE_SETUP
@@ -77611,7 +77640,7 @@ YY_RULE_SETUP
                              yylval->ival = 2;
 //                             return yytokentype::DELIMITER;
                              return yy::HTTP_Parser::token::DELIMITER; }
-  YY_BREAK
+	YY_BREAK
 // end <chunked_body>
 
 case 21:
@@ -77619,6 +77648,7 @@ case 21:
 YY_RULE_SETUP
 { message_block_p->rd_ptr (yyleng);
                              iparser_p->offset (yyleng);
+
                              if (chunk_size)
                              {
                                /* undo the effects of YY_DO_BEFORE_ACTION */
@@ -77634,109 +77664,84 @@ YY_RULE_SETUP
                                              yyleng, chunk_size));
 
                                // (frame and) skip over chunk data
+                               unsigned int available_bytes = message_block_p->length ();
                                unsigned int bytes_to_skip = missing_chunk_bytes;
                                unsigned int remainder = 0;
-                               ACE_Message_Block* message_p, *message_2, *message_3;
-                               if (missing_chunk_bytes > message_block_p->length ())
-                                 missing_chunk_bytes -= message_block_p->length ();
-                               else
+                               ACE_Message_Block* message_p, *message_2;
+                               message_p = message_block_p;
+                               do
                                {
-                                 remainder =
-                                   (message_block_p->length () - missing_chunk_bytes);
-                                 missing_chunk_bytes = 0;
-                               } // end ELSE
-                               if (!missing_chunk_bytes)
-                               { // the fragment contains the (trailing end of
-                                 // the) chunk
-                                 // --> (insert buffer and) frame the chunk
-                                 //     data, see below)
-                                 if (remainder)
-                                 { // bits of the next chunk are available
-                                   message_p = message_block_p->duplicate ();
-                                   ACE_ASSERT (message_p);
-                                   message_2 = message_block_p->cont ();
-                                   if (message_2)
-                                     message_p->cont (message_2);
-                                   message_p->rd_ptr (bytes_to_skip);
-                                   ACE_ASSERT (message_p->length () == remainder);
-                                   message_block_p->cont (message_p);
-                                 } // end IF
-
-                                 message_block_p->wr_ptr (message_block_p->rd_ptr () + bytes_to_skip);
-                                 ACE_ASSERT (message_block_p->length () == bytes_to_skip);
-                               } // end IF
-                               else
-                               {
-                                 if (!iparser_p->isBlocking ())
-                                   return yy::HTTP_Parser::token::END_OF_FRAGMENT;
-//                                   return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
-
-                                 // wait for (missing) chunk data fragment(s)
-                                 while (missing_chunk_bytes)
+                                 if (missing_chunk_bytes > available_bytes)
                                  {
+                                   missing_chunk_bytes -= available_bytes;
+
+                                   if (!iparser_p->isBlocking ())
+                                     return yy::HTTP_Parser::token::END_OF_FRAGMENT;
+  //                                   return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
                                    if (!iparser_p->switchBuffer ())
                                    { // *NOTE*: most probable reason: connection
                                      //         has been closed --> session end
                                      ACE_DEBUG ((LM_DEBUG,
                                                  ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
-                                     return yy::HTTP_Parser::token::END_OF_FRAGMENT;
-//                                     return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+                                     yyterminate();
                                    } // end IF
                                    message_p = iparser_p->buffer ();
 
-                                   if (missing_chunk_bytes > message_p->length ())
-                                     missing_chunk_bytes -= message_p->length ();
-                                   else
-                                   {
-                                     bytes_to_skip = missing_chunk_bytes;
-                                     remainder =
-                                       (message_p->length () - missing_chunk_bytes);
-                                     missing_chunk_bytes = 0;
-                                   } // end ELSE
-                                 } // end WHILE
+                                   available_bytes = message_p->length ();
 
-                                 // chunk ends in the current fragment
-                                 // --> (insert buffer and) frame the chunk
-                                 //     data, see below)
+                                   continue;
+                                 } // end IF
+                                 bytes_to_skip = missing_chunk_bytes;
+                                 remainder =
+                                   (available_bytes - missing_chunk_bytes);
+                                 missing_chunk_bytes = 0;
+
                                  if (remainder)
                                  { // bits of the next chunk are available
                                    message_2 = message_p->duplicate ();
-                                   ACE_ASSERT (message_2);
-                                   message_3 = message_p->cont ();
-                                   if (message_3)
-                                     message_2->cont (message_3);
+                                   if (!message_2)
+                                   {
+                                     ACE_DEBUG ((LM_ERROR,
+                                                 ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", returning\n")));
+                                     yyterminate();
+                                   } // end IF
+                                   message_p->cont (message_2);
                                    message_2->rd_ptr (bytes_to_skip);
                                    ACE_ASSERT (message_2->length () == remainder);
-                                   message_p->cont (message_2);
-                                   message_p->wr_ptr (message_p->rd_ptr () + bytes_to_skip);
-                                   ACE_ASSERT (message_p->length () == bytes_to_skip);
+                                   message_p->length (bytes_to_skip);
                                  } // end IF
+                               } while (missing_chunk_bytes);
+                               ACE_ASSERT (message_block_p->total_length () >= chunk_size);
 
-                                 ACE_ASSERT (message_block_p->total_length () >= chunk_size);
-                               } // end ELSE
-
-                               // switch buffers (one more time)
+                               // switch buffer (--> handle trailing CRLF)
                                if (!iparser_p->switchBuffer ())
-                               {
-                                 ACE_DEBUG ((LM_ERROR,
+                               { // *NOTE*: most probable reason: connection
+                                 //         has been closed --> session end
+                                 ACE_DEBUG ((LM_DEBUG,
                                              ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
                                  yyterminate();
                                } // end IF
                                message_block_p = iparser_p->buffer ();
-//                               remainder += 2;
-                               message_block_p->rd_ptr (2); // chunk_size/remainder + CRLF
+                               ACE_ASSERT (message_block_p->length () >= 2);
+                               message_block_p->rd_ptr (2); // CRLF
+                               // gobble initial bytes (CRLF)
+                               char c = yyinput (yyscanner);
+                               ACE_ASSERT (c == '\r');
+                               c = yyinput (yyscanner);
+                               ACE_ASSERT (c == '\n');
 
-                               // gobble initial bytes
-//                               yyg->yy_c_buf_p += remainder;
-                               yyg->yy_c_buf_p += 2;
-                               yyg->yy_hold_char = *yyg->yy_c_buf_p;
-                               //YY_FLUSH_BUFFER; // --> refill scan buffer
-//                               char c;
-//                               for (unsigned int i = 0;
-//                                    i < remainder;
-//                                    ++i)
-//                                 c = yyinput (yyscanner);
-//                               ACE_UNUSED_ARG (c);
+                               // switch buffer (next chunk ?)
+                               if (!message_block_p->length ())
+                               {
+                                 if (!iparser_p->switchBuffer ())
+                                 { // *NOTE*: most probable reason: connection
+                                   //         has been closed --> session end
+                                   ACE_DEBUG ((LM_DEBUG,
+                                               ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
+                                   yyterminate();
+                                 } // end IF
+                                 message_block_p = iparser_p->buffer ();
+                               } // end IF
 
                                iparser_p->offset (chunk_size + 2);
                                yylval->ival = yyleng + (chunk_size + 2);
@@ -77748,13 +77753,16 @@ YY_RULE_SETUP
                                              ACE_TEXT ("found last entity chunk @%d[fragment offset: %d]: 1 (+ 2) byte(s)\n"),
                                              iparser_p->offset () - yyleng,
                                              (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng));
+
+                               // *NOTE*: do not consume the terminating CRLF
+                               //         here; this happens in <chunked_body>
                                iparser_p->offset (1 + 2);
                                yylval->ival = yyleng;
                              } // end ELSE
                              BEGIN (chunked_body);
 //                             return yytokentype::CHUNK;
                              return yy::HTTP_Parser::token::CHUNK; }
-  YY_BREAK
+	YY_BREAK
 // end <chunk>
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(request):
@@ -77769,8 +77777,8 @@ case YY_STATE_EOF(response_headers):
 case YY_STATE_EOF(body):
 case YY_STATE_EOF(chunked_body):
 case YY_STATE_EOF(chunk):
-{ yyterminate(); } // *NOTE*: yywrap returned non-zero
-  YY_BREAK
+{ yyterminate(); } // *NOTE*: HTTP_Scanner_wrap returned non-zero
+	YY_BREAK
 case 22:
 /* rule 22 can match eol */
 YY_RULE_SETUP
@@ -77789,151 +77797,152 @@ YY_RULE_SETUP
                                return yy::HTTP_Parser::token::END_OF_FRAGMENT;
                              } // end IF
                              yyless (0); }
-  YY_BREAK
+	YY_BREAK
 case 23:
 YY_RULE_SETUP
 YY_FATAL_ERROR( "flex scanner jammed" );
-  YY_BREAK
+	YY_BREAK
 
-  case YY_END_OF_BUFFER:
-    {
-    /* Amount of text matched not including the EOB char. */
-    int yy_amount_of_matched_text = (int) (yy_cp - yyg->yytext_ptr) - 1;
+	case YY_END_OF_BUFFER:
+		{
+		/* Amount of text matched not including the EOB char. */
+		int yy_amount_of_matched_text = (int) (yy_cp - yyg->yytext_ptr) - 1;
 
-    /* Undo the effects of YY_DO_BEFORE_ACTION. */
-    *yy_cp = yyg->yy_hold_char;
-    YY_RESTORE_YY_MORE_OFFSET
+		/* Undo the effects of YY_DO_BEFORE_ACTION. */
+		*yy_cp = yyg->yy_hold_char;
+		YY_RESTORE_YY_MORE_OFFSET
 
-    if ( YY_CURRENT_BUFFER_LVALUE->yy_buffer_status == YY_BUFFER_NEW )
-      {
-      /* We're scanning a new file or input source.  It's
-       * possible that this happened because the user
-       * just pointed yyin at a new source and called
-       * HTTP_Scanner_lex().  If so, then we have to assure
-       * consistency between YY_CURRENT_BUFFER and our
-       * globals.  Here is the right place to do so, because
-       * this is the first action (other than possibly a
-       * back-up) that will match for the new input source.
-       */
-      yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
+		if ( YY_CURRENT_BUFFER_LVALUE->yy_buffer_status == YY_BUFFER_NEW )
+			{
+			/* We're scanning a new file or input source.  It's
+			 * possible that this happened because the user
+			 * just pointed yyin at a new source and called
+			 * HTTP_Scanner_lex().  If so, then we have to assure
+			 * consistency between YY_CURRENT_BUFFER and our
+			 * globals.  Here is the right place to do so, because
+			 * this is the first action (other than possibly a
+			 * back-up) that will match for the new input source.
+			 */
+			yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
 /* %if-c-only */
-      YY_CURRENT_BUFFER_LVALUE->yy_input_file = yyin;
+			YY_CURRENT_BUFFER_LVALUE->yy_input_file = yyin;
 /* %endif */
 /* %if-c++-only */
 /* %endif */
-      YY_CURRENT_BUFFER_LVALUE->yy_buffer_status = YY_BUFFER_NORMAL;
-      }
+			YY_CURRENT_BUFFER_LVALUE->yy_buffer_status = YY_BUFFER_NORMAL;
+			}
 
-    /* Note that here we test for yy_c_buf_p "<=" to the position
-     * of the first EOB in the buffer, since yy_c_buf_p will
-     * already have been incremented past the NUL character
-     * (since all states make transitions on EOB to the
-     * end-of-buffer state).  Contrast this with the test
-     * in input().
-     */
-    if ( yyg->yy_c_buf_p <= &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars] )
-      { /* This was really a NUL. */
-      yy_state_type yy_next_state;
+		/* Note that here we test for yy_c_buf_p "<=" to the position
+		 * of the first EOB in the buffer, since yy_c_buf_p will
+		 * already have been incremented past the NUL character
+		 * (since all states make transitions on EOB to the
+		 * end-of-buffer state).  Contrast this with the test
+		 * in input().
+		 */
+		if ( yyg->yy_c_buf_p <= &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars] )
+			{ /* This was really a NUL. */
+			yy_state_type yy_next_state;
 
-      yyg->yy_c_buf_p = yyg->yytext_ptr + yy_amount_of_matched_text;
+			yyg->yy_c_buf_p = yyg->yytext_ptr + yy_amount_of_matched_text;
 
-      yy_current_state = yy_get_previous_state( yyscanner );
+			yy_current_state = yy_get_previous_state( yyscanner );
 
-      /* Okay, we're now positioned to make the NUL
-       * transition.  We couldn't have
-       * yy_get_previous_state() go ahead and do it
-       * for us because it doesn't know how to deal
-       * with the possibility of jamming (and we don't
-       * want to build jamming into it because then it
-       * will run more slowly).
-       */
+			/* Okay, we're now positioned to make the NUL
+			 * transition.  We couldn't have
+			 * yy_get_previous_state() go ahead and do it
+			 * for us because it doesn't know how to deal
+			 * with the possibility of jamming (and we don't
+			 * want to build jamming into it because then it
+			 * will run more slowly).
+			 */
 
-      yy_next_state = yy_try_NUL_trans( yy_current_state , yyscanner);
+			yy_next_state = yy_try_NUL_trans( yy_current_state , yyscanner);
 
-      yy_bp = yyg->yytext_ptr + YY_MORE_ADJ;
+			yy_bp = yyg->yytext_ptr + YY_MORE_ADJ;
 
-      if ( yy_next_state )
-        {
-        /* Consume the NUL. */
-        yy_cp = ++yyg->yy_c_buf_p;
-        yy_current_state = yy_next_state;
-        goto yy_match;
-        }
+			if ( yy_next_state )
+				{
+				/* Consume the NUL. */
+				yy_cp = ++yyg->yy_c_buf_p;
+				yy_current_state = yy_next_state;
+				goto yy_match;
+				}
 
-      else
-        {
+			else
+				{
 /* %% [14.0] code to do back-up for compressed tables and set up yy_cp goes here */
-        yy_cp = yyg->yy_c_buf_p;
-        goto yy_find_action;
-        }
-      }
+				yy_cp = yyg->yy_c_buf_p;
+				goto yy_find_action;
+				}
+			}
 
-    else switch ( yy_get_next_buffer( yyscanner ) )
-      {
-      case EOB_ACT_END_OF_FILE:
-        {
-        yyg->yy_did_buffer_switch_on_eof = 0;
+		else switch ( yy_get_next_buffer( yyscanner ) )
+			{
+			case EOB_ACT_END_OF_FILE:
+				{
+				yyg->yy_did_buffer_switch_on_eof = 0;
 
-        if ( HTTP_Scanner_wrap(yyscanner ) )
-          {
-          /* Note: because we've taken care in
-           * yy_get_next_buffer() to have set up
-           * yytext, we can now set up
-           * yy_c_buf_p so that if some total
-           * hoser (like flex itself) wants to
-           * call the scanner after we return the
-           * YY_NULL, it'll still work - another
-           * YY_NULL will get returned.
-           */
-          yyg->yy_c_buf_p = yyg->yytext_ptr + YY_MORE_ADJ;
+				if ( HTTP_Scanner_wrap(yyscanner ) )
+					{
+					/* Note: because we've taken care in
+					 * yy_get_next_buffer() to have set up
+					 * yytext, we can now set up
+					 * yy_c_buf_p so that if some total
+					 * hoser (like flex itself) wants to
+					 * call the scanner after we return the
+					 * YY_NULL, it'll still work - another
+					 * YY_NULL will get returned.
+					 */
+					yyg->yy_c_buf_p = yyg->yytext_ptr + YY_MORE_ADJ;
 
-          yy_act = YY_STATE_EOF(YY_START);
-          goto do_action;
-          }
+					yy_act = YY_STATE_EOF(YY_START);
+					goto do_action;
+					}
 
-        else
-          {
-          if ( ! yyg->yy_did_buffer_switch_on_eof )
-            YY_NEW_FILE;
-          }
-        break;
-        }
+				else
+					{
+					if ( ! yyg->yy_did_buffer_switch_on_eof )
+						YY_NEW_FILE;
+					}
+				break;
+				}
 
-      case EOB_ACT_CONTINUE_SCAN:
-        yyg->yy_c_buf_p =
-          yyg->yytext_ptr + yy_amount_of_matched_text;
+			case EOB_ACT_CONTINUE_SCAN:
+				yyg->yy_c_buf_p =
+					yyg->yytext_ptr + yy_amount_of_matched_text;
 
-        yy_current_state = yy_get_previous_state( yyscanner );
+				yy_current_state = yy_get_previous_state( yyscanner );
 
-        yy_cp = yyg->yy_c_buf_p;
-        yy_bp = yyg->yytext_ptr + YY_MORE_ADJ;
-        goto yy_match;
+				yy_cp = yyg->yy_c_buf_p;
+				yy_bp = yyg->yytext_ptr + YY_MORE_ADJ;
+				goto yy_match;
 
-      case EOB_ACT_LAST_MATCH:
-        yyg->yy_c_buf_p =
-        &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars];
+			case EOB_ACT_LAST_MATCH:
+				yyg->yy_c_buf_p =
+				&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars];
 
-        yy_current_state = yy_get_previous_state( yyscanner );
+				yy_current_state = yy_get_previous_state( yyscanner );
 
-        yy_cp = yyg->yy_c_buf_p;
-        yy_bp = yyg->yytext_ptr + YY_MORE_ADJ;
-        goto yy_find_action;
-      }
-    break;
-    }
+				yy_cp = yyg->yy_c_buf_p;
+				yy_bp = yyg->yytext_ptr + YY_MORE_ADJ;
+				goto yy_find_action;
+			}
+		break;
+		}
 
-  default:
-    YY_FATAL_ERROR(
-      "fatal flex scanner internal error--no action found" );
-  } /* end of action switch */
-    } /* end of scanning one token */
-  } /* end of user's declarations */
+	default:
+		YY_FATAL_ERROR(
+			"fatal flex scanner internal error--no action found" );
+	} /* end of action switch */
+		} /* end of scanning one token */
+	} /* end of user's declarations */
 } /* end of HTTP_Scanner_lex */
 /* %ok-for-header */
 
 
 /* %if-c++-only */
 /* %not-for-header */
+
 /* %ok-for-header */
 
 /* %endif */
@@ -77953,134 +77962,134 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %endif */
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-  char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
-  char *source = yyg->yytext_ptr;
-  int number_to_move, i;
-  int ret_val;
+	char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
+	char *source = yyg->yytext_ptr;
+	yy_size_t number_to_move, i;
+	int ret_val;
 
-  if ( yyg->yy_c_buf_p > &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars + 1] )
-    YY_FATAL_ERROR(
-    "fatal flex scanner internal error--end of buffer missed" );
+	if ( yyg->yy_c_buf_p > &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars + 1] )
+		YY_FATAL_ERROR(
+		"fatal flex scanner internal error--end of buffer missed" );
 
-  if ( YY_CURRENT_BUFFER_LVALUE->yy_fill_buffer == 0 )
-    { /* Don't try to fill the buffer, so this is an EOF. */
-    if ( yyg->yy_c_buf_p - yyg->yytext_ptr - YY_MORE_ADJ == 1 )
-      {
-      /* We matched a single character, the EOB, so
-       * treat this as a final EOF.
-       */
-      return EOB_ACT_END_OF_FILE;
-      }
+	if ( YY_CURRENT_BUFFER_LVALUE->yy_fill_buffer == 0 )
+		{ /* Don't try to fill the buffer, so this is an EOF. */
+		if ( yyg->yy_c_buf_p - yyg->yytext_ptr - YY_MORE_ADJ == 1 )
+			{
+			/* We matched a single character, the EOB, so
+			 * treat this as a final EOF.
+			 */
+			return EOB_ACT_END_OF_FILE;
+			}
 
-    else
-      {
-      /* We matched some text prior to the EOB, first
-       * process it.
-       */
-      return EOB_ACT_LAST_MATCH;
-      }
-    }
+		else
+			{
+			/* We matched some text prior to the EOB, first
+			 * process it.
+			 */
+			return EOB_ACT_LAST_MATCH;
+			}
+		}
 
-  /* Try to read more data. */
+	/* Try to read more data. */
 
-  /* First move last chars to start of buffer. */
-  number_to_move = (int) (yyg->yy_c_buf_p - yyg->yytext_ptr - 1);
+	/* First move last chars to start of buffer. */
+	number_to_move = (yy_size_t) (yyg->yy_c_buf_p - yyg->yytext_ptr) - 1;
 
-  for ( i = 0; i < number_to_move; ++i )
-    *(dest++) = *(source++);
+	for ( i = 0; i < number_to_move; ++i )
+		*(dest++) = *(source++);
 
-  if ( YY_CURRENT_BUFFER_LVALUE->yy_buffer_status == YY_BUFFER_EOF_PENDING )
-    /* don't do the read, it's not guaranteed to return an EOF,
-     * just force an EOF
-     */
-    YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars = 0;
+	if ( YY_CURRENT_BUFFER_LVALUE->yy_buffer_status == YY_BUFFER_EOF_PENDING )
+		/* don't do the read, it's not guaranteed to return an EOF,
+		 * just force an EOF
+		 */
+		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars = 0;
 
-  else
-    {
-      int num_to_read =
-      YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
+	else
+		{
+			int num_to_read =
+			YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
-    while ( num_to_read <= 0 )
-      { /* Not enough room in the buffer - grow it. */
+		while ( num_to_read <= 0 )
+			{ /* Not enough room in the buffer - grow it. */
 
-      /* just a shorter name for the current buffer */
-      YY_BUFFER_STATE b = YY_CURRENT_BUFFER_LVALUE;
+			/* just a shorter name for the current buffer */
+			YY_BUFFER_STATE b = YY_CURRENT_BUFFER_LVALUE;
 
-      int yy_c_buf_p_offset =
-        (int) (yyg->yy_c_buf_p - b->yy_ch_buf);
+			int yy_c_buf_p_offset =
+				(int) (yyg->yy_c_buf_p - b->yy_ch_buf);
 
-      if ( b->yy_is_our_buffer )
-        {
-        int new_size = b->yy_buf_size * 2;
+			if ( b->yy_is_our_buffer )
+				{
+				int new_size = b->yy_buf_size * 2;
 
-        if ( new_size <= 0 )
-          b->yy_buf_size += b->yy_buf_size / 8;
-        else
-          b->yy_buf_size *= 2;
+				if ( new_size <= 0 )
+					b->yy_buf_size += b->yy_buf_size / 8;
+				else
+					b->yy_buf_size *= 2;
 
-        b->yy_ch_buf = (char *)
-          /* Include room in for 2 EOB chars. */
-          HTTP_Scanner_realloc((void *) b->yy_ch_buf,(yy_size_t) (b->yy_buf_size + 2) ,yyscanner );
-        }
-      else
-        /* Can't grow it, we don't own it. */
-        b->yy_ch_buf = NULL;
+				b->yy_ch_buf = (char *)
+					/* Include room in for 2 EOB chars. */
+					HTTP_Scanner_realloc((void *) b->yy_ch_buf,b->yy_buf_size + 2 ,yyscanner );
+				}
+			else
+				/* Can't grow it, we don't own it. */
+				b->yy_ch_buf = NULL;
 
-      if ( ! b->yy_ch_buf )
-        YY_FATAL_ERROR(
-        "fatal error - scanner input buffer overflow" );
+			if ( ! b->yy_ch_buf )
+				YY_FATAL_ERROR(
+				"fatal error - scanner input buffer overflow" );
 
-      yyg->yy_c_buf_p = &b->yy_ch_buf[yy_c_buf_p_offset];
+			yyg->yy_c_buf_p = &b->yy_ch_buf[yy_c_buf_p_offset];
 
-      num_to_read = YY_CURRENT_BUFFER_LVALUE->yy_buf_size -
-            number_to_move - 1;
+			num_to_read = YY_CURRENT_BUFFER_LVALUE->yy_buf_size -
+						number_to_move - 1;
 
-      }
+			}
 
-    if ( num_to_read > YY_READ_BUF_SIZE )
-      num_to_read = YY_READ_BUF_SIZE;
+		if ( num_to_read > YY_READ_BUF_SIZE )
+			num_to_read = YY_READ_BUF_SIZE;
 
-    /* Read in more data. */
-    YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-      yyg->yy_n_chars, num_to_read );
+		/* Read in more data. */
+		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
+			yyg->yy_n_chars, num_to_read );
 
-    YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
-    }
+		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
+		}
 
-  if ( yyg->yy_n_chars == 0 )
-    {
-    if ( number_to_move == YY_MORE_ADJ )
-      {
-      ret_val = EOB_ACT_END_OF_FILE;
-      HTTP_Scanner_restart(yyin  ,yyscanner);
-      }
+	if ( yyg->yy_n_chars == 0 )
+		{
+		if ( number_to_move == YY_MORE_ADJ )
+			{
+			ret_val = EOB_ACT_END_OF_FILE;
+			HTTP_Scanner_restart(yyin  ,yyscanner);
+			}
 
-    else
-      {
-      ret_val = EOB_ACT_LAST_MATCH;
-      YY_CURRENT_BUFFER_LVALUE->yy_buffer_status =
-        YY_BUFFER_EOF_PENDING;
-      }
-    }
+		else
+			{
+			ret_val = EOB_ACT_LAST_MATCH;
+			YY_CURRENT_BUFFER_LVALUE->yy_buffer_status =
+				YY_BUFFER_EOF_PENDING;
+			}
+		}
 
-  else
-    ret_val = EOB_ACT_CONTINUE_SCAN;
+	else
+		ret_val = EOB_ACT_CONTINUE_SCAN;
 
-  if ((yyg->yy_n_chars + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
-    /* Extend the array by 50%, plus the number we really need. */
-    int new_size = yyg->yy_n_chars + number_to_move + (yyg->yy_n_chars >> 1);
-    YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) HTTP_Scanner_realloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,(yy_size_t) new_size ,yyscanner );
-    if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
-      YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
-  }
+	if ((int) (yyg->yy_n_chars + number_to_move) > YY_CURRENT_BUFFER_LVALUE->yy_buf_size) {
+		/* Extend the array by 50%, plus the number we really need. */
+		int new_size = yyg->yy_n_chars + number_to_move + (yyg->yy_n_chars >> 1);
+		YY_CURRENT_BUFFER_LVALUE->yy_ch_buf = (char *) HTTP_Scanner_realloc((void *) YY_CURRENT_BUFFER_LVALUE->yy_ch_buf,new_size ,yyscanner );
+		if ( ! YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
+			YY_FATAL_ERROR( "out of dynamic memory in yy_get_next_buffer()" );
+	}
 
-  yyg->yy_n_chars += number_to_move;
-  YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars] = YY_END_OF_BUFFER_CHAR;
-  YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars + 1] = YY_END_OF_BUFFER_CHAR;
+	yyg->yy_n_chars += number_to_move;
+	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars] = YY_END_OF_BUFFER_CHAR;
+	YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars + 1] = YY_END_OF_BUFFER_CHAR;
 
-  yyg->yytext_ptr = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[0];
+	yyg->yytext_ptr = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[0];
 
-  return ret_val;
+	return ret_val;
 }
 
 
@@ -78088,35 +78097,36 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 
 /* %if-c-only */
 /* %not-for-header */
+
     static yy_state_type yy_get_previous_state (yyscan_t yyscanner)
 /* %endif */
 /* %if-c++-only */
 /* %endif */
 {
-  yy_state_type yy_current_state;
-  char *yy_cp;
+	yy_state_type yy_current_state;
+	char *yy_cp;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
 /* %% [15.0] code to get the start state into yy_current_state goes here */
-  yy_current_state = yyg->yy_start;
+	yy_current_state = yyg->yy_start;
 
-  for ( yy_cp = yyg->yytext_ptr + YY_MORE_ADJ; yy_cp < yyg->yy_c_buf_p; ++yy_cp )
-    {
+	for ( yy_cp = yyg->yytext_ptr + YY_MORE_ADJ; yy_cp < yyg->yy_c_buf_p; ++yy_cp )
+		{
 /* %% [16.0] code to find the next state goes here */
-    if ( *yy_cp )
-      {
-      yy_current_state = yy_nxt[yy_current_state][YY_SC_TO_UI(*yy_cp)];
-      }
-    else
-      yy_current_state = yy_NUL_trans[yy_current_state];
-    if ( yy_accept[yy_current_state] )
-      {
-      yyg->yy_last_accepting_state = yy_current_state;
-      yyg->yy_last_accepting_cpos = yy_cp;
-      }
-    }
+		if ( *yy_cp )
+			{
+			yy_current_state = yy_nxt[yy_current_state][YY_SC_TO_UI(*yy_cp)];
+			}
+		else
+			yy_current_state = yy_NUL_trans[yy_current_state];
+		if ( yy_accept[yy_current_state] )
+			{
+			yyg->yy_last_accepting_state = yy_current_state;
+			yyg->yy_last_accepting_cpos = yy_cp;
+			}
+		}
 
-  return yy_current_state;
+	return yy_current_state;
 }
 
 
@@ -78131,25 +78141,25 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-  int yy_is_jam;
+	int yy_is_jam;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner; /* This var may be unused depending upon options. */
 /* %% [17.0] code to find the next state, and perhaps do backing up, goes here */
-  char *yy_cp = yyg->yy_c_buf_p;
+	char *yy_cp = yyg->yy_c_buf_p;
 
-  yy_current_state = yy_NUL_trans[yy_current_state];
-  yy_is_jam = (yy_current_state == 0);
+	yy_current_state = yy_NUL_trans[yy_current_state];
+	yy_is_jam = (yy_current_state == 0);
 
-  if ( ! yy_is_jam )
-    {
-    if ( yy_accept[yy_current_state] )
-      {
-      yyg->yy_last_accepting_state = yy_current_state;
-      yyg->yy_last_accepting_cpos = yy_cp;
-      }
-    }
+	if ( ! yy_is_jam )
+		{
+		if ( yy_accept[yy_current_state] )
+			{
+			yyg->yy_last_accepting_state = yy_current_state;
+			yyg->yy_last_accepting_cpos = yy_cp;
+			}
+		}
 
-  (void)yyg;
-  return yy_is_jam ? 0 : yy_current_state;
+	(void)yyg;
+	return yy_is_jam ? 0 : yy_current_state;
 }
 
 
@@ -78171,78 +78181,78 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-  int c;
+	int c;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-  *yyg->yy_c_buf_p = yyg->yy_hold_char;
+	*yyg->yy_c_buf_p = yyg->yy_hold_char;
 
-  if ( *yyg->yy_c_buf_p == YY_END_OF_BUFFER_CHAR )
-    {
-    /* yy_c_buf_p now points to the character we want to return.
-     * If this occurs *before* the EOB characters, then it's a
-     * valid NUL; if not, then we've hit the end of the buffer.
-     */
-    if ( yyg->yy_c_buf_p < &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars] )
-      /* This was really a NUL. */
-      *yyg->yy_c_buf_p = '\0';
+	if ( *yyg->yy_c_buf_p == YY_END_OF_BUFFER_CHAR )
+		{
+		/* yy_c_buf_p now points to the character we want to return.
+		 * If this occurs *before* the EOB characters, then it's a
+		 * valid NUL; if not, then we've hit the end of the buffer.
+		 */
+		if ( yyg->yy_c_buf_p < &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[yyg->yy_n_chars] )
+			/* This was really a NUL. */
+			*yyg->yy_c_buf_p = '\0';
 
-    else
-      { /* need more input */
-      int offset = (int) (yyg->yy_c_buf_p - yyg->yytext_ptr);
-      ++yyg->yy_c_buf_p;
+		else
+			{ /* need more input */
+			int offset = yyg->yy_c_buf_p - yyg->yytext_ptr;
+			++yyg->yy_c_buf_p;
 
-      switch ( yy_get_next_buffer( yyscanner ) )
-        {
-        case EOB_ACT_LAST_MATCH:
-          /* This happens because yy_g_n_b()
-           * sees that we've accumulated a
-           * token and flags that we need to
-           * try matching the token before
-           * proceeding.  But for input(),
-           * there's no matching to consider.
-           * So convert the EOB_ACT_LAST_MATCH
-           * to EOB_ACT_END_OF_FILE.
-           */
+			switch ( yy_get_next_buffer( yyscanner ) )
+				{
+				case EOB_ACT_LAST_MATCH:
+					/* This happens because yy_g_n_b()
+					 * sees that we've accumulated a
+					 * token and flags that we need to
+					 * try matching the token before
+					 * proceeding.  But for input(),
+					 * there's no matching to consider.
+					 * So convert the EOB_ACT_LAST_MATCH
+					 * to EOB_ACT_END_OF_FILE.
+					 */
 
-          /* Reset buffer status. */
-          HTTP_Scanner_restart(yyin ,yyscanner);
+					/* Reset buffer status. */
+					HTTP_Scanner_restart(yyin ,yyscanner);
 
-          /*FALLTHROUGH*/
+					/*FALLTHROUGH*/
 
-        case EOB_ACT_END_OF_FILE:
-          {
-          if ( HTTP_Scanner_wrap(yyscanner ) )
-            return 0;
+				case EOB_ACT_END_OF_FILE:
+					{
+					if ( HTTP_Scanner_wrap(yyscanner ) )
+						return 0;
 
-          if ( ! yyg->yy_did_buffer_switch_on_eof )
-            YY_NEW_FILE;
+					if ( ! yyg->yy_did_buffer_switch_on_eof )
+						YY_NEW_FILE;
 #ifdef __cplusplus
-          return yyinput(yyscanner);
+					return yyinput(yyscanner);
 #else
-          return input(yyscanner);
+					return input(yyscanner);
 #endif
-          }
+					}
 
-        case EOB_ACT_CONTINUE_SCAN:
-          yyg->yy_c_buf_p = yyg->yytext_ptr + offset;
-          break;
-        }
-      }
-    }
+				case EOB_ACT_CONTINUE_SCAN:
+					yyg->yy_c_buf_p = yyg->yytext_ptr + offset;
+					break;
+				}
+			}
+		}
 
-  c = *(unsigned char *) yyg->yy_c_buf_p;	/* cast for 8-bit char's */
-  *yyg->yy_c_buf_p = '\0';	/* preserve yytext */
-  yyg->yy_hold_char = *++yyg->yy_c_buf_p;
+	c = *(unsigned char *) yyg->yy_c_buf_p;	/* cast for 8-bit char's */
+	*yyg->yy_c_buf_p = '\0';	/* preserve yytext */
+	yyg->yy_hold_char = *++yyg->yy_c_buf_p;
 
 /* %% [19.0] update BOL and yylineno */
-  if ( c == '\n' )
-
+	if ( c == '\n' )
+		   
     do{ yylineno++;
         yycolumn=0;
     }while(0)
 ;
 
-  return c;
+	return c;
 }
 /* %if-c-only */
 #endif	/* ifndef YY_NO_INPUT */
@@ -78261,14 +78271,14 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-  if ( ! YY_CURRENT_BUFFER ){
+	if ( ! YY_CURRENT_BUFFER ){
         HTTP_Scanner_ensure_buffer_stack (yyscanner);
-    YY_CURRENT_BUFFER_LVALUE =
+		YY_CURRENT_BUFFER_LVALUE =
             HTTP_Scanner__create_buffer(yyin,YY_BUF_SIZE ,yyscanner);
-  }
+	}
 
-  HTTP_Scanner__init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
-  HTTP_Scanner__load_buffer_state(yyscanner );
+	HTTP_Scanner__init_buffer(YY_CURRENT_BUFFER,input_file ,yyscanner);
+	HTTP_Scanner__load_buffer_state(yyscanner );
 }
 
 /* %if-c++-only */
@@ -78286,32 +78296,32 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-  /* TODO. We should be able to replace this entire function body
-   * with
-   *		HTTP_Scanner_pop_buffer_state();
-   *		HTTP_Scanner_push_buffer_state(new_buffer);
+	/* TODO. We should be able to replace this entire function body
+	 * with
+	 *		HTTP_Scanner_pop_buffer_state();
+	 *		HTTP_Scanner_push_buffer_state(new_buffer);
      */
-  HTTP_Scanner_ensure_buffer_stack (yyscanner);
-  if ( YY_CURRENT_BUFFER == new_buffer )
-    return;
+	HTTP_Scanner_ensure_buffer_stack (yyscanner);
+	if ( YY_CURRENT_BUFFER == new_buffer )
+		return;
 
-  if ( YY_CURRENT_BUFFER )
-    {
-    /* Flush out information for old buffer. */
-    *yyg->yy_c_buf_p = yyg->yy_hold_char;
-    YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = yyg->yy_c_buf_p;
-    YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
-    }
+	if ( YY_CURRENT_BUFFER )
+		{
+		/* Flush out information for old buffer. */
+		*yyg->yy_c_buf_p = yyg->yy_hold_char;
+		YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = yyg->yy_c_buf_p;
+		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
+		}
 
-  YY_CURRENT_BUFFER_LVALUE = new_buffer;
-  HTTP_Scanner__load_buffer_state(yyscanner );
+	YY_CURRENT_BUFFER_LVALUE = new_buffer;
+	HTTP_Scanner__load_buffer_state(yyscanner );
 
-  /* We don't actually know whether we did this switch during
-   * EOF (HTTP_Scanner_wrap()) processing, but the only time this flag
-   * is looked at is after HTTP_Scanner_wrap() is called, so it's safe
-   * to go ahead and always set it.
-   */
-  yyg->yy_did_buffer_switch_on_eof = 1;
+	/* We don't actually know whether we did this switch during
+	 * EOF (HTTP_Scanner_wrap()) processing, but the only time this flag
+	 * is looked at is after HTTP_Scanner_wrap() is called, so it's safe
+	 * to go ahead and always set it.
+	 */
+	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 
 
@@ -78322,14 +78332,14 @@ static void HTTP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %endif */
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-  yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
-  yyg->yytext_ptr = yyg->yy_c_buf_p = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
+	yyg->yy_n_chars = YY_CURRENT_BUFFER_LVALUE->yy_n_chars;
+	yyg->yytext_ptr = yyg->yy_c_buf_p = YY_CURRENT_BUFFER_LVALUE->yy_buf_pos;
 /* %if-c-only */
-  yyin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
+	yyin = YY_CURRENT_BUFFER_LVALUE->yy_input_file;
 /* %endif */
 /* %if-c++-only */
 /* %endif */
-  yyg->yy_hold_char = *yyg->yy_c_buf_p;
+	yyg->yy_hold_char = *yyg->yy_c_buf_p;
 }
 
 /** Allocate and initialize an input buffer state.
@@ -78344,26 +78354,26 @@ static void HTTP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-  YY_BUFFER_STATE b;
+	YY_BUFFER_STATE b;
+    
+	b = (YY_BUFFER_STATE) HTTP_Scanner_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+	if ( ! b )
+		YY_FATAL_ERROR( "out of dynamic memory in HTTP_Scanner__create_buffer()" );
 
-  b = (YY_BUFFER_STATE) HTTP_Scanner_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
-  if ( ! b )
-    YY_FATAL_ERROR( "out of dynamic memory in HTTP_Scanner__create_buffer()" );
+	b->yy_buf_size = (yy_size_t)size;
 
-  b->yy_buf_size = size;
+	/* yy_ch_buf has to be 2 characters longer than the size given because
+	 * we need to put in 2 end-of-buffer characters.
+	 */
+	b->yy_ch_buf = (char *) HTTP_Scanner_alloc(b->yy_buf_size + 2 ,yyscanner );
+	if ( ! b->yy_ch_buf )
+		YY_FATAL_ERROR( "out of dynamic memory in HTTP_Scanner__create_buffer()" );
 
-  /* yy_ch_buf has to be 2 characters longer than the size given because
-   * we need to put in 2 end-of-buffer characters.
-   */
-  b->yy_ch_buf = (char *) HTTP_Scanner_alloc((yy_size_t) (b->yy_buf_size + 2) ,yyscanner );
-  if ( ! b->yy_ch_buf )
-    YY_FATAL_ERROR( "out of dynamic memory in HTTP_Scanner__create_buffer()" );
+	b->yy_is_our_buffer = 1;
 
-  b->yy_is_our_buffer = 1;
+	HTTP_Scanner__init_buffer(b,file ,yyscanner);
 
-  HTTP_Scanner__init_buffer(b,file ,yyscanner);
-
-  return b;
+	return b;
 }
 
 /* %if-c++-only */
@@ -78381,16 +78391,16 @@ static void HTTP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-  if ( ! b )
-    return;
+	if ( ! b )
+		return;
 
-  if ( b == YY_CURRENT_BUFFER ) /* Not sure if we should pop here. */
-    YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
+	if ( b == YY_CURRENT_BUFFER ) /* Not sure if we should pop here. */
+		YY_CURRENT_BUFFER_LVALUE = (YY_BUFFER_STATE) 0;
 
-  if ( b->yy_is_our_buffer )
-    HTTP_Scanner_free((void *) b->yy_ch_buf ,yyscanner );
+	if ( b->yy_is_our_buffer )
+		HTTP_Scanner_free((void *) b->yy_ch_buf ,yyscanner );
 
-  HTTP_Scanner_free((void *) b ,yyscanner );
+	HTTP_Scanner_free((void *) b ,yyscanner );
 }
 
 
@@ -78405,17 +78415,17 @@ static void HTTP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %endif */
 
 {
-  int oerrno = errno;
+	int oerrno = errno;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-  HTTP_Scanner__flush_buffer(b ,yyscanner);
+	HTTP_Scanner__flush_buffer(b ,yyscanner);
 
 /* %if-c-only */
-  b->yy_input_file = file;
+	b->yy_input_file = file;
 /* %endif */
 /* %if-c++-only */
 /* %endif */
-  b->yy_fill_buffer = 1;
+	b->yy_fill_buffer = 1;
 
     /* If b is the current buffer, then HTTP_Scanner__init_buffer was _probably_
      * called from HTTP_Scanner_restart() or through yy_get_next_buffer.
@@ -78428,14 +78438,14 @@ static void HTTP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 
 /* %if-c-only */
 
-
+    
         b->yy_is_interactive = 0;
-
+    
 
 /* %endif */
 /* %if-c++-only */
 /* %endif */
-  errno = oerrno;
+	errno = oerrno;
 }
 
 /** Discard all buffered characters. On the next scan, YY_INPUT will be called.
@@ -78449,25 +78459,25 @@ static void HTTP_Scanner__load_buffer_state  (yyscan_t yyscanner)
 /* %endif */
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-  if ( ! b )
-    return;
+	if ( ! b )
+		return;
 
-  b->yy_n_chars = 0;
+	b->yy_n_chars = 0;
 
-  /* We always need two end-of-buffer characters.  The first causes
-   * a transition to the end-of-buffer state.  The second causes
-   * a jam in that state.
-   */
-  b->yy_ch_buf[0] = YY_END_OF_BUFFER_CHAR;
-  b->yy_ch_buf[1] = YY_END_OF_BUFFER_CHAR;
+	/* We always need two end-of-buffer characters.  The first causes
+	 * a transition to the end-of-buffer state.  The second causes
+	 * a jam in that state.
+	 */
+	b->yy_ch_buf[0] = YY_END_OF_BUFFER_CHAR;
+	b->yy_ch_buf[1] = YY_END_OF_BUFFER_CHAR;
 
-  b->yy_buf_pos = &b->yy_ch_buf[0];
+	b->yy_buf_pos = &b->yy_ch_buf[0];
 
-  b->yy_at_bol = 1;
-  b->yy_buffer_status = YY_BUFFER_NEW;
+	b->yy_at_bol = 1;
+	b->yy_buffer_status = YY_BUFFER_NEW;
 
-  if ( b == YY_CURRENT_BUFFER )
-    HTTP_Scanner__load_buffer_state(yyscanner );
+	if ( b == YY_CURRENT_BUFFER )
+		HTTP_Scanner__load_buffer_state(yyscanner );
 }
 
 /* %if-c-or-c++ */
@@ -78484,28 +78494,28 @@ void HTTP_Scanner_push_buffer_state (YY_BUFFER_STATE new_buffer , yyscan_t yysca
 /* %endif */
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-  if (new_buffer == NULL)
-    return;
+	if (new_buffer == NULL)
+		return;
 
-  HTTP_Scanner_ensure_buffer_stack(yyscanner);
+	HTTP_Scanner_ensure_buffer_stack(yyscanner);
 
-  /* This block is copied from HTTP_Scanner__switch_to_buffer. */
-  if ( YY_CURRENT_BUFFER )
-    {
-    /* Flush out information for old buffer. */
-    *yyg->yy_c_buf_p = yyg->yy_hold_char;
-    YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = yyg->yy_c_buf_p;
-    YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
-    }
+	/* This block is copied from HTTP_Scanner__switch_to_buffer. */
+	if ( YY_CURRENT_BUFFER )
+		{
+		/* Flush out information for old buffer. */
+		*yyg->yy_c_buf_p = yyg->yy_hold_char;
+		YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = yyg->yy_c_buf_p;
+		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = yyg->yy_n_chars;
+		}
 
-  /* Only push if top exists. Otherwise, replace top. */
-  if (YY_CURRENT_BUFFER)
-    yyg->yy_buffer_stack_top++;
-  YY_CURRENT_BUFFER_LVALUE = new_buffer;
+	/* Only push if top exists. Otherwise, replace top. */
+	if (YY_CURRENT_BUFFER)
+		yyg->yy_buffer_stack_top++;
+	YY_CURRENT_BUFFER_LVALUE = new_buffer;
 
-  /* copied from HTTP_Scanner__switch_to_buffer. */
-  HTTP_Scanner__load_buffer_state(yyscanner );
-  yyg->yy_did_buffer_switch_on_eof = 1;
+	/* copied from HTTP_Scanner__switch_to_buffer. */
+	HTTP_Scanner__load_buffer_state(yyscanner );
+	yyg->yy_did_buffer_switch_on_eof = 1;
 }
 /* %endif */
 
@@ -78522,18 +78532,18 @@ void HTTP_Scanner_pop_buffer_state (yyscan_t yyscanner)
 /* %endif */
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-  if (!YY_CURRENT_BUFFER)
-    return;
+	if (!YY_CURRENT_BUFFER)
+		return;
 
-  HTTP_Scanner__delete_buffer(YY_CURRENT_BUFFER ,yyscanner);
-  YY_CURRENT_BUFFER_LVALUE = NULL;
-  if (yyg->yy_buffer_stack_top > 0)
-    --yyg->yy_buffer_stack_top;
+	HTTP_Scanner__delete_buffer(YY_CURRENT_BUFFER ,yyscanner);
+	YY_CURRENT_BUFFER_LVALUE = NULL;
+	if (yyg->yy_buffer_stack_top > 0)
+		--yyg->yy_buffer_stack_top;
 
-  if (YY_CURRENT_BUFFER) {
-    HTTP_Scanner__load_buffer_state(yyscanner );
-    yyg->yy_did_buffer_switch_on_eof = 1;
-  }
+	if (YY_CURRENT_BUFFER) {
+		HTTP_Scanner__load_buffer_state(yyscanner );
+		yyg->yy_did_buffer_switch_on_eof = 1;
+	}
 }
 /* %endif */
 
@@ -78548,47 +78558,47 @@ static void HTTP_Scanner_ensure_buffer_stack (yyscan_t yyscanner)
 /* %if-c++-only */
 /* %endif */
 {
-  yy_size_t num_to_alloc;
+	int num_to_alloc;
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-  if (!yyg->yy_buffer_stack) {
+	if (!yyg->yy_buffer_stack) {
 
-    /* First allocation is just for 2 elements, since we don't know if this
-     * scanner will even need a stack. We use 2 instead of 1 to avoid an
-     * immediate realloc on the next call.
+		/* First allocation is just for 2 elements, since we don't know if this
+		 * scanner will even need a stack. We use 2 instead of 1 to avoid an
+		 * immediate realloc on the next call.
          */
       num_to_alloc = 1; /* After all that talk, this was set to 1 anyways... */
-    yyg->yy_buffer_stack = (struct yy_buffer_state**)HTTP_Scanner_alloc
-                (num_to_alloc * sizeof(struct yy_buffer_state*)
-                , yyscanner);
-    if ( ! yyg->yy_buffer_stack )
-      YY_FATAL_ERROR( "out of dynamic memory in HTTP_Scanner_ensure_buffer_stack()" );
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)HTTP_Scanner_alloc
+								(num_to_alloc * sizeof(struct yy_buffer_state*)
+								, yyscanner);
+		if ( ! yyg->yy_buffer_stack )
+			YY_FATAL_ERROR( "out of dynamic memory in HTTP_Scanner_ensure_buffer_stack()" );
+								  
+		
+		memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
+				
+		yyg->yy_buffer_stack_max = num_to_alloc;
+		yyg->yy_buffer_stack_top = 0;
+		return;
+	}
 
+	if (yyg->yy_buffer_stack_top >= (yyg->yy_buffer_stack_max) - 1){
 
-    memset(yyg->yy_buffer_stack, 0, num_to_alloc * sizeof(struct yy_buffer_state*));
+		/* Increase the buffer to prepare for a possible push. */
+		yy_size_t grow_size = 8 /* arbitrary grow size */;
 
-    yyg->yy_buffer_stack_max = num_to_alloc;
-    yyg->yy_buffer_stack_top = 0;
-    return;
-  }
+		num_to_alloc = yyg->yy_buffer_stack_max + grow_size;
+		yyg->yy_buffer_stack = (struct yy_buffer_state**)HTTP_Scanner_realloc
+								(yyg->yy_buffer_stack,
+								num_to_alloc * sizeof(struct yy_buffer_state*)
+								, yyscanner);
+		if ( ! yyg->yy_buffer_stack )
+			YY_FATAL_ERROR( "out of dynamic memory in HTTP_Scanner_ensure_buffer_stack()" );
 
-  if (yyg->yy_buffer_stack_top >= (yyg->yy_buffer_stack_max) - 1){
-
-    /* Increase the buffer to prepare for a possible push. */
-    yy_size_t grow_size = 8 /* arbitrary grow size */;
-
-    num_to_alloc = yyg->yy_buffer_stack_max + grow_size;
-    yyg->yy_buffer_stack = (struct yy_buffer_state**)HTTP_Scanner_realloc
-                (yyg->yy_buffer_stack,
-                num_to_alloc * sizeof(struct yy_buffer_state*)
-                , yyscanner);
-    if ( ! yyg->yy_buffer_stack )
-      YY_FATAL_ERROR( "out of dynamic memory in HTTP_Scanner_ensure_buffer_stack()" );
-
-    /* zero only the new slots.*/
-    memset(yyg->yy_buffer_stack + yyg->yy_buffer_stack_max, 0, grow_size * sizeof(struct yy_buffer_state*));
-    yyg->yy_buffer_stack_max = num_to_alloc;
-  }
+		/* zero only the new slots.*/
+		memset(yyg->yy_buffer_stack + yyg->yy_buffer_stack_max, 0, grow_size * sizeof(struct yy_buffer_state*));
+		yyg->yy_buffer_stack_max = num_to_alloc;
+	}
 }
 /* %endif */
 
@@ -78601,35 +78611,35 @@ static void HTTP_Scanner_ensure_buffer_stack (yyscan_t yyscanner)
  * @param base the character buffer
  * @param size the size in bytes of the character buffer
  * @param yyscanner The scanner object.
- * @return the newly allocated buffer state object.
+ * @return the newly allocated buffer state object. 
  */
 YY_BUFFER_STATE HTTP_Scanner__scan_buffer  (char * base, yy_size_t  size , yyscan_t yyscanner)
 {
-  YY_BUFFER_STATE b;
+	YY_BUFFER_STATE b;
+    
+	if ( size < 2 ||
+	     base[size-2] != YY_END_OF_BUFFER_CHAR ||
+	     base[size-1] != YY_END_OF_BUFFER_CHAR )
+		/* They forgot to leave room for the EOB's. */
+		return NULL;
 
-  if ( size < 2 ||
-       base[size-2] != YY_END_OF_BUFFER_CHAR ||
-       base[size-1] != YY_END_OF_BUFFER_CHAR )
-    /* They forgot to leave room for the EOB's. */
-    return NULL;
+	b = (YY_BUFFER_STATE) HTTP_Scanner_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
+	if ( ! b )
+		YY_FATAL_ERROR( "out of dynamic memory in HTTP_Scanner__scan_buffer()" );
 
-  b = (YY_BUFFER_STATE) HTTP_Scanner_alloc(sizeof( struct yy_buffer_state ) ,yyscanner );
-  if ( ! b )
-    YY_FATAL_ERROR( "out of dynamic memory in HTTP_Scanner__scan_buffer()" );
+	b->yy_buf_size = size - 2;	/* "- 2" to take care of EOB's */
+	b->yy_buf_pos = b->yy_ch_buf = base;
+	b->yy_is_our_buffer = 0;
+	b->yy_input_file = NULL;
+	b->yy_n_chars = b->yy_buf_size;
+	b->yy_is_interactive = 0;
+	b->yy_at_bol = 1;
+	b->yy_fill_buffer = 0;
+	b->yy_buffer_status = YY_BUFFER_NEW;
 
-  b->yy_buf_size = (int) (size - 2);	/* "- 2" to take care of EOB's */
-  b->yy_buf_pos = b->yy_ch_buf = base;
-  b->yy_is_our_buffer = 0;
-  b->yy_input_file = NULL;
-  b->yy_n_chars = b->yy_buf_size;
-  b->yy_is_interactive = 0;
-  b->yy_at_bol = 1;
-  b->yy_fill_buffer = 0;
-  b->yy_buffer_status = YY_BUFFER_NEW;
+	HTTP_Scanner__switch_to_buffer(b ,yyscanner );
 
-  HTTP_Scanner__switch_to_buffer(b ,yyscanner );
-
-  return b;
+	return b;
 }
 /* %endif */
 
@@ -78645,10 +78655,10 @@ YY_BUFFER_STATE HTTP_Scanner__scan_buffer  (char * base, yy_size_t  size , yysca
  * @note If you want to scan bytes that may contain NUL values, then use
  *       HTTP_Scanner__scan_bytes() instead.
  */
-YY_BUFFER_STATE HTTP_Scanner__scan_string (const char * yystr , yyscan_t yyscanner)
+YY_BUFFER_STATE HTTP_Scanner__scan_string (yyconst char * yystr , yyscan_t yyscanner)
 {
-
-  return HTTP_Scanner__scan_bytes(yystr,(int) strlen(yystr) ,yyscanner);
+    
+	return HTTP_Scanner__scan_bytes(yystr,(int) strlen(yystr) ,yyscanner);
 }
 /* %endif */
 
@@ -78663,34 +78673,34 @@ YY_BUFFER_STATE HTTP_Scanner__scan_string (const char * yystr , yyscan_t yyscann
  * @param yyscanner The scanner object.
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE HTTP_Scanner__scan_bytes  (const char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
+YY_BUFFER_STATE HTTP_Scanner__scan_bytes  (yyconst char * yybytes, int  _yybytes_len , yyscan_t yyscanner)
 {
-  YY_BUFFER_STATE b;
-  char *buf;
-  yy_size_t n;
-  int i;
+	YY_BUFFER_STATE b;
+	char *buf;
+	yy_size_t n;
+	yy_size_t i;
+    
+	/* Get memory for full buffer, including space for trailing EOB's. */
+	n = (yy_size_t) _yybytes_len + 2;
+	buf = (char *) HTTP_Scanner_alloc(n ,yyscanner );
+	if ( ! buf )
+		YY_FATAL_ERROR( "out of dynamic memory in HTTP_Scanner__scan_bytes()" );
 
-  /* Get memory for full buffer, including space for trailing EOB's. */
-  n = (yy_size_t) (_yybytes_len + 2);
-  buf = (char *) HTTP_Scanner_alloc(n ,yyscanner );
-  if ( ! buf )
-    YY_FATAL_ERROR( "out of dynamic memory in HTTP_Scanner__scan_bytes()" );
+	for ( i = 0; i < _yybytes_len; ++i )
+		buf[i] = yybytes[i];
 
-  for ( i = 0; i < _yybytes_len; ++i )
-    buf[i] = yybytes[i];
+	buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
 
-  buf[_yybytes_len] = buf[_yybytes_len+1] = YY_END_OF_BUFFER_CHAR;
+	b = HTTP_Scanner__scan_buffer(buf,n ,yyscanner);
+	if ( ! b )
+		YY_FATAL_ERROR( "bad buffer in HTTP_Scanner__scan_bytes()" );
 
-  b = HTTP_Scanner__scan_buffer(buf,n ,yyscanner);
-  if ( ! b )
-    YY_FATAL_ERROR( "bad buffer in HTTP_Scanner__scan_bytes()" );
+	/* It's okay to grow etc. this buffer, and we should throw it
+	 * away when we're done.
+	 */
+	b->yy_is_our_buffer = 1;
 
-  /* It's okay to grow etc. this buffer, and we should throw it
-   * away when we're done.
-   */
-  b->yy_is_our_buffer = 1;
-
-  return b;
+	return b;
 }
 /* %endif */
 
@@ -78709,12 +78719,12 @@ YY_BUFFER_STATE HTTP_Scanner__scan_bytes  (const char * yybytes, int  _yybytes_l
 #endif
 
 /* %if-c-only */
-static void yynoreturn yy_fatal_error (const char* msg , yyscan_t yyscanner)
+static void yynoreturn yy_fatal_error (yyconst char* msg , yyscan_t yyscanner)
 {
-  struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-  (void)yyg;
-  (void) fprintf( stderr, "%s\n", msg );
-  exit( YY_EXIT_FAILURE );
+	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+	(void)yyg;
+	(void) fprintf( stderr, "%s\n", msg );
+	exit( YY_EXIT_FAILURE );
 }
 /* %endif */
 /* %if-c++-only */
@@ -78724,18 +78734,18 @@ static void yynoreturn yy_fatal_error (const char* msg , yyscan_t yyscanner)
 
 #undef yyless
 #define yyless(n) \
-  do \
-    { \
-    /* Undo effects of setting up yytext. */ \
+	do \
+		{ \
+		/* Undo effects of setting up yytext. */ \
         int yyless_macro_arg = (n); \
         YY_LESS_LINENO(yyless_macro_arg);\
-    yytext[yyleng] = yyg->yy_hold_char; \
-    yyg->yy_c_buf_p = yytext + yyless_macro_arg; \
-    yyg->yy_hold_char = *yyg->yy_c_buf_p; \
-    *yyg->yy_c_buf_p = '\0'; \
-    yyleng = yyless_macro_arg; \
-    } \
-  while ( 0 )
+		yytext[yyleng] = yyg->yy_hold_char; \
+		yyg->yy_c_buf_p = yytext + yyless_macro_arg; \
+		yyg->yy_hold_char = *yyg->yy_c_buf_p; \
+		*yyg->yy_c_buf_p = '\0'; \
+		yyleng = yyless_macro_arg; \
+		} \
+	while ( 0 )
 
 
 
@@ -78762,11 +78772,11 @@ YY_EXTRA_TYPE HTTP_Scanner_get_extra  (yyscan_t yyscanner)
 int HTTP_Scanner_get_lineno  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-
-
+    
+    
         if (! YY_CURRENT_BUFFER)
             return 0;
-
+    
     return yylineno;
 }
 
@@ -78779,11 +78789,11 @@ int HTTP_Scanner_get_lineno  (yyscan_t yyscanner)
 int HTTP_Scanner_get_column  (yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-
-
+    
+    
         if (! YY_CURRENT_BUFFER)
             return 0;
-
+    
     return yycolumn;
 }
 
@@ -78856,11 +78866,11 @@ void HTTP_Scanner_set_lineno (int  _line_number , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-
+    
         /* lineno is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
            YY_FATAL_ERROR( "HTTP_Scanner_set_lineno called with no buffer" );
-
+    
     yylineno = _line_number;
 }
 
@@ -78875,11 +78885,11 @@ void HTTP_Scanner_set_column (int  _column_no , yyscan_t yyscanner)
 {
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
-
+    
         /* column is only valid if an input buffer exists. */
         if (! YY_CURRENT_BUFFER )
            YY_FATAL_ERROR( "HTTP_Scanner_set_column called with no buffer" );
-
+    
     yycolumn = _column_no;
 }
 
@@ -78939,7 +78949,9 @@ void HTTP_Scanner_set_debug (int  _bdebug , yyscan_t yyscanner)
  * the ONLY reentrant function that doesn't take the scanner as the last argument.
  * That's why we explicitly handle the declaration, instead of using our macros.
  */
+
 int HTTP_Scanner_lex_init(yyscan_t* ptr_yy_globals)
+
 {
     if (ptr_yy_globals == NULL){
         errno = EINVAL;
@@ -78967,7 +78979,9 @@ int HTTP_Scanner_lex_init(yyscan_t* ptr_yy_globals)
  * The user defined value in the first argument will be available to HTTP_Scanner_alloc in
  * the yyextra field.
  */
+
 int HTTP_Scanner_lex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_globals )
+
 {
     struct yyguts_t dummy_yyguts;
 
@@ -78977,20 +78991,20 @@ int HTTP_Scanner_lex_init_extra(YY_EXTRA_TYPE yy_user_defined,yyscan_t* ptr_yy_g
         errno = EINVAL;
         return 1;
     }
-
+	
     *ptr_yy_globals = (yyscan_t) HTTP_Scanner_alloc ( sizeof( struct yyguts_t ), &dummy_yyguts );
-
+	
     if (*ptr_yy_globals == NULL){
         errno = ENOMEM;
         return 1;
     }
-
+    
     /* By setting to 0xAA, we expose bugs in
     yy_init_globals. Leave at 0x00 for releases. */
     memset(*ptr_yy_globals,0x00,sizeof(struct yyguts_t));
-
+    
     HTTP_Scanner_set_extra (yy_user_defined, *ptr_yy_globals);
-
+    
     return yy_init_globals ( *ptr_yy_globals );
 }
 
@@ -79005,7 +79019,7 @@ static int yy_init_globals (yyscan_t yyscanner)
      */
 
 
-
+    
 
     yyg->yy_buffer_stack = NULL;
     yyg->yy_buffer_stack_top = 0;
@@ -79048,15 +79062,15 @@ int HTTP_Scanner_lex_destroy  (yyscan_t yyscanner)
     struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
 
     /* Pop the buffer stack, destroying each element. */
-  while(YY_CURRENT_BUFFER){
-    HTTP_Scanner__delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
-    YY_CURRENT_BUFFER_LVALUE = NULL;
-    HTTP_Scanner_pop_buffer_state(yyscanner);
-  }
+	while(YY_CURRENT_BUFFER){
+		HTTP_Scanner__delete_buffer(YY_CURRENT_BUFFER ,yyscanner );
+		YY_CURRENT_BUFFER_LVALUE = NULL;
+		HTTP_Scanner_pop_buffer_state(yyscanner);
+	}
 
-  /* Destroy the stack itself. */
-  HTTP_Scanner_free(yyg->yy_buffer_stack ,yyscanner);
-  yyg->yy_buffer_stack = NULL;
+	/* Destroy the stack itself. */
+	HTTP_Scanner_free(yyg->yy_buffer_stack ,yyscanner);
+	yyg->yy_buffer_stack = NULL;
 
 
     /* Destroy the start condition stack. */
@@ -79088,27 +79102,27 @@ int HTTP_Scanner_lex_destroy  (yyscan_t yyscanner)
 
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy (char* s1, const char * s2, int n , yyscan_t yyscanner)
+static void yy_flex_strncpy (char* s1, yyconst char * s2, int n , yyscan_t yyscanner)
 {
-  struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-  (void)yyg;
+	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+	(void)yyg;
 
-  int i;
-  for ( i = 0; i < n; ++i )
-    s1[i] = s2[i];
+	int i;
+	for ( i = 0; i < n; ++i )
+		s1[i] = s2[i];
 }
 #endif
 
 
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen (const char * s , yyscan_t yyscanner)
+static int yy_flex_strlen (yyconst char * s , yyscan_t yyscanner)
 {
-  int n;
-  for ( n = 0; s[n]; ++n )
-    ;
+	int n;
+	for ( n = 0; s[n]; ++n )
+		;
 
-  return n;
+	return n;
 }
 #endif
 
@@ -79116,35 +79130,35 @@ static int yy_flex_strlen (const char * s , yyscan_t yyscanner)
 
 void *HTTP_Scanner_alloc (yy_size_t  size , yyscan_t yyscanner)
 {
-  struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-  (void)yyg;
-  return malloc(size);
+	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+	(void)yyg;
+	return malloc(size);
 }
 
 
 
 void *HTTP_Scanner_realloc  (void * ptr, yy_size_t  size , yyscan_t yyscanner)
 {
-  struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-  (void)yyg;
+	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+	(void)yyg;
 
-  /* The cast to (char *) in the following accommodates both
-   * implementations that use char* generic pointers, and those
-   * that use void* generic pointers.  It works with the latter
-   * because both ANSI C and C++ allow castless assignment from
-   * any pointer type to void*, and deal with argument conversions
-   * as though doing an assignment.
-   */
-  return realloc(ptr, size);
+	/* The cast to (char *) in the following accommodates both
+	 * implementations that use char* generic pointers, and those
+	 * that use void* generic pointers.  It works with the latter
+	 * because both ANSI C and C++ allow castless assignment from
+	 * any pointer type to void*, and deal with argument conversions
+	 * as though doing an assignment.
+	 */
+	return realloc(ptr, size);
 }
 
 
 
 void HTTP_Scanner_free (void * ptr , yyscan_t yyscanner)
 {
-  struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
-  (void)yyg;
-  free( (char *) ptr );	/* see HTTP_Scanner_realloc() for (char *) cast */
+	struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+	(void)yyg;
+	free( (char *) ptr );	/* see HTTP_Scanner_realloc() for (char *) cast */
 }
 
 
@@ -79157,6 +79171,7 @@ void HTTP_Scanner_free (void * ptr , yyscan_t yyscanner)
 
 
 /* %ok-for-header */
+
 
 
 

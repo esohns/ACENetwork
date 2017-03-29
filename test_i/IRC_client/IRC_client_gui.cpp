@@ -59,6 +59,8 @@
 #include "irc_common.h"
 #include "irc_defines.h"
 
+#include "test_i_defines.h"
+
 #include "IRC_client_defines.h"
 #include "IRC_client_gui_callbacks.h"
 #include "IRC_client_gui_common.h"
@@ -79,14 +81,6 @@ do_printUsage (const std::string& programName_in)
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT ("test_i");
-#endif // #ifdef DEBUG_DEBUGGER
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -96,9 +90,9 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
+  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
+  path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [FILENAME]   : configuration file [\"")
             << path
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
@@ -109,9 +103,9 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
+  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
+  path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-g [FILENAME]   : GTK rc file [\"")
             << path
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
@@ -126,10 +120,10 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
+  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-p[FILENAME]    : phonebook file [\"")
+  path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-p [FILENAME]   : phonebook file [\"")
             << path
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
@@ -145,13 +139,13 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  path = configuration_path;
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-u [DIRECTORY]  : UI file directory [\"")
-            << path
-            << ACE_TEXT_ALWAYS_CHAR ("\"]")
-            << std::endl;
+  //path = configuration_path;
+  //path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  //path += ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
+  //std::cout << ACE_TEXT_ALWAYS_CHAR ("-u [DIRECTORY]  : UI file directory [\"")
+  //          << path
+  //          << ACE_TEXT_ALWAYS_CHAR ("\"]")
+  //          << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-v              : print version information and exit [")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -170,12 +164,10 @@ do_processArguments (int argc_in,
                      std::string& UIRCFile_out,
                      bool& useThreadpool_out,
                      bool& logToFile_out,
-                     bool& loadPhonebook_out,
                      std::string& phonebookFile_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
-                     std::string& UIDefinitionFileDirectory_out,
                      bool& printVersionAndExit_out,
                      unsigned int& numThreadPoolThreads_out)
 {
@@ -183,14 +175,6 @@ do_processArguments (int argc_in,
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_i");
-#endif // #ifdef DEBUG_DEBUGGER
 
   // initialize results
   configurationFile_out          = configuration_path;
@@ -216,7 +200,6 @@ do_processArguments (int argc_in,
 
   logToFile_out                  = false;
 
-  loadPhonebook_out              = false;
   phonebookFile_out              = configuration_path;
   phonebookFile_out             += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebookFile_out             +=
@@ -232,17 +215,17 @@ do_processArguments (int argc_in,
 
   traceInformation_out           = false;
 
-  UIDefinitionFileDirectory_out  = configuration_path;
-  UIDefinitionFileDirectory_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  UIDefinitionFileDirectory_out +=
-    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
+  //UIDefinitionFileDirectory_out  = configuration_path;
+  //UIDefinitionFileDirectory_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  //UIDefinitionFileDirectory_out +=
+  //  ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
 
   printVersionAndExit_out        = false;
   numThreadPoolThreads_out       = IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS;
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("c:dg:hlp::rs:tu:vx:"),
+                              ACE_TEXT ("c:dg:hlp:rs:tvx:"),
                               1, // skip command name
                               1, // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -281,7 +264,6 @@ do_processArguments (int argc_in,
       }
       case 'p':
       {
-        loadPhonebook_out = true;
         phonebookFile_out = argumentParser.opt_arg ();
         break;
       }
@@ -301,11 +283,6 @@ do_processArguments (int argc_in,
       case 't':
       {
         traceInformation_out = true;
-        break;
-      }
-      case 'u':
-      {
-        UIDefinitionFileDirectory_out = argumentParser.opt_arg ();
         break;
       }
       case 'v':
@@ -457,17 +434,20 @@ do_work (bool useThreadPool_in,
   ACE_ASSERT (CBData_in.configuration);
 
   // step1: initialize IRC handler module
+  CBData_in.configuration->moduleHandlerConfiguration.connectionConfiguration =
+    &CBData_in.configuration->connectionConfiguration;
+  CBData_in.configuration->moduleHandlerConfiguration.protocolConfiguration =
+    &CBData_in.configuration->protocolConfiguration;
   CBData_in.configuration->moduleHandlerConfiguration.streamConfiguration =
       &CBData_in.configuration->streamConfiguration;
-  CBData_in.configuration->moduleHandlerConfiguration.protocolConfiguration =
-      &CBData_in.configuration->protocolConfiguration;
+
   CBData_in.configuration->streamConfiguration.moduleHandlerConfiguration =
       &CBData_in.configuration->moduleHandlerConfiguration;
   CBData_in.configuration->streamConfiguration.moduleConfiguration =
       &CBData_in.configuration->moduleConfiguration;
-  IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
-                                                   NULL,
-                                                   true);
+  //IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
+  //                                                 NULL,
+  //                                                 true);
   //IRC_Client_Module_IRCHandler* IRCHandler_impl_p = NULL;
   //IRCHandler_impl_p =
   //  dynamic_cast<IRC_Client_Module_IRCHandler*> (IRC_handler.writer ());
@@ -483,8 +463,8 @@ do_work (bool useThreadPool_in,
   //              ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::initialize(), returning\n")));
   //  return;
   //} // end IF
-  CBData_in.configuration->streamConfiguration.module = &IRC_handler;
-  CBData_in.configuration->streamConfiguration.cloneModule = true;
+  //CBData_in.configuration->streamConfiguration.module = &IRC_handler;
+  //CBData_in.configuration->streamConfiguration.cloneModule = true;
 
   // step2: initialize event dispatch
   struct Common_DispatchThreadData thread_data;
@@ -514,12 +494,14 @@ do_work (bool useThreadPool_in,
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
-  Common_TimerConfiguration timer_configuration;
+  struct Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
 
   // step4: initialize signal handling
-  IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
+  struct IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
+  signal_handler_configuration.hasUI = !UIDefinitionFile_in.empty ();
+  signal_handler_configuration.useReactor = CBData_in.configuration->useReactor;
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1099,14 +1081,6 @@ ACE_TMAIN (int argc_in,
   // step2a: process commandline arguments
   std::string configuration_path             =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path                        += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path                        += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path                        += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path                        += ACE_TEXT_ALWAYS_CHAR ("..");
-  configuration_path                        += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path                        += ACE_TEXT_ALWAYS_CHAR ("test_i");
-#endif // #ifdef DEBUG_DEBUGGER
 
   std::string configuration_file_name        = configuration_path;
   configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -1129,7 +1103,6 @@ ACE_TMAIN (int argc_in,
 
   bool use_thread_pool                       = NET_EVENT_USE_THREAD_POOL;
   bool log_to_file                           = false;
-  bool load_phonebook                        = false;
 
   std::string phonebook_file_name            = configuration_path;
   phonebook_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -1161,12 +1134,11 @@ ACE_TMAIN (int argc_in,
                             UIRC_file_name,
                             use_thread_pool,
                             log_to_file,
-                            load_phonebook,
                             phonebook_file_name,
                             use_reactor,
                             reporting_interval,
                             trace_information,
-                            UIDefinitionFile_directory,
+                            //UIDefinitionFile_directory,
                             print_version_and_exit,
                             number_of_thread_pool_threads))
   {
@@ -1303,15 +1275,30 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   // step6: initialize configuration objects
-
-  // initialize protocol configuration
-  Stream_CachedAllocatorHeap_T<struct Stream_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                                     IRC_BUFFER_SIZE);
-  IRC_Client_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES,
-                                                   &heap_allocator);
-
   struct IRC_Client_Configuration configuration;
   struct IRC_Client_UserData user_data;
+
+  // initialize protocol configuration
+  Stream_CachedAllocatorHeap_T<struct IRC_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                                  IRC_MAXIMUM_FRAME_SIZE + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE);
+  if (!heap_allocator.initialize (configuration.allocatorConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize allocator: \"%m\", aborting\n")));
+
+    Common_Tools::finalizeLogging ();
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
+
+    return EXIT_FAILURE;
+  } // end IF
+  IRC_Client_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES,
+                                                   &heap_allocator);
 
   user_data.connectionConfiguration = &configuration.connectionConfiguration;
 
@@ -1319,16 +1306,30 @@ ACE_TMAIN (int argc_in,
   if (debug)
     configuration.parserConfiguration.debugScanner = debug;
   ////////////////////// socket handler configuration //////////////////////////
+  configuration.socketHandlerConfiguration.connectionConfiguration =
+    &configuration.connectionConfiguration;
+  configuration.socketHandlerConfiguration.socketConfiguration =
+    &configuration.socketConfiguration;
   configuration.socketHandlerConfiguration.messageAllocator =
-    configuration.streamConfiguration.messageAllocator;
+    &message_allocator;
   configuration.socketHandlerConfiguration.statisticReportingInterval =
     configuration.streamConfiguration.statisticReportingInterval;
   configuration.socketHandlerConfiguration.userData =
     configuration.userData;
+
+  configuration.connectionConfiguration.socketHandlerConfiguration = 
+    &configuration.socketHandlerConfiguration;
+  configuration.connectionConfiguration.streamConfiguration =
+    &configuration.streamConfiguration;
   ////////////////////////// stream configuration //////////////////////////////
+  configuration.moduleConfiguration.streamConfiguration =
+    &configuration.streamConfiguration;
+
   configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.moduleConfiguration->streamConfiguration =
-      &configuration.streamConfiguration;
+  configuration.streamConfiguration.moduleConfiguration =
+      &configuration.moduleConfiguration;
+  configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+    &configuration.moduleHandlerConfiguration));
   configuration.streamConfiguration.statisticReportingInterval =
       reporting_interval;
   configuration.moduleHandlerConfiguration.parserConfiguration =
@@ -1340,7 +1341,7 @@ ACE_TMAIN (int argc_in,
   cb_user_data.UIFileDirectory = UIDefinitionFile_directory;
 //   userData.phoneBook;
 //   userData.loginOptions.password = ;
-  cb_user_data.configuration->protocolConfiguration.loginOptions.nickName =
+  cb_user_data.configuration->protocolConfiguration.loginOptions.nickname =
       ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);
 //   userData.loginOptions.user.username = ;
   std::string host_name;
@@ -1389,7 +1390,7 @@ ACE_TMAIN (int argc_in,
   cb_user_data.RCFiles.push_back (UIRC_file_name);
 
   // step7: parse configuration file(s) (if any)
-  if (load_phonebook)
+  if (Common_File_Tools::isReadable (phonebook_file_name))
     do_parsePhonebookFile (phonebook_file_name,
                            cb_user_data.phoneBook);
   if (!configuration_file_name.empty ())

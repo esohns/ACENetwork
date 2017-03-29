@@ -144,6 +144,9 @@ struct IRC_Client_Configuration
    , socketHandlerConfiguration ()
    , connectionConfiguration ()
    ///////////////////////////////////////
+   , allocatorConfiguration ()
+   , moduleConfiguration ()
+   , moduleHandlerConfiguration ()
    , streamConfiguration ()
    , userData ()
    ///////////////////////////////////////
@@ -163,6 +166,7 @@ struct IRC_Client_Configuration
   struct IRC_Client_SocketHandlerConfiguration socketHandlerConfiguration;
   struct IRC_Client_ConnectionConfiguration    connectionConfiguration;
   // ****************************** stream *************************************
+  struct IRC_AllocatorConfiguration            allocatorConfiguration;
   struct Stream_ModuleConfiguration            moduleConfiguration;
   struct IRC_Client_ModuleHandlerConfiguration moduleHandlerConfiguration;
   struct IRC_Client_StreamConfiguration        streamConfiguration;

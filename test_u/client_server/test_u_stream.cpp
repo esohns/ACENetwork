@@ -148,21 +148,9 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
                 ACE_TEXT ("dynamic_cast<Test_U_Module_TCPSocketHandler> failed, aborting\n")));
     return false;
   } // end IF
-//  if (!socketHandler_impl_p->initialize (configuration_in.moduleHandlerConfiguration_2))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-//                socketHandler_.name ()));
-//    return false;
-//  } // end IF
-  if (!socketHandler_impl_p->initialize (inherited::state_))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                module_p->name ()));
-    return false;
-  } // end IF
+  socketHandler_impl_p->set (&(inherited::state_));
   socketHandler_impl_p->initialize ();
+
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)
@@ -181,7 +169,6 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   // set (session) message allocator
   //inherited::allocator_ = configuration_in.messageAllocator;
 
-  // OK: all went well
   inherited::isInitialized_ = true;
 
   return true;

@@ -128,6 +128,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/client_server)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/irc)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ########### next target ###############
@@ -168,13 +169,17 @@ set (IRC_client_SRCS
      Streambuf_alt.cpp
      Streambuf_alt.h
      Streambuf_alt.inl)
+set (IRC_client_INI
+     etc/IRC_client.ini
+     etc/IRC_client_phonebook.ini)
 
 #set_source_files_properties(${IRC_client_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
 set (EXECUTABLE IRC_client)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
-                ${IRC_client_SRCS})
+                ${IRC_client_SRCS}
+                ${IRC_client_INI})
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_i")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
@@ -195,6 +200,7 @@ elseif (WIN32)
  target_link_libraries (${EXECUTABLE} ${PANEL_LIBRARY})
 endif ()
 target_link_libraries (${EXECUTABLE} Common)
+target_link_libraries (${EXECUTABLE} CommonUI)
 target_link_libraries (${EXECUTABLE} ACEStream)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
 #target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Client)
@@ -209,8 +215,10 @@ install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)
-#install (FILES etc/net_client.glade
-#         DESTINATION etc/lib${PROJECT_NAME}/test_i COMPONENT config)
+install (FILES
+         etc/IRC_client.ini
+         etc/IRC_client_phonebook.ini
+         DESTINATION etc/lib${PROJECT_NAME}/test_i COMPONENT config)
 
 ################################################################################
 
@@ -275,7 +283,11 @@ set (IRC_client_gui_SRCS
 set (EXECUTABLE_GUI IRC_client_gui)
 add_executable (${EXECUTABLE_GUI}
                 EXCLUDE_FROM_ALL
-                ${IRC_client_gui_SRCS})
+                ${IRC_client_gui_SRCS}
+                ${IRC_client_INI}
+                etc/IRC_client_channel.glade
+                etc/IRC_client_connection.glade
+                etc/IRC_client_main.glade)
 set_property (TARGET ${EXECUTABLE_GUI} PROPERTY FOLDER "test_i")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
@@ -328,17 +340,28 @@ install (TARGETS ${EXECUTABLE_GUI}
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)
 install (FILES
-         IRC_client.ini
-         IRC_client_channel_tab.glade
-         IRC_client_main.glade
-         IRC_client_server_page.glade
-         servers.ini
+         etc/IRC_client.ini
+         etc/IRC_client_phonebook.ini
+         etc/IRC_client_channel.glade
+         etc/IRC_client_connection.glade
+         etc/IRC_client_main.glade
          DESTINATION etc/lib${PROJECT_NAME}/test_i COMPONENT config)
 
 ##########################################
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
+                         ARGS "-l -t"
+#                         FORWARD_ARGS
+                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
+                                              ${PROJECT_SOURCE_DIR}/../pdcurses/win32
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
+                                              /usr/local/lib
+                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_i/IRC_client
+                         ENVIRONMENT foo=bar)
+ create_target_launcher (${EXECUTABLE_GUI}
                          ARGS "-l -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
@@ -355,20 +378,37 @@ elseif (WIN32)
                          ARGS "-l -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
+                                              ${PROJECT_SOURCE_DIR}/../pdcurses/win32
+                                              G:/software/Development/dll
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/err/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/image/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/math/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/modules/dec/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/modules/dev/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/modules/vis/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/protocol/irc/Debug
+                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_i/IRC_client
+                         ENVIRONMENT foo=bar)
+ create_target_launcher (${EXECUTABLE_GUI}
+                         ARGS "-l -t"
+#                        FORWARD_ARGS
+                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug/bin
-#                                              ${PROJECT_SOURCE_DIR}/../libav-11.7/libavcodec
-#                                              ${PROJECT_SOURCE_DIR}/../libav-11.7/libavresample
-#                                              ${PROJECT_SOURCE_DIR}/../libav-11.7/libavutil
                                               G:/software/Development/dll
                                               ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/err/Debug
                                               ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/image/Debug
                                               ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/math/Debug
                                               ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/ui/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/modules/dec/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/modules/dev/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/modules/vis/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dec/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/vis/Debug
+                                              ${PROJECT_SOURCE_DIR}/cmake/src/protocol/irc/Debug
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_i/IRC_client
                          ENVIRONMENT foo=bar)
 endif ()

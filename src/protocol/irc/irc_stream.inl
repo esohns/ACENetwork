@@ -43,18 +43,6 @@ IRC_Stream_T<StreamStateType,
              SessionMessageType,
              UserDataType>::IRC_Stream_T (const std::string& name_in)
  : inherited (name_in)
- , marshal_ (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
-             NULL,
-             false)
- , parser_ (ACE_TEXT_ALWAYS_CHAR ("Parser"),
-            NULL,
-            false)
- //, handler_ (ACE_TEXT_ALWAYS_CHAR ("IRCHandler"),
- //            NULL,
- //            false)
- , runtimeStatistic_ (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),
-                      NULL,
-                      false)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::IRC_Stream_T"));
 
@@ -87,39 +75,39 @@ IRC_Stream_T<StreamStateType,
   inherited::shutdown ();
 }
 
-template <typename StreamStateType,
-          typename ConfigurationType,
-          typename StatisticContainerType,
-          typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename UserDataType>
-bool
-IRC_Stream_T<StreamStateType,
-             ConfigurationType,
-             StatisticContainerType,
-             ModuleHandlerConfigurationType,
-             SessionDataType,
-             SessionDataContainerType,
-             ControlMessageType,
-             DataMessageType,
-             SessionMessageType,
-             UserDataType>::load (Stream_ModuleList_t& modules_out,
-                                  bool& deleteModules_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::load"));
-
-  deleteModules_out = false;
-
-  modules_out.push_back (&runtimeStatistic_);
-  modules_out.push_back (&parser_);
-  modules_out.push_back (&marshal_);
-
-  return true;
-}
+//template <typename StreamStateType,
+//          typename ConfigurationType,
+//          typename StatisticContainerType,
+//          typename ModuleHandlerConfigurationType,
+//          typename SessionDataType,
+//          typename SessionDataContainerType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType,
+//          typename UserDataType>
+//bool
+//IRC_Stream_T<StreamStateType,
+//             ConfigurationType,
+//             StatisticContainerType,
+//             ModuleHandlerConfigurationType,
+//             SessionDataType,
+//             SessionDataContainerType,
+//             ControlMessageType,
+//             DataMessageType,
+//             SessionMessageType,
+//             UserDataType>::load (Stream_ModuleList_t& modules_out,
+//                                  bool& deleteModules_out)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::load"));
+//
+//  deleteModules_out = false;
+//
+//  modules_out.push_back (&runtimeStatistic_);
+//  modules_out.push_back (&parser_);
+//  modules_out.push_back (&marshal_);
+//
+//  return true;
+//}
 
 template <typename StreamStateType,
           typename ConfigurationType,
@@ -170,148 +158,43 @@ IRC_Stream_T<StreamStateType,
   // - push them onto the stream (tail-first) !
   SessionDataType& session_data_r =
       const_cast<SessionDataType&> (inherited::sessionData_->get ());
+  inherited::state_.currentSessionData = &session_data_r;
   session_data_r.sessionID = configuration_in.sessionID;
 
 //  ACE_ASSERT (configuration_in.moduleConfiguration);
 //  configuration_in.moduleConfiguration->streamState = &inherited::state_;
 
   // ---------------------------------------------------------------------------
-  if (configuration_in.module)
-  {
-    // *TODO*: (at least part of) this procedure belongs in libACEStream
-    //         --> remove type inferences
-    typename inherited::IMODULE_T* imodule_p =
-      dynamic_cast<typename inherited::IMODULE_T*> (configuration_in.module);
-    if (!imodule_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<Stream_IModule_T> failed, aborting\n"),
-                  configuration_in.module->name ()));
-      return false;
-    } // end IF
-    if (!imodule_p->initialize (*configuration_in.moduleConfiguration))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to initialize module, aborting\n"),
-                  configuration_in.module->name ()));
-      return false;
-    } // end IF
-    Stream_Task_t* task_p = configuration_in.module->writer ();
-    ACE_ASSERT (task_p);
-    typename inherited::IMODULE_HANDLER_T* imodule_handler_p =
-        dynamic_cast<typename inherited::IMODULE_HANDLER_T*> (task_p);
-    if (!imodule_handler_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: dynamic_cast<Stream_IModuleHandler_T> failed, aborting\n"),
-                  configuration_in.module->name ()));
-      return false;
-    } // end IF
-    if (!imodule_handler_p->initialize (*configuration_in.moduleHandlerConfiguration))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to initialize module handler, aborting\n"),
-                  configuration_in.module->name ()));
-      return false;
-    } // end IF
-    //inherited::modules_.push_front (configuration_in.module);
-  } // end IF
 
-  // ---------------------------------------------------------------------------
-
-  // ******************* Runtime Statistics ************************
-  //STATISTIC_WRITER_T* runtimeStatistic_impl_p =
-  //  dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
-  //if (!runtimeStatistic_impl_p)
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n")));
-  //  return false;
-  //} // end IF
-  //if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval,
-  //                                          true,
-  //                                          configuration_in.printFinalReport,
-  //                                          configuration_in.messageAllocator))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-  //              runtimeStatistic_.name ()));
-  //  return false;
-  //} // end IF
-
-//   // ******************* Handler ************************
-//   IRC_Module_Handler* handler_impl = NULL;
-//   handler_impl = dynamic_cast<IRC_Module_Handler*> (handler_.writer ());
-//   if (!handler_impl)
-//   {
-//     ACE_DEBUG ((LM_ERROR,
-//                 ACE_TEXT ("dynamic_cast<IRC_Module_Handler> failed, aborting\n")));
-//     return false;
-//   } // end IF
-//   if (!handler_impl->initialize (configuration_in.messageAllocator,
-//                                  (configuration_in.clientPingInterval ? false // servers shouldn't receive "pings" in the first place
-//                                                                       : NET_DEF_PING_PONG), // auto-answer "ping" as a client ?...
-//                                  (configuration_in.clientPingInterval == 0))) // clients print ('.') dots for received "pings"...
-//   {
-//     ACE_DEBUG ((LM_ERROR,
-//                 ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-//                 handler_.name ()));
-//     return false;
-//   } // end IF
-
-  // ******************* Parser ************************
-  PARSER_T* parser_impl_p = NULL;
-  parser_impl_p = dynamic_cast<PARSER_T*> (parser_.writer ());
-  if (!parser_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<IRC_Module_Parser_T*> failed, aborting\n")));
-    return false;
-  } // end IF
-  ACE_ASSERT (configuration_in.moduleHandlerConfiguration->parserConfiguration);
-  if (!parser_impl_p->initialize (configuration_in.messageAllocator,                                               // message allocator
-                                  configuration_in.moduleHandlerConfiguration->crunchMessages,                     // "crunch" messages ?
-                                  configuration_in.moduleHandlerConfiguration->parserConfiguration->debugScanner,  // debug scanner ?
-                                  configuration_in.moduleHandlerConfiguration->parserConfiguration->debugParser))  // debug parser ?
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                parser_.name ()));
-    return false;
-  } // end IF
+  Stream_Module_t* module_p = NULL;
 
   // ******************* Marshal ************************
-  BISECTOR_T* bisector_impl_p = NULL;
-  bisector_impl_p =
-   dynamic_cast<BISECTOR_T*> (marshal_.writer ());
+  module_p =
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("Marshal")));
+  if (!module_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
+                ACE_TEXT ("Marshal")));
+    return false;
+  } // end IF
+
+  BISECTOR_T* bisector_impl_p = dynamic_cast<BISECTOR_T*> (module_p->writer ());
   if (!bisector_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<IRC_Module_Bisector_T*> failed, aborting\n")));
     return false;
   } // end IF
-  // *TODO*: remove type inference
-  if (!bisector_impl_p->initialize (*configuration_in.moduleHandlerConfiguration,
-                                    configuration_in.messageAllocator))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                marshal_.name ()));
-    return false;
-  } // end IF
-  if (!bisector_impl_p->initialize (inherited::state_))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                marshal_.name ()));
-    return false;
-  } // end IF
+  bisector_impl_p->set (&(inherited::state_));
 
-  // enqueue the module...
+  // enqueue the module
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)
-  marshal_.arg (inherited::sessionData_);
+  module_p->arg (inherited::sessionData_);
+
+  // ---------------------------------------------------------------------------
 
   if (setupPipeline_in)
     if (!inherited::setup ())
@@ -320,11 +203,6 @@ IRC_Stream_T<StreamStateType,
                   ACE_TEXT ("failed to setup pipeline, aborting\n")));
       return false;
     } // end IF
-
-  // set (session) message allocator
-  // *TODO*: clean this up ! --> sanity check
-  ACE_ASSERT (configuration_in.messageAllocator);
-  //inherited::allocator_ = configuration_in.messageAllocator;
 
   inherited::isInitialized_ = true;
 
@@ -355,18 +233,67 @@ IRC_Stream_T<StreamStateType,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::collect"));
 
-  STATISTIC_WRITER_T* runtimeStatistic_impl_p = NULL;
-  runtimeStatistic_impl_p =
-    dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
-  if (!runtimeStatistic_impl_p)
+  // sanity check(s)
+  ACE_ASSERT (inherited::sessionData_);
+
+  int result = -1;
+  SessionDataType& session_data_r =
+    const_cast<SessionDataType&> (inherited::sessionData_->get ());
+  Stream_Module_t* module_p =
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
+  if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n")));
+                ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
+                ACE_TEXT ("StatisticReport")));
+    return false;
+  } // end IF
+  STATISTIC_WRITER_T* statistic_impl_p =
+    dynamic_cast<STATISTIC_WRITER_T*> (module_p->writer ());
+  if (!statistic_impl_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("dynamic_cast<Stream_Module_StatisticReport_WriterTask_T> failed, aborting\n")));
     return false;
   } // end IF
 
-  // delegate to this module...
-  return runtimeStatistic_impl_p->collect (data_out);
+  // synch access
+  if (session_data_r.lock)
+  {
+    result = session_data_r.lock->acquire ();
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", aborting\n")));
+      return false;
+    } // end IF
+  } // end IF
+
+  session_data_r.currentStatistic.timeStamp = COMMON_TIME_NOW;
+
+  // delegate to the statistic module
+  bool result_2 = false;
+  try {
+    result_2 = statistic_impl_p->collect (data_out);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), continuing\n")));
+  }
+  if (!result_2)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_IStatistic_T::collect(), aborting\n")));
+  else
+    session_data_r.currentStatistic = data_out;
+
+  if (session_data_r.lock)
+  {
+    result = session_data_r.lock->release ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
+  } // end IF
+
+  return result_2;
 }
 
 template <typename StreamStateType,
@@ -393,21 +320,8 @@ IRC_Stream_T<StreamStateType,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::report"));
 
-//   RPG_Net_Module_RuntimeStatistic* runtimeStatistic_impl = NULL;
-//   runtimeStatistic_impl = dynamic_cast<RPG_Net_Module_RuntimeStatistic*> (//                                            myRuntimeStatistic.writer());
-//   if (!runtimeStatistic_impl)
-//   {
-//     ACE_DEBUG((LM_ERROR,
-//                ACE_TEXT("dynamic_cast<RPG_Net_Module_RuntimeStatistic) failed> (aborting\n")));
-//
-//     return;
-//   } // end IF
-//
-//   // delegate to this module...
-//   return (runtimeStatistic_impl->report());
-
-  // just a dummy
   ACE_ASSERT (false);
+  ACE_NOTSUP;
 
   ACE_NOTREACHED (return;)
 }

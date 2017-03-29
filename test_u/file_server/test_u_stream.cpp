@@ -150,13 +150,8 @@ Test_U_Stream::initialize (const FileServer_StreamConfiguration& configuration_i
                 ACE_TEXT ("dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n")));
     return false;
   } // end IF
-  if (!net_io_impl_p->initialize (inherited::state_))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                module_p->name ()));
-    return false;
-  } // end IF
+  net_io_impl_p->set (&(inherited::state_));
+
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)
@@ -175,7 +170,6 @@ Test_U_Stream::initialize (const FileServer_StreamConfiguration& configuration_i
   // set (session) message allocator
   //inherited::allocator_ = configuration_in.messageAllocator;
 
-  // OK: all went well
   inherited::isInitialized_ = true;
 
   return true;
@@ -394,13 +388,8 @@ Test_U_UDPStream::initialize (const struct FileServer_StreamConfiguration& confi
                 ACE_TEXT ("dynamic_cast<Test_U_FileReaderH> failed, aborting\n")));
     return false;
   } // end IF
-  if (!file_source_impl_p->initialize (inherited::state_))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                module_p->name ()));
-    return false;
-  } // end IF
+  file_source_impl_p->set (&(inherited::state_));
+
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)
@@ -419,7 +408,6 @@ Test_U_UDPStream::initialize (const struct FileServer_StreamConfiguration& confi
   // set (session) message allocator
   //inherited::allocator_ = configuration_in.messageAllocator;
 
-  // OK: all went well
   inherited::isInitialized_ = true;
 
   return true;

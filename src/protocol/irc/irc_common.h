@@ -129,14 +129,14 @@ typedef std::bitset<7> IRC_UserModes_t;
 struct IRC_LoginOptions
 {
   inline IRC_LoginOptions ()
-   : passWord ()
-   , nickName ()
+   : password ()
+   , nickname ()
    , user ()
    , channel ()
   {};
 
-  std::string passWord;
-  std::string nickName;
+  std::string password;
+  std::string nickname;
   struct User
   {
     inline User ()

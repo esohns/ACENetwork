@@ -139,12 +139,9 @@ HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (const std::string&
   // trace ?
   HTTP_Scanner_set_debug ((traceScanning_in ? 1 : 0),
                           scannerState_);
-#if YYDEBUG
-  parser_.set_debug_level (traceParsing_in ? 1
-                                           : 0); // binary (see bison manual)
+  parser_.set_debug_level (trace_ ? 1 : 0); // binary (see bison manual)
   yydebug = (trace_ ? 1 : 0);
 //  yysetdebug (trace_ ? 1 : 0);
-#endif
 }
 
 template <typename SessionMessageType>
@@ -232,14 +229,11 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_ParserC
 
   HTTP_Scanner_set_debug ((configuration_->debugScanner ? 1 : 0),
                           scannerState_);
-#if YYDEBUG
   parser_.set_debug_level (trace_ ? 1
                                   : 0); // binary (see bison manual)
   yydebug = (trace_ ? 1 : 0);
 //  yysetdebug (trace_ ? 1 : 0);
-#endif
 
-  // OK
   isInitialized_ = true;
 
   return true;

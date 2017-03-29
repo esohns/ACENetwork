@@ -264,20 +264,7 @@ BitTorrent_PeerStream_T<StreamStateType,
                 ACE_TEXT ("dynamic_cast<BitTorrent_Module_Parser_T*> failed, aborting\n")));
     goto error;
   } // end IF
-//  if (!parser_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-//                marshal_.name ()));
-//    return false;
-//  } // end IF
-  if (!parser_impl_p->initialize (inherited::state_))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to initialize writer task, aborting\n"),
-                module_p->name ()));
-    goto error;
-  } // end IF
+  parser_impl_p->set (&(inherited::state_));
 
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a

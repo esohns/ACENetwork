@@ -89,6 +89,13 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
   passMessageDownstream_out = true;
 
   // sanity check(s)
+  // *TODO*: in scenarios where message streamers are head-module siblings to
+  //         the message parsers (standard marshalling functionality), any
+  //         downstream statistic module will not be able to account for the
+  //         outbound data byte-stream, as it has not been generated at that
+  //         stage
+  //         --> make the streamer sibling to any module task that generates
+  //             outbound data to generate the byte stream early
   ACE_ASSERT (message_inout->length () == 0);
 
   // serialize structured data
@@ -126,7 +133,8 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
           buffer += (*iterator_2).second;
           buffer += ACE_TEXT_ALWAYS_CHAR ("&");
         } // end FOR
-        buffer.erase (--buffer.end ());
+        if (!record_r.form.empty ())
+          buffer.erase (--buffer.end ());
 
         buffer += ACE_TEXT_ALWAYS_CHAR (" ");
         buffer += ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_VERSION_STRING_PREFIX);

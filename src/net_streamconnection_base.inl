@@ -377,9 +377,8 @@ Net_StreamConnectionBase_T<HandlerType,
   } // end SWITCH
   ACE_ASSERT (handler_configuration_p);
   // *TODO*: remove type inference
-  ACE_ASSERT (handler_configuration_p->userData);
   ConfigurationType* configuration_p =
-    handler_configuration_p->userData->connectionConfiguration;
+    handler_configuration_p->connectionConfiguration;
   ACE_ASSERT (configuration_p);
   if (!inherited::CONNECTION_BASE_T::initialize (*configuration_p))
   {

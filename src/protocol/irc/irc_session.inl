@@ -245,7 +245,7 @@ IRC_Session_T<ConnectionType,
   ACE_ASSERT (configuration_p);
   ACE_ASSERT (configuration_p->protocolConfiguration);
   inherited::state_.nickName =
-      configuration_p->protocolConfiguration->loginOptions.nickName;
+      configuration_p->protocolConfiguration->loginOptions.nickname;
 
   // step1: initialize output
   //UIState_ = configuration_p->cursesState;

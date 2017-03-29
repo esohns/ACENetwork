@@ -584,7 +584,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                  ACE_DEBUG ((LM_DEBUG,
                                              ACE_TEXT ("found entity @%d[fragment offset: %d]: %d/%d byte(s)\n"),
                                              iparser_p->offset () - yyleng,
-                                             (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng,
+                                             (message_block_p->rd_ptr () - message_block_p->base ()),
                                              yyleng, chunk_size));
                              } // end IF
                              else
@@ -593,10 +593,10 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                return yy::HTTP_Parser::token::BODY; }
 } // end <body>
 <chunked_body>{
-{CHUNK_LINE}{CRLF}         { // *TODO*: let the scanner parse this (it does it anyway)
-                             regex_string =
-                                 ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_REGEX_CHUNK_LINE);
-                             regex.assign (regex_string, regex_flags);
+{CHUNK_LINE}{CRLF}         {
+                             // *TODO*: let the scanner parse this (it does it anyway)
+                             regex.assign (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_REGEX_CHUNK_LINE),
+                                           regex_flags);
                              std::string input_string = yytext;
                              if (!std::regex_match (input_string,
                                                     match_results,
@@ -618,6 +618,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              missing_chunk_bytes = chunk_size;
                              converter.setf (std::ios::dec,
                                              std::ios::basefield);
+
                              BEGIN (chunk);
                              yycolumn -= yyleng;
                              /* yymore (); */ yyless (0); }
@@ -647,6 +648,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
 <chunk>{
 {CHUNK_LINE}{CRLF}         { message_block_p->rd_ptr (yyleng);
                              iparser_p->offset (yyleng);
+
                              if (chunk_size)
                              {
                                /* undo the effects of YY_DO_BEFORE_ACTION */
@@ -662,109 +664,84 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                              yyleng, chunk_size));
 
                                // (frame and) skip over chunk data
+                               unsigned int available_bytes = message_block_p->length ();
                                unsigned int bytes_to_skip = missing_chunk_bytes;
                                unsigned int remainder = 0;
-                               ACE_Message_Block* message_p, *message_2, *message_3;
-                               if (missing_chunk_bytes > message_block_p->length ())
-                                 missing_chunk_bytes -= message_block_p->length ();
-                               else
+                               ACE_Message_Block* message_p, *message_2;
+                               message_p = message_block_p;
+                               do
                                {
-                                 remainder =
-                                   (message_block_p->length () - missing_chunk_bytes);
-                                 missing_chunk_bytes = 0;
-                               } // end ELSE
-                               if (!missing_chunk_bytes)
-                               { // the fragment contains the (trailing end of
-                                 // the) chunk
-                                 // --> (insert buffer and) frame the chunk
-                                 //     data, see below)
-                                 if (remainder)
-                                 { // bits of the next chunk are available
-                                   message_p = message_block_p->duplicate ();
-                                   ACE_ASSERT (message_p);
-                                   message_2 = message_block_p->cont ();
-                                   if (message_2)
-                                     message_p->cont (message_2);
-                                   message_p->rd_ptr (bytes_to_skip);
-                                   ACE_ASSERT (message_p->length () == remainder);
-                                   message_block_p->cont (message_p);
-                                 } // end IF
-
-                                 message_block_p->wr_ptr (message_block_p->rd_ptr () + bytes_to_skip);
-                                 ACE_ASSERT (message_block_p->length () == bytes_to_skip);
-                               } // end IF
-                               else
-                               {
-                                 if (!iparser_p->isBlocking ())
-                                   return yy::HTTP_Parser::token::END_OF_FRAGMENT;
-//                                   return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
-
-                                 // wait for (missing) chunk data fragment(s)
-                                 while (missing_chunk_bytes)
+                                 if (missing_chunk_bytes > available_bytes)
                                  {
+                                   missing_chunk_bytes -= available_bytes;
+
+                                   if (!iparser_p->isBlocking ())
+                                     return yy::HTTP_Parser::token::END_OF_FRAGMENT;
+  //                                   return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
                                    if (!iparser_p->switchBuffer ())
                                    { // *NOTE*: most probable reason: connection
                                      //         has been closed --> session end
                                      ACE_DEBUG ((LM_DEBUG,
                                                  ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
-                                     return yy::HTTP_Parser::token::END_OF_FRAGMENT;
-//                                     return yytokentype::END_OF_FRAGMENT; // not enough data, cannot proceed
+                                     yyterminate();
                                    } // end IF
                                    message_p = iparser_p->buffer ();
 
-                                   if (missing_chunk_bytes > message_p->length ())
-                                     missing_chunk_bytes -= message_p->length ();
-                                   else
-                                   {
-                                     bytes_to_skip = missing_chunk_bytes;
-                                     remainder =
-                                       (message_p->length () - missing_chunk_bytes);
-                                     missing_chunk_bytes = 0;
-                                   } // end ELSE
-                                 } // end WHILE
+                                   available_bytes = message_p->length ();
 
-                                 // chunk ends in the current fragment
-                                 // --> (insert buffer and) frame the chunk
-                                 //     data, see below)
+                                   continue;
+                                 } // end IF
+                                 bytes_to_skip = missing_chunk_bytes;
+                                 remainder =
+                                   (available_bytes - missing_chunk_bytes);
+                                 missing_chunk_bytes = 0;
+
                                  if (remainder)
                                  { // bits of the next chunk are available
                                    message_2 = message_p->duplicate ();
-                                   ACE_ASSERT (message_2);
-                                   message_3 = message_p->cont ();
-                                   if (message_3)
-                                     message_2->cont (message_3);
+                                   if (!message_2)
+                                   {
+                                     ACE_DEBUG ((LM_ERROR,
+                                                 ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", returning\n")));
+                                     yyterminate();
+                                   } // end IF
+                                   message_p->cont (message_2);
                                    message_2->rd_ptr (bytes_to_skip);
                                    ACE_ASSERT (message_2->length () == remainder);
-                                   message_p->cont (message_2);
-                                   message_p->wr_ptr (message_p->rd_ptr () + bytes_to_skip);
-                                   ACE_ASSERT (message_p->length () == bytes_to_skip);
+                                   message_p->length (bytes_to_skip);
                                  } // end IF
+                               } while (missing_chunk_bytes);
+                               ACE_ASSERT (message_block_p->total_length () >= chunk_size);
 
-                                 ACE_ASSERT (message_block_p->total_length () >= chunk_size);
-                               } // end ELSE
-
-                               // switch buffers (one more time)
+                               // switch buffer (--> handle trailing CRLF)
                                if (!iparser_p->switchBuffer ())
-                               {
-                                 ACE_DEBUG ((LM_ERROR,
+                               { // *NOTE*: most probable reason: connection
+                                 //         has been closed --> session end
+                                 ACE_DEBUG ((LM_DEBUG,
                                              ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
                                  yyterminate();
                                } // end IF
                                message_block_p = iparser_p->buffer ();
-//                               remainder += 2;
-                               message_block_p->rd_ptr (2); // chunk_size/remainder + CRLF
+                               ACE_ASSERT (message_block_p->length () >= 2);
+                               message_block_p->rd_ptr (2); // CRLF
+                               // gobble initial bytes (CRLF)
+                               char c = yyinput (yyscanner);
+                               ACE_ASSERT (c == '\r');
+                               c = yyinput (yyscanner);
+                               ACE_ASSERT (c == '\n');
 
-                               // gobble initial bytes
-//                               yyg->yy_c_buf_p += remainder;
-                               yyg->yy_c_buf_p += 2;
-                               yyg->yy_hold_char = *yyg->yy_c_buf_p;
-                               //YY_FLUSH_BUFFER; // --> refill scan buffer
-//                               char c;
-//                               for (unsigned int i = 0;
-//                                    i < remainder;
-//                                    ++i)
-//                                 c = yyinput (yyscanner);
-//                               ACE_UNUSED_ARG (c);
+                               // switch buffer (next chunk ?)
+                               if (!message_block_p->length ())
+                               {
+                                 if (!iparser_p->switchBuffer ())
+                                 { // *NOTE*: most probable reason: connection
+                                   //         has been closed --> session end
+                                   ACE_DEBUG ((LM_DEBUG,
+                                               ACE_TEXT ("failed to Net_IParser::switchBuffer(), returning\n")));
+                                   yyterminate();
+                                 } // end IF
+                                 message_block_p = iparser_p->buffer ();
+                               } // end IF
 
                                iparser_p->offset (chunk_size + 2);
                                yylval->ival = yyleng + (chunk_size + 2);
@@ -776,6 +753,9 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                                              ACE_TEXT ("found last entity chunk @%d[fragment offset: %d]: 1 (+ 2) byte(s)\n"),
                                              iparser_p->offset () - yyleng,
                                              (message_block_p->rd_ptr () - message_block_p->base ()) - yyleng));
+
+                               // *NOTE*: do not consume the terminating CRLF
+                               //         here; this happens in <chunked_body>
                                iparser_p->offset (1 + 2);
                                yylval->ival = yyleng;
                              } // end ELSE

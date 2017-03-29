@@ -32,7 +32,9 @@ template <ACE_SYNCH_DECL,
           ////////////////////////////////
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          ////////////////////////////////
+          typename UserDataType>
 class IRC_Module_Streamer_T
  : public Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
@@ -43,7 +45,7 @@ class IRC_Module_Streamer_T
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 Stream_UserData>
+                                 UserDataType>
 {
  public:
   IRC_Module_Streamer_T ();
@@ -63,7 +65,7 @@ class IRC_Module_Streamer_T
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 Stream_UserData> inherited;
+                                 UserDataType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Streamer_T (const IRC_Module_Streamer_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Streamer_T& operator= (const IRC_Module_Streamer_T&))

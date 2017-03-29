@@ -46,7 +46,7 @@ class ACE_Message_Block;
 //class Stream_CachedMessageAllocator_T;
 
 class IRC_Export IRC_Message
- : public Stream_DataMessageBase_T<struct Stream_AllocatorConfiguration,
+ : public Stream_DataMessageBase_T<struct IRC_AllocatorConfiguration,
                                    enum Stream_MessageType,
                                    IRC_Record,
                                    IRC_CommandType_t>
@@ -65,11 +65,11 @@ class IRC_Export IRC_Message
 
  public:
   IRC_Message (unsigned int); // size
-   // *NOTE*: to be used by allocators
-   IRC_Message (ACE_Data_Block*, // data block to use
-                ACE_Allocator*,  // message allocator
-                bool = true);    // increment running message counter ?
-   //IRC_Message(ACE_Allocator*); // message allocator
+  // *NOTE*: to be used by allocators
+  IRC_Message (ACE_Data_Block*, // data block to use
+               ACE_Allocator*,  // message allocator
+               bool = true);    // increment running message counter ?
+  //IRC_Message(ACE_Allocator*); // message allocator
   virtual ~IRC_Message();
 
   virtual IRC_CommandType_t command () const; // return value: message type
@@ -90,7 +90,7 @@ class IRC_Export IRC_Message
   IRC_Message (const IRC_Message&);
 
  private:
-  typedef Stream_DataMessageBase_T<struct Stream_AllocatorConfiguration,
+  typedef Stream_DataMessageBase_T<struct IRC_AllocatorConfiguration,
                                    enum Stream_MessageType,
                                    IRC_Record,
                                    IRC_CommandType_t> inherited;

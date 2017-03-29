@@ -66,6 +66,20 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 //                         IRC_SessionMessage> IRC_IStreamNotify_t;
 //typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
 
+struct IRC_AllocatorConfiguration
+ : Stream_AllocatorConfiguration
+{
+  inline IRC_AllocatorConfiguration ()
+   : Stream_AllocatorConfiguration ()
+  {
+    defaultBufferSize = IRC_MAXIMUM_FRAME_SIZE;
+    // *NOTE*: this facilitates (message block) data buffers to be scanned with
+    //         'flex's yy_scan_buffer() method
+    paddingBytes = NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE;
+  };
+};
+
+struct IRC_SocketHandlerConfiguration;
 struct IRC_StreamConfiguration;
 struct IRC_ConnectionConfiguration
   : Net_ConnectionConfiguration
@@ -73,13 +87,15 @@ struct IRC_ConnectionConfiguration
   inline IRC_ConnectionConfiguration ()
     : Net_ConnectionConfiguration ()
     ///////////////////////////////////////
+    , socketHandlerConfiguration (NULL)
     , streamConfiguration (NULL)
     //, userData (NULL)
   {
-    PDUSize = IRC_BUFFER_SIZE;
+    PDUSize = IRC_MAXIMUM_FRAME_SIZE;
   };
 
-  struct IRC_StreamConfiguration* streamConfiguration;
+  struct IRC_SocketHandlerConfiguration* socketHandlerConfiguration;
+  struct IRC_StreamConfiguration*        streamConfiguration;
 
   //struct IRC_UserData*            userData;
 };
@@ -91,7 +107,9 @@ struct IRC_SocketHandlerConfiguration
    : Net_SocketHandlerConfiguration ()
    //////////////////////////////////////
    //, userData (NULL)
-  {};
+  {
+    PDUSize = IRC_MAXIMUM_FRAME_SIZE;
+  };
 
   //struct IRC_UserData* userData;
 };
@@ -129,17 +147,21 @@ struct IRC_ModuleHandlerConfiguration
 {
   inline IRC_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
-   , inbound (false)
+   , inbound (true)
    , printProgressDot (false)
    , pushStatisticMessages (true)
    , connectionConfiguration (NULL)
    , protocolConfiguration (NULL)
   {
+    concurrency = STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+
     // *NOTE*: this option may be useful for (downstream) parsers that only work
     //         on CONTIGUOUS buffers (i.e. cannot parse chained message blocks)
     // *WARNING*: currently, this does NOT work with multithreaded streams
     //            --> USE WITH CAUTION !
     crunchMessages = IRC_DEFAULT_CRUNCH_MESSAGES;
+
+    passive = false;
   };
 
   bool                                inbound; // statistic/IO module

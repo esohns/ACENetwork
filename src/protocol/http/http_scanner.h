@@ -46,7 +46,7 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 6
-#define YY_FLEX_SUBMINOR_VERSION 3
+#define YY_FLEX_SUBMINOR_VERSION 1
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -67,72 +67,40 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 /* %endif */
 
 /* %if-c-only */
-    #define yy_create_buffer HTTP_Scanner__create_buffer
-
-    #define yy_delete_buffer HTTP_Scanner__delete_buffer
-
-    #define yy_scan_buffer HTTP_Scanner__scan_buffer
-
-    #define yy_scan_string HTTP_Scanner__scan_string
-
-    #define yy_scan_bytes HTTP_Scanner__scan_bytes
-
-    #define yy_init_buffer HTTP_Scanner__init_buffer
-
-    #define yy_flush_buffer HTTP_Scanner__flush_buffer
-
-    #define yy_load_buffer_state HTTP_Scanner__load_buffer_state
-
-    #define yy_switch_to_buffer HTTP_Scanner__switch_to_buffer
-
-    #define yypush_buffer_state HTTP_Scanner_push_buffer_state
-
-    #define yypop_buffer_state HTTP_Scanner_pop_buffer_state
-
-    #define yyensure_buffer_stack HTTP_Scanner_ensure_buffer_stack
-
-    #define yylex HTTP_Scanner_lex
-
-    #define yyrestart HTTP_Scanner_restart
-
-    #define yylex_init HTTP_Scanner_lex_init
-
-    #define yylex_init_extra HTTP_Scanner_lex_init_extra
-
-    #define yylex_destroy HTTP_Scanner_lex_destroy
-
-    #define yyget_debug HTTP_Scanner_get_debug
-
-    #define yyset_debug HTTP_Scanner_set_debug
-
-    #define yyget_extra HTTP_Scanner_get_extra
-
-    #define yyset_extra HTTP_Scanner_set_extra
-
-    #define yyget_in HTTP_Scanner_get_in
-
-    #define yyset_in HTTP_Scanner_set_in
-
-    #define yyget_out HTTP_Scanner_get_out
-
-    #define yyset_out HTTP_Scanner_set_out
-
-    #define yyget_leng HTTP_Scanner_get_leng
-
-    #define yyget_text HTTP_Scanner_get_text
-
-    #define yyget_lineno HTTP_Scanner_get_lineno
-
-    #define yyset_lineno HTTP_Scanner_set_lineno
-
-
-        #define yyget_column HTTP_Scanner_get_column
-
-        #define yyset_column HTTP_Scanner_set_column
-
-
-    #define yywrap HTTP_Scanner_wrap
-
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+        
+        
+    
+    
 /* %endif */
 
 
@@ -140,12 +108,9 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 
 
 
-    #define yyalloc HTTP_Scanner_alloc
-
-    #define yyrealloc HTTP_Scanner_realloc
-
-    #define yyfree HTTP_Scanner_free
-
+    
+    
+    
 
 /* %if-c-only */
 
@@ -179,7 +144,7 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
- * if you want the limit (max/min) macros for int types.
+ * if you want the limit (max/min) macros for int types. 
  */
 #ifndef __STDC_LIMIT_MACROS
 #define __STDC_LIMIT_MACROS 1
@@ -196,7 +161,7 @@ typedef uint32_t flex_uint32_t;
 typedef signed char flex_int8_t;
 typedef short int flex_int16_t;
 typedef int flex_int32_t;
-typedef unsigned char flex_uint8_t;
+typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
 
@@ -247,6 +212,10 @@ typedef unsigned int flex_uint32_t;
 #define yynoreturn
 #endif
 
+
+    
+
+
 /* %not-for-header */
 
 
@@ -271,6 +240,8 @@ typedef void* yyscan_t;
 
 
 
+    
+    
 
 
 
@@ -279,8 +250,8 @@ typedef void* yyscan_t;
 
 
 
-/* For convenience, these vars (plus the bison vars far below)
-   are macros in the reentrant scanner. */
+///* For convenience, these vars (plus the bison vars far below)
+//   are macros in the reentrant scanner. */
 //#define yyin yyg->yyin_r
 //#define yyout yyg->yyout_r
 //#define yyextra yyg->yyextra_r
@@ -298,6 +269,17 @@ typedef void* yyscan_t;
 
 /* %if-not-reentrant */
 /* %endif */
+
+
+
+    
+    
+    
+    
+
+
+
+
 
 
 
@@ -342,68 +324,76 @@ typedef size_t yy_size_t;
 
 
 
+
+
+
+
+
+
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
 struct yy_buffer_state
-  {
+	{
 /* %if-c-only */
-  FILE *yy_input_file;
+	FILE *yy_input_file;
 /* %endif */
 
 /* %if-c++-only */
 /* %endif */
 
 
-  char *yy_ch_buf;		/* input buffer */
-  char *yy_buf_pos;		/* current position in input buffer */
+	char *yy_ch_buf;		/* input buffer */
+	char *yy_buf_pos;		/* current position in input buffer */
 
-  /* Size of input buffer in bytes, not including room for EOB
-   * characters.
-   */
-  int yy_buf_size;
+	/* Size of input buffer in bytes, not including room for EOB
+	 * characters.
+	 */
+	int yy_buf_size;
 
-  /* Number of characters read into yy_ch_buf, not including EOB
-   * characters.
-   */
-  int yy_n_chars;
+	/* Number of characters read into yy_ch_buf, not including EOB
+	 * characters.
+	 */
+	int yy_n_chars;
 
-  /* Whether we "own" the buffer - i.e., we know we created it,
-   * and can realloc() it to grow it, and should free() it to
-   * delete it.
-   */
-  int yy_is_our_buffer;
+	/* Whether we "own" the buffer - i.e., we know we created it,
+	 * and can realloc() it to grow it, and should free() it to
+	 * delete it.
+	 */
+	int yy_is_our_buffer;
 
-  /* Whether this is an "interactive" input source; if so, and
-   * if we're using stdio for input, then we want to use getc()
-   * instead of fread(), to make sure we stop fetching input after
-   * each newline.
-   */
-  int yy_is_interactive;
+	/* Whether this is an "interactive" input source; if so, and
+	 * if we're using stdio for input, then we want to use getc()
+	 * instead of fread(), to make sure we stop fetching input after
+	 * each newline.
+	 */
+	int yy_is_interactive;
 
-  /* Whether we're considered to be at the beginning of a line.
-   * If so, '^' rules will be active on the next match, otherwise
-   * not.
-   */
-  int yy_at_bol;
+	/* Whether we're considered to be at the beginning of a line.
+	 * If so, '^' rules will be active on the next match, otherwise
+	 * not.
+	 */
+	int yy_at_bol;
 
     int yy_bs_lineno; /**< The line count. */
     int yy_bs_column; /**< The column count. */
+    
 
+	/* Whether to try to fill the input buffer when we reach the
+	 * end of it.
+	 */
+	int yy_fill_buffer;
 
-  /* Whether to try to fill the input buffer when we reach the
-   * end of it.
-   */
-  int yy_fill_buffer;
+	int yy_buffer_status;
 
-  int yy_buffer_status;
-
-  };
+	};
 #endif /* !YY_STRUCT_YY_BUFFER_STATE */
 
 /* %if-c-only Standard (non-C++) definition */
 /* %not-for-header */
 
 /* %endif */
+
+
 
 
 
@@ -414,25 +404,33 @@ struct yy_buffer_state
 
 /* %endif */
 
-void HTTP_Scanner_restart ( FILE *input_file , yyscan_t yyscanner );
-void HTTP_Scanner__switch_to_buffer ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
-YY_BUFFER_STATE HTTP_Scanner__create_buffer ( FILE *file, int size , yyscan_t yyscanner );
-void HTTP_Scanner__delete_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
-void HTTP_Scanner__flush_buffer ( YY_BUFFER_STATE b , yyscan_t yyscanner );
-void HTTP_Scanner_push_buffer_state ( YY_BUFFER_STATE new_buffer , yyscan_t yyscanner );
-void HTTP_Scanner_pop_buffer_state ( yyscan_t yyscanner );
+void HTTP_Scanner_restart (FILE *input_file ,yyscan_t yyscanner );
+void HTTP_Scanner__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Scanner__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
+void HTTP_Scanner__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void HTTP_Scanner__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+void HTTP_Scanner_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+void HTTP_Scanner_pop_buffer_state (yyscan_t yyscanner );
 
 
 
-YY_BUFFER_STATE HTTP_Scanner__scan_buffer ( char *base, yy_size_t size , yyscan_t yyscanner );
-YY_BUFFER_STATE HTTP_Scanner__scan_string ( const char *yy_str , yyscan_t yyscanner );
-YY_BUFFER_STATE HTTP_Scanner__scan_bytes ( const char *bytes, int len , yyscan_t yyscanner );
+
+
+YY_BUFFER_STATE HTTP_Scanner__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Scanner__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
+YY_BUFFER_STATE HTTP_Scanner__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
 
 /* %endif */
 
-void *HTTP_Scanner_alloc ( yy_size_t , yyscan_t yyscanner );
-void *HTTP_Scanner_realloc ( void *, yy_size_t , yyscan_t yyscanner );
-void HTTP_Scanner_free ( void * , yyscan_t yyscanner );
+void *HTTP_Scanner_alloc (yy_size_t ,yyscan_t yyscanner );
+void *HTTP_Scanner_realloc (void *,yy_size_t ,yyscan_t yyscanner );
+void HTTP_Scanner_free (void * ,yyscan_t yyscanner );
+
+
+
+
+
+
 
 
 
@@ -452,6 +450,8 @@ void HTTP_Scanner_free ( void * , yyscan_t yyscanner );
 
 
 /* %endif */
+
+
 
 
 
@@ -506,7 +506,7 @@ void HTTP_Scanner_free ( void * , yyscan_t yyscanner );
 
 int HTTP_Scanner_lex_init (yyscan_t* scanner);
 
-int HTTP_Scanner_lex_init_extra ( YY_EXTRA_TYPE user_defined, yyscan_t* scanner);
+int HTTP_Scanner_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 
 /* %endif */
 
@@ -516,66 +516,66 @@ int HTTP_Scanner_lex_init_extra ( YY_EXTRA_TYPE user_defined, yyscan_t* scanner)
    These are made visible to non-reentrant scanners for convenience. */
 
 
-int HTTP_Scanner_lex_destroy ( yyscan_t yyscanner );
+int HTTP_Scanner_lex_destroy (yyscan_t yyscanner );
 
 
 
-int HTTP_Scanner_get_debug ( yyscan_t yyscanner );
+int HTTP_Scanner_get_debug (yyscan_t yyscanner );
 
 
 
-void HTTP_Scanner_set_debug ( int debug_flag , yyscan_t yyscanner );
+void HTTP_Scanner_set_debug (int debug_flag ,yyscan_t yyscanner );
 
 
 
-YY_EXTRA_TYPE HTTP_Scanner_get_extra ( yyscan_t yyscanner );
+YY_EXTRA_TYPE HTTP_Scanner_get_extra (yyscan_t yyscanner );
 
 
 
-void HTTP_Scanner_set_extra ( YY_EXTRA_TYPE user_defined , yyscan_t yyscanner );
+void HTTP_Scanner_set_extra (YY_EXTRA_TYPE user_defined ,yyscan_t yyscanner );
 
 
 
-FILE *HTTP_Scanner_get_in ( yyscan_t yyscanner );
+FILE *HTTP_Scanner_get_in (yyscan_t yyscanner );
 
 
 
-void HTTP_Scanner_set_in  ( FILE * _in_str , yyscan_t yyscanner );
+void HTTP_Scanner_set_in  (FILE * _in_str ,yyscan_t yyscanner );
 
 
 
-FILE *HTTP_Scanner_get_out ( yyscan_t yyscanner );
+FILE *HTTP_Scanner_get_out (yyscan_t yyscanner );
 
 
 
-void HTTP_Scanner_set_out  ( FILE * _out_str , yyscan_t yyscanner );
+void HTTP_Scanner_set_out  (FILE * _out_str ,yyscan_t yyscanner );
 
 
 
-      int HTTP_Scanner_get_leng ( yyscan_t yyscanner );
+			int HTTP_Scanner_get_leng (yyscan_t yyscanner );
 
 
 
-char *HTTP_Scanner_get_text ( yyscan_t yyscanner );
+char *HTTP_Scanner_get_text (yyscan_t yyscanner );
 
 
 
-int HTTP_Scanner_get_lineno ( yyscan_t yyscanner );
+int HTTP_Scanner_get_lineno (yyscan_t yyscanner );
 
 
 
-void HTTP_Scanner_set_lineno ( int _line_number , yyscan_t yyscanner );
-
-
-
-
-int HTTP_Scanner_get_column  ( yyscan_t yyscanner );
+void HTTP_Scanner_set_lineno (int _line_number ,yyscan_t yyscanner );
 
 
 
 
+int HTTP_Scanner_get_column  (yyscan_t yyscanner );
 
-void HTTP_Scanner_set_column ( int _column_no , yyscan_t yyscanner );
+
+
+
+
+void HTTP_Scanner_set_column (int _column_no ,yyscan_t yyscanner );
 
 
 
@@ -588,9 +588,9 @@ void HTTP_Scanner_set_column ( int _column_no , yyscan_t yyscanner );
 
 #ifndef YY_SKIP_YYWRAP
 #ifdef __cplusplus
-extern "C" int HTTP_Scanner_wrap ( yyscan_t yyscanner );
+extern "C" int HTTP_Scanner_wrap (yyscan_t yyscanner );
 #else
-extern int HTTP_Scanner_wrap ( yyscan_t yyscanner );
+extern int HTTP_Scanner_wrap (yyscan_t yyscanner );
 #endif
 #endif
 
@@ -599,11 +599,11 @@ extern int HTTP_Scanner_wrap ( yyscan_t yyscanner );
 /* %endif */
 
 #ifndef yytext_ptr
-static void yy_flex_strncpy ( char *, const char *, int , yyscan_t yyscanner);
+static void yy_flex_strncpy (char *,yyconst char *,int ,yyscan_t yyscanner);
 #endif
 
 #ifdef YY_NEED_STRLEN
-static int yy_flex_strlen ( const char * , yyscan_t yyscanner);
+static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #endif
 
 #ifndef YY_NO_INPUT
@@ -707,8 +707,6 @@ extern int HTTP_Scanner_lex (yyscan_t yyscanner);
 #undef YY_DECL_IS_OURS
 #undef YY_DECL
 #endif
-
-
 
 #undef HTTP_Scanner_IN_HEADER
 #endif /* HTTP_Scanner_HEADER_H */

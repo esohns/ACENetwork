@@ -41,9 +41,6 @@
 
 IRC_Client_Module_IRCHandler::IRC_Client_Module_IRCHandler ()
  : inherited ()
- , lock_ ()
- , subscribers_ ()
- , isInitialized_ (false)
  , conditionLock_ ()
  , condition_ (conditionLock_)
  , connectionIsAlive_ (false)
@@ -71,11 +68,8 @@ IRC_Client_Module_IRCHandler::initialize (const struct IRC_Client_ModuleHandlerC
   ACE_ASSERT (configuration_in.streamConfiguration);
   ACE_ASSERT (configuration_in.streamConfiguration->messageAllocator);
 
-  if (isInitialized_)
+  if (inherited::isInitialized_)
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("re-initializing...\n")));
-
     { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, conditionLock_, false);
 
       connectionIsAlive_ = false;
@@ -88,35 +82,14 @@ IRC_Client_Module_IRCHandler::initialize (const struct IRC_Client_ModuleHandlerC
     } // end lock scope
     initialRegistration_ = true;
     receivedInitialNotice_ = false;
-
-    { // synch access to subscribers
-      ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
-
-      subscribers_.clear ();
-    } // end lock scope
-
-    isInitialized_ = false;
   } // end IF
 
 //   if (configuration_.automaticPong)
 //     ACE_DEBUG((LM_DEBUG,
 //                ACE_TEXT("auto-answering ping messages...\n")));
 
-  if (configuration_in.subscriber)
-  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
-
-    subscribers_.push_back (configuration_in.subscriber);
-  } // end IF
-  ACE_ASSERT (!configuration_in.subscribers && !configuration_in.subscribersLock);
-  const_cast<struct IRC_Client_ModuleHandlerConfiguration&> (configuration_in).subscribers =
-      &subscribers_;
-  const_cast<struct IRC_Client_ModuleHandlerConfiguration&> (configuration_in).subscribersLock =
-      &lock_;
-
-  isInitialized_ = inherited::initialize (configuration_in,
-                                          allocator_in);
-
-  return true;
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 void
@@ -447,6 +420,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
     }
   } // end SWITCH
 
+  // forward messages to any subscriber(s)
   inherited::handleDataMessage (message_inout,
                                 passMessageDownstream_out);
 }
@@ -464,7 +438,6 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (isInitialized_);
 
   switch (message_inout->type ())
   {
@@ -488,7 +461,7 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
       {
         ACE_Guard<ACE_SYNCH_MUTEX> aGuard (session_data_r.connectionState->lock);
         session_data_r.connectionState->nickName =
-            inherited::configuration_->protocolConfiguration->loginOptions.nickName;
+            inherited::configuration_->protocolConfiguration->loginOptions.nickname;
       } // end lock scope
 
       // step1: remember connection has been opened...
@@ -553,8 +526,6 @@ IRC_Client_Module_IRCHandler::registerc (const struct IRC_LoginOptions& loginOpt
   // 4. send NICK
   // 5. send USER
 
-  // sanity check(s)
-  ACE_ASSERT (isInitialized_);
   // step1: ...is done ?
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, conditionLock_, false);
 
@@ -636,13 +607,13 @@ IRC_Client_Module_IRCHandler::registerc (const struct IRC_LoginOptions& loginOpt
     return false;
   } // end IF
 
-  message_p->parameters_.push_back (loginOptions_in.passWord);
+  message_p->parameters_.push_back (loginOptions_in.password);
 
   // step3b: send it upstream
   sendMessage (message_p);
 
   // step4: initialize nickname
-  nick (loginOptions_in.nickName);
+  nick (loginOptions_in.nickname);
 
   // step5a: initialize user
   message_p = allocateMessage (IRC_Record::USER);
@@ -1394,8 +1365,8 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
     return;
   } // end IF
 
-//   ACE_DEBUG((LM_DEBUG,
-//              ACE_TEXT("pushed message...\n")));
+//   ACE_DEBUG ((LM_DEBUG,
+//               ACE_TEXT ("pushed message...\n")));
 }
 
 ACE_Task<ACE_MT_SYNCH,

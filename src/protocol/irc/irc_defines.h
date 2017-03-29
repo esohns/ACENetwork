@@ -22,13 +22,9 @@
 #define IRC_DEFINES_H
 
 // protocol
-// "\0\0"
-#define YY_END_OF_BUFFER_CHAR                  0
-#define IRC_FLEX_BUFFER_BOUNDARY_SIZE          2
 // CRLF = "\r\n"
 #define IRC_FRAME_BOUNDARY                     "\r\n"
 #define IRC_FRAME_BOUNDARY_SIZE                2
-#define IRC_MAXIMUM_FRAME_SIZE                 512 // bytes
 
 #define IRC_MAXIMUM_NOTICE_DELAY               3  // seconds
 // *NOTE*: some servers perform DNS address resolution, which can take a while
@@ -38,13 +34,11 @@
 // *NOTE*: according to RFC1459, IRC messages SHALL not exceed 512 bytes.
 //         A buffer size of 512 bytes will allow "crunching" messages into a
 //         single buffer. While this arguably "wastes" some memory, it allows
-//         [easier/more robust] scanning / parsing...
-//         Provide an extra 2 '\0' "resilience" bytes needed for scanning with
-//         "flex"
+//         [easier/more robust] scanning / parsing
 // *WARNING*: be aware that a single read from the connected socket may well
 //            cover MORE than one complete message at a time, so this value is
-//            just a (somewhat qualified) proposal...
-#define IRC_BUFFER_SIZE                        (IRC_MAXIMUM_FRAME_SIZE + IRC_FLEX_BUFFER_BOUNDARY_SIZE)
+//            just a (somewhat qualified) proposal
+#define IRC_MAXIMUM_FRAME_SIZE                 512 // bytes
 
 // "crunch" messages for easier parsing ?
 // *NOTE*: this comes at the cost of alloc/free, memcopy and locking per
@@ -103,10 +97,6 @@
 
 // *TODO*: move these to irc_client_defines.h
 // client
-// asynchronous connections
-#define IRC_CONNECTION_ASYNCH_TIMEOUT          60 // second(s)
-#define IRC_CONNECTION_ASYNCH_TIMEOUT_INTERVAL 1  // second(s)
-
 #define IRC_SESSION_LOG_FILENAME_PREFIX        "IRC_session"
 #define IRC_SESSION_DEF_LOG                    false // log to file ? : stdout
 

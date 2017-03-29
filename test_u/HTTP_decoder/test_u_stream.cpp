@@ -112,8 +112,8 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
     return false;
   } // end IF
   ACE_ASSERT (inherited::sessionData_);
-  Test_U_HTTPDecoder_SessionData& session_data_r =
-      const_cast<Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->get ());
+  struct Test_U_HTTPDecoder_SessionData& session_data_r =
+      const_cast<struct Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->get ());
   session_data_r.sessionID = configuration_in.sessionID;
   // *TODO*: remove type inferences
   ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
@@ -156,7 +156,7 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   WRITER_T* IOWriter_impl_p = NULL;
   std::string buffer;
 
-  const_cast<Test_U_StreamConfiguration&> (configuration_in).moduleHandlerConfiguration->targetFileName =
+  const_cast<struct Test_U_StreamConfiguration&> (configuration_in).moduleHandlerConfiguration->targetFileName =
       buffer;
 
   // ******************* IO ************************
@@ -168,21 +168,8 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
                 ACE_TEXT ("dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n")));
     goto error;
   } // end IF
-//  if (!IOWriter_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("%s: failed to initialize Stream_Module_Net_IOWriter_T, aborting\n"),
-//                IO_.name ()));
-//    goto error;
-//  } // end IF
-  if (!IOWriter_impl_p->initialize (inherited::state_))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to initialize Stream_Module_Net_IOWriter_T, aborting\n"),
-                IO_.name ()));
-    goto error;
-  } // end IF
-  //  IOWriter_impl_p->reset ();
+  IOWriter_impl_p->set (&(inherited::state_));
+
   IOReader_impl_p = dynamic_cast<READER_T*> (IO_.reader ());
   if (!IOReader_impl_p)
   {
@@ -212,10 +199,6 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
 
   // -------------------------------------------------------------
 
-  // set (session) message allocator
-  //inherited::allocator_ = configuration_in.messageAllocator;
-
-  // OK: all went well
   inherited::isInitialized_ = true;
   //inherited::dump_state ();
 

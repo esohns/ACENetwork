@@ -51,7 +51,7 @@ class Net_IConnectionManagerBase
 
 template <typename AddressType,
           typename ConfigurationType,
-          typename StateType,
+          typename StateType, // connection-
           typename StatisticContainerType,
           ////////////////////////////////
           typename UserDataType>

@@ -27,6 +27,7 @@
 #include <ace/Log_Msg.h>
 #include <ace/Message_Block.h>
 
+#include "net_defines.h"
 #include "net_macros.h"
 
 #include "irc_defines.h"
@@ -277,7 +278,7 @@ IRC_ParserDriver::scan_begin (bool useYYScanBuffer_in)
   {
     bufferState_ =
       IRC_Scanner__scan_buffer (fragment_->rd_ptr (),
-                                (fragment_->length () + IRC_FLEX_BUFFER_BOUNDARY_SIZE),
+                                fragment_->length () + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE,
                                 scannerState_);
   } // end IF
   else

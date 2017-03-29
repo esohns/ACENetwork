@@ -145,6 +145,17 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
 
+  // sanity check(s)
+  ACE_ASSERT (configuration_.socketConfiguration);
+  ACE_ASSERT (configuration_.connectionConfiguration);
+
+  // *TODO*: remove type inferences
+  configuration_.socketConfiguration->address = address_in;
+  configuration_.connectionConfiguration->socketHandlerConfiguration =
+    &configuration_;
+
+  ACE_UNUSED_ARG (address_in);
+
   int result = -1;
 
   ICONNECTOR_T* iconnector_p = this;

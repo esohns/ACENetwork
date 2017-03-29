@@ -18,6 +18,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#ifdef __cplusplus
+extern "C"
+{
+#include <libavcodec/avcodec.h>
+#include <libavutil/pixfmt.h>
+}
+#endif /* __cplusplus */
+
 #include <ace/Log_Msg.h>
 
 #include "common_timer_manager_common.h"
@@ -304,61 +312,6 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
       break;
   } // end SWITCH
 }
-
-//template <ACE_SYNCH_DECL,
-//          typename TimePolicyType,
-//          typename ConfigurationType,
-//          typename ControlMessageType,
-//          typename DataMessageType,
-//          typename SessionMessageType>
-//DataMessageType*
-//HTTP_Module_Parser_T<ACE_SYNCH_USE,
-//                     TimePolicyType,
-//                     ConfigurationType,
-//                     ControlMessageType,
-//                     DataMessageType,
-//                     SessionMessageType>::allocateMessage (unsigned int requestedSize_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::allocateMessage"));
-
-//  // initialize return value(s)
-//  DataMessageType* message_p = NULL;
-
-//  if (allocator_)
-//  {
-//allocate:
-//    try {
-//      message_p =
-//        static_cast<DataMessageType*> (allocator_->malloc (requestedSize_in));
-//    } catch (...) {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
-//                  requestedSize_in));
-//      return NULL;
-//    }
-
-//    // keep retrying ?
-//    if (!message_p && !allocator_->block ())
-//      goto allocate;
-//  } // end IF
-//  else
-//    ACE_NEW_NORETURN (message_p,
-//                      DataMessageType (requestedSize_in));
-//  if (!message_p)
-//  {
-//    if (allocator_)
-//    {
-//      if (allocator_->block ())
-//        ACE_DEBUG ((LM_CRITICAL,
-//                    ACE_TEXT ("failed to allocate DataMessageType: \"%m\", aborting\n")));
-//    } // end IF
-//    else
-//      ACE_DEBUG ((LM_CRITICAL,
-//                  ACE_TEXT ("failed to allocate DataMessageType: \"%m\", aborting\n")));
-//  } // end IF
-
-//  return message_p;
-//}
 
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
@@ -818,72 +771,6 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   } // end SWITCH
 }
 
-//template <ACE_SYNCH_DECL,
-//          typename TaskSynchType,
-//          typename TimePolicyType,
-//          typename SessionMessageType,
-//          typename DataMessageType,
-//          typename ConfigurationType,
-//          typename StreamStateType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename StatisticContainerType>
-//DataMessageType*
-//HTTP_Module_ParserH_T<ACE_SYNCH_USE,
-//                      TimePolicyType,
-//                     SessionMessageType,
-//                     DataMessageType,
-//                     ConfigurationType,
-//                     StreamStateType,
-//                     SessionDataType,
-//                     SessionDataContainerType,
-//                     StatisticContainerType>::allocateMessage (unsigned int requestedSize_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::allocateMessage"));
-//
-//  // sanity check(s)
-//  ACE_ASSERT (inherited::configuration_);
-//  ACE_ASSERT (inherited::configuration_->streamConfiguration);
-//
-//  // initialize return value(s)
-//  DataMessageType* message_p = NULL;
-//
-//  if (inherited::configuration_->streamConfiguration->messageAllocator)
-//  {
-//allocate:
-//    try {
-//      message_p =
-//        static_cast<DataMessageType*> (inherited::configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
-//    } catch (...) {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
-//                  requestedSize_in));
-//      return NULL;
-//    }
-//
-//    // keep retrying ?
-//    if (!message_p && !inherited::configuration_->streamConfiguration->messageAllocator->block ())
-//      goto allocate;
-//  } // end IF
-//  else
-//    ACE_NEW_NORETURN (message_p,
-//                      DataMessageType (requestedSize_in));
-//  if (!message_p)
-//  {
-//    if (inherited::configuration_->streamConfiguration->messageAllocator)
-//    {
-//      if (inherited::configuration_->streamConfiguration->messageAllocator->block ())
-//        ACE_DEBUG ((LM_CRITICAL,
-//                    ACE_TEXT ("failed to allocate SessionMessageType: \"%m\", aborting\n")));
-//    } // end IF
-//    else
-//      ACE_DEBUG ((LM_CRITICAL,
-//                  ACE_TEXT ("failed to allocate SessionMessageType: \"%m\", aborting\n")));
-//  } // end IF
-//
-//  return message_p;
-//}
-
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
@@ -1008,7 +895,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   } // end IF
   data_container_p->set (record_inout);
   record_inout = NULL;
-  headFragment_->initialize (data_container_p,
+  data_container_2 = data_container_p;
+  headFragment_->initialize (data_container_2,
                              NULL);
 
   // make sure the whole fragment chain references the same data record

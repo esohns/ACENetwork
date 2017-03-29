@@ -64,8 +64,8 @@ class BitTorrent_Module_Parser_T
   BitTorrent_Module_Parser_T ();
   virtual ~BitTorrent_Module_Parser_T ();
 
-  // override (part of) Stream_IModuleHandler_T
-  virtual bool initialize (const ConfigurationType&);
+  virtual bool initialize (const ConfigurationType&,
+                           Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
@@ -152,8 +152,7 @@ class BitTorrent_Module_ParserH_T
   BitTorrent_Module_ParserH_T ();
   virtual ~BitTorrent_Module_ParserH_T ();
 
-  // *PORTABILITY*: for some reason, this base class member is not exposed
-  //                (MSVC/gcc)
+  // *NOTE*: disambiguate Common_ISet_T::set()
   using Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                     TimePolicyType,
                                     ControlMessageType,
@@ -166,10 +165,11 @@ class BitTorrent_Module_ParserH_T
                                     SessionDataType,
                                     SessionDataContainerType,
                                     StatisticContainerType,
-                                    UserDataType>::initialize;
+                                    UserDataType>::set;
 
   // override (part of) Stream_IModuleHandler_T
-  virtual bool initialize (const ConfigurationType&);
+  virtual bool initialize (const ConfigurationType&,
+                           Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle

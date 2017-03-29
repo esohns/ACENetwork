@@ -33,13 +33,15 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename UserDataType>
 IRC_Module_Streamer_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ConfigurationType,
                       ControlMessageType,
                       DataMessageType,
-                      SessionMessageType>::IRC_Module_Streamer_T ()
+                      SessionMessageType,
+                      UserDataType>::IRC_Module_Streamer_T ()
  : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Streamer_T::IRC_Module_Streamer_T"));
@@ -51,13 +53,15 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename UserDataType>
 IRC_Module_Streamer_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ConfigurationType,
                       ControlMessageType,
                       DataMessageType,
-                      SessionMessageType>::~IRC_Module_Streamer_T ()
+                      SessionMessageType,
+                      UserDataType>::~IRC_Module_Streamer_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Streamer_T::~IRC_Module_Streamer_T"));
 
@@ -68,15 +72,17 @@ template <ACE_SYNCH_DECL,
           typename ConfigurationType,
           typename ControlMessageType,
           typename DataMessageType,
-          typename SessionMessageType>
+          typename SessionMessageType,
+          typename UserDataType>
 void
 IRC_Module_Streamer_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ConfigurationType,
                       ControlMessageType,
                       DataMessageType,
-                      SessionMessageType>::handleDataMessage (DataMessageType*& message_inout,
-                                                              bool& passMessageDownstream_out)
+                      SessionMessageType,
+                      UserDataType>::handleDataMessage (DataMessageType*& message_inout,
+                                                        bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Streamer_T::handleDataMessage"));
 

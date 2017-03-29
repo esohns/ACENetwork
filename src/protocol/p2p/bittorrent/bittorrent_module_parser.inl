@@ -87,7 +87,8 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
                            ControlMessageType,
                            DataMessageType,
                            SessionMessageType,
-                           UserDataType>::initialize (const ConfigurationType& configuration_in)
+                           UserDataType>::initialize (const ConfigurationType& configuration_in,
+                                                      Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Parser_T::initialize"));
 
@@ -126,7 +127,8 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
     return false;
   } // end IF
 
-  return inherited::initialize (configuration_in);
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 template <ACE_SYNCH_DECL,
@@ -524,7 +526,8 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
-                            UserDataType>::initialize (const ConfigurationType& configuration_in)
+                            UserDataType>::initialize (const ConfigurationType& configuration_in,
+                                                      Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::initialize"));
 
@@ -556,7 +559,8 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
     return false;
   } // end IF
 
-  return inherited::initialize (configuration_in);
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 template <ACE_SYNCH_DECL,

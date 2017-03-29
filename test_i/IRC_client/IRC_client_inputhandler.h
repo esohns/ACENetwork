@@ -62,7 +62,7 @@ class IRC_Client_InputHandler
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_InputHandler (const IRC_Client_InputHandler&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_InputHandler& operator= (const IRC_Client_InputHandler&))
 
-  ACE_Message_Block* allocateMessage (unsigned int = IRC_BUFFER_SIZE); // size
+  ACE_Message_Block* allocateMessage (unsigned int = IRC_MAXIMUM_FRAME_SIZE); // size
 
   struct IRC_Client_InputHandlerConfiguration* configuration_;
   ACE_Message_Block*                           currentReadBuffer_;

@@ -62,6 +62,13 @@
 // protocol parsers
 #define YY_END_OF_BUFFER_CHAR                           0 // "\0\0"
 #define NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE          2
+// *IMPORTANT NOTE*: scans buffers in-place (avoids a copy,
+//         see: http://flex.sourceforge.net/manual/Multiple-Input-Buffers.html)
+//         --> in order to use yy_scan_buffer(), the buffer needs to have been
+//             prepared for usage by flex: buffers need two trailing '\0's
+//             BEYOND their datas' tail byte (i.e. at positions length() + 1 and
+//             length() + 2)
+#define NET_PROTOCOL_FLEX_DEFAULT_USE_YY_SCAN_BUFFER    true
 
 // output more debugging information ?
 #define NET_PROTOCOL_DEFAULT_LEX_TRACE                  false

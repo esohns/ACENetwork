@@ -150,8 +150,7 @@ class HTTP_Module_ParserH_T
   HTTP_Module_ParserH_T ();
   virtual ~HTTP_Module_ParserH_T ();
 
-  // *PORTABILITY*: for some reason, this base class member is not exposed
-  //                (MSVC/gcc)
+  // *NOTE*: disambiguate Common_ISet_T::set()
   using Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                     TimePolicyType,
                                     ControlMessageType,
@@ -164,7 +163,7 @@ class HTTP_Module_ParserH_T
                                     SessionDataType,
                                     SessionDataContainerType,
                                     StatisticContainerType,
-                                    UserDataType>::initialize;
+                                    UserDataType>::set;
 
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const ConfigurationType&,

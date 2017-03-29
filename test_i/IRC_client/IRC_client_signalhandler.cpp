@@ -35,6 +35,8 @@
 #include "IRC_client_curses.h"
 #include "IRC_client_network.h"
 
+#include "IRC_client_gui_common.h"
+
 IRC_Client_SignalHandler::IRC_Client_SignalHandler (bool useReactor_in,
                                                     bool useCursesLibrary_in)
  : inherited (this) // event handler handle
@@ -174,13 +176,22 @@ done_connect:
   // ...shutdown ?
   if (shutdown)
   {
-    // step1: notify curses dispatch ?
     if (inherited::configuration_)
-      if (inherited::configuration_->cursesState)
-      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);
+    {
+      // step1: stop GTK event dispatch ?
+      if (inherited::configuration_->hasUI)
+        IRC_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false,  // wait ?
+                                                                false); // N/A
+      else
+      {
+        if (inherited::configuration_->cursesState)
+        {
+          ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);
 
-        inherited::configuration_->cursesState->finished = true;
+          inherited::configuration_->cursesState->finished = true;
+        } // end IF
       } // end IF
+    } // end IF
 
     // step2: stop event dispatch
     Common_Tools::finalizeEventDispatch (inherited::configuration_->useReactor,  // stop reactor ?

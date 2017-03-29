@@ -22,6 +22,7 @@
 
 #include "stream_iallocator.h"
 
+#include "net_defines.h"
 #include "net_macros.h"
 
 #include "irc_record.h"
@@ -153,12 +154,12 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
 //     message->dump_state();
 
     // step1: get a new message buffer
-    message_p = allocateMessage (IRC_BUFFER_SIZE);
+    message_p = allocateMessage (IRC_MAXIMUM_FRAME_SIZE);
     if (!message_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to allocate message(%u), returning\n"),
-                  IRC_BUFFER_SIZE));
+                  IRC_MAXIMUM_FRAME_SIZE));
       goto error;
     } // end IF
 
@@ -183,7 +184,7 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
     } // end FOR
 
     // step3: append the "\0\0"-sequence, as required by flex
-    ACE_ASSERT (message_p->space () >= IRC_FLEX_BUFFER_BOUNDARY_SIZE);
+    ACE_ASSERT (message_p->space () >= NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE);
     //ACE_ASSERT (IRC_FLEX_BUFFER_BOUNDARY_SIZE == 2);
     *(message_p->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
     *(message_p->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;

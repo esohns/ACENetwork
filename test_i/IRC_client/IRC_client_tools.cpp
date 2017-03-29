@@ -119,9 +119,9 @@ IRC_Client_Tools::parseConfigurationFile (const std::string& fileName_in,
 //                 item_type));
 
     if (item_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_PASSWORD_LABEL))
-      loginOptions_out.passWord = ACE_TEXT_ALWAYS_CHAR (item_value.c_str ());
+      loginOptions_out.password = ACE_TEXT_ALWAYS_CHAR (item_value.c_str ());
     else if (item_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_NICKNAME_LABEL))
-      loginOptions_out.nickName = ACE_TEXT_ALWAYS_CHAR (item_value.c_str ());
+      loginOptions_out.nickname = ACE_TEXT_ALWAYS_CHAR (item_value.c_str ());
     else if (item_name == ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_USER_LABEL))
       loginOptions_out.user.userName =
           ACE_TEXT_ALWAYS_CHAR (item_value.c_str ());

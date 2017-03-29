@@ -49,7 +49,7 @@ template <typename SessionDataType, // reference-counted
           ////////////////////////////////
           typename UserDataType>
 class IRC_SessionMessage_T
- : public Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
+ : public Stream_SessionMessageBase_T<struct IRC_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       SessionDataType,
                                       UserDataType>
@@ -90,7 +90,7 @@ class IRC_SessionMessage_T
   IRC_SessionMessage_T (const IRC_SessionMessage_T&);
 
  private:
-  typedef Stream_SessionMessageBase_T<struct Stream_AllocatorConfiguration,
+  typedef Stream_SessionMessageBase_T<struct IRC_AllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       SessionDataType,
                                       UserDataType> inherited;

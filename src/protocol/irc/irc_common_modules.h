@@ -75,12 +75,12 @@ typedef Stream_Module_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                    struct IRC_Stream_SessionData,
                                                    IRC_Stream_SessionData_t> IRC_Module_StatisticReport_WriterTask_t;
 
-typedef IRC_Module_Streamer_T<ACE_MT_SYNCH,
-                              Common_TimePolicy_t,
-                              struct IRC_ModuleHandlerConfiguration,
-                              ACE_Message_Block,
-                              IRC_Message,
-                              IRC_SessionMessage_t> IRC_Module_Streamer_t;
+//typedef IRC_Module_Streamer_T<ACE_MT_SYNCH,
+//                              Common_TimePolicy_t,
+//                              struct IRC_ModuleHandlerConfiguration,
+//                              ACE_Message_Block,
+//                              IRC_Message,
+//                              IRC_SessionMessage_t> IRC_Module_Streamer_t;
 //typedef IRC_Module_Bisector_T<ACE_SYNCH_MUTEX,
 //                              ACE_MT_SYNCH,
 //                              Common_TimePolicy_t,

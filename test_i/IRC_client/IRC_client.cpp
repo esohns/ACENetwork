@@ -71,6 +71,8 @@ using namespace std;
 #include "irc_common.h"
 #include "irc_defines.h"
 
+#include "test_i_defines.h"
+
 #include "IRC_client_configuration.h"
 #include "IRC_client_curses.h"
 #include "IRC_client_defines.h"
@@ -90,67 +92,65 @@ do_printUsage (const std::string& programName_in)
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_i");
-#endif // #ifdef DEBUG_DEBUGGER
-
-  std::cout << ACE_TEXT ("usage: ")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
-            << ACE_TEXT (" [OPTIONS]")
+            << ACE_TEXT_ALWAYS_CHAR (" [OPTIONS]")
             << std::endl << std::endl;
-  std::cout << ACE_TEXT ("currently available options:") << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("currently available options:") << std::endl;
+  // *NOTE*: the default behaviour is to use the first 'connection' entry in the
+  //         configuration file (if any)
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-a [IP Address]: IRC server address {\"")
+            << ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEFAULT_SERVER_HOSTNAME)
+            << ACE_TEXT_ALWAYS_CHAR ("\"}")
+            << std::endl;
   std::string path = configuration_path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  path +=
+    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
-  std::cout << ACE_TEXT ("-c [FILE] : configuration file")
-            << ACE_TEXT (" [\"")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [FILE]      : configuration file {\"")
             << path
-            << ACE_TEXT ("\"]")
+            << ACE_TEXT_ALWAYS_CHAR ("\"}")
             << std::endl;
-  std::cout << ACE_TEXT ("-d        : debug parser")
-            << ACE_TEXT (" [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-d        : debug parser {")
             << false
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
-  std::cout << ACE_TEXT ("-l        : log to a file")
-            << ACE_TEXT (" [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-l        : log to a file {")
             << IRC_CLIENT_SESSION_DEFAULT_LOG
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
-  std::cout << ACE_TEXT ("-n        : use (PD|n)curses library [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-n        : use (PD|n)curses library {")
             << IRC_CLIENT_SESSION_USE_CURSES
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
-  std::cout << ACE_TEXT ("-r        : use reactor [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-r        : use reactor {")
             << NET_EVENT_USE_REACTOR
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
-  std::cout << ACE_TEXT ("-s [VALUE]: reporting interval (seconds: 0 --> OFF)")
-            << ACE_TEXT (" [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]: reporting interval (seconds: 0 --> OFF) {")
             << IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
-  std::cout << ACE_TEXT ("-t        : trace information")
-            << ACE_TEXT (" [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-t        : trace information {")
             << false
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
-  std::cout << ACE_TEXT ("-v        : print version information and exit")
-            << ACE_TEXT (" [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-v        : print version information and exit {")
             << false
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
-  std::cout << ACE_TEXT ("-x [VALUE]: #thread pool threads ([")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-x [VALUE]: #thread pool threads {")
             << IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS
-            << ACE_TEXT ("]")
+            << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
 } // end print_usage
 
 bool
 do_processArguments (int argc_in,
                      ACE_TCHAR* argv_in[], // cannot be const...
+                     ACE_INET_Addr& serverAddress_out,
                      std::string& configurationFile_out,
                      bool& debugParser_out,
                      bool& logToFile_out,
@@ -165,17 +165,31 @@ do_processArguments (int argc_in,
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory ();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_i");
-#endif // #ifdef DEBUG_DEBUGGER
 
   // initialize configuration
+  std::string address_string =
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEFAULT_SERVER_HOSTNAME);
+  address_string += ':';
+  std::stringstream converter;
+  converter << IRC_DEFAULT_SERVER_PORT;
+  address_string += converter.str ();
+  int result =
+    serverAddress_out.string_to_addr (address_string.c_str (),
+                                      AF_INET);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::string_to_addr(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (address_string.c_str ())));
+    return false;
+  } // end IF
   configurationFile_out          = configuration_path;
   configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configurationFile_out         += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
-
+  configurationFile_out         +=
+    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+  configurationFile_out         += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configurationFile_out         +=
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
   debugParser_out                = false;
   logToFile_out                  = IRC_CLIENT_SESSION_DEFAULT_LOG;
   useCursesLibrary_out           = IRC_CLIENT_SESSION_USE_CURSES;
@@ -188,18 +202,36 @@ do_processArguments (int argc_in,
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
-                              ACE_TEXT ("c:dlnrs:tvx:"),
+                              ACE_TEXT ("a:c:dlnrs:tvx:"),
                               1,                         // skip command name
                               1,                         // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
                               0);                        // for now, don't support long options
 
   int option = 0;
-  std::stringstream converter;
   while ((option = argumentParser ()) != EOF)
   {
     switch (option)
     {
+      case 'a':
+      {
+        address_string = argumentParser.opt_arg ();
+        address_string += ':';
+        std::stringstream converter;
+        converter << IRC_DEFAULT_SERVER_PORT;
+        address_string += converter.str ();
+        result =
+          serverAddress_out.string_to_addr (address_string.c_str (),
+                                            AF_INET);
+        if (result == -1)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_INET_Addr::string_to_addr(\"%s\"): \"%m\", aborting\n"),
+                      ACE_TEXT (address_string.c_str ())));
+          return false;
+        } // end IF
+        break;
+      }
       case 'c':
       {
         configurationFile_out = argumentParser.opt_arg ();
@@ -644,8 +676,7 @@ done:
 void
 do_work (IRC_Client_Configuration& configuration_in,
          bool useCursesLibrary_in,
-         const std::string& serverHostname_in,
-         unsigned short serverPortNumber_in,
+         const ACE_INET_Addr& serverAddress_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -707,19 +738,16 @@ do_work (IRC_Client_Configuration& configuration_in,
   } // end IF
 
   // step3: initialize client connector
-  //IRC_Client_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
-  //ACE_NEW_NORETURN (socket_handler_configuration_p,
-  //                  IRC_Client_SocketHandlerConfiguration ());
-  //if (!socket_handler_configuration_p)
-  //{
-  //  ACE_DEBUG ((LM_CRITICAL,
-  //              ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-  //  return;
-  //} // end IF
+  configuration_in.socketConfiguration.address = serverAddress_in;
+
   //configuration_in.socketHandlerConfiguration.bufferSize =
   //  IRC_CLIENT_BUFFER_SIZE;
+  configuration_in.socketHandlerConfiguration.connectionConfiguration =
+    &configuration_in.connectionConfiguration;
   configuration_in.socketHandlerConfiguration.messageAllocator =
     configuration_in.streamConfiguration.messageAllocator;
+  configuration_in.socketHandlerConfiguration.socketConfiguration =
+    &configuration_in.socketConfiguration;
   configuration_in.socketHandlerConfiguration.statisticReportingInterval =
     configuration_in.streamConfiguration.statisticReportingInterval;
   configuration_in.connectionConfiguration.moduleHandlerConfiguration =
@@ -760,20 +788,11 @@ do_work (IRC_Client_Configuration& configuration_in,
   } // end IF
 
   // step3: initialize signal handling
-  IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
+  struct IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
   signal_handler_configuration.connector = connector_p;
   signal_handler_configuration.cursesState = &curses_state;
-  result =
-      signal_handler_configuration.peerAddress.set (serverPortNumber_in,
-                                                    serverHostname_in.c_str (),
-                                                    1,
-                                                    AF_INET);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
-    return;
-  } // end IF
+  signal_handler_configuration.peerAddress =
+    configuration_in.socketConfiguration.address;
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -814,18 +833,9 @@ do_work (IRC_Client_Configuration& configuration_in,
       connector_p->connect (signal_handler_configuration.peerAddress);
   if (handle == ACE_INVALID_HANDLE)
   {
-    // debug info
-    ACE_TCHAR buffer[BUFSIZ];
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result =
-        signal_handler_configuration.peerAddress.addr_to_string (buffer,
-                                                                 sizeof (buffer));
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to \"%s\": \"%m\", returning\n"),
-                buffer));
+                ACE_TEXT (Net_Common_Tools::IPAddress2String (signal_handler_configuration.peerAddress).c_str ())));
 
     // clean up
     Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
@@ -1020,15 +1030,16 @@ ACE_TMAIN (int argc_in,
   int result = -1;
 
   // step1: initialize libraries
-//  // *PORTABILITY*: on Windows, init ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  if (ACE::init () == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
-//    return EXIT_FAILURE;
-//  } // end IF
-//#endif
+  // *PORTABILITY*: on Windows, initialize ACE
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  result = ACE::init ();
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
+    return EXIT_FAILURE;
+  } // end IF
+#endif
 
   // *PROCESS PROFILE*
   ACE_Profile_Timer process_profile;
@@ -1040,17 +1051,40 @@ ACE_TMAIN (int argc_in,
   // step2a: process commandline arguments
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  configuration_path = Common_File_Tools::getWorkingDirectory();
-  configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  configuration_path += ACE_TEXT_ALWAYS_CHAR ("test_i");
-#endif // #ifdef DEBUG_DEBUGGER
 
+  ACE_INET_Addr server_address;
+  std::string address_string =
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEFAULT_SERVER_HOSTNAME);
+  address_string += ':';
+  std::stringstream converter;
+  converter << IRC_DEFAULT_SERVER_PORT;
+  address_string += converter.str ();
+  result =
+    server_address.string_to_addr (address_string.c_str (),
+                                   AF_INET);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::string_to_addr(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (address_string.c_str ())));
+
+//    // *PORTABILITY*: on Windows, fini ACE...
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    result = ACE::fini ();
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+//#endif
+
+    return EXIT_FAILURE;
+  } // end IF
   std::string configuration_file_name        = configuration_path;
   configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_file_name                   +=
+    ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
+  configuration_file_name                   += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  configuration_file_name                   +=
       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
-
   bool debug_parser                          = false;
   bool log_to_file                           = IRC_CLIENT_SESSION_DEFAULT_LOG;
   bool use_curses_library                    = IRC_CLIENT_SESSION_USE_CURSES;
@@ -1063,6 +1097,7 @@ ACE_TMAIN (int argc_in,
       IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS;
   if (!do_processArguments (argc_in,
                             argv_in,
+                            server_address,
                             configuration_file_name,
                             debug_parser,
                             log_to_file,
@@ -1073,7 +1108,6 @@ ACE_TMAIN (int argc_in,
                             print_version_and_exit,
                             number_of_thread_pool_threads))
   {
-    // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
 //    // *PORTABILITY*: on Windows, fini ACE...
@@ -1089,7 +1123,6 @@ ACE_TMAIN (int argc_in,
   // step2b: validate argument(s)
   if (!Common_File_Tools::isReadable (configuration_file_name))
   {
-    // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
 //    // *PORTABILITY*: on Windows, fini ACE...
@@ -1197,20 +1230,39 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   // step6: initialize configuration objects
+  struct IRC_Client_Configuration configuration;
 
   // initialize protocol configuration
-  Stream_CachedAllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                              IRC_BUFFER_SIZE);
+  Stream_CachedAllocatorHeap_T<struct IRC_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                                  IRC_MAXIMUM_FRAME_SIZE + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE);
+  if (!heap_allocator.initialize (configuration.allocatorConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize allocator: \"%m\", aborting\n")));
+
+    Common_Tools::finalizeSignals (signal_set,
+                                   previous_signal_actions,
+                                   previous_signal_mask);
+    Common_Tools::finalizeLogging ();
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
+
+    return EXIT_FAILURE;
+  } // end IF
   IRC_Client_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES,
                                                    &heap_allocator);
 
-  IRC_Client_Configuration configuration;
   ////////////////////////////////////////
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.statisticReportingInterval =
     statistic_reporting_interval;
   ////////////////////////////////////////
-  configuration.protocolConfiguration.loginOptions.nickName =
+  configuration.protocolConfiguration.loginOptions.nickname =
     ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);
   //   userData.loginOptions.user.username = ;
   std::string host_name;
@@ -1257,20 +1309,46 @@ ACE_TMAIN (int argc_in,
                                     configuration.protocolConfiguration.loginOptions.user.realName);
 
   // step7: parse configuration file(s) (if any)
-  host_name = ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_DEFAULT_SERVER_HOSTNAME);
-  unsigned short port_number = IRC_DEFAULT_SERVER_PORT;
   if (!configuration_file_name.empty ())
   {
     IRC_Client_Connections_t connections;
     IRC_Client_Tools::parseConfigurationFile (configuration_file_name,
                                               configuration.protocolConfiguration.loginOptions,
                                               connections);
-    if (!connections.empty ())
+    if (server_address.is_any () &&
+        !connections.empty ())
     {
       IRC_Client_ConnectionsIterator_t iterator = connections.begin ();
-      host_name = (*iterator).hostName;
       IRC_Client_PortRangesIterator_t iterator_2 = (*iterator).ports.begin ();
-      port_number = (*iterator_2).first;
+      address_string = (*iterator).hostName;
+      address_string += ':';
+      converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+      converter.clear ();
+      converter << (*iterator_2).first;
+      address_string += converter.str ();
+      result =
+        server_address.string_to_addr (address_string.c_str (),
+                                       AF_INET);
+      if (result == -1)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_INET_Addr::string_to_addr(\"%s\"): \"%m\", aborting\n"),
+                    ACE_TEXT (address_string.c_str ())));
+
+        Common_Tools::finalizeSignals (signal_set,
+                                       previous_signal_actions,
+                                       previous_signal_mask);
+        Common_Tools::finalizeLogging ();
+    //    // *PORTABILITY*: on Windows, fini ACE...
+    //#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    //    result = ACE::fini ();
+    //    if (result == -1)
+    //      ACE_DEBUG ((LM_ERROR,
+    //                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+    //#endif
+
+        return EXIT_FAILURE;
+      } // end IF
     } // end IF
   } // end IF
   ///////////////////////////////////////
@@ -1281,8 +1359,7 @@ ACE_TMAIN (int argc_in,
   timer.start ();
   do_work (configuration,
            use_curses_library,
-           host_name,
-           port_number,
+           server_address,
            signal_set,
            ignored_signal_set,
            previous_signal_actions,
