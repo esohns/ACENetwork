@@ -119,7 +119,7 @@ Net_Client_Connector_T<HandlerType,
 
   Net_ITransportLayer_t* itransportlayer_p = handler_p;
   result = itransportlayer_p->transportLayer ();
-  
+
   // clean up
   delete handler_p;
 
@@ -195,7 +195,7 @@ Net_Client_Connector_T<HandlerType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Connector::connect(%s): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     return ACE_INVALID_HANDLE;
   } // end IF
   ACE_ASSERT (handler_p);

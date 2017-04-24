@@ -32,10 +32,8 @@
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
 
-//#include "test_u_connection_manager_common.h"
 #include "test_u_stream_common.h"
 
-//#include "file_server_connection_common.h"
 #include "file_server_defines.h"
 
 // forward declarations
@@ -99,6 +97,7 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct FileServer_ConnectionState,
                                  Net_RuntimeStatistic_t,
                                  struct FileServer_UserData> FileServer_IInetConnectionManager_t;
+struct FileServer_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration
  : Stream_ModuleHandlerConfiguration
 {
@@ -114,6 +113,7 @@ struct Test_U_ModuleHandlerConfiguration
    , socketConfiguration (NULL)
    , socketHandlerConfiguration (NULL)
    , stream (NULL)
+   , streamConfiguration (NULL)
    , streamType (FILE_SERVER_DEFAULT_MPEG_TS_STREAM_TYPE)
    , subscriber (NULL)
    , subscribers (NULL)
@@ -129,29 +129,33 @@ struct Test_U_ModuleHandlerConfiguration
   struct Net_SocketConfiguration*               socketConfiguration;        // net target module
   struct FileServer_SocketHandlerConfiguration* socketHandlerConfiguration; // net target module
   Test_U_UDPStream*                             stream;                     // net target module
+  struct FileServer_StreamConfiguration*        streamConfiguration;        // net target module
   unsigned int                                  streamType;                 // MPEG TS decoder module
   FileServer_ISessionNotify_t*                  subscriber;                 // event handler module
   FileServer_Subscribers_t*                     subscribers;                // event handler module
 };
 
+typedef std::map<std::string,
+                 struct Test_U_ModuleHandlerConfiguration*> Test_U_ModuleHandlerConfigurations_t;
+typedef Test_U_ModuleHandlerConfigurations_t::iterator Test_U_ModuleHandlerConfigurationsIterator_t;
 struct FileServer_StreamConfiguration
  : Stream_Configuration
 {
   inline FileServer_StreamConfiguration ()
    : Stream_Configuration ()
    , moduleConfiguration_2 ()
-   , moduleHandlerConfiguration (NULL)
+   , moduleHandlerConfigurations ()
    , moduleHandlerConfiguration_2 ()
    , useReactor (NET_EVENT_USE_REACTOR)
    , userData (NULL)
   {};
 
-  struct Stream_ModuleConfiguration         moduleConfiguration_2;        // module configuration
-  struct Test_U_ModuleHandlerConfiguration* moduleHandlerConfiguration;   // module handler configuration
-  struct Test_U_ModuleHandlerConfiguration  moduleHandlerConfiguration_2; // module handler configuration
-  bool                                      useReactor;
+  struct Stream_ModuleConfiguration        moduleConfiguration_2;        // module configuration
+  Test_U_ModuleHandlerConfigurations_t     moduleHandlerConfigurations;  // module handler configuration
+  struct Test_U_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration
+  bool                                     useReactor;
 
-  struct FileServer_UserData*               userData;                     // user data
+  struct FileServer_UserData*              userData;                     // user data
 };
 
 #endif

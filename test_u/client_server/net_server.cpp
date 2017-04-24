@@ -497,12 +497,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
     &configuration.streamConfiguration.moduleConfiguration_2;
   configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
-  configuration.streamConfiguration.moduleHandlerConfiguration =
-    &configuration.streamConfiguration.moduleHandlerConfiguration_2;
   configuration.streamConfiguration.moduleHandlerConfiguration_2.protocolConfiguration =
     &configuration.protocolConfiguration;
   configuration.streamConfiguration.moduleHandlerConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
+  configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                                        &configuration.streamConfiguration.moduleHandlerConfiguration_2));
   // *TODO*: is this correct ?
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;
   configuration.streamConfiguration.statisticReportingInterval =

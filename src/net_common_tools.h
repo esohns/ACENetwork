@@ -76,14 +76,14 @@ class Net_Common_Tools
   static std::string getDefaultInterface (int); // link layer type(s) (bitmask)
 
   // *NOTE*: make sure the argument points at at least 6 (!) bytes of allocated memory
-  static std::string LinkLayerAddress2String (const unsigned char* const, // pointer to physical address data (i.e. START of ethernet header address field !)
-                                              enum Net_LinkLayerType = NET_LINKLAYER_802_3);
-  static std::string LinkLayerType2String (enum Net_LinkLayerType);
-  static std::string EthernetProtocolTypeID2String (unsigned short); // ethernet frame type (network (== big-endian) byte order !)
+  static std::string LinkLayerAddressToString (const unsigned char* const, // pointer to physical address data (i.e. START of ethernet header address field !)
+                                               enum Net_LinkLayerType = NET_LINKLAYER_802_3);
+  static std::string LinkLayerTypeToString (enum Net_LinkLayerType);
+  static std::string EthernetProtocolTypeIDToString (unsigned short); // ethernet frame type (network (== big-endian) byte order !)
 
     // *WARNING*: ensure that the array argument can hold at least 6 bytes !
-  static bool interface2MACAddress (const std::string&, // interface identifier
-                                    unsigned char[]);   // return value: MAC address
+  static bool interfaceToMACAddress (const std::string&, // interface identifier
+                                     unsigned char[]);   // return value: MAC address
 
   // network layer
   static bool getAddress (std::string&,  // host name
@@ -91,24 +91,24 @@ class Net_Common_Tools
 
   // *NOTE*: this returns the external (i.e. routable) IP address for clients
   //         behind a (NATted-) gateway
-  static bool interface2ExternalIPAddress (const std::string&, // interface identifier
-                                           ACE_INET_Addr&);    // return value: external IP address
-  static bool interface2IPAddress (const std::string&, // interface identifier
-                                   ACE_INET_Addr&);    // return value: (first) IP address
-  static bool IPAddress2Interface (const ACE_INET_Addr&, // IP address
-                                   std::string&);        // return value: interface identifier
+  static bool interfaceToExternalIPAddress (const std::string&, // interface identifier
+                                            ACE_INET_Addr&);    // return value: external IP address
+  static bool interfaceToIPAddress (const std::string&, // interface identifier
+                                    ACE_INET_Addr&);    // return value: (first) IP address
+  static bool IPAddressToInterface (const ACE_INET_Addr&, // IP address
+                                    std::string&);        // return value: interface identifier
 
-  inline static std::string IPAddress2String (const ACE_INET_Addr& address_in,
-                                              bool addressOnly_in = false) { return Net_Common_Tools::IPAddress2String ((addressOnly_in ? 0 : ACE_HTONS (address_in.get_port_number ())), ACE_HTONL (address_in.get_ip_address ())); };
+  inline static std::string IPAddressToString (const ACE_INET_Addr& address_in,
+                                               bool addressOnly_in = false) { return Net_Common_Tools::IPAddressToString ((addressOnly_in ? 0 : ACE_HTONS (address_in.get_port_number ())), ACE_HTONL (address_in.get_ip_address ())); };
   // *NOTE*: if (the first argument is '0'), the trailing ":0" will be cropped
   //         from the return value
-  static std::string IPAddress2String (unsigned short, // port (network byte order !)
-                                       ACE_UINT32);    // IP address (network byte order !)
-  static std::string IPProtocol2String (unsigned char); // protocol
+  static std::string IPAddressToString (unsigned short, // port (network byte order !)
+                                        ACE_UINT32);    // IP address (network byte order !)
+  static std::string IPProtocolToString (unsigned char); // protocol
 
   static bool matchIPAddress (std::string&); // dotted-decimal
   // *NOTE*: (see also: ace/INET_Addr.h:237)
-  static ACE_INET_Addr string2IPAddress (std::string&); // host name (DNS name or dotted-decimal)
+  static ACE_INET_Addr stringToIPAddress (std::string&); // host name (DNS name or dotted-decimal)
 
   // transport layer
 
@@ -116,9 +116,9 @@ class Net_Common_Tools
   // session layer (and above)
   static bool getHostname (std::string&); // return value: hostname
 
-  static std::string URL2HostName (const std::string&, // URL
-                                   bool = true,        // return protocol (if any) ?
-                                   bool = true);       // return port (if any) ?
+  static std::string URLToHostName (const std::string&, // URL
+                                    bool = true,        // return protocol (if any) ?
+                                    bool = true);       // return port (if any) ?
 
   // --- socket API ---
 

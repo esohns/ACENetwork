@@ -213,7 +213,7 @@ Net_SessionBase_T<AddressType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s: \"%m\", returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     return;
   } // end IF
   if (isAsynch_)
@@ -247,7 +247,7 @@ Net_SessionBase_T<AddressType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s: \"%m\", returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     return;
   } // end IF
 
@@ -267,7 +267,7 @@ Net_SessionBase_T<AddressType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (to: %s) failed to initialize (status was: %d), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
                 status));
     goto error;
   } // end IF
@@ -286,7 +286,7 @@ Net_SessionBase_T<AddressType,
 
   //ACE_DEBUG ((LM_DEBUG,
   //            ACE_TEXT ("connected to %s: %u...\n"),
-  //            ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ()),
+  //            ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
   //            iconnection_p->id ()));
 
   iconnection_p->decrease ();
@@ -458,7 +458,8 @@ Net_SessionBase_T<AddressType,
 
     std::pair<Net_ConnectionsIterator_t, bool> result =
         state_.connections.insert (id_in);
-//    ACE_ASSERT (result.second);
+//    ACE_UNUSED_ARG (result);
+    ACE_ASSERT (result.second);
   } // end lock scope
 
   //ACE_DEBUG ((LM_DEBUG,

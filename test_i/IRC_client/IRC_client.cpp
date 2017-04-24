@@ -696,10 +696,10 @@ do_work (IRC_Client_Configuration& configuration_in,
       &configuration_in.streamConfiguration;
   configuration_in.moduleHandlerConfiguration.protocolConfiguration =
       &configuration_in.protocolConfiguration;
-  configuration_in.streamConfiguration.moduleHandlerConfiguration =
-      &configuration_in.moduleHandlerConfiguration;
   configuration_in.streamConfiguration.moduleConfiguration =
       &configuration_in.moduleConfiguration;
+  configuration_in.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                                           &configuration_in.moduleHandlerConfiguration));
   IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
                                                    NULL);
   IRC_Client_Module_IRCHandler* IRCHandler_impl_p = NULL;
@@ -835,7 +835,7 @@ do_work (IRC_Client_Configuration& configuration_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to \"%s\": \"%m\", returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (signal_handler_configuration.peerAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (signal_handler_configuration.peerAddress).c_str ())));
 
     // clean up
     Common_Tools::finalizeEventDispatch (configuration_in.useReactor,

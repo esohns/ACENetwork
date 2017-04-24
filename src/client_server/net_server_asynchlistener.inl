@@ -122,7 +122,7 @@ Net_Server_AsynchListener_T<HandlerType,
   if (result == 0)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Acceptor::accept(\"%s\"): \"%s\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (remoteAddress_in).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (remoteAddress_in).c_str ()),
                 ACE_TEXT (ACE_OS::strerror (static_cast<int> (result_in.error ())))));
 
   return ((result == 1) ? 0 : -1);
@@ -488,12 +488,12 @@ Net_Server_AsynchListener_T<HandlerType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::bind(0x%@[\"%s\"]): \"%m\", aborting\n"),
                 listen_handle,
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (listenAddress_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (listenAddress_in).c_str ())));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::bind(%d[\"%s\"]): \"%m\", aborting\n"),
                 listen_handle,
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (listenAddress_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (listenAddress_in).c_str ())));
 #endif
     goto close;
   } // end IF
@@ -506,13 +506,13 @@ Net_Server_AsynchListener_T<HandlerType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::listen(0x%@[\"%s\"],%d): \"%m\", aborting\n"),
                 listen_handle,
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (listenAddress_in).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (listenAddress_in).c_str ()),
                 backLog_in));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::listen(%d[\"%s\"],%d): \"%m\", aborting\n"),
                 listen_handle,
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (listenAddress_in).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (listenAddress_in).c_str ()),
                 backLog_in));
 #endif
     goto close;
@@ -633,19 +633,19 @@ Net_Server_AsynchListener_T<HandlerType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Server_AsynchListener_T::open(\"%s\"): \"%m\", returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (configuration_->address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
     return;
   } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("0x%@: started listening: %s...\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddress2String (configuration_->address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: started listening: %s...\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddress2String (configuration_->address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
 #endif
 
   isListening_ = true;

@@ -441,10 +441,10 @@ do_work (bool useThreadPool_in,
   CBData_in.configuration->moduleHandlerConfiguration.streamConfiguration =
       &CBData_in.configuration->streamConfiguration;
 
-  CBData_in.configuration->streamConfiguration.moduleHandlerConfiguration =
-      &CBData_in.configuration->moduleHandlerConfiguration;
   CBData_in.configuration->streamConfiguration.moduleConfiguration =
       &CBData_in.configuration->moduleConfiguration;
+  CBData_in.configuration->streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                                                   &CBData_in.configuration->moduleHandlerConfiguration));
   //IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
   //                                                 NULL,
   //                                                 true);
@@ -1317,7 +1317,7 @@ ACE_TMAIN (int argc_in,
   configuration.socketHandlerConfiguration.userData =
     configuration.userData;
 
-  configuration.connectionConfiguration.socketHandlerConfiguration = 
+  configuration.connectionConfiguration.socketHandlerConfiguration =
     &configuration.socketHandlerConfiguration;
   configuration.connectionConfiguration.streamConfiguration =
     &configuration.streamConfiguration;

@@ -260,14 +260,14 @@ BitTorrent_Control_T<SessionAsynchType,
   record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_HEADER),
                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_STARTED_STRING)));
   interface_string = Net_Common_Tools::getDefaultInterface (link_layers);
-  if (!Net_Common_Tools::interface2ExternalIPAddress (interface_string,
-                                                      external_ip_address))
+  if (!Net_Common_Tools::interfaceToExternalIPAddress (interface_string,
+                                                       external_ip_address))
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interface2ExternalIPAddress(\"%s\"), continuing\n"),
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), continuing\n"),
                 ACE_TEXT (interface_string.c_str ())));
   else
     record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_IP_HEADER),
-                                           Net_Common_Tools::IPAddress2String (external_ip_address).c_str ()));
+                                           Net_Common_Tools::IPAddressToString (external_ip_address).c_str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
   converter << BITTORRENT_DEFAULT_TRACKER_REQUEST_NUMWANT_PEERS;
@@ -336,7 +336,7 @@ allocate:
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to the tracker (was: %s), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (tracker_address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (tracker_address).c_str ())));
     goto error;
   } // end IF
   remove_session = false;

@@ -96,22 +96,27 @@ struct IRC_Client_ModuleHandlerConfiguration
   struct IRC_Client_UserData*                userData;
 };
 
+struct IRC_Client_ModuleHandlerConfiguration;
+typedef std::map<std::string,
+                 struct IRC_Client_ModuleHandlerConfiguration*> IRC_Client_ModuleHandlerConfigurations_t;
+typedef IRC_Client_ModuleHandlerConfigurations_t::iterator IRC_Client_ModuleHandlerConfigurationsIterator_t;
+typedef IRC_Client_ModuleHandlerConfigurations_t::const_iterator IRC_Client_ModuleHandlerConfigurationsConstIterator_t;
 struct IRC_Client_StreamConfiguration
  : Stream_Configuration
 {
   inline IRC_Client_StreamConfiguration ()
    : Stream_Configuration ()
    , moduleConfiguration (NULL)
-   , moduleHandlerConfiguration (NULL)
+   , moduleHandlerConfigurations ()
    , protocolConfiguration (NULL)
    , userData (NULL)
   {};
 
-  struct Stream_ModuleConfiguration*            moduleConfiguration;        // stream module configuration
-  struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration; // module handler configuration
-  struct IRC_ProtocolConfiguration*             protocolConfiguration;      // protocol configuration
+  struct Stream_ModuleConfiguration*       moduleConfiguration;         // stream module configuration
+  IRC_Client_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration
+  struct IRC_ProtocolConfiguration*        protocolConfiguration;       // protocol configuration
 
-  struct IRC_Client_UserData*                   userData;
+  struct IRC_Client_UserData*              userData;
 };
 
 typedef Stream_SessionData_T<struct IRC_Client_SessionData> IRC_Client_SessionData_t;

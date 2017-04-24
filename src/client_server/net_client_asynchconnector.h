@@ -56,6 +56,7 @@ class Net_Client_AsynchConnector_T
                            HandlerConfigurationType>
 {
  public:
+  typedef AddressType ADDRESS_T;
   typedef StreamType STREAM_T;
 
   typedef Net_IConnection_T<AddressType,

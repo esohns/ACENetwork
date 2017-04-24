@@ -1091,11 +1091,11 @@ allocate:
   DHCP_record.xid = DHCP_Tools::generateXID ();
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-  if (!Net_Common_Tools::interface2MACAddress (data_p->configuration->socketConfiguration.networkInterface,
-                                               DHCP_record.chaddr))
+  if (!Net_Common_Tools::interfaceToMACAddress (data_p->configuration->socketConfiguration.networkInterface,
+                                                DHCP_record.chaddr))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interface2MACAddress(), returning\n")));
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToMACAddress(), returning\n")));
     return;
   } // end IF
   // *TODO*: support optional options:
@@ -1265,19 +1265,19 @@ allocate:
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
   ACE_INET_Addr IP_address;
-  if (!Net_Common_Tools::interface2IPAddress (data_p->configuration->socketConfiguration.networkInterface,
-                                              IP_address))
+  if (!Net_Common_Tools::interfaceToIPAddress (data_p->configuration->socketConfiguration.networkInterface,
+                                               IP_address))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interface2IPAddress(), returning\n")));
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(), returning\n")));
     return;
   } // end IF
   DHCP_record.ciaddr = IP_address.get_ip_address ();
-  if (!Net_Common_Tools::interface2MACAddress (data_p->configuration->socketConfiguration.networkInterface,
-                                               DHCP_record.chaddr))
+  if (!Net_Common_Tools::interfaceToMACAddress (data_p->configuration->socketConfiguration.networkInterface,
+                                                DHCP_record.chaddr))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interface2MACAddress(), returning\n")));
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToMACAddress(), returning\n")));
     return;
   } // end IF
   // *TODO*: support optional options:
@@ -1383,11 +1383,11 @@ allocate:
   } // end IF
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-  if (!Net_Common_Tools::interface2MACAddress (data_p->configuration->socketConfiguration.networkInterface,
-                                               DHCP_record.chaddr))
+  if (!Net_Common_Tools::interfaceToMACAddress (data_p->configuration->socketConfiguration.networkInterface,
+                                                DHCP_record.chaddr))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interface2MACAddress(), returning\n")));
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToMACAddress(), returning\n")));
     return;
   } // end IF
   // *TODO*: support optional options:
@@ -1503,19 +1503,19 @@ allocate:
     session_data_r.xid = DHCP_record.xid;
   } // end IF
   ACE_INET_Addr IP_address;
-  if (!Net_Common_Tools::interface2IPAddress (data_p->configuration->socketConfiguration.networkInterface,
-                                              IP_address))
+  if (!Net_Common_Tools::interfaceToIPAddress (data_p->configuration->socketConfiguration.networkInterface,
+                                               IP_address))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interface2IPAddress(), returning\n")));
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(), returning\n")));
     return;
   } // end IF
   DHCP_record.ciaddr = IP_address.get_ip_address ();
-  if (!Net_Common_Tools::interface2MACAddress (data_p->configuration->socketConfiguration.networkInterface,
-                                               DHCP_record.chaddr))
+  if (!Net_Common_Tools::interfaceToMACAddress (data_p->configuration->socketConfiguration.networkInterface,
+                                                DHCP_record.chaddr))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interface2MACAddress(), returning\n")));
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToMACAddress(), returning\n")));
     return;
   } // end IF
   // *TODO*: support optional options:
@@ -1884,11 +1884,11 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                                                                   static_cast<ACE_UINT32> (INADDR_LOOPBACK));
     else if (!data_p->configuration->listenerConfiguration.networkInterface.empty ())
     {
-      if (!Net_Common_Tools::interface2IPAddress (data_p->configuration->listenerConfiguration.networkInterface,
-                                                  data_p->configuration->listenerConfiguration.address))
+      if (!Net_Common_Tools::interfaceToIPAddress (data_p->configuration->listenerConfiguration.networkInterface,
+                                                   data_p->configuration->listenerConfiguration.address))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::interface2IPAddress(), continuing\n")));
+                    ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(), continuing\n")));
         result = -1;
       } // end IF
       data_p->configuration->listenerConfiguration.address.set_port_number (DHCP_DEFAULT_CLIENT_PORT,

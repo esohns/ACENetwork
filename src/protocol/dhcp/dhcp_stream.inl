@@ -163,31 +163,6 @@ DHCP_Stream_T<StreamStateType,
 
   int result = -1;
   typename inherited::MODULE_T* module_p = NULL;
-  //if (configuration_in.notificationStrategy)
-  //{
-  //  module_p = inherited::head ();
-  //  if (!module_p)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("no head module found, aborting\n")));
-  //    return false;
-  //  } // end IF
-  //  typename inherited::TASK_T* task_p = module_p->reader ();
-  //  if (!task_p)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("no head module reader task found, aborting\n")));
-  //    return false;
-  //  } // end IF
-  //  typename inherited::QUEUE_T* queue_p = task_p->msg_queue ();
-  //  if (!queue_p)
-  //  {
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("no head module reader task queue found, aborting\n")));
-  //    return false;
-  //  } // end IF
-  //  queue_p->notification_strategy (configuration_in.notificationStrategy);
-  //} // end IF
 
 //  ACE_ASSERT (configuration_in.moduleConfiguration);
 //  configuration_in.moduleConfiguration->streamState = &inherited::state_;

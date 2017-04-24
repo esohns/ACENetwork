@@ -109,7 +109,7 @@ class Net_StreamTCPSocketBase_T
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
   virtual Net_ConnectionId_t id () const;
-  virtual ACE_Notification_Strategy* notification ();
+  inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); };
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
                                                 // thread(s) ?

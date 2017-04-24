@@ -55,11 +55,6 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::load"));
 
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
-  // *TODO*: remove type inference
-  ACE_ASSERT (inherited::configuration_->moduleHandlerConfiguration);
-
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_FileReader_Module (ACE_TEXT_ALWAYS_CHAR ("FileSource"),
@@ -291,11 +286,6 @@ Test_U_UDPStream::load (Stream_ModuleList_t& modules_out,
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_UDPStream::load"));
 
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
-  // *TODO*: remove type inference
-  ACE_ASSERT (inherited::configuration_->moduleHandlerConfiguration);
-
   Stream_Module_t* module_p = NULL;
   if (inherited::configuration_->useReactor)
     ACE_NEW_RETURN (module_p,
@@ -497,7 +487,7 @@ Test_U_UDPStream::report () const
 //     return;
 //   } // end IF
 //
-//   // delegate to this module...
+//   // delegate to this module
 //   return (runtimeStatistic_impl->report ());
 
   // just a dummy

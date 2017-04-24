@@ -164,18 +164,21 @@ struct Test_U_ModuleHandlerConfiguration
   std::string                               URL;
 };
 
+typedef std::map<std::string,
+                 struct Test_U_ModuleHandlerConfiguration*> Test_U_ModuleHandlerConfigurations_t;
+typedef Test_U_ModuleHandlerConfigurations_t::iterator Test_U_ModuleHandlerConfigurationsIterator_t;
 struct Test_U_StreamConfiguration
  : HTTP_StreamConfiguration
 {
   inline Test_U_StreamConfiguration ()
    : HTTP_StreamConfiguration ()
-   , moduleHandlerConfiguration (NULL)
+   , moduleHandlerConfigurations ()
    , userData (NULL)
   {};
 
-  struct Test_U_ModuleHandlerConfiguration* moduleHandlerConfiguration; // stream module handler configuration
+  Test_U_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // stream module handler configuration
 
-  struct Test_U_UserData*                   userData;
+  struct Test_U_UserData*              userData;
 };
 
 struct Test_U_HTTPDecoder_StreamState

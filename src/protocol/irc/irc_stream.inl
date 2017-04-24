@@ -138,8 +138,7 @@ IRC_Stream_T<StreamStateType,
   // sanity check(s)
   ACE_ASSERT (!inherited::isInitialized_);
   ACE_ASSERT (!inherited::isRunning ());
-  ACE_ASSERT (configuration_in.moduleConfiguration);
-  ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
+//  ACE_ASSERT (configuration_in.moduleConfiguration);
 
   // allocate a new session state, reset stream
   if (!inherited::initialize (configuration_in,

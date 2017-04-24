@@ -23,6 +23,7 @@
 
 #include "common_timer_manager_common.h"
 
+#include "net_common_tools.h"
 #include "net_macros.h"
 
 template <typename AddressType,
@@ -176,11 +177,7 @@ Net_ConnectionBase_T<AddressType,
       return false;
     } // end IF
 
-    int result = -1;
     ACE_HANDLE handle = ACE_INVALID_HANDLE;
-    ACE_TCHAR buffer[BUFSIZ];
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
-    std::string local_address_string;
     AddressType local_address, remote_address;
     try {
 //#if defined (__GNUG__)
@@ -201,35 +198,21 @@ Net_ConnectionBase_T<AddressType,
                   ACE_TEXT ("caught exception in Net_IConnection_T::info(), aborting\n")));
       return false;
     }
-    result = local_address.addr_to_string (buffer,
-                                           sizeof (buffer),
-                                           1);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Addr::addr_to_string(): \"%m\", continuing\n")));
-    local_address_string = buffer;
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result = remote_address.addr_to_string (buffer,
-                                            sizeof (buffer),
-                                            1);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Addr::addr_to_string(): \"%m\", continuing\n")));
 
     // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("registered connection [0x%@/0x%@]: %s <--> %s (total: %d)\n"),
                 this, handle,
-                ACE_TEXT (local_address_string.c_str ()),
-                buffer,
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address).c_str ()),
                 manager_->count ()));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("registered connection [%@/%d]: %s <--> %s (total: %d)\n"),
                 this, handle,
-                ACE_TEXT (local_address_string.c_str ()),
-                buffer,
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address).c_str ()),
                 manager_->count ()));
 #endif
   } // end IF

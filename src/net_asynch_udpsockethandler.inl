@@ -90,8 +90,48 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   //ACE_DEBUG ((LM_DEBUG,
   //            ACE_TEXT ("maximum message size: %u...\n"),
   //            PDUSize_));
-  writeOnly_ =
-    inherited::configuration_->socketConfiguration->writeOnly;
+  writeOnly_ = inherited::configuration_->socketConfiguration->writeOnly;
+
+  // step1: connect ?
+  // *TODO*: remove type inference
+  if (inherited::configuration_->socketConfiguration->connect)
+  {
+    ACE_INET_Addr associated_address =
+        (writeOnly_ ? address_
+                    : ACE_INET_Addr (static_cast<u_short> (0),
+                                     static_cast<ACE_UINT32> (INADDR_ANY)));
+    result =
+        ACE_OS::connect (handle_in,
+                         reinterpret_cast<struct sockaddr*> (associated_address.get_addr ()),
+                         associated_address.get_addr_size ());
+    if (result == -1)
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::connect(0x%@,\"%s\"): \"%m\", returning\n"),
+                  handle_in,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::connect(%d,\"%s\"): \"%m\", returning\n"),
+                  handle_in,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
+#endif
+      return;
+    } // end IF
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("0x%@: associated to \"%s\"\n"),
+                handle_in,
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
+#else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%d: associated to \"%s\"\n"),
+                handle_in,
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
+#endif
+  } // end IF
+
   if (!writeOnly_)
   {
     // step1: tweak socket
@@ -122,7 +162,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
                                       -1))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setLinger(%d,%s,-1), aborting\n"),
+                  ACE_TEXT ("failed to Net_Common_Tools::setLinger(%d,%s,-1), returning\n"),
                   handle_in,
                   (inherited::configuration_->socketConfiguration->linger ? ACE_TEXT ("true")
                                                                           : ACE_TEXT ("false"))));
@@ -139,16 +179,33 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to initialize input stream (handle was: 0x%@), aborting\n"),
+                  ACE_TEXT ("failed to initialize input stream (handle was: 0x%@), returning\n"),
                   handle_in));
 #else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to initialize input stream (handle was: %d), aborting\n"),
+                  ACE_TEXT ("failed to initialize input stream (handle was: %d), returning\n"),
                   handle_in));
 #endif
       return;
     } // end IF
   } // end IF
+  if (inherited::configuration_->socketConfiguration->bufferSize)
+    if (!Net_Common_Tools::setSocketBuffer (handle_in,
+                                            SO_SNDBUF,
+                                            inherited::configuration_->socketConfiguration->bufferSize))
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_SNDBUF,%u), continuing\n"),
+                  handle_in,
+                  inherited::configuration_->socketConfiguration->bufferSize));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
+                  handle_in,
+                  inherited::configuration_->socketConfiguration->bufferSize));
+#endif
+    } // end IF
 
   // step3: initialize output stream
   result = outputStream_.open (*this,
@@ -159,11 +216,11 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to initialize output stream (handle was: 0x%@), aborting\n"),
+                  ACE_TEXT ("failed to initialize output stream (handle was: 0x%@), returning\n"),
                   handle_in));
 #else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to initialize output stream (handle was: %d), aborting\n"),
+                  ACE_TEXT ("failed to initialize output stream (handle was: %d), returning\n"),
                   handle_in));
 #endif
 
@@ -173,6 +230,52 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 
     return;
   } // end IF
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  // *NOTE*: (on Linux), packet fragmentation is off by default, so sendto()-ing
+  //         datagrams larger than MTU will trigger errno EMSGSIZE (90)
+  //         --> enable packet fragmentation
+  if (!Net_Common_Tools::setPathMTUDiscovery (handle_in,
+                                              IP_PMTUDISC_WANT))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::disablePathMTUDiscovery(%d,%d), aborting\n"),
+                handle_in,
+                IP_PMTUDISC_WANT));
+
+    // clean up
+    handle_close (handle_in,
+                  ACE_Event_Handler::ALL_EVENTS_MASK);
+
+    return;
+  } // end IF
+#endif
+
+//#if defined (ACE_LINUX)
+//  if (errorQueue_)
+//    if (!Net_Common_Tools::enableErrorQueue (handle_in))
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to Net_Common_Tools::enableErrorQueue() (handle was: %d), aborting\n"),
+//                  handle_in));
+//      goto error;
+//    } // end IF
+//#endif
+
+//  // debug info
+//  unsigned int so_max_msg_size = Net_Common_Tools::getMaxMsgSize (handle);
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("maximum message size for UDP socket 0x%@: %u byte(s)...\n"),
+//              handle,
+//              so_max_msg_size));
+//#else
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("maximum message size for UDP socket %d: %u byte(s)...\n"),
+//              handle,
+//              so_max_msg_size));
+//#endif
 }
 
 template <typename ConfigurationType>

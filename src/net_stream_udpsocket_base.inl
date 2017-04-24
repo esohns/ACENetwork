@@ -460,7 +460,6 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->messageAllocator);
 
   // read a datagram from the socket
   bool enqueue = true;
@@ -468,7 +467,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   ACE_Message_Block* buffer_p =
     allocateMessage (inherited2::configuration_->PDUSize);
   if (unlikely (!buffer_p))
-  {
+  { ACE_ASSERT (inherited2::configuration_->messageAllocator);
     if (inherited2::configuration_->messageAllocator->block ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -738,12 +737,12 @@ Net_StreamUDPSocketBase_T<HandlerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%t: failed to ACE_SOCK_Dgram::send(\"%s\") (handle was: 0x%@): \"%m\", aborting\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddress2String (inherited::address_).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::address_).c_str ()),
                     inherited::peer_.get_handle ()));
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%t: failed to ACE_SOCK_Dgram::send(\"%s\") (handle was: %d): \"%m\", aborting\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddress2String (inherited::address_).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::address_).c_str ()),
                     inherited::peer_.get_handle ()));
 #endif
       } // end IF
@@ -986,9 +985,11 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   handle_out = inherited::SVC_HANDLER_T::get_handle ();
   localSAP_out.reset ();
-  remoteSAP_out = inherited::address_;
+  remoteSAP_out.reset ();
 
-  if (likely (!inherited::writeOnly_))
+  if (likely (inherited::writeOnly_))
+    remoteSAP_out = inherited::address_;
+  else
   {
     result = inherited::peer_.get_local_addr (localSAP_out);
     if (result == -1)
@@ -1193,8 +1194,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
               id (), handle,
-              ACE_TEXT (Net_Common_Tools::IPAddress2String (local_inet_address).c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddress2String (peer_inet_address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (local_inet_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_inet_address).c_str ())));
 }
 
 template <typename HandlerType,
@@ -2102,12 +2103,12 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%t: failed to ACE_SOCK_IO::send(\"%s\") (handle was: 0x%@): \"%m\", aborting\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddress2String (inherited::address_).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::address_).c_str ()),
                     inherited::peer_.get_handle ()));
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%t: failed to ACE_SOCK_IO::send(\"%s\") (handle was: %d): \"%m\", aborting\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddress2String (inherited::address_).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::address_).c_str ()),
                     inherited::peer_.get_handle ()));
 #endif
       } // end IF
@@ -2556,8 +2557,8 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
               id (), handle,
-              ACE_TEXT (Net_Common_Tools::IPAddress2String (local_inet_address).c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddress2String (peer_inet_address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (local_inet_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_inet_address).c_str ())));
 }
 
 template <typename AddressType,
@@ -3768,8 +3769,8 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
               id (), handle,
-              ACE_TEXT (Net_Common_Tools::IPAddress2String (local_address).c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddress2String (peer_address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
 }
 
 template <typename AddressType,

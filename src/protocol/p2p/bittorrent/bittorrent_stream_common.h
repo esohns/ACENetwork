@@ -202,6 +202,11 @@ struct BitTorrent_TrackerModuleHandlerConfiguration
   BitTorrent_ITrackerSubscribers_t*        subscribers;
 };
 
+struct BitTorrent_PeerModuleHandlerConfiguration;
+typedef std::map<std::string,
+                 struct BitTorrent_PeerModuleHandlerConfiguration*> BitTorrent_PeerModuleHandlerConfigurations_t;
+typedef BitTorrent_PeerModuleHandlerConfigurations_t::iterator BitTorrent_PeerModuleHandlerConfigurationsIterator_t;
+typedef BitTorrent_PeerModuleHandlerConfigurations_t::const_iterator BitTorrent_PeerModuleHandlerConfigurationsConstIterator_t;
 struct BitTorrent_PeerStreamConfiguration
  : Stream_Configuration
 {
@@ -209,14 +214,19 @@ struct BitTorrent_PeerStreamConfiguration
    : Stream_Configuration ()
    , filename ()
    , metaInfo (NULL)
-   , moduleHandlerConfiguration (NULL)
+   , moduleHandlerConfigurations ()
   {};
 
-  std::string                                       filename; // .torrent file
-  Bencoding_Dictionary_t*                           metaInfo;
+  std::string                                   filename; // .torrent file
+  Bencoding_Dictionary_t*                       metaInfo;
 
-  struct BitTorrent_PeerModuleHandlerConfiguration* moduleHandlerConfiguration;
+  BitTorrent_PeerModuleHandlerConfigurations_t* moduleHandlerConfigurations;
 };
+struct BitTorrent_TrackerModuleHandlerConfiguration;
+typedef std::map<std::string,
+                 struct BitTorrent_TrackerModuleHandlerConfiguration*> BitTorrent_TrackerModuleHandlerConfigurations_t;
+typedef BitTorrent_TrackerModuleHandlerConfigurations_t::iterator BitTorrent_TrackerModuleHandlerConfigurationsIterator_t;
+typedef BitTorrent_TrackerModuleHandlerConfigurations_t::const_iterator BitTorrent_TrackerModuleHandlerConfigurationsConstIterator_t;
 struct BitTorrent_TrackerStreamConfiguration
  : Stream_Configuration
 {
@@ -224,13 +234,13 @@ struct BitTorrent_TrackerStreamConfiguration
    : Stream_Configuration ()
    , filename ()
    , metaInfo (NULL)
-   , moduleHandlerConfiguration (NULL)
+   , moduleHandlerConfigurations ()
   {};
 
-  std::string                                          filename; // .torrent file
-  Bencoding_Dictionary_t*                              metaInfo;
+  std::string                                      filename; // .torrent file
+  Bencoding_Dictionary_t*                          metaInfo;
 
-  struct BitTorrent_TrackerModuleHandlerConfiguration* moduleHandlerConfiguration;
+  BitTorrent_TrackerModuleHandlerConfigurations_t* moduleHandlerConfigurations;
 };
 
 struct BitTorrent_ConnectionState;

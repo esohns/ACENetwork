@@ -70,7 +70,7 @@ Net_UDPSocketHandler_T<SocketType,
 
   int result = -1;
 #if defined (ACE_LINUX)
-  bool handle_priviledges = false;
+  bool handle_privileges = false;
 #endif
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
 
@@ -90,28 +90,30 @@ Net_UDPSocketHandler_T<SocketType,
   // *NOTE*: even when this is a write-only connection
   //         (configuration_p->socketConfiguration->writeOnly), the base class
   //         still requires a valid handle to open the output stream
-  ACE_INET_Addr local_SAP (static_cast<u_short> (0),
-                           static_cast<ACE_UINT32> (INADDR_ANY));
   if (!writeOnly_)
   {
     // sanity check(s)
     // *TODO*: remove type inferences
     ACE_ASSERT (configuration_p->listenerConfiguration);
 
-    local_SAP = configuration_p->listenerConfiguration->address;
+    address_ = configuration_p->listenerConfiguration->address;
   } // end IF
 
 #if defined (ACE_LINUX)
   // (temporarily) elevate priviledges to open system sockets
-  if (local_SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEDGED_PORT)
+  if (address_.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT)
   {
     if (!Common_Tools::setRootPrivileges ())
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_Tools::setRootPrivileges(): \"%m\", continuing\n")));
-    handle_priviledges = true;
+    handle_privileges = true;
   } // end IF
 #endif
-  result = inherited2::peer_.open (local_SAP,                // local SAP
+  ACE_INET_Addr inet_address =
+      (writeOnly_ ? ACE_INET_Addr (static_cast<u_short> (0),
+                                   static_cast<ACE_UINT32> (INADDR_ANY))
+                  : address_);
+  result = inherited2::peer_.open (inet_address,             // SAP
                                    ACE_PROTOCOL_FAMILY_INET, // protocol family
                                    0,                        // protocol
                                    1);                       // reuse_addr
@@ -119,11 +121,11 @@ Net_UDPSocketHandler_T<SocketType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (local_SAP).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address).c_str ())));
     goto error;
   } // end IF
 #if defined (ACE_LINUX)
-  if (handle_priviledges)
+  if (handle_privileges)
     Common_Tools::dropRootPrivileges ();
 #endif
   handle = inherited2::get_handle ();
@@ -133,26 +135,26 @@ Net_UDPSocketHandler_T<SocketType,
   // *TODO*: remove type inference
   if (configuration_p->socketConfiguration->connect)
   {
-    ACE_INET_Addr associated_address = (writeOnly_ ? address_
-                                                   : local_SAP);
-
-    struct sockaddr* sockaddr_p =
-        reinterpret_cast<struct sockaddr*> (associated_address.get_addr ());
-    result = ACE_OS::connect (handle,
-                              sockaddr_p,
-                              associated_address.get_addr_size ());
+    ACE_INET_Addr associated_address =
+        (writeOnly_ ? address_
+                    : ACE_INET_Addr (static_cast<u_short> (0),
+                                     static_cast<ACE_UINT32> (INADDR_ANY)));
+    result =
+        ACE_OS::connect (handle,
+                         reinterpret_cast<struct sockaddr*> (associated_address.get_addr ()),
+                         associated_address.get_addr_size ());
     if (result == -1)
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::connect(0x%@,\"%s\"): \"%m\", aborting\n"),
                   handle,
-                  ACE_TEXT (Net_Common_Tools::IPAddress2String (associated_address).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::connect(%d,\"%s\"): \"%m\", aborting\n"),
                   handle,
-                  ACE_TEXT (Net_Common_Tools::IPAddress2String (associated_address).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
 #endif
       goto error;
     } // end IF
@@ -160,14 +162,14 @@ Net_UDPSocketHandler_T<SocketType,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("0x%@: associated to \"%s\"\n"),
                 handle,
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (associated_address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: associated to \"%s\"\n"),
                 handle,
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (associated_address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
 #endif
-
+  } // end IF
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //    ACE_DEBUG ((LM_DEBUG,
 //                ACE_TEXT ("0x%@: (initial) MTU between \"%s\" and \"%s\": %u byte(s)...\n"),
@@ -181,32 +183,52 @@ Net_UDPSocketHandler_T<SocketType,
 //                buffer, buffer_2,
 //                Net_Common_Tools::getMTU (handle)));
 //#endif
-  } // end IF
 
   // step3: tweak socket
   // *NOTE*: recvfrom()-ing datagrams larger than SO_RCVBUF will truncate the
   //         inbound datagram (MSG_TRUNC flag will be set)
   // *TODO*: remove type inferences
-  if (configuration_p->socketConfiguration->bufferSize)
+  if (!writeOnly_)
   {
-    if (!Net_Common_Tools::setSocketBuffer (handle,
-                                            SO_RCVBUF,
-                                            configuration_p->socketConfiguration->bufferSize))
-    {
+    // step1: tweak socket
+    if (configuration_p->socketConfiguration->bufferSize)
+      if (!Net_Common_Tools::setSocketBuffer (handle,
+                                              SO_RCVBUF,
+                                              configuration_p->socketConfiguration->bufferSize))
+      {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
-                  handle,
-                  configuration_p->socketConfiguration->bufferSize));
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
+                    handle,
+                    configuration_p->socketConfiguration->bufferSize));
 #else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
-                  handle,
-                  configuration_p->socketConfiguration->bufferSize));
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
+                    handle,
+                    configuration_p->socketConfiguration->bufferSize));
 #endif
+      } // end IF
+
+    // *PORTABILITY*: (currently,) MS Windows (TM) UDP sockets do not support
+    //                SO_LINGER
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    if (!Net_Common_Tools::setLinger (handle,
+                                      configuration_p->socketConfiguration->linger,
+                                      -1))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setLinger(%d,%s,-1), returning\n"),
+                  handle,
+                  (configuration_p->socketConfiguration->linger ? ACE_TEXT ("true")
+                                                                : ACE_TEXT ("false"))));
+      goto error;
     } // end IF
-    // *NOTE*: sendto()-ing datagrams larger than SO_SNDBUF will trigger errno
-    //         EMSGSIZE (90)
+#endif
+  } // end IF
+  // *NOTE*: sendto()-ing datagrams larger than SO_SNDBUF will trigger errno
+  //         EMSGSIZE (90)
+  if (configuration_p->socketConfiguration->bufferSize)
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_SNDBUF,
                                             configuration_p->socketConfiguration->bufferSize))
@@ -223,24 +245,6 @@ Net_UDPSocketHandler_T<SocketType,
                   configuration_p->socketConfiguration->bufferSize));
 #endif
     } // end IF
-  } // end IF
-
-// *PORTABILITY*: (currently,) MS Windows (TM) UDP sockets do not support
-//                SO_LINGER
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-  if (!Net_Common_Tools::setLinger (handle,
-                                    configuration_p->socketConfiguration->linger,
-                                    -1))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::setLinger(%d,%s,-1), aborting\n"),
-                handle,
-                (configuration_p->socketConfiguration->linger ? ACE_TEXT ("true")
-                                                              : ACE_TEXT ("false"))));
-    goto error;
-  } // end IF
-#endif
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -287,7 +291,7 @@ Net_UDPSocketHandler_T<SocketType,
 
 error:
 #if defined (ACE_LINUX)
-  if (handle_priviledges)
+  if (handle_privileges)
     Common_Tools::dropRootPrivileges ();
 #endif
 
@@ -495,7 +499,7 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   // (temporarily) elevate priviledges to open system sockets
   u_short port_number = local_SAP.get_port_number ();
   if (port_number &&
-      (port_number <= NET_ADDRESS_MAXIMUM_PRIVILEDGED_PORT))
+      (port_number <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT))
   {
     if (!Common_Tools::setRootPrivileges ())
       ACE_DEBUG ((LM_ERROR,
@@ -513,8 +517,8 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK_CODgram::open(\"%s\",\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (local_SAP).c_str ()),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (remote_SAP).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (local_SAP).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_SAP).c_str ())));
     goto error;
   } // end IF
 #if defined (ACE_LINUX)

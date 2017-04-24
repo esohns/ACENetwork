@@ -44,7 +44,7 @@
 
 #if defined (ACE_LINUX)
 // *NOTE*: binding to these ports requires the CAP_NET_BIND_SERVICE capability
-#define NET_ADDRESS_MAXIMUM_PRIVILEDGED_PORT            1023
+#define NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT             1023
 #endif
 #define NET_ADDRESS_DEFAULT_PORT                        10001
 #define NET_ADDRESS_DEFAULT_IP_MULTICAST                "224.0.0.1"

@@ -196,6 +196,11 @@ class BitTorrent_Session_T
                                             typename inherited::ISESSION_T,
                                             CBDataType> TRACKER_HANDLER_T;
 
+  typedef typename std::map<std::string,
+                            PeerModuleHandlerConfigurationType*>::iterator PEERMODULEHANDLERCONFIGURATIONITERATOR_T;
+  typedef typename std::map<std::string,
+                            TrackerModuleHandlerConfigurationType*>::iterator TRACKERMODULEHANDLERCONFIGURATIONITERATOR_T;
+
   // implement/override (part of) BitTorrent_ISession_T
   virtual void connect (Net_ConnectionId_t);
   virtual void disconnect (Net_ConnectionId_t);

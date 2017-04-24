@@ -527,19 +527,19 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   configuration_in.peerModuleHandlerConfiguration.streamConfiguration =
       &configuration_in.peerStreamConfiguration;
 //  configuration_in.moduleHandlerConfiguration.protocolConfiguration =
-  configuration_in.peerStreamConfiguration.moduleHandlerConfiguration =
-      &configuration_in.peerModuleHandlerConfiguration;
   configuration_in.peerStreamConfiguration.moduleConfiguration =
       &configuration_in.moduleConfiguration;
+  configuration_in.peerStreamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                                               &configuration_in.peerModuleHandlerConfiguration));
 
   configuration_in.trackerModuleHandlerConfiguration.parserConfiguration =
       &configuration_in.parserConfiguration;
   configuration_in.trackerModuleHandlerConfiguration.streamConfiguration =
       &configuration_in.trackerStreamConfiguration;
-  configuration_in.trackerStreamConfiguration.moduleHandlerConfiguration =
-      &configuration_in.trackerModuleHandlerConfiguration;
   configuration_in.trackerStreamConfiguration.moduleConfiguration =
       &configuration_in.moduleConfiguration;
+  configuration_in.trackerStreamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                                                  &configuration_in.trackerModuleHandlerConfiguration));
 
   // step2: initialize event dispatch
   struct Common_DispatchThreadData dispatch_thread_data;

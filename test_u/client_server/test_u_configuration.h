@@ -105,20 +105,23 @@ struct Test_U_ModuleHandlerConfiguration
   Test_U_Subscribers_t*                subscribers;
 };
 
+typedef std::map<std::string,
+                 struct Test_U_ModuleHandlerConfiguration*> Test_U_ModuleHandlerConfigurations_t;
+typedef Test_U_ModuleHandlerConfigurations_t::iterator Test_U_ModuleHandlerConfigurationsIterator_t;
 struct Test_U_StreamConfiguration
  : Stream_Configuration
 {
   inline Test_U_StreamConfiguration ()
    : Stream_Configuration ()
    , moduleConfiguration_2 ()
-   , moduleHandlerConfiguration (NULL)
    , moduleHandlerConfiguration_2 ()
+   , moduleHandlerConfigurations ()
    , userData (NULL)
   {};
 
   struct Stream_ModuleConfiguration         moduleConfiguration_2;        // module configuration
-  struct Test_U_ModuleHandlerConfiguration* moduleHandlerConfiguration;   // module handler configuration
   struct Test_U_ModuleHandlerConfiguration  moduleHandlerConfiguration_2; // module handler configuration
+  Test_U_ModuleHandlerConfigurations_t      moduleHandlerConfigurations;  // module handler configuration
 
   struct Test_U_UserData*                   userData;                     // user data
 };

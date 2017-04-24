@@ -254,7 +254,7 @@ connection_setup_function (void* arg_in)
       if (handle == ACE_INVALID_HANDLE)
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("failed to connect(\"%s\"): \"%m\", continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddress2String (configuration_p->socketHandlerConfiguration->socketConfiguration->address).c_str ())));
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_p->socketHandlerConfiguration->socketConfiguration->address).c_str ())));
       else
       {
         done = true;

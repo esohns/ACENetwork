@@ -21,8 +21,8 @@
 #ifndef NET_CONFIGURATION_H
 #define NET_CONFIGURATION_H
 
+#include <deque>
 #include <string>
-#include <vector>
 
 #include <ace/INET_Addr.h>
 #include <ace/Log_Msg.h>
@@ -90,8 +90,8 @@ struct Net_SocketConfiguration
   bool             useLoopBackDevice;
   bool             writeOnly; // UDP
 };
-typedef std::vector<struct Net_SocketConfiguration> Net_SocketConfigurationStack_t;
-typedef Net_SocketConfigurationStack_t::iterator Net_SocketConfigurationIterator_t;
+typedef std::deque<struct Net_SocketConfiguration> Net_SocketConfigurations_t;
+typedef Net_SocketConfigurations_t::iterator Net_SocketConfigurationIterator_t;
 
 struct Net_SocketHandlerConfiguration;
 struct Net_ListenerConfiguration

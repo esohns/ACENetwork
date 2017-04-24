@@ -32,7 +32,7 @@
 #include "net_iconnectionmanager.h"
 
 template <typename AddressType,
-          typename ConfigurationType,
+          typename ConfigurationType, // connection-
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
@@ -57,6 +57,7 @@ class Net_Connection_Manager_T
   // convenience types
   typedef ConfigurationType CONFIGURATION_T;
   typedef StateType STATE_T;
+  typedef UserDataType USERDATA_T;
   typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,

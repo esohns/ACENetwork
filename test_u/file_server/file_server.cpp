@@ -561,8 +561,8 @@ do_work (
     &configuration.streamConfiguration.moduleConfiguration_2;
   configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
-  configuration.streamConfiguration.moduleHandlerConfiguration =
-    &configuration.streamConfiguration.moduleHandlerConfiguration_2;
+  configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                                        &configuration.streamConfiguration.moduleHandlerConfiguration_2));
   configuration.streamConfiguration.moduleHandlerConfiguration_2.connectionManager =
     connection_manager_p;
   configuration.streamConfiguration.moduleHandlerConfiguration_2.socketConfiguration =

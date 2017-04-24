@@ -28,6 +28,7 @@
 
 #include "test_u_message.h"
 #include "test_u_session_message.h"
+#include "test_u_common.h"
 #include "test_u_common_modules.h"
 
 Test_U_InboundConnectionStream::Test_U_InboundConnectionStream (const std::string& name_in)
@@ -50,14 +51,6 @@ Test_U_InboundConnectionStream::load (Stream_ModuleList_t& modules_out,
                                       bool& deleteModules_out)
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_InboundConnectionStream::load"));
-
-  // initialize return value(s)
-  deleteModules_out = true;
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
-  // *TODO*: remove type inference
-  ACE_ASSERT (inherited::configuration_->moduleHandlerConfiguration);
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
@@ -102,6 +95,8 @@ Test_U_InboundConnectionStream::load (Stream_ModuleList_t& modules_out,
                   false);
   modules_out.push_back (module_p);
 
+  deleteModules_out = true;
+
   return true;
 }
 
@@ -126,17 +121,17 @@ Test_U_InboundConnectionStream::initialize (const Test_U_StreamConfiguration& co
     return false;
   } // end IF
   ACE_ASSERT (inherited::sessionData_);
-  Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<Test_U_DHCPClient_SessionData&> (inherited::sessionData_->get ());
+  struct Test_U_DHCPClient_SessionData& session_data_r =
+    const_cast<struct Test_U_DHCPClient_SessionData&> (inherited::sessionData_->get ());
+  Test_U_ModuleHandlerConfigurationsIterator_t iterator =
+      const_cast<struct Test_U_StreamConfiguration&> (configuration_in).moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != configuration_in.moduleHandlerConfigurations.end ());
   // *TODO*: remove type inferences
   session_data_r.sessionID = configuration_in.sessionID;
   ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
-  session_data_r.targetFileName =
-    configuration_in.moduleHandlerConfiguration->targetFileName;
+  session_data_r.targetFileName = (*iterator).second->targetFileName;
 
   // ---------------------------------------------------------------------------
-  // *TODO*: remove type inferences
-  ACE_ASSERT (configuration_in.moduleConfiguration);
 
   // ---------------------------------------------------------------------------
 
@@ -152,7 +147,6 @@ Test_U_InboundConnectionStream::initialize (const Test_U_StreamConfiguration& co
                 ACE_TEXT ("NetIO")));
     return false;
   } // end IF
-  //netIO_.initialize (*configuration_in.moduleConfiguration);
   netIO_impl_p =
       dynamic_cast<Test_U_Module_Net_Writer_t*> (module_p->writer ());
   if (!netIO_impl_p)
@@ -369,16 +363,14 @@ Test_U_OutboundConnectionStream::initialize (const Test_U_StreamConfiguration& c
     return false;
   } // end IF
   ACE_ASSERT (inherited::sessionData_);
-  Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<Test_U_DHCPClient_SessionData&> (inherited::sessionData_->get ());
-  // *TODO*: remove type inferences
-  ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
-  session_data_r.targetFileName =
-    configuration_in.moduleHandlerConfiguration->targetFileName;
+  struct Test_U_DHCPClient_SessionData& session_data_r =
+    const_cast<struct Test_U_DHCPClient_SessionData&> (inherited::sessionData_->get ());
+  Test_U_ModuleHandlerConfigurationsIterator_t iterator =
+      const_cast<struct Test_U_StreamConfiguration&> (configuration_in).moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != configuration_in.moduleHandlerConfigurations.end ());
+  session_data_r.targetFileName = (*iterator).second->targetFileName;
 
   // ---------------------------------------------------------------------------
-  // *TODO*: remove type inferences
-  ACE_ASSERT (configuration_in.moduleConfiguration);
 
   // ---------------------------------------------------------------------------
 
@@ -395,7 +387,8 @@ Test_U_OutboundConnectionStream::initialize (const Test_U_StreamConfiguration& c
     return false;
   } // end IF
   //netIO_.initialize (*configuration_in.moduleConfiguration);
-  netIO_impl_p = dynamic_cast<Test_U_Module_Net_Writer_t*> (module_p->writer ());
+  netIO_impl_p =
+      dynamic_cast<Test_U_Module_Net_Writer_t*> (module_p->writer ());
   if (!netIO_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -444,8 +437,8 @@ Test_U_OutboundConnectionStream::collect (DHCP_RuntimeStatistic_t& data_out)
   ACE_ASSERT (inherited::sessionData_);
 
   int result = -1;
-  Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<Test_U_DHCPClient_SessionData&> (inherited::sessionData_->get ());
+  struct Test_U_DHCPClient_SessionData& session_data_r =
+    const_cast<struct Test_U_DHCPClient_SessionData&> (inherited::sessionData_->get ());
 
   Stream_Module_t* module_p =
     const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
@@ -515,7 +508,6 @@ Test_U_OutboundConnectionStream::report () const
   //   {
   //     ACE_DEBUG ((LM_ERROR,
   //                 ACE_TEXT ("dynamic_cast<Net_Module_Statistic_ReaderTask_t> failed, returning\n")));
-  //
   //     return;
   //   } // end IF
   //

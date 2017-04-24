@@ -61,11 +61,6 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
   //  delete *iterator;
   //modules_out.clear ();
 
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
-  // *TODO*: remove type inference
-  ACE_ASSERT (inherited::configuration_->moduleHandlerConfiguration);
-
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_ProtocolHandler_Module (ACE_TEXT_ALWAYS_CHAR ("ProtocolHandler"),

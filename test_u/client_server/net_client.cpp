@@ -517,12 +517,12 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
     &configuration.streamConfiguration.moduleConfiguration_2;
   configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
-  configuration.streamConfiguration.moduleHandlerConfiguration =
-    &configuration.streamConfiguration.moduleHandlerConfiguration_2;
   configuration.streamConfiguration.moduleHandlerConfiguration_2.protocolConfiguration =
     &configuration.protocolConfiguration;
   configuration.streamConfiguration.moduleHandlerConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
+  configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                                        &configuration.streamConfiguration.moduleHandlerConfiguration_2));
   configuration.streamConfiguration.printFinalReport = true;
   // *TODO*: is this correct ?
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;

@@ -285,18 +285,21 @@ struct Test_U_SignalHandlerConfiguration
   long                                statisticReportingTimerID;
 };
 
+typedef std::map<std::string,
+                 struct Test_U_StreamModuleHandlerConfiguration*> Test_U_ModuleHandlerConfigurations_t;
+typedef Test_U_ModuleHandlerConfigurations_t::iterator Test_U_ModuleHandlerConfigurationsIterator_t;
 struct Test_U_StreamConfiguration
  : DHCP_StreamConfiguration
 {
   inline Test_U_StreamConfiguration ()
    : DHCP_StreamConfiguration ()
-   , moduleHandlerConfiguration (NULL)
+   , moduleHandlerConfigurations ()
    , userData (NULL)
   {};
 
-  struct Test_U_StreamModuleHandlerConfiguration* moduleHandlerConfiguration; // stream module handler configuration
+  Test_U_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // stream module handler configuration
 
-  struct Test_U_UserData*                         userData;
+  struct Test_U_UserData*              userData;
 };
 
 struct Test_U_DHCPClient_StreamState

@@ -170,7 +170,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     return ACE_INVALID_HANDLE;
   } // end IF
   ACE_ASSERT (connectHandle_ != ACE_INVALID_HANDLE);
@@ -311,7 +311,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Connect_Impl::connect(%s): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (remoteAddress_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (remoteAddress_in).c_str ())));
     goto close;
   } // end IF
 
@@ -378,12 +378,12 @@ Net_Client_AsynchConnector_T<HandlerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (peer_address).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ()),
                 ACE::sock_error (static_cast<int> (error))));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (peer_address).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ()),
                 ACE_TEXT (ACE_OS::strerror (error))));
 #endif
   } // end IF
@@ -690,12 +690,12 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (peer_address).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ()),
                 ACE::sock_error (static_cast<int> (error))));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (peer_address).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ()),
                 ACE_TEXT (ACE_OS::strerror (error))));
 #endif
   } // end IF

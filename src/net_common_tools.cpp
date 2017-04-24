@@ -77,10 +77,10 @@ operator++ (enum Net_LinkLayerType& lhs, int) // postfix-
 //////////////////////////////////////////
 
 std::string
-Net_Common_Tools::IPAddress2String (unsigned short port_in,
-                                    ACE_UINT32 IPAddress_in)
+Net_Common_Tools::IPAddressToString (unsigned short port_in,
+                                     ACE_UINT32 IPAddress_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::IPAddress2String"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::IPAddressToString"));
 
   // initialize return value(s)
   std::string return_value;
@@ -183,9 +183,9 @@ Net_Common_Tools::matchIPAddress (std::string& address_in)
 }
 
 ACE_INET_Addr
-Net_Common_Tools::string2IPAddress (std::string& address_in)
+Net_Common_Tools::stringToIPAddress (std::string& address_in)
 {
-  NETWORK_TRACE ("Net_Common_Tools::string2IPAddress");
+  NETWORK_TRACE ("Net_Common_Tools::stringToIPAddress");
 
   // *NOTE*: ACE_INET_Addr::string_to_address() needs a trailing port number to
   //         function properly (see: ace/INET_Addr.h:237)
@@ -210,9 +210,9 @@ Net_Common_Tools::string2IPAddress (std::string& address_in)
 }
 
 std::string
-Net_Common_Tools::IPProtocol2String (unsigned char protocol_in)
+Net_Common_Tools::IPProtocolToString (unsigned char protocol_in)
 {
-  NETWORK_TRACE ("Net_Common_Tools::IPProtocol2String");
+  NETWORK_TRACE ("Net_Common_Tools::IPProtocolToString");
 
   // initialize return value(s)
   std::string result;
@@ -310,10 +310,10 @@ Net_Common_Tools::IPProtocol2String (unsigned char protocol_in)
 }
 
 std::string
-Net_Common_Tools::LinkLayerAddress2String (const unsigned char* const addressDataPtr_in,
-                                           enum Net_LinkLayerType type_in)
+Net_Common_Tools::LinkLayerAddressToString (const unsigned char* const addressDataPtr_in,
+                                            enum Net_LinkLayerType type_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::LinkLayerAddress2String"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::LinkLayerAddressToString"));
 
   // initialize return value(s)
   std::string result = ACE_TEXT_ALWAYS_CHAR ("NET_LINKLAYER_INVALID");
@@ -372,7 +372,7 @@ Net_Common_Tools::LinkLayerAddress2String (const unsigned char* const addressDat
       //         layer-) addressing
       ACE_DEBUG ((LM_WARNING,
                   ACE_TEXT ("link layer type \"%s\" does not support addressing, continuing\n"),
-                  ACE_TEXT (Net_Common_Tools::LinkLayerType2String (type_in).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::LinkLayerTypeToString (type_in).c_str ())));
       return ACE_TEXT_ALWAYS_CHAR ("");
     }
     case NET_LINKLAYER_ATM:
@@ -387,7 +387,7 @@ Net_Common_Tools::LinkLayerAddress2String (const unsigned char* const addressDat
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown link layer type (was: \"%s\"), aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::LinkLayerType2String (type_in).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::LinkLayerTypeToString (type_in).c_str ())));
       break;
     }
   } // end SWITCH
@@ -395,9 +395,9 @@ Net_Common_Tools::LinkLayerAddress2String (const unsigned char* const addressDat
   return result;
 }
 std::string
-Net_Common_Tools::LinkLayerType2String (enum Net_LinkLayerType type_in)
+Net_Common_Tools::LinkLayerTypeToString (enum Net_LinkLayerType type_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::LinkLayerType2String"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::LinkLayerTypeToString"));
 
   // initialize return value(s)
   std::string result = ACE_TEXT_ALWAYS_CHAR ("NET_LINKLAYER_INVALID");
@@ -427,9 +427,9 @@ Net_Common_Tools::LinkLayerType2String (enum Net_LinkLayerType type_in)
 }
 
 std::string
-Net_Common_Tools::EthernetProtocolTypeID2String (unsigned short frameType_in)
+Net_Common_Tools::EthernetProtocolTypeIDToString (unsigned short frameType_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::EthernetProtocolTypeID2String"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::EthernetProtocolTypeIDToString"));
 
   // initialize return value(s)
   std::string result;
@@ -653,10 +653,10 @@ Net_Common_Tools::EthernetProtocolTypeID2String (unsigned short frameType_in)
 }
 
 bool
-Net_Common_Tools::interface2ExternalIPAddress (const std::string& interfaceIdentifier_in,
-                                               ACE_INET_Addr& IPAddress_out)
+Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIdentifier_in,
+                                                ACE_INET_Addr& IPAddress_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interface2ExternalIPAddress"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceToExternalIPAddress"));
 
   // initialize return value(s)
   IPAddress_out.reset ();
@@ -668,11 +668,11 @@ Net_Common_Tools::interface2ExternalIPAddress (const std::string& interfaceIdent
 
   // step1: determine the 'internal' IP address
   ACE_INET_Addr internal_ip_address;
-  if (!Net_Common_Tools::interface2IPAddress (interface_identifier_string,
-                                              internal_ip_address))
+  if (!Net_Common_Tools::interfaceToIPAddress (interface_identifier_string,
+                                               internal_ip_address))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interface2IPAddress(\"%s\"), aborting\n"),
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), aborting\n"),
                 ACE_TEXT (interface_identifier_string.c_str ())));
     return false;
   } // end IF
@@ -767,25 +767,25 @@ Net_Common_Tools::interface2ExternalIPAddress (const std::string& interfaceIdent
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to resolve IP address (was: %s), aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (internal_ip_address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (internal_ip_address).c_str ())));
     return false;
   } // end IF
-  IPAddress_out = Net_Common_Tools::string2IPAddress (external_ip_address);
+  IPAddress_out = Net_Common_Tools::stringToIPAddress (external_ip_address);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("interface \"%s\" --> %s (--> %s)\n"),
               ACE_TEXT (interfaceIdentifier_in.c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddress2String (internal_ip_address).c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddress2String (IPAddress_out).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (internal_ip_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (IPAddress_out).c_str ())));
 
   return true;
 }
 
 bool
-Net_Common_Tools::interface2MACAddress (const std::string& interfaceIdentifier_in,
-                                        unsigned char MACAddress_out[])
+Net_Common_Tools::interfaceToMACAddress (const std::string& interfaceIdentifier_in,
+                                         unsigned char MACAddress_out[])
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interface2MACAddress"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceToMACAddress"));
 
 //  // sanity check(s)
 //  ACE_ASSERT (sizeof (MACAddress_out) >= 6);
@@ -905,10 +905,10 @@ continue_:
 }
 
 bool
-Net_Common_Tools::interface2IPAddress (const std::string& interfaceIdentifier_in,
-                                       ACE_INET_Addr& IPAddress_out)
+Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_in,
+                                        ACE_INET_Addr& IPAddress_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interface2IPAddress"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceToIPAddress"));
 
   // initialize return value(s)
   IPAddress_out.reset ();
@@ -1098,10 +1098,10 @@ continue_:
 }
 
 bool
-Net_Common_Tools::IPAddress2Interface (const ACE_INET_Addr& IPAddress_in,
-                                       std::string& interfaceIdentifier_out)
+Net_Common_Tools::IPAddressToInterface (const ACE_INET_Addr& IPAddress_in,
+                                        std::string& interfaceIdentifier_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::IPAddress2Interface"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::IPAddressToInterface"));
 
   // initialize return value(s)
   interfaceIdentifier_out.clear ();
@@ -1186,7 +1186,7 @@ Net_Common_Tools::IPAddress2Interface (const ACE_INET_Addr& IPAddress_in,
     //            ACE_TEXT ("found adapter \"%s\": \"%s\" on network %s...\n"),
     //            ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->FriendlyName),
     //            ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->Description),
-    //            ACE_TEXT (Net_Common_Tools::IPAddress2String (ACE_INET_Addr (static_cast<u_short> (0),
+    //            ACE_TEXT (Net_Common_Tools::IPAddressToString (ACE_INET_Addr (static_cast<u_short> (0),
     //                                                                         static_cast<ACE_UINT32> ((ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN) ? ACE_SWAP_LONG (sockaddr_in_p->sin_addr.S_un.S_addr) & network_mask
     //                                                                                                                                        : sockaddr_in_p->sin_addr.S_un.S_addr & network_mask)),
     //                                                          true).c_str ())));
@@ -1346,7 +1346,7 @@ Net_Common_Tools::getDefaultDeviceIdentifier (enum Net_LinkLayerType type_in)
                       ACE_TEXT ("found network interface \"%s\"[%s]: IP#: %s; MAC#: %s...\n"),
                       ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->FriendlyName),
                       ACE_TEXT (ip_adapter_addresses_2->AdapterName),
-                      ACE_TEXT (Net_Common_Tools::IPAddress2String (inet_address).c_str ()),
+                      ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address).c_str ()),
                       ACE_TEXT (Net_Common_Tools::LinkLayerAddress2String (ip_adapter_addresses_2->PhysicalAddress,
                                                                            type_in).c_str ())));
         } // end IF
@@ -1482,7 +1482,7 @@ Net_Common_Tools::getDefaultInterface (int linkLayerType_in)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_Common_Tools::getDefaultDeviceIdentifier() (type was: \"%s\"), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::LinkLayerType2String (i).c_str ())));
+                    ACE_TEXT (Net_Common_Tools::LinkLayerTypeToString (i).c_str ())));
         continue;
       } // end IF
       interfaces.push_back (interface_identifier);
@@ -2191,11 +2191,11 @@ Net_Common_Tools::setLoopBackFastPath (ACE_HANDLE handle_in)
 //}
 
 std::string
-Net_Common_Tools::URL2HostName (const std::string& URL_in,
-                                bool returnProtocol_in,
-                                bool returnPort_in)
+Net_Common_Tools::URLToHostName (const std::string& URL_in,
+                                 bool returnProtocol_in,
+                                 bool returnPort_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::URL2HostName"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::URLToHostName"));
 
   std::string result;
 

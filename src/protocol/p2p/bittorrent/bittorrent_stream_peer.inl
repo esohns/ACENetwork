@@ -162,8 +162,7 @@ BitTorrent_PeerStream_T<StreamStateType,
   // sanity check(s)
   ACE_ASSERT (!inherited::isInitialized_);
   ACE_ASSERT (!inherited::isRunning ());
-  ACE_ASSERT (configuration_in.moduleConfiguration);
-  ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
+//  ACE_ASSERT (configuration_in.moduleConfiguration);
 
 //  int result = -1;
   SessionDataType* session_data_p = NULL;
@@ -187,9 +186,6 @@ BitTorrent_PeerStream_T<StreamStateType,
   session_data_p->sessionID = configuration_in.sessionID;
 
   // ---------------------------------------------------------------------------
-  // sanity check(s)
-  ACE_ASSERT (configuration_in.moduleConfiguration);
-
   //  configuration_in.moduleConfiguration.streamState = &state_;
 
   // ---------------------------------------------------------------------------

@@ -300,6 +300,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::connect"));
 
   // step0: subscribe to notifications
+  PEERMODULEHANDLERCONFIGURATIONITERATOR_T iterator;
   PeerConnectionConfigurationType* configuration_p = NULL;
   PeerUserDataType* user_data_p = NULL;
   typename PeerStreamType::IDATA_NOTIFY_T* subscriber_p = NULL;
@@ -311,20 +312,19 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     inherited::connectionManager_->get (configuration_p,
                                         user_data_p);
     ACE_ASSERT (configuration_p);
+    // *TODO*: remove type inferences
     ACE_ASSERT (configuration_p->socketHandlerConfiguration);
     ACE_ASSERT (configuration_p->streamConfiguration);
-    ACE_ASSERT (configuration_p->streamConfiguration->moduleHandlerConfiguration);
-
-    // *TODO*: remove type inferences
 
     // step1: set up configuration
     configuration_p->socketHandlerConfiguration->socketConfiguration->address =
         address_in;
 
-    subscriber_p =
-        configuration_p->streamConfiguration->moduleHandlerConfiguration->subscriber;
-    configuration_p->streamConfiguration->moduleHandlerConfiguration->subscriber =
-        &peerStreamHandler_;
+    iterator =
+        configuration_p->streamConfiguration->moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator != configuration_p->streamConfiguration->moduleHandlerConfigurations.end ());
+    subscriber_p = (*iterator).second->subscriber;
+    (*iterator).second->subscriber = &peerStreamHandler_;
 
     clone_module = configuration_p->streamConfiguration->cloneModule;
     delete_module = configuration_p->streamConfiguration->deleteModule;
@@ -341,8 +341,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   // step2: reset configuration
   if (inherited::connectionManager_)
   {
-    configuration_p->streamConfiguration->moduleHandlerConfiguration->subscriber =
-        subscriber_p;
+    ACE_ASSERT (configuration_p);
+    // *TODO*: remove type inferences
+    ACE_ASSERT (configuration_p->streamConfiguration);
+
+    ACE_ASSERT (iterator != configuration_p->streamConfiguration->moduleHandlerConfigurations.end ());
+    (*iterator).second->subscriber = subscriber_p;
 
     configuration_p->streamConfiguration->cloneModule = clone_module;
     configuration_p->streamConfiguration->deleteModule = delete_module;
@@ -856,6 +860,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
 
   // step0: subscribe to notifications
+  TRACKERMODULEHANDLERCONFIGURATIONITERATOR_T iterator;
   TrackerConnectionConfigurationType* configuration_p = NULL;
   TrackerUserDataType* user_data_p = NULL;
   typename TrackerStreamType::IDATA_NOTIFY_T* subscriber_p = NULL;
@@ -867,21 +872,20 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     trackerConnectionManager_->get (configuration_p,
                                     user_data_p);
     ACE_ASSERT (configuration_p);
+    // *TODO*: remove type inferences
     ACE_ASSERT (configuration_p->socketHandlerConfiguration);
     ACE_ASSERT (configuration_p->streamConfiguration);
-    ACE_ASSERT (configuration_p->streamConfiguration->moduleHandlerConfiguration);
-
-    // *TODO*: remove type inferences
 
     // step1: set up configuration
     configuration_p->socketHandlerConfiguration->socketConfiguration->address =
         address_in;
 
-    subscriber_p =
-        configuration_p->streamConfiguration->moduleHandlerConfiguration->subscriber;
+    iterator =
+        configuration_p->streamConfiguration->moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator != configuration_p->streamConfiguration->moduleHandlerConfigurations.end ());
+    subscriber_p = (*iterator).second->subscriber;
     ACE_ASSERT (!subscriber_p);
-    configuration_p->streamConfiguration->moduleHandlerConfiguration->subscriber =
-        &trackerStreamHandler_;
+    (*iterator).second->subscriber = &trackerStreamHandler_;
 
     clone_module = configuration_p->streamConfiguration->cloneModule;
     delete_module = configuration_p->streamConfiguration->deleteModule;
@@ -920,7 +924,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                 ACE_TEXT ("%s: failed to connect to tracker %s: \"%m\", returning\n"),
                 ACE::basename (metaInfoFileName_.c_str (),
                                ACE_DIRECTORY_SEPARATOR_CHAR),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     goto error;
   } // end IF
   if (inherited::isAsynch_)
@@ -957,7 +961,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                 ACE_TEXT ("%s: failed to connect to tracker %s: \"%m\", returning\n"),
                 ACE::basename (metaInfoFileName_.c_str (),
                                ACE_DIRECTORY_SEPARATOR_CHAR),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     goto error;
   } // end IF
 
@@ -973,7 +977,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (to tracker: %s) failed to initialize (status was: %d), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
                 status));
     goto error;
   } // end IF
@@ -992,7 +996,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   //ACE_DEBUG ((LM_DEBUG,
   //            ACE_TEXT ("connected to tracker %s: %u...\n"),
-  //            ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ()),
+  //            ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
   //            iconnection_p->id ()));
 
   iconnection_p->decrease ();
@@ -1000,13 +1004,15 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 error:
   if (trackerConnectionManager_)
   {
-    configuration_p->streamConfiguration->moduleHandlerConfiguration->subscriber =
-        subscriber_p;
+    ACE_ASSERT (configuration_p);
+    ACE_ASSERT (configuration_p->streamConfiguration);
+
+    ACE_ASSERT (iterator != configuration_p->streamConfiguration->moduleHandlerConfigurations.end ());
+    (*iterator).second->subscriber = subscriber_p;
 
     configuration_p->streamConfiguration->cloneModule = clone_module;
     configuration_p->streamConfiguration->deleteModule = delete_module;
     configuration_p->streamConfiguration->module = module_p;
-
   } // end IF
 };
 

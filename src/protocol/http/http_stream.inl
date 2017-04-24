@@ -150,8 +150,6 @@ HTTP_Stream_T<StreamStateType,
   // sanity check(s)
   ACE_ASSERT (!inherited::isInitialized_);
   ACE_ASSERT (!inherited::isRunning ());
-  ACE_ASSERT (configuration_in.moduleConfiguration);
-  ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
 
   //  int result = -1;
   SessionDataType* session_data_p = NULL;
@@ -173,10 +171,6 @@ HTTP_Stream_T<StreamStateType,
   session_data_p->sessionID = configuration_in.sessionID;
 
   // ---------------------------------------------------------------------------
-  // sanity check(s)
-  ACE_ASSERT (configuration_in.moduleConfiguration);
-
-  //  configuration_in.moduleConfiguration.streamState = &state_;
 
   // ---------------------------------------------------------------------------
 
@@ -200,7 +194,7 @@ HTTP_Stream_T<StreamStateType,
   //     return false;
   //   } // end IF
 
-  // ******************* Runtime Statistics ************************
+  // ******************* Runtime Statistic ************************
   //STATISTIC_WRITER_T* runtimeStatistic_impl_p =
   //  dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
   //if (!runtimeStatistic_impl_p)
@@ -250,20 +244,7 @@ HTTP_Stream_T<StreamStateType,
                 ACE_TEXT ("dynamic_cast<HTTP_Module_Parser_T*> failed, aborting\n")));
     goto error;
   } // end IF
-//  if (!parser_impl_p->initialize (*configuration_in.moduleHandlerConfiguration))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-//                marshal_.name ()));
-//    return false;
-//  } // end IF
-  if (!parser_impl_p->initialize (inherited::state_))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize module: \"%s\", aborting\n"),
-                module_p->name ()));
-    goto error;
-  } // end IF
+  parser_impl_p->set (&(inherited::state_));
 
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a

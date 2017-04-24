@@ -440,16 +440,17 @@ do_work (bool useThreadPool_in,
       &CBData_in.configuration->peerStreamConfiguration;
 //  CBData_in.configuration->moduleHandlerConfiguration.protocolConfiguration =
 //      &CBData_in.configuration->protocolConfiguration;
-  CBData_in.configuration->peerStreamConfiguration.moduleHandlerConfiguration =
-      &CBData_in.configuration->peerModuleHandlerConfiguration;
   CBData_in.configuration->peerStreamConfiguration.moduleConfiguration =
       &CBData_in.configuration->moduleConfiguration;
+  CBData_in.configuration->peerStreamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                                                       &CBData_in.configuration->peerModuleHandlerConfiguration));
+
   CBData_in.configuration->trackerModuleHandlerConfiguration.streamConfiguration =
       &CBData_in.configuration->trackerStreamConfiguration;
-  CBData_in.configuration->trackerStreamConfiguration.moduleHandlerConfiguration =
-      &CBData_in.configuration->trackerModuleHandlerConfiguration;
   CBData_in.configuration->trackerStreamConfiguration.moduleConfiguration =
       &CBData_in.configuration->moduleConfiguration;
+  CBData_in.configuration->trackerStreamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                                                          &CBData_in.configuration->trackerModuleHandlerConfiguration));
 
   CBData_in.configuration->peerConnectionConfiguration.streamConfiguration =
       &CBData_in.configuration->peerStreamConfiguration;

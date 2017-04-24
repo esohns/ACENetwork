@@ -289,7 +289,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   //ACE_DEBUG ((LM_DEBUG,
   //            ACE_TEXT ("%s: DHCP server address: \"%s\"\n"),
   //            inherited::mod_->name (),
-  //            ACE_TEXT (Net_Common_Tools::IPAddress2String (session_data_r.serverAddress).c_str ())));
+  //            ACE_TEXT (Net_Common_Tools::IPAddressToString (session_data_r.serverAddress).c_str ())));
 
   // step2a: set up the (broadcast) connection configuration
   // step2aa: set up the socket configuration
@@ -337,7 +337,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to connect to \"%s\", returning\n"),
                 inherited::mod_->name (),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (session_data_r.serverAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (session_data_r.serverAddress).c_str ())));
     goto error;
   } // end IF
   if (use_reactor)
@@ -355,7 +355,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to connect to \"%s\", returning\n"),
                 inherited::mod_->name (),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (session_data_r.serverAddress).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (session_data_r.serverAddress).c_str ())));
     goto error;
   } // end IF
 
@@ -414,11 +414,11 @@ continue_:
   DHCP_record.secs = data_r.secs;
   if (inherited::configuration_->protocolConfiguration->requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-  if (!Net_Common_Tools::interface2MACAddress (inherited::configuration_->socketConfiguration->networkInterface,
-                                               DHCP_record.chaddr))
+  if (!Net_Common_Tools::interfaceToMACAddress (inherited::configuration_->socketConfiguration->networkInterface,
+                                                DHCP_record.chaddr))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interface2MACAddress(), returning\n")));
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToMACAddress(), returning\n")));
 
     // clean up
     message_p->release ();
@@ -931,7 +931,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to connect to \"%s\", aborting\n"),
                 inherited::mod_->name (),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     goto error;
   } // end IF
   if (iconnector_p->useReactor ())
@@ -964,7 +964,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to connect to \"%s\", aborting\n"),
                 inherited::mod_->name (),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     goto error;
   } // end IF
   // step3: wait for the connection to finish initializing
@@ -980,7 +980,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to initialize connection to \"%s\" (status was: %d), aborting\n"),
                 inherited::mod_->name (),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
                 status));
     goto error;
   } // end IF
@@ -1018,7 +1018,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: connected to \"%s\" (id: %u)...\n"),
               inherited::mod_->name (),
-              ACE_TEXT (Net_Common_Tools::IPAddress2String (address_in).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
               iconnection_p->id ()));
 
   useReactor_out = iconnector_p->useReactor ();

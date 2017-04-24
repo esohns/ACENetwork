@@ -58,6 +58,7 @@ class Net_Client_Connector_T
                            HandlerConfigurationType>
 {
  public:
+  typedef AddressType ADDRESS_T;
   typedef StreamType STREAM_T;
 
   typedef Net_IConnection_T<AddressType,
@@ -227,7 +228,7 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   inline virtual const HandlerConfigurationType& get () const { return configuration_; };
 
   // *NOTE*: this is just a stub
-  inline virtual void abort () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void abort () { };
   // specialize (part of) Net_Client_IConnector_T
   virtual ACE_HANDLE connect (const ACE_INET_Addr&);
 

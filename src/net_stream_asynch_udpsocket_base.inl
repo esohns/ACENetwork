@@ -145,7 +145,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 #if defined (ACE_LINUX)
   // (temporarily) elevate priviledges to open system sockets
   if (!inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly &&
-      (local_SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEDGED_PORT))
+      (local_SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT))
   {
     if (!Common_Tools::setRootPrivileges ())
     {
@@ -165,7 +165,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketType::open(%s): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddress2String (local_SAP).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (local_SAP).c_str ())));
     goto error;
   } // end IF
 #if defined (ACE_LINUX)
@@ -772,8 +772,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [id: %u [%d]]: \"%s\" <--> \"%s\"\n"),
               id (), handle,
-              ACE_TEXT (Net_Common_Tools::IPAddress2String (local_address).c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddress2String (peer_address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
 }
 
 template <typename HandlerType,

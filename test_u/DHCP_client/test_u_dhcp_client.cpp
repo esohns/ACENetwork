@@ -652,11 +652,11 @@ do_work (bool requestBroadcastReplies_in,
                                                          ACE_ADDRESS_FAMILY_INET);
   else if (!networkInterface_in.empty ())
   {
-    if (!Net_Common_Tools::interface2IPAddress (networkInterface_in,
-                                                configuration.listenerConfiguration.address))
+    if (!Net_Common_Tools::interfaceToIPAddress (networkInterface_in,
+                                                 configuration.listenerConfiguration.address))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::interface2IPAddress(), continuing\n")));
+                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(), continuing\n")));
       result = -1;
     } // end IF
     configuration.listenerConfiguration.address.set_port_number (DHCP_DEFAULT_CLIENT_PORT,
@@ -1094,11 +1094,11 @@ allocate:
     DHCP_record.xid = DHCP_Tools::generateXID ();
     if (configuration.protocolConfiguration.requestBroadcastReplies)
       DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-    if (!Net_Common_Tools::interface2MACAddress (configuration.socketConfiguration.networkInterface,
-                                                 DHCP_record.chaddr))
+    if (!Net_Common_Tools::interfaceToMACAddress (configuration.socketConfiguration.networkInterface,
+                                                  DHCP_record.chaddr))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::interface2MACAddress(), returning\n")));
+                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToMACAddress(), returning\n")));
 
       // clean up
       //    message_data_container_p->decrease ();
