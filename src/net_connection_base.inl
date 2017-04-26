@@ -150,73 +150,67 @@ Net_ConnectionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::registerc"));
 
+  ICONNECTION_T* iconnection_p = NULL;
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  AddressType local_address, remote_address;
+
   // sanity check(s)
   ACE_ASSERT (!isRegistered_);
+  if (!manager_)
+    goto continue_; // nothing to do
 
-  // (try to) register with the connection manager...
-  //ICONNECTION_T* iconnection_p = this;
+  // (try to) register with the connection manager
+  //iconnection_p = this;
 //#if defined (__GNUG__)
   // *WORKAROUND*: see header
-  ICONNECTION_T* iconnection_p = (connection_in ? connection_in : this);
+  iconnection_p = (connection_in ? connection_in : this);
 //#endif
-  if (manager_)
+  try {
+    isRegistered_ = manager_->registerc (iconnection_p);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IConnectionManager_T::registerc(), continuing\n")));
+    isRegistered_ = false;
+  }
+  if (!isRegistered_)
   {
-    try {
-      isRegistered_ = manager_->registerc (iconnection_p);
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnectionManager_T::registerc(), continuing\n")));
-      isRegistered_ = false;
-    }
-    if (!isRegistered_)
-    {
-      // *NOTE*: most probable reason: maximum number of connections has been
-      //         reached
-      //ACE_DEBUG ((LM_DEBUG,
-      //            ACE_TEXT ("failed to Net_IConnectionManager_T::registerc(), aborting\n")));
-      return false;
-    } // end IF
-
-    ACE_HANDLE handle = ACE_INVALID_HANDLE;
-    AddressType local_address, remote_address;
-    try {
-//#if defined (__GNUG__)
-      // *WORKAROUND*: see header
-      ICONNECTION_T* connection_p = (connection_in ? connection_in
-                                                   : this);
-      ACE_ASSERT (connection_p);
-      connection_p->info (handle,
-                          local_address,
-                          remote_address);
-//#else
-//      this->info (handle,
-//                  local_address,
-//                  remote_address);
-//#endif
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection_T::info(), aborting\n")));
-      return false;
-    }
-
-    // *PORTABILITY*: this isn't entirely portable...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("registered connection [0x%@/0x%@]: %s <--> %s (total: %d)\n"),
-                this, handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address).c_str ()),
-                manager_->count ()));
-#else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("registered connection [%@/%d]: %s <--> %s (total: %d)\n"),
-                this, handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address).c_str ()),
-                manager_->count ()));
-#endif
+    // *NOTE*: most probable reason: maximum number of connections has been
+    //         reached
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("failed to Net_IConnectionManager_T::registerc(), aborting\n")));
+    return false;
   } // end IF
 
+  try {
+//#if defined (__GNUG__)
+    // *WORKAROUND*: see header
+    ACE_ASSERT (iconnection_p);
+    iconnection_p->info (handle,
+                         local_address,
+                         remote_address);
+//#else
+    //      this->info (handle,
+    //                  local_address,
+    //                  remote_address);
+//#endif
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IConnection_T::info(), aborting\n")));
+    return false;
+  }
+
+  ACE_DEBUG ((LM_DEBUG,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+              ACE_TEXT ("registered connection [0x%@/0x%@]: %s <--> %s (total: %d)\n"),
+#else
+              ACE_TEXT ("registered connection [%@/%d]: %s <--> %s (total: %d)\n"),
+#endif
+              this, handle,
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address).c_str ()),
+              manager_->count ()));
+
+continue_:
   return true;
 }
 

@@ -352,8 +352,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   ACE_UNUSED_ARG (handle_in);
 
   int result = -1;
-  Stream_Base_t* stream_p = (stream_.upStream () ? stream_.upStream ()
-                                                 : &stream_);
+  Stream_Base_t* upstream_p = stream_.upStream ();
+  Stream_Base_t* stream_p = (upstream_p ? upstream_p : &stream_);
   ACE_Message_Block* message_block_p, *message_block_2 = NULL;
   size_t bytes_sent = 0;
 

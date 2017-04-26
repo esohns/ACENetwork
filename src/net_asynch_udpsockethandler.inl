@@ -70,6 +70,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   ACE_UNUSED_ARG (messageBlock_in);
 
   int result = -1;
+  bool connect_socket = false;
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
@@ -93,8 +94,15 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   writeOnly_ = inherited::configuration_->socketConfiguration->writeOnly;
 
   // step1: connect ?
+  connect_socket = inherited::configuration_->socketConfiguration->connect;
+  // *IMPORTANT NOTE*: outbound sockets need to be associated with the peer
+  //                   address as the data dispatch happens out of context
+  if (writeOnly_)
+  { ACE_ASSERT (inherited::configuration_->socketConfiguration->connect);
+    connect_socket = true;
+  } // end IF
   // *TODO*: remove type inference
-  if (inherited::configuration_->socketConfiguration->connect)
+  if (connect_socket)
   {
     ACE_INET_Addr associated_address =
         (writeOnly_ ? address_
@@ -134,7 +142,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 
   if (!writeOnly_)
   {
-    // step1: tweak socket
+    // step2a: tweak inbound socket
     if (inherited::configuration_->socketConfiguration->bufferSize)
       if (!Net_Common_Tools::setSocketBuffer (handle_in,
                                               SO_RCVBUF,
@@ -170,7 +178,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
     } // end IF
 #endif
 
-    // step2: initialize input stream
+    // step2b: initialize input stream
     result = inputStream_.open (*this,
                                 handle_in,
                                 NULL,
@@ -189,6 +197,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
       return;
     } // end IF
   } // end IF
+  // step3: tweak outbound socket (if any)
   if (inherited::configuration_->socketConfiguration->bufferSize)
     if (!Net_Common_Tools::setSocketBuffer (handle_in,
                                             SO_SNDBUF,
@@ -207,7 +216,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 #endif
     } // end IF
 
-  // step3: initialize output stream
+  // step4: initialize output stream
   result = outputStream_.open (*this,
                                handle_in,
                                NULL,

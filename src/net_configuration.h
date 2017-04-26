@@ -78,6 +78,9 @@ struct Net_SocketConfiguration
 
   ACE_INET_Addr    address;
   int              bufferSize; // socket buffer size (I/O)
+  // *IMPORTANT NOTE*: set this for asynchronous event dispatch; the socket
+  //                   needs to be associated with the peer address, as the data
+  //                   dispatch happens out of context
   bool             connect; // UDP
   bool             linger;
   // *TODO*: remove address information (pass as AddressType in open() instead)

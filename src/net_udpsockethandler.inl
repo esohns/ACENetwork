@@ -184,13 +184,12 @@ Net_UDPSocketHandler_T<SocketType,
 //                Net_Common_Tools::getMTU (handle)));
 //#endif
 
-  // step3: tweak socket
   // *NOTE*: recvfrom()-ing datagrams larger than SO_RCVBUF will truncate the
   //         inbound datagram (MSG_TRUNC flag will be set)
   // *TODO*: remove type inferences
   if (!writeOnly_)
   {
-    // step1: tweak socket
+    // step3: tweak inbound socket
     if (configuration_p->socketConfiguration->bufferSize)
       if (!Net_Common_Tools::setSocketBuffer (handle,
                                               SO_RCVBUF,
@@ -226,6 +225,7 @@ Net_UDPSocketHandler_T<SocketType,
     } // end IF
 #endif
   } // end IF
+  // step4: tweak outbound socket
   // *NOTE*: sendto()-ing datagrams larger than SO_SNDBUF will trigger errno
   //         EMSGSIZE (90)
   if (configuration_p->socketConfiguration->bufferSize)
