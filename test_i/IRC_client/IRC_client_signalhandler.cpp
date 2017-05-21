@@ -149,25 +149,13 @@ IRC_Client_SignalHandler::handle (int signal_in)
     }
     if (handle == ACE_INVALID_HANDLE)
     {
-      ACE_TCHAR buffer[BUFSIZ];
-      ACE_OS::memset(buffer, 0, sizeof (buffer));
-      result =
-        inherited::configuration_->peerAddress.addr_to_string (buffer,
-                                                               sizeof (buffer));
-      if (result == -1)
-      {
-        // *PORTABILITY*: tracing in a signal handler context is not portable
-        // *TODO*
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-      } // end IF
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Client_IConnector_t::connect(\"%s\"): \"%m\", continuing\n"),
-                  buffer));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->peerAddress).c_str ())));
 
-      // release an existing connection, maybe that helps...
+      // release an existing connection (that may resolve the issue)
       connection_manager_p->abort (NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST);
     } // end IF
   } // end IF
@@ -185,9 +173,7 @@ done_connect:
       else
       {
         if (inherited::configuration_->cursesState)
-        {
-          ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);
-
+        { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);
           inherited::configuration_->cursesState->finished = true;
         } // end IF
       } // end IF

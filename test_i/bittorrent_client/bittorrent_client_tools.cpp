@@ -106,8 +106,8 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
 
   // step2: initialize connector
   bool result_2 =
-      (isPeer_in ? peerConnector_in.initialize (*peer_configuration_p->socketHandlerConfiguration)
-                 : trackerConnector_in.initialize (*tracker_configuration_p->socketHandlerConfiguration));
+      (isPeer_in ? peerConnector_in.initialize (*peer_configuration_p)
+                 : trackerConnector_in.initialize (*tracker_configuration_p));
   if (!result_2)
   {
     ACE_DEBUG ((LM_ERROR,

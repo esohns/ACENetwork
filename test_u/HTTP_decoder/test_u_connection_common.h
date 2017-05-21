@@ -170,6 +170,7 @@ typedef Net_TCPConnectionBase_T<Test_U_TCPHandler_t,
                                 struct Test_U_ConnectionState,
                                 HTTP_RuntimeStatistic_t,
                                 struct Test_U_SocketHandlerConfiguration,
+                                struct Test_U_ListenerConfiguration,
                                 Test_U_Stream_t,
                                 struct Test_U_UserData> Test_U_TCPConnection_t;
 typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPHandler_t,
@@ -177,13 +178,14 @@ typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPHandler_t,
                                       struct Test_U_ConnectionState,
                                       HTTP_RuntimeStatistic_t,
                                       struct Test_U_SocketHandlerConfiguration,
+                                      struct Test_U_ListenerConfiguration,
                                       Test_U_Stream_t,
                                       struct Test_U_UserData> Test_U_AsynchTCPConnection_t;
 
 //////////////////////////////////////////
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         struct Test_U_SocketHandlerConfiguration> Test_U_IConnector_t;
+                         struct Test_U_ConnectionConfiguration> Test_U_IConnector_t;
 
 //////////////////////////////////////////
 

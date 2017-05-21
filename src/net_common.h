@@ -23,6 +23,9 @@
 
 #include <set>
 
+#if defined (ACE_HAS_NETLINK)
+#include <ace/Netlink_Addr.h>
+#endif
 #include <ace/Synch_Traits.h>
 #include <ace/Time_Value.h>
 
@@ -170,5 +173,22 @@ struct Net_ConnectionState
 
 typedef std::set<Net_ConnectionId_t> Net_Connections_t;
 typedef Net_Connections_t::iterator Net_ConnectionsIterator_t;
+
+#if defined (ACE_HAS_NETLINK)
+class Net_Netlink_Addr
+ : public ACE_Netlink_Addr
+{
+ public:
+  Net_Netlink_Addr& operator= (const ACE_Addr&);
+
+  virtual int addr_to_string (ACE_TCHAR[],
+                              size_t,
+                              int = 1) const;
+  inline bool is_any (void) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
+
+ private:
+  typedef ACE_Netlink_Addr inherited;
+};
+#endif /* ACE_HAS_NETLINK */
 
 #endif

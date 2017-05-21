@@ -22,6 +22,7 @@
 
 #include "common_defines.h"
 
+#include "net_common_tools.h"
 #include "net_macros.h"
 
 template <typename HandlerType,
@@ -433,17 +434,9 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   result = activate_svc_handler (handler_p);
   if (result == -1)
   {
-    ACE_TCHAR buffer[BUFSIZ];
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result = address_in.addr_to_string (buffer,
-                                        sizeof (buffer),
-                                        1);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_Connector_T::activate_svc_handler(), (address was: \"%s\"): \"%m\", aborting\n"),
-                buffer));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     return ACE_INVALID_HANDLE;
   } // end IF
 
@@ -757,15 +750,9 @@ Net_Client_Connector_T<HandlerType,
   result = handler_p->open (iconnector_p);
   if (result == -1)
   {
-    ACE_TCHAR buffer[BUFSIZ];
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result = address_in.addr_to_string (buffer, sizeof (buffer));
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to HandlerType::open(\"%s\"): \"%m\", aborting\n"),
-                buffer));
+                ACE_TEXT ("failed to HandlerType::open(%s): \"%m\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::NetlinkAddressToString (address_in).c_str ())));
     return ACE_INVALID_HANDLE;
   } // end IF
 

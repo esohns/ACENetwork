@@ -918,7 +918,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                 ACE_TEXT ("failed to allocate memory, aborting\n")));
     return ACE_INVALID_HANDLE;
   } // end IF
-  if (!iconnector_p->initialize (*(inherited::configuration_->socketHandlerConfiguration)))
+  if (!iconnector_p->initialize (*(inherited::configuration_->connectionConfiguration)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector, aborting\n")));

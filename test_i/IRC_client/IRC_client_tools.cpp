@@ -265,7 +265,7 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   } // end IF
 
   // step2: initialize connector
-  if (!connector_in.initialize (*configuration_p->socketHandlerConfiguration))
+  if (!connector_in.initialize (*configuration_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));

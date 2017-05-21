@@ -171,6 +171,8 @@ class Net_StreamTCPSocketBase_T
   Net_StreamTCPSocketBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T (const Net_StreamTCPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamTCPSocketBase_T& operator= (const Net_StreamTCPSocketBase_T&))
+
+  bool               notify_; // still to notify the processing stream ?
 };
 
 // include template definition

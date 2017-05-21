@@ -147,6 +147,7 @@ struct Test_U_ModuleHandlerConfiguration
    , printProgressDot (true)
    , socketConfiguration (NULL)
    , socketHandlerConfiguration (NULL)
+   , streamConfiguration (NULL)
    , targetFileName ()
    , URL ()
   {};
@@ -160,6 +161,7 @@ struct Test_U_ModuleHandlerConfiguration
   bool                                      printProgressDot; // file writer module
   struct Net_SocketConfiguration*           socketConfiguration;
   struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
+  struct Test_U_StreamConfiguration*        streamConfiguration;
   std::string                               targetFileName; // file writer module (HTML)
   std::string                               URL;
 };

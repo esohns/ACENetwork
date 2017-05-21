@@ -85,8 +85,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      ControllerInterfaceType,
                      CBDataType>::BitTorrent_Session_T ()
  : inherited ()
+ , trackerConnectionConfiguration_ (NULL)
  , trackerConnectionManager_ (NULL)
- , trackerHandlerConfiguration_ (NULL)
  , logToFile_ (BITTORRENT_DEFAULT_SESSION_LOG)
  , metaInfoFileName_ ()
  , peerHandlerModule_ (NULL)
@@ -237,9 +237,9 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     inherited::state_.controller = configuration_in.controller;
     inherited::state_.metaInfo = configuration_in.metaInfo;
   } // end lock scope
+  trackerConnectionConfiguration_ =
+      const_cast<ConfigurationType&> (configuration_in).trackerConnectionConfiguration;
   trackerConnectionManager_ = configuration_in.trackerConnectionManager;
-  trackerHandlerConfiguration_ =
-      const_cast<ConfigurationType&> (configuration_in).trackerSocketHandlerConfiguration;
   metaInfoFileName_ = configuration_in.metaInfoFileName;
   if (!trackerStreamHandler_.initialize (*configuration_in.parserConfiguration))
   {
@@ -471,7 +471,7 @@ allocate:
     static_cast<typename PeerStreamType::MESSAGE_T*> (inherited::configuration_->peerConnectionConfiguration->messageAllocator->malloc (inherited::configuration_->peerConnectionConfiguration->PDUSize));
   // keep retrying ?
   if (!message_p &&
-      !inherited::configuration_->socketHandlerConfiguration->messageAllocator->block ())
+      !inherited::configuration_->peerConnectionConfiguration->messageAllocator->block ())
     goto allocate;
   if (!message_p)
   {
@@ -656,8 +656,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->metaInfo);
-  ACE_ASSERT (inherited::configuration_->trackerConnectionConfiguration);
-  ACE_ASSERT (inherited::configuration_->trackerConnectionConfiguration->messageAllocator);
+  ACE_ASSERT (trackerConnectionConfiguration_);
+  ACE_ASSERT (trackerConnectionConfiguration_->messageAllocator);
   ACE_ASSERT (trackerConnectionManager_);
 
   struct HTTP_Record* record_p = NULL;
@@ -673,6 +673,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   typename ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T* message_p =
       NULL;
   ACE_Message_Block* message_block_p = NULL;
+  bool use_SSL = false;
 
   ACE_NEW_NORETURN (record_p,
                     struct HTTP_Record ());
@@ -688,12 +689,14 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   for (;
        iterator != inherited::configuration_->metaInfo->end ();
        ++iterator)
-    if (*(*iterator).first == key) break;
+    if (*(*iterator).first == key)
+      break;
   ACE_ASSERT (iterator != inherited::configuration_->metaInfo->end ());
   ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
   if (!HTTP_Tools::parseURL (*(*iterator).second->string,
                              host_name_string,
-                             record_p->URI))
+                             record_p->URI,
+                             use_SSL))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),
@@ -738,7 +741,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   record_p = NULL;
 allocate:
   message_p =
-    static_cast<typename ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (inherited::configuration_->trackerSocketHandlerConfiguration->messageAllocator->malloc (inherited::configuration_->trackerConnectionConfiguration->PDUSize));
+    static_cast<typename ITRACKER_STREAM_CONNECTION_T::STREAM_T::MESSAGE_T*> (inherited::configuration_->trackerConnectionConfiguration->messageAllocator->malloc (inherited::configuration_->trackerConnectionConfiguration->PDUSize));
   // keep retrying ?
   if (!message_p &&
       !inherited::configuration_->trackerConnectionConfiguration->messageAllocator->block ())
@@ -908,8 +911,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   typename TrackerConnectorType::ICONNECTOR_T* iconnector_p = &connector;
   typename TrackerConnectorType::ICONNECTION_T* iconnection_p = NULL;
   int result = -1;
-  ACE_ASSERT (trackerHandlerConfiguration_);
-  if (!iconnector_p->initialize (*trackerHandlerConfiguration_))
+  ACE_ASSERT (trackerConnectionConfiguration_);
+  if (!iconnector_p->initialize (*trackerConnectionConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -971,7 +974,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   do
   {
     status = iconnection_p->status ();
-    if (status == NET_CONNECTION_STATUS_OK) break;
+    if (status == NET_CONNECTION_STATUS_OK)
+      break;
   } while (COMMON_TIME_NOW < deadline);
   if (status != NET_CONNECTION_STATUS_OK)
   {

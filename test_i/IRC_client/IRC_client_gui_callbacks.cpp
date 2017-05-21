@@ -172,9 +172,9 @@ connection_setup_function (void* arg_in)
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
   IRC_Client_Connector_t connector (connection_manager_p,
-                                    data_p->configuration->streamConfiguration.statisticReportingInterval);
+                                    data_p->configuration->moduleHandlerConfiguration.statisticReportingInterval);
   IRC_Client_AsynchConnector_t asynch_connector (connection_manager_p,
-                                                 data_p->configuration->streamConfiguration.statisticReportingInterval);
+                                                 data_p->configuration->moduleHandlerConfiguration.statisticReportingInterval);
   IRC_Client_IConnector_t* connector_p = &connector;
   if (!data_p->configuration->useReactor)
     connector_p = &asynch_connector;
@@ -189,11 +189,11 @@ connection_setup_function (void* arg_in)
                              user_data_p);
   // sanity check(s)
   ACE_ASSERT (configuration_p);
-  ACE_ASSERT (configuration_p->socketHandlerConfiguration);
-  ACE_ASSERT (configuration_p->socketHandlerConfiguration->socketConfiguration);
+  //ACE_ASSERT (configuration_p->socketHandlerConfiguration);
+  //ACE_ASSERT (configuration_p->socketHandlerConfiguration->socketConfiguration);
 
   // step2c: initialize connector
-  if (!connector_p->initialize (*configuration_p->socketHandlerConfiguration))
+  if (!connector_p->initialize (*configuration_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));

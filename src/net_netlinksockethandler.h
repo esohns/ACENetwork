@@ -22,28 +22,15 @@
 #define NET_NETLINK_SOCKETHANDLER_H
 
 #include <ace/Global_Macros.h>
-#include <ace/Netlink_Addr.h>
 #include <ace/Reactor_Notification_Strategy.h>
 #include <ace/SOCK_Netlink.h>
 #include <ace/Svc_Handler.h>
 #include <ace/Synch_Traits.h>
 
+#include "net_common.h"
 #include "net_sockethandler_base.h"
 
 #if defined (ACE_HAS_NETLINK)
-class Net_Netlink_Addr
- : public ACE_Netlink_Addr
-{
- public:
-  virtual int addr_to_string (ACE_TCHAR[],
-                              size_t,
-                              int = 1) const;
-  Net_Netlink_Addr& operator= (const ACE_Addr&);
-
- private:
-  typedef ACE_Netlink_Addr inherited;
-};
-
 // *NOTE*: this should be added to ACE so Svc_Handler can be parametrized with
 //         ACE_SOCK_Netlink
 class Net_SOCK_Netlink
@@ -90,7 +77,7 @@ class Net_NetlinkSocketHandler_T
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkSocketHandler_T& operator= (const Net_NetlinkSocketHandler_T&))
 };
 
-// include template implementation
+// include template definition
 #include "net_netlinksockethandler.inl"
 #endif
 

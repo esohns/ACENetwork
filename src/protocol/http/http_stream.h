@@ -83,9 +83,7 @@ class HTTP_Stream_T
                      bool&);               // return value: delete modules ?
 
   // override Common_IInitialize_T
-  virtual bool initialize (const ConfigurationType&, // configuration
-                           bool = true,              // setup pipeline ?
-                           bool = true);             // reset session data ?
+  virtual bool initialize (const ConfigurationType&); // configuration
 
   // implement Common_IStatistic_T
   // *NOTE*: delegate this to rntimeStatistic_

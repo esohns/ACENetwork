@@ -218,6 +218,7 @@ struct Test_U_StreamModuleHandlerConfiguration
    , passive (false)
    , socketConfiguration (NULL)
    , socketHandlerConfiguration (NULL)
+   , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
@@ -231,6 +232,7 @@ struct Test_U_StreamModuleHandlerConfiguration
   bool                                      passive; // UDP target module
   struct Net_SocketConfiguration*           socketConfiguration;
   struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
+  struct Test_U_StreamConfiguration*        streamConfiguration; // dhcp discover module
   Test_U_ISessionNotify_t*                  subscriber;
   Test_U_Subscribers_t*                     subscribers;
   std::string                               targetFileName; // dump module

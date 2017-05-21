@@ -405,8 +405,8 @@ HTTP_ParserDriver_T<SessionMessageType>::switchBuffer (bool unlink_in)
     if (!fragment_->cont ())
     {
       // *NOTE*: most probable reason: received session end
-      ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("no data after HTTP_ParserDriver_T::waitBuffer(), aborting\n")));
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("no data after HTTP_ParserDriver_T::waitBuffer(), aborting\n")));
       return false;
     } // end IF
   } // end IF

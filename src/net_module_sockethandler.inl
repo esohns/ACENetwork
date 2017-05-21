@@ -52,9 +52,9 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataContainerType,
                               StatisticContainerType,
                               ProtocolHeaderType,
-                              UserDataType>::Net_Module_TCPSocketHandler_T (ACE_SYNCH_MUTEX_T* lock_in,
+                              UserDataType>::Net_Module_TCPSocketHandler_T (ISTREAM_T* stream_in,
                                                                             bool generateSessionMessages_in)
- : inherited (lock_in,
+ : inherited (stream_in,
               false,
               STREAM_HEADMODULECONCURRENCY_CONCURRENT,
               generateSessionMessages_in)
@@ -258,16 +258,16 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // sanity check(s)
-  // *TODO*: remove type inference
   ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::configuration_->streamConfiguration);
   ACE_ASSERT (inherited::isInitialized_);
 
   switch (message_inout->type ())
   {
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
-      if (inherited::configuration_->streamConfiguration->statisticReportingInterval)
+      // *TODO*: remove type inference
+      if (inherited::configuration_->statisticReportingInterval !=
+          ACE_Time_Value::zero)
       {
         // schedule regular statistic collection
         ACE_Time_Value interval (STREAM_DEFAULT_STATISTIC_COLLECTION_INTERVAL, 0);

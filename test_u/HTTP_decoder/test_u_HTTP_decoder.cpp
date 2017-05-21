@@ -531,9 +531,8 @@ do_work (unsigned int bufferSize_in,
   configuration.moduleConfiguration.streamConfiguration =
     &configuration.streamConfiguration;
 
-  configuration.moduleHandlerConfiguration.streamConfiguration =
-    &configuration.streamConfiguration;
-
+  //configuration.moduleHandlerConfiguration.allocatorConfiguration =
+  //  &configuration.allocatorConfiguration;
   // *NOTE*: yyparse() does not currently return until the whole entity has been
   //         processed --> use (a) dedicated thread(s) so the event dispatch
   //         does not deadlock in single-threaded reactor/proactor scenarios
@@ -555,9 +554,15 @@ do_work (unsigned int bufferSize_in,
     &configuration.socketConfiguration;
   configuration.moduleHandlerConfiguration.socketHandlerConfiguration =
     &configuration.socketHandlerConfiguration;
+  configuration.moduleHandlerConfiguration.statisticReportingInterval =
+    statisticReportingInterval_in;
+  configuration.moduleHandlerConfiguration.streamConfiguration =
+    &configuration.streamConfiguration;
   configuration.moduleHandlerConfiguration.targetFileName = fileName_in;
   configuration.moduleHandlerConfiguration.URL = URL_in;
   // ******************** (sub-)stream configuration data **********************
+  //configuration.streamConfiguration.allocatorConfiguration =
+  //  &configuration.allocatorConfiguration;
   //if (bufferSize_in)
   //  configuration.streamConfiguration.bufferSize = bufferSize_in;
   configuration.streamConfiguration.messageAllocator = &message_allocator;
@@ -566,8 +571,6 @@ do_work (unsigned int bufferSize_in,
   configuration.streamConfiguration.moduleHandlerConfiguration =
     &configuration.moduleHandlerConfiguration;
   configuration.streamConfiguration.printFinalReport = true;
-  configuration.streamConfiguration.statisticReportingInterval =
-    statisticReportingInterval_in;
 
   // step0b: initialize event dispatch
   struct Common_DispatchThreadData thread_data;
@@ -721,7 +724,7 @@ do_work (unsigned int bufferSize_in,
                 ACE_TEXT ("failed to allocate memory, returning\n")));
     goto clean_up;
   } // end IF
-  if (!iconnector_p->initialize (configuration.socketHandlerConfiguration))
+  if (!iconnector_p->initialize (configuration.connectionConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector, returning\n")));

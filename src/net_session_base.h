@@ -83,14 +83,14 @@ class Net_SessionBase_T
 //                        ACE_SOCK_CONNECTOR> CONNECTOR_T;
 //  typedef ACE_Asynch_Connector<ConnectionType> ASYNCH_CONNECTOR_T;
 
-  ConfigurationType*        configuration_;
-  ConnectionManagerType*    connectionManager_;
-  HandlerConfigurationType* handlerConfiguration_;
-  bool                      isAsynch_;
+  ConfigurationType*           configuration_;
+  ConnectionConfigurationType* connectionConfiguration_;
+  ConnectionManagerType*       connectionManager_;
+  bool                         isAsynch_;
 
-  ACE_SYNCH_MUTEX           lock_;
-  ACE_SYNCH_CONDITION       condition_;
-  StateType                 state_;
+  ACE_SYNCH_MUTEX              lock_;
+  ACE_SYNCH_CONDITION          condition_;
+  StateType                    state_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_SessionBase_T (const Net_SessionBase_T&))

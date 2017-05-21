@@ -282,7 +282,7 @@ typedef Net_AsynchUDPConnectionBase_T<Test_U_OutboundAsynchHandler_t,
 //////////////////////////////////////////
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         struct Test_U_SocketHandlerConfiguration> Test_U_IConnector_t;
+                         struct Test_U_ConnectionConfiguration> Test_U_IConnector_t;
 
 //////////////////////////////////////////
 

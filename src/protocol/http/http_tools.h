@@ -56,7 +56,8 @@ class HTTP_Export HTTP_Tools
   static bool parseURL (const std::string&, // URL
                         std::string&,       // return value: host name
 //                        ACE_INET_Addr&,     // return value: host address
-                        std::string&);      // return value: URI
+                        std::string&,       // return value: URI
+                        bool&);             // return value: use SSL ?
   // *NOTE*: this 'escapes' the input so it can be sent in an URL
   //         (see also: RFC 1738)
   static std::string URLEncode (const std::string&);

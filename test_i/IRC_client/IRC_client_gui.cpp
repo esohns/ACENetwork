@@ -132,7 +132,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]      : reporting interval (seconds) [0: off] [")
-            << IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL
+            << NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-t              : trace information [")
@@ -211,7 +211,7 @@ do_processArguments (int argc_in,
   useReactor_out                 = NET_EVENT_USE_REACTOR;
 
   statisticReportingInterval_out =
-    IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+    NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
 
   traceInformation_out           = false;
 
@@ -421,8 +421,9 @@ do_initializeSignals (bool useReactor_in,
 void
 do_work (bool useThreadPool_in,
          unsigned int numberOfDispatchThreads_in,
-         IRC_Client_GTK_CBData& CBData_in,
+         struct IRC_Client_GTK_CBData& CBData_in,
          const std::string& UIDefinitionFile_in,
+         const ACE_Time_Value& statisticReportingInterval_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -438,6 +439,8 @@ do_work (bool useThreadPool_in,
     &CBData_in.configuration->connectionConfiguration;
   CBData_in.configuration->moduleHandlerConfiguration.protocolConfiguration =
     &CBData_in.configuration->protocolConfiguration;
+  CBData_in.configuration->moduleHandlerConfiguration.statisticReportingInterval =
+    statisticReportingInterval_in;
   CBData_in.configuration->moduleHandlerConfiguration.streamConfiguration =
       &CBData_in.configuration->streamConfiguration;
 
@@ -1115,7 +1118,7 @@ ACE_TMAIN (int argc_in,
   bool use_reactor                           = NET_EVENT_USE_REACTOR;
 
   unsigned int reporting_interval            =
-    IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+    NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
 
   bool trace_information                     = false;
 
@@ -1313,7 +1316,7 @@ ACE_TMAIN (int argc_in,
   configuration.socketHandlerConfiguration.messageAllocator =
     &message_allocator;
   configuration.socketHandlerConfiguration.statisticReportingInterval =
-    configuration.streamConfiguration.statisticReportingInterval;
+    ACE_Time_Value (reporting_interval, 0);
   configuration.socketHandlerConfiguration.userData =
     configuration.userData;
 
@@ -1330,8 +1333,6 @@ ACE_TMAIN (int argc_in,
       &configuration.moduleConfiguration;
   configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
     &configuration.moduleHandlerConfiguration));
-  configuration.streamConfiguration.statisticReportingInterval =
-      reporting_interval;
   configuration.moduleHandlerConfiguration.parserConfiguration =
       &configuration.parserConfiguration;
   configuration.userData = &user_data;
@@ -1427,6 +1428,7 @@ ACE_TMAIN (int argc_in,
            number_of_thread_pool_threads,
            cb_user_data,
            ui_definition_file_name,
+           ACE_Time_Value (reporting_interval, 0),
            signal_set,
            ignored_signal_set,
            previous_signal_actions,

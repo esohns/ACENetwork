@@ -459,9 +459,10 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
          unsigned short serverPortNumber_in,
          bool useReactor_in,
          const ACE_Time_Value& pingInterval_in,
+         const ACE_Time_Value& statisticReportingInterval_in,
          unsigned int numberOfDispatchThreads_in,
          bool useUDP_in,
-         Test_U_Client_GTK_CBData& CBData_in,
+         struct Test_U_Client_GTK_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -551,7 +552,7 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
   configuration.socketHandlerConfiguration.messageAllocator =
     &message_allocator;
   configuration.socketHandlerConfiguration.statisticReportingInterval =
-    configuration.streamConfiguration.statisticReportingInterval;
+    statisticReportingInterval_in;
   configuration.socketHandlerConfiguration.userData =
     &configuration.userData;
 
@@ -591,15 +592,15 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
   Test_U_IInetConnectionManager_t* iconnection_manager_p =
     connection_manager_p;
   Test_U_Client_Connector_t connector (iconnection_manager_p,
-                                       configuration.streamConfiguration.statisticReportingInterval);
+                                       statisticReportingInterval_in);
   Test_U_Client_AsynchConnector_t asynch_connector (iconnection_manager_p,
-                                                    configuration.streamConfiguration.statisticReportingInterval);
+                                                    statisticReportingInterval_in);
   Test_U_IConnector_t* connector_p = NULL;
   if (useReactor_in)
     connector_p = &connector;
   else
     connector_p = &asynch_connector;
-  if (!connector_p->initialize (configuration.socketHandlerConfiguration))
+  if (!connector_p->initialize (configuration.connectionConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -664,8 +665,8 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
   // step0e: initialize signal handling
   configuration.signalHandlerConfiguration.messageAllocator =
     &message_allocator;
-  configuration.signalHandlerConfiguration.socketHandlerConfiguration =
-    &configuration.socketHandlerConfiguration;
+  configuration.signalHandlerConfiguration.connectionConfiguration =
+    &configuration.connectionConfiguration;
   configuration.signalHandlerConfiguration.useReactor = useReactor_in;
   if (!signalHandler_in.initialize (configuration.signalHandlerConfiguration))
   {
@@ -1001,6 +1002,8 @@ ACE_TMAIN (int argc_in,
   bool use_reactor = NET_EVENT_USE_REACTOR;
   ACE_Time_Value ping_interval (NET_CLIENT_DEF_SERVER_PING_INTERVAL / 1000,
                                 (NET_CLIENT_DEF_SERVER_PING_INTERVAL % 1000) * 1000);
+  ACE_Time_Value statistic_reporting_interval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
+                                               0);
   bool trace_information = false;
   bool use_UDP = false;
   bool print_version_and_exit = false;
@@ -1094,7 +1097,7 @@ ACE_TMAIN (int argc_in,
   if (run_stress_test)
     action_mode = Test_U_Client_TimeoutHandler::ACTION_STRESS;
 
-  Test_U_Client_GTK_CBData gtk_cb_user_data;
+  struct Test_U_Client_GTK_CBData gtk_cb_user_data;
   gtk_cb_user_data.progressData.GTKState = &gtk_cb_user_data;
   // step1d: initialize logging and/or tracing
   Common_Logger_t logger (&gtk_cb_user_data.logStack,
@@ -1246,6 +1249,7 @@ ACE_TMAIN (int argc_in,
            server_port_number,
            use_reactor,
            ping_interval,
+           statistic_reporting_interval,
            number_of_dispatch_threads,
            use_UDP,
            gtk_cb_user_data,

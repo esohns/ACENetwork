@@ -37,6 +37,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -47,6 +48,7 @@ Net_StreamConnectionBase_T<HandlerType,
                            StatisticContainerType,
                            SocketConfigurationType,
                            HandlerConfigurationType,
+                           ListenerConfigurationType,
                            StreamType,
                            StreamStatusType,
                            UserDataType>::Net_StreamConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
@@ -66,6 +68,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -76,6 +79,7 @@ Net_StreamConnectionBase_T<HandlerType,
                            StatisticContainerType,
                            SocketConfigurationType,
                            HandlerConfigurationType,
+                           ListenerConfigurationType,
                            StreamType,
                            StreamStatusType,
                            UserDataType>::~Net_StreamConnectionBase_T ()
@@ -106,6 +110,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -117,6 +122,7 @@ Net_StreamConnectionBase_T<HandlerType,
                            StatisticContainerType,
                            SocketConfigurationType,
                            HandlerConfigurationType,
+                           ListenerConfigurationType,
                            StreamType,
                            StreamStatusType,
                            UserDataType>::set (Net_ClientServerRole role_in)
@@ -146,6 +152,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -157,6 +164,7 @@ Net_StreamConnectionBase_T<HandlerType,
                            StatisticContainerType,
                            SocketConfigurationType,
                            HandlerConfigurationType,
+                           ListenerConfigurationType,
                            StreamType,
                            StreamStatusType,
                            UserDataType>::send (ACE_Message_Block*& message_inout)
@@ -208,6 +216,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -219,6 +228,7 @@ Net_StreamConnectionBase_T<HandlerType,
                            StatisticContainerType,
                            SocketConfigurationType,
                            HandlerConfigurationType,
+                           ListenerConfigurationType,
                            StreamType,
                            StreamStatusType,
                            //UserDataType>::get () const
@@ -272,6 +282,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -283,6 +294,7 @@ Net_StreamConnectionBase_T<HandlerType,
                            StatisticContainerType,
                            SocketConfigurationType,
                            HandlerConfigurationType,
+                           ListenerConfigurationType,
                            StreamType,
                            StreamStatusType,
                            UserDataType>::waitForIdleState () const
@@ -330,6 +342,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -341,6 +354,7 @@ Net_StreamConnectionBase_T<HandlerType,
                            StatisticContainerType,
                            SocketConfigurationType,
                            HandlerConfigurationType,
+                           ListenerConfigurationType,
                            StreamType,
                            StreamStatusType,
                            UserDataType>::open (void* arg_in)
@@ -350,21 +364,23 @@ Net_StreamConnectionBase_T<HandlerType,
   // step0: initialize this connection
   // *NOTE*: client-side: arg_in is a handle to the connector
   //         server-side: arg_in is a handle to the listener
-  const HandlerConfigurationType* handler_configuration_p = NULL;
+
+  // *TODO*: remove type inference
+  ConfigurationType* configuration_p = NULL;
   switch (this->role ())
   {
     case NET_ROLE_CLIENT:
     {
       ICONNECTOR_T* iconnector_p = static_cast<ICONNECTOR_T*> (arg_in);
       ACE_ASSERT (iconnector_p);
-      handler_configuration_p = &(iconnector_p->get ());
+      configuration_p = &const_cast<ConfigurationType&> (iconnector_p->get ());
       break;
     }
     case NET_ROLE_SERVER:
     {
       ILISTENER_T* ilistener_p = static_cast<ILISTENER_T*> (arg_in);
       ACE_ASSERT (ilistener_p);
-      handler_configuration_p = &(ilistener_p->get ());
+      configuration_p = &const_cast<ConfigurationType&> (ilistener_p->get ());
       break;
     }
     default:
@@ -375,10 +391,6 @@ Net_StreamConnectionBase_T<HandlerType,
       return -1;
     }
   } // end SWITCH
-  ACE_ASSERT (handler_configuration_p);
-  // *TODO*: remove type inference
-  ConfigurationType* configuration_p =
-    handler_configuration_p->connectionConfiguration;
   ACE_ASSERT (configuration_p);
   if (!inherited::CONNECTION_BASE_T::initialize (*configuration_p))
   {
@@ -452,6 +464,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -463,6 +476,7 @@ Net_StreamConnectionBase_T<HandlerType,
                            StatisticContainerType,
                            SocketConfigurationType,
                            HandlerConfigurationType,
+                           ListenerConfigurationType,
                            StreamType,
                            StreamStatusType,
                            UserDataType>::close (u_long arg_in)
@@ -544,6 +558,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -555,6 +570,7 @@ Net_StreamConnectionBase_T<HandlerType,
                            StatisticContainerType,
                            SocketConfigurationType,
                            HandlerConfigurationType,
+                           ListenerConfigurationType,
                            StreamType,
                            StreamStatusType,
                            UserDataType>::open (ACE_HANDLE handle_in,
@@ -580,6 +596,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -590,6 +607,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  StatisticContainerType,
                                  SocketConfigurationType,
                                  HandlerConfigurationType,
+                                 ListenerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
                                  UserDataType>::Net_AsynchStreamConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
@@ -609,6 +627,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -619,6 +638,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  StatisticContainerType,
                                  SocketConfigurationType,
                                  HandlerConfigurationType,
+                                 ListenerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
                                  UserDataType>::~Net_AsynchStreamConnectionBase_T ()
@@ -634,6 +654,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -645,6 +666,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  StatisticContainerType,
                                  SocketConfigurationType,
                                  HandlerConfigurationType,
+                                 ListenerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
                                  UserDataType>::act (const void* act_in)
@@ -655,7 +677,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   // *NOTE*: client-side: arg_in is a handle to the connector
   //         server-side: arg_in is a handle to the listener
-  const HandlerConfigurationType* handler_configuration_p = NULL;
+  ConfigurationType* configuration_p = NULL;
   switch (this->role ())
   {
     case NET_ROLE_CLIENT:
@@ -663,14 +685,14 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
       const ICONNECTOR_T* iconnector_p =
         static_cast<const ICONNECTOR_T*> (act_in);
       ACE_ASSERT (iconnector_p);
-      handler_configuration_p = &iconnector_p->get ();
+      configuration_p = &const_cast<ConfigurationType&> (iconnector_p->get ());
       break;
     }
     case NET_ROLE_SERVER:
     {
       const ILISTENER_T* ilistener_p = static_cast<const ILISTENER_T*> (act_in);
       ACE_ASSERT (ilistener_p);
-      handler_configuration_p = &ilistener_p->get ();
+      configuration_p = &const_cast<ConfigurationType&> (ilistener_p->get ());
       break;
     }
     default:
@@ -681,11 +703,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
       return;
     }
   } // end SWITCH
-  ACE_ASSERT (handler_configuration_p);
-  // *TODO*: remove type inference
-  ACE_ASSERT (handler_configuration_p->connectionConfiguration);
-  ConfigurationType* configuration_p =
-    handler_configuration_p->connectionConfiguration;
   ACE_ASSERT (configuration_p);
   if (!inherited::CONNECTION_BASE_T::initialize (*configuration_p))
   {
@@ -702,6 +719,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -713,6 +731,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  StatisticContainerType,
                                  SocketConfigurationType,
                                  HandlerConfigurationType,
+                                 ListenerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
                                  UserDataType>::send (ACE_Message_Block*& message_inout)
@@ -759,6 +778,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -770,6 +790,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  StatisticContainerType,
                                  SocketConfigurationType,
                                  HandlerConfigurationType,
+                                 ListenerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
                                  //UserDataType>::get () const
@@ -823,6 +844,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -834,6 +856,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  StatisticContainerType,
                                  SocketConfigurationType,
                                  HandlerConfigurationType,
+                                 ListenerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
                                  UserDataType>::set (Net_ClientServerRole role_in)
@@ -871,6 +894,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -882,6 +906,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  StatisticContainerType,
                                  SocketConfigurationType,
                                  HandlerConfigurationType,
+                                 ListenerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
                                  UserDataType>::flush (bool flushSessionMessages_in)
@@ -910,6 +935,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -921,6 +947,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  StatisticContainerType,
                                  SocketConfigurationType,
                                  HandlerConfigurationType,
+                                 ListenerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
                                  UserDataType>::waitForIdleState () const
@@ -974,6 +1001,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
           typename StreamType,
           typename StreamStatusType,
           typename UserDataType>
@@ -985,6 +1013,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  StatisticContainerType,
                                  SocketConfigurationType,
                                  HandlerConfigurationType,
+                                 ListenerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
                                  UserDataType>::open (void* arg_in)

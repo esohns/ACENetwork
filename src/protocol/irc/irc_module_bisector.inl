@@ -57,9 +57,9 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
-                      UserDataType>::IRC_Module_Bisector_T (ACE_SYNCH_MUTEX_T* lock_in,
+                      UserDataType>::IRC_Module_Bisector_T (ISTREAM_T* stream_in,
                                                             bool generateSessionMessages_in)
- : inherited (lock_in,
+ : inherited (stream_in,
               false,
               STREAM_HEADMODULECONCURRENCY_CONCURRENT,
               generateSessionMessages_in)
@@ -144,7 +144,8 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
-                      UserDataType>::initialize (const ConfigurationType& configuration_in)
+                      UserDataType>::initialize (const ConfigurationType& configuration_in,
+                                                 Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::initialize"));
 
@@ -152,13 +153,9 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
 
   // sanity check(s)
   ACE_ASSERT (configuration_in.parserConfiguration);
-  ACE_ASSERT (configuration_in.streamConfiguration);
 
   if (inherited::isInitialized_)
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("re-initializing...\n")));
-
     numberOfFrames_ = 0;
     if (bufferState_)
     {
@@ -171,8 +168,6 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
     buffer_ = NULL;
     messageLength_ = 0;
 //     currentBufferIsResized_ = false;
-
-    inherited::isInitialized_ = false;
   } // end IF
 
   //// initialize scanner context
@@ -191,11 +186,13 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
   IRC_Bisector_set_debug ((configuration_in.parserConfiguration->debugScanner ? 1 : 0),
                           context_);
 
-  result = inherited::initialize (configuration_in);
+  result = inherited::initialize (configuration_in,
+                                  allocator_in);
   if (!result)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_HeadModuleTaskBase_T::initialize(): \"%m\", aborting\n")));
+                ACE_TEXT ("%s: failed to Stream_HeadModuleTaskBase_T::initialize(), aborting\n"),
+                inherited::mod_->name ()));
     return false;
   } // end IF
 

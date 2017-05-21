@@ -129,61 +129,69 @@ IRC_Stream_T<StreamStateType,
              ControlMessageType,
              DataMessageType,
              SessionMessageType,
-             UserDataType>::initialize (const ConfigurationType& configuration_in,
-                                         bool setupPipeline_in,
-                                         bool resetSessionData_in)
+             UserDataType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::initialize"));
 
   // sanity check(s)
-  ACE_ASSERT (!inherited::isInitialized_);
   ACE_ASSERT (!inherited::isRunning ());
-//  ACE_ASSERT (configuration_in.moduleConfiguration);
+
+//  bool result = false;
+  bool setup_pipeline = configuration_in.setupPipeline;
+  bool reset_setup_pipeline = false;
+  SessionDataType* session_data_p = NULL;
+  typename inherited::ISTREAM_T::MODULE_T* module_p = NULL;
+  BISECTOR_T* bisector_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  if (!inherited::initialize (configuration_in,
-                              false,
-                              resetSessionData_in))
+  const_cast<ConfigurationType&> (configuration_in).setupPipeline =
+    false;
+  reset_setup_pipeline = true;
+  if (!inherited::initialize (configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_Base_T::initialize(), aborting\n")));
-    return false;
+                ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
+                ACE_TEXT (inherited::name_.c_str ())));
+    goto error;
   } // end IF
+  const_cast<ConfigurationType&> (configuration_in).setupPipeline =
+    setup_pipeline;
+  reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
 
   // things to be done here:
   // - create modules (done for the ones "owned" by the stream itself)
   // - initialize modules
   // - push them onto the stream (tail-first) !
-  SessionDataType& session_data_r =
-      const_cast<SessionDataType&> (inherited::sessionData_->get ());
-  inherited::state_.currentSessionData = &session_data_r;
-  session_data_r.sessionID = configuration_in.sessionID;
+  session_data_p =
+      &const_cast<SessionDataType&> (inherited::sessionData_->get ());
+  inherited::state_.currentSessionData = session_data_p;
+  session_data_p->sessionID = configuration_in.sessionID;
 
 //  ACE_ASSERT (configuration_in.moduleConfiguration);
 //  configuration_in.moduleConfiguration->streamState = &inherited::state_;
 
   // ---------------------------------------------------------------------------
 
-  Stream_Module_t* module_p = NULL;
-
   // ******************* Marshal ************************
   module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("Marshal")));
+    const_cast<typename inherited::ISTREAM_T::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("Marshal")));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
+                ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
+                ACE_TEXT (inherited::name_.c_str ()),
                 ACE_TEXT ("Marshal")));
-    return false;
+    goto error;
   } // end IF
 
-  BISECTOR_T* bisector_impl_p = dynamic_cast<BISECTOR_T*> (module_p->writer ());
+  bisector_impl_p = dynamic_cast<BISECTOR_T*> (module_p->writer ());
   if (!bisector_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<IRC_Module_Bisector_T*> failed, aborting\n")));
-    return false;
+                ACE_TEXT ("%s: dynamic_cast<IRC_Module_Bisector_T> failed, aborting\n"),
+                ACE_TEXT (inherited::name_.c_str ())));
+    goto error;
   } // end IF
   bisector_impl_p->set (&(inherited::state_));
 
@@ -195,17 +203,25 @@ IRC_Stream_T<StreamStateType,
 
   // ---------------------------------------------------------------------------
 
-  if (setupPipeline_in)
+  if (configuration_in.setupPipeline)
     if (!inherited::setup ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to setup pipeline, aborting\n")));
-      return false;
+                  ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
+                  ACE_TEXT (inherited::name_.c_str ())));
+      goto error;
     } // end IF
 
   inherited::isInitialized_ = true;
 
   return true;
+
+error:
+  if (reset_setup_pipeline)
+    const_cast<ConfigurationType&> (configuration_in).setupPipeline =
+      setup_pipeline;
+
+  return false;
 }
 
 template <typename StreamStateType,

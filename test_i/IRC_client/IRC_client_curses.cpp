@@ -48,7 +48,7 @@ using namespace std;
 
 bool
 curses_join (const std::string& channel_in,
-             IRC_Client_CursesState& state_in)
+             struct IRC_Client_CursesState& state_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::curses_join"));
 
@@ -129,7 +129,7 @@ curses_join (const std::string& channel_in,
 void
 curses_log (const std::string& channel_in,
             const std::string& text_in,
-            IRC_Client_CursesState& state_in,
+            struct IRC_Client_CursesState& state_in,
             bool lockedAccess_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::curses_log"));
@@ -214,7 +214,7 @@ release:
 }
 
 bool
-curses_main (IRC_Client_CursesState& state_in,
+curses_main (struct IRC_Client_CursesState& state_in,
              IRC_IControl* controller_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::curses_main"));
@@ -509,7 +509,7 @@ curses_main (IRC_Client_CursesState& state_in,
 
     // step3bc: get user input
     { // *IMPORTANT NOTE*: release lock while waiting for input
-      ACE_Guard<ACE_Reverse_Lock<ACE_SYNCH_MUTEX> > aGuard (reverse_lock);
+      ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard, reverse_lock, false);
 
       ch = wgetch (state_in.input);
     } // end lock scope
@@ -583,12 +583,9 @@ curses_main (IRC_Client_CursesState& state_in,
           receivers.clear ();
           receivers.push_front (state_in.sessionState->channel);
         } // end lock scope
-        try
-        {
+        try {
           controller_in->send (receivers, message_text);
-        }
-        catch (...)
-        {
+        } catch (...) {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("caught exception in IRC_Client_IIRCControl::send(), aborting\n")));
           goto clean;
@@ -717,13 +714,13 @@ close:
 
 bool
 curses_part (const std::string& channel_in,
-             IRC_Client_CursesState& state_in)
+             struct IRC_Client_CursesState& state_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::curses_part"));
 
   int result = ERR;
 
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (state_in.lock);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_in.lock, false);
 
   IRC_Client_CursesChannelsIterator_t iterator =
       state_in.panels.find (channel_in);

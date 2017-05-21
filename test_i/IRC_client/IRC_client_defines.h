@@ -45,7 +45,7 @@
 
 #define IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS         3
 
-#define IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds: 0 --> OFF
+//#define IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds: 0 --> OFF
 
 // client
 // asynchronous connections

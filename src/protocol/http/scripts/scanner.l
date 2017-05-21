@@ -590,7 +590,10 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              else
                                missing_chunk_bytes -= yyleng;
                              if (!missing_chunk_bytes)
-                               return yy::HTTP_Parser::token::BODY; }
+                             {
+                               yylval->ival = chunk_size;
+                               return yy::HTTP_Parser::token::BODY;
+                             } }
 } // end <body>
 <chunked_body>{
 {CHUNK_LINE}{CRLF}         {

@@ -123,7 +123,7 @@ class Net_ISocketConnection_T
  //                [Note that for differing return types, this would be allowed,
  //                if the return types were covariant. This explains the
  //                somewhat misleading error message returned by MSVC.]
- //, public Common_IGet_T<HandlerConfigurationType>
+ //, public Common_IGetR_T<HandlerConfigurationType>
  , public Common_IInitialize_T<HandlerConfigurationType>
 {
  public:
@@ -135,11 +135,10 @@ class Net_ISocketConnection_T
 
   virtual ~Net_ISocketConnection_T () {};
 
+  virtual const HandlerConfigurationType& get () = 0;
+
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&) = 0;
-
-  // *TODO*: see above
-  virtual const HandlerConfigurationType& get () = 0;
 };
 
 //////////////////////////////////////////

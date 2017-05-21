@@ -42,6 +42,7 @@ template <typename HandlerType,
           ///////////////////////////////
           typename SocketConfigurationType,
           typename HandlerConfigurationType, // socket-
+          typename ListenerConfigurationType,
           ///////////////////////////////
           typename StreamType,
           typename StreamStatusType,
@@ -82,6 +83,7 @@ class Net_StreamConnectionBase_T
   virtual void set (Net_ClientServerRole);
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&);
+  //inline virtual const HandlerConfigurationType& get () const { return configuration_; };
   inline virtual const HandlerConfigurationType& get () { return configuration_; };
   inline virtual const StreamType& stream () const { return inherited::stream_; };
   virtual bool wait (StreamStatusType,
@@ -105,9 +107,9 @@ class Net_StreamConnectionBase_T
   //typedef ACE_Connector<HandlerType,
   //                      ACE_SOCK_CONNECTOR> ACE_CONNECTOR_T;
   typedef Net_IConnector_T<AddressType,
-                           HandlerConfigurationType> ICONNECTOR_T;
-  typedef Net_IListener_T<ConfigurationType,
-                          HandlerConfigurationType> ILISTENER_T;
+                           ConfigurationType> ICONNECTOR_T;
+  typedef Net_IListener_T<ListenerConfigurationType,
+                          ConfigurationType> ILISTENER_T;
   typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,
@@ -147,6 +149,7 @@ template <typename HandlerType,
           ///////////////////////////////
           typename SocketConfigurationType,
           typename HandlerConfigurationType, // socket-
+          typename ListenerConfigurationType,
           ///////////////////////////////
           typename StreamType,
           typename StreamStatusType,
@@ -202,9 +205,9 @@ class Net_AsynchStreamConnectionBase_T
  protected:
   typedef StreamType STREAM_T;
   typedef Net_IConnector_T<AddressType,
-                           HandlerConfigurationType> ICONNECTOR_T;
-  typedef Net_IListener_T<ConfigurationType,
-                          HandlerConfigurationType> ILISTENER_T;
+                           ConfigurationType> ICONNECTOR_T;
+  typedef Net_IListener_T<ListenerConfigurationType,
+                          ConfigurationType> ILISTENER_T;
   typedef Net_IConnectionManager_T<AddressType,
                                    ConfigurationType,
                                    StateType,

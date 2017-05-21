@@ -86,15 +86,15 @@ struct IRC_Client_CursesState
   IRC_Client_SessionState*            sessionState;
 };
 
-bool curses_join (const std::string&,       // channel
-                  IRC_Client_CursesState&); // state
+bool curses_join (const std::string&,              // channel
+                  struct IRC_Client_CursesState&); // state
 void curses_log (const std::string&,      // channel (empty ? server log : channel)
                  const std::string&,      // text
-                 IRC_Client_CursesState&, // state
-                 bool = true);            // lock ?
-bool curses_main (IRC_Client_CursesState&, // state
-                  IRC_IControl*);          // controller
-bool curses_part (const std::string&,       // channel
-                  IRC_Client_CursesState&); // state
+                 struct IRC_Client_CursesState&, // state
+                 bool = true);                   // lock ?
+bool curses_main (struct IRC_Client_CursesState&, // state
+                  IRC_IControl*);                 // controller
+bool curses_part (const std::string&,              // channel
+                  struct IRC_Client_CursesState&); // state
 
 #endif

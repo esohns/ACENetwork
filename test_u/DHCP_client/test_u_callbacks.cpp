@@ -1151,10 +1151,11 @@ allocate:
 
   Test_U_InboundConnectionStream& stream_r =
       const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
-  const Test_U_DHCPClient_SessionData_t* session_data_container_p = stream_r.get ();
+  const Test_U_DHCPClient_SessionData_t* session_data_container_p =
+    &stream_r.get ();
   ACE_ASSERT (session_data_container_p);
-  Test_U_DHCPClient_SessionData& session_data_r =
-      const_cast<Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
+  struct Test_U_DHCPClient_SessionData& session_data_r =
+      const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
   session_data_r.timeStamp = state_r.timeStamp;
   session_data_r.xid = DHCP_record.xid;
 
@@ -1218,10 +1219,10 @@ action_inform_activate_cb (GtkAction* action_in,
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   const Test_U_DHCPClient_SessionData_t* session_data_container_p =
-      stream_r.get ();
+      &stream_r.get ();
   ACE_ASSERT (session_data_container_p);
-  Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
+  struct Test_U_DHCPClient_SessionData& session_data_r =
+    const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
 
   // clean up
   iconnection_p->decrease ();
@@ -1346,10 +1347,10 @@ action_request_activate_cb (GtkAction* action_in,
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   const Test_U_DHCPClient_SessionData_t* session_data_container_p =
-      stream_r.get ();
+      &stream_r.get ();
   ACE_ASSERT (session_data_container_p);
-  Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
+  struct Test_U_DHCPClient_SessionData& session_data_r =
+    const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
 
   // clean up
   iconnection_p->decrease ();
@@ -1457,10 +1458,11 @@ action_release_activate_cb (GtkAction* action_in,
 
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
-  const Test_U_DHCPClient_SessionData_t* session_data_container_p = stream_r.get ();
+  const Test_U_DHCPClient_SessionData_t* session_data_container_p =
+    &stream_r.get ();
   ACE_ASSERT (session_data_container_p);
-  Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
+  struct Test_U_DHCPClient_SessionData& session_data_r =
+    const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
 
   // clean up
   iconnection_p->decrease ();
@@ -1739,9 +1741,9 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       connection_manager_p;
     ACE_ASSERT (iconnection_manager_p);
     Test_U_ConnectorBcast_t connector_bcast (iconnection_manager_p,
-      data_p->configuration->streamConfiguration.statisticReportingInterval);
+                                             data_p->configuration->moduleHandlerConfiguration.statisticReportingInterval);
     Test_U_AsynchConnectorBcast_t asynch_connector_bcast (iconnection_manager_p,
-      data_p->configuration->streamConfiguration.statisticReportingInterval);
+                                                          data_p->configuration->moduleHandlerConfiguration.statisticReportingInterval);
     //Test_U_Connector_t connector_bcast (iconnection_manager_p,
     //                                    data_p->configuration->streamConfiguration.statisticReportingInterval);
     //Test_U_AsynchConnector_t asynch_connector_bcast (iconnection_manager_p,
@@ -1771,7 +1773,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       iconnector_p = &connector_bcast;
     else
       iconnector_p = &asynch_connector_bcast;
-    if (!iconnector_p->initialize (data_p->configuration->socketHandlerConfiguration))
+    if (!iconnector_p->initialize (data_p->configuration->connectionConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));

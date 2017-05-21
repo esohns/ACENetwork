@@ -55,7 +55,7 @@ class Net_Client_Connector_T
  : public ACE_Connector<HandlerType,
                         ConnectorType>
  , public Net_IConnector_T<AddressType,
-                           HandlerConfigurationType>
+                           ConfigurationType>
 {
  public:
   typedef AddressType ADDRESS_T;
@@ -92,7 +92,7 @@ class Net_Client_Connector_T
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   typedef Net_IConnector_T<AddressType,
-                           HandlerConfigurationType> ICONNECTOR_T;
+                           ConfigurationType> ICONNECTOR_T;
 
   Net_Client_Connector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
                           const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
@@ -103,8 +103,8 @@ class Net_Client_Connector_T
   inline virtual bool useReactor () const { return true; };
 
   // *NOTE*: handlers retrieve the configuration object with get ()
-  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = const_cast<HandlerConfigurationType&> (configuration_in); return true; };
-  inline virtual const HandlerConfigurationType& get () const { return configuration_; };
+  inline virtual const ConfigurationType& get () const { return configuration_; };
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration->connectionConfiguration = &configuration_; return true; };
 
   virtual void abort ();
   virtual ACE_HANDLE connect (const AddressType&);
@@ -133,10 +133,10 @@ class Net_Client_Connector_T
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  HandlerConfigurationType configuration_;
+  ConfigurationType      configuration_; // connection-
 
-  ICONNECTION_MANAGER_T*   connectionManager_;
-  ACE_Time_Value           statisticCollectionInterval_;
+  ICONNECTION_MANAGER_T* connectionManager_;
+  ACE_Time_Value         statisticCollectionInterval_;
 };
 
 //////////////////////////////////////////
@@ -145,7 +145,7 @@ class Net_Client_Connector_T
 template <typename HandlerType,
           typename ConnectorType, // ACE_SOCK_CONNECTOR
           ////////////////////////////////
-          typename ConfigurationType,
+          typename ConfigurationType, // connection-
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
@@ -170,7 +170,7 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                              StreamType,
                              UserDataType>
  : public Net_IConnector_T<ACE_INET_Addr,
-                           HandlerConfigurationType>
+                           ConfigurationType>
 {
  public:
   typedef StreamType STREAM_T;
@@ -213,7 +213,7 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   typedef Net_IConnector_T<ACE_INET_Addr,
-                           HandlerConfigurationType> ICONNECTOR_T;
+                           ConfigurationType> ICONNECTOR_T;
 
   Net_Client_Connector_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
                           const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
@@ -224,8 +224,8 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   inline virtual bool useReactor () const { return true; };
 
   // *NOTE*: handlers retrieve the configuration object with get ()
-  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = const_cast<HandlerConfigurationType&> (configuration_in); return true; };
-  inline virtual const HandlerConfigurationType& get () const { return configuration_; };
+  inline virtual const ConfigurationType& get () const { return configuration_; };
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration->connectionConfiguration = &configuration_; return true; };
 
   // *NOTE*: this is just a stub
   inline virtual void abort () { };
@@ -263,10 +263,10 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  HandlerConfigurationType configuration_;
+  ConfigurationType      configuration_; // connection-
 
-  ICONNECTION_MANAGER_T*   connectionManager_;
-  ACE_Time_Value           statisticCollectionInterval_;
+  ICONNECTION_MANAGER_T* connectionManager_;
+  ACE_Time_Value         statisticCollectionInterval_;
 };
 
 //////////////////////////////////////////
@@ -277,7 +277,7 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 template <typename HandlerType,
           typename ConnectorType, // ACE_SOCK_CONNECTOR
           ////////////////////////////////
-          typename ConfigurationType,
+          typename ConfigurationType, // connection-
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
@@ -296,7 +296,7 @@ class Net_Client_Connector_T<HandlerType,
                              StreamType,
                              UserDataType>
  : public Net_IConnector_T<Net_Netlink_Addr,
-                           HandlerConfigurationType>
+                           ConfigurationType>
 {
  public:
   typedef StreamType STREAM_T;
@@ -332,7 +332,7 @@ class Net_Client_Connector_T<HandlerType,
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   typedef Net_IConnector_T<Net_Netlink_Addr,
-                           HandlerConfigurationType> ICONNECTOR_T;
+                           ConfigurationType> ICONNECTOR_T;
 
   Net_Client_Connector_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
                           const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
@@ -343,8 +343,8 @@ class Net_Client_Connector_T<HandlerType,
   inline virtual bool useReactor () const { return true; };
 
   // *NOTE*: handlers retrieve the configuration object with get ()
-  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = const_cast<HandlerConfigurationType&> (configuration_in); return true; };
-  inline virtual const HandlerConfigurationType& get () const { return configuration_; };
+  inline virtual const ConfigurationType& get () const { return configuration_; };
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration->connectionConfiguration = &configuration_; return true; };
 
   // *NOTE*: this is just a stub
   inline virtual void abort () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
@@ -359,10 +359,10 @@ class Net_Client_Connector_T<HandlerType,
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  HandlerConfigurationType configuration_;
+  ConfigurationType      configuration_; // connection-
 
-  ICONNECTION_MANAGER_T*   connectionManager_;
-  ACE_Time_Value           statisticCollectionInterval_;
+  ICONNECTION_MANAGER_T* connectionManager_;
+  ACE_Time_Value         statisticCollectionInterval_;
 };
 #endif
 

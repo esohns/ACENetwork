@@ -79,13 +79,13 @@
 struct Test_U_Configuration
 {
   inline Test_U_Configuration ()
-   : socketConfiguration ()
+   : socketConfigurations ()
    , allocatorConfiguration ()
    //, protocolConfiguration ()
   {};
 
   // **************************** socket data **********************************
-  struct Net_SocketConfiguration       socketConfiguration;
+  Net_SocketConfigurations_t           socketConfigurations;
   // **************************** stream data **********************************
   struct Stream_AllocatorConfiguration allocatorConfiguration;
   // *************************** protocol data *********************************

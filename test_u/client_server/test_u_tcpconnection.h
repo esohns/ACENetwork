@@ -46,6 +46,7 @@ class Test_U_TCPConnection
                                   struct Test_U_ConnectionState,
                                   Net_RuntimeStatistic_t,
                                   struct Test_U_SocketHandlerConfiguration,
+                                  struct Test_U_ListenerConfiguration,
                                   Test_U_Stream,
                                   struct Test_U_UserData>
 {
@@ -72,6 +73,7 @@ class Test_U_TCPConnection
                                   struct Test_U_ConnectionState,
                                   Net_RuntimeStatistic_t,
                                   struct Test_U_SocketHandlerConfiguration,
+                                  struct Test_U_ListenerConfiguration,
                                   Test_U_Stream,
                                   struct Test_U_UserData> inherited;
 
@@ -91,6 +93,7 @@ class Test_U_AsynchTCPConnection
                                         struct Test_U_ConnectionState,
                                         Net_RuntimeStatistic_t,
                                         struct Test_U_SocketHandlerConfiguration,
+                                        struct Test_U_ListenerConfiguration,
                                         Test_U_Stream,
                                         struct Test_U_UserData>
 {
@@ -117,6 +120,7 @@ class Test_U_AsynchTCPConnection
                                         struct Test_U_ConnectionState,
                                         Net_RuntimeStatistic_t,
                                         struct Test_U_SocketHandlerConfiguration,
+                                        struct Test_U_ListenerConfiguration,
                                         Test_U_Stream,
                                         struct Test_U_UserData> inherited;
 

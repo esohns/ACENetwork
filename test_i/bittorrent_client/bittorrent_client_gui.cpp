@@ -1287,37 +1287,25 @@ ACE_TMAIN (int argc_in,
 
   BitTorrent_Client_Configuration configuration;
 
-  ////////////////////// socket handler configuration //////////////////////////
-  configuration.peerSocketHandlerConfiguration.messageAllocator =
-      &peer_message_allocator;
-  configuration.peerSocketHandlerConfiguration.statisticReportingInterval =
-    configuration.peerStreamConfiguration.statisticReportingInterval;
-  configuration.peerSocketHandlerConfiguration.userData =
-    &configuration.peerUserData;
-
-  configuration.trackerSocketHandlerConfiguration.messageAllocator =
-      &tracker_message_allocator;
-  configuration.trackerSocketHandlerConfiguration.statisticReportingInterval =
-    configuration.trackerStreamConfiguration.statisticReportingInterval;
-  configuration.trackerSocketHandlerConfiguration.userData =
-    &configuration.trackerUserData;
   ////////////////////////// stream configuration //////////////////////////////
   configuration.parserConfiguration.debugScanner = debug;
   if (debug)
     configuration.parserConfiguration.debugScanner = true;
 
+  configuration.peerModuleHandlerConfiguration.statisticReportingInterval =
+      ACE_Time_Value (reporting_interval, 0);
+
   configuration.peerStreamConfiguration.messageAllocator = &peer_message_allocator;
   configuration.peerStreamConfiguration.moduleConfiguration->streamConfiguration =
       &configuration.peerStreamConfiguration;
-  configuration.peerStreamConfiguration.statisticReportingInterval =
-      reporting_interval;
   configuration.peerModuleHandlerConfiguration.parserConfiguration =
       &configuration.parserConfiguration;
 
+  configuration.trackerModuleHandlerConfiguration.statisticReportingInterval =
+      ACE_Time_Value (reporting_interval, 0);
+
   configuration.trackerStreamConfiguration.moduleConfiguration->streamConfiguration =
       &configuration.trackerStreamConfiguration;
-  configuration.trackerStreamConfiguration.statisticReportingInterval =
-      reporting_interval;
   configuration.trackerModuleHandlerConfiguration.parserConfiguration =
       &configuration.parserConfiguration;
   configuration.trackerStreamConfiguration.messageAllocator =
@@ -1338,8 +1326,22 @@ ACE_TMAIN (int argc_in,
       &configuration.moduleConfiguration;
   configuration.trackerUserData.moduleHandlerConfiguration =
       &configuration.trackerModuleHandlerConfiguration;
+  ////////////////////// socket handler configuration //////////////////////////
+  configuration.peerSocketHandlerConfiguration.messageAllocator =
+      &peer_message_allocator;
+  configuration.peerSocketHandlerConfiguration.statisticReportingInterval =
+    configuration.peerModuleHandlerConfiguration.statisticReportingInterval;
+  configuration.peerSocketHandlerConfiguration.userData =
+    &configuration.peerUserData;
 
-  BitTorrent_Client_GTK_CBData cb_user_data;
+  configuration.trackerSocketHandlerConfiguration.messageAllocator =
+      &tracker_message_allocator;
+  configuration.trackerSocketHandlerConfiguration.statisticReportingInterval =
+    configuration.trackerModuleHandlerConfiguration.statisticReportingInterval;
+  configuration.trackerSocketHandlerConfiguration.userData =
+    &configuration.trackerUserData;
+
+  struct BitTorrent_Client_GTK_CBData cb_user_data;
   cb_user_data.configuration = &configuration;
   cb_user_data.UIFileDirectory = UIDefinitionFile_directory;
 //   userData.phoneBook;

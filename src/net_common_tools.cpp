@@ -76,6 +76,34 @@ operator++ (enum Net_LinkLayerType& lhs, int) // postfix-
 
 //////////////////////////////////////////
 
+#if defined (ACE_HAS_NETLINK)
+std::string
+Net_Common_Tools::NetlinkAddressToString (const Net_Netlink_Addr& NetlinkAddress_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::NetlinkAddressToString"));
+
+  // initialize return value(s)
+  std::string return_value;
+
+  int result = -1;
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (&buffer, 0, sizeof (buffer));
+  result = NetlinkAddress_in.addr_to_string (buffer,
+                                             sizeof (buffer),
+                                             1); // N/A
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", aborting\n")));
+    return return_value;
+  } // end IF
+
+  // copy string from buffer
+  return_value = buffer;
+
+  return return_value;
+}
+#endif
 std::string
 Net_Common_Tools::IPAddressToString (unsigned short port_in,
                                      ACE_UINT32 IPAddress_in)
@@ -105,7 +133,7 @@ Net_Common_Tools::IPAddressToString (unsigned short port_in,
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Inet_Addr::addr_to_string: \"%m\", aborting\n")));
+                ACE_TEXT ("failed to ACE_Inet_Addr::addr_to_string(): \"%m\", aborting\n")));
     return return_value;
   } // end IF
 
@@ -1336,8 +1364,8 @@ Net_Common_Tools::getDefaultDeviceIdentifier (enum Net_LinkLayerType type_in)
         {
           // debug info
           ACE_INET_Addr inet_address;
-          Net_Common_Tools::interface2IPAddress (ip_adapter_addresses_2->AdapterName,
-                                                 inet_address);
+          Net_Common_Tools::interfaceToIPAddress (ip_adapter_addresses_2->AdapterName,
+                                                  inet_address);
           if (type_in == NET_LINKLAYER_802_3)
           {
             ACE_ASSERT (ip_adapter_addresses_2->PhysicalAddressLength >= ETH_ALEN);
@@ -1347,8 +1375,8 @@ Net_Common_Tools::getDefaultDeviceIdentifier (enum Net_LinkLayerType type_in)
                       ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->FriendlyName),
                       ACE_TEXT (ip_adapter_addresses_2->AdapterName),
                       ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address).c_str ()),
-                      ACE_TEXT (Net_Common_Tools::LinkLayerAddress2String (ip_adapter_addresses_2->PhysicalAddress,
-                                                                           type_in).c_str ())));
+                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (ip_adapter_addresses_2->PhysicalAddress,
+                                                                            type_in).c_str ())));
         } // end IF
 
 continue_:

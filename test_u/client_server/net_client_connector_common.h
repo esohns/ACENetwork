@@ -38,7 +38,7 @@ class Test_U_Stream;
 //////////////////////////////////////////
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         struct Test_U_SocketHandlerConfiguration> Test_U_IConnector_t;
+                         struct Test_U_ConnectionConfiguration> Test_U_IConnector_t;
 
 typedef Net_Client_AsynchConnector_T<Test_U_AsynchTCPConnection,
                                      ACE_INET_Addr,

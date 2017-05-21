@@ -29,7 +29,7 @@
 #include "net_client_common.h"
 
 class Test_U_Client_SignalHandler
- : public Common_SignalHandler_T<Test_U_Client_SignalHandlerConfiguration>
+ : public Common_SignalHandler_T<struct Test_U_Client_SignalHandlerConfiguration>
  , public Common_ISignal
 {
  public:
@@ -40,7 +40,7 @@ class Test_U_Client_SignalHandler
   virtual void handle (int); // signal
 
  private:
-  typedef Common_SignalHandler_T<Test_U_Client_SignalHandlerConfiguration> inherited;
+  typedef Common_SignalHandler_T<struct Test_U_Client_SignalHandlerConfiguration> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Client_SignalHandler (const Test_U_Client_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Client_SignalHandler& operator= (const Test_U_Client_SignalHandler&))

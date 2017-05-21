@@ -47,11 +47,11 @@ template <typename ConnectionType,
           typename ConfigurationType,
           typename MessageType,
           typename SessionMessageType,
-          typename SocketHandlerConfigurationType,
           typename ModuleHandlerConfigurationType,
           typename StateType, // ui state (curses/gtk/...) *TODO*: to be removed
           ///////////////////////////////
           // *TODO*: remove these ASAP
+          typename ConnectionConfigurationType,
           typename ConnectionManagerType,
           typename InputHandlerType,
           typename InputHandlerConfigurationType,
@@ -73,9 +73,9 @@ class IRC_Session_T
                                           ConfigurationType,
                                           MessageType,
                                           SessionMessageType,
-                                          SocketHandlerConfigurationType,
                                           ModuleHandlerConfigurationType,
                                           StateType,
+                                          ConnectionConfigurationType,
                                           ConnectionManagerType,
                                           InputHandlerType,
                                           InputHandlerConfigurationType,
@@ -88,9 +88,9 @@ class IRC_Session_T
                                                  ConfigurationType,
                                                  MessageType,
                                                  SessionMessageType,
-                                                 SocketHandlerConfigurationType,
                                                  ModuleHandlerConfigurationType,
                                                  StateType,
+                                                 ConnectionConfigurationType,
                                                  ConnectionManagerType,
                                                  InputHandlerType,
                                                  InputHandlerConfigurationType,
@@ -108,7 +108,7 @@ class IRC_Session_T
   virtual void start (Stream_SessionId_t,
                       const SessionDataType&);
   virtual void notify (Stream_SessionId_t,
-                       const Stream_SessionMessageType&);
+                       const enum Stream_SessionMessageType&);
   virtual void end (Stream_SessionId_t);
   virtual void notify (Stream_SessionId_t,
                        const MessageType&);

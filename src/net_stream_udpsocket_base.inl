@@ -569,7 +569,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   {
     // *TODO*: remove type inferences
     const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
-        stream_.get ();
+        &stream_.get ();
     ACE_ASSERT (session_data_container_p);
     typename StreamType::SESSION_DATA_T& session_data_r =
         const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->get ());
@@ -1939,7 +1939,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   {
     // *TODO*: remove type inferences
     const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
-        stream_.get ();
+        &stream_.get ();
     ACE_ASSERT (session_data_container_p);
     typename StreamType::SESSION_DATA_T& session_data_r =
         const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->get ());

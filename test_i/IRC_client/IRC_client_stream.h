@@ -56,9 +56,7 @@ class IRC_Client_Stream
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const struct IRC_Client_StreamConfiguration&, // configuration
-                           bool = true,                                  // setup pipeline ?
-                           bool = true);                                 // reset session data ?
+  virtual bool initialize (const struct IRC_Client_StreamConfiguration&); // configuration
 
   // *TODO*: remove this API
   void ping ();

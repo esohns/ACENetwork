@@ -30,6 +30,7 @@
 
 #include "common_ui_gtk_manager.h"
 
+#include "net_common_tools.h"
 #include "net_macros.h"
 
 //#include "test_u_stream.h"
@@ -124,10 +125,10 @@ Test_U_Client_SignalHandler::handle (int signal_in)
   if (connect &&
       inherited::configuration_->connector)
   {
-    ACE_ASSERT (inherited::configuration_->socketHandlerConfiguration);
+    ACE_ASSERT (inherited::configuration_->connectionConfiguration);
     ACE_HANDLE handle = ACE_INVALID_HANDLE;
     try {
-      inherited::configuration_->connector->initialize (*inherited::configuration_->socketHandlerConfiguration);
+      inherited::configuration_->connector->initialize (*inherited::configuration_->connectionConfiguration);
       handle =
         inherited::configuration_->connector->connect (inherited::configuration_->peerAddress);
     } catch (...) {
@@ -138,21 +139,11 @@ Test_U_Client_SignalHandler::handle (int signal_in)
     }
     if (handle == ACE_INVALID_HANDLE)
     {
-      ACE_TCHAR buffer[BUFSIZ];
-      ACE_OS::memset (buffer, 0, sizeof (buffer));
-      result =
-        inherited::configuration_->peerAddress.addr_to_string (buffer,
-                                                               sizeof (buffer));
-      // *PORTABILITY*: tracing in a signal handler context is not portable
-      // *TODO*
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Client_IConnector::connect(\"%s\"): \"%m\", continuing\n"),
-                  buffer));
+                  ACE_TEXT ("failed to Net_Client_IConnector::connect(%s): \"%m\", continuing\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->peerAddress).c_str ())));
     } // end IF
   } // end IF
 

@@ -26,17 +26,17 @@
 #include "common_itask.h"
 
 template <typename ConfigurationType,
-          typename HandlerConfigurationType> // socket-
+          typename ConnectionConfigurationType>
 class Net_IListener_T
  : public Common_ITaskControl_T<ACE_MT_SYNCH>
- , public Common_IGetR_T<HandlerConfigurationType>
- //, public Common_IInitialize_T<HandlerConfigurationType>
+ , public Common_IGetR_T<ConnectionConfigurationType>
+ //, public Common_IInitialize_T<ConnectionConfigurationType>
  , public Common_IInitialize_T<ConfigurationType>
 {
  public:
   virtual ~Net_IListener_T () {};
 
-  //virtual bool initialize (const HandlerConfigurationType&) = 0;
+  //virtual bool initialize (const ConnectionConfigurationType&) = 0;
 
   virtual bool useReactor () const = 0; // ? : uses proactor
 };

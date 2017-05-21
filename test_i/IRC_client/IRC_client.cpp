@@ -130,7 +130,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]: reporting interval (seconds: 0 --> OFF) {")
-            << IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL
+            << NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-t        : trace information {")
@@ -195,7 +195,7 @@ do_processArguments (int argc_in,
   useCursesLibrary_out           = IRC_CLIENT_SESSION_USE_CURSES;
   useReactor_out                 = NET_EVENT_USE_REACTOR;
   statisticReportingInterval_out =
-      IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+    NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out           = false;
   printVersionAndExit_out        = false;
   numThreadPoolThreads_out       = IRC_CLIENT_DEFAULT_NUMBER_OF_TP_THREADS;
@@ -674,9 +674,10 @@ done:
 }
 
 void
-do_work (IRC_Client_Configuration& configuration_in,
+do_work (struct IRC_Client_Configuration& configuration_in,
          bool useCursesLibrary_in,
          const ACE_INET_Addr& serverAddress_in,
+         const ACE_Time_Value& statisticReportingInterval_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -692,10 +693,17 @@ do_work (IRC_Client_Configuration& configuration_in,
     configuration_in.cursesState = &curses_state;
 
   // step1: initialize IRC handler module
-  configuration_in.moduleHandlerConfiguration.streamConfiguration =
-      &configuration_in.streamConfiguration;
+  configuration_in.moduleHandlerConfiguration.allocatorConfiguration =
+      &configuration_in.allocatorConfiguration;
   configuration_in.moduleHandlerConfiguration.protocolConfiguration =
       &configuration_in.protocolConfiguration;
+  configuration_in.moduleHandlerConfiguration.statisticReportingInterval =
+    statisticReportingInterval_in;
+  //configuration_in.moduleHandlerConfiguration.streamConfiguration =
+  //  &configuration_in.streamConfiguration;
+
+  configuration_in.streamConfiguration.allocatorConfiguration =
+    &configuration_in.allocatorConfiguration;
   configuration_in.streamConfiguration.moduleConfiguration =
       &configuration_in.moduleConfiguration;
   configuration_in.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
@@ -749,7 +757,7 @@ do_work (IRC_Client_Configuration& configuration_in,
   configuration_in.socketHandlerConfiguration.socketConfiguration =
     &configuration_in.socketConfiguration;
   configuration_in.socketHandlerConfiguration.statisticReportingInterval =
-    configuration_in.streamConfiguration.statisticReportingInterval;
+    statisticReportingInterval_in;
   configuration_in.connectionConfiguration.moduleHandlerConfiguration =
     &configuration_in.moduleHandlerConfiguration;
   configuration_in.connectionConfiguration.protocolConfiguration =
@@ -771,16 +779,16 @@ do_work (IRC_Client_Configuration& configuration_in,
   //connector_configuration.socketHandlerConfiguration =
   //  &configuration_in.socketHandlerConfiguration;
   IRC_Client_SessionConnector_t connector (connection_manager_p,
-                                           configuration_in.streamConfiguration.statisticReportingInterval);
+                                           statisticReportingInterval_in);
   IRC_Client_AsynchSessionConnector_t asynch_connector (connection_manager_p,
-                                                        configuration_in.streamConfiguration.statisticReportingInterval);
+                                                        statisticReportingInterval_in);
   IRC_Client_IConnector_t* connector_p = NULL;
   if (configuration_in.useReactor)
     connector_p = &connector;
   else
     connector_p = &asynch_connector;
   //if (!connector_p->initialize (connector_configuration))
-  if (!connector_p->initialize (configuration_in.socketHandlerConfiguration))
+  if (!connector_p->initialize (configuration_in.connectionConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -1090,7 +1098,7 @@ ACE_TMAIN (int argc_in,
   bool use_curses_library                    = IRC_CLIENT_SESSION_USE_CURSES;
   bool use_reactor                           = NET_EVENT_USE_REACTOR;
   unsigned int statistic_reporting_interval  =
-      IRC_CLIENT_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+    NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information                     = false;
   bool print_version_and_exit                = false;
   unsigned int number_of_thread_pool_threads =
@@ -1259,8 +1267,6 @@ ACE_TMAIN (int argc_in,
 
   ////////////////////////////////////////
   configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.statisticReportingInterval =
-    statistic_reporting_interval;
   ////////////////////////////////////////
   configuration.protocolConfiguration.loginOptions.nickname =
     ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);
@@ -1360,6 +1366,7 @@ ACE_TMAIN (int argc_in,
   do_work (configuration,
            use_curses_library,
            server_address,
+           ACE_Time_Value (statistic_reporting_interval, 0),
            signal_set,
            ignored_signal_set,
            previous_signal_actions,

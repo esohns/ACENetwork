@@ -142,6 +142,7 @@ struct IRC_ProtocolConfiguration
   bool                    printPingDot;  // print dot '.' (stdlog) for answered PINGs
 };
 
+struct IRC_StreamConfiguration;
 struct IRC_ModuleHandlerConfiguration
  : Stream_ModuleHandlerConfiguration
 {
@@ -150,6 +151,7 @@ struct IRC_ModuleHandlerConfiguration
    , inbound (true)
    , printProgressDot (false)
    , pushStatisticMessages (true)
+   , streamConfiguration (NULL)
    , connectionConfiguration (NULL)
    , protocolConfiguration (NULL)
   {
@@ -168,6 +170,8 @@ struct IRC_ModuleHandlerConfiguration
 
   bool                                printProgressDot; // file writer module
   bool                                pushStatisticMessages; // statistic module
+
+  struct IRC_StreamConfiguration*     streamConfiguration;
 
   struct IRC_ConnectionConfiguration* connectionConfiguration;
   struct IRC_ProtocolConfiguration*   protocolConfiguration;

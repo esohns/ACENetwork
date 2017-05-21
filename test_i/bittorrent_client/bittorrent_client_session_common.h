@@ -67,18 +67,18 @@ struct BitTorrent_Client_SessionConfiguration
 {
   inline BitTorrent_Client_SessionConfiguration ()
    : BitTorrent_SessionConfiguration ()
+   , connectionConfiguration (NULL)
    , connectionManager (NULL)
    , controller (NULL)
+   , trackerConnectionConfiguration (NULL)
    , trackerConnectionManager (NULL)
-   , socketHandlerConfiguration (NULL)
-   , trackerSocketHandlerConfiguration (NULL)
   {};
 
-  BitTorrent_Client_PeerConnection_Manager_t*                 connectionManager;
-  BitTorrent_Client_IControl_t*                               controller;
-  BitTorrent_Client_TrackerConnection_Manager_t*              trackerConnectionManager;
-  struct BitTorrent_Client_PeerSocketHandlerConfiguration*    socketHandlerConfiguration;
-  struct BitTorrent_Client_TrackerSocketHandlerConfiguration* trackerSocketHandlerConfiguration;
+  struct BitTorrent_Client_PeerConnectionConfiguration*    connectionConfiguration;
+  BitTorrent_Client_PeerConnection_Manager_t*              connectionManager;
+  BitTorrent_Client_IControl_t*                            controller;
+  struct BitTorrent_Client_TrackerConnectionConfiguration* trackerConnectionConfiguration;
+  BitTorrent_Client_TrackerConnection_Manager_t*           trackerConnectionManager;
 };
 
 //typedef std::map<std::string, BitTorrent_Client_Connections_t> BitTorrent_Client_SessionConnections_t;

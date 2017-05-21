@@ -71,9 +71,7 @@ class Test_U_Stream
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const struct Test_U_StreamConfiguration&, // configuration
-                           bool = true,                              // setup pipeline ?
-                           bool = true);                             // reset session data ?
+  virtual bool initialize (const struct Test_U_StreamConfiguration&); // configuration
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_

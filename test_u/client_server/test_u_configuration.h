@@ -79,6 +79,7 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
 typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
 typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 
+struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration
  : Stream_ModuleHandlerConfiguration
 {
@@ -88,6 +89,7 @@ struct Test_U_ModuleHandlerConfiguration
    //, printProgressDot (false)
    , protocolConfiguration (NULL)
    , pushStatisticMessages (true)
+   , streamConfiguration (NULL)
    , sessionData (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
@@ -97,6 +99,8 @@ struct Test_U_ModuleHandlerConfiguration
   //bool                             printProgressDot; // file writer module
   struct Test_U_ProtocolConfiguration* protocolConfiguration; // protocol handler
   bool                                 pushStatisticMessages; // statistic module
+
+  struct Test_U_StreamConfiguration*   streamConfiguration;
 
   // *TODO*: remove this (--> session message data)
   struct Test_U_StreamSessionData*     sessionData;

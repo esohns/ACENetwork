@@ -71,9 +71,7 @@ class Test_U_Stream
                      bool&);               // return value: delete ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const struct FileServer_StreamConfiguration&, // configuration
-                           bool = true,                                  // setup pipeline ?
-                           bool = true);                                 // reset session data ?
+  virtual bool initialize (const struct FileServer_StreamConfiguration&); // configuration
 
   // *TODO*: re-consider this API
   //void ping ();
@@ -133,9 +131,7 @@ class Test_U_UDPStream
                      bool&);               // return value: delete ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const struct FileServer_StreamConfiguration&, // configuration
-                           bool = true,                                  // setup pipeline ?
-                           bool = true);                                 // reset session data ?
+  virtual bool initialize (const struct FileServer_StreamConfiguration&); // configuration
 
   // *TODO*: re-consider this API
   //void ping ();

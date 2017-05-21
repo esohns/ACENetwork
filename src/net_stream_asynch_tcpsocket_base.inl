@@ -154,15 +154,13 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 #else
     static_cast<size_t> (handle_in); // (== socket handle)
 #endif
-  if (unlikely (!stream_.initialize (*inherited3::configuration_->streamConfiguration,
-                                     true,
-                                     true)))
+  if (unlikely (!stream_.initialize (*inherited3::configuration_->streamConfiguration)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
     goto error;
   } // end IF
-  session_data_container_p = stream_.get ();
+  session_data_container_p = &stream_.get ();
   ACE_ASSERT (session_data_container_p);
   session_data_p =
     &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->get ());
@@ -429,10 +427,9 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   } // end IF
 
   // step1: shut down the processing stream
-  stream_.finished (false); // finish upstream (if any)
   stream_.flush (false, // do not flush inbound data
                  false, // do not flush session messages
-                 true); // flush upstream (if any)
+                 false); // flush upstream (if any)
   stream_.wait (true,   // wait for worker(s) (if any)
                 false,  // wait for upstream (if any)
                 false); // wait for downstream (if any)

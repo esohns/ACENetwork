@@ -47,6 +47,7 @@ class Test_U_TCPConnection
                                   struct FileServer_ConnectionState,
                                   Net_RuntimeStatistic_t,
                                   struct FileServer_SocketHandlerConfiguration,
+                                  struct FileServer_ListenerConfiguration,
                                   Test_U_Stream,
                                   struct FileServer_UserData>
 {
@@ -73,6 +74,7 @@ class Test_U_TCPConnection
                                   struct FileServer_ConnectionState,
                                   Net_RuntimeStatistic_t,
                                   struct FileServer_SocketHandlerConfiguration,
+                                  struct FileServer_ListenerConfiguration,
                                   Test_U_Stream,
                                   struct FileServer_UserData> inherited;
 
@@ -92,6 +94,7 @@ class Test_U_AsynchTCPConnection
                                         struct FileServer_ConnectionState,
                                         Net_RuntimeStatistic_t,
                                         struct FileServer_SocketHandlerConfiguration,
+                                        struct FileServer_ListenerConfiguration,
                                         Test_U_Stream,
                                         struct FileServer_UserData>
 {
@@ -118,6 +121,7 @@ class Test_U_AsynchTCPConnection
                                         struct FileServer_ConnectionState,
                                         Net_RuntimeStatistic_t,
                                         struct FileServer_SocketHandlerConfiguration,
+                                        struct FileServer_ListenerConfiguration,
                                         Test_U_Stream,
                                         struct FileServer_UserData> inherited;
 

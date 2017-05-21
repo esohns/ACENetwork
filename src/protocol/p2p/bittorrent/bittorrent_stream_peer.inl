@@ -153,9 +153,7 @@ BitTorrent_PeerStream_T<StreamStateType,
                         HandlerConfigurationType,
                         SessionStateType,
                         CBDataType,
-                        UserDataType>::initialize (const ConfigurationType& configuration_in,
-                                                   bool setupPipeline_in,
-                                                   bool resetSessionData_in)
+                        UserDataType>::initialize (const ConfigurationType& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStream_T::initialize"));
 
@@ -169,16 +167,24 @@ BitTorrent_PeerStream_T<StreamStateType,
   typename inherited::MODULE_T* module_p = NULL;
   PARSER_T* parser_impl_p = NULL;
 
+  bool result = false;
+  bool setup_pipeline = configuration_in.setupPipeline;
+  bool reset_setup_pipeline = false;
+
   // allocate a new session state, reset stream
-  if (!inherited::initialize (configuration_in,
-                              false,
-                              resetSessionData_in))
+  const_cast<ConfigurationType&> (configuration_in).setupPipeline =
+    false;
+  reset_setup_pipeline = true;
+  if (!inherited::initialize (configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
                 ACE_TEXT (inherited::name ().c_str ())));
     goto error;
   } // end IF
+  const_cast<ConfigurationType&> (configuration_in).setupPipeline =
+    setup_pipeline;
+  reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
   session_data_p =
     &const_cast<SessionDataType&> (inherited::sessionData_->get ());
@@ -267,7 +273,7 @@ BitTorrent_PeerStream_T<StreamStateType,
   //             handle to the session data)
   module_p->arg (inherited::sessionData_);
 
-  if (setupPipeline_in)
+  if (configuration_in.setupPipeline)
     if (!inherited::setup (NULL))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -280,6 +286,10 @@ BitTorrent_PeerStream_T<StreamStateType,
   return true;
 
 error:
+  if (reset_setup_pipeline)
+    const_cast<ConfigurationType&> (configuration_in).setupPipeline =
+      setup_pipeline;
+
   return false;
 }
 

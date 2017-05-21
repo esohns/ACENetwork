@@ -53,7 +53,7 @@ template <typename HandlerType,
 class Net_Client_AsynchConnector_T
  : public ACE_Asynch_Connector<HandlerType>
  , public Net_IConnector_T<AddressType,
-                           HandlerConfigurationType>
+                           ConfigurationType>
 {
  public:
   typedef AddressType ADDRESS_T;
@@ -90,7 +90,7 @@ class Net_Client_AsynchConnector_T
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   typedef Net_IConnector_T<AddressType,
-                           HandlerConfigurationType> ICONNECTOR_T;
+                           ConfigurationType> ICONNECTOR_T;
 
   Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
                                 const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
@@ -105,8 +105,8 @@ class Net_Client_AsynchConnector_T
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  inline virtual const HandlerConfigurationType& get () const { return configuration_; };
-  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = const_cast<HandlerConfigurationType&> (configuration_in); return true; };
+  inline virtual const ConfigurationType& get () const { return configuration_; };
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration->connectionConfiguration = &configuration_; return true; };
 
   virtual enum Net_TransportLayerType transportLayer () const;
   inline virtual bool useReactor () const { return false; };
@@ -122,14 +122,14 @@ class Net_Client_AsynchConnector_T
   // override default creation strategy
   virtual HandlerType* make_handler (void);
 
-  HandlerConfigurationType configuration_;
+  ConfigurationType      configuration_; // connection-
   // *NOTE*: due to the current ACE API, there is no way to pass a handle back
   //         from ACE_Asynch_Connector::connect() to
   //         Net_Client_IConnector_T::connect () (see above) --> store it here
-  ACE_HANDLE               connectHandle_;
-
-  ICONNECTION_MANAGER_T*   connectionManager_;
-  ACE_Time_Value           statisticCollectionInterval_;
+  ACE_HANDLE             connectHandle_;
+  ICONNECTION_MANAGER_T* connectionManager_;
+  ACE_Time_Value         statisticCollectionInterval_;
+  AddressType            SAP_;
 
  private:
   typedef ACE_Asynch_Connector<HandlerType> inherited;
@@ -159,7 +159,7 @@ class Net_Client_AsynchConnector_T
 // partial specialization (for UDP)
 template <typename HandlerType,
           ////////////////////////////////
-          typename ConfigurationType,
+          typename ConfigurationType, // connection-
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
@@ -190,7 +190,7 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                                              StreamType,
                                                              UserDataType> >
  , public Net_IConnector_T<ACE_INET_Addr,
-                           HandlerConfigurationType>
+                           ConfigurationType>
 {
  public:
   typedef StreamType STREAM_T;
@@ -233,7 +233,7 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   typedef Net_IConnector_T<ACE_INET_Addr,
-                           HandlerConfigurationType> ICONNECTOR_T;
+                           ConfigurationType> ICONNECTOR_T;
 
   Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
                                 const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
@@ -248,8 +248,8 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  inline virtual const HandlerConfigurationType& get () const { return configuration_; };
-  virtual bool initialize (const HandlerConfigurationType&);
+  inline virtual const ConfigurationType& get () const { return configuration_; };
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration->connectionConfiguration = &configuration_; return true; };
 
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_UDP; };
   inline virtual bool useReactor () const { return false; };
@@ -267,10 +267,10 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                         StreamType,
                                         UserDataType>* make_handler (void);
 
-  HandlerConfigurationType configuration_;
-
-  ICONNECTION_MANAGER_T*   connectionManager_;
-  ACE_Time_Value           statisticCollectionInterval_;
+  ConfigurationType      configuration_; // connection-
+  ICONNECTION_MANAGER_T* connectionManager_;
+  ACE_Time_Value         statisticCollectionInterval_;
+  ACE_INET_Addr          SAP_;
 
  private:
   typedef ACE_Asynch_Connector<Net_AsynchUDPConnectionBase_T<HandlerType,
@@ -292,7 +292,7 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 // partial specialization (for Netlink)
 template <typename HandlerType,
           ////////////////////////////////
-          typename ConfigurationType,
+          typename ConfigurationType, // connection-
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
@@ -311,7 +311,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                    UserDataType>
  : public ACE_Asynch_Connector<HandlerType>
  , public Net_IConnector_T<Net_Netlink_Addr,
-                           HandlerConfigurationType>
+                           ConfigurationType>
 {
  public:
   typedef StreamType STREAM_T;
@@ -347,7 +347,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   typedef Net_IConnector_T<Net_Netlink_Addr,
-                           HandlerConfigurationType> ICONNECTOR_T;
+                           ConfigurationType> ICONNECTOR_T;
 
   Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
                                 const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
@@ -362,8 +362,8 @@ class Net_Client_AsynchConnector_T<HandlerType,
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  inline virtual const HandlerConfigurationType& get () const { return configuration_; };
-  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = const_cast<HandlerConfigurationType&> (configuration_in); return true; };
+  inline virtual const ConfigurationType& get () const { return configuration_; };
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration->connectionConfiguration = &configuration_; return true; };
 
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_NETLINK; };
   inline virtual bool useReactor () const { return false; };
@@ -375,10 +375,10 @@ class Net_Client_AsynchConnector_T<HandlerType,
   // override default creation strategy
   virtual HandlerType* make_handler (void);
 
-  HandlerConfigurationType configuration_;
-
-  ICONNECTION_MANAGER_T*   connectionManager_;
-  ACE_Time_Value           statisticCollectionInterval_;
+  ConfigurationType      configuration_; // connection-
+  ICONNECTION_MANAGER_T* connectionManager_;
+  ACE_Time_Value         statisticCollectionInterval_;
+  Net_Netlink_Addr       SAP_;
 
  private:
   typedef ACE_Asynch_Connector<HandlerType> inherited;

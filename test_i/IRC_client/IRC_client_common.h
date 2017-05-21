@@ -156,7 +156,7 @@ struct IRC_Client_SessionData
 typedef Stream_Statistic IRC_RuntimeStatistic_t;
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         struct IRC_Client_SocketHandlerConfiguration> IRC_Client_IConnector_t;
+                         struct IRC_Client_ConnectionConfiguration> IRC_Client_IConnector_t;
 struct IRC_Client_CursesState;
 struct IRC_Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration

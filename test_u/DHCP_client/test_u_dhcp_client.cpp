@@ -613,8 +613,6 @@ do_work (bool requestBroadcastReplies_in,
   configuration.streamConfiguration.moduleHandlerConfiguration =
     &configuration.moduleHandlerConfiguration;
   configuration.streamConfiguration.printFinalReport = true;
-  configuration.streamConfiguration.statisticReportingInterval =
-      statisticReportingInterval_in;
 
   configuration.moduleHandlerConfiguration.printFinalReport = true;
   configuration.moduleHandlerConfiguration.subscribersLock =
@@ -633,6 +631,9 @@ do_work (bool requestBroadcastReplies_in,
     &configuration.protocolConfiguration;
   configuration.moduleHandlerConfiguration.socketConfiguration =
     &configuration.socketConfiguration;
+  configuration.moduleHandlerConfiguration.statisticReportingInterval =
+    (statisticReportingInterval_in ? ACE_Time_Value (statisticReportingInterval_in, 0)
+                                   : ACE_Time_Value::zero);
   configuration.moduleHandlerConfiguration.streamConfiguration =
     &configuration.streamConfiguration;
   configuration.moduleHandlerConfiguration.targetFileName = fileName_in;
@@ -843,7 +844,7 @@ do_work (bool requestBroadcastReplies_in,
     iconnector_p = &connector;
   else
     iconnector_p = &asynch_connector;
-  if (!iconnector_p->initialize (configuration.socketHandlerConfiguration))
+  if (!iconnector_p->initialize (configuration.connectionConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector, returning\n")));
@@ -937,14 +938,14 @@ do_work (bool requestBroadcastReplies_in,
   if (UIDefinitionFileName_in.empty ())
   {
     Test_U_Connector_t connector_2 (iconnection_manager_p,
-                                    configuration.streamConfiguration.statisticReportingInterval);
+                                    configuration.moduleHandlerConfiguration.statisticReportingInterval);
     Test_U_AsynchConnector_t asynch_connector_2 (iconnection_manager_p,
-                                                 configuration.streamConfiguration.statisticReportingInterval);
+                                                 configuration.moduleHandlerConfiguration.statisticReportingInterval);
     if (useReactor_in)
       iconnector_p = &connector_2;
     else
       iconnector_p = &asynch_connector_2;
-    if (!iconnector_p->initialize (configuration.socketHandlerConfiguration))
+    if (!iconnector_p->initialize (configuration.connectionConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -1135,10 +1136,10 @@ allocate:
     Test_U_OutboundConnectionStream& stream_r =
         const_cast<Test_U_OutboundConnectionStream&> (istream_connection_p->stream ());
     const Test_U_DHCPClient_SessionData_t* session_data_container_p =
-        stream_r.get ();
+        &stream_r.get ();
     ACE_ASSERT (session_data_container_p);
-    Test_U_DHCPClient_SessionData& session_data_r =
-        const_cast<Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
+    struct Test_U_DHCPClient_SessionData& session_data_r =
+        const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
     session_data_r.timeStamp = state_r.timeStamp;
     session_data_r.xid = DHCP_record.xid;
 

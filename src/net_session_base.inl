@@ -49,8 +49,8 @@ Net_SessionBase_T<AddressType,
                   StateType,
                   SessionInterfaceType>::Net_SessionBase_T ()
  : configuration_ (NULL)
+ , connectionConfiguration_ (NULL)
  , connectionManager_ (NULL)
- , handlerConfiguration_ (NULL)
  , isAsynch_ (!NET_EVENT_USE_REACTOR)
  , lock_ ()
  , condition_ (lock_)
@@ -153,9 +153,9 @@ Net_SessionBase_T<AddressType,
 
   configuration_ = &const_cast<ConfigurationType&> (configuration_in);
   // *TODO*: remove type inferences
+  connectionConfiguration_ =
+      const_cast<ConfigurationType&> (configuration_in).connectionConfiguration;
   connectionManager_ = configuration_in.connectionManager;
-  handlerConfiguration_ =
-      const_cast<ConfigurationType&> (configuration_in).socketHandlerConfiguration;
   isAsynch_ = !configuration_in.useReactor;
 
   return true;
@@ -195,8 +195,8 @@ Net_SessionBase_T<AddressType,
 
   // step1: initialize connector
   typename ConnectorType::ICONNECTOR_T* iconnector_p = &connector;
-  ACE_ASSERT (handlerConfiguration_);
-  if (!iconnector_p->initialize (*handlerConfiguration_))
+  ACE_ASSERT (connectionConfiguration_);
+  if (!iconnector_p->initialize (*connectionConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -332,21 +332,12 @@ Net_SessionBase_T<AddressType,
   // sanity check(s)
   ACE_ASSERT (connectionManager_);
 
-  // debug info
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  int result = address_in.addr_to_string (buffer,
-                                          sizeof (buffer));
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-
   ConnectionType* connection_p = connectionManager_->get (address_in);
   if (!connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (peer was: \"%s\") not found, returning\n"),
-                buffer));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     return;
   } // end IF
 

@@ -394,7 +394,8 @@ bool
 HTTP_Tools::parseURL (const std::string& URL_in,
                       std::string& hostName_out,
 //                      ACE_INET_Addr& hostName_out,
-                      std::string& URI_out)
+                      std::string& URI_out,
+                      bool& useSSL_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::parseURL"));
 
@@ -402,8 +403,8 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   hostName_out.clear ();
 //  hostName_out.reset ();
   URI_out.clear ();
+  useSSL_out = false;
 
-  bool use_SSL = false;
 //  std::string hostname;
   unsigned short port = HTTP_DEFAULT_SERVER_PORT;
   std::istringstream converter;
@@ -428,8 +429,7 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   ACE_ASSERT (match_results.ready () && !match_results.empty ());
 
   if (match_results[1].matched)
-    use_SSL = true;
-  ACE_UNUSED_ARG (use_SSL);
+    useSSL_out = true;
   ACE_ASSERT (match_results[2].matched);
 //  hostname = match_results[2];
   hostName_out = match_results[2];

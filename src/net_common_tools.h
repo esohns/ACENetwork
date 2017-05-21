@@ -37,8 +37,7 @@ enum Net_LinkLayerType  operator++ (enum Net_LinkLayerType& lhs, int);
 
 //////////////////////////////////////////
 
-//class Net_Export Net_Common_Tools
-class Net_Common_Tools
+class Net_Export Net_Common_Tools
 {
  public:
   // --- addresses ---
@@ -100,6 +99,9 @@ class Net_Common_Tools
 
   inline static std::string IPAddressToString (const ACE_INET_Addr& address_in,
                                                bool addressOnly_in = false) { return Net_Common_Tools::IPAddressToString ((addressOnly_in ? 0 : ACE_HTONS (address_in.get_port_number ())), ACE_HTONL (address_in.get_ip_address ())); };
+#if defined (ACE_HAS_NETLINK)
+  static std::string NetlinkAddressToString (const Net_Netlink_Addr&);
+#endif
   // *NOTE*: if (the first argument is '0'), the trailing ":0" will be cropped
   //         from the return value
   static std::string IPAddressToString (unsigned short, // port (network byte order !)

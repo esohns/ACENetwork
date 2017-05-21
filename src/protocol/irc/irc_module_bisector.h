@@ -72,8 +72,12 @@ class IRC_Module_Bisector_T
                                       UserDataType>
 {
  public:
-  IRC_Module_Bisector_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
-                         bool = true);              // generate session messages ?
+  // convenient types
+  typedef Stream_IStream_T<ACE_SYNCH_USE,
+                           Common_TimePolicy_t> ISTREAM_T;
+
+  IRC_Module_Bisector_T (ISTREAM_T* = NULL, // stream handle
+                         bool = true);      // generate session messages ?
   virtual ~IRC_Module_Bisector_T ();
 
   // *PORTABILITY*: for some reason, this base class member is not exposed
@@ -93,7 +97,8 @@ class IRC_Module_Bisector_T
                                     UserDataType>::initialize;
 
   // override (part of) Stream_IModuleHandler_T
-  virtual bool initialize (const ConfigurationType&);
+  virtual bool initialize (const ConfigurationType&,
+                           Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle

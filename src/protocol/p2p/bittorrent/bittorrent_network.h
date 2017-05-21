@@ -197,6 +197,7 @@ typedef Net_TCPConnectionBase_T<BitTorrent_PeerTCPHandler_t,
                                 struct BitTorrent_PeerConnectionState,
                                 BitTorrent_RuntimeStatistic_t,
                                 struct Net_SocketHandlerConfiguration,
+                                struct Net_ListenerConfiguration,
                                 BitTorrent_PeerStream_t,
                                 struct BitTorrent_UserData> BitTorrent_PeerTCPConnection_t;
 typedef Net_AsynchTCPConnectionBase_T<BitTorrent_PeerAsynchTCPHandler_t,
@@ -204,6 +205,7 @@ typedef Net_AsynchTCPConnectionBase_T<BitTorrent_PeerAsynchTCPHandler_t,
                                       struct BitTorrent_PeerConnectionState,
                                       BitTorrent_RuntimeStatistic_t,
                                       struct Net_SocketHandlerConfiguration,
+                                      struct Net_ListenerConfiguration,
                                       BitTorrent_PeerStream_t,
                                       struct BitTorrent_UserData> BitTorrent_PeerAsynchTCPConnection_t;
 
@@ -232,6 +234,7 @@ typedef Net_TCPConnectionBase_T<BitTorrent_TrackerTCPHandler_t,
                                 struct BitTorrent_TrackerConnectionState,
                                 BitTorrent_RuntimeStatistic_t,
                                 struct Net_SocketHandlerConfiguration,
+                                struct Net_ListenerConfiguration,
                                 BitTorrent_TrackerStream_t,
                                 struct BitTorrent_UserData> BitTorrent_TrackerTCPConnection_t;
 typedef Net_AsynchTCPConnectionBase_T<BitTorrent_TrackerAsynchTCPHandler_t,
@@ -239,15 +242,16 @@ typedef Net_AsynchTCPConnectionBase_T<BitTorrent_TrackerAsynchTCPHandler_t,
                                       struct BitTorrent_TrackerConnectionState,
                                       BitTorrent_RuntimeStatistic_t,
                                       struct Net_SocketHandlerConfiguration,
+                                      struct Net_ListenerConfiguration,
                                       BitTorrent_TrackerStream_t,
                                       struct BitTorrent_UserData> BitTorrent_TrackerAsynchTCPConnection_t;
 
 //////////////////////////////////////////
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         struct Net_SocketHandlerConfiguration> BitTorrent_IConnector_t;
-//typedef Net_IConnector_T<ACE_INET_Addr,
-//                         truct Net_ConnectorConfiguration> BitTorrent_IConnector_t;
+                         struct BitTorrent_PeerConnectionConfiguration> BitTorrent_IPeerConnector_t;
+typedef Net_IConnector_T<ACE_INET_Addr,
+                         struct BitTorrent_TrackerConnectionConfiguration> BitTorrent_ITrackerConnector_t;
 
 // peer
 typedef Net_Client_Connector_T<BitTorrent_PeerTCPConnection_t,

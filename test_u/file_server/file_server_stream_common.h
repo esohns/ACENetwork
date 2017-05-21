@@ -110,9 +110,8 @@ struct Test_U_ModuleHandlerConfiguration
    , outboundQueue (NULL)
    , program (FILE_SERVER_DEFAULT_MPEG_TS_PROGRAM_NUMBER)
    , pushStatisticMessages (true)
-   , socketConfiguration (NULL)
+   , socketConfigurations (NULL)
    , socketHandlerConfiguration (NULL)
-   , stream (NULL)
    , streamConfiguration (NULL)
    , streamType (FILE_SERVER_DEFAULT_MPEG_TS_STREAM_TYPE)
    , subscriber (NULL)
@@ -126,9 +125,8 @@ struct Test_U_ModuleHandlerConfiguration
   Stream_IMessageQueue*                         outboundQueue;              // event handler module
   unsigned int                                  program;                    // MPEG TS decoder module
   bool                                          pushStatisticMessages;      // statistic/file source module
-  struct Net_SocketConfiguration*               socketConfiguration;        // net target module
+  Net_SocketConfigurations_t*                   socketConfigurations;       // net target module
   struct FileServer_SocketHandlerConfiguration* socketHandlerConfiguration; // net target module
-  Test_U_UDPStream*                             stream;                     // net target module
   struct FileServer_StreamConfiguration*        streamConfiguration;        // net target module
   unsigned int                                  streamType;                 // MPEG TS decoder module
   FileServer_ISessionNotify_t*                  subscriber;                 // event handler module

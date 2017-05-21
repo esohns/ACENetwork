@@ -46,6 +46,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           ////////////////////////////////
           typename HandlerConfigurationType, // socket-
+          typename ListenerConfigurationType,
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
@@ -58,6 +59,7 @@ class Net_TCPConnectionBase_T
                                      StatisticContainerType,
                                      struct Net_SocketConfiguration,
                                      HandlerConfigurationType,
+                                     ListenerConfigurationType,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      UserDataType>
@@ -68,6 +70,7 @@ class Net_TCPConnectionBase_T
                                                     StateType,
                                                     StatisticContainerType,
                                                     HandlerConfigurationType,
+                                                    ListenerConfigurationType,
                                                     StreamType,
                                                     UserDataType>,
                             ACE_SOCK_ACCEPTOR>;
@@ -76,6 +79,7 @@ class Net_TCPConnectionBase_T
                                                     StateType,
                                                     StatisticContainerType,
                                                     HandlerConfigurationType,
+                                                    ListenerConfigurationType,
                                                     StreamType,
                                                     UserDataType>,
                             Net_SOCK_Acceptor>;
@@ -84,6 +88,7 @@ class Net_TCPConnectionBase_T
                                                      StateType,
                                                      StatisticContainerType,
                                                      HandlerConfigurationType,
+                                                     ListenerConfigurationType,
                                                      StreamType,
                                                      UserDataType>,
                              ACE_SOCK_CONNECTOR>;
@@ -92,6 +97,7 @@ class Net_TCPConnectionBase_T
                                                      StateType,
                                                      StatisticContainerType,
                                                      HandlerConfigurationType,
+                                                     ListenerConfigurationType,
                                                      StreamType,
                                                      UserDataType>,
                              Net_SOCK_Connector>;
@@ -104,6 +110,7 @@ class Net_TCPConnectionBase_T
                                      StatisticContainerType,
                                      struct Net_SocketConfiguration,
                                      HandlerConfigurationType,
+                                     ListenerConfigurationType,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      UserDataType> STREAM_CONNECTION_BASE_T;
@@ -126,6 +133,7 @@ class Net_TCPConnectionBase_T
                                      StatisticContainerType,
                                      struct Net_SocketConfiguration,
                                      HandlerConfigurationType,
+                                     ListenerConfigurationType,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      UserDataType> inherited;
@@ -148,6 +156,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           ////////////////////////////////
           typename HandlerConfigurationType, // socket-
+          typename ListenerConfigurationType,
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
@@ -160,6 +169,7 @@ class Net_AsynchTCPConnectionBase_T
                                            StatisticContainerType,
                                            struct Net_SocketConfiguration,
                                            HandlerConfigurationType,
+                                           ListenerConfigurationType,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            UserDataType>
@@ -170,6 +180,7 @@ class Net_AsynchTCPConnectionBase_T
                                                                  StateType,
                                                                  StatisticContainerType,
                                                                  HandlerConfigurationType,
+                                                                 ListenerConfigurationType,
                                                                  StreamType,
                                                                  UserDataType> >;
   friend class ACE_Asynch_Connector<Net_AsynchTCPConnectionBase_T<HandlerType,
@@ -177,6 +188,7 @@ class Net_AsynchTCPConnectionBase_T
                                                                   StateType,
                                                                   StatisticContainerType,
                                                                   HandlerConfigurationType,
+                                                                  ListenerConfigurationType,
                                                                   StreamType,
                                                                   UserDataType> >;
 
@@ -188,6 +200,7 @@ class Net_AsynchTCPConnectionBase_T
                                            StatisticContainerType,
                                            struct Net_SocketConfiguration,
                                            HandlerConfigurationType,
+                                           ListenerConfigurationType,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            UserDataType> STREAM_CONNECTION_BASE_T;
@@ -210,6 +223,7 @@ class Net_AsynchTCPConnectionBase_T
                                            StatisticContainerType,
                                            struct Net_SocketConfiguration,
                                            HandlerConfigurationType,
+                                           ListenerConfigurationType,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            UserDataType> inherited;

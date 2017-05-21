@@ -68,8 +68,12 @@ class Net_Module_TCPSocketHandler_T
                                       UserDataType>
 {
  public:
-  Net_Module_TCPSocketHandler_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
-                                 bool = true);              // generate session messages ?
+  // convenient types
+  typedef Stream_IStream_T<ACE_SYNCH_USE,
+                           Common_TimePolicy_t> ISTREAM_T;
+
+  Net_Module_TCPSocketHandler_T (ISTREAM_T* = NULL, // stream handle
+                                 bool = true);      // generate session messages ?
   virtual ~Net_Module_TCPSocketHandler_T ();
 
 #if defined (__GNUG__) || defined (_MSC_VER)

@@ -57,6 +57,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
  , sendLock_ ()
  , serializeOutput_ (false)
  , stream_ (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_DEFAULT_NAME))
+ , notify_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::Net_StreamTCPSocketBase_T"));
 
@@ -87,6 +88,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
  , sendLock_ ()
  , serializeOutput_ (false)
  , stream_ ()
+ , notify_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::Net_StreamTCPSocketBase_T"));
 
@@ -218,7 +220,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
     goto error;
   } // end IF
-  session_data_container_p = stream_.get ();
+  session_data_container_p = &stream_.get ();
   ACE_ASSERT (session_data_container_p);
   session_data_p = &session_data_container_p->get ();
   // *TODO*: remove type inferences
@@ -808,6 +810,22 @@ Net_StreamTCPSocketBase_T<HandlerType,
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
 
+  // step0a: set state
+  // *IMPORTANT NOTE*: set the state early to avoid deadlock in
+  //                   waitForCompletion() (see below), which may be implicitly
+  //                   invoked by stream_.finished()
+  // *TODO*: remove type inference
+  if (inherited2::state_.status != NET_CONNECTION_STATUS_CLOSED)
+    inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
+
+  // step0b: notify stream ?
+  if (notify_)
+  {
+    notify_ = false;
+    stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
+                    true);
+  } // end IF
+
   switch (mask_in)
   {
     case ACE_Event_Handler::READ_MASK:       // --> socket has been closed (receive failed)
@@ -822,7 +840,6 @@ Net_StreamTCPSocketBase_T<HandlerType,
       // *IMPORTANT NOTE*: when the socket closes, any dispatching threads
       //                   currently servicing the socket handle will call
       //                   handle_close()
-      stream_.finished (true);
       stream_.flush (false,  // flush inbound ?
                      false,  // flush session messages ?
                      false); // flush upstream ?

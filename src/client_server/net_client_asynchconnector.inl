@@ -46,6 +46,7 @@ Net_Client_AsynchConnector_T<HandlerType,
  , connectHandle_ (ACE_INVALID_HANDLE)
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
+ , SAP_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
@@ -145,16 +146,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
 
-  // sanity check(s)
-  ACE_ASSERT (configuration_.socketConfiguration);
-  ACE_ASSERT (configuration_.connectionConfiguration);
-
-  // *TODO*: remove type inferences
-  configuration_.socketConfiguration->address = address_in;
-  configuration_.connectionConfiguration->socketHandlerConfiguration =
-    &configuration_;
-
-  ACE_UNUSED_ARG (address_in);
+  SAP_ = address_in;
 
   int result = -1;
 
@@ -357,7 +349,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   ACE_UNUSED_ARG (localSAP_in);
 
-  // *NOTE*: on error, the addresses are not passed through
+  // *NOTE*: on error addresses are not passed through
   // *TODO*: in case of errors, addresses are not supplied
 
   int result = -1;
@@ -369,10 +361,11 @@ Net_Client_AsynchConnector_T<HandlerType,
   {
     error = result_in.error ();
 
-    ACE_INET_Addr peer_address = remoteSAP_in;
+    AddressType peer_address = remoteSAP_in;
     if (error)
-    { ACE_ASSERT (configuration_.socketConfiguration);
-      peer_address = configuration_.socketConfiguration->address;
+    { // sanity check(s)
+      ACE_ASSERT (remoteSAP_in.is_any ());
+      peer_address = SAP_;
     } // end IF
     //if (error != ECONNREFUSED) // happens intermittently on Win32
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -563,6 +556,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
  : configuration_ ()
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
+ , SAP_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
@@ -684,8 +678,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
     if (error)
     { // sanity check(s)
       ACE_ASSERT (remoteSAP_in.is_any ());
-      ACE_ASSERT (configuration_.socketConfiguration);
-      peer_address = configuration_.socketConfiguration->address;
+      peer_address = SAP_;
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
@@ -701,40 +694,6 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
   } // end IF
 
   return ((result == 1) ? 0 : -1);
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-bool
-Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
-                                                           ConfigurationType,
-                                                           StateType,
-                                                           StatisticContainerType,
-                                                           HandlerConfigurationType,
-                                                           StreamType,
-                                                           UserDataType>,
-                             ACE_INET_Addr,
-                             ConfigurationType,
-                             StateType,
-                             StatisticContainerType,
-                             HandlerConfigurationType,
-                             StreamType,
-                             UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::initialize"));
-
-  configuration_ = const_cast<HandlerConfigurationType&> (configuration_in);
-  // *TODO*: remove type inference
-  ACE_ASSERT (configuration_.connectionConfiguration);
-  connectionManager_ =
-    configuration_.connectionConfiguration->connectionManager;
-
-  return true;
 }
 
 template <typename HandlerType,
@@ -762,16 +721,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
 
-  // sanity check(s)
-  ACE_ASSERT (configuration_.socketConfiguration);
-  ACE_ASSERT (configuration_.connectionConfiguration);
-
-  // *TODO*: remove type inferences
-  configuration_.socketConfiguration->address = address_in;
-  configuration_.connectionConfiguration->socketHandlerConfiguration =
-    &configuration_;
-
-  ACE_UNUSED_ARG (address_in);
+  SAP_ = address_in;
 
   CONNECTION_T* handler_p = NULL;
   handler_p = make_handler ();
@@ -869,6 +819,7 @@ Net_Client_AsynchConnector_T<HandlerType,
  : configuration_ ()
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
+ , SAP_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
@@ -954,7 +905,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
 
-  // *NOTE*: on error, the addresses are not passed through...
+  // *NOTE*: on error addresses are not passed through
 
   int result = -1;
   unsigned long error = 0;
@@ -965,17 +916,17 @@ Net_Client_AsynchConnector_T<HandlerType,
   {
     error = result_in.error ();
 
+    Net_Netlink_Addr peer_address = remoteSAP_in;
+    if (error)
+    { // sanity check(s)
+      ACE_ASSERT (remoteSAP_in.is_any ());
+      peer_address = SAP_;
+    } // end IF
+
     // *TODO*: in case of errors, addresses are not supplied
-    ACE_TCHAR buffer[BUFSIZ];
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
-    // *TODO*: find a replacement for ACE_INET_Addr::addr_to_string
-    //  int result_2 = remoteSAP_in.addr_to_string (buffer, sizeof (buffer));
-    //    if (result_2 == -1)
-    //      ACE_DEBUG ((LM_ERROR,
-    //                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(\"%s\"): \"%s\", aborting\n"),
-                buffer,
+                ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::NetlinkAddressToString (peer_address).c_str ()),
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                 ACE::sock_error (error)));
 #else
@@ -1004,6 +955,8 @@ Net_Client_AsynchConnector_T<HandlerType,
                              UserDataType>::connect (const Net_Netlink_Addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
+
+  SAP_ = address_in;
 
   HandlerType* handler_p = make_handler ();
   if (!handler_p)

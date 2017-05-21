@@ -114,8 +114,8 @@ class BitTorrent_Session_T
   inline virtual void trackerDisconnect (const ACE_INET_Addr& address_in) { inherited::disconnect (address_in); };
 
  protected:
-  TrackerConnectionManagerType*    trackerConnectionManager_;
-  TrackerHandlerConfigurationType* trackerHandlerConfiguration_;
+  TrackerConnectionConfigurationType* trackerConnectionConfiguration_;
+  TrackerConnectionManagerType*       trackerConnectionManager_;
 
  private:
   typedef Net_SessionBase_T<ACE_INET_Addr,

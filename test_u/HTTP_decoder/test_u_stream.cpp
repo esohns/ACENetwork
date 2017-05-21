@@ -83,13 +83,9 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
-                           bool setupPipeline_in,
-                           bool resetSessionData_in)
+Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::initialize"));
-
-  bool result = false;
 
   // sanity check(s)
   ACE_ASSERT (!isRunning ());
@@ -101,16 +97,24 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
                   ACE_TEXT ("failed to Stream_Base_T::finalize(): \"%m\", continuing\n")));
   } // end IF
 
+  bool result = false;
+  bool setup_pipeline = configuration_in.setupPipeline;
+  bool reset_setup_pipeline = false;
+
   // allocate a new session state, reset stream
-  if (!inherited::initialize (configuration_in,
-                              false,
-                              resetSessionData_in))
+  const_cast<struct Test_U_StreamConfiguration&> (configuration_in).setupPipeline =
+    false;
+  reset_setup_pipeline = true;
+  if (!inherited::initialize (configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
                 ACE_TEXT (inherited::name ().c_str ())));
     return false;
   } // end IF
+  const_cast<struct Test_U_StreamConfiguration&> (configuration_in).setupPipeline =
+    setup_pipeline;
+  reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
   struct Test_U_HTTPDecoder_SessionData& session_data_r =
       const_cast<struct Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->get ());
@@ -182,7 +186,7 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   //             handle to the session data)
   IO_.arg (inherited::sessionData_);
 
-  if (setupPipeline_in)
+  if (configuration_in.setupPipeline)
     if (!inherited::setup ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -198,6 +202,9 @@ Test_U_Stream::initialize (const Test_U_StreamConfiguration& configuration_in,
   result = true;
 
 error:
+  if (reset_setup_pipeline)
+    const_cast<struct Test_U_StreamConfiguration&> (configuration_in).setupPipeline =
+      setup_pipeline;
 //  if (reset_configuration)
 //  {
 //    configuration_in.moduleHandlerConfiguration->concurrency = concurrency_mode;
@@ -233,20 +240,22 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
   if (!statisticReport_impl)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> failed, aborting\n")));
+                ACE_TEXT ("%s: dynamic_cast<Stream_Module_StatisticReport_WriterTask_T> failed, aborting\n"),
+                ACE_TEXT (inherited::name_.c_str ())));
     return false;
   } // end IF
 
   // synch access
-  Test_U_HTTPDecoder_SessionData& session_data_r =
-      const_cast<Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->get ());
+  struct Test_U_HTTPDecoder_SessionData& session_data_r =
+      const_cast<struct Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->get ());
   if (session_data_r.lock)
   {
     result = session_data_r.lock->acquire ();
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", aborting\n")));
+                  ACE_TEXT ("%s: failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", aborting\n"),
+                  ACE_TEXT (inherited::name_.c_str ())));
       return false;
     } // end IF
   } // end IF
@@ -259,11 +268,13 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
     result_2 = statisticReport_impl->collect (data_out);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), continuing\n")));
+                ACE_TEXT ("%s: caught exception in Common_IStatistic_T::collect(), continuing\n"),
+                ACE_TEXT (inherited::name_.c_str ())));
   }
   if (!result)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_IStatistic_T::collect(), aborting\n")));
+                ACE_TEXT ("%s: failed to Common_IStatistic_T::collect(), aborting\n"),
+                ACE_TEXT (inherited::name_.c_str ())));
   else
     session_data_r.currentStatistic = data_out;
 
@@ -272,7 +283,8 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
     result = session_data_r.lock->release ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
+                  ACE_TEXT ("%s: failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n"),
+                  ACE_TEXT (inherited::name_.c_str ())));
   } // end IF
 
   return result_2;

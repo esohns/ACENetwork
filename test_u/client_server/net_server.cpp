@@ -497,28 +497,29 @@ do_work (unsigned int maximumNumberOfConnections_in,
     &configuration.streamConfiguration.moduleConfiguration_2;
   configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
+
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.printFinalReport =
+    true;
   configuration.streamConfiguration.moduleHandlerConfiguration_2.protocolConfiguration =
     &configuration.protocolConfiguration;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.statisticReportingInterval =
+    statisticReportingInterval_in;
   configuration.streamConfiguration.moduleHandlerConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscriber =
+    &ui_event_handler;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribers =
+    &CBData_in.subscribers;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribersLock =
+    &CBData_in.subscribersLock;
+
   configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                                         &configuration.streamConfiguration.moduleHandlerConfiguration_2));
   // *TODO*: is this correct ?
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;
-  configuration.streamConfiguration.statisticReportingInterval =
-    statisticReportingInterval_in;
   configuration.streamConfiguration.userData = &configuration.userData;
   configuration.userData.connectionConfiguration =
       &configuration.connectionConfiguration;
-
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.printFinalReport =
-      true;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscriber =
-    &ui_event_handler;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribers =
-      &CBData_in.subscribers;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribersLock =
-    &CBData_in.subscribersLock;
 
   // ********************** connection configuration data **********************
   configuration.connectionConfiguration.socketHandlerConfiguration =

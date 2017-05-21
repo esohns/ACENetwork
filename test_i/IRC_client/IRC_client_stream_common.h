@@ -83,6 +83,7 @@ struct IRC_Client_ModuleHandlerConfiguration
    ///////////////////////////////////////
    , subscriber (NULL)
    , subscribers (NULL)
+   , streamConfiguration (NULL)
    , connectionConfiguration (NULL)
    , userData (NULL)
   {};
@@ -90,6 +91,8 @@ struct IRC_Client_ModuleHandlerConfiguration
   /* handler */
   IRC_Client_ISessionNotify_t*               subscriber; // (initial) subscriber
   IRC_Client_ISubscribers_t*                 subscribers;
+
+  struct IRC_Client_StreamConfiguration*     streamConfiguration;
 
   struct IRC_Client_ConnectionConfiguration* connectionConfiguration;
 

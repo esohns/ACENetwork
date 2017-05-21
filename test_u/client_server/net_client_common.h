@@ -51,7 +51,7 @@ class Test_U_SessionMessage;
 class Test_U_Message;
 class Test_U_Client_TimeoutHandler;
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         struct Test_U_SocketHandlerConfiguration> Test_U_IConnector_t;
+                         struct Test_U_ConnectionConfiguration> Test_U_IConnector_t;
 
 struct Test_U_Client_ConnectorConfiguration
 {
@@ -72,19 +72,19 @@ struct Test_U_Client_SignalHandlerConfiguration
   inline Test_U_Client_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    , actionTimerId (-1)
+   , connectionConfiguration (NULL)
    , connector (NULL)
    , messageAllocator (NULL)
    , peerAddress ()
-   , socketHandlerConfiguration (NULL)
    , statisticReportingInterval (0)
   {};
 
-  long                                      actionTimerId;
-  Test_U_IConnector_t*                      connector;
-  Stream_IAllocator*                        messageAllocator;
-  ACE_INET_Addr                             peerAddress;
-  struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
-  unsigned int                              statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
+  long                                   actionTimerId;
+  struct Test_U_ConnectionConfiguration* connectionConfiguration;
+  Test_U_IConnector_t*                   connector;
+  Stream_IAllocator*                     messageAllocator;
+  ACE_INET_Addr                          peerAddress;
+  unsigned int                           statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
 };
 
 struct Test_U_Client_Configuration

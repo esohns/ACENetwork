@@ -35,8 +35,7 @@
 #include "net_streamconnection_base.h"
 #include "net_transportlayer_netlink.h"
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (ACE_HAS_NETLINK)
 template <typename HandlerType,
           ////////////////////////////////
           typename ConfigurationType,
@@ -44,6 +43,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           ////////////////////////////////
           typename HandlerConfigurationType, // socket-
+//          typename ListenerConfigurationType,
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
@@ -56,6 +56,7 @@ class Net_NetlinkConnection_T
                                      StatisticContainerType,
                                      struct Net_SocketConfiguration,
                                      HandlerConfigurationType,
+                                     struct Net_ListenerConfiguration,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      UserDataType>
@@ -111,6 +112,7 @@ class Net_NetlinkConnection_T
                                      StatisticContainerType,
                                      struct Net_SocketConfiguration,
                                      HandlerConfigurationType,
+                                     struct Net_ListenerConfiguration,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      UserDataType> inherited;
@@ -132,6 +134,7 @@ template <typename HandlerType,
           typename StatisticContainerType,
           ////////////////////////////////
           typename HandlerConfigurationType,
+//          typename ListenerConfigurationType,
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
@@ -144,6 +147,7 @@ class Net_AsynchNetlinkConnection_T
                                            StatisticContainerType,
                                            struct Net_SocketConfiguration,
                                            HandlerConfigurationType,
+                                           struct Net_ListenerConfiguration,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            UserDataType>
@@ -199,6 +203,7 @@ class Net_AsynchNetlinkConnection_T
                                            StatisticContainerType,
                                            struct Net_SocketConfiguration,
                                            HandlerConfigurationType,
+                                           struct Net_ListenerConfiguration,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            UserDataType> inherited;

@@ -563,12 +563,16 @@ do_work (
     &configuration.streamConfiguration;
   configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                                         &configuration.streamConfiguration.moduleHandlerConfiguration_2));
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.allocatorConfiguration =
+    &configuration.allocatorConfiguration;
   configuration.streamConfiguration.moduleHandlerConfiguration_2.connectionManager =
     connection_manager_p;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.socketConfiguration =
-    &configuration.socketConfiguration;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.socketConfigurations =
+    &configuration.socketConfigurations;
   configuration.streamConfiguration.moduleHandlerConfiguration_2.socketHandlerConfiguration =
     &configuration.socketHandlerConfiguration;
+  configuration.streamConfiguration.moduleHandlerConfiguration_2.statisticReportingInterval =
+    ACE_Time_Value (statisticReportingInterval_in, 0);
   configuration.streamConfiguration.moduleHandlerConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
 
@@ -576,8 +580,6 @@ do_work (
   //  &configuration.protocolConfiguration;
   // *TODO*: is this correct ?
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;
-  configuration.streamConfiguration.statisticReportingInterval =
-    statisticReportingInterval_in;
   configuration.streamConfiguration.useReactor = useReactor_in;
   configuration.streamConfiguration.userData = &configuration.userData;
   configuration.userData.connectionConfiguration =
@@ -608,22 +610,25 @@ do_work (
   // ********************** socket configuration data **************************
   if (useUDP_in)
   {
-    result =
-      configuration.socketConfiguration.address.set (listeningPortNumber_in,
-                                                     INADDR_LOOPBACK);
+    struct Net_SocketConfiguration socket_configuration;
+    result = socket_configuration.address.set (listeningPortNumber_in,
+                                               INADDR_LOOPBACK,
+                                               1,
+                                               0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
       goto error;
     } // end IF
-    configuration.socketConfiguration.writeOnly = true;
+    socket_configuration.writeOnly = true;
+    configuration.socketConfigurations.push_back (socket_configuration);
   } // end IF
   // ****************** socket handler configuration data **********************
   configuration.socketHandlerConfiguration.messageAllocator =
     &message_allocator;
-  configuration.socketHandlerConfiguration.socketConfiguration =
-    &configuration.socketConfiguration;
+  //configuration.socketHandlerConfiguration.socketConfiguration =
+  //  &configuration.socketConfiguration;
   configuration.socketHandlerConfiguration.userData =
     &configuration.userData;
   // ****************** connection configuration data **********************

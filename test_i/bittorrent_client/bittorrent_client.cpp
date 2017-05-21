@@ -486,6 +486,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
          bool debugParser_in,
          bool useCursesLibrary_in,
          const std::string& metaInfoFileName_in,
+         const ACE_Time_Value& statisticReportingInterval_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -522,24 +523,35 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   if (debugParser_in)
     configuration_in.parserConfiguration.debugScanner = true;
 
+  configuration_in.peerModuleHandlerConfiguration.allocatorConfiguration =
+    configuration_in.peerStreamConfiguration.allocatorConfiguration;
   configuration_in.peerModuleHandlerConfiguration.parserConfiguration =
       &configuration_in.parserConfiguration;
+  configuration_in.peerModuleHandlerConfiguration.statisticReportingInterval =
+    statisticReportingInterval_in;
   configuration_in.peerModuleHandlerConfiguration.streamConfiguration =
       &configuration_in.peerStreamConfiguration;
-//  configuration_in.moduleHandlerConfiguration.protocolConfiguration =
-  configuration_in.peerStreamConfiguration.moduleConfiguration =
-      &configuration_in.moduleConfiguration;
   configuration_in.peerStreamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                                                &configuration_in.peerModuleHandlerConfiguration));
 
+  configuration_in.trackerModuleHandlerConfiguration.allocatorConfiguration =
+    configuration_in.trackerStreamConfiguration.allocatorConfiguration;
   configuration_in.trackerModuleHandlerConfiguration.parserConfiguration =
       &configuration_in.parserConfiguration;
+  configuration_in.trackerModuleHandlerConfiguration.statisticReportingInterval =
+    statisticReportingInterval_in;
   configuration_in.trackerModuleHandlerConfiguration.streamConfiguration =
       &configuration_in.trackerStreamConfiguration;
   configuration_in.trackerStreamConfiguration.moduleConfiguration =
       &configuration_in.moduleConfiguration;
   configuration_in.trackerStreamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                                                   &configuration_in.trackerModuleHandlerConfiguration));
+
+  configuration_in.peerStreamConfiguration.moduleConfiguration =
+    &configuration_in.moduleConfiguration;
+
+  configuration_in.trackerStreamConfiguration.moduleConfiguration =
+    &configuration_in.moduleConfiguration;
 
   // step2: initialize event dispatch
   struct Common_DispatchThreadData dispatch_thread_data;
@@ -563,14 +575,14 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   configuration_in.peerSocketHandlerConfiguration.messageAllocator =
     configuration_in.peerStreamConfiguration.messageAllocator;
   configuration_in.peerSocketHandlerConfiguration.statisticReportingInterval =
-    configuration_in.peerStreamConfiguration.statisticReportingInterval;
+    statisticReportingInterval_in;
   configuration_in.peerSocketHandlerConfiguration.userData =
     &configuration_in.peerUserData;
 
   configuration_in.trackerSocketHandlerConfiguration.messageAllocator =
     configuration_in.trackerStreamConfiguration.messageAllocator;
   configuration_in.trackerSocketHandlerConfiguration.statisticReportingInterval =
-    configuration_in.trackerStreamConfiguration.statisticReportingInterval;
+    statisticReportingInterval_in;
   configuration_in.trackerSocketHandlerConfiguration.userData =
     &configuration_in.trackerUserData;
 
@@ -596,10 +608,10 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
       tracker_connection_manager_p;
   configuration_in.sessionConfiguration.metaInfoFileName =
       metaInfoFileName_in;
-  configuration_in.sessionConfiguration.socketHandlerConfiguration =
-      &configuration_in.peerSocketHandlerConfiguration;
-  configuration_in.sessionConfiguration.trackerSocketHandlerConfiguration =
-      &configuration_in.trackerSocketHandlerConfiguration;
+  configuration_in.sessionConfiguration.connectionConfiguration =
+      &configuration_in.peerConnectionConfiguration;
+  configuration_in.sessionConfiguration.trackerConnectionConfiguration =
+      &configuration_in.trackerConnectionConfiguration;
   configuration_in.sessionConfiguration.parserConfiguration =
       &configuration_in.parserConfiguration;
   configuration_in.sessionConfiguration.useReactor =
@@ -1006,12 +1018,8 @@ ACE_TMAIN (int argc_in,
   ////////////////////////////////////////
   configuration.peerStreamConfiguration.messageAllocator =
       &peer_message_allocator;
-  configuration.peerStreamConfiguration.statisticReportingInterval =
-      statistic_reporting_interval;
   configuration.trackerStreamConfiguration.messageAllocator =
       &tracker_message_allocator;
-  configuration.trackerStreamConfiguration.statisticReportingInterval =
-      statistic_reporting_interval;
   ////////////////////////////////////////
   configuration.useReactor = use_reactor;
 
@@ -1039,6 +1047,7 @@ ACE_TMAIN (int argc_in,
            debug_parser,
            use_curses_library,
            meta_info_file_name,
+           ACE_Time_Value (statistic_reporting_interval, 0),
            signal_set,
            ignored_signal_set,
            previous_signal_actions,

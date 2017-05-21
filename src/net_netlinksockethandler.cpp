@@ -27,8 +27,18 @@
 
 #include <ace/OS.h>
 
+Net_Netlink_Addr&
+Net_Netlink_Addr::operator= (const ACE_Addr& rhs)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Netlink_Addr::operator="));
+
+  *this = rhs;
+
+  return *this;
+}
+
 int
-Net_Netlink_Addr::addr_to_string (ACE_TCHAR buffer_in[],
+Net_Netlink_Addr::addr_to_string (ACE_TCHAR buffer_out[],
                                   size_t size_in,
                                   int IPAddressFormat_in) const
 {
@@ -36,7 +46,8 @@ Net_Netlink_Addr::addr_to_string (ACE_TCHAR buffer_in[],
 
   ACE_UNUSED_ARG (IPAddressFormat_in);
 
-  ACE_OS::memset (buffer_in, 0, size_in);
+  // initialize return value(s)
+  ACE_OS::memset (buffer_out, 0, size_in);
 
   // sanity check(s)
   int pid = inherited::get_pid ();
@@ -54,7 +65,7 @@ Net_Netlink_Addr::addr_to_string (ACE_TCHAR buffer_in[],
   } // end IF
 
   ACE_TCHAR const *format = ACE_TEXT ("%u:%u");
-  int result = ACE_OS::sprintf (buffer_in, format,
+  int result = ACE_OS::sprintf (buffer_out, format,
                                 pid, gid);
   if (result < 0)
     ACE_DEBUG ((LM_ERROR,
@@ -63,13 +74,4 @@ Net_Netlink_Addr::addr_to_string (ACE_TCHAR buffer_in[],
   return (static_cast<unsigned int> (result) == (total_length -1) ? 0 : -1);
 }
 
-Net_Netlink_Addr&
-Net_Netlink_Addr::operator= (const ACE_Addr& rhs)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Netlink_Addr::operator="));
-
-  *this = rhs;
-
-  return *this;
-}
 #endif

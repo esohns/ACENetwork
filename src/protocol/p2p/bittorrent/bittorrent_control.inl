@@ -146,6 +146,7 @@ BitTorrent_Control_T<SessionAsynchType,
   std::string user_agent;
   // *TODO*: support more link layer types
   int link_layers = (NET_LINKLAYER_802_3 | NET_LINKLAYER_PPP);
+  bool use_SSL = false;
 
   // step1: parse metainfo
   ACE_ASSERT (configuration_->parserConfiguration);
@@ -208,13 +209,15 @@ BitTorrent_Control_T<SessionAsynchType,
   for (;
        iterator != configuration_->metaInfo->end ();
        ++iterator)
-    if (*(*iterator).first == key) break;
+    if (*(*iterator).first == key)
+      break;
   ACE_ASSERT (iterator != configuration_->metaInfo->end ());
   ACE_ASSERT ((*iterator).second->type == Bencoding_Element::BENCODING_TYPE_STRING);
   if (!HTTP_Tools::parseURL (*(*iterator).second->string,
                              host_name_string,
 //                             tracker_address,
-                             record_p->URI))
+                             record_p->URI,
+                             use_SSL))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),

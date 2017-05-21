@@ -65,8 +65,6 @@ IRC_Client_Module_IRCHandler::initialize (const struct IRC_Client_ModuleHandlerC
 
   // sanity check(s)
   ACE_ASSERT (inherited2::stateLock_);
-  ACE_ASSERT (configuration_in.streamConfiguration);
-  ACE_ASSERT (configuration_in.streamConfiguration->messageAllocator);
 
   if (inherited::isInitialized_)
   {
@@ -1217,55 +1215,6 @@ IRC_Client_Module_IRCHandler::onChange (IRC_RegistrationState newState_in)
   } // end IF
 }
 
-IRC_Message*
-IRC_Client_Module_IRCHandler::allocateMessage (unsigned int requestedSize_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::allocateMessage"));
-
-  // initialize return value(s)
-  IRC_Message* message_p = NULL;
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::configuration_->streamConfiguration);
-
-  if (inherited::configuration_->streamConfiguration->messageAllocator)
-  {
-allocate:
-    try {
-      message_p =
-        static_cast<IRC_Message*> (inherited::configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
-                  requestedSize_in));
-      return NULL;
-    }
-
-    // keep retrying ?
-    if (!message_p &&
-        !inherited::configuration_->streamConfiguration->messageAllocator->block ())
-      goto allocate;
-  } // end IF
-  else
-    ACE_NEW_NORETURN (message_p,
-                      IRC_Message (requestedSize_in));
-  if (!message_p)
-  {
-    if (inherited::configuration_->streamConfiguration->messageAllocator)
-    {
-      if (inherited::configuration_->streamConfiguration->messageAllocator->block ())
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate SessionMessageType: \"%m\", aborting\n")));
-    } // end IF
-    else
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate SessionMessageType: \"%m\", aborting\n")));
-  } // end IF
-
-  return message_p;
-}
-
 IRC_Record*
 IRC_Client_Module_IRCHandler::allocateMessage (IRC_Record::CommandType type_in)
 {
@@ -1313,11 +1262,12 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
 
   // step1: allocate a message buffer
   IRC_Message* message_p =
-      allocateMessage (inherited::configuration_->connectionConfiguration->PDUSize);
+      inherited::allocateMessage (inherited::configuration_->connectionConfiguration->PDUSize);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_Module_IRCHandler::allocateMessage(%u), returning\n"),
+                ACE_TEXT ("%s: failed to Stream_TaskBase_T::allocateMessage(%u), returning\n"),
+                inherited::mod_->name (),
                 inherited::configuration_->connectionConfiguration->PDUSize));
 
     // clean up
@@ -1337,21 +1287,23 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
   // step3: send it upstream
 
   // *NOTE*: there is NO way to prevent asynchronous closure of the connection;
-  //         this protect against closure of the stream while the message is
-  //         propagated... (see line 614)
+  //         this wards closure of the stream while the message is propagated
+  //         (see line 614)
   //         --> grab lock and check connectionIsAlive_
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, conditionLock_);
-  // sanity check
-  if (!connectionIsAlive_)
-  {
-    //ACE_DEBUG ((LM_DEBUG,
-    //            ACE_TEXT ("connection has been closed/lost - cannot send message, returning\n")));
+  //{
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, conditionLock_);
+    // sanity check
+    if (!connectionIsAlive_)
+    {
+      //ACE_DEBUG ((LM_DEBUG,
+      //            ACE_TEXT ("connection has been closed/lost - cannot send message, returning\n")));
 
-    // clean up
-    message_p->release ();
+      // clean up
+      message_p->release ();
 
-    return;
-  } // end IF
+      return;
+    } // end IF
+  //} // end lock scope
 
   result = inherited::reply (message_p, NULL);
   if (result == -1)
