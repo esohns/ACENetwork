@@ -995,39 +995,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
-  } // end IF
+  } // end ELSE
 }
-
-//template <typename HandlerType,
-//          typename AddressType,
-//          typename ConfigurationType,
-//          typename StateType,
-//          typename StatisticContainerType,
-//          typename HandlerConfigurationType,
-//          typename StreamType,
-//          typename UserDataType,
-//          typename ModuleConfigurationType,
-//          typename ModuleHandlerConfigurationType>
-//Net_ConnectionId_t
-//Net_StreamUDPSocketBase_T<HandlerType,
-//                          AddressType,
-//                          ConfigurationType,
-//                          StateType,
-//                          StatisticContainerType,
-//                          HandlerConfigurationType,
-//                          StreamType,
-//                          UserDataType,
-//                          ModuleConfigurationType,
-//                          ModuleHandlerConfigurationType>::id () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::id"));
-//
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ());
-//#else
-//  return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ());
-//#endif
-//}
 
 template <typename HandlerType,
           typename AddressType,
@@ -2350,47 +2319,18 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
   handle_out = inherited::SVC_HANDLER_T::get_handle ();
   localSAP_out.reset ();
-  remoteSAP_out = inherited::address_;
+  remoteSAP_out.reset ();
 
-  if (likely (!inherited::writeOnly_))
+  if (likely (inherited::writeOnly_))
+    remoteSAP_out = inherited::address_;
+  else
   {
     result = inherited::peer_.get_local_addr (localSAP_out);
     if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
-  } // end IF
+  } // end ELSE
 }
-
-//template <typename AddressType,
-//          typename ConfigurationType,
-//          typename StateType,
-//          typename StatisticContainerType,
-//          typename HandlerConfigurationType,
-//          typename StreamType,
-//          typename UserDataType,
-//          typename ModuleConfigurationType,
-//          typename ModuleHandlerConfigurationType>
-//Net_ConnectionId_t
-//Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
-//                                                 HandlerConfigurationType>,
-//                          AddressType,
-//                          ConfigurationType,
-//                          StateType,
-//                          StatisticContainerType,
-//                          HandlerConfigurationType,
-//                          StreamType,
-//                          UserDataType,
-//                          ModuleConfigurationType,
-//                          ModuleHandlerConfigurationType>::id () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::id"));
-//
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ());
-//#else
-//  return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ());
-//#endif
-//}
 
 template <typename AddressType,
           typename ConfigurationType,
@@ -3595,14 +3535,10 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration->socketConfiguration);
 
   handle_out = inherited::SVC_HANDLER_T::get_handle ();
-//  result = localSAP_out.set (static_cast<u_short> (0),
-//                             static_cast<ACE_UINT32> (INADDR_NONE));
-//  if (result == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_INET_Addr::set(0, %d): \"%m\", continuing\n"),
-//                INADDR_NONE));
-  localSAP_out = ACE_Addr::sap_any;
-  if (likely (!inherited::writeOnly_))
+  localSAP_out.reset ();
+  remoteSAP_out.reset ();
+
+  if (likely (inherited::writeOnly_))
   {
     result = inherited::peer_.get_local_addr (localSAP_out);
     if (unlikely (result == -1))

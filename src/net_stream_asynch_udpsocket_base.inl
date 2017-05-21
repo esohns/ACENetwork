@@ -563,12 +563,15 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   localSAP_out.reset ();
   remoteSAP_out.reset ();
 
-  result = inherited2::get_local_addr (localSAP_out);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
   if (inherited::writeOnly_)
     remoteSAP_out = inherited::address_;
+  else
+  {
+    result = inherited2::get_local_addr (localSAP_out);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+  } // end ELSE
 }
 
 template <typename HandlerType,
