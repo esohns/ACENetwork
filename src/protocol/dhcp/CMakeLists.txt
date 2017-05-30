@@ -22,6 +22,7 @@ endif ()
 
 add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
+add_definitions (-DNET_HAS_DLL)
 
 if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libCommon/src)

@@ -21,15 +21,16 @@
 #ifndef NET_TCPCONNECTION_BASE_H
 #define NET_TCPCONNECTION_BASE_H
 
-#include <ace/Acceptor.h>
-#include <ace/Asynch_Acceptor.h>
-#include <ace/Asynch_Connector.h>
-#include <ace/Connector.h>
-#include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
-#include <ace/SOCK_Acceptor.h>
-#include <ace/SOCK_Connector.h>
-#include <ace/Time_Value.h>
+#include "ace/Acceptor.h"
+#include "ace/Asynch_Acceptor.h"
+#include "ace/Asynch_Connector.h"
+#include "ace/Connector.h"
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
+#include "ace/SOCK_Acceptor.h"
+#include "ace/SOCK_Connector.h"
+#include "ace/Time_Value.h"
+#include "ace/SSL/SSL_SOCK_Connector.h"
 
 #include "stream_statemachine_control.h"
 
@@ -101,6 +102,15 @@ class Net_TCPConnectionBase_T
                                                      StreamType,
                                                      UserDataType>,
                              Net_SOCK_Connector>;
+  friend class ACE_Connector<Net_TCPConnectionBase_T<HandlerType,
+                                                     ConfigurationType,
+                                                     StateType,
+                                                     StatisticContainerType,
+                                                     HandlerConfigurationType,
+                                                     ListenerConfigurationType,
+                                                     StreamType,
+                                                     UserDataType>,
+                             ACE_SSL_SOCK_Connector>;
 
  public:
   typedef Net_StreamConnectionBase_T<HandlerType,

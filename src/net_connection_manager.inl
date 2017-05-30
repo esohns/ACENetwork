@@ -67,7 +67,6 @@ Net_Connection_Manager_T<AddressType,
   bool do_abort = false;
 
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
-
     if (!connections_.is_empty ())
     {
       ACE_DEBUG ((LM_WARNING,
@@ -167,7 +166,7 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::set"));
 
-  //ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
+  //ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
 
   configuration_ = &const_cast<ConfigurationType&> (configuration_in);
   userData_ = userData_in;
@@ -193,7 +192,7 @@ Net_Connection_Manager_T<AddressType,
   // sanity check(s)
   ACE_ASSERT (isInitialized_);
 
-  //ACE_Guard<ACE_SYNCH_RECURSIVE_MUTEX> aGuard (lock_);
+  //ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
 
   configuration_out = configuration_;
   userData_out = userData_;
@@ -219,7 +218,6 @@ Net_Connection_Manager_T<AddressType,
   ICONNECTION_T* connection_p = NULL;
 
   { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, NULL);
-
     unsigned int index = 0;
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
          iterator.next (connection_p);
@@ -286,18 +284,18 @@ Net_Connection_Manager_T<AddressType,
   ACE_ASSERT (handle_in != ACE_INVALID_HANDLE);
 
   ICONNECTION_T* connection_p = NULL;
-
   { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, NULL);
-
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
          iterator.next (connection_p);
          iterator.advance ())
+    { ACE_ASSERT (connection_p);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       if (connection_p->id () == reinterpret_cast<Net_ConnectionId_t> (handle_in))
 #else
       if (connection_p->id () == static_cast<Net_ConnectionId_t> (handle_in))
 #endif
         break;
+    } // end FOR
     if (connection_p)
       connection_p->increase (); // increase reference count
     else
@@ -381,8 +379,7 @@ Net_Connection_Manager_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::registerc"));
 
   { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
-
-    if (!isActive_ || // --> currently rejecting new connections...
+    if (!isActive_ || // --> currently rejecting new connections
         (connections_.size () >= maximumNumberOfConnections_))
       return false;
 
@@ -418,11 +415,11 @@ Net_Connection_Manager_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::deregister"));
 
-  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
+  ICONNECTION_T* connection_p = NULL;
+  bool found = false;
+  int result = -1;
 
-    ICONNECTION_T* connection_p = NULL;
-    bool found = false;
-    int result = -1;
+  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
          iterator.next (connection_p);
          iterator.advance ())
@@ -455,7 +452,7 @@ Net_Connection_Manager_T<AddressType,
                   ACE_TEXT ("caught exception in Net_IConnection_T::decrease(): \"%m\", continuing\n")));
     }
 
-    // if there are no more connections, signal any waiters...
+    // iff there are no more connections, signal any waiters
     if (connections_.is_empty () == 1)
     {
       result = condition_.broadcast ();
@@ -485,7 +482,6 @@ Net_Connection_Manager_T<AddressType,
   unsigned int result = 0;
 
   { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, 0);
-
     result = static_cast<unsigned int> (connections_.size ());
   } // end lock scope
 
@@ -538,7 +534,9 @@ Net_Connection_Manager_T<AddressType,
                   ACE_TEXT ("failed to ACE_SYNCH_RECURSIVE_MUTEX::acquire(): \"%m\", continuing\n")));
   } // end IF
 
-  isActive_ = false;
+  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
+    isActive_ = false;
+  } // end lock scope
 
   if (lockedAccess_in)
   {
@@ -566,7 +564,6 @@ Net_Connection_Manager_T<AddressType,
   bool result = false;
 
   { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
-
     result = isActive_;
   } // end lock scope
 
@@ -623,7 +620,6 @@ Net_Connection_Manager_T<AddressType,
 begin:
   // step1: gather a set of open connection handles
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
-
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
          iterator.next (connection_p);
          iterator.advance ())
@@ -652,9 +648,7 @@ begin:
   for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections);
        iterator.next (connection_p);
        iterator.advance ())
-  {
-    ACE_ASSERT (connection_p);
-
+  { ACE_ASSERT (connection_p);
     try {
       connection_p->close ();
     } catch (...) {
@@ -663,6 +657,7 @@ begin:
     }
 
     connection_p->decrease ();
+    connection_p = NULL;
   } // end FOR
   if (is_first)
   {
@@ -698,7 +693,6 @@ Net_Connection_Manager_T<AddressType,
   int result = -1;
 
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
-
     while (connections_.is_empty () == 0)
     {
       ACE_DEBUG ((LM_DEBUG,
@@ -728,17 +722,16 @@ Net_Connection_Manager_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortLeastRecent"));
 
   ICONNECTION_T* connection_p = NULL;
+  int result = -1;
 
   // *NOTE*: when using single-threaded reactors, close()ing the connection
   //         inside the lock scope may lead to deadlock
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
-
-    // sanity check(s)
     if (connections_.is_empty () == 1)
       return;
 
     // close "oldest" connection --> list head
-    int result = connections_.get (connection_p, 0);
+    result = connections_.get (connection_p, 0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -774,18 +767,17 @@ Net_Connection_Manager_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abortMostRecent"));
 
   ICONNECTION_T* connection_p = NULL;
+  int result = -1;
 
   // *NOTE*: when using single-threaded reactors, close()ing the connection
   //         inside the lock scope may lead to deadlock
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
-
-    // sanity check(s)
     if (connections_.is_empty () == 1)
       return;
 
     // close "newest" connection --> list tail
     CONNECTION_CONTAINER_REVERSEITERATOR_T iterator (connections_);
-    int result = iterator.next (connection_p);
+    result = iterator.next (connection_p);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -828,22 +820,24 @@ Net_Connection_Manager_T<AddressType,
 
   StatisticContainerType statistic;
   // aggregate statistical data
-  // *WARNING*: this assumes we're holding our lock !
+  // *WARNING*: this assumes the caller is holding the lock !
   ICONNECTION_T* connection_p = NULL;
-  for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
-       iterator.next (connection_p);
-       iterator.advance ())
-  {
-    ACE_OS::memset (&statistic, 0, sizeof (statistic));
-    try { // collect information
-      connection_p->collect (statistic);
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Common_IStatistic::collect(), continuing\n")));
-    }
+  //{ ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
+    for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
+         iterator.next (connection_p);
+         iterator.advance ())
+    {
+      ACE_OS::memset (&statistic, 0, sizeof (statistic));
+      try { // collect information
+        connection_p->collect (statistic);
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("caught exception in Common_IStatistic::collect(), continuing\n")));
+      }
 
-    data_out += statistic;
-  } // end FOR
+      data_out += statistic;
+    } // end FOR
+  //} // end lock scope
 
   return true;
 }
@@ -867,7 +861,6 @@ Net_Connection_Manager_T<AddressType,
   ACE_OS::memset (&result, 0, sizeof (result));
 
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
-
     // aggregate data from active connections
     if (!const_cast<OWN_TYPE_T*> (this)->collect (result))
     {
@@ -903,9 +896,7 @@ Net_Connection_Manager_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::dump_state"));
 
   ICONNECTION_T* connection_p = NULL;
-
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
-
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
          iterator.next (connection_p);
          iterator.advance ())

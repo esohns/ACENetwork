@@ -24,7 +24,8 @@
 
 template <typename ConnectorType>
 Test_I_HTTPGet_Stream_T<ConnectorType>::Test_I_HTTPGet_Stream_T ()
- : inherited (ACE_TEXT_ALWAYS_CHAR ("SourceStream"))
+ : inherited (ACE_TEXT_ALWAYS_CHAR ("SourceStream"),
+              true)
  , netSource_ (ACE_TEXT_ALWAYS_CHAR ("NetSource"),
                NULL,
                false)

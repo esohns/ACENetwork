@@ -228,7 +228,8 @@ struct Test_U_ConnectionConfiguration
 struct Test_U_Configuration
 {
   inline Test_U_Configuration ()
-   : signalHandlerConfiguration ()
+   : allocatorConfiguration ()
+   , signalHandlerConfiguration ()
    , socketConfiguration ()
    , socketHandlerConfiguration ()
    , connectionConfiguration ()
@@ -240,6 +241,7 @@ struct Test_U_Configuration
    , userData ()
   {};
 
+  struct Test_U_AllocatorConfiguration     allocatorConfiguration;
   // **************************** signal data **********************************
   struct Test_U_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************

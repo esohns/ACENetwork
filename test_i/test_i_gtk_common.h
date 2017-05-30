@@ -21,33 +21,26 @@
 #ifndef TEST_I_GTK_COMMON_H
 #define TEST_I_GTK_COMMON_H
 
+#include <deque>
 #include <map>
 #include <set>
 
-#include <ace/OS_NS_Thread.h>
+#include "ace/OS_NS_Thread.h"
+#include "ace/Singleton.h"
+#include "ace/Synch_Traits.h"
 
-#include <gtk/gtk.h>
+#include "gtk/gtk.h"
 
 #include "common_ui_common.h"
+#include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
+#include "common_ui_gtk_manager.h"
 
 #include "stream_common.h"
 
 // forward declarations
 struct Test_I_Configuration;
 
-//enum Test_I_GTK_Event
-//{
-//  TEST_I_GKTEVENT_INVALID = -1,
-//  // ------------------------------------
-//  TEST_I_GTKEVENT_START = 0,
-//  TEST_I_GTKEVENT_DATA,
-//  TEST_I_GTKEVENT_END,
-//  TEST_I_GTKEVENT_STATISTIC,
-//  // ------------------------------------
-//  TEST_I_GTKEVENT_MAX
-//};
-//typedef std::deque<enum Test_I_GTK_Event> Test_I_GTK_Events_t;
 typedef std::deque<enum Common_UI_Event> Test_I_GTK_Events_t;
 typedef Test_I_GTK_Events_t::const_iterator Test_I_GTK_EventsIterator_t;
 
@@ -100,5 +93,11 @@ struct Test_I_ThreadData
   struct Test_I_GTK_CBData* CBData;
   guint                     eventSourceID;
 };
+
+typedef Common_UI_GtkBuilderDefinition_T<struct Test_I_GTK_CBData> Test_I_GtkBuilderDefinition_t;
+
+typedef Common_UI_GTK_Manager_T<struct Test_I_GTK_CBData> Test_I_GTK_Manager_t;
+typedef ACE_Singleton<Test_I_GTK_Manager_t,
+                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> TEST_I_UI_GTK_MANAGER_SINGLETON;
 
 #endif

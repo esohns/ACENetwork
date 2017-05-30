@@ -100,7 +100,10 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/misc)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/net)
 elseif (WIN32)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
+
  include_directories ($ENV{ACE_ROOT})
+
  # *TODO*: repair pkgconfig support
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
 

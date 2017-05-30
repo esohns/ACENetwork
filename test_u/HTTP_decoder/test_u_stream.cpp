@@ -19,26 +19,27 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 
 //#include "http_scanner.h"
 
 #include "test_u_stream.h"
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "net_macros.h"
 
 #include "test_u_session_message.h"
 
 Test_U_Stream::Test_U_Stream (const std::string& name_in)
- : inherited (name_in)
+ : inherited (name_in,
+              true)
  , IO_ (ACE_TEXT_ALWAYS_CHAR ("NetIO"),
         NULL,
         false)
- , dump_ (ACE_TEXT_ALWAYS_CHAR ("FileDump"),
-          NULL,
-          false)
+// , dump_ (ACE_TEXT_ALWAYS_CHAR ("FileDump"),
+//          NULL,
+//          false)
  , marshal_ (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
              NULL,
              false)
@@ -76,7 +77,7 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
   modules_out.push_back (&fileWriter_);
   modules_out.push_back (&statisticReport_);
   modules_out.push_back (&marshal_);
-  modules_out.push_back (&dump_);
+//  modules_out.push_back (&dump_);
   modules_out.push_back (&IO_);
 
   return true;
@@ -262,7 +263,7 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
 
   session_data_r.currentStatistic.timeStamp = COMMON_TIME_NOW;
 
-  // delegate to the statistics module...
+  // delegate to the statistics module
   bool result_2 = false;
   try {
     result_2 = statisticReport_impl->collect (data_out);

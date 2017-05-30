@@ -21,8 +21,8 @@
 #ifdef __cplusplus
 extern "C"
 {
-#include <libavcodec/avcodec.h>
-#include <libavutil/pixfmt.h>
+//#include <libavcodec/avcodec.h>
+//#include <libavutil/pixfmt.h>
 }
 #endif /* __cplusplus */
 
@@ -350,14 +350,13 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   if (iterator != record_inout->headers.end ())
   {
     session_data_r.format =
-        HTTP_Tools::Encoding2CompressionFormat ((*iterator).second);
+        HTTP_Tools::EncodingToCompressionFormat ((*iterator).second);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s: set compression format: \"%s\"\n"),
                 inherited::mod_->name (),
                 ACE_TEXT (Stream_Module_Decoder_Tools::compressionFormatToString (session_data_r.format).c_str ())));
   } // end IF
 
-  const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
   DATA_CONTAINER_T* data_container_p, *data_container_2 = NULL;
   DataMessageType* message_p = NULL;
 
@@ -375,7 +374,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   } // end IF
   data_container_p->set (record_inout);
   record_inout = NULL;
-  headFragment_->initialize (data_container_p,
+  data_container_2 = data_container_p;
+  headFragment_->initialize (data_container_2,
                              NULL);
 
   // make sure the whole fragment chain references the same data record
@@ -871,7 +871,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   if (iterator != record_inout->headers.end ())
   {
     session_data_r.format =
-        HTTP_Tools::Encoding2CompressionFormat ((*iterator).second);
+        HTTP_Tools::EncodingToCompressionFormat ((*iterator).second);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s: set compression format: \"%s\"\n"),
                 inherited::mod_->name (),

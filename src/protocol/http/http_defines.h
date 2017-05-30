@@ -23,7 +23,7 @@
 
 // stream
 // *TODO*: this makes no sense, remove ASAP
-#define HTTP_BUFFER_SIZE                          16384
+//#define HTTP_BUFFER_SIZE                          16384
 
 // (strip protocol data and) 'crunch' parsed messages for easier downstream
 // processing ?

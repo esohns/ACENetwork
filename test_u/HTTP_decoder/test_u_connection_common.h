@@ -21,14 +21,15 @@
 #ifndef TEST_U_CONNECTION_COMMON_H
 #define TEST_U_CONNECTION_COMMON_H
 
-#include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-#include <ace/Netlink_Addr.h>
+#include "ace/Netlink_Addr.h"
 #endif
-#include <ace/SOCK_Connector.h>
-#include <ace/Synch_Traits.h>
+#include "ace/SOCK_Connector.h"
+#include "ace/Synch_Traits.h"
+#include "ace/SSL/SSL_SOCK_Connector.h"
 
 #include "stream_common.h"
 
@@ -49,6 +50,7 @@
 #include "net_client_connector.h"
 
 #include "http_common.h"
+#include "http_network.h"
 
 //#include "test_u_stream_common.h"
 #include "test_u_stream.h"
@@ -144,7 +146,6 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
 
 //////////////////////////////////////////
 
-// outbound
 typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct Test_U_SocketHandlerConfiguration,
                                                          ACE_SOCK_STREAM>,
                                   ACE_INET_Addr,
@@ -155,6 +156,16 @@ typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct Test_U_SocketHan
                                   struct Test_U_UserData,
                                   struct Stream_ModuleConfiguration,
                                   struct Test_U_ModuleHandlerConfiguration> Test_U_TCPHandler_t;
+typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct Test_U_SocketHandlerConfiguration,
+                                                         ACE_SSL_SOCK_Stream>,
+                                  ACE_INET_Addr,
+                                  struct Test_U_ConnectionConfiguration,
+                                  struct Test_U_ConnectionState,
+                                  HTTP_RuntimeStatistic_t,
+                                  Test_U_Stream_t,
+                                  struct Test_U_UserData,
+                                  struct Stream_ModuleConfiguration,
+                                  struct Test_U_ModuleHandlerConfiguration> Test_U_SSLTCPHandler_t;
 typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<struct Test_U_SocketHandlerConfiguration>,
                                         ACE_INET_Addr,
                                         struct Test_U_ConnectionConfiguration,
@@ -173,6 +184,14 @@ typedef Net_TCPConnectionBase_T<Test_U_TCPHandler_t,
                                 struct Test_U_ListenerConfiguration,
                                 Test_U_Stream_t,
                                 struct Test_U_UserData> Test_U_TCPConnection_t;
+typedef Net_TCPConnectionBase_T<Test_U_SSLTCPHandler_t,
+                                struct Test_U_ConnectionConfiguration,
+                                struct Test_U_ConnectionState,
+                                HTTP_RuntimeStatistic_t,
+                                struct Test_U_SocketHandlerConfiguration,
+                                struct Test_U_ListenerConfiguration,
+                                Test_U_Stream_t,
+                                struct Test_U_UserData> Test_U_SSLTCPConnection_t;
 typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPHandler_t,
                                       struct Test_U_ConnectionConfiguration,
                                       struct Test_U_ConnectionState,
@@ -189,15 +208,6 @@ typedef Net_IConnector_T<ACE_INET_Addr,
 
 //////////////////////////////////////////
 
-// outbound
-typedef Net_Client_AsynchConnector_T<Test_U_AsynchTCPConnection_t,
-                                     ACE_INET_Addr,
-                                     struct Test_U_ConnectionConfiguration,
-                                     struct Test_U_ConnectionState,
-                                     HTTP_RuntimeStatistic_t,
-                                     struct Test_U_SocketHandlerConfiguration,
-                                     Test_U_Stream_t,
-                                     struct Test_U_UserData> Test_U_TCPAsynchConnector_t;
 typedef Net_Client_Connector_T<Test_U_TCPConnection_t,
                                Net_SOCK_Connector,
                                ACE_INET_Addr,
@@ -207,5 +217,22 @@ typedef Net_Client_Connector_T<Test_U_TCPConnection_t,
                                struct Test_U_SocketHandlerConfiguration,
                                Test_U_Stream_t,
                                struct Test_U_UserData> Test_U_TCPConnector_t;
+typedef Net_Client_Connector_T<Test_U_SSLTCPConnection_t,
+                               ACE_SSL_SOCK_Connector,
+                               ACE_INET_Addr,
+                               struct Test_U_ConnectionConfiguration,
+                               struct Test_U_ConnectionState,
+                               HTTP_RuntimeStatistic_t,
+                               struct Test_U_SocketHandlerConfiguration,
+                               Test_U_Stream_t,
+                               struct Test_U_UserData> Test_U_SSLTCPConnector_t;
+typedef Net_Client_AsynchConnector_T<Test_U_AsynchTCPConnection_t,
+                                     ACE_INET_Addr,
+                                     struct Test_U_ConnectionConfiguration,
+                                     struct Test_U_ConnectionState,
+                                     HTTP_RuntimeStatistic_t,
+                                     struct Test_U_SocketHandlerConfiguration,
+                                     Test_U_Stream_t,
+                                     struct Test_U_UserData> Test_U_TCPAsynchConnector_t;
 
 #endif

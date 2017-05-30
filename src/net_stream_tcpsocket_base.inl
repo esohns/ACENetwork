@@ -460,6 +460,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::handle_input"));
 
   int result = -1;
+  ssize_t bytes_received = -1;
 
   ACE_UNUSED_ARG (handle_in);
 
@@ -480,7 +481,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
   } // end IF
 
   // read some data from the socket
-  ssize_t bytes_received =
+retry:
+  bytes_received =
       inherited::peer_.recv (currentReadBuffer_->wr_ptr (),       // buffer
                              inherited2::configuration_->PDUSize, // #bytes to read
                              0);                                  // flags
@@ -491,21 +493,24 @@ Net_StreamTCPSocketBase_T<HandlerType,
       // *IMPORTANT NOTE*: a number of issues can occur here:
       // - connection reset by peer
       // - connection abort()ed locally
+      // [- data buffer is empty (SSL)]
       int error = ACE_OS::last_error ();
+      if (error == EWOULDBLOCK)      // 11: SSL_read() failed (buffer is empty)
+        goto retry;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       if (//(error != EPIPE)        && // 9    : write() on a close()d socket *TODO*
           (error != ECONNABORTED) && // 10053: local close()
           (error != ECONNRESET))     // 10054: peer closed the connection
 #else
-      if ((error != EPIPE)        && // <-- connection reset by peer
+      if ((error != EPIPE)        && // 32: connection reset by peer (write)
           // -------------------------------------------------------------------
-          (error != EBADF)        &&
-          (error != ENOTSOCK)     &&
-          (error != ECONNABORTED) && // <-- connection abort()ed locally
-          (error != ECONNRESET))
+          (error != EBADF)        && // 9
+          (error != ENOTSOCK)     && // 88
+          (error != ECONNABORTED) && // 103: connection abort()ed locally
+          (error != ECONNRESET))     // 104: connection reset by peer (read)
 #endif
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_SOCK_Stream::recv(%d): \"%m\", aborting\n"),
+                    ACE_TEXT ("failed to ACE_(SSL_)SOCK_Stream::recv(%d): \"%m\", aborting\n"),
                     handle_in));
 
       // clean up
@@ -1348,7 +1353,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // initialize return value(s)
   ACE_Message_Block* message_block_p = NULL;
 
-  //if (inherited::configuration_.messageAllocator)
+//  if (inherited::configuration_->messageAllocator)
   if (inherited2::configuration_->streamConfiguration->messageAllocator)
   {
 allocate:

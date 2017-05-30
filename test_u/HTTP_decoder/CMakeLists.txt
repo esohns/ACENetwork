@@ -31,12 +31,40 @@ endif ()
 if (NOT ACE_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
 endif ()
+set (ACE_SSL_LIB_FILE libACE_SSL.so)
+if (UNIX)
+ if (DEFINED ENV{ACE_ROOT})
+  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
+                PATHS ENV ACE_ROOT
+                PATH_SUFFIXES ace/lib build/linux/ace/lib
+                DOC "searching for ${ACE_SSL_LIB_FILE}")
+ else ()
+  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
+                DOC "searching for ${ACE_SSL_LIB_FILE} (system paths)")
+ endif ()
+elseif (WIN32)
+ if (CMAKE_BUILD_TYPE STREQUAL Debug)
+  set (LIB_FILE_SUFFIX d)
+ endif ()
+ unset (ACE_SSL_LIB_FILE)
+ set (ACE_SSL_LIB_FILE ACE_SSL${LIB_FILE_SUFFIX}.lib)
+ find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
+               PATHS ENV ACE_ROOT
+               PATH_SUFFIXES lib
+               DOC "searching for ${ACE_SSL_LIB_FILE}"
+               NO_DEFAULT_PATH)
+endif ()
+#if (NOT EXISTS ACE_LIBRARY)
+if (NOT ACE_SSL_LIBRARY)
+ message (FATAL_ERROR "could not find ${ACE_SSL_LIB_FILE} (was: \"${ACE_SSL_LIBRARY}\"), aborting")
+endif ()
 
 include (FindPkgConfig)
 if (UNIX)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
 # *NOTE*: libCommon requires libcap
  pkg_check_modules (PKG_CAP REQUIRED libcap)
+ pkg_check_modules (PKG_OPENSSL REQUIRED openssl)
 endif ()
 
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
@@ -88,6 +116,8 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/misc)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/net)
 elseif (WIN32)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
@@ -150,12 +180,14 @@ target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
  target_link_libraries (${EXECUTABLE} rt)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
+ target_link_libraries (${EXECUTABLE} ${PKG_OPENSSL_LIBRARIES})
 elseif (WIN32)
 # *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
  target_link_libraries (${EXECUTABLE} ntdll.lib)
 endif ()
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
+target_link_libraries (${EXECUTABLE} ${ACE_SSL_LIBRARY})
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} ACEStream)
 target_link_libraries (${EXECUTABLE} ACEStream_Decoder)

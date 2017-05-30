@@ -113,7 +113,7 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
   struct HTTP_Record& record_r = static_cast<struct HTTP_Record&> (data_r);
   if (HTTP_Tools::isRequest (record_r))
   {
-    buffer = HTTP_Tools::Method2String (record_r.method);
+    buffer = HTTP_Tools::MethodToString (record_r.method);
     buffer += ACE_TEXT_ALWAYS_CHAR (" ");
     buffer += record_r.URI;
 
@@ -138,7 +138,7 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
 
         buffer += ACE_TEXT_ALWAYS_CHAR (" ");
         buffer += ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_VERSION_STRING_PREFIX);
-        buffer += HTTP_Tools::Version2String (record_r.version);
+        buffer += HTTP_Tools::VersionToString (record_r.version);
 
         break;
       }
@@ -146,7 +146,7 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
       {
         buffer += ACE_TEXT_ALWAYS_CHAR (" ");
         buffer += ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_VERSION_STRING_PREFIX);
-        buffer += HTTP_Tools::Version2String (record_r.version);
+        buffer += HTTP_Tools::VersionToString (record_r.version);
 
         for (HTTP_FormIterator_t iterator_2 = record_r.form.begin ();
              iterator_2 != record_r.form.end ();
@@ -181,7 +181,7 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown HTTP method (was: \"%s\"), continuing\n"),
-                    ACE_TEXT (HTTP_Tools::Method2String (record_r.method).c_str ())));
+                    ACE_TEXT (HTTP_Tools::MethodToString (record_r.method).c_str ())));
         break;
       }
     } // end SWITCH
@@ -193,12 +193,12 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
     is_request = false;
 
     buffer = ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_VERSION_STRING_PREFIX);
-    buffer += HTTP_Tools::Version2String (record_r.version);
+    buffer += HTTP_Tools::VersionToString (record_r.version);
     buffer += ACE_TEXT_ALWAYS_CHAR (" ");
     converter << record_r.status;
     buffer += converter.str ();
     buffer += ACE_TEXT_ALWAYS_CHAR (" ");
-    buffer += HTTP_Tools::Status2Reason (record_r.status);
+    buffer += HTTP_Tools::StatusToReason (record_r.status);
     buffer += ACE_TEXT_ALWAYS_CHAR ("\r\n");
   } // end ELSE
 

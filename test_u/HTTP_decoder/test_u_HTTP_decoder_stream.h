@@ -48,17 +48,17 @@ class Test_I_HTTPGet_Stream_T
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         /////////////////
-                        Stream_StateMachine_ControlState,
-                        Test_I_Stream_State,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_I_Stream_State,
                         /////////////////
-                        Test_I_Stream_Configuration,
+                        struct Test_I_Stream_Configuration,
                         /////////////////
                         Test_I_RuntimeStatistic_t,
                         /////////////////
-                        Stream_ModuleConfiguration,
-                        Test_I_Stream_ModuleHandlerConfiguration,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_I_Stream_ModuleHandlerConfiguration,
                         /////////////////
-                        Test_I_Stream_SessionData,   // session data
+                        struct Test_I_Stream_SessionData, // session data
                         Test_I_Stream_SessionData_t, // session data container (reference counted)
                         Test_I_Stream_SessionMessage,
                         Test_I_Stream_Message>
@@ -68,7 +68,7 @@ class Test_I_HTTPGet_Stream_T
   virtual ~Test_I_HTTPGet_Stream_T ();
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const Test_I_Stream_Configuration&); // configuration
+  virtual bool initialize (const struct Test_I_Stream_Configuration&); // configuration
 
   // *TODO*: re-consider this API
   void ping ();
@@ -84,17 +84,17 @@ class Test_I_HTTPGet_Stream_T
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
                         /////////////////
-                        Stream_StateMachine_ControlState,
-                        Test_I_Stream_State,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_I_Stream_State,
                         /////////////////
-                        Test_I_Stream_Configuration,
+                        struct Test_I_Stream_Configuration,
                         /////////////////
                         Test_I_RuntimeStatistic_t,
                         /////////////////
-                        Stream_ModuleConfiguration,
-                        Test_I_Stream_ModuleHandlerConfiguration,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_I_Stream_ModuleHandlerConfiguration,
                         /////////////////
-                        Test_I_Stream_SessionData,   // session data
+                        struct Test_I_Stream_SessionData, // session data
                         Test_I_Stream_SessionData_t, // session data container (reference counted)
                         Test_I_Stream_SessionMessage,
                         Test_I_Stream_Message> inherited;
@@ -103,22 +103,22 @@ class Test_I_HTTPGet_Stream_T
                                      Test_I_Stream_SessionMessage,
                                      Test_I_Stream_Message,
                                      ////
-                                     Test_I_Stream_ModuleHandlerConfiguration,
+                                     struct Test_I_Stream_ModuleHandlerConfiguration,
                                      ////
-                                     Test_I_Stream_State,
+                                     struct Test_I_Stream_State,
                                      ////
-                                     Test_I_Stream_SessionData,
+                                     struct Test_I_Stream_SessionData,
                                      Test_I_Stream_SessionData_t,
                                      ////
                                      Test_I_RuntimeStatistic_t,
                                      ////
                                      Test_I_Stream_InetConnectionManager_t,
                                      ConnectorType> SOURCE_WRITER_T;
-  typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,                             // task synch type
-                                         Common_TimePolicy_t,                      // time policy
-                                         Stream_ModuleConfiguration,               // module configuration type
-                                         Test_I_Stream_ModuleHandlerConfiguration, // module handler configuration type
-                                         SOURCE_WRITER_T> SOURCE_MODULE_T;         // writer type
+  typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,                                    // task synch type
+                                         Common_TimePolicy_t,                             // time policy
+                                         struct Stream_ModuleConfiguration,               // module configuration type
+                                         struct Test_I_Stream_ModuleHandlerConfiguration, // module handler configuration type
+                                         SOURCE_WRITER_T> SOURCE_MODULE_T;                // writer type
 
   ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPGet_Stream_T (const Test_I_HTTPGet_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_HTTPGet_Stream_T& operator= (const Test_I_HTTPGet_Stream_T&))
@@ -131,12 +131,13 @@ class Test_I_HTTPGet_Stream_T
   //Test_I_Stream_Module_HTMLWriter_Module       HTMLWriter_;
 };
 
-// include template implementation
+// include template definition
 #include "test_i_http_get_stream.inl"
 
 /////////////////////////////////////////
 
 typedef Test_I_HTTPGet_Stream_T<Test_I_Stream_TCPConnector_t> Test_I_HTTPGet_Stream_t;
+typedef Test_I_HTTPGet_Stream_T<Test_I_Stream_SSLTCPConnector_t> Test_I_HTTPGet_SSLStream_t;
 typedef Test_I_HTTPGet_Stream_T<Test_I_Stream_TCPAsynchConnector_t> Test_I_HTTPGet_AsynchStream_t;
 
 #endif

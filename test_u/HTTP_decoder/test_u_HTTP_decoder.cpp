@@ -76,16 +76,6 @@ do_printUsage (const std::string& programName_in)
 
   std::string path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("..");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("..");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("test_u");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("protocol");
-#endif // #ifdef DEBUG_DEBUGGER
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -158,24 +148,15 @@ do_processArguments (int argc_in,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
-                     std::string& URI_out,
+                     std::string& URL_out,
                      bool& printVersionAndExit_out,
                      unsigned int& numberOfDispatchThreads_out)
 {
   STREAM_TRACE (ACE_TEXT ("::do_processArguments"));
 
+  int result = -1;
   std::string path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("..");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("..");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("test_u");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("protocol");
-#endif // #ifdef DEBUG_DEBUGGER
 
   // initialize results
   bufferSize_out = TEST_U_DEFAULT_BUFFER_SIZE;
@@ -190,22 +171,21 @@ do_processArguments (int argc_in,
   useReactor_out = NET_EVENT_USE_REACTOR;
   statisticReportingInterval_out = STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out = false;
-  URI_out.clear ();
+  URL_out.clear ();
   printVersionAndExit_out = false;
-  numberOfDispatchThreads_out =
-    TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
+  numberOfDispatchThreads_out = TEST_U_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
 
-  ACE_Get_Opt argumentParser (argc_in,
-                              argv_in,
-                              ACE_TEXT ("b:df:lors:tu:vx:"),
-                              1,                         // skip command name
-                              1,                         // report parsing errors
-                              ACE_Get_Opt::PERMUTE_ARGS, // ordering
-                              0);                        // for now, don't use long options
+  ACE_Get_Opt argument_parser (argc_in,
+                               argv_in,
+                               ACE_TEXT ("b:df:lors:tu:vx:"),
+                               1,                         // skip command name
+                               1,                         // report parsing errors
+                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
+                               0);                        // for now, don't use long options
 
   int option = 0;
   std::stringstream converter;
-  while ((option = argumentParser ()) != EOF)
+  while ((option = argument_parser ()) != EOF)
   {
     switch (option)
     {
@@ -213,7 +193,7 @@ do_processArguments (int argc_in,
       {
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter << argumentParser.opt_arg ();
+        converter << argument_parser.opt_arg ();
         converter >> bufferSize_out;
         break;
       }
@@ -224,7 +204,7 @@ do_processArguments (int argc_in,
       }
       case 'f':
       {
-        outputFileName_out = ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
+        outputFileName_out = ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
         break;
       }
       case 'l':
@@ -246,7 +226,7 @@ do_processArguments (int argc_in,
       {
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter << argumentParser.opt_arg ();
+        converter << argument_parser.opt_arg ();
         converter >> statisticReportingInterval_out;
         break;
       }
@@ -257,87 +237,97 @@ do_processArguments (int argc_in,
       }
       case 'u':
       {
+        URL_out = ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
+
         // step1: parse URL
-        URI_out = ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
-        std::string regex_string =
-          ACE_TEXT_ALWAYS_CHAR ("^(?:http://)?([[:alnum:]-.]+)(?:\\:([[:digit:]]{1,5}))?(.+)?$");
-        std::regex regex (regex_string);
-        std::smatch match_results;
-        if (!std::regex_match (URI_out,
-                               match_results,
-                               regex,
-                               std::regex_constants::match_default))
+        std::string URI_string;
+        bool use_ssl = false;
+        if (!HTTP_Tools::parseURL (URL_out,
+                                   hostName_out,
+                                   URI_string,
+                                   use_ssl))
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("invalid URL string (was: \"%s\"), aborting\n"),
-                      ACE_TEXT (URI_out.c_str ())));
+                      ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), aborting\n"),
+                      ACE_TEXT (URL_out.c_str ())));
           return false;
         } // end IF
-        ACE_ASSERT (match_results.ready () && !match_results.empty ());
 
-        ACE_ASSERT (match_results[1].matched);
-        hostName_out = match_results[1];
-        if (match_results[2].matched)
+        std::string hostname_string = hostName_out;
+        ACE_INET_Addr peer_address;
+        size_t position =
+          hostName_out.find_last_of (':', std::string::npos);
+        if (position == std::string::npos)
         {
-          converter.clear ();
-          converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-          converter << match_results[2].str ();
-          converter >> port_out;
+          port_out = (use_ssl ? HTTPS_DEFAULT_SERVER_PORT
+                              : HTTP_DEFAULT_SERVER_PORT);
+          hostname_string += ':';
+          std::ostringstream converter;
+          converter << port_out;
+          hostname_string += converter.str ();
         } // end IF
-        ACE_ASSERT (match_results[3].matched);
-//        URI_out = match_results[3];
+        else
+        {
+          std::istringstream converter (hostName_out.substr (position + 1,
+                                                             std::string::npos));
+          converter >> port_out;
+        } // end ELSE
+        result = peer_address.set (hostname_string.c_str (),
+                                   AF_INET);
+        if (result == -1)
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
+                      ACE_TEXT (hostname_string.c_str ())));
+          return false;
+        } // end IF
 
         // step2: validate address/verify host name exists
         //        --> resolve
-        std::string dotted_decimal_string;
-        // *TODO*: support IPv6 as well
-        regex_string =
-          ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]{1,3}\\.){4}$");
-        regex = regex_string;
-        std::smatch match_results_2;
-        if (std::regex_match (hostName_out,
-                              match_results_2,
-                              regex,
-                              std::regex_constants::match_default))
+        ACE_TCHAR buffer[HOST_NAME_MAX];
+        ACE_OS::memset (buffer, 0, sizeof (buffer));
+        result = peer_address.get_host_name (buffer,
+                                             sizeof (buffer));
+        if (result == -1)
         {
-          ACE_ASSERT (match_results_2.ready ()  &&
-                      !match_results_2.empty () &&
-                      match_results_2[1].matched);
-          dotted_decimal_string = hostName_out;
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_INET_Addr::get_host_name(): \"%m\", aborting\n")));
+          return false;
         } // end IF
-        if (!Net_Common_Tools::getAddress (hostName_out,
+        std::string hostname = ACE_TEXT_ALWAYS_CHAR (buffer);
+        std::string dotted_decimal_string;
+        if (!Net_Common_Tools::getAddress (hostname,
                                            dotted_decimal_string))
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to Net_Common_Tools::getAddress(), aborting\n")));
+                      ACE_TEXT ("failed to Net_Common_Tools::getAddress(\"%s\"), aborting\n"),
+                      ACE_TEXT (hostname.c_str ())));
           return false;
         } // end IF
 
         // step3: validate URI
-//        regex_string =
-//            ACE_TEXT_ALWAYS_CHAR ("^(\\/.+(?=\\/))*\\/(.+?)(\\.(html|htm))?$");
-        regex_string =
-            ACE_TEXT_ALWAYS_CHAR ("^(?:http://)?((.+\\.)+([^\\/]+))(\\/.+(?=\\/))*\\/(.+?)(\\.(html|htm))?$");
-        regex.assign (regex_string,
-                      (std::regex_constants::ECMAScript |
-                       std::regex_constants::icase));
+        std::string regex_string =
+            ACE_TEXT_ALWAYS_CHAR ("^(\\/.+(?=\\/))*\\/(.+?)(\\.(html|htm))?$");
+        std::regex regex (regex_string,
+                          (std::regex_constants::ECMAScript |
+                           std::regex_constants::icase));
         std::smatch match_results_3;
-        if (!std::regex_match (URI_out,
+        if (!std::regex_match (URI_string,
                                match_results_3,
                                regex,
                                std::regex_constants::match_default))
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid URI (was: \"%s\"), aborting\n"),
-                      ACE_TEXT (URI_out.c_str ())));
+                      ACE_TEXT (URI_string.c_str ())));
           return false;
         } // end IF
         ACE_ASSERT (match_results_3.ready () && !match_results_3.empty ());
 
         if (!match_results_3[2].matched)
-          URI_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_URL);
-        else if (!match_results_3[3].matched)
-          URI_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_SUFFIX);
+          URL_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_URL);
+//        else if (!match_results_3[3].matched)
+//          URL_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_SUFFIX);
 
         break;
       }
@@ -350,7 +340,7 @@ do_processArguments (int argc_in,
       {
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter << argumentParser.opt_arg ();
+        converter << argument_parser.opt_arg ();
         converter >> numberOfDispatchThreads_out;
         break;
       }
@@ -359,21 +349,21 @@ do_processArguments (int argc_in,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("option \"%c\" requires an argument, aborting\n"),
-                    argumentParser.opt_opt ()));
+                    argument_parser.opt_opt ()));
         return false;
       }
       case '?':
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("unrecognized option \"%s\", aborting\n"),
-                    ACE_TEXT (argumentParser.last_option ())));
+                    ACE_TEXT (argument_parser.last_option ())));
         return false;
       }
       case 0:
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("found long option \"%s\", aborting\n"),
-                    ACE_TEXT (argumentParser.long_option ())));
+                    ACE_TEXT (argument_parser.long_option ())));
         return false;
       }
       default:
@@ -479,14 +469,20 @@ do_work (unsigned int bufferSize_in,
   STREAM_TRACE (ACE_TEXT ("::do_work"));
 
   // step0a: initialize configuration and stream
-  Test_U_Configuration configuration;
+  struct Test_U_Configuration configuration;
   configuration.userData.connectionConfiguration =
       &configuration.connectionConfiguration;
 //  configuration.userData.streamConfiguration =
 //      &configuration.streamConfiguration;
   configuration.useReactor = useReactor_in;
 
-  Stream_AllocatorHeap_T<Test_U_AllocatorConfiguration> heap_allocator;
+  Stream_AllocatorHeap_T<struct Test_U_AllocatorConfiguration> heap_allocator;
+  if (!heap_allocator.initialize (configuration.allocatorConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize allocator, returning\n")));
+    return;
+  } // end IF
   Test_U_MessageAllocator_t message_allocator (TEST_U_MAX_MESSAGES, // maximum #buffers
                                                &heap_allocator,     // heap allocator handle
                                                true);               // block ?
@@ -519,12 +515,18 @@ do_work (unsigned int bufferSize_in,
   // ******************** socket handler configuration data ********************
   configuration.socketHandlerConfiguration.messageAllocator =
     &message_allocator;
+  configuration.socketHandlerConfiguration.socketConfiguration =
+    &configuration.socketConfiguration;
   configuration.socketHandlerConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
   configuration.socketHandlerConfiguration.userData =
     &configuration.userData;
 
   configuration.connectionConfiguration.PDUSize = bufferSize_in;
+  configuration.connectionConfiguration.socketHandlerConfiguration =
+      &configuration.socketHandlerConfiguration;
+  configuration.connectionConfiguration.streamConfiguration =
+      &configuration.streamConfiguration;
 
   // ********************** stream configuration data **************************
   // ********************** module configuration data **************************
@@ -568,8 +570,8 @@ do_work (unsigned int bufferSize_in,
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.moduleConfiguration =
     &configuration.moduleConfiguration;
-  configuration.streamConfiguration.moduleHandlerConfiguration =
-    &configuration.moduleHandlerConfiguration;
+  configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                        &configuration.moduleHandlerConfiguration));
   configuration.streamConfiguration.printFinalReport = true;
 
   // step0b: initialize event dispatch
@@ -704,20 +706,30 @@ do_work (unsigned int bufferSize_in,
   ACE_Time_Value initialization_timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT,
                                          0);
   ACE_Time_Value deadline;
-  Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
+  enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
 //  Test_U_MessageData* message_data_p = NULL;
   struct HTTP_Record* record_p = NULL;
   Test_U_MessageData_t* message_data_container_p = NULL;
   Test_U_Message* message_p = NULL;
   ACE_Message_Block* message_block_p = NULL;
   if (useReactor_in)
-    ACE_NEW_NORETURN (iconnector_p,
-                      Test_U_TCPConnector_t (connection_manager_p,
-                                             configuration.socketHandlerConfiguration.statisticReportingInterval));
+  {
+    if (port_in == HTTPS_DEFAULT_SERVER_PORT)
+      ACE_NEW_NORETURN (iconnector_p,
+                        Test_U_SSLTCPConnector_t (connection_manager_p,
+                                                  configuration.socketHandlerConfiguration.statisticReportingInterval));
+    else
+      ACE_NEW_NORETURN (iconnector_p,
+                        Test_U_TCPConnector_t (connection_manager_p,
+                                               configuration.socketHandlerConfiguration.statisticReportingInterval));
+  } // end IF
   else
+  { // *TODO*: add SSL support to the proactor framework
+    ACE_ASSERT (port_in != HTTPS_DEFAULT_SERVER_PORT);
     ACE_NEW_NORETURN (iconnector_p,
                       Test_U_TCPAsynchConnector_t (connection_manager_p,
                                                    configuration.socketHandlerConfiguration.statisticReportingInterval));
+  } // end ELSE
   if (!iconnector_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -1102,7 +1114,8 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (number_of_dispatch_threads == 0) number_of_dispatch_threads = 1;
+  if (number_of_dispatch_threads == 0)
+    number_of_dispatch_threads = 1;
 
   // step1d: initialize logging and/or tracing
   std::string log_file_name;

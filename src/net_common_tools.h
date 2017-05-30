@@ -24,11 +24,11 @@
 #include <limits>
 #include <string>
 
-#include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
 
 #include "net_common.h"
-#include "net_exports.h"
+//#include "net_exports.h"
 
 //////////////////////////////////////////
 
@@ -37,7 +37,8 @@ enum Net_LinkLayerType  operator++ (enum Net_LinkLayerType& lhs, int);
 
 //////////////////////////////////////////
 
-class Net_Export Net_Common_Tools
+//class Net_Export Net_Common_Tools
+class Net_Common_Tools
 {
  public:
   // --- addresses ---
@@ -54,7 +55,7 @@ class Net_Export Net_Common_Tools
   //         - if the (corresponding IP-) address is not 'local' (here: relative
   //         to the netmask and host IP address) to any connected LAN, there is
   //         currently no public API to determine the 'best' route; only
-  //         internet routers have such information).
+  //         internet routers maintain such information).
   // [*TODO*: for a known peer IP address, implement a function that uses ICMP
   //         over each IP interface to determine the 'best' route.]
   //         Notwithstanding, some platforms assign (hard-coded) priorities to
@@ -88,8 +89,8 @@ class Net_Export Net_Common_Tools
   static bool getAddress (std::string&,  // host name
                           std::string&); // dotted-decimal
 
-  // *NOTE*: this returns the external (i.e. routable) IP address for clients
-  //         behind a (NATted-) gateway
+  // *NOTE*: this returns the external (i.e. routable) IP address (for clients
+  //         behind a (NATted-) gateway)
   static bool interfaceToExternalIPAddress (const std::string&, // interface identifier
                                             ACE_INET_Addr&);    // return value: external IP address
   static bool interfaceToIPAddress (const std::string&, // interface identifier

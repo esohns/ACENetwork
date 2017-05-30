@@ -22,15 +22,16 @@ set (${PROJECT_NAME}_Test_I_SRCS
      test_i_common.h
      test_i_curses_defines.h
      test_i_defines.h
-     test_i_gtk_common.h)
+     test_i_gtk_common.h
+     test_i_stream_common.h)
 #install (FILES
 #         ${PROJECT_NAME}_Test_I_SRCS
 #         DESTINATION include)
 
 add_subdirectory (bittorrent_client)
 add_subdirectory (IRC_client)
+add_subdirectory (url_stream_load)
 
 add_custom_target (test_i
                    COMMAND echo building test_i...)
-add_dependencies (test_i bittorrent_client bittorrent_client_gui IRC_client IRC_client_gui)
-
+add_dependencies (test_i bittorrent_client bittorrent_client_gui IRC_client IRC_client_gui url_stream_load)

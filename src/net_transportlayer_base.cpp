@@ -21,6 +21,9 @@
 
 #include "net_transportlayer_base.h"
 
+#include "ace/Assert.h"
+#include "ace/config-macros.h"
+
 #include "net_macros.h"
 
 Net_InetTransportLayer_Base::Net_InetTransportLayer_Base (Net_TransportLayerType transportLayer_in)
@@ -34,32 +37,8 @@ Net_InetTransportLayer_Base::Net_InetTransportLayer_Base (Net_TransportLayerType
 
 Net_InetTransportLayer_Base::~Net_InetTransportLayer_Base ()
 {
-  NETWORK_TRACE(ACE_TEXT("Net_InetTransportLayer_Base::~Net_InetTransportLayer_Base"));
+  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::~Net_InetTransportLayer_Base"));
 
-}
-
-enum Common_DispatchType
-Net_InetTransportLayer_Base::dispatch ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::dispatch"));
-
-  return dispatch_;
-}
-
-enum Net_ClientServerRole
-Net_InetTransportLayer_Base::role ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::role"));
-
-  return role_;
-}
-
-enum Net_TransportLayerType
-Net_InetTransportLayer_Base::transportLayer ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::transportLayer"));
-
-  return transportLayer_;
 }
 
 bool
@@ -99,32 +78,8 @@ Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base ()
 
 Net_NetlinkTransportLayer_Base::~Net_NetlinkTransportLayer_Base ()
 {
-  NETWORK_TRACE(ACE_TEXT("Net_NetlinkTransportLayer_Base::~Net_NetlinkTransportLayer_Base"));
+  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::~Net_NetlinkTransportLayer_Base"));
 
-}
-
-enum Common_DispatchType
-Net_NetlinkTransportLayer_Base::dispatch ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::dispatch"));
-
-  return dispatch_;
-}
-
-enum Net_ClientServerRole
-Net_NetlinkTransportLayer_Base::role ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::role"));
-
-  return role_;
-}
-
-enum Net_TransportLayerType
-Net_NetlinkTransportLayer_Base::transportLayer ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::transportLayer"));
-
-  return transportLayer_;
 }
 
 bool

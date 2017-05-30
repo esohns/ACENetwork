@@ -28,7 +28,7 @@
 #include <regex>
 #include <sstream>
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "common_defines.h"
 #include "common_tools.h"
@@ -52,26 +52,26 @@ HTTP_Tools::dump (const struct HTTP_Record& record_in)
     is_request = true;
 
     buffer = ACE_TEXT_ALWAYS_CHAR ("Method: ");
-    buffer += HTTP_Tools::Method2String (record_in.method);
+    buffer += HTTP_Tools::MethodToString (record_in.method);
     buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
     buffer += ACE_TEXT_ALWAYS_CHAR ("Request-URI: ");
     buffer += record_in.URI;
     buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
     buffer += ACE_TEXT_ALWAYS_CHAR ("Version: ");
-    buffer += HTTP_Tools::Version2String (record_in.version);
+    buffer += HTTP_Tools::VersionToString (record_in.version);
     buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
   } // end IF
   else
   {
     buffer = ACE_TEXT_ALWAYS_CHAR ("Version: ");
-    buffer += HTTP_Tools::Version2String (record_in.version);
+    buffer += HTTP_Tools::VersionToString (record_in.version);
     buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
     buffer += ACE_TEXT_ALWAYS_CHAR ("Status: ");
     converter << record_in.status;
     buffer += converter.str ();
     buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
     buffer += ACE_TEXT_ALWAYS_CHAR ("Reason: \"");
-    buffer += HTTP_Tools::Status2Reason (record_in.status);
+    buffer += HTTP_Tools::StatusToReason (record_in.status);
     buffer += ACE_TEXT_ALWAYS_CHAR ("\"\n");
   } // end ELSE
 
@@ -156,9 +156,9 @@ HTTP_Tools::dump (const struct HTTP_Record& record_in)
 }
 
 std::string
-HTTP_Tools::Method2String (const HTTP_Method_t& method_in)
+HTTP_Tools::MethodToString (const HTTP_Method_t& method_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::Method2String"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::MethodToString"));
 
   // initialize result
   std::string result = ACE_TEXT_ALWAYS_CHAR ("INVALID/UNKNOWN");
@@ -184,9 +184,9 @@ HTTP_Tools::Method2String (const HTTP_Method_t& method_in)
 }
 
 std::string
-HTTP_Tools::Version2String (const HTTP_Version_t& version_in)
+HTTP_Tools::VersionToString (const HTTP_Version_t& version_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::Version2String"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::VersionToString"));
 
   // initialize result
   std::string result = ACE_TEXT_ALWAYS_CHAR ("INVALID/UNKNOWN");
@@ -214,9 +214,9 @@ HTTP_Tools::Version2String (const HTTP_Version_t& version_in)
 }
 
 std::string
-HTTP_Tools::Status2Reason (const HTTP_Status_t& status_in)
+HTTP_Tools::StatusToReason (const HTTP_Status_t& status_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::Status2Reason"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::StatusToReason"));
 
   // initialize result
   std::string result = ACE_TEXT_ALWAYS_CHAR ("INVALID/UNKNOWN");
@@ -268,9 +268,9 @@ HTTP_Tools::Status2Reason (const HTTP_Status_t& status_in)
 }
 
 HTTP_Method_t
-HTTP_Tools::Method2Type (const std::string& method_in)
+HTTP_Tools::MethodToType (const std::string& method_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::Method2Type"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::MethodToType"));
 
   if (method_in == ACE_TEXT_ALWAYS_CHAR ("GET"))
     return HTTP_Codes::HTTP_METHOD_GET;
@@ -289,9 +289,9 @@ HTTP_Tools::Method2Type (const std::string& method_in)
 }
 
 HTTP_Version_t
-HTTP_Tools::Version2Type (const std::string& version_in)
+HTTP_Tools::VersionToType (const std::string& version_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::Version2Type"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::VersionToType"));
 
   if (version_in == ACE_TEXT_ALWAYS_CHAR ("0.9"))
     return HTTP_Codes::HTTP_VERSION_0_9;
@@ -368,9 +368,9 @@ HTTP_Tools::isRequest (const struct HTTP_Record& record_in)
 }
 
 enum Stream_Decoder_CompressionFormatType
-HTTP_Tools::Encoding2CompressionFormat (const std::string& encoding_in)
+HTTP_Tools::EncodingToCompressionFormat (const std::string& encoding_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::Encoding2CompressionFormat"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::EncodingToCompressionFormat"));
 
   std::locale locale;
   std::string lowercase_string;
@@ -498,6 +498,29 @@ HTTP_Tools::parseURL (const std::string& URL_in,
   return true;
 }
 
+bool
+HTTP_Tools::URLRequiresSSL (const std::string& URL_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::URLRequiresSSL"));
+
+  std::string regex_string = ACE_TEXT_ALWAYS_CHAR ("^(?:http(s)?://)?(.+)?$");
+  std::regex regex (regex_string);
+  std::smatch match_results;
+  if (!std::regex_match (URL_in,
+                         match_results,
+                         regex,
+                         std::regex_constants::match_default))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid URL string (was: \"%s\"), aborting\n"),
+                ACE_TEXT (URL_in.c_str ())));
+    return false;
+  } // end IF
+  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+
+  return match_results[1].matched;
+}
+
 std::string
 HTTP_Tools::URLEncode (const std::string& string_in)
 {
@@ -572,14 +595,14 @@ HTTP_Tools::URLEncode (const std::string& string_in)
 }
 
 std::string
-HTTP_Tools::IPAddress2HostName (const ACE_INET_Addr& address_in)
+HTTP_Tools::IPAddressToHostName (const ACE_INET_Addr& address_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::IPAddress2HostName"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Tools::IPAddressToHostName"));
 
   std::string result;
 
   int result_2 = -1;
-  ACE_TCHAR buffer[32];
+  ACE_TCHAR buffer[BUFSIZ]; // *TODO*: max. 32 bytes ?
   ACE_OS::memset (&buffer, 0, sizeof (buffer));
   result_2 = address_in.addr_to_string (buffer,
                                         sizeof (buffer),
@@ -587,7 +610,7 @@ HTTP_Tools::IPAddress2HostName (const ACE_INET_Addr& address_in)
   if (result_2 == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Inet_Addr::addr_to_string: \"%m\", aborting\n")));
+                ACE_TEXT ("failed to ACE_Inet_Addr::addr_to_string(): \"%m\", aborting\n")));
     return result;
   } // end IF
   result = ACE_TEXT_ALWAYS_CHAR (buffer);

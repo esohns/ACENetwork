@@ -219,7 +219,7 @@ head:               "method" head_rest1              { $$ = $1->size () + $2 + 1
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.method =
-                                                         HTTP_Tools::Method2Type (*$1);
+                                                         HTTP_Tools::MethodToType (*$1);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set method: \"%s\"\n"),
 //                                                                   ACE_TEXT ($1->c_str ())));
@@ -249,7 +249,7 @@ head:               "method" head_rest1              { $$ = $1->size () + $2 + 1
                                                        ACE_ASSERT (match_results[1].matched);
 
                                                        record_r.version =
-                                                           HTTP_Tools::Version2Type (match_results[1].str ());
+                                                           HTTP_Tools::VersionToType (match_results[1].str ());
 //                                                         ACE_DEBUG ((LM_DEBUG,
 //                                                                     ACE_TEXT ("set version: \"%s\"\n"),
 //                                                                     ACE_TEXT (match_results[1].str ().c_str ())));
@@ -271,7 +271,7 @@ request_line_rest2: "version"                        { $$ = $1->size () + 2;
                                                        struct HTTP_Record& record_r =
                                                          iparser_p->current ();
                                                        record_r.version =
-                                                         HTTP_Tools::Version2Type (*$1);
+                                                         HTTP_Tools::VersionToType (*$1);
 //                                                       ACE_DEBUG ((LM_DEBUG,
 //                                                                   ACE_TEXT ("set version: \"%s\"\n"),
 //                                                                   ACE_TEXT ((*$1).c_str ())));

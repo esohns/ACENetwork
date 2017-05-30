@@ -118,10 +118,15 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/misc)
 elseif (WIN32)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/misc)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party)

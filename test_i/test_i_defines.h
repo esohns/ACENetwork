@@ -21,29 +21,58 @@
 #ifndef TEST_I_DEFINES_H
 #define TEST_I_DEFINES_H
 
+#include "ace/config-lite.h"
+
 // event dispatch
-#define TEST_I_DEFAULT_NUMBER_OF_TP_THREADS         3
+#define TEST_I_DEFAULT_NUMBER_OF_TP_THREADS          3
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#define TEST_I_DEFAULT_NUMBER_OF_DISPATCHING_THREADS 1
+#else
+// *IMPORTANT NOTE*: on Linux, specifying 1 will not work correctly for proactor
+//                   scenarios using the default (rt signal) implementation.
+//                   Apparently, the thread already blocked in sigwaitinfo (see
+//                   man pages) will not react to signals pertaining to a
+//                   changed dispatch set
+// *TODO*: retest and qualify
+#define TEST_I_DEFAULT_NUMBER_OF_DISPATCHING_THREADS 2
+#endif
 
 // stream
-#define TEST_I_DEFAULT_BUFFER_SIZE                  16384 // bytes
-#define TEST_I_MAX_MESSAGES                         0 // 0 --> no limits
+#define TEST_I_DEFAULT_BUFFER_SIZE                   16384 // bytes
+#define TEST_I_MAX_MESSAGES                          0 // 0 --> no limits
 
 // (asynchronous) connections
-#define TEST_I_CONNECTION_ASYNCH_TIMEOUT            60 // second(s)
+#define TEST_I_CONNECTION_ASYNCH_TIMEOUT             60 // second(s)
 // *IMPORTANT NOTE*: this means that asynchronous connections take at least this
 //                   amount of time to establish
-#define TEST_I_CONNECTION_ASYNCH_TIMEOUT_INTERVAL   1  // second(s)
+#define TEST_I_CONNECTION_ASYNCH_TIMEOUT_INTERVAL    1  // second(s)
 
 // sessions
-#define TEST_I_SESSION_LOG_FILENAME_PREFIX          "bittorrent_client_session"
-#define TEST_I_SESSION_USE_CURSES                   true // use (PD|N)curses library ?
+#define TEST_I_SESSION_LOG_FILENAME_PREFIX           "test_i"
+#define TEST_I_SESSION_USE_CURSES                    true // use (PD|N)curses library ?
 
-#define TEST_I_DEFAULT_SESSION_LOG                  false // log to file ? : stdout
+#define TEST_I_DEFAULT_SESSION_LOG                   false // log to file ? : stdout
 
 // statistic
-#define TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds: 0 --> OFF
+#define TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL  0 // seconds: 0 --> OFF
 
 // file system
-#define TEST_I_DEFAULT_CONFIGURATION_DIRECTORY      "etc"
+#define TEST_I_DEFAULT_CONFIGURATION_DIRECTORY       "etc"
+
+//////////////////////////////////////////
+
+// UI
+#define TEST_I_UI_THREAD_NAME                        "stream processor"
+
+// UI - GTK
+#define TEST_I_UI_GTK_DEFAULT_RC_FILE                "resources.rc"
+#define TEST_I_UI_GTK_DEFAULT_GLADE_FILE             "test_i.glade"
+
+//#define TEST_I_UI_GTK_PANGO_LOG_FONT_DESCRIPTION          "Monospace 8"
+//#define TEST_I_UI_GTK_PANGO_LOG_COLOR_BASE                "#FFFFFF" // white
+//#define TEST_I_UI_GTK_PANGO_LOG_COLOR_TEXT                "#000000" // black
+
+#define TEST_I_UI_STATUSBAR_CONTEXT_DATA             "data"
+#define TEST_I_UI_STATUSBAR_CONTEXT_INFORMATION      "information"
 
 #endif

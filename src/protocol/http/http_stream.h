@@ -23,23 +23,26 @@
 
 #include <string>
 
-#include <ace/Global_Macros.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 
 #include "stream_base.h"
 #include "stream_common.h"
+#include "stream_inotify.h"
 #include "stream_statemachine_control.h"
 #include "stream_streammodule_base.h"
 
 #include "net_module_runtimestatistic.h"
 
+#include "http_codes.h"
 #include "http_common.h"
-//#include "http_module_bisector.h"
 #include "http_module_parser.h"
 #include "http_module_streamer.h"
-#include "http_stream_common.h"
+
+// forward declarations
+typedef Stream_INotify_T<enum Stream_SessionMessageType> HTTP_Stream_INotify_t;
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -114,16 +117,6 @@ class HTTP_Stream_T
                                  ControlMessageType,
                                  DataMessageType,
                                  SessionMessageType> STREAMER_T;
-  //typedef HTTP_Module_Bisector_T<ACE_SYNCH_MUTEX,
-  //                               ACE_MT_SYNCH,
-  //                               Common_TimePolicy_t,
-  //                               SessionMessageType,
-  //                               ProtocolMessageType,
-  //                               ModuleHandlerConfigurationType,
-  //                               StreamStateType,
-  //                               SessionDataType,
-  //                               SessionDataContainerType,
-  //                               StatisticContainerType> BISECTOR_T;
   typedef HTTP_Module_ParserH_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 ControlMessageType,
@@ -137,12 +130,6 @@ class HTTP_Stream_T
                                 SessionDataContainerType,
                                 StatisticContainerType,
                                 UserDataType> PARSER_T;
-  //typedef Stream_StreamModule_T<ACE_MT_SYNCH,
-  //                              Common_TimePolicy_t,
-  //                              Stream_ModuleConfiguration,
-  //                              ModuleHandlerConfigurationType,
-  //                              STREAMER_T,
-  //                              BISECTOR_T> MODULE_MARSHAL_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 Stream_SessionId_t,
@@ -153,16 +140,6 @@ class HTTP_Stream_T
                                 HTTP_Stream_INotify_t,
                                 STREAMER_T,
                                 PARSER_T> MODULE_MARSHAL_T;
-
-  //typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
-  //                             Common_TimePolicy_t,
-  //                             SessionMessageType,
-  //                             ProtocolMessageType> PARSER_T;
-  //typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
-  //                                       Common_TimePolicy_t,
-  //                                       Stream_ModuleConfiguration,
-  //                                       ModuleHandlerConfigurationType,
-  //                                       PARSER_T> MODULE_PARSER_T;
 
   typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
                                             Common_TimePolicy_t,

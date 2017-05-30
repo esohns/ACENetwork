@@ -144,11 +144,11 @@ class Test_U_Stream
   // finalize stream
   // *NOTE*: need this to clean up queued modules if something goes wrong during
   //         initialize () !
-  bool finalize (const Stream_Configuration&); // configuration
+//  bool finalize (const struct Stream_Configuration&); // configuration
 
   // modules
   IO_MODULE_T                          IO_;
-  Test_U_Module_FileWriter_Module      dump_; // <-- raw HTTP output
+//  Test_U_Module_FileWriter_Module      dump_; // <-- raw HTTP output
   Test_U_Module_Marshal_Module         marshal_;
   Test_U_Module_StatisticReport_Module statisticReport_;
   Test_U_Module_FileWriter_Module      fileWriter_; // <-- entity (HTML) output

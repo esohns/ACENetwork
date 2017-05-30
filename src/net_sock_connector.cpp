@@ -21,8 +21,9 @@
 
 #include "net_sock_connector.h"
 
-#include <ace/Log_Msg.h>
-#include <ace/OS.h>
+//#include "ace/Countdown_Time.h"
+#include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
 #include "net_common_tools.h"
 #include "net_defines.h"
@@ -355,15 +356,15 @@ close:
 //Net_SOCK_SSL_Connector::Net_SOCK_SSL_Connector ()
 //{
 //  NET_TRACE (ACE_TEXT ("Net_SOCK_SSL_Connector::Net_SOCK_SSL_Connector"));
-
+//
 //}
-
+//
 //Net_SOCK_SSL_Connector::~Net_SOCK_SSL_Connector ()
 //{
 //  NET_TRACE (ACE_TEXT ("Net_SOCK_SSL_Connector::~Net_SOCK_SSL_Connector"));
-
+//
 //}
-
+//
 //int
 //Net_SOCK_SSL_Connector::connect (ACE_SSL_SOCK_Stream& stream_in,
 //                                 const ACE_Addr& remoteAddress_in,
@@ -371,119 +372,119 @@ close:
 //                                 const ACE_Addr& localAddress_in,
 //                                 int reuseAddr_in,
 //                                 int flags_in,
-//                                 int permissions_in,
-//                                 int protocol_in)
+//                                 int permissions_in)
 //{
 //  NET_TRACE (ACE_TEXT ("Net_SOCK_SSL_Connector::connect"));
-
+//
 //  // Take into account the time to complete the basic TCP handshake
 //  // and the SSL handshake.
 //  ACE_Time_Value time_copy;
 //  ACE_Countdown_Time countdown (&time_copy);
-//  if (timeout != 0)
+//  if (timeout_in != 0)
 //    {
-//      time_copy += *timeout;
+//      time_copy += *timeout_in;
 //      countdown.start ();
 //    }
-
-////  int result =
-////    inherited::connector_.connect (stream_in.peer (),
-////                                   remote_sap,
-////                                   timeout,
-////                                   local_sap,
-////                                   reuse_addr,
-////                                   flags,
-////                                   perms);
-
+//
+//  int result =
+//    inherited::connector_.connect (stream_in.peer (),
+//                                   remoteAddress_in,
+//                                   timeout_in,
+//                                   localAddress_in,
+//                                   reuseAddr_in,
+//                                   flags_in,
+//                                   permissions_in);
+//
 //  int error = 0;
 //  if (result == -1)
 //    error = errno;  // Save us some TSS accesses.
-
+//
 //  // Obtain the handle from the underlying SOCK_Stream and set it in
 //  // the SSL_SOCK_Stream.  Note that the case where a connection is in
 //  // progress is also handled.  In that case, the handle must also be
 //  // set in the SSL_SOCK_Stream so that the correct handle is returned
 //  // when performing non-blocking connect()s.
-//  if (new_stream.get_handle () == ACE_INVALID_HANDLE
+//  if (stream_in.get_handle () == ACE_INVALID_HANDLE
 //      && (result == 0
 //          || (result == -1 && (error == EWOULDBLOCK
 //                               || error == EINPROGRESS))))
-//    new_stream.set_handle (new_stream.peer ().get_handle ());
-
+//    stream_in.set_handle (stream_in.peer ().get_handle ());
+//
 //  if (result == -1)
 //    return result;
-
+//
 //  // If using a timeout, update the countdown timer to reflect the time
 //  // spent on the connect itself, then pass the remaining time to
 //  // ssl_connect to bound the time on the handshake.
-//  if (timeout != 0)
+//  if (timeout_in != 0)
 //    {
 //      countdown.update ();
-//      timeout = &time_copy;
+//      timeout_in = &time_copy;
 //    }
-
-//  result = this->ssl_connect (new_stream, timeout);
-
+//
+//  result = this->ssl_connect (stream_in, timeout_in);
+//
 //  if (result == -1)
-//    new_stream.close ();
-
+//    stream_in.close ();
+//
 //  return result;
 //}
-
+//
 //#if !defined (ACE_HAS_WINCE)
 //int
-//Net_SOCK_SSL_Connector::connect (ACE_SOCK_Stream &new_stream,
-//                                const ACE_Addr &remote_sap,
-//                                ACE_QoS_Params qos_params,
-//                                const ACE_Time_Value *timeout,
-//                                const ACE_Addr &local_sap,
-//                                ACE_Protocol_Info * protocolinfo,
-//                                ACE_SOCK_GROUP g,
-//                                u_long flags,
-//                                int reuse_addr,
-//                                int /* perms */)
+//Net_SOCK_SSL_Connector::connect (ACE_SSL_SOCK_Stream& stream_in,
+//                                 const ACE_Addr& remoteAddress_in,
+//                                 ACE_QoS_Params QOSParameters_in,
+//                                 const ACE_Time_Value* timeout_in,
+//                                 const ACE_Addr& localAddress_in,
+//                                 ACE_Protocol_Info* ProtocolInfo_in,
+//                                 ACE_SOCK_GROUP group_in,
+//                                 u_long flags_in,
+//                                 int reuseAddr_in,
+//                                 int /* perms */)
 //{
-//  ACE_TRACE ("Net_SOCK_SSL_Connector::connect");
+//  NET_TRACE ("Net_SOCK_SSL_Connector::connect");
 //
-//  if (this->shared_open (new_stream,
-//    remote_sap.get_type (),
-//    0,
-//    protocolinfo,
-//    g,
-//    flags,
-//    reuse_addr) == -1)
+//  if (this->shared_open (stream_in,
+//                         remoteAddress_in.get_type (),
+//                         0,
+//                         ProtocolInfo_in,
+//                         group_in,
+//                         flags_in,
+//                         reuseAddr_in) == -1)
 //    return -1;
-//  else if (this->shared_connect_start (new_stream,
-//    timeout,
-//    local_sap) == -1)
+//  else if (this->shared_connect_start (stream_in,
+//                                       timeout_in,
+//                                       localAddress_in) == -1)
 //    return -1;
 //
-//  int result = ACE_OS::connect (new_stream.get_handle (),
-//                                reinterpret_cast<sockaddr *> (remote_sap.get_addr ()),
-//                                remote_sap.get_size (),
-//                                qos_params);
+//  int result =
+//    ACE_OS::connect (stream_in.get_handle (),
+//                     reinterpret_cast<sockaddr *> (remoteAddress_in.get_addr ()),
+//                     remoteAddress_in.get_size (),
+//                     QOSParameters_in);
 //
-//  return this->shared_connect_finish (new_stream, timeout, result);
+//  return this->shared_connect_finish (stream_in, timeout_in, result);
 //}
 //#endif  // ACE_HAS_WINCE
-
+//
 //int
-//Net_SOCK_SSL_Connector::shared_connect_start (ACE_SOCK_Stream& stream_in,
+//Net_SOCK_SSL_Connector::shared_connect_start (ACE_SSL_SOCK_Stream& stream_in,
 //                                              const ACE_Time_Value* timeout_in,
 //                                              const ACE_Addr& localAddress_in,
 //                                              const ACE_Addr& remoteAddress_in)
 //{
 //  NET_TRACE (ACE_TEXT ("Net_SOCK_SSL_Connector::shared_connect_start"));
-
+//
 //  int result = -1;
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  const ACE_INET_Addr* inet_addr_p = NULL;
 //#endif
 //  ACE_HANDLE handle = stream_in.get_handle ();
-
+//
 //  // sanity check(s)
 //  ACE_ASSERT (handle != ACE_INVALID_HANDLE);
-
+//
 //  if (localAddress_in != ACE_Addr::sap_any)
 //  {
 //    sockaddr* sockaddr_p =
@@ -507,7 +508,7 @@ close:
 //      goto close;
 //    } // end IF
 //  } // end IF
-
+//
 //  // Enable non-blocking, if required.
 //  if (timeout_in)
 //  {
@@ -526,9 +527,9 @@ close:
 //      goto close;
 //    } // end IF
 //  } // end IF
-
+//
 //  ///////////////////////////////////////
-
+//
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  // enable SIO_LOOPBACK_FAST_PATH on Win32
 //  if (remoteAddress_in.get_type () == ACE_ADDRESS_FAMILY_INET)
@@ -552,13 +553,13 @@ close:
 //      } // end IF
 //  } // end IF
 //#endif
-
+//
 //  return 0;
-
+//
 //close:
 //  // Save/restore errno.
 //  ACE_Errno_Guard error (errno);
-
+//
 //  result = stream_in.close ();
 //  if (result == -1)
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -570,6 +571,6 @@ close:
 //                ACE_TEXT ("failed to ACE_SOCK_Stream::close(%d): \"%m\", continuing\n"),
 //                handle));
 //#endif
-
+//
 //  return -1;
 //}

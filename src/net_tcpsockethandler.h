@@ -21,12 +21,13 @@
 #ifndef NET_TCP_SOCKETHANDLER_T_H
 #define NET_TCP_SOCKETHANDLER_T_H
 
-#include <ace/config-macros.h>
-#include <ace/Event_Handler.h>
-#include <ace/Global_Macros.h>
-#include <ace/Reactor_Notification_Strategy.h>
-#include <ace/Svc_Handler.h>
-#include <ace/Synch_Traits.h>
+#include "ace/config-macros.h"
+#include "ace/Event_Handler.h"
+#include "ace/Global_Macros.h"
+#include "ace/Reactor_Notification_Strategy.h"
+#include "ace/Svc_Handler.h"
+#include "ace/Synch_Traits.h"
+#include "ace/SSL/SSL_SOCK_Stream.h"
 
 #include "net_sockethandler_base.h"
 
@@ -34,7 +35,8 @@ template <typename ConfigurationType,
           typename StreamType>
 class Net_TCPSocketHandler_T
  : public Net_SocketHandlerBase_T<ConfigurationType>
- , public ACE_Svc_Handler<StreamType, ACE_MT_SYNCH>
+ , public ACE_Svc_Handler<StreamType,
+                          ACE_MT_SYNCH>
 {
  public:
   // override some task-based members
@@ -52,7 +54,41 @@ class Net_TCPSocketHandler_T
 
  private:
   typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
-  typedef ACE_Svc_Handler<StreamType, ACE_MT_SYNCH> inherited2;
+  typedef ACE_Svc_Handler<StreamType,
+                          ACE_MT_SYNCH> inherited2;
+
+  ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T (const Net_TCPSocketHandler_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T& operator= (const Net_TCPSocketHandler_T&))
+};
+
+//////////////////////////////////////////
+
+// partial specialization (for SSL)
+template <typename ConfigurationType>
+class Net_TCPSocketHandler_T<ConfigurationType,
+                             ACE_SSL_SOCK_Stream>
+ : public Net_SocketHandlerBase_T<ConfigurationType>
+ , public ACE_Svc_Handler<ACE_SSL_SOCK_Stream,
+                          ACE_MT_SYNCH>
+{
+ public:
+  // override some task-based members
+  virtual int open (void* = NULL); // args
+
+  // override some event handler methods
+  virtual int handle_close (ACE_HANDLE,        // handle
+                            ACE_Reactor_Mask); // event mask
+
+ protected:
+  Net_TCPSocketHandler_T ();
+  virtual ~Net_TCPSocketHandler_T ();
+
+  ACE_Reactor_Notification_Strategy notificationStrategy_;
+
+ private:
+  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
+  typedef ACE_Svc_Handler<ACE_SSL_SOCK_Stream,
+                          ACE_MT_SYNCH> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T (const Net_TCPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T& operator= (const Net_TCPSocketHandler_T&))

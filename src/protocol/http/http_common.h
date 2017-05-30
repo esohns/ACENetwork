@@ -24,10 +24,7 @@
 #include <map>
 #include <string>
 
-#include "common_inotify.h"
-
-//#include "stream_common.h"
-#include "stream_control_message.h"
+#include "stream_common.h"
 #include "stream_data_base.h"
 #include "stream_isessionnotify.h"
 
@@ -41,22 +38,12 @@ struct HTTP_Record;
 class HTTP_SessionMessage;
 struct HTTP_Stream_SessionData;
 struct HTTP_Stream_UserData;
-//template <typename AllocatorConfigurationType,
-//          typename ControlMessageType,
-//          typename SessionMessageType,
-//          typename DataType>
-//class HTTP_Message_T;
-
-//typedef Stream_ControlMessage_T<Stream_ControlType,
-//                                Stream_AllocatorConfiguration,
-//                                HTTP_Message_t,
-//                                HTTP_SessionMessage> HTTP_ControlMessage_t;
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                     struct HTTP_Stream_SessionData,
                                     enum Stream_SessionMessageType,
                                     struct HTTP_Record,
-                                    HTTP_SessionMessage> IRC_ISessionNotify_t;
+                                    HTTP_SessionMessage> HTTP_ISessionNotify_t;
 
 typedef Stream_Statistic HTTP_RuntimeStatistic_t;
 
@@ -88,19 +75,5 @@ struct HTTP_Record
   HTTP_Codes::VersionType version;
 };
 typedef Stream_DataBase_T<struct HTTP_Record> HTTP_MessageData_t;
-
-struct HTTP_ConnectionState
- : Net_ConnectionState
-{
-  inline HTTP_ConnectionState ()
-   : Net_ConnectionState ()
-   , configuration (NULL)
-   , userData (NULL)
-  {};
-
-  struct HTTP_ConnectionConfiguration* configuration;
-
-  struct HTTP_Stream_UserData*         userData;
-};
 
 #endif

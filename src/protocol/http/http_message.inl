@@ -109,7 +109,7 @@ HTTP_Message_T<AllocatorConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::Command2String"));
 
   return (method_in == HTTP_Codes::HTTP_METHOD_INVALID ? ACE_TEXT_ALWAYS_CHAR (HTTP_COMMAND_STRING_RESPONSE)
-                                                       : HTTP_Tools::Method2String (method_in));
+                                                       : HTTP_Tools::MethodToString (method_in));
 }
 
 template <typename AllocatorConfigurationType,

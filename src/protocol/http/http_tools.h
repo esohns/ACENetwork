@@ -23,8 +23,8 @@
 
 #include <string>
 
-#include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
 
 #include "stream_dec_common.h"
 
@@ -40,29 +40,31 @@ class HTTP_Export HTTP_Tools
   // debug info
   static std::string dump (const HTTP_Record&);
 
-  static std::string Method2String (const HTTP_Method_t&);
-  static std::string Version2String (const HTTP_Version_t&);
-  static std::string Status2Reason (const HTTP_Status_t&);
+  static std::string MethodToString (const HTTP_Method_t&);
+  static std::string VersionToString (const HTTP_Version_t&);
+  static std::string StatusToReason (const HTTP_Status_t&);
 
-  static HTTP_Method_t Method2Type (const std::string&);
-  static HTTP_Version_t Version2Type (const std::string&);
+  static HTTP_Method_t MethodToType (const std::string&);
+  static HTTP_Version_t VersionToType (const std::string&);
 
   static bool isHeaderType (const std::string&,      // field name
                             HTTP_Codes::HeaderType); // header type
   static bool isRequest (const struct HTTP_Record&);
 
-  static enum Stream_Decoder_CompressionFormatType Encoding2CompressionFormat (const std::string&);
+  static enum Stream_Decoder_CompressionFormatType EncodingToCompressionFormat (const std::string&);
 
   static bool parseURL (const std::string&, // URL
                         std::string&,       // return value: host name
 //                        ACE_INET_Addr&,     // return value: host address
                         std::string&,       // return value: URI
                         bool&);             // return value: use SSL ?
+  static bool URLRequiresSSL (const std::string&); // URL
+
   // *NOTE*: this 'escapes' the input so it can be sent in an URL
   //         (see also: RFC 1738)
   static std::string URLEncode (const std::string&);
 
-  static std::string IPAddress2HostName (const ACE_INET_Addr&); // host address
+  static std::string IPAddressToHostName (const ACE_INET_Addr&); // host address
 
  private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_Tools ())

@@ -142,6 +142,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   handle_manager = true;
 
   // step2: initialize/start stream
+  ACE_ASSERT (inherited3::configuration_);
   // step2a: connect the stream head message queue with this handler ?
   if (likely (!inherited3::configuration_->socketHandlerConfiguration->useThreadPerConnection))
     inherited3::configuration_->streamConfiguration->notificationStrategy =

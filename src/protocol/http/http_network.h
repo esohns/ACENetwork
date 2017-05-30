@@ -23,14 +23,15 @@
 
 #include <string>
 
-#include <ace/INET_Addr.h>
-#include <ace/Singleton.h>
-#include <ace/Synch_Traits.h>
-#include <ace/Time_Value.h>
+#include "ace/INET_Addr.h"
+#include "ace/Singleton.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Time_Value.h"
 
 #include "stream_common.h"
 
 #include "net_asynch_tcpsockethandler.h"
+#include "net_configuration.h"
 #include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
@@ -43,13 +44,40 @@
 #include "net_client_connector.h"
 
 #include "http_common.h"
-#include "http_configuration.h"
-//#include "http_stream.h"
 #include "http_stream_common.h"
+
+//struct HTTP_ConnectionConfiguration;
+struct HTTP_ConnectionState
+  : Net_ConnectionState
+{
+  inline HTTP_ConnectionState ()
+    : Net_ConnectionState ()
+    , configuration (NULL)
+    , userData (NULL)
+  {};
+
+  //struct HTTP_ConnectionConfiguration* configuration;
+  struct Net_ConnectionConfiguration* configuration;
+
+  struct HTTP_Stream_UserData*        userData;
+};
+
+struct HTTP_SocketHandlerConfiguration
+ : Net_SocketHandlerConfiguration
+{
+  inline HTTP_SocketHandlerConfiguration ()
+   : Net_SocketHandlerConfiguration ()
+   //////////////////////////////////////
+   , userData (NULL)
+  {};
+
+  struct HTTP_Stream_UserData* userData;
+};
 
 /////////////////////////////////////////
 
-typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct HTTP_SocketHandlerConfiguration>,
+typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct HTTP_SocketHandlerConfiguration,
+                                                         ACE_SOCK_STREAM>,
                                   ACE_INET_Addr,
                                   struct Net_ConnectionConfiguration,
                                   struct HTTP_ConnectionState,
@@ -71,15 +99,17 @@ typedef Net_TCPConnectionBase_T<HTTP_TCPHandler_t,
                                 struct Net_ConnectionConfiguration,
                                 struct HTTP_ConnectionState,
                                 HTTP_RuntimeStatistic_t,
-                                HTTP_Stream_t,
                                 struct HTTP_SocketHandlerConfiguration,
+                                struct Net_ListenerConfiguration,
+                                HTTP_Stream_t,
                                 struct HTTP_Stream_UserData> HTTP_TCPConnection_t;
 typedef Net_AsynchTCPConnectionBase_T<HTTP_AsynchTCPHandler_t,
                                       struct Net_ConnectionConfiguration,
                                       struct HTTP_ConnectionState,
                                       HTTP_RuntimeStatistic_t,
-                                      HTTP_Stream_t,
                                       struct HTTP_SocketHandlerConfiguration,
+                                      struct Net_ListenerConfiguration,
+                                      HTTP_Stream_t,
                                       struct HTTP_Stream_UserData> HTTP_AsynchTCPConnection_t;
 
 /////////////////////////////////////////
@@ -88,14 +118,21 @@ typedef Net_IConnection_T<ACE_INET_Addr,
                           struct Net_ConnectionConfiguration,
                           struct HTTP_ConnectionState,
                           HTTP_RuntimeStatistic_t> HTTP_IConnection_t;
-typedef Net_ISocketConnection_T<ACE_INET_Addr,
+//typedef Net_ISocketConnection_T<ACE_INET_Addr,
+//                                struct Net_ConnectionConfiguration,
+//                                struct HTTP_ConnectionState,
+//                                HTTP_RuntimeStatistic_t,
+//                                struct Net_SocketConfiguration,
+//                                struct HTTP_SocketHandlerConfiguration> HTTP_ISocketConnection_t;
+typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 struct Net_ConnectionConfiguration,
                                 struct HTTP_ConnectionState,
                                 HTTP_RuntimeStatistic_t,
-                                HTTP_Stream_t,
-                                enum Stream_StateMachine_ControlState,
                                 struct Net_SocketConfiguration,
-                                struct HTTP_SocketHandlerConfiguration> HTTP_ISocketConnection_t;
+                                struct HTTP_SocketHandlerConfiguration,
+                                HTTP_Stream_t,
+                                enum Stream_StateMachine_ControlState> HTTP_IStreamConnection_t;
+
 //typedef Net_ISession_T<ACE_INET_Addr,
 //                       struct Net_SocketConfiguration,
 //                       struct Net_ConnectionConfiguration,

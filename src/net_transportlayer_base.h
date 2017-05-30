@@ -21,7 +21,7 @@
 #ifndef NET_TRANSPORTLAYER_BASE_H
 #define NET_TRANSPORTLAYER_BASE_H
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
 #include "common.h"
 
@@ -38,9 +38,9 @@ class Net_InetTransportLayer_Base
 
   // implement (part of) Net_ITransportLayer_T
   inline virtual void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
-  virtual enum Common_DispatchType dispatch ();
-  virtual enum Net_ClientServerRole role ();
-  virtual enum Net_TransportLayerType transportLayer ();
+  inline virtual enum Common_DispatchType dispatch () { return dispatch_; };
+  inline virtual enum Net_ClientServerRole role () { return role_; };
+  inline virtual enum Net_TransportLayerType transportLayer () { return transportLayer_; };
 
  protected:
   Net_InetTransportLayer_Base (enum Net_TransportLayerType);
@@ -73,9 +73,9 @@ class Net_NetlinkTransportLayer_Base
   virtual ~Net_NetlinkTransportLayer_Base ();
 
   // implement (part of) Net_ITransportLayer_T
-  virtual enum Common_DispatchType dispatch ();
-  virtual enum Net_ClientServerRole role ();
-  virtual enum Net_TransportLayerType transportLayer ();
+  inline virtual enum Common_DispatchType dispatch () { return dispatch_; };
+  inline virtual enum Net_ClientServerRole role () { return role_; };
+  inline virtual enum Net_TransportLayerType transportLayer () { return transportLayer_; };
 
  protected:
   Net_NetlinkTransportLayer_Base ();

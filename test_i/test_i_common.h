@@ -25,6 +25,8 @@
 #include "stream_inotify.h"
 
 #include "net_common.h"
+#include "net_configuration.h"
+#include "net_defines.h"
 
 struct Net_Configuration;
 struct Test_I_UserData
@@ -35,7 +37,7 @@ struct Test_I_UserData
    , configuration (NULL)
   {};
 
-  Net_Configuration* configuration;
+  struct Net_Configuration* configuration;
 };
 
 struct Test_I_ConnectionState
@@ -47,10 +49,68 @@ struct Test_I_ConnectionState
    , userData (NULL)
   {};
 
-  // *TODO*: consider making this a separate entity (i.e. a pointer)
-  Net_Configuration* configuration;
+  // *TODO*: remove ASAP
+  struct Net_Configuration*    configuration;
 
-  Test_I_UserData*   userData;
+  struct HTTP_Stream_UserData* userData;
+};
+
+struct Test_I_AllocatorConfiguration
+ : Stream_AllocatorConfiguration
+{
+  inline Test_I_AllocatorConfiguration ()
+   : Stream_AllocatorConfiguration ()
+  {
+    // *NOTE*: this facilitates (message block) data buffers to be scanned with
+    //         'flex's yy_scan_buffer() method
+    paddingBytes = NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE;
+  };
+};
+
+typedef Stream_Statistic Test_I_RuntimeStatistic_t;
+typedef Common_IStatistic_T<Test_I_RuntimeStatistic_t> Test_I_StatisticReportingHandler_t;
+
+struct Test_I_SignalHandlerConfiguration
+  : Common_SignalHandlerConfiguration
+{
+  inline Test_I_SignalHandlerConfiguration ()
+    : Common_SignalHandlerConfiguration ()
+    , statisticReportingHandler (NULL)
+    , statisticReportingTimerID (-1)
+  {};
+
+  Test_I_StatisticReportingHandler_t* statisticReportingHandler;
+  long                                statisticReportingTimerID;
+};
+
+struct Test_I_Configuration
+{
+  inline Test_I_Configuration ()
+   : signalHandlerConfiguration ()
+   , allocatorConfiguration ()
+   , socketConfiguration ()
+   , socketHandlerConfiguration ()
+   , connectionConfiguration ()
+   , parserConfiguration ()
+   , moduleConfiguration ()
+   , userData ()
+   , useReactor (NET_EVENT_USE_REACTOR)
+  {};
+
+  // **************************** signal data **********************************
+  struct Test_I_SignalHandlerConfiguration signalHandlerConfiguration;
+  // **************************** socket data **********************************
+  struct Test_I_AllocatorConfiguration     allocatorConfiguration;
+  struct Net_SocketConfiguration           socketConfiguration;
+  struct Net_SocketHandlerConfiguration    socketHandlerConfiguration;
+  struct Net_ConnectionConfiguration       connectionConfiguration;
+  // **************************** parser data **********************************
+  struct Common_ParserConfiguration        parserConfiguration;
+  // **************************** stream data **********************************
+  struct Stream_ModuleConfiguration        moduleConfiguration;
+
+  struct Test_I_UserData                   userData;
+  bool                                     useReactor;
 };
 
 typedef Stream_INotify_T<enum Stream_SessionMessageType> Test_I_IStreamNotify_t;

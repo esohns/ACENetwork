@@ -42,7 +42,6 @@
 // forward declarations
 struct HTTP_ConnectionState;
 struct HTTP_Record;
-struct HTTP_ModuleHandlerConfiguration;
 class HTTP_SessionMessage;
 struct HTTP_Stream_SessionData;
 struct HTTP_Stream_UserData;
@@ -64,26 +63,14 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 //                         HTTP_Record,
 //                         HTTP_SessionMessage> HTTP_IStreamNotify_t;
 
-//struct Net_ConnectionConfiguration
+//struct HTTP_ConnectionConfiguration
 // : Net_ConnectionConfiguration
 //{
-//  inline Net_ConnectionConfiguration ()
+//  inline HTTP_ConnectionConfiguration ()
 //   : Net_ConnectionConfiguration ()
 //   //////////////////////////////////////
 //  {};
 //};
-
-struct HTTP_SocketHandlerConfiguration
- : Net_SocketHandlerConfiguration
-{
-  inline HTTP_SocketHandlerConfiguration ()
-   : Net_SocketHandlerConfiguration ()
-   //////////////////////////////////////
-   , userData (NULL)
-  {};
-
-  struct HTTP_Stream_UserData* userData;
-};
 
 //struct HTTP_ConnectorConfiguration
 //{
@@ -99,55 +86,5 @@ struct HTTP_SocketHandlerConfiguration
 //  struct HTTP_SocketHandlerConfiguration* socketHandlerConfiguration;
 //  unsigned int                            statisticCollectionInterval; // statistic collecting interval (second(s)) [0: off]
 //};
-
-struct HTTP_ProtocolConfiguration
-{
-  inline HTTP_ProtocolConfiguration ()
-   : printProgressDot (HTTP_DEFAULT_PRINT_PROGRESSDOT)
-  {};
-
-  bool printProgressDot;  // print dot '.' (stdlog) for received messages
-};
-
-struct HTTP_StreamConfiguration;
-struct HTTP_ModuleHandlerConfiguration
- : public Stream_ModuleHandlerConfiguration
-{
-  inline HTTP_ModuleHandlerConfiguration ()
-   : Stream_ModuleHandlerConfiguration ()
-   //////////////////////////////////////
-   , printProgressDot (false)
-   , pushStatisticMessages (true)
-   , protocolConfiguration (NULL)
-   //, streamConfiguration (NULL)
-  {
-    crunchMessages = HTTP_DEFAULT_CRUNCH_MESSAGES; // http parser module
-    printFinalReport = true;
-  };
-
-  bool                               printProgressDot; // file writer module
-  bool                               pushStatisticMessages;
-
-  struct HTTP_ProtocolConfiguration* protocolConfiguration;
-  //struct HTTP_StreamConfiguration*   streamConfiguration;
-};
-
-struct HTTP_StreamConfiguration
- : Stream_Configuration
-{
-  inline HTTP_StreamConfiguration ()
-   : Stream_Configuration ()
-   , moduleConfiguration ()
-   , moduleHandlerConfiguration ()
-   , protocolConfiguration (NULL)
-   //, userData (NULL)
-  {};
-
-  struct Stream_ModuleConfiguration*      moduleConfiguration;        // stream module configuration
-  struct HTTP_ModuleHandlerConfiguration* moduleHandlerConfiguration; // module handler configuration
-  struct HTTP_ProtocolConfiguration*      protocolConfiguration;      // protocol configuration
-
-  //struct HTTP_Stream_UserData*           userData;
-};
 
 #endif
