@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "common_defines.h"
 
@@ -50,7 +50,7 @@ Net_Client_Connector_T<HandlerType,
               //                   "synch options" (see line 200 below)
               ACE_NONBLOCK)             // flags: non-blocking I/O
               //0)                       // flags
- , configuration_ ()
+ , configuration_ (NULL)
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
@@ -322,7 +322,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                        StreamType,
                        UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                               const ACE_Time_Value& statisticCollectionInterval_in)
- : configuration_ ()
+ : configuration_ (NULL)
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
@@ -359,38 +359,6 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
 
 }
-
-//template <typename HandlerType,
-//          typename ConnectorType,
-//          typename ConfigurationType,
-//          typename StateType,
-//          typename StatisticContainerType,
-//          typename HandlerConfigurationType,
-//          typename StreamType,
-//          typename UserDataType>
-//void
-//Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
-//                                               ConfigurationType,
-//                                               StateType,
-//                                               StatisticContainerType,
-//                                               HandlerConfigurationType,
-//                                               StreamType,
-//                                               UserDataType>,
-//                       ConnectorType,
-//                       ACE_INET_Addr,
-//                       ConfigurationType,
-//                       StateType,
-//                       StatisticContainerType,
-//                       HandlerConfigurationType,
-//                       StreamType,
-//                       UserDataType>::abort ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
-//
-//  ACE_ASSERT (false);
-//  ACE_NOTSUP;
-//  ACE_NOTREACHED (return;)
-//}
 
 template <typename HandlerType,
           typename ConnectorType,
@@ -653,7 +621,7 @@ Net_Client_Connector_T<HandlerType,
                        StreamType,
                        UserDataType>::Net_Client_Connector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                               const ACE_Time_Value& statisticCollectionInterval_in)
- : configuration_ ()
+ : configuration_ (NULL)
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
 {
@@ -684,33 +652,6 @@ Net_Client_Connector_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
 
 }
-
-//template <typename HandlerType,
-//          typename ConnectorType,
-//          typename ConfigurationType,
-//          typename StateType,
-//          typename StatisticContainerType,
-//          typename HandlerConfigurationType,
-//          typename StreamType,
-//          typename UserDataType>
-//void
-//Net_Client_Connector_T<HandlerType,
-//                       ConnectorType,
-//                       Net_Netlink_Addr,
-//                       ConfigurationType,
-//                       StateType,
-//                       StatisticContainerType,
-//                       HandlerConfigurationType,
-//                       StreamType,
-//                       UserDataType>::abort ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
-//
-//  ACE_ASSERT (false);
-
-//  ACE_NOTSUP;
-//  ACE_NOTREACHED (return;)
-//}
 
 template <typename HandlerType,
           typename ConnectorType,

@@ -20,8 +20,8 @@
 
 #include <string>
 
-#include <ace/Log_Msg.h>
-#include <ace/OS.h>
+#include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
 #include "common_timer_manager_common.h"
 
@@ -57,7 +57,6 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
  , sessionData_ (NULL)
  , broadcastConnectionHandle_ (ACE_INVALID_HANDLE)
  , connectionHandle_ (ACE_INVALID_HANDLE)
- , initialized_ (false)
  , isSessionConnection_ (false)
  , sendRequestOnOffer_ (false)
 {
@@ -183,35 +182,30 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
-                       ConnectorType>::initialize (const ConfigurationType& configuration_in)
+                       ConnectorType>::initialize (const ConfigurationType& configuration_in,
+                                                   Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (configuration_in.protocolConfiguration);
 
-  if (initialized_)
+  if (inherited::isInitialized_)
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("re-initializing...\n")));
-
     // clean up
     if (sessionData_)
     {
       sessionData_->decrease ();
       sessionData_ = NULL;
     } // end IF
-
-    initialized_ = false;
   } // end IF
 
   // *TODO*: remove type inference
   sendRequestOnOffer_ =
       configuration_in.protocolConfiguration->sendRequestOnOffer;
 
-  initialized_ = inherited::initialize (configuration_in);
-
-  return initialized_;
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 template <ACE_SYNCH_DECL,
@@ -1130,7 +1124,8 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         StreamStateType,
                         SessionDataType,
                         SessionDataContainerType,
-                        StatisticContainerType>::initialize (const ConfigurationType& configuration_in)
+                        StatisticContainerType>::initialize (const ConfigurationType& configuration_in,
+                                                             Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::initialize"));
 
@@ -1141,13 +1136,10 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
 
   if (inherited::isInitialized_)
   {
-    //ACE_DEBUG ((LM_DEBUG,
-    //            ACE_TEXT ("re-initializing...\n")));
-
-    inherited::isInitialized_ = false;
   } // end IF
 
-  return inherited::initialize (configuration_in);
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 template <ACE_SYNCH_DECL,

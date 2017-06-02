@@ -173,9 +173,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
 
-  {
-    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-
+  {//ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
     if (!headFragment_)
       headFragment_ = message_inout;
     else
@@ -226,9 +224,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   // *NOTE*: the message has been parsed successfully
   //         --> pass the data (chain) downstream
-  {
-    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-
+  {//ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
     //// *NOTE*: new data fragments may have arrived by now
     ////         --> set the next head fragment ?
     //message_2 = dynamic_cast<DataMessageType*> (message_p->cont ());
@@ -281,8 +277,6 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                                                                 bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Parser_T::handleSessionMessage"));
-
-  //int result = -1;
 
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
@@ -506,9 +500,6 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
   if (inherited::isInitialized_)
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("re-initializing...\n")));
-
     crunch_ = HTTP_DEFAULT_CRUNCH_MESSAGES;
 
     if (headFragment_)
@@ -516,8 +507,6 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
       headFragment_->release ();
       headFragment_ = NULL;
     } // end IF
-
-    inherited::isInitialized_ = false;
   } // end IF
 
   crunch_ = configuration_in.crunchMessages;
@@ -584,9 +573,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
 
-  {
-    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-
+  {//ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
     if (!headFragment_)
       headFragment_ = message_inout;
     else
@@ -637,9 +624,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
   // *NOTE*: the message has been parsed successfully
   //         --> pass the data (chain) downstream
-  {
-    //ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-
+  {//ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
     //// *NOTE*: new data fragments may have arrived by now
     ////         --> set the next head fragment ?
     //message_2 = dynamic_cast<DataMessageType*> (message_p->cont ());
@@ -707,8 +692,6 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_ParserH_T::handleSessionMessage"));
 
-//  int result = -1;
-
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
@@ -746,10 +729,9 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
     case STREAM_SESSION_MESSAGE_END:
     {
       // *NOTE*: only process the first 'session end' message (see above: 2566)
-      {
-        ACE_Guard<ACE_SYNCH_MUTEX> aGuard (inherited::lock_);
-
-        if (inherited::sessionEndProcessed_) break; // done
+      { ACE_Guard<ACE_SYNCH_MUTEX> aGuard (inherited::lock_);
+        if (inherited::sessionEndProcessed_)
+          break; // done
         inherited::sessionEndProcessed_ = true;
       } // end lock scope
 

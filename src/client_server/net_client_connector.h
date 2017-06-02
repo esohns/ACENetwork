@@ -21,10 +21,10 @@
 #ifndef NET_CLIENT_CONNECTOR_H
 #define NET_CLIENT_CONNECTOR_H
 
-#include <ace/Connector.h>
-#include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
-#include <ace/Time_Value.h>
+#include "ace/Connector.h"
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
+#include "ace/Time_Value.h"
 
 #include "stream_statemachine_control.h"
 
@@ -103,8 +103,8 @@ class Net_Client_Connector_T
   inline virtual bool useReactor () const { return true; };
 
   // *NOTE*: handlers retrieve the configuration object with get ()
-  inline virtual const ConfigurationType& get () const { return configuration_; };
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration->connectionConfiguration = &configuration_; return true; };
+  inline virtual const ConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { ACE_ASSERT (configuration_in.socketHandlerConfiguration); configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration->connectionConfiguration = configuration_; return true; };
 
   virtual void abort ();
   virtual ACE_HANDLE connect (const AddressType&);
@@ -133,7 +133,7 @@ class Net_Client_Connector_T
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  ConfigurationType      configuration_; // connection-
+  ConfigurationType*     configuration_; // connection-
 
   ICONNECTION_MANAGER_T* connectionManager_;
   ACE_Time_Value         statisticCollectionInterval_;
@@ -224,8 +224,8 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   inline virtual bool useReactor () const { return true; };
 
   // *NOTE*: handlers retrieve the configuration object with get ()
-  inline virtual const ConfigurationType& get () const { return configuration_; };
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration->connectionConfiguration = &configuration_; return true; };
+  inline virtual const ConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { ACE_ASSERT (configuration_in.socketHandlerConfiguration); configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration->connectionConfiguration = configuration_; return true; };
 
   // *NOTE*: this is just a stub
   inline virtual void abort () { };
@@ -263,7 +263,7 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  ConfigurationType      configuration_; // connection-
+  ConfigurationType*     configuration_; // connection-
 
   ICONNECTION_MANAGER_T* connectionManager_;
   ACE_Time_Value         statisticCollectionInterval_;
@@ -343,8 +343,8 @@ class Net_Client_Connector_T<HandlerType,
   inline virtual bool useReactor () const { return true; };
 
   // *NOTE*: handlers retrieve the configuration object with get ()
-  inline virtual const ConfigurationType& get () const { return configuration_; };
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration->connectionConfiguration = &configuration_; return true; };
+  inline virtual const ConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { ACE_ASSERT (configuration_in.socketHandlerConfiguration); configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration->connectionConfiguration = configuration_; return true; };
 
   // *NOTE*: this is just a stub
   inline virtual void abort () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
@@ -359,7 +359,7 @@ class Net_Client_Connector_T<HandlerType,
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
-  ConfigurationType      configuration_; // connection-
+  ConfigurationType*     configuration_; // connection-
 
   ICONNECTION_MANAGER_T* connectionManager_;
   ACE_Time_Value         statisticCollectionInterval_;

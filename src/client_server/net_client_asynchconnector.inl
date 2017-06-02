@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "common_defines.h"
 
@@ -42,7 +42,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                              StreamType,
                              UserDataType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                                           const ACE_Time_Value& statisticCollectionInterval_in)
- : configuration_ ()
+ : configuration_ (NULL)
  , connectHandle_ (ACE_INVALID_HANDLE)
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
@@ -553,7 +553,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                              StreamType,
                              UserDataType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                                           const ACE_Time_Value& statisticCollectionInterval_in)
- : configuration_ ()
+ : configuration_ (NULL)
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
  , SAP_ ()
@@ -816,7 +816,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                              StreamType,
                              UserDataType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                                           const ACE_Time_Value& statisticCollectionInterval_in)
- : configuration_ ()
+ : configuration_ (NULL)
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
  , SAP_ ()

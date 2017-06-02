@@ -55,7 +55,7 @@ class Test_U_Module_ProtocolHandler
 
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const struct Stream_ModuleHandlerConfiguration&,
-                           Stream_IAllocator*);
+                           Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (Test_U_Message*&, // data message handle
@@ -81,12 +81,11 @@ class Test_U_Module_ProtocolHandler
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler (const Test_U_Module_ProtocolHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler& operator= (const Test_U_Module_ProtocolHandler&))
 
-  // helper methods
-  Test_U_Message* allocateMessage (unsigned int); // requested size
+//  // helper methods
+//  Test_U_Message* allocateMessage (unsigned int); // requested size
 
-  Stream_IAllocator* allocator_;
-  unsigned int       counter_;
-  unsigned int       sessionID_;
+  unsigned int counter_;
+  unsigned int sessionID_;
 };
 
 // declare module

@@ -57,7 +57,7 @@ IRC_Client_SignalHandler::handle (int signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::handleSignal"));
 
-  int result = -1;
+//  int result = -1;
   IRC_Client_IConnection_Manager_t* connection_manager_p =
       IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
 

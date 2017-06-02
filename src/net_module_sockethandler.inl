@@ -133,16 +133,11 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
 
   if (inherited::isInitialized_)
   {
-    //ACE_DEBUG ((LM_WARNING,
-    //            ACE_TEXT ("re-initializing...\n")));
-
     currentMessageLength_ = 0;
     if (currentMessage_)
       currentMessage_->release ();
     currentMessage_ = NULL;
     currentBuffer_ = NULL;
-
-    inherited::isInitialized_ = false;
   } // end IF
 
   result = inherited::initialize (configuration_in);

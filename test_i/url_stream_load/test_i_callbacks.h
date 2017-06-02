@@ -47,7 +47,7 @@ extern "C"
 // callbacks
 G_MODULE_EXPORT void togglebutton_connect_toggled_cb (GtkToggleButton*, gpointer);
 G_MODULE_EXPORT gint button_cut_clicked_cb (GtkWidget*, gpointer);
-//G_MODULE_EXPORT void entry_url_activate_cb (GtkEntry*, gpointer);
+G_MODULE_EXPORT void entry_url_activate_cb (GtkEntry*, gpointer);
 //G_MODULE_EXPORT void filechooserbutton_output_file_set_cb (GtkWidget*, gpointer);
 //G_MODULE_EXPORT void spinbutton_buffer_value_changed_cb (GtkWidget*, gpointer);
 //G_MODULE_EXPORT void checkbutton_save_toggled_cb (GtkCheckButton*, gpointer);

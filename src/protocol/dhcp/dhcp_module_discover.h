@@ -21,7 +21,7 @@
 #ifndef DHCP_MODULE_DISCOVER_H
 #define DHCP_MODULE_DISCOVER_H
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
 #include "stream_headmoduletask_base.h"
 #include "stream_statistichandler.h"
@@ -50,15 +50,15 @@ class DHCP_Module_Discover_T
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
                                   Stream_UserData>
- //, public Stream_IModuleHandler_T<ConfigurationType>
 {
  public:
   DHCP_Module_Discover_T ();
   virtual ~DHCP_Module_Discover_T ();
 
-  //// override (part of) Stream_IModuleHandler_T
+  // override (part of) Stream_IModuleHandler_T
   //virtual const ConfigurationType& get () const;
-  virtual bool initialize (const ConfigurationType&);
+  virtual bool initialize (const ConfigurationType&,
+                           Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
@@ -91,7 +91,6 @@ class DHCP_Module_Discover_T
 
   ACE_HANDLE                           broadcastConnectionHandle_;
   ACE_HANDLE                           connectionHandle_; // unicast
-  bool                                 initialized_;
   bool                                 isSessionConnection_;
   bool                                 sendRequestOnOffer_;
 };
@@ -152,7 +151,8 @@ class DHCP_Module_DiscoverH_T
                                     Stream_UserData>::initialize;
 
   // override (part of) Stream_IModuleHandler_T
-  virtual bool initialize (const ConfigurationType&);
+  virtual bool initialize (const ConfigurationType&,
+                           Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle

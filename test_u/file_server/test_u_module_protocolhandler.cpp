@@ -26,7 +26,7 @@
 
 #include <iostream>
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "common_timer_manager_common.h"
 
@@ -38,7 +38,6 @@
 
 Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler ()
  : inherited ()
- , allocator_ (NULL)
  , counter_ (1)
  , sessionID_ (0)
 {
@@ -58,21 +57,11 @@ Test_U_Module_ProtocolHandler::initialize (const struct Stream_ModuleHandlerConf
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::initialize"));
 
-//  int result = -1;
-
   if (inherited::isInitialized_)
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("re-initializing...\n")));
-
-    allocator_ = NULL;
     counter_ = 1;
     sessionID_ = 0;
-
-    inherited::isInitialized_ = false;
   } // end IF
-
-  allocator_ = allocator_in;
 
   return inherited::initialize (configuration_in,
                                 allocator_in);
@@ -99,7 +88,7 @@ Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& mes
 
   // sanity check(s)
   ACE_ASSERT (message_inout);
-  ACE_ASSERT (isInitialized_);
+  ACE_ASSERT (inherited::isInitialized_);
 
 //  int result = -1;
   switch (message_inout->type ())
@@ -135,31 +124,31 @@ Test_U_Module_ProtocolHandler::dump_state () const
 //               ACE_TEXT (inherited::name ())));
 }
 
-Test_U_Message*
-Test_U_Module_ProtocolHandler::allocateMessage (unsigned int requestedSize_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::allocateMessage"));
+//Test_U_Message*
+//Test_U_Module_ProtocolHandler::allocateMessage (unsigned int requestedSize_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::allocateMessage"));
 
-  // initialize return value(s)
-  Test_U_Message* message_p = NULL;
+//  // initialize return value(s)
+//  Test_U_Message* message_p = NULL;
 
-  // sanity check(s)
-  ACE_ASSERT (allocator_);
+//  // sanity check(s)
+//  ACE_ASSERT (allocator_);
 
-  try {
-    message_p =
-      static_cast<Test_U_Message*> (allocator_->malloc (requestedSize_in));
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
-                requestedSize_in));
-  }
-  if (!message_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_IAllocator::malloc(%u), aborting\n"),
-                requestedSize_in));
-  } // end IF
+//  try {
+//    message_p =
+//      static_cast<Test_U_Message*> (allocator_->malloc (requestedSize_in));
+//  } catch (...) {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
+//                requestedSize_in));
+//  }
+//  if (!message_p)
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to Stream_IAllocator::malloc(%u), aborting\n"),
+//                requestedSize_in));
+//  } // end IF
 
-  return message_p;
-}
+//  return message_p;
+//}

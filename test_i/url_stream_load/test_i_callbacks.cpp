@@ -1260,6 +1260,31 @@ button_cut_clicked_cb (GtkWidget* widget_in,
   return FALSE;
 } // button_cut_clicked_cb
 
+void
+entry_url_activate_cb (GtkEntry* entry_in,
+                       gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::entry_url_activate_cb"));
+
+  ACE_UNUSED_ARG (entry_in);
+  struct Test_I_URLStreamLoad_GTK_CBData* data_p =
+      static_cast<struct Test_I_URLStreamLoad_GTK_CBData*> (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+
+  Common_UI_GTKBuildersIterator_t iterator =
+    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  // sanity check(s)
+  ACE_ASSERT (iterator != data_p->builders.end ());
+
+  GtkToggleButton* toggle_button_p =
+      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                 ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_TOGGLEBUTTON_CONNECT_NAME)));
+  ACE_ASSERT (toggle_button_p);
+  gtk_toggle_button_toggled (toggle_button_p);
+}
+
 gint
 button_about_clicked_cb (GtkWidget* widget_in,
                          gpointer userData_in)
@@ -1314,14 +1339,13 @@ button_quit_clicked_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);
-  //Stream_GTK_CBData* data_p = static_cast<Stream_GTK_CBData*> (userData_in);
+  //struct Test_I_URLStreamLoad_GTK_CBData* data_p =
+  //  static_cast<struct Test_I_URLStreamLoad_GTK_CBData*> (userData_in);
   //// sanity check(s)
   //ACE_ASSERT (data_p);
 
   //// step1: remove event sources
-  //{
-  //  ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->lock);
-
+  //{ ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->lock);
   //  for (Common_UI_GTKEventSourceIdsIterator_t iterator = data_p->eventSourceIds.begin ();
   //       iterator != data_p->eventSourceIds.end ();
   //       iterator++)

@@ -199,7 +199,7 @@ BitTorrent_TrackerStream_T<StreamStateType,
 //  typename inherited::MODULE_T* module_p = NULL;
 //  PARSER_T* parser_impl_p = NULL;
 
-  bool result = false;
+//  bool result = false;
   bool setup_pipeline = configuration_in.setupPipeline;
   bool reset_setup_pipeline = false;
 

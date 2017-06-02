@@ -74,13 +74,12 @@ session_handler_cb (void* arg_in)
   guint context_id = 0;
   GtkProgressBar* progress_bar_p = NULL;
   GtkStatusbar* statusbar_p = NULL;
-  gchar* string_p = NULL;
+//  gchar* string_p = NULL;
   std::string label_string =
       ACE_TEXT_ALWAYS_CHAR (ACE::basename (data_p->filename.c_str ()));
-  int result_2 = -1;
+//  int result_2 = -1;
 
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->lock, NULL);
-
     // step1: create new connection handler
     Common_UI_GTKBuildersIterator_t iterator =
       data_p->CBData->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));

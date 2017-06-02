@@ -21,10 +21,10 @@
 #ifndef NET_CLIENT_ASYNCHCONNECTOR_H
 #define NET_CLIENT_ASYNCHCONNECTOR_H
 
-#include <ace/Asynch_Connector.h>
-#include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
-#include <ace/Time_Value.h>
+#include "ace/Asynch_Connector.h"
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
+#include "ace/Time_Value.h"
 
 #include "stream_statemachine_common.h"
 
@@ -105,8 +105,8 @@ class Net_Client_AsynchConnector_T
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  inline virtual const ConfigurationType& get () const { return configuration_; };
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration->connectionConfiguration = &configuration_; return true; };
+  inline virtual const ConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { ACE_ASSERT (configuration_in.socketHandlerConfiguration); configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration->connectionConfiguration = configuration_; return true; };
 
   virtual enum Net_TransportLayerType transportLayer () const;
   inline virtual bool useReactor () const { return false; };
@@ -122,7 +122,7 @@ class Net_Client_AsynchConnector_T
   // override default creation strategy
   virtual HandlerType* make_handler (void);
 
-  ConfigurationType      configuration_; // connection-
+  ConfigurationType*     configuration_; // connection-
   // *NOTE*: due to the current ACE API, there is no way to pass a handle back
   //         from ACE_Asynch_Connector::connect() to
   //         Net_Client_IConnector_T::connect () (see above) --> store it here
@@ -248,8 +248,8 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  inline virtual const ConfigurationType& get () const { return configuration_; };
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration->connectionConfiguration = &configuration_; return true; };
+  inline virtual const ConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { ACE_ASSERT (configuration_in.socketHandlerConfiguration); configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration->connectionConfiguration = configuration_; return true; };
 
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_UDP; };
   inline virtual bool useReactor () const { return false; };
@@ -267,7 +267,7 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                         StreamType,
                                         UserDataType>* make_handler (void);
 
-  ConfigurationType      configuration_; // connection-
+  ConfigurationType*     configuration_; // connection-
   ICONNECTION_MANAGER_T* connectionManager_;
   ACE_Time_Value         statisticCollectionInterval_;
   ACE_INET_Addr          SAP_;
@@ -362,8 +362,8 @@ class Net_Client_AsynchConnector_T<HandlerType,
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  inline virtual const ConfigurationType& get () const { return configuration_; };
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration->connectionConfiguration = &configuration_; return true; };
+  inline virtual const ConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { ACE_ASSERT (configuration_in.socketHandlerConfiguration); configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration->connectionConfiguration = configuration_; return true; };
 
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_NETLINK; };
   inline virtual bool useReactor () const { return false; };
@@ -375,7 +375,7 @@ class Net_Client_AsynchConnector_T<HandlerType,
   // override default creation strategy
   virtual HandlerType* make_handler (void);
 
-  ConfigurationType      configuration_; // connection-
+  ConfigurationType*     configuration_; // connection-
   ICONNECTION_MANAGER_T* connectionManager_;
   ACE_Time_Value         statisticCollectionInterval_;
   Net_Netlink_Addr       SAP_;
