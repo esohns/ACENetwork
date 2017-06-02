@@ -80,13 +80,13 @@ Test_I_ConnectionStream::load (Stream_ModuleList_t& modules_out,
                                              false),
                   false);
   modules_out.push_back (module_p);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_I_Net_IO_Module (ACE_TEXT_ALWAYS_CHAR ("NetIO"),
-                                        NULL,
-                                        false),
-                  false);
-  modules_out.push_back (module_p);
+//  module_p = NULL;
+//  ACE_NEW_RETURN (module_p,
+//                  Test_I_Net_IO_Module (ACE_TEXT_ALWAYS_CHAR ("NetIO"),
+//                                        NULL,
+//                                        false),
+//                  false);
+//  modules_out.push_back (module_p);
 
   deleteModules_out = true;
 
@@ -107,7 +107,8 @@ Test_I_ConnectionStream::initialize (const struct Test_I_URLStreamLoad_StreamCon
   struct Test_I_URLStreamLoad_SessionData* session_data_p = NULL;
   Test_I_URLStreamLoad_ModuleHandlerConfigurationsIterator_t iterator;
   Stream_Module_t* module_p = NULL;
-  Test_I_Net_Writer_t* netIO_impl_p = NULL;
+//  Test_I_Net_Writer_t* netIO_impl_p = NULL;
+  Test_I_HTTPParser* parser_impl_p = NULL;
 
   // allocate a new session state, reset stream
   const_cast<struct Test_I_URLStreamLoad_StreamConfiguration&> (configuration_in).setupPipeline =
@@ -138,24 +139,25 @@ Test_I_ConnectionStream::initialize (const struct Test_I_URLStreamLoad_StreamCon
   // ---------------------------------------------------------------------------
   // ******************* Net IO ************************
   module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("NetIO")));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("Marshal")));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
                 ACE_TEXT (inherited::name_.c_str ()),
-                ACE_TEXT ("NetIO")));
+                ACE_TEXT ("Marshal")));
     goto failed;
   } // end IF
-  netIO_impl_p = dynamic_cast<Test_I_Net_Writer_t*> (module_p->writer ());
-  if (!netIO_impl_p)
+  parser_impl_p = dynamic_cast<Test_I_HTTPParser*> (module_p->writer ());
+  if (!parser_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT ("%s/%s: dynamic_cast<HTTP_Module_ParserH_T> failed, aborting\n"),
+                ACE_TEXT (inherited::name_.c_str ()),
+                ACE_TEXT (module_p->name ())));
     goto failed;
   } // end IF
-  netIO_impl_p->set (&(inherited::state_));
+  parser_impl_p->set (&(inherited::state_));
 
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a

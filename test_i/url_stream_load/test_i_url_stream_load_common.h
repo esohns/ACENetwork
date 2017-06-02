@@ -97,9 +97,11 @@ struct Test_I_URLStreamLoad_GTK_ProgressData
 {
   inline Test_I_URLStreamLoad_GTK_ProgressData ()
    : Test_I_GTK_ProgressData ()
+//   , statistic ()
    , transferred (0)
   {};
 
+//  HTTP_RuntimeStatistic_t statistic;
   unsigned int transferred; // byte(s)
 };
 
@@ -111,7 +113,6 @@ struct Test_I_URLStreamLoad_GTK_CBData
    , configuration (NULL)
    , handle (ACE_INVALID_HANDLE)
    , progressData ()
-   , statistic ()
    , subscribers ()
   {};
 
@@ -119,7 +120,6 @@ struct Test_I_URLStreamLoad_GTK_CBData
 
   ACE_HANDLE                                   handle;
   struct Test_I_URLStreamLoad_GTK_ProgressData progressData;
-  HTTP_RuntimeStatistic_t                      statistic;
   Test_I_Subscribers_t                         subscribers;
 };
 

@@ -216,10 +216,11 @@ idle_initialize_UI_cb (gpointer userData_in)
       GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME)));
   ACE_ASSERT (spin_button_p);
+  gtk_spin_button_set_range (spin_button_p,
+                             0.0,
+                             std::numeric_limits<double>::max ());
   gtk_spin_button_set_value (spin_button_p,
-                             static_cast<double> (data_p->configuration->socketConfiguration.bufferSize));
-  //gtk_spin_button_set_value (spin_button_p,
-  //                           static_cast<double> (data_p->configuration->connectionConfiguration.PDUSize));
+                             static_cast<double> (data_p->configuration->connectionConfiguration.PDUSize));
 
   GtkEntry* entry_p =
     GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
@@ -631,6 +632,26 @@ idle_update_info_display_cb (gpointer userData_in)
   {
     switch (*iterator_2)
     {
+      case COMMON_UI_EVENT_CONNECT:
+      case COMMON_UI_EVENT_DISCONNECT:
+      {
+        spin_button_p =
+          GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_CONNECTIONS_NAME)));
+        ACE_ASSERT (spin_button_p);
+        gtk_spin_button_spin (spin_button_p,
+                              (((*iterator_2) == COMMON_UI_EVENT_CONNECT) ? GTK_SPIN_STEP_FORWARD
+                                                                          : GTK_SPIN_STEP_BACKWARD),
+                              1.0);
+
+        spin_button_p =
+          GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                   ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
+        ACE_ASSERT (spin_button_p);
+
+        is_session_message = true;
+        break;
+      }
       case COMMON_UI_EVENT_STARTED:
       {
         spin_button_p =

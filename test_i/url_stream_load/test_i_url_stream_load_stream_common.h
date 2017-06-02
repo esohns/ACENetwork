@@ -31,7 +31,7 @@
 #include "ace/Singleton.h"
 #include "ace/Time_Value.h"
 
-#include <gtk/gtk.h>
+#include "gtk/gtk.h"
 
 #include "common.h"
 #include "common_istatistic.h"
@@ -125,7 +125,9 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
-  {};
+  {
+    concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
+  };
 
   struct Net_ConnectionConfiguration*     connectionConfiguration;
   guint                                   contextID;

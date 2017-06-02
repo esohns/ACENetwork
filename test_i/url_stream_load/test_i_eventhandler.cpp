@@ -34,7 +34,7 @@
 #include "test_i_callbacks.h"
 #include "test_i_defines.h"
 
-Test_I_EventHandler::Test_I_EventHandler (Test_I_URLStreamLoad_GTK_CBData* CBData_in)
+Test_I_EventHandler::Test_I_EventHandler (struct Test_I_URLStreamLoad_GTK_CBData* CBData_in)
  : CBData_ (CBData_in)
  , sessionDataMap_ ()
 {
@@ -50,7 +50,7 @@ Test_I_EventHandler::~Test_I_EventHandler ()
 
 void
 Test_I_EventHandler::start (Stream_SessionId_t sessionID_in,
-                            const Test_I_URLStreamLoad_SessionData& sessionData_in)
+                            const struct Test_I_URLStreamLoad_SessionData& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_EventHandler::start"));
 
@@ -60,7 +60,7 @@ Test_I_EventHandler::start (Stream_SessionId_t sessionID_in,
   ACE_ASSERT (iterator == sessionDataMap_.end ());
 
   sessionDataMap_.insert (std::make_pair (sessionID_in,
-                                          &const_cast<Test_I_URLStreamLoad_SessionData&> (sessionData_in)));
+                                          &const_cast<struct Test_I_URLStreamLoad_SessionData&> (sessionData_in)));
 
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
@@ -154,6 +154,16 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionID_in,
   enum Common_UI_Event event = COMMON_UI_EVENT_INVALID;
   switch (sessionMessage_in.type ())
   {
+    case STREAM_SESSION_MESSAGE_CONNECT:
+    {
+      event = COMMON_UI_EVENT_CONNECT;
+      break;
+    }
+    case STREAM_SESSION_MESSAGE_DISCONNECT:
+    {
+      event = COMMON_UI_EVENT_DISCONNECT;
+      break;
+    }
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
       if ((*iterator).second->lock)
