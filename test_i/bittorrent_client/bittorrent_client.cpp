@@ -33,24 +33,24 @@ using namespace std;
 //                       prevent ace/iosfwd.h from causing any harm
 #define ACE_IOSFWD_H
 
-#include <ace/Get_Opt.h>
-#include <ace/High_Res_Timer.h>
-#include <ace/iosfwd.h>
+#include "ace/Get_Opt.h"
+#include "ace/High_Res_Timer.h"
+#include "ace/iosfwd.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <ace/Init_ACE.h>
+#include "ace/Init_ACE.h"
 #endif
-#include <ace/Synch.h>
-#include <ace/POSIX_Proactor.h>
-#include <ace/Proactor.h>
-#include <ace/Profile_Timer.h>
-#include <ace/Sig_Handler.h>
-#include <ace/Signal.h>
-#include <ace/Version.h>
+#include "ace/Synch.h"
+#include "ace/POSIX_Proactor.h"
+#include "ace/Proactor.h"
+#include "ace/Profile_Timer.h"
+#include "ace/Sig_Handler.h"
+#include "ace/Signal.h"
+#include "ace/Version.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN32)
-#include <curses.h>
+#include "curses.h"
 #else
-#include <ncurses.h>
+#include "ncurses.h"
 // *NOTE*: the ncurses "timeout" macros conflicts with
 //         ACE_Synch_Options::timeout. Since not currently being used, it's safe
 //         to undefine...
@@ -523,35 +523,42 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   if (debugParser_in)
     configuration_in.parserConfiguration.debugScanner = true;
 
-  configuration_in.peerModuleHandlerConfiguration.allocatorConfiguration =
-    configuration_in.peerStreamConfiguration.allocatorConfiguration;
-  configuration_in.peerModuleHandlerConfiguration.parserConfiguration =
+  struct BitTorrent_Client_PeerModuleHandlerConfiguration peer_modulehandler_configuration;
+  peer_modulehandler_configuration.allocatorConfiguration =
+    &configuration_in.allocatorConfiguration;
+  peer_modulehandler_configuration.parserConfiguration =
       &configuration_in.parserConfiguration;
-  configuration_in.peerModuleHandlerConfiguration.statisticReportingInterval =
+  peer_modulehandler_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
-  configuration_in.peerModuleHandlerConfiguration.streamConfiguration =
+  peer_modulehandler_configuration.streamConfiguration =
       &configuration_in.peerStreamConfiguration;
   configuration_in.peerStreamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                               &configuration_in.peerModuleHandlerConfiguration));
+                                                                                               peer_modulehandler_configuration));
 
-  configuration_in.trackerModuleHandlerConfiguration.allocatorConfiguration =
-    configuration_in.trackerStreamConfiguration.allocatorConfiguration;
-  configuration_in.trackerModuleHandlerConfiguration.parserConfiguration =
+  struct BitTorrent_Client_TrackerModuleHandlerConfiguration tracker_modulehandler_configuration;
+  tracker_modulehandler_configuration.allocatorConfiguration =
+    &configuration_in.allocatorConfiguration;
+  tracker_modulehandler_configuration.parserConfiguration =
       &configuration_in.parserConfiguration;
-  configuration_in.trackerModuleHandlerConfiguration.statisticReportingInterval =
+  tracker_modulehandler_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
-  configuration_in.trackerModuleHandlerConfiguration.streamConfiguration =
+  tracker_modulehandler_configuration.streamConfiguration =
       &configuration_in.trackerStreamConfiguration;
   configuration_in.trackerStreamConfiguration.moduleConfiguration =
       &configuration_in.moduleConfiguration;
   configuration_in.trackerStreamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                                  &configuration_in.trackerModuleHandlerConfiguration));
+                                                                                                  tracker_modulehandler_configuration));
 
   configuration_in.peerStreamConfiguration.moduleConfiguration =
     &configuration_in.moduleConfiguration;
 
   configuration_in.trackerStreamConfiguration.moduleConfiguration =
     &configuration_in.moduleConfiguration;
+
+  struct BitTorrent_Client_PeerConnectionConfiguration peer_connection_configuration;
+  struct BitTorrent_Client_TrackerConnectionConfiguration tracker_connection_configuration;
+  BitTorrent_Client_PeerConnectionConfigurationIterator_t iterator;
+  BitTorrent_Client_TrackerConnectionConfigurationIterator_t iterator_2;
 
   // step2: initialize event dispatch
   struct Common_DispatchThreadData dispatch_thread_data;
@@ -570,35 +577,48 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   } // end IF
 
   // step3: initialize configuration (part 2)
-  //configuration_in.socketHandlerConfiguration.bufferSize =
+  //peer_connection_configuration.socketHandlerConfiguration.bufferSize =
   //  BITTORRENT_CLIENT_BUFFER_SIZE;
-  configuration_in.peerSocketHandlerConfiguration.messageAllocator =
+
+  peer_connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
+    statisticReportingInterval_in;
+  peer_connection_configuration.socketHandlerConfiguration.userData =
+    &configuration_in.peerUserData;
+
+  peer_connection_configuration.messageAllocator =
     configuration_in.peerStreamConfiguration.messageAllocator;
-  configuration_in.peerSocketHandlerConfiguration.statisticReportingInterval =
-    statisticReportingInterval_in;
-  configuration_in.peerSocketHandlerConfiguration.userData =
-    &configuration_in.peerUserData;
-
-  configuration_in.trackerSocketHandlerConfiguration.messageAllocator =
-    configuration_in.trackerStreamConfiguration.messageAllocator;
-  configuration_in.trackerSocketHandlerConfiguration.statisticReportingInterval =
-    statisticReportingInterval_in;
-  configuration_in.trackerSocketHandlerConfiguration.userData =
-    &configuration_in.trackerUserData;
-
-  configuration_in.peerConnectionConfiguration.socketHandlerConfiguration =
-    &configuration_in.peerSocketHandlerConfiguration;
-  configuration_in.peerConnectionConfiguration.streamConfiguration =
+  peer_connection_configuration.streamConfiguration =
     &configuration_in.peerStreamConfiguration;
-  configuration_in.peerConnectionConfiguration.userData =
+  peer_connection_configuration.userData =
     &configuration_in.peerUserData;
 
-  configuration_in.trackerConnectionConfiguration.socketHandlerConfiguration =
-    &configuration_in.trackerSocketHandlerConfiguration;
-  configuration_in.trackerConnectionConfiguration.streamConfiguration =
-    &configuration_in.trackerStreamConfiguration;
-  configuration_in.trackerConnectionConfiguration.userData =
+  configuration_in.peerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                        peer_connection_configuration));
+  iterator =
+    configuration_in.peerConnectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != configuration_in.peerConnectionConfigurations.end ());
+  (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
+    &((*iterator).second);
+
+  tracker_connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
+    statisticReportingInterval_in;
+  tracker_connection_configuration.socketHandlerConfiguration.userData =
     &configuration_in.trackerUserData;
+
+  tracker_connection_configuration.messageAllocator =
+    configuration_in.trackerStreamConfiguration.messageAllocator;
+  tracker_connection_configuration.streamConfiguration =
+    &configuration_in.trackerStreamConfiguration;
+  tracker_connection_configuration.userData =
+    &configuration_in.trackerUserData;
+
+  configuration_in.trackerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                           tracker_connection_configuration));
+  iterator_2 =
+    configuration_in.trackerConnectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != configuration_in.trackerConnectionConfigurations.end ());
+  (*iterator_2).second.socketHandlerConfiguration.connectionConfiguration =
+    &((*iterator_2).second);
 
   configuration_in.sessionConfiguration.controller =
       &bittorrent_control;
@@ -609,9 +629,9 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   configuration_in.sessionConfiguration.metaInfoFileName =
       metaInfoFileName_in;
   configuration_in.sessionConfiguration.connectionConfiguration =
-      &configuration_in.peerConnectionConfiguration;
+    &((*iterator).second);
   configuration_in.sessionConfiguration.trackerConnectionConfiguration =
-      &configuration_in.trackerConnectionConfiguration;
+    &((*iterator_2).second);
   configuration_in.sessionConfiguration.parserConfiguration =
       &configuration_in.parserConfiguration;
   configuration_in.sessionConfiguration.useReactor =
@@ -620,18 +640,18 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   if (useCursesLibrary_in)
     configuration_in.signalHandlerConfiguration.cursesState = &curses_state;
 
-  configuration_in.peerUserData.connectionConfiguration =
-      &configuration_in.peerConnectionConfiguration;
-  configuration_in.peerUserData.moduleConfiguration =
-      &configuration_in.moduleConfiguration;
-  configuration_in.peerUserData.moduleHandlerConfiguration =
-      &configuration_in.peerModuleHandlerConfiguration;
-  configuration_in.trackerUserData.connectionConfiguration =
-      &configuration_in.trackerConnectionConfiguration;
-  configuration_in.trackerUserData.moduleConfiguration =
-      &configuration_in.moduleConfiguration;
-  configuration_in.trackerUserData.moduleHandlerConfiguration =
-      &configuration_in.trackerModuleHandlerConfiguration;
+  //configuration_in.peerUserData.connectionConfiguration =
+  //    &configuration_in.peerConnectionConfiguration;
+  //configuration_in.peerUserData.moduleConfiguration =
+  //    &configuration_in.moduleConfiguration;
+  //configuration_in.peerUserData.moduleHandlerConfiguration =
+  //    &configuration_in.peerModuleHandlerConfiguration;
+  //configuration_in.trackerUserData.connectionConfiguration =
+  //    &configuration_in.trackerConnectionConfiguration;
+  //configuration_in.trackerUserData.moduleConfiguration =
+  //    &configuration_in.moduleConfiguration;
+  //configuration_in.trackerUserData.moduleHandlerConfiguration =
+  //    &configuration_in.trackerModuleHandlerConfiguration;
 
   // step4: initialize signal handling
   if (!signalHandler_in.initialize (configuration_in.signalHandlerConfiguration))
@@ -652,11 +672,11 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   // step5: initialize connection manager
   peer_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  peer_connection_manager_p->set (configuration_in.peerConnectionConfiguration,
+  peer_connection_manager_p->set ((*iterator).second,
                                   //configuration_in.streamUserData);
                                   NULL);
   tracker_connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  tracker_connection_manager_p->set (configuration_in.trackerConnectionConfiguration,
+  tracker_connection_manager_p->set ((*iterator_2).second,
                                      //configuration_in.streamUserData);
                                      NULL);
 

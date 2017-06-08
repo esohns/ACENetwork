@@ -118,7 +118,6 @@ Net_StreamUDPSocketBase_T<HandlerType,
   ConfigurationType* configuration_p =
     static_cast<ConfigurationType*> (arg_in);
   ACE_ASSERT (configuration_p);
-  ACE_ASSERT (configuration_p->socketHandlerConfiguration);
   ACE_ASSERT (configuration_p->streamConfiguration);
 
   int result = -1;
@@ -159,7 +158,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   // step1: open / tweak socket, ...
   // *TODO*: remove type inferences
-  result = inherited::open (configuration_p->socketHandlerConfiguration);
+  result = inherited::open (&configuration_p->socketHandlerConfiguration);
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -186,7 +185,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   // step3a: connect stream head message queue with the reactor notification
   //         pipe ?
   // *TODO*: remove type inferences
-  if (likely (!configuration_p->socketHandlerConfiguration->useThreadPerConnection))
+  if (likely (!configuration_p->socketHandlerConfiguration.useThreadPerConnection))
     configuration_p->streamConfiguration->notificationStrategy =
         &(inherited::notificationStrategy_);
 
@@ -255,7 +254,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   // *NOTE*: let the reactor manage this handler
   // *WARNING*: this has some implications (see close() below)
   // *TODO*: remove type inference
-  if (likely (!configuration_p->socketHandlerConfiguration->useThreadPerConnection))
+  if (likely (!configuration_p->socketHandlerConfiguration.useThreadPerConnection))
     inherited2::decrease ();
 
   inherited2::initialize (*configuration_p);
@@ -460,26 +459,28 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration->allocatorConfiguration);
 
   // read a datagram from the socket
   bool enqueue = true;
   // *TODO*: remove type inferences
   ACE_Message_Block* buffer_p =
-    allocateMessage (inherited2::configuration_->PDUSize);
+    allocateMessage (inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize);
   if (unlikely (!buffer_p))
   { ACE_ASSERT (inherited2::configuration_->messageAllocator);
     if (inherited2::configuration_->messageAllocator->block ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                  inherited2::configuration_->PDUSize));
+                  inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize));
       return -1;
     } // end IF
 
     // no buffer available --> drop datagram and continue
     enqueue = false;
     ACE_NEW_NORETURN (buffer_p,
-                      ACE_Message_Block (inherited2::configuration_->PDUSize,
+                      ACE_Message_Block (inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize,
                                          ACE_Message_Block::MB_DATA,
                                          NULL,
                                          NULL,
@@ -494,7 +495,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate ACE_Message_Block(%u), aborting\n"),
-                  inherited2::configuration_->PDUSize));
+                  inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize));
       return -1;
     } // end IF
   } // end IF
@@ -504,10 +505,10 @@ Net_StreamUDPSocketBase_T<HandlerType,
   ssize_t bytes_received = -1;
   ACE_INET_Addr peer_address;
   bytes_received =
-    inherited::peer_.recv (buffer_p->wr_ptr (),                 // buf
-                           inherited2::configuration_->PDUSize, // n
-                           peer_address,                        // addr
-                           0);                                  // flags
+    inherited::peer_.recv (buffer_p->wr_ptr (),                                                                        // buffer handle
+                           inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize, // buffer size
+                           peer_address,                                                                               // peer address
+                           0);                                                                                         // flags
   //bytes_received = inherited::peer_.recv (buffer_p->wr_ptr (),                 // buf
   //                                        inherited2::configuration_->PDUSize, // n
   //                                        0,                                   // flags
@@ -639,7 +640,6 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   // *IMPORTANT NOTE*: in a threaded environment, workers MAY be dispatching the
@@ -700,7 +700,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   // finished ?
   // *TODO*: remove type inferences
-  if (unlikely (inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection))
+  if (unlikely (inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection))
     if (currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
     {
       currentWriteBuffer_->release ();
@@ -850,7 +850,6 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
 
   int result = -1;
   ACE_Reactor* reactor_p = inherited::reactor ();
@@ -872,7 +871,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
-      if (unlikely (!inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection))
+      if (unlikely (!inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection))
       {
         // *IMPORTANT NOTE*: in a multithreaded environment, in particular when
         //                   using a multithreaded reactor, there may still be
@@ -1465,7 +1464,6 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   ConfigurationType* configuration_p =
     static_cast<ConfigurationType*> (arg_in);
   ACE_ASSERT (configuration_p);
-  ACE_ASSERT (configuration_p->socketHandlerConfiguration);
   ACE_ASSERT (configuration_p->streamConfiguration);
 
   int result = -1;
@@ -1506,7 +1504,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   serializeOutput_ = configuration_p->streamConfiguration->serializeOutput;
 
   // step1: open / tweak socket, ...
-  result = inherited::open (configuration_p->socketHandlerConfiguration);
+  result = inherited::open (&configuration_p->socketHandlerConfiguration);
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1533,7 +1531,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   // step3a: connect stream head message queue with the reactor notification
   //         pipe ?
   // *TODO*: remove type inferences
-  if (likely (!configuration_p->socketHandlerConfiguration->useThreadPerConnection))
+  if (likely (!configuration_p->socketHandlerConfiguration.useThreadPerConnection))
     configuration_p->streamConfiguration->notificationStrategy =
         &(inherited::notificationStrategy_);
 
@@ -1601,7 +1599,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
   // *NOTE*: let the reactor manage this handler...
   // *WARNING*: this has some implications (see close() below)
-  if (likely (!configuration_p->socketHandlerConfiguration->useThreadPerConnection))
+  if (likely (!configuration_p->socketHandlerConfiguration.useThreadPerConnection))
     inherited2::decrease ();
 
   inherited2::initialize (*configuration_p);
@@ -1804,26 +1802,28 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration->allocatorConfiguration);
 
   // read a datagram from the socket
   bool enqueue = true;
   // *TODO*: remove type inferences
   ACE_Message_Block* buffer_p =
-    allocateMessage (inherited2::configuration_->PDUSize);
+    allocateMessage (inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize);
   if (unlikely (!buffer_p))
   {
     if (inherited2::configuration_->messageAllocator->block ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                  inherited2::configuration_->PDUSize));
+                  inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize));
       return -1;
     } // end IF
 
     // no buffer available --> drop datagram and continue
     enqueue = false;
     ACE_NEW_NORETURN (buffer_p,
-                      ACE_Message_Block (inherited2::configuration_->PDUSize,
+                      ACE_Message_Block (inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize,
                                          ACE_Message_Block::MB_DATA,
                                          NULL,
                                          NULL,
@@ -1838,7 +1838,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate ACE_Message_Block(%u), aborting\n"),
-                  inherited2::configuration_->PDUSize));
+                  inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize));
       return -1;
     } // end IF
   } // end IF
@@ -1847,10 +1847,10 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   // read a datagram from the socket
   ssize_t bytes_received = -1;
   bytes_received =
-    inherited::peer_.recv (buffer_p->wr_ptr (),                 // data buffer
-                           inherited2::configuration_->PDUSize, // space
-                           0,                                   // flags
-                           NULL);                               // timeout
+    inherited::peer_.recv (buffer_p->wr_ptr (),                                                                        // buffer handle
+                           inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize, // buffer size
+                           0,                                                                                          // flags
+                           NULL);                                                                                      // timeout
   switch (bytes_received)
   {
     case -1:
@@ -1978,7 +1978,6 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
 
   // *IMPORTANT NOTE*: in a threaded environment, workers MAY be dispatching the
   //                   reactor notification queue concurrently (most notably,
@@ -2036,7 +2035,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   ACE_ASSERT (currentWriteBuffer_);
 
   // finished ?
-  if (unlikely (inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection))
+  if (unlikely (inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection))
     if (currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
     {
       currentWriteBuffer_->release ();
@@ -2185,8 +2184,6 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
-  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   int result = -1;
   ACE_Reactor* reactor_p = inherited::reactor ();
@@ -2208,7 +2205,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
-      if (likely (!inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection))
+      if (likely (!inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection))
       {
         // *IMPORTANT NOTE*: in a multithreaded environment, in particular when
         //                   using a multithreaded reactor, there may still be
@@ -2541,7 +2538,8 @@ allocate:
         static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(0), aborting\n")));
+                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
+                  requestedSize_in));
       return NULL;
     }
 
@@ -2850,7 +2848,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   // step2a: connect stream head message queue with the reactor notification
   //         pipe ?
   // *TODO*: remove type inferences
-  if (likely (!configuration_p->socketHandlerConfiguration->useThreadPerConnection))
+  if (likely (!configuration_p->socketHandlerConfiguration.useThreadPerConnection))
     configuration_p->streamConfiguration->notificationStrategy =
         &(inherited::notificationStrategy_);
 
@@ -2923,7 +2921,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 
   // *NOTE*: let the reactor manage this handler...
   // *WARNING*: this has some implications (see close() below)
-  if (likely (!inherited2::configuration_.streamConfiguration->useThreadPerConnection))
+  if (likely (!inherited2::configuration_.streamConfiguration.useThreadPerConnection))
     inherited2::decrease ();
 
   inherited2::initialize (*configuration_p);
@@ -3104,7 +3102,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
-  ACE_ASSERT (inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration->allocatorConfiguration);
 
   // read a datagram from the socket
   bool enqueue = true;
@@ -3308,7 +3306,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   ACE_ASSERT (currentWriteBuffer_);
 
   // finished ?
-  if (unlikely (inherited2::configuration_->streamConfiguration->useThreadPerConnection))
+  if (unlikely (inherited2::configuration_->streamConfiguration.useThreadPerConnection))
     if (currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
     {
       // clean up
@@ -3448,7 +3446,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
       // a multithreaded reactor, there may still be in-flight notifications
       // being dispatched at this stage, so this just speeds things up a little
       // *TODO*: remove type inference
-      if (likely (!inherited2::configuration_.streamConfiguration->useThreadPerConnection))
+      if (likely (!inherited2::configuration_.streamConfiguration.useThreadPerConnection))
       {
         ACE_Reactor* reactor_p = inherited::reactor ();
         ACE_ASSERT (reactor_p);
@@ -3531,8 +3529,6 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
-  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration->socketConfiguration);
 
   handle_out = inherited::SVC_HANDLER_T::get_handle ();
   localSAP_out.reset ();
@@ -3546,7 +3542,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                   ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
   } // end IF
   remoteSAP_out =
-      inherited2::configuration_->socketHandlerConfiguration->socketConfiguration->address;
+      inherited2::configuration_->socketHandlerConfiguration.socketConfiguration.address;
 }
 
 template <typename AddressType,

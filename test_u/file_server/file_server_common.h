@@ -23,9 +23,9 @@
 
 #include <list>
 
-#include <ace/INET_Addr.h>
-#include <ace/Singleton.h>
-#include <ace/Synch_Traits.h>
+#include "ace/INET_Addr.h"
+#include "ace/Singleton.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_istatistic.h"
 #include "common_isubscribe.h"
@@ -95,47 +95,26 @@ struct FileServer_SignalHandlerConfiguration
   long                                    statisticReportingTimerID;
 };
 
-struct FileServer_SocketHandlerConfiguration;
-struct FileServer_ListenerConfiguration
- : Net_ListenerConfiguration
-{
-  inline FileServer_ListenerConfiguration ()
-   : Net_ListenerConfiguration ()
-   , connectionManager (NULL)
-   , socketHandlerConfiguration (NULL)
-//   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
-  {};
-
-  FileServer_IInetConnectionManager_t*          connectionManager;
-  struct FileServer_SocketHandlerConfiguration* socketHandlerConfiguration;
-//  bool                                    useLoopBackDevice;
-};
-
 struct FileServer_Configuration
  : Test_U_Configuration
 {
   inline FileServer_Configuration ()
    : Test_U_Configuration ()
-   , streamConfiguration ()
-   , socketHandlerConfiguration ()
-   , connectionConfiguration ()
+   , connectionConfigurations ()
    , handle (ACE_INVALID_HANDLE)
    , listener (NULL)
    , listenerConfiguration ()
    , signalHandlerConfiguration ()
+   , streamConfiguration ()
    , userData ()
   {};
 
-  struct FileServer_StreamConfiguration        streamConfiguration;
-
-  struct FileServer_SocketHandlerConfiguration socketHandlerConfiguration;
-  struct FileServer_ConnectionConfiguration    connectionConfiguration;
-
+  FileServer_ConnectionConfigurations_t        connectionConfigurations;
   ACE_HANDLE                                   handle;
   Test_U_IListener_t*                          listener;
   struct FileServer_ListenerConfiguration      listenerConfiguration;
-
   struct FileServer_SignalHandlerConfiguration signalHandlerConfiguration;
+  struct FileServer_StreamConfiguration        streamConfiguration;
 
   struct FileServer_UserData                   userData;
 };

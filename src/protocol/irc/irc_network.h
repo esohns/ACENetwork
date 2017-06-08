@@ -21,13 +21,14 @@
 #ifndef IRC_NETWORK_H
 #define IRC_NETWORK_H
 
+#include <map>
 #include <string>
 
-#include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
-#include <ace/Singleton.h>
-#include <ace/Synch_Traits.h>
-#include <ace/Time_Value.h>
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
+#include "ace/Singleton.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Time_Value.h"
 
 #include "stream_common.h"
 
@@ -44,9 +45,90 @@
 #include "net_client_connector.h"
 
 #include "irc_common.h"
-#include "irc_configuration.h"
-//#include "irc_stream.h"
 #include "irc_stream_common.h"
+
+struct IRC_ConnectionConfiguration;
+struct IRC_SocketHandlerConfiguration
+ : Net_SocketHandlerConfiguration
+{
+  inline IRC_SocketHandlerConfiguration ()
+   : Net_SocketHandlerConfiguration ()
+   ///////////////////////////////////////
+   , connectionConfiguration (NULL)
+  {};
+
+  struct IRC_ConnectionConfiguration* connectionConfiguration;
+};
+
+struct IRC_StreamConfiguration;
+struct IRC_ConnectionConfiguration
+ : Net_ConnectionConfiguration
+{
+  inline IRC_ConnectionConfiguration ()
+   : Net_ConnectionConfiguration ()
+   ///////////////////////////////////////
+   , socketHandlerConfiguration ()
+   , streamConfiguration (NULL)
+  {
+    PDUSize = IRC_MAXIMUM_FRAME_SIZE;
+  };
+
+  struct IRC_SocketHandlerConfiguration socketHandlerConfiguration;
+  struct IRC_StreamConfiguration*       streamConfiguration;
+};
+typedef std::map<std::string,
+                 struct IRC_ConnectionConfiguration> IRC_ConnectionConfigurations_t;
+typedef IRC_ConnectionConfigurations_t::iterator IRC_ConnectionConfigurationIterator_t;
+
+struct IRC_Configuration;
+struct IRC_ConnectionState
+ : Net_ConnectionState
+{
+  inline IRC_ConnectionState ()
+   : Net_ConnectionState ()
+   , configuration (NULL)
+   , controller (NULL)
+   , currentStatistic ()
+  {};
+
+  struct IRC_Configuration* configuration;
+  IRC_IControl*             controller;
+
+  IRC_RuntimeStatistic_t    currentStatistic;
+};
+
+struct IRC_SessionState
+ : IRC_ConnectionState
+{
+  inline IRC_SessionState ()
+   : IRC_ConnectionState ()
+   , away (false)
+   , channel ()
+   , channelModes ()
+   , isFirstMessage (false)
+   , nickName ()
+   , userModes ()
+  {};
+
+  // *TODO*: remove this
+  bool               away;
+  std::string        channel;
+  IRC_ChannelModes_t channelModes;
+  bool               isFirstMessage;
+  std::string        nickName;
+  IRC_UserModes_t    userModes;
+};
+
+//typedef Net_IConnection_T<ACE_INET_Addr,
+//                          struct IRC_Configuration,
+//                          struct IRC_ConnectionState,
+//                          IRC_RuntimeStatistic_t,
+//                          IRC_Stream> IRC_IConnection_t;
+typedef Net_IConnectionManager_T<ACE_INET_Addr,
+                                 struct IRC_ConnectionConfiguration,
+                                 struct IRC_ConnectionState,
+                                 IRC_RuntimeStatistic_t,
+                                 struct Stream_UserData> IRC_IConnection_Manager_t;
 
 //////////////////////////////////////////
 
@@ -101,9 +183,9 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 IRC_Stream_t,
                                 enum Stream_StateMachine_ControlState> IRC_IStreamConnection_t;
 //typedef Net_ISession_T<ACE_INET_Addr,
-//                       Net_SocketConfiguration,
-//                       IRC_ConnectionConfiguration,
-//                       IRC_ConnectionState,
+//                       struct Net_SocketConfiguration,
+//                       struct IRC_ConnectionConfiguration,
+//                       struct IRC_ConnectionState,
 //                       IRC_RuntimeStatistic_t,
 //                       IRC_Stream> IRC_ISession_t;
 

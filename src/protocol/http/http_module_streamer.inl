@@ -18,10 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include <sstream>
 #include <string>
 
-#include <ace/Log_Msg.h>
-#include <ace/OS.h>
+#include "ace/Log_Msg.h"
 
 #include "net_macros.h"
 
@@ -40,8 +40,8 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        ControlMessageType,
                        DataMessageType,
-                       SessionMessageType>::HTTP_Module_Streamer_T ()
- : inherited ()
+                       SessionMessageType>::HTTP_Module_Streamer_T (ISTREAM_T* stream_in)
+ : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Streamer_T::HTTP_Module_Streamer_T"));
 
@@ -180,7 +180,8 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
       default:
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("invalid/unknown HTTP method (was: \"%s\"), continuing\n"),
+                    ACE_TEXT ("%s: invalid/unknown HTTP method (was: \"%s\"), continuing\n"),
+                    inherited::mod_->name (),
                     ACE_TEXT (HTTP_Tools::MethodToString (record_r.method).c_str ())));
         break;
       }
@@ -252,7 +253,8 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
   if (message_inout->space () < buffer.size ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("[%u]: not enough buffer space (was: %d/%d), aborting\n"),
+                ACE_TEXT ("%s: [%u]: not enough buffer space (was: %d/%d), aborting\n"),
+                inherited::mod_->name (),
                 message_inout->id (),
                 message_inout->space (), buffer.size ()));
 
@@ -269,7 +271,8 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+                ACE_TEXT ("%s: failed to ACE_Message_Block::copy(): \"%m\", aborting\n"),
+                inherited::mod_->name ()));
 
     // clean up
     passMessageDownstream_out = false;
@@ -287,7 +290,8 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
   if (message_inout->space () < content_buffer.size ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("[%u]: not enough buffer space (was: %d/%d), aborting\n"),
+                ACE_TEXT ("%s: [%u]: not enough buffer space (was: %d/%d), aborting\n"),
+                inherited::mod_->name (),
                 message_inout->id (),
                 message_inout->space (), content_buffer.size ()));
 
@@ -304,7 +308,8 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Message_Block::copy(): \"%m\", aborting\n")));
+                ACE_TEXT ("%s: failed to ACE_Message_Block::copy(): \"%m\", aborting\n"),
+                inherited::mod_->name ()));
 
     // clean up
     passMessageDownstream_out = false;

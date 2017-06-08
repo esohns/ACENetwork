@@ -23,9 +23,9 @@
 
 #include <list>
 
-#include <ace/INET_Addr.h>
-#include <ace/Singleton.h>
-#include <ace/Synch_Traits.h>
+#include "ace/INET_Addr.h"
+#include "ace/Singleton.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_istatistic.h"
 #include "common_isubscribe.h"
@@ -85,12 +85,12 @@ struct Test_U_Server_ListenerConfiguration
   inline Test_U_Server_ListenerConfiguration ()
    : Net_ListenerConfiguration ()
    , connectionManager (NULL)
-   , socketHandlerConfiguration (NULL)
+   , socketHandlerConfiguration ()
 //   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {};
 
-  Test_U_IInetConnectionManager_t*          connectionManager;
-  struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
+  Test_U_IInetConnectionManager_t*         connectionManager;
+  struct Test_U_SocketHandlerConfiguration socketHandlerConfiguration;
 //  bool                                    useLoopBackDevice;
 };
 

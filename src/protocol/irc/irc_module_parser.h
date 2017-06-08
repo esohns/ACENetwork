@@ -21,7 +21,9 @@
 #ifndef IRC_MODULE_PARSER_H
 #define IRC_MODULE_PARSER_H
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
+
+#include "common_time_common.h"
 
 #include "stream_task_base_synch.h"
 
@@ -72,14 +74,12 @@ class IRC_Module_Parser_T
                                  Stream_UserData>
 {
  public:
-  IRC_Module_Parser_T ();
+  IRC_Module_Parser_T (ISTREAM_T*); // stream handle
   virtual ~IRC_Module_Parser_T ();
 
   // configuration / initialization
-  bool initialize (Stream_IAllocator*,                 // message allocator
-                   bool = IRC_DEFAULT_CRUNCH_MESSAGES, // crunch messages ?
-                   bool = IRC_DEFAULT_LEX_TRACE,       // debug scanner ?
-                   bool = IRC_DEFAULT_YACC_TRACE);     // debug parser ?
+  virtual bool initialize (const ConfigurationType&, // configuration handle
+                           Stream_IAllocator*);      // allocator handle
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
@@ -95,24 +95,18 @@ class IRC_Module_Parser_T
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 Stream_UserData> inherited;
+                                 struct Stream_UserData> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (IRC_Module_Parser_T ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Parser_T (const IRC_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Parser_T& operator= (const IRC_Module_Parser_T&))
 
-  // helper methods
-  DataMessageType* allocateMessage (unsigned int); // requested size
-
-  // message allocator
-  Stream_IAllocator* allocator_;
+  bool             crunchMessages_;
 
   // driver
-  bool               debugScanner_;
-  bool               debugParser_;
-  IRC_ParserDriver   driver_;
-
-  bool               crunchMessages_;
-  bool               isInitialized_;
+  bool             debugScanner_;
+  bool             debugParser_;
+  IRC_ParserDriver driver_;
 };
 
 // include template definition

@@ -68,6 +68,7 @@ if (UNIX)
 # *NOTE*: libCommon requires libcap
  pkg_check_modules (PKG_CAP REQUIRED libcap)
  pkg_check_modules (PKG_OPENSSL REQUIRED openssl)
+ pkg_check_modules (PKG_LIBXML2 REQUIRED libxml-2.0)
 # pkg_check_modules (PKG_CURSES REQUIRED ncurses panel)
  if (GTK3_SUPPORT)
   pkg_check_modules (PKG_GTK3 REQUIRED gtk+-3.0)
@@ -80,6 +81,17 @@ if (UNIX)
 # endif ()
 # *TODO*: repair WIN32 pkgconfig support
 elseif (WIN32)
+# *TODO*: repair pkgconfig support
+ unset (LIBXML2_LIB_FILE)
+ set (LIBXML2_LIB_FILE libxml2.lib)
+ find_library (LIBXML2_LIBRARY ${LIBXML2_LIB_FILE}
+               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../../libxml2-2.9.4
+               PATH_SUFFIXES win32/bin.msvc
+               DOC "searching for \"${LIBXML2_LIB_FILE}\""
+               NO_DEFAULT_PATH)
+ if (NOT LIBXML2_LIBRARY)
+  message (FATAL_ERROR "could not find libxml2 (was: \"${LIBXML2_LIB_FILE}\"), aborting")
+ endif ()
 # find_library (CURSES_LIBRARY pdcurses.lib
 #               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses
 #               PATH_SUFFIXES win32
@@ -88,7 +100,6 @@ elseif (WIN32)
 #               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses
 #               PATH_SUFFIXES win32
 #               DOC "searching for panel.lib")
-
 # if (NOT CURSES_LIBRARY)
 #  message (FATAL_ERROR "could not find pdcurses.lib, aborting")
 # endif ()
@@ -137,6 +148,7 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
 
  include_directories (${PKG_CAP_INCLUDE_DIRS})
+ include_directories (${PKG_LIBXML2_INCLUDE_DIRS})
 # include_directories (${PKG_CURSES_INCLUDE_DIRS})
  if (GTK3_SUPPORT)
   include_directories (${PKG_GTK3_INCLUDE_DIRS})
@@ -149,6 +161,7 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/dec)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/dev)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/file)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/html)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/misc)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/net)
 elseif (WIN32)
@@ -156,6 +169,9 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
  include_directories ("$ENV{PROGRAMFILES}/Microsoft SDKs/Windows/v7.0/Samples/multimedia/directshow/baseclasses")
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
+
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libiconv-1.9.2-1/include)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libxml2-2.9.4/include)
 
 # *TODO*: repair pkgconfig support
 # gtk
@@ -188,6 +204,7 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/dec)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/file)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/html)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/misc)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/net)
 endif ()
@@ -215,6 +232,8 @@ set (${PROJECT_NAME}_URLStreamLoad_EXE_SRCS
      test_i_message.h
      test_i_module_eventhandler.cpp
      test_i_module_eventhandler.h
+     test_i_module_htmlparser.cpp
+     test_i_module_htmlparser.h
      test_i_session_message.cpp
      test_i_session_message.h
      test_i_signalhandler.cpp
@@ -247,6 +266,9 @@ target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 if (WIN32)
  ## *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
+
+# target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/libeay32.lib)
+ target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/ssleay32.lib)
 endif ()
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 target_link_libraries (${EXECUTABLE} ${ACE_SSL_LIBRARY})
@@ -254,6 +276,7 @@ if (UNIX)
  target_link_libraries (${EXECUTABLE} rt)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
  target_link_libraries (${EXECUTABLE} ${PKG_OPENSSL_LIBRARIES})
+ target_link_libraries (${EXECUTABLE} ${PKG_LIBXML2_LIBRARIES})
  target_link_libraries (${EXECUTABLE} X11)
 # target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
  if (GTK3_SUPPORT)
@@ -263,6 +286,9 @@ if (UNIX)
  endif ()
 elseif (WIN32)
  target_link_libraries (${EXECUTABLE} ntdll.lib)
+
+ target_link_libraries (${EXECUTABLE} ${LIBXML2_LIBRARY})
+
 # *TODO*: repair WIN32 pkgconfig support
  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gio-2.0.lib)
  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/glib-2.0.lib)
@@ -274,8 +300,11 @@ elseif (WIN32)
 endif ()
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} CommonUI)
+
 target_link_libraries (${EXECUTABLE} ACEStream)
 target_link_libraries (${EXECUTABLE} ACEStream_Decoder)
+target_link_libraries (${EXECUTABLE} ACEStream_HTML)
+
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
@@ -345,7 +374,7 @@ if (UNIX)
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-l -t"
+                         ARGS "-l -r -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../openssl/bin
                                               ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
@@ -361,6 +390,7 @@ elseif (WIN32)
                                               ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/ui/Debug
                                               ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/modules/dec/Debug
+                                              ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/modules/html/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/protocol/http/Debug
                          WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_i/url_stream_load

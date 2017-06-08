@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/Log_Msg.h>
-#include <ace/Stream.h>
+#include "ace/Log_Msg.h"
+#include "ace/Stream.h"
 
 #include "common_tools.h"
 
@@ -118,8 +118,6 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited4::configuration_);
-  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration);
-  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration);
   ACE_ASSERT (inherited4::configuration_->streamConfiguration);
 
   int result = -1;
@@ -140,11 +138,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   AddressType SAP_any (static_cast<u_short> (0),
                        static_cast<ACE_UINT32> (INADDR_ANY));
   AddressType local_SAP =
-    (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly ? SAP_any
-                                                                                            : inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->address);
+    (inherited4::configuration_->socketHandlerConfiguration.socketConfiguration.writeOnly ? SAP_any
+                                                                                          : inherited4::configuration_->socketHandlerConfiguration.socketConfiguration.address);
 #if defined (ACE_LINUX)
   // (temporarily) elevate priviledges to open system sockets
-  if (!inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly &&
+  if (!inherited4::configuration_.socketHandlerConfiguration.socketConfiguration.writeOnly &&
       (local_SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT))
   {
     if (!Common_Tools::setRootPrivileges ())
@@ -176,7 +174,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   inherited::handle (inherited2::get_handle ());
 
   // step2a: initialize base-class
-  if (!inherited::initialize (*inherited4::configuration_->socketHandlerConfiguration))
+  if (!inherited::initialize (inherited4::configuration_->socketHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_SocketHandlerBase::initialize(): \"%m\", aborting\n")));
@@ -201,7 +199,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   // step3: initialize/start stream
   useThreadPerConnection_ =
-    inherited4::configuration_->socketHandlerConfiguration->useThreadPerConnection;
+    inherited4::configuration_->socketHandlerConfiguration.useThreadPerConnection;
 
   // step3a: connect stream head message queue with a notification pipe/queue ?
   if (!useThreadPerConnection_)
@@ -242,7 +240,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   } // end IF
 
   // step4: start reading (need to pass any data ?)
-  if (!inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly)
+  if (!inherited4::configuration_->socketHandlerConfiguration.socketConfiguration.writeOnly)
   {
     if (messageBlock_in.length () == 0)
       inherited::initiate_read_dgram ();
@@ -291,7 +289,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     // *NOTE*: registered with the proactor at this point
     //         --> data may start arriving at handle_input ()
   } // end IF
-  if (inherited4::configuration_->socketHandlerConfiguration->socketConfiguration->writeOnly)
+  if (inherited4::configuration_->socketHandlerConfiguration.socketConfiguration.writeOnly)
     this->decrease (); // float the connection (connection manager)
                        //ACE_ASSERT (this->count () == 2); // connection manager & read operation
                        //                                     (+ stream module(s))

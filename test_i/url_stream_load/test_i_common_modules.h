@@ -32,8 +32,6 @@
 #include "stream_misc_dump.h"
 #include "stream_misc_statistic_report.h"
 
-#include "stream_module_io.h"
-
 #include "net_connection_manager.h"
 
 #include "http_common.h"
@@ -54,35 +52,6 @@ typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  struct HTTP_Stream_UserData> Test_I_ConnectionManager_t;
 
 // declare module(s)
-typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
-                                     Test_I_ControlMessage_t,
-                                     Test_I_Message,
-                                     Test_I_SessionMessage,
-                                     struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
-                                     enum Stream_ControlType,
-                                     enum Stream_SessionMessageType,
-                                     struct Test_I_URLStreamLoad_StreamState,
-                                     struct Test_I_URLStreamLoad_SessionData,
-                                     Test_I_URLStreamLoad_SessionData_t,
-                                     HTTP_RuntimeStatistic_t,
-                                     ACE_INET_Addr,
-                                     Test_I_ConnectionManager_t,
-                                     struct HTTP_Stream_UserData> Test_I_Net_Writer_t;
-typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
-                                     Test_I_ControlMessage_t,
-                                     Test_I_Message,
-                                     Test_I_SessionMessage,
-                                     struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
-                                     enum Stream_ControlType,
-                                     enum Stream_SessionMessageType,
-                                     struct Test_I_URLStreamLoad_StreamState,
-                                     struct Test_I_URLStreamLoad_SessionData,
-                                     Test_I_URLStreamLoad_SessionData_t,
-                                     HTTP_RuntimeStatistic_t,
-                                     ACE_INET_Addr,
-                                     Test_I_ConnectionManager_t,
-                                     struct HTTP_Stream_UserData> Test_I_Net_Reader_t;
-
 typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
                                struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
@@ -124,22 +93,7 @@ typedef Stream_Module_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                    struct Test_I_URLStreamLoad_SessionData,
                                                    Test_I_URLStreamLoad_SessionData_t> Test_I_StatisticReport_WriterTask_t;
 
-//typedef Stream_Module_Net_Source_HTTP_Get_T<ACE_MT_SYNCH,
-//                                            Common_TimePolicy_t,
-//                                            struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
-//                                            Test_I_ControlMessage_t,
-//                                            Test_I_Message,
-//                                            Test_I_SessionMessage> Test_I_HTTPGet;
-
 // declare module(s)
-DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,                // session data type
-                          enum Stream_SessionMessageType,                         // session event type
-                          struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
-                          Test_I_IStreamNotify_t,                                 // stream notification interface type
-                          Test_I_Net_Reader_t,                                    // reader type
-                          Test_I_Net_Writer_t,                                    // writer type
-                          Test_I_Net_IO);                                         // name
-
 DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,                // session data type
                           enum Stream_SessionMessageType,                         // session event type
                           struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
@@ -155,11 +109,5 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,              
                           Test_I_StatisticReport_ReaderTask_t,                    // reader type
                           Test_I_StatisticReport_WriterTask_t,                    // writer type
                           Test_I_StatisticReport);                                // name
-
-//DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_URLStreamLoad_SessionData,        // session data type
-//                              enum Stream_SessionMessageType,                 // session event type
-//                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
-//                              Test_I_IStreamNotify_t,                         // stream notification interface type
-//                              Test_I_Module_Dump);                            // writer type
 
 #endif

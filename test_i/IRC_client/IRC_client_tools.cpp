@@ -247,14 +247,12 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   // *TODO*: remove type inferences
   ACE_ASSERT (configuration_p);
   ACE_ASSERT (configuration_p->protocolConfiguration);
-  ACE_ASSERT (configuration_p->socketHandlerConfiguration);
-  ACE_ASSERT (configuration_p->socketHandlerConfiguration->socketConfiguration);
   ACE_ASSERT (configuration_p->streamConfiguration);
 
   // step1: set up configuration
   configuration_p->protocolConfiguration->loginOptions =
       loginOptions_in;
-  configuration_p->socketHandlerConfiguration->socketConfiguration->address =
+  configuration_p->socketHandlerConfiguration.socketConfiguration.address =
       peerAddress_in;
   if (finalModule_inout)
   {

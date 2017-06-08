@@ -23,8 +23,8 @@
 
 #include <string>
 
-#include <ace/Global_Macros.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 
@@ -34,11 +34,11 @@
 
 #include "stream_module_io.h"
 
+#include "http_common.h"
+
 #include "test_u_common.h"
 
-//#include "test_u_connection_common.h"
-#include "test_u_common_modules.h"
-#include "test_u_HTTP_decoder_common.h"
+#include "test_u_HTTP_decoder_stream_common.h"
 
 // forward declarations
 class ACE_Message_Block;
@@ -140,18 +140,6 @@ class Test_U_Stream
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream (const Test_U_Stream&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream& operator= (const Test_U_Stream&))
-
-  // finalize stream
-  // *NOTE*: need this to clean up queued modules if something goes wrong during
-  //         initialize () !
-//  bool finalize (const struct Stream_Configuration&); // configuration
-
-  // modules
-  IO_MODULE_T                          IO_;
-//  Test_U_Module_FileWriter_Module      dump_; // <-- raw HTTP output
-  Test_U_Module_Marshal_Module         marshal_;
-  Test_U_Module_StatisticReport_Module statisticReport_;
-  Test_U_Module_FileWriter_Module      fileWriter_; // <-- entity (HTML) output
 };
 
 #endif

@@ -21,8 +21,8 @@
 #ifndef HTTP_MODULE_PARSER_H
 #define HTTP_MODULE_PARSER_H
 
-#include <ace/Global_Macros.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "stream_headmoduletask_base.h"
 #include "stream_statistichandler.h"
@@ -59,7 +59,7 @@ class HTTP_Module_Parser_T
  , public HTTP_ParserDriver_T<SessionMessageType>
 {
  public:
-  HTTP_Module_Parser_T ();
+  HTTP_Module_Parser_T (ISTREAM_T*); // stream handle
   virtual ~HTTP_Module_Parser_T ();
 
   // override (part of) Stream_IModuleHandler_T
@@ -88,6 +88,7 @@ class HTTP_Module_Parser_T
                                   Stream_UserData> inherited;
   typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
 
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T (const HTTP_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T& operator= (const HTTP_Module_Parser_T&))
 
@@ -103,10 +104,6 @@ class HTTP_Module_Parser_T
   //         the 'document entity' content. The protocol data is then available
   //         only from the HTTP_Record (i.e. DATA_T)
   bool             crunch_;
-
-//  // driver
-//  bool             debugScanner_;
-//  bool             debugParser_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -147,7 +144,7 @@ class HTTP_Module_ParserH_T
  , public HTTP_ParserDriver_T<SessionMessageType>
 {
  public:
-  HTTP_Module_ParserH_T ();
+  HTTP_Module_ParserH_T (ISTREAM_T*); // stream handle
   virtual ~HTTP_Module_ParserH_T ();
 
   // *NOTE*: disambiguate Common_ISet_T::set()
@@ -199,6 +196,7 @@ class HTTP_Module_ParserH_T
                                       UserDataType> inherited;
   typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
 
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T (const HTTP_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T& operator= (const HTTP_Module_ParserH_T&))
 
@@ -214,10 +212,6 @@ class HTTP_Module_ParserH_T
   //         the 'document entity' content. The protocol data is then available
   //         only from the HTTP_Record (i.e. DATA_T)
   bool             crunch_;
-
-//  // driver
-//  bool             debugScanner_;
-//  bool             debugParser_;
 };
 
 // include template definition

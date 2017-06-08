@@ -29,26 +29,13 @@
 
 #include "net_macros.h"
 
+#include "test_u_common_modules.h"
+
 #include "test_u_session_message.h"
 
 Test_U_Stream::Test_U_Stream (const std::string& name_in)
  : inherited (name_in,
               true)
- , IO_ (ACE_TEXT_ALWAYS_CHAR ("NetIO"),
-        NULL,
-        false)
-// , dump_ (ACE_TEXT_ALWAYS_CHAR ("FileDump"),
-//          NULL,
-//          false)
- , marshal_ (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
-             NULL,
-             false)
- , statisticReport_ (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
-                     NULL,
-                     false)
- , fileWriter_ (ACE_TEXT_ALWAYS_CHAR ("FileWriter"),
-                NULL,
-                false)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::Test_U_Stream"));
 
@@ -71,14 +58,49 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
   // initialize return value(s)
   deleteModules_out = false;
 
-  // *NOTE*: one problem is that any module that was NOT enqueued onto the
-  //         stream (e.g. because initialize() failed) needs to be explicitly
-  //         close()d
-  modules_out.push_back (&fileWriter_);
-  modules_out.push_back (&statisticReport_);
-  modules_out.push_back (&marshal_);
-//  modules_out.push_back (&dump_);
-  modules_out.push_back (&IO_);
+  // modules
+  Stream_Module_t* module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_U_Module_FileWriter_Module (this,
+                                                   ACE_TEXT_ALWAYS_CHAR ("FileWriter"),
+                                                   NULL,
+                                                   false),
+                  false);
+  modules_out.push_back (module_p);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_U_Module_StatisticReport_Module (this,
+                                                        ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+                                                        NULL,
+                                                        false),
+                  false);
+  modules_out.push_back (module_p);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_U_Module_Marshal_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR ("Marshal"),
+                                                NULL,
+                                                false),
+                  false);
+  modules_out.push_back (module_p);
+  module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                Test_U_Module_FileWriter_Module (this,
+  //                                                 ACE_TEXT_ALWAYS_CHAR ("FileDump"),
+  //                                                 NULL,
+  //                                                 false),
+  //                false);
+  //modules_out.push_back (module_p);
+  //module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  IO_MODULE_T (this,
+                               ACE_TEXT_ALWAYS_CHAR ("NetIO"),
+                               NULL,
+                               false),
+                  false);
+  modules_out.push_back (module_p);
+
+  deleteModules_out = true;
 
   return true;
 }
@@ -95,7 +117,8 @@ Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuratio
   {
     if (!inherited::finalize ())
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Stream_Base_T::finalize(): \"%m\", continuing\n")));
+                  ACE_TEXT ("%s: failed to Stream_Base_T::finalize(): \"%m\", continuing\n"),
+                  ACE_TEXT (inherited::name_.c_str ())));
   } // end IF
 
   bool result = false;
@@ -110,7 +133,7 @@ Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuratio
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
-                ACE_TEXT (inherited::name ().c_str ())));
+                ACE_TEXT (inherited::name_.c_str ())));
     return false;
   } // end IF
   const_cast<struct Test_U_StreamConfiguration&> (configuration_in).setupPipeline =
@@ -149,49 +172,62 @@ Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuratio
 //  } // end IF
 
   // ---------------------------------------------------------------------------
+  typename inherited::MODULE_T* module_p = NULL;
   READER_T* IOReader_impl_p = NULL;
   WRITER_T* IOWriter_impl_p = NULL;
   Test_U_ModuleHandlerConfigurationsIterator_t iterator =
       const_cast<struct Test_U_StreamConfiguration&> (configuration_in).moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.moduleHandlerConfigurations.end ());
-
-  (*iterator).second->targetFileName.clear ();
+  (*iterator).second.targetFileName.clear ();
 
   // ******************* IO ************************
-//  IO_.initialize (*configuration_in.moduleConfiguration);
-  IOWriter_impl_p = dynamic_cast<WRITER_T*> (IO_.writer ());
+  module_p =
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("NetIO")));
+  if (!module_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
+                ACE_TEXT (inherited::name_.c_str ()),
+                ACE_TEXT ("NetIO")));
+    goto error;
+  } // end IF
+  IOWriter_impl_p = dynamic_cast<WRITER_T*> (module_p->writer ());
   if (!IOWriter_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n")));
+                ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n"),
+                ACE_TEXT (inherited::name_.c_str ())));
     goto error;
   } // end IF
   IOWriter_impl_p->set (&(inherited::state_));
 
-  IOReader_impl_p = dynamic_cast<READER_T*> (IO_.reader ());
+  IOReader_impl_p = dynamic_cast<READER_T*> (module_p->reader ());
   if (!IOReader_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Stream_Module_Net_IOReader_T> failed, aborting\n")));
+                ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOReader_T> failed, aborting\n"),
+                ACE_TEXT (inherited::name_.c_str ())));
     goto error;
   } // end IF
-  if (!IOReader_impl_p->initialize (*(*iterator).second))
+  if (!IOReader_impl_p->initialize ((*iterator).second))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to initialize Stream_Module_Net_IOReader_T, aborting\n"),
-                IO_.name ()));
+                ACE_TEXT ("%s/%s: failed to initialize Stream_Module_Net_IOReader_T, aborting\n"),
+                ACE_TEXT (inherited::name_.c_str ()),
+                module_p->name ()));
     goto error;
   } // end IF
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
   //             handle to the session data)
-  IO_.arg (inherited::sessionData_);
+  module_p->arg (inherited::sessionData_);
 
   if (configuration_in.setupPipeline)
     if (!inherited::setup ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to setup pipeline, aborting\n")));
+                  ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
+                  ACE_TEXT (inherited::name_.c_str ())));
       goto error;
     } // end IF
 
@@ -235,9 +271,18 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
   ACE_ASSERT (inherited::sessionData_);
 
   int result = -1;
-
+  typename inherited::MODULE_T* module_p =
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
+  if (!module_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
+                ACE_TEXT (inherited::name_.c_str ()),
+                ACE_TEXT ("StatisticReport")));
+    return false;
+  } // end IF
   Test_U_Module_StatisticReport_WriterTask_t* statisticReport_impl =
-    dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (statisticReport_.writer ());
+    dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
   if (!statisticReport_impl)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -306,7 +351,7 @@ Test_U_Stream::report () const
 //     return;
 //   } // end IF
 //
-//   // delegate to this module...
+//   // delegate to this module
 //   return (runtimeStatistic_impl->report ());
 
   // just a dummy

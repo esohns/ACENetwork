@@ -523,7 +523,8 @@ do_work (
                                                        false);
 
   Test_U_EventHandler ui_event_handler (&CBData_in);
-  Test_U_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
+  Test_U_Module_EventHandler_Module event_handler (NULL,
+                                                   ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
                                                    NULL,
                                                    true);
   Test_U_Module_EventHandler* event_handler_p =
@@ -550,6 +551,30 @@ do_work (
   // ********************** stream configuration data **************************
 //  configuration.allocatorConfiguration.defaultBufferSize =
 //    bufferSize_in;
+  struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
+  modulehandler_configuration.allocatorConfiguration =
+    &configuration.allocatorConfiguration;
+  modulehandler_configuration.connectionConfigurations =
+    &configuration.connectionConfigurations;
+  modulehandler_configuration.connectionManager = connection_manager_p;
+  modulehandler_configuration.fileName = fileName_in;
+  if (useUDP_in)
+    modulehandler_configuration.inbound = false;
+  modulehandler_configuration.printFinalReport = true;
+  //modulehandler_configuration.program =
+  //  FILE_SERVER_DEFAULT_MPEG_TS_PROGRAM_NUMBER;
+  modulehandler_configuration.statisticReportingInterval =
+    ACE_Time_Value (statisticReportingInterval_in, 0);
+  modulehandler_configuration.streamConfiguration =
+    &configuration.streamConfiguration;
+  //modulehandler_configuration.streamType =
+  //  FILE_SERVER_DEFAULT_MPEG_TS_STREAM_TYPE;
+  if (!UIDefinitionFile_in.empty ())
+  {
+    modulehandler_configuration.subscribersLock = &CBData_in.subscribersLock;
+    modulehandler_configuration.subscriber = &ui_event_handler;
+    modulehandler_configuration.subscribers = &CBData_in.subscribers;
+  } // end IF
 
   configuration.streamConfiguration.allocatorConfiguration =
     &configuration.allocatorConfiguration;
@@ -562,19 +587,7 @@ do_work (
   configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
   configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                        &configuration.streamConfiguration.moduleHandlerConfiguration_2));
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.allocatorConfiguration =
-    &configuration.allocatorConfiguration;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.connectionManager =
-    connection_manager_p;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.socketConfigurations =
-    &configuration.socketConfigurations;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.socketHandlerConfiguration =
-    &configuration.socketHandlerConfiguration;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.statisticReportingInterval =
-    ACE_Time_Value (statisticReportingInterval_in, 0);
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.streamConfiguration =
-    &configuration.streamConfiguration;
+                                                                                        modulehandler_configuration));
 
   //configuration.streamConfiguration.protocolConfiguration =
   //  &configuration.protocolConfiguration;
@@ -582,62 +595,42 @@ do_work (
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;
   configuration.streamConfiguration.useReactor = useReactor_in;
   configuration.streamConfiguration.userData = &configuration.userData;
-  configuration.userData.connectionConfiguration =
-      &configuration.connectionConfiguration;
-
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.fileName =
-    fileName_in;
-  if (useUDP_in)
-    configuration.streamConfiguration.moduleHandlerConfiguration_2.inbound =
-      false;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.printFinalReport =
-    true;
-  //configuration.streamConfiguration.moduleHandlerConfiguration_2.program =
-  //  FILE_SERVER_DEFAULT_MPEG_TS_PROGRAM_NUMBER;
-  //configuration.streamConfiguration.moduleHandlerConfiguration_2.streamType =
-  //  FILE_SERVER_DEFAULT_MPEG_TS_STREAM_TYPE;
-
-  if (!UIDefinitionFile_in.empty ())
-  {
-    configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribersLock =
-      &CBData_in.subscribersLock;
-    configuration.streamConfiguration.moduleHandlerConfiguration_2.subscriber =
-      &ui_event_handler;
-    configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribers =
-      &CBData_in.subscribers;
-  } // end IF
+  //configuration.userData.connectionConfiguration =
+  //    &configuration.connectionConfiguration;
 
   // ********************** socket configuration data **************************
+  struct FileServer_ConnectionConfiguration connection_configuration;
+  FileServer_ConnectionConfigurationIterator_t iterator;
   if (useUDP_in)
   {
-    struct Net_SocketConfiguration socket_configuration;
-    result = socket_configuration.address.set (listeningPortNumber_in,
-                                               INADDR_LOOPBACK,
-                                               1,
-                                               0);
+    result =
+      configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration.address.set (listeningPortNumber_in,
+                                                                                                      static_cast<ACE_UINT32> (INADDR_ANY),
+                                                                                                      1,
+                                                                                                      0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
       goto error;
     } // end IF
-    socket_configuration.writeOnly = true;
-    configuration.socketConfigurations.push_back (socket_configuration);
+    configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration.writeOnly =
+      true;
   } // end IF
-  // ****************** socket handler configuration data **********************
-  configuration.socketHandlerConfiguration.messageAllocator =
-    &message_allocator;
-  //configuration.socketHandlerConfiguration.socketConfiguration =
-  //  &configuration.socketConfiguration;
-  configuration.socketHandlerConfiguration.userData =
+  // ****************** connection configuration data **************************
+  connection_configuration.socketHandlerConfiguration.userData =
     &configuration.userData;
-  // ****************** connection configuration data **********************
-  configuration.connectionConfiguration.socketHandlerConfiguration =
-    &configuration.socketHandlerConfiguration;
-  configuration.connectionConfiguration.streamConfiguration =
+  connection_configuration.messageAllocator = &message_allocator;
+  connection_configuration.streamConfiguration =
     &configuration.streamConfiguration;
-  configuration.connectionConfiguration.userData =
-    &configuration.userData;
+  connection_configuration.userData = &configuration.userData;
+  configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                 connection_configuration));
+  iterator =
+    configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
+  (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
+    &((*iterator).second);
 
   //  config.delete_module = false;
   // *WARNING*: set at runtime, by the appropriate connection handler
@@ -715,7 +708,7 @@ do_work (
 
   // step3: initialize connection manager
   connection_manager_p->initialize (maximumNumberOfConnections_in);
-  iconnection_manager_p->set (configuration.connectionConfiguration,
+  iconnection_manager_p->set ((*iterator).second,
                               &user_data);
 
   // step4: initialize listener
@@ -723,8 +716,10 @@ do_work (
   if (useLoopBack_in)
   {
     result =
-      configuration.listenerConfiguration.address.set (listeningPortNumber_in,
-                                                       INADDR_LOOPBACK);
+      configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration.address.set (listeningPortNumber_in,
+                                                                                                      INADDR_LOOPBACK,
+                                                                                                      1,
+                                                                                                      0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -733,11 +728,9 @@ do_work (
     } // end IF
   } // end IF
   else
-    configuration.listenerConfiguration.address.set_port_number (listeningPortNumber_in,
-                                                                 1);
+    configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration.address.set_port_number (listeningPortNumber_in,
+                                                                                                                1);
   configuration.listenerConfiguration.connectionManager = connection_manager_p;
-  configuration.listenerConfiguration.socketHandlerConfiguration =
-    &configuration.socketHandlerConfiguration;
   //configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;
 
   // step5: handle events (signals, incoming connections/data, timers, ...)

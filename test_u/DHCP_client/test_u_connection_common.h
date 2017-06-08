@@ -21,13 +21,16 @@
 #ifndef TEST_U_CONNECTION_COMMON_H
 #define TEST_U_CONNECTION_COMMON_H
 
-#include <ace/INET_Addr.h>
+#include <map>
+#include <string>
+
+#include "ace/INET_Addr.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-#include <ace/Netlink_Addr.h>
+#include "ace/Netlink_Addr.h"
 #endif
-#include <ace/SOCK_Connector.h>
-#include <ace/Synch_Traits.h>
+#include "ace/SOCK_Connector.h"
+#include "ace/Synch_Traits.h"
 
 #include "stream_common.h"
 
@@ -70,6 +73,22 @@ struct Test_U_SocketHandlerConfiguration;
 
 //////////////////////////////////////////
 
+struct Test_U_ConnectionConfiguration;
+struct Test_U_SocketHandlerConfiguration
+ : DHCP_SocketHandlerConfiguration
+{
+  inline Test_U_SocketHandlerConfiguration ()
+   : DHCP_SocketHandlerConfiguration ()
+   ///////////////////////////////////////
+   , connectionConfiguration (NULL)
+   , userData (NULL)
+  {};
+
+  struct Test_U_ConnectionConfiguration* connectionConfiguration;
+
+  struct Test_U_UserData*                userData;
+};
+
 struct Test_U_StreamConfiguration;
 struct Test_U_ConnectionConfiguration
  : DHCP_ConnectionConfiguration
@@ -78,17 +97,20 @@ struct Test_U_ConnectionConfiguration
    : DHCP_ConnectionConfiguration ()
    ///////////////////////////////////////
    , connectionManager (NULL)
-   , socketHandlerConfiguration (NULL)
+   , socketHandlerConfiguration ()
    , streamConfiguration (NULL)
    , userData (NULL)
   {};
 
-  Test_U_IConnectionManager_t*              connectionManager;
-  struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
-  struct Test_U_StreamConfiguration*        streamConfiguration;
+  Test_U_IConnectionManager_t*             connectionManager;
+  struct Test_U_SocketHandlerConfiguration socketHandlerConfiguration;
+  struct Test_U_StreamConfiguration*       streamConfiguration;
 
-  struct Test_U_UserData*                   userData;
+  struct Test_U_UserData*                  userData;
 };
+typedef std::map<std::string,
+                 struct Test_U_ConnectionConfiguration> Test_U_ConnectionConfigurations_t;
+typedef Test_U_ConnectionConfigurations_t::iterator Test_U_ConnectionConfigurationIterator_t;
 
 struct Test_U_ConnectionState
  : DHCP_ConnectionState

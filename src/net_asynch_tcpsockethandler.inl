@@ -18,10 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/Log_Msg.h>
-#include <ace/OS.h>
-#include <ace/OS_Memory.h>
-#include <ace/Proactor.h>
+#include "ace/Log_Msg.h"
+#include "ace/OS.h"
+#include "ace/OS_Memory.h"
+#include "ace/Proactor.h"
 
 #include "common_defines.h"
 
@@ -95,7 +95,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 
   // sanity checks
   ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::configuration_->socketConfiguration);
+  ACE_ASSERT (inherited::configuration_->connectionConfiguration);
   ACE_ASSERT (handle_in != ACE_INVALID_HANDLE);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -112,43 +112,43 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   } // end IF
 #endif
 
-  allocator_ = inherited::configuration_->messageAllocator;
-  PDUSize_ = inherited::configuration_->PDUSize;
+  allocator_ = inherited::configuration_->connectionConfiguration->messageAllocator;
+  PDUSize_ = inherited::configuration_->connectionConfiguration->PDUSize;
 
   // step1: tweak socket
   // *TODO*: remove type inference
-  if (likely (inherited::configuration_->socketConfiguration->bufferSize))
+  if (likely (inherited::configuration_->socketConfiguration.bufferSize))
   {
     if (unlikely (!Net_Common_Tools::setSocketBuffer (handle_in,
                                                       SO_RCVBUF,
-                                                      inherited::configuration_->socketConfiguration->bufferSize)))
+                                                      inherited::configuration_->socketConfiguration.bufferSize)))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                   handle_in,
-                  inherited::configuration_->socketConfiguration->bufferSize));
+                  inherited::configuration_->socketConfiguration.bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
                   handle_in,
-                  inherited::configuration_->socketConfiguration->bufferSize));
+                  inherited::configuration_->socketConfiguration.bufferSize));
 #endif
     } // end IF
     if (unlikely (!Net_Common_Tools::setSocketBuffer (handle_in,
                                                       SO_SNDBUF,
-                                                      inherited::configuration_->socketConfiguration->bufferSize)))
+                                                      inherited::configuration_->socketConfiguration.bufferSize)))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_SNDBUF,%u), continuing\n"),
                   handle_in,
-                  inherited::configuration_->socketConfiguration->bufferSize));
+                  inherited::configuration_->socketConfiguration.bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
                   handle_in,
-                  inherited::configuration_->socketConfiguration->bufferSize));
+                  inherited::configuration_->socketConfiguration.bufferSize));
 #endif
     } // end IF
   } // end IF
@@ -194,7 +194,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
     goto close;
   } // end IF
   if (unlikely (!Net_Common_Tools::setLinger (handle_in,
-                                              inherited::configuration_->socketConfiguration->linger,
+                                              inherited::configuration_->socketConfiguration.linger,
                                               std::numeric_limits<unsigned short>::max ())))
   {
     error = ACE_OS::last_error ();
@@ -204,14 +204,14 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setLinger(0x%@,%s,-1), aborting\n"),
                   handle_in,
-                  (inherited::configuration_->socketConfiguration->linger ? ACE_TEXT ("true")
-                                                                          : ACE_TEXT ("false"))));
+                  (inherited::configuration_->socketConfiguration.linger ? ACE_TEXT ("true")
+                                                                         : ACE_TEXT ("false"))));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setLinger(%d,%s,-1), aborting\n"),
                   handle_in,
-                  (inherited::configuration_->socketConfiguration->linger ? ACE_TEXT ("true")
-                                                                          : ACE_TEXT ("false"))));
+                  (inherited::configuration_->socketConfiguration.linger ? ACE_TEXT ("true")
+                                                                         : ACE_TEXT ("false"))));
 #endif
     } // end IF
     goto close;

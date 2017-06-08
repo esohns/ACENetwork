@@ -51,28 +51,32 @@ IRC_Client_Stream::load (Stream_ModuleList_t& modules_out,
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  IRC_Client_Module_IRCHandler_Module (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
+                  IRC_Client_Module_IRCHandler_Module (this,
+                                                       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
                                                        NULL,
                                                        false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  IRC_Client_Module_StatisticReport_Module (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+                  IRC_Client_Module_StatisticReport_Module (this,
+                                                            ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
                                                             NULL,
                                                             false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  IRC_Client_Module_Parser_Module (ACE_TEXT_ALWAYS_CHAR ("Parser"),
+                  IRC_Client_Module_Parser_Module (this,
+                                                   ACE_TEXT_ALWAYS_CHAR ("Parser"),
                                                    NULL,
                                                    false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  IRC_Client_Module_Marshal_Module (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
+                  IRC_Client_Module_Marshal_Module (this,
+                                                    ACE_TEXT_ALWAYS_CHAR ("Marshal"),
                                                     NULL,
                                                     false),
                   false);

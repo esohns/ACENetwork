@@ -21,7 +21,8 @@
 #ifndef TEST_U_MODULE_HEADERPARSER_H
 #define TEST_U_MODULE_HEADERPARSER_H
 
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 
@@ -48,11 +49,12 @@ class Test_U_Module_HeaderParser
                                  struct Test_U_UserData>
 {
  public:
-  Test_U_Module_HeaderParser ();
+  Test_U_Module_HeaderParser (ISTREAM_T*); // stream handle
   virtual ~Test_U_Module_HeaderParser ();
 
   // initialization
-  bool initialize ();
+  virtual bool initialize (const struct Test_U_ModuleHandlerConfiguration&,
+                           Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (Test_U_Message*&, // data message handle
@@ -73,10 +75,9 @@ class Test_U_Module_HeaderParser
                                  enum Stream_SessionMessageType,
                                  struct Test_U_UserData> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_HeaderParser ());
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_HeaderParser (const Test_U_Module_HeaderParser&));
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_HeaderParser& operator= (const Test_U_Module_HeaderParser&));
-
-  bool isInitialized_;
 };
 
 // declare module

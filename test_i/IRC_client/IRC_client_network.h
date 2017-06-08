@@ -21,10 +21,13 @@
 #ifndef IRC_CLIENT_NETWORK_H
 #define IRC_CLIENT_NETWORK_H
 
-#include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
-#include <ace/Singleton.h>
-#include <ace/Synch_Traits.h>
+#include <map>
+#include <string>
+
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
+#include "ace/Singleton.h"
+#include "ace/Synch_Traits.h"
 
 #include "irc_network.h"
 
@@ -35,6 +38,51 @@
 #include "IRC_client_stream_common.h"
 
 //////////////////////////////////////////
+
+struct IRC_Client_ConnectionConfiguration;
+struct IRC_Client_SocketHandlerConfiguration
+ : IRC_SocketHandlerConfiguration
+{
+  inline IRC_Client_SocketHandlerConfiguration ()
+   : IRC_SocketHandlerConfiguration ()
+   ///////////////////////////////////////
+   , connectionConfiguration (NULL)
+   , userData (NULL)
+  {};
+
+  struct IRC_Client_ConnectionConfiguration* connectionConfiguration;
+
+  struct IRC_Client_UserData*                userData;
+};
+
+struct IRC_StreamConfiguration;
+struct IRC_Client_ConnectionConfiguration
+ : IRC_ConnectionConfiguration
+{
+  inline IRC_Client_ConnectionConfiguration ()
+   : IRC_ConnectionConfiguration ()
+   ///////////////////////////////////////
+   , cursesState (NULL)
+   , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
+   , protocolConfiguration (NULL)
+   , socketHandlerConfiguration ()
+   , streamConfiguration (NULL)
+   , useReactor (NET_EVENT_USE_REACTOR)
+   , userData (NULL)
+  {};
+
+  struct IRC_Client_CursesState*               cursesState;
+  bool                                         logToFile;
+  struct IRC_ProtocolConfiguration*            protocolConfiguration;
+  struct IRC_Client_SocketHandlerConfiguration socketHandlerConfiguration;
+  struct IRC_Client_StreamConfiguration*       streamConfiguration;
+  bool                                         useReactor;
+
+  struct IRC_Client_UserData*                  userData;
+};
+typedef std::map<std::string,
+                 struct IRC_Client_ConnectionConfiguration> IRC_Client_ConnectionConfigurations_t;
+typedef IRC_Client_ConnectionConfigurations_t::iterator IRC_Client_ConnectionConfigurationIterator_t;
 
 struct IRC_Client_ConnectionState
  : IRC_ConnectionState

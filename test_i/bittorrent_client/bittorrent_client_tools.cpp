@@ -70,20 +70,16 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
   ACE_ASSERT (tracker_user_data_p);
   // *TODO*: remove type inferences
   ACE_ASSERT (peer_configuration_p);
-  ACE_ASSERT (peer_configuration_p->socketHandlerConfiguration);
-  ACE_ASSERT (peer_configuration_p->socketHandlerConfiguration->socketConfiguration);
   ACE_ASSERT (peer_configuration_p->streamConfiguration);
   ACE_ASSERT (tracker_configuration_p);
-  ACE_ASSERT (tracker_configuration_p->socketHandlerConfiguration);
-  ACE_ASSERT (tracker_configuration_p->socketHandlerConfiguration->socketConfiguration);
   ACE_ASSERT (tracker_configuration_p->streamConfiguration);
 
   // step1: set up configuration
   if (isPeer_in)
-    peer_configuration_p->socketHandlerConfiguration->socketConfiguration->address =
+    peer_configuration_p->socketHandlerConfiguration.socketConfiguration.address =
         address_in;
   else
-    tracker_configuration_p->socketHandlerConfiguration->socketConfiguration->address =
+    tracker_configuration_p->socketHandlerConfiguration.socketConfiguration.address =
         address_in;
   if (finalModule_inout)
   {
@@ -101,7 +97,8 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
           deleteModule_in;
       tracker_configuration_p->streamConfiguration->module = finalModule_inout;
     } // end ELSE
-    if (deleteModule_in) finalModule_inout = NULL;
+    if (deleteModule_in)
+      finalModule_inout = NULL;
   } // end IF
 
   // step2: initialize connector
@@ -125,17 +122,9 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
                             : trackerConnector_in.connect (address_in));
   if (return_value == ACE_INVALID_HANDLE)
   {
-    // debug info
-    ACE_TCHAR buffer[BUFSIZ];
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result = address_in.addr_to_string (buffer,
-                                        sizeof (buffer));
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("failed to connect(\"%s\"): \"%m\", aborting\n"),
-                buffer));
+                ACE_TEXT ("failed to Net_IConnector_T::connect(%s): \"%m\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     goto error;
   } // end IF
 

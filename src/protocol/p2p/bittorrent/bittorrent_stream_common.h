@@ -214,12 +214,13 @@ struct BitTorrent_PeerStreamConfiguration
    : Stream_Configuration ()
    , filename ()
    , metaInfo (NULL)
+   , moduleConfiguration_2 ()
    , moduleHandlerConfigurations ()
   {};
 
   std::string                                   filename; // .torrent file
   Bencoding_Dictionary_t*                       metaInfo;
-
+  struct Stream_ModuleConfiguration             moduleConfiguration_2;
   BitTorrent_PeerModuleHandlerConfigurations_t* moduleHandlerConfigurations;
 };
 struct BitTorrent_TrackerModuleHandlerConfiguration;
@@ -234,12 +235,13 @@ struct BitTorrent_TrackerStreamConfiguration
    : Stream_Configuration ()
    , filename ()
    , metaInfo (NULL)
+   , moduleConfiguration_2 ()
    , moduleHandlerConfigurations ()
   {};
 
   std::string                                      filename; // .torrent file
   Bencoding_Dictionary_t*                          metaInfo;
-
+  struct Stream_ModuleConfiguration                moduleConfiguration_2;
   BitTorrent_TrackerModuleHandlerConfigurations_t* moduleHandlerConfigurations;
 };
 

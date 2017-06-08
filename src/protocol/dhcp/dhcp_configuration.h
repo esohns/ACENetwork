@@ -82,7 +82,7 @@ struct DHCP_ConnectionConfiguration
   inline DHCP_ConnectionConfiguration ()
    : Net_ConnectionConfiguration ()
    ///////////////////////////////////////
-   , socketHandlerConfiguration (NULL)
+   , socketHandlerConfiguration ()
    , streamConfiguration (NULL)
    , userData (NULL)
   {
@@ -90,11 +90,13 @@ struct DHCP_ConnectionConfiguration
     //PDUSize = DHCP_BUFFER_SIZE;
   };
 
-  struct DHCP_SocketHandlerConfiguration* socketHandlerConfiguration;
-  struct DHCP_StreamConfiguration*        streamConfiguration;
+  struct DHCP_SocketHandlerConfiguration socketHandlerConfiguration;
+  struct DHCP_StreamConfiguration*       streamConfiguration;
 
-  struct DHCP_Stream_UserData*            userData;
+  struct DHCP_Stream_UserData*           userData;
 };
+typedef std::deque<struct DHCP_ConnectionConfiguration> DHCP_ConnectionConfigurations_t;
+typedef DHCP_ConnectionConfigurations_t::iterator DHCP_ConnectionConfigurationIterator_t;
 
 //struct DHCP_ConnectorConfiguration
 //{
@@ -130,23 +132,24 @@ struct DHCP_ModuleHandlerConfiguration
    : Stream_ModuleHandlerConfiguration ()
    ///////////////////////////////////////
 //   , connection (NULL)
+   , connectionConfigurations (NULL)
    , printProgressDot (DHCP_DEFAULT_PRINT_PROGRESSDOT)
-   , pushStatisticMessages (true)
    , protocolConfiguration (NULL)
-   , socketHandlerConfiguration (NULL)
+   , pushStatisticMessages (true)
   {
     crunchMessages = DHCP_DEFAULT_CRUNCH_MESSAGES; // dhcp parser module
     printFinalReport = true;
   };
 
 //  Test_U_IConnection_t*       connection; // UDP target/net IO module
-
-  bool                                    printProgressDot; // file writer module
-  bool                                    pushStatisticMessages;
-
-  struct DHCP_ProtocolConfiguration*      protocolConfiguration;
-  struct DHCP_SocketHandlerConfiguration* socketHandlerConfiguration;
+  DHCP_ConnectionConfigurations_t*   connectionConfigurations;
+  bool                               printProgressDot; // file writer module
+  struct DHCP_ProtocolConfiguration* protocolConfiguration;
+  bool                               pushStatisticMessages;
 };
+typedef std::map<std::string,
+                 struct DHCP_ModuleHandlerConfiguration*> DHCP_ModuleHandlerConfigurations_t;
+typedef DHCP_ModuleHandlerConfigurations_t::const_iterator DHCP_ModuleHandlerConfigurationsConstIterator_t;
 
 struct DHCP_StreamConfiguration
  : Stream_Configuration
@@ -154,14 +157,14 @@ struct DHCP_StreamConfiguration
   inline DHCP_StreamConfiguration ()
    : Stream_Configuration ()
    , moduleConfiguration ()
-   , moduleHandlerConfiguration ()
+   , moduleHandlerConfigurations ()
    , protocolConfiguration (NULL)
    //, userData (NULL)
   {};
 
-  struct Stream_ModuleConfiguration*      moduleConfiguration;        // stream module configuration
-  struct DHCP_ModuleHandlerConfiguration* moduleHandlerConfiguration; // module handler configuration
-  struct DHCP_ProtocolConfiguration*      protocolConfiguration;      // protocol configuration
+  struct Stream_ModuleConfiguration* moduleConfiguration;        // stream module configuration
+  DHCP_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration
+  struct DHCP_ProtocolConfiguration* protocolConfiguration;      // protocol configuration
 
   //struct DHCP_Stream_UserData*           userData;
 };

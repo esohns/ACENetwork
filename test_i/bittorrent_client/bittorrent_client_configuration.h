@@ -39,15 +39,15 @@ struct BitTorrent_Client_PeerUserData
 {
   inline BitTorrent_Client_PeerUserData ()
    : connectionConfiguration (NULL)
-   , moduleConfiguration (NULL)
-   , moduleHandlerConfiguration (NULL)
+   //, moduleConfiguration (NULL)
+   //, moduleHandlerConfiguration (NULL)
   {};
 
   struct BitTorrent_Client_PeerConnectionConfiguration*    connectionConfiguration;
 
   // *TODO*: remove these ASAP
-  struct Stream_ModuleConfiguration*                       moduleConfiguration;
-  struct BitTorrent_Client_PeerModuleHandlerConfiguration* moduleHandlerConfiguration;
+  //struct Stream_ModuleConfiguration*                       moduleConfiguration;
+  //struct BitTorrent_Client_PeerModuleHandlerConfiguration* moduleHandlerConfiguration;
 };
 struct BitTorrent_Client_TrackerConnectionConfiguration;
 struct BitTorrent_Client_TrackerModuleHandlerConfiguration;
@@ -55,15 +55,15 @@ struct BitTorrent_Client_TrackerUserData
 {
   inline BitTorrent_Client_TrackerUserData ()
    : connectionConfiguration (NULL)
-   , moduleConfiguration (NULL)
-   , moduleHandlerConfiguration (NULL)
+   //, moduleConfiguration (NULL)
+   //, moduleHandlerConfiguration (NULL)
   {};
 
   struct BitTorrent_Client_TrackerConnectionConfiguration*    connectionConfiguration;
 
   // *TODO*: remove these ASAP
-  struct Stream_ModuleConfiguration*                          moduleConfiguration;
-  struct BitTorrent_Client_TrackerModuleHandlerConfiguration* moduleHandlerConfiguration;
+  //struct Stream_ModuleConfiguration*                          moduleConfiguration;
+  //struct BitTorrent_Client_TrackerModuleHandlerConfiguration* moduleHandlerConfiguration;
 };
 
 struct BitTorrent_Client_CursesState;
@@ -72,18 +72,13 @@ struct BitTorrent_Client_Configuration
   inline BitTorrent_Client_Configuration ()
    : signalHandlerConfiguration ()
    ///////////////////////////////////////
-   , socketConfiguration ()
-   , peerSocketHandlerConfiguration ()
-   , trackerSocketHandlerConfiguration ()
-   , peerConnectionConfiguration ()
-   , trackerConnectionConfiguration ()
+   , peerConnectionConfigurations ()
+   , trackerConnectionConfigurations ()
    ///////////////////////////////////////
    , allocatorConfiguration ()
    , parserConfiguration ()
    , moduleConfiguration ()
-   , peerModuleHandlerConfiguration ()
    , peerStreamConfiguration ()
-   , trackerModuleHandlerConfiguration ()
    , trackerStreamConfiguration ()
    ///////////////////////////////////////
 //   , protocolConfiguration ()
@@ -98,35 +93,30 @@ struct BitTorrent_Client_Configuration
   {};
 
   // ****************************** signal *************************************
-  struct BitTorrent_Client_SignalHandlerConfiguration        signalHandlerConfiguration;
+  struct BitTorrent_Client_SignalHandlerConfiguration signalHandlerConfiguration;
   // ****************************** socket *************************************
-  struct Net_SocketConfiguration                             socketConfiguration;
   // *TODO*: workaround to accomodate different message allocators for each connection type.
   //         --> there must be a better way to implement this
-  struct BitTorrent_Client_PeerSocketHandlerConfiguration    peerSocketHandlerConfiguration;
-  struct BitTorrent_Client_TrackerSocketHandlerConfiguration trackerSocketHandlerConfiguration;
-  struct BitTorrent_Client_PeerConnectionConfiguration       peerConnectionConfiguration;
-  struct BitTorrent_Client_TrackerConnectionConfiguration    trackerConnectionConfiguration;
+  BitTorrent_Client_PeerConnectionConfigurations_t    peerConnectionConfigurations;
+  BitTorrent_Client_TrackerConnectionConfigurations_t trackerConnectionConfigurations;
   // ****************************** stream *************************************
-  struct BitTorrent_AllocatorConfiguration                   allocatorConfiguration;
-  struct Common_ParserConfiguration                          parserConfiguration;
-  struct Stream_ModuleConfiguration                          moduleConfiguration;
-  struct BitTorrent_Client_PeerModuleHandlerConfiguration    peerModuleHandlerConfiguration;
-  struct BitTorrent_Client_PeerStreamConfiguration           peerStreamConfiguration;
-  struct BitTorrent_Client_TrackerModuleHandlerConfiguration trackerModuleHandlerConfiguration;
-  struct BitTorrent_Client_TrackerStreamConfiguration        trackerStreamConfiguration;
+  struct BitTorrent_AllocatorConfiguration            allocatorConfiguration;
+  struct Common_ParserConfiguration                   parserConfiguration;
+  struct Stream_ModuleConfiguration                   moduleConfiguration;
+  struct BitTorrent_Client_PeerStreamConfiguration    peerStreamConfiguration;
+  struct BitTorrent_Client_TrackerStreamConfiguration trackerStreamConfiguration;
   // ***************************** protocol ************************************
 //  struct BitTorrent_ProtocolConfiguration             protocolConfiguration;
-  struct BitTorrent_Client_SessionConfiguration              sessionConfiguration;
+  struct BitTorrent_Client_SessionConfiguration       sessionConfiguration;
   // ***************************************************************************
   // *TODO*: move this somewhere else
-  struct BitTorrent_Client_CursesState*                      cursesState;
-  int                                                        groupID;
-  bool                                                       logToFile;
-  bool                                                       useReactor;
+  struct BitTorrent_Client_CursesState*               cursesState;
+  int                                                 groupID;
+  bool                                                logToFile;
+  bool                                                useReactor;
 
-  struct BitTorrent_Client_PeerUserData                      peerUserData;
-  struct BitTorrent_Client_TrackerUserData                   trackerUserData;
+  struct BitTorrent_Client_PeerUserData               peerUserData;
+  struct BitTorrent_Client_TrackerUserData            trackerUserData;
 };
 
 #endif

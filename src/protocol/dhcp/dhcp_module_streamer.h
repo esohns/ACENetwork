@@ -21,7 +21,7 @@
 #ifndef DHCP_MODULE_STREAMER_H
 #define DHCP_MODULE_STREAMER_H
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
 #include "stream_task_base_synch.h"
 
@@ -46,7 +46,7 @@ class DHCP_Module_Streamer_T
                                  Stream_UserData>
 {
  public:
-  DHCP_Module_Streamer_T ();
+  DHCP_Module_Streamer_T (ISTREAM_T*); // stream handle
   virtual ~DHCP_Module_Streamer_T ();
 
   // implement (part of) Stream_ITaskBase
@@ -65,6 +65,7 @@ class DHCP_Module_Streamer_T
                                  enum Stream_SessionMessageType,
                                  Stream_UserData> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Streamer_T ())
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Streamer_T (const DHCP_Module_Streamer_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Streamer_T& operator= (const DHCP_Module_Streamer_T&))
 };

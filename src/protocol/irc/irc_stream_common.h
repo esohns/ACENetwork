@@ -21,7 +21,7 @@
 #ifndef IRC_STREAM_COMMON_H
 #define IRC_STREAM_COMMON_H
 
-#include <ace/Synch_Traits.h>
+#include "ace/Synch_Traits.h"
 
 #include "common_inotify.h"
 #include "common_time_common.h"

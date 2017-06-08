@@ -23,13 +23,13 @@
 
 #include <string>
 
-#include <ace/Asynch_Connector.h>
-#include <ace/config-macros.h>
-#include <ace/Connector.h>
-#include <ace/Global_Macros.h>
-#include <ace/SOCK_Connector.h>
-#include <ace/Synch_Traits.h>
-#include <ace/Time_Value.h>
+#include "ace/Asynch_Connector.h"
+#include "ace/config-macros.h"
+#include "ace/Connector.h"
+#include "ace/Global_Macros.h"
+#include "ace/SOCK_Connector.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Time_Value.h"
 
 #include "stream_common.h"
 
@@ -47,7 +47,7 @@ template <typename ConnectionType,
           typename ConfigurationType,
           typename MessageType,
           typename SessionMessageType,
-          typename ModuleHandlerConfigurationType,
+          typename ModuleHandlerConfigurationIteratorType,
           typename StateType, // ui state (curses/gtk/...) *TODO*: to be removed
           ///////////////////////////////
           // *TODO*: remove these ASAP
@@ -73,7 +73,7 @@ class IRC_Session_T
                                           ConfigurationType,
                                           MessageType,
                                           SessionMessageType,
-                                          ModuleHandlerConfigurationType,
+                                          ModuleHandlerConfigurationIteratorType,
                                           StateType,
                                           ConnectionConfigurationType,
                                           ConnectionManagerType,
@@ -88,7 +88,7 @@ class IRC_Session_T
                                                  ConfigurationType,
                                                  MessageType,
                                                  SessionMessageType,
-                                                 ModuleHandlerConfigurationType,
+                                                 ModuleHandlerConfigurationIteratorType,
                                                  StateType,
                                                  ConnectionConfigurationType,
                                                  ConnectionManagerType,

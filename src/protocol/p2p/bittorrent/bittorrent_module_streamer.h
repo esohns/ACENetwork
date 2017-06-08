@@ -21,8 +21,9 @@
 #ifndef BITTORRENT_MODULE_STREAMER_H
 #define BITTORRENT_MODULE_STREAMER_H
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
+#include "stream_common.h"
 #include "stream_task_base_synch.h"
 
 template <ACE_SYNCH_DECL,
@@ -43,10 +44,10 @@ class BitTorrent_Module_Streamer_T
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 Stream_UserData>
+                                 struct Stream_UserData>
 {
  public:
-  BitTorrent_Module_Streamer_T ();
+  BitTorrent_Module_Streamer_T (ISTREAM_T*); // stream handle
   virtual ~BitTorrent_Module_Streamer_T ();
 
   // implement (part of) Stream_ITaskBase
@@ -63,8 +64,9 @@ class BitTorrent_Module_Streamer_T
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 Stream_UserData> inherited;
+                                 struct Stream_UserData> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_Streamer_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_Streamer_T (const BitTorrent_Module_Streamer_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_Streamer_T& operator= (const BitTorrent_Module_Streamer_T&))
 };

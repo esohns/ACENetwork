@@ -21,9 +21,12 @@
 #ifndef FILE_SERVER_CONNECTION_COMMON_H
 #define FILE_SERVER_CONNECTION_COMMON_H
 
-#include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
-#include <ace/SOCK_Dgram_Mcast.h>
+#include <map>
+#include <string>
+
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
+#include "ace/SOCK_Dgram_Mcast.h"
 
 #include "stream_common.h"
 #include "stream_control_message.h"
@@ -44,9 +47,6 @@
 
 #include "test_u_common.h"
 #include "test_u_connection_common.h"
-//#include "test_u_connection_manager_common.h"
-//#include "test_u_socket_common.h"
-//#include "test_u_stream.h"
 
 #include "file_server_defines.h"
 #include "file_server_stream_common.h"
@@ -66,28 +66,7 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Net_RuntimeStatistic_t,
                                  struct FileServer_UserData> FileServer_IConnectionManager_t;
 
-struct FileServer_SocketHandlerConfiguration;
-struct FileServer_StreamConfiguration;
-struct FileServer_ConnectionConfiguration
- : Test_U_ConnectionConfiguration
-{
-  inline FileServer_ConnectionConfiguration ()
-   : Test_U_ConnectionConfiguration ()
-   ///////////////////////////////////////
-   , connectionManager (NULL)
-   , streamConfiguration (NULL)
-   , userData (NULL)
-  {
-    PDUSize = FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE;
-  };
-
-  FileServer_IConnectionManager_t*              connectionManager;
-  struct FileServer_SocketHandlerConfiguration* socketHandlerConfiguration;
-  struct FileServer_StreamConfiguration*        streamConfiguration;
-
-  struct FileServer_UserData*                   userData;
-};
-
+struct FileServer_ConnectionConfiguration;
 struct FileServer_SocketHandlerConfiguration
  : Net_SocketHandlerConfiguration
 {
@@ -102,6 +81,31 @@ struct FileServer_SocketHandlerConfiguration
   struct FileServer_UserData*                userData;
 };
 
+struct FileServer_StreamConfiguration;
+struct FileServer_ConnectionConfiguration
+ : Test_U_ConnectionConfiguration
+{
+  inline FileServer_ConnectionConfiguration ()
+   : Test_U_ConnectionConfiguration ()
+   ///////////////////////////////////////
+   , connectionManager (NULL)
+   , socketHandlerConfiguration ()
+   , streamConfiguration (NULL)
+   , userData (NULL)
+  {
+    PDUSize = FILE_SERVER_DEFAULT_MESSAGE_DATA_BUFFER_SIZE;
+  };
+
+  FileServer_IConnectionManager_t*             connectionManager;
+  struct FileServer_SocketHandlerConfiguration socketHandlerConfiguration;
+  struct FileServer_StreamConfiguration*       streamConfiguration;
+
+  struct FileServer_UserData*                  userData;
+};
+typedef std::map<std::string,
+                 struct FileServer_ConnectionConfiguration> FileServer_ConnectionConfigurations_t;
+typedef FileServer_ConnectionConfigurations_t::iterator FileServer_ConnectionConfigurationIterator_t;
+
 struct FileServer_ConnectionState
  : Net_ConnectionState
 {
@@ -111,6 +115,19 @@ struct FileServer_ConnectionState
   {};
 
   struct FileServer_UserData* userData;
+};
+
+struct FileServer_ListenerConfiguration
+ : Net_ListenerConfiguration
+{
+  inline FileServer_ListenerConfiguration ()
+   : Net_ListenerConfiguration ()
+   , connectionManager (NULL)
+   , socketHandlerConfiguration ()
+  {};
+
+  FileServer_IInetConnectionManager_t*         connectionManager;
+  struct FileServer_SocketHandlerConfiguration socketHandlerConfiguration;
 };
 
 //////////////////////////////////////////

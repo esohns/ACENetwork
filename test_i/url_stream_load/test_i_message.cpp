@@ -29,6 +29,50 @@
 
 #include "net_macros.h"
 
+Test_I_MessageDataContainer::Test_I_MessageDataContainer ()
+ : inherited ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_MessageDataContainer::Test_I_MessageDataContainer"));
+
+}
+
+Test_I_MessageDataContainer::Test_I_MessageDataContainer (struct Test_I_MessageData*& messageData_in,
+                                                          bool delete_in)
+ : inherited (messageData_in,
+              delete_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_MessageDataContainer::Test_I_MessageDataContainer"));
+
+}
+
+Test_I_MessageDataContainer::~Test_I_MessageDataContainer ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_MessageDataContainer::~Test_I_MessageDataContainer"));
+
+}
+
+void
+Test_I_MessageDataContainer::set (struct HTTP_Record*& record_inout)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_I_MessageDataContainer::Test_I_MessageDataContainer"));
+
+  struct Test_I_MessageData* data_p = NULL;
+  ACE_NEW_NORETURN (data_p,
+                    struct Test_I_MessageData ());
+  if (!data_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+    return;
+  } // end IF
+  data_p->HTTPRecord = record_inout;
+  record_inout = NULL;
+
+  inherited::set (data_p);
+}
+
+//////////////////////////////////////////
+
 Test_I_Message::Test_I_Message (unsigned int size_in)
  : inherited (size_in)
 {

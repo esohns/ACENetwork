@@ -24,10 +24,10 @@
 //#include <ace/Asynch_Connector.h>
 //#include <ace/config-macros.h>
 //#include <ace/Connector.h>
-#include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
 //#include <ace/SOCK_Connector.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Synch_Traits.h"
 
 #include "net_session_base.h"
 
@@ -197,9 +197,9 @@ class BitTorrent_Session_T
                                             CBDataType> TRACKER_HANDLER_T;
 
   typedef typename std::map<std::string,
-                            PeerModuleHandlerConfigurationType*>::iterator PEERMODULEHANDLERCONFIGURATIONITERATOR_T;
+                            PeerModuleHandlerConfigurationType>::iterator PEERMODULEHANDLERCONFIGURATIONITERATOR_T;
   typedef typename std::map<std::string,
-                            TrackerModuleHandlerConfigurationType*>::iterator TRACKERMODULEHANDLERCONFIGURATIONITERATOR_T;
+                            TrackerModuleHandlerConfigurationType>::iterator TRACKERMODULEHANDLERCONFIGURATIONITERATOR_T;
 
   // implement/override (part of) BitTorrent_ISession_T
   virtual void connect (Net_ConnectionId_t);

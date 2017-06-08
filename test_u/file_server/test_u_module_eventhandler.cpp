@@ -22,15 +22,15 @@
 #include <ace/Synch.h>
 #include "test_u_module_eventhandler.h"
 
-#include <ace/Log_Msg.h>
-#include <ace/OS_Memory.h>
+#include "ace/Log_Msg.h"
+#include "ace/OS_Memory.h"
 
 #include "stream_imessagequeue.h"
 
 #include "net_macros.h"
 
-Test_U_Module_EventHandler::Test_U_Module_EventHandler ()
- : inherited ()
+Test_U_Module_EventHandler::Test_U_Module_EventHandler (ISTREAM_T* stream_in)
+ : inherited (stream_in)
  //, connection_ (NULL)
  //, outboundQueue_ (NULL)
 {
@@ -203,7 +203,7 @@ Test_U_Module_EventHandler::clone ()
   Test_U_Module_EventHandler* module_handler_p = NULL;
 
   ACE_NEW_NORETURN (module_handler_p,
-                    Test_U_Module_EventHandler ());
+                    Test_U_Module_EventHandler (NULL));
   if (!module_handler_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -213,7 +213,8 @@ Test_U_Module_EventHandler::clone ()
   } // end IF
 
   // sanity check(s)
-  if (!inherited::configuration_) goto continue_;
+  if (!inherited::configuration_)
+    goto continue_;
   
   if (!module_handler_p->initialize (*inherited::configuration_,
                                      inherited::allocator_))

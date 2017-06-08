@@ -24,8 +24,8 @@
 #include <list>
 #include <string>
 
-#include <ace/Global_Macros.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 
@@ -60,7 +60,7 @@ class IRC_Client_Module_IRCHandler
  , public IRC_IControl
 {
  public:
-  IRC_Client_Module_IRCHandler ();
+  IRC_Client_Module_IRCHandler (ISTREAM_T*); // stream handle
   virtual ~IRC_Client_Module_IRCHandler ();
 
   // implement (part of) Common_IStateMachine_T
@@ -131,6 +131,7 @@ class IRC_Client_Module_IRCHandler
                                          struct IRC_Client_SessionData> inherited;
   typedef IRC_StateMachine_Registration inherited2;
 
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler (const IRC_Client_Module_IRCHandler&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler& operator= (const IRC_Client_Module_IRCHandler&))
 
@@ -138,7 +139,6 @@ class IRC_Client_Module_IRCHandler
   virtual void onChange (enum IRC_RegistrationState); // new state
 
   // helper methods
-  IRC_Message* allocateMessage (unsigned int); // requested size
   IRC_Record* allocateMessage (IRC_Record::CommandType); // command
 
   // *NOTE*: "fire-and-forget" - the argument is consumed

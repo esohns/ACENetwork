@@ -462,7 +462,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   CBData_in.configuration = &configuration;
 
   Test_U_EventHandler ui_event_handler (&CBData_in);
-  Test_U_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
+  Test_U_Module_EventHandler_Module event_handler (NULL,
+                                                   ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
                                                    NULL,
                                                    true);
   Test_U_Module_EventHandler* event_handler_p =
@@ -498,42 +499,41 @@ do_work (unsigned int maximumNumberOfConnections_in,
   configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
 
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.printFinalReport =
-    true;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.protocolConfiguration =
+  struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
+  modulehandler_configuration.printFinalReport = true;
+  modulehandler_configuration.protocolConfiguration =
     &configuration.protocolConfiguration;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.statisticReportingInterval =
+  modulehandler_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.streamConfiguration =
+  modulehandler_configuration.streamConfiguration =
     &configuration.streamConfiguration;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscriber =
-    &ui_event_handler;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribers =
-    &CBData_in.subscribers;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribersLock =
-    &CBData_in.subscribersLock;
+  modulehandler_configuration.subscriber = &ui_event_handler;
+  modulehandler_configuration.subscribers = &CBData_in.subscribers;
+  modulehandler_configuration.subscribersLock = &CBData_in.subscribersLock;
 
   configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                        &configuration.streamConfiguration.moduleHandlerConfiguration_2));
+                                                                                        modulehandler_configuration));
   // *TODO*: is this correct ?
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;
   configuration.streamConfiguration.userData = &configuration.userData;
-  configuration.userData.connectionConfiguration =
-      &configuration.connectionConfiguration;
+  //configuration.userData.connectionConfiguration =
+  //    &configuration.connectionConfiguration;
 
   // ********************** connection configuration data **********************
-  configuration.connectionConfiguration.socketHandlerConfiguration =
-    &configuration.socketHandlerConfiguration;
-  configuration.connectionConfiguration.streamConfiguration =
-    &configuration.streamConfiguration;
-  // ********************** socket configuration data **************************
-  // ****************** socket handler configuration data **********************
-  configuration.socketHandlerConfiguration.connectionConfiguration =
-    &configuration.connectionConfiguration;
-  configuration.socketHandlerConfiguration.messageAllocator =
-    &message_allocator;
-  configuration.socketHandlerConfiguration.userData =
+  struct Test_U_ConnectionConfiguration connection_configuration;
+  connection_configuration.socketHandlerConfiguration.userData =
     &configuration.userData;
+  connection_configuration.messageAllocator = &message_allocator;
+  connection_configuration.streamConfiguration =
+    &configuration.streamConfiguration;
+  connection_configuration.userData = &configuration.userData;
+  configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                 connection_configuration));
+  Test_U_ConnectionConfigurationIterator_t iterator =
+    configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
+  (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
+    &((*iterator).second);
 
   //  config.delete_module = false;
   // *WARNING*: set at runtime, by the appropriate connection handler
@@ -637,7 +637,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
       TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (maximumNumberOfConnections_in);
-  connection_manager_p->set (configuration.connectionConfiguration,
+  connection_manager_p->set ((*iterator).second,
                              &user_data);
 
   // step4: handle events (signals, incoming connections/data, timers, ...)
@@ -722,8 +722,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
   if (useLoopBack_in)
   {
     result =
-      configuration.listenerConfiguration.address.set (listeningPortNumber_in,
-                                                       INADDR_LOOPBACK);
+      configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration.address.set (listeningPortNumber_in,
+                                                                                                      INADDR_LOOPBACK,
+                                                                                                      1,
+                                                                                                      0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -746,11 +748,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
     } // end IF
   } // end IF
   else
-    configuration.listenerConfiguration.address.set_port_number (listeningPortNumber_in,
-                                                                 1);
+    configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration.address.set_port_number (listeningPortNumber_in,
+                                                                                                                1);
   configuration.listenerConfiguration.connectionManager = connection_manager_p;
-  configuration.listenerConfiguration.socketHandlerConfiguration =
-    &configuration.socketHandlerConfiguration;
   //configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;
 
   if (!CBData_in.configuration->listener->initialize (configuration.listenerConfiguration))

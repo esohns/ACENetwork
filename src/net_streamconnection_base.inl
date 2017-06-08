@@ -90,11 +90,10 @@ Net_StreamConnectionBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
-  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration);
 
   // wait for any worker(s)
   // *TODO*: remove type inference
-  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration->useThreadPerConnection))
+  if (unlikely (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.useThreadPerConnection))
   {
     result = ACE_Task_Base::wait ();
     if (result == -1)

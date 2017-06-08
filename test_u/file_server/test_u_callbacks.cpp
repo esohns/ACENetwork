@@ -370,7 +370,7 @@ idle_initialize_ui_cb (gpointer userData_in)
                              0.0,
                              std::numeric_limits<double>::max ());
   gtk_spin_button_set_value (spin_button_p,
-                             static_cast<gdouble> (data_p->configuration->listenerConfiguration.address.get_port_number ()));
+                             static_cast<gdouble> (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration.address.get_port_number ()));
 
   GtkFileChooserButton* file_chooser_button_p =
     GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -379,7 +379,10 @@ idle_initialize_ui_cb (gpointer userData_in)
   //GError* error_p = NULL;
   //GFile* file_p = NULL;
   gchar* filename_p = NULL;
-  if (!data_p->configuration->streamConfiguration.moduleHandlerConfiguration_2.fileName.empty ())
+  Test_U_ModuleHandlerConfigurationsIterator_t iterator_2 =
+    data_p->configuration->streamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.moduleHandlerConfigurations.end ());
+  if (!(*iterator_2).second.fileName.empty ())
   {
     // *NOTE*: gtk does not complain if the file doesn't exist, but the button
     //         will display "(None)"
@@ -394,13 +397,13 @@ idle_initialize_ui_cb (gpointer userData_in)
     //if (!gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
     //                                              file_uri.c_str ()))
     filename_p =
-      Common_UI_Tools::Locale2UTF8 (data_p->configuration->streamConfiguration.moduleHandlerConfiguration_2.fileName);
+      Common_UI_Tools::Locale2UTF8 ((*iterator_2).second.fileName);
     if (!gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_button_p),
                                         filename_p))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to gtk_file_chooser_set_filename(\"%s\"): \"%s\", aborting\n"),
-                  ACE_TEXT (data_p->configuration->streamConfiguration.moduleHandlerConfiguration_2.fileName.c_str ())));
+                  ACE_TEXT ((*iterator_2).second.fileName.c_str ())));
 
       // clean up
       g_free (filename_p);
@@ -451,8 +454,7 @@ idle_initialize_ui_cb (gpointer userData_in)
   } // end ELSE
 
   std::string default_folder_uri = ACE_TEXT_ALWAYS_CHAR ("file://");
-  default_folder_uri +=
-    data_p->configuration->streamConfiguration.moduleHandlerConfiguration_2.fileName;
+  default_folder_uri += (*iterator_2).second.fileName;
   gboolean result_2 =
     gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
                                              default_folder_uri.c_str ());
@@ -809,8 +811,8 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
       GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_GTK_SPINBUTTON_PORT_NAME)));
     ACE_ASSERT (spin_button_p);
-    data_p->configuration->listenerConfiguration.address.set_port_number (gtk_spin_button_get_value_as_int (spin_button_p),
-                                                                          1);
+    data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration.address.set_port_number (static_cast<u_short> (gtk_spin_button_get_value_as_int (spin_button_p)),
+                                                                                                                         1);
 
     GtkFileChooserButton* file_chooser_button_p =
       GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -837,7 +839,10 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
       return;
     } // end IF
     g_object_unref (file_p);
-    data_p->configuration->streamConfiguration.moduleHandlerConfiguration_2.fileName =
+    Test_U_ModuleHandlerConfigurationsIterator_t iterator_2 =
+      data_p->configuration->streamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.moduleHandlerConfigurations.end ());
+    (*iterator_2).second.fileName =
         Common_UI_Tools::UTF82Locale (filename_p, -1);
     g_free (filename_p);
 

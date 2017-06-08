@@ -21,10 +21,10 @@
 #ifndef NET_CLIENT_SSL_CONNECTOR_H
 #define NET_CLIENT_SSL_CONNECTOR_H
 
-#include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
-#include <ace/Time_Value.h>
-#include <ace/SSL/SSL_SOCK_Connector.h>
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
+#include "ace/Time_Value.h"
+#include "ace/SSL/SSL_SOCK_Connector.h"
 
 #include "stream_statemachine_control.h"
 
@@ -97,7 +97,7 @@ class Net_Client_SSL_Connector_T
 
   // *NOTE*: handlers retrieve the configuration object with get ()
   inline virtual const ConfigurationType& get () const { return configuration_; };
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration->connectionConfiguration = &configuration_; return true; };
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration.connectionConfiguration = &configuration_; return true; };
 
   virtual void abort ();
   virtual ACE_HANDLE connect (const AddressType&);

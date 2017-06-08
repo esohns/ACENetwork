@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "common_timer_manager_common.h"
 
@@ -41,8 +41,8 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
                            ControlMessageType,
                            DataMessageType,
                            SessionMessageType,
-                           UserDataType>::BitTorrent_Module_Parser_T ()
- : inherited ()
+                           UserDataType>::BitTorrent_Module_Parser_T (ISTREAM_T* stream_in)
+ : inherited (stream_in)
  , inherited2 (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
                NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
  , headFragment_ (NULL)
@@ -99,9 +99,6 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
 
   if (inherited::isInitialized_)
   {
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("re-initializing...\n")));
-
     ACE_ASSERT (inherited::msg_queue_);
     result = inherited::msg_queue_->activate ();
     if (result == -1)
@@ -157,9 +154,6 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
 
   // initialize return value(s)
   passMessageDownstream_out = false;
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::mod_);
 
   // append the "\0\0"-sequence, as required by flex
   ACE_ASSERT (message_inout->capacity () - message_inout->length () >=
@@ -453,8 +447,8 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
-                            UserDataType>::BitTorrent_Module_ParserH_T ()
- : inherited (NULL,
+                            UserDataType>::BitTorrent_Module_ParserH_T (ISTREAM_T* stream_in)
+ : inherited (stream_in,
               false,
               STREAM_HEADMODULECONCURRENCY_CONCURRENT,
               true)
@@ -536,9 +530,6 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
 
   if (inherited::isInitialized_)
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("re-initializing...\n")));
-
     crunch_ = true;
 
     if (headFragment_)
@@ -838,73 +829,6 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
   } // end SWITCH
 }
 
-//template <ACE_SYNCH_DECL,
-//          typename TaskSynchType,
-//          typename TimePolicyType,
-//          typename SessionMessageType,
-//          typename DataMessageType,
-//          typename ConfigurationType,
-//          typename StreamStateType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename StatisticContainerType>
-//DataMessageType*
-//BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
-//                     TaskSynchType,
-//                     TimePolicyType,
-//                     SessionMessageType,
-//                     DataMessageType,
-//                     ConfigurationType,
-//                     StreamStateType,
-//                     SessionDataType,
-//                     SessionDataContainerType,
-//                     StatisticContainerType>::allocateMessage (unsigned int requestedSize_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::allocateMessage"));
-//
-//  // sanity check(s)
-//  ACE_ASSERT (inherited::configuration_);
-//  ACE_ASSERT (inherited::configuration_->streamConfiguration);
-//
-//  // initialize return value(s)
-//  DataMessageType* message_p = NULL;
-//
-//  if (inherited::configuration_->streamConfiguration->messageAllocator)
-//  {
-//allocate:
-//    try {
-//      message_p =
-//        static_cast<DataMessageType*> (inherited::configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
-//    } catch (...) {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
-//                  requestedSize_in));
-//      return NULL;
-//    }
-//
-//    // keep retrying ?
-//    if (!message_p && !inherited::configuration_->streamConfiguration->messageAllocator->block ())
-//      goto allocate;
-//  } // end IF
-//  else
-//    ACE_NEW_NORETURN (message_p,
-//                      DataMessageType (requestedSize_in));
-//  if (!message_p)
-//  {
-//    if (inherited::configuration_->streamConfiguration->messageAllocator)
-//    {
-//      if (inherited::configuration_->streamConfiguration->messageAllocator->block ())
-//        ACE_DEBUG ((LM_CRITICAL,
-//                    ACE_TEXT ("failed to allocate SessionMessageType: \"%m\", aborting\n")));
-//    } // end IF
-//    else
-//      ACE_DEBUG ((LM_CRITICAL,
-//                  ACE_TEXT ("failed to allocate SessionMessageType: \"%m\", aborting\n")));
-//  } // end IF
-//
-//  return message_p;
-//}
-
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
@@ -948,7 +872,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
   if (!inherited::putStatisticMessage (data_out)) // data container
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to putStatisticMessage(SESSION_STATISTIC), aborting\n")));
+                ACE_TEXT ("failed to putStatisticMessage(), aborting\n")));
     return false;
   } // end IF
 

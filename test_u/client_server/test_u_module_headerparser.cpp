@@ -24,15 +24,14 @@
 #include "test_u_sessionmessage.h"
 #include "test_u_module_headerparser.h"
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "net_macros.h"
 
 #include "test_u_message.h"
 
-Test_U_Module_HeaderParser::Test_U_Module_HeaderParser ()
- : //inherited(),
-   isInitialized_ (false)
+Test_U_Module_HeaderParser::Test_U_Module_HeaderParser (ISTREAM_T* stream_in)
+ : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::Test_U_Module_HeaderParser"));
 
@@ -45,22 +44,18 @@ Test_U_Module_HeaderParser::~Test_U_Module_HeaderParser()
 }
 
 bool
-Test_U_Module_HeaderParser::initialize ()
+Test_U_Module_HeaderParser::initialize (const struct Test_U_ModuleHandlerConfiguration& configuration_in,
+                                        Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::initialize"));
 
   // sanity check(s)
-  if (isInitialized_)
+  if (inherited::isInitialized_)
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("re-initializing...\n")));
-
-    isInitialized_ = false;
   } // end IF
 
-  isInitialized_ = true;
-
-  return isInitialized_;
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 void

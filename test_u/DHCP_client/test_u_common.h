@@ -29,12 +29,12 @@
 #include <set>
 #include <string>
 
-#include <ace/INET_Addr.h>
-#include <ace/Synch_Traits.h>
-#include <ace/Singleton.h>
-#include <ace/Time_Value.h>
+#include "ace/INET_Addr.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Singleton.h"
+#include "ace/Time_Value.h"
 
-#include <gtk/gtk.h>
+#include "gtk/gtk.h"
 
 #include "common.h"
 #include "common_istatistic.h"
@@ -167,21 +167,6 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
 typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
 typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 
-struct Test_U_SocketHandlerConfiguration
- : DHCP_SocketHandlerConfiguration
-{
-  inline Test_U_SocketHandlerConfiguration ()
-   : DHCP_SocketHandlerConfiguration ()
-   ///////////////////////////////////////
-   , connectionConfiguration (NULL)
-   , userData (NULL)
-  {};
-
-  struct Test_U_ConnectionConfiguration* connectionConfiguration;
-
-  struct Test_U_UserData*                userData;
-};
-
 //typedef Net_IConnectionManager_T<ACE_INET_Addr,
 //                                 Test_U_Configuration,
 //                                 Test_U_ConnectionState,
@@ -212,31 +197,31 @@ struct Test_U_StreamModuleHandlerConfiguration
   inline Test_U_StreamModuleHandlerConfiguration ()
    : DHCP_ModuleHandlerConfiguration ()
    , broadcastConnection (NULL)
-   , connectionConfiguration (NULL)
-   , contextID (0)
+   , connectionConfigurations (NULL)
+   //, contextID (0)
    , inbound (true)
    , passive (false)
-   , socketConfiguration (NULL)
-   , socketHandlerConfiguration (NULL)
    , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
   {};
 
-  Test_U_IConnection_t*                     broadcastConnection; // UDP target/net IO module
-  struct Test_U_ConnectionConfiguration*    connectionConfiguration;
+  Test_U_IConnection_t*              broadcastConnection; // UDP target/net IO module
+  Test_U_ConnectionConfigurations_t* connectionConfigurations;
   //struct Test_U_Configuration*              configuration;
-  guint                                     contextID;
-  bool                                      inbound; // net IO module
-  bool                                      passive; // UDP target module
-  struct Net_SocketConfiguration*           socketConfiguration;
-  struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
-  struct Test_U_StreamConfiguration*        streamConfiguration; // dhcp discover module
-  Test_U_ISessionNotify_t*                  subscriber;
-  Test_U_Subscribers_t*                     subscribers;
-  std::string                               targetFileName; // dump module
+  //guint                                     contextID;
+  bool                               inbound; // net IO module
+  bool                               passive; // UDP target module
+  struct Test_U_StreamConfiguration* streamConfiguration; // dhcp discover module
+  Test_U_ISessionNotify_t*           subscriber;
+  Test_U_Subscribers_t*              subscribers;
+  std::string                        targetFileName; // dump module
 };
+typedef std::map<std::string,
+                 struct Test_U_StreamModuleHandlerConfiguration> Test_U_ModuleHandlerConfigurations_t;
+typedef Test_U_ModuleHandlerConfigurations_t::const_iterator Test_U_ModuleHandlerConfigurationsConstIterator_t;
+typedef Test_U_ModuleHandlerConfigurations_t::iterator Test_U_ModuleHandlerConfigurationsIterator_t;
 
 typedef DHCP_ProtocolConfiguration Test_U_ProtocolConfiguration_t;
 
@@ -245,27 +230,22 @@ struct Test_U_ListenerConfiguration
 {
   inline Test_U_ListenerConfiguration ()
    : Net_ListenerConfiguration ()
-   , messageAllocator (NULL)
-   , networkInterface ()
-   , socketHandlerConfiguration (NULL)
+   , socketHandlerConfiguration ()
    , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
                                  0)
-   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {
-    int result = address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-                              static_cast<ACE_UINT32> (INADDR_ANY),
-                              1,
-                              0);
+    int result =
+      socketHandlerConfiguration.socketConfiguration.address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+                                                                  static_cast<ACE_UINT32> (INADDR_ANY),
+                                                                  1,
+                                                                  0);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
   };
 
-  Stream_IAllocator*                        messageAllocator;
-  std::string                               networkInterface;
-  struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
-  ACE_Time_Value                            statisticReportingInterval; // [ACE_Time_Value::zero: off]
-  bool                                      useLoopBackDevice;
+  struct Test_U_SocketHandlerConfiguration socketHandlerConfiguration;
+  ACE_Time_Value                           statisticReportingInterval; // [ACE_Time_Value::zero: off]
 };
 typedef Net_IListener_T<struct Test_U_ListenerConfiguration,
                         struct Test_U_SocketHandlerConfiguration> Test_U_IListener_t;
@@ -287,18 +267,17 @@ struct Test_U_SignalHandlerConfiguration
   long                                statisticReportingTimerID;
 };
 
-typedef std::map<std::string,
-                 struct Test_U_StreamModuleHandlerConfiguration*> Test_U_ModuleHandlerConfigurations_t;
-typedef Test_U_ModuleHandlerConfigurations_t::iterator Test_U_ModuleHandlerConfigurationsIterator_t;
 struct Test_U_StreamConfiguration
  : DHCP_StreamConfiguration
 {
   inline Test_U_StreamConfiguration ()
    : DHCP_StreamConfiguration ()
+   , moduleConfiguration_2 ()
    , moduleHandlerConfigurations ()
    , userData (NULL)
   {};
 
+  struct Stream_ModuleConfiguration    moduleConfiguration_2;       // stream module configuration
   Test_U_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // stream module handler configuration
 
   struct Test_U_UserData*              userData;
@@ -320,12 +299,9 @@ struct Test_U_Configuration
 {
   inline Test_U_Configuration ()
    : signalHandlerConfiguration ()
-   , socketConfiguration ()
-   , socketHandlerConfiguration ()
-   , connectionConfiguration ()
+   , connectionConfigurations ()
    , parserConfiguration ()
-   , moduleConfiguration ()
-   , moduleHandlerConfiguration ()
+   , allocatorConfiguration ()
    , streamConfiguration ()
    , listenerConfiguration ()
    , userData ()
@@ -333,24 +309,21 @@ struct Test_U_Configuration
   {};
 
   // **************************** signal data **********************************
-  struct Test_U_SignalHandlerConfiguration       signalHandlerConfiguration;
+  struct Test_U_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************
-  struct Net_SocketConfiguration                 socketConfiguration;
-  struct Test_U_SocketHandlerConfiguration       socketHandlerConfiguration;
-  struct Test_U_ConnectionConfiguration          connectionConfiguration;
+  Test_U_ConnectionConfigurations_t        connectionConfigurations;
   // **************************** parser data **********************************
-  struct Common_ParserConfiguration              parserConfiguration;
+  struct Common_ParserConfiguration        parserConfiguration;
   // **************************** stream data **********************************
-  struct Stream_ModuleConfiguration              moduleConfiguration;
-  struct Test_U_StreamModuleHandlerConfiguration moduleHandlerConfiguration;
-  struct Test_U_StreamConfiguration              streamConfiguration;
+  struct Test_U_AllocatorConfiguration     allocatorConfiguration;
+  struct Test_U_StreamConfiguration        streamConfiguration;
   // *************************** protocol data *********************************
-  Test_U_ProtocolConfiguration_t                 protocolConfiguration;
+  Test_U_ProtocolConfiguration_t           protocolConfiguration;
   // *************************** listener data *********************************
-  struct Test_U_ListenerConfiguration            listenerConfiguration;
+  struct Test_U_ListenerConfiguration      listenerConfiguration;
 
-  struct Test_U_UserData                         userData;
-  bool                                           useReactor;
+  struct Test_U_UserData                   userData;
+  bool                                     useReactor;
 };
 
 //typedef Stream_IModuleHandler_T<Test_U_StreamModuleHandlerConfiguration> Test_U_IModuleHandler_t;
@@ -384,7 +357,7 @@ struct Test_U_GTK_ProgressData
 
 enum Test_U_GTK_Event
 {
-  TEST_U_GKTEVENT_INVALID = -1,
+  TEST_U_GTKEVENT_INVALID = -1,
   // ------------------------------------
   TEST_U_GTKEVENT_START = 0,
   TEST_U_GTKEVENT_DATA,

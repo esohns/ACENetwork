@@ -121,17 +121,17 @@ struct HTTP_StreamConfiguration
 {
   inline HTTP_StreamConfiguration ()
    : Stream_Configuration ()
-   , moduleConfiguration ()
+   , moduleConfiguration_2 ()
    , moduleHandlerConfigurations ()
    //, protocolConfiguration (NULL)
    , userData (NULL)
   {};
 
-  struct Stream_ModuleConfiguration* moduleConfiguration;         // stream module configuration
+  struct Stream_ModuleConfiguration  moduleConfiguration_2;       // stream module configuration
   HTTP_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration
   //struct HTTP_ProtocolConfiguration* protocolConfiguration;       // protocol configuration
 
-  struct HTTP_Stream_UserData*            userData;
+  struct HTTP_Stream_UserData*       userData;
 };
 
 //typedef Common_INotify_T<unsigned int,

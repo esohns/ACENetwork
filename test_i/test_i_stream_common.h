@@ -25,6 +25,8 @@
 #include "stream_inotify.h"
 #include "stream_session_data.h"
 
+//#include "stream_module_htmlparser.h"
+
 // forward declarations
 typedef Stream_Statistic Test_I_RuntimeStatistic_t;
 struct Net_ConnectionState;
@@ -63,5 +65,28 @@ struct Test_I_StreamState
 };
 
 typedef Stream_INotify_T<enum Stream_SessionMessageType> Test_I_IStreamNotify_t;
+
+//enum Test_I_SAXParserStateBase
+//{
+//  SAXPARSER_STATE_INVALID = -1,
+//  ////////////////////////////////////////
+//  SAXPARSER_STATE_IN_HEAD = 0,
+//  SAXPARSER_STATE_IN_HTML,
+//  SAXPARSER_STATE_IN_BODY
+//  ////////////////////////////////////////
+//};
+//struct Test_I_SAXParserContext
+// : Stream_Module_HTMLParser_SAXParserContextBase
+//{
+//  inline Test_I_SAXParserContext ()
+//   : Stream_Module_HTMLParser_SAXParserContextBase ()
+//   , sessionData (NULL)
+//   , state (SAXPARSER_STATE_INVALID)
+//  {};
+//
+//  struct Test_I_StreamSessionData* sessionData;
+//
+//  enum Test_I_SAXParserStateBase   state;
+//};
 
 #endif

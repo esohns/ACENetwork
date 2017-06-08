@@ -32,6 +32,7 @@
 #include "common_istatistic.h"
 
 #include "stream_common.h"
+#include "stream_istreamcontrol.h"
 #include "stream_resetcounterhandler.h"
 #include "stream_statistichandler.h"
 #include "stream_streammodule_base.h"
@@ -65,7 +66,11 @@ class Net_Module_Statistic_ReaderTask_T
                         TimePolicyType>
 {
  public:
-  Net_Module_Statistic_ReaderTask_T ();
+  // convenient types
+  typedef Stream_IStream_T<ACE_SYNCH_USE,
+                           TimePolicyType> ISTREAM_T;
+
+  Net_Module_Statistic_ReaderTask_T (ISTREAM_T*); // stream handle
   virtual ~Net_Module_Statistic_ReaderTask_T ();
 
   virtual int put (ACE_Message_Block*,      // message
@@ -85,6 +90,7 @@ class Net_Module_Statistic_ReaderTask_T
   typedef DataMessageType Net_MessageType_t;
   typedef ProtocolCommandType Net_CommandType_t;
 
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_ReaderTask_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_ReaderTask_T (const Net_Module_Statistic_ReaderTask_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_ReaderTask_T& operator= (const Net_Module_Statistic_ReaderTask_T&))
 };
@@ -120,7 +126,7 @@ class Net_Module_Statistic_WriterTask_T
                                                 ProtocolCommandType,
                                                 StatisticContainerType>;
  public:
-  Net_Module_Statistic_WriterTask_T ();
+  Net_Module_Statistic_WriterTask_T (ISTREAM_T*); // stream handle
   virtual ~Net_Module_Statistic_WriterTask_T ();
 
   // override (part of) Stream_IModuleHandler_T
@@ -164,14 +170,13 @@ class Net_Module_Statistic_WriterTask_T
                     unsigned int> Net_MessageStatisticRecord_t;
   typedef typename Net_MessageStatistic_t::const_iterator Net_MessageStatisticIterator_t;
 
+  ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_WriterTask_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_WriterTask_T (const Net_Module_Statistic_WriterTask_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Module_Statistic_WriterTask_T& operator= (const Net_Module_Statistic_WriterTask_T&))
 
   // helper method(s)
   void final_report () const;
   void fini_timers (bool = true); // cancel both timers ? (false --> cancel only localReportingHandlerID_)
-
-  bool                              isInitialized_;
 
   // timer stuff
   Stream_ResetCounterHandler        resetTimeoutHandler_;
@@ -203,9 +208,6 @@ class Net_Module_Statistic_WriterTask_T
 
   // *MESSAGE TYPE STATS*
   Net_MessageStatistic_t            messageTypeStatistic_;
-
-  // *CACHE STATS*
-  const Stream_IAllocator*          allocator_;
 };
 
 // include template definition

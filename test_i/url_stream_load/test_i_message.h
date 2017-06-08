@@ -40,9 +40,34 @@ template <ACE_SYNCH_DECL,
           typename DataMessageType,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
+class Test_I_MessageDataContainer
+ : public Stream_DataBase_T<struct Test_I_MessageData>
+ , public Common_ISetPP_T<struct HTTP_Record>
+{
+ public:
+   Test_I_MessageDataContainer ();
+  // *IMPORTANT NOTE*: fire-and-forget API
+  Test_I_MessageDataContainer (struct Test_I_MessageData*&, // data handle
+                               bool = true);                // delete in dtor ?
+  virtual ~Test_I_MessageDataContainer ();
+
+  // implement Common_ISetPP_T
+  virtual void set (struct HTTP_Record*&);
+
+ private:
+  typedef Stream_DataBase_T<struct Test_I_MessageData> inherited;
+
+  ACE_UNIMPLEMENTED_FUNC (Test_I_MessageDataContainer (const Test_I_MessageDataContainer&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_MessageDataContainer& operator= (const Test_I_MessageDataContainer&))
+};
+
+//////////////////////////////////////////
+
 class Test_I_Message
- : public HTTP_Message_T<struct Test_I_AllocatorConfiguration,
-                         enum Stream_MessageType>
+ : public Stream_DataMessageBase_2<struct Test_I_AllocatorConfiguration,
+                                   enum Stream_MessageType,
+                                   Test_I_MessageDataContainer,
+                                   HTTP_Method_t>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
@@ -66,13 +91,10 @@ class Test_I_Message
   Test_I_Message (const Test_I_Message&);
 
  private:
-  typedef HTTP_Message_T<struct Test_I_AllocatorConfiguration,
-                         enum Stream_MessageType> inherited;
-//  typedef Stream_DataMessageBase_2<Test_I_AllocatorConfiguration,
-//                                   Test_I_MessageData_t,
-//                                   DHCP_MessageType_t> inherited;
-//  typedef DHCP_Message_T<Test_I_AllocatorConfiguration,
-//                         Test_I_MessageData_t> inherited;
+  typedef Stream_DataMessageBase_2<struct Test_I_AllocatorConfiguration,
+                                   enum Stream_MessageType,
+                                   Test_I_MessageDataContainer,
+                                   HTTP_Method_t> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_I_Message ())
   // *NOTE*: to be used by message allocators

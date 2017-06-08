@@ -476,13 +476,14 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
   Common_Tools::initialize ();
 
   // step0a: initialize configuration
-  Test_U_Client_Configuration configuration;
+  struct Test_U_Client_Configuration configuration;
   CBData_in.configuration = &configuration;
 
   Test_U_EventHandler ui_event_handler (&CBData_in);
-  Test_U_Module_EventHandler_Module event_handler (ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
-                                                NULL,
-                                                true);
+  Test_U_Module_EventHandler_Module event_handler (NULL,
+                                                   ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
+                                                   NULL,
+                                                   true);
   Test_U_Module_EventHandler* event_handler_p =
     dynamic_cast<Test_U_Module_EventHandler*> (event_handler.writer ());
   if (!event_handler_p)
@@ -496,7 +497,7 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
   if (!heap_allocator.initialize (configuration.allocatorConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize allocator, returning\n")));
+                ACE_TEXT ("failed to initialize heap allocator, returning\n")));
     return;
   } // end IF
   Test_U_StreamMessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
@@ -509,6 +510,16 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
   configuration.protocolConfiguration.printPongMessages =
     UIDefinitionFile_in.empty ();
   // ********************** stream configuration data **************************
+  struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
+  modulehandler_configuration.protocolConfiguration =
+    &configuration.protocolConfiguration;
+  modulehandler_configuration.streamConfiguration =
+    &configuration.streamConfiguration;
+  modulehandler_configuration.printFinalReport = true;
+  modulehandler_configuration.subscriber = &ui_event_handler;
+  modulehandler_configuration.subscribersLock = &CBData_in.subscribersLock;
+  modulehandler_configuration.subscribers = &CBData_in.subscribers;
+
   configuration.streamConfiguration.cloneModule = !(UIDefinitionFile_in.empty ());
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.module =
@@ -518,43 +529,32 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
     &configuration.streamConfiguration.moduleConfiguration_2;
   configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
     &configuration.streamConfiguration;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.protocolConfiguration =
-    &configuration.protocolConfiguration;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.streamConfiguration =
-    &configuration.streamConfiguration;
   configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                        &configuration.streamConfiguration.moduleHandlerConfiguration_2));
+                                                                                        modulehandler_configuration));
   configuration.streamConfiguration.printFinalReport = true;
   // *TODO*: is this correct ?
   configuration.streamConfiguration.serializeOutput = useThreadPool_in;
   configuration.streamConfiguration.userData = &configuration.userData;
-  configuration.userData.connectionConfiguration =
-      &configuration.connectionConfiguration;
-
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.printFinalReport =
-      true;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscriber =
-    &ui_event_handler;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribersLock =
-      &CBData_in.subscribersLock;
-  configuration.streamConfiguration.moduleHandlerConfiguration_2.subscribers =
-      &CBData_in.subscribers;
+  //configuration.userData.connectionConfiguration =
+  //    &configuration.connectionConfiguration;
 
   // ********************** connection configuration data **********************
-  configuration.connectionConfiguration.socketHandlerConfiguration =
-    &configuration.socketHandlerConfiguration;
-  configuration.connectionConfiguration.streamConfiguration =
-    &configuration.streamConfiguration;
-  // ********************** socket configuration data **************************
-  // ****************** socket handler configuration data **********************
-  configuration.socketHandlerConfiguration.connectionConfiguration =
-    &configuration.connectionConfiguration;
-  configuration.socketHandlerConfiguration.messageAllocator =
-    &message_allocator;
-  configuration.socketHandlerConfiguration.statisticReportingInterval =
+  struct Test_U_ConnectionConfiguration connection_configuration;
+  connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
-  configuration.socketHandlerConfiguration.userData =
+  connection_configuration.streamConfiguration =
+    &configuration.streamConfiguration;
+  connection_configuration.messageAllocator = &message_allocator;
+  connection_configuration.userData =
     &configuration.userData;
+
+  configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                 connection_configuration));
+  Test_U_ConnectionConfigurationIterator_t iterator =
+    configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
+  (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
+    &((*iterator).second);
 
   //  config.useThreadPerConnection = false;
   //  config.serializeOutput = false;
@@ -600,7 +600,7 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
     connector_p = &connector;
   else
     connector_p = &asynch_connector;
-  if (!connector_p->initialize (configuration.connectionConfiguration))
+  if (!connector_p->initialize ((*iterator).second))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -609,7 +609,7 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
   // step0d: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  connection_manager_p->set (configuration.connectionConfiguration,
+  connection_manager_p->set ((*iterator).second,
                              &configuration.userData);
 
   // step0e: initialize action timer
@@ -666,7 +666,7 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
   configuration.signalHandlerConfiguration.messageAllocator =
     &message_allocator;
   configuration.signalHandlerConfiguration.connectionConfiguration =
-    &configuration.connectionConfiguration;
+    &((*iterator).second);
   configuration.signalHandlerConfiguration.useReactor = useReactor_in;
   if (!signalHandler_in.initialize (configuration.signalHandlerConfiguration))
   {

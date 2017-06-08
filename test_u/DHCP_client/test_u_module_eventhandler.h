@@ -21,8 +21,8 @@
 #ifndef TEST_U_MODULE_EVENTHANDLER_H
 #define TEST_U_MODULE_EVENTHANDLER_H
 
-#include <ace/Global_Macros.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 
@@ -45,7 +45,7 @@ class Test_U_Module_EventHandler
                                          Test_U_DHCPClient_SessionData>
 {
  public:
-  Test_U_Module_EventHandler ();
+  Test_U_Module_EventHandler (ISTREAM_T*); // stream handle
   virtual ~Test_U_Module_EventHandler ();
 
   // implement Common_IClone_T
@@ -62,15 +62,16 @@ class Test_U_Module_EventHandler
                                          Stream_SessionId_t,
                                          Test_U_DHCPClient_SessionData> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler (const Test_U_Module_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler& operator= (const Test_U_Module_EventHandler&))
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (Test_U_DHCPClient_SessionData,           // session data type
-                              Stream_SessionMessageType,               // session event type
-                              Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
-                              Test_U_IStreamNotify_t,                  // stream notification interface type
-                              Test_U_Module_EventHandler);             // writer type
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_DHCPClient_SessionData,           // session data type
+                              enum Stream_SessionMessageType,                 // session event type
+                              struct Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
+                              Test_U_IStreamNotify_t,                         // stream notification interface type
+                              Test_U_Module_EventHandler);                    // writer type
 
 #endif

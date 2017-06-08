@@ -57,28 +57,32 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_FileReader_Module (ACE_TEXT_ALWAYS_CHAR ("FileSource"),
+                  Test_U_FileReader_Module (this,
+                                            ACE_TEXT_ALWAYS_CHAR ("FileSource"),
                                             NULL,
                                             false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_MPEG_TS_DecoderReader_Module (ACE_TEXT_ALWAYS_CHAR ("MPEGTSDecoder"),
-                                                       NULL,
-                                                       false),
-                  false);
-  modules_out.push_back (module_p);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  Test_U_StatisticReport_Module (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+                  Test_U_MPEG_TS_Decoder_Module (this,
+                                                 ACE_TEXT_ALWAYS_CHAR ("MPEGTSDecoder"),
                                                  NULL,
                                                  false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Net_IO_Module (ACE_TEXT_ALWAYS_CHAR ("NetworkIO"),
+                  Test_U_StatisticReport_Module (this,
+                                                 ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+                                                 NULL,
+                                                 false),
+                  false);
+  modules_out.push_back (module_p);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_U_Net_IO_Module (this,
+                                        ACE_TEXT_ALWAYS_CHAR ("NetworkIO"),
                                         NULL,
                                         false),
                   false);
@@ -102,9 +106,12 @@ Test_U_Stream::initialize (const struct FileServer_StreamConfiguration& configur
   ACE_ASSERT (module_p);
   typename inherited::TASK_T* task_p = module_p->reader ();
   ACE_ASSERT (task_p);
-  const_cast<struct FileServer_StreamConfiguration&> (configuration_in).moduleHandlerConfiguration_2.outboundQueue =
+  Test_U_ModuleHandlerConfigurationsIterator_t iterator =
+    const_cast<struct FileServer_StreamConfiguration&> (configuration_in).moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != const_cast<struct FileServer_StreamConfiguration&> (configuration_in).moduleHandlerConfigurations.end ());
+  (*iterator).second.outboundQueue =
     dynamic_cast<Stream_IMessageQueue*> (task_p->msg_queue ());
-  ACE_ASSERT (configuration_in.moduleHandlerConfiguration_2.outboundQueue);
+  ACE_ASSERT ((*iterator).second.outboundQueue);
 
 //  bool result = false;
   bool setup_pipeline = configuration_in.setupPipeline;
@@ -308,34 +315,39 @@ Test_U_UDPStream::load (Stream_ModuleList_t& modules_out,
   Stream_Module_t* module_p = NULL;
   if (inherited::configuration_->useReactor)
     ACE_NEW_RETURN (module_p,
-                    Test_U_Module_Net_UDPTarget_Module (ACE_TEXT_ALWAYS_CHAR ("NetworkTarget"),
+                    Test_U_Module_Net_UDPTarget_Module (this,
+                                                        ACE_TEXT_ALWAYS_CHAR ("NetworkTarget"),
                                                         NULL,
                                                         false),
                     false);
   else
     ACE_NEW_RETURN (module_p,
-                  Test_U_Module_Net_AsynchUDPTarget_Module (ACE_TEXT_ALWAYS_CHAR ("NetworkTarget"),
+                  Test_U_Module_Net_AsynchUDPTarget_Module (this,
+                                                            ACE_TEXT_ALWAYS_CHAR ("NetworkTarget"),
                                                             NULL,
                                                             false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_MPEG_TS_Decoder_Module (ACE_TEXT_ALWAYS_CHAR ("MPEGTSDecoder"),
+                  Test_U_MPEG_TS_Decoder_Module (this,
+                                                 ACE_TEXT_ALWAYS_CHAR ("MPEGTSDecoder"),
                                                  NULL,
                                                  false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_StatisticReport_Module (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+                  Test_U_StatisticReport_Module (this,
+                                                 ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
                                                  NULL,
                                                  false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_FileReaderH_Module (ACE_TEXT_ALWAYS_CHAR ("FileSource"),
+                  Test_U_FileReaderH_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR ("FileSource"),
                                              NULL,
                                              false),
                   false);
@@ -355,8 +367,10 @@ Test_U_UDPStream::initialize (const struct FileServer_StreamConfiguration& confi
   ACE_ASSERT (!inherited::isInitialized_);
 
   // update configuration
-  const_cast<struct FileServer_StreamConfiguration&> (configuration_in).moduleHandlerConfiguration_2.stream =
-    this;
+  Test_U_ModuleHandlerConfigurationsIterator_t iterator =
+    const_cast<struct FileServer_StreamConfiguration&> (configuration_in).moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != const_cast<struct FileServer_StreamConfiguration&> (configuration_in).moduleHandlerConfigurations.end ());
+  (*iterator).second.stream = this;
 
   bool result = false;
   bool setup_pipeline = configuration_in.setupPipeline;

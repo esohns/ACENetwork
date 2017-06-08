@@ -18,9 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/INET_Addr.h>
-#include <ace/Log_Msg.h>
-#include <ace/Stream.h>
+#include "ace/INET_Addr.h"
+#include "ace/Log_Msg.h"
+#include "ace/Stream.h"
 
 #include "stream_common.h"
 
@@ -114,11 +114,10 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   // step1: initialize base-class, tweak socket, initialize I/O, ...
   ACE_ASSERT (inherited3::configuration_);
-  ACE_ASSERT (inherited3::configuration_->socketHandlerConfiguration);
   ACE_ASSERT (inherited3::configuration_->streamConfiguration);
 
   // *TODO*: remove type inferences
-  if (unlikely (!inherited::initialize (*inherited3::configuration_->socketHandlerConfiguration)))
+  if (unlikely (!inherited::initialize (inherited3::configuration_->socketHandlerConfiguration)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to HandlerType::initialize(), aborting\n")));
@@ -142,9 +141,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   handle_manager = true;
 
   // step2: initialize/start stream
-  ACE_ASSERT (inherited3::configuration_);
   // step2a: connect the stream head message queue with this handler ?
-  if (likely (!inherited3::configuration_->socketHandlerConfiguration->useThreadPerConnection))
+  if (likely (!inherited3::configuration_->socketHandlerConfiguration.useThreadPerConnection))
     inherited3::configuration_->streamConfiguration->notificationStrategy =
         this;
 

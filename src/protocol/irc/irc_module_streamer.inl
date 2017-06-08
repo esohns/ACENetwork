@@ -20,8 +20,9 @@
 
 #include <string>
 
-#include <ace/Log_Msg.h>
-#include <ace/OS.h>
+#include "ace/Assert.h"
+#include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
 #include "net_macros.h"
 
@@ -41,8 +42,8 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
                       ControlMessageType,
                       DataMessageType,
                       SessionMessageType,
-                      UserDataType>::IRC_Module_Streamer_T ()
- : inherited ()
+                      UserDataType>::IRC_Module_Streamer_T (ISTREAM_T* stream_in)
+ : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Streamer_T::IRC_Module_Streamer_T"));
 
@@ -348,8 +349,8 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
     *message_inout->wr_ptr () = ' ';
     message_inout->wr_ptr (1);
   } // end IF
-  unsigned long forward_i = 0;
-  unsigned long reverse_i = data_r.parameters_.size ();
+  size_t forward_i = 0;
+  size_t reverse_i = data_r.parameters_.size ();
   char parameter_separator = ' ';
   list_items_ranges_iterator_t range_iterator =
     data_r.parameterRanges_.begin ();
@@ -470,8 +471,8 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
   *(message_inout->wr_ptr () + 1) = '\n';
   message_inout->wr_ptr (IRC_FRAME_BOUNDARY_SIZE);
 
-//   ACE_DEBUG((LM_DEBUG,
-//              ACE_TEXT("[%u]: streamed [%u byte(s)]...\n"),
-//              message_inout->id(),
-//              message_inout->length()));
+//   ACE_DEBUG ((LM_DEBUG,
+//               ACE_TEXT ("[%u]: streamed [%u byte(s)]...\n"),
+//               message_inout->id (),
+//               message_inout->length ()));
 }

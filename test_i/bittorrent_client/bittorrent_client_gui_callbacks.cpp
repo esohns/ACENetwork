@@ -753,13 +753,16 @@ button_connect_clicked_cb (GtkWidget* widget_in,
                 ACE_TEXT ("no destination folder selected, returning\n")));
     return;
   } // end IF
-  data_p->configuration->trackerModuleHandlerConfiguration.destination = path_p;
+  BitTorrent_Client_TrackerModuleHandlerConfigurationsIterator_t iterator_2 =
+    data_p->configuration->trackerStreamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != data_p->configuration->trackerStreamConfiguration.moduleHandlerConfigurations.end ());
+  (*iterator_2).second.destination = path_p;
   g_free (path_p);
-  if (!Common_File_Tools::isDirectory (data_p->configuration->trackerModuleHandlerConfiguration.destination))
+  if (!Common_File_Tools::isDirectory ((*iterator_2).second.destination))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("destination folder (was: \"%s\") does not exist, returning\n"),
-                ACE_TEXT (data_p->configuration->trackerModuleHandlerConfiguration.destination.c_str ())));
+                ACE_TEXT ((*iterator_2).second.destination.c_str ())));
     return;
   } // end IF
 

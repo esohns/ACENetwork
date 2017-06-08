@@ -47,7 +47,7 @@ template <typename ConnectionType,
           typename ConfigurationType,
           typename MessageType,
           typename SessionMessageType,
-          typename ModuleHandlerConfigurationType,
+          typename ModuleHandlerConfigurationIteratorType,
           typename StateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
@@ -61,7 +61,7 @@ IRC_Session_T<ConnectionType,
               ConfigurationType,
               MessageType,
               SessionMessageType,
-              ModuleHandlerConfigurationType,
+              ModuleHandlerConfigurationIteratorType,
               StateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
@@ -89,7 +89,7 @@ template <typename ConnectionType,
           typename ConfigurationType,
           typename MessageType,
           typename SessionMessageType,
-          typename ModuleHandlerConfigurationType,
+          typename ModuleHandlerConfigurationIteratorType,
           typename StateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
@@ -103,7 +103,7 @@ IRC_Session_T<ConnectionType,
               ConfigurationType,
               MessageType,
               SessionMessageType,
-              ModuleHandlerConfigurationType,
+              ModuleHandlerConfigurationIteratorType,
               StateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
@@ -164,7 +164,7 @@ template <typename ConnectionType,
           typename ConfigurationType,
           typename MessageType,
           typename SessionMessageType,
-          typename ModuleHandlerConfigurationType,
+          typename ModuleHandlerConfigurationIteratorType,
           typename StateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
@@ -179,7 +179,7 @@ IRC_Session_T<ConnectionType,
               ConfigurationType,
               MessageType,
               SessionMessageType,
-              ModuleHandlerConfigurationType,
+              ModuleHandlerConfigurationIteratorType,
               StateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
@@ -335,7 +335,7 @@ template <typename ConnectionType,
           typename ConfigurationType,
           typename MessageType,
           typename SessionMessageType,
-          typename ModuleHandlerConfigurationType,
+          typename ModuleHandlerConfigurationIteratorType,
           typename StateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
@@ -350,7 +350,7 @@ IRC_Session_T<ConnectionType,
               ConfigurationType,
               MessageType,
               SessionMessageType,
-              ModuleHandlerConfigurationType,
+              ModuleHandlerConfigurationIteratorType,
               StateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
@@ -377,7 +377,7 @@ template <typename ConnectionType,
           typename ConfigurationType,
           typename MessageType,
           typename SessionMessageType,
-          typename ModuleHandlerConfigurationType,
+          typename ModuleHandlerConfigurationIteratorType,
           typename StateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
@@ -392,7 +392,7 @@ IRC_Session_T<ConnectionType,
               ConfigurationType,
               MessageType,
               SessionMessageType,
-              ModuleHandlerConfigurationType,
+              ModuleHandlerConfigurationIteratorType,
               StateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
@@ -428,7 +428,7 @@ template <typename ConnectionType,
           typename ConfigurationType,
           typename MessageType,
           typename SessionMessageType,
-          typename ModuleHandlerConfigurationType,
+          typename ModuleHandlerConfigurationIteratorType,
           typename StateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
@@ -443,7 +443,7 @@ IRC_Session_T<ConnectionType,
               ConfigurationType,
               MessageType,
               SessionMessageType,
-              ModuleHandlerConfigurationType,
+              ModuleHandlerConfigurationIteratorType,
               StateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
@@ -944,7 +944,7 @@ template <typename ConnectionType,
           typename ConfigurationType,
           typename MessageType,
           typename SessionMessageType,
-          typename ModuleHandlerConfigurationType,
+          typename ModuleHandlerConfigurationIteratorType,
           typename StateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
@@ -959,7 +959,7 @@ IRC_Session_T<ConnectionType,
               ConfigurationType,
               MessageType,
               SessionMessageType,
-              ModuleHandlerConfigurationType,
+              ModuleHandlerConfigurationIteratorType,
               StateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
@@ -981,7 +981,7 @@ template <typename ConnectionType,
           typename ConfigurationType,
           typename MessageType,
           typename SessionMessageType,
-          typename ModuleHandlerConfigurationType,
+          typename ModuleHandlerConfigurationIteratorType,
           typename StateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
@@ -996,7 +996,7 @@ IRC_Session_T<ConnectionType,
               ConfigurationType,
               MessageType,
               SessionMessageType,
-              ModuleHandlerConfigurationType,
+              ModuleHandlerConfigurationIteratorType,
               StateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
@@ -1061,28 +1061,30 @@ IRC_Session_T<ConnectionType,
   } // end SWITCH
   ACE_ASSERT (connection_configuration_p);
 
-  ModuleHandlerConfigurationType* module_handler_configuration_p = NULL;
+  ModuleHandlerConfigurationIteratorType iterator;
   if (!inherited::manager_)
   {
     // *TODO*: remove type inference
-    ACE_ASSERT (connection_configuration_p->socketHandlerConfiguration);
-    ACE_ASSERT (connection_configuration_p->socketHandlerConfiguration->userData);
-    module_handler_configuration_p =
-      connection_configuration_p->socketHandlerConfiguration->userData->moduleHandlerConfiguration;
-    ACE_ASSERT (module_handler_configuration_p);
+    ACE_ASSERT (connection_configuration_p->streamConfiguration);
+
+    iterator =
+      connection_configuration_p->streamConfiguration->moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator != connection_configuration_p->streamConfiguration->moduleHandlerConfigurations.end ());
   } // end IF
   else
   {
+    // *TODO*: remove type inference
     ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
-    module_handler_configuration_p =
-        inherited::CONNECTION_BASE_T::configuration_->moduleHandlerConfiguration;
-  } // end ELSE
-  ACE_ASSERT (module_handler_configuration_p);
+    ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration);
 
-  module_handler_configuration_p->subscriber = this;
-  module_handler_configuration_p->userData =
-    connection_configuration_p->socketHandlerConfiguration->userData;
-  ACE_ASSERT (module_handler_configuration_p->userData);
+    iterator =
+      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->moduleHandlerConfigurations.end ());
+  } // end ELSE
+  (*iterator).second.subscriber = this;
+  (*iterator).second.userData =
+    connection_configuration_p->socketHandlerConfiguration.userData;
+  ACE_ASSERT ((*iterator).second.userData);
 //  const IRC_ConnectionState& connection_state_r = inherited::state ();
 //  module_handler_configuration_p->userData->connectionState =
 //      &const_cast<IRC_ConnectionState&> (connection_state_r);
@@ -1104,7 +1106,7 @@ template <typename ConnectionType,
           typename ConfigurationType,
           typename MessageType,
           typename SessionMessageType,
-          typename ModuleHandlerConfigurationType,
+          typename ModuleHandlerConfigurationIteratorType,
           typename StateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
@@ -1119,7 +1121,7 @@ IRC_Session_T<ConnectionType,
               ConfigurationType,
               MessageType,
               SessionMessageType,
-              ModuleHandlerConfigurationType,
+              ModuleHandlerConfigurationIteratorType,
               StateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
@@ -1132,9 +1134,11 @@ IRC_Session_T<ConnectionType,
 
   // sanity checK(s)
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+  // *TODO*: remove type inferences
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration);
 
   // step0: intialize configuration object
-  ModuleHandlerConfigurationType* module_handler_configuration_p = NULL;
+  ModuleHandlerConfigurationIteratorType iterator;
 //  if (!inherited::manager_)
 //  {
 //    // *NOTE*: client-side: arg_in is a handle to the connector
@@ -1171,11 +1175,10 @@ IRC_Session_T<ConnectionType,
 //    ACE_ASSERT (module_handler_configuration_p);
 //  } // end IF
 //  else
-  module_handler_configuration_p =
-      inherited::CONNECTION_BASE_T::configuration_->moduleHandlerConfiguration;
-  // sanity check(s)
-  ACE_ASSERT (module_handler_configuration_p);
-  module_handler_configuration_p->subscriber = this;
+  iterator =
+      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->moduleHandlerConfigurations.end ());
+  (*iterator).second.subscriber = this;
 //  ACE_ASSERT (module_handler_configuration_p->userData);
 //  const IRC_ConnectionState& connection_state_r = inherited::state ();
 //  module_handler_configuration_p->userData->connectionState =
@@ -1194,7 +1197,7 @@ template <typename ConnectionType,
           typename ConfigurationType,
           typename MessageType,
           typename SessionMessageType,
-          typename ModuleHandlerConfigurationType,
+          typename ModuleHandlerConfigurationIteratorType,
           typename StateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
@@ -1209,7 +1212,7 @@ IRC_Session_T<ConnectionType,
               ConfigurationType,
               MessageType,
               SessionMessageType,
-              ModuleHandlerConfigurationType,
+              ModuleHandlerConfigurationIteratorType,
               StateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
@@ -1232,7 +1235,7 @@ template <typename ConnectionType,
           typename ConfigurationType,
           typename MessageType,
           typename SessionMessageType,
-          typename ModuleHandlerConfigurationType,
+          typename ModuleHandlerConfigurationIteratorType,
           typename StateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
@@ -1247,7 +1250,7 @@ IRC_Session_T<ConnectionType,
               ConfigurationType,
               MessageType,
               SessionMessageType,
-              ModuleHandlerConfigurationType,
+              ModuleHandlerConfigurationIteratorType,
               StateType,
               ConnectionConfigurationType,
               ConnectionManagerType,
@@ -1285,7 +1288,7 @@ template <typename ConnectionType,
           typename ConfigurationType,
           typename MessageType,
           typename SessionMessageType,
-          typename ModuleHandlerConfigurationType,
+          typename ModuleHandlerConfigurationIteratorType,
           typename StateType,
           typename ConnectionConfigurationType,
           typename ConnectionManagerType,
@@ -1300,7 +1303,7 @@ IRC_Session_T<ConnectionType,
               ConfigurationType,
               MessageType,
               SessionMessageType,
-              ModuleHandlerConfigurationType,
+              ModuleHandlerConfigurationIteratorType,
               StateType,
               ConnectionConfigurationType,
               ConnectionManagerType,

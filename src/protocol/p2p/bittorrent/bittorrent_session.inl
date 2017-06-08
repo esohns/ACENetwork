@@ -97,12 +97,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::BitTorrent_Session_T"));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-
     inherited::state_.peerId = BitTorrent_Tools::generatePeerId ();
   } // end lock scope
 
   ACE_NEW_NORETURN (peerHandlerModule_,
-                    PEER_MESSAGEHANDLER_MODULE_T (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
+                    PEER_MESSAGEHANDLER_MODULE_T (NULL,
+                                                  ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
                                                   NULL,
                                                   false));
   if (!peerHandlerModule_)
@@ -112,7 +112,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     return;
   } // end IF
   ACE_NEW_NORETURN (trackerHandlerModule_,
-                    TRACKER_MESSAGEHANDLER_MODULE_T (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
+                    TRACKER_MESSAGEHANDLER_MODULE_T (NULL,
+                                                     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
                                                      NULL,
                                                      false));
   if (!trackerHandlerModule_)
@@ -313,18 +314,17 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                                         user_data_p);
     ACE_ASSERT (configuration_p);
     // *TODO*: remove type inferences
-    ACE_ASSERT (configuration_p->socketHandlerConfiguration);
     ACE_ASSERT (configuration_p->streamConfiguration);
 
     // step1: set up configuration
-    configuration_p->socketHandlerConfiguration->socketConfiguration->address =
+    configuration_p->socketHandlerConfiguration.socketConfiguration.address =
         address_in;
 
     iterator =
         configuration_p->streamConfiguration->moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator != configuration_p->streamConfiguration->moduleHandlerConfigurations.end ());
-    subscriber_p = (*iterator).second->subscriber;
-    (*iterator).second->subscriber = &peerStreamHandler_;
+    subscriber_p = (*iterator).second.subscriber;
+    (*iterator).second.subscriber = &peerStreamHandler_;
 
     clone_module = configuration_p->streamConfiguration->cloneModule;
     delete_module = configuration_p->streamConfiguration->deleteModule;
@@ -346,7 +346,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     ACE_ASSERT (configuration_p->streamConfiguration);
 
     ACE_ASSERT (iterator != configuration_p->streamConfiguration->moduleHandlerConfigurations.end ());
-    (*iterator).second->subscriber = subscriber_p;
+    (*iterator).second.subscriber = subscriber_p;
 
     configuration_p->streamConfiguration->cloneModule = clone_module;
     configuration_p->streamConfiguration->deleteModule = delete_module;
@@ -876,19 +876,18 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                                     user_data_p);
     ACE_ASSERT (configuration_p);
     // *TODO*: remove type inferences
-    ACE_ASSERT (configuration_p->socketHandlerConfiguration);
     ACE_ASSERT (configuration_p->streamConfiguration);
 
     // step1: set up configuration
-    configuration_p->socketHandlerConfiguration->socketConfiguration->address =
+    configuration_p->socketHandlerConfiguration.socketConfiguration.address =
         address_in;
 
     iterator =
         configuration_p->streamConfiguration->moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator != configuration_p->streamConfiguration->moduleHandlerConfigurations.end ());
-    subscriber_p = (*iterator).second->subscriber;
+    subscriber_p = (*iterator).second.subscriber;
     ACE_ASSERT (!subscriber_p);
-    (*iterator).second->subscriber = &trackerStreamHandler_;
+    (*iterator).second.subscriber = &trackerStreamHandler_;
 
     clone_module = configuration_p->streamConfiguration->cloneModule;
     delete_module = configuration_p->streamConfiguration->deleteModule;
@@ -1012,7 +1011,7 @@ error:
     ACE_ASSERT (configuration_p->streamConfiguration);
 
     ACE_ASSERT (iterator != configuration_p->streamConfiguration->moduleHandlerConfigurations.end ());
-    (*iterator).second->subscriber = subscriber_p;
+    (*iterator).second.subscriber = subscriber_p;
 
     configuration_p->streamConfiguration->cloneModule = clone_module;
     configuration_p->streamConfiguration->deleteModule = delete_module;

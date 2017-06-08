@@ -21,12 +21,12 @@
 #ifndef NET_SERVER_ASYNCHLISTENER_H
 #define NET_SERVER_ASYNCHLISTENER_H
 
-#include <ace/Asynch_Acceptor.h>
-#include <ace/Asynch_IO.h>
-#include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
-#include <ace/Singleton.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Asynch_Acceptor.h"
+#include "ace/Asynch_IO.h"
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
+#include "ace/Singleton.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_idumpstate.h"
 
@@ -136,10 +136,9 @@ class Net_Server_AsynchListener_T
   //virtual void handle_accept(const ACE_Asynch_Accept::Result&); // result
 
   //int                      addressFamily_;
-  ConfigurationType*        configuration_;
-  HandlerConfigurationType* handlerConfiguration_;
-  bool                      isInitialized_;
-  bool                      isListening_;
+  ConfigurationType* configuration_;
+  bool               isInitialized_;
+  bool               isListening_;
 };
 
 // include template definition

@@ -21,8 +21,8 @@
 #ifndef TEST_U_MODULE_PROTOCOLHANDLER_H
 #define TEST_U_MODULE_PROTOCOLHANDLER_H
 
-#include <ace/Global_Macros.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_itimerhandler.h"
 #include "common_time_common.h"
@@ -54,12 +54,12 @@ class Test_U_Module_ProtocolHandler
  , public Common_ITimerHandler
 {
  public:
-  Test_U_Module_ProtocolHandler ();
+  Test_U_Module_ProtocolHandler (ISTREAM_T*); // stream handle
   virtual ~Test_U_Module_ProtocolHandler ();
 
   // initialization
   virtual bool initialize (const struct Test_U_ModuleHandlerConfiguration&, // configuration
-                           Stream_IAllocator*);                             // allocator
+                           Stream_IAllocator* = NULL);                      // allocator
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (Test_U_Message*&, // data message handle
@@ -85,18 +85,15 @@ class Test_U_Module_ProtocolHandler
                                  enum Stream_SessionMessageType,
                                  struct Test_U_UserData> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler (const Test_U_Module_ProtocolHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler& operator= (const Test_U_Module_ProtocolHandler&))
-
-  // helper methods
-  Test_U_Message* allocateMessage (unsigned int); // requested size
 
   // timer
   Common_TimerHandler pingHandler_;
   ACE_Time_Value      pingInterval_;
   long                pingTimerID_;
 
-  Stream_IAllocator*  allocator_;
   bool                automaticPong_;
   unsigned int        counter_;
   bool                printPongDot_;

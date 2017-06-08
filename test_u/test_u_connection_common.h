@@ -21,7 +21,7 @@
 #ifndef TEST_U_CONNECTION_COMMON_H
 #define TEST_U_CONNECTION_COMMON_H
 
-#include <ace/INET_Addr.h>
+#include "ace/INET_Addr.h"
 
 #include "net_common.h"
 #include "net_configuration.h"

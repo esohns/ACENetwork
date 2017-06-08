@@ -30,6 +30,7 @@
 #include "test_i_session_message.h"
 #include "test_i_common.h"
 #include "test_i_common_modules.h"
+#include "test_i_module_htmlparser.h"
 
 Test_I_ConnectionStream::Test_I_ConnectionStream (const std::string& name_in)
  : inherited (name_in)
@@ -60,22 +61,25 @@ Test_I_ConnectionStream::load (Stream_ModuleList_t& modules_out,
   //                false);
   //modules_out.push_back (module_p);
   //module_p = NULL;
-  //ACE_NEW_RETURN (module_p,
-  //                Test_I_Module_DHCPDiscover_Module (ACE_TEXT_ALWAYS_CHAR ("DHCPDiscover"),
-  //                                                   NULL,
-  //                                                   false),
-  //                false);
-  //modules_out.push_back (module_p);
-  //module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_I_StatisticReport_Module (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+                  Test_I_Module_HTMLParser_Module (this,
+                                                   ACE_TEXT_ALWAYS_CHAR ("HTMLParser"),
+                                                   NULL,
+                                                   false),
+                  false);
+  modules_out.push_back (module_p);
+  module_p = NULL;
+  ACE_NEW_RETURN (module_p,
+                  Test_I_StatisticReport_Module (this,
+                                                 ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
                                                  NULL,
                                                  false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_I_HTTPMarshal_Module (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
+                  Test_I_HTTPMarshal_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR ("Marshal"),
                                              NULL,
                                              false),
                   false);
@@ -132,7 +136,7 @@ Test_I_ConnectionStream::initialize (const struct Test_I_URLStreamLoad_StreamCon
   ACE_ASSERT (iterator != configuration_in.moduleHandlerConfigurations.end ());
   // *TODO*: remove type inferences
   session_data_p->sessionID = configuration_in.sessionID;
-  session_data_p->targetFileName = (*iterator).second->targetFileName;
+  session_data_p->targetFileName = (*iterator).second.targetFileName;
 
   // ---------------------------------------------------------------------------
 

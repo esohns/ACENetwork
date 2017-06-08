@@ -24,10 +24,10 @@
 #include <map>
 #include <string>
 
-#include <ace/Global_Macros.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
-#include <gtk/gtk.h>
+#include "gtk/gtk.h"
 
 #include "common_iget.h"
 
@@ -61,8 +61,8 @@ class IRC_Client_GUI_Connection
   //            IRC_Client_GTK_CBData::Common_UI_GTKState::lock held !
   virtual ~IRC_Client_GUI_Connection ();
 
-  void initialize (IRC_Client_SessionState*, // session state handle
-                   IRC_IControl*);           // controller handle
+  void initialize (struct IRC_Client_SessionState*, // session state handle
+                   IRC_IControl*);                  // controller handle
   // *WARNING*: this requires gdk_threads_enter()/leave() protection !
   void finalize (bool = true); // locked access ?
   void close ();
@@ -79,7 +79,7 @@ class IRC_Client_GUI_Connection
                        const IRC_Client_SessionMessage&);
 
   // implement Common_IGet_T
-  virtual const IRC_Client_GTK_ConnectionCBData& get () const;
+  virtual const struct IRC_Client_GTK_ConnectionCBData& get () const;
 
   // *NOTE*: a return value of -1 indicates non-existence
   gint exists (const std::string&, // channel/nick
@@ -122,14 +122,14 @@ class IRC_Client_GUI_Connection
 
   IRC_Client_GUI_MessageHandler* getHandler (const std::string&); // id (channel/nickname)
 
-  IRC_Client_GTK_ConnectionCBData CBData_;
-  guint                           contextID_;
-  bool                            isFirstUsersMsg_;
-  IRC_Client_SessionState*        sessionState_;
-  std::string                     UIFileDirectory_;
+  struct IRC_Client_GTK_ConnectionCBData CBData_;
+  guint                                  contextID_;
+  bool                                   isFirstUsersMsg_;
+  struct IRC_Client_SessionState*        sessionState_;
+  std::string                            UIFileDirectory_;
 
-  mutable ACE_SYNCH_MUTEX         lock_;
-  MESSAGE_HANDLERS_T              messageHandlers_;
+  mutable ACE_SYNCH_MUTEX                lock_;
+  MESSAGE_HANDLERS_T                     messageHandlers_;
 };
 
 #endif

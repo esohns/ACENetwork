@@ -21,8 +21,8 @@
 #ifndef IRC_CLIENT_SESSION_COMMON_H
 #define IRC_CLIENT_SESSION_COMMON_H
 
-#include <ace/INET_Addr.h>
-#include <ace/SOCK_Connector.h>
+#include "ace/INET_Addr.h"
+#include "ace/SOCK_Connector.h"
 
 #include "irc_common.h"
 #include "irc_configuration.h"
@@ -61,7 +61,7 @@ typedef IRC_Session_T<IRC_Client_TCPConnection_t,
                       struct IRC_Client_ConnectionConfiguration,
                       IRC_Message,
                       IRC_Client_SessionMessage,
-                      struct IRC_Client_ModuleHandlerConfiguration,
+                      IRC_Client_ModuleHandlerConfigurationsIterator_t,
                       struct IRC_Client_CursesState,
                       struct IRC_Client_ConnectionConfiguration,
                       IRC_Client_IConnection_Manager_t,
@@ -75,7 +75,7 @@ typedef IRC_Session_T<IRC_Client_AsynchTCPConnection_t,
                       struct IRC_Client_ConnectionConfiguration,
                       IRC_Message,
                       IRC_Client_SessionMessage,
-                      struct IRC_Client_ModuleHandlerConfiguration,
+                      IRC_Client_ModuleHandlerConfigurationsIterator_t,
                       struct IRC_Client_CursesState,
                       struct IRC_Client_ConnectionConfiguration,
                       IRC_Client_IConnection_Manager_t,

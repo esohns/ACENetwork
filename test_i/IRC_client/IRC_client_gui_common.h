@@ -25,11 +25,11 @@
 #include <string>
 #include <vector>
 
-#include <ace/OS.h>
-#include <ace/Synch_Traits.h>
-#include <ace/Singleton.h>
+#include "ace/OS.h"
+#include "ace/Singleton.h"
+#include "ace/Synch_Traits.h"
 
-#include <gtk/gtk.h>
+#include "gtk/gtk.h"
 
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
@@ -44,7 +44,8 @@
 class IRC_Client_GUI_Connection;
 class IRC_Client_GUI_MessageHandler;
 
-typedef std::map<std::string, IRC_Client_GUI_Connection*> IRC_Client_GUI_Connections_t;
+typedef std::map<std::string,
+                 IRC_Client_GUI_Connection*> IRC_Client_GUI_Connections_t;
 typedef IRC_Client_GUI_Connections_t::iterator IRC_Client_GUI_ConnectionsIterator_t;
 typedef IRC_Client_GUI_Connections_t::const_iterator IRC_Client_GUI_ConnectionsConstIterator_t;
 
@@ -64,7 +65,7 @@ struct IRC_Client_GTK_ProgressData
 
   IRC_Client_GUI_CompletedActions_t completedActions;
   GdkCursorType                     cursorType;
-  Common_UI_GTKState*               GTKState;
+  struct Common_UI_GTKState*        GTKState;
   IRC_Client_GUI_PendingActions_t   pendingActions;
 };
 
@@ -81,12 +82,12 @@ struct IRC_Client_GTK_CBData
    , UIFileDirectory ()
   {};
 
-  IRC_Client_Configuration*    configuration;
-  IRC_Client_GUI_Connections_t connections;
-  guint                        contextID;
-  IRC_Client_PhoneBook         phoneBook;
-  IRC_Client_GTK_ProgressData  progressData;
-  std::string                  UIFileDirectory;
+  struct IRC_Client_Configuration*   configuration;
+  IRC_Client_GUI_Connections_t       connections;
+  guint                              contextID;
+  struct IRC_Client_PhoneBook        phoneBook;
+  struct IRC_Client_GTK_ProgressData progressData;
+  std::string                        UIFileDirectory;
 };
 
 struct IRC_Client_ConnectionThreadData
@@ -98,10 +99,10 @@ struct IRC_Client_ConnectionThreadData
    , phonebookEntry ()
   {};
 
-  IRC_Client_Configuration*  configuration;
-  IRC_Client_GTK_CBData*     CBData;
-  IRC_LoginOptions           loginOptions;
-  IRC_Client_ConnectionEntry phonebookEntry;
+  struct IRC_Client_Configuration*  configuration;
+  struct IRC_Client_GTK_CBData*     CBData;
+  struct IRC_LoginOptions           loginOptions;
+  struct IRC_Client_ConnectionEntry phonebookEntry;
 };
 
 struct IRC_Client_GTK_ConnectionCBData
@@ -121,7 +122,7 @@ struct IRC_Client_GTK_ConnectionCBData
   IRC_Client_GUI_Connections_t* connections;
   IRC_IControl*                 controller;
   guint                         eventSourceID;
-  Common_UI_GTKState*           GTKState;
+  struct Common_UI_GTKState*    GTKState;
   // *TODO*: remove this
   std::string                   label;
   bool                          pending;
@@ -145,19 +146,19 @@ struct IRC_Client_GTK_HandlerCBData
    , timeStamp ()
   {};
 
-  unsigned int                   acknowledgements;
-  std::string                    builderLabel;
-  IRC_ChannelModes_t             channelModes;
-  IRC_Client_GUI_Connection*     connection;
-  IRC_IControl*                  controller;
-  guint                          eventSourceID;
-  struct Common_UI_GTKState*     GTKState;
-  IRC_Client_GUI_MessageHandler* handler;
+  unsigned int                      acknowledgements;
+  std::string                       builderLabel;
+  IRC_ChannelModes_t                channelModes;
+  struct IRC_Client_GUI_Connection* connection;
+  IRC_IControl*                     controller;
+  guint                             eventSourceID;
+  struct Common_UI_GTKState*        GTKState;
+  IRC_Client_GUI_MessageHandler*    handler;
   // *TODO*: remove this
-  std::string                    id;
-  string_list_t                  parameters;
-  bool                           pending;
-  std::string                    timeStamp;
+  std::string                       id;
+  string_list_t                     parameters;
+  bool                              pending;
+  std::string                       timeStamp;
 };
 
 typedef Common_UI_GtkBuilderDefinition_T<struct IRC_Client_GTK_CBData> IRC_Client_GtkBuilderDefinition_t;

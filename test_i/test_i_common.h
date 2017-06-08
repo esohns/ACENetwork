@@ -86,31 +86,27 @@ struct Test_I_SignalHandlerConfiguration
 struct Test_I_Configuration
 {
   inline Test_I_Configuration ()
-   : signalHandlerConfiguration ()
-   , allocatorConfiguration ()
-   , socketConfiguration ()
-   , socketHandlerConfiguration ()
-   , connectionConfiguration ()
+   : allocatorConfiguration ()
+   , signalHandlerConfiguration ()
+   , connectionConfigurations ()
    , parserConfiguration ()
-   , moduleConfiguration ()
+   //, streamConfiguration ()
    , userData ()
    , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
-  // **************************** signal data **********************************
-  struct Test_I_SignalHandlerConfiguration signalHandlerConfiguration;
-  // **************************** socket data **********************************
   struct Test_I_AllocatorConfiguration     allocatorConfiguration;
-  struct Net_SocketConfiguration           socketConfiguration;
-  struct Net_SocketHandlerConfiguration    socketHandlerConfiguration;
-  struct Net_ConnectionConfiguration       connectionConfiguration;
+  // **************************** socket data **********************************
+  Net_ConnectionConfigurations_t           connectionConfigurations;
   // **************************** parser data **********************************
   struct Common_ParserConfiguration        parserConfiguration;
-  // **************************** stream data **********************************
-  struct Stream_ModuleConfiguration        moduleConfiguration;
+  //// **************************** stream data **********************************
+  //struct Test_I_StreamConfiguration        streamConfiguration;
+  // **************************** signal data **********************************
+  struct Test_I_SignalHandlerConfiguration signalHandlerConfiguration;
+  bool                                     useReactor;
 
   struct Test_I_UserData                   userData;
-  bool                                     useReactor;
 };
 
 typedef Stream_INotify_T<enum Stream_SessionMessageType> Test_I_IStreamNotify_t;

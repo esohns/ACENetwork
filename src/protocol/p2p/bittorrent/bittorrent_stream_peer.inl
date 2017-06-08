@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "net_macros.h"
 
@@ -107,14 +107,16 @@ BitTorrent_PeerStream_T<StreamStateType,
 //  modules_out.push_back (module_p);
 //  module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  MODULE_STATISTIC_T (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+                  MODULE_STATISTIC_T (this,
+                                      ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
                                       NULL,
                                       false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  MODULE_MARSHAL_T (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
+                  MODULE_MARSHAL_T (this,
+                                    ACE_TEXT_ALWAYS_CHAR ("Marshal"),
                                     NULL,
                                     false),
                   false);
@@ -179,7 +181,7 @@ BitTorrent_PeerStream_T<StreamStateType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
-                ACE_TEXT (inherited::name ().c_str ())));
+                ACE_TEXT (inherited::name_.c_str ())));
     goto error;
   } // end IF
   const_cast<ConfigurationType&> (configuration_in).setupPipeline =
@@ -277,7 +279,8 @@ BitTorrent_PeerStream_T<StreamStateType,
     if (!inherited::setup (NULL))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to set up pipeline, aborting\n")));
+                  ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
+                  ACE_TEXT (inherited::name_.c_str ())));
       goto error;
     } // end IF
 
@@ -334,7 +337,7 @@ BitTorrent_PeerStream_T<StreamStateType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: module \"%s\" not found, aborting\n"),
-                ACE_TEXT (inherited::name ().c_str ()),
+                ACE_TEXT (inherited::name_.c_str ()),
                 ACE_TEXT ("StatisticReport")));
     return false;
   } // end IF

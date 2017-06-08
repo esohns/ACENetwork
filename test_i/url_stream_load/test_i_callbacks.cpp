@@ -219,15 +219,21 @@ idle_initialize_UI_cb (gpointer userData_in)
   gtk_spin_button_set_range (spin_button_p,
                              0.0,
                              std::numeric_limits<double>::max ());
+  Test_I_URLStreamLoad_ConnectionConfigurationIterator_t iterator_2 =
+    data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   gtk_spin_button_set_value (spin_button_p,
-                             static_cast<double> (data_p->configuration->connectionConfiguration.PDUSize));
+                             static_cast<double> ((*iterator_2).second.PDUSize));
 
   GtkEntry* entry_p =
     GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_URL_NAME)));
   ACE_ASSERT (entry_p);
+  Test_I_URLStreamLoad_ModuleHandlerConfigurationsIterator_t iterator_3 =
+    data_p->configuration->streamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.moduleHandlerConfigurations.end ());
   gchar* text_p =
-    Common_UI_Tools::Locale2UTF8 (data_p->configuration->moduleHandlerConfiguration.URL);
+    Common_UI_Tools::Locale2UTF8 ((*iterator_3).second.URL);
   gtk_entry_set_text (entry_p,
                       text_p);
   g_free (text_p);
@@ -262,16 +268,16 @@ idle_initialize_UI_cb (gpointer userData_in)
   //GFile* file_p = NULL;
   struct _GString* string_p = NULL;
   gchar* filename_p = NULL;
-  if (!data_p->configuration->moduleHandlerConfiguration.targetFileName.empty ())
+  if (!(*iterator_3).second.targetFileName.empty ())
   {
     // *NOTE*: gtk does not complain if the file doesn't exist, but the button
     //         will display "(None)" --> create empty file
-    if (!Common_File_Tools::isReadable (data_p->configuration->moduleHandlerConfiguration.targetFileName))
-      if (!Common_File_Tools::create (data_p->configuration->moduleHandlerConfiguration.targetFileName))
+    if (!Common_File_Tools::isReadable ((*iterator_3).second.targetFileName))
+      if (!Common_File_Tools::create ((*iterator_3).second.targetFileName))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Common_File_Tools::create(\"%s\"): \"%m\", aborting\n"),
-                    ACE_TEXT (data_p->configuration->moduleHandlerConfiguration.targetFileName.c_str ())));
+                    ACE_TEXT ((*iterator_3).second.targetFileName.c_str ())));
         return G_SOURCE_REMOVE;
       } // end IF
     //file_p =
@@ -284,8 +290,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     //  data_p->configuration->moduleHandlerConfiguration.targetFileName;
     //if (!gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
     //                                              file_uri.c_str ()))
-    string_p =
-      g_string_new (data_p->configuration->moduleHandlerConfiguration.targetFileName.c_str ());
+    string_p = g_string_new ((*iterator_3).second.targetFileName.c_str ());
     filename_p = string_p->str;
       //Common_UI_Tools::Locale2UTF8 (data_p->configuration->moduleHandlerConfiguration.targetFileName);
     if (!gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_button_p),
@@ -293,7 +298,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to gtk_file_chooser_set_filename(\"%s\"): \"%s\", aborting\n"),
-                  ACE_TEXT (data_p->configuration->moduleHandlerConfiguration.targetFileName.c_str ())));
+                  ACE_TEXT ((*iterator_3).second.targetFileName.c_str ())));
 
       // clean up
       g_string_free (string_p, FALSE);
@@ -349,8 +354,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   } // end ELSE
 
   std::string default_folder_uri = ACE_TEXT_ALWAYS_CHAR ("file://");
-  default_folder_uri +=
-    data_p->configuration->moduleHandlerConfiguration.targetFileName;
+  default_folder_uri += (*iterator_3).second.targetFileName;
   if (!gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
                                                 default_folder_uri.c_str ()))
   {
@@ -365,7 +369,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_SAVE_NAME)));
   ACE_ASSERT (check_button_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
-                                !data_p->configuration->moduleHandlerConfiguration.targetFileName.empty ());
+                                !(*iterator_3).second.targetFileName.empty ());
   check_button_p =
     GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_ASYNCH_NAME)));
@@ -377,7 +381,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_LOOPBACK_NAME)));
   ACE_ASSERT (check_button_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
-                                data_p->configuration->socketConfiguration.address.is_loopback ());
+                                (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address.is_loopback ());
 
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -884,18 +888,24 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     GtkFileChooserButton* file_chooser_button_p = NULL;
     gchar* URI_p, *directory_p, *hostname_p = NULL;
     GError* error_p = NULL;
+    Test_I_URLStreamLoad_ConnectionConfigurationIterator_t iterator_2 =
+      data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
+    Test_I_URLStreamLoad_ModuleHandlerConfigurationsIterator_t iterator_3 =
+      data_p->configuration->streamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.moduleHandlerConfigurations.end ());
     Test_I_TCPConnector_t connector (iconnection_manager_p,
-                                     data_p->configuration->moduleHandlerConfiguration.statisticReportingInterval);
+                                     (*iterator_3).second.statisticReportingInterval);
     Test_I_SSLTCPConnector_t ssl_connector (iconnection_manager_p,
-                                            data_p->configuration->moduleHandlerConfiguration.statisticReportingInterval);
+                                            (*iterator_3).second.statisticReportingInterval);
     Test_I_AsynchTCPConnector_t asynch_connector (iconnection_manager_p,
-                                                  data_p->configuration->moduleHandlerConfiguration.statisticReportingInterval);
+                                                  (*iterator_3).second.statisticReportingInterval);
     Test_I_IConnector_t* iconnector_p = NULL;
     Test_I_IStreamConnection_t* istream_connection_p = NULL;
     HTTP_Form_t HTTP_form;
     HTTP_Headers_t HTTP_headers;
     struct HTTP_Record* HTTP_record_p = NULL;
-    Stream_DataBase_T<struct HTTP_Record>* message_data_p = NULL;
+    Test_I_Message::DATA_T* message_data_p = NULL;
     Test_I_Message* message_p = NULL;
     ACE_Message_Block* message_block_p = NULL;
     GtkSpinner* spinner_p = NULL;
@@ -906,7 +916,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME)));
     ACE_ASSERT (spin_button_p);
-    data_p->configuration->socketConfiguration.bufferSize =
+    (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.bufferSize =
       static_cast<unsigned int> (gtk_spin_button_get_value_as_int (spin_button_p));
     //data_p->configuration->connectionConfiguration.PDUSize =
     //  static_cast<unsigned int> (gtk_spin_button_get_value_as_int (spin_button_p));
@@ -916,16 +926,16 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_URL_NAME)));
     ACE_ASSERT (entry_p);
-    data_p->configuration->moduleHandlerConfiguration.URL =
+    (*iterator_3).second.URL =
       Common_UI_Tools::UTF82Locale (gtk_entry_get_text (entry_p), -1);
-    if (!HTTP_Tools::parseURL (data_p->configuration->moduleHandlerConfiguration.URL,
+    if (!HTTP_Tools::parseURL ((*iterator_3).second.URL,
                                hostname_string,
                                URI_string,
                                use_SSL))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to HTTP_Tools::parseURL(\"%s\"), returning\n"),
-                  ACE_TEXT (data_p->configuration->moduleHandlerConfiguration.URL.c_str ())));
+                  ACE_TEXT ((*iterator_3).second.URL.c_str ())));
       goto error;
     } // end IF
     hostname_string_2 = hostname_string;
@@ -940,8 +950,8 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       hostname_string_2 += converter.str ();
     } // end IF
     result =
-      data_p->configuration->socketConfiguration.address.set (hostname_string_2.c_str (),
-                                                              AF_INET);
+      (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address.set (hostname_string_2.c_str (),
+                                                                                       AF_INET);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -949,8 +959,8 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                   ACE_TEXT (hostname_string_2.c_str ())));
       goto error;
     } // end IF
-    data_p->configuration->socketConfiguration.useLoopBackDevice =
-      data_p->configuration->socketConfiguration.address.is_loopback ();
+    (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.useLoopBackDevice =
+      (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address.is_loopback ();
 
     // save to file ?
     check_button_p =
@@ -959,7 +969,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (check_button_p);
     if (!gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check_button_p)))
     {
-      data_p->configuration->moduleHandlerConfiguration.targetFileName.clear ();
+      (*iterator_3).second.targetFileName.clear ();
       goto continue_;
     } // end IF
     // retrieve output filename
@@ -997,11 +1007,9 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                                           ACE_DIRECTORY_SEPARATOR_CHAR));
     g_free (directory_p); directory_p = NULL;
     ACE_ASSERT (Common_File_Tools::isDirectory (directory_string));
-    data_p->configuration->moduleHandlerConfiguration.targetFileName =
-        directory_string;
-    data_p->configuration->moduleHandlerConfiguration.targetFileName +=
-        ACE_DIRECTORY_SEPARATOR_STR;
-    data_p->configuration->moduleHandlerConfiguration.targetFileName +=
+    (*iterator_3).second.targetFileName = directory_string;
+    (*iterator_3).second.targetFileName += ACE_DIRECTORY_SEPARATOR_STR_A;
+    (*iterator_3).second.targetFileName +=
         ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_OUTPUT_FILE);
 
     // step3: connect to peer
@@ -1018,7 +1026,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 
       iconnector_p = &asynch_connector;
     } // end ELSE
-    if (!iconnector_p->initialize (data_p->configuration->connectionConfiguration))
+    if (!iconnector_p->initialize ((*iterator_2).second))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize connector: \"%m\", aborting\n")));
@@ -1036,7 +1044,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 
     // step3b: connect
     data_p->handle =
-        iconnector_p->connect (data_p->configuration->socketConfiguration.address);
+        iconnector_p->connect ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address);
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
     if (!data_p->configuration->useReactor)
@@ -1054,7 +1062,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       do
       {
         iconnection_p =
-            iconnection_manager_p->get (data_p->configuration->socketConfiguration.address,
+            iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address,
                                         true);
         if (iconnection_p)
         {
@@ -1071,19 +1079,19 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       if (!iconnection_p)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to connect to %s (timed out after: %#T), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->socketConfiguration.address).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address).c_str ()),
                     &timeout));
     } // end IF
     else
       iconnection_p =
-        iconnection_manager_p->get (data_p->configuration->socketConfiguration.address,
+        iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address,
                                     true);
     if ((data_p->handle == ACE_INVALID_HANDLE) ||
         !iconnection_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->socketConfiguration.address).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address).c_str ())));
 
       // clean up
       iconnector_p->abort ();
@@ -1094,12 +1102,12 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("0x%@: opened TCP socket to %s\n"),
                 data_p->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->socketConfiguration.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address).c_str ())));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: opened TCP socket to %s\n"),
                 data_p->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->socketConfiguration.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address).c_str ())));
 #endif
 
     // step4: send HTTP request
@@ -1123,11 +1131,11 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     HTTP_record_p->method =
       (HTTP_form.empty () ? HTTP_Codes::HTTP_METHOD_GET
                           : HTTP_Codes::HTTP_METHOD_POST);
-    HTTP_record_p->URI = data_p->configuration->moduleHandlerConfiguration.URL;
+    HTTP_record_p->URI = (*iterator_3).second.URL;
     HTTP_record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
 
     ACE_NEW_NORETURN (message_data_p,
-                      Stream_DataBase_T<struct HTTP_Record> ());
+                      Test_I_Message::DATA_T ());
     if (!message_data_p)
     {
       ACE_DEBUG ((LM_CRITICAL,
@@ -1141,13 +1149,13 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     // *IMPORTANT NOTE*: fire-and-forget API (HTTP_record_p)
     message_data_p->set (HTTP_record_p);
 
-    ACE_ASSERT (data_p->configuration->connectionConfiguration.messageAllocator);
+    ACE_ASSERT ((*iterator_2).second.messageAllocator);
 allocate:
     message_p =
-      static_cast<Test_I_Message*> (data_p->configuration->connectionConfiguration.messageAllocator->malloc (data_p->configuration->connectionConfiguration.PDUSize));
+      static_cast<Test_I_Message*> ((*iterator_2).second.messageAllocator->malloc ((*iterator_2).second.PDUSize));
     // keep retrying ?
     if (!message_p &&
-        !data_p->configuration->connectionConfiguration.messageAllocator->block ())
+        !(*iterator_2).second.messageAllocator->block ())
       goto allocate;
     if (!message_p)
     {
@@ -1250,7 +1258,7 @@ error:
   gtk_widget_set_sensitive (GTK_WIDGET (box_p), true);
 
   un_toggling_connect = true;
-  gtk_toggle_button_toggled (toggleButton_in);
+  gtk_toggle_button_set_active (toggleButton_in, false);
 } // toggle_button_connect_toggled_cb
 
 gint
@@ -1392,7 +1400,7 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   // step3: stop GTK event processing
   // *NOTE*: triggering UI shutdown here is more consistent, compared to doing
   //         it from the signal handler
-  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
+  TEST_I_URLSTREAMLOAD_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
 
   return FALSE;
 } // button_quit_clicked_cb

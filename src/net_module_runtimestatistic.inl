@@ -18,9 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/Guard_T.h>
-#include <ace/Log_Msg.h>
-#include <ace/Time_Value.h>
+#include "ace/Guard_T.h"
+#include "ace/Log_Msg.h"
+#include "ace/Time_Value.h"
 
 #include "common_timer_manager_common.h"
 
@@ -45,9 +45,8 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
                                   DataMessageType,
                                   SessionMessageType,
                                   ProtocolCommandType,
-                                  StatisticContainerType>::Net_Module_Statistic_WriterTask_T ()
- : inherited ()
- , isInitialized_ (false)
+                                  StatisticContainerType>::Net_Module_Statistic_WriterTask_T (ISTREAM_T* stream_in)
+ : inherited (stream_in)
  , resetTimeoutHandler_ (this)
  , resetTimeoutHandlerID_ (-1)
  , localReportingHandler_ (ACTION_REPORT,
@@ -66,7 +65,6 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
  , byteCounter_ (0)
  , lastBytesPerSecondCount_ (0)
  , messageTypeStatistic_ ()
- , allocator_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::Net_Module_Statistic_WriterTask_T"));
 
@@ -117,11 +115,8 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::initialize"));
 
   // sanity check(s)
-  if (isInitialized_)
+  if (inherited::isInitialized_)
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("re-initializing...\n")));
-
     // stop timers
     fini_timers (true);
 
@@ -129,9 +124,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
     printFinalReport_ = false;
     sessionID_ = 0;
     // reset various counters...
-    {
-      ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, false);
-
+    { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, false);
       numInboundMessages_ = 0;
       numOutboundMessages_ = 0;
       numSessionMessages_ = 0;
@@ -145,9 +138,6 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
 
       messageTypeStatistic_.clear ();
     } // end lock scope
-    allocator_ = NULL;
-
-    isInitialized_ = false;
   } // end IF
 
   reportingInterval_ = configuration_in.reportingInterval;
@@ -172,7 +162,6 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
 //               resetTimeoutHandlerID_));
   } // end IF
   printFinalReport_ = configuration_in.printFinalReport;
-  allocator_ = allocator_in;
 //   // sanity check(s)
 //   if (!allocator_)
 //   {
@@ -181,9 +170,8 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
 //     return false;
 //   } // end IF
 
-  isInitialized_ = true;
-
-  return true;
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 template <typename SynchStrategyType,
@@ -213,9 +201,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
   // sanity check(s)
   ACE_ASSERT (message_inout);
 
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     // update counters...
     numInboundMessages_++;
     numInboundBytes_ += message_inout->total_length ();
@@ -256,9 +242,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
   ACE_ASSERT (message_inout);
   ACE_ASSERT (isInitialized_);
 
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     // update counters...
     // *NOTE*: currently, session messages travel only downstream...
     //numInboundMessages_++;
@@ -364,9 +348,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::reset"));
 
   // this should happen every second (roughly)...
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     // remember this result (satisfies an asynchronous API)...
     lastMessagesPerSecondCount_ = messageCounter_;
     lastBytesPerSecondCount_ = byteCounter_;
@@ -404,9 +386,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
   // initialize return value(s)
   ACE_OS::memset (&data_out, 0, sizeof (StatisticContainerType));
 
-  {
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, false);
-
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, false);
     data_out.bytes = (numInboundBytes_ + numOutboundBytes_);
     data_out.dataMessages = (numInboundMessages_ + numOutboundMessages_);
 //    data_out.droppedMessages = 0;
@@ -574,10 +554,12 @@ Net_Module_Statistic_ReaderTask_T<SynchStrategyType,
                                   DataMessageType,
                                   SessionMessageType,
                                   ProtocolCommandType,
-                                  StatisticContainerType>::Net_Module_Statistic_ReaderTask_T ()
+                                  StatisticContainerType>::Net_Module_Statistic_ReaderTask_T (ISTREAM_T* stream_in)
  : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_ReaderTask_T::Net_Module_Statistic_ReaderTask_T"));
+
+  ACE_UNUSED_ARG (stream_in);
 
   inherited::flags_ |= ACE_Task_Flags::ACE_READER;
 }
@@ -650,9 +632,7 @@ Net_Module_Statistic_ReaderTask_T<SynchStrategyType,
     return -1;
   } // end IF
 
-  {
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, sibling_p->lock_, -1);
-
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, sibling_p->lock_, -1);
     // update counters...
     sibling_p->numOutboundMessages_++;
     sibling_p->numOutboundBytes_ += messageBlock_in->total_length ();

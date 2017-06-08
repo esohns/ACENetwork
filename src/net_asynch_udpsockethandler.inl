@@ -74,7 +74,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::configuration_->socketConfiguration);
+  ACE_ASSERT (inherited::configuration_->connectionConfiguration);
 
   // step0: initialize base class
   ACE_Proactor* proactor_p = ACE_Proactor::instance ();
@@ -83,25 +83,26 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   if (handle_in != ACE_INVALID_HANDLE)
     inherited2::handle (handle_in);
 
-  address_ = inherited::configuration_->socketConfiguration->address;
-  allocator_ = inherited::configuration_->messageAllocator;
+  // *TODO*: remove type inferences
+  address_ = inherited::configuration_->socketConfiguration.address;
+  allocator_ =
+    inherited::configuration_->connectionConfiguration->messageAllocator;
   PDUSize_ =
     ((handle_in != ACE_INVALID_HANDLE) ? NET_PROTOCOL_DEFAULT_UDP_BUFFER_SIZE
                                        : Net_Common_Tools::getMTU (handle_in));
   //ACE_DEBUG ((LM_DEBUG,
   //            ACE_TEXT ("maximum message size: %u...\n"),
   //            PDUSize_));
-  writeOnly_ = inherited::configuration_->socketConfiguration->writeOnly;
+  writeOnly_ = inherited::configuration_->socketConfiguration.writeOnly;
 
   // step1: connect ?
-  connect_socket = inherited::configuration_->socketConfiguration->connect;
+  connect_socket = inherited::configuration_->socketConfiguration.connect;
   // *IMPORTANT NOTE*: outbound sockets need to be associated with the peer
   //                   address as the data dispatch happens out of context
   if (writeOnly_)
-  { ACE_ASSERT (inherited::configuration_->socketConfiguration->connect);
+  { ACE_ASSERT (inherited::configuration_->socketConfiguration.connect);
     connect_socket = true;
   } // end IF
-  // *TODO*: remove type inference
   if (connect_socket)
   {
     ACE_INET_Addr associated_address =
@@ -143,21 +144,21 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   if (!writeOnly_)
   {
     // step2a: tweak inbound socket
-    if (inherited::configuration_->socketConfiguration->bufferSize)
+    if (inherited::configuration_->socketConfiguration.bufferSize)
       if (!Net_Common_Tools::setSocketBuffer (handle_in,
                                               SO_RCVBUF,
-                                              inherited::configuration_->socketConfiguration->bufferSize))
+                                              inherited::configuration_->socketConfiguration.bufferSize))
       {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                     handle_in,
-                    inherited::configuration_->socketConfiguration->bufferSize));
+                    inherited::configuration_->socketConfiguration.bufferSize));
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
                     handle_in,
-                    inherited::configuration_->socketConfiguration->bufferSize));
+                    inherited::configuration_->socketConfiguration.bufferSize));
 #endif
       } // end IF
 
@@ -166,14 +167,14 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
     if (!Net_Common_Tools::setLinger (handle_in,
-                                      inherited::configuration_->socketConfiguration->linger,
+                                      inherited::configuration_->socketConfiguration.linger,
                                       -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setLinger(%d,%s,-1), returning\n"),
                   handle_in,
-                  (inherited::configuration_->socketConfiguration->linger ? ACE_TEXT ("true")
-                                                                          : ACE_TEXT ("false"))));
+                  (inherited::configuration_->socketConfiguration.linger ? ACE_TEXT ("true")
+                                                                         : ACE_TEXT ("false"))));
       return;
     } // end IF
 #endif
@@ -198,21 +199,21 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
     } // end IF
   } // end IF
   // step3: tweak outbound socket (if any)
-  if (inherited::configuration_->socketConfiguration->bufferSize)
+  if (inherited::configuration_->socketConfiguration.bufferSize)
     if (!Net_Common_Tools::setSocketBuffer (handle_in,
                                             SO_SNDBUF,
-                                            inherited::configuration_->socketConfiguration->bufferSize))
+                                            inherited::configuration_->socketConfiguration.bufferSize))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_SNDBUF,%u), continuing\n"),
                   handle_in,
-                  inherited::configuration_->socketConfiguration->bufferSize));
+                  inherited::configuration_->socketConfiguration.bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
                   handle_in,
-                  inherited::configuration_->socketConfiguration->bufferSize));
+                  inherited::configuration_->socketConfiguration.bufferSize));
 #endif
     } // end IF
 

@@ -23,11 +23,10 @@
 
 #include <string>
 
-#include <ace/INET_Addr.h>
-#include <ace/Time_Value.h>
+#include "ace/INET_Addr.h"
+#include "ace/Time_Value.h"
 
 #include "common_defines.h"
-//#include "common_inotify.h"
 
 #include "stream_common.h"
 
@@ -38,27 +37,14 @@
 #include "irc_common.h"
 #include "irc_defines.h"
 #include "irc_icontrol.h"
+#include "irc_network.h"
 #include "irc_stream_common.h"
 
 // forward declarations
-struct IRC_ConnectionConfiguration;
-struct IRC_ConnectionState;
 class IRC_Record;
 struct IRC_ModuleHandlerConfiguration;
 //class IRC_SessionMessage;
 struct IRC_Stream_SessionData;
-//struct IRC_UserData;
-
-//typedef Net_IConnection_T<ACE_INET_Addr,
-//                          struct IRC_Configuration,
-//                          struct IRC_ConnectionState,
-//                          IRC_RuntimeStatistic_t,
-//                          IRC_Stream> IRC_IConnection_t;
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
-                                 struct IRC_ConnectionConfiguration,
-                                 struct IRC_ConnectionState,
-                                 IRC_RuntimeStatistic_t,
-                                 struct Stream_UserData> IRC_IConnection_Manager_t;
 
 //typedef Common_INotify_T<unsigned int,
 //                         struct IRC_Stream_SessionData,
@@ -77,41 +63,6 @@ struct IRC_AllocatorConfiguration
     //         'flex's yy_scan_buffer() method
     paddingBytes = NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE;
   };
-};
-
-struct IRC_SocketHandlerConfiguration;
-struct IRC_StreamConfiguration;
-struct IRC_ConnectionConfiguration
-  : Net_ConnectionConfiguration
-{
-  inline IRC_ConnectionConfiguration ()
-    : Net_ConnectionConfiguration ()
-    ///////////////////////////////////////
-    , socketHandlerConfiguration (NULL)
-    , streamConfiguration (NULL)
-    //, userData (NULL)
-  {
-    PDUSize = IRC_MAXIMUM_FRAME_SIZE;
-  };
-
-  struct IRC_SocketHandlerConfiguration* socketHandlerConfiguration;
-  struct IRC_StreamConfiguration*        streamConfiguration;
-
-  //struct IRC_UserData*            userData;
-};
-
-struct IRC_SocketHandlerConfiguration
- : Net_SocketHandlerConfiguration
-{
-  inline IRC_SocketHandlerConfiguration ()
-   : Net_SocketHandlerConfiguration ()
-   //////////////////////////////////////
-   //, userData (NULL)
-  {
-    PDUSize = IRC_MAXIMUM_FRAME_SIZE;
-  };
-
-  //struct IRC_UserData* userData;
 };
 
 //struct IRC_ConnectorConfiguration
@@ -148,11 +99,11 @@ struct IRC_ModuleHandlerConfiguration
 {
   inline IRC_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
+   , connectionConfigurations (NULL)
    , inbound (true)
    , printProgressDot (false)
    , pushStatisticMessages (true)
    , streamConfiguration (NULL)
-   , connectionConfiguration (NULL)
    , protocolConfiguration (NULL)
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_CONCURRENT;
@@ -166,16 +117,16 @@ struct IRC_ModuleHandlerConfiguration
     passive = false;
   };
 
+  IRC_ConnectionConfigurations_t*     connectionConfigurations;
   bool                                inbound; // statistic/IO module
-
   bool                                printProgressDot; // file writer module
   bool                                pushStatisticMessages; // statistic module
-
   struct IRC_StreamConfiguration*     streamConfiguration;
-
-  struct IRC_ConnectionConfiguration* connectionConfiguration;
   struct IRC_ProtocolConfiguration*   protocolConfiguration;
 };
+typedef std::map<std::string,
+                 struct IRC_ModuleHandlerConfiguration> IRC_ModuleHandlerConfigurations_t;
+typedef IRC_ModuleHandlerConfigurations_t::const_iterator IRC_ModuleHandlerConfigurationsConstIterator_t;
 
 struct IRC_StreamConfiguration
  : Stream_Configuration
@@ -183,16 +134,13 @@ struct IRC_StreamConfiguration
   inline IRC_StreamConfiguration ()
    : Stream_Configuration ()
    , moduleConfiguration_2 ()
-   , moduleHandlerConfiguration_2 ()
+   , moduleHandlerConfigurations ()
    , protocolConfiguration (NULL)
-   //, userData (NULL)
   {};
 
-  struct Stream_ModuleConfiguration     moduleConfiguration_2;        // stream module configuration
-  struct IRC_ModuleHandlerConfiguration moduleHandlerConfiguration_2; // module handler configuration
-  struct IRC_ProtocolConfiguration*     protocolConfiguration;        // protocol configuration
-
-  //struct IRC_UserData*           userData;
+  struct Stream_ModuleConfiguration moduleConfiguration_2;       // stream module configuration
+  IRC_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration
+  struct IRC_ProtocolConfiguration* protocolConfiguration;       // protocol configuration
 };
 
 #endif

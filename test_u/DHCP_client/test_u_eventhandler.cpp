@@ -151,7 +151,7 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
 
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
-  Test_U_GTK_Event event = TEST_U_GKTEVENT_INVALID;
+  Test_U_GTK_Event event = TEST_U_GTKEVENT_INVALID;
   switch (sessionMessage_in.type ())
   {
     case STREAM_SESSION_MESSAGE_STATISTIC:

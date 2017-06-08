@@ -36,6 +36,7 @@ template <ACE_SYNCH_DECL,
           ////////////////////////////////
           typename ConfigurationType,
           ////////////////////////////////
+          typename ConnectionConfigurationIteratorType, // (const-)
           typename ConnectionManagerType,
           typename ConnectorTypeBcast,
           typename ConnectorType>
@@ -52,7 +53,7 @@ class DHCP_Module_Discover_T
                                   Stream_UserData>
 {
  public:
-  DHCP_Module_Discover_T ();
+  DHCP_Module_Discover_T (ISTREAM_T*); // stream handle
   virtual ~DHCP_Module_Discover_T ();
 
   // override (part of) Stream_IModuleHandler_T
@@ -66,9 +67,6 @@ class DHCP_Module_Discover_T
   virtual void handleSessionMessage (SessionMessageType*&, // session message handle
                                      bool&);               // return value: pass message downstream ?
 
- protected:
-  typename SessionMessageType::DATA_T* sessionData_;
-
  private:
   typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
                                   TimePolicyType,
@@ -81,6 +79,7 @@ class DHCP_Module_Discover_T
                                   enum Stream_SessionMessageType,
                                   Stream_UserData> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Discover_T ())
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Discover_T (const DHCP_Module_Discover_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Discover_T& operator= (const DHCP_Module_Discover_T&))
 
@@ -89,10 +88,10 @@ class DHCP_Module_Discover_T
   ACE_HANDLE connect (const ACE_INET_Addr&, // peer address
                       bool&);               // reuturn value: use reactor ?
 
-  ACE_HANDLE                           broadcastConnectionHandle_;
-  ACE_HANDLE                           connectionHandle_; // unicast
-  bool                                 isSessionConnection_;
-  bool                                 sendRequestOnOffer_;
+  ACE_HANDLE broadcastConnectionHandle_;
+  ACE_HANDLE connectionHandle_; // unicast
+  bool       isSessionConnection_;
+  bool       sendRequestOnOffer_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -129,9 +128,9 @@ class DHCP_Module_DiscoverH_T
                                       Stream_UserData>
 {
  public:
-  DHCP_Module_DiscoverH_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
-                           bool = false,              // auto-start ?
-                           bool = true);              // generate session messages ?
+  DHCP_Module_DiscoverH_T (ISTREAM_T*,   // stream handle
+                           bool = false, // auto-start ?
+                           bool = true); // generate session messages ?
   virtual ~DHCP_Module_DiscoverH_T ();
 
   // *PORTABILITY*: for some reason, this base class member is not exposed

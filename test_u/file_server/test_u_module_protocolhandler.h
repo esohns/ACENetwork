@@ -21,8 +21,8 @@
 #ifndef TEST_U_MODULE_PROTOCOLHANDLER_H
 #define TEST_U_MODULE_PROTOCOLHANDLER_H
 
-#include <ace/Global_Macros.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 
@@ -50,7 +50,7 @@ class Test_U_Module_ProtocolHandler
                                  struct Stream_UserData>
 {
  public:
-  Test_U_Module_ProtocolHandler ();
+  Test_U_Module_ProtocolHandler (ISTREAM_T*); // stream handle
   virtual ~Test_U_Module_ProtocolHandler ();
 
   // override (part of) Stream_IModuleHandler_T
@@ -78,11 +78,9 @@ class Test_U_Module_ProtocolHandler
                                  enum Stream_SessionMessageType,
                                  struct Stream_UserData> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler (const Test_U_Module_ProtocolHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler& operator= (const Test_U_Module_ProtocolHandler&))
-
-//  // helper methods
-//  Test_U_Message* allocateMessage (unsigned int); // requested size
 
   unsigned int counter_;
   unsigned int sessionID_;

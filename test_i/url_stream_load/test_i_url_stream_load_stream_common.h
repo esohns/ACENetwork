@@ -49,6 +49,8 @@
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
 
+#include "stream_module_htmlparser.h"
+
 #include "net_defines.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
@@ -72,6 +74,54 @@ typedef Net_IConnection_T<ACE_INET_Addr,
                           struct HTTP_ConnectionState,
                           HTTP_RuntimeStatistic_t> Test_I_IConnection_t;
 
+struct HTTP_Record;
+struct Test_I_MessageData
+{
+  inline Test_I_MessageData ()
+   : HTTPRecord (NULL)
+   , HTMLDocument (NULL)
+  {};
+  inline ~Test_I_MessageData ()
+  {
+    if (HTTPRecord)
+      delete HTTPRecord;
+    if (HTMLDocument)
+      xmlFreeDoc (HTMLDocument);
+  };
+  inline void operator+= (Test_I_MessageData rhs_in)
+  { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); };
+  inline operator struct HTTP_Record&() const
+  { ACE_ASSERT (HTTPRecord); return *HTTPRecord; };
+
+  struct HTTP_Record* HTTPRecord;
+  xmlDocPtr           HTMLDocument;
+};
+
+struct Test_I_URLStreamLoad_SessionData;
+enum Test_I_URLStreamLoad_SAXParserState
+{
+  TEST_I_SAXPARSER_STATE_INVALID = -1,
+  ////////////////////////////////////////
+  TEST_I_SAXPARSER_STATE_IN_HEAD = 0,
+  TEST_I_SAXPARSER_STATE_IN_HTML,
+  TEST_I_SAXPARSER_STATE_IN_BODY
+  ////////////////////////////////////////
+};
+struct Test_I_URLStreamLoad_SAXParserContext
+ : Stream_Module_HTMLParser_SAXParserContextBase
+{
+  inline Test_I_URLStreamLoad_SAXParserContext ()
+   : Stream_Module_HTMLParser_SAXParserContextBase ()
+   , sessionData (NULL)
+   , state (TEST_I_SAXPARSER_STATE_INVALID)
+   , URL ()
+  {};
+
+  struct Test_I_URLStreamLoad_SessionData* sessionData;
+  enum Test_I_URLStreamLoad_SAXParserState state;
+  std::string                              URL;
+};
+
 struct Test_I_URLStreamLoad_SessionData
  : Test_I_StreamSessionData
 {
@@ -81,6 +131,7 @@ struct Test_I_URLStreamLoad_SessionData
               static_cast<ACE_UINT32> (INADDR_ANY))
    , connection (NULL)
    , format (STREAM_COMPRESSION_FORMAT_INVALID)
+   , parserContext ()
    , targetFileName ()
    , userData (NULL)
   {};
@@ -95,12 +146,13 @@ struct Test_I_URLStreamLoad_SessionData
     return *this;
   }
 
-  ACE_INET_Addr                             address;
-  Test_I_IConnection_t*                     connection;
-  enum Stream_Decoder_CompressionFormatType format; // HTTP parser module
-  std::string                               targetFileName; // file writer module
+  ACE_INET_Addr                                address;
+  Test_I_IConnection_t*                        connection;
+  enum Stream_Decoder_CompressionFormatType    format; // HTTP parser module
+  struct Test_I_URLStreamLoad_SAXParserContext parserContext; // HTML parser module
+  std::string                                  targetFileName; // file writer module
 
-  struct HTTP_Stream_UserData*              userData;
+  struct HTTP_Stream_UserData*                 userData;
 };
 typedef Stream_SessionData_T<struct Test_I_URLStreamLoad_SessionData> Test_I_URLStreamLoad_SessionData_t;
 
@@ -117,11 +169,10 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
 {
   inline Test_I_URLStreamLoad_ModuleHandlerConfiguration ()
    : HTTP_ModuleHandlerConfiguration ()
-   , connectionConfiguration (NULL)
-   , contextID (0)
+   , connectionConfigurations (NULL)
+   //, contextID (0)
    , inbound (true)
-   , socketConfiguration (NULL)
-   , socketHandlerConfiguration (NULL)
+   , mode (STREAM_MODULE_HTMLPARSER_MODE_SAX)
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
@@ -129,31 +180,27 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
   };
 
-  struct Net_ConnectionConfiguration*     connectionConfiguration;
-  guint                                   contextID;
-  bool                                    inbound; // net IO module
-  struct Net_SocketConfiguration*         socketConfiguration;
-  struct HTTP_SocketHandlerConfiguration* socketHandlerConfiguration;
-  Test_I_ISessionNotify_t*                subscriber;
-  Test_I_Subscribers_t*                   subscribers;
-  std::string                             targetFileName; // dump module
+  Test_I_URLStreamLoad_ConnectionConfigurations_t* connectionConfigurations;
+  //guint                                   contextID;
+  bool                                             inbound; // net IO module
+  enum Stream_Module_HTMLParser_Mode               mode; // HTML parser module
+  Test_I_ISessionNotify_t*                         subscriber;
+  Test_I_Subscribers_t*                            subscribers;
+  std::string                                      targetFileName; // dump module
 };
-
 typedef std::map<std::string,
-                 struct Test_I_URLStreamLoad_ModuleHandlerConfiguration*> Test_I_URLStreamLoad_ModuleHandlerConfigurations_t;
+                 struct Test_I_URLStreamLoad_ModuleHandlerConfiguration> Test_I_URLStreamLoad_ModuleHandlerConfigurations_t;
 typedef Test_I_URLStreamLoad_ModuleHandlerConfigurations_t::iterator Test_I_URLStreamLoad_ModuleHandlerConfigurationsIterator_t;
+
 struct Test_I_URLStreamLoad_StreamConfiguration
  : HTTP_StreamConfiguration
 {
   inline Test_I_URLStreamLoad_StreamConfiguration ()
    : HTTP_StreamConfiguration ()
    , moduleHandlerConfigurations ()
-   , userData (NULL)
   {};
 
   Test_I_URLStreamLoad_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // stream module handler configuration
-
-  struct HTTP_Stream_UserData*                       userData;
 };
 
 struct Test_I_URLStreamLoad_StreamState

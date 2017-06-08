@@ -24,8 +24,8 @@
 #include <bitset>
 #include <string>
 
-#include <ace/Synch_Traits.h>
-#include <ace/Time_Value.h>
+#include "ace/Synch_Traits.h"
+#include "ace/Time_Value.h"
 
 #include "net_common.h"
 
@@ -175,46 +175,5 @@ struct IRC_LoginOptions
 };
 
 typedef Stream_Statistic IRC_RuntimeStatistic_t;
-
-struct IRC_ConnectionState
- : Net_ConnectionState
-{
-  inline IRC_ConnectionState ()
-   : Net_ConnectionState ()
-   , configuration (NULL)
-   , controller (NULL)
-   , currentStatistic ()
-   //, userData (NULL)
-  {};
-
-  struct IRC_Configuration*  configuration;
-  IRC_IControl*              controller;
-
-  IRC_RuntimeStatistic_t     currentStatistic;
-
-  //struct IRC_UserData*       userData;
-};
-
-struct IRC_SessionState
- : IRC_ConnectionState
-{
-  inline IRC_SessionState ()
-   : IRC_ConnectionState ()
-   , away (false)
-   , channel ()
-   , channelModes ()
-   , isFirstMessage (false)
-   , nickName ()
-   , userModes ()
-  {};
-
-  // *TODO*: remove this
-  bool               away;
-  std::string        channel;
-  IRC_ChannelModes_t channelModes;
-  bool               isFirstMessage;
-  std::string        nickName;
-  IRC_UserModes_t    userModes;
-};
 
 #endif

@@ -470,8 +470,8 @@ do_work (unsigned int bufferSize_in,
 
   // step0a: initialize configuration and stream
   struct Test_U_Configuration configuration;
-  configuration.userData.connectionConfiguration =
-      &configuration.connectionConfiguration;
+  //configuration.userData.connectionConfiguration =
+  //    &configuration.connectionConfiguration;
 //  configuration.userData.streamConfiguration =
 //      &configuration.streamConfiguration;
   configuration.useReactor = useReactor_in;
@@ -480,7 +480,7 @@ do_work (unsigned int bufferSize_in,
   if (!heap_allocator.initialize (configuration.allocatorConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize allocator, returning\n")));
+                ACE_TEXT ("failed to initialize heap allocator, returning\n")));
     return;
   } // end IF
   Test_U_MessageAllocator_t message_allocator (TEST_U_MAX_MESSAGES, // maximum #buffers
@@ -496,11 +496,12 @@ do_work (unsigned int bufferSize_in,
   if (debugParser_in)
     configuration.parserConfiguration.debugScanner = true;
   // *********************** socket configuration data *************************
+  struct Test_U_ConnectionConfiguration connection_configuration;
   int result =
-    configuration.socketConfiguration.address.set (port_in,
-                                                   hostName_in.c_str (),
-                                                   1,
-                                                   ACE_ADDRESS_FAMILY_INET);
+    connection_configuration.socketHandlerConfiguration.socketConfiguration.address.set (port_in,
+                                                                                         hostName_in.c_str (),
+                                                                                         1,
+                                                                                         ACE_ADDRESS_FAMILY_INET);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -509,69 +510,66 @@ do_work (unsigned int bufferSize_in,
                 port_in));
     return;
   } // end IF
-  configuration.socketConfiguration.useLoopBackDevice =
-    configuration.socketConfiguration.address.is_loopback ();
-  configuration.socketConfiguration.writeOnly = true;
-  // ******************** socket handler configuration data ********************
-  configuration.socketHandlerConfiguration.messageAllocator =
-    &message_allocator;
-  configuration.socketHandlerConfiguration.socketConfiguration =
-    &configuration.socketConfiguration;
-  configuration.socketHandlerConfiguration.statisticReportingInterval =
+  connection_configuration.socketHandlerConfiguration.socketConfiguration.useLoopBackDevice =
+    connection_configuration.socketHandlerConfiguration.socketConfiguration.address.is_loopback ();
+  connection_configuration.socketHandlerConfiguration.socketConfiguration.writeOnly =
+    true;
+  connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
-  configuration.socketHandlerConfiguration.userData =
+  connection_configuration.socketHandlerConfiguration.userData =
     &configuration.userData;
-
-  configuration.connectionConfiguration.PDUSize = bufferSize_in;
-  configuration.connectionConfiguration.socketHandlerConfiguration =
-      &configuration.socketHandlerConfiguration;
-  configuration.connectionConfiguration.streamConfiguration =
+  connection_configuration.messageAllocator = &message_allocator;
+  connection_configuration.PDUSize = bufferSize_in;
+  connection_configuration.streamConfiguration =
       &configuration.streamConfiguration;
+  configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                 connection_configuration));
+  Test_U_ConnectionConfigurationIterator_t iterator =
+    configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
+  (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
+    &((*iterator).second);
 
   // ********************** stream configuration data **************************
   // ********************** module configuration data **************************
-  configuration.moduleConfiguration.streamConfiguration =
-    &configuration.streamConfiguration;
-
+  struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
   //configuration.moduleHandlerConfiguration.allocatorConfiguration =
   //  &configuration.allocatorConfiguration;
   // *NOTE*: yyparse() does not currently return until the whole entity has been
   //         processed --> use (a) dedicated thread(s) so the event dispatch
   //         does not deadlock in single-threaded reactor/proactor scenarios
-  configuration.moduleHandlerConfiguration.concurrency =
+  modulehandler_configuration.concurrency =
     STREAM_HEADMODULECONCURRENCY_ACTIVE;
-  configuration.moduleHandlerConfiguration.configuration = &configuration;
-  configuration.moduleHandlerConfiguration.connectionManager =
-    connection_manager_p;
-  configuration.moduleHandlerConfiguration.dumpFileName =
-      Common_File_Tools::getLogDirectory (LIBACENETWORK_PACKAGE_NAME);
-  configuration.moduleHandlerConfiguration.dumpFileName +=
-      ACE_DIRECTORY_SEPARATOR_CHAR_A;;
-  configuration.moduleHandlerConfiguration.dumpFileName +=
-      ACE_TEXT_ALWAYS_CHAR ("dump.txt");
-  configuration.moduleHandlerConfiguration.hostName = hostName_in;
-  configuration.moduleHandlerConfiguration.parserConfiguration =
-      &configuration.parserConfiguration;
-  configuration.moduleHandlerConfiguration.socketConfiguration =
-    &configuration.socketConfiguration;
-  configuration.moduleHandlerConfiguration.socketHandlerConfiguration =
-    &configuration.socketHandlerConfiguration;
-  configuration.moduleHandlerConfiguration.statisticReportingInterval =
+  modulehandler_configuration.configuration = &configuration;
+  modulehandler_configuration.connectionConfigurations =
+    &configuration.connectionConfigurations;
+  modulehandler_configuration.connectionManager = connection_manager_p;
+  modulehandler_configuration.dumpFileName =
+    Common_File_Tools::getLogDirectory (LIBACENETWORK_PACKAGE_NAME);
+  modulehandler_configuration.dumpFileName += ACE_DIRECTORY_SEPARATOR_CHAR_A;
+  modulehandler_configuration.dumpFileName += ACE_TEXT_ALWAYS_CHAR ("dump.txt");
+  modulehandler_configuration.hostName = hostName_in;
+  modulehandler_configuration.parserConfiguration =
+    &configuration.parserConfiguration;
+  modulehandler_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
-  configuration.moduleHandlerConfiguration.streamConfiguration =
+  modulehandler_configuration.streamConfiguration =
     &configuration.streamConfiguration;
-  configuration.moduleHandlerConfiguration.targetFileName = fileName_in;
-  configuration.moduleHandlerConfiguration.URL = URL_in;
+  modulehandler_configuration.targetFileName = fileName_in;
+  modulehandler_configuration.URL = URL_in;
+
   // ******************** (sub-)stream configuration data **********************
+  configuration.streamConfiguration.moduleConfiguration =
+    &configuration.streamConfiguration.moduleConfiguration_2;
+  configuration.streamConfiguration.moduleConfiguration->streamConfiguration =
+    &configuration.streamConfiguration;
   //configuration.streamConfiguration.allocatorConfiguration =
   //  &configuration.allocatorConfiguration;
   //if (bufferSize_in)
   //  configuration.streamConfiguration.bufferSize = bufferSize_in;
   configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.moduleConfiguration =
-    &configuration.moduleConfiguration;
   configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                        &configuration.moduleHandlerConfiguration));
+                                                                                        modulehandler_configuration));
   configuration.streamConfiguration.printFinalReport = true;
 
   // step0b: initialize event dispatch
@@ -592,7 +590,7 @@ do_work (unsigned int bufferSize_in,
 
   // step0c: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  connection_manager_p->set (configuration.connectionConfiguration,
+  connection_manager_p->set ((*iterator).second,
                              &configuration.userData);
 
   // step0d: initialize regular (global) statistic reporting
@@ -689,16 +687,6 @@ do_work (unsigned int bufferSize_in,
   } // end IF
 
   // step1: connect
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  result =
-    configuration.socketConfiguration.address.addr_to_string (buffer,
-                                                              sizeof (buffer),
-                                                              1);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string: \"%m\", continuing\n")));
-
   Test_U_IConnector_t* iconnector_p = NULL;
   Test_U_IConnection_t* connection_p = NULL;
   Test_U_IStreamConnection_t* istream_connection_p = NULL;
@@ -717,18 +705,18 @@ do_work (unsigned int bufferSize_in,
     if (port_in == HTTPS_DEFAULT_SERVER_PORT)
       ACE_NEW_NORETURN (iconnector_p,
                         Test_U_SSLTCPConnector_t (connection_manager_p,
-                                                  configuration.socketHandlerConfiguration.statisticReportingInterval));
+                                                  (*iterator).second.socketHandlerConfiguration.statisticReportingInterval));
     else
       ACE_NEW_NORETURN (iconnector_p,
                         Test_U_TCPConnector_t (connection_manager_p,
-                                               configuration.socketHandlerConfiguration.statisticReportingInterval));
+                                               (*iterator).second.socketHandlerConfiguration.statisticReportingInterval));
   } // end IF
   else
   { // *TODO*: add SSL support to the proactor framework
     ACE_ASSERT (port_in != HTTPS_DEFAULT_SERVER_PORT);
     ACE_NEW_NORETURN (iconnector_p,
                       Test_U_TCPAsynchConnector_t (connection_manager_p,
-                                                   configuration.socketHandlerConfiguration.statisticReportingInterval));
+                                                   (*iterator).second.socketHandlerConfiguration.statisticReportingInterval));
   } // end ELSE
   if (!iconnector_p)
   {
@@ -736,19 +724,19 @@ do_work (unsigned int bufferSize_in,
                 ACE_TEXT ("failed to allocate memory, returning\n")));
     goto clean_up;
   } // end IF
-  if (!iconnector_p->initialize (configuration.connectionConfiguration))
+  if (!iconnector_p->initialize ((*iterator).second))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector, returning\n")));
     goto clean_up;
   } // end IF
   handle =
-    iconnector_p->connect (configuration.socketConfiguration.address);
+    iconnector_p->connect ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address);
   if (handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to \"%s\", returning\n"),
-                buffer));
+                ACE_TEXT ("failed to connect to %s, returning\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address).c_str ())));
     goto clean_up;
   } // end IF
   if (iconnector_p->useReactor ())
@@ -773,15 +761,16 @@ do_work (unsigned int bufferSize_in,
     do
     {
       connection_p =
-        connection_manager_p->get (configuration.socketConfiguration.address);
-      if (connection_p) break;
+        connection_manager_p->get ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address);
+      if (connection_p)
+        break;
     } while (COMMON_TIME_NOW < deadline);
   } // end IF
   if (!connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to \"%s\", returning\n"),
-                buffer));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address).c_str ())));
     goto clean_up;
   } // end IF
   // step1b: wait for the connection to finish initializing
@@ -795,8 +784,8 @@ do_work (unsigned int bufferSize_in,
   if (status != NET_CONNECTION_STATUS_OK)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize connection to \"%s\" (status was: %d), returning\n"),
-                buffer,
+                ACE_TEXT ("failed to initialize connection to %s (status was: %d), returning\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address).c_str ()),
                 status));
 
     // clean up
@@ -823,8 +812,8 @@ do_work (unsigned int bufferSize_in,
   istream_connection_p->wait (STREAM_STATE_RUNNING,
                               NULL); // <-- block
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connected to \"%s\"...\n"),
-              buffer));
+              ACE_TEXT ("connected to %s\n"),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address).c_str ())));
 
   // step2: send HTTP request
 //  ACE_NEW_NORETURN (message_data_p,
@@ -880,7 +869,7 @@ do_work (unsigned int bufferSize_in,
   } // end IF
 allocate:
   message_p =
-    static_cast<Test_U_Message*> (message_allocator.malloc (configuration.connectionConfiguration.PDUSize));
+    static_cast<Test_U_Message*> (message_allocator.malloc ((*iterator).second.PDUSize));
   // keep retrying ?
   if (!message_p && !message_allocator.block ())
     goto allocate;

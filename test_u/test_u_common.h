@@ -21,7 +21,7 @@
 #ifndef TEST_U_COMMON_H
 #define TEST_U_COMMON_H
 
-#include <ace/config-lite.h>
+#include "ace/config-lite.h"
 
 #include "net_common.h"
 #include "net_configuration.h"
@@ -46,20 +46,6 @@ struct Test_U_UserData
   {};
 
   struct Test_U_ConnectionConfiguration* connectionConfiguration;
-};
-
-struct Test_U_SocketHandlerConfiguration
- : Net_SocketHandlerConfiguration
-{
-  inline Test_U_SocketHandlerConfiguration ()
-   : Net_SocketHandlerConfiguration ()
-   , connectionConfiguration (NULL)
-   , userData (NULL)
-  {};
-
-  struct Test_U_ConnectionConfiguration* connectionConfiguration;
-
-  struct Test_U_UserData*                userData;
 };
 
 #endif

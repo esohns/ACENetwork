@@ -21,9 +21,9 @@
 #ifndef TEST_U_COMMON_MODULES_H
 #define TEST_U_COMMON_MODULES_H
 
-#include <ace/Message_Block.h>
-#include <ace/Stream_Modules.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Message_Block.h"
+#include "ace/Stream_Modules.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 
@@ -94,9 +94,7 @@ typedef Stream_Module_Net_Target_T<ACE_MT_SYNCH,
                                    Test_U_Message,
                                    Test_U_SessionMessage,
                                    FileServer_SessionData_t,
-                                   struct Net_SocketConfiguration,
-                                   struct FileServer_SocketHandlerConfiguration,
-                                   struct FileServer_ConnectionConfiguration,
+                                   FileServer_ConnectionConfigurationIterator_t,
                                    FileServer_InetConnectionManager_t,
                                    Test_U_UDPConnector_t> Test_U_Module_Net_UDPTarget;
 typedef Stream_Module_Net_Target_T<ACE_MT_SYNCH,
@@ -106,9 +104,7 @@ typedef Stream_Module_Net_Target_T<ACE_MT_SYNCH,
                                    Test_U_Message,
                                    Test_U_SessionMessage,
                                    FileServer_SessionData_t,
-                                   struct Net_SocketConfiguration,
-                                   struct FileServer_SocketHandlerConfiguration,
-                                   struct FileServer_ConnectionConfiguration,
+                                   FileServer_ConnectionConfigurationIterator_t,
                                    FileServer_InetConnectionManager_t,
                                    Test_U_UDPAsynchConnector_t> Test_U_Module_Net_AsynchUDPTarget;
 DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type
@@ -157,20 +153,16 @@ typedef Stream_Decoder_MPEG_TS_Decoder_T<ACE_MT_SYNCH,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
                                          FileServer_SessionData_t> Test_U_MPEG_TS_Decoder;
-typedef ACE_Thru_Task<ACE_MT_SYNCH,
-                      Common_TimePolicy_t> Test_U_MPEG_TS_Decoder_Writer_t;
-DATASTREAM_MODULE_DUPLEX (struct FileServer_SessionData,            // session data type
-                          enum Stream_SessionMessageType,           // session event type
-                          struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
-                          Test_U_IStreamNotify_t,                   // stream notification interface type
-                          Test_U_MPEG_TS_Decoder,                   // reader type
-                          Test_U_MPEG_TS_Decoder_Writer_t,          // writer type
-                          Test_U_MPEG_TS_DecoderReader);            // name
-DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type
-                              enum Stream_SessionMessageType,           // session event type
-                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
-                              Test_U_IStreamNotify_t,                   // stream notification interface type
-                              Test_U_MPEG_TS_Decoder);                  // writer type
+DATASTREAM_MODULE_OUTPUT_ONLY (struct FileServer_SessionData,            // session data type
+                               enum Stream_SessionMessageType,           // session event type
+                               struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                               Test_U_IStreamNotify_t,                   // stream notification interface type
+                               Test_U_MPEG_TS_Decoder);                  // reader type
+//DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type
+//                              enum Stream_SessionMessageType,           // session event type
+//                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+//                              Test_U_IStreamNotify_t,                   // stream notification interface type
+//                              Test_U_MPEG_TS_Decoder);                  // writer type
 
 typedef Stream_Module_FileReader_Writer_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,

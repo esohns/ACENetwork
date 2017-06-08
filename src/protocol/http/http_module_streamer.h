@@ -21,8 +21,9 @@
 #ifndef HTTP_MODULE_STREAMER_H
 #define HTTP_MODULE_STREAMER_H
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
+#include "stream_common.h"
 #include "stream_task_base_synch.h"
 
 template <ACE_SYNCH_DECL,
@@ -46,7 +47,7 @@ class HTTP_Module_Streamer_T
                                  Stream_UserData>
 {
  public:
-  HTTP_Module_Streamer_T ();
+  HTTP_Module_Streamer_T (ISTREAM_T*); // stream handle
   virtual ~HTTP_Module_Streamer_T ();
 
   // implement (part of) Stream_ITaskBase
@@ -65,6 +66,7 @@ class HTTP_Module_Streamer_T
                                  enum Stream_SessionMessageType,
                                  Stream_UserData> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Streamer_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Streamer_T (const HTTP_Module_Streamer_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Streamer_T& operator= (const HTTP_Module_Streamer_T&))
 };

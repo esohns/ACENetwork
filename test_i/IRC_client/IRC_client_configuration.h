@@ -23,8 +23,8 @@
 
 #include <string>
 
-#include <ace/INET_Addr.h>
-#include <ace/Time_Value.h>
+#include "ace/INET_Addr.h"
+#include "ace/Time_Value.h"
 
 #include "common_defines.h"
 #include "common_inotify.h"
@@ -37,9 +37,10 @@
 #include "irc_configuration.h"
 #include "irc_defines.h"
 
-#include "IRC_client_common.h"
-#include "IRC_client_defines.h"
-#include "IRC_client_stream_common.h"
+#include "irc_client_common.h"
+#include "irc_client_defines.h"
+#include "irc_client_network.h"
+#include "irc_client_stream_common.h"
 
 // forward declarations
 struct IRC_Client_ConnectionConfiguration;
@@ -76,53 +77,6 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 //  unsigned int                           statisticCollectionInterval; // statistics collecting interval (second(s)) [0: off]
 //};
 
-struct IRC_Client_SocketHandlerConfiguration;
-struct IRC_StreamConfiguration;
-struct IRC_UserData;
-struct IRC_Client_ConnectionConfiguration
- : IRC_ConnectionConfiguration
-{
-  inline IRC_Client_ConnectionConfiguration ()
-   : IRC_ConnectionConfiguration ()
-   ///////////////////////////////////////
-   , socketHandlerConfiguration (NULL)
-   , moduleHandlerConfiguration (NULL)
-   , streamConfiguration (NULL)
-   , protocolConfiguration (NULL)
-   , cursesState (NULL)
-   , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
-   , userData (NULL)
-   , useReactor (NET_EVENT_USE_REACTOR)
-  {};
-
-  struct IRC_Client_SocketHandlerConfiguration* socketHandlerConfiguration;
-
-  struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
-  struct IRC_Client_StreamConfiguration*        streamConfiguration;
-
-  struct IRC_ProtocolConfiguration*             protocolConfiguration;
-
-  struct IRC_Client_CursesState*                cursesState;
-  bool                                          logToFile;
-  struct IRC_Client_UserData*                   userData;
-  bool                                          useReactor;
-};
-
-struct IRC_Client_SocketHandlerConfiguration
- : IRC_SocketHandlerConfiguration
-{
-  inline IRC_Client_SocketHandlerConfiguration ()
-   : IRC_SocketHandlerConfiguration ()
-   ///////////////////////////////////////
-   , connectionConfiguration (NULL)
-   , userData (NULL)
-  {};
-
-  struct IRC_Client_ConnectionConfiguration* connectionConfiguration;
-
-  struct IRC_Client_UserData*                userData;
-};
-
 struct IRC_Client_ConnectionConfiguration;
 struct IRC_Client_InputHandlerConfiguration
 {
@@ -140,15 +94,11 @@ struct IRC_Client_Configuration
 {
   inline IRC_Client_Configuration ()
    : parserConfiguration ()
-   , socketConfiguration ()
-   , socketHandlerConfiguration ()
-   , connectionConfiguration ()
+   ///////////////////////////////////////
+   , connectionConfigurations ()
    ///////////////////////////////////////
    , allocatorConfiguration ()
-   , moduleConfiguration ()
-   , moduleHandlerConfiguration ()
    , streamConfiguration ()
-   , userData ()
    ///////////////////////////////////////
    , protocolConfiguration ()
    ///////////////////////////////////////
@@ -157,32 +107,31 @@ struct IRC_Client_Configuration
    , groupID (COMMON_EVENT_THREAD_GROUP_ID)
    , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
    , useReactor (NET_EVENT_USE_REACTOR)
+   ///////////////////////////////////////
+   , userData ()
   {};
 
   // ****************************** parser *************************************
-  struct Common_ParserConfiguration            parserConfiguration;
+  struct Common_ParserConfiguration     parserConfiguration;
   // ****************************** socket *************************************
-  struct Net_SocketConfiguration               socketConfiguration;
-  struct IRC_Client_SocketHandlerConfiguration socketHandlerConfiguration;
-  struct IRC_Client_ConnectionConfiguration    connectionConfiguration;
+  IRC_Client_ConnectionConfigurations_t connectionConfigurations;
   // ****************************** stream *************************************
-  struct IRC_AllocatorConfiguration            allocatorConfiguration;
-  struct Stream_ModuleConfiguration            moduleConfiguration;
-  struct IRC_Client_ModuleHandlerConfiguration moduleHandlerConfiguration;
-  struct IRC_Client_StreamConfiguration        streamConfiguration;
-  struct IRC_Client_UserData*                  userData;
+  struct IRC_AllocatorConfiguration     allocatorConfiguration;
+  struct IRC_Client_StreamConfiguration streamConfiguration;
   // ***************************** protocol ************************************
-  struct IRC_ProtocolConfiguration             protocolConfiguration;
+  struct IRC_ProtocolConfiguration      protocolConfiguration;
   // ***************************************************************************
   // *TODO*: move this somewhere else
-  struct IRC_Client_CursesState*               cursesState;
+  struct IRC_Client_CursesState*        cursesState;
   // *NOTE*: see also https://en.wikipedia.org/wiki/Internet_Relay_Chat#Character_encoding
   // *TODO*: implement support for 7-bit ASCII (as it is the most compatible
   //         encoding)
-  enum IRC_CharacterEncoding                   encoding;
-  int                                          groupID;
-  bool                                         logToFile;
-  bool                                         useReactor;
+  enum IRC_CharacterEncoding            encoding;
+  int                                   groupID;
+  bool                                  logToFile;
+  bool                                  useReactor;
+
+  struct IRC_Client_UserData            userData;
 };
 
 #endif

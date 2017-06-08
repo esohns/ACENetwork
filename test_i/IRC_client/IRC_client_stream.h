@@ -23,7 +23,7 @@
 
 #include <string>
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
 #include "irc_common.h"
 #include "irc_configuration.h"
@@ -31,7 +31,7 @@
 #include "irc_stream.h"
 #include "irc_stream_common.h"
 
-#include "IRC_client_configuration.h"
+//#include "IRC_client_configuration.h"
 #include "IRC_client_sessionmessage.h"
 #include "IRC_client_stream_common.h"
 

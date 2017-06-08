@@ -24,23 +24,23 @@
 #include <sstream>
 #include <string>
 
-#include <ace/Configuration.h>
-#include <ace/Configuration_Import_Export.h>
-#include <ace/Get_Opt.h>
-#include <ace/High_Res_Timer.h>
-#include <ace/iosfwd.h>
+#include "ace/Configuration.h"
+#include "ace/Configuration_Import_Export.h"
+#include "ace/Get_Opt.h"
+#include "ace/High_Res_Timer.h"
+#include "ace/iosfwd.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <ace/Init_ACE.h>
+#include "ace/Init_ACE.h"
 #endif
-#include <ace/POSIX_Proactor.h>
-#include <ace/Synch.h>
-#include <ace/Proactor.h>
-#include <ace/Profile_Timer.h>
-#include <ace/Sig_Handler.h>
-#include <ace/Signal.h>
-#include <ace/Version.h>
+#include "ace/POSIX_Proactor.h"
+#include "ace/Synch.h"
+#include "ace/Proactor.h"
+#include "ace/Profile_Timer.h"
+#include "ace/Sig_Handler.h"
+#include "ace/Signal.h"
+#include "ace/Version.h"
 
-#include <gtk/gtk.h>
+#include "gtk/gtk.h"
 
 #include "common_file_tools.h"
 #include "common_tools.h"
@@ -434,20 +434,25 @@ do_work (bool useThreadPool_in,
   // sanity check(s)
   ACE_ASSERT (CBData_in.configuration);
 
-  // step1: initialize IRC handler module
-  CBData_in.configuration->moduleHandlerConfiguration.connectionConfiguration =
-    &CBData_in.configuration->connectionConfiguration;
-  CBData_in.configuration->moduleHandlerConfiguration.protocolConfiguration =
-    &CBData_in.configuration->protocolConfiguration;
-  CBData_in.configuration->moduleHandlerConfiguration.statisticReportingInterval =
-    statisticReportingInterval_in;
-  CBData_in.configuration->moduleHandlerConfiguration.streamConfiguration =
-      &CBData_in.configuration->streamConfiguration;
+  // step1: initialize configuration
+  IRC_Client_ConnectionConfigurationIterator_t iterator =
+    CBData_in.configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != CBData_in.configuration->connectionConfigurations.end ());
 
-  CBData_in.configuration->streamConfiguration.moduleConfiguration =
-      &CBData_in.configuration->moduleConfiguration;
+  struct IRC_Client_ModuleHandlerConfiguration modulehandler_configuration;
+  modulehandler_configuration.connectionConfigurations =
+    &CBData_in.configuration->connectionConfigurations;
+  modulehandler_configuration.parserConfiguration =
+    &CBData_in.configuration->parserConfiguration;
+  modulehandler_configuration.protocolConfiguration =
+    &CBData_in.configuration->protocolConfiguration;
+  modulehandler_configuration.statisticReportingInterval =
+    statisticReportingInterval_in;
+  modulehandler_configuration.streamConfiguration =
+    &CBData_in.configuration->streamConfiguration;
   CBData_in.configuration->streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                                   &CBData_in.configuration->moduleHandlerConfiguration));
+                                                                                                   modulehandler_configuration));
+
   //IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
   //                                                 NULL,
   //                                                 true);
@@ -490,8 +495,8 @@ do_work (bool useThreadPool_in,
       IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  connection_manager_p->set (CBData_in.configuration->connectionConfiguration,
-                             CBData_in.configuration->userData);
+  connection_manager_p->set ((*iterator).second,
+                             &CBData_in.configuration->userData);
 
   // step3b: initialize timer manager
   Common_Timer_Manager_t* timer_manager_p =
@@ -1279,7 +1284,6 @@ ACE_TMAIN (int argc_in,
 
   // step6: initialize configuration objects
   struct IRC_Client_Configuration configuration;
-  struct IRC_Client_UserData user_data;
 
   // initialize protocol configuration
   Stream_CachedAllocatorHeap_T<struct IRC_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
@@ -1303,39 +1307,32 @@ ACE_TMAIN (int argc_in,
   IRC_Client_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES,
                                                    &heap_allocator);
 
-  user_data.connectionConfiguration = &configuration.connectionConfiguration;
+  //user_data.connectionConfiguration = &configuration.connectionConfiguration;
 
   configuration.parserConfiguration.debugParser = debug;
   if (debug)
     configuration.parserConfiguration.debugScanner = debug;
   ////////////////////// socket handler configuration //////////////////////////
-  configuration.socketHandlerConfiguration.connectionConfiguration =
-    &configuration.connectionConfiguration;
-  configuration.socketHandlerConfiguration.socketConfiguration =
-    &configuration.socketConfiguration;
-  configuration.socketHandlerConfiguration.messageAllocator =
-    &message_allocator;
-  configuration.socketHandlerConfiguration.statisticReportingInterval =
+  struct IRC_Client_ConnectionConfiguration connection_configuration;
+  connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
     ACE_Time_Value (reporting_interval, 0);
-  configuration.socketHandlerConfiguration.userData =
-    configuration.userData;
-
-  configuration.connectionConfiguration.socketHandlerConfiguration =
-    &configuration.socketHandlerConfiguration;
-  configuration.connectionConfiguration.streamConfiguration =
+  connection_configuration.socketHandlerConfiguration.userData =
+    &configuration.userData;
+  connection_configuration.messageAllocator = &message_allocator;
+  connection_configuration.streamConfiguration =
     &configuration.streamConfiguration;
+  configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                 connection_configuration));
+  IRC_Client_ConnectionConfigurationIterator_t iterator =
+    configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
+  (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
+    &((*iterator).second);
+
   ////////////////////////// stream configuration //////////////////////////////
-  configuration.moduleConfiguration.streamConfiguration =
-    &configuration.streamConfiguration;
-
   configuration.streamConfiguration.messageAllocator = &message_allocator;
   configuration.streamConfiguration.moduleConfiguration =
-      &configuration.moduleConfiguration;
-  configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-    &configuration.moduleHandlerConfiguration));
-  configuration.moduleHandlerConfiguration.parserConfiguration =
-      &configuration.parserConfiguration;
-  configuration.userData = &user_data;
+      &configuration.streamConfiguration.moduleConfiguration_2;
 
   struct IRC_Client_GTK_CBData cb_user_data;
   cb_user_data.configuration = &configuration;

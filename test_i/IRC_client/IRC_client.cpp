@@ -33,24 +33,24 @@ using namespace std;
 //                       prevent ace/iosfwd.h from causing any harm
 #define ACE_IOSFWD_H
 
-#include <ace/Get_Opt.h>
-#include <ace/High_Res_Timer.h>
-#include <ace/iosfwd.h>
+#include "ace/Get_Opt.h"
+#include "ace/High_Res_Timer.h"
+#include "ace/iosfwd.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <ace/Init_ACE.h>
+#include "ace/Init_ACE.h"
 #endif
-#include <ace/POSIX_Proactor.h>
-#include <ace/Synch.h>
-#include <ace/Proactor.h>
-#include <ace/Profile_Timer.h>
-#include <ace/Sig_Handler.h>
-#include <ace/Signal.h>
-#include <ace/Version.h>
+#include "ace/POSIX_Proactor.h"
+#include "ace/Synch.h"
+#include "ace/Proactor.h"
+#include "ace/Profile_Timer.h"
+#include "ace/Sig_Handler.h"
+#include "ace/Signal.h"
+#include "ace/Version.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN32)
-#include <curses.h>
+#include "curses.h"
 #else
-#include <ncurses.h>
+#include "ncurses.h"
 // *NOTE*: the ncurses "timeout" macros conflicts with
 //         ACE_Synch_Options::timeout. Since not currently being used, it's safe
 //         to undefine...
@@ -688,27 +688,33 @@ do_work (struct IRC_Client_Configuration& configuration_in,
 
   int result = -1;
   // *TODO*: clean this up
-  IRC_Client_CursesState curses_state;
+  struct IRC_Client_CursesState curses_state;
   if (useCursesLibrary_in)
     configuration_in.cursesState = &curses_state;
 
   // step1: initialize IRC handler module
-  configuration_in.moduleHandlerConfiguration.allocatorConfiguration =
+  struct IRC_Client_ModuleHandlerConfiguration modulehandler_configuration;
+  modulehandler_configuration.allocatorConfiguration =
       &configuration_in.allocatorConfiguration;
-  configuration_in.moduleHandlerConfiguration.protocolConfiguration =
+  modulehandler_configuration.protocolConfiguration =
       &configuration_in.protocolConfiguration;
-  configuration_in.moduleHandlerConfiguration.statisticReportingInterval =
+  modulehandler_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
-  //configuration_in.moduleHandlerConfiguration.streamConfiguration =
+  //modulehandler_configuration.streamConfiguration =
   //  &configuration_in.streamConfiguration;
 
   configuration_in.streamConfiguration.allocatorConfiguration =
     &configuration_in.allocatorConfiguration;
   configuration_in.streamConfiguration.moduleConfiguration =
-      &configuration_in.moduleConfiguration;
+      &configuration_in.streamConfiguration.moduleConfiguration_2;
   configuration_in.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                           &configuration_in.moduleHandlerConfiguration));
-  IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
+                                                                                           modulehandler_configuration));
+  IRC_Client_ModuleHandlerConfigurationsIterator_t iterator =
+    configuration_in.streamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != configuration_in.streamConfiguration.moduleHandlerConfigurations.end ());
+
+  IRC_Client_Module_IRCHandler_Module IRC_handler (NULL,
+                                                   ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
                                                    NULL);
   IRC_Client_Module_IRCHandler* IRCHandler_impl_p = NULL;
   IRCHandler_impl_p =
@@ -722,12 +728,12 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   configuration_in.streamConfiguration.cloneModule = true;
   configuration_in.streamConfiguration.deleteModule = false;
   configuration_in.streamConfiguration.module = &IRC_handler;
-  if (!IRCHandler_impl_p->initialize (configuration_in.moduleHandlerConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_Client_Module_IRCHandler_Module::initialize(), returning\n")));
-    return;
-  } // end IF
+  //if (!IRCHandler_impl_p->initialize (configuration_in.moduleHandlerConfiguration))
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to IRC_Client_Module_IRCHandler_Module::initialize(), returning\n")));
+  //  return;
+  //} // end IF
 
   // step2: initialize event dispatch
   struct Common_DispatchThreadData thread_data;
@@ -746,28 +752,33 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   } // end IF
 
   // step3: initialize client connector
-  configuration_in.socketConfiguration.address = serverAddress_in;
+  struct IRC_Client_ConnectionConfiguration connection_configuration;
+  connection_configuration.socketHandlerConfiguration.socketConfiguration.address =
+    serverAddress_in;
 
-  //configuration_in.socketHandlerConfiguration.bufferSize =
+  //connection_configuration.socketHandlerConfiguration.bufferSize =
   //  IRC_CLIENT_BUFFER_SIZE;
-  configuration_in.socketHandlerConfiguration.connectionConfiguration =
-    &configuration_in.connectionConfiguration;
-  configuration_in.socketHandlerConfiguration.messageAllocator =
-    configuration_in.streamConfiguration.messageAllocator;
-  configuration_in.socketHandlerConfiguration.socketConfiguration =
-    &configuration_in.socketConfiguration;
-  configuration_in.socketHandlerConfiguration.statisticReportingInterval =
+  connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
-  configuration_in.connectionConfiguration.moduleHandlerConfiguration =
-    &configuration_in.moduleHandlerConfiguration;
-  configuration_in.connectionConfiguration.protocolConfiguration =
+  connection_configuration.socketHandlerConfiguration.userData =
+    &configuration_in.userData;
+
+  connection_configuration.messageAllocator =
+    configuration_in.streamConfiguration.messageAllocator;
+  connection_configuration.protocolConfiguration =
     &configuration_in.protocolConfiguration;
-  configuration_in.connectionConfiguration.socketHandlerConfiguration =
-    &configuration_in.socketHandlerConfiguration;
-  configuration_in.connectionConfiguration.streamConfiguration =
+  connection_configuration.streamConfiguration =
     &configuration_in.streamConfiguration;
-  configuration_in.connectionConfiguration.userData =
-    configuration_in.userData;
+  connection_configuration.userData =
+    &configuration_in.userData;
+
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                    connection_configuration));
+  IRC_Client_ConnectionConfigurationIterator_t iterator_2 =
+    configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != configuration_in.connectionConfigurations.end ());
+  (*iterator_2).second.socketHandlerConfiguration.connectionConfiguration =
+    &((*iterator_2).second);
 
   //IRC_Client_SessionState session_state;
   //session_state.configuration = configuration_in;
@@ -788,7 +799,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   else
     connector_p = &asynch_connector;
   //if (!connector_p->initialize (connector_configuration))
-  if (!connector_p->initialize (configuration_in.connectionConfiguration))
+  if (!connector_p->initialize ((*iterator_2).second))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
@@ -799,8 +810,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   struct IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
   signal_handler_configuration.connector = connector_p;
   signal_handler_configuration.cursesState = &curses_state;
-  signal_handler_configuration.peerAddress =
-    configuration_in.socketConfiguration.address;
+  signal_handler_configuration.peerAddress = serverAddress_in;
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -819,7 +829,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
 
   // step4: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
-  connection_manager_p->set (configuration_in.connectionConfiguration,
+  connection_manager_p->set ((*iterator_2).second,
                              //configuration_in.streamUserData);
                              NULL);
 
@@ -837,13 +847,12 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   } // end IF
 
   // step5b: (try to) connect to the server
-  ACE_HANDLE handle =
-      connector_p->connect (signal_handler_configuration.peerAddress);
+  ACE_HANDLE handle = connector_p->connect (serverAddress_in);
   if (handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to connect to \"%s\": \"%m\", returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (signal_handler_configuration.peerAddress).c_str ())));
+                ACE_TEXT ("failed to connect to %s: \"%m\", returning\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (serverAddress_in).c_str ())));
 
     // clean up
     Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
@@ -857,11 +866,11 @@ do_work (struct IRC_Client_Configuration& configuration_in,
 
   // step6a: wait for connection / setup
 
-  IRC_Client_InputThreadData input_thread_data;
+  struct IRC_Client_InputThreadData input_thread_data;
   input_thread_data.configuration = &configuration_in;
   input_thread_data.groupID = configuration_in.groupID;
   input_thread_data.moduleHandlerConfiguration =
-      &configuration_in.moduleHandlerConfiguration;
+    const_cast<IRC_Client_ModuleHandlerConfiguration*> (&((*iterator).second));
   if (useCursesLibrary_in)
     input_thread_data.cursesState = &curses_state;
   input_thread_data.useReactor = configuration_in.useReactor;

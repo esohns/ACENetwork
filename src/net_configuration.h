@@ -24,9 +24,9 @@
 #include <deque>
 #include <string>
 
-#include <ace/INET_Addr.h>
-#include <ace/Log_Msg.h>
-#include <ace/Time_Value.h>
+#include "ace/INET_Addr.h"
+#include "ace/Log_Msg.h"
+#include "ace/Time_Value.h"
 
 #include "net_iconnectionmanager.h"
 #include "net_defines.h"
@@ -49,7 +49,7 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 struct Net_SocketConfiguration
 {
   inline Net_SocketConfiguration ()
-   : address (static_cast<u_short> (0),
+   : address (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
               static_cast<ACE_UINT32> (INADDR_ANY))
    , bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
    , connect (NET_SOCKET_DEFAULT_UDP_CONNECT)
@@ -93,52 +93,6 @@ struct Net_SocketConfiguration
   bool             useLoopBackDevice;
   bool             writeOnly; // UDP
 };
-typedef std::deque<struct Net_SocketConfiguration> Net_SocketConfigurations_t;
-typedef Net_SocketConfigurations_t::iterator Net_SocketConfigurationIterator_t;
-
-struct Net_SocketHandlerConfiguration;
-struct Net_ListenerConfiguration
-{
-  inline Net_ListenerConfiguration ()
-   : address (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
-              static_cast<ACE_UINT32> (INADDR_ANY))
-   , addressFamily (ACE_ADDRESS_FAMILY_INET)
-//   , connectionManager (NULL)
-   , messageAllocator (NULL)
-   , socketHandlerConfiguration (NULL)
-   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
-  {};
-
-  ACE_INET_Addr                          address;
-  int                                    addressFamily;
-//  Net_IInetConnectionManager_t*   connectionManager;
-  Stream_IAllocator*                     messageAllocator;
-  struct Net_SocketHandlerConfiguration* socketHandlerConfiguration;
-  bool                                   useLoopBackDevice;
-};
-
-struct Net_ConnectionConfiguration
-{
-  inline Net_ConnectionConfiguration ()
-   : connectionManager (NULL)
-   , messageAllocator (NULL)
-   , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
-   , socketHandlerConfiguration (NULL)
-   , streamConfiguration (NULL)
-   , userData (NULL)
-  {};
-
-  Net_IInetConnectionManager_t*          connectionManager;
-  Stream_IAllocator*                     messageAllocator;
-  // *NOTE*: applies to the corresponding protocol, if it has fixed size
-  //         datagrams; otherwise, this is the size of the individual (opaque)
-  //         stream buffers
-  unsigned int                           PDUSize; // package data unit size
-  struct Net_SocketHandlerConfiguration* socketHandlerConfiguration;
-  struct Stream_Configuration*           streamConfiguration;
-
-  struct Net_UserData*                   userData;
-};
 
 struct Net_ConnectionConfiguration;
 struct Net_SocketHandlerConfiguration
@@ -146,9 +100,7 @@ struct Net_SocketHandlerConfiguration
   inline Net_SocketHandlerConfiguration ()
    : connectionConfiguration (NULL)
    , listenerConfiguration (NULL)
-   , messageAllocator (NULL)
-   , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
-   , socketConfiguration (NULL)
+   , socketConfiguration ()
    , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
                                  0)
    , useThreadPerConnection (false)
@@ -158,14 +110,50 @@ struct Net_SocketHandlerConfiguration
 
   struct Net_ConnectionConfiguration* connectionConfiguration;
   struct Net_ListenerConfiguration*   listenerConfiguration;
-  Stream_IAllocator*                  messageAllocator;
-  unsigned int                        PDUSize;
-  struct Net_SocketConfiguration*     socketConfiguration;
+  struct Net_SocketConfiguration      socketConfiguration;
   ACE_Time_Value                      statisticReportingInterval; // [ACE_Time_Value::zero: off]
   bool                                useThreadPerConnection;
 
   struct Net_UserData*                userData;
 };
+
+struct Net_ListenerConfiguration
+{
+  inline Net_ListenerConfiguration ()
+   : addressFamily (ACE_ADDRESS_FAMILY_INET)
+//   , connectionManager (NULL)
+   , socketHandlerConfiguration ()
+  {};
+
+  int                                   addressFamily;
+//  Net_IInetConnectionManager_t*   connectionManager;
+  struct Net_SocketHandlerConfiguration socketHandlerConfiguration;
+};
+
+struct Net_ConnectionConfiguration
+{
+  inline Net_ConnectionConfiguration ()
+   : connectionManager (NULL)
+   , messageAllocator (NULL)
+   , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
+   , socketHandlerConfiguration ()
+   , streamConfiguration (NULL)
+   , userData (NULL)
+  {};
+
+  Net_IInetConnectionManager_t*         connectionManager;
+  Stream_IAllocator*                    messageAllocator;
+  // *NOTE*: applies to the corresponding protocol, if it has fixed size
+  //         datagrams; otherwise, this is the size of the individual (opaque)
+  //         stream buffers
+  unsigned int                          PDUSize; // package data unit size
+  struct Net_SocketHandlerConfiguration socketHandlerConfiguration;
+  struct Stream_Configuration*          streamConfiguration;
+
+  struct Net_UserData*                  userData;
+};
+typedef std::deque<struct Net_ConnectionConfiguration> Net_ConnectionConfigurations_t;
+typedef Net_ConnectionConfigurations_t::iterator Net_ConnectionConfigurationIterator_t;
 
 struct Net_SessionConfiguration
 {

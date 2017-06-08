@@ -248,7 +248,7 @@ struct BitTorrent_Client_TrackerStreamState
 
 struct BitTorrent_Client_PeerModuleHandlerConfiguration;
 typedef std::map<std::string,
-                 struct BitTorrent_Client_PeerModuleHandlerConfiguration*> BitTorrent_Client_PeerModuleHandlerConfigurations_t;
+                 struct BitTorrent_Client_PeerModuleHandlerConfiguration> BitTorrent_Client_PeerModuleHandlerConfigurations_t;
 typedef BitTorrent_Client_PeerModuleHandlerConfigurations_t::iterator BitTorrent_Client_PeerModuleHandlerConfigurationsIterator_t;
 typedef BitTorrent_Client_PeerModuleHandlerConfigurations_t::const_iterator BitTorrent_Client_PeerModuleHandlerConfigurationsConstIterator_t;
 struct BitTorrent_Client_PeerStreamConfiguration
@@ -266,7 +266,7 @@ struct BitTorrent_Client_PeerStreamConfiguration
 };
 struct BitTorrent_Client_TrackerModuleHandlerConfiguration;
 typedef std::map<std::string,
-                 struct BitTorrent_Client_TrackerModuleHandlerConfiguration*> BitTorrent_Client_TrackerModuleHandlerConfigurations_t;
+                 struct BitTorrent_Client_TrackerModuleHandlerConfiguration> BitTorrent_Client_TrackerModuleHandlerConfigurations_t;
 typedef BitTorrent_Client_TrackerModuleHandlerConfigurations_t::iterator BitTorrent_Client_TrackerModuleHandlerConfigurationsIterator_t;
 typedef BitTorrent_Client_TrackerModuleHandlerConfigurations_t::const_iterator BitTorrent_Client_TrackerModuleHandlerConfigurationsConstIterator_t;
 struct BitTorrent_Client_TrackerStreamConfiguration

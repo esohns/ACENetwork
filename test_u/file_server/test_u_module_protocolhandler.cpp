@@ -36,8 +36,8 @@
 
 #include "test_u_message.h"
 
-Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler ()
- : inherited ()
+Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler (ISTREAM_T* stream_in)
+ : inherited (stream_in)
  , counter_ (1)
  , sessionID_ (0)
 {
@@ -123,32 +123,3 @@ Test_U_Module_ProtocolHandler::dump_state () const
 //               ACE_TEXT (" ***** MODULE: \"%s\" state *****\\END\n"),
 //               ACE_TEXT (inherited::name ())));
 }
-
-//Test_U_Message*
-//Test_U_Module_ProtocolHandler::allocateMessage (unsigned int requestedSize_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::allocateMessage"));
-
-//  // initialize return value(s)
-//  Test_U_Message* message_p = NULL;
-
-//  // sanity check(s)
-//  ACE_ASSERT (allocator_);
-
-//  try {
-//    message_p =
-//      static_cast<Test_U_Message*> (allocator_->malloc (requestedSize_in));
-//  } catch (...) {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
-//                requestedSize_in));
-//  }
-//  if (!message_p)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to Stream_IAllocator::malloc(%u), aborting\n"),
-//                requestedSize_in));
-//  } // end IF
-
-//  return message_p;
-//}

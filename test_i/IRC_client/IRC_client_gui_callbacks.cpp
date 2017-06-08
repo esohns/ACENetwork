@@ -147,7 +147,10 @@ connection_setup_function (void* arg_in)
     return result;
   } // end IF
 //  gdk_threads_leave ();
-  data_p->configuration->moduleHandlerConfiguration.subscriber = connection_p;
+  IRC_Client_ModuleHandlerConfigurationsIterator_t iterator_2 =
+    data_p->configuration->streamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.moduleHandlerConfigurations.end ());
+  (*iterator_2).second.subscriber = connection_p;
 
   // *WARNING*: beyond this point, need to remove the connection page !
   //            --> goto remove_page
@@ -172,9 +175,9 @@ connection_setup_function (void* arg_in)
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
   IRC_Client_Connector_t connector (connection_manager_p,
-                                    data_p->configuration->moduleHandlerConfiguration.statisticReportingInterval);
+                                    (*iterator_2).second.statisticReportingInterval);
   IRC_Client_AsynchConnector_t asynch_connector (connection_manager_p,
-                                                 data_p->configuration->moduleHandlerConfiguration.statisticReportingInterval);
+                                                 (*iterator_2).second.statisticReportingInterval);
   IRC_Client_IConnector_t* connector_p = &connector;
   if (!data_p->configuration->useReactor)
     connector_p = &asynch_connector;
@@ -237,10 +240,10 @@ connection_setup_function (void* arg_in)
       g_free (string_p);
 
       result_3 =
-        configuration_p->socketHandlerConfiguration->socketConfiguration->address.set (current_port,
-                                                                                       data_p->phonebookEntry.hostName.c_str (),
-                                                                                       1,
-                                                                                       ACE_ADDRESS_FAMILY_INET);
+        configuration_p->socketHandlerConfiguration.socketConfiguration.address.set (current_port,
+                                                                                     data_p->phonebookEntry.hostName.c_str (),
+                                                                                     1,
+                                                                                     ACE_ADDRESS_FAMILY_INET);
       if (result_3 == -1)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -250,11 +253,11 @@ connection_setup_function (void* arg_in)
 
       // step3: (try to) connect to the server
       handle =
-        connector_p->connect (configuration_p->socketHandlerConfiguration->socketConfiguration->address);
+        connector_p->connect (configuration_p->socketHandlerConfiguration.socketConfiguration.address);
       if (handle == ACE_INVALID_HANDLE)
         ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("failed to connect(\"%s\"): \"%m\", continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_p->socketHandlerConfiguration->socketConfiguration->address).c_str ())));
+                    ACE_TEXT ("failed to connect(%s): \"%m\", continuing\n"),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_p->socketHandlerConfiguration.socketConfiguration.address).c_str ())));
       else
       {
         done = true;
@@ -291,8 +294,9 @@ connection_failed:
   } // end IF
   if (!data_p->configuration->useReactor)
   {
-    ACE_Time_Value deadline = COMMON_TIME_NOW +
-                              ACE_Time_Value (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT, 0);
+    ACE_Time_Value deadline =
+      (COMMON_TIME_NOW +
+       ACE_Time_Value (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT, 0));
     ACE_Time_Value delay (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT_INTERVAL, 0);
     do
     {
@@ -304,7 +308,7 @@ connection_failed:
 
       // *TODO*: this does not work
       connection_2 =
-        connection_manager_p->get (configuration_p->socketHandlerConfiguration->socketConfiguration->address);
+        connection_manager_p->get (configuration_p->socketHandlerConfiguration.socketConfiguration.address);
       if (connection_2)
         break; // done
     } while (COMMON_TIME_NOW < deadline);
@@ -358,7 +362,7 @@ connection_failed:
   } // end IF
 
   // step3: initialize new connection handler
-  connection_p->initialize (&const_cast<IRC_Client_SessionState&> (connection_2->state ()),
+  connection_p->initialize (&const_cast<struct IRC_Client_SessionState&> (connection_2->state ()),
                             icontrol_p);
   { // synch access
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

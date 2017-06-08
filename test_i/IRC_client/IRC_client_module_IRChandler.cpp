@@ -25,8 +25,8 @@
 //#include <iostream>
 #include <sstream>
 
-#include <ace/iosfwd.h>
-#include <ace/OS.h>
+#include "ace/iosfwd.h"
+#include "ace/OS.h"
 
 #include "common_timer_manager.h"
 
@@ -39,8 +39,8 @@
 #include "IRC_client_defines.h"
 #include "IRC_client_network.h"
 
-IRC_Client_Module_IRCHandler::IRC_Client_Module_IRCHandler ()
- : inherited ()
+IRC_Client_Module_IRCHandler::IRC_Client_Module_IRCHandler (ISTREAM_T* stream_in)
+ : inherited (stream_in)
  , conditionLock_ ()
  , condition_ (conditionLock_)
  , connectionIsAlive_ (false)
@@ -69,13 +69,11 @@ IRC_Client_Module_IRCHandler::initialize (const struct IRC_Client_ModuleHandlerC
   if (inherited::isInitialized_)
   {
     { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, conditionLock_, false);
-
       connectionIsAlive_ = false;
     } // end lock scope
 
     { // synch access to state machine
       ACE_GUARD_RETURN (ACE_SYNCH_NULL_MUTEX, aGuard, *inherited2::stateLock_, false);
-
       inherited2::state_ = REGISTRATION_STATE_NICK;
     } // end lock scope
     initialRegistration_ = true;
@@ -1200,7 +1198,7 @@ IRC_Client_Module_IRCHandler::dump_state () const
 void
 IRC_Client_Module_IRCHandler::onChange (IRC_RegistrationState newState_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::allocateMessage"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::onChange"));
 
   int result = -1;
 
@@ -1257,18 +1255,22 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::configuration_->connectionConfiguration);
+  ACE_ASSERT (inherited::configuration_->connectionConfigurations);
   ACE_ASSERT (record_inout);
+
+  IRC_Client_ConnectionConfigurationIterator_t iterator =
+    inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != inherited::configuration_->connectionConfigurations->end ());
 
   // step1: allocate a message buffer
   IRC_Message* message_p =
-      inherited::allocateMessage (inherited::configuration_->connectionConfiguration->PDUSize);
+      inherited::allocateMessage ((*iterator).second.PDUSize);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_TaskBase_T::allocateMessage(%u), returning\n"),
                 inherited::mod_->name (),
-                inherited::configuration_->connectionConfiguration->PDUSize));
+                (*iterator).second.PDUSize));
 
     // clean up
     record_inout->decrease ();
@@ -1332,7 +1334,7 @@ IRC_Client_Module_IRCHandler::clone ()
            Common_TimePolicy_t>* task_p = NULL;
 
   ACE_NEW_NORETURN (task_p,
-                    IRC_Client_Module_IRCHandler ());
+                    IRC_Client_Module_IRCHandler (NULL));
   if (!task_p)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("%s: failed to allocate memory: \"%m\", aborting\n"),

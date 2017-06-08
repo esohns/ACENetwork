@@ -26,7 +26,7 @@
 
 #include <iostream>
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "common_timer_manager_common.h"
 
@@ -36,13 +36,12 @@
 
 #include "test_u_message.h"
 
-Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler ()
- : inherited ()
+Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler (ISTREAM_T* stream_in)
+ : inherited (stream_in)
  , pingHandler_ (this,  // dispatch ourselves
                  false) // ping peer at regular intervals...
  , pingInterval_ (ACE_Time_Value::zero) // [0: --> OFF]
  , pingTimerID_ (-1)
- , allocator_ (NULL)
  , automaticPong_ (true)
  , counter_ (1)
  , printPongDot_ (false)
@@ -111,7 +110,6 @@ Test_U_Module_ProtocolHandler::initialize (const struct Test_U_ModuleHandlerConf
     } // end IF
     pingInterval_ = ACE_Time_Value::zero;
 
-    allocator_ = NULL;
     automaticPong_ = true;
     counter_ = 1;
     printPongDot_ = false;
@@ -121,7 +119,6 @@ Test_U_Module_ProtocolHandler::initialize (const struct Test_U_ModuleHandlerConf
   // *TODO*: remove type inferences
   pingInterval_ = configuration_in.protocolConfiguration->pingInterval;
 
-  allocator_ = allocator_in;
   automaticPong_ = configuration_in.protocolConfiguration->pingAutoAnswer;
   //if (automaticPong)
   //   ACE_DEBUG ((LM_DEBUG,
@@ -354,33 +351,4 @@ Test_U_Module_ProtocolHandler::dump_state () const
 //   ACE_DEBUG ((LM_DEBUG,
 //               ACE_TEXT (" ***** MODULE: \"%s\" state *****\\END\n"),
 //               ACE_TEXT (inherited::name ())));
-}
-
-Test_U_Message*
-Test_U_Module_ProtocolHandler::allocateMessage (unsigned int requestedSize_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::allocateMessage"));
-
-  // initialize return value(s)
-  Test_U_Message* message_p = NULL;
-
-  // sanity check(s)
-  ACE_ASSERT (allocator_);
-
-  try {
-    message_p =
-      static_cast<Test_U_Message*> (allocator_->malloc (requestedSize_in));
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
-                requestedSize_in));
-  }
-  if (!message_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_IAllocator::malloc(%u), aborting\n"),
-                requestedSize_in));
-  } // end IF
-
-  return message_p;
 }

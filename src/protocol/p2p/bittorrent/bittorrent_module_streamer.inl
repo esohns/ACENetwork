@@ -20,8 +20,8 @@
 
 #include <string>
 
-#include <ace/Log_Msg.h>
-#include <ace/OS.h>
+#include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
 #include "net_macros.h"
 
@@ -40,8 +40,8 @@ BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
                              ConfigurationType,
                              ControlMessageType,
                              DataMessageType,
-                             SessionMessageType>::BitTorrent_Module_Streamer_T ()
- : inherited ()
+                             SessionMessageType>::BitTorrent_Module_Streamer_T (ISTREAM_T* stream_in)
+ : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Streamer_T::BitTorrent_Module_Streamer_T"));
 

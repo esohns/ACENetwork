@@ -23,8 +23,8 @@
 
 #include <vector>
 
-#include <ace/Global_Macros.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "stream_headmoduletask_base.h"
 #include "stream_statistichandler.h"
@@ -61,7 +61,7 @@ class BitTorrent_Module_Parser_T
                                     SessionMessageType>
 {
  public:
-  BitTorrent_Module_Parser_T ();
+  BitTorrent_Module_Parser_T (ISTREAM_T*); // stream handle
   virtual ~BitTorrent_Module_Parser_T ();
 
   virtual bool initialize (const ConfigurationType&,
@@ -90,6 +90,7 @@ class BitTorrent_Module_Parser_T
   typedef BitTorrent_ParserDriver_T<DataMessageType,
                                     SessionMessageType> inherited2;
 
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_Parser_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_Parser_T (const BitTorrent_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_Parser_T& operator= (const BitTorrent_Module_Parser_T&))
 
@@ -149,7 +150,7 @@ class BitTorrent_Module_ParserH_T
                                     SessionMessageType>
 {
  public:
-  BitTorrent_Module_ParserH_T ();
+  BitTorrent_Module_ParserH_T (ISTREAM_T*); // stream handle
   virtual ~BitTorrent_Module_ParserH_T ();
 
   // *NOTE*: disambiguate Common_ISet_T::set()
@@ -202,6 +203,7 @@ class BitTorrent_Module_ParserH_T
   typedef BitTorrent_ParserDriver_T<DataMessageType,
                                     SessionMessageType> inherited2;
 
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_ParserH_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_ParserH_T (const BitTorrent_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_ParserH_T& operator= (const BitTorrent_Module_ParserH_T&))
 

@@ -30,6 +30,7 @@
 #include "net_macros.h"
 
 #include "test_u_connection_manager_common.h"
+#include "test_u_session_message.h"
 
 Test_U_Protocol_SignalHandler::Test_U_Protocol_SignalHandler ()
  : inherited (this ) // event handler handle

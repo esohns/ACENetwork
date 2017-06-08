@@ -56,9 +56,7 @@ struct Test_I_URLStreamLoad_Configuration
   inline Test_I_URLStreamLoad_Configuration ()
    : Test_I_Configuration ()
    , signalHandlerConfiguration ()
-   , socketHandlerConfiguration ()
-   , connectionConfiguration ()
-   , moduleHandlerConfiguration ()
+   , connectionConfigurations ()
    , streamConfiguration ()
    //, protocolConfiguration ()
    , userData ()
@@ -67,10 +65,8 @@ struct Test_I_URLStreamLoad_Configuration
   // **************************** signal data **********************************
   struct Test_I_URLStreamLoad_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************
-  struct HTTP_SocketHandlerConfiguration                 socketHandlerConfiguration;
-  struct Test_I_URLStreamLoad_ConnectionConfiguration    connectionConfiguration;
+  Test_I_URLStreamLoad_ConnectionConfigurations_t        connectionConfigurations;
   // **************************** stream data **********************************
-  struct Test_I_URLStreamLoad_ModuleHandlerConfiguration moduleHandlerConfiguration;
   struct Test_I_URLStreamLoad_StreamConfiguration        streamConfiguration;
   // *************************** protocol data *********************************
   //struct HTTP_ProtocolConfiguration        protocolConfiguration;

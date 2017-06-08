@@ -21,7 +21,7 @@
 #ifndef BITTORRENT_CLIENT_COMMON_MODULES_H
 #define BITTORRENT_CLIENT_COMMON_MODULES_H
 
-#include <ace/Synch_Traits.h>
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 

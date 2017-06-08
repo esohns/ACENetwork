@@ -30,8 +30,8 @@
 
 #include "test_u_message.h"
 
-Test_U_Module_HeaderParser::Test_U_Module_HeaderParser ()
- : inherited ()
+Test_U_Module_HeaderParser::Test_U_Module_HeaderParser (ISTREAM_T* stream_in)
+ : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::Test_U_Module_HeaderParser"));
 

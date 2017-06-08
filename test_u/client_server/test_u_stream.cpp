@@ -22,7 +22,7 @@
 #include <ace/Synch.h>
 #include "test_u_stream.h"
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
@@ -63,28 +63,32 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_ProtocolHandler_Module (ACE_TEXT_ALWAYS_CHAR ("ProtocolHandler"),
+                  Test_U_Module_ProtocolHandler_Module (this,
+                                                        ACE_TEXT_ALWAYS_CHAR ("ProtocolHandler"),
                                                         NULL,
                                                         false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_StatisticReport_Module (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+                  Test_U_Module_StatisticReport_Module (this,
+                                                        ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
                                                         NULL,
                                                         false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_HeaderParser_Module (ACE_TEXT_ALWAYS_CHAR ("HeaderParser"),
+                  Test_U_Module_HeaderParser_Module (this,
+                                                     ACE_TEXT_ALWAYS_CHAR ("HeaderParser"),
                                                      NULL,
                                                      false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_TCPSocketHandler_Module (ACE_TEXT_ALWAYS_CHAR ("SocketHandler"),
+                  Test_U_Module_TCPSocketHandler_Module (this,
+                                                         ACE_TEXT_ALWAYS_CHAR ("SocketHandler"),
                                                          NULL,
                                                          false),
                   false);

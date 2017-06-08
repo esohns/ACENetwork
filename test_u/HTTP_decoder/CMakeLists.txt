@@ -159,7 +159,8 @@ set (${PROJECT_NAME}_Protocol_EXE_SRCS
      test_u_HTTP_decoder.cpp
      test_u_HTTP_decoder_common.h
      test_u_HTTP_decoder_signalhandler.cpp
-     test_u_HTTP_decoder_signalhandler.h)
+     test_u_HTTP_decoder_signalhandler.h
+     test_u_HTTP_decoder_stream_common.h)
 #  test_u_template_instantiations.cpp
 
 #string (TOLOWER "${PROJECT_NAME}_Protocol" EXECUTABLE)
@@ -186,11 +187,17 @@ elseif (WIN32)
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
  target_link_libraries (${EXECUTABLE} ntdll.lib)
 endif ()
+#target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/libeay32.lib)
+target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/ssleay32.lib)
+
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 target_link_libraries (${EXECUTABLE} ${ACE_SSL_LIBRARY})
+
 target_link_libraries (${EXECUTABLE} Common)
+
 target_link_libraries (${EXECUTABLE} ACEStream)
 target_link_libraries (${EXECUTABLE} ACEStream_Decoder)
+
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 

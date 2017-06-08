@@ -18,15 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifdef __cplusplus
-extern "C"
-{
-//#include <libavcodec/avcodec.h>
-//#include <libavutil/pixfmt.h>
-}
-#endif /* __cplusplus */
-
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "common_timer_manager_common.h"
 
@@ -50,8 +42,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType>::HTTP_Module_Parser_T ()
- : inherited ()
+                     SessionMessageType>::HTTP_Module_Parser_T (ISTREAM_T* stream_in)
+ : inherited (stream_in)
  , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME), // scanner tables file (if any)
                NET_PROTOCOL_DEFAULT_LEX_TRACE,                            // trace scanning ?
                NET_PROTOCOL_DEFAULT_YACC_TRACE)                           // trace parsing ?
@@ -416,8 +408,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
-                      UserDataType>::HTTP_Module_ParserH_T ()
- : inherited (NULL,                                    // lock handle (state machine)
+                      UserDataType>::HTTP_Module_ParserH_T (ISTREAM_T* stream_in)
+ : inherited (stream_in,                               // stream handle
               false,                                   // auto-start ? (active mode only)
               STREAM_HEADMODULECONCURRENCY_CONCURRENT, // concurrency mode
               true)                                    // generate sesssion messages ?
@@ -796,7 +788,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   if (!inherited::putStatisticMessage (data_out)) // data container
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to putStatisticMessage(SESSION_STATISTICS), aborting\n")));
+                ACE_TEXT ("failed to putStatisticMessage(), aborting\n")));
     return false;
   } // end IF
 

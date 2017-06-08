@@ -23,11 +23,11 @@
 
 #include <list>
 
-#include <ace/INET_Addr.h>
+#include "ace/INET_Addr.h"
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include <ace/Netlink_Addr.h>
+#include "ace/Netlink_Addr.h"
 #endif
-#include <ace/Time_Value.h>
+#include "ace/Time_Value.h"
 
 #include "stream_common.h"
 #include "stream_iallocator.h"
@@ -108,35 +108,31 @@ struct Test_U_ModuleHandlerConfiguration
   Test_U_ISessionNotify_t*             subscriber;
   Test_U_Subscribers_t*                subscribers;
 };
-
 typedef std::map<std::string,
-                 struct Test_U_ModuleHandlerConfiguration*> Test_U_ModuleHandlerConfigurations_t;
+                 struct Test_U_ModuleHandlerConfiguration> Test_U_ModuleHandlerConfigurations_t;
 typedef Test_U_ModuleHandlerConfigurations_t::iterator Test_U_ModuleHandlerConfigurationsIterator_t;
+
 struct Test_U_StreamConfiguration
  : Stream_Configuration
 {
   inline Test_U_StreamConfiguration ()
    : Stream_Configuration ()
    , moduleConfiguration_2 ()
-   , moduleHandlerConfiguration_2 ()
    , moduleHandlerConfigurations ()
    , userData (NULL)
   {};
 
-  struct Stream_ModuleConfiguration         moduleConfiguration_2;        // module configuration
-  struct Test_U_ModuleHandlerConfiguration  moduleHandlerConfiguration_2; // module handler configuration
-  Test_U_ModuleHandlerConfigurations_t      moduleHandlerConfigurations;  // module handler configuration
+  struct Stream_ModuleConfiguration    moduleConfiguration_2;        // module configuration
+  Test_U_ModuleHandlerConfigurations_t moduleHandlerConfigurations;  // module handler configuration
 
-  struct Test_U_UserData*                   userData;                     // user data
+  struct Test_U_UserData*              userData;                     // user data
 };
 
 //struct Test_U_ConnectionConfiguration;
 struct Test_U_Configuration
 {
   inline Test_U_Configuration ()
-   : socketConfiguration ()
-   , socketHandlerConfiguration ()
-   , connectionConfiguration ()
+   : connectionConfigurations ()
    , allocatorConfiguration ()
    , streamConfiguration ()
    , protocolConfiguration ()
@@ -144,16 +140,14 @@ struct Test_U_Configuration
   {};
 
   // **************************** socket data **********************************
-  struct Net_SocketConfiguration           socketConfiguration;
-  struct Test_U_SocketHandlerConfiguration socketHandlerConfiguration;
-  struct Test_U_ConnectionConfiguration    connectionConfiguration;
+  Test_U_ConnectionConfigurations_t    connectionConfigurations;
   // **************************** stream data **********************************
-  struct Stream_AllocatorConfiguration     allocatorConfiguration;
-  struct Test_U_StreamConfiguration        streamConfiguration;
+  struct Stream_AllocatorConfiguration allocatorConfiguration;
+  struct Test_U_StreamConfiguration    streamConfiguration;
   // *************************** protocol data *********************************
-  struct Test_U_ProtocolConfiguration      protocolConfiguration;
+  struct Test_U_ProtocolConfiguration  protocolConfiguration;
 
-  struct Test_U_UserData                   userData;
+  struct Test_U_UserData               userData;
 };
 
 #endif

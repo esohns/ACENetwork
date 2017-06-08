@@ -132,17 +132,20 @@ struct BitTorrent_Client_PeerConnectionConfiguration
   inline BitTorrent_Client_PeerConnectionConfiguration ()
    : BitTorrent_PeerConnectionConfiguration ()
    ///////////////////////////////////////
-   , socketHandlerConfiguration (NULL)
+   , socketHandlerConfiguration ()
    , streamConfiguration (NULL)
    , userData (NULL)
   {};
 
-  struct BitTorrent_Client_PeerSocketHandlerConfiguration* socketHandlerConfiguration;
-
-  struct BitTorrent_Client_PeerStreamConfiguration*        streamConfiguration;
+  struct BitTorrent_Client_PeerSocketHandlerConfiguration socketHandlerConfiguration;
+  struct BitTorrent_Client_PeerStreamConfiguration*       streamConfiguration;
 
   struct BitTorrent_Client_PeerUserData*                   userData;
 };
+typedef std::map<std::string,
+                 struct BitTorrent_Client_PeerConnectionConfiguration> BitTorrent_Client_PeerConnectionConfigurations_t;
+typedef BitTorrent_Client_PeerConnectionConfigurations_t::iterator BitTorrent_Client_PeerConnectionConfigurationIterator_t;
+
 struct BitTorrent_Client_TrackerStreamConfiguration;
 struct BitTorrent_Client_TrackerConnectionConfiguration
  : BitTorrent_TrackerConnectionConfiguration
@@ -150,17 +153,19 @@ struct BitTorrent_Client_TrackerConnectionConfiguration
   inline BitTorrent_Client_TrackerConnectionConfiguration ()
    : BitTorrent_TrackerConnectionConfiguration ()
    ///////////////////////////////////////
-   , socketHandlerConfiguration (NULL)
+   , socketHandlerConfiguration ()
    , streamConfiguration (NULL)
    , userData (NULL)
   {};
 
-  struct BitTorrent_Client_TrackerSocketHandlerConfiguration* socketHandlerConfiguration;
+  struct BitTorrent_Client_TrackerSocketHandlerConfiguration socketHandlerConfiguration;
+  struct BitTorrent_Client_TrackerStreamConfiguration*       streamConfiguration;
 
-  struct BitTorrent_Client_TrackerStreamConfiguration*        streamConfiguration;
-
-  struct BitTorrent_Client_TrackerUserData*                   userData;
+  struct BitTorrent_Client_TrackerUserData*                  userData;
 };
+typedef std::map<std::string,
+                 struct BitTorrent_Client_TrackerConnectionConfiguration> BitTorrent_Client_TrackerConnectionConfigurations_t;
+typedef BitTorrent_Client_TrackerConnectionConfigurations_t::iterator BitTorrent_Client_TrackerConnectionConfigurationIterator_t;
 
 struct BitTorrent_Client_PeerConnectionConfiguration;
 struct BitTorrent_Client_TrackerConnectionConfiguration;

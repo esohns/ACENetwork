@@ -21,6 +21,9 @@
 #ifndef TEST_I_CONNECTION_COMMON_H
 #define TEST_I_CONNECTION_COMMON_H
 
+#include <map>
+#include <string>
+
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 #include "ace/SOCK_Connector.h"
@@ -78,7 +81,7 @@ struct Test_I_URLStreamLoad_ConnectionConfiguration
   inline Test_I_URLStreamLoad_ConnectionConfiguration ()
     : Net_ConnectionConfiguration ()
     , connectionManager (NULL)
-    , socketHandlerConfiguration (NULL)
+    , socketHandlerConfiguration ()
     , streamConfiguration (NULL)
     , userData (NULL)
   {
@@ -86,11 +89,14 @@ struct Test_I_URLStreamLoad_ConnectionConfiguration
   };
 
   Test_I_IConnectionManager_t*                     connectionManager;
-  struct HTTP_SocketHandlerConfiguration*          socketHandlerConfiguration;
+  struct HTTP_SocketHandlerConfiguration           socketHandlerConfiguration;
   struct Test_I_URLStreamLoad_StreamConfiguration* streamConfiguration;
 
   struct HTTP_Stream_UserData*                     userData;
 };
+typedef std::map<std::string,
+                 struct Test_I_URLStreamLoad_ConnectionConfiguration> Test_I_URLStreamLoad_ConnectionConfigurations_t;
+typedef Test_I_URLStreamLoad_ConnectionConfigurations_t::iterator Test_I_URLStreamLoad_ConnectionConfigurationIterator_t;
 
 //////////////////////////////////////////
 

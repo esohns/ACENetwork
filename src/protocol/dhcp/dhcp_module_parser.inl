@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "common_timer_manager_common.h"
 
@@ -39,12 +39,11 @@ DHCP_Module_Parser_T<ACE_SYNCH_USE,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType>::DHCP_Module_Parser_T ()
- : inherited ()
+                     SessionMessageType>::DHCP_Module_Parser_T (ISTREAM_T* stream_in)
+ : inherited (stream_in)
  , driver_ (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
             NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
  , isDriverInitialized_ (false)
- , initialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Parser_T::DHCP_Module_Parser_T"));
 
@@ -79,21 +78,17 @@ DHCP_Module_Parser_T<ACE_SYNCH_USE,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType>::initialize (const ConfigurationType& configuration_in)
+                     SessionMessageType>::initialize (const ConfigurationType& configuration_in,
+                                                      Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Parser_T::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (configuration_in.parserConfiguration);
 
-  if (initialized_)
+  if (inherited::isInitialized_)
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("re-initializing...\n")));
-
     isDriverInitialized_ = false;
-
-    initialized_ = false;
   } // end IF
 
   // initialize driver
@@ -107,9 +102,8 @@ DHCP_Module_Parser_T<ACE_SYNCH_USE,
     return false;
   } // end IF
 
-  initialized_ = inherited::initialize (configuration_in);
-
-  return initialized_;
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 template <ACE_SYNCH_DECL,
@@ -235,11 +229,12 @@ DHCP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType>::DHCP_Module_ParserH_T (ACE_SYNCH_MUTEX_T* lock_in,
+                      StatisticContainerType>::DHCP_Module_ParserH_T (ISTREAM_T* stream_in,
                                                                       bool autoStart_in,
                                                                       bool generateSessionMessages_in)
- : inherited (lock_in,
+ : inherited (stream_in,
               autoStart_in,
+              STREAM_HEADMODULECONCURRENCY_PASSIVE,
               generateSessionMessages_in)
  , driver_ (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
             NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
@@ -302,7 +297,8 @@ DHCP_Module_ParserH_T<ACE_SYNCH_USE,
                       StreamStateType,
                       SessionDataType,
                       SessionDataContainerType,
-                      StatisticContainerType>::initialize (const ConfigurationType& configuration_in)
+                      StatisticContainerType>::initialize (const ConfigurationType& configuration_in,
+                                                           Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::initialize"));
 
@@ -313,9 +309,6 @@ DHCP_Module_ParserH_T<ACE_SYNCH_USE,
 
   if (inherited::initialized_)
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("re-initializing...\n")));
-
     isDriverInitialized_ = false;
   } // end IF
 
@@ -328,15 +321,8 @@ DHCP_Module_ParserH_T<ACE_SYNCH_USE,
     return false;
   } // end IF
 
-  result = inherited::initialize (configuration_in);
-  if (!result)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_HeadModuleTaskBase_T::initialize(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
-
-  return result;
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 template <ACE_SYNCH_DECL,
@@ -546,71 +532,4 @@ DHCP_Module_ParserH_T<ACE_SYNCH_USE,
 //  ACE_ASSERT (false);
 //  ACE_NOTSUP;
 //  ACE_NOTREACHED (return);
-//}
-
-//template <ACE_SYNCH_USE,
-//          typename TaskSynchType,
-//          typename TimePolicyType,
-//          typename SessionMessageType,
-//          typename ProtocolMessageType,
-//          typename ConfigurationType,
-//          typename StreamStateType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename StatisticContainerType>
-//bool
-//DHCP_Module_ParserH_T<ACE_SYNCH_USE,
-//                     TaskSynchType,
-//                     TimePolicyType,
-//                     SessionMessageType,
-//                     ProtocolMessageType,
-//                     ConfigurationType,
-//                     StreamStateType,
-//                     SessionDataType,
-//                     SessionDataContainerType,
-//                     StatisticContainerType>::putStatisticMessage (const StatisticContainerType& statisticData_in) const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::putStatisticMessage"));
-//
-//  // sanity check(s)
-//  ACE_ASSERT (inherited::configuration_);
-//  ACE_ASSERT (inherited::configuration_->streamConfiguration);
-//
-////  // step1: initialize session data
-////  IRC_StreamSessionData* session_data_p = NULL;
-////  ACE_NEW_NORETURN (session_data_p,
-////                    IRC_StreamSessionData ());
-////  if (!session_data_p)
-////  {
-////    ACE_DEBUG ((LM_CRITICAL,
-////                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-////    return false;
-////  } // end IF
-////  //ACE_OS::memset (data_p, 0, sizeof (IRC_SessionData));
-//  SessionDataType& session_data_r =
-//      const_cast<SessionDataType&> (inherited::sessionData_->get ());
-//  session_data_r.currentStatistic = statisticData_in;
-//
-////  // step2: allocate session data container
-////  IRC_StreamSessionData_t* session_data_container_p = NULL;
-////  // *NOTE*: fire-and-forget stream_session_data_p
-////  ACE_NEW_NORETURN (session_data_container_p,
-////                    IRC_StreamSessionData_t (stream_session_data_p,
-////                                                    true));
-////  if (!session_data_container_p)
-////  {
-////    ACE_DEBUG ((LM_CRITICAL,
-////                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-//
-////    // clean up
-////    delete stream_session_data_p;
-//
-////    return false;
-////  } // end IF
-//
-//  // step3: send the data downstream...
-//  // *NOTE*: fire-and-forget session_data_container_p
-//  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
-//                                       *inherited::sessionData_,
-//                                       inherited::configuration_->streamConfiguration->messageAllocator);
 //}

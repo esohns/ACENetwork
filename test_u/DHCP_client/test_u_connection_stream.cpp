@@ -22,7 +22,7 @@
 #include <ace/Synch.h>
 #include "test_u_connection_stream.h"
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "net_macros.h"
 
@@ -54,21 +54,24 @@ Test_U_InboundConnectionStream::load (Stream_ModuleList_t& modules_out,
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_Dump_Module (ACE_TEXT_ALWAYS_CHAR ("Dump"),
+                  Test_U_Module_Dump_Module (this,
+                                             ACE_TEXT_ALWAYS_CHAR ("Dump"),
                                              NULL,
                                              false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_DHCPDiscover_Module (ACE_TEXT_ALWAYS_CHAR ("DHCPDiscover"),
+                  Test_U_Module_DHCPDiscover_Module (this,
+                                                     ACE_TEXT_ALWAYS_CHAR ("DHCPDiscover"),
                                                      NULL,
                                                      false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_StatisticReport_Module (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+                  Test_U_Module_StatisticReport_Module (this,
+                                                        ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
                                                         NULL,
                                                         false),
                   false);
@@ -82,14 +85,16 @@ Test_U_InboundConnectionStream::load (Stream_ModuleList_t& modules_out,
 //  modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_Marshal_Module (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
+                  Test_U_Module_Marshal_Module (this,
+                                                ACE_TEXT_ALWAYS_CHAR ("Marshal"),
                                                 NULL,
                                                 false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_Net_IO_Module (ACE_TEXT_ALWAYS_CHAR ("NetIO"),
+                  Test_U_Module_Net_IO_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR ("NetIO"),
                                                NULL,
                                                false),
                   false);
@@ -138,8 +143,7 @@ Test_U_InboundConnectionStream::initialize (const struct Test_U_StreamConfigurat
   ACE_ASSERT (iterator != configuration_in.moduleHandlerConfigurations.end ());
   // *TODO*: remove type inferences
   session_data_p->sessionID = configuration_in.sessionID;
-  ACE_ASSERT (configuration_in.moduleHandlerConfiguration);
-  session_data_p->targetFileName = (*iterator).second->targetFileName;
+  session_data_p->targetFileName = (*iterator).second.targetFileName;
 
   // ---------------------------------------------------------------------------
 
@@ -333,21 +337,24 @@ Test_U_OutboundConnectionStream::load (Stream_ModuleList_t& modules_out,
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_StatisticReport_Module (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+                  Test_U_Module_StatisticReport_Module (this,
+                                                        ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
                                                         NULL,
                                                         false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_Streamer_Module (ACE_TEXT_ALWAYS_CHAR ("Marshal"),
+                  Test_U_Module_Streamer_Module (this,
+                                                 ACE_TEXT_ALWAYS_CHAR ("Marshal"),
                                                  NULL,
                                                  false),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_Net_IO_Module (ACE_TEXT_ALWAYS_CHAR ("NetIO"),
+                  Test_U_Module_Net_IO_Module (this,
+                                               ACE_TEXT_ALWAYS_CHAR ("NetIO"),
                                                NULL,
                                                false),
                   false);
@@ -392,7 +399,7 @@ Test_U_OutboundConnectionStream::initialize (const struct Test_U_StreamConfigura
   iterator =
       const_cast<struct Test_U_StreamConfiguration&> (configuration_in).moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.moduleHandlerConfigurations.end ());
-  session_data_p->targetFileName = (*iterator).second->targetFileName;
+  session_data_p->targetFileName = (*iterator).second.targetFileName;
 
   // ---------------------------------------------------------------------------
 

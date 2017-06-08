@@ -21,8 +21,8 @@
 #ifndef TEST_U_COMMON_MODULES_H
 #define TEST_U_COMMON_MODULES_H
 
-#include <ace/INET_Addr.h>
-#include <ace/Synch_Traits.h>
+#include "ace/INET_Addr.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 
@@ -92,6 +92,7 @@ typedef DHCP_Module_Discover_T<ACE_MT_SYNCH,
                                Test_U_Message,
                                Test_U_SessionMessage,
                                struct Test_U_StreamModuleHandlerConfiguration,
+                               Test_U_ConnectionConfigurationIterator_t,
                                Test_U_ConnectionManager_t,
                                Test_U_OutboundConnectorBcast_t,
                                Test_U_OutboundConnector_t> Test_U_Module_DHCPDiscover;
@@ -192,16 +193,11 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_DHCPClient_SessionData,           //
                               struct Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
                               Test_U_IStreamNotify_t,                         // stream notification interface type
                               Test_U_Module_DHCPDiscoverH);                   // writer type
-
-typedef ACE_Thru_Task<ACE_MT_SYNCH,
-                      Common_TimePolicy_t> Test_U_ThruTask_t;
-DATASTREAM_MODULE_DUPLEX (struct Test_U_DHCPClient_SessionData,           // session data type
-                          enum Stream_SessionMessageType,                 // session event type
-                          struct Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
-                          Test_U_IStreamNotify_t,                         // stream notification interface type
-                          Test_U_Module_Streamer,                         // reader type
-                          Test_U_ThruTask_t,                              // writer type
-                          Test_U_Module_Streamer);                        // name
+DATASTREAM_MODULE_OUTPUT_ONLY (struct Test_U_DHCPClient_SessionData,           // session data type
+                               enum Stream_SessionMessageType,                 // session event type
+                               struct Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
+                               Test_U_IStreamNotify_t,                         // stream notification interface type
+                               Test_U_Module_Streamer);                        // reader type
 DATASTREAM_MODULE_DUPLEX (struct Test_U_DHCPClient_SessionData,           // session data type
                           enum Stream_SessionMessageType,                 // session event type
                           struct Test_U_StreamModuleHandlerConfiguration, // module handler configuration type

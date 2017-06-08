@@ -21,10 +21,10 @@
 #ifndef NET_SERVER_SSL_LISTENER_H
 #define NET_SERVER_SSL_LISTENER_H
 
-#include <ace/Acceptor.h>
-#include <ace/Global_Macros.h>
-#include <ace/Singleton.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Acceptor.h"
+#include "ace/Global_Macros.h"
+#include "ace/Singleton.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_idumpstate.h"
 
@@ -113,13 +113,12 @@ class Net_Server_SSL_Listener_T
   // implement (part of) Common_IControl_T
   inline virtual void initialize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
-  ConfigurationType*        configuration_;
-  HandlerConfigurationType* handlerConfiguration_;
-  bool                      hasChanged_;
-  bool                      isInitialized_;
-  bool                      isListening_;
-  bool                      isOpen_;
-  bool                      isSuspended_;
+  ConfigurationType* configuration_;
+  bool               hasChanged_;
+  bool               isInitialized_;
+  bool               isListening_;
+  bool               isOpen_;
+  bool               isSuspended_;
 };
 
 // include template definition

@@ -18,10 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/INET_Addr.h>
-#include <ace/Log_Msg.h>
-#include <ace/OS.h>
-#include <ace/Reactor.h>
+#include "ace/INET_Addr.h"
+#include "ace/Log_Msg.h"
+#include "ace/OS.h"
+#include "ace/Reactor.h"
 
 #include "net_common.h"
 #include "net_common_tools.h"
@@ -48,7 +48,6 @@ Net_Server_SSL_Listener_T<HandlerType,
  : inherited (NULL, // use global (default) reactor
               1)    // always accept ALL pending connections
  , configuration_ (NULL)
- , handlerConfiguration_ (NULL)
  , hasChanged_ (false)
  , isInitialized_ (false)
  , isListening_ (false)
@@ -157,7 +156,8 @@ Net_Server_SSL_Listener_T<HandlerType,
                 ACE_TEXT ("not initialized, returning\n")));
     return;
   } // end IF
-  if (isListening_) return; // nothing to do
+  if (isListening_)
+    return; // nothing to do
 
   if (hasChanged_)
   {
@@ -211,17 +211,15 @@ Net_Server_SSL_Listener_T<HandlerType,
   // *TODO*: remove type inferences
   // sanity check(s)
   ACE_ASSERT (configuration_);
-  ACE_ASSERT (handlerConfiguration_);
-  ACE_ASSERT (handlerConfiguration_->socketConfiguration);
-  if (handlerConfiguration_->socketConfiguration->useLoopBackDevice)
+  if (configuration_->socketHandlerConfiguration.socketConfiguration.useLoopBackDevice)
   {
     result =
-      configuration_->address.set (configuration_->address.get_port_number (), // port
+      configuration_->address.set (configuration_->socketHandlerConfiguration.socketConfiguration.address.get_port_number (), // port
                                    // *PORTABILITY*: disambiguate this under Windows
                                    // *TODO*: bind to specific interface/address ?
-                                   ACE_LOCALHOST,                              // hostname
-                                   1,                                          // encode ?
-                                   AF_INET);                                   // address family
+                                   ACE_LOCALHOST,                                                                             // hostname
+                                   1,                                                                                         // encode ?
+                                   AF_INET);                                                                                  // address family
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -230,12 +228,12 @@ Net_Server_SSL_Listener_T<HandlerType,
     } // end IF
   } // end IF
   result =
-      inherited::open (configuration_->address,  // local address
-                       ACE_Reactor::instance (), // corresp. reactor
-                       ACE_NONBLOCK,             // flags (use non-blocking sockets !)
-                       //0,                        // flags (default is blocking sockets)
-                       1,                        // always accept ALL pending connections
-                       1);                       // try to re-use address
+      inherited::open (configuration_->socketHandlerConfiguration.socketConfiguration.address, // local address
+                       ACE_Reactor::instance (),                                               // reactor handle
+                       ACE_NONBLOCK,                                                           // flags (use non-blocking sockets)
+                       //0,                                                                    // flags (*NOTE*: default is blocking sockets)
+                       1,                                                                      // accept all pending connections
+                       1);                                                                     // try to re-use address
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -247,12 +245,12 @@ Net_Server_SSL_Listener_T<HandlerType,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("0x%@: started listening: %s...\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketHandlerConfiguration.socketConfiguration.address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: started listening: %s...\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketHandlerConfiguration.socketConfiguration.address).c_str ())));
 #endif
 
   isListening_ = true;
@@ -322,9 +320,9 @@ Net_Server_SSL_Listener_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::get"));
 
   // sanity check(s)
-  ACE_ASSERT (handlerConfiguration_);
+  ACE_ASSERT (configuration_);
 
-  return *handlerConfiguration_;
+  return configuration_->socketHandlerConfiguration;
 }
 
 template <typename HandlerType,
@@ -347,11 +345,7 @@ Net_Server_SSL_Listener_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_SSL_Listener_T::initialize"));
 
-  // sanity check(s)
-  ACE_ASSERT (configuration_in.socketHandlerConfiguration);
-
   configuration_ = &const_cast<ConfigurationType&> (configuration_in);
-  handlerConfiguration_ = configuration_in.socketHandlerConfiguration;
   hasChanged_ = true;
   isInitialized_ = true;
 
@@ -421,13 +415,12 @@ Net_Server_SSL_Listener_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
-  ACE_ASSERT (handlerConfiguration_);
 
   // default behavior
   // *TODO*: remove type inferences
   ACE_NEW_NORETURN (handler_out,
                     HandlerType (configuration_->connectionManager,
-                                 handlerConfiguration_->statisticReportingInterval));
+                                 configuration_->socketHandlerConfiguration.statisticReportingInterval));
   if (!handler_out)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));

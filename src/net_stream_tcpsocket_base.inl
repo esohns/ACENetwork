@@ -147,7 +147,6 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   int result = -1;
@@ -202,7 +201,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // step2a: connect stream head message queue with the reactor notification
   //         pipe ?
   // *TODO*: remove type inferences
-  if (!inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection)
+  if (!inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection)
     inherited2::configuration_->streamConfiguration->notificationStrategy =
       &(inherited::notificationStrategy_);
 
@@ -242,7 +241,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // step3: tweak socket, register I/O handle with the reactor, ...
   // *NOTE*: as soon as this returns, data starts arriving at handle_input()
   result =
-    inherited::open (inherited2::configuration_->socketHandlerConfiguration);
+    inherited::open (&inherited2::configuration_->socketHandlerConfiguration);
   if (result == -1)
   {
     // *NOTE*: this can happen when the connection handle is still registered
@@ -466,26 +465,28 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // sanity check
   ACE_ASSERT (inherited2::configuration_);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited2::configuration_->streamConfiguration->allocatorConfiguration);
   ACE_ASSERT (!currentReadBuffer_);
 
   // read some data from the socket
   // *TODO*: remove type inference
   currentReadBuffer_ =
-    allocateMessage (inherited2::configuration_->PDUSize);
+    allocateMessage (inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize);
   if (likely (!currentReadBuffer_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                inherited2::configuration_->PDUSize));
+                inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize));
     return -1; // <-- remove 'this' from dispatch
   } // end IF
 
   // read some data from the socket
 retry:
   bytes_received =
-      inherited::peer_.recv (currentReadBuffer_->wr_ptr (),       // buffer
-                             inherited2::configuration_->PDUSize, // #bytes to read
-                             0);                                  // flags
+    inherited::peer_.recv (currentReadBuffer_->wr_ptr (),                                                              // buffer
+                           inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize, // #bytes to read
+                           0);                                                                                         // flags
   switch (bytes_received)
   {
     case -1:
@@ -607,7 +608,6 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
 
   int result = -1;
   ssize_t bytes_sent = 0;
@@ -640,8 +640,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
     // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
     //                   been notified to the reactor
     result =
-      (unlikely (inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection) ? inherited::getq (currentWriteBuffer_, NULL)
-                                                                                                 : stream_.get (currentWriteBuffer_, NULL));
+      (unlikely (inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection) ? inherited::getq (currentWriteBuffer_, NULL)
+                                                                                                : stream_.get (currentWriteBuffer_, NULL));
     if (unlikely (result == -1))
     {
       // *NOTE*: a number of issues can occur here:
@@ -651,8 +651,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
       if ((error != EAGAIN)   && // 11   : connection has been closed
           (error != ESHUTDOWN))  // 10058: queue has been deactivated
         ACE_DEBUG ((LM_ERROR,
-                    (inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
-                                                                                                    : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
+                    (inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection ? ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")
+                                                                                                   : ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n"))));
       goto release;
     } // end IF
   } // end IF
@@ -660,7 +660,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   result = 0;
 
   // finished ?
-  if (unlikely (inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection))
+  if (unlikely (inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection))
     if (currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
     {
       //       ACE_DEBUG ((LM_DEBUG,
@@ -813,7 +813,6 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->socketHandlerConfiguration);
 
   // step0a: set state
   // *IMPORTANT NOTE*: set the state early to avoid deadlock in
@@ -854,7 +853,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
-      if (likely (!inherited2::configuration_->socketHandlerConfiguration->useThreadPerConnection))
+      if (likely (!inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection))
       { // *IMPORTANT NOTE*: in a multithreaded environment, in particular when
         //                   using a multithreaded reactor, there may still be
         //                   in-flight notifications being dispatched at this
@@ -1294,34 +1293,16 @@ Net_StreamTCPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::dump_state"));
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  ACE_INET_Addr local_inet_address, peer_inet_address;
+  AddressType local_inet_address, peer_inet_address;
   info (handle,
         local_inet_address,
         peer_inet_address);
 
-  ACE_TCHAR buffer[BUFSIZ];
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string local_address;
-  if (local_inet_address.addr_to_string (buffer,
-    sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    local_address = buffer;
-  ACE_OS::memset (buffer, 0, sizeof (buffer));
-  std::string peer_address;
-  if (peer_inet_address.addr_to_string (buffer,
-    sizeof (buffer)) == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
-  else
-    peer_address = buffer;
-
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connection [Id: %u [%u]]: \"%s\" <--> \"%s\"\n"),
+              ACE_TEXT ("connection [id: %u, handle: %u]: %s <--> %s\n"),
               id (), handle,
-              ACE_TEXT (local_address.c_str ()),
-              ACE_TEXT (peer_address.c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (local_inet_address).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_inet_address).c_str ())));
 }
 
 template <typename HandlerType,

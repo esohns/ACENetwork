@@ -45,7 +45,7 @@ class Test_I_Module_EventHandler
                                          struct Test_I_URLStreamLoad_SessionData>
 {
  public:
-  Test_I_Module_EventHandler ();
+  Test_I_Module_EventHandler (ISTREAM_T*); // stream handle
   virtual ~Test_I_Module_EventHandler ();
 
   // implement Common_IClone_T
@@ -62,6 +62,7 @@ class Test_I_Module_EventHandler
                                          Stream_SessionId_t,
                                          struct Test_I_URLStreamLoad_SessionData> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (Test_I_Module_EventHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_I_Module_EventHandler (const Test_I_Module_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_Module_EventHandler& operator= (const Test_I_Module_EventHandler&))
 };

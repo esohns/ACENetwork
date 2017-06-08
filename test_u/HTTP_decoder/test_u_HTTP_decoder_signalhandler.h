@@ -21,7 +21,7 @@
 #ifndef TEST_U_PROTOCOL_SIGNALHANDLER_H
 #define TEST_U_PROTOCOL_SIGNALHANDLER_H
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
 #include "common_isignal.h"
 #include "common_signalhandler.h"
@@ -29,7 +29,7 @@
 #include "test_u_HTTP_decoder_common.h"
 
 class Test_U_Protocol_SignalHandler
- : public Common_SignalHandler_T<Test_U_SignalHandlerConfiguration>
+ : public Common_SignalHandler_T<struct Test_U_SignalHandlerConfiguration>
  , public Common_ISignal
 {
  public:
@@ -40,7 +40,7 @@ class Test_U_Protocol_SignalHandler
   virtual void handle (int); // signal
 
  private:
-  typedef Common_SignalHandler_T<Test_U_SignalHandlerConfiguration> inherited;
+  typedef Common_SignalHandler_T<struct Test_U_SignalHandlerConfiguration> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Protocol_SignalHandler (const Test_U_Protocol_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Protocol_SignalHandler& operator= (const Test_U_Protocol_SignalHandler&))

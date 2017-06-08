@@ -18,9 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/Log_Msg.h>
-
-#include "stream_iallocator.h"
+#include "ace/Log_Msg.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
@@ -38,15 +36,13 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
                     ConfigurationType,
                     ControlMessageType,
                     DataMessageType,
-                    SessionMessageType>::IRC_Module_Parser_T ()
- : inherited ()
- , allocator_ (NULL)
+                    SessionMessageType>::IRC_Module_Parser_T (ISTREAM_T* stream_in)
+ : inherited (stream_in)
+ , crunchMessages_ (IRC_DEFAULT_CRUNCH_MESSAGES) // "crunch" messages ?
  , debugScanner_ (IRC_DEFAULT_LEX_TRACE) // trace scanning ?
  , debugParser_ (IRC_DEFAULT_YACC_TRACE) // trace parsing ?
  , driver_ (IRC_DEFAULT_LEX_TRACE,  // trace scanning ?
             IRC_DEFAULT_YACC_TRACE) // trace parsing ?
- , crunchMessages_ (IRC_DEFAULT_CRUNCH_MESSAGES) // "crunch" messages ?
- , isInitialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Parser_T::IRC_Module_Parser_T"));
 
@@ -81,36 +77,28 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
                     ConfigurationType,
                     ControlMessageType,
                     DataMessageType,
-                    SessionMessageType>::initialize (Stream_IAllocator* allocator_in,
-                                                     bool crunchMessages_in,
-                                                     bool debugScanner_in,
-                                                     bool debugParser_in)
+                    SessionMessageType>::initialize (const ConfigurationType& configuration_in,
+                                                     Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Parser_T::initialize"));
 
   // sanity check(s)
-  ACE_ASSERT (allocator_in);
-  if (isInitialized_)
+  if (inherited::isInitialized_)
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("re-initializing...\n")));
-
-    allocator_ = NULL;
     debugScanner_ = IRC_DEFAULT_LEX_TRACE;
     debugParser_ = IRC_DEFAULT_YACC_TRACE;
     crunchMessages_ = IRC_DEFAULT_CRUNCH_MESSAGES;
-    isInitialized_ = false;
   } // end IF
 
-  allocator_ = allocator_in;
-  debugScanner_ = debugScanner_in;
-  debugParser_ = debugParser_in;
-  crunchMessages_ = crunchMessages_in;
+  // sanity check(s)
+  ACE_ASSERT (configuration_in.parserConfiguration);
 
-  // OK: all's well...
-  isInitialized_ = true;
+  debugScanner_ = configuration_in.parserConfiguration->debugScanner;
+  debugParser_ = configuration_in.parserConfiguration->debugParser;
+  crunchMessages_ = configuration_in.crunchMessages;
 
-  return isInitialized_;
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 template <ACE_SYNCH_DECL,
@@ -154,7 +142,7 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
 //     message->dump_state();
 
     // step1: get a new message buffer
-    message_p = allocateMessage (IRC_MAXIMUM_FRAME_SIZE);
+    message_p = inherited::allocateMessage (IRC_MAXIMUM_FRAME_SIZE);
     if (!message_p)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -255,59 +243,4 @@ error:
   message_p->release ();
   message_p = NULL;
   passMessageDownstream_out = false;
-}
-
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
-DataMessageType*
-IRC_Module_Parser_T<ACE_SYNCH_USE,
-                    TimePolicyType,
-                    ConfigurationType,
-                    ControlMessageType,
-                    DataMessageType,
-                    SessionMessageType>::allocateMessage (unsigned int requestedSize_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Module_Parser_T::allocateMessage"));
-
-  // initialize return value(s)
-  DataMessageType* message_p = NULL;
-
-  if (allocator_)
-  {
-allocate:
-    try {
-      message_p =
-        static_cast<DataMessageType*> (allocator_->malloc (requestedSize_in));
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
-                  requestedSize_in));
-      return NULL;
-    }
-
-    // keep retrying ?
-    if (!message_p && !allocator_->block ())
-      goto allocate;
-  } // end IF
-  else
-    ACE_NEW_NORETURN (message_p,
-                      DataMessageType (requestedSize_in));
-  if (!message_p)
-  {
-    if (allocator_)
-    {
-      if (allocator_->block ())
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate data message: \"%m\", aborting\n")));
-    } // end IF
-    else
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate data message: \"%m\", aborting\n")));
-  } // end IF
-
-  return message_p;
 }
