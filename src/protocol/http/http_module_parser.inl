@@ -42,7 +42,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType>::HTTP_Module_Parser_T (ISTREAM_T* stream_in)
+                     SessionMessageType>::HTTP_Module_Parser_T (typename TASK_BASE_T::ISTREAM_T* stream_in)
  : inherited (stream_in)
  , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME), // scanner tables file (if any)
                NET_PROTOCOL_DEFAULT_LEX_TRACE,                            // trace scanning ?
@@ -408,7 +408,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
-                      UserDataType>::HTTP_Module_ParserH_T (ISTREAM_T* stream_in)
+                      UserDataType>::HTTP_Module_ParserH_T (typename inherited::ISTREAM_T* stream_in)
  : inherited (stream_in,                               // stream handle
               false,                                   // auto-start ? (active mode only)
               STREAM_HEADMODULECONCURRENCY_CONCURRENT, // concurrency mode

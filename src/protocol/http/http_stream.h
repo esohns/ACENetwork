@@ -113,7 +113,7 @@ class HTTP_Stream_T
 
   typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 ConfigurationType,
+                                 ModuleHandlerConfigurationType,
                                  ControlMessageType,
                                  DataMessageType,
                                  SessionMessageType> STREAMER_T;

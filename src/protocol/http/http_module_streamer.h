@@ -44,17 +44,8 @@ class HTTP_Module_Streamer_T
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 Stream_UserData>
+                                 struct Stream_UserData>
 {
- public:
-  HTTP_Module_Streamer_T (ISTREAM_T*); // stream handle
-  virtual ~HTTP_Module_Streamer_T ();
-
-  // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (DataMessageType*&, // data message handle
-                                  bool&);            // return value: pass message downstream ?
-
- private:
   typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
                                  ConfigurationType,
@@ -64,8 +55,17 @@ class HTTP_Module_Streamer_T
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 Stream_UserData> inherited;
+                                 struct Stream_UserData> inherited;
 
+ public:
+  HTTP_Module_Streamer_T (typename TASK_BASE_T::ISTREAM_T*); // stream handle
+  virtual ~HTTP_Module_Streamer_T ();
+
+  // implement (part of) Stream_ITaskBase
+  virtual void handleDataMessage (DataMessageType*&, // data message handle
+                                  bool&);            // return value: pass message downstream ?
+
+ private:
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Streamer_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Streamer_T (const HTTP_Module_Streamer_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Streamer_T& operator= (const HTTP_Module_Streamer_T&))

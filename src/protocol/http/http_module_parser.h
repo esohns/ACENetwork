@@ -55,11 +55,23 @@ class HTTP_Module_Parser_T
                                   Stream_SessionId_t,
                                   enum Stream_ControlType,
                                   enum Stream_SessionMessageType,
-                                  Stream_UserData>
+                                  struct Stream_UserData>
  , public HTTP_ParserDriver_T<SessionMessageType>
 {
+  typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
+                                  TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
+                                  SessionMessageType,
+                                  Stream_SessionId_t,
+                                  enum Stream_ControlType,
+                                  enum Stream_SessionMessageType,
+                                  struct Stream_UserData> inherited;
+  typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
+
  public:
-  HTTP_Module_Parser_T (ISTREAM_T*); // stream handle
+  HTTP_Module_Parser_T (typename TASK_BASE_T::ISTREAM_T*); // stream handle
   virtual ~HTTP_Module_Parser_T ();
 
   // override (part of) Stream_IModuleHandler_T
@@ -76,18 +88,6 @@ class HTTP_Module_Parser_T
   DataMessageType* headFragment_;
 
  private:
-  typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
-                                  TimePolicyType,
-                                  ConfigurationType,
-                                  ControlMessageType,
-                                  DataMessageType,
-                                  SessionMessageType,
-                                  Stream_SessionId_t,
-                                  enum Stream_ControlType,
-                                  enum Stream_SessionMessageType,
-                                  Stream_UserData> inherited;
-  typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
-
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T (const HTTP_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Parser_T& operator= (const HTTP_Module_Parser_T&))
@@ -143,8 +143,23 @@ class HTTP_Module_ParserH_T
                                       UserDataType>
  , public HTTP_ParserDriver_T<SessionMessageType>
 {
+  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
+                                      TimePolicyType,
+                                      ControlMessageType,
+                                      DataMessageType,
+                                      SessionMessageType,
+                                      ConfigurationType,
+                                      StreamControlType,
+                                      StreamNotificationType,
+                                      StreamStateType,
+                                      SessionDataType,
+                                      SessionDataContainerType,
+                                      StatisticContainerType,
+                                      UserDataType> inherited;
+  typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
+
  public:
-  HTTP_Module_ParserH_T (ISTREAM_T*); // stream handle
+  HTTP_Module_ParserH_T (typename inherited::ISTREAM_T*); // stream handle
   virtual ~HTTP_Module_ParserH_T ();
 
   // *NOTE*: disambiguate Common_ISet_T::set()
@@ -181,21 +196,6 @@ class HTTP_Module_ParserH_T
   DataMessageType* headFragment_;
 
  private:
-  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
-                                      TimePolicyType,
-                                      ControlMessageType,
-                                      DataMessageType,
-                                      SessionMessageType,
-                                      ConfigurationType,
-                                      StreamControlType,
-                                      StreamNotificationType,
-                                      StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
-                                      StatisticContainerType,
-                                      UserDataType> inherited;
-  typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
-
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T (const HTTP_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T& operator= (const HTTP_Module_ParserH_T&))

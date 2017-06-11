@@ -36,7 +36,7 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
                     ConfigurationType,
                     ControlMessageType,
                     DataMessageType,
-                    SessionMessageType>::IRC_Module_Parser_T (ISTREAM_T* stream_in)
+                    SessionMessageType>::IRC_Module_Parser_T (typename ISTREAM_T* stream_in)
  : inherited (stream_in)
  , crunchMessages_ (IRC_DEFAULT_CRUNCH_MESSAGES) // "crunch" messages ?
  , debugScanner_ (IRC_DEFAULT_LEX_TRACE) // trace scanning ?

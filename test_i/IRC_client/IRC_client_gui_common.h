@@ -146,19 +146,19 @@ struct IRC_Client_GTK_HandlerCBData
    , timeStamp ()
   {};
 
-  unsigned int                      acknowledgements;
-  std::string                       builderLabel;
-  IRC_ChannelModes_t                channelModes;
-  struct IRC_Client_GUI_Connection* connection;
-  IRC_IControl*                     controller;
-  guint                             eventSourceID;
-  struct Common_UI_GTKState*        GTKState;
-  IRC_Client_GUI_MessageHandler*    handler;
+  unsigned int                   acknowledgements;
+  std::string                    builderLabel;
+  IRC_ChannelModes_t             channelModes;
+  IRC_Client_GUI_Connection*     connection;
+  IRC_IControl*                  controller;
+  guint                          eventSourceID;
+  struct Common_UI_GTKState*     GTKState;
+  IRC_Client_GUI_MessageHandler* handler;
   // *TODO*: remove this
-  std::string                       id;
-  string_list_t                     parameters;
-  bool                              pending;
-  std::string                       timeStamp;
+  std::string                    id;
+  string_list_t                  parameters;
+  bool                           pending;
+  std::string                    timeStamp;
 };
 
 typedef Common_UI_GtkBuilderDefinition_T<struct IRC_Client_GTK_CBData> IRC_Client_GtkBuilderDefinition_t;

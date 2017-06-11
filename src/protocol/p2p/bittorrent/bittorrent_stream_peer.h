@@ -137,7 +137,7 @@ class BitTorrent_PeerStream_T
 
   typedef BitTorrent_Module_Streamer_T<ACE_MT_SYNCH,
                                        Common_TimePolicy_t,
-                                       ConfigurationType,
+                                       ModuleHandlerConfigurationType,
                                        ControlMessageType,
                                        DataMessageType,
                                        SessionMessageType> STREAMER_T;

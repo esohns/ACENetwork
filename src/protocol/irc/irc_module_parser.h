@@ -73,19 +73,6 @@ class IRC_Module_Parser_T
                                  enum Stream_SessionMessageType,
                                  Stream_UserData>
 {
- public:
-  IRC_Module_Parser_T (ISTREAM_T*); // stream handle
-  virtual ~IRC_Module_Parser_T ();
-
-  // configuration / initialization
-  virtual bool initialize (const ConfigurationType&, // configuration handle
-                           Stream_IAllocator*);      // allocator handle
-
-  // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (DataMessageType*&, // data message handle
-                                  bool&);            // return value: pass message downstream ?
-
- private:
   typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
                                  ConfigurationType,
@@ -97,6 +84,19 @@ class IRC_Module_Parser_T
                                  enum Stream_SessionMessageType,
                                  struct Stream_UserData> inherited;
 
+ public:
+  IRC_Module_Parser_T (typename ISTREAM_T*); // stream handle
+  virtual ~IRC_Module_Parser_T ();
+
+  // configuration / initialization
+  virtual bool initialize (const ConfigurationType&,   // configuration handle
+                           Stream_IAllocator* = NULL); // allocator handle
+
+  // implement (part of) Stream_ITaskBase
+  virtual void handleDataMessage (DataMessageType*&, // data message handle
+                                  bool&);            // return value: pass message downstream ?
+
+ private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Parser_T ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Parser_T (const IRC_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Parser_T& operator= (const IRC_Module_Parser_T&))

@@ -48,15 +48,6 @@ class IRC_Module_Streamer_T
                                  enum Stream_SessionMessageType,
                                  UserDataType>
 {
- public:
-  IRC_Module_Streamer_T (ISTREAM_T*); // stream handle
-  virtual ~IRC_Module_Streamer_T ();
-
-  // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (DataMessageType*&, // data message handle
-                                  bool&);            // return value: pass message downstream ?
-
- private:
   typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
                                  ConfigurationType,
@@ -68,6 +59,15 @@ class IRC_Module_Streamer_T
                                  enum Stream_SessionMessageType,
                                  UserDataType> inherited;
 
+ public:
+  IRC_Module_Streamer_T (typename ISTREAM_T*); // stream handle
+  virtual ~IRC_Module_Streamer_T ();
+
+  // implement (part of) Stream_ITaskBase
+  virtual void handleDataMessage (DataMessageType*&, // data message handle
+                                  bool&);            // return value: pass message downstream ?
+
+ private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Streamer_T ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Streamer_T (const IRC_Module_Streamer_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Module_Streamer_T& operator= (const IRC_Module_Streamer_T&))
