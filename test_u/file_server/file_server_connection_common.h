@@ -98,7 +98,7 @@ struct FileServer_ConnectionConfiguration
 
   FileServer_IConnectionManager_t*             connectionManager;
   struct FileServer_SocketHandlerConfiguration socketHandlerConfiguration;
-  struct FileServer_StreamConfiguration*       streamConfiguration;
+  FileServer_StreamConfiguration_t*            streamConfiguration;
 
   struct FileServer_UserData*                  userData;
 };
@@ -162,12 +162,14 @@ typedef Net_Connection_Manager_T<ACE_INET_Addr,
 
 typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
+                                      stream_name_string_,
                                       enum Stream_ControlType,
                                       enum Stream_SessionMessageType,
                                       enum Stream_StateMachine_ControlState,
                                       struct FileServer_StreamState,
                                       struct FileServer_StreamConfiguration,
                                       Net_RuntimeStatistic_t,
+                                      struct Stream_AllocatorConfiguration,
                                       struct Stream_ModuleConfiguration,
                                       struct Test_U_ModuleHandlerConfiguration,
                                       struct FileServer_SessionData,

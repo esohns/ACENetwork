@@ -229,9 +229,9 @@ idle_initialize_UI_cb (gpointer userData_in)
     GTK_ENTRY (gtk_builder_get_object ((*iterator).second.second,
                                        ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_URL_NAME)));
   ACE_ASSERT (entry_p);
-  Test_I_URLStreamLoad_ModuleHandlerConfigurationsIterator_t iterator_3 =
-    data_p->configuration->streamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.moduleHandlerConfigurations.end ());
+  Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_3 =
+    data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
   gchar* text_p =
     Common_UI_Tools::Locale2UTF8 ((*iterator_3).second.URL);
   gtk_entry_set_text (entry_p,
@@ -891,9 +891,9 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     Test_I_URLStreamLoad_ConnectionConfigurationIterator_t iterator_2 =
       data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-    Test_I_URLStreamLoad_ModuleHandlerConfigurationsIterator_t iterator_3 =
-      data_p->configuration->streamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.moduleHandlerConfigurations.end ());
+    Test_I_URLStreamLoad_StreamConfiguration_t::ITERATOR_T iterator_3 =
+      data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
     Test_I_TCPConnector_t connector (iconnection_manager_p,
                                      (*iterator_3).second.statisticReportingInterval);
     Test_I_SSLTCPConnector_t ssl_connector (iconnection_manager_p,

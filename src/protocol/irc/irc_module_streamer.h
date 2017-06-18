@@ -60,7 +60,12 @@ class IRC_Module_Streamer_T
                                  UserDataType> inherited;
 
  public:
-  IRC_Module_Streamer_T (typename ISTREAM_T*); // stream handle
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  IRC_Module_Streamer_T (ISTREAM_T*);                     // stream handle
+#else
+  IRC_Module_Streamer_T (typename inherited::ISTREAM_T*); // stream handle
+#endif
   virtual ~IRC_Module_Streamer_T ();
 
   // implement (part of) Stream_ITaskBase

@@ -43,8 +43,10 @@
 //#include "bittorrent_module_handler.h"
 
 // forward declarations
-typedef Stream_INotify_T<Stream_SessionMessageType> BitTorrent_INotify_t;
+typedef Stream_INotify_T<enum Stream_SessionMessageType> BitTorrent_INotify_t;
 typedef Stream_Statistic BitTorrent_RuntimeStatistic_t;
+
+extern const char stream_name_string_[];
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -81,24 +83,6 @@ class BitTorrent_TrackerStream_T
                         SessionMessageType,
                         UserDataType>
 {
- public:
-  BitTorrent_TrackerStream_T (const std::string&); // name
-  virtual ~BitTorrent_TrackerStream_T ();
-
-  // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&, // return value: module list
-                     bool&);               // return value: delete modules ?
-
-  // override Common_IInitialize_T
-  virtual bool initialize (const ConfigurationType&); // configuration
-
-//  // implement Common_IStatistic_T
-//  // *NOTE*: delegates to the statistic report module
-//  virtual bool collect (StatisticContainerType&); // return value: statistic data
-//  // just a dummy (set statisticReportingInterval instead)
-//  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
-
- private:
   typedef HTTP_Stream_T<StreamStateType,
                         ConfigurationType,
                         StatisticContainerType,
@@ -110,6 +94,29 @@ class BitTorrent_TrackerStream_T
                         SessionMessageType,
                         UserDataType> inherited;
 
+ public:
+  BitTorrent_TrackerStream_T ();
+  virtual ~BitTorrent_TrackerStream_T ();
+
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ModuleList_t&, // return value: module list
+                     bool&);               // return value: delete modules ?
+
+  // override Common_IInitialize_T
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual bool initialize (const CONFIGURATION_T&); // configuration
+#else
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
+#endif
+
+//  // implement Common_IStatistic_T
+//  // *NOTE*: delegates to the statistic report module
+//  virtual bool collect (StatisticContainerType&); // return value: statistic data
+//  // just a dummy (set statisticReportingInterval instead)
+//  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+
+ private:
   typedef BitTorrent_TrackerStream_T<StreamStateType,
                                      ConfigurationType,
                                      StatisticContainerType,
@@ -152,7 +159,6 @@ class BitTorrent_TrackerStream_T
 //                                         BitTorrent_INotify_t,           // stream notification interface type
 //                                         HANDLER_T> MODULE_HANDLER_T;
 
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStream_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStream_T (const BitTorrent_TrackerStream_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStream_T& operator= (const BitTorrent_TrackerStream_T&))
 };

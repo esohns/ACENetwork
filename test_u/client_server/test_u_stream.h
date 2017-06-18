@@ -23,8 +23,8 @@
 
 #include <string>
 
-#include <ace/Global_Macros.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 
@@ -43,15 +43,19 @@ typedef Stream_ControlMessage_T<enum Stream_ControlType,
 class Test_U_Message;
 class Test_U_SessionMessage;
 
+extern const char stream_name_string_[];
+
 class Test_U_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
+                        stream_name_string_,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
                         struct Test_U_StreamState,
                         struct Test_U_StreamConfiguration,
                         Net_RuntimeStatistic_t,
+                        struct Stream_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_U_ModuleHandlerConfiguration,
                         struct Test_U_StreamSessionData, // session data
@@ -60,8 +64,26 @@ class Test_U_Stream
                         Test_U_Message,
                         Test_U_SessionMessage>
 {
+  typedef Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        stream_name_string_,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_U_StreamState,
+                        struct Test_U_StreamConfiguration,
+                        Net_RuntimeStatistic_t,
+                        struct Stream_AllocatorConfiguration,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_U_ModuleHandlerConfiguration,
+                        struct Test_U_StreamSessionData,
+                        Test_U_StreamSessionData_t,
+                        Test_U_ControlMessage_t,
+                        Test_U_Message,
+                        Test_U_SessionMessage> inherited;
+
  public:
-  Test_U_Stream (const std::string&); // name
+  Test_U_Stream ();
   virtual ~Test_U_Stream ();
 
   // implement (part of) Stream_IStreamControlBase
@@ -69,7 +91,7 @@ class Test_U_Stream
                      bool&);               // return value: delete ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const struct Test_U_StreamConfiguration&); // configuration
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
 
   // *TODO*: re-consider this API
   void ping ();
@@ -80,23 +102,6 @@ class Test_U_Stream
   virtual void report () const;
 
  private:
-  typedef Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct Test_U_StreamState,
-                        struct Test_U_StreamConfiguration,
-                        Net_RuntimeStatistic_t,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_ModuleHandlerConfiguration,
-                        struct Test_U_StreamSessionData,
-                        Test_U_StreamSessionData_t,
-                        Test_U_ControlMessage_t,
-                        Test_U_Message,
-                        Test_U_SessionMessage> inherited;
-
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Stream ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream (const Test_U_Stream&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream& operator= (const Test_U_Stream&))
 

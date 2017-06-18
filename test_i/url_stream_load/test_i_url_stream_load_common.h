@@ -67,7 +67,7 @@ struct Test_I_URLStreamLoad_Configuration
   // **************************** socket data **********************************
   Test_I_URLStreamLoad_ConnectionConfigurations_t        connectionConfigurations;
   // **************************** stream data **********************************
-  struct Test_I_URLStreamLoad_StreamConfiguration        streamConfiguration;
+  Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration;
   // *************************** protocol data *********************************
   //struct HTTP_ProtocolConfiguration        protocolConfiguration;
 

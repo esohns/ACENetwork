@@ -24,15 +24,15 @@
 #include <regex>
 #include <string>
 
-#include <ace/Get_Opt.h>
+#include "ace/Get_Opt.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <ace/Init_ACE.h>
+#include "ace/Init_ACE.h"
 #endif
-#include <ace/Log_Msg.h>
-#include <ace/Profile_Timer.h>
-#include <ace/Sig_Handler.h>
-#include <ace/Signal.h>
-#include <ace/Version.h>
+#include "ace/Log_Msg.h"
+#include "ace/Profile_Timer.h"
+#include "ace/Sig_Handler.h"
+#include "ace/Signal.h"
+#include "ace/Version.h"
 
 #ifdef LIBACESTREAM_ENABLE_VALGRIND_SUPPORT
 #include <valgrind/valgrind.h>
@@ -65,6 +65,8 @@
 #include "test_u_message.h"
 #include "test_u_HTTP_decoder_signalhandler.h"
 #include "test_u_session_message.h"
+
+const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("HTTPDecoderStream");
 
 void
 do_printUsage (const std::string& programName_in)
@@ -477,7 +479,7 @@ do_work (unsigned int bufferSize_in,
   configuration.useReactor = useReactor_in;
 
   Stream_AllocatorHeap_T<struct Test_U_AllocatorConfiguration> heap_allocator;
-  if (!heap_allocator.initialize (configuration.allocatorConfiguration))
+  if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize heap allocator, returning\n")));
@@ -559,18 +561,13 @@ do_work (unsigned int bufferSize_in,
   modulehandler_configuration.URL = URL_in;
 
   // ******************** (sub-)stream configuration data **********************
-  configuration.streamConfiguration.moduleConfiguration =
-    &configuration.streamConfiguration.moduleConfiguration_2;
-  configuration.streamConfiguration.moduleConfiguration->streamConfiguration =
-    &configuration.streamConfiguration;
-  //configuration.streamConfiguration.allocatorConfiguration =
-  //  &configuration.allocatorConfiguration;
   //if (bufferSize_in)
   //  configuration.streamConfiguration.bufferSize = bufferSize_in;
-  configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                        modulehandler_configuration));
-  configuration.streamConfiguration.printFinalReport = true;
+  configuration.streamConfiguration.configuration_.messageAllocator =
+    &message_allocator;
+  configuration.streamConfiguration.configuration_.printFinalReport = true;
+  configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                            modulehandler_configuration));
 
   // step0b: initialize event dispatch
   struct Common_DispatchThreadData thread_data;
@@ -581,7 +578,7 @@ do_work (unsigned int bufferSize_in,
                                               thread_data.numberOfDispatchThreads,
                                               thread_data.proactorType,
                                               thread_data.reactorType,
-                                              configuration.streamConfiguration.serializeOutput))
+                                              configuration.streamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));

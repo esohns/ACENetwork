@@ -172,7 +172,15 @@ typedef BitTorrent_ISession_T<ACE_INET_Addr,
                               enum Stream_StateMachine_ControlState,
                               struct BitTorrent_Client_SessionConfiguration,
                               struct BitTorrent_Client_SessionState> BitTorrent_Client_ISession_t;
+extern const char stream_name_string_[];
+struct BitTorrent_AllocatorConfiguration;
 struct BitTorrent_Client_PeerStreamConfiguration;
+struct BitTorrent_Client_PeerModuleHandlerConfiguration;
+typedef Stream_Configuration_T<stream_name_string_,
+                               struct BitTorrent_AllocatorConfiguration,
+                               struct BitTorrent_Client_PeerStreamConfiguration,
+                               struct Stream_ModuleConfiguration,
+                               struct BitTorrent_Client_PeerModuleHandlerConfiguration> BitTorrent_Client_PeerStreamConfiguration_t;
 struct BitTorrent_Client_PeerModuleHandlerConfiguration
  : BitTorrent_PeerModuleHandlerConfiguration
 {
@@ -187,15 +195,23 @@ struct BitTorrent_Client_PeerModuleHandlerConfiguration
    , userData (NULL)
   {};
 
-  struct BitTorrent_Client_GTK_CBData*              CBData;
-  BitTorrent_Client_ISession_t*                     session;
-  struct BitTorrent_Client_PeerStreamConfiguration* streamConfiguration;
-  BitTorrent_Client_IPeerNotify_t*                  subscriber; // (initial) subscriber
-  BitTorrent_Client_IPeerSubscribers_t*             subscribers;
+  struct BitTorrent_Client_GTK_CBData*         CBData;
+  BitTorrent_Client_ISession_t*                session;
+  BitTorrent_Client_PeerStreamConfiguration_t* streamConfiguration;
+  BitTorrent_Client_IPeerNotify_t*             subscriber; // (initial) subscriber
+  BitTorrent_Client_IPeerSubscribers_t*        subscribers;
 
-  struct BitTorrent_Client_PeerUserData*            userData;
+  struct BitTorrent_Client_PeerUserData*       userData;
 };
+
+struct HTTP_AllocatorConfiguration;
 struct BitTorrent_Client_TrackerStreamConfiguration;
+struct BitTorrent_Client_TrackerModuleHandlerConfiguration;
+typedef Stream_Configuration_T<stream_name_string_,
+                               struct HTTP_AllocatorConfiguration,
+                               struct BitTorrent_Client_TrackerStreamConfiguration,
+                               struct Stream_ModuleConfiguration,
+                               struct BitTorrent_Client_TrackerModuleHandlerConfiguration> BitTorrent_Client_TrackerStreamConfiguration_t;
 struct BitTorrent_Client_TrackerModuleHandlerConfiguration
  : BitTorrent_TrackerModuleHandlerConfiguration
 {
@@ -210,13 +226,13 @@ struct BitTorrent_Client_TrackerModuleHandlerConfiguration
    , userData (NULL)
   {};
 
-  struct BitTorrent_Client_GTK_CBData*                 CBData;
-  BitTorrent_Client_ISession_t*                        session;
-  struct BitTorrent_Client_TrackerStreamConfiguration* streamConfiguration;
-  BitTorrent_Client_ITrackerNotify_t*                  subscriber; // (initial) subscriber
-  BitTorrent_Client_ITrackerSubscribers_t*             subscribers;
+  struct BitTorrent_Client_GTK_CBData*            CBData;
+  BitTorrent_Client_ISession_t*                   session;
+  BitTorrent_Client_TrackerStreamConfiguration_t* streamConfiguration;
+  BitTorrent_Client_ITrackerNotify_t*             subscriber; // (initial) subscriber
+  BitTorrent_Client_ITrackerSubscribers_t*        subscribers;
 
-  struct BitTorrent_Client_TrackerUserData*            userData;
+  struct BitTorrent_Client_TrackerUserData*       userData;
 };
 
 struct BitTorrent_Client_PeerStreamState
@@ -247,40 +263,26 @@ struct BitTorrent_Client_TrackerStreamState
 };
 
 struct BitTorrent_Client_PeerModuleHandlerConfiguration;
-typedef std::map<std::string,
-                 struct BitTorrent_Client_PeerModuleHandlerConfiguration> BitTorrent_Client_PeerModuleHandlerConfigurations_t;
-typedef BitTorrent_Client_PeerModuleHandlerConfigurations_t::iterator BitTorrent_Client_PeerModuleHandlerConfigurationsIterator_t;
-typedef BitTorrent_Client_PeerModuleHandlerConfigurations_t::const_iterator BitTorrent_Client_PeerModuleHandlerConfigurationsConstIterator_t;
 struct BitTorrent_Client_PeerStreamConfiguration
  : BitTorrent_PeerStreamConfiguration
 {
   inline BitTorrent_Client_PeerStreamConfiguration ()
    : BitTorrent_PeerStreamConfiguration ()
-   , moduleHandlerConfigurations ()
    , userData (NULL)
   {}
 
-  BitTorrent_Client_PeerModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration
-
-  struct BitTorrent_Client_PeerUserData*              userData;
+  struct BitTorrent_Client_PeerUserData* userData;
 };
 struct BitTorrent_Client_TrackerModuleHandlerConfiguration;
-typedef std::map<std::string,
-                 struct BitTorrent_Client_TrackerModuleHandlerConfiguration> BitTorrent_Client_TrackerModuleHandlerConfigurations_t;
-typedef BitTorrent_Client_TrackerModuleHandlerConfigurations_t::iterator BitTorrent_Client_TrackerModuleHandlerConfigurationsIterator_t;
-typedef BitTorrent_Client_TrackerModuleHandlerConfigurations_t::const_iterator BitTorrent_Client_TrackerModuleHandlerConfigurationsConstIterator_t;
 struct BitTorrent_Client_TrackerStreamConfiguration
  : BitTorrent_TrackerStreamConfiguration
 {
   inline BitTorrent_Client_TrackerStreamConfiguration ()
    : BitTorrent_TrackerStreamConfiguration ()
-   , moduleHandlerConfigurations ()
    , userData (NULL)
   {}
 
-  BitTorrent_Client_TrackerModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration
-
-  struct BitTorrent_Client_TrackerUserData*              userData;
+  struct BitTorrent_Client_TrackerUserData* userData;
 };
 
 typedef Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,

@@ -48,12 +48,14 @@ class Test_U_SessionMessage;
 class Test_U_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
+                        stream_name_string_,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
                         struct Test_U_HTTPDecoder_StreamState,
                         struct Test_U_StreamConfiguration,
                         HTTP_RuntimeStatistic_t,
+                        struct Stream_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_U_ModuleHandlerConfiguration,
                         struct Test_U_HTTPDecoder_SessionData,
@@ -62,8 +64,26 @@ class Test_U_Stream
                         Test_U_Message,
                         Test_U_SessionMessage>
 {
+  typedef Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        stream_name_string_,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_U_HTTPDecoder_StreamState,
+                        struct Test_U_StreamConfiguration,
+                        HTTP_RuntimeStatistic_t,
+                        struct Stream_AllocatorConfiguration,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_U_ModuleHandlerConfiguration,
+                        struct Test_U_HTTPDecoder_SessionData,
+                        Test_U_HTTPDecoder_SessionData_t,
+                        Test_U_ControlMessage_t,
+                        Test_U_Message,
+                        Test_U_SessionMessage> inherited;
+
  public:
-  Test_U_Stream (const std::string&); // name
+  Test_U_Stream ();
   virtual ~Test_U_Stream ();
 
   // implement (part of) Stream_IStreamControlBase
@@ -71,7 +91,7 @@ class Test_U_Stream
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const struct Test_U_StreamConfiguration&); // configuration
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
@@ -82,22 +102,6 @@ class Test_U_Stream
   void ping ();
 
  private:
-  typedef Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct Test_U_HTTPDecoder_StreamState,
-                        struct Test_U_StreamConfiguration,
-                        HTTP_RuntimeStatistic_t,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_ModuleHandlerConfiguration,
-                        struct Test_U_HTTPDecoder_SessionData,
-                        Test_U_HTTPDecoder_SessionData_t,
-                        Test_U_ControlMessage_t,
-                        Test_U_Message,
-                        Test_U_SessionMessage> inherited;
-
   typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                        Test_U_ControlMessage_t,
                                        Test_U_Message,
@@ -137,7 +141,6 @@ class Test_U_Stream
                                 READER_T,                                 // reader type
                                 WRITER_T> IO_MODULE_T;                    // writer type
 
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Stream ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream (const Test_U_Stream&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream& operator= (const Test_U_Stream&))
 };

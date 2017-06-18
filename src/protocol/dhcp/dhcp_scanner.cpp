@@ -1,3 +1,4 @@
+#include "ace/Synch.h"
 #include "dhcp_parser.h"
 
 /*

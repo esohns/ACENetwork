@@ -23,8 +23,8 @@
 
 #include <string>
 
-#include <ace/Global_Macros.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 
@@ -41,6 +41,8 @@
 #include "irc_module_streamer.h"
 #include "irc_record.h"
 #include "irc_stream_common.h"
+
+extern const char stream_name_string_[];
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -61,12 +63,14 @@ template <typename StreamStateType,
 class IRC_Stream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
+                        stream_name_string_,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
                         StreamStateType,
                         ConfigurationType,
                         StatisticContainerType,
+                        struct IRC_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         ModuleHandlerConfigurationType,
                         SessionDataType,
@@ -75,32 +79,16 @@ class IRC_Stream_T
                         DataMessageType,
                         SessionMessageType>
 {
- public:
-  IRC_Stream_T (const std::string&); // name
-  virtual ~IRC_Stream_T ();
-
-  //// implement (part of) Stream_IStreamControlBase
-  //virtual bool load (Stream_ModuleList_t&, // return value: module list
-  //                   bool&);               // return value: delete modules ?
-
-  // implement Common_IInitialize_T
-  virtual bool initialize (const ConfigurationType&); // configuration
-
-  // implement Common_IStatistic_T
-  // *NOTE*: delegate this to rntimeStatistic_
-  virtual bool collect (StatisticContainerType&); // return value: statistic data
-  // this is just a dummy (use statisticsReportingInterval instead)
-  virtual void report () const;
-
- private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
+                        stream_name_string_,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
                         StreamStateType,
                         ConfigurationType,
                         StatisticContainerType,
+                        struct IRC_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         ModuleHandlerConfigurationType,
                         SessionDataType,
@@ -109,6 +97,29 @@ class IRC_Stream_T
                         DataMessageType,
                         SessionMessageType> inherited;
 
+ public:
+  IRC_Stream_T ();
+  virtual ~IRC_Stream_T ();
+
+  //// implement (part of) Stream_IStreamControlBase
+  //virtual bool load (Stream_ModuleList_t&, // return value: module list
+  //                   bool&);               // return value: delete modules ?
+
+  // implement Common_IInitialize_T
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual bool initialize (const CONFIGURATION_T&); // configuration
+#else
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
+#endif
+
+  // implement Common_IStatistic_T
+  // *NOTE*: delegate this to rntimeStatistic_
+  virtual bool collect (StatisticContainerType&); // return value: statistic data
+  // this is just a dummy (use statisticsReportingInterval instead)
+  virtual void report () const;
+
+ private:
   typedef IRC_Module_Streamer_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 ModuleHandlerConfigurationType,
@@ -187,7 +198,6 @@ class IRC_Stream_T
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Stream_T ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Stream_T (const IRC_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Stream_T& operator= (const IRC_Stream_T&))
 

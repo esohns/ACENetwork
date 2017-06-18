@@ -23,8 +23,8 @@
 
 #include <string>
 
-#include <ace/Global_Macros.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 
@@ -38,15 +38,19 @@ class Stream_IAllocator;
 class Test_U_Message;
 class Test_U_SessionMessage;
 
+extern const char stream_name_string_[];
+
 class Test_U_InboundConnectionStream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
+                        stream_name_string_,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
                         struct Test_U_StreamState,
                         struct Test_U_StreamConfiguration,
                         DHCP_RuntimeStatistic_t,
+                        struct Stream_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_U_StreamModuleHandlerConfiguration,
                         struct Test_U_DHCPClient_SessionData,
@@ -55,8 +59,26 @@ class Test_U_InboundConnectionStream
                         Test_U_Message,
                         Test_U_SessionMessage>
 {
+  typedef Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        stream_name_string_,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_U_StreamState,
+                        struct Test_U_StreamConfiguration,
+                        DHCP_RuntimeStatistic_t,
+                        struct Stream_AllocatorConfiguration,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_U_StreamModuleHandlerConfiguration,
+                        struct Test_U_DHCPClient_SessionData,
+                        Test_U_DHCPClient_SessionData_t,
+                        ACE_Message_Block,
+                        Test_U_Message,
+                        Test_U_SessionMessage> inherited;
+
  public:
-  Test_U_InboundConnectionStream (const std::string&); // name
+  Test_U_InboundConnectionStream ();
   virtual ~Test_U_InboundConnectionStream ();
 
   // implement (part of) Stream_IStreamControlBase
@@ -64,7 +86,7 @@ class Test_U_InboundConnectionStream
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const struct Test_U_StreamConfiguration&); // configuration
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
@@ -75,23 +97,6 @@ class Test_U_InboundConnectionStream
   void ping ();
 
  private:
-  typedef Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct Test_U_StreamState,
-                        struct Test_U_StreamConfiguration,
-                        DHCP_RuntimeStatistic_t,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_StreamModuleHandlerConfiguration,
-                        struct Test_U_DHCPClient_SessionData,
-                        Test_U_DHCPClient_SessionData_t,
-                        ACE_Message_Block,
-                        Test_U_Message,
-                        Test_U_SessionMessage> inherited;
-
-  ACE_UNIMPLEMENTED_FUNC (Test_U_InboundConnectionStream ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_InboundConnectionStream (const Test_U_InboundConnectionStream&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_InboundConnectionStream& operator= (const Test_U_InboundConnectionStream&))
 };
@@ -101,12 +106,14 @@ class Test_U_InboundConnectionStream
 class Test_U_OutboundConnectionStream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
+                        stream_name_string_,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
                         struct Test_U_StreamState,
                         struct Test_U_StreamConfiguration,
                         DHCP_RuntimeStatistic_t,
+                        struct Stream_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_U_StreamModuleHandlerConfiguration,
                         struct Test_U_DHCPClient_SessionData,
@@ -115,8 +122,26 @@ class Test_U_OutboundConnectionStream
                         Test_U_Message,
                         Test_U_SessionMessage>
 {
+  typedef Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        stream_name_string_,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_U_StreamState,
+                        struct Test_U_StreamConfiguration,
+                        DHCP_RuntimeStatistic_t,
+                        struct Stream_AllocatorConfiguration,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_U_StreamModuleHandlerConfiguration,
+                        struct Test_U_DHCPClient_SessionData,
+                        Test_U_DHCPClient_SessionData_t,
+                        ACE_Message_Block,
+                        Test_U_Message,
+                        Test_U_SessionMessage> inherited;
+
  public:
-  Test_U_OutboundConnectionStream (const std::string&); // name
+  Test_U_OutboundConnectionStream ();
   virtual ~Test_U_OutboundConnectionStream ();
 
   // implement (part of) Stream_IStreamControlBase
@@ -124,7 +149,7 @@ class Test_U_OutboundConnectionStream
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const struct Test_U_StreamConfiguration&); // configuration
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
@@ -135,23 +160,6 @@ class Test_U_OutboundConnectionStream
   void ping ();
 
  private:
-  typedef Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct Test_U_StreamState,
-                        struct Test_U_StreamConfiguration,
-                        DHCP_RuntimeStatistic_t,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_StreamModuleHandlerConfiguration,
-                        struct Test_U_DHCPClient_SessionData,
-                        Test_U_DHCPClient_SessionData_t,
-                        ACE_Message_Block,
-                        Test_U_Message,
-                        Test_U_SessionMessage> inherited;
-
-  ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream (const Test_U_OutboundConnectionStream&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream& operator= (const Test_U_OutboundConnectionStream&))
 };

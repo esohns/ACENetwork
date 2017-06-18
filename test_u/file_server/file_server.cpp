@@ -85,6 +85,8 @@ struct random_data random_data;
 char random_state_buffer[BUFSIZ];
 #endif
 
+const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("FileServerStream");
+
 void
 do_printUsage (const std::string& programName_in)
 {
@@ -576,25 +578,23 @@ do_work (
     modulehandler_configuration.subscribers = &CBData_in.subscribers;
   } // end IF
 
-  configuration.streamConfiguration.allocatorConfiguration =
-    &configuration.allocatorConfiguration;
-  configuration.streamConfiguration.cloneModule =
+  configuration.streamConfiguration.configuration_.cloneModule =
     !(UIDefinitionFile_in.empty ());
-  configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.module = &event_handler;
-  configuration.streamConfiguration.moduleConfiguration =
-    &configuration.streamConfiguration.moduleConfiguration_2;
-  configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
-    &configuration.streamConfiguration;
-  configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                        modulehandler_configuration));
+  configuration.streamConfiguration.configuration_.messageAllocator =
+    &message_allocator;
+  configuration.streamConfiguration.configuration_.module = &event_handler;
+  configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                            modulehandler_configuration));
 
   //configuration.streamConfiguration.protocolConfiguration =
   //  &configuration.protocolConfiguration;
   // *TODO*: is this correct ?
-  configuration.streamConfiguration.serializeOutput = useThreadPool_in;
-  configuration.streamConfiguration.useReactor = useReactor_in;
-  configuration.streamConfiguration.userData = &configuration.userData;
+  configuration.streamConfiguration.configuration_.serializeOutput =
+    useThreadPool_in;
+  configuration.streamConfiguration.configuration_.useReactor =
+    useReactor_in;
+  configuration.streamConfiguration.configuration_.userData =
+    &configuration.userData;
   //configuration.userData.connectionConfiguration =
   //    &configuration.connectionConfiguration;
 
@@ -649,7 +649,7 @@ do_work (
                                               thread_data.numberOfDispatchThreads,
                                               thread_data.proactorType,
                                               thread_data.reactorType,
-                                              configuration.streamConfiguration.serializeOutput))
+                                              configuration.streamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
@@ -871,7 +871,7 @@ do_work (
       //// clean up
       //delete iconnector_p;
 
-      Test_U_UDPStream stream (ACE_TEXT_ALWAYS_CHAR ("UPDStream"));
+      Test_U_UDPStream stream;
       if (!stream.initialize (configuration.streamConfiguration))
       {
         ACE_DEBUG ((LM_ERROR,

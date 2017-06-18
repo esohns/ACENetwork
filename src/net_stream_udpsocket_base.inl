@@ -58,7 +58,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
  , currentWriteBuffer_ (NULL)
  , sendLock_ ()
  , serializeOutput_ (false)
- , stream_ (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_DEFAULT_NAME))
+ , stream_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::Net_StreamUDPSocketBase_T"));
 
@@ -154,7 +154,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
   //                       (see handle_close())
   inherited::closing_ = true;
   // *TODO*: find a better way to do this
-  serializeOutput_ = configuration_p->streamConfiguration->serializeOutput;
+  serializeOutput_ =
+      configuration_p->streamConfiguration->configuration_.serializeOutput;
 
   // step1: open / tweak socket, ...
   // *TODO*: remove type inferences
@@ -186,7 +187,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   //         pipe ?
   // *TODO*: remove type inferences
   if (likely (!configuration_p->socketHandlerConfiguration.useThreadPerConnection))
-    configuration_p->streamConfiguration->notificationStrategy =
+    configuration_p->streamConfiguration->configuration_.notificationStrategy =
         &(inherited::notificationStrategy_);
 
   // step3c: initialize stream
@@ -195,7 +196,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   //         several consecutive sessions, and/or each session needs a reference
   //         to its' own specific and/or 'unique' ID...)
   // *TODO*: remove type inferences
-  configuration_p->streamConfiguration->sessionID =
+  configuration_p->streamConfiguration->configuration_.sessionID =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     reinterpret_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #else
@@ -460,27 +461,26 @@ Net_StreamUDPSocketBase_T<HandlerType,
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
-  ACE_ASSERT (inherited2::configuration_->streamConfiguration->allocatorConfiguration);
 
   // read a datagram from the socket
   bool enqueue = true;
   // *TODO*: remove type inferences
   ACE_Message_Block* buffer_p =
-    allocateMessage (inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize);
+    allocateMessage (inherited2::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize);
   if (unlikely (!buffer_p))
   { ACE_ASSERT (inherited2::configuration_->messageAllocator);
     if (inherited2::configuration_->messageAllocator->block ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                  inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize));
+                  inherited2::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize));
       return -1;
     } // end IF
 
     // no buffer available --> drop datagram and continue
     enqueue = false;
     ACE_NEW_NORETURN (buffer_p,
-                      ACE_Message_Block (inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize,
+                      ACE_Message_Block (inherited2::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize,
                                          ACE_Message_Block::MB_DATA,
                                          NULL,
                                          NULL,
@@ -495,7 +495,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate ACE_Message_Block(%u), aborting\n"),
-                  inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize));
+                  inherited2::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize));
       return -1;
     } // end IF
   } // end IF
@@ -506,7 +506,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   ACE_INET_Addr peer_address;
   bytes_received =
     inherited::peer_.recv (buffer_p->wr_ptr (),                                                                        // buffer handle
-                           inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize, // buffer size
+                           inherited2::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize, // buffer size
                            peer_address,                                                                               // peer address
                            0);                                                                                         // flags
   //bytes_received = inherited::peer_.recv (buffer_p->wr_ptr (),                 // buf
@@ -1198,12 +1198,12 @@ Net_StreamUDPSocketBase_T<HandlerType,
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   // *TODO*: remove type inferences
-  if (likely (inherited2::configuration_->streamConfiguration->messageAllocator))
+  if (likely (inherited2::configuration_->streamConfiguration->configuration_.messageAllocator))
   {
 allocate:
     try {
       message_block_p =
-        static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
+        static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration->configuration_.messageAllocator->malloc (requestedSize_in));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(0), aborting\n")));
@@ -1212,7 +1212,7 @@ allocate:
 
     // keep retrying ?
     if (unlikely (!message_block_p &&
-                  !inherited2::configuration_->streamConfiguration->messageAllocator->block ()))
+                  !inherited2::configuration_->streamConfiguration->configuration_.messageAllocator->block ()))
       goto allocate;
   } // end IF
   else
@@ -1230,9 +1230,9 @@ allocate:
                                          NULL));
   if (unlikely (!message_block_p))
   {
-    if (inherited2::configuration_->streamConfiguration->messageAllocator)
+    if (inherited2::configuration_->streamConfiguration->configuration_.messageAllocator)
     {
-      if (inherited2::configuration_->streamConfiguration->messageAllocator->block ())
+      if (inherited2::configuration_->streamConfiguration->configuration_.messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     } // end IF
@@ -1501,7 +1501,8 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   inherited::closing_ = true;
   // *TODO*: find a better way to do this
   // *TODO*: remove type inferences
-  serializeOutput_ = configuration_p->streamConfiguration->serializeOutput;
+  serializeOutput_ =
+    configuration_p->streamConfiguration->configuration_.serializeOutput;
 
   // step1: open / tweak socket, ...
   result = inherited::open (&configuration_p->socketHandlerConfiguration);
@@ -1532,7 +1533,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   //         pipe ?
   // *TODO*: remove type inferences
   if (likely (!configuration_p->socketHandlerConfiguration.useThreadPerConnection))
-    configuration_p->streamConfiguration->notificationStrategy =
+    configuration_p->streamConfiguration->configuration_.notificationStrategy =
         &(inherited::notificationStrategy_);
 
   // step3c: initialize stream
@@ -1541,7 +1542,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   //         several consecutive sessions, and/or each session needs a reference
   //         to its' own specific and/or 'unique' ID...)
   // *TODO*: remove type inferences
-  configuration_p->streamConfiguration->sessionID =
+  configuration_p->streamConfiguration->configuration_.sessionID =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     reinterpret_cast<unsigned int> (inherited::get_handle ()); // (== socket handle)
 #else
@@ -1803,27 +1804,26 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
-  ACE_ASSERT (inherited2::configuration_->streamConfiguration->allocatorConfiguration);
 
   // read a datagram from the socket
   bool enqueue = true;
   // *TODO*: remove type inferences
   ACE_Message_Block* buffer_p =
-    allocateMessage (inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize);
+    allocateMessage (inherited2::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize);
   if (unlikely (!buffer_p))
   {
     if (inherited2::configuration_->messageAllocator->block ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
-                  inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize));
+                  inherited2::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize));
       return -1;
     } // end IF
 
     // no buffer available --> drop datagram and continue
     enqueue = false;
     ACE_NEW_NORETURN (buffer_p,
-                      ACE_Message_Block (inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize,
+                      ACE_Message_Block (inherited2::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize,
                                          ACE_Message_Block::MB_DATA,
                                          NULL,
                                          NULL,
@@ -1838,7 +1838,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
     {
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate ACE_Message_Block(%u), aborting\n"),
-                  inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize));
+                  inherited2::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize));
       return -1;
     } // end IF
   } // end IF
@@ -1848,7 +1848,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   ssize_t bytes_received = -1;
   bytes_received =
     inherited::peer_.recv (buffer_p->wr_ptr (),                                                                        // buffer handle
-                           inherited2::configuration_->streamConfiguration->allocatorConfiguration->defaultBufferSize, // buffer size
+                           inherited2::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize, // buffer size
                            0,                                                                                          // flags
                            NULL);                                                                                      // timeout
   switch (bytes_received)

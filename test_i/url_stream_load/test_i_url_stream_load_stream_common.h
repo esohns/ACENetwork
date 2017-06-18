@@ -188,20 +188,20 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
   Test_I_Subscribers_t*                            subscribers;
   std::string                                      targetFileName; // dump module
 };
-typedef std::map<std::string,
-                 struct Test_I_URLStreamLoad_ModuleHandlerConfiguration> Test_I_URLStreamLoad_ModuleHandlerConfigurations_t;
-typedef Test_I_URLStreamLoad_ModuleHandlerConfigurations_t::iterator Test_I_URLStreamLoad_ModuleHandlerConfigurationsIterator_t;
 
 struct Test_I_URLStreamLoad_StreamConfiguration
  : HTTP_StreamConfiguration
 {
   inline Test_I_URLStreamLoad_StreamConfiguration ()
    : HTTP_StreamConfiguration ()
-   , moduleHandlerConfigurations ()
   {};
-
-  Test_I_URLStreamLoad_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // stream module handler configuration
 };
+extern const char stream_name_string_[];
+typedef Stream_Configuration_T<stream_name_string_,
+                               struct Test_I_AllocatorConfiguration,
+                               struct Test_I_URLStreamLoad_StreamConfiguration,
+                               struct Stream_ModuleConfiguration,
+                               struct Test_I_URLStreamLoad_ModuleHandlerConfiguration> Test_I_URLStreamLoad_StreamConfiguration_t;
 
 struct Test_I_URLStreamLoad_StreamState
  : Test_I_StreamState

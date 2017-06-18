@@ -44,7 +44,19 @@
 #include "net_client_connector.h"
 
 #include "http_common.h"
+#include "http_stream.h"
 #include "http_stream_common.h"
+
+typedef HTTP_Stream_T<struct HTTP_StreamState,
+                      struct HTTP_StreamConfiguration,
+                      HTTP_RuntimeStatistic_t,
+                      struct HTTP_ModuleHandlerConfiguration,
+                      struct HTTP_Stream_SessionData,
+                      HTTP_Stream_SessionData_t,
+                      ACE_Message_Block,
+                      HTTP_Message_t,
+                      HTTP_SessionMessage,
+                      struct HTTP_Stream_UserData> HTTP_Stream_t;
 
 //struct HTTP_ConnectionConfiguration;
 struct HTTP_ConnectionState

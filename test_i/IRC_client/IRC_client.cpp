@@ -82,6 +82,8 @@ using namespace std;
 #include "IRC_client_signalhandler.h"
 #include "IRC_client_tools.h"
 
+const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("IRCClientStream");
+
 void
 do_printUsage (const std::string& programName_in)
 {
@@ -694,8 +696,6 @@ do_work (struct IRC_Client_Configuration& configuration_in,
 
   // step1: initialize IRC handler module
   struct IRC_Client_ModuleHandlerConfiguration modulehandler_configuration;
-  modulehandler_configuration.allocatorConfiguration =
-      &configuration_in.allocatorConfiguration;
   modulehandler_configuration.protocolConfiguration =
       &configuration_in.protocolConfiguration;
   modulehandler_configuration.statisticReportingInterval =
@@ -703,15 +703,11 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   //modulehandler_configuration.streamConfiguration =
   //  &configuration_in.streamConfiguration;
 
-  configuration_in.streamConfiguration.allocatorConfiguration =
-    &configuration_in.allocatorConfiguration;
-  configuration_in.streamConfiguration.moduleConfiguration =
-      &configuration_in.streamConfiguration.moduleConfiguration_2;
-  configuration_in.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                           modulehandler_configuration));
-  IRC_Client_ModuleHandlerConfigurationsIterator_t iterator =
-    configuration_in.streamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.streamConfiguration.moduleHandlerConfigurations.end ());
+  configuration_in.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                               modulehandler_configuration));
+  IRC_Client_StreamConfiguration_t::ITERATOR_T iterator =
+    configuration_in.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != configuration_in.streamConfiguration.end ());
 
   IRC_Client_Module_IRCHandler_Module IRC_handler (NULL,
                                                    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
@@ -725,15 +721,9 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                 ACE_TEXT ("dynamic_cast<IRC_Client_Module_IRCHandler> failed, returning\n")));
     return;
   } // end IF
-  configuration_in.streamConfiguration.cloneModule = true;
-  configuration_in.streamConfiguration.deleteModule = false;
-  configuration_in.streamConfiguration.module = &IRC_handler;
-  //if (!IRCHandler_impl_p->initialize (configuration_in.moduleHandlerConfiguration))
-  //{
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to IRC_Client_Module_IRCHandler_Module::initialize(), returning\n")));
-  //  return;
-  //} // end IF
+  configuration_in.streamConfiguration.configuration_.cloneModule = true;
+  configuration_in.streamConfiguration.configuration_.deleteModule = false;
+  configuration_in.streamConfiguration.configuration_.module = &IRC_handler;
 
   // step2: initialize event dispatch
   struct Common_DispatchThreadData thread_data;
@@ -744,7 +734,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                                               thread_data.numberOfDispatchThreads,
                                               thread_data.proactorType,
                                               thread_data.reactorType,
-                                              configuration_in.streamConfiguration.serializeOutput))
+                                              configuration_in.streamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
@@ -764,7 +754,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     &configuration_in.userData;
 
   connection_configuration.messageAllocator =
-    configuration_in.streamConfiguration.messageAllocator;
+    configuration_in.streamConfiguration.configuration_.messageAllocator;
   connection_configuration.protocolConfiguration =
     &configuration_in.protocolConfiguration;
   connection_configuration.streamConfiguration =
@@ -1252,10 +1242,10 @@ ACE_TMAIN (int argc_in,
   // initialize protocol configuration
   Stream_CachedAllocatorHeap_T<struct IRC_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
                                                                                   IRC_MAXIMUM_FRAME_SIZE + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE);
-  if (!heap_allocator.initialize (configuration.allocatorConfiguration))
+  if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize allocator: \"%m\", aborting\n")));
+                ACE_TEXT ("failed to initialize heap allocator: \"%m\", aborting\n")));
 
     Common_Tools::finalizeSignals (signal_set,
                                    previous_signal_actions,
@@ -1275,7 +1265,8 @@ ACE_TMAIN (int argc_in,
                                                    &heap_allocator);
 
   ////////////////////////////////////////
-  configuration.streamConfiguration.messageAllocator = &message_allocator;
+  configuration.streamConfiguration.configuration_.messageAllocator =
+    &message_allocator;
   ////////////////////////////////////////
   configuration.protocolConfiguration.loginOptions.nickname =
     ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);

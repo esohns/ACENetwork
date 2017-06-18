@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_STREAM_T_H
-#define TEST_U_STREAM_T_H
+#ifndef TEST_I_STREAM_T_H
+#define TEST_I_STREAM_T_H
 
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
@@ -33,43 +33,60 @@
 
 #include "stream_module_target.h"
 
-#include "test_u_common.h"
-#include "test_u_common_modules.h"
-//#include "test_u_message.h"
-//#include "test_u_session_message.h"
+#include "test_i_common.h"
+#include "test_i_common_modules.h"
+//#include "test_i_message.h"
+//#include "test_i_session_message.h"
 
 // forward declarations
 class Stream_IAllocator;
-class Test_U_Message;
-class Test_U_SessionMessage;
+class Test_I_Message;
+class Test_I_SessionMessage;
 
 template <typename ConnectorType>
-class Test_U_Stream_T
+class Test_I_Stream_T
  : public Stream_Base_T<ACE_SYNCH_MUTEX,
                         ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        int,
-                        Stream_SessionMessageType,
-                        Stream_StateMachine_ControlState,
-                        Test_U_StreamState,
-                        Test_U_StreamConfiguration,
-                        Test_U_RuntimeStatistic_t,
-                        Stream_ModuleConfiguration,
-                        Test_U_StreamModuleHandlerConfiguration,
-                        Test_U_StreamSessionData,   // session data
-                        Test_U_StreamSessionData_t, // session data container (reference counted)
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_I_StreamState,
+                        struct Test_I_StreamConfiguration,
+                        Test_I_RuntimeStatistic_t,
+                        struct Test_I_AllocatorConfiguration,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_I_StreamModuleHandlerConfiguration,
+                        struct Test_I_StreamSessionData, // session data
+                        Test_I_StreamSessionData_t,      // session data container (reference counted)
                         ACE_Message_Block,
-                        Test_U_Message,
-                        Test_U_SessionMessage>
+                        Test_I_Message,
+                        Test_I_SessionMessage>
 {
+  typedef Stream_Base_T<ACE_SYNCH_MUTEX,
+                        ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_I_StreamState,
+                        struct Test_I_StreamConfiguration,
+                        Test_I_RuntimeStatistic_t,
+                        struct Test_I_AllocatorConfiguration,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_I_StreamModuleHandlerConfiguration,
+                        struct Test_I_StreamSessionData, // session data
+                        Test_I_StreamSessionData_t,      // session data container (reference counted)
+                        ACE_Message_Block,
+                        Test_I_Message,
+                        Test_I_SessionMessage> inherited;
+
  public:
-  Test_U_Stream_T ();
-  virtual ~Test_U_Stream_T ();
+  Test_I_Stream_T ();
+  virtual ~Test_I_Stream_T ();
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const Test_U_StreamConfiguration&, // configuration
-                           bool = true,                       // setup pipeline ?
-                           bool = true);                      // reset session data ?
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
 
   // *TODO*: re-consider this API
   void ping ();
@@ -80,52 +97,36 @@ class Test_U_Stream_T
   virtual void report () const;
 
  private:
-  typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-                        ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        int,
-                        Stream_SessionMessageType,
-                        Stream_StateMachine_ControlState,
-                        Test_U_StreamState,
-                        Test_U_StreamConfiguration,
-                        Test_U_RuntimeStatistic_t,
-                        Stream_ModuleConfiguration,
-                        Test_U_StreamModuleHandlerConfiguration,
-                        Test_U_StreamSessionData,   // session data
-                        Test_U_StreamSessionData_t, // session data container (reference counted)
-                        ACE_Message_Block,
-                        Test_U_Message,
-                        Test_U_SessionMessage> inherited;
   typedef Stream_Module_Net_Target_T<ACE_MT_SYNCH,
                                      Common_TimePolicy_t,
-                                     Test_U_StreamModuleHandlerConfiguration,
+                                     struct Test_I_StreamModuleHandlerConfiguration,
                                      ACE_Message_Block,
-                                     Test_U_Message,
-                                     Test_U_SessionMessage,
-                                     Test_U_StreamSessionData_t,
-                                     Test_U_ConnectionManager_t,
+                                     Test_I_Message,
+                                     Test_I_SessionMessage,
+                                     Test_I_StreamSessionData_t,
+                                     Test_I_ConnectionManager_t,
                                      ConnectorType> WRITER_T;
-  typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,                            // task synch type
-                                         Common_TimePolicy_t,                     // time policy
-                                         Stream_SessionId_t,                      // session id type
-                                         Test_U_StreamSessionData,                // session data type
-                                         Stream_SessionMessageType,               // session event type
-                                         Stream_ModuleConfiguration,              // module configuration type
-                                         Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
-                                         Test_U_IStreamNotify_t,                  // stream notification interface type
-                                         WRITER_T> TARGET_MODULE_T;               // writer type
+  typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,                                   // task synch type
+                                         Common_TimePolicy_t,                            // time policy
+                                         Stream_SessionId_t,                             // session id type
+                                         struct Test_I_StreamSessionData,                // session data type
+                                         enum Stream_SessionMessageType,                 // session event type
+                                         struct Stream_ModuleConfiguration,              // module configuration type
+                                         struct Test_I_StreamModuleHandlerConfiguration, // module handler configuration type
+                                         Test_I_IStreamNotify_t,                         // stream notification interface type
+                                         WRITER_T> TARGET_MODULE_T;                      // writer type
 
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Stream_T (const Test_U_Stream_T&))
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Stream_T& operator= (const Test_U_Stream_T&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_Stream_T (const Test_I_Stream_T&))
+  ACE_UNIMPLEMENTED_FUNC (Test_I_Stream_T& operator= (const Test_I_Stream_T&))
 
   // modules
-  Test_U_Module_DHCPDiscoverH_Module    DHCPDiscover_;
-  Test_U_Module_RuntimeStatistic_Module runtimeStatistic_;
-  Test_U_Module_Marshal_Module          marshal_;
+  Test_I_Module_DHCPDiscoverH_Module    DHCPDiscover_;
+  Test_I_Module_RuntimeStatistic_Module runtimeStatistic_;
+  Test_I_Module_Marshal_Module          marshal_;
   TARGET_MODULE_T                       netTarget_;
 };
 
 // include template definition
-#include "test_u_stream.inl"
+#include "test_i_stream.inl"
 
 #endif

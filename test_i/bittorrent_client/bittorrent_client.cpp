@@ -89,6 +89,8 @@ using namespace std;
 
 #include "test_i_defines.h"
 
+const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("BitTorrentStream");
+
 void
 do_printUsage (const std::string& programName_in)
 {
@@ -514,6 +516,19 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
       BITTORRENT_CLIENT_TRACKERCONNECTION_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (peer_connection_manager_p);
   ACE_ASSERT (tracker_connection_manager_p);
+  Stream_CachedAllocatorHeap_T<struct BitTorrent_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                                         BITTORRENT_BUFFER_SIZE);
+  if (!heap_allocator.initialize (configuration_in.peerStreamConfiguration.allocatorConfiguration_))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize heap allocator, returning\n")));
+    return;
+  } // end IF
+
+  BitTorrent_Client_PeerMessageAllocator_t peer_message_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                   &heap_allocator);
+  BitTorrent_Client_TrackerMessageAllocator_t tracker_message_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                         &heap_allocator);
 
   // step1: initialize configuration
   if (useCursesLibrary_in)
@@ -524,36 +539,30 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     configuration_in.parserConfiguration.debugScanner = true;
 
   struct BitTorrent_Client_PeerModuleHandlerConfiguration peer_modulehandler_configuration;
-  peer_modulehandler_configuration.allocatorConfiguration =
-    &configuration_in.allocatorConfiguration;
   peer_modulehandler_configuration.parserConfiguration =
       &configuration_in.parserConfiguration;
   peer_modulehandler_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
   peer_modulehandler_configuration.streamConfiguration =
       &configuration_in.peerStreamConfiguration;
-  configuration_in.peerStreamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                               peer_modulehandler_configuration));
+
+  configuration_in.peerStreamConfiguration.configuration_.messageAllocator =
+    &peer_message_allocator;
+  configuration_in.peerStreamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                   peer_modulehandler_configuration));
 
   struct BitTorrent_Client_TrackerModuleHandlerConfiguration tracker_modulehandler_configuration;
-  tracker_modulehandler_configuration.allocatorConfiguration =
-    &configuration_in.allocatorConfiguration;
   tracker_modulehandler_configuration.parserConfiguration =
       &configuration_in.parserConfiguration;
   tracker_modulehandler_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
   tracker_modulehandler_configuration.streamConfiguration =
       &configuration_in.trackerStreamConfiguration;
-  configuration_in.trackerStreamConfiguration.moduleConfiguration =
-      &configuration_in.moduleConfiguration;
-  configuration_in.trackerStreamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                                  tracker_modulehandler_configuration));
 
-  configuration_in.peerStreamConfiguration.moduleConfiguration =
-    &configuration_in.moduleConfiguration;
-
-  configuration_in.trackerStreamConfiguration.moduleConfiguration =
-    &configuration_in.moduleConfiguration;
+  configuration_in.trackerStreamConfiguration.configuration_.messageAllocator =
+    &tracker_message_allocator;
+  configuration_in.trackerStreamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                      tracker_modulehandler_configuration));
 
   struct BitTorrent_Client_PeerConnectionConfiguration peer_connection_configuration;
   struct BitTorrent_Client_TrackerConnectionConfiguration tracker_connection_configuration;
@@ -569,7 +578,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
                                               dispatch_thread_data.numberOfDispatchThreads,
                                               dispatch_thread_data.proactorType,
                                               dispatch_thread_data.reactorType,
-                                              configuration_in.peerStreamConfiguration.serializeOutput))
+                                              configuration_in.peerStreamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
@@ -579,14 +588,13 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   // step3: initialize configuration (part 2)
   //peer_connection_configuration.socketHandlerConfiguration.bufferSize =
   //  BITTORRENT_CLIENT_BUFFER_SIZE;
-
   peer_connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
   peer_connection_configuration.socketHandlerConfiguration.userData =
     &configuration_in.peerUserData;
 
   peer_connection_configuration.messageAllocator =
-    configuration_in.peerStreamConfiguration.messageAllocator;
+    &peer_message_allocator;
   peer_connection_configuration.streamConfiguration =
     &configuration_in.peerStreamConfiguration;
   peer_connection_configuration.userData =
@@ -606,7 +614,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     &configuration_in.trackerUserData;
 
   tracker_connection_configuration.messageAllocator =
-    configuration_in.trackerStreamConfiguration.messageAllocator;
+    &tracker_message_allocator;
   tracker_connection_configuration.streamConfiguration =
     &configuration_in.trackerStreamConfiguration;
   tracker_connection_configuration.userData =
@@ -639,19 +647,6 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   if (useCursesLibrary_in)
     configuration_in.signalHandlerConfiguration.cursesState = &curses_state;
-
-  //configuration_in.peerUserData.connectionConfiguration =
-  //    &configuration_in.peerConnectionConfiguration;
-  //configuration_in.peerUserData.moduleConfiguration =
-  //    &configuration_in.moduleConfiguration;
-  //configuration_in.peerUserData.moduleHandlerConfiguration =
-  //    &configuration_in.peerModuleHandlerConfiguration;
-  //configuration_in.trackerUserData.connectionConfiguration =
-  //    &configuration_in.trackerConnectionConfiguration;
-  //configuration_in.trackerUserData.moduleConfiguration =
-  //    &configuration_in.moduleConfiguration;
-  //configuration_in.trackerUserData.moduleHandlerConfiguration =
-  //    &configuration_in.trackerModuleHandlerConfiguration;
 
   // step4: initialize signal handling
   if (!signalHandler_in.initialize (configuration_in.signalHandlerConfiguration))
@@ -1027,38 +1022,9 @@ ACE_TMAIN (int argc_in,
   // step6: initialize configuration objects
 
   // initialize protocol configuration
-  Stream_CachedAllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                              BITTORRENT_BUFFER_SIZE);
-  BitTorrent_Client_PeerMessageAllocator_t peer_message_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                   &heap_allocator);
-  BitTorrent_Client_TrackerMessageAllocator_t tracker_message_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                         &heap_allocator);
-
-  BitTorrent_Client_Configuration configuration;
-  ////////////////////////////////////////
-  configuration.peerStreamConfiguration.messageAllocator =
-      &peer_message_allocator;
-  configuration.trackerStreamConfiguration.messageAllocator =
-      &tracker_message_allocator;
+  struct BitTorrent_Client_Configuration configuration;
   ////////////////////////////////////////
   configuration.useReactor = use_reactor;
-
-  if (!heap_allocator.initialize (configuration.allocatorConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize allocator, aborting\n")));
-
-    Common_Tools::finalizeLogging ();
-//    // *PORTABILITY*: on Windows, fini ACE...
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    result = ACE::fini ();
-//    if (result == -1)
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-//#endif
-
-    return EXIT_FAILURE;
-  } // end IF
 
   // step8: do work
   ACE_High_Res_Timer timer;

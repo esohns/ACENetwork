@@ -21,7 +21,7 @@
 #ifndef NET_CLIENT_CONNECTOR_COMMON_H
 #define NET_CLIENT_CONNECTOR_COMMON_H
 
-#include <ace/INET_Addr.h>
+#include "ace/INET_Addr.h"
 
 #include "net_iconnector.h"
 

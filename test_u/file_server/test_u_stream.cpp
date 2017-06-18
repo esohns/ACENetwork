@@ -23,7 +23,7 @@
 #include "test_u_connection_common.h"
 #include "test_u_stream.h"
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
@@ -34,8 +34,8 @@
 #include "test_u_module_headerparser.h"
 #include "test_u_module_protocolhandler.h"
 
-Test_U_Stream::Test_U_Stream (const std::string& name_in)
- : inherited (name_in)
+Test_U_Stream::Test_U_Stream ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::Test_U_Stream"));
 
@@ -94,7 +94,7 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_U_Stream::initialize (const struct FileServer_StreamConfiguration& configuration_in)
+Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::initialize"));
 
@@ -106,38 +106,38 @@ Test_U_Stream::initialize (const struct FileServer_StreamConfiguration& configur
   ACE_ASSERT (module_p);
   typename inherited::TASK_T* task_p = module_p->reader ();
   ACE_ASSERT (task_p);
-  Test_U_ModuleHandlerConfigurationsIterator_t iterator =
-    const_cast<struct FileServer_StreamConfiguration&> (configuration_in).moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != const_cast<struct FileServer_StreamConfiguration&> (configuration_in).moduleHandlerConfigurations.end ());
+  typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).end ());
   (*iterator).second.outboundQueue =
     dynamic_cast<Stream_IMessageQueue*> (task_p->msg_queue ());
   ACE_ASSERT ((*iterator).second.outboundQueue);
 
 //  bool result = false;
-  bool setup_pipeline = configuration_in.setupPipeline;
+  bool setup_pipeline = configuration_in.configuration_.setupPipeline;
   bool reset_setup_pipeline = false;
   struct FileServer_SessionData* session_data_p = NULL;
   Test_U_Module_Net_Writer_t* net_io_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<struct FileServer_StreamConfiguration&> (configuration_in).setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
     goto error;
   } // end IF
-  const_cast<struct FileServer_StreamConfiguration&> (configuration_in).setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
 
   session_data_p =
       &const_cast<struct FileServer_SessionData&> (inherited::sessionData_->get ());
-  session_data_p->sessionID = configuration_in.sessionID;
+  //session_data_p->sessionID = configuration_in.sessionID;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;
 
@@ -150,7 +150,7 @@ Test_U_Stream::initialize (const struct FileServer_StreamConfiguration& configur
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ()),
+                ACE_TEXT (inherited::configuration_.name_.c_str ()),
                 ACE_TEXT ("NetworkIO")));
     goto error;
   } // end IF
@@ -160,7 +160,7 @@ Test_U_Stream::initialize (const struct FileServer_StreamConfiguration& configur
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
     goto error;
   } // end IF
   net_io_impl_p->set (&(inherited::state_));
@@ -170,12 +170,12 @@ Test_U_Stream::initialize (const struct FileServer_StreamConfiguration& configur
   //             handle to the session data)
   module_p->arg (inherited::sessionData_);
 
-  if (configuration_in.setupPipeline)
-    if (!inherited::setup (configuration_in.notificationStrategy))
+  if (configuration_in.configuration_.setupPipeline)
+    if (!inherited::setup (configuration_in.configuration_.notificationStrategy))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (inherited::name_.c_str ())));
+                  ACE_TEXT (inherited::configuration_.name_.c_str ())));
       goto error;
     } // end IF
 
@@ -190,7 +190,7 @@ Test_U_Stream::initialize (const struct FileServer_StreamConfiguration& configur
 
 error:
   if (reset_setup_pipeline)
-    const_cast<struct FileServer_StreamConfiguration&> (configuration_in).setupPipeline =
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
       setup_pipeline;
 
   return false;
@@ -291,8 +291,8 @@ Test_U_Stream::report () const
 
 //////////////////////////////////////////
 
-Test_U_UDPStream::Test_U_UDPStream (const std::string& name_in)
- : inherited (name_in)
+Test_U_UDPStream::Test_U_UDPStream ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_UDPStream::Test_U_UDPStream"));
 
@@ -313,7 +313,7 @@ Test_U_UDPStream::load (Stream_ModuleList_t& modules_out,
   NETWORK_TRACE (ACE_TEXT ("Test_U_UDPStream::load"));
 
   Stream_Module_t* module_p = NULL;
-  if (inherited::configuration_->useReactor)
+  if (inherited::configuration_.configuration_.useReactor)
     ACE_NEW_RETURN (module_p,
                     Test_U_Module_Net_UDPTarget_Module (this,
                                                         ACE_TEXT_ALWAYS_CHAR ("NetworkTarget"),
@@ -359,7 +359,7 @@ Test_U_UDPStream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_U_UDPStream::initialize (const struct FileServer_StreamConfiguration& configuration_in)
+Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_UDPStream::initialize"));
 
@@ -367,37 +367,37 @@ Test_U_UDPStream::initialize (const struct FileServer_StreamConfiguration& confi
   ACE_ASSERT (!inherited::isInitialized_);
 
   // update configuration
-  Test_U_ModuleHandlerConfigurationsIterator_t iterator =
-    const_cast<struct FileServer_StreamConfiguration&> (configuration_in).moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != const_cast<struct FileServer_StreamConfiguration&> (configuration_in).moduleHandlerConfigurations.end ());
+  typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).end ());
   (*iterator).second.stream = this;
 
   bool result = false;
-  bool setup_pipeline = configuration_in.setupPipeline;
+  bool setup_pipeline = configuration_in.configuration_.setupPipeline;
   bool reset_setup_pipeline = false;
   struct FileServer_SessionData* session_data_p = NULL;
   Stream_Module_t* module_p = NULL;
   Test_U_FileReaderH* file_source_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<struct FileServer_StreamConfiguration&> (configuration_in).setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
     goto error;
   } // end IF
-  const_cast<struct FileServer_StreamConfiguration&> (configuration_in).setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
 
   session_data_p =
       &const_cast<struct FileServer_SessionData&> (inherited::sessionData_->get ());
-  session_data_p->sessionID = configuration_in.sessionID;
+  //session_data_p->sessionID = configuration_in.sessionID;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;
 
@@ -410,7 +410,7 @@ Test_U_UDPStream::initialize (const struct FileServer_StreamConfiguration& confi
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ()),
+                ACE_TEXT (inherited::configuration_.name_.c_str ()),
                 ACE_TEXT ("FileSource")));
     goto error;
   } // end IF
@@ -420,7 +420,7 @@ Test_U_UDPStream::initialize (const struct FileServer_StreamConfiguration& confi
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<Test_U_FileReaderH> failed, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
     goto error;
   } // end IF
   file_source_impl_p->set (&(inherited::state_));
@@ -430,12 +430,12 @@ Test_U_UDPStream::initialize (const struct FileServer_StreamConfiguration& confi
   //             handle to the session data)
   module_p->arg (inherited::sessionData_);
 
-  if (configuration_in.setupPipeline)
-    if (!inherited::setup (configuration_in.notificationStrategy))
+  if (configuration_in.configuration_.setupPipeline)
+    if (!inherited::setup (configuration_in.configuration_.notificationStrategy))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (inherited::name_.c_str ())));
+                  ACE_TEXT (inherited::configuration_.name_.c_str ())));
       goto error;
     } // end IF
 
@@ -450,7 +450,7 @@ Test_U_UDPStream::initialize (const struct FileServer_StreamConfiguration& confi
 
 error:
   if (reset_setup_pipeline)
-    const_cast<struct FileServer_StreamConfiguration&> (configuration_in).setupPipeline =
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
       setup_pipeline;
 
   return false;

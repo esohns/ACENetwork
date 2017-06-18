@@ -60,8 +60,24 @@ class BitTorrent_Module_Parser_T
  , public BitTorrent_ParserDriver_T<DataMessageType,
                                     SessionMessageType>
 {
+  typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
+                                  TimePolicyType,
+                                  ConfigurationType,
+                                  ControlMessageType,
+                                  DataMessageType,
+                                  SessionMessageType,
+                                  Stream_SessionId_t,
+                                  enum Stream_ControlType,
+                                  enum Stream_SessionMessageType,
+                                  UserDataType> inherited;
+
  public:
-  BitTorrent_Module_Parser_T (ISTREAM_T*); // stream handle
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  BitTorrent_Module_Parser_T (ISTREAM_T*);                     // stream handle
+#else
+  BitTorrent_Module_Parser_T (typename inherited::ISTREAM_T*); // stream handle
+#endif
   virtual ~BitTorrent_Module_Parser_T ();
 
   virtual bool initialize (const ConfigurationType&,
@@ -77,16 +93,6 @@ class BitTorrent_Module_Parser_T
   DataMessageType* headFragment_;
 
  private:
-  typedef Stream_TaskBaseAsynch_T<ACE_SYNCH_USE,
-                                  TimePolicyType,
-                                  ConfigurationType,
-                                  ControlMessageType,
-                                  DataMessageType,
-                                  SessionMessageType,
-                                  Stream_SessionId_t,
-                                  enum Stream_ControlType,
-                                  enum Stream_SessionMessageType,
-                                  UserDataType> inherited;
   typedef BitTorrent_ParserDriver_T<DataMessageType,
                                     SessionMessageType> inherited2;
 
@@ -149,8 +155,27 @@ class BitTorrent_Module_ParserH_T
  , public BitTorrent_ParserDriver_T<DataMessageType,
                                     SessionMessageType>
 {
+  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
+                                      TimePolicyType,
+                                      ControlMessageType,
+                                      DataMessageType,
+                                      SessionMessageType,
+                                      ConfigurationType,
+                                      StreamControlType,
+                                      StreamNotificationType,
+                                      StreamStateType,
+                                      SessionDataType,
+                                      SessionDataContainerType,
+                                      StatisticContainerType,
+                                      UserDataType> inherited;
+
  public:
-  BitTorrent_Module_ParserH_T (ISTREAM_T*); // stream handle
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  BitTorrent_Module_ParserH_T (ISTREAM_T*);                     // stream handle
+#else
+  BitTorrent_Module_ParserH_T (typename inherited::ISTREAM_T*); // stream handle
+#endif
   virtual ~BitTorrent_Module_ParserH_T ();
 
   // *NOTE*: disambiguate Common_ISet_T::set()
@@ -187,19 +212,6 @@ class BitTorrent_Module_ParserH_T
   DataMessageType* headFragment_;
 
  private:
-  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
-                                      TimePolicyType,
-                                      ControlMessageType,
-                                      DataMessageType,
-                                      SessionMessageType,
-                                      ConfigurationType,
-                                      StreamControlType,
-                                      StreamNotificationType,
-                                      StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
-                                      StatisticContainerType,
-                                      UserDataType> inherited;
   typedef BitTorrent_ParserDriver_T<DataMessageType,
                                     SessionMessageType> inherited2;
 

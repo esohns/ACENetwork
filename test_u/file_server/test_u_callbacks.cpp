@@ -379,9 +379,9 @@ idle_initialize_ui_cb (gpointer userData_in)
   //GError* error_p = NULL;
   //GFile* file_p = NULL;
   gchar* filename_p = NULL;
-  Test_U_ModuleHandlerConfigurationsIterator_t iterator_2 =
-    data_p->configuration->streamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.moduleHandlerConfigurations.end ());
+  FileServer_StreamConfiguration_t::ITERATOR_T iterator_2 =
+    data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.end ());
   if (!(*iterator_2).second.fileName.empty ())
   {
     // *NOTE*: gtk does not complain if the file doesn't exist, but the button
@@ -839,9 +839,9 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
       return;
     } // end IF
     g_object_unref (file_p);
-    Test_U_ModuleHandlerConfigurationsIterator_t iterator_2 =
-      data_p->configuration->streamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.moduleHandlerConfigurations.end ());
+    FileServer_StreamConfiguration_t::ITERATOR_T iterator_2 =
+      data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.end ());
     (*iterator_2).second.fileName =
         Common_UI_Tools::UTF82Locale (filename_p, -1);
     g_free (filename_p);

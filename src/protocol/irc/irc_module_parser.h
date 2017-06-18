@@ -71,7 +71,7 @@ class IRC_Module_Parser_T
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 Stream_UserData>
+                                 struct Stream_UserData>
 {
   typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
@@ -85,7 +85,12 @@ class IRC_Module_Parser_T
                                  struct Stream_UserData> inherited;
 
  public:
-  IRC_Module_Parser_T (typename ISTREAM_T*); // stream handle
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  IRC_Module_Parser_T (ISTREAM_T*);                     // stream handle
+#else
+  IRC_Module_Parser_T (typename inherited::ISTREAM_T*); // stream handle
+#endif
   virtual ~IRC_Module_Parser_T ();
 
   // configuration / initialization

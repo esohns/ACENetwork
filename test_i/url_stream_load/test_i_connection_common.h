@@ -75,6 +75,14 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 //  struct Test_I_UserData* userData;
 //};
 
+extern const char stream_name_string_[];
+struct Test_I_URLStreamLoad_StreamConfiguration;
+struct Test_I_URLStreamLoad_ModuleHandlerConfiguration;
+typedef Stream_Configuration_T<stream_name_string_,
+                               struct Test_I_AllocatorConfiguration,
+                               struct Test_I_URLStreamLoad_StreamConfiguration,
+                               struct Stream_ModuleConfiguration,
+                               struct Test_I_URLStreamLoad_ModuleHandlerConfiguration> Test_I_URLStreamLoad_StreamConfiguration_t;
 struct Test_I_URLStreamLoad_ConnectionConfiguration
  : Net_ConnectionConfiguration
 {
@@ -88,11 +96,11 @@ struct Test_I_URLStreamLoad_ConnectionConfiguration
     PDUSize = NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
   };
 
-  Test_I_IConnectionManager_t*                     connectionManager;
-  struct HTTP_SocketHandlerConfiguration           socketHandlerConfiguration;
-  struct Test_I_URLStreamLoad_StreamConfiguration* streamConfiguration;
+  Test_I_IConnectionManager_t*                connectionManager;
+  struct HTTP_SocketHandlerConfiguration      socketHandlerConfiguration;
+  Test_I_URLStreamLoad_StreamConfiguration_t* streamConfiguration;
 
-  struct HTTP_Stream_UserData*                     userData;
+  struct HTTP_Stream_UserData*                userData;
 };
 typedef std::map<std::string,
                  struct Test_I_URLStreamLoad_ConnectionConfiguration> Test_I_URLStreamLoad_ConnectionConfigurations_t;

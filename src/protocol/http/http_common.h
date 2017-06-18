@@ -33,7 +33,7 @@
 #include "http_codes.h"
 
 // forward declarations
-struct HTTP_Configuration;
+//struct HTTP_Configuration;
 struct HTTP_Record;
 class HTTP_SessionMessage;
 struct HTTP_Stream_SessionData;

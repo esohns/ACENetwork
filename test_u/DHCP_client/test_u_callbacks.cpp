@@ -1046,7 +1046,7 @@ action_discover_activate_cb (GtkAction* action_in,
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
   ACE_ASSERT (data_p->configuration->handle != ACE_INVALID_HANDLE);
-  ACE_ASSERT (data_p->configuration->streamConfiguration.messageAllocator);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_.messageAllocator);
   ACE_ASSERT (iterator != data_p->builders.end ());
 
   //gtk_action_set_sensitive (action_in, FALSE);
@@ -1203,7 +1203,7 @@ action_inform_activate_cb (GtkAction* action_in,
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
   ACE_ASSERT (data_p->configuration->handle != ACE_INVALID_HANDLE);
-  ACE_ASSERT (data_p->configuration->streamConfiguration.messageAllocator);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_.messageAllocator);
   ACE_ASSERT (iterator != data_p->builders.end ());
 
   Test_U_IConnectionManager_t* iconnection_manager_p =
@@ -1334,7 +1334,7 @@ action_request_activate_cb (GtkAction* action_in,
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
   ACE_ASSERT (data_p->configuration->handle != ACE_INVALID_HANDLE);
-  ACE_ASSERT (data_p->configuration->streamConfiguration.messageAllocator);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_.messageAllocator);
   ACE_ASSERT (iterator != data_p->builders.end ());
 
   Test_U_IConnectionManager_t* iconnection_manager_p =
@@ -1449,7 +1449,7 @@ action_release_activate_cb (GtkAction* action_in,
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
   ACE_ASSERT (data_p->configuration->handle != ACE_INVALID_HANDLE);
-  ACE_ASSERT (data_p->configuration->streamConfiguration.messageAllocator);
+  ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_.messageAllocator);
   ACE_ASSERT (iterator != data_p->builders.end ());
 
   Test_U_IConnectionManager_t* iconnection_manager_p =
@@ -1752,9 +1752,9 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     } // end IF
 
     // connect (broadcast)
-    Test_U_ModuleHandlerConfigurationsConstIterator_t iterator_2 =
-      data_p->configuration->streamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.moduleHandlerConfigurations.end ());
+    Test_U_StreamConfiguration_t::ITERATOR_T iterator_2 =
+      data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.end ());
     Test_U_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
       connection_manager_p;
     ACE_ASSERT (iconnection_manager_p);

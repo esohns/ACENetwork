@@ -42,7 +42,11 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
                      ConfigurationType,
                      ControlMessageType,
                      DataMessageType,
-                     SessionMessageType>::HTTP_Module_Parser_T (typename TASK_BASE_T::ISTREAM_T* stream_in)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                     SessionMessageType>::HTTP_Module_Parser_T (ISTREAM_T* stream_in)
+#else
+                     SessionMessageType>::HTTP_Module_Parser_T (typename inherited::ISTREAM_T* stream_in)
+#endif
  : inherited (stream_in)
  , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME), // scanner tables file (if any)
                NET_PROTOCOL_DEFAULT_LEX_TRACE,                            // trace scanning ?

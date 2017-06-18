@@ -81,6 +81,8 @@
 #include "test_i_url_stream_load_common.h"
 #include "test_i_url_stream_load_defines.h"
 
+const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("URLStreamLoadStream");
+
 void
 do_print_usage (const std::string& programName_in)
 {
@@ -518,10 +520,10 @@ do_work (bool debugParser_in,
                                                           true);
 
   Stream_AllocatorHeap_T<struct Test_I_AllocatorConfiguration> heap_allocator;
-  if (!heap_allocator.initialize (CBData_in.configuration->allocatorConfiguration))
+  if (!heap_allocator.initialize (CBData_in.configuration->streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize message allocator, returning\n")));
+                ACE_TEXT ("failed to initialize heap allocator, returning\n")));
     return;
   } // end IF
   Test_I_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
@@ -564,8 +566,7 @@ do_work (bool debugParser_in,
   // ********************** module configuration data **************************
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration;
   modulehandler_configuration.allocatorConfiguration =
-    &CBData_in.configuration->allocatorConfiguration;
-  //modulehandler_configuration.configuration = CBData_in.configuration;
+    &CBData_in.configuration->streamConfiguration.allocatorConfiguration_;
   modulehandler_configuration.connectionConfigurations =
     &CBData_in.configuration->connectionConfigurations;
   //modulehandler_configuration.connectionManager = connection_manager_p;
@@ -573,6 +574,8 @@ do_work (bool debugParser_in,
     &CBData_in.configuration->parserConfiguration;
   modulehandler_configuration.statisticReportingInterval =
     statisticReportingInterval_in;
+//  modulehandler_configuration.streamConfiguration =
+//    &CBData_in.configuration->streamConfiguration;
   modulehandler_configuration.subscriber = &event_handler;
   modulehandler_configuration.targetFileName = fileName_in;
   modulehandler_configuration.URL = URL_in;
@@ -580,20 +583,15 @@ do_work (bool debugParser_in,
   //if (bufferSize_in)
   //  CBData_in.configuration->allocatorConfiguration.defaultBufferSize =
   //    bufferSize_in;
-  CBData_in.configuration->streamConfiguration.moduleConfiguration =
-    &CBData_in.configuration->streamConfiguration.moduleConfiguration_2;
-  CBData_in.configuration->streamConfiguration.moduleConfiguration->streamConfiguration =
-    &CBData_in.configuration->streamConfiguration;
-
-  CBData_in.configuration->streamConfiguration.allocatorConfiguration =
-    &CBData_in.configuration->allocatorConfiguration;
-  CBData_in.configuration->streamConfiguration.messageAllocator =
+  CBData_in.configuration->streamConfiguration.configuration_.messageAllocator =
     &message_allocator;
-  CBData_in.configuration->streamConfiguration.module = &event_handler_module;
-  CBData_in.configuration->streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                                   modulehandler_configuration));
-  CBData_in.configuration->streamConfiguration.printFinalReport = true;
-  CBData_in.configuration->streamConfiguration.userData =
+  CBData_in.configuration->streamConfiguration.configuration_.module =
+    &event_handler_module;
+  CBData_in.configuration->streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                       modulehandler_configuration));
+  CBData_in.configuration->streamConfiguration.configuration_.printFinalReport =
+    true;
+  CBData_in.configuration->streamConfiguration.configuration_.userData =
     &CBData_in.configuration->userData;
 
   CBData_in.configuration->useReactor = useReactor_in;
@@ -623,7 +621,7 @@ do_work (bool debugParser_in,
                                               thread_data.numberOfDispatchThreads,
                                               thread_data.proactorType, // *NOTE*: return value
                                               thread_data.reactorType, // *NOTE*: return value
-                                              CBData_in.configuration->streamConfiguration.serializeOutput)) // *NOTE*: return value
+                                              CBData_in.configuration->streamConfiguration.configuration_.serializeOutput)) // *NOTE*: return value
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));

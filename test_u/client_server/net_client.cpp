@@ -26,22 +26,22 @@
 #include <string>
 
 //#include <ace/streams.h>
-#include <ace/Get_Opt.h>
-#include <ace/High_Res_Timer.h>
+#include "ace/Get_Opt.h"
+#include "ace/High_Res_Timer.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <ace/Init_ACE.h>
+#include "ace/Init_ACE.h"
 #endif
-#include <ace/Log_Msg.h>
-#include <ace/Synch.h>
-#include <ace/Proactor.h>
-#include <ace/Profile_Timer.h>
+#include "ace/Log_Msg.h"
+#include "ace/Synch.h"
+#include "ace/Proactor.h"
+#include "ace/Profile_Timer.h"
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include <ace/POSIX_Proactor.h>
+#include "ace/POSIX_Proactor.h"
 #endif
-#include <ace/Reactor.h>
-#include <ace/Sig_Handler.h>
-#include <ace/Signal.h>
-#include <ace/Version.h>
+#include "ace/Reactor.h"
+#include "ace/Sig_Handler.h"
+#include "ace/Signal.h"
+#include "ace/Version.h"
 
 #include "common_file_tools.h"
 #include "common_logger.h"
@@ -86,6 +86,8 @@ unsigned int random_seed;
 struct random_data random_data;
 char random_state_buffer[BUFSIZ];
 #endif
+
+const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("NetClientStream");
 
 void
 do_printUsage (const std::string& programName_in)
@@ -494,7 +496,7 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
   } // end IF
 
   Stream_AllocatorHeap_T<struct Stream_AllocatorConfiguration> heap_allocator;
-  if (!heap_allocator.initialize (configuration.allocatorConfiguration))
+  if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize heap allocator, returning\n")));
@@ -520,23 +522,21 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
   modulehandler_configuration.subscribersLock = &CBData_in.subscribersLock;
   modulehandler_configuration.subscribers = &CBData_in.subscribers;
 
-  configuration.streamConfiguration.cloneModule = !(UIDefinitionFile_in.empty ());
-  configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.module =
+  configuration.streamConfiguration.configuration_.cloneModule =
+    !(UIDefinitionFile_in.empty ());
+  configuration.streamConfiguration.configuration_.messageAllocator =
+    &message_allocator;
+  configuration.streamConfiguration.configuration_.module =
     (!UIDefinitionFile_in.empty () ? &event_handler
                                    : NULL);
-  configuration.streamConfiguration.moduleConfiguration =
-    &configuration.streamConfiguration.moduleConfiguration_2;
-  configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
-    &configuration.streamConfiguration;
-  configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                        modulehandler_configuration));
-  configuration.streamConfiguration.printFinalReport = true;
+  configuration.streamConfiguration.configuration_.printFinalReport = true;
   // *TODO*: is this correct ?
-  configuration.streamConfiguration.serializeOutput = useThreadPool_in;
-  configuration.streamConfiguration.userData = &configuration.userData;
-  //configuration.userData.connectionConfiguration =
-  //    &configuration.connectionConfiguration;
+  configuration.streamConfiguration.configuration_.serializeOutput =
+    useThreadPool_in;
+  configuration.streamConfiguration.configuration_.userData =
+    &configuration.userData;
+  configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                            modulehandler_configuration));
 
   // ********************** connection configuration data **********************
   struct Test_U_ConnectionConfiguration connection_configuration;
@@ -578,7 +578,7 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
                                               thread_data.numberOfDispatchThreads,
                                               thread_data.proactorType,
                                               thread_data.reactorType,
-                                              configuration.streamConfiguration.serializeOutput))
+                                              configuration.streamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize event dispatch, returing\n")));

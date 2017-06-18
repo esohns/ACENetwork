@@ -1,7 +1,7 @@
 %top{
+#include <ace/Synch.h>
 #include "http_common.h"
 #include "http_exports.h"
-#include <ace/Synch.h>
 #include "http_iparser.h"
 #undef YYTOKENTYPE
 #include "http_parser.h"

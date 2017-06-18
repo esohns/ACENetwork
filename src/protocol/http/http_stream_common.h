@@ -26,19 +26,34 @@
 #include "common_inotify.h"
 #include "common_time_common.h"
 
-#include "stream_common.h"
+#include "stream_configuration.h"
 #include "stream_imodule.h"
 #include "stream_session_data.h"
 
+#include "net_defines.h"
+
 #include "http_common.h"
-#include "http_stream.h"
+#include "http_message.h"
+//#include "http_stream.h"
 
 // forward declarations
 struct HTTP_ConnectionState;
 struct HTTP_ModuleHandlerConfiguration;
 struct HTTP_StreamConfiguration;
 
-typedef HTTP_Message_T<struct Stream_AllocatorConfiguration,
+struct HTTP_AllocatorConfiguration
+ : Stream_AllocatorConfiguration
+{
+  inline HTTP_AllocatorConfiguration ()
+   : Stream_AllocatorConfiguration ()
+  {
+    // *NOTE*: this facilitates (message block) data buffers to be scanned with
+    //         'flex's yy_scan_buffer() method
+    paddingBytes = NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE;
+  };
+};
+
+typedef HTTP_Message_T<struct HTTP_AllocatorConfiguration,
                        HTTP_MessageData_t> HTTP_Message_t;
 //typedef Stream_ControlMessage_T<enum Stream_ControlType,
 //                                struct Stream_AllocatorConfiguration,
@@ -65,13 +80,13 @@ struct HTTP_Stream_UserData
 {
   inline HTTP_Stream_UserData ()
    : Stream_UserData ()
-   , moduleConfiguration (NULL)
-   , moduleHandlerConfiguration (NULL)
+   //, moduleConfiguration (NULL)
+   //, moduleHandlerConfiguration (NULL)
   {};
 
   // *TODO*: remove these ASAP
-  struct Stream_ModuleConfiguration*      moduleConfiguration;
-  struct HTTP_ModuleHandlerConfiguration* moduleHandlerConfiguration;
+  //struct Stream_ModuleConfiguration*      moduleConfiguration;
+  //struct HTTP_ModuleHandlerConfiguration* moduleHandlerConfiguration;
 };
 
 struct HTTP_StreamState
@@ -94,15 +109,16 @@ struct HTTP_ModuleHandlerConfiguration
   inline HTTP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    //////////////////////////////////////
+   , crunchMessages (HTTP_DEFAULT_CRUNCH_MESSAGES)
    , printProgressDot (false)
    , pushStatisticMessages (true)
    //, protocolConfiguration (NULL)
    , URL ()
   {
-    crunchMessages = HTTP_DEFAULT_CRUNCH_MESSAGES; // http parser module
     printFinalReport = true;
   };
 
+  bool                               crunchMessages; // http parser module
   bool                               printProgressDot; // file writer module
   bool                               pushStatisticMessages;
 
@@ -110,25 +126,16 @@ struct HTTP_ModuleHandlerConfiguration
   std::string                        URL;
 };
 
-typedef std::map<std::string,
-                 struct HTTP_ModuleHandlerConfiguration*> HTTP_ModuleHandlerConfigurations_t;
-typedef HTTP_ModuleHandlerConfigurations_t::iterator HTTP_ModuleHandlerConfigurationsIterator_t;
-typedef HTTP_ModuleHandlerConfigurations_t::const_iterator HTTP_ModuleHandlerConfigurationsConstIterator_t;
-
 //struct HTTP_ProtocolConfiguration;
 struct HTTP_StreamConfiguration
  : Stream_Configuration
 {
   inline HTTP_StreamConfiguration ()
    : Stream_Configuration ()
-   , moduleConfiguration_2 ()
-   , moduleHandlerConfigurations ()
    //, protocolConfiguration (NULL)
    , userData (NULL)
   {};
 
-  struct Stream_ModuleConfiguration  moduleConfiguration_2;       // stream module configuration
-  HTTP_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration
   //struct HTTP_ProtocolConfiguration* protocolConfiguration;       // protocol configuration
 
   struct HTTP_Stream_UserData*       userData;
@@ -139,16 +146,5 @@ struct HTTP_StreamConfiguration
 //                         HTTP_Record,
 //                         HTTP_SessionMessage> HTTP_IStreamNotify_t;
 typedef Stream_INotify_T<enum Stream_SessionMessageType> HTTP_Stream_INotify_t;
-
-typedef HTTP_Stream_T<struct HTTP_StreamState,
-                      struct HTTP_StreamConfiguration,
-                      HTTP_RuntimeStatistic_t,
-                      struct HTTP_ModuleHandlerConfiguration,
-                      struct HTTP_Stream_SessionData,
-                      HTTP_Stream_SessionData_t,
-                      ACE_Message_Block,
-                      HTTP_Message_t,
-                      HTTP_SessionMessage,
-                      struct HTTP_Stream_UserData> HTTP_Stream_t;
 
 #endif

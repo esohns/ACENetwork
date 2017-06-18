@@ -45,7 +45,11 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
                                   DataMessageType,
                                   SessionMessageType,
                                   ProtocolCommandType,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
                                   StatisticContainerType>::Net_Module_Statistic_WriterTask_T (ISTREAM_T* stream_in)
+#else
+                                  StatisticContainerType>::Net_Module_Statistic_WriterTask_T (typename inherited::ISTREAM_T* stream_in)
+#endif
  : inherited (stream_in)
  , resetTimeoutHandler_ (this)
  , resetTimeoutHandlerID_ (-1)
@@ -240,7 +244,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
 
   // sanity check(s)
   ACE_ASSERT (message_inout);
-  ACE_ASSERT (isInitialized_);
+  ACE_ASSERT (inherited::isInitialized_);
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     // update counters...
@@ -427,8 +431,8 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
                100.0F),
               lastBytesPerSecondCount_,
               (numInboundBytes_ + numOutboundBytes_),
-              (allocator_ ? allocator_->cache_size () : 0),
-              (allocator_ ? allocator_->cache_depth () : 0)));
+              (inherited::allocator_ ? inherited::allocator_->cache_size () : 0),
+              (inherited::allocator_ ? inherited::allocator_->cache_depth () : 0)));
 }
 
 template <typename SynchStrategyType,
@@ -451,10 +455,7 @@ Net_Module_Statistic_WriterTask_T<SynchStrategyType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_Statistic_WriterTask_T::final_report"));
 
-  {
-    // synchronize access to statistics data
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     if ((numInboundMessages_ + numOutboundMessages_))
     {
       ACE_DEBUG ((LM_INFO,

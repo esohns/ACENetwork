@@ -23,8 +23,8 @@
 
 #include <string>
 
-#include <ace/Global_Macros.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 
@@ -40,6 +40,8 @@
 #include "dhcp_module_parser.h"
 #include "dhcp_module_streamer.h"
 #include "dhcp_stream_common.h"
+
+extern const char stream_name_string_[];
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -58,13 +60,15 @@ template <typename StreamStateType,
 class DHCP_Stream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
+                        stream_name_string_,
                         int,
-                        Stream_SessionMessageType,
-                        Stream_StateMachine_ControlState,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
                         StreamStateType,
                         ConfigurationType,
                         StatisticContainerType,
-                        Stream_ModuleConfiguration,
+                        struct Stream_AllocatorConfiguration,
+                        struct Stream_ModuleConfiguration,
                         ModuleHandlerConfigurationType,
                         SessionDataType,
                         SessionDataContainerType,
@@ -72,8 +76,26 @@ class DHCP_Stream_T
                         DataMessageType,
                         SessionMessageType>
 {
+  typedef Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        stream_name_string_,
+                        int,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        StreamStateType,
+                        ConfigurationType,
+                        StatisticContainerType,
+                        struct Stream_AllocatorConfiguration,
+                        struct Stream_ModuleConfiguration,
+                        ModuleHandlerConfigurationType,
+                        SessionDataType,
+                        SessionDataContainerType,
+                        ControlMessageType,
+                        DataMessageType,
+                        SessionMessageType> inherited;
+
  public:
-  DHCP_Stream_T (const std::string&); // name
+  DHCP_Stream_T ();
   virtual ~DHCP_Stream_T ();
 
   // implement (part of) Stream_IStreamControlBase
@@ -81,7 +103,12 @@ class DHCP_Stream_T
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const ConfigurationType&); // configuration
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual bool initialize (const CONFIGURATION_T&); // configuration
+#else
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
+#endif
 
   // implement Common_IStatistic_T
   // *NOTE*: delegate this to rntimeStatistic_
@@ -90,22 +117,6 @@ class DHCP_Stream_T
   virtual void report () const;
 
  private:
-  typedef Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        int,
-                        Stream_SessionMessageType,
-                        Stream_StateMachine_ControlState,
-                        StreamStateType,
-                        ConfigurationType,
-                        StatisticContainerType,
-                        Stream_ModuleConfiguration,
-                        ModuleHandlerConfigurationType,
-                        SessionDataType,
-                        SessionDataContainerType,
-                        ControlMessageType,
-                        DataMessageType,
-                        SessionMessageType> inherited;
-
   typedef DHCP_Module_Streamer_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  ConfigurationType,
@@ -129,25 +140,25 @@ class DHCP_Stream_T
                                 SessionMessageType,
                                 ModuleHandlerConfigurationType,
                                 int,
-                                Stream_SessionMessageType,
+                                enum Stream_SessionMessageType,
                                 StreamStateType,
                                 SessionDataType,
                                 SessionDataContainerType,
                                 StatisticContainerType> PARSER_T;
   //typedef Stream_StreamModule_T<ACE_MT_SYNCH,
   //                              Common_TimePolicy_t,
-  //                              Stream_ModuleConfiguration,
+  //                              struct Stream_ModuleConfiguration,
   //                              ModuleHandlerConfigurationType,
   //                              STREAMER_T,
   //                              BISECTOR_T> MODULE_MARSHAL_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                Stream_SessionId_t,             // session id type
-                                SessionDataType,                // session data type
-                                Stream_SessionMessageType,      // session event type
-                                Stream_ModuleConfiguration,
+                                Stream_SessionId_t,                // session id type
+                                SessionDataType,                   // session data type
+                                enum Stream_SessionMessageType,    // session event type
+                                struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
-                                DHCP_Stream_INotify_t,          // stream notification interface type
+                                DHCP_Stream_INotify_t,             // stream notification interface type
                                 STREAMER_T,
                                 PARSER_T> MODULE_MARSHAL_T;
 
@@ -179,16 +190,15 @@ class DHCP_Stream_T
                                             DHCP_RuntimeStatistic_t> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
-                                Stream_SessionId_t,             // session id type
-                                SessionDataType,                // session data type
-                                Stream_SessionMessageType,      // session event type
-                                Stream_ModuleConfiguration,
+                                Stream_SessionId_t,                // session id type
+                                SessionDataType,                   // session data type
+                                enum Stream_SessionMessageType,    // session event type
+                                struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
-                                DHCP_Stream_INotify_t,          // stream notification interface type
+                                DHCP_Stream_INotify_t,             // stream notification interface type
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;
 
-  ACE_UNIMPLEMENTED_FUNC (DHCP_Stream_T ())
   ACE_UNIMPLEMENTED_FUNC (DHCP_Stream_T (const DHCP_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Stream_T& operator= (const DHCP_Stream_T&))
 

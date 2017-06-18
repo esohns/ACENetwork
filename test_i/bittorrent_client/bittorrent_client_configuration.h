@@ -38,12 +38,12 @@ struct BitTorrent_Client_PeerModuleHandlerConfiguration;
 struct BitTorrent_Client_PeerUserData
 {
   inline BitTorrent_Client_PeerUserData ()
-   : connectionConfiguration (NULL)
+   //: connectionConfiguration (NULL)
    //, moduleConfiguration (NULL)
    //, moduleHandlerConfiguration (NULL)
   {};
 
-  struct BitTorrent_Client_PeerConnectionConfiguration*    connectionConfiguration;
+  //struct BitTorrent_Client_PeerConnectionConfiguration*    connectionConfiguration;
 
   // *TODO*: remove these ASAP
   //struct Stream_ModuleConfiguration*                       moduleConfiguration;
@@ -54,12 +54,12 @@ struct BitTorrent_Client_TrackerModuleHandlerConfiguration;
 struct BitTorrent_Client_TrackerUserData
 {
   inline BitTorrent_Client_TrackerUserData ()
-   : connectionConfiguration (NULL)
+   //: connectionConfiguration (NULL)
    //, moduleConfiguration (NULL)
    //, moduleHandlerConfiguration (NULL)
   {};
 
-  struct BitTorrent_Client_TrackerConnectionConfiguration*    connectionConfiguration;
+  //struct BitTorrent_Client_TrackerConnectionConfiguration*    connectionConfiguration;
 
   // *TODO*: remove these ASAP
   //struct Stream_ModuleConfiguration*                          moduleConfiguration;
@@ -75,9 +75,7 @@ struct BitTorrent_Client_Configuration
    , peerConnectionConfigurations ()
    , trackerConnectionConfigurations ()
    ///////////////////////////////////////
-   , allocatorConfiguration ()
    , parserConfiguration ()
-   , moduleConfiguration ()
    , peerStreamConfiguration ()
    , trackerStreamConfiguration ()
    ///////////////////////////////////////
@@ -100,11 +98,9 @@ struct BitTorrent_Client_Configuration
   BitTorrent_Client_PeerConnectionConfigurations_t    peerConnectionConfigurations;
   BitTorrent_Client_TrackerConnectionConfigurations_t trackerConnectionConfigurations;
   // ****************************** stream *************************************
-  struct BitTorrent_AllocatorConfiguration            allocatorConfiguration;
   struct Common_ParserConfiguration                   parserConfiguration;
-  struct Stream_ModuleConfiguration                   moduleConfiguration;
-  struct BitTorrent_Client_PeerStreamConfiguration    peerStreamConfiguration;
-  struct BitTorrent_Client_TrackerStreamConfiguration trackerStreamConfiguration;
+  BitTorrent_Client_PeerStreamConfiguration_t         peerStreamConfiguration;
+  BitTorrent_Client_TrackerStreamConfiguration_t      trackerStreamConfiguration;
   // ***************************** protocol ************************************
 //  struct BitTorrent_ProtocolConfiguration             protocolConfiguration;
   struct BitTorrent_Client_SessionConfiguration       sessionConfiguration;

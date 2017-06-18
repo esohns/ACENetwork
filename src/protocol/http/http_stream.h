@@ -40,9 +40,12 @@
 #include "http_common.h"
 #include "http_module_parser.h"
 #include "http_module_streamer.h"
+#include "http_stream_common.h"
 
 // forward declarations
 typedef Stream_INotify_T<enum Stream_SessionMessageType> HTTP_Stream_INotify_t;
+
+extern const char stream_name_string_[];
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -63,12 +66,14 @@ template <typename StreamStateType,
 class HTTP_Stream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
+                        stream_name_string_,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
                         StreamStateType,
                         ConfigurationType,
                         StatisticContainerType,
+                        struct HTTP_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         ModuleHandlerConfigurationType,
                         SessionDataType,
@@ -77,32 +82,16 @@ class HTTP_Stream_T
                         DataMessageType,
                         SessionMessageType>
 {
- public:
-  HTTP_Stream_T (const std::string&); // name
-  virtual ~HTTP_Stream_T ();
-
-  // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&, // return value: module list
-                     bool&);               // return value: delete modules ?
-
-  // override Common_IInitialize_T
-  virtual bool initialize (const ConfigurationType&); // configuration
-
-  // implement Common_IStatistic_T
-  // *NOTE*: delegate this to rntimeStatistic_
-  virtual bool collect (StatisticContainerType&); // return value: statistic data
-  // just a dummy (set statisticReportingInterval instead)
-  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
-
- private:
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
+                        stream_name_string_,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
                         StreamStateType,
                         ConfigurationType,
                         StatisticContainerType,
+                        struct HTTP_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         ModuleHandlerConfigurationType,
                         SessionDataType,
@@ -111,6 +100,29 @@ class HTTP_Stream_T
                         DataMessageType,
                         SessionMessageType> inherited;
 
+ public:
+  HTTP_Stream_T ();
+  virtual ~HTTP_Stream_T ();
+
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ModuleList_t&, // return value: module list
+                     bool&);               // return value: delete modules ?
+
+  // override Common_IInitialize_T
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual bool initialize (const CONFIGURATION_T&); // configuration
+#else
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
+#endif
+
+  // implement Common_IStatistic_T
+  // *NOTE*: delegate this to rntimeStatistic_
+  virtual bool collect (StatisticContainerType&); // return value: statistic data
+  // just a dummy (set statisticReportingInterval instead)
+  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+
+ private:
   typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
                                  ModuleHandlerConfigurationType,
@@ -168,7 +180,6 @@ class HTTP_Stream_T
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;
 
-  ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T (const HTTP_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T& operator= (const HTTP_Stream_T&))
 };

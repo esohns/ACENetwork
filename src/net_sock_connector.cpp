@@ -19,6 +19,7 @@
 ***************************************************************************/
 #include "stdafx.h"
 
+#include "ace/Synch.h"
 #include "net_sock_connector.h"
 
 //#include "ace/Countdown_Time.h"

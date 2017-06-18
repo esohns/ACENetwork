@@ -24,23 +24,23 @@
 #include <sstream>
 #include <string>
 
-#include <ace/Configuration.h>
-#include <ace/Configuration_Import_Export.h>
-#include <ace/Get_Opt.h>
-#include <ace/High_Res_Timer.h>
-#include <ace/iosfwd.h>
+#include "ace/Configuration.h"
+#include "ace/Configuration_Import_Export.h"
+#include "ace/Get_Opt.h"
+#include "ace/High_Res_Timer.h"
+#include "ace/iosfwd.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <ace/Init_ACE.h>
+#include "ace/Init_ACE.h"
 #endif
-#include <ace/POSIX_Proactor.h>
-#include <ace/Synch.h>
-#include <ace/Proactor.h>
-#include <ace/Profile_Timer.h>
-#include <ace/Sig_Handler.h>
-#include <ace/Signal.h>
-#include <ace/Version.h>
+#include "ace/POSIX_Proactor.h"
+#include "ace/Synch.h"
+#include "ace/Proactor.h"
+#include "ace/Profile_Timer.h"
+#include "ace/Sig_Handler.h"
+#include "ace/Signal.h"
+#include "ace/Version.h"
 
-#include <gtk/gtk.h>
+#include "gtk/gtk.h"
 
 #include "common_file_tools.h"
 #include "common_tools.h"
@@ -73,6 +73,8 @@
 #include "bittorrent_client_signalhandler.h"
 #include "bittorrent_client_stream_common.h"
 #include "bittorrent_client_tools.h"
+
+const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("BitTorrentStream");
 
 void
 do_printUsage (const std::string& programName_in)
@@ -452,8 +454,8 @@ do_work (bool useThreadPool_in,
     &CBData_in.configuration->parserConfiguration;
 //  peer_modulehandler_configuration.protocolConfiguration =
 //      &CBData_in.configuration->protocolConfiguration;
-  CBData_in.configuration->peerStreamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                                       peer_modulehandler_configuration));
+  CBData_in.configuration->peerStreamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                           peer_modulehandler_configuration));
 
   struct BitTorrent_Client_TrackerModuleHandlerConfiguration tracker_modulehandler_configuration;
   tracker_modulehandler_configuration.statisticReportingInterval =
@@ -462,8 +464,8 @@ do_work (bool useThreadPool_in,
       &CBData_in.configuration->trackerStreamConfiguration;
   tracker_modulehandler_configuration.parserConfiguration =
     &CBData_in.configuration->parserConfiguration;
-  CBData_in.configuration->trackerStreamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                                          tracker_modulehandler_configuration));
+  CBData_in.configuration->trackerStreamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                              tracker_modulehandler_configuration));
 
   // step2: initialize event dispatch
   struct Common_DispatchThreadData thread_data;
@@ -474,7 +476,7 @@ do_work (bool useThreadPool_in,
                                               thread_data.numberOfDispatchThreads,
                                               thread_data.proactorType,
                                               thread_data.reactorType,
-                                              CBData_in.configuration->peerStreamConfiguration.serializeOutput))
+                                              CBData_in.configuration->peerStreamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize event dispatch, returning\n")));
@@ -1296,19 +1298,11 @@ ACE_TMAIN (int argc_in,
   if (debug)
     configuration.parserConfiguration.debugScanner = true;
 
-  configuration.peerStreamConfiguration.messageAllocator =
+  configuration.peerStreamConfiguration.configuration_.messageAllocator =
     &peer_message_allocator;
-  configuration.peerStreamConfiguration.moduleConfiguration =
-    &configuration.peerStreamConfiguration.moduleConfiguration_2;
-  configuration.peerStreamConfiguration.moduleConfiguration->streamConfiguration =
-    &configuration.peerStreamConfiguration;
 
-  configuration.trackerStreamConfiguration.messageAllocator =
+  configuration.trackerStreamConfiguration.configuration_.messageAllocator =
     &tracker_message_allocator;
-  configuration.trackerStreamConfiguration.moduleConfiguration =
-    &configuration.trackerStreamConfiguration.moduleConfiguration_2;
-  configuration.trackerStreamConfiguration.moduleConfiguration->streamConfiguration =
-    &configuration.trackerStreamConfiguration;
 
   configuration.sessionConfiguration.parserConfiguration =
       &configuration.parserConfiguration;

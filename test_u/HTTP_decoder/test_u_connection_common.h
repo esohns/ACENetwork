@@ -116,7 +116,7 @@ struct Test_U_ConnectionConfiguration
   {};
 
   struct Test_U_SocketHandlerConfiguration socketHandlerConfiguration;
-  struct Test_U_StreamConfiguration*       streamConfiguration;
+  Test_U_StreamConfiguration_t*            streamConfiguration;
 
   struct Test_U_UserData*                  userData;
 };

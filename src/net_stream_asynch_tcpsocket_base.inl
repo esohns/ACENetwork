@@ -51,7 +51,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
  , inherited2 ()
  , inherited3 (interfaceHandle_in,
                statisticCollectionInterval_in)
- , stream_ (std::string (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_DEFAULT_NAME)))
+ , stream_ ()
  , notify_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::Net_StreamAsynchTCPSocketBase_T"));
@@ -143,17 +143,17 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   // step2: initialize/start stream
   // step2a: connect the stream head message queue with this handler ?
   if (likely (!inherited3::configuration_->socketHandlerConfiguration.useThreadPerConnection))
-    inherited3::configuration_->streamConfiguration->notificationStrategy =
+    inherited3::configuration_->streamConfiguration->configuration_.notificationStrategy =
         this;
 
   // *TODO*: remove type inferences
-  inherited3::configuration_->streamConfiguration->sessionID =
+  inherited3::configuration_->streamConfiguration->configuration_.sessionID =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     reinterpret_cast<size_t> (handle_in); // (== socket handle)
 #else
     static_cast<size_t> (handle_in); // (== socket handle)
 #endif
-  if (unlikely (!stream_.initialize (*inherited3::configuration_->streamConfiguration)))
+  if (unlikely (!stream_.initialize (*(inherited3::configuration_->streamConfiguration))))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));

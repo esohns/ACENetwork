@@ -42,7 +42,7 @@
 #include "irc_record.h"
 #include "irc_stream_common.h"
 
-#include "irc_client_common.h"
+#include "IRC_client_common.h"
 
 // forward declaration(s)
 struct IRC_Client_SessionData;
@@ -66,6 +66,7 @@ struct IRC_Client_StreamState
   {};
 
   struct IRC_Client_SessionData* currentSessionData;
+
   struct IRC_Client_UserData*    userData;
 };
 
@@ -81,6 +82,14 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                     IRC_Client_SessionMessage> IRC_Client_ISessionNotify_t;
 typedef std::list<IRC_Client_ISessionNotify_t*> IRC_Client_ISubscribers_t;
 typedef IRC_Client_ISubscribers_t::const_iterator IRC_Client_ISubscribersIterator_t;
+extern const char stream_name_string_[];
+struct IRC_Client_StreamConfiguration;
+struct IRC_Client_ModuleHandlerConfiguration;
+typedef Stream_Configuration_T<stream_name_string_,
+                               struct IRC_AllocatorConfiguration,
+                               struct IRC_Client_StreamConfiguration,
+                               struct Stream_ModuleConfiguration,
+                               struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_StreamConfiguration_t;
 struct IRC_Client_ModuleHandlerConfiguration
  : IRC_ModuleHandlerConfiguration
 {
@@ -95,7 +104,7 @@ struct IRC_Client_ModuleHandlerConfiguration
   {};
 
   IRC_Client_ConnectionConfigurations_t* connectionConfigurations;
-  struct IRC_Client_StreamConfiguration* streamConfiguration;
+  IRC_Client_StreamConfiguration_t*      streamConfiguration;
   IRC_Client_ISessionNotify_t*           subscriber; // (initial) subscriber
   IRC_Client_ISubscribers_t*             subscribers;
 
@@ -103,26 +112,18 @@ struct IRC_Client_ModuleHandlerConfiguration
 };
 
 struct IRC_Client_ModuleHandlerConfiguration;
-typedef std::map<std::string,
-                 struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_ModuleHandlerConfigurations_t;
-typedef IRC_Client_ModuleHandlerConfigurations_t::iterator IRC_Client_ModuleHandlerConfigurationsIterator_t;
-typedef IRC_Client_ModuleHandlerConfigurations_t::const_iterator IRC_Client_ModuleHandlerConfigurationsConstIterator_t;
 struct IRC_Client_StreamConfiguration
  : Stream_Configuration
 {
   inline IRC_Client_StreamConfiguration ()
    : Stream_Configuration ()
-   , moduleConfiguration_2 ()
-   , moduleHandlerConfigurations ()
    , protocolConfiguration (NULL)
    , userData (NULL)
   {};
 
-  struct Stream_ModuleConfiguration        moduleConfiguration_2;       // stream module configuration
-  IRC_Client_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration
-  struct IRC_ProtocolConfiguration*        protocolConfiguration;       // protocol configuration
+  struct IRC_ProtocolConfiguration* protocolConfiguration; // protocol configuration
 
-  struct IRC_Client_UserData*              userData;
+  struct IRC_Client_UserData*       userData;
 };
 
 typedef Stream_SessionData_T<struct IRC_Client_SessionData> IRC_Client_SessionData_t;

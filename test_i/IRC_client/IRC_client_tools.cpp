@@ -224,7 +224,7 @@ IRC_Client_Tools::parseConfigurationFile (const std::string& fileName_in,
 ACE_HANDLE
 IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
                            const ACE_INET_Addr& peerAddress_in,
-                           const IRC_LoginOptions& loginOptions_in,
+                           const struct IRC_LoginOptions& loginOptions_in,
                            bool cloneModule_in,
                            bool deleteModule_in,
                            Stream_Module_t*& finalModule_inout)
@@ -234,8 +234,8 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   ACE_HANDLE return_value = ACE_INVALID_HANDLE;
 
   int result = -1;
-  IRC_Client_ConnectionConfiguration* configuration_p = NULL;
-  IRC_Client_UserData* user_data_p = NULL;
+  struct IRC_Client_ConnectionConfiguration* configuration_p = NULL;
+  struct IRC_Client_UserData* user_data_p = NULL;
 
   // step0: retrive default configuration
   IRC_Client_IConnection_Manager_t* connection_manager_p =
@@ -256,10 +256,14 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
       peerAddress_in;
   if (finalModule_inout)
   {
-    configuration_p->streamConfiguration->cloneModule = cloneModule_in;
-    configuration_p->streamConfiguration->deleteModule = deleteModule_in;
-    configuration_p->streamConfiguration->module = finalModule_inout;
-    if (deleteModule_in) finalModule_inout = NULL;
+    configuration_p->streamConfiguration->configuration_.cloneModule =
+      cloneModule_in;
+    configuration_p->streamConfiguration->configuration_.deleteModule =
+      deleteModule_in;
+    configuration_p->streamConfiguration->configuration_.module =
+      finalModule_inout;
+    if (deleteModule_in)
+      finalModule_inout = NULL;
   } // end IF
 
   // step2: initialize connector
@@ -279,17 +283,9 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   return_value = connector_in.connect (peerAddress_in);
   if (return_value == ACE_INVALID_HANDLE)
   {
-    // debug info
-    ACE_TCHAR buffer[BUFSIZ];
-    ACE_OS::memset (buffer, 0, sizeof (buffer));
-    result = peerAddress_in.addr_to_string (buffer,
-                                            sizeof (buffer));
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("failed to connect(\"%s\"): \"%m\", aborting\n"),
-                buffer));
+                ACE_TEXT ("failed to connect(%s): \"%m\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (peerAddress_in).c_str ())));
     goto error;
   } // end IF
 

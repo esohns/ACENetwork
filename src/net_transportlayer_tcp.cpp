@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include "ace/Synch.h"
 #include "net_transportlayer_tcp.h"
 
 #include "net_macros.h"

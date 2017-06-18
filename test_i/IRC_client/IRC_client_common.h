@@ -50,7 +50,7 @@
 
 #include "FILE_Stream.h"
 #include "IOStream_alt_T.h"
-#include "irc_client_defines.h"
+#include "IRC_client_defines.h"
 
 // forward declarations
 struct IRC_Client_ConnectionConfiguration;

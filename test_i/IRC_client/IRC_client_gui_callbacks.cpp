@@ -147,9 +147,9 @@ connection_setup_function (void* arg_in)
     return result;
   } // end IF
 //  gdk_threads_leave ();
-  IRC_Client_ModuleHandlerConfigurationsIterator_t iterator_2 =
-    data_p->configuration->streamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.moduleHandlerConfigurations.end ());
+  IRC_Client_StreamConfiguration_t::ITERATOR_T iterator_2 =
+    data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.end ());
   (*iterator_2).second.subscriber = connection_p;
 
   // *WARNING*: beyond this point, need to remove the connection page !

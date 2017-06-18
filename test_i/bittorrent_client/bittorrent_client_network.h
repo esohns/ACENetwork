@@ -24,10 +24,10 @@
 #include <map>
 #include <string>
 
-#include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
-#include <ace/Singleton.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
+#include "ace/Singleton.h"
+#include "ace/Synch_Traits.h"
 
 #include "net_asynch_tcpsockethandler.h"
 #include "net_connection_manager.h"
@@ -138,7 +138,7 @@ struct BitTorrent_Client_PeerConnectionConfiguration
   {};
 
   struct BitTorrent_Client_PeerSocketHandlerConfiguration socketHandlerConfiguration;
-  struct BitTorrent_Client_PeerStreamConfiguration*       streamConfiguration;
+  BitTorrent_Client_PeerStreamConfiguration_t*            streamConfiguration;
 
   struct BitTorrent_Client_PeerUserData*                   userData;
 };
@@ -159,7 +159,7 @@ struct BitTorrent_Client_TrackerConnectionConfiguration
   {};
 
   struct BitTorrent_Client_TrackerSocketHandlerConfiguration socketHandlerConfiguration;
-  struct BitTorrent_Client_TrackerStreamConfiguration*       streamConfiguration;
+  BitTorrent_Client_TrackerStreamConfiguration_t*            streamConfiguration;
 
   struct BitTorrent_Client_TrackerUserData*                  userData;
 };

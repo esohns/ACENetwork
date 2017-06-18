@@ -32,8 +32,8 @@
 #include "test_i_common_modules.h"
 #include "test_i_module_htmlparser.h"
 
-Test_I_ConnectionStream::Test_I_ConnectionStream (const std::string& name_in)
- : inherited (name_in)
+Test_I_ConnectionStream::Test_I_ConnectionStream ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream::Test_I_ConnectionStream"));
 
@@ -98,44 +98,44 @@ Test_I_ConnectionStream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_I_ConnectionStream::initialize (const struct Test_I_URLStreamLoad_StreamConfiguration& configuration_in)
+Test_I_ConnectionStream::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream::initialize"));
 
   // sanity check(s)
-  ACE_ASSERT (!isRunning ());
+  ACE_ASSERT (!inherited::isRunning ());
 
-  bool result = false;
-  bool setup_pipeline = configuration_in.setupPipeline;
+//  bool result = false;
+  bool setup_pipeline = configuration_in.configuration_.setupPipeline;
   bool reset_setup_pipeline = false;
   struct Test_I_URLStreamLoad_SessionData* session_data_p = NULL;
-  Test_I_URLStreamLoad_ModuleHandlerConfigurationsIterator_t iterator;
+  typename inherited::CONFIGURATION_T::ITERATOR_T iterator;
   Stream_Module_t* module_p = NULL;
 //  Test_I_Net_Writer_t* netIO_impl_p = NULL;
   Test_I_HTTPParser* parser_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<struct Test_I_URLStreamLoad_StreamConfiguration&> (configuration_in).setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
     goto failed;
   } // end IF
-  const_cast<struct Test_I_URLStreamLoad_StreamConfiguration&> (configuration_in).setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
   session_data_p =
     &const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->get ());
   iterator =
-      const_cast<struct Test_I_URLStreamLoad_StreamConfiguration&> (configuration_in).moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.moduleHandlerConfigurations.end ());
+      const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != configuration_in.end ());
   // *TODO*: remove type inferences
-  session_data_p->sessionID = configuration_in.sessionID;
+  //session_data_p->sessionID = configuration_in.sessionID;
   session_data_p->targetFileName = (*iterator).second.targetFileName;
 
   // ---------------------------------------------------------------------------
@@ -148,7 +148,7 @@ Test_I_ConnectionStream::initialize (const struct Test_I_URLStreamLoad_StreamCon
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ()),
+                ACE_TEXT (inherited::configuration_.name_.c_str ()),
                 ACE_TEXT ("Marshal")));
     goto failed;
   } // end IF
@@ -157,7 +157,7 @@ Test_I_ConnectionStream::initialize (const struct Test_I_URLStreamLoad_StreamCon
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s/%s: dynamic_cast<HTTP_Module_ParserH_T> failed, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ()),
+                ACE_TEXT (inherited::configuration_.name_.c_str ()),
                 ACE_TEXT (module_p->name ())));
     goto failed;
   } // end IF
@@ -168,12 +168,12 @@ Test_I_ConnectionStream::initialize (const struct Test_I_URLStreamLoad_StreamCon
   //             handle to the session data)
   module_p->arg (inherited::sessionData_);
 
-  if (configuration_in.setupPipeline)
-    if (!inherited::setup (configuration_in.notificationStrategy))
+  if (configuration_in.configuration_.setupPipeline)
+    if (!inherited::setup (configuration_in.configuration_.notificationStrategy))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (inherited::name_.c_str ())));
+                  ACE_TEXT (inherited::configuration_.name_.c_str ())));
       goto failed;
     } // end IF
 
@@ -188,12 +188,12 @@ Test_I_ConnectionStream::initialize (const struct Test_I_URLStreamLoad_StreamCon
 
 failed:
   if (reset_setup_pipeline)
-    const_cast<struct Test_I_URLStreamLoad_StreamConfiguration&> (configuration_in).setupPipeline =
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
       setup_pipeline;
   if (!inherited::reset ())
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
 
   return false;
 }

@@ -71,6 +71,8 @@
 #include "IRC_client_signalhandler.h"
 #include "IRC_client_tools.h"
 
+const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("IRCClientStream");
+
 void
 do_printUsage (const std::string& programName_in)
 {
@@ -450,8 +452,8 @@ do_work (bool useThreadPool_in,
     statisticReportingInterval_in;
   modulehandler_configuration.streamConfiguration =
     &CBData_in.configuration->streamConfiguration;
-  CBData_in.configuration->streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                                   modulehandler_configuration));
+  CBData_in.configuration->streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                                       modulehandler_configuration));
 
   //IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
   //                                                 NULL,
@@ -483,7 +485,7 @@ do_work (bool useThreadPool_in,
                                               thread_data.numberOfDispatchThreads,
                                               thread_data.proactorType,
                                               thread_data.reactorType,
-                                              CBData_in.configuration->streamConfiguration.serializeOutput))
+                                              CBData_in.configuration->streamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize event dispatch, returning\n")));
@@ -1288,7 +1290,7 @@ ACE_TMAIN (int argc_in,
   // initialize protocol configuration
   Stream_CachedAllocatorHeap_T<struct IRC_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
                                                                                   IRC_MAXIMUM_FRAME_SIZE + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE);
-  if (!heap_allocator.initialize (configuration.allocatorConfiguration))
+  if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize allocator: \"%m\", aborting\n")));
@@ -1330,9 +1332,8 @@ ACE_TMAIN (int argc_in,
     &((*iterator).second);
 
   ////////////////////////// stream configuration //////////////////////////////
-  configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.moduleConfiguration =
-      &configuration.streamConfiguration.moduleConfiguration_2;
+  configuration.streamConfiguration.configuration_.messageAllocator =
+    &message_allocator;
 
   struct IRC_Client_GTK_CBData cb_user_data;
   cb_user_data.configuration = &configuration;

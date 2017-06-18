@@ -19,6 +19,5 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "http_scanner.h"
-
+#include "ace/Synch.h"
 #include "http_parser_driver.h"

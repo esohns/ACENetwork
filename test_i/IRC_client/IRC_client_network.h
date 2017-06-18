@@ -75,7 +75,7 @@ struct IRC_Client_ConnectionConfiguration
   bool                                         logToFile;
   struct IRC_ProtocolConfiguration*            protocolConfiguration;
   struct IRC_Client_SocketHandlerConfiguration socketHandlerConfiguration;
-  struct IRC_Client_StreamConfiguration*       streamConfiguration;
+  IRC_Client_StreamConfiguration_t*            streamConfiguration;
   bool                                         useReactor;
 
   struct IRC_Client_UserData*                  userData;

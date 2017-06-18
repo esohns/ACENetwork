@@ -113,7 +113,7 @@ class Net_Module_Statistic_WriterTask_T
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 Stream_UserData>
+                                 struct Stream_UserData>
  , public Common_ICounter
  , public Common_IStatistic_T<StatisticContainerType>
 {
@@ -125,8 +125,25 @@ class Net_Module_Statistic_WriterTask_T
                                                 SessionMessageType,
                                                 ProtocolCommandType,
                                                 StatisticContainerType>;
+
+  typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
+                                 TimePolicyType,
+                                 ConfigurationType,
+                                 ControlMessageType,
+                                 DataMessageType,
+                                 SessionMessageType,
+                                 Stream_SessionId_t,
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_UserData> inherited;
+
  public:
-  Net_Module_Statistic_WriterTask_T (ISTREAM_T*); // stream handle
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Net_Module_Statistic_WriterTask_T (ISTREAM_T*);                     // stream handle
+#else
+  Net_Module_Statistic_WriterTask_T (typename inherited::ISTREAM_T*); // stream handle
+#endif
   virtual ~Net_Module_Statistic_WriterTask_T ();
 
   // override (part of) Stream_IModuleHandler_T
@@ -150,17 +167,6 @@ class Net_Module_Statistic_WriterTask_T
   virtual void report () const;
 
  private:
-  typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
-                                 TimePolicyType,
-                                 ConfigurationType,
-                                 ControlMessageType,
-                                 DataMessageType,
-                                 SessionMessageType,
-                                 Stream_SessionId_t,
-                                 enum Stream_ControlType,
-                                 enum Stream_SessionMessageType,
-                                 Stream_UserData> inherited;
-
   // message type counters
 //  typedef std::set<ProtocolCommandType> Net_Messages_t;
 //  typedef typename Net_Messages_t::const_iterator Net_MessagesIterator_t;

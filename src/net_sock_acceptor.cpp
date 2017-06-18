@@ -19,10 +19,11 @@
 ***************************************************************************/
 #include "stdafx.h"
 
+#include "ace/Synch.h"
 #include "net_sock_acceptor.h"
 
-#include <ace/Log_Msg.h>
-#include <ace/OS.h>
+#include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
 #include "net_common_tools.h"
 #include "net_defines.h"

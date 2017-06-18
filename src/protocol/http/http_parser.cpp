@@ -49,6 +49,7 @@
 #  endif
 # endif
 
+#include "ace/Synch.h"
 #include "http_parser.h"
 
 // User implementation prologue.

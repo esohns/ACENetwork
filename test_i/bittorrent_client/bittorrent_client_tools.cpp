@@ -47,7 +47,7 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
 
   ACE_HANDLE return_value = ACE_INVALID_HANDLE;
 
-  int result = -1;
+//  int result = -1;
   struct BitTorrent_Client_PeerConnectionConfiguration* peer_configuration_p =
       NULL;
   struct BitTorrent_Client_PeerUserData* peer_user_data_p = NULL;
@@ -85,17 +85,21 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
   {
     if (isPeer_in)
     {
-      peer_configuration_p->streamConfiguration->cloneModule = cloneModule_in;
-      peer_configuration_p->streamConfiguration->deleteModule = deleteModule_in;
-      peer_configuration_p->streamConfiguration->module = finalModule_inout;
+      peer_configuration_p->streamConfiguration->configuration_.cloneModule =
+        cloneModule_in;
+      peer_configuration_p->streamConfiguration->configuration_.deleteModule =
+        deleteModule_in;
+      peer_configuration_p->streamConfiguration->configuration_.module =
+        finalModule_inout;
     } // end IF
     else
     {
-      tracker_configuration_p->streamConfiguration->cloneModule =
-          cloneModule_in;
-      tracker_configuration_p->streamConfiguration->deleteModule =
-          deleteModule_in;
-      tracker_configuration_p->streamConfiguration->module = finalModule_inout;
+      tracker_configuration_p->streamConfiguration->configuration_.cloneModule =
+        cloneModule_in;
+      tracker_configuration_p->streamConfiguration->configuration_.deleteModule =
+        deleteModule_in;
+      tracker_configuration_p->streamConfiguration->configuration_.module =
+        finalModule_inout;
     } // end ELSE
     if (deleteModule_in)
       finalModule_inout = NULL;

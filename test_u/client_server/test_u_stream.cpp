@@ -33,8 +33,8 @@
 #include "test_u_module_headerparser.h"
 #include "test_u_module_protocolhandler.h"
 
-Test_U_Stream::Test_U_Stream (const std::string& name_in)
- : inherited (name_in)
+Test_U_Stream::Test_U_Stream ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::Test_U_Stream"));
 
@@ -100,7 +100,7 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuration_in)
+Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::initialize"));
 
@@ -108,31 +108,31 @@ Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuratio
   ACE_ASSERT (!inherited::isInitialized_);
 
 //  bool result = false;
-  bool setup_pipeline = configuration_in.setupPipeline;
+  bool setup_pipeline = configuration_in.configuration_.setupPipeline;
   bool reset_setup_pipeline = false;
   struct Test_U_StreamSessionData* session_data_p = NULL;
   Stream_Module_t* module_p = NULL;
   Test_U_Module_TCPSocketHandler* socketHandler_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<struct Test_U_StreamConfiguration&> (configuration_in).setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
     goto error;
   } // end IF
-  const_cast<struct Test_U_StreamConfiguration&> (configuration_in).setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
 
   session_data_p =
       &const_cast<struct Test_U_StreamSessionData&> (inherited::sessionData_->get ());
-  session_data_p->sessionID = configuration_in.sessionID;
+  //session_data_p->sessionID = configuration_in.sessionID;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;
 
@@ -145,7 +145,7 @@ Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuratio
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ()),
+                ACE_TEXT (inherited::configuration_.name_.c_str ()),
                 ACE_TEXT ("SocketHandler")));
     goto error;
   } // end IF
@@ -155,7 +155,7 @@ Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuratio
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<Test_U_Module_TCPSocketHandler> failed, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
     goto error;
   } // end IF
   socketHandler_impl_p->set (&(inherited::state_));
@@ -166,12 +166,12 @@ Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuratio
   //             handle to the session data)
   module_p->arg (inherited::sessionData_);
 
-  if (configuration_in.setupPipeline)
-    if (!inherited::setup (configuration_in.notificationStrategy))
+  if (configuration_in.configuration_.setupPipeline)
+    if (!inherited::setup (configuration_in.configuration_.notificationStrategy))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (inherited::name_.c_str ())));
+                  ACE_TEXT (inherited::configuration_.name_.c_str ())));
       goto error;
     } // end IF
 
@@ -186,7 +186,7 @@ Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuratio
 
 error:
   if (reset_setup_pipeline)
-    const_cast<struct Test_U_StreamConfiguration&> (configuration_in).setupPipeline =
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
       setup_pipeline;
 
   return false;

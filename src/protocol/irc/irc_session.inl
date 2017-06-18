@@ -1068,8 +1068,8 @@ IRC_Session_T<ConnectionType,
     ACE_ASSERT (connection_configuration_p->streamConfiguration);
 
     iterator =
-      connection_configuration_p->streamConfiguration->moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator != connection_configuration_p->streamConfiguration->moduleHandlerConfigurations.end ());
+      connection_configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator != connection_configuration_p->streamConfiguration->end ());
   } // end IF
   else
   {
@@ -1078,8 +1078,8 @@ IRC_Session_T<ConnectionType,
     ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration);
 
     iterator =
-      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->moduleHandlerConfigurations.end ());
+      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->end ());
   } // end ELSE
   (*iterator).second.subscriber = this;
   (*iterator).second.userData =
@@ -1176,8 +1176,8 @@ IRC_Session_T<ConnectionType,
 //  } // end IF
 //  else
   iterator =
-      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->moduleHandlerConfigurations.end ());
+      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->end ());
   (*iterator).second.subscriber = this;
 //  ACE_ASSERT (module_handler_configuration_p->userData);
 //  const IRC_ConnectionState& connection_state_r = inherited::state ();

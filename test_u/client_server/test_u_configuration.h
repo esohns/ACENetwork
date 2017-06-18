@@ -30,6 +30,7 @@
 #include "ace/Time_Value.h"
 
 #include "stream_common.h"
+#include "stream_configuration.h"
 #include "stream_iallocator.h"
 #include "stream_isessionnotify.h"
 
@@ -40,9 +41,8 @@
 #include "net_server_defines.h"
 
 #include "test_u_common.h"
-#include "test_u_stream_common.h"
-
 #include "test_u_connection_common.h"
+#include "test_u_stream_common.h"
 
 // forward declarations
 //struct Test_U_ConnectionConfiguration;
@@ -79,7 +79,14 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
 typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
 typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 
+extern const char stream_name_string_[];
 struct Test_U_StreamConfiguration;
+struct Test_U_ModuleHandlerConfiguration;
+typedef Stream_Configuration_T<stream_name_string_,
+                               struct Stream_AllocatorConfiguration,
+                               struct Test_U_StreamConfiguration,
+                               struct Stream_ModuleConfiguration,
+                               struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
 struct Test_U_ModuleHandlerConfiguration
  : Stream_ModuleHandlerConfiguration
 {
@@ -100,7 +107,7 @@ struct Test_U_ModuleHandlerConfiguration
   struct Test_U_ProtocolConfiguration* protocolConfiguration; // protocol handler
   bool                                 pushStatisticMessages; // statistic module
 
-  struct Test_U_StreamConfiguration*   streamConfiguration;
+  Test_U_StreamConfiguration_t*        streamConfiguration;
 
   // *TODO*: remove this (--> session message data)
   struct Test_U_StreamSessionData*     sessionData;
@@ -108,24 +115,16 @@ struct Test_U_ModuleHandlerConfiguration
   Test_U_ISessionNotify_t*             subscriber;
   Test_U_Subscribers_t*                subscribers;
 };
-typedef std::map<std::string,
-                 struct Test_U_ModuleHandlerConfiguration> Test_U_ModuleHandlerConfigurations_t;
-typedef Test_U_ModuleHandlerConfigurations_t::iterator Test_U_ModuleHandlerConfigurationsIterator_t;
 
 struct Test_U_StreamConfiguration
  : Stream_Configuration
 {
   inline Test_U_StreamConfiguration ()
    : Stream_Configuration ()
-   , moduleConfiguration_2 ()
-   , moduleHandlerConfigurations ()
    , userData (NULL)
   {};
 
-  struct Stream_ModuleConfiguration    moduleConfiguration_2;        // module configuration
-  Test_U_ModuleHandlerConfigurations_t moduleHandlerConfigurations;  // module handler configuration
-
-  struct Test_U_UserData*              userData;                     // user data
+  struct Test_U_UserData* userData; // user data
 };
 
 //struct Test_U_ConnectionConfiguration;
@@ -133,21 +132,19 @@ struct Test_U_Configuration
 {
   inline Test_U_Configuration ()
    : connectionConfigurations ()
-   , allocatorConfiguration ()
    , streamConfiguration ()
    , protocolConfiguration ()
    , userData ()
   {};
 
   // **************************** socket data **********************************
-  Test_U_ConnectionConfigurations_t    connectionConfigurations;
+  Test_U_ConnectionConfigurations_t   connectionConfigurations;
   // **************************** stream data **********************************
-  struct Stream_AllocatorConfiguration allocatorConfiguration;
-  struct Test_U_StreamConfiguration    streamConfiguration;
+  Test_U_StreamConfiguration_t        streamConfiguration;
   // *************************** protocol data *********************************
-  struct Test_U_ProtocolConfiguration  protocolConfiguration;
+  struct Test_U_ProtocolConfiguration protocolConfiguration;
 
-  struct Test_U_UserData               userData;
+  struct Test_U_UserData              userData;
 };
 
 #endif

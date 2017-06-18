@@ -33,9 +33,8 @@
 
 #include "test_u_session_message.h"
 
-Test_U_Stream::Test_U_Stream (const std::string& name_in)
- : inherited (name_in,
-              true)
+Test_U_Stream::Test_U_Stream ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::Test_U_Stream"));
 
@@ -106,7 +105,7 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuration_in)
+Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::initialize"));
 
@@ -118,31 +117,31 @@ Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuratio
     if (!inherited::finalize ())
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to Stream_Base_T::finalize(): \"%m\", continuing\n"),
-                  ACE_TEXT (inherited::name_.c_str ())));
+                  ACE_TEXT (inherited::configuration_.name_.c_str ())));
   } // end IF
 
   bool result = false;
-  bool setup_pipeline = configuration_in.setupPipeline;
+  bool setup_pipeline = configuration_in.configuration_.setupPipeline;
   bool reset_setup_pipeline = false;
 
   // allocate a new session state, reset stream
-  const_cast<struct Test_U_StreamConfiguration&> (configuration_in).setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
     return false;
   } // end IF
-  const_cast<struct Test_U_StreamConfiguration&> (configuration_in).setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
   struct Test_U_HTTPDecoder_SessionData& session_data_r =
       const_cast<struct Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->get ());
-  session_data_r.sessionID = configuration_in.sessionID;
+  //session_data_r.sessionID = configuration_in.sessionID;
   // *TODO*: remove type inferences
   //session_data_r.targetFileName =
   //  configuration_in.moduleHandlerConfiguration->targetFileName;
@@ -175,9 +174,9 @@ Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuratio
   typename inherited::MODULE_T* module_p = NULL;
   READER_T* IOReader_impl_p = NULL;
   WRITER_T* IOWriter_impl_p = NULL;
-  Test_U_ModuleHandlerConfigurationsIterator_t iterator =
-      const_cast<struct Test_U_StreamConfiguration&> (configuration_in).moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration_in.moduleHandlerConfigurations.end ());
+  typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
+      const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != configuration_in.end ());
   (*iterator).second.targetFileName.clear ();
 
   // ******************* IO ************************
@@ -187,7 +186,7 @@ Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuratio
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ()),
+                ACE_TEXT (inherited::configuration_.name_.c_str ()),
                 ACE_TEXT ("NetIO")));
     goto error;
   } // end IF
@@ -196,7 +195,7 @@ Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuratio
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
     goto error;
   } // end IF
   IOWriter_impl_p->set (&(inherited::state_));
@@ -206,14 +205,14 @@ Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuratio
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOReader_T> failed, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
     goto error;
   } // end IF
   if (!IOReader_impl_p->initialize ((*iterator).second))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s/%s: failed to initialize Stream_Module_Net_IOReader_T, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ()),
+                ACE_TEXT (inherited::configuration_.name_.c_str ()),
                 module_p->name ()));
     goto error;
   } // end IF
@@ -222,12 +221,12 @@ Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuratio
   //             handle to the session data)
   module_p->arg (inherited::sessionData_);
 
-  if (configuration_in.setupPipeline)
+  if (configuration_in.configuration_.setupPipeline)
     if (!inherited::setup ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (inherited::name_.c_str ())));
+                  ACE_TEXT (inherited::configuration_.name_.c_str ())));
       goto error;
     } // end IF
 
@@ -240,7 +239,7 @@ Test_U_Stream::initialize (const struct Test_U_StreamConfiguration& configuratio
 
 error:
   if (reset_setup_pipeline)
-    const_cast<struct Test_U_StreamConfiguration&> (configuration_in).setupPipeline =
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
       setup_pipeline;
 //  if (reset_configuration)
 //  {
@@ -277,7 +276,7 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ()),
+                ACE_TEXT (inherited::configuration_.name_.c_str ()),
                 ACE_TEXT ("StatisticReport")));
     return false;
   } // end IF
@@ -287,7 +286,7 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<Stream_Module_StatisticReport_WriterTask_T> failed, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
     return false;
   } // end IF
 
@@ -301,7 +300,7 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", aborting\n"),
-                  ACE_TEXT (inherited::name_.c_str ())));
+                  ACE_TEXT (inherited::configuration_.name_.c_str ())));
       return false;
     } // end IF
   } // end IF
@@ -315,12 +314,12 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: caught exception in Common_IStatistic_T::collect(), continuing\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
   }
   if (!result)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Common_IStatistic_T::collect(), aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
   else
     session_data_r.currentStatistic = data_out;
 
@@ -330,7 +329,7 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n"),
-                  ACE_TEXT (inherited::name_.c_str ())));
+                  ACE_TEXT (inherited::configuration_.name_.c_str ())));
   } // end IF
 
   return result_2;

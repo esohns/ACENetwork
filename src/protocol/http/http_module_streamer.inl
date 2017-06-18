@@ -40,7 +40,11 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
                        ConfigurationType,
                        ControlMessageType,
                        DataMessageType,
-                       SessionMessageType>::HTTP_Module_Streamer_T (typename TASK_BASE_T::ISTREAM_T* stream_in)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                       SessionMessageType>::HTTP_Module_Streamer_T (ISTREAM_T* stream_in)
+#else
+                       SessionMessageType>::HTTP_Module_Streamer_T (typename inherited::ISTREAM_T* stream_in)
+#endif
  : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Module_Streamer_T::HTTP_Module_Streamer_T"));

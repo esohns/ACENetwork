@@ -47,21 +47,6 @@ class IRC_Client_Stream
                        IRC_Client_SessionMessage,
                        struct IRC_Client_UserData>
 {
- public:
-  IRC_Client_Stream (const std::string&); // name
-  virtual ~IRC_Client_Stream ();
-
-  // implement (part of) Stream_IStreamControlBase
-  virtual bool load (Stream_ModuleList_t&, // return value: module list
-                     bool&);               // return value: delete modules ?
-
-  // implement Common_IInitialize_T
-  virtual bool initialize (const struct IRC_Client_StreamConfiguration&); // configuration
-
-  // *TODO*: remove this API
-  void ping ();
-
- private:
   typedef IRC_Stream_T<struct IRC_Client_StreamState,
                        struct IRC_Client_StreamConfiguration,
                        IRC_RuntimeStatistic_t,
@@ -73,7 +58,21 @@ class IRC_Client_Stream
                        IRC_Client_SessionMessage,
                        struct IRC_Client_UserData> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream ())
+ public:
+  IRC_Client_Stream (); // name
+  virtual ~IRC_Client_Stream ();
+
+  // implement (part of) Stream_IStreamControlBase
+  virtual bool load (Stream_ModuleList_t&, // return value: module list
+                     bool&);               // return value: delete modules ?
+
+  // implement Common_IInitialize_T
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
+
+  // *TODO*: remove this API
+  void ping ();
+
+ private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream (const IRC_Client_Stream&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream& operator= (const IRC_Client_Stream&))
 };

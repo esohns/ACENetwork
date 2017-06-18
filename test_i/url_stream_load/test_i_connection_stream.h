@@ -40,15 +40,19 @@ class Stream_IAllocator;
 class Test_I_Message;
 class Test_I_SessionMessage;
 
+extern const char stream_name_string_[];
+
 class Test_I_ConnectionStream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
+                        stream_name_string_,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
                         struct Test_I_URLStreamLoad_StreamState,
                         struct Test_I_URLStreamLoad_StreamConfiguration,
                         HTTP_RuntimeStatistic_t,
+                        struct Test_I_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
                         struct Test_I_URLStreamLoad_SessionData,
@@ -57,8 +61,26 @@ class Test_I_ConnectionStream
                         Test_I_Message,
                         Test_I_SessionMessage>
 {
+  typedef Stream_Base_T<ACE_MT_SYNCH,
+                        Common_TimePolicy_t,
+                        stream_name_string_,
+                        enum Stream_ControlType,
+                        enum Stream_SessionMessageType,
+                        enum Stream_StateMachine_ControlState,
+                        struct Test_I_URLStreamLoad_StreamState,
+                        struct Test_I_URLStreamLoad_StreamConfiguration,
+                        HTTP_RuntimeStatistic_t,
+                        struct Test_I_AllocatorConfiguration,
+                        struct Stream_ModuleConfiguration,
+                        struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                        struct Test_I_URLStreamLoad_SessionData,
+                        Test_I_URLStreamLoad_SessionData_t,
+                        ACE_Message_Block,
+                        Test_I_Message,
+                        Test_I_SessionMessage> inherited;
+
  public:
-  Test_I_ConnectionStream (const std::string&); // name
+  Test_I_ConnectionStream ();
   virtual ~Test_I_ConnectionStream ();
 
   // implement (part of) Stream_IStreamControlBase
@@ -66,7 +88,7 @@ class Test_I_ConnectionStream
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const struct Test_I_URLStreamLoad_StreamConfiguration&); // configuration
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
@@ -77,23 +99,6 @@ class Test_I_ConnectionStream
   void ping ();
 
  private:
-  typedef Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct Test_I_URLStreamLoad_StreamState,
-                        struct Test_I_URLStreamLoad_StreamConfiguration,
-                        HTTP_RuntimeStatistic_t,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
-                        struct Test_I_URLStreamLoad_SessionData,
-                        Test_I_URLStreamLoad_SessionData_t,
-                        ACE_Message_Block,
-                        Test_I_Message,
-                        Test_I_SessionMessage> inherited;
-
-  ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream ())
   ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream (const Test_I_ConnectionStream&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_ConnectionStream& operator= (const Test_I_ConnectionStream&))
 };

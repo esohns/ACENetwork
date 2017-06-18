@@ -23,8 +23,8 @@
 #include "net_macros.h"
 
 template <typename ConnectorType>
-Test_U_Stream_T<ConnectorType>::Test_U_Stream_T ()
- : inherited (ACE_TEXT_ALWAYS_CHAR ("DHCPClientStream"))
+Test_I_Stream_T<ConnectorType>::Test_I_Stream_T ()
+ : inherited ()
  , DHCPDiscover_ (ACE_TEXT_ALWAYS_CHAR ("DHCPDiscover"),
                   NULL,
                   false)
@@ -38,7 +38,7 @@ Test_U_Stream_T<ConnectorType>::Test_U_Stream_T ()
                NULL,
                false)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::Test_U_Stream_T"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_T::Test_I_Stream_T"));
 
   // remember the "owned" ones...
   // *TODO*: clean this up
@@ -58,9 +58,9 @@ Test_U_Stream_T<ConnectorType>::Test_U_Stream_T ()
 }
 
 template <typename ConnectorType>
-Test_U_Stream_T<ConnectorType>::~Test_U_Stream_T ()
+Test_I_Stream_T<ConnectorType>::~Test_I_Stream_T ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::~Test_U_Stream_T"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_T::~Test_I_Stream_T"));
 
   // *NOTE*: this implements an ordered shutdown on destruction...
   inherited::shutdown ();
@@ -68,9 +68,9 @@ Test_U_Stream_T<ConnectorType>::~Test_U_Stream_T ()
 
 template <typename ConnectorType>
 void
-Test_U_Stream_T<ConnectorType>::ping ()
+Test_I_Stream_T<ConnectorType>::ping ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::ping"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_T::ping"));
 
   ACE_ASSERT (false);
   ACE_NOTSUP;
@@ -80,11 +80,9 @@ Test_U_Stream_T<ConnectorType>::ping ()
 
 template <typename ConnectorType>
 bool
-Test_U_Stream_T<ConnectorType>::initialize (const Test_U_StreamConfiguration& configuration_in,
-                                            bool setupPipeline_in,
-                                            bool resetSessionData_in)
+Test_I_Stream_T<ConnectorType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_T::initialize"));
 
   int result = -1;
 
@@ -362,9 +360,9 @@ failed:
 
 template <typename ConnectorType>
 bool
-Test_U_Stream_T<ConnectorType>::collect (Test_U_RuntimeStatistic_t& data_out)
+Test_I_Stream_T<ConnectorType>::collect (Test_U_RuntimeStatistic_t& data_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::collect"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_T::collect"));
 
   // sanity check(s)
   ACE_ASSERT (inherited::sessionData_);
@@ -426,9 +424,9 @@ Test_U_Stream_T<ConnectorType>::collect (Test_U_RuntimeStatistic_t& data_out)
 
 template <typename ConnectorType>
 void
-Test_U_Stream_T<ConnectorType>::report () const
+Test_I_Stream_T<ConnectorType>::report () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::report"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_T::report"));
 
 //   Net_Module_Statistic_ReaderTask_t* runtimeStatistic_impl = NULL;
 //   runtimeStatistic_impl = dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//runtimeStatistic_.writer ());

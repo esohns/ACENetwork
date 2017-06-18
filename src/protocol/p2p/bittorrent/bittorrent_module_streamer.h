@@ -46,15 +46,6 @@ class BitTorrent_Module_Streamer_T
                                  enum Stream_SessionMessageType,
                                  struct Stream_UserData>
 {
- public:
-  BitTorrent_Module_Streamer_T (ISTREAM_T*); // stream handle
-  virtual ~BitTorrent_Module_Streamer_T ();
-
-  // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (DataMessageType*&, // data message handle
-                                  bool&);            // return value: pass message downstream ?
-
- private:
   typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
                                  TimePolicyType,
                                  ConfigurationType,
@@ -66,6 +57,20 @@ class BitTorrent_Module_Streamer_T
                                  enum Stream_SessionMessageType,
                                  struct Stream_UserData> inherited;
 
+ public:
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  BitTorrent_Module_Streamer_T (ISTREAM_T*);                     // stream handle
+#else
+  BitTorrent_Module_Streamer_T (typename inherited::ISTREAM_T*); // stream handle
+#endif
+  virtual ~BitTorrent_Module_Streamer_T ();
+
+  // implement (part of) Stream_ITaskBase
+  virtual void handleDataMessage (DataMessageType*&, // data message handle
+                                  bool&);            // return value: pass message downstream ?
+
+ private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_Streamer_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_Streamer_T (const BitTorrent_Module_Streamer_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Module_Streamer_T& operator= (const BitTorrent_Module_Streamer_T&))

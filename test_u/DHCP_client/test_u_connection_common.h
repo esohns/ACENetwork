@@ -89,7 +89,15 @@ struct Test_U_SocketHandlerConfiguration
   struct Test_U_UserData*                userData;
 };
 
+extern const char stream_name_string_[];
+struct Test_U_AllocatorConfiguration;
 struct Test_U_StreamConfiguration;
+struct Test_U_StreamModuleHandlerConfiguration;
+typedef Stream_Configuration_T<stream_name_string_,
+                               struct Test_U_AllocatorConfiguration,
+                               struct Test_U_StreamConfiguration,
+                               struct Stream_ModuleConfiguration,
+                               struct Test_U_StreamModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
 struct Test_U_ConnectionConfiguration
  : DHCP_ConnectionConfiguration
 {
@@ -104,7 +112,7 @@ struct Test_U_ConnectionConfiguration
 
   Test_U_IConnectionManager_t*             connectionManager;
   struct Test_U_SocketHandlerConfiguration socketHandlerConfiguration;
-  struct Test_U_StreamConfiguration*       streamConfiguration;
+  Test_U_StreamConfiguration_t*            streamConfiguration;
 
   struct Test_U_UserData*                  userData;
 };

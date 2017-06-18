@@ -25,8 +25,8 @@
 #include "IRC_client_common_modules.h"
 #include "IRC_client_module_IRChandler.h"
 
-IRC_Client_Stream::IRC_Client_Stream (const std::string& name_in)
- : inherited (name_in)
+IRC_Client_Stream::IRC_Client_Stream ()
+ : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::IRC_Client_Stream"));
 
@@ -36,7 +36,7 @@ IRC_Client_Stream::~IRC_Client_Stream ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::~IRC_Client_Stream"));
 
-  // *NOTE*: this implements an ordered shutdown on destruction...
+  // *NOTE*: this implements an ordered shutdown on destruction
   inherited::shutdown ();
 }
 
@@ -45,9 +45,6 @@ IRC_Client_Stream::load (Stream_ModuleList_t& modules_out,
                          bool& delete_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::load"));
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
@@ -88,7 +85,7 @@ IRC_Client_Stream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-IRC_Client_Stream::initialize (const struct IRC_Client_StreamConfiguration& configuration_in)
+IRC_Client_Stream::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream::initialize"));
 
@@ -97,24 +94,24 @@ IRC_Client_Stream::initialize (const struct IRC_Client_StreamConfiguration& conf
   ACE_ASSERT (!isRunning ());
 
 //  bool result = false;
-  bool setup_pipeline = configuration_in.setupPipeline;
+  bool setup_pipeline = configuration_in.configuration_.setupPipeline;
   bool reset_setup_pipeline = false;
   struct IRC_Client_SessionData* session_data_p = NULL;
   typename inherited::ISTREAM_T::MODULE_T* module_p = NULL;
   IRC_Client_Module_Bisector_t* bisector_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<struct IRC_Client_StreamConfiguration&> (configuration_in).setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
     goto error;
   } // end IF
-  const_cast<struct IRC_Client_StreamConfiguration&> (configuration_in).setupPipeline =
+  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
@@ -126,7 +123,7 @@ IRC_Client_Stream::initialize (const struct IRC_Client_StreamConfiguration& conf
   session_data_p =
       &const_cast<struct IRC_Client_SessionData&> (inherited::sessionData_->get ());
   inherited::state_.currentSessionData = session_data_p;
-  session_data_p->sessionID = configuration_in.sessionID;
+  //session_data_p->sessionID = configuration_in.sessionID;
 
 //  ACE_ASSERT (configuration_in.moduleConfiguration);
 //  configuration_in.moduleConfiguration->streamState = &inherited::state_;
@@ -139,7 +136,7 @@ IRC_Client_Stream::initialize (const struct IRC_Client_StreamConfiguration& conf
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ()),
+                ACE_TEXT (inherited::configuration_.name_.c_str ()),
                 ACE_TEXT ("Marshal")));
     goto error;
   } // end IF
@@ -149,7 +146,7 @@ IRC_Client_Stream::initialize (const struct IRC_Client_StreamConfiguration& conf
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<IRC_Module_Bisector_T> failed, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
+                ACE_TEXT (inherited::configuration_.name_.c_str ())));
     goto error;
   } // end IF
   bisector_impl_p->set (&(inherited::state_));
@@ -162,12 +159,12 @@ IRC_Client_Stream::initialize (const struct IRC_Client_StreamConfiguration& conf
 
   // ---------------------------------------------------------------------------
 
-  if (configuration_in.setupPipeline)
+  if (configuration_in.configuration_.setupPipeline)
     if (!inherited::setup (NULL))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (inherited::name_.c_str ())));
+                  ACE_TEXT (inherited::configuration_.name_.c_str ())));
       goto error;
     } // end IF
 
@@ -178,7 +175,7 @@ IRC_Client_Stream::initialize (const struct IRC_Client_StreamConfiguration& conf
 
 error:
   if (reset_setup_pipeline)
-    const_cast<struct IRC_Client_StreamConfiguration&> (configuration_in).setupPipeline =
+    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
       setup_pipeline;
 
   return false;

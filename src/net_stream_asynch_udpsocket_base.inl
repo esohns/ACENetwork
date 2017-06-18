@@ -53,7 +53,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                                                                                   const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited4 (interfaceHandle_in,
                statisticCollectionInterval_in)
- , stream_ (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_DEFAULT_NAME))
+ , stream_ ()
  , useThreadPerConnection_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::Net_StreamAsynchUDPSocketBase_T"));
@@ -142,7 +142,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                                                                           : inherited4::configuration_->socketHandlerConfiguration.socketConfiguration.address);
 #if defined (ACE_LINUX)
   // (temporarily) elevate priviledges to open system sockets
-  if (!inherited4::configuration_.socketHandlerConfiguration.socketConfiguration.writeOnly &&
+  if (!inherited4::configuration_->socketHandlerConfiguration.socketConfiguration.writeOnly &&
       (local_SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT))
   {
     if (!Common_Tools::setRootPrivileges ())
@@ -203,12 +203,12 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   // step3a: connect stream head message queue with a notification pipe/queue ?
   if (!useThreadPerConnection_)
-    inherited4::configuration_->streamConfiguration->notificationStrategy =
+    inherited4::configuration_->streamConfiguration->configuration_.notificationStrategy =
       this;
 
   // step3d: initialize stream
   // *TODO*: this clearly is a design glitch
-  inherited4::configuration_->streamConfiguration->sessionID =
+  inherited4::configuration_->streamConfiguration->configuration_.sessionID =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       reinterpret_cast<size_t> (inherited::handle ()); // (== socket handle)
 #else

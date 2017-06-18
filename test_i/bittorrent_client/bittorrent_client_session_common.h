@@ -21,7 +21,7 @@
 #ifndef BITTORRENT_CLIENT_SESSION_COMMON_H
 #define BITTORRENT_CLIENT_SESSION_COMMON_H
 
-#include <ace/INET_Addr.h>
+#include "ace/INET_Addr.h"
 
 #include "stream_common.h"
 

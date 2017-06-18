@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include "ace/Synch.h"
 #include "net_transportlayer_base.h"
 
 #include "ace/Assert.h"

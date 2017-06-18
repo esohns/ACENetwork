@@ -71,7 +71,7 @@ class HTTP_Module_Parser_T
   typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
 
  public:
-  HTTP_Module_Parser_T (typename TASK_BASE_T::ISTREAM_T*); // stream handle
+  HTTP_Module_Parser_T (typename inherited::ISTREAM_T*); // stream handle
   virtual ~HTTP_Module_Parser_T ();
 
   // override (part of) Stream_IModuleHandler_T
@@ -156,10 +156,14 @@ class HTTP_Module_ParserH_T
                                       SessionDataContainerType,
                                       StatisticContainerType,
                                       UserDataType> inherited;
-  typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
 
  public:
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  HTTP_Module_ParserH_T (ISTREAM_T*); // stream handle
+#else
   HTTP_Module_ParserH_T (typename inherited::ISTREAM_T*); // stream handle
+#endif
   virtual ~HTTP_Module_ParserH_T ();
 
   // *NOTE*: disambiguate Common_ISet_T::set()
@@ -196,6 +200,8 @@ class HTTP_Module_ParserH_T
   DataMessageType* headFragment_;
 
  private:
+   typedef HTTP_ParserDriver_T<SessionMessageType> inherited2;
+
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T (const HTTP_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_ParserH_T& operator= (const HTTP_Module_ParserH_T&))

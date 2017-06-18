@@ -80,6 +80,8 @@
 
 #include "test_u_dhcp_client_common.h"
 
+const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("DHCPClientStream");
+
 void
 do_printUsage (const std::string& programName_in)
 {
@@ -90,16 +92,6 @@ do_printUsage (const std::string& programName_in)
 
   std::string path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("..");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("..");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("test_u");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("DHCP_client");
-#endif // #ifdef DEBUG_DEBUGGER
 
   std::cout << ACE_TEXT_ALWAYS_CHAR ("usage: ")
             << programName_in
@@ -207,16 +199,6 @@ do_processArguments (int argc_in,
 
   std::string path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("..");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("..");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("test_u");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("DHCP_client");
-#endif // #ifdef DEBUG_DEBUGGER
 
   // initialize results
   requestBroadcastReplies_out = DHCP_DEFAULT_FLAGS_BROADCAST;
@@ -539,7 +521,7 @@ do_work (bool requestBroadcastReplies_in,
 //  } // end IF
 
   Stream_AllocatorHeap_T<struct Test_U_AllocatorConfiguration> heap_allocator;
-  if (!heap_allocator.initialize (configuration.allocatorConfiguration))
+  if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize heap allocator, returning\n")));
@@ -623,19 +605,15 @@ do_work (bool requestBroadcastReplies_in,
     &((*iterator).second);
 
   // ********************** stream configuration data **************************
-  configuration.streamConfiguration.cloneModule = true;
-  configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.module =
+  configuration.streamConfiguration.configuration_.cloneModule = true;
+  configuration.streamConfiguration.configuration_.messageAllocator =
+    &message_allocator;
+  configuration.streamConfiguration.configuration_.module =
     (!UIDefinitionFileName_in.empty () ? &event_handler
                                        : NULL);
-  configuration.streamConfiguration.moduleConfiguration =
-    &configuration.streamConfiguration.moduleConfiguration_2;
-  configuration.streamConfiguration.printFinalReport = true;
+  configuration.streamConfiguration.configuration_.printFinalReport = true;
 
   // ********************** module configuration data **************************
-  configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
-    &configuration.streamConfiguration;
-
   struct Test_U_StreamModuleHandlerConfiguration modulehandler_configuration;
   modulehandler_configuration.connectionConfigurations =
     &CBData_in.configuration->connectionConfigurations;
@@ -653,11 +631,11 @@ do_work (bool requestBroadcastReplies_in,
   modulehandler_configuration.subscribersLock =
     &CBData_in.subscribersLock;
   modulehandler_configuration.targetFileName = fileName_in;
-  configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                        modulehandler_configuration));
-  Test_U_ModuleHandlerConfigurationsIterator_t iterator_2 =
-    configuration.streamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != configuration.streamConfiguration.moduleHandlerConfigurations.end ());
+  configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                            modulehandler_configuration));
+  Test_U_StreamConfiguration_t::ITERATOR_T iterator_2 =
+    configuration.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != configuration.streamConfiguration.end ());
 
   // ********************** protocol configuration data ************************
   configuration.protocolConfiguration.requestBroadcastReplies =
@@ -731,7 +709,7 @@ do_work (bool requestBroadcastReplies_in,
                                               thread_data.numberOfDispatchThreads,
                                               thread_data.proactorType,
                                               thread_data.reactorType,
-                                              configuration.streamConfiguration.serializeOutput))
+                                              configuration.streamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
@@ -842,7 +820,7 @@ do_work (bool requestBroadcastReplies_in,
   // *NOTE*: the DHCP server address may not be known at this stage, so
   //         connection to the unicast address is handled by the discovery
   //         module
-  configuration.streamConfiguration.module = NULL;
+  configuration.streamConfiguration.configuration_.module = NULL;
   connection_manager_p->set ((*iterator).second,
                              &configuration.userData);
 
@@ -944,7 +922,7 @@ do_work (bool requestBroadcastReplies_in,
   // step1ca: reinitialize connection manager
   (*iterator).second.socketHandlerConfiguration.socketConfiguration.writeOnly =
     false;
-  configuration.streamConfiguration.module =
+  configuration.streamConfiguration.configuration_.module =
     (!UIDefinitionFileName_in.empty () ? &event_handler
                                        : NULL);
   //connection_manager_p->set (configuration,
@@ -1334,16 +1312,6 @@ ACE_TMAIN (int argc_in,
 
   std::string path =
     Common_File_Tools::getWorkingDirectory ();
-#if defined (DEBUG_DEBUGGER)
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("..");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("..");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("test_u");
-  path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
-  path += ACE_TEXT_ALWAYS_CHAR ("DHCP_client");
-#endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
   bool request_broadcast_replies = DHCP_DEFAULT_FLAGS_BROADCAST;

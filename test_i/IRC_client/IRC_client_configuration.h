@@ -37,10 +37,10 @@
 #include "irc_configuration.h"
 #include "irc_defines.h"
 
-#include "irc_client_common.h"
-#include "irc_client_defines.h"
-#include "irc_client_network.h"
-#include "irc_client_stream_common.h"
+#include "IRC_client_common.h"
+#include "IRC_client_defines.h"
+#include "IRC_client_network.h"
+#include "IRC_client_stream_common.h"
 
 // forward declarations
 struct IRC_Client_ConnectionConfiguration;
@@ -97,7 +97,6 @@ struct IRC_Client_Configuration
    ///////////////////////////////////////
    , connectionConfigurations ()
    ///////////////////////////////////////
-   , allocatorConfiguration ()
    , streamConfiguration ()
    ///////////////////////////////////////
    , protocolConfiguration ()
@@ -116,8 +115,7 @@ struct IRC_Client_Configuration
   // ****************************** socket *************************************
   IRC_Client_ConnectionConfigurations_t connectionConfigurations;
   // ****************************** stream *************************************
-  struct IRC_AllocatorConfiguration     allocatorConfiguration;
-  struct IRC_Client_StreamConfiguration streamConfiguration;
+  IRC_Client_StreamConfiguration_t      streamConfiguration;
   // ***************************** protocol ************************************
   struct IRC_ProtocolConfiguration      protocolConfiguration;
   // ***************************************************************************

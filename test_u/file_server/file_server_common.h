@@ -74,10 +74,10 @@ struct FileServer_UserData
 {
   inline FileServer_UserData ()
    : Net_UserData ()
-   , connectionConfiguration (NULL)
+   //, connectionConfiguration (NULL)
   {};
 
-  struct FileServer_ConnectionConfiguration* connectionConfiguration;
+  //struct FileServer_ConnectionConfiguration* connectionConfiguration;
 };
 
 struct FileServer_SignalHandlerConfiguration
@@ -114,7 +114,7 @@ struct FileServer_Configuration
   Test_U_IListener_t*                          listener;
   struct FileServer_ListenerConfiguration      listenerConfiguration;
   struct FileServer_SignalHandlerConfiguration signalHandlerConfiguration;
-  struct FileServer_StreamConfiguration        streamConfiguration;
+  FileServer_StreamConfiguration_t             streamConfiguration;
 
   struct FileServer_UserData                   userData;
 };

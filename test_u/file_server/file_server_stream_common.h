@@ -100,7 +100,14 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct FileServer_ConnectionState,
                                  Net_RuntimeStatistic_t,
                                  struct FileServer_UserData> FileServer_IInetConnectionManager_t;
+extern const char stream_name_string_[];
 struct FileServer_StreamConfiguration;
+struct Test_U_ModuleHandlerConfiguration;
+typedef Stream_Configuration_T<stream_name_string_,
+                               struct Stream_AllocatorConfiguration,
+                               struct FileServer_StreamConfiguration,
+                               struct Stream_ModuleConfiguration,
+                               struct Test_U_ModuleHandlerConfiguration> FileServer_StreamConfiguration_t;
 struct Test_U_ModuleHandlerConfiguration
  : Stream_ModuleHandlerConfiguration
 {
@@ -128,31 +135,24 @@ struct Test_U_ModuleHandlerConfiguration
   Stream_IMessageQueue*                  outboundQueue;            // event handler module
   unsigned int                           program;                  // MPEG TS decoder module
   bool                                   pushStatisticMessages;    // statistic/file source module
-  struct FileServer_StreamConfiguration* streamConfiguration;      // net target module
+  FileServer_StreamConfiguration_t*      streamConfiguration;      // net target module
   unsigned int                           streamType;               // MPEG TS decoder module
   FileServer_ISessionNotify_t*           subscriber;               // event handler module
   FileServer_Subscribers_t*              subscribers;              // event handler module
 };
-typedef std::map<std::string,
-                 struct Test_U_ModuleHandlerConfiguration> Test_U_ModuleHandlerConfigurations_t;
-typedef Test_U_ModuleHandlerConfigurations_t::iterator Test_U_ModuleHandlerConfigurationsIterator_t;
 
 struct FileServer_StreamConfiguration
  : Stream_Configuration
 {
   inline FileServer_StreamConfiguration ()
    : Stream_Configuration ()
-   , moduleConfiguration_2 ()
-   , moduleHandlerConfigurations ()
    , useReactor (NET_EVENT_USE_REACTOR)
    , userData (NULL)
   {};
 
-  struct Stream_ModuleConfiguration    moduleConfiguration_2;       // module configuration
-  Test_U_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration
-  bool                                 useReactor;
+  bool                        useReactor;
 
-  struct FileServer_UserData*          userData;                    // user data
+  struct FileServer_UserData* userData;   // user data
 };
 
 #endif

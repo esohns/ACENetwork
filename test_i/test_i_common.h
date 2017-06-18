@@ -22,6 +22,7 @@
 #define TEST_I_COMMON_H
 
 #include "stream_common.h"
+#include "stream_configuration.h"
 #include "stream_inotify.h"
 
 #include "net_common.h"
@@ -45,14 +46,11 @@ struct Test_I_ConnectionState
 {
   inline Test_I_ConnectionState ()
    : Net_ConnectionState ()
-   , configuration (NULL)
-   , userData (NULL)
+   //, configuration (NULL)
   {};
 
   // *TODO*: remove ASAP
-  struct Net_Configuration*    configuration;
-
-  struct HTTP_Stream_UserData* userData;
+  //struct Net_Configuration* configuration;
 };
 
 struct Test_I_AllocatorConfiguration
@@ -86,16 +84,14 @@ struct Test_I_SignalHandlerConfiguration
 struct Test_I_Configuration
 {
   inline Test_I_Configuration ()
-   : allocatorConfiguration ()
-   , signalHandlerConfiguration ()
-   , connectionConfigurations ()
+   : connectionConfigurations ()
    , parserConfiguration ()
    //, streamConfiguration ()
-   , userData ()
+   , signalHandlerConfiguration ()
    , useReactor (NET_EVENT_USE_REACTOR)
+   , userData ()
   {};
 
-  struct Test_I_AllocatorConfiguration     allocatorConfiguration;
   // **************************** socket data **********************************
   Net_ConnectionConfigurations_t           connectionConfigurations;
   // **************************** parser data **********************************

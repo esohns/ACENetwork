@@ -21,7 +21,7 @@
 #ifndef NET_CONFIGURATION_H
 #define NET_CONFIGURATION_H
 
-#include <deque>
+#include <map>
 #include <string>
 
 #include "ace/INET_Addr.h"
@@ -130,6 +130,7 @@ struct Net_ListenerConfiguration
   struct Net_SocketHandlerConfiguration socketHandlerConfiguration;
 };
 
+struct Stream_Configuration;
 struct Net_ConnectionConfiguration
 {
   inline Net_ConnectionConfiguration ()
@@ -152,9 +153,11 @@ struct Net_ConnectionConfiguration
 
   struct Net_UserData*                  userData;
 };
-typedef std::deque<struct Net_ConnectionConfiguration> Net_ConnectionConfigurations_t;
+typedef std::map<std::string,
+                 struct Net_ConnectionConfiguration> Net_ConnectionConfigurations_t;
 typedef Net_ConnectionConfigurations_t::iterator Net_ConnectionConfigurationIterator_t;
 
+struct Common_ParserConfiguration;
 struct Net_SessionConfiguration
 {
   inline Net_SessionConfiguration ()

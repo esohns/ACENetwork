@@ -58,7 +58,12 @@ class HTTP_Module_Streamer_T
                                  struct Stream_UserData> inherited;
 
  public:
-  HTTP_Module_Streamer_T (typename TASK_BASE_T::ISTREAM_T*); // stream handle
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  HTTP_Module_Streamer_T (ISTREAM_T*); // stream handle
+#else
+  HTTP_Module_Streamer_T (typename inherited::ISTREAM_T*); // stream handle
+#endif
   virtual ~HTTP_Module_Streamer_T ();
 
   // implement (part of) Stream_ITaskBase

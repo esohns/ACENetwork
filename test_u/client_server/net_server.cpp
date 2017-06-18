@@ -27,22 +27,22 @@
 #include <vector>
 
 //#include <ace/streams.h>
-#include <ace/Get_Opt.h>
-#include <ace/High_Res_Timer.h>
+#include "ace/Get_Opt.h"
+#include "ace/High_Res_Timer.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <ace/Init_ACE.h>
+#include "ace/Init_ACE.h"
 #endif
-#include <ace/Log_Msg.h>
-#include <ace/Synch.h>
-#include <ace/Proactor.h>
-#include <ace/Profile_Timer.h>
+#include "ace/Log_Msg.h"
+#include "ace/Synch.h"
+#include "ace/Proactor.h"
+#include "ace/Profile_Timer.h"
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include <ace/POSIX_Proactor.h>
+#include "ace/POSIX_Proactor.h"
 #endif
-#include <ace/Reactor.h>
-#include <ace/Sig_Handler.h>
-#include <ace/Signal.h>
-#include <ace/Version.h>
+#include "ace/Reactor.h"
+#include "ace/Sig_Handler.h"
+#include "ace/Signal.h"
+#include "ace/Version.h"
 
 #include "common_file_tools.h"
 #include "common_logger.h"
@@ -82,6 +82,8 @@ unsigned int random_seed;
 struct random_data random_data;
 char random_state_buffer[BUFSIZ];
 #endif
+
+const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("NetServerStream");
 
 void
 do_printUsage (const std::string& programName_in)
@@ -489,15 +491,13 @@ do_work (unsigned int maximumNumberOfConnections_in,
   // ******************** protocol configuration data **************************
   configuration.protocolConfiguration.pingInterval = pingInterval_in;
   // ********************** stream configuration data **************************
-  configuration.streamConfiguration.cloneModule = !(UIDefinitionFile_in.empty ());
-  configuration.streamConfiguration.messageAllocator = &message_allocator;
-  configuration.streamConfiguration.module =
+  configuration.streamConfiguration.configuration_.cloneModule =
+    !(UIDefinitionFile_in.empty ());
+  configuration.streamConfiguration.configuration_.messageAllocator =
+    &message_allocator;
+  configuration.streamConfiguration.configuration_.module =
     (!UIDefinitionFile_in.empty () ? &event_handler
                                    : NULL);
-  configuration.streamConfiguration.moduleConfiguration =
-    &configuration.streamConfiguration.moduleConfiguration_2;
-  configuration.streamConfiguration.moduleConfiguration_2.streamConfiguration =
-    &configuration.streamConfiguration;
 
   struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
   modulehandler_configuration.printFinalReport = true;
@@ -511,13 +511,13 @@ do_work (unsigned int maximumNumberOfConnections_in,
   modulehandler_configuration.subscribers = &CBData_in.subscribers;
   modulehandler_configuration.subscribersLock = &CBData_in.subscribersLock;
 
-  configuration.streamConfiguration.moduleHandlerConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                                        modulehandler_configuration));
+  configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
+                                                            modulehandler_configuration));
   // *TODO*: is this correct ?
-  configuration.streamConfiguration.serializeOutput = useThreadPool_in;
-  configuration.streamConfiguration.userData = &configuration.userData;
-  //configuration.userData.connectionConfiguration =
-  //    &configuration.connectionConfiguration;
+  configuration.streamConfiguration.configuration_.serializeOutput =
+    useThreadPool_in;
+  configuration.streamConfiguration.configuration_.userData =
+    &configuration.userData;
 
   // ********************** connection configuration data **********************
   struct Test_U_ConnectionConfiguration connection_configuration;
@@ -553,7 +553,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
                                               thread_data.numberOfDispatchThreads,
                                               thread_data.proactorType,
                                               thread_data.reactorType,
-                                              configuration.streamConfiguration.serializeOutput))
+                                              configuration.streamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));

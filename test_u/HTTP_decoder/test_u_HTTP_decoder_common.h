@@ -52,10 +52,7 @@ struct Test_U_HTTPDecoder_UserData
 {
   inline Test_U_HTTPDecoder_UserData ()
    : Test_U_UserData ()
-   , streamConfiguration (NULL)
   {};
-
-  struct Test_U_StreamConfiguration* streamConfiguration;
 };
 
 struct Test_U_AllocatorConfiguration
@@ -86,8 +83,7 @@ struct Test_U_SignalHandlerConfiguration
 struct Test_U_Configuration
 {
   inline Test_U_Configuration ()
-   : allocatorConfiguration ()
-   , connectionConfigurations ()
+   : connectionConfigurations ()
    , parserConfiguration ()
    , signalHandlerConfiguration ()
    , streamConfiguration ()
@@ -95,7 +91,6 @@ struct Test_U_Configuration
    , userData ()
   {};
 
-  struct Test_U_AllocatorConfiguration     allocatorConfiguration;
   // **************************** socket data **********************************
   Test_U_ConnectionConfigurations_t        connectionConfigurations;
   // **************************** parser data **********************************
@@ -103,7 +98,7 @@ struct Test_U_Configuration
   // **************************** signal data **********************************
   struct Test_U_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** stream data **********************************
-  struct Test_U_StreamConfiguration        streamConfiguration;
+  Test_U_StreamConfiguration_t             streamConfiguration;
   // *************************** protocol data *********************************
   bool                                     useReactor;
 

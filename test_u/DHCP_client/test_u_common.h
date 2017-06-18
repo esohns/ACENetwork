@@ -174,23 +174,15 @@ typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 //                                 Test_U_UserData> Test_U_IConnectionManager_t;
 
 // forward declarations
+extern const char stream_name_string_[];
+struct Test_U_AllocatorConfiguration;
+struct Test_U_StreamConfiguration;
 struct Test_U_StreamModuleHandlerConfiguration;
-struct Test_U_StreamState;
-
-//typedef Stream_Base_T<ACE_SYNCH_MUTEX,
-//                      ACE_MT_SYNCH,
-//                      Common_TimePolicy_t,
-//                      Stream_StateMachine_ControlState,
-//                      Test_U_StreamState,
-//                      Test_U_StreamConfiguration,
-//                      DHCP_RuntimeStatistic_t,
-//                      Stream_ModuleConfiguration,
-//                      Test_U_StreamModuleHandlerConfiguration,
-//                      Test_U_StreamSessionData,   // session data
-//                      Test_U_StreamSessionData_t, // session data container (reference counted)
-//                      Test_U_SessionMessage,
-//                      Test_U_Message> Test_U_StreamBase_t;
-
+typedef Stream_Configuration_T<stream_name_string_,
+                               struct Test_U_AllocatorConfiguration,
+                               struct Test_U_StreamConfiguration,
+                               struct Stream_ModuleConfiguration,
+                               struct Test_U_StreamModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
 struct Test_U_StreamModuleHandlerConfiguration
  : DHCP_ModuleHandlerConfiguration
 {
@@ -213,15 +205,11 @@ struct Test_U_StreamModuleHandlerConfiguration
   //guint                                     contextID;
   bool                               inbound; // net IO module
   bool                               passive; // UDP target module
-  struct Test_U_StreamConfiguration* streamConfiguration; // dhcp discover module
+  Test_U_StreamConfiguration_t*      streamConfiguration; // dhcp discover module
   Test_U_ISessionNotify_t*           subscriber;
   Test_U_Subscribers_t*              subscribers;
   std::string                        targetFileName; // dump module
 };
-typedef std::map<std::string,
-                 struct Test_U_StreamModuleHandlerConfiguration> Test_U_ModuleHandlerConfigurations_t;
-typedef Test_U_ModuleHandlerConfigurations_t::const_iterator Test_U_ModuleHandlerConfigurationsConstIterator_t;
-typedef Test_U_ModuleHandlerConfigurations_t::iterator Test_U_ModuleHandlerConfigurationsIterator_t;
 
 typedef DHCP_ProtocolConfiguration Test_U_ProtocolConfiguration_t;
 
@@ -272,15 +260,10 @@ struct Test_U_StreamConfiguration
 {
   inline Test_U_StreamConfiguration ()
    : DHCP_StreamConfiguration ()
-   , moduleConfiguration_2 ()
-   , moduleHandlerConfigurations ()
    , userData (NULL)
   {};
 
-  struct Stream_ModuleConfiguration    moduleConfiguration_2;       // stream module configuration
-  Test_U_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // stream module handler configuration
-
-  struct Test_U_UserData*              userData;
+  struct Test_U_UserData* userData;
 };
 
 struct Test_U_DHCPClient_StreamState
@@ -301,7 +284,6 @@ struct Test_U_Configuration
    : signalHandlerConfiguration ()
    , connectionConfigurations ()
    , parserConfiguration ()
-   , allocatorConfiguration ()
    , streamConfiguration ()
    , listenerConfiguration ()
    , userData ()
@@ -315,8 +297,7 @@ struct Test_U_Configuration
   // **************************** parser data **********************************
   struct Common_ParserConfiguration        parserConfiguration;
   // **************************** stream data **********************************
-  struct Test_U_AllocatorConfiguration     allocatorConfiguration;
-  struct Test_U_StreamConfiguration        streamConfiguration;
+  Test_U_StreamConfiguration_t             streamConfiguration;
   // *************************** protocol data *********************************
   Test_U_ProtocolConfiguration_t           protocolConfiguration;
   // *************************** listener data *********************************

@@ -730,13 +730,14 @@ button_connect_clicked_cb (GtkWidget* widget_in,
                 ACE_TEXT ("no .torrent file selected, returning\n")));
     return;
   } // end IF
-  data_p->configuration->trackerStreamConfiguration.filename = filename_p;
+  data_p->configuration->trackerStreamConfiguration.configuration_.filename =
+    filename_p;
   g_free (filename_p);
-  if (!Common_File_Tools::isReadable (data_p->configuration->trackerStreamConfiguration.filename))
+  if (!Common_File_Tools::isReadable (data_p->configuration->trackerStreamConfiguration.configuration_.filename))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT (".torrent file (was: \"%s\") not readable, returning\n"),
-                ACE_TEXT (data_p->configuration->trackerStreamConfiguration.filename.c_str ())));
+                ACE_TEXT (data_p->configuration->trackerStreamConfiguration.configuration_.filename.c_str ())));
     return;
   } // end IF
 
@@ -753,9 +754,9 @@ button_connect_clicked_cb (GtkWidget* widget_in,
                 ACE_TEXT ("no destination folder selected, returning\n")));
     return;
   } // end IF
-  BitTorrent_Client_TrackerModuleHandlerConfigurationsIterator_t iterator_2 =
-    data_p->configuration->trackerStreamConfiguration.moduleHandlerConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != data_p->configuration->trackerStreamConfiguration.moduleHandlerConfigurations.end ());
+  BitTorrent_Client_TrackerStreamConfiguration_t::ITERATOR_T iterator_2 =
+    data_p->configuration->trackerStreamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != data_p->configuration->trackerStreamConfiguration.end ());
   (*iterator_2).second.destination = path_p;
   g_free (path_p);
   if (!Common_File_Tools::isDirectory ((*iterator_2).second.destination))
