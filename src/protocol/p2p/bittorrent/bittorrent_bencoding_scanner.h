@@ -30,7 +30,7 @@ BitTorrent_Bencoding_Scanner::yylex (yy::BitTorrent_Bencoding_Parser::semantic_t
                                      yy::location* yylloc)
 #endif
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
 #ifndef yyFlexLexer
 #define yyFlexLexer BitTorrent_Bencoding_Scanner_FlexLexer

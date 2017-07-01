@@ -21,8 +21,8 @@
 #ifndef NET_ICONNECTOR_H
 #define NET_ICONNECTOR_H
 
-#include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
 
 #include "common_iget.h"
 #include "common_iinitialize.h"

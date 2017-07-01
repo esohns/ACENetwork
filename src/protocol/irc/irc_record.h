@@ -26,7 +26,7 @@
 #include <utility>
 #include <vector>
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
 #include "common_idumpstate.h"
 #include "common_referencecounter_base.h"

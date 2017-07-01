@@ -24,9 +24,9 @@
 #include <string>
 #include <vector>
 
-#include <ace/INET_Addr.h>
-#include <ace/Singleton.h>
-#include <ace/Synch_Traits.h>
+#include "ace/INET_Addr.h"
+#include "ace/Singleton.h"
+#include "ace/Synch_Traits.h"
 
 #include "stream_common.h"
 

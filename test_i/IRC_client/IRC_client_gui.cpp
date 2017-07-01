@@ -1437,8 +1437,8 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Tools::period2String (working_time,
-                               working_time_string);
+  Common_Tools::periodToString (working_time,
+                                working_time_string);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
               ACE_TEXT (working_time_string.c_str ())));
@@ -1476,9 +1476,9 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Tools::period2String (user_time,
+  Common_Tools::periodToString (user_time,
                                user_time_string);
-  Common_Tools::period2String (system_time,
+  Common_Tools::periodToString (system_time,
                                system_time_string);
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)

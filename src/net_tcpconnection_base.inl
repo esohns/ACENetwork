@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
@@ -70,27 +70,6 @@ Net_TCPConnectionBase_T<HandlerType,
 
 }
 
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename ListenerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-Net_TCPConnectionBase_T<HandlerType,
-                        ConfigurationType,
-                        StateType,
-                        StatisticContainerType,
-                        HandlerConfigurationType,
-                        ListenerConfigurationType,
-                        StreamType,
-                        UserDataType>::~Net_TCPConnectionBase_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPConnectionBase_T::~Net_TCPConnectionBase_T"));
-
-}
-
 /////////////////////////////////////////
 
 template <typename HandlerType,
@@ -137,26 +116,5 @@ Net_AsynchTCPConnectionBase_T<HandlerType,
               ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnectionBase_T::Net_AsynchTCPConnectionBase_T"));
-
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename ListenerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-Net_AsynchTCPConnectionBase_T<HandlerType,
-                              ConfigurationType,
-                              StateType,
-                              StatisticContainerType,
-                              HandlerConfigurationType,
-                              ListenerConfigurationType,
-                              StreamType,
-                              UserDataType>::~Net_AsynchTCPConnectionBase_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnectionBase_T::~Net_AsynchTCPConnectionBase_T"));
 
 }

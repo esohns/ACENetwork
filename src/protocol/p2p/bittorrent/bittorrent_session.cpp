@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "stream_misc_messagehandler.h"
 
 #include "bittorrent_session.h"

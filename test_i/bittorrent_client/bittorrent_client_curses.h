@@ -24,7 +24,7 @@
 #include <map>
 #include <string>
 
-#include <ace/Synch_Traits.h>
+#include "ace/Synch_Traits.h"
 
 #if defined (_MSC_VER)
 #include <curses.h>

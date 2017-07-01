@@ -1,5 +1,5 @@
 %top{
-  #include <ace/Synch.h>
+  #include "ace/Synch.h"
   #include "bittorrent_iparser.h"
 //  #include "bittorrent_bencoding_scanner.h"
 
@@ -37,7 +37,7 @@ BitTorrent_Bencoding_Scanner::yylex (yy::BitTorrent_Bencoding_Parser::semantic_t
 
   #include <sstream>
 
-  #include <ace/Synch.h>
+  #include "ace/Synch.h"
   #include "bittorrent_bencoding_parser.h"
   #include "bittorrent_bencoding_scanner.h"
 

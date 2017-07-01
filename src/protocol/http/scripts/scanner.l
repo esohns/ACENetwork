@@ -1,5 +1,5 @@
 %top{
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "http_common.h"
 #include "http_exports.h"
 #include "http_iparser.h"
@@ -31,10 +31,10 @@ void HTTP_Scanner_set_column (int, yyscan_t);
 #include <sstream>
 #include <string>
 
-#include <ace/ace_wchar.h>
-#include <ace/Log_Msg.h>
-#include <ace/Message_Block.h>
-#include <ace/OS_Memory.h>
+#include "ace/ace_wchar.h"
+#include "ace/Log_Msg.h"
+#include "ace/Message_Block.h"
+#include "ace/OS_Memory.h"
 
 #include "common_tools.h"
 

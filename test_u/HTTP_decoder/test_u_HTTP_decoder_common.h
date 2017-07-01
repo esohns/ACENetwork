@@ -21,6 +21,9 @@
 #ifndef TEST_U_HTTP_DECODER_COMMON_H
 #define TEST_U_HTTP_DECODER_COMMON_H
 
+#include <map>
+#include <string>
+
 #include "ace/Synch_Traits.h"
 
 #include "common.h"
@@ -41,7 +44,7 @@
 
 #include "test_u_common.h"
 
-#include "test_u_connection_common.h"
+//#include "test_u_connection_common.h"
 #include "test_u_HTTP_decoder_stream_common.h"
 
 //#include "test_u_connection_common.h"
@@ -80,6 +83,18 @@ struct Test_U_SignalHandlerConfiguration
   unsigned int       statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
 };
 
+struct Test_U_ConnectionConfiguration;
+typedef std::map<std::string,
+                 struct Test_U_ConnectionConfiguration> Test_U_ConnectionConfigurations_t;
+extern const char stream_name_string_[];
+struct Test_U_AllocatorConfiguration;
+struct Test_U_StreamConfiguration;
+struct Test_U_ModuleHandlerConfiguration;
+typedef Stream_Configuration_T<stream_name_string_,
+                               struct Test_U_AllocatorConfiguration,
+                               struct Test_U_StreamConfiguration,
+                               struct Stream_ModuleConfiguration,
+                               struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
 struct Test_U_Configuration
 {
   inline Test_U_Configuration ()

@@ -21,7 +21,7 @@
 #ifndef DHCP_SessionMessage_T_H
 #define DHCP_SessionMessage_T_H
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
 #include "stream_session_message_base.h"
 

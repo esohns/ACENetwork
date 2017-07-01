@@ -19,13 +19,13 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "irc_parser_driver.h"
 
 #include <sstream>
 
-#include <ace/Log_Msg.h>
-#include <ace/Message_Block.h>
+#include "ace/Log_Msg.h"
+#include "ace/Message_Block.h"
 
 #include "net_defines.h"
 #include "net_macros.h"

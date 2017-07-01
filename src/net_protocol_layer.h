@@ -21,7 +21,7 @@
 #ifndef Net_PROTOCOL_LAYER_H
 #define Net_PROTOCOL_LAYER_H
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
 #include <string>
 

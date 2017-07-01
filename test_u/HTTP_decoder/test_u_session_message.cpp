@@ -19,10 +19,10 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "test_u_session_message.h"
 
-#include <ace/Malloc_Base.h>
+#include "ace/Malloc_Base.h"
 
 #include "stream_macros.h"
 

@@ -35,7 +35,7 @@
 #    define NETWORK_HAS_TRACE
 #  endif /* NETWORK_HAS_TRACE */
 #  define NETWORK_TRACE(X) NETWORK_TRACE_IMPL(X)
-#  include <ace/Trace.h>
+#  include "ace/Trace.h"
 #endif /* NETWORK_NTRACE */
 
 #ifdef __GNUC__

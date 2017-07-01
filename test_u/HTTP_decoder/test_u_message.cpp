@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "test_u_message.h"
 
 #include "ace/Log_Msg.h"
@@ -29,6 +29,7 @@
 
 #include "net_macros.h"
 
+#include "test_u_connection_common.h"
 #include "test_u_session_message.h"
 
 Test_U_Message::Test_U_Message (unsigned int size_in)

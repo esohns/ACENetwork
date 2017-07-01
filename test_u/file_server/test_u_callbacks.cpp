@@ -21,10 +21,10 @@
 
 #include "test_u_callbacks.h"
 
-#include <ace/Log_Msg.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Log_Msg.h"
+#include "ace/Synch_Traits.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "common_timer_manager.h"
 
 #include "common_ui_common.h"

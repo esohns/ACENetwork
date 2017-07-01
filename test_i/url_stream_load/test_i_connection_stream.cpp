@@ -19,7 +19,7 @@
 ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "test_i_connection_stream.h"
 
 #include "ace/Log_Msg.h"

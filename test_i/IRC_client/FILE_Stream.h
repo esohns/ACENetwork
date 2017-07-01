@@ -20,17 +20,17 @@
 
 #ifndef ACE_FILE_STREAM_H
 #define ACE_FILE_STREAM_H
-#include /**/ <ace/pre.h>
+#include /**/ "ace/pre.h"
 
-//#include <ace/config-macros.h>
-#include <ace/FILE_IO.h>
-#include <ace/Versioned_Namespace.h>
+//#include "ace/config-macros.h"
+#include "ace/FILE_IO.h"
+#include "ace/Versioned_Namespace.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include <ace/FILE_Addr.h>
+#include "ace/FILE_Addr.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 

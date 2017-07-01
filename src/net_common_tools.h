@@ -46,16 +46,13 @@ class Net_Common_Tools
   // physical layer
 
   // link layer
-  // *NOTE*: returns the 'default' network interface, i.e. the device identifier
-  //         associated with the default (currently: IP- only) 'route' (or
-  //         'gateway').
-  //         Today, general-purpose link-layer APIs really do not make much
-  //         sense - the interface to choose depends on the peer address(es) and
-  //         -type (note how even if such information where available in advance
-  //         - if the (corresponding IP-) address is not 'local' (here: relative
-  //         to the netmask and host IP address) to any connected LAN, there is
-  //         currently no public API to determine the 'best' route; only
-  //         internet routers maintain such information).
+  // *NOTE*: today, such general-purpose link-layer APIs really do not make much
+  //         sense because the interface to choose always depends on the peer
+  //         address(es) and -type (note how even if such information where
+  //         available in advance - if the (corresponding IP-) address is not
+  //         'local' (here: relative to the netmask and host IP address) to any
+  //         connected LAN, there is currently no public API to determine the
+  //         'best' route; only internet routers maintain such information).
   // [*TODO*: for a known peer IP address, implement a function that uses ICMP
   //         over each IP interface to determine the 'best' route.]
   //         Notwithstanding, some platforms assign (hard-coded) priorities to
@@ -67,11 +64,15 @@ class Net_Common_Tools
   //         - the first 'connected' interface (iff applicable) [with the
   //         - highest priority (e.g. lowest 'metric' (MS-Windows)), if
   //           specified]
-  // *TODO*: the Linux version is incomplete (selects Ethernet/PPP only, and
+  // *NOTE*: returns the 'default' internet network interface, i.e. the device
+  //         identifier associated with the 'default' (currently: IP- only)
+  //         'route' (or 'gateway').
+  // *TODO*: - the Linux version is incomplete (selects Ethernet/PPP only, and
   //         does not check connectedness yet)
-  static std::string getDefaultDeviceIdentifier (enum Net_LinkLayerType = NET_LINKLAYER_802_3);
+  //         - the Win32 is incomplete (returns first 'connected' interface)
+  static std::string getDefaultInterface (enum Net_LinkLayerType = NET_LINKLAYER_802_3);
   // *NOTE*: queries the system for installed network interfaces, returning the
-  //         'default' one (see above)
+  //         'default' one (bitmask-version of the above)
   // *TODO*: only Ethernet (IEEE 802.3) and PPP is currently supported
   static std::string getDefaultInterface (int); // link layer type(s) (bitmask)
 
@@ -85,6 +86,17 @@ class Net_Common_Tools
   static bool interfaceToMACAddress (const std::string&, // interface identifier
                                      unsigned char[]);   // return value: MAC address
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  static std::string interfaceToString (REFGUID); // interface adapter GUID
+  static bool associateWithWLAN (REFGUID,            // interface adapter GUID
+#else
+  static bool associateWithWLAN (const std::string&, // interface adapter
+#endif
+                                 const std::string&, // SSID
+                                 ACE_INET_Addr&,     // return value: peer SAP
+                                 ACE_INET_Addr&,     // return value: local SAP
+                                 bool = true);       // scan for networks ?
+
   // network layer
   static bool getAddress (std::string&,  // host name
                           std::string&); // dotted-decimal
@@ -93,8 +105,11 @@ class Net_Common_Tools
   //         behind a (NATted-) gateway)
   static bool interfaceToExternalIPAddress (const std::string&, // interface identifier
                                             ACE_INET_Addr&);    // return value: external IP address
+  // *NOTE*: on Win32 systems, specify the 'AdapterName', not 'FriendlyName'
+  //         --> use Common_Tools::GUIDToString()
   static bool interfaceToIPAddress (const std::string&, // interface identifier
-                                    ACE_INET_Addr&);    // return value: (first) IP address
+                                    ACE_INET_Addr&,     // return value: (first) IP address
+                                    ACE_INET_Addr&);    // return value: (first) gateway IP address
   static bool IPAddressToInterface (const ACE_INET_Addr&, // IP address
                                     std::string&);        // return value: interface identifier
 

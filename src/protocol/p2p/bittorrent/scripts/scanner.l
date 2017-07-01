@@ -1,7 +1,7 @@
 %top{
 #include "bittorrent_common.h"
 #include "bittorrent_exports.h"
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "bittorrent_iparser.h"
 #undef YYTOKENTYPE
 //#undef PARSER_HEADER_H
@@ -35,10 +35,10 @@ void BitTorrent_Scanner_set_column (int, yyscan_t);
 #include <sstream>
 #include <string>
 
-#include <ace/ace_wchar.h>
-#include <ace/Log_Msg.h>
-#include <ace/Message_Block.h>
-#include <ace/OS_Memory.h>
+#include "ace/ace_wchar.h"
+#include "ace/Log_Msg.h"
+#include "ace/Message_Block.h"
+#include "ace/OS_Memory.h"
 
 #include "net_macros.h"
 

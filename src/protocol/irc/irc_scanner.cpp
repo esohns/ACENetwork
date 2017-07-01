@@ -1970,7 +1970,7 @@ static yyconst flex_int32_t yy_rule_linenum[23] =
 #include "ace/ace_wchar.h"
 #include "ace/OS_Memory.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "irc_module_parser.h"
 #include "irc_parser_driver.h"
 

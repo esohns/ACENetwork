@@ -21,8 +21,8 @@
 #ifndef NET_MODULE_SOCKETHANDLER_H
 #define NET_MODULE_SOCKETHANDLER_H
 
-#include <ace/Global_Macros.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 

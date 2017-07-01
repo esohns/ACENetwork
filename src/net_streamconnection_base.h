@@ -21,12 +21,12 @@
 #ifndef NET_STREAMCONNECTION_BASE_H
 #define NET_STREAMCONNECTION_BASE_H
 
-#include <ace/config-macros.h>
-//#include <ace/Connector.h>
-#include <ace/Global_Macros.h>
-#include <ace/Message_Block.h>
-//#include <ace/SOCK_Connector.h>
-#include <ace/Time_Value.h>
+#include "ace/config-macros.h"
+//#include "ace/Connector.h"
+#include "ace/Global_Macros.h"
+#include "ace/Message_Block.h"
+//#include "ace/SOCK_Connector.h"
+#include "ace/Time_Value.h"
 
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
@@ -177,7 +177,7 @@ class Net_AsynchStreamConnectionBase_T
                                   StreamType,
                                   StreamStatusType> ISTREAM_CONNECTION_T;
 
-  virtual ~Net_AsynchStreamConnectionBase_T ();
+  inline virtual ~Net_AsynchStreamConnectionBase_T () {};
 
   // override some ACE_Service_Handler members
   using HandlerType::open;

@@ -21,7 +21,7 @@
 
 #include "net_protocol_layer.h"
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "net_macros.h"
 

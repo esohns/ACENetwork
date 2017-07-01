@@ -67,29 +67,6 @@ template <typename HandlerType,
           typename UserDataType,
           typename ModuleConfigurationType,
           typename ModuleHandlerConfigurationType>
-Net_StreamAsynchTCPSocketBase_T<HandlerType,
-                                AddressType,
-                                ConfigurationType,
-                                StateType,
-                                StatisticContainerType,
-                                StreamType,
-                                UserDataType,
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::~Net_StreamAsynchTCPSocketBase_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchTCPSocketBase_T::~Net_StreamAsynchTCPSocketBase_T"));
-
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
 void
 Net_StreamAsynchTCPSocketBase_T<HandlerType,
                                 AddressType,

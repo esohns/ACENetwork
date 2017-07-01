@@ -221,6 +221,7 @@ set_target_properties (${PROJECT_NAME} PROPERTIES VERSION ${VERSION_MAJOR}.${VER
 
 if (WIN32)
  target_link_libraries (${PROJECT_NAME} iphlpapi.lib)
+ target_link_libraries (${PROJECT_NAME} Wlanapi.lib)
  target_link_libraries (${PROJECT_NAME} ${ACE_LIBRARY})
  target_link_libraries (${PROJECT_NAME} Common)
 endif ()

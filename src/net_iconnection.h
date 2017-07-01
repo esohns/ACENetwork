@@ -21,9 +21,9 @@
 #ifndef NET_ICONNECTION_T_H
 #define NET_ICONNECTION_T_H
 
-#include <ace/config-macros.h>
-#include <ace/INET_Addr.h>
-#include <ace/Message_Block.h>
+#include "ace/config-macros.h"
+#include "ace/INET_Addr.h"
+#include "ace/Message_Block.h"
 
 #include "common_idumpstate.h"
 #include "common_iget.h"

@@ -63,7 +63,7 @@ class Net_StreamAsynchTCPSocketBase_T
                                StatisticContainerType,
                                UserDataType> CONNECTION_BASE_T;
 
-  virtual ~Net_StreamAsynchTCPSocketBase_T ();
+  inline virtual ~Net_StreamAsynchTCPSocketBase_T () {};
 
   // implement some task methods
   int close (u_long = 0); // reason

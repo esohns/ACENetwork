@@ -18,11 +18,11 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/INET_Addr.h>
-#include <ace/Log_Msg.h>
-#include <ace/OS.h>
-#include <ace/OS_Memory.h>
-#include <ace/Time_Value.h>
+#include "ace/INET_Addr.h"
+#include "ace/Log_Msg.h"
+#include "ace/OS.h"
+#include "ace/OS_Memory.h"
+#include "ace/Time_Value.h"
 
 #include "net_defines.h"
 #include "net_macros.h"

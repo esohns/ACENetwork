@@ -19,7 +19,7 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "IRC_client_stream.h"
 
 #include "IRC_client_common_modules.h"

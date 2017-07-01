@@ -105,11 +105,11 @@ using namespace std;
 //                       prevent ace/iosfwd.h from causing any harm
 #define ACE_IOSFWD_H
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "net_macros.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "irc_message.h"
 #include "irc_module_parser.h"
 #include "irc_parser_driver.h"

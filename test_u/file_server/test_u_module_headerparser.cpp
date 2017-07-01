@@ -19,12 +19,12 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "test_u_stream.h"
 #include "test_u_sessionmessage.h"
 #include "test_u_module_headerparser.h"
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "net_macros.h"
 

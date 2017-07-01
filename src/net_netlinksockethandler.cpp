@@ -19,13 +19,13 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "net_netlinksockethandler.h"
 
 #if defined (ACE_HAS_NETLINK)
 #include <cmath>
 
-#include <ace/OS.h>
+#include "ace/OS.h"
 
 Net_Netlink_Addr&
 Net_Netlink_Addr::operator= (const ACE_Addr& rhs)

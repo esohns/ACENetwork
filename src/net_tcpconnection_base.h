@@ -133,7 +133,7 @@ class Net_TCPConnectionBase_T
 
   Net_TCPConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
                            const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  virtual ~Net_TCPConnectionBase_T ();
+  inline virtual ~Net_TCPConnectionBase_T () {};
 
  private:
   typedef Net_StreamConnectionBase_T<HandlerType,
@@ -223,7 +223,7 @@ class Net_AsynchTCPConnectionBase_T
 
   Net_AsynchTCPConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
                                  const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  virtual ~Net_AsynchTCPConnectionBase_T ();
+  inline virtual ~Net_AsynchTCPConnectionBase_T () {};
 
  private:
   typedef Net_AsynchStreamConnectionBase_T<HandlerType,

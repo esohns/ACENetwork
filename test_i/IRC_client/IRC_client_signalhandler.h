@@ -21,7 +21,7 @@
 #ifndef IRC_CLIENT_SIGNALHANDLER_H
 #define IRC_CLIENT_SIGNALHANDLER_H
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
 #include "common_isignal.h"
 #include "common_signalhandler.h"

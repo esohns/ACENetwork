@@ -18,9 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/Log_Msg.h>
-#include <ace/SOCK_Stream.h>
-#include <ace/Svc_Handler.h>
+#include "ace/Log_Msg.h"
+#include "ace/SOCK_Stream.h"
+#include "ace/Svc_Handler.h"
 
 #include "common.h"
 
@@ -616,33 +616,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
  , configuration_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::Net_AsynchStreamConnectionBase_T"));
-
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename ListenerConfigurationType,
-          typename StreamType,
-          typename StreamStatusType,
-          typename UserDataType>
-Net_AsynchStreamConnectionBase_T<HandlerType,
-                                 AddressType,
-                                 ConfigurationType,
-                                 StateType,
-                                 StatisticContainerType,
-                                 SocketConfigurationType,
-                                 HandlerConfigurationType,
-                                 ListenerConfigurationType,
-                                 StreamType,
-                                 StreamStatusType,
-                                 UserDataType>::~Net_AsynchStreamConnectionBase_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::~Net_AsynchStreamConnectionBase_T"));
 
 }
 

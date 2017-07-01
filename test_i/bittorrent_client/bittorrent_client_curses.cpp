@@ -29,16 +29,16 @@ using namespace std;
 //                       and prevent ace/iosfwd.h from causing any harm
 #define ACE_IOSFWD_H
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 
 #include "bittorrent_client_curses.h"
 
 #include <string>
 
-#include <ace/Assert.h>
-#include <ace/Guard_T.h>
-#include <ace/Log_Msg.h>
-#include <ace/Reverse_Lock_T.h>
+#include "ace/Assert.h"
+#include "ace/Guard_T.h"
+#include "ace/Log_Msg.h"
+#include "ace/Reverse_Lock_T.h"
 
 #include "net_macros.h"
 

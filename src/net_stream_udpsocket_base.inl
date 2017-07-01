@@ -24,9 +24,9 @@
 #include <netinet/ip_icmp.h>
 #endif
 
-#include <ace/Log_Msg.h>
-#include <ace/OS.h>
-#include <ace/Svc_Handler.h>
+#include "ace/Log_Msg.h"
+#include "ace/OS.h"
+#include "ace/Svc_Handler.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
@@ -1404,7 +1404,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
  , currentWriteBuffer_ (NULL)
  , sendLock_ ()
  , serializeOutput_ (false)
- , stream_ (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_DEFAULT_NAME))
+ , stream_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::Net_StreamUDPSocketBase_T"));
 
@@ -2530,12 +2530,12 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
 
   // *TODO*: remove type inferences
-  if (likely (inherited2::configuration_->streamConfiguration->messageAllocator))
+  if (likely (inherited2::configuration_->streamConfiguration->configuration_.messageAllocator))
   {
 allocate:
     try {
       message_block_p =
-        static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration->messageAllocator->malloc (requestedSize_in));
+        static_cast<ACE_Message_Block*> (inherited2::configuration_->streamConfiguration->configuration_.messageAllocator->malloc (requestedSize_in));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
@@ -2545,7 +2545,7 @@ allocate:
 
     // keep retrying ?
     if (unlikely (!message_block_p &&
-                  !inherited2::configuration_->streamConfiguration->messageAllocator->block ()))
+                  !inherited2::configuration_->streamConfiguration->configuration_.messageAllocator->block ()))
       goto allocate;
   } // end IF
   else
@@ -2563,9 +2563,9 @@ allocate:
                                          NULL));
   if (unlikely (!message_block_p))
   {
-    if (inherited2::configuration_->streamConfiguration->messageAllocator)
+    if (inherited2::configuration_->streamConfiguration->configuration_.messageAllocator)
     {
-      if (inherited2::configuration_->streamConfiguration->messageAllocator->block ())
+      if (inherited2::configuration_->streamConfiguration->configuration_.messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     } // end IF

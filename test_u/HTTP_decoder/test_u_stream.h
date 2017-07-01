@@ -38,6 +38,7 @@
 
 #include "test_u_common.h"
 
+#include "test_u_HTTP_decoder_common.h"
 #include "test_u_HTTP_decoder_stream_common.h"
 
 // forward declarations
@@ -55,7 +56,7 @@ class Test_U_Stream
                         struct Test_U_HTTPDecoder_StreamState,
                         struct Test_U_StreamConfiguration,
                         HTTP_RuntimeStatistic_t,
-                        struct Stream_AllocatorConfiguration,
+                        struct Test_U_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_U_ModuleHandlerConfiguration,
                         struct Test_U_HTTPDecoder_SessionData,
@@ -73,7 +74,7 @@ class Test_U_Stream
                         struct Test_U_HTTPDecoder_StreamState,
                         struct Test_U_StreamConfiguration,
                         HTTP_RuntimeStatistic_t,
-                        struct Stream_AllocatorConfiguration,
+                        struct Test_U_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_U_ModuleHandlerConfiguration,
                         struct Test_U_HTTPDecoder_SessionData,

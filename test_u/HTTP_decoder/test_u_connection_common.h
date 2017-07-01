@@ -57,6 +57,7 @@
 
 //#include "test_u_stream_common.h"
 #include "test_u_stream.h"
+//#include "test_u_HTTP_decoder_stream_common.h"
 
 // forward declarations
 class Test_U_Message;
@@ -83,8 +84,8 @@ struct Test_U_SocketHandlerConfiguration;
 //                      struct Test_U_StreamSessionData,
 //                      Test_U_StreamSessionData_t,
 //                      Test_U_SessionMessage,
-//                      Test_U_Message> Test_U_Stream_t;
-typedef Test_U_Stream Test_U_Stream_t;
+//                      Test_U_Message> Test_U_Stream;
+//typedef Test_U_Stream Test_U_Stream;
 
 //////////////////////////////////////////
 
@@ -150,7 +151,7 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 HTTP_RuntimeStatistic_t,
                                 struct Net_SocketConfiguration,
                                 struct Test_U_SocketHandlerConfiguration,
-                                Test_U_Stream_t,
+                                Test_U_Stream,
                                 enum Stream_StateMachine_ControlState> Test_U_IStreamConnection_t;
 
 //////////////////////////////////////////
@@ -161,7 +162,7 @@ typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct Test_U_SocketHan
                                   struct Test_U_ConnectionConfiguration,
                                   struct Test_U_ConnectionState,
                                   HTTP_RuntimeStatistic_t,
-                                  Test_U_Stream_t,
+                                  Test_U_Stream,
                                   struct Test_U_UserData,
                                   struct Stream_ModuleConfiguration,
                                   struct Test_U_ModuleHandlerConfiguration> Test_U_TCPHandler_t;
@@ -171,7 +172,7 @@ typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct Test_U_SocketHan
                                   struct Test_U_ConnectionConfiguration,
                                   struct Test_U_ConnectionState,
                                   HTTP_RuntimeStatistic_t,
-                                  Test_U_Stream_t,
+                                  Test_U_Stream,
                                   struct Test_U_UserData,
                                   struct Stream_ModuleConfiguration,
                                   struct Test_U_ModuleHandlerConfiguration> Test_U_SSLTCPHandler_t;
@@ -180,7 +181,7 @@ typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<struct Test
                                         struct Test_U_ConnectionConfiguration,
                                         struct Test_U_ConnectionState,
                                         HTTP_RuntimeStatistic_t,
-                                        Test_U_Stream_t,
+                                        Test_U_Stream,
                                         struct Test_U_UserData,
                                         struct Stream_ModuleConfiguration,
                                         struct Test_U_ModuleHandlerConfiguration> Test_U_AsynchTCPHandler_t;
@@ -191,7 +192,7 @@ typedef Net_TCPConnectionBase_T<Test_U_TCPHandler_t,
                                 HTTP_RuntimeStatistic_t,
                                 struct Test_U_SocketHandlerConfiguration,
                                 struct Test_U_ListenerConfiguration,
-                                Test_U_Stream_t,
+                                Test_U_Stream,
                                 struct Test_U_UserData> Test_U_TCPConnection_t;
 typedef Net_TCPConnectionBase_T<Test_U_SSLTCPHandler_t,
                                 struct Test_U_ConnectionConfiguration,
@@ -199,7 +200,7 @@ typedef Net_TCPConnectionBase_T<Test_U_SSLTCPHandler_t,
                                 HTTP_RuntimeStatistic_t,
                                 struct Test_U_SocketHandlerConfiguration,
                                 struct Test_U_ListenerConfiguration,
-                                Test_U_Stream_t,
+                                Test_U_Stream,
                                 struct Test_U_UserData> Test_U_SSLTCPConnection_t;
 typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPHandler_t,
                                       struct Test_U_ConnectionConfiguration,
@@ -207,7 +208,7 @@ typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPHandler_t,
                                       HTTP_RuntimeStatistic_t,
                                       struct Test_U_SocketHandlerConfiguration,
                                       struct Test_U_ListenerConfiguration,
-                                      Test_U_Stream_t,
+                                      Test_U_Stream,
                                       struct Test_U_UserData> Test_U_AsynchTCPConnection_t;
 
 //////////////////////////////////////////
@@ -224,7 +225,7 @@ typedef Net_Client_Connector_T<Test_U_TCPConnection_t,
                                struct Test_U_ConnectionState,
                                HTTP_RuntimeStatistic_t,
                                struct Test_U_SocketHandlerConfiguration,
-                               Test_U_Stream_t,
+                               Test_U_Stream,
                                struct Test_U_UserData> Test_U_TCPConnector_t;
 typedef Net_Client_Connector_T<Test_U_SSLTCPConnection_t,
                                ACE_SSL_SOCK_Connector,
@@ -233,7 +234,7 @@ typedef Net_Client_Connector_T<Test_U_SSLTCPConnection_t,
                                struct Test_U_ConnectionState,
                                HTTP_RuntimeStatistic_t,
                                struct Test_U_SocketHandlerConfiguration,
-                               Test_U_Stream_t,
+                               Test_U_Stream,
                                struct Test_U_UserData> Test_U_SSLTCPConnector_t;
 typedef Net_Client_AsynchConnector_T<Test_U_AsynchTCPConnection_t,
                                      ACE_INET_Addr,
@@ -241,7 +242,7 @@ typedef Net_Client_AsynchConnector_T<Test_U_AsynchTCPConnection_t,
                                      struct Test_U_ConnectionState,
                                      HTTP_RuntimeStatistic_t,
                                      struct Test_U_SocketHandlerConfiguration,
-                                     Test_U_Stream_t,
+                                     Test_U_Stream,
                                      struct Test_U_UserData> Test_U_TCPAsynchConnector_t;
 
 #endif

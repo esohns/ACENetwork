@@ -29,18 +29,18 @@
 #ifndef ACE_IOSTREAM_ALT_T_H
 #define ACE_IOSTREAM_ALT_T_H
 
-#include /**/ <ace/pre.h>
+#include /**/ "ace/pre.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#  include <ace/Global_Macros.h>
-#  include <ace/iosfwd.h>
-#  include <ace/IOStream.h>
+#  include "ace/Global_Macros.h"
+#  include "ace/iosfwd.h"
+#  include "ace/IOStream.h"
 
 #  if defined (ACE_LACKS_IOSTREAM_FX)
-#   include <ace/os_include/os_ctype.h>
+#   include "ace/os_include/os_ctype.h"
 #  endif /**/
 
 #include "IOStream_alt_macros.h"

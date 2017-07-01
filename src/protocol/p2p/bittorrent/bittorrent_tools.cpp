@@ -26,8 +26,8 @@
 
 #include <openssl/sha.h>
 
-#include <ace/Log_Msg.h>
-#include <ace/Message_Block.h>
+#include "ace/Log_Msg.h"
+#include "ace/Message_Block.h"
 
 #include "common_file_tools.h"
 
@@ -37,7 +37,7 @@
 #include "libACENetwork_config.h"
 #endif
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "bittorrent_bencoding_scanner.h"
 #include "bittorrent_bencoding_parser_driver.h"
 #include "bittorrent_defines.h"

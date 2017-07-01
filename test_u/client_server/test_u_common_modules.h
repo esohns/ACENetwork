@@ -21,8 +21,8 @@
 #ifndef TEST_U_COMMON_MODULES_H
 #define TEST_U_COMMON_MODULES_H
 
-#include <ace/Message_Block.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Message_Block.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 

@@ -22,8 +22,8 @@
 #include "ace/Synch.h"
 #include "test_u_eventhandler.h"
 
-#include <ace/Guard_T.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Guard_T.h"
+#include "ace/Synch_Traits.h"
 
 #include "stream_session_message_base.h"
 

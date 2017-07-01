@@ -19,11 +19,11 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "test_u_stream.h"
 #include "test_u_tcpconnection.h"
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "net_defines.h"
 #include "net_macros.h"

@@ -19,13 +19,13 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "IRC_client_gui_connection.h"
 
 #include <sstream>
 
-#include <ace/ACE.h>
-#include <ace/Log_Msg.h>
+#include "ace/ACE.h"
+#include "ace/Log_Msg.h"
 
 #include "common_file_tools.h"
 

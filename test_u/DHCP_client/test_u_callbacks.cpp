@@ -31,11 +31,11 @@
 #endif
 #include <sstream>
 
-#include <ace/Guard_T.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Guard_T.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_file_tools.h"
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "common_timer_manager.h"
 
 #include "common_ui_common.h"
@@ -78,7 +78,7 @@ load_network_interfaces (GtkListStore* listStore_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::error2String (result).c_str ())));
+                ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
     return false;
   } // end IF
   ACE_ASSERT (buffer_length);
@@ -97,7 +97,7 @@ load_network_interfaces (GtkListStore* listStore_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::error2String (result).c_str ())));
+                ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
 
     // clean up
     ACE_FREE_FUNC (ip_adapter_info_p);
@@ -1274,12 +1274,14 @@ allocate:
   } // end IF
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-  ACE_INET_Addr IP_address;
+  ACE_INET_Addr IP_address, gateway_address;
   if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.networkInterface,
-                                               IP_address))
+                                               IP_address,
+                                               gateway_address))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(), returning\n")));
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
+                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.networkInterface.c_str ())));
     return;
   } // end IF
   DHCP_record.ciaddr = IP_address.get_ip_address ();
@@ -1519,12 +1521,14 @@ allocate:
     state_r.xid = DHCP_record.xid;
     session_data_r.xid = DHCP_record.xid;
   } // end IF
-  ACE_INET_Addr IP_address;
+  ACE_INET_Addr IP_address, gateway_address;
   if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.networkInterface,
-                                               IP_address))
+                                               IP_address,
+                                               gateway_address))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(), returning\n")));
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
+                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.networkInterface.c_str ())));
     return;
   } // end IF
   DHCP_record.ciaddr = IP_address.get_ip_address ();
@@ -1904,11 +1908,14 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                                                                                                                  0);
     else if (!data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration.networkInterface.empty ())
     {
+      ACE_INET_Addr gateway_address;
       if (!Net_Common_Tools::interfaceToIPAddress (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration.networkInterface,
-                                                   data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration.address))
+                                                   data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration.address,
+                                                   gateway_address))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(), continuing\n")));
+                    ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), continuing\n"),
+                    ACE_TEXT (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration.networkInterface.c_str ())));
         result = -1;
       } // end IF
       data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration.address.set_port_number (DHCP_DEFAULT_CLIENT_PORT,

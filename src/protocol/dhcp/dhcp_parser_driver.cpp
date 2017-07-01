@@ -19,11 +19,12 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include "ace/Synch.h"
 #include "dhcp_parser_driver.h"
 
-#include <ace/Log_Msg.h>
-#include <ace/Message_Block.h>
-#include <ace/Message_Queue.h>
+#include "ace/Log_Msg.h"
+#include "ace/Message_Block.h"
+#include "ace/Message_Queue.h"
 
 #include "net_macros.h"
 

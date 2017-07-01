@@ -19,13 +19,13 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "irc_message.h"
 
 #include <sstream>
 
-#include <ace/Message_Block.h>
-#include <ace/Malloc_Base.h>
+#include "ace/Message_Block.h"
+#include "ace/Malloc_Base.h"
 
 #include "net_macros.h"
 

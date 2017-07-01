@@ -26,10 +26,10 @@
 #include <string>
 #include <vector>
 
-#include <ace/Assert.h>
-#include <ace/Basic_Types.h>
-#include <ace/config-macros.h>
-#include <ace/OS.h>
+#include "ace/Assert.h"
+#include "ace/Basic_Types.h"
+#include "ace/config-macros.h"
+#include "ace/OS.h"
 
 #include "bittorrent_defines.h"
 

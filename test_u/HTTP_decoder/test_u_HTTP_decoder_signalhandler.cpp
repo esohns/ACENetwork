@@ -19,16 +19,17 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "test_u_HTTP_decoder_signalhandler.h"
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 //#include "common_timer_manager.h"
 #include "common_tools.h"
 
 #include "net_macros.h"
 
+#include "test_u_connection_common.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_session_message.h"
 

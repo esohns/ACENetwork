@@ -21,10 +21,10 @@
 
 #include "bittorrent_client_gui_callbacks.h"
 
-#include <ace/ACE.h>
-#include <ace/Log_Msg.h>
-#include <ace/OS.h>
-#include <ace/Synch.h>
+#include "ace/ACE.h"
+#include "ace/Log_Msg.h"
+#include "ace/OS.h"
+#include "ace/Synch.h"
 
 #include "common_ui_common.h"
 #include "common_ui_defines.h"

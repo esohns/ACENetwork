@@ -19,10 +19,10 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "test_u_signalhandler.h"
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 //#include "common_timer_manager.h"
 #include "common_tools.h"

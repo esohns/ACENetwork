@@ -652,11 +652,14 @@ do_work (bool requestBroadcastReplies_in,
                                                                                                       ACE_ADDRESS_FAMILY_INET);
   else if (!networkInterface_in.empty ())
   {
+    ACE_INET_Addr gateway_address;
     if (!Net_Common_Tools::interfaceToIPAddress (networkInterface_in,
-                                                 configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration.address))
+                                                 configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration.address,
+                                                 gateway_address))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(), continuing\n")));
+                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), continuing\n"),
+                  ACE_TEXT (networkInterface_in.c_str ())));
       result = -1;
     } // end IF
     configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration.address.set_port_number (DHCP_DEFAULT_CLIENT_PORT,
@@ -1612,8 +1615,8 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Tools::period2String (working_time,
-                               working_time_string);
+  Common_Tools::periodToString (working_time,
+                                working_time_string);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
@@ -1653,9 +1656,9 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Tools::period2String (user_time,
+  Common_Tools::periodToString (user_time,
                                user_time_string);
-  Common_Tools::period2String (system_time,
+  Common_Tools::periodToString (system_time,
                                system_time_string);
 
   // debug info

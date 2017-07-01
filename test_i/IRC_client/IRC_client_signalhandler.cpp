@@ -19,14 +19,14 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "IRC_client_signalhandler.h"
 
-#include <ace/Guard_T.h>
-#include <ace/Log_Msg.h>
-//#include <ace/Proactor.h>
-//#include <ace/Reactor.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Guard_T.h"
+#include "ace/Log_Msg.h"
+//#include "ace/Proactor.h"
+//#include "ace/Reactor.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_tools.h"
 

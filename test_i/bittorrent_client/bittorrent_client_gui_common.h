@@ -25,10 +25,10 @@
 #include <set>
 #include <string>
 
-#include <ace/INET_Addr.h>
-#include <ace/os_include/os_pthread.h>
-#include <ace/Synch_Traits.h>
-#include <ace/Singleton.h>
+#include "ace/INET_Addr.h"
+#include "ace/os_include/os_pthread.h"
+#include "ace/Synch_Traits.h"
+#include "ace/Singleton.h"
 
 #include <gtk/gtk.h>
 

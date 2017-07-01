@@ -21,6 +21,8 @@
 #ifndef NET_DEFINES_H
 #define NET_DEFINES_H
 
+#include "ace/config-lite.h"
+
 // interface
 // *PORTABILITY*: NIC device names are not portable
 //                Win32: let the user choose the device identifier from a list
@@ -31,6 +33,7 @@
 #else
 #define NET_INTERFACE_DEFAULT_ETHERNET                  "eth0"
 #define NET_INTERFACE_DEFAULT_PPP                       "ppp0"
+#define NET_INTERFACE_DEFAULT_WLAN                      "wlan0"
 #define NET_INTERFACE_LOOPBACK                          "lo"
 #endif
 #define NET_INTERFACE_DEFAULT_USE_LOOPBACK              false
@@ -52,6 +55,11 @@
 #define NET_ADDRESS_NSLOOKUP_RESULT_ADDRESS_KEY_STRING  "Address"
 
 // protocols
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#define NET_PROTOCOL_WIN32_WLAN_SCAN_TIMEOUT            5 // seconds
+#define NET_PROTOCOL_WIN32_WLAN_SCAN_RETRIES            3
+#endif
+
 // *IMPORTANT NOTE*: must match with the kernel module implementation !
 #define NET_PROTOCOL_DEFAULT_NETLINK                    NETLINK_GENERIC
 #define NET_PROTOCOL_DEFAULT_NETLINK_GROUP              1

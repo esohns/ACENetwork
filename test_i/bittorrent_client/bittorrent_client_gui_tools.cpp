@@ -19,14 +19,14 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 
 #include "http_scanner.h"
 
 #include "stream_misc_messagehandler.h"
 #include "bittorrent_client_gui_tools.h"
 
-#include <ace/Log_Msg.h>
+#include "ace/Log_Msg.h"
 
 #include "common_ui_defines.h"
 

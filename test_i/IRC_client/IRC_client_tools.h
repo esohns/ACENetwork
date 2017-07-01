@@ -23,8 +23,8 @@
 
 #include <string>
 
-#include <ace/Global_Macros.h>
-#include <ace/INET_Addr.h>
+#include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
 
 #include "stream_common.h"
 

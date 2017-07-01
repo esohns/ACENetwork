@@ -21,7 +21,7 @@
 #ifndef FileServer_SignalHandler_H
 #define FileServer_SignalHandler_H
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
 #include "common_signalhandler.h"
 #include "common_isignal.h"

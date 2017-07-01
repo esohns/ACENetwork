@@ -24,10 +24,10 @@
 #include <set>
 
 #if defined (ACE_HAS_NETLINK)
-#include <ace/Netlink_Addr.h>
+#include "ace/Netlink_Addr.h"
 #endif
-#include <ace/Synch_Traits.h>
-#include <ace/Time_Value.h>
+#include "ace/Synch_Traits.h"
+#include "ace/Time_Value.h"
 
 #include "stream_common.h"
 

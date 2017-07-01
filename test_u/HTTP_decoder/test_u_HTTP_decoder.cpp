@@ -46,7 +46,7 @@
 #include "stream_allocatorheap.h"
 #include "stream_macros.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "stream_file_sink.h"
 
 #ifdef HAVE_CONFIG_H
@@ -63,6 +63,7 @@
 #include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
 #include "test_u_message.h"
+#include "test_u_HTTP_decoder_common.h"
 #include "test_u_HTTP_decoder_signalhandler.h"
 #include "test_u_session_message.h"
 
@@ -472,10 +473,6 @@ do_work (unsigned int bufferSize_in,
 
   // step0a: initialize configuration and stream
   struct Test_U_Configuration configuration;
-  //configuration.userData.connectionConfiguration =
-  //    &configuration.connectionConfiguration;
-//  configuration.userData.streamConfiguration =
-//      &configuration.streamConfiguration;
   configuration.useReactor = useReactor_in;
 
   Stream_AllocatorHeap_T<struct Test_U_AllocatorConfiguration> heap_allocator;
@@ -1243,8 +1240,8 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Tools::period2String (working_time,
-                               working_time_string);
+  Common_Tools::periodToString (working_time,
+                                working_time_string);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
@@ -1284,9 +1281,9 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Tools::period2String (user_time,
+  Common_Tools::periodToString (user_time,
                                user_time_string);
-  Common_Tools::period2String (system_time,
+  Common_Tools::periodToString (system_time,
                                system_time_string);
 
   // debug info

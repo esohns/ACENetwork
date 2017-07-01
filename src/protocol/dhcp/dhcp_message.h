@@ -23,7 +23,7 @@
 
 #include <string>
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
 #include "stream_data_message_base.h"
 

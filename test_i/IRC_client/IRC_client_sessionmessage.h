@@ -21,7 +21,7 @@
 #ifndef IRC_CLIENT_SESSIONMESSAGE_H
 #define IRC_CLIENT_SESSIONMESSAGE_H
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
 #include "irc_sessionmessage.h"
 

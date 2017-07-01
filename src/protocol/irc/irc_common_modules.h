@@ -21,7 +21,7 @@
 #ifndef IRC_COMMON_MODULES_H
 #define IRC_COMMON_MODULES_H
 
-#include <ace/Synch_Traits.h>
+#include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 

@@ -24,7 +24,7 @@
 %code top {
 #include "stdafx.h"
 
-#include <ace/Synch.h>
+#include "ace/Synch.h"
 #include "bittorrent_parser.h"
 }
 
@@ -154,13 +154,13 @@ typedef void* yyscan_t;
 //                       prevent ace/iosfwd.h from causing any harm
 /*#define ACE_IOSFWD_H*/
 
-#include <ace/Log_Msg.h>
-#include <ace/OS.h>
+#include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
 #include "net_macros.h"
 
 #include "bittorrent_defines.h"
-/*#include <ace/Synch.h>*/
+/*#include "ace/Synch.h"*/
 #include "bittorrent_parser_driver.h"
 #include "bittorrent_scanner.h"
 #include "bittorrent_tools.h"

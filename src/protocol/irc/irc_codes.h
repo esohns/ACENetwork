@@ -21,7 +21,7 @@
 #ifndef IRC_CODES_H
 #define IRC_CODES_H
 
-#include <ace/Global_Macros.h>
+#include "ace/Global_Macros.h"
 
 class IRC_Codes
 {

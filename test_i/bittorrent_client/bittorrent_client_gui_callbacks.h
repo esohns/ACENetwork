@@ -21,7 +21,7 @@
 #ifndef BITTORRENT_CLIENT_GUI_CALLBACKS_H
 #define BITTORRENT_CLIENT_GUI_CALLBACKS_H
 
-#include <ace/config-macros.h>
+#include "ace/config-macros.h"
 
 #include <gtk/gtk.h>
 
