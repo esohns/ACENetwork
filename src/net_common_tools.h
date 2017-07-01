@@ -90,6 +90,7 @@ class Net_Common_Tools
   static std::string interfaceToString (REFGUID); // interface adapter GUID
   static bool associateWithWLAN (REFGUID,            // interface adapter GUID
 #else
+  static bool interfaceIsWireless (const std::string&); // interface identifier
   static bool associateWithWLAN (const std::string&, // interface adapter
 #endif
                                  const std::string&, // SSID

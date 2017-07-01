@@ -43,17 +43,8 @@ class DHCP_Module_Streamer_T
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 Stream_UserData>
+                                 struct Stream_UserData>
 {
- public:
-  DHCP_Module_Streamer_T (ISTREAM_T*); // stream handle
-  virtual ~DHCP_Module_Streamer_T ();
-
-  // implement (part of) Stream_ITaskBase
-  virtual void handleDataMessage (DataMessageType*&, // data message handle
-                                  bool&);            // return value: pass message downstream ?
-
- private:
   typedef Stream_TaskBaseSynch_T<SynchStrategyType,
                                  TimePolicyType,
                                  ConfigurationType,
@@ -63,8 +54,23 @@ class DHCP_Module_Streamer_T
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 Stream_UserData> inherited;
+                                 struct Stream_UserData> inherited;
 
+ public:
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  DHCP_Module_Streamer_T (ISTREAM_T*);                     // stream handle
+#else
+  DHCP_Module_Streamer_T (typename inherited::ISTREAM_T*); // stream handle
+#endif
+
+  virtual ~DHCP_Module_Streamer_T ();
+
+  // implement (part of) Stream_ITaskBase
+  virtual void handleDataMessage (DataMessageType*&, // data message handle
+                                  bool&);            // return value: pass message downstream ?
+
+ private:
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Streamer_T ())
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Streamer_T (const DHCP_Module_Streamer_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Streamer_T& operator= (const DHCP_Module_Streamer_T&))

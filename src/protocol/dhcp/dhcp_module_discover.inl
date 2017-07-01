@@ -54,7 +54,11 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                        ConnectionConfigurationIteratorType,
                        ConnectionManagerType,
                        ConnectorTypeBcast,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
                        ConnectorType>::DHCP_Module_Discover_T (ISTREAM_T* stream_in)
+#else
+                       ConnectorType>::DHCP_Module_Discover_T (typename inherited::ISTREAM_T* stream_in)
+#endif
  : inherited (stream_in)
  , broadcastConnectionHandle_ (ACE_INVALID_HANDLE)
  , connectionHandle_ (ACE_INVALID_HANDLE)
@@ -187,12 +191,6 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 
   if (inherited::isInitialized_)
   {
-    // clean up
-    if (sessionData_)
-    {
-      sessionData_->decrease ();
-      sessionData_ = NULL;
-    } // end IF
   } // end IF
 
   // *TODO*: remove type inference
@@ -1039,7 +1037,11 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         StreamStateType,
                         SessionDataType,
                         SessionDataContainerType,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
                         StatisticContainerType>::DHCP_Module_DiscoverH_T (ISTREAM_T* stream_in,
+#else
+                        StatisticContainerType>::DHCP_Module_DiscoverH_T (typename inherited::ISTREAM_T* stream_in,
+#endif
                                                                           bool autoStart_in,
                                                                           bool generateSessionMessages_in)
  : inherited (stream_in,

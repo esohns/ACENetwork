@@ -2,9 +2,10 @@ option (GTK3_SUPPORT "enable Gtk3 support"
         ON)
 
 if (UNIX)
-# include (CheckLibraryExists)
+ include (CheckLibraryExists)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
  find_package (Threads REQUIRED)
+ check_library_exists (iwlib iw_sockets_open "" HAVE_LIB_IW)
 endif ()
 
 set (ACE_LIB_FILE libACE.so)
@@ -192,7 +193,7 @@ set (bittorrent_client_SRCS
 #set_source_files_properties(${bittorrent_client_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
 set (EXECUTABLE bittorrent_client)
-add_executable (${EXECUTABLE} 
+add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${bittorrent_client_SRCS})
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_i")
@@ -214,6 +215,7 @@ target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (UNIX)
  target_link_libraries (${EXECUTABLE} rt)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
+ target_link_libraries (${EXECUTABLE} iw)
  target_link_libraries (${EXECUTABLE} ${FLEX_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
 elseif (WIN32)
@@ -320,6 +322,7 @@ target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
 if (UNIX)
  target_link_libraries (${EXECUTABLE_GUI} rt)
  target_link_libraries (${EXECUTABLE_GUI} ${PKG_CAP_LIBRARIES})
+ target_link_libraries (${EXECUTABLE_GUI} iw)
  target_link_libraries (${EXECUTABLE_GUI} ${FLEX_LIBRARY})
  target_link_libraries (${EXECUTABLE_GUI} X11)
  if (GTK3_SUPPORT)

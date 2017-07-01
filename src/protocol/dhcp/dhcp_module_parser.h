@@ -51,10 +51,26 @@ class DHCP_Module_Parser_T
                                  Stream_SessionId_t,
                                  enum Stream_ControlType,
                                  enum Stream_SessionMessageType,
-                                 Stream_UserData>
+                                 struct Stream_UserData>
 {
+  typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
+                                 TimePolicyType,
+                                 ConfigurationType,
+                                 ControlMessageType,
+                                 DataMessageType,
+                                 SessionMessageType,
+                                 Stream_SessionId_t,
+                                 enum Stream_ControlType,
+                                 enum Stream_SessionMessageType,
+                                 struct Stream_UserData> inherited;
+
  public:
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   DHCP_Module_Parser_T (ISTREAM_T*); // stream handle
+#else
+  DHCP_Module_Parser_T (typename inherited::ISTREAM_T*); // stream handle
+#endif
   virtual ~DHCP_Module_Parser_T ();
 
   // override (part of) Stream_IModuleHandler_T
@@ -68,17 +84,6 @@ class DHCP_Module_Parser_T
                                      bool&);               // return value: pass message downstream ?
 
  private:
-  typedef Stream_TaskBaseSynch_T<ACE_SYNCH_USE,
-                                 TimePolicyType,
-                                 ConfigurationType,
-                                 ControlMessageType,
-                                 DataMessageType,
-                                 SessionMessageType,
-                                 Stream_SessionId_t,
-                                 enum Stream_ControlType,
-                                 enum Stream_SessionMessageType,
-                                 Stream_UserData> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Parser_T ())
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Parser_T (const DHCP_Module_Parser_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_Parser_T& operator= (const DHCP_Module_Parser_T&))
@@ -124,12 +129,31 @@ class DHCP_Module_ParserH_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
-                                      Stream_UserData>
+                                      struct Stream_UserData>
 {
+  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
+                                      TimePolicyType,
+                                      ControlMessageType,
+                                      DataMessageType,
+                                      SessionMessageType,
+                                      ConfigurationType,
+                                      StreamControlType,
+                                      StreamNotificationType,
+                                      StreamStateType,
+                                      SessionDataType,
+                                      SessionDataContainerType,
+                                      StatisticContainerType,
+                                      struct Stream_UserData> inherited;
+
  public:
-  DHCP_Module_ParserH_T (ISTREAM_T*,   // stream handle
-                         bool = false, // auto-start ?
-                         bool = true); // generate session messages ?
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  DHCP_Module_ParserH_T (ISTREAM_T*,                     // stream handle
+#else
+  DHCP_Module_ParserH_T (typename inherited::ISTREAM_T*, // stream handle
+#endif
+                         bool = false,                   // auto-start ?
+                         bool = true);                   // generate session messages ?
   virtual ~DHCP_Module_ParserH_T ();
 
   // *PORTABILITY*: for some reason, this base class member is not exposed
@@ -164,20 +188,6 @@ class DHCP_Module_ParserH_T
   //virtual void report () const;
 
  private:
-  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
-                                      TimePolicyType,
-                                      ControlMessageType,
-                                      DataMessageType,
-                                      SessionMessageType,
-                                      ConfigurationType,
-                                      StreamControlType,
-                                      StreamNotificationType,
-                                      StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
-                                      StatisticContainerType,
-                                      Stream_UserData> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_ParserH_T ())
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_ParserH_T (const DHCP_Module_ParserH_T&))
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_ParserH_T& operator= (const DHCP_Module_ParserH_T&))
@@ -192,8 +202,8 @@ class DHCP_Module_ParserH_T
   //bool putStatisticMessage (const StatisticContainerType&) const;
 
   // driver
-  DHCP_ParserDriver  driver_;
-  bool               isDriverInitialized_;
+  DHCP_ParserDriver driver_;
+  bool              isDriverInitialized_;
 };
 
 // include template definition

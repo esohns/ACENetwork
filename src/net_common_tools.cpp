@@ -32,10 +32,11 @@
 #include <mstcpip.h>
 #include <Wlanapi.h>
 #else
-#include <netinet/ether.h>
+#include <ifaddrs.h>
+#include <iwlib.h>
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
-#include <ifaddrs.h>
+#include <netinet/ether.h>
 #endif
 
 #include "ace/Dirent_Selector.h"
@@ -1063,7 +1064,7 @@ continue_:
   struct sockaddr_ll* sockaddr_ll_p = NULL;
   for (struct ifaddrs* ifaddrs_2 = ifaddrs_p;
        ifaddrs_2;
-       ifaddrs_2 = ifaddrs_p->ifa_next)
+       ifaddrs_2 = ifaddrs_2->ifa_next)
   {
     if (ACE_OS::strcmp (interfaceIdentifier_in.c_str (),
                         ifaddrs_2->ifa_name))
@@ -1170,6 +1171,51 @@ error:
 }
 #endif
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+bool
+Net_Common_Tools::interfaceIsWireless (const std::string& adapter_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceIsWireless"));
+
+  // sanity check(s)
+  ACE_ASSERT (!adapter_in.empty ());
+  ACE_ASSERT (adapter_in.size () <= IFNAMSIZ);
+
+  bool result = false;
+  int socket_handle = -1;
+  struct iwreq request_s;
+  ACE_OS::memset (&request_s, 0, sizeof (struct iwreq));
+  int result_2 = -1;
+
+  ACE_OS::strncpy (request_s.ifr_name,
+                   adapter_in.c_str (),
+                   IFNAMSIZ);
+  socket_handle = ACE_OS::socket (AF_INET,
+                                  SOCK_STREAM,
+                                  0);
+  if (socket_handle == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::socket(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (adapter_in.c_str ())));
+    return false;
+  } // end IF
+  result_2 = ACE_OS::ioctl (socket_handle,
+                            SIOCGIWNAME,
+                            &request_s);
+  if (!result_2)
+    result = true;
+
+  result_2 = ACE_OS::close (socket_handle);
+  if (socket_handle == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::close(\"%s\"): \"%m\", continuing\n"),
+                ACE_TEXT (adapter_in.c_str ())));
+
+  return result;
+}
+#endif
 bool
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 Net_Common_Tools::associateWithWLAN (REFGUID adapter_in,
@@ -1534,7 +1580,91 @@ error:
 
   return result;
 #else
-  ACE_ASSERT (false);
+  int socket_handle = -1;
+  int result_2 = -1;
+  struct iwreq iwreq_s;
+  char essid[IW_ESSID_MAX_SIZE + 1];
+  struct iw_range iw_range_s;
+  struct wireless_scan_head wireless_scan_head_s;
+  struct wireless_scan* wireless_scan_p = NULL;
+
+  socket_handle = iw_sockets_open ();
+  if (socket_handle == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to iw_sockets_open(): \"%m\", aborting\n")));
+    goto clean;
+  } // end IF
+
+  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  ACE_OS::memset (essid, 0, sizeof (IW_ESSID_MAX_SIZE + 1));
+  iwreq_s.u.essid.pointer = essid;
+  iwreq_s.u.essid.length = IW_ESSID_MAX_SIZE + 1;
+  result_2 = iw_get_ext (socket_handle,
+                         adapter_in.c_str (),
+                         SIOCGIWESSID,
+                         &iwreq_s);
+  if (result_2 < 0)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to iw_get_ext(%s,SIOCGIWESSID): \"%m\", aborting\n"),
+                ACE_TEXT (adapter_in.c_str ())));
+    goto clean;
+  } // end IF
+  if (!ACE_OS::memcmp (SSID_in.c_str (),
+                       iwreq_s.u.essid.pointer,
+                       iwreq_s.u.essid.length))
+  { // --> already connected, nothing to do
+    result = true;
+    goto clean;
+  } // end IF
+
+  ACE_OS::memset (&iw_range_s, 0, sizeof (struct iw_range));
+  result_2 = iw_get_range_info (socket_handle,
+                                adapter_in.c_str (),
+                                &iw_range_s);
+  if (result_2 < 0)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to iw_get_range_info(): \"%m\", aborting\n")));
+    goto clean;
+  } // end IF
+  ACE_OS::memset (&wireless_scan_head_s, 0, sizeof (struct wireless_scan_head));
+  result_2 = iw_scan (socket_handle,
+                      const_cast<char*> (adapter_in.c_str ()),
+                      iw_range_s.we_version_compiled,
+                      &wireless_scan_head_s);
+  if (result_2 < 0)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to iw_scan(): \"%m\", aborting\n")));
+    goto clean;
+  } // end IF
+  for (wireless_scan_p = wireless_scan_head_s.result;
+       wireless_scan_p;
+       wireless_scan_p = wireless_scan_p->next)
+  {
+    if (!wireless_scan_p->b.essid_on)
+      continue;
+    if (!ACE_OS::strncmp (SSID_in.c_str (),
+                          wireless_scan_p->b.essid,
+                          wireless_scan_p->b.essid_len))
+    { // --> found SSID on adapter
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("\"%s\": found SSID (was: \"%s\"), connecting...\n"),
+                  ACE_TEXT (adapter_in.c_str ()),
+                  ACE_TEXT (SSID_in.c_str ())));
+
+      result = true;
+      goto clean;
+    } // end IF
+  } // end FOR
+
+clean:
+  iw_sockets_close (socket_handle);
+//  if (result_2 == -1)
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to iw_sockets_close(): \"%m\", continuing\n")));
 
   return result;
 #endif
@@ -2038,7 +2168,8 @@ continue_:
 
       result = connected_interfaces.begin ()->second;
 #else
-      // *TODO*: this should work on most Linux systems, but is really a bad idea:
+      // *TODO*: this should work on most Unixy systems, but is a really bad
+      //         idea:
       //         - relies on local 'ip'
       //         - temporary files
       //         - system(3) call
