@@ -113,7 +113,7 @@ Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURAT
   // sanity check(s)
   ACE_ASSERT (!isRunning ());
 
-  bool result = false;
+//  bool result = false;
   bool setup_pipeline = configuration_in.configuration_.setupPipeline;
   bool reset_setup_pipeline = false;
   struct Test_U_DHCPClient_SessionData* session_data_p = NULL;
@@ -129,7 +129,7 @@ Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURAT
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
-                ACE_TEXT (inherited::configuration_.name_.c_str ())));
+                ACE_TEXT (inherited::configuration_->name_.c_str ())));
     goto failed;
   } // end IF
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
@@ -155,7 +155,7 @@ Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURAT
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (inherited::configuration_.name_.c_str ()),
+                ACE_TEXT (inherited::configuration_->name_.c_str ()),
                 ACE_TEXT ("NetIO")));
     goto failed;
   } // end IF
@@ -165,7 +165,7 @@ Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURAT
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n"),
-                ACE_TEXT (inherited::configuration_.name_.c_str ())));
+                ACE_TEXT (inherited::configuration_->name_.c_str ())));
     goto failed;
   } // end IF
   netIO_impl_p->set (&(inherited::state_));
@@ -180,7 +180,7 @@ Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURAT
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (inherited::configuration_.name_.c_str ())));
+                  ACE_TEXT (inherited::configuration_->name_.c_str ())));
       goto failed;
     } // end IF
 
@@ -200,7 +200,7 @@ failed:
   if (!inherited::reset ())
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::reset(): \"%m\", continuing\n"),
-                ACE_TEXT (inherited::configuration_.name_.c_str ())));
+                ACE_TEXT (inherited::configuration_->name_.c_str ())));
 
   return false;
 }
@@ -387,7 +387,7 @@ Test_U_OutboundConnectionStream::initialize (const typename inherited::CONFIGURA
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
-                ACE_TEXT (inherited::configuration_.name_.c_str ())));
+                ACE_TEXT (inherited::configuration_->name_.c_str ())));
     goto failed;
   } // end IF
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
@@ -435,7 +435,7 @@ Test_U_OutboundConnectionStream::initialize (const typename inherited::CONFIGURA
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (inherited::configuration_.name_.c_str ())));
+                  ACE_TEXT (inherited::configuration_->name_.c_str ())));
       goto failed;
     } // end IF
 

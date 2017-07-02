@@ -1237,6 +1237,7 @@ Net_Common_Tools::associateWithWLAN (const std::string& adapter_in,
   localSAP_out.reset ();
 
   bool result = false;
+  unsigned int retries = 0;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HANDLE handle_client = NULL;
   // *TODO*: support WinXP
@@ -1275,7 +1276,6 @@ Net_Common_Tools::associateWithWLAN (const std::string& adapter_in,
                                          0);
   ACE_Time_Value timeout;
   int result_3 = -1;
-  unsigned int retries = 0;
 
   result_2 = WlanOpenHandle (maximum_client_version,
                              NULL,
@@ -1510,11 +1510,11 @@ check_networks:
               ACE_TEXT ("SSID (was: \"%s\") not found on WLAN interface \"%s\"%s\n"),
               ACE_TEXT (SSID_in.c_str ()),
               ACE_TEXT_WCHAR_TO_TCHAR (interface_info_p->strInterfaceDescription),
-              (scanForNetworks_in ? ((retries == NET_PROTOCOL_WIN32_WLAN_SCAN_RETRIES) ? ACE_TEXT (", giving up")
-                                                                                       : ACE_TEXT (", scanning..."))
+              (scanForNetworks_in ? ((retries == NET_PROTOCOL_WLAN_SCAN_RETRIES) ? ACE_TEXT (", giving up")
+                                                                                 : ACE_TEXT (", scanning..."))
                                   : ACE_TEXT (", aborting"))));
   if (!scanForNetworks_in ||
-      (retries == NET_PROTOCOL_WIN32_WLAN_SCAN_RETRIES))
+      (retries == NET_PROTOCOL_WLAN_SCAN_RETRIES))
     goto error;
   ++retries;
 
@@ -1630,6 +1630,8 @@ error:
     goto clean;
   } // end IF
   ACE_OS::memset (&wireless_scan_head_s, 0, sizeof (struct wireless_scan_head));
+
+scan:
   result_2 = iw_scan (socket_handle,
                       const_cast<char*> (adapter_in.c_str ()),
                       iw_range_s.we_version_compiled,
@@ -1659,6 +1661,19 @@ error:
       goto clean;
     } // end IF
   } // end FOR
+  // SSID not found --> scan for networks ?
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("SSID (was: \"%s\") not found on WLAN interface \"%s\"%s\n"),
+              ACE_TEXT (SSID_in.c_str ()),
+              ACE_TEXT (adapter_in.c_str ()),
+              (scanForNetworks_in ? ((retries == NET_PROTOCOL_WLAN_SCAN_RETRIES) ? ACE_TEXT (", giving up")
+                                                                                 : ACE_TEXT (", scanning..."))
+                                  : ACE_TEXT (", aborting"))));
+  if (!scanForNetworks_in ||
+      (retries == NET_PROTOCOL_WLAN_SCAN_RETRIES))
+    goto clean;
+  ++retries;
+  goto scan;
 
 clean:
   iw_sockets_close (socket_handle);
@@ -1683,11 +1698,7 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
 
   std::string interface_identifier_string = interfaceIdentifier_in;
   if (interface_identifier_string.empty ())
-    interface_identifier_string =
-      Net_Common_Tools::getDefaultInterface ();
-
-//  ACE_TCHAR buffer[BUFSIZ];
-//  ACE_OS::memset (buffer, 0, sizeof (buffer));
+    interface_identifier_string = Net_Common_Tools::getDefaultInterface ();
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ULONG flags = (GAA_FLAG_INCLUDE_PREFIX             |

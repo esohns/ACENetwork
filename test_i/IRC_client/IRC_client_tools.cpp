@@ -233,7 +233,7 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
 
   ACE_HANDLE return_value = ACE_INVALID_HANDLE;
 
-  int result = -1;
+//  int result = -1;
   struct IRC_Client_ConnectionConfiguration* configuration_p = NULL;
   struct IRC_Client_UserData* user_data_p = NULL;
 

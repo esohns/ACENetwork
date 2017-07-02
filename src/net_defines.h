@@ -55,9 +55,9 @@
 #define NET_ADDRESS_NSLOOKUP_RESULT_ADDRESS_KEY_STRING  "Address"
 
 // protocols
+#define NET_PROTOCOL_WLAN_SCAN_RETRIES                  3
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #define NET_PROTOCOL_WIN32_WLAN_SCAN_TIMEOUT            5 // seconds
-#define NET_PROTOCOL_WIN32_WLAN_SCAN_RETRIES            3
 #endif
 
 // *IMPORTANT NOTE*: must match with the kernel module implementation !
