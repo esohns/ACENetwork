@@ -609,7 +609,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
         (error != ENOMEM)          && // 12 : [server: local close()] *TODO*: ?
         (error != ERROR_IO_PENDING))  // 997:
 #else
-    if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
+    if (error == EINPROGRESS)
+      result = 0; // --> AIO_CANCELED
     if ((error != ENOENT)     && // 2  : *TODO*
         (error != EBADF)      && // 9  : Linux [client: local close()]
         (error != EINVAL)     && // 22 : Linux [client: local close()]

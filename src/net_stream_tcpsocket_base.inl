@@ -350,42 +350,15 @@ Net_StreamTCPSocketBase_T<HandlerType,
     case CLOSE_DURING_NEW_CONNECTION: // e.g. connect()ion refused
     case NET_CONNECTION_CLOSE_REASON_INITIALIZATION: // initialization (i.e. open()) failed
     {
-      //ACE_HANDLE handle =
-      //  ((arg_in == NET_CLOSE_REASON_INITIALIZATION) ? ACE_INVALID_HANDLE
-      //                                               : inherited::get_handle ());
       ACE_HANDLE handle = inherited::get_handle ();
 
-      // step1: release any connection resources
+      // shutdown operations, release any connection resources
       result = handle_close (handle,
                              ACE_Event_Handler::ALL_EVENTS_MASK);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
                     handle, ACE_Event_Handler::ALL_EVENTS_MASK));
-
-      //  step2: release the socket handle ?
-      if (arg_in != CLOSE_DURING_NEW_CONNECTION) // <-- already done via dtor
-      {
-        ACE_ASSERT (handle != ACE_INVALID_HANDLE);
-        int result_2 = ACE_OS::closesocket (handle);
-        if (result_2 == -1)
-        {
-          int error = ACE_OS::last_error ();
-          ACE_UNUSED_ARG (error);
-          //          if ((error != ENOTSOCK) && // Win32 (failed to connect: timed out)
-          //              (error != EBADF))      // Linux (failed to connect: timed out)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
-                      reinterpret_cast<size_t> (handle)));
-#else
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                      handle));
-#endif
-          result = -1;
-        } // end IF
-      } // end IF
 
       break;
     }
@@ -393,35 +366,13 @@ Net_StreamTCPSocketBase_T<HandlerType,
     {
       ACE_HANDLE handle = inherited::get_handle ();
 
-      // step1: shutdown operations, release any connection resources
-      // *NOTE*: may 'delete this'
+      // shutdown operations, release any connection resources
       result = handle_close (handle,
                              ACE_Event_Handler::ALL_EVENTS_MASK);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
                     handle, ACE_Event_Handler::ALL_EVENTS_MASK));
-
-      //  step2: release the socket handle ?
-      if (handle != ACE_INVALID_HANDLE)
-      {
-        int result_2 = ACE_OS::closesocket (handle);
-        if (result_2 == -1)
-        {
-          int error = ACE_OS::last_error ();
-          if (error != ENOTSOCK) //  Win32 (failed to connect: timed out)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
-                        reinterpret_cast<size_t> (handle)));
-#else
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                        handle));
-#endif
-          result = -1;
-        } // end IF
-      } // end IF
 
       break;
     }
@@ -810,9 +761,6 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   int result = -1;
 
-  // sanity check(s)
-  ACE_ASSERT (inherited2::configuration_);
-
   // step0a: set state
   // *IMPORTANT NOTE*: set the state early to avoid deadlock in
   //                   waitForCompletion() (see below), which may be implicitly
@@ -839,7 +787,11 @@ Net_StreamTCPSocketBase_T<HandlerType,
                                              //     accept failed (e.g. too many connections) /
                                              //     select failed (EBADF see Select_Reactor_T.cpp) /
                                              //     user abort
-    { // step1: signal completion and wait for all processing
+    {
+      // sanity check(s)
+      ACE_ASSERT (inherited2::configuration_);
+
+      // step1: signal completion and wait for all processing
       // *IMPORTANT NOTE*: when the socket closes, any dispatching threads
       //                   currently servicing the socket handle will call
       //                   handle_close()
@@ -897,11 +849,11 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   // step3: invoke base class maintenance
   bool deregister = inherited2::isRegistered_;
-  // *IMPORTANT NOTE*: use get_handle() here to pass proper handle
-  //                   otherwise, this fails for the usecase "accept failed"
-  //                   (see above)
+  // *IMPORTANT NOTE*: retain the socket handle:
+  //                   - otherwise this fails for the usecase "accept failed"
+  //                     (see above)
+  //                   - until deregistered from the manager
   ACE_HANDLE handle = inherited::get_handle ();
-  // *IMPORTANT NOTE*: may delete 'this'
   result = inherited::handle_close (handle,
                                     mask_in);
   if (unlikely (result == -1))
@@ -916,22 +868,12 @@ Net_StreamTCPSocketBase_T<HandlerType,
                 handle, mask_in));
 #endif
   } // end IF
+  inherited::set_handle (handle);
 
   // step4: deregister with the connection manager (if any)
+  // *NOTE*: may delete 'this'
   if (likely (deregister))
     inherited2::deregister ();
-
-//  // step5: clean up
-//  if (currentReadBuffer_)
-//  {
-//    currentReadBuffer_->release ();
-//    currentReadBuffer_ = NULL;
-//  } // end IF
-//  if (currentWriteBuffer_)
-//  {
-//    currentWriteBuffer_->release ();
-//    currentWriteBuffer_ = NULL;
-//  } // end IF
 
   return result;
 }
@@ -958,7 +900,6 @@ Net_StreamTCPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::increase"));
 
-  //ACE_Event_Handler::Reference_Count count = inherited2::increase ();
   ACE_Event_Handler::Reference_Count count = inherited::add_reference ();
   //  ACE_DEBUG ((LM_DEBUG,
   //              ACE_TEXT ("%@/%u: added, count: %d\n"), this, id (), count));
@@ -988,10 +929,6 @@ Net_StreamTCPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::decrease"));
 
-  //  void* this_ptr = this;
-  //  unsigned int session_id = id ();
-
-  //ACE_Event_Handler::Reference_Count count = inherited2::decrease ();
   ACE_Event_Handler::Reference_Count count = inherited::remove_reference ();
   //  if (count)
   //    ACE_DEBUG ((LM_DEBUG,
@@ -1002,69 +939,6 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   return static_cast<unsigned int> (count);
 }
-
-//template <typename AddressType,
-//          typename SocketConfigurationType,
-//          typename ConfigurationType,
-//          typename UserDataType,
-//          typename StateType,
-//          typename StatisticContainerType,
-//          typename StreamType,
-//          typename HandlerType>
-//ACE_Event_Handler::Reference_Count
-//Net_StreamTCPSocketBase_T<AddressType,
-//                          SocketConfigurationType,
-//                          ConfigurationType,
-//                          UserDataType,
-//                          StateType,
-//                          StatisticContainerType,
-//                          StreamType,
-//                          HandlerType>::add_reference (void)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::add_reference"));
-//
-//  //ACE_Event_Handler::Reference_Count count = inherited2::increase ();
-//  ACE_Event_Handler::Reference_Count count = inherited::add_reference ();
-////  ACE_DEBUG ((LM_DEBUG,
-////              ACE_TEXT ("%@/%u: added, count: %d\n"), this, id (), count));
-//
-//  return count;
-//}
-//
-//template <typename AddressType,
-//          typename SocketConfigurationType,
-//          typename ConfigurationType,
-//          typename UserDataType,
-//          typename StateType,
-//          typename StatisticContainerType,
-//          typename StreamType,
-//          typename HandlerType>
-//ACE_Event_Handler::Reference_Count
-//Net_StreamTCPSocketBase_T<AddressType,
-//                          SocketConfigurationType,
-//                          ConfigurationType,
-//                          UserDataType,
-//                          StateType,
-//                          StatisticContainerType,
-//                          StreamType,
-//                          HandlerType>::remove_reference (void)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::remove_reference"));
-//
-////  void* this_ptr = this;
-////  unsigned int session_id = id ();
-//
-//  //ACE_Event_Handler::Reference_Count count = inherited2::decrease ();
-//  ACE_Event_Handler::Reference_Count count = inherited::remove_reference ();
-////  if (count)
-////    ACE_DEBUG ((LM_DEBUG,
-////                ACE_TEXT ("%@/%u: removed, count: %d\n"), this_ptr, session_id, count));
-////  else
-////    ACE_DEBUG ((LM_DEBUG,
-////                ACE_TEXT ("%@/%u: removed, count: %d --> deleted !\n"), this_ptr, session_id, count));
-//
-//  return count;
-//}
 
 template <typename HandlerType,
           typename AddressType,
@@ -1091,6 +965,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::info"));
 
   int result = -1;
+  int error = 0;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   handle_out = inherited::get_handle ();
@@ -1100,13 +975,27 @@ Net_StreamTCPSocketBase_T<HandlerType,
 
   result = inherited::peer_.get_local_addr (localSAP_out);
   if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK::get_local_addr(): \"%m\", continuing\n")));
+  {
+    error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    if (error != EBADF) // 9: Linux: socket already closed
+#endif
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SOCK::get_local_addr(): \"%m\", continuing\n")));
+  } // end IF
   result = inherited::peer_.get_remote_addr (remoteSAP_out);
   // *NOTE*: peer may have disconnected already --> not an error
   if (result == -1)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("failed to ACE_SOCK::get_remote_addr(): \"%m\", continuing\n")));
+  {
+    error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    if (error != EBADF) // 9: Linux: socket already closed
+#endif
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SOCK::get_remote_addr(): \"%m\", continuing\n")));
+  } // end IF
 }
 
 template <typename HandlerType,
@@ -1191,19 +1080,25 @@ Net_StreamTCPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::waitForCompletion"));
 
   // step1: wait for the stream to flush
-  //        --> all data has been dispatched (here: to the reactor/kernel)
   stream_.wait (waitForThreads_in,
                 false,            // wait for upstream ?
                 false);           // wait for downstream ?
 
-  // *TODO*: different platforms may implement methods by which successful
-  //         placing of the data onto the wire can be established
-  //         (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
+  // *NOTE*: all data has been dispatched to the reactor (i.e. kernel)
+
+  // step2: wait for the kernel to place the data onto the wire
+  // *TODO*: platforms may implement different methods by which this can be
+  //         established (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
 #if defined (ACE_LINUX)
-  ACE_HANDLE handle = inherited::get_handle ();
-  bool no_delay = Net_Common_Tools::getNoDelay (handle);
-  Net_Common_Tools::setNoDelay (handle, true);
-  Net_Common_Tools::setNoDelay (handle, no_delay);
+  // *TODO*: remove type inference
+  if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
+  {
+    ACE_HANDLE handle = inherited::get_handle ();
+    ACE_ASSERT (handle != ACE_INVALID_HANDLE);
+    bool no_delay = Net_Common_Tools::getNoDelay (handle);
+    Net_Common_Tools::setNoDelay (handle, true);
+    Net_Common_Tools::setNoDelay (handle, no_delay);
+  } // end IF
 #endif
 }
 

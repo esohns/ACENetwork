@@ -1056,11 +1056,27 @@ Net_StreamUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::waitForCompletion"));
 
-  // wait for the stream to flush
-  // --> all data has been dispatched (here: to the reactor/kernel)
+  // step1: wait for the stream to flush
   stream_.wait (waitForThreads_in,
-                false,
-                false);
+                false,            // wait for upstream ?
+                false);           // wait for downstream ?
+
+  // *NOTE*: all data has been dispatched to the reactor (i.e. kernel)
+
+  // step2: wait for the kernel to place the data onto the wire
+  // *TODO*: platforms may implement different methods by which this can be
+  //         established (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
+#if defined (ACE_LINUX)
+  // *TODO*: remove type inference
+  if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
+  {
+    ACE_HANDLE handle = inherited::get_handle ();
+    ACE_ASSERT (handle != ACE_INVALID_HANDLE);
+    bool no_delay = Net_Common_Tools::getNoDelay (handle);
+    Net_Common_Tools::setNoDelay (handle, true);
+    Net_Common_Tools::setNoDelay (handle, no_delay);
+  } // end IF
+#endif
 }
 
 template <typename HandlerType,
@@ -2388,11 +2404,27 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::waitForCompletion"));
 
-  // wait for the stream to flush
-  // --> all data has been dispatched (here: to the reactor/kernel)
+  // step1: wait for the stream to flush
   stream_.wait (waitForThreads_in,
-                false,
-                false);
+                false,            // wait for upstream ?
+                false);           // wait for downstream ?
+
+  // *NOTE*: all data has been dispatched to the reactor (i.e. kernel)
+
+  // step2: wait for the kernel to place the data onto the wire
+  // *TODO*: platforms may implement different methods by which this can be
+  //         established (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
+#if defined (ACE_LINUX)
+  // *TODO*: remove type inference
+  if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
+  {
+    ACE_HANDLE handle = inherited::get_handle ();
+    ACE_ASSERT (handle != ACE_INVALID_HANDLE);
+    bool no_delay = Net_Common_Tools::getNoDelay (handle);
+    Net_Common_Tools::setNoDelay (handle, true);
+    Net_Common_Tools::setNoDelay (handle, no_delay);
+  } // end IF
+#endif
 }
 
 template <typename AddressType,
@@ -3600,8 +3632,9 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::waitForCompletion"));
 
   // step1: wait for the stream to flush
-  //        --> all data has been dispatched (here: to the reactor/kernel)
-  stream_.flush ();
+  stream_.wait (waitForThreads_in,
+                false,            // wait for upstream ?
+                false);           // wait for downstream ?
 }
 
 template <typename AddressType,

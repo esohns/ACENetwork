@@ -59,9 +59,14 @@ template <typename SocketType,
           typename ConfigurationType>
 class Net_UDPSocketHandler_T
  : public Net_SocketHandlerBase_T<ConfigurationType>
- , public ACE_Svc_Handler<SocketType, ACE_MT_SYNCH>
+ , public ACE_Svc_Handler<SocketType,
+                          ACE_MT_SYNCH>
 {
  public:
+  // convenient types
+  typedef ACE_Svc_Handler<SocketType,
+                          ACE_MT_SYNCH> SVC_HANDLER_T;
+
   //// override some event handler methods
   //virtual ACE_Event_Handler::Reference_Count add_reference (void);
   //// *IMPORTANT NOTE*: this API works as long as the reactor doesn't manage
@@ -76,12 +81,10 @@ class Net_UDPSocketHandler_T
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
   // resolve ambiguity between ACE_Event_Handler and ACE_Svc_Handler
-  using ACE_Svc_Handler<SocketType, ACE_MT_SYNCH>::get_handle;
-  using ACE_Svc_Handler<SocketType, ACE_MT_SYNCH>::set_handle;
+  using SVC_HANDLER_T::get_handle;
+  using SVC_HANDLER_T::set_handle;
 
  protected:
-  typedef ACE_Svc_Handler<SocketType, ACE_MT_SYNCH> SVC_HANDLER_T;
-
   Net_UDPSocketHandler_T ();
   virtual ~Net_UDPSocketHandler_T ();
 
@@ -95,7 +98,8 @@ class Net_UDPSocketHandler_T
 
  private:
   typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
-  typedef ACE_Svc_Handler<SocketType, ACE_MT_SYNCH> inherited2;
+  typedef ACE_Svc_Handler<SocketType,
+                          ACE_MT_SYNCH> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T& operator= (const Net_UDPSocketHandler_T&))
@@ -108,9 +112,14 @@ template <typename ConfigurationType>
 class Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                              ConfigurationType>
  : public Net_SocketHandlerBase_T<ConfigurationType>
- , public ACE_Svc_Handler<Net_SOCK_CODgram, ACE_MT_SYNCH>
+ , public ACE_Svc_Handler<Net_SOCK_CODgram,
+                          ACE_MT_SYNCH>
 {
  public:
+  // convenient types
+  typedef ACE_Svc_Handler<Net_SOCK_CODgram,
+                          ACE_MT_SYNCH> SVC_HANDLER_T;
+
   //// override some event handler methods
   //virtual ACE_Event_Handler::Reference_Count add_reference (void);
   //// *IMPORTANT NOTE*: this API works as long as the reactor doesn't manage
@@ -125,12 +134,10 @@ class Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
   // resolve ambiguity between ACE_Event_Handler and ACE_Svc_Handler
-  using ACE_Svc_Handler<Net_SOCK_CODgram, ACE_MT_SYNCH>::get_handle;
-  using ACE_Svc_Handler<Net_SOCK_CODgram, ACE_MT_SYNCH>::set_handle;
+  using SVC_HANDLER_T::get_handle;
+  using SVC_HANDLER_T::set_handle;
 
  protected:
-  typedef ACE_Svc_Handler<Net_SOCK_CODgram, ACE_MT_SYNCH> SVC_HANDLER_T;
-
   Net_UDPSocketHandler_T ();
   virtual ~Net_UDPSocketHandler_T ();
 
@@ -144,7 +151,8 @@ class Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
  private:
   typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
-  typedef ACE_Svc_Handler<Net_SOCK_CODgram, ACE_MT_SYNCH> inherited2;
+  typedef ACE_Svc_Handler<Net_SOCK_CODgram,
+                          ACE_MT_SYNCH> inherited2;
 
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T& operator= (const Net_UDPSocketHandler_T&))

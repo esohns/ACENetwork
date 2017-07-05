@@ -319,6 +319,11 @@ Net_TCPSocketHandler_T<ConfigurationType,
     }
   } // end SWITCH
 
+  result = inherited2::peer_.close ();
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_SOCK_Stream::close(): \"%m\", continuing\n")));
+
   return result;
 }
 
@@ -620,6 +625,11 @@ Net_TCPSocketHandler_T<ConfigurationType,
       break;
     }
   } // end SWITCH
+
+  result = inherited2::peer_.close ();
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_SSL_SOCK_Stream::close(): \"%m\", continuing\n")));
 
   return result;
 }
