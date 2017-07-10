@@ -38,6 +38,7 @@
 
 #include "http_codes.h"
 #include "http_common.h"
+#include "http_exports.h"
 #include "http_module_parser.h"
 #include "http_module_streamer.h"
 #include "http_stream_common.h"
@@ -45,7 +46,7 @@
 // forward declarations
 typedef Stream_INotify_T<enum Stream_SessionMessageType> HTTP_Stream_INotify_t;
 
-extern const char stream_name_string_[];
+extern HTTP_Export const char stream_http_stream_name_string_[];
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -66,7 +67,7 @@ template <typename StreamStateType,
 class HTTP_Stream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        stream_name_string_,
+                        stream_http_stream_name_string_,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -84,7 +85,7 @@ class HTTP_Stream_T
 {
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        stream_name_string_,
+                        stream_http_stream_name_string_,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,

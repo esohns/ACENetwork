@@ -36,13 +36,14 @@
 #include "stream_misc_statistic_report.h"
 
 #include "irc_common.h"
+#include "irc_exports.h"
 #include "irc_module_bisector.h"
 #include "irc_module_parser.h"
 #include "irc_module_streamer.h"
 #include "irc_record.h"
 #include "irc_stream_common.h"
 
-extern const char stream_name_string_[];
+extern IRC_Export const char stream_irc_stream_name_string_[];
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -63,7 +64,7 @@ template <typename StreamStateType,
 class IRC_Stream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        stream_name_string_,
+                        stream_irc_stream_name_string_,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -81,7 +82,7 @@ class IRC_Stream_T
 {
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        stream_name_string_,
+                        stream_irc_stream_name_string_,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,

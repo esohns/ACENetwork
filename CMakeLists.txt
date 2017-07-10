@@ -89,6 +89,13 @@ install (FILES "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_config.h"
          DESTINATION "${INSTALL_INCLUDE_DIR}/${PROJECT_NAME}"
          COMPONENT dev)
 
+set (BUILD_TEST_U TRUE
+     CACHE BOOL "build test_u")
+set (BUILD_TEST_I TRUE
+     CACHE BOOL "build test_i")
+set (DEBUG_DEBUGGER TRUE
+     CACHE BOOL "in debugger")
+
 if (CMAKE_BUILD_TYPE STREQUAL Debug)
  if (CMAKE_COMPILER_IS_GNUCXX)
   add_compile_options (-g)
@@ -100,6 +107,10 @@ if (CMAKE_BUILD_TYPE STREQUAL Debug)
   add_definitions (-D_ITERATOR_DEBUG_LEVEL=1)
  endif ()
 #  set_property (SOURCE PROPERTY COMPILE_DEFINITIONS _DEBUG)
+ if (DEBUG_DEBUGGER AND
+     NOT DEFINED IN_CPACK)
+  add_definitions (-DDEBUG_DEBUGGER)
+ endif ()
 elseif (CMAKE_BUILD_TYPE STREQUAL Release)
  if (CMAKE_COMPILER_IS_GNUCXX)
   add_compile_options (-O3)

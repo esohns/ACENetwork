@@ -46,6 +46,8 @@ class ACE_Message_Block;
 class Test_U_Message;
 class Test_U_SessionMessage;
 
+extern const char stream_name_string_[];
+
 class Test_U_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,

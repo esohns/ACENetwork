@@ -79,10 +79,10 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
 typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
 typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 
-extern const char stream_name_string_[];
+//extern const char stream_name_string_[];
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
-typedef Stream_Configuration_T<stream_name_string_,
+typedef Stream_Configuration_T<//stream_name_string_,
                                struct Stream_AllocatorConfiguration,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,

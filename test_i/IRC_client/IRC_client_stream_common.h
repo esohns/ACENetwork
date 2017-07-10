@@ -82,10 +82,10 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                     IRC_Client_SessionMessage> IRC_Client_ISessionNotify_t;
 typedef std::list<IRC_Client_ISessionNotify_t*> IRC_Client_ISubscribers_t;
 typedef IRC_Client_ISubscribers_t::const_iterator IRC_Client_ISubscribersIterator_t;
-extern const char stream_name_string_[];
+//extern const char stream_name_string_[];
 struct IRC_Client_StreamConfiguration;
 struct IRC_Client_ModuleHandlerConfiguration;
-typedef Stream_Configuration_T<stream_name_string_,
+typedef Stream_Configuration_T<//stream_name_string_,
                                struct IRC_AllocatorConfiguration,
                                struct IRC_Client_StreamConfiguration,
                                struct Stream_ModuleConfiguration,

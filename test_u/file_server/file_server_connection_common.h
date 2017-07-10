@@ -160,6 +160,8 @@ typedef Net_Connection_Manager_T<ACE_INET_Addr,
 
 //////////////////////////////////////////
 
+extern const char stream_name_string_[];
+
 typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       stream_name_string_,

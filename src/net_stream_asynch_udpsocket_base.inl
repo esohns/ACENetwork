@@ -556,19 +556,28 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::info"));
 
   int result = -1;
+  int error = 0;
 
   handle_out = inherited2::get_handle ();
   localSAP_out.reset ();
   remoteSAP_out.reset ();
 
-  if (inherited::writeOnly_)
+  if (likely (inherited::writeOnly_))
     remoteSAP_out = inherited::address_;
   else
   {
     result = inherited2::get_local_addr (localSAP_out);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+    if (unlikely (result == -1))
+    {
+      error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if (error != ENOTSOCK) // 10038: socket already closed
+#else
+      if (error != EBADF)    // 9    : socket already closed
+#endif
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+    } // end IF
   } // end ELSE
 }
 
@@ -1429,6 +1438,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::info"));
 
   int result = -1;
+  int error = 0;
 
   handle_out = inherited2::get_handle ();
 //  result = localSAP_out.set (static_cast<u_short> (0),
@@ -1438,12 +1448,19 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 //                ACE_TEXT ("failed to ACE_INET_Addr::set(0, %d): \"%m\", continuing\n"),
 //                INADDR_NONE));
   localSAP_out = ACE_Addr::sap_any;
-  if (!inherited4::writeOnly_)
+  if (likely (!inherited4::writeOnly_))
   {
     result = inherited2::get_local_addr (localSAP_out);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+    if (unlikely (result == -1))
+    {
+      error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+      if (error != EBADF) // 9: Linux: socket already closed
+#endif
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_SOCK_Netlink::get_local_addr(): \"%m\", continuing\n")));
+    } // end IF
   } // end IF
   remoteSAP_out = inherited4::address_;
 }

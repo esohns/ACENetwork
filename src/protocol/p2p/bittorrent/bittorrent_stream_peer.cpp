@@ -20,8 +20,9 @@
 #include "stdafx.h"
 
 #include "ace/Synch.h"
-
 #include "bittorrent_stream_peer.h"
 
-//#include "bittorrent_message.h"
-//#include "bittorrent_sessionmessage.h"
+#include "bittorrent_exports.h"
+
+BitTorrent_Export const char stream_bittorrent_stream_name_string_[] =
+  ACE_TEXT_ALWAYS_CHAR ("BitTorrentPeerStream");

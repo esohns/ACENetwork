@@ -172,11 +172,11 @@ typedef BitTorrent_ISession_T<ACE_INET_Addr,
                               enum Stream_StateMachine_ControlState,
                               struct BitTorrent_Client_SessionConfiguration,
                               struct BitTorrent_Client_SessionState> BitTorrent_Client_ISession_t;
-extern const char stream_name_string_[];
+//extern const char stream_name_string_[];
 struct BitTorrent_AllocatorConfiguration;
 struct BitTorrent_Client_PeerStreamConfiguration;
 struct BitTorrent_Client_PeerModuleHandlerConfiguration;
-typedef Stream_Configuration_T<stream_name_string_,
+typedef Stream_Configuration_T<//stream_name_string_,
                                struct BitTorrent_AllocatorConfiguration,
                                struct BitTorrent_Client_PeerStreamConfiguration,
                                struct Stream_ModuleConfiguration,
@@ -207,7 +207,7 @@ struct BitTorrent_Client_PeerModuleHandlerConfiguration
 struct HTTP_AllocatorConfiguration;
 struct BitTorrent_Client_TrackerStreamConfiguration;
 struct BitTorrent_Client_TrackerModuleHandlerConfiguration;
-typedef Stream_Configuration_T<stream_name_string_,
+typedef Stream_Configuration_T<//stream_name_string_,
                                struct HTTP_AllocatorConfiguration,
                                struct BitTorrent_Client_TrackerStreamConfiguration,
                                struct Stream_ModuleConfiguration,

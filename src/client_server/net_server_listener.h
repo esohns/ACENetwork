@@ -81,6 +81,7 @@ class Net_Server_Listener_T
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
   inline virtual bool isRunning () const { return isListening_; };
+  inline virtual void finished (bool = true) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   virtual const HandlerConfigurationType& get () const;
   //virtual bool initialize (const HandlerConfigurationType&);

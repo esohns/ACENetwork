@@ -174,11 +174,11 @@ typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 //                                 Test_U_UserData> Test_U_IConnectionManager_t;
 
 // forward declarations
-extern const char stream_name_string_[];
+//extern const char stream_name_string_[];
 struct Test_U_AllocatorConfiguration;
 struct Test_U_StreamConfiguration;
 struct Test_U_StreamModuleHandlerConfiguration;
-typedef Stream_Configuration_T<stream_name_string_,
+typedef Stream_Configuration_T<//stream_name_string_,
                                struct Test_U_AllocatorConfiguration,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,

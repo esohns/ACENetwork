@@ -39,14 +39,12 @@
 #include "http_stream.h"
 
 #include "bittorrent_common.h"
-//#include "bittorrent_module_bisector.h"
+ //#include "bittorrent_module_bisector.h"
 //#include "bittorrent_module_handler.h"
 
 // forward declarations
 typedef Stream_INotify_T<enum Stream_SessionMessageType> BitTorrent_INotify_t;
 typedef Stream_Statistic BitTorrent_RuntimeStatistic_t;
-
-extern const char stream_name_string_[];
 
 template <typename StreamStateType,
           ////////////////////////////////

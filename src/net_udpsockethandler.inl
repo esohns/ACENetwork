@@ -119,7 +119,7 @@ Net_UDPSocketHandler_T<SocketType,
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to SocketType::open(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to SocketType::open(%s): \"%m\", aborting\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address).c_str ())));
     goto error;
   } // end IF
@@ -146,28 +146,28 @@ Net_UDPSocketHandler_T<SocketType,
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::connect(0x%@,\"%s\"): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to ACE_OS::connect(0x%@,%s): \"%m\", aborting\n"),
                   handle,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
 #else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::connect(%d,\"%s\"): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to ACE_OS::connect(%d,%s): \"%m\", aborting\n"),
                   handle,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
 #endif
       goto error;
     } // end IF
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("0x%@: associated to \"%s\"\n"),
-                handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
-#else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%d: associated to \"%s\"\n"),
-                handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
-#endif
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("0x%@: associated datagram socket to %s\n"),
+//                handle,
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
+//#else
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("%d: associated datagram socket to %s\n"),
+//                handle,
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
+//#endif
   } // end IF
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //    ACE_DEBUG ((LM_DEBUG,

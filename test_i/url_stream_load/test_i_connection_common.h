@@ -75,10 +75,10 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 //  struct Test_I_UserData* userData;
 //};
 
-extern const char stream_name_string_[];
+//extern const char stream_name_string_[];
 struct Test_I_URLStreamLoad_StreamConfiguration;
 struct Test_I_URLStreamLoad_ModuleHandlerConfiguration;
-typedef Stream_Configuration_T<stream_name_string_,
+typedef Stream_Configuration_T<//stream_name_string_,
                                struct Test_I_AllocatorConfiguration,
                                struct Test_I_URLStreamLoad_StreamConfiguration,
                                struct Stream_ModuleConfiguration,

@@ -89,11 +89,11 @@ struct Test_U_SocketHandlerConfiguration
   struct Test_U_UserData*                userData;
 };
 
-extern const char stream_name_string_[];
+//extern const char stream_name_string_[];
 struct Test_U_AllocatorConfiguration;
 struct Test_U_StreamConfiguration;
 struct Test_U_StreamModuleHandlerConfiguration;
-typedef Stream_Configuration_T<stream_name_string_,
+typedef Stream_Configuration_T<//stream_name_string_,
                                struct Test_U_AllocatorConfiguration,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,

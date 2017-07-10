@@ -981,6 +981,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::info"));
 
   int result = -1;
+  int error = 0;
 
   handle_out = inherited::SVC_HANDLER_T::get_handle ();
   localSAP_out.reset ();
@@ -991,9 +992,16 @@ Net_StreamUDPSocketBase_T<HandlerType,
   else
   {
     result = inherited::peer_.get_local_addr (localSAP_out);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+    if (unlikely (result == -1))
+    {
+      error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+      if (error != EBADF) // 9: Linux: socket already closed
+#endif
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+    } // end IF
   } // end ELSE
 }
 
@@ -1068,14 +1076,14 @@ Net_StreamUDPSocketBase_T<HandlerType,
   //         established (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
 #if defined (ACE_LINUX)
   // *TODO*: remove type inference
-  if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
-  {
-    ACE_HANDLE handle = inherited::get_handle ();
-    ACE_ASSERT (handle != ACE_INVALID_HANDLE);
-    bool no_delay = Net_Common_Tools::getNoDelay (handle);
-    Net_Common_Tools::setNoDelay (handle, true);
-    Net_Common_Tools::setNoDelay (handle, no_delay);
-  } // end IF
+//  if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
+//  {
+//    ACE_HANDLE handle = inherited::get_handle ();
+//    ACE_ASSERT (handle != ACE_INVALID_HANDLE);
+//    bool no_delay = Net_Common_Tools::getNoDelay (handle);
+//    Net_Common_Tools::setNoDelay (handle, true);
+//    Net_Common_Tools::setNoDelay (handle, no_delay);
+//  } // end IF
 #endif
 }
 
@@ -2329,6 +2337,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::info"));
 
   int result = -1;
+  int error = 0;
 
   handle_out = inherited::SVC_HANDLER_T::get_handle ();
   localSAP_out.reset ();
@@ -2340,8 +2349,15 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   {
     result = inherited::peer_.get_local_addr (localSAP_out);
     if (unlikely (result == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+    {
+      error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+      if (error != EBADF) // 9: Linux: socket already closed
+#endif
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_SOCK_CODgram::get_local_addr(): \"%m\", continuing\n")));
+    } // end IF
   } // end ELSE
 }
 
@@ -3558,6 +3574,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::info"));
 
   int result = -1;
+  int error = 0;
 
   // sanity check(s)
   ACE_ASSERT (inherited2::configuration_);
@@ -3570,8 +3587,15 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   {
     result = inherited::peer_.get_local_addr (localSAP_out);
     if (unlikely (result == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+    {
+      error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+      if (error != EBADF) // 9: Linux: socket already closed
+#endif
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_SOCK_Netlink::get_local_addr(): \"%m\", continuing\n")));
+    } // end IF
   } // end IF
   remoteSAP_out =
       inherited2::configuration_->socketHandlerConfiguration.socketConfiguration.address;

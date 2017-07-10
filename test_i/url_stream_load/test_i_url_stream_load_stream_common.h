@@ -196,8 +196,8 @@ struct Test_I_URLStreamLoad_StreamConfiguration
    : HTTP_StreamConfiguration ()
   {};
 };
-extern const char stream_name_string_[];
-typedef Stream_Configuration_T<stream_name_string_,
+//extern const char stream_name_string_[];
+typedef Stream_Configuration_T<//stream_name_string_,
                                struct Test_I_AllocatorConfiguration,
                                struct Test_I_URLStreamLoad_StreamConfiguration,
                                struct Stream_ModuleConfiguration,

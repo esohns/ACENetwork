@@ -117,28 +117,28 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::connect(0x%@,\"%s\"): \"%m\", returning\n"),
+                  ACE_TEXT ("failed to ACE_OS::connect(0x%@,%s): \"%m\", returning\n"),
                   handle_in,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
 #else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::connect(%d,\"%s\"): \"%m\", returning\n"),
+                  ACE_TEXT ("failed to ACE_OS::connect(%d,%s): \"%m\", returning\n"),
                   handle_in,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
 #endif
       return;
     } // end IF
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("0x%@: associated to \"%s\"\n"),
-                handle_in,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
-#else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%d: associated to \"%s\"\n"),
-                handle_in,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
-#endif
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("0x%@: associated datagram socket to %s\n"),
+//                handle_in,
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
+//#else
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("%d: associated datagram socket to %s\n"),
+//                handle_in,
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
+//#endif
   } // end IF
 
   if (!writeOnly_)

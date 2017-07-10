@@ -22,5 +22,9 @@
 #include "ace/Synch.h"
 #include "irc_stream.h"
 
-#include "irc_message.h"
-#include "irc_sessionmessage.h"
+#include "irc_exports.h"
+//#include "irc_message.h"
+//#include "irc_sessionmessage.h"
+
+IRC_Export const char stream_irc_stream_name_string_[] =
+  ACE_TEXT_ALWAYS_CHAR ("IRCStream");

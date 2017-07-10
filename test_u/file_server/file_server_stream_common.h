@@ -100,10 +100,10 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct FileServer_ConnectionState,
                                  Net_RuntimeStatistic_t,
                                  struct FileServer_UserData> FileServer_IInetConnectionManager_t;
-extern const char stream_name_string_[];
+//extern const char stream_name_string_[];
 struct FileServer_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
-typedef Stream_Configuration_T<stream_name_string_,
+typedef Stream_Configuration_T<//stream_name_string_,
                                struct Stream_AllocatorConfiguration,
                                struct FileServer_StreamConfiguration,
                                struct Stream_ModuleConfiguration,

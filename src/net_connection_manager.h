@@ -108,11 +108,12 @@ class Net_Connection_Manager_T
 
   // ---------------------------------------------------------------------------
 
-  // implement (part of) Common_IControl
+  // implement Common_ITaskControl_T
   virtual void start ();
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
   virtual bool isRunning () const;
+  inline void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   // implement Common_ILock
   virtual bool lock (bool = true); // block ?

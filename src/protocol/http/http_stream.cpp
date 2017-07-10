@@ -20,10 +20,10 @@
 #include "stdafx.h"
 
 #include "ace/Synch.h"
-
-#include "http_scanner.h"
-
+//#include "http_scanner.h"
 #include "http_stream.h"
 
-//#include "http_message.h"
-//#include "http_sessionmessage.h"
+#include "http_exports.h"
+
+HTTP_Export const char stream_http_stream_name_string_[] =
+  ACE_TEXT_ALWAYS_CHAR ("HTTPStream");

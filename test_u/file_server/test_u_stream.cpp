@@ -127,7 +127,7 @@ Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configurat
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
-                ACE_TEXT (inherited::configuration_->name_.c_str ())));
+                ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
@@ -150,7 +150,7 @@ Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configurat
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (inherited::configuration_->name_.c_str ()),
+                ACE_TEXT (stream_name_string_),
                 ACE_TEXT ("NetworkIO")));
     goto error;
   } // end IF
@@ -160,7 +160,7 @@ Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configurat
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n"),
-                ACE_TEXT (inherited::configuration_->name_.c_str ())));
+                ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
   net_io_impl_p->set (&(inherited::state_));
@@ -175,7 +175,7 @@ Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configurat
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (inherited::configuration_->name_.c_str ())));
+                  ACE_TEXT (stream_name_string_)));
       goto error;
     } // end IF
 
@@ -387,7 +387,7 @@ Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configu
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
-                ACE_TEXT (inherited::configuration_->name_.c_str ())));
+                ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
@@ -410,7 +410,7 @@ Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configu
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (inherited::configuration_->name_.c_str ()),
+                ACE_TEXT (stream_name_string_),
                 ACE_TEXT ("FileSource")));
     goto error;
   } // end IF
@@ -420,7 +420,7 @@ Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configu
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<Test_U_FileReaderH> failed, aborting\n"),
-                ACE_TEXT (inherited::configuration_->name_.c_str ())));
+                ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
   file_source_impl_p->set (&(inherited::state_));
@@ -435,7 +435,7 @@ Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configu
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (inherited::configuration_->name_.c_str ())));
+                  ACE_TEXT (stream_name_string_)));
       goto error;
     } // end IF
 

@@ -37,6 +37,7 @@
 #include "net_module_runtimestatistic.h"
 
 #include "bittorrent_common.h"
+#include "bittorrent_exports.h"
 //#include "bittorrent_module_bisector.h"
 //#include "bittorrent_module_handler.h"
 #include "bittorrent_module_parser.h"
@@ -46,7 +47,7 @@
 typedef Stream_INotify_T<Stream_SessionMessageType> BitTorrent_INotify_t;
 typedef Stream_Statistic BitTorrent_RuntimeStatistic_t;
 
-extern const char stream_name_string_[];
+extern BitTorrent_Export const char stream_bittorrent_stream_name_string_[];
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -73,7 +74,7 @@ template <typename StreamStateType,
 class BitTorrent_PeerStream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        stream_name_string_,
+                        stream_bittorrent_stream_name_string_,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -91,7 +92,7 @@ class BitTorrent_PeerStream_T
 {
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        stream_name_string_,
+                        stream_bittorrent_stream_name_string_,
                         enum Stream_ControlType,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,

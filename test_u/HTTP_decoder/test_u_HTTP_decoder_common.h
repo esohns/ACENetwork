@@ -86,11 +86,11 @@ struct Test_U_SignalHandlerConfiguration
 struct Test_U_ConnectionConfiguration;
 typedef std::map<std::string,
                  struct Test_U_ConnectionConfiguration> Test_U_ConnectionConfigurations_t;
-extern const char stream_name_string_[];
+//extern const char stream_name_string_[];
 struct Test_U_AllocatorConfiguration;
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
-typedef Stream_Configuration_T<stream_name_string_,
+typedef Stream_Configuration_T<//stream_name_string_,
                                struct Test_U_AllocatorConfiguration,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,

@@ -44,7 +44,9 @@ class Test_U_SessionMessage;
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
                                 struct Stream_AllocatorConfiguration> Test_U_ControlMessage_t;
-  
+
+extern const char stream_name_string_[];
+
 class Test_U_Stream
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,

@@ -111,11 +111,11 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct Test_U_ConnectionState,
                                  HTTP_RuntimeStatistic_t,
                                  struct Test_U_UserData> Test_U_IConnectionManager_t;
-extern const char stream_name_string_[];
+//extern const char stream_name_string_[];
 struct Test_U_AllocatorConfiguration;
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
-typedef Stream_Configuration_T<stream_name_string_,
+typedef Stream_Configuration_T<//stream_name_string_,
                                struct Test_U_AllocatorConfiguration,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
