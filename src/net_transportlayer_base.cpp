@@ -22,52 +22,9 @@
 #include "ace/Synch.h"
 #include "net_transportlayer_base.h"
 
-#include "ace/Assert.h"
-#include "ace/config-macros.h"
-
-#include "net_macros.h"
-
-Net_InetTransportLayer_Base::Net_InetTransportLayer_Base (Net_TransportLayerType transportLayer_in)
- : dispatch_ (COMMON_DISPATCH_INVALID)
- , role_ (NET_ROLE_INVALID)
- , transportLayer_ (transportLayer_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::Net_InetTransportLayer_Base"));
-
-}
-
-Net_InetTransportLayer_Base::~Net_InetTransportLayer_Base ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::~Net_InetTransportLayer_Base"));
-
-}
-
-bool
-Net_InetTransportLayer_Base::initialize (enum Common_DispatchType dispatch_in,
-                                         enum Net_ClientServerRole role_in,
-                                         const Net_SocketConfiguration& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::initialize"));
-
-  dispatch_ = dispatch_in;
-  role_ = role_in;
-  ACE_UNUSED_ARG (configuration_in);
-
-  return true;
-}
-
-void
-Net_InetTransportLayer_Base::finalize ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayer_Base::finalize"));
-
-  ACE_ASSERT (false);
-}
-
 /////////////////////////////////////////
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (ACE_HAS_NETLINK)
 Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base ()
  : dispatch_(COMMON_DISPATCH_INVALID)
  , role_(NET_ROLE_INVALID)
@@ -77,32 +34,18 @@ Net_NetlinkTransportLayer_Base::Net_NetlinkTransportLayer_Base ()
 
 }
 
-Net_NetlinkTransportLayer_Base::~Net_NetlinkTransportLayer_Base ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::~Net_NetlinkTransportLayer_Base"));
-
-}
-
 bool
 Net_NetlinkTransportLayer_Base::initialize (enum Common_DispatchType dispatch_in,
                                             enum Net_ClientServerRole role_in,
-                                            const Net_SocketConfiguration& configuration_in)
+                                            const struct Net_NetlinkSocketConfiguration& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::initialize"));
+
+  ACE_UNUSED_ARG (configuration_in);
 
   dispatch_ = dispatch_in;
   role_ = role_in;
 
-  ACE_UNUSED_ARG (configuration_in);
-
   return true;
-}
-
-void
-Net_NetlinkTransportLayer_Base::finalize ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkTransportLayer_Base::finalize"));
-
-  ACE_ASSERT (false);
 }
 #endif

@@ -185,6 +185,7 @@ set (${PROJECT_NAME}_LIB_SRCS
      net_tcpsockethandler.inl
      net_transportlayer_base.cpp
      net_transportlayer_base.h
+     net_transportlayer_base.inl
      net_transportlayer_ip_cast.cpp
      net_transportlayer_ip_cast.h
      net_transportlayer_netlink.cpp
@@ -293,6 +294,7 @@ install (FILES
          net_tcpsockethandler.h
          net_tcpsockethandler.inl
          net_transportlayer_base.h
+         net_transportlayer_base.inl
          net_transportlayer_ip_cast.h
          net_transportlayer_netlink.h
          net_transportlayer_tcp.h

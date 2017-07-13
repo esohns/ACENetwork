@@ -85,7 +85,7 @@ class Net_Server_AsynchListener_T
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
   inline virtual bool isRunning () const { return isListening_; };
-  inline virtual void finished (bool = true) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()

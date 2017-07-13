@@ -30,6 +30,7 @@
 
 #include "stream_statemachine_control.h"
 
+#include "net_configuration.h"
 #include "net_iconnectionmanager.h"
 #include "net_streamconnection_base.h"
 #include "net_transportlayer_udp.h"
@@ -51,9 +52,9 @@ class Net_UDPConnectionBase_T
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     struct Net_SocketConfiguration,
+                                     struct Net_UDPSocketConfiguration,
                                      HandlerConfigurationType,
-                                     struct Net_SocketConfiguration,
+                                     struct Net_ListenerConfiguration,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      UserDataType>
@@ -74,9 +75,9 @@ class Net_UDPConnectionBase_T
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     struct Net_SocketConfiguration,
+                                     struct Net_UDPSocketConfiguration,
                                      HandlerConfigurationType,
-                                     struct Net_SocketConfiguration,
+                                     struct Net_ListenerConfiguration,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      UserDataType> STREAM_CONNECTION_BASE_T;
@@ -117,9 +118,9 @@ class Net_UDPConnectionBase_T
                                      ConfigurationType,
                                      StateType,
                                      StatisticContainerType,
-                                     struct Net_SocketConfiguration,
+                                     struct Net_UDPSocketConfiguration,
                                      HandlerConfigurationType,
-                                     struct Net_SocketConfiguration,
+                                     struct Net_ListenerConfiguration,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
                                      UserDataType> inherited;
@@ -152,9 +153,9 @@ class Net_AsynchUDPConnectionBase_T
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           struct Net_SocketConfiguration,
+                                           struct Net_UDPSocketConfiguration,
                                            HandlerConfigurationType,
-                                           struct Net_SocketConfiguration,
+                                           struct Net_ListenerConfiguration,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            UserDataType>
@@ -174,9 +175,9 @@ class Net_AsynchUDPConnectionBase_T
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           struct Net_SocketConfiguration,
+                                           struct Net_UDPSocketConfiguration,
                                            HandlerConfigurationType,
-                                           struct Net_SocketConfiguration,
+                                           struct Net_ListenerConfiguration,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            UserDataType> STREAM_CONNECTION_BASE_T;
@@ -205,9 +206,9 @@ class Net_AsynchUDPConnectionBase_T
                                            ConfigurationType,
                                            StateType,
                                            StatisticContainerType,
-                                           struct Net_SocketConfiguration,
+                                           struct Net_UDPSocketConfiguration,
                                            HandlerConfigurationType,
-                                           struct Net_SocketConfiguration,
+                                           struct Net_ListenerConfiguration,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
                                            UserDataType> inherited;

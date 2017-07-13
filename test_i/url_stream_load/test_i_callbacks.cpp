@@ -381,7 +381,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_LOOPBACK_NAME)));
   ACE_ASSERT (check_button_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
-                                (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address.is_loopback ());
+                                (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address.is_loopback ());
 
   GtkProgressBar* progressbar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -916,7 +916,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_SPINBUTTON_BUFFERSIZE_NAME)));
     ACE_ASSERT (spin_button_p);
-    (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.bufferSize =
+    (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.bufferSize =
       static_cast<unsigned int> (gtk_spin_button_get_value_as_int (spin_button_p));
     //data_p->configuration->connectionConfiguration.PDUSize =
     //  static_cast<unsigned int> (gtk_spin_button_get_value_as_int (spin_button_p));
@@ -950,8 +950,8 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       hostname_string_2 += converter.str ();
     } // end IF
     result =
-      (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address.set (hostname_string_2.c_str (),
-                                                                                       AF_INET);
+      (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address.set (hostname_string_2.c_str (),
+                                                                                         AF_INET);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -959,8 +959,8 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                   ACE_TEXT (hostname_string_2.c_str ())));
       goto error;
     } // end IF
-    (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.useLoopBackDevice =
-      (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address.is_loopback ();
+    (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice =
+      (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address.is_loopback ();
 
     // save to file ?
     check_button_p =
@@ -1044,7 +1044,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 
     // step3b: connect
     data_p->handle =
-        iconnector_p->connect ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address);
+        iconnector_p->connect ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address);
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
     if (!data_p->configuration->useReactor)
@@ -1062,7 +1062,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       do
       {
         iconnection_p =
-            iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address,
+            iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address,
                                         true);
         if (iconnection_p)
         {
@@ -1079,19 +1079,19 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       if (!iconnection_p)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to connect to %s (timed out after: %#T), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ()),
                     &timeout));
     } // end IF
     else
       iconnection_p =
-        iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address,
+        iconnection_manager_p->get ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address,
                                     true);
     if ((data_p->handle == ACE_INVALID_HANDLE) ||
         !iconnection_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
 
       // clean up
       iconnector_p->abort ();
@@ -1102,12 +1102,12 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("0x%@: opened TCP socket to %s\n"),
                 data_p->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: opened TCP socket to %s\n"),
                 data_p->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
 #endif
 
     // step4: send HTTP request

@@ -23,19 +23,18 @@
 
 #include "ace/Global_Macros.h"
 
-#include "net_exports.h"
+#include "net_configuration.h"
 #include "net_transportlayer_base.h"
 
-//class Net_Export Net_TransportLayer_UDP
 class Net_TransportLayer_UDP
- : public Net_InetTransportLayer_Base
+ : public Net_InetTransportLayerBase_T<struct Net_UDPSocketConfiguration>
 {
  public:
   Net_TransportLayer_UDP ();
-  virtual ~Net_TransportLayer_UDP ();
+  inline virtual ~Net_TransportLayer_UDP () {};
 
  private:
-  typedef Net_InetTransportLayer_Base inherited;
+  typedef Net_InetTransportLayerBase_T<struct Net_UDPSocketConfiguration> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_UDP (const Net_TransportLayer_UDP&))
   ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_UDP& operator= (const Net_TransportLayer_UDP&))

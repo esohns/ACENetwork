@@ -537,10 +537,10 @@ do_work (bool debugParser_in,
 
   // *********************** socket configuration data ************************
   struct Test_I_URLStreamLoad_ConnectionConfiguration connection_configuration;
-  connection_configuration.socketHandlerConfiguration.socketConfiguration.address =
+  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.address =
     remoteHost_in;
-  connection_configuration.socketHandlerConfiguration.socketConfiguration.useLoopBackDevice =
-    connection_configuration.socketHandlerConfiguration.socketConfiguration.address.is_loopback ();
+  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice =
+    connection_configuration.socketHandlerConfiguration.socketConfiguration_2.address.is_loopback ();
   connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
   connection_configuration.socketHandlerConfiguration.userData =

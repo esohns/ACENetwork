@@ -25,6 +25,7 @@
 #include "ace/Reactor.h"
 
 #include "net_common_tools.h"
+#include "net_configuration.h"
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -97,55 +98,60 @@ Net_TCPSocketHandler_T<ConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::open"));
 
   ConfigurationType* configuration_p =
-    static_cast<ConfigurationType*> (arg_in);
+    reinterpret_cast<ConfigurationType*> (arg_in);
   ACE_ASSERT (configuration_p);
+  // *TODO*: remove type inferences
+  ACE_ASSERT (configuration_p->socketConfiguration);
+  struct Net_TCPSocketConfiguration* socket_configuration_p =
+    dynamic_cast<struct Net_TCPSocketConfiguration*> (configuration_p->socketConfiguration);
 
   // initialize return value
   int result = -1;
 
   // sanity check(s)
   ACE_ASSERT (arg_in);
+  ACE_ASSERT (socket_configuration_p);
 
   // step1: tweak socket
-  // *TODO*: remove type inferences
   ACE_HANDLE handle = inherited2::get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
-  if (configuration_p->socketConfiguration.bufferSize)
+  if (socket_configuration_p->bufferSize)
   {
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_RCVBUF,
-                                            configuration_p->socketConfiguration.bufferSize))
+                                            socket_configuration_p->bufferSize))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  socket_configuration_p->bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  socket_configuration_p->bufferSize));
 #endif
     } // end IF
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_SNDBUF,
-                                            configuration_p->socketConfiguration.bufferSize))
+                                            socket_configuration_p->bufferSize))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  socket_configuration_p->bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  socket_configuration_p->bufferSize));
 #endif
     } // end IF
   } // end IF
 
+  // disable Nagle's algorithm
   if (!Net_Common_Tools::setNoDelay (handle,
                                      NET_SOCKET_DEFAULT_TCP_NODELAY))
   {
@@ -167,13 +173,13 @@ Net_TCPSocketHandler_T<ConfigurationType,
     return -1;
   } // end IF
   if (!Net_Common_Tools::setLinger (handle,
-                                    configuration_p->socketConfiguration.linger,
+                                    socket_configuration_p->linger,
                                     std::numeric_limits<unsigned short>::max ()))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
-                (configuration_p->socketConfiguration.linger ? ACE_TEXT ("true")
-                                                             : ACE_TEXT ("false")),
+                (socket_configuration_p->linger ? ACE_TEXT ("true")
+                                                : ACE_TEXT ("false")),
                 handle));
     return -1;
   } // end IF
@@ -397,53 +403,58 @@ Net_TCPSocketHandler_T<ConfigurationType,
   ConfigurationType* configuration_p =
     static_cast<ConfigurationType*> (arg_in);
   ACE_ASSERT (configuration_p);
+  ACE_ASSERT (configuration_p->socketConfiguration);
+  struct Net_TCPSocketConfiguration* socket_configuration_p =
+        dynamic_cast<struct Net_TCPSocketConfiguration*> (configuration_p->socketConfiguration);
 
   // initialize return value
   int result = -1;
 
   // sanity check(s)
   ACE_ASSERT (arg_in);
+  ACE_ASSERT (socket_configuration_p);
 
   // step1: tweak socket
   // *TODO*: remove type inferences
   ACE_HANDLE handle = inherited2::get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
-  if (configuration_p->socketConfiguration.bufferSize)
+  if (socket_configuration_p->bufferSize)
   {
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_RCVBUF,
-                                            configuration_p->socketConfiguration.bufferSize))
+                                            socket_configuration_p->bufferSize))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  socket_configuration_p->bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  socket_configuration_p->bufferSize));
 #endif
     } // end IF
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_SNDBUF,
-                                            configuration_p->socketConfiguration.bufferSize))
+                                            socket_configuration_p->bufferSize))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  socket_configuration_p->bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  socket_configuration_p->bufferSize));
 #endif
     } // end IF
   } // end IF
 
+  // disable Nagle's algorithm
   if (!Net_Common_Tools::setNoDelay (handle,
                                      NET_SOCKET_DEFAULT_TCP_NODELAY))
   {
@@ -465,22 +476,22 @@ Net_TCPSocketHandler_T<ConfigurationType,
     return -1;
   } // end IF
   if (!Net_Common_Tools::setLinger (handle,
-                                    configuration_p->socketConfiguration.linger,
+                                    socket_configuration_p->linger,
                                     std::numeric_limits<unsigned short>::max ()))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
-                (configuration_p->socketConfiguration.linger ? ACE_TEXT ("true")
-                                                             : ACE_TEXT ("false")),
+                (socket_configuration_p->linger ? ACE_TEXT ("true")
+                                                : ACE_TEXT ("false")),
                 handle));
     return -1;
   } // end IF
 
   // step2: tweak SSL context
   typename inherited2::stream_type& peer_stream_r = inherited2::peer ();
-  SSL* ssl_p = peer_stream_r.ssl ();
+  struct ssl_st* ssl_p = peer_stream_r.ssl ();
   ACE_ASSERT (ssl_p);
-  SSL_CTX* ssl_ctx_p = SSL_get_SSL_CTX (ssl_p);
+  struct ssl_ctx_st* ssl_ctx_p = SSL_get_SSL_CTX (ssl_p);
   ACE_ASSERT (ssl_ctx_p);
   long ssl_ctx_mode_bitmask = SSL_CTX_set_mode (ssl_ctx_p,
                                                 SSL_MODE_AUTO_RETRY);

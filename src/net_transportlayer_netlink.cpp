@@ -22,10 +22,9 @@
 #include "ace/Synch.h"
 #include "net_transportlayer_netlink.h"
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
 #include "net_macros.h"
 
+#if defined (ACE_HAS_NETLINK)
 Net_TransportLayer_Netlink::Net_TransportLayer_Netlink ()
  : inherited ()
 {
@@ -33,9 +32,4 @@ Net_TransportLayer_Netlink::Net_TransportLayer_Netlink ()
 
 }
 
-Net_TransportLayer_Netlink::~Net_TransportLayer_Netlink ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_Netlink::~Net_TransportLayer_Netlink"));
-
-}
 #endif

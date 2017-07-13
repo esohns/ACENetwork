@@ -33,6 +33,8 @@
 
 #include "net_tcpconnection_base.h"
 
+#include "net_client_common.h"
+
 #include "test_u_configuration.h"
 #include "test_u_connection_common.h"
 #include "test_u_socket_common.h"
@@ -49,6 +51,7 @@ class Test_U_TCPConnection
                                   struct Test_U_ListenerConfiguration,
                                   Test_U_Stream,
                                   struct Test_U_UserData>
+ , public Net_IPing
 {
   friend class ACE_Acceptor<Test_U_TCPConnection, ACE_SOCK_ACCEPTOR>;
   friend class ACE_Connector<Test_U_TCPConnection, ACE_SOCK_CONNECTOR>;
@@ -64,7 +67,7 @@ class Test_U_TCPConnection
                         const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Test_U_TCPConnection ();
 
-  // implement (part of) Net_ITransportLayer_T
+  // implement Net_IPing
   virtual void ping ();
 
  private:
@@ -96,6 +99,7 @@ class Test_U_AsynchTCPConnection
                                         struct Test_U_ListenerConfiguration,
                                         Test_U_Stream,
                                         struct Test_U_UserData>
+ , public Net_IPing
 {
  friend class ACE_Asynch_Acceptor<Test_U_AsynchTCPConnection>;
  friend class ACE_Asynch_Connector<Test_U_AsynchTCPConnection>;
@@ -111,7 +115,7 @@ class Test_U_AsynchTCPConnection
                               const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Test_U_AsynchTCPConnection ();
 
-  // implement (part of) Net_ITransportLayer_T
+  // implement Net_IPing
   virtual void ping ();
 
  private:

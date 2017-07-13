@@ -223,10 +223,10 @@ struct Test_U_ListenerConfiguration
                                  0)
   {
     int result =
-      socketHandlerConfiguration.socketConfiguration.address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-                                                                  static_cast<ACE_UINT32> (INADDR_ANY),
-                                                                  1,
-                                                                  0);
+      socketHandlerConfiguration.socketConfiguration_2.address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+                                                                    static_cast<ACE_UINT32> (INADDR_ANY),
+                                                                    1,
+                                                                    0);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));

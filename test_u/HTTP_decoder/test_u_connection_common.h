@@ -26,11 +26,6 @@
 
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-#include "ace/Netlink_Addr.h"
-#endif
-#include "ace/SOCK_Connector.h"
 #include "ace/Synch_Traits.h"
 #include "ace/SSL/SSL_SOCK_Connector.h"
 
@@ -51,13 +46,12 @@
 
 #include "net_client_asynchconnector.h"
 #include "net_client_connector.h"
+#include "net_client_ssl_connector.h"
 
 #include "http_common.h"
 #include "http_network.h"
 
-//#include "test_u_stream_common.h"
 #include "test_u_stream.h"
-//#include "test_u_HTTP_decoder_stream_common.h"
 
 // forward declarations
 class Test_U_Message;
@@ -224,23 +218,25 @@ typedef Net_Client_Connector_T<Test_U_TCPConnection_t,
                                struct Test_U_ConnectionConfiguration,
                                struct Test_U_ConnectionState,
                                HTTP_RuntimeStatistic_t,
+                               struct Net_TCPSocketConfiguration,
                                struct Test_U_SocketHandlerConfiguration,
                                Test_U_Stream,
                                struct Test_U_UserData> Test_U_TCPConnector_t;
-typedef Net_Client_Connector_T<Test_U_SSLTCPConnection_t,
-                               ACE_SSL_SOCK_Connector,
-                               ACE_INET_Addr,
-                               struct Test_U_ConnectionConfiguration,
-                               struct Test_U_ConnectionState,
-                               HTTP_RuntimeStatistic_t,
-                               struct Test_U_SocketHandlerConfiguration,
-                               Test_U_Stream,
-                               struct Test_U_UserData> Test_U_SSLTCPConnector_t;
+typedef Net_Client_SSL_Connector_T<Test_U_SSLTCPConnection_t,
+                                   ACE_SSL_SOCK_Connector,
+                                   ACE_INET_Addr,
+                                   struct Test_U_ConnectionConfiguration,
+                                   struct Test_U_ConnectionState,
+                                   HTTP_RuntimeStatistic_t,
+                                   struct Test_U_SocketHandlerConfiguration,
+                                   Test_U_Stream,
+                                   struct Test_U_UserData> Test_U_SSLTCPConnector_t;
 typedef Net_Client_AsynchConnector_T<Test_U_AsynchTCPConnection_t,
                                      ACE_INET_Addr,
                                      struct Test_U_ConnectionConfiguration,
                                      struct Test_U_ConnectionState,
                                      HTTP_RuntimeStatistic_t,
+                                     struct Net_TCPSocketConfiguration,
                                      struct Test_U_SocketHandlerConfiguration,
                                      Test_U_Stream,
                                      struct Test_U_UserData> Test_U_TCPAsynchConnector_t;

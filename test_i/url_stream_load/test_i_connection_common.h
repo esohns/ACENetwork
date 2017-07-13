@@ -48,6 +48,7 @@
 
 #include "net_client_asynchconnector.h"
 #include "net_client_connector.h"
+#include "net_client_ssl_connector.h"
 
 #include "http_common.h"
 #include "http_network.h"
@@ -191,23 +192,25 @@ typedef Net_Client_Connector_T<Test_I_TCPConnection_t,
                                struct Test_I_URLStreamLoad_ConnectionConfiguration,
                                struct HTTP_ConnectionState,
                                HTTP_RuntimeStatistic_t,
+                               struct Net_TCPSocketConfiguration,
                                struct HTTP_SocketHandlerConfiguration,
                                Test_I_ConnectionStream,
                                struct HTTP_Stream_UserData> Test_I_TCPConnector_t;
-typedef Net_Client_Connector_T<Test_I_SSLTCPConnection_t,
-                               ACE_SSL_SOCK_Connector,
-                               ACE_INET_Addr,
-                               struct Test_I_URLStreamLoad_ConnectionConfiguration,
-                               struct HTTP_ConnectionState,
-                               HTTP_RuntimeStatistic_t,
-                               struct HTTP_SocketHandlerConfiguration,
-                               Test_I_ConnectionStream,
-                               struct HTTP_Stream_UserData> Test_I_SSLTCPConnector_t;
+typedef Net_Client_SSL_Connector_T<Test_I_SSLTCPConnection_t,
+                                   ACE_SSL_SOCK_Connector,
+                                   ACE_INET_Addr,
+                                   struct Test_I_URLStreamLoad_ConnectionConfiguration,
+                                   struct HTTP_ConnectionState,
+                                   HTTP_RuntimeStatistic_t,
+                                   struct HTTP_SocketHandlerConfiguration,
+                                   Test_I_ConnectionStream,
+                                   struct HTTP_Stream_UserData> Test_I_SSLTCPConnector_t;
 typedef Net_Client_AsynchConnector_T<Test_I_AsynchTCPConnection_t,
                                      ACE_INET_Addr,
                                      struct Test_I_URLStreamLoad_ConnectionConfiguration,
                                      struct HTTP_ConnectionState,
                                      HTTP_RuntimeStatistic_t,
+                                     struct Net_TCPSocketConfiguration,
                                      struct HTTP_SocketHandlerConfiguration,
                                      Test_I_ConnectionStream,
                                      struct HTTP_Stream_UserData> Test_I_AsynchTCPConnector_t;

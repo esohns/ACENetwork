@@ -72,10 +72,14 @@ struct FileServer_SocketHandlerConfiguration
 {
   inline FileServer_SocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
+   , socketConfiguration_2 ()
    , connectionConfiguration (NULL)
    , userData (NULL)
-  {};
+  {
+    socketConfiguration = &socketConfiguration_2;
+  };
 
+  struct Net_UDPSocketConfiguration          socketConfiguration_2;
   struct FileServer_ConnectionConfiguration* connectionConfiguration;
 
   struct FileServer_UserData*                userData;
@@ -276,6 +280,7 @@ typedef Net_Client_AsynchConnector_T<Test_U_AsynchUDPConnection_t,
                                      struct FileServer_ConnectionConfiguration,
                                      struct FileServer_ConnectionState,
                                      Net_RuntimeStatistic_t,
+                                     struct Net_UDPSocketConfiguration,
                                      struct FileServer_SocketHandlerConfiguration,
                                      Test_U_NetStream_t,
                                      struct FileServer_UserData> Test_U_UDPAsynchConnector_t;
@@ -285,6 +290,7 @@ typedef Net_Client_Connector_T<Test_U_UDPConnection_t,
                                struct FileServer_ConnectionConfiguration,
                                struct FileServer_ConnectionState,
                                Net_RuntimeStatistic_t,
+                               struct Net_UDPSocketConfiguration,
                                struct FileServer_SocketHandlerConfiguration,
                                Test_U_NetStream_t,
                                struct FileServer_UserData> Test_U_UDPConnector_t;

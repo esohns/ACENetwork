@@ -18,26 +18,33 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_TRANSPORTLAYER_TCP_H
-#define Net_TRANSPORTLAYER_TCP_H
+#include "ace/Assert.h"
+#include "ace/config-macros.h"
 
-#include "ace/Global_Macros.h"
+#include "net_macros.h"
 
-#include "net_configuration.h"
-#include "net_transportlayer_base.h"
-
-class Net_TransportLayer_TCP
- : public Net_InetTransportLayerBase_T<struct Net_TCPSocketConfiguration>
+template <typename ConfigurationType>
+Net_InetTransportLayerBase_T<ConfigurationType>::Net_InetTransportLayerBase_T (enum Net_TransportLayerType transportLayer_in)
+ : dispatch_ (COMMON_DISPATCH_INVALID)
+ , role_ (NET_ROLE_INVALID)
+ , transportLayer_ (transportLayer_in)
 {
- public:
-  Net_TransportLayer_TCP ();
-  inline virtual ~Net_TransportLayer_TCP () {};
+  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayerBase_T::Net_InetTransportLayerBase_T"));
 
- private:
-  typedef Net_InetTransportLayerBase_T<struct Net_TCPSocketConfiguration> inherited;
+}
 
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_TCP (const Net_TransportLayer_TCP&));
-  ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_TCP& operator= (const Net_TransportLayer_TCP&));
-};
+template <typename ConfigurationType>
+bool
+Net_InetTransportLayerBase_T<ConfigurationType>::initialize (enum Common_DispatchType dispatch_in,
+                                                             enum Net_ClientServerRole role_in,
+                                                             const ConfigurationType& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_InetTransportLayerBase_T::initialize"));
 
-#endif
+  ACE_UNUSED_ARG (configuration_in);
+
+  dispatch_ = dispatch_in;
+  role_ = role_in;
+
+  return true;
+}

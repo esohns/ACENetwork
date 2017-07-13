@@ -722,10 +722,10 @@ do_work (unsigned int maximumNumberOfConnections_in,
   if (useLoopBack_in)
   {
     result =
-      configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration.address.set (listeningPortNumber_in,
-                                                                                                      INADDR_LOOPBACK,
-                                                                                                      1,
-                                                                                                      0);
+      configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.set (listeningPortNumber_in,
+                                                                                                        INADDR_LOOPBACK,
+                                                                                                        1,
+                                                                                                        0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -748,8 +748,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
     } // end IF
   } // end IF
   else
-    configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration.address.set_port_number (listeningPortNumber_in,
-                                                                                                                1);
+    configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.set_port_number (listeningPortNumber_in,
+                                                                                                                  1);
   configuration.listenerConfiguration.connectionManager = connection_manager_p;
   //configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;
 

@@ -31,7 +31,6 @@
 #include "net_configuration.h"
 
 #include "test_u_common.h"
-//#include "test_u_configuration.h"
 
 struct Test_U_ConnectionConfiguration;
 struct Test_U_SocketHandlerConfiguration
@@ -39,10 +38,16 @@ struct Test_U_SocketHandlerConfiguration
 {
   inline Test_U_SocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
+   , socketConfiguration_2 ()
+   , socketConfiguration_3 ()
    , connectionConfiguration (NULL)
    , userData (NULL)
-  {};
+  {
+    socketConfiguration = &socketConfiguration_2;
+  };
 
+  struct Net_TCPSocketConfiguration      socketConfiguration_2;
+  struct Net_UDPSocketConfiguration      socketConfiguration_3;
   struct Test_U_ConnectionConfiguration* connectionConfiguration;
 
   struct Test_U_UserData*                userData;

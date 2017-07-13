@@ -211,13 +211,13 @@ Net_Server_Listener_T<HandlerType,
   // sanity check(s)
   ACE_ASSERT (configuration_);
   // *TODO*: remove type inferences
-  if (configuration_->socketHandlerConfiguration.socketConfiguration.useLoopBackDevice)
+  if (configuration_->socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice)
   {
     result =
-      configuration_->socketHandlerConfiguration.socketConfiguration.address.set (configuration_->socketHandlerConfiguration.socketConfiguration.address.get_port_number (), // port
-                                                                                  INADDR_LOOPBACK,                                                                           // IP address
-                                                                                  1,                                                                                         // encode ?
-                                                                                  0);                                                                                        // map ?
+      configuration_->socketHandlerConfiguration.socketConfiguration_2.address.set (configuration_->socketHandlerConfiguration.socketConfiguration_2.address.get_port_number (), // port
+                                                                                    INADDR_LOOPBACK,                                                                             // IP address
+                                                                                    1,                                                                                           // encode ?
+                                                                                    0);                                                                                          // map ?
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -226,12 +226,12 @@ Net_Server_Listener_T<HandlerType,
     } // end IF
   } // end IF
   result =
-    inherited::open (configuration_->socketHandlerConfiguration.socketConfiguration.address, // local address
-                     ACE_Reactor::instance (),                                               // corresp. reactor
-                     ACE_NONBLOCK,                                                           // flags (use non-blocking sockets !)
-                     //0,                                                                    // flags (default is blocking sockets)
-                     1,                                                                      // always accept ALL pending connections
-                     1);                                                                     // try to re-use address
+    inherited::open (configuration_->socketHandlerConfiguration.socketConfiguration_2.address, // local address
+                     ACE_Reactor::instance (),                                                 // corresp. reactor
+                     ACE_NONBLOCK,                                                             // flags (use non-blocking sockets !)
+                     //0,                                                                      // flags (default is blocking sockets)
+                     1,                                                                        // always accept ALL pending connections
+                     1);                                                                       // try to re-use address
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -243,12 +243,12 @@ Net_Server_Listener_T<HandlerType,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("0x%@: started listening: %s...\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketHandlerConfiguration.socketConfiguration.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: started listening: %s...\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketHandlerConfiguration.socketConfiguration.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
 #endif
 
   isListening_ = true;

@@ -175,6 +175,8 @@ class Net_Common_Tools
                          bool,                                                          // on ? : off
                          unsigned short = std::numeric_limits<unsigned short>::max ()); // seconds {0     --> send RST on close,
                                                                                         //          65535 --> reuse default/current value}
+  static bool setReuseAddress (ACE_HANDLE,    // socket handle
+                               bool = false); // (try to) set SO_REUSEPORT as well ?
 
 #if defined (ACE_LINUX)
   static bool enableErrorQueue (ACE_HANDLE); // socket handle

@@ -1170,21 +1170,20 @@ button_ping_clicked_cb (GtkWidget* widget_in,
                 index - 1));
     return FALSE;
   } // end IF
-  Net_ITransportLayer_t* connection_p =
-    dynamic_cast<Net_ITransportLayer_t*> (connection_base_p);
-  if (!connection_p)
+  Net_IPing* iping_p = dynamic_cast<Net_IPing*> (connection_base_p);
+  if (!iping_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dynamic_cast<const Net_ITransportLayer_t*> (%@), aborting\n"),
+                ACE_TEXT ("failed to dynamic_cast<Net_IPing>(%@), aborting\n"),
                 connection_base_p));
     return FALSE;
   } // end IF
 
   try {
-    connection_p->ping ();
+    iping_p->ping ();
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_ITransportLayer_t::ping(), aborting\n")));
+                ACE_TEXT ("caught exception in Net_IPing::ping(), aborting\n")));
 
     // clean up
     connection_base_p->decrease ();

@@ -391,28 +391,19 @@ Test_U_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
       return -1;
     }
     if (handle == ACE_INVALID_HANDLE)
-    {
-      ACE_TCHAR buffer[BUFSIZ];
-      ACE_OS::memset (buffer, 0, sizeof (buffer));
-      int result_3 = peerAddress_.addr_to_string (buffer, sizeof (buffer));
-      if (result_3 == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Client_IConnector::connect(\"%s\"), continuing\n"),
-                  buffer));
-    } // end IF
+                  ACE_TEXT ("failed to Net_Client_IConnector::connect(%s), continuing\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peerAddress_).c_str ())));
   } // end IF
 
   if (do_ping)
   {
     ACE_ASSERT (ping_connection_p);
-    Net_ITransportLayer_t* transportlayer_p =
-      dynamic_cast<Net_ITransportLayer_t*> (ping_connection_p);
-    if (!transportlayer_p)
+    Net_IPing* iping_p = dynamic_cast<Net_IPing*> (ping_connection_p);
+    if (!iping_p)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to dynamic_cast<Net_ITransportLayer_t*> (0x%@), aborting\n"),
+                  ACE_TEXT ("failed to dynamic_cast<Net_IPing>(0x%@), aborting\n"),
                   ping_connection_p));
 
       // clean up
@@ -422,10 +413,10 @@ Test_U_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
     } // end IF
 
     try {
-      transportlayer_p->ping ();
+      iping_p->ping ();
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_ITransportLayer_t::ping(), aborting\n")));
+                  ACE_TEXT ("caught exception in Net_IPing::ping(), aborting\n")));
 
       // clean up
       ping_connection_p->decrease ();

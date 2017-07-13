@@ -45,17 +45,38 @@ typedef Net_Client_AsynchConnector_T<Test_U_AsynchTCPConnection,
                                      struct Test_U_ConnectionConfiguration,
                                      struct Test_U_ConnectionState,
                                      Net_RuntimeStatistic_t,
+                                     struct Net_TCPSocketConfiguration,
                                      struct Test_U_SocketHandlerConfiguration,
                                      Test_U_Stream,
-                                     struct Test_U_UserData> Test_U_Client_AsynchConnector_t;
+                                     struct Test_U_UserData> Test_U_Client_TCP_AsynchConnector_t;
 typedef Net_Client_Connector_T<Test_U_TCPConnection,
                                ACE_SOCK_CONNECTOR,
                                ACE_INET_Addr,
                                struct Test_U_ConnectionConfiguration,
                                struct Test_U_ConnectionState,
                                Net_RuntimeStatistic_t,
+                               struct Net_TCPSocketConfiguration,
                                struct Test_U_SocketHandlerConfiguration,
                                Test_U_Stream,
-                               struct Test_U_UserData> Test_U_Client_Connector_t;
+                               struct Test_U_UserData> Test_U_Client_TCP_Connector_t;
+//typedef Net_Client_AsynchConnector_T<Test_U_AsynchUDPConnection,
+//                                     ACE_INET_Addr,
+//                                     struct Test_U_ConnectionConfiguration,
+//                                     struct Test_U_ConnectionState,
+//                                     Net_RuntimeStatistic_t,
+//                                     struct Net_UDPSocketConfiguration,
+//                                     struct Test_U_SocketHandlerConfiguration,
+//                                     Test_U_Stream,
+//                                     struct Test_U_UserData> Test_U_Client_UDP_AsynchConnector_t;
+//typedef Net_Client_Connector_T<Test_U_UDPConnection,
+//                               ACE_SOCK_CONNECTOR,
+//                               ACE_INET_Addr,
+//                               struct Test_U_ConnectionConfiguration,
+//                               struct Test_U_ConnectionState,
+//                               Net_RuntimeStatistic_t,
+//                               struct Net_UDPSocketConfiguration,
+//                               struct Test_U_SocketHandlerConfiguration,
+//                               Test_U_Stream,
+//                               struct Test_U_UserData> Test_U_Client_UDP_Connector_t;
 
 #endif

@@ -24,16 +24,14 @@
 #include <map>
 #include <string>
 
+#include "ace/Basic_Types.h"
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
 #include "ace/Time_Value.h"
 
-#include "net_iconnectionmanager.h"
+#include "net_common.h"
 #include "net_defines.h"
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-#include "net_netlinksockethandler.h"
-#endif
+#include "net_iconnectionmanager.h"
 
 // forward declarations
 struct Net_UserData;
@@ -44,23 +42,78 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  Net_RuntimeStatistic_t,
                                  struct Net_UserData> Net_IInetConnectionManager_t;
 
-//typedef std::deque<ACE_INET_Addr> Net_InetAddressStack_t;
-//typedef Net_InetAddressStack_t::iterator Net_InetAddressStackIterator_t;
-struct Net_SocketConfiguration
+struct Net_SocketConfigurationBase
 {
-  inline Net_SocketConfiguration ()
-   : address (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
-              static_cast<ACE_UINT32> (INADDR_ANY))
-   , bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
-   , connect (NET_SOCKET_DEFAULT_UDP_CONNECT)
-   , linger (NET_SOCKET_DEFAULT_LINGER)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-   , netlinkAddress ()
-   , netlinkProtocol (NET_PROTOCOL_DEFAULT_NETLINK)
-#endif
+  inline Net_SocketConfigurationBase ()
+   : bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
    , networkInterface (ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET))
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
+  {};
+  inline virtual ~Net_SocketConfigurationBase () {};
+
+  int         bufferSize; // socket buffer size (I/O)
+  std::string networkInterface; // NIC identifier
+  bool        useLoopBackDevice;
+};
+
+#if defined (ACE_HAS_NETLINK)
+struct Net_NetlinkSocketConfiguration
+ : Net_SocketConfigurationBase
+{
+  inline Net_NetlinkSocketConfiguration ()
+   : Net_SocketConfigurationBase ()
+   , address ()
+   , protocol (NET_PROTOCOL_DEFAULT_NETLINK)
+  {};
+  inline virtual ~Net_NetlinkSocketConfiguration () {};
+
+  Net_Netlink_Addr address;
+  int              protocol;
+};
+#endif
+
+struct Net_TCPSocketConfiguration
+ : Net_SocketConfigurationBase
+{
+  inline Net_TCPSocketConfiguration ()
+   : Net_SocketConfigurationBase ()
+   , address (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
+              static_cast<ACE_UINT32> (INADDR_ANY))
+   , linger (NET_SOCKET_DEFAULT_LINGER)
+  {
+    int result = -1;
+    if (useLoopBackDevice)
+    {
+      result = address.set (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
+                            static_cast<ACE_UINT32> (INADDR_LOOPBACK),
+                            1,
+                            0);
+      if (result == -1)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
+    } // end IF
+  };
+  inline virtual ~Net_TCPSocketConfiguration () {};
+
+  ACE_INET_Addr address;
+  bool          linger;
+};
+
+struct Net_UDPSocketConfiguration
+ : Net_SocketConfigurationBase
+{
+  inline Net_UDPSocketConfiguration ()
+   : Net_SocketConfigurationBase ()
+   , address (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
+              static_cast<ACE_UINT32> (INADDR_ANY))
+   , connect (NET_SOCKET_DEFAULT_UDP_CONNECT)
+   // *PORTABILITY*: (currently,) MS Windows (TM) UDP sockets do not support
+   //                SO_LINGER
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+   , linger (NET_SOCKET_DEFAULT_LINGER)
+#endif
+   , sourcePort (0)
    , writeOnly (false)
   {
     int result = -1;
@@ -75,24 +128,23 @@ struct Net_SocketConfiguration
                     ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
     } // end IF
   };
+  inline virtual ~Net_UDPSocketConfiguration () {};
 
-  ACE_INET_Addr    address;
-  int              bufferSize; // socket buffer size (I/O)
+  ACE_INET_Addr address;
   // *IMPORTANT NOTE*: set this for asynchronous event dispatch; the socket
   //                   needs to be associated with the peer address, as the data
   //                   dispatch happens out of context
-  bool             connect; // UDP
-  bool             linger;
-  // *TODO*: remove address information (pass as AddressType in open() instead)
+  bool          connect;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  Net_Netlink_Addr netlinkAddress;
-  int              netlinkProtocol;
+  bool          linger;
 #endif
-  std::string      networkInterface; // NIC identifier
-  bool             useLoopBackDevice;
-  bool             writeOnly; // UDP
+  ACE_UINT16    sourcePort;
+  bool          writeOnly;
 };
+
+//typedef std::deque<ACE_INET_Addr> Net_InetAddressStack_t;
+//typedef Net_InetAddressStack_t::iterator Net_InetAddressStackIterator_t;
 
 struct Net_ConnectionConfiguration;
 struct Net_SocketHandlerConfiguration
@@ -100,7 +152,7 @@ struct Net_SocketHandlerConfiguration
   inline Net_SocketHandlerConfiguration ()
    : connectionConfiguration (NULL)
    , listenerConfiguration (NULL)
-   , socketConfiguration ()
+   , socketConfiguration (NULL)
    , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
                                  0)
    , useThreadPerConnection (false)
@@ -110,7 +162,7 @@ struct Net_SocketHandlerConfiguration
 
   struct Net_ConnectionConfiguration* connectionConfiguration;
   struct Net_ListenerConfiguration*   listenerConfiguration;
-  struct Net_SocketConfiguration      socketConfiguration;
+  struct Net_SocketConfigurationBase* socketConfiguration;
   ACE_Time_Value                      statisticReportingInterval; // [ACE_Time_Value::zero: off]
   bool                                useThreadPerConnection;
 
@@ -121,12 +173,10 @@ struct Net_ListenerConfiguration
 {
   inline Net_ListenerConfiguration ()
    : addressFamily (ACE_ADDRESS_FAMILY_INET)
-//   , connectionManager (NULL)
    , socketHandlerConfiguration ()
   {};
 
   int                                   addressFamily;
-//  Net_IInetConnectionManager_t*   connectionManager;
   struct Net_SocketHandlerConfiguration socketHandlerConfiguration;
 };
 

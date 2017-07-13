@@ -18,13 +18,16 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#include "ace/Asynch_IO_Impl.h"
+#include "ace/Event_Handler.h"
 #include "ace/Log_Msg.h"
-#include "ace/Stream.h"
+#include "ace/Proactor.h"
 
 #include "common_tools.h"
 
 #include "stream_common.h"
 
+#include "net_configuration.h"
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -118,18 +121,21 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (inherited4::configuration_);
+  // *TODO*: remove type inferences
+  ACE_ASSERT (inherited4::configuration_->socketHandlerConfiguration.socketConfiguration);
   ACE_ASSERT (inherited4::configuration_->streamConfiguration);
 
+  struct Net_UDPSocketConfiguration* socket_configuration_p =
+        dynamic_cast<struct Net_UDPSocketConfiguration*> (inherited4::configuration_->socketHandlerConfiguration.socketConfiguration);
   int result = -1;
 #if defined (ACE_LINUX)
   bool handle_privileges = false;
 #endif
   bool handle_manager = false;
   bool handle_socket = false;
-  //// *TODO*: remove type inferences
-  //const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
-  //    NULL;
-  //const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
+
+  // sanity check(s)
+  ACE_ASSERT (socket_configuration_p);
 
   // step1: open socket ?
   // *NOTE*: even when this is a write-only connection
@@ -138,11 +144,11 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   AddressType SAP_any (static_cast<u_short> (0),
                        static_cast<ACE_UINT32> (INADDR_ANY));
   AddressType local_SAP =
-    (inherited4::configuration_->socketHandlerConfiguration.socketConfiguration.writeOnly ? SAP_any
-                                                                                          : inherited4::configuration_->socketHandlerConfiguration.socketConfiguration.address);
+    (socket_configuration_p->writeOnly ? SAP_any
+                                       : socket_configuration_p->address);
 #if defined (ACE_LINUX)
   // (temporarily) elevate priviledges to open system sockets
-  if (!inherited4::configuration_->socketHandlerConfiguration.socketConfiguration.writeOnly &&
+  if (!socket_configuration_p->writeOnly &&
       (local_SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT))
   {
     if (!Common_Tools::setRootPrivileges ())
@@ -240,7 +246,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   } // end IF
 
   // step4: start reading (need to pass any data ?)
-  if (!inherited4::configuration_->socketHandlerConfiguration.socketConfiguration.writeOnly)
+  if (!socket_configuration_p->writeOnly)
   {
     if (messageBlock_in.length () == 0)
       inherited::initiate_read_dgram ();
@@ -289,7 +295,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     // *NOTE*: registered with the proactor at this point
     //         --> data may start arriving at handle_input ()
   } // end IF
-  if (inherited4::configuration_->socketHandlerConfiguration.socketConfiguration.writeOnly)
+  if (socket_configuration_p->writeOnly)
     this->decrease (); // float the connection (connection manager)
                        //ACE_ASSERT (this->count () == 2); // connection manager & read operation
                        //                                     (+ stream module(s))

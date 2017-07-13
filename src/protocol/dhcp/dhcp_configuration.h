@@ -69,10 +69,15 @@ struct DHCP_SocketHandlerConfiguration
   inline DHCP_SocketHandlerConfiguration ()
     : Net_SocketHandlerConfiguration ()
     ///////////////////////////////////////
+    , socketConfiguration_2 ()
     , userData (NULL)
-  {};
+  {
+    socketConfiguration = &socketConfiguration_2;
+  };
 
-  struct DHCP_Stream_UserData* userData;
+  struct Net_UDPSocketConfiguration socketConfiguration_2;
+
+  struct DHCP_Stream_UserData*      userData;
 };
 
 struct DHCP_StreamConfiguration;

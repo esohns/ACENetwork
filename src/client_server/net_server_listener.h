@@ -61,13 +61,6 @@ class Net_Server_Listener_T
                              ACE_SYNCH_RECURSIVE_MUTEX>;
 
  public:
-  //typedef Net_IConnectionManager_T<AddressType,
-  //                                 ConfigurationType,
-  //                                 StateType,
-  //                                 Stream_Statistic,
-  //                                 StreamType,
-  //                                 UserDataType> ICONNECTION_MANAGER_T;
-
   inline bool isInitialized () const { return isInitialized_; };
 
   // override some methods from ACE_Acceptor
@@ -81,7 +74,7 @@ class Net_Server_Listener_T
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
   inline virtual bool isRunning () const { return isListening_; };
-  inline virtual void finished (bool = true) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   virtual const HandlerConfigurationType& get () const;
   //virtual bool initialize (const HandlerConfigurationType&);

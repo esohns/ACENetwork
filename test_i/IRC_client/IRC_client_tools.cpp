@@ -252,7 +252,7 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   // step1: set up configuration
   configuration_p->protocolConfiguration->loginOptions =
       loginOptions_in;
-  configuration_p->socketHandlerConfiguration.socketConfiguration.address =
+  configuration_p->socketHandlerConfiguration.socketConfiguration_2.address =
       peerAddress_in;
   if (finalModule_inout)
   {

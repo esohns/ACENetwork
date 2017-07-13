@@ -22,59 +22,21 @@
 #include "ace/Synch.h"
 #include "net_transportlayer_ip_cast.h"
 
-//#include "common.h"
-
-//#include "net_common.h"
 #include "net_macros.h"
 
 Net_TransportLayer_IP_Broadcast::Net_TransportLayer_IP_Broadcast ()
  : inherited (NET_TRANSPORTLAYER_IP_CAST)
-// , inherited2 ()
-// , myAddress ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Broadcast::Net_TransportLayer_IP_Broadcast"));
 
 }
 
-Net_TransportLayer_IP_Broadcast::~Net_TransportLayer_IP_Broadcast ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Broadcast::~Net_TransportLayer_IP_Broadcast"));
-
-//  if (inherited2::close () == -1)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_SOCK_Dgram_Bcast::close(): \"%m\", continuing\n")));
-}
-
-//bool
-//Net_TransportLayer_IP_Broadcast::initialize (const Net_SocketConfiguration_t& configuration_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Broadcast::initialize"));
-
-//  return true;
-//}
-
 /////////////////////////////////////////
 
 Net_TransportLayer_IP_Multicast::Net_TransportLayer_IP_Multicast ()
  : inherited (NET_TRANSPORTLAYER_IP_CAST)
-// , inherited2 (ACE_SOCK_Dgram_Mcast::DEFOPTS)
 // , joined_ (false)
-// , address_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Multicast::Net_TransportLayer_IP_Multicast"));
 
 }
-
-Net_TransportLayer_IP_Multicast::~Net_TransportLayer_IP_Multicast ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Multicast::~Net_TransportLayer_IP_Multicast"));
-
-}
-
-//bool
-//Net_TransportLayer_IP_Multicast::initialize (const Net_SocketConfiguration_t& configuration_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_IP_Multicast::initialize"));
-
-//  return true;
-//}

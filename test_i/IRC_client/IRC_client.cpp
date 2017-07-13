@@ -743,7 +743,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
 
   // step3: initialize client connector
   struct IRC_Client_ConnectionConfiguration connection_configuration;
-  connection_configuration.socketHandlerConfiguration.socketConfiguration.address =
+  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.address =
     serverAddress_in;
 
   //connection_configuration.socketHandlerConfiguration.bufferSize =

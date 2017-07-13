@@ -2782,35 +2782,13 @@ Net_Common_Tools::setNoDelay (ACE_HANDLE handle_in,
 
 bool
 Net_Common_Tools::setKeepAlive (ACE_HANDLE handle_in,
-                                bool keepAlive_in)
+                                bool on_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::setKeepAlive"));
 
   int result = -1;
-  int optval = (keepAlive_in ? 1 : 0);
+  int optval = (on_in ? 1 : 0);
   int optlen = sizeof (optval);
-  result = ACE_OS::setsockopt (handle_in,
-                               SOL_SOCKET,
-                               SO_KEEPALIVE,
-                               reinterpret_cast<const char*> (&optval),
-                               optlen);
-  if (result)
-  {
-    // *PORTABILITY*
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,SO_KEEPALIVE): \"%m\", aborting\n"),
-                handle_in));
-#else
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::setsockopt(%d,SO_KEEPALIVE): \"%m\", aborting\n"),
-                handle_in));
-#endif
-    return false;
-  } // end IF
-
-  // validate result
-  optval = 0;
   result = ACE_OS::getsockopt (handle_in,
                                SOL_SOCKET,
                                SO_KEEPALIVE,
@@ -2831,13 +2809,32 @@ Net_Common_Tools::setKeepAlive (ACE_HANDLE handle_in,
     return false;
   } // end IF
 
-  //ACE_DEBUG((LM_DEBUG,
-  //           ACE_TEXT("setsockopt(%d,SO_KEEPALIVE): %s\n"),
-  //           handle_in,
-  //           (keepAlive_in ? ((optval == 1) ? "on" : "off")
-  //                         : ((optval == 0) ? "off" : "on"))));
+  optval = (on_in ? 1 : 0);
+  result = ACE_OS::setsockopt (handle_in,
+                               SOL_SOCKET,
+                               SO_KEEPALIVE,
+                               reinterpret_cast<const char*> (&optval),
+                               optlen);
+  if (result)
+  {
+    // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,SO_KEEPALIVE): \"%m\", aborting\n"),
+                handle_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::setsockopt(%d,SO_KEEPALIVE): \"%m\", aborting\n"),
+                handle_in));
+#endif
+    return false;
+  } // end IF
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("setsockopt(%d,SO_KEEPALIVE): %s\n"),
+//              handle_in,
+//              (on_in ? ACE_TEXT ("on") : ACE_TEXT ("off"))));
 
-  return (keepAlive_in ? (optval == 1) : (optval == 0));
+  return (result == 0);
 }
 
 bool
@@ -2900,6 +2897,89 @@ Net_Common_Tools::setLinger (ACE_HANDLE handle_in,
 //              optval.l_linger));
 
   return (result == 0);
+}
+
+bool
+Net_Common_Tools::setReuseAddress (ACE_HANDLE handle_in,
+                                   bool reusePort_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::setReuseAddress"));
+
+  int result = -1;
+  int optval = 1;
+  int optlen = sizeof (optval);
+  result = ACE_OS::setsockopt (handle_in,
+                               SOL_SOCKET,
+                               SO_REUSEADDR,
+                               reinterpret_cast<const char*> (&optval),
+                               optlen);
+  if (result)
+  {
+    // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,SO_REUSEADDR): \"%m\", aborting\n"),
+                handle_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::setsockopt(%d,SO_REUSEADDR): \"%m\", aborting\n"),
+                handle_in));
+#endif
+    return false;
+  } // end IF
+
+  if (reusePort_in)
+  {
+    result = ACE_OS::setsockopt (handle_in,
+                                 SOL_SOCKET,
+                                 SO_REUSEPORT,
+                                 reinterpret_cast<const char*> (&optval),
+                                 optlen);
+    if (result)
+    {
+      // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,SO_REUSEPORT): \"%m\", aborting\n"),
+                  handle_in));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::setsockopt(%d,SO_REUSEPORT): \"%m\", aborting\n"),
+                  handle_in));
+#endif
+      return false;
+    } // end IF
+  } // end IF
+
+  // validate result
+  optval = 0;
+  result = ACE_OS::getsockopt (handle_in,
+                               SOL_SOCKET,
+                               SO_REUSEADDR,
+                               reinterpret_cast<char*> (&optval),
+                               &optlen);
+  if (result)
+  {
+    // *PORTABILITY*
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,SO_REUSEADDR): \"%m\", aborting\n"),
+                handle_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockopt(%d,SO_REUSEADDR): \"%m\", aborting\n"),
+                handle_in));
+#endif
+    return false;
+  } // end IF
+
+  //ACE_DEBUG((LM_DEBUG,
+  //           ACE_TEXT("setsockopt(%d,SO_REUSEADDR): %s\n"),
+  //           handle_in,
+  //           (keepAlive_in ? ((optval == 1) ? "on" : "off")
+  //                         : ((optval == 0) ? "off" : "on"))));
+
+  return (optval == 1);
 }
 
 #if defined (ACE_LINUX)

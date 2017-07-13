@@ -591,10 +591,10 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
   ACE_ASSERT (connection_manager_p);
   Test_U_IInetConnectionManager_t* iconnection_manager_p =
     connection_manager_p;
-  Test_U_Client_Connector_t connector (iconnection_manager_p,
-                                       statisticReportingInterval_in);
-  Test_U_Client_AsynchConnector_t asynch_connector (iconnection_manager_p,
-                                                    statisticReportingInterval_in);
+  Test_U_Client_TCP_AsynchConnector_t asynch_connector (iconnection_manager_p,
+                                                        statisticReportingInterval_in);
+  Test_U_Client_TCP_Connector_t connector (iconnection_manager_p,
+                                           statisticReportingInterval_in);
   Test_U_IConnector_t* connector_p = NULL;
   if (useReactor_in)
     connector_p = &connector;

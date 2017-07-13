@@ -124,7 +124,7 @@ Net_StreamConnectionBase_T<HandlerType,
                            ListenerConfigurationType,
                            StreamType,
                            StreamStatusType,
-                           UserDataType>::set (Net_ClientServerRole role_in)
+                           UserDataType>::set (enum Net_ClientServerRole role_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionBase_T::set"));
 
@@ -831,7 +831,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                                  ListenerConfigurationType,
                                  StreamType,
                                  StreamStatusType,
-                                 UserDataType>::set (Net_ClientServerRole role_in)
+                                 UserDataType>::set (enum Net_ClientServerRole role_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::set"));
 

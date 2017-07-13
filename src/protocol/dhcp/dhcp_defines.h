@@ -21,11 +21,6 @@
 #ifndef DHCP_DEFINES_H
 #define DHCP_DEFINES_H
 
-//// parser
-//// "\0\0"
-//#define YY_END_OF_BUFFER_CHAR                     0
-//#define DHCP_FLEX_BUFFER_BOUNDARY_SIZE            2
-
 // stream
 #define DHCP_BUFFER_SIZE                          1024
 
@@ -55,8 +50,8 @@
 #define DHCP_DEFAULT_PRINT_PROGRESSDOT            false
 
 // protocol
-#define DHCP_DEFAULT_CLIENT_PORT                  68
-#define DHCP_DEFAULT_SERVER_PORT                  67
+#define DHCP_DEFAULT_CLIENT_PORT                  68 // UDP
+#define DHCP_DEFAULT_SERVER_PORT                  67 // UDP
 
 // *TODO*: this is the minimum, DHCP supports negotiation of larger frames
 #define DHCP_MESSAGE_SIZE                         576

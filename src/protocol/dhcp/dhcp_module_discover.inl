@@ -26,6 +26,7 @@
 #include "common_timer_manager_common.h"
 
 #include "net_common_tools.h"
+#include "net_configuration.h"
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -254,6 +255,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   DHCP_OptionsIterator_t iterator;
   int result = -1;
   ConnectionConfigurationIteratorType iterator_2;
+  struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
 
   iterator_2 =
     inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (inherited::mod_->name ()));
@@ -300,14 +302,14 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (!session_data_r.connection);
 
-  address =
-    (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address;
-  write_only =
-    (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.writeOnly;
-  (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address =
-      session_data_r.serverAddress;
-  (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.writeOnly =
-    true;
+  ACE_ASSERT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration);
+  socket_configuration_p =
+    dynamic_cast<struct Net_UDPSocketConfiguration*> ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration);
+  ACE_ASSERT (socket_configuration_p);
+  address = socket_configuration_p->address;
+  write_only = socket_configuration_p->writeOnly;
+  socket_configuration_p->address = session_data_r.serverAddress;
+  socket_configuration_p->writeOnly = true;
 
   // step2ab: set up the connection manager
   // *NOTE*: the stream configuration may contain a module handle that is
@@ -372,10 +374,8 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   } // end IF
 
   // step2e: reset the connection configuration
-  (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address =
-    address;
-  (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.writeOnly =
-    write_only;
+  socket_configuration_p->address = address;
+  socket_configuration_p->writeOnly = write_only;
   inherited::configuration_->streamConfiguration->configuration_.cloneModule =
     clone_module;
   inherited::configuration_->streamConfiguration->configuration_.deleteModule =
@@ -388,10 +388,8 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 error:
   if (reset_configuration)
   {
-    (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.address =
-      address;
-    (*iterator_2).second.socketHandlerConfiguration.socketConfiguration.writeOnly =
-      write_only;
+    socket_configuration_p->address = address;
+    socket_configuration_p->writeOnly = write_only;
     inherited::configuration_->streamConfiguration->configuration_.cloneModule =
       clone_module;
     inherited::configuration_->streamConfiguration->configuration_.deleteModule =
@@ -431,13 +429,13 @@ continue_:
   DHCP_record.secs = data_r.secs;
   if (inherited::configuration_->protocolConfiguration->requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-  if (!Net_Common_Tools::interfaceToMACAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.networkInterface,
+  if (!Net_Common_Tools::interfaceToMACAddress (socket_configuration_p->networkInterface,
                                                 DHCP_record.chaddr))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Net_Common_Tools::interfaceToMACAddress(\"%s\"), returning\n"),
                 inherited::mod_->name (),
-                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration.networkInterface.c_str ())));
+                ACE_TEXT (socket_configuration_p->networkInterface.c_str ())));
 
     // clean up
     message_p->release ();
@@ -548,6 +546,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
       bool use_reactor = false;
       ConnectionConfigurationIteratorType iterator;
       bool write_only = false;
+      struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
 
       // sanity check(s)
       ACE_ASSERT (inherited::configuration_);
@@ -633,10 +632,12 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 
       // step2aa: set up the socket configuration
       // *TODO*: remove type inferences
-      write_only =
-        (*iterator).second.socketHandlerConfiguration.socketConfiguration.writeOnly;
-      (*iterator).second.socketHandlerConfiguration.socketConfiguration.writeOnly =
-        true;
+      ACE_ASSERT ((*iterator).second.socketHandlerConfiguration.socketConfiguration);
+      socket_configuration_p =
+        dynamic_cast<struct Net_UDPSocketConfiguration*> ((*iterator).second.socketHandlerConfiguration.socketConfiguration);
+      ACE_ASSERT (socket_configuration_p);
+      write_only = socket_configuration_p->writeOnly;
+      socket_configuration_p->writeOnly = true;
 
       // step2ab: set up the connection manager
       // *NOTE*: the stream configuration may contain a module handle that is
@@ -671,14 +672,14 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
       //                           configuration_->userData);
 
       broadcastConnectionHandle_ =
-          this->connect ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address,
+          this->connect (socket_configuration_p->address,
                          use_reactor);
       if (broadcastConnectionHandle_ == ACE_INVALID_HANDLE)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: failed to connect to %s, aborting\n"),
                     inherited::mod_->name (),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address).c_str ())));
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->address).c_str ())));
         goto error;
       } // end IF
       if (use_reactor)
@@ -690,19 +691,18 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 #endif
       else
         session_data_r.broadcastConnection =
-            connection_manager_p->get ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address);
+            connection_manager_p->get (socket_configuration_p->address);
       if (!session_data_r.broadcastConnection)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: failed to connect to %s, aborting\n"),
                     inherited::mod_->name (),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address).c_str ())));
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->address).c_str ())));
         goto error;
       } // end IF
 
       // step2e: reset the connection configuration
-      (*iterator).second.socketHandlerConfiguration.socketConfiguration.writeOnly =
-        write_only;
+      socket_configuration_p->writeOnly = write_only;
       inherited::configuration_->streamConfiguration->configuration_.cloneModule =
         clone_module;
       inherited::configuration_->streamConfiguration->configuration_.deleteModule =
@@ -719,8 +719,7 @@ continue_:
 error:
       if (reset_configuration)
       {
-        (*iterator).second.socketHandlerConfiguration.socketConfiguration.writeOnly =
-          write_only;
+        socket_configuration_p->writeOnly = write_only;
         inherited::configuration_->streamConfiguration->configuration_.cloneModule =
           clone_module;
         inherited::configuration_->streamConfiguration->configuration_.deleteModule =

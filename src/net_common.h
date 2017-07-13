@@ -34,7 +34,11 @@
 // forward declarations
 template <typename ConfigurationType>
 class Net_ITransportLayer_T;
-struct Net_SocketConfiguration;
+#if defined (ACE_HAS_NETLINK)
+struct Net_NetlinkSocketConfiguration;
+#endif
+struct Net_TCPSocketConfiguration;
+struct Net_UDPSocketConfiguration;
 
 enum Net_LinkLayerType
 {
@@ -139,7 +143,11 @@ enum Net_Connection_Status
 };
 
 typedef Stream_Statistic Net_RuntimeStatistic_t;
-typedef Net_ITransportLayer_T<struct Net_SocketConfiguration> Net_ITransportLayer_t;
+#if defined (ACE_HAS_NETLINK)
+typedef Net_ITransportLayer_T<struct Net_NetlinkSocketConfiguration> Net_INetlinkTransportLayer_t;
+#endif
+typedef Net_ITransportLayer_T<struct Net_TCPSocketConfiguration> Net_ITCPTransportLayer_t;
+typedef Net_ITransportLayer_T<struct Net_UDPSocketConfiguration> Net_IUDPTransportLayer_t;
 
 struct Net_UserData
 {

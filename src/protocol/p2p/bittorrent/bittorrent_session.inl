@@ -317,7 +317,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     ACE_ASSERT (configuration_p->streamConfiguration);
 
     // step1: set up configuration
-    configuration_p->socketHandlerConfiguration.socketConfiguration.address =
+    configuration_p->socketHandlerConfiguration.socketConfiguration_2.address =
         address_in;
 
     iterator =
@@ -887,7 +887,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     ACE_ASSERT (configuration_p->streamConfiguration);
 
     // step1: set up configuration
-    configuration_p->socketHandlerConfiguration.socketConfiguration.address =
+    configuration_p->socketHandlerConfiguration.socketConfiguration_2.address =
         address_in;
 
     iterator =

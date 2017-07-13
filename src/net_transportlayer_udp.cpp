@@ -22,10 +22,6 @@
 #include "ace/Synch.h"
 #include "net_transportlayer_udp.h"
 
-//#include <sstream>
-//#include <string>
-
-//#include "net_defines.h"
 #include "net_macros.h"
 
 Net_TransportLayer_UDP::Net_TransportLayer_UDP ()
@@ -33,27 +29,4 @@ Net_TransportLayer_UDP::Net_TransportLayer_UDP ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_UDP::Net_TransportLayer_UDP"));
 
-  //std::string address = ACE_TEXT_ALWAYS_CHAR (NET_DEFAULT_IP_BROADCAST_ADDRESS);
-  //address += ':';
-  //std::ostringstream converter;
-  //converter << NET_DEFAULT_PORT;
-  //address += converter.str ();
-  //if (address_.set (ACE_TEXT (address.c_str ()), AF_INET) == -1)
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
-  //if (inherited2::open (address_,
-  //                      ACE_PROTOCOL_FAMILY_INET,
-  //                      0,
-  //                      0) == -1)
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to ACE_SOCK_Dgram::open(): \"%m\", continuing\n")));
-}
-
-Net_TransportLayer_UDP::~Net_TransportLayer_UDP ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_UDP::~Net_TransportLayer_UDP"));
-
-  //if (inherited2::close () == -1)
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to ACE_SOCK_Dgram::close(): \"%m\", continuing\n")));
 }

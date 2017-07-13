@@ -145,4 +145,12 @@ typedef Common_UI_GTK_Manager_T<struct Test_U_Client_GTK_CBData> Test_U_Client_G
 typedef ACE_Singleton<Test_U_Client_GTK_Manager_t,
                       typename ACE_MT_SYNCH::RECURSIVE_MUTEX> CLIENT_UI_GTK_MANAGER_SINGLETON;
 
+class Net_IPing
+{
+ public:
+  inline virtual ~Net_IPing () {};
+
+  virtual void ping () = 0;
+};
+
 #endif

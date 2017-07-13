@@ -30,9 +30,3 @@ Net_TransportLayer_TCP::Net_TransportLayer_TCP ()
   NETWORK_TRACE (ACE_TEXT ("Net_TransportLayer_TCP::Net_TransportLayer_TCP"));
 
 }
-
-Net_TransportLayer_TCP::~Net_TransportLayer_TCP ()
-{
-  NETWORK_TRACE(ACE_TEXT("Net_TransportLayer_TCP::~Net_TransportLayer_TCP"));
-
-}

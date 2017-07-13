@@ -23,19 +23,15 @@
 
 #include "ace/Global_Macros.h"
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-#include "net_common.h"
-#include "net_exports.h"
 #include "net_transportlayer_base.h"
 
-//class Net_Export Net_TransportLayer_Netlink
+#if defined (ACE_HAS_NETLINK)
 class Net_TransportLayer_Netlink
  : public Net_NetlinkTransportLayer_Base
 {
  public:
   Net_TransportLayer_Netlink ();
-  virtual ~Net_TransportLayer_Netlink ();
+  inline virtual ~Net_TransportLayer_Netlink () {};
 
  private:
   typedef Net_NetlinkTransportLayer_Base inherited;

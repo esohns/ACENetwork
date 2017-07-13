@@ -22,10 +22,8 @@
 #define NET_STREAMCONNECTION_BASE_H
 
 #include "ace/config-macros.h"
-//#include "ace/Connector.h"
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
-//#include "ace/SOCK_Connector.h"
 #include "ace/Time_Value.h"
 
 #include "net_iconnection.h"
@@ -75,12 +73,11 @@ class Net_StreamConnectionBase_T
   // override some task-based members
   virtual int open (void* = NULL); // arg
   virtual int close (u_long = 0); // arg (reason)
-//  virtual int svc (void);
 
   // implement (part of) Net_ISocketConnection_T
   inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = configuration_in; return true; };
   //virtual const HandlerConfigurationType& get () const;
-  virtual void set (Net_ClientServerRole);
+  virtual void set (enum Net_ClientServerRole);
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&);
   //inline virtual const HandlerConfigurationType& get () const { return configuration_; };
@@ -104,8 +101,6 @@ class Net_StreamConnectionBase_T
 
  protected:
   typedef StreamType STREAM_T;
-  //typedef ACE_Connector<HandlerType,
-  //                      ACE_SOCK_CONNECTOR> ACE_CONNECTOR_T;
   typedef Net_IConnector_T<AddressType,
                            ConfigurationType> ICONNECTOR_T;
   typedef Net_IListener_T<ListenerConfigurationType,
@@ -133,9 +128,6 @@ class Net_StreamConnectionBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_StreamConnectionBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_StreamConnectionBase_T (const Net_StreamConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamConnectionBase_T& operator= (const Net_StreamConnectionBase_T&))
-
-  // helper methods
-//  void shutdown ();
 };
 
 /////////////////////////////////////////
@@ -188,7 +180,7 @@ class Net_AsynchStreamConnectionBase_T
   // implement (part of) Net_IStreamConnection_T
   inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = configuration_in; return true; };
   //virtual const HandlerConfigurationType& get () const;
-  virtual void set (Net_ClientServerRole);
+  virtual void set (enum Net_ClientServerRole);
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&);
   inline virtual const HandlerConfigurationType& get () { return configuration_; };

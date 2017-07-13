@@ -26,26 +26,45 @@
 #include "net_common.h"
 
 template <typename ConfigurationType> // socket-
-class Net_ITransportLayer_T
+class Net_ILinkLayer_T
 {
  public:
-  inline virtual ~Net_ITransportLayer_T () {};
-
-  // *TODO*: this is an ICMP (i.e. link-layer) (or protocol-level) function
-  //         --> move somewhere else
-  virtual void ping () = 0;
+  inline virtual ~Net_ILinkLayer_T () {};
 
   // information
   // *TODO*: move this somewhere else
   virtual enum Common_DispatchType dispatch () = 0;
   virtual enum Net_ClientServerRole role () = 0;
   virtual void set (enum Net_ClientServerRole) = 0;
-  virtual enum Net_TransportLayerType transportLayer () = 0;
 
   virtual bool initialize (enum Common_DispatchType,
                            enum Net_ClientServerRole,
                            const ConfigurationType&) = 0;
   virtual void finalize () = 0;
+};
+
+template <typename ConfigurationType> // socket-
+class Net_IIPLinkLayer_T
+ : public Net_ILinkLayer_T<ConfigurationType>
+{
+ public:
+  inline virtual ~Net_IIPLinkLayer_T () {};
+
+  // *NOTE*: this is an ICMP function
+  virtual void ping () = 0;
+};
+
+//////////////////////////////////////////
+
+template <typename ConfigurationType> // socket-
+class Net_ITransportLayer_T
+ : public Net_ILinkLayer_T<ConfigurationType>
+{
+ public:
+  inline virtual ~Net_ITransportLayer_T () {};
+
+  // information
+  virtual enum Net_TransportLayerType transportLayer () = 0;
 };
 
 #endif

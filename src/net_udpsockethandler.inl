@@ -26,6 +26,7 @@
 #include "common_tools.h"
 
 #include "net_common_tools.h"
+#include "net_configuration.h"
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
 #include "net_macros.h"
@@ -68,6 +69,14 @@ Net_UDPSocketHandler_T<SocketType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::open"));
 
+  ConfigurationType* configuration_p =
+    reinterpret_cast<ConfigurationType*> (arg_in);
+  ACE_ASSERT (configuration_p);
+  // *TODO*: remove type inferences
+  ACE_ASSERT (configuration_p->socketConfiguration);
+  struct Net_UDPSocketConfiguration* socket_configuration_p =
+    dynamic_cast<struct Net_UDPSocketConfiguration*> (configuration_p->socketConfiguration);
+
   int result = -1;
 #if defined (ACE_LINUX)
   bool handle_privileges = false;
@@ -76,13 +85,11 @@ Net_UDPSocketHandler_T<SocketType,
 
   // sanity check(s)
   ACE_ASSERT (arg_in);
-  ConfigurationType* configuration_p =
-    reinterpret_cast<ConfigurationType*> (arg_in);
-  ACE_ASSERT (configuration_p);
+  ACE_ASSERT (socket_configuration_p);
 
   // *TODO*: remove type inferences
-  address_ = configuration_p->socketConfiguration.address;
-  writeOnly_ = configuration_p->socketConfiguration.writeOnly;
+  address_ = socket_configuration_p->address;
+  writeOnly_ = socket_configuration_p->writeOnly;
 
   // step1: open socket ?
   // *NOTE*: even when this is a write-only connection
@@ -93,9 +100,11 @@ Net_UDPSocketHandler_T<SocketType,
     // sanity check(s)
     // *TODO*: remove type inferences
     ACE_ASSERT (configuration_p->listenerConfiguration);
+    struct Net_UDPSocketConfiguration* socket_configuration_2 =
+      dynamic_cast<struct Net_UDPSocketConfiguration*> (configuration_p->listenerConfiguration->socketHandlerConfiguration.socketConfiguration);
+    ACE_ASSERT (socket_configuration_2);
 
-    address_ =
-      configuration_p->listenerConfiguration->socketHandlerConfiguration.socketConfiguration.address;
+    address_ = socket_configuration_2->address;
   } // end IF
 
 #if defined (ACE_LINUX)
@@ -132,7 +141,7 @@ Net_UDPSocketHandler_T<SocketType,
 
   // step2: connect ?
   // *TODO*: remove type inference
-  if (configuration_p->socketConfiguration.connect)
+  if (socket_configuration_p->connect)
   {
     ACE_INET_Addr associated_address =
         (writeOnly_ ? address_
@@ -183,27 +192,67 @@ Net_UDPSocketHandler_T<SocketType,
 //                Net_Common_Tools::getMTU (handle)));
 //#endif
 
+  // step3: set source port ?
+  if (socket_configuration_p->sourcePort)
+  { // *NOTE*: the socket address may be in use --> support multi-use
+    if (!Net_Common_Tools::setReuseAddress (handle,
+                                            false)) // SO_REUSEPORT ?
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setReuseAddress(0x%@), continuing\n"),
+                  handle));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setReuseAddress(%d), continuing\n"),
+                  handle));
+#endif
+    } // end IF
+
+    ACE_INET_Addr local_SAP (socket_configuration_p->sourcePort,
+                             static_cast<ACE_UINT32> (INADDR_ANY));
+    result =
+        ACE_OS::bind (handle,
+                      reinterpret_cast<struct sockaddr*> (local_SAP.get_addr ()),
+                      local_SAP.get_addr_size ());
+    if (result == -1)
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::bind(0x%@,%s): \"%m\", aborting\n"),
+                  handle,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (local_SAP).c_str ())));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", aborting\n"),
+                  handle,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (local_SAP).c_str ())));
+#endif
+      goto error;
+    } // end IF
+  } // end IF
+
   // *NOTE*: recvfrom()-ing datagrams larger than SO_RCVBUF will truncate the
   //         inbound datagram (MSG_TRUNC flag will be set)
   // *TODO*: remove type inferences
   if (!writeOnly_)
   {
-    // step3: tweak inbound socket
-    if (configuration_p->socketConfiguration.bufferSize)
+    // step4a: tweak inbound socket
+    if (socket_configuration_p->bufferSize)
       if (!Net_Common_Tools::setSocketBuffer (handle,
                                               SO_RCVBUF,
-                                              configuration_p->socketConfiguration.bufferSize))
+                                              socket_configuration_p->bufferSize))
       {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                     handle,
-                    configuration_p->socketConfiguration.bufferSize));
+                    socket_configuration_p->bufferSize));
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
                     handle,
-                    configuration_p->socketConfiguration.bufferSize));
+                    socket_configuration_p->bufferSize));
 #endif
       } // end IF
 
@@ -212,36 +261,36 @@ Net_UDPSocketHandler_T<SocketType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
     if (!Net_Common_Tools::setLinger (handle,
-                                      configuration_p->socketConfiguration.linger,
+                                      socket_configuration_p->linger,
                                       -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setLinger(%d,%s,-1), returning\n"),
                   handle,
-                  (configuration_p->socketConfiguration.linger ? ACE_TEXT ("true")
-                                                               : ACE_TEXT ("false"))));
+                  (socket_configuration_p->linger ? ACE_TEXT ("true")
+                                                  : ACE_TEXT ("false"))));
       goto error;
     } // end IF
 #endif
   } // end IF
-  // step4: tweak outbound socket
+  // step4b: tweak outbound socket
   // *NOTE*: sendto()-ing datagrams larger than SO_SNDBUF will trigger errno
   //         EMSGSIZE (90)
-  if (configuration_p->socketConfiguration.bufferSize)
+  if (socket_configuration_p->bufferSize)
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_SNDBUF,
-                                            configuration_p->socketConfiguration.bufferSize))
+                                            socket_configuration_p->bufferSize))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  socket_configuration_p->bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  socket_configuration_p->bufferSize));
 #endif
     } // end IF
 
@@ -453,6 +502,14 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPSocketHandler_T::open"));
 
+  ConfigurationType* configuration_p =
+    reinterpret_cast<ConfigurationType*> (arg_in);
+  ACE_ASSERT (configuration_p);
+  // *TODO*: remove type inferences
+  ACE_ASSERT (configuration_p->socketConfiguration);
+  struct Net_UDPSocketConfiguration* socket_configuration_p =
+    dynamic_cast<struct Net_UDPSocketConfiguration*> (configuration_p->socketConfiguration);
+
   int result = -1;
 #if defined (ACE_LINUX)
   bool handle_privileges = false;
@@ -461,13 +518,11 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
   // sanity check(s)
   ACE_ASSERT (arg_in);
-  ConfigurationType* configuration_p =
-    reinterpret_cast<ConfigurationType*> (arg_in);
-  ACE_ASSERT (configuration_p);
+  ACE_ASSERT (socket_configuration_p);
 
   // *TODO*: remove type inferences
-  address_ = configuration_p->socketConfiguration.address;
-  writeOnly_ = configuration_p->socketConfiguration.writeOnly;
+  address_ = socket_configuration_p->address;
+  writeOnly_ = socket_configuration_p->writeOnly;
 
   // step1: open socket ?
   // *NOTE*: even when this is a write-only connection
@@ -482,8 +537,7 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
     ACE_ASSERT (configuration_p->listenerConfiguration);
 
     // *TODO*: remove type inference
-    local_SAP =
-      configuration_p->listenerConfiguration->socketHandlerConfiguration.socketConfiguration.address;
+    local_SAP = socket_configuration_p->address;
   } // end IF
 
 //  ACE_INET_Addr remote_SAP = ACE_Addr::sap_any;
@@ -514,7 +568,7 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_SOCK_CODgram::open(\"%s\",\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_SOCK_CODgram::open(%s,%s): \"%m\", aborting\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (local_SAP).c_str ()),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_SAP).c_str ())));
     goto error;
@@ -526,44 +580,70 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   handle = inherited2::get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
 
+  // step2: set source port ?
+  if (socket_configuration_p->sourcePort)
+  {
+    local_SAP.set_port_number (socket_configuration_p->sourcePort,
+                               1);
+    result =
+        ACE_OS::bind (handle,
+                      reinterpret_cast<struct sockaddr*> (local_SAP.get_addr ()),
+                      local_SAP.get_addr_size ());
+    if (result == -1)
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::bind(0x%@,%s): \"%m\", aborting\n"),
+                  handle,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (local_SAP).c_str ())));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", aborting\n"),
+                  handle,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (local_SAP).c_str ())));
+#endif
+      goto error;
+    } // end IF
+  } // end IF
+
   // step3: tweak socket
   // *NOTE*: recvfrom()-ing datagrams larger than SO_RCVBUF will truncate the
   //         inbound datagram (MSG_TRUNC flag will be set)
   // *TODO*: remove type inferences
-  if (configuration_p->socketConfiguration.bufferSize)
+  if (socket_configuration_p->bufferSize)
   {
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_RCVBUF,
-                                            configuration_p->socketConfiguration.bufferSize))
+                                            socket_configuration_p->bufferSize))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  socket_configuration_p->bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  socket_configuration_p->bufferSize));
 #endif
     } // end IF
     // *NOTE*: sendto()-ing datagrams larger than SO_SNDBUF will trigger errno
     //         EMSGSIZE (90)
     if (!Net_Common_Tools::setSocketBuffer (handle,
                                             SO_SNDBUF,
-                                            configuration_p->socketConfiguration.bufferSize))
+                                            socket_configuration_p->bufferSize))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  socket_configuration_p->bufferSize));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
                   handle,
-                  configuration_p->socketConfiguration.bufferSize));
+                  socket_configuration_p->bufferSize));
 #endif
     } // end IF
   } // end IF
@@ -573,14 +653,14 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   if (!Net_Common_Tools::setLinger (handle,
-                                    configuration_p->socketConfiguration.linger,
+                                    socket_configuration_p->linger,
                                     -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%d,%s,-1), aborting\n"),
                 handle,
-                (configuration_p->socketConfiguration.linger ? ACE_TEXT ("true")
-                                                             : ACE_TEXT ("false"))));
+                (socket_configuration_p->linger ? ACE_TEXT ("true")
+                                                : ACE_TEXT ("false"))));
     goto error;
   } // end IF
 #endif

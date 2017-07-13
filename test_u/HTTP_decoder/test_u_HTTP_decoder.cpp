@@ -497,10 +497,10 @@ do_work (unsigned int bufferSize_in,
   // *********************** socket configuration data *************************
   struct Test_U_ConnectionConfiguration connection_configuration;
   int result =
-    connection_configuration.socketHandlerConfiguration.socketConfiguration.address.set (port_in,
-                                                                                         hostName_in.c_str (),
-                                                                                         1,
-                                                                                         ACE_ADDRESS_FAMILY_INET);
+    connection_configuration.socketHandlerConfiguration.socketConfiguration_2.address.set (port_in,
+                                                                                           hostName_in.c_str (),
+                                                                                           1,
+                                                                                           ACE_ADDRESS_FAMILY_INET);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -509,10 +509,10 @@ do_work (unsigned int bufferSize_in,
                 port_in));
     return;
   } // end IF
-  connection_configuration.socketHandlerConfiguration.socketConfiguration.useLoopBackDevice =
-    connection_configuration.socketHandlerConfiguration.socketConfiguration.address.is_loopback ();
-  connection_configuration.socketHandlerConfiguration.socketConfiguration.writeOnly =
-    true;
+  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice =
+    connection_configuration.socketHandlerConfiguration.socketConfiguration_2.address.is_loopback ();
+//  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.writeOnly =
+//    true;
   connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
   connection_configuration.socketHandlerConfiguration.userData =
@@ -725,12 +725,12 @@ do_work (unsigned int bufferSize_in,
     goto clean_up;
   } // end IF
   handle =
-    iconnector_p->connect ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address);
+    iconnector_p->connect ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address);
   if (handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
     goto clean_up;
   } // end IF
   if (iconnector_p->useReactor ())
@@ -755,7 +755,7 @@ do_work (unsigned int bufferSize_in,
     do
     {
       connection_p =
-        connection_manager_p->get ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address);
+        connection_manager_p->get ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address);
       if (connection_p)
         break;
     } while (COMMON_TIME_NOW < deadline);
@@ -764,7 +764,7 @@ do_work (unsigned int bufferSize_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to \"%s\", returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
     goto clean_up;
   } // end IF
   // step1b: wait for the connection to finish initializing
@@ -779,7 +779,7 @@ do_work (unsigned int bufferSize_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connection to %s (status was: %d), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ()),
                 status));
 
     // clean up
@@ -807,7 +807,7 @@ do_work (unsigned int bufferSize_in,
                               NULL); // <-- block
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connected to %s\n"),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
 
   // step2: send HTTP request
 //  ACE_NEW_NORETURN (message_data_p,

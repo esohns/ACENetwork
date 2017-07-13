@@ -24,10 +24,10 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 #include "ace/Time_Value.h"
-#include "ace/SSL/SSL_SOCK_Connector.h"
 
 #include "stream_statemachine_control.h"
 
+#include "net_common.h"
 #include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
 #include "net_iconnector.h"
@@ -46,7 +46,7 @@ template <typename HandlerType,
           ////////////////////////////////
           typename UserDataType>
 class Net_Client_SSL_Connector_T
- : public ACE_SSL_SOCK_Connector
+ : public ConnectorType
  , public Net_IConnector_T<AddressType,
                            ConfigurationType>
 {
@@ -58,17 +58,11 @@ class Net_Client_SSL_Connector_T
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
-//  typedef Net_ISocketConnection_T<AddressType,
-//                                  ConfigurationType,
-//                                  StateType,
-//                                  StatisticContainerType,
-//                                  struct Net_SocketConfiguration,
-//                                  HandlerConfigurationType> ISOCKET_CONNECTION_T;
   typedef Net_IStreamConnection_T<AddressType,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
-                                  struct Net_SocketConfiguration,
+                                  struct Net_TCPSocketConfiguration,
                                   HandlerConfigurationType,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
@@ -109,12 +103,13 @@ class Net_Client_SSL_Connector_T
   virtual int make_svc_handler (HandlerType*&);
 
  private:
-  typedef ACE_SSL_SOCK_Connector inherited;
+  typedef ConnectorType inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SSL_Connector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SSL_Connector_T (const Net_Client_SSL_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_SSL_Connector_T& operator= (const Net_Client_SSL_Connector_T&))
 
+  // convenient types
   typedef Net_Client_SSL_Connector_T<HandlerType,
                                      ConnectorType,
                                      AddressType,
@@ -124,6 +119,7 @@ class Net_Client_SSL_Connector_T
                                      HandlerConfigurationType,
                                      StreamType,
                                      UserDataType> OWN_TYPE_T;
+  typedef Net_ITransportLayer_T<struct Net_TCPSocketConfiguration> ITRANSPORTLAYER_T;
 
   ConfigurationType      configuration_; // connection-
 

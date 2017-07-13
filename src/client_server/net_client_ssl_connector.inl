@@ -113,7 +113,7 @@ Net_Client_SSL_Connector_T<HandlerType,
   } // end IF
   ACE_ASSERT (handler_p);
 
-  Net_ITransportLayer_t* itransportlayer_p = handler_p;
+  ITRANSPORTLAYER_T* itransportlayer_p = handler_p;
   result = itransportlayer_p->transportLayer ();
   
   // clean up
