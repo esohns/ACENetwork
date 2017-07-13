@@ -95,18 +95,6 @@ Net_UDPSocketHandler_T<SocketType,
   // *NOTE*: even when this is a write-only connection
   //         (configuration_p->socketConfiguration->writeOnly), the base class
   //         still requires a valid handle to open the output stream
-  if (!writeOnly_)
-  {
-    // sanity check(s)
-    // *TODO*: remove type inferences
-    ACE_ASSERT (configuration_p->listenerConfiguration);
-    struct Net_UDPSocketConfiguration* socket_configuration_2 =
-      dynamic_cast<struct Net_UDPSocketConfiguration*> (configuration_p->listenerConfiguration->socketHandlerConfiguration.socketConfiguration);
-    ACE_ASSERT (socket_configuration_2);
-
-    address_ = socket_configuration_2->address;
-  } // end IF
-
 #if defined (ACE_LINUX)
   // (temporarily) elevate priviledges to open system sockets
   if (address_.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT)
@@ -118,13 +106,14 @@ Net_UDPSocketHandler_T<SocketType,
   } // end IF
 #endif
   ACE_INET_Addr inet_address =
-      (writeOnly_ ? ACE_INET_Addr (static_cast<u_short> (0),
-                                   static_cast<ACE_UINT32> (INADDR_ANY))
-                  : address_);
+      (writeOnly_ ? (socket_configuration_p->sourcePort ? ACE_INET_Addr (static_cast<u_short> (socket_configuration_p->sourcePort),
+                                                                         static_cast<ACE_UINT32> (INADDR_ANY))
+                                                        : ACE_sap_any_cast (const ACE_INET_Addr&))
+                  : socket_configuration_p->listenAddress);
   result = inherited2::peer_.open (inet_address,             // SAP
                                    ACE_PROTOCOL_FAMILY_INET, // protocol family
                                    0,                        // protocol
-                                   1);                       // reuse_addr
+                                   1);                       // SO_REUSEADDR
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -143,26 +132,25 @@ Net_UDPSocketHandler_T<SocketType,
   // *TODO*: remove type inference
   if (socket_configuration_p->connect)
   {
-    ACE_INET_Addr associated_address =
+    inet_address =
         (writeOnly_ ? address_
-                    : ACE_INET_Addr (static_cast<u_short> (0),
-                                     static_cast<ACE_UINT32> (INADDR_ANY)));
+                    : ACE_sap_any_cast (const ACE_INET_Addr&));
     result =
         ACE_OS::connect (handle,
-                         reinterpret_cast<struct sockaddr*> (associated_address.get_addr ()),
-                         associated_address.get_addr_size ());
+                         reinterpret_cast<struct sockaddr*> (inet_address.get_addr ()),
+                         inet_address.get_addr_size ());
     if (result == -1)
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::connect(0x%@,%s): \"%m\", aborting\n"),
                   handle,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address).c_str ())));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::connect(%d,%s): \"%m\", aborting\n"),
                   handle,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address).c_str ())));
 #endif
       goto error;
     } // end IF
@@ -170,74 +158,34 @@ Net_UDPSocketHandler_T<SocketType,
 //    ACE_DEBUG ((LM_DEBUG,
 //                ACE_TEXT ("0x%@: associated datagram socket to %s\n"),
 //                handle,
-//                ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address).c_str ())));
 //#else
 //    ACE_DEBUG ((LM_DEBUG,
 //                ACE_TEXT ("%d: associated datagram socket to %s\n"),
 //                handle,
-//                ACE_TEXT (Net_Common_Tools::IPAddressToString (associated_address).c_str ())));
+//                ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address).c_str ())));
 //#endif
   } // end IF
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("0x%@: (initial) MTU between \"%s\" and \"%s\": %u byte(s)...\n"),
+//                ACE_TEXT ("0x%@: (initial) MTU between \"%s\" and \"%s\": %u byte(s)\n"),
 //                handle,
 //                buffer, buffer_2,
 //                Net_Common_Tools::getMTU (handle)));
 //#else
 //    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("%d: (initial) MTU between \"%s\" and \"%s\": %u byte(s)...\n"),
+//                ACE_TEXT ("%d: (initial) MTU between \"%s\" and \"%s\": %u byte(s)\n"),
 //                handle,
 //                buffer, buffer_2,
 //                Net_Common_Tools::getMTU (handle)));
 //#endif
-
-  // step3: set source port ?
-  if (socket_configuration_p->sourcePort)
-  { // *NOTE*: the socket address may be in use --> support multi-use
-    if (!Net_Common_Tools::setReuseAddress (handle,
-                                            false)) // SO_REUSEPORT ?
-    {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setReuseAddress(0x%@), continuing\n"),
-                  handle));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setReuseAddress(%d), continuing\n"),
-                  handle));
-#endif
-    } // end IF
-
-    ACE_INET_Addr local_SAP (socket_configuration_p->sourcePort,
-                             static_cast<ACE_UINT32> (INADDR_ANY));
-    result =
-        ACE_OS::bind (handle,
-                      reinterpret_cast<struct sockaddr*> (local_SAP.get_addr ()),
-                      local_SAP.get_addr_size ());
-    if (result == -1)
-    {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::bind(0x%@,%s): \"%m\", aborting\n"),
-                  handle,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (local_SAP).c_str ())));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", aborting\n"),
-                  handle,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (local_SAP).c_str ())));
-#endif
-      goto error;
-    } // end IF
-  } // end IF
 
   // *NOTE*: recvfrom()-ing datagrams larger than SO_RCVBUF will truncate the
   //         inbound datagram (MSG_TRUNC flag will be set)
   // *TODO*: remove type inferences
   if (!writeOnly_)
   {
-    // step4a: tweak inbound socket
+    // step3a: tweak inbound socket
     if (socket_configuration_p->bufferSize)
       if (!Net_Common_Tools::setSocketBuffer (handle,
                                               SO_RCVBUF,
@@ -273,7 +221,7 @@ Net_UDPSocketHandler_T<SocketType,
     } // end IF
 #endif
   } // end IF
-  // step4b: tweak outbound socket
+  // step3b: tweak outbound socket
   // *NOTE*: sendto()-ing datagrams larger than SO_SNDBUF will trigger errno
   //         EMSGSIZE (90)
   if (socket_configuration_p->bufferSize)
@@ -528,24 +476,13 @@ Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   // *NOTE*: even when this is a write-only connection
   //         (configuration_p->socketConfiguration->writeOnly), the base class
   //         still requires a valid handle to open the output stream
-//  ACE_INET_Addr local_SAP = ACE_Addr::sap_any;
-  ACE_INET_Addr local_SAP (static_cast<u_short> (0),
-                           static_cast<ACE_UINT32> (INADDR_ANY));
-  if (!writeOnly_)
-  {
-    // sanity check(s)
-    ACE_ASSERT (configuration_p->listenerConfiguration);
-
-    // *TODO*: remove type inference
-    local_SAP = socket_configuration_p->address;
-  } // end IF
-
-//  ACE_INET_Addr remote_SAP = ACE_Addr::sap_any;
-  ACE_INET_Addr remote_SAP (static_cast<u_short> (0),
-                            static_cast<ACE_UINT32> (INADDR_ANY));
-  // *TODO*: remove type inference
-  if (writeOnly_)
-    remote_SAP = address_;
+  ACE_INET_Addr local_SAP =
+      (writeOnly_ ? (socket_configuration_p->sourcePort ? ACE_INET_Addr (static_cast<u_short> (socket_configuration_p->sourcePort),
+                                                                         static_cast<ACE_UINT32> (INADDR_ANY))
+                                                        : ACE_sap_any_cast (const ACE_INET_Addr&))
+                  : address_);
+  ACE_INET_Addr remote_SAP = (writeOnly_ ? address_
+                                         : ACE_sap_any_cast (const ACE_INET_Addr&));
 
 #if defined (ACE_LINUX)
   // (temporarily) elevate priviledges to open system sockets

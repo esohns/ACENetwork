@@ -147,32 +147,6 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 //#endif
   } // end IF
 
-  // step2: set source port ?
-  if (socket_configuration_p->sourcePort)
-  {
-    ACE_INET_Addr local_SAP (socket_configuration_p->sourcePort,
-                             static_cast<ACE_UINT32> (INADDR_ANY));
-    result =
-        ACE_OS::bind (handle_in,
-                      reinterpret_cast<struct sockaddr*> (local_SAP.get_addr ()),
-                      local_SAP.get_addr_size ());
-    if (result == -1)
-    {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::bind(0x%@,%s): \"%m\", returning\n"),
-                  handle_in,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (local_SAP).c_str ())));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", returning\n"),
-                  handle_in,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (local_SAP).c_str ())));
-#endif
-      return;
-    } // end IF
-  } // end IF
-
   if (!writeOnly_)
   {
     // step3a: tweak inbound socket

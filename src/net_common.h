@@ -66,7 +66,9 @@ enum Net_TransportLayerType
 {
   NET_TRANSPORTLAYER_INVALID = -1,
   NET_TRANSPORTLAYER_IP_CAST = 0, // 'pseudo' (LAN-only, no flow control)
+#if defined (ACE_LINUX)
   NET_TRANSPORTLAYER_NETLINK, // 'pseudo' ((Linux-)host only, no flow control) kernel<->user space protocol
+#endif
   NET_TRANSPORTLAYER_TCP,
   NET_TRANSPORTLAYER_UDP,
   ////////////////////////////////////////

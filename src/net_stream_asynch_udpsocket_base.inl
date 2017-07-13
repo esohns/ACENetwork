@@ -144,8 +144,10 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   AddressType SAP_any (static_cast<u_short> (0),
                        static_cast<ACE_UINT32> (INADDR_ANY));
   AddressType local_SAP =
-    (socket_configuration_p->writeOnly ? SAP_any
-                                       : socket_configuration_p->address);
+    (socket_configuration_p->writeOnly ? (socket_configuration_p->sourcePort ? ACE_INET_Addr (static_cast<u_short> (socket_configuration_p->sourcePort),
+                                                                                              static_cast<ACE_UINT32> (INADDR_ANY))
+                                                                             : ACE_sap_any_cast (const ACE_INET_Addr&))
+                                       :  socket_configuration_p->address);
 #if defined (ACE_LINUX)
   // (temporarily) elevate priviledges to open system sockets
   if (!socket_configuration_p->writeOnly &&
@@ -568,21 +570,32 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   localSAP_out.reset ();
   remoteSAP_out.reset ();
 
+  result = inherited2::get_local_addr (localSAP_out);
+  if (unlikely (result == -1))
+  {
+    error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    if (error != EBADF) // 9: Linux: socket already closed
+#endif
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+  } // end IF
   if (likely (inherited::writeOnly_))
     remoteSAP_out = inherited::address_;
   else
   {
-    result = inherited2::get_local_addr (localSAP_out);
+    result = inherited2::get_remote_addr (remoteSAP_out);
     if (unlikely (result == -1))
     {
       error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if (error != ENOTSOCK) // 10038: socket already closed
 #else
-      if (error != EBADF)    // 9    : socket already closed
+      if ((error != EBADF) &&    // 9: Linux: socket already closed
+          (error != ENOTCONN)) // 107: Linux: not connected
 #endif
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+                    ACE_TEXT ("failed to ACE_SOCK_Dgram::get_remote_addr(): \"%m\", continuing\n")));
     } // end IF
   } // end ELSE
 }

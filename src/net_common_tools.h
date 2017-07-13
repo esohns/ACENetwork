@@ -130,7 +130,7 @@ class Net_Common_Tools
   static ACE_INET_Addr stringToIPAddress (std::string&); // host name (DNS name or dotted-decimal)
 
   // transport layer
-
+  static std::string TransportLayerTypeToString (enum Net_TransportLayerType);
 
   // session layer (and above)
   static bool getHostname (std::string&); // return value: hostname

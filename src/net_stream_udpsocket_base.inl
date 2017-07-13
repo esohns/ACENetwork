@@ -987,20 +987,32 @@ Net_StreamUDPSocketBase_T<HandlerType,
   localSAP_out.reset ();
   remoteSAP_out.reset ();
 
+  result = inherited::peer_.get_local_addr (localSAP_out);
+  if (unlikely (result == -1))
+  {
+    error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    if (error != EBADF) // 9: Linux: socket already closed
+#endif
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+  } // end IF
   if (likely (inherited::writeOnly_))
     remoteSAP_out = inherited::address_;
   else
   {
-    result = inherited::peer_.get_local_addr (localSAP_out);
+    result = inherited::peer_.get_remote_addr (remoteSAP_out);
     if (unlikely (result == -1))
     {
       error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-      if (error != EBADF) // 9: Linux: socket already closed
+      if ((error != EBADF) &&    // 9: Linux: socket already closed
+          (error != ENOTCONN)) // 107: Linux: not connected
 #endif
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+                    ACE_TEXT ("failed to ACE_SOCK_Dgram::get_remote_addr(): \"%m\", continuing\n")));
     } // end IF
   } // end ELSE
 }
@@ -2343,20 +2355,32 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   localSAP_out.reset ();
   remoteSAP_out.reset ();
 
+  result = inherited::peer_.get_local_addr (localSAP_out);
+  if (unlikely (result == -1))
+  {
+    error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    if (error != EBADF) // 9: Linux: socket already closed
+#endif
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+  } // end IF
   if (likely (inherited::writeOnly_))
     remoteSAP_out = inherited::address_;
   else
   {
-    result = inherited::peer_.get_local_addr (localSAP_out);
+    result = inherited::peer_.get_remote_addr (remoteSAP_out);
     if (unlikely (result == -1))
     {
       error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-      if (error != EBADF) // 9: Linux: socket already closed
+      if ((error != EBADF) &&    // 9: Linux: socket already closed
+          (error != ENOTCONN)) // 107: Linux: not connected
 #endif
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_SOCK_CODgram::get_local_addr(): \"%m\", continuing\n")));
+                    ACE_TEXT ("failed to ACE_SOCK_Dgram::get_remote_addr(): \"%m\", continuing\n")));
     } // end IF
   } // end ELSE
 }

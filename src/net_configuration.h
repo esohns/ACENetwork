@@ -113,6 +113,7 @@ struct Net_UDPSocketConfiguration
 #else
    , linger (NET_SOCKET_DEFAULT_LINGER)
 #endif
+   , listenAddress ()
    , sourcePort (0)
    , writeOnly (false)
   {
@@ -139,6 +140,7 @@ struct Net_UDPSocketConfiguration
 #else
   bool          linger;
 #endif
+  ACE_INET_Addr listenAddress;
   ACE_UINT16    sourcePort;
   bool          writeOnly;
 };
@@ -151,7 +153,6 @@ struct Net_SocketHandlerConfiguration
 {
   inline Net_SocketHandlerConfiguration ()
    : connectionConfiguration (NULL)
-   , listenerConfiguration (NULL)
    , socketConfiguration (NULL)
    , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
                                  0)
@@ -161,7 +162,6 @@ struct Net_SocketHandlerConfiguration
   {};
 
   struct Net_ConnectionConfiguration* connectionConfiguration;
-  struct Net_ListenerConfiguration*   listenerConfiguration;
   struct Net_SocketConfigurationBase* socketConfiguration;
   ACE_Time_Value                      statisticReportingInterval; // [ACE_Time_Value::zero: off]
   bool                                useThreadPerConnection;

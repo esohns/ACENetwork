@@ -502,6 +502,38 @@ Net_Common_Tools::IPProtocolToString (unsigned char protocol_in)
 }
 
 std::string
+Net_Common_Tools::TransportLayerTypeToString (enum Net_TransportLayerType type_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::TransportLayerTypeToString"));
+
+  // initialize return value(s)
+  std::string result = ACE_TEXT_ALWAYS_CHAR ("NET_TRANSPORTLAYER_INVALID");
+
+  switch (type_in)
+  {
+    case NET_TRANSPORTLAYER_IP_CAST:
+      return ACE_TEXT_ALWAYS_CHAR ("IP");
+#if defined (ACE_LINUX)
+    case NET_TRANSPORTLAYER_NETLINK:
+      return ACE_TEXT_ALWAYS_CHAR ("Netlink");
+#endif
+    case NET_TRANSPORTLAYER_TCP:
+      return ACE_TEXT_ALWAYS_CHAR ("TCP");
+    case NET_TRANSPORTLAYER_UDP:
+      return ACE_TEXT_ALWAYS_CHAR ("UDP");
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown transport layer type (was: %d), aborting\n"),
+                  type_in));
+      break;
+    }
+  } // end SWITCH
+
+  return result;
+}
+
+std::string
 Net_Common_Tools::LinkLayerAddressToString (const unsigned char* const addressDataPtr_in,
                                             enum Net_LinkLayerType type_in)
 {

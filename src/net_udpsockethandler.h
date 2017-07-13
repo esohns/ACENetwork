@@ -46,7 +46,7 @@ class Net_SOCK_Dgram
  : public ACE_SOCK_Dgram
 {
  public:
-  int get_remote_addr (ACE_Addr&) const;
+  using ACE_SOCK::get_remote_addr;
 
  private:
   typedef ACE_SOCK_Dgram inherited;
