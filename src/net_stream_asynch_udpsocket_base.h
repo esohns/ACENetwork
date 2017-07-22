@@ -120,10 +120,9 @@ class Net_StreamAsynchUDPSocketBase_T
   virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
   virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 
-//  // *TODO*: handle short writes (more) gracefully...
-//  ACE_Message_Block* buffer_;
+//  // *TODO*: handle short writes (more) gracefully
+  //ACE_Message_Block* buffer_;
   StreamType         stream_;
-  bool               useThreadPerConnection_;
 
  private:
   typedef HandlerType inherited;
@@ -138,6 +137,8 @@ class Net_StreamAsynchUDPSocketBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&))
+
+  bool               notify_; // still to notify the processing stream ?
 };
 
 //////////////////////////////////////////
@@ -223,10 +224,9 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
   // helper methods
   virtual void handle_read_dgram (const ACE_Asynch_Read_Dgram::Result&); // result
 
-//  // *TODO*: handle short writes (more) gracefully...
+//  // *TODO*: handle short writes (more) gracefully
 //  ACE_Message_Block* buffer_;
   StreamType         stream_;
-  bool               useThreadPerConnection_;
 
  private:
   typedef Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>  inherited;
@@ -241,6 +241,8 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T& operator= (const Net_StreamAsynchUDPSocketBase_T&))
+
+  bool               notify_; // still to notify the processing stream ?
 };
 #endif
 

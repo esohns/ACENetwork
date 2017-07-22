@@ -57,6 +57,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
  , sendLock_ ()
  , serializeOutput_ (false)
  , stream_ ()
+ /////////////////////////////////////////
  , notify_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::Net_StreamTCPSocketBase_T"));
@@ -819,7 +820,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                                                     ACE_Event_Handler::ALL_EVENTS_MASK);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(0x%@, ALL_EVENTS_MASK): \"%m\", continuing\n"),
+                      ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(0x%@,ALL_EVENTS_MASK): \"%m\", continuing\n"),
                       this));
         //else if (result > 0)
         //  ACE_DEBUG ((LM_DEBUG,
@@ -860,18 +861,17 @@ Net_StreamTCPSocketBase_T<HandlerType,
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to HandlerType::handle_close(0x%@, %d): \"%m\", continuing\n"),
+                ACE_TEXT ("failed to HandlerType::handle_close(0x%@,%d): \"%m\", continuing\n"),
                 handle, mask_in));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to HandlerType::handle_close(%d, %d): \"%m\", continuing\n"),
+                ACE_TEXT ("failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
                 handle, mask_in));
 #endif
   } // end IF
-  inherited::set_handle (handle);
+  inherited::set_handle (handle); // used for debugging purposes only
 
   // step4: deregister with the connection manager (if any)
-  // *NOTE*: may delete 'this'
   if (likely (deregister))
     inherited2::deregister ();
 

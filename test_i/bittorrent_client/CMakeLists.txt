@@ -197,6 +197,12 @@ add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${bittorrent_client_SRCS})
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_i")
+if (NOT BUILD_TEST_I AND WIN32)
+ set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD 1)
+endif ()
+if (CMAKE_BUILD_TYPE STREQUAL Debug AND WIN32)
+ set_target_properties (${EXECUTABLE} PROPERTIES COMPILE_FLAGS "/wd4503")
+endif ()
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)
@@ -205,10 +211,6 @@ add_dependencies (${EXECUTABLE} ACEStream_Decoder)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_BitTorrent)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
-
-if (WIN32)
- set_target_properties (${EXECUTABLE} PROPERTIES COMPILE_FLAGS "/wd4503")
-endif ()
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
@@ -219,6 +221,8 @@ if (UNIX)
  target_link_libraries (${EXECUTABLE} ${FLEX_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
 elseif (WIN32)
+ set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
+
  target_link_libraries (${EXECUTABLE} ntdll.lib)
  target_link_libraries (${EXECUTABLE} ${CURSES_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${PANEL_LIBRARY})
@@ -304,7 +308,9 @@ add_executable (${EXECUTABLE_GUI}
                 EXCLUDE_FROM_ALL
                 ${bittorrent_client_gui_SRCS})
 set_property (TARGET ${EXECUTABLE_GUI} PROPERTY FOLDER "test_i")
-
+if (NOT BUILD_TEST_I AND WIN32)
+ set_target_properties (${EXECUTABLE_GUI} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD 1)
+endif ()
 if (CMAKE_BUILD_TYPE STREQUAL Debug AND WIN32)
  set_target_properties (${EXECUTABLE_GUI} PROPERTIES COMPILE_FLAGS "/wd4503")
 endif ()

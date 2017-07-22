@@ -255,6 +255,9 @@ add_executable (${EXECUTABLE}
                 ${ACENetwork_URLStreamLoad_EXE_SRCS}
                 etc/test_i.glade)
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_i")
+if (NOT BUILD_TEST_I AND WIN32)
+ set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD 1)
+endif ()
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)

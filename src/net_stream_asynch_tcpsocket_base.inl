@@ -118,10 +118,10 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   handle_manager = true;
 
   // step2: initialize/start stream
-  // step2a: connect the stream head message queue with this handler ?
-  if (likely (!inherited3::configuration_->socketHandlerConfiguration.useThreadPerConnection))
-    inherited3::configuration_->streamConfiguration->configuration_.notificationStrategy =
-        this;
+  // step2a: connect the stream head message queue with this handler; the queue
+  //         will forward outbound data to handle_output ()
+  inherited3::configuration_->streamConfiguration->configuration_.notificationStrategy =
+    this;
 
   // *TODO*: remove type inferences
   inherited3::configuration_->streamConfiguration->configuration_.sessionID =
@@ -395,7 +395,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
     inherited3::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
 
   // step0b: notify stream ?
-  if (notify_)
+  if (likely (notify_))
   {
     notify_ = false;
     stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
@@ -403,8 +403,8 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   } // end IF
 
   // step1: shut down the processing stream
-  stream_.flush (false, // do not flush inbound data
-                 false, // do not flush session messages
+  stream_.flush (false,  // do not flush inbound data
+                 false,  // do not flush session messages
                  false); // flush upstream (if any)
   stream_.wait (true,   // wait for worker(s) (if any)
                 false,  // wait for upstream (if any)
@@ -417,46 +417,13 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   // step2: invoke base-class maintenance
   result = inherited::handle_close (handle_in,
                                     mask_in);
-  if (result == -1)
-  {
-//    int error = ACE_OS::last_error ();
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//    if ((error != ENOENT)                  && // 2   : *TODO*
-//        (error != ENOMEM)                  && // 12  : [server: local close()] *TODO*: ?
-//        (error != ERROR_IO_PENDING)        && // 997 :
-//        (error != ERROR_CONNECTION_ABORTED))  // 1236: [client: local close()]
-//#else
-//    if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
-//    if ((error != ENOENT)     && // 2  : *TODO*
-//        (error != EBADF)      && // 9  : Linux [client: local close()]
-//        (error != EPIPE)      && // 32 : Linux [client: remote close()]
-//        (error != EINPROGRESS))  // 115: happens on Linux
-//#endif
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
-  } // end IF
+  if (unlikely (result == -1))
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
 
   // step3: deregister with the connection manager (if any)
-  if (inherited3::isRegistered_)
+  if (likely (inherited3::isRegistered_))
     inherited3::deregister ();
-
-  // *IMPORTANT NOTE*: the basic user-close idea is to simply cancel the open
-  //                   read operation, which would release all resources and
-  //                   close the socket asynchronously. Unfortunately (on Win32
-  //                   systems), CancelIO() does not wake up the read operation
-  //                   reliably
-  //                   --> close the socket early in close (see above)
-  //// step5: close socket handle
-  //result = ACE_OS::closesocket (handle_in);
-  //if (result == -1)
-  //{
-  //  int error = ACE_OS::last_error ();
-  //  //if (error != ENOTSOCK) // 10038: happens on Win32
-  //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
-  //              reinterpret_cast<size_t> (handle_in)));
-  //} // end IF
-  //inherited::handle (handle_in); // debugging purposes only !
 
   return result;
 }
@@ -597,7 +564,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 //  ACE_UNUSED_ARG (arg_in);
   int result = -1;
 
-  // step1: shutdown i/o streams (cancel operations), release (write) socket handle
+  // step1: cancel i/o operation(s), release (write) socket handle, ...
   ACE_HANDLE handle = inherited::handle ();
   result = inherited::handle_close (handle,
                                     ACE_Event_Handler::ALL_EVENTS_MASK);
@@ -639,7 +606,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
                   ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                   handle));
 #endif
-    inherited::handle (ACE_INVALID_HANDLE);
+    //inherited::handle (ACE_INVALID_HANDLE);
   } // end IF
 
   // *TODO*: remove type inference

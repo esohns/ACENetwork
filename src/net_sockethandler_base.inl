@@ -44,7 +44,10 @@ Net_SocketHandlerBase_T<ConfigurationType>::initialize (const ConfigurationType&
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SocketHandlerBase_T::initialize"));
 
-  //ACE_UNUSED_ARG (configuration_in);
+  if (isInitialized_)
+  {
+    isInitialized_ = false;
+  } // end IF
 
   configuration_ = &const_cast<ConfigurationType&> (configuration_in);
   isInitialized_ = true;

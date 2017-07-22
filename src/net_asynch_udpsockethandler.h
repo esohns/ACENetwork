@@ -28,6 +28,7 @@
 #include "ace/Message_Block.h"
 #include "ace/Notification_Strategy.h"
 
+#include "common_iinitialize.h"
 #include "common_referencecounter_base.h"
 
 #include "net_sockethandler_base.h"
@@ -38,11 +39,16 @@ class Stream_IAllocator;
 template <typename ConfigurationType>
 class Net_AsynchUDPSocketHandler_T
  : public Net_SocketHandlerBase_T<ConfigurationType>
+ , public Common_IReset
  , public ACE_Service_Handler
  , public ACE_Notification_Strategy
 {
  public:
   virtual ~Net_AsynchUDPSocketHandler_T ();
+
+  // implement Common_IReset
+  // *NOTE*: use this to change the target address after initialization
+  virtual void reset ();
 
   // override some handler method(s)
   virtual void open (ACE_HANDLE,          // (socket) handle
@@ -81,6 +87,7 @@ class Net_AsynchUDPSocketHandler_T
   typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
   typedef ACE_Service_Handler inherited2;
   typedef ACE_Notification_Strategy inherited3;
+  typedef Net_AsynchUDPSocketHandler_T<ConfigurationType> OWN_TYPE_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler_T (const Net_AsynchUDPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler_T& operator= (const Net_AsynchUDPSocketHandler_T&))

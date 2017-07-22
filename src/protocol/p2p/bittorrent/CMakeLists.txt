@@ -192,6 +192,7 @@ endif ()
 add_library (${PROJECT_NAME}_Protocol_BitTorrent SHARED
              ${ACENetwork_Protocol_BitTorrent_SRCS}
              ${ACENetwork_Protocol_BitTorrent_SCRIPTS})
+set_property (TARGET ${PROJECT_NAME}_Protocol_BitTorrent PROPERTY FOLDER "protocols")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${PROJECT_NAME}_Protocol_BitTorrent Common)

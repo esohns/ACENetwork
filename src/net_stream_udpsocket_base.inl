@@ -59,6 +59,8 @@ Net_StreamUDPSocketBase_T<HandlerType,
  , sendLock_ ()
  , serializeOutput_ (false)
  , stream_ ()
+ /////////////////////////////////////////
+ , notify_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::Net_StreamUDPSocketBase_T"));
 
@@ -848,12 +850,24 @@ Net_StreamUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_close"));
 
-  // sanity check(s)
-  ACE_ASSERT (inherited2::configuration_);
-
   int result = -1;
   ACE_Reactor* reactor_p = inherited::reactor ();
   ACE_ASSERT (reactor_p);
+
+  // *IMPORTANT NOTE*: when control reaches here, the socket handle has already
+  //                   gone away, i.e. no new data will be accepted by the
+  //                   kernel / forwarded by the proactor
+  //                   --> finish processing: flush all remaining outbound data
+  //                       and wait for all workers within the stream
+  //                   [--> cancel any pending asynchronous operations]
+
+  // step0: notify stream ?
+  if (notify_)
+  {
+    notify_ = false;
+    stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
+                    true);
+  } // end IF
 
   switch (mask_in)
   {
@@ -866,8 +880,19 @@ Net_StreamUDPSocketBase_T<HandlerType,
                                              //     select failed (EBADF see Select_Reactor_T.cpp) /
                                              //     user abort
     {
-      // step1: wait for all workers within the stream (if any)
-      stream_.stop (true); // <-- wait for completion
+      // sanity check(s)
+      ACE_ASSERT (inherited2::configuration_);
+
+      // step1: signal completion and wait for all processing
+      // *IMPORTANT NOTE*: when the socket closes, any dispatching threads
+      //                   currently servicing the socket handle will call
+      //                   handle_close()
+      stream_.flush (false,  // flush inbound ?
+                     false,  // flush session messages ?
+                     false); // flush upstream ?
+      stream_.wait (true,   // wait for worker(s) (if any)
+                    false,  // wait for upstream (if any)
+                    false); // wait for downstream (if any)
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
@@ -885,7 +910,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
                                                     ACE_Event_Handler::ALL_EVENTS_MASK);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(%@): \"%m\", continuing\n"),
+                      ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(0x%@,ALL_EVENTS_MASK): \"%m\", continuing\n"),
                       this));
       } // end IF
 
@@ -942,9 +967,17 @@ Net_StreamUDPSocketBase_T<HandlerType,
   result = inherited::handle_close (handle_in,
                                     mask_in);
   if (unlikely (result == -1))
-    ACE_DEBUG ((LM_DEBUG,
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HandlerType::handle_close(0x%@,%d): \"%m\", continuing\n"),
+                handle, mask_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
-                handle_in, mask_in));
+                handle, mask_in));
+#endif
+  } // end IF
   inherited::set_handle (handle); // used for debugging purposes only
 
   // step5: deregister with the connection manager (if any)
@@ -992,8 +1025,9 @@ Net_StreamUDPSocketBase_T<HandlerType,
   {
     error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if (error != ENOTSOCK) // 10038: socket already closed
 #else
-    if (error != EBADF) // 9: Linux: socket already closed
+    if (error != EBADF)    //     9: Linux: socket already closed
 #endif
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
@@ -1007,8 +1041,10 @@ Net_StreamUDPSocketBase_T<HandlerType,
     {
       error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if ((error != ENOTSOCK) && // 10038: socket already closed
+          (error != ENOTCONN))   // 10057: not connected
 #else
-      if ((error != EBADF) &&    // 9: Linux: socket already closed
+      if ((error != EBADF) &&  //   9: Linux: socket already closed
           (error != ENOTCONN)) // 107: Linux: not connected
 #endif
         ACE_DEBUG ((LM_ERROR,
@@ -1441,6 +1477,8 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
  , sendLock_ ()
  , serializeOutput_ (false)
  , stream_ ()
+ /////////////////////////////////////////
+ , notify_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::Net_StreamUDPSocketBase_T"));
 
@@ -2218,12 +2256,17 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::handle_close"));
 
-  // sanity check(s)
-  ACE_ASSERT (inherited2::configuration_);
-
   int result = -1;
   ACE_Reactor* reactor_p = inherited::reactor ();
   ACE_ASSERT (reactor_p);
+
+  // step0: notify stream ?
+  if (notify_)
+  {
+    notify_ = false;
+    stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
+                    true);
+  } // end IF
 
   switch (mask_in)
   {
@@ -2236,8 +2279,19 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                                              //     select failed (EBADF see Select_Reactor_T.cpp) /
                                              //     user abort
     {
-      // step1: wait for all workers within the stream (if any)
-      stream_.stop (true); // <-- wait for completion
+      // sanity check(s)
+      ACE_ASSERT (inherited2::configuration_);
+
+      // step1: signal completion and wait for all processing
+      // *IMPORTANT NOTE*: when the socket closes, any dispatching threads
+      //                   currently servicing the socket handle will call
+      //                   handle_close()
+      stream_.flush (false,  // flush inbound ?
+                     false,  // flush session messages ?
+                     false); // flush upstream ?
+      stream_.wait (true,   // wait for worker(s) (if any)
+                    false,  // wait for upstream (if any)
+                    false); // wait for downstream (if any)
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
@@ -2255,14 +2309,13 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                                                     ACE_Event_Handler::ALL_EVENTS_MASK);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(%@): \"%m\", continuing\n"),
+                      ACE_TEXT ("failed to ACE_Reactor::purge_pending_notifications(0x%@,ALL_EVENTS_MASK): \"%m\", continuing\n"),
                       this));
       } // end IF
 
       break;
     }
     default:
-      // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("handle_close called for unknown reasons (handle: 0x%@, mask: %u) --> check implementation !, continuing\n"),
@@ -2310,9 +2363,17 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   result = inherited::handle_close (handle_in,
                                     mask_in);
   if (unlikely (result == -1))
-    ACE_DEBUG ((LM_DEBUG,
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HandlerType::handle_close(0x%@,%d): \"%m\", continuing\n"),
+                handle, mask_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
-                handle_in, mask_in));
+                handle, mask_in));
+#endif
+  } // end IF
   inherited::set_handle (handle); // used for debugging purposes only
 
   // step5: deregister with the connection manager (if any)
@@ -2360,6 +2421,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   {
     error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if (error != ENOTSOCK) // 10038: socket already closed
 #else
     if (error != EBADF) // 9: Linux: socket already closed
 #endif
@@ -2375,8 +2437,10 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
     {
       error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if ((error != ENOTSOCK) && // 10038: socket already closed
+          (error != ENOTCONN))   // 10057: not connected
 #else
-      if ((error != EBADF) &&    // 9: Linux: socket already closed
+      if ((error != EBADF) &&  //   9: Linux: socket already closed
           (error != ENOTCONN)) // 107: Linux: not connected
 #endif
         ACE_DEBUG ((LM_ERROR,
@@ -2810,6 +2874,8 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
  , sendLock_ ()
  , serializeOutput_ (false)
  , stream_ ()
+ /////////////////////////////////////////
+ , notify_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::Net_StreamUDPSocketBase_T"));
 
@@ -3497,21 +3563,38 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 
   int result = -1;
 
-  // sanity check(s)
-  ACE_ASSERT (inherited2::configuration_);
-  ACE_ASSERT (inherited2::configuration_->streamConfiguration);
+  // step0: notify stream ?
+  if (notify_)
+  {
+    notify_ = false;
+    stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
+                    true);
+  } // end IF
 
   switch (mask_in)
   {
-    case ACE_Event_Handler::READ_MASK:       // --> socket has been closed
+    case ACE_Event_Handler::READ_MASK:       // --> socket has been closed (receive failed)
+//    case ACE_Event_Handler::ACCEPT_MASK:
+    case ACE_Event_Handler::WRITE_MASK:      // --> socket has been closed (send failed) (DevPoll)
+    case ACE_Event_Handler::EXCEPT_MASK:     // --> socket has been closed (send failed)
     case ACE_Event_Handler::ALL_EVENTS_MASK: // --> connect failed (e.g. connection refused) /
                                              //     accept failed (e.g. too many connections) /
                                              //     select failed (EBADF see Select_Reactor_T.cpp) /
-                                             //     asynch abort
+                                             //     user abort
     {
-      // step1: wait for all workers within the stream (if any)
-      if (stream_.isRunning ())
-        stream_.stop (true); // <-- wait for completion
+      // sanity check(s)
+      ACE_ASSERT (inherited2::configuration_);
+
+      // step1: signal completion and wait for all processing
+      // *IMPORTANT NOTE*: when the socket closes, any dispatching threads
+      //                   currently servicing the socket handle will call
+      //                   handle_close()
+      stream_.flush (false,  // flush inbound ?
+                     false,  // flush session messages ?
+                     false); // flush upstream ?
+      stream_.wait (true,   // wait for worker(s) (if any)
+                    false,  // wait for upstream (if any)
+                    false); // wait for downstream (if any)
 
       // step2: purge any pending notifications ?
       // *IMPORTANT NOTE*: if called from a non-reactor context, or when using a
@@ -3533,11 +3616,6 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 
       break;
     }
-    case ACE_Event_Handler::EXCEPT_MASK:
-      //if (handle_in == ACE_INVALID_HANDLE) // <-- notification has completed (!useThreadPerConnection)
-      //  ACE_DEBUG ((LM_ERROR,
-      //              ACE_TEXT ("notification completed, continuing\n")));
-      break;
     default:
       // *PORTABILITY*: this isn't entirely portable...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -3555,19 +3633,30 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   } // end SWITCH
 
   // invoke base-class maintenance
+  bool deregister = inherited2::isRegistered_;
+  // *IMPORTANT NOTE*: use get_handle() here to pass proper handle
+  //                   otherwise, this fails for the usecase "accept failed"
+  //                   (see above)
+  ACE_HANDLE handle = inherited::get_handle ();
   result = inherited::handle_close (handle_in,
                                     mask_in);
   if (unlikely (result == -1))
-    ACE_DEBUG ((LM_DEBUG,
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_NetlinkSocketHandler_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
+                handle, mask_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_NetlinkSocketHandler_T::handle_close(%d,%d): \"%m\", continuing\n"),
-                handle_in, mask_in));
+                handle, mask_in));
+#endif
+  } // end IF
+  inherited::set_handle (handle); // used for debugging purposes only
 
   // step4: deregister with the connection manager (if any)
-  inherited2::deregister ();
-
-  // step5: release a reference
-  // *IMPORTANT NOTE*: may 'delete this'
-  this->decrease ();
+  if (likely (deregister))
+    inherited2::deregister ();
 
   return result;
 }

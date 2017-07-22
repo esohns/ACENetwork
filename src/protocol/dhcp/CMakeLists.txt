@@ -98,6 +98,7 @@ endif ()
 add_library (${PROJECT_NAME}_Protocol_DHCP SHARED
              ${ACENetwork_Protocol_DHCP_SRCS}
              ${ACENetwork_Protocol_DCHP_SCRIPTS})
+set_property (TARGET ${PROJECT_NAME}_Protocol_DHCP PROPERTY FOLDER "protocols")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${PROJECT_NAME}_Protocol_DHCP Common)

@@ -189,6 +189,9 @@ add_executable (${EXECUTABLE}
                 ${IRC_client_SRCS}
                 ${IRC_client_INI})
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_i")
+if (NOT BUILD_TEST_I AND WIN32)
+ set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD 1)
+endif ()
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)
@@ -316,6 +319,9 @@ add_executable (${EXECUTABLE_GUI}
                 etc/IRC_client_connection.glade
                 etc/IRC_client_main.glade)
 set_property (TARGET ${EXECUTABLE_GUI} PROPERTY FOLDER "test_i")
+if (NOT BUILD_TEST_I AND WIN32)
+ set_target_properties (${EXECUTABLE_GUI} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD 1)
+endif ()
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE_GUI} Common)

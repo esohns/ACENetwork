@@ -57,7 +57,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
  : inherited4 (interfaceHandle_in,
                statisticCollectionInterval_in)
  , stream_ ()
- , useThreadPerConnection_ (false)
+ /////////////////////////////////////////
+ , notify_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::Net_StreamAsynchUDPSocketBase_T"));
 
@@ -189,7 +190,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     goto error;
   } // end IF
   // step2b: tweak socket, initialize I/O
-  inherited::open (inherited::handle (), messageBlock_in);
+  inherited::open (inherited2::get_handle (),
+                   messageBlock_in);
 
   // step5: register with the connection manager (if any)
 #if defined (__GNUG__)
@@ -206,13 +208,10 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   handle_manager = true;
 
   // step3: initialize/start stream
-  useThreadPerConnection_ =
-    inherited4::configuration_->socketHandlerConfiguration.useThreadPerConnection;
-
-  // step3a: connect stream head message queue with a notification pipe/queue ?
-  if (!useThreadPerConnection_)
-    inherited4::configuration_->streamConfiguration->configuration_.notificationStrategy =
-      this;
+  // step3a: connect the stream head message queue with this handler; the queue
+  //         will forward outbound data to handle_output ()
+  inherited4::configuration_->streamConfiguration->configuration_.notificationStrategy =
+    this;
 
   // step3d: initialize stream
   // *TODO*: this clearly is a design glitch
@@ -266,7 +265,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       ACE_ASSERT (proactor_p);
       ACE_Asynch_Read_Dgram_Result_Impl* fake_result_p =
         proactor_p->create_asynch_read_dgram_result (inherited::proxy (),                  // handler proxy
-                                                     inherited::handle (),                 // socket handle
+                                                     inherited2::get_handle (),            // socket handle
                                                      message_block_p,                      // buffer
                                                      message_block_p->size (),             // #bytes to read
                                                      0,                                    // flags
@@ -316,7 +315,7 @@ error:
 
   if (handle_socket)
   {
-    result = inherited::handle_close (inherited::handle (),
+    result = inherited::handle_close (inherited2::get_handle (),
                                       ACE_Event_Handler::ALL_EVENTS_MASK);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
@@ -366,7 +365,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
   //                   been notified
   result = stream_p->get (message_block_p, NULL);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Stream::get(): \"%m\", aborting\n")));
@@ -383,7 +382,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     if (length > inherited::PDUSize_)
     {
       ACE_Message_Block* message_block_3 = message_block_2->duplicate ();
-      if (!message_block_3)
+      if (unlikely (!message_block_3))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
@@ -436,11 +435,12 @@ send:
                                      NULL,                                 // ACT
                                      0,                                    // priority
                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
-    if (result_2 == -1)
+    if (unlikely (result_2 == -1))
     {
       int error = ACE_OS::last_error ();
       // *WARNING*: this could fail on multi-threaded proactors
-      if (error == EAGAIN) goto send; // 11: happens on Linux
+      if (error == EAGAIN)
+        goto send; // 11: happens on Linux
 
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::send(%u): \"%m\", aborting\n"),
@@ -453,6 +453,10 @@ send:
 
       return -1;
     } // end IF
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("sent %u byte(s) to %s\n"),
+                bytes_sent,
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::address_).c_str ())));
     message_block_p = message_block_2;
   } while (message_block_p);
 
@@ -488,47 +492,45 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   ACE_UNUSED_ARG (handle_in);
 
-  // step1: wait for all workers within the stream (if any)
-  stream_.stop (true,  // <-- wait for completion
-                true); // locked access ?
-
-  // step2: purge any pending notifications ?
-  // *WARNING: do this here, while still holding on to the current write buffer
   int result = -1;
-  if (likely (!useThreadPerConnection_))
+
+  // *IMPORTANT NOTE*: when control reaches here, the socket handle has already
+  //                   gone away, i.e. no new data will be accepted by the
+  //                   kernel / forwarded by the proactor
+  //                   --> finish processing: flush all remaining outbound data
+  //                       and wait for all workers within the stream
+  //                   [--> cancel any pending asynchronous operations]
+
+  // step0b: notify stream ?
+  if (likely (notify_))
   {
-    Stream_Iterator_t iterator (stream_);
-    const Stream_Module_t* module_p = NULL;
-    result = iterator.next (module_p);
-    if (unlikely (result == 1))
-    {
-      ACE_ASSERT (module_p);
-      Stream_Task_t* task_p =
-          const_cast<Stream_Module_t*> (module_p)->writer ();
-      ACE_ASSERT (task_p);
-      result = task_p->flush (ACE_Task_Flags::ACE_FLUSHALL);
-      if (result == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_MessageQueue::flush(): \"%m\", continuing\n")));
-      if (result > 0)
-        ACE_DEBUG ((LM_WARNING,
-                    ACE_TEXT ("flushed %d messages...\n")));
-    } // end IF
+    notify_ = false;
+    stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
+                    true);
   } // end IF
 
-  // step3: invoke base-class maintenance ?
+  // step1: shut down the processing stream
+  stream_.flush (false,  // do not flush inbound data
+                 false,  // do not flush session messages
+                 false); // flush upstream (if any)
+  stream_.wait (true,   // wait for worker(s) (if any)
+                false,  // wait for upstream (if any)
+                false); // wait for downstream (if any)
+
+  // *NOTE*: pending socket operations are notified by the kernel and will
+  //         return automatically
+  // *TODO*: consider cancel()ling any pending write operations
+
+  // step2: invoke base-class maintenance
   // *NOTE*: if the connection has been close()d locally, the socket is already
   //         closed at this point
-  if (unlikely (inherited4::state_.status != NET_CONNECTION_STATUS_CLOSED))
-  {
-    result = inherited::handle_close (inherited::handle (),
-                                      mask_in);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to SocketHandlerType::handle_close(): \"%m\", continuing\n")));
-  } // end IF
+  result = inherited::handle_close (inherited::handle (),
+                                    mask_in);
+  if (unlikely (result == -1))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
 
-  // step4: deregister with the connection manager (if any)
+  // step3: deregister with the connection manager (if any)
   if (likely (inherited4::isRegistered_))
     inherited4::deregister ();
 
@@ -575,8 +577,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   {
     error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if (error != ENOTSOCK) // 10038: Win32: handle is not a socket (i.e. socket already closed)
 #else
-    if (error != EBADF) // 9: Linux: socket already closed
+    if (error != EBADF)    //     9: Linux: socket already closed
 #endif
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
@@ -590,8 +593,10 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     {
       error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if ((error != ENOTSOCK) && // 10038: Win32: socket already closed
+          (error != ENOTCONN))   // 10057: Win32: not connected
 #else
-      if ((error != EBADF) &&    // 9: Linux: socket already closed
+      if ((error != EBADF) &&  //   9: Linux: socket already closed
           (error != ENOTCONN)) // 107: Linux: not connected
 #endif
         ACE_DEBUG ((LM_ERROR,
@@ -716,7 +721,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     if (result == -1)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to SocketType::close(%u): \"%m\", continuing\n"),
+                  ACE_TEXT ("failed to SocketType::close(0x%@): \"%m\", continuing\n"),
                   reinterpret_cast<size_t> (handle)));
 #else
       ACE_DEBUG ((LM_ERROR,
@@ -756,14 +761,21 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::waitForCompletion"));
 
+  // *WARNING*: this assumes that no new data will be dispatched to the stream
+  //            in the meantime (i.e. make sure the stream has been stop()ped,
+  //            or this will:
+  //            - {waitForThreads_in && stream thread count > 0}: block
+  //            - otherwise: wait for the next idle period)
+
   // step1: wait for the stream to flush
-  //        --> all data has been dispatched (here: to the proactor/kernel)
   stream_.wait (waitForThreads_in,
                 false,             // don't wait for upstream modules
                 false);            // don't wait for downstream modules
+  // --> all data has been dispatched (here: to the proactor/kernel)
 
-  // step2: wait for the asynchronous operations to complete
+  // step2: wait for any scheduled asynchronous operations to complete
   inherited::counter_.wait (0);
+  // --> all data has been sent
 }
 
 template <typename HandlerType,
@@ -1009,7 +1021,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   } // end SWITCH
 
   // clean up
-  result_in.message_block ()->release ();
+  ACE_Message_Block* message_block_p = result_in.message_block ();
+  if (message_block_p)
+    message_block_p->release ();
 
   result = handle_close (inherited::handle (),
                          ACE_Event_Handler::ALL_EVENTS_MASK);
@@ -1077,10 +1091,9 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                                                                                   const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited4 (interfaceHandle_in,
                statisticCollectionInterval_in)
-// , buffer_ (NULL)
- //, userData_ ()
  , stream_ ()
- , useThreadPerConnection_ (false)
+ /////////////////////////////////////////
+ , notify_ (true)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::Net_StreamAsynchUDPSocketBase_T"));
 
@@ -1186,12 +1199,10 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   inherited::open (inherited2::get_handle (), messageBlock_in);
 
   // step3: initialize/start stream
-  useThreadPerConnection_ =
-    inherited4::configuration_->streamConfiguration->useThreadPerConnection;
-  // step3a: connect stream head message queue with a notification pipe/queue ?
-  if (!useThreadPerConnection_)
-    inherited4::configuration_->streamConfiguration->notificationStrategy =
-        this;
+  // step3a: connect the stream head message queue with this handler; the queue
+  //         will forward outbound data to handle_output ()
+  inherited4::configuration_->streamConfiguration->configuration_.notificationStrategy =
+    this;
 
   // *TODO*: this clearly is a design glitch
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1393,23 +1404,19 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   if (stream_.isRunning ())
     stream_.stop (true); // <-- wait for completion
 
-  // step2: purge any pending notifications ?
-  // *WARNING: do this here, while still holding on to the current write buffer
-  if (likely (!useThreadPerConnection_))
+  // step2: purge any pending data
+  Stream_Iterator_t iterator (stream_);
+  const Stream_Module_t* module_p = NULL;
+  result = iterator.next (module_p);
+  if (unlikely (result == 1))
   {
-    Stream_Iterator_t iterator (stream_);
-    const Stream_Module_t* module_p = NULL;
-    result = iterator.next (module_p);
-    if (unlikely (result == 1))
-    {
-      ACE_ASSERT (module_p);
-      Stream_Task_t* task_p =
-          const_cast<Stream_Module_t*> (module_p)->writer ();
-      ACE_ASSERT (task_p);
-      if (task_p->msg_queue ()->flush () == -1)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_MessageQueue::flush(): \"%m\", continuing\n")));
-    } // end IF
+    ACE_ASSERT (module_p);
+    Stream_Task_t* task_p =
+        const_cast<Stream_Module_t*> (module_p)->writer ();
+    ACE_ASSERT (task_p);
+    if (task_p->msg_queue ()->flush () == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_MessageQueue::flush(): \"%m\", continuing\n")));
   } // end IF
 
   // step3: invoke base-class maintenance

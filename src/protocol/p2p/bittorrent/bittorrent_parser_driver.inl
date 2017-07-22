@@ -226,7 +226,7 @@ BitTorrent_ParserDriver_T<MessageType,
   if (inherited::useYYScanBuffer_)
     result_p =
       BitTorrent_Scanner__scan_buffer (buffer_in,
-                                       size_in + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE,
+                                       size_in + NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
                                        state_in);
   else
     result_p = BitTorrent_Scanner__scan_bytes (buffer_in,

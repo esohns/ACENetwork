@@ -24,6 +24,12 @@
 #include <map>
 #include <string>
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include <cguid.h>
+#include <guiddef.h>
+#include <wlanapi.h>
+#endif
+
 #include "ace/Basic_Types.h"
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
@@ -34,8 +40,9 @@
 #include "net_iconnectionmanager.h"
 
 // forward declarations
-struct Net_UserData;
 class Stream_IAllocator;
+struct Net_ConnectionConfiguration;
+struct Net_UserData;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct Net_ConnectionConfiguration,
                                  struct Net_ConnectionState,
@@ -217,6 +224,38 @@ struct Net_SessionConfiguration
 
   struct Common_ParserConfiguration* parserConfiguration;
   bool                               useReactor;
+};
+
+//////////////////////////////////////////
+
+struct Net_WLANMonitorConfiguration
+{
+  inline Net_WLANMonitorConfiguration ()
+   : autoAssociate (false)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+   , deviceIdentifier (GUID_NULL)
+   , enableBackgroundScans (NET_WLANMONITOR_DEFAULT_BACKGROUNDSCANS)
+   , enableStreamingMode (NET_WLANMONITOR_DEFAULT_STREAMINGMODE)
+   , notificationCB (NULL)
+   , notificationCBData (NULL)
+#else
+   , deviceIdentifier ()
+#endif
+   , SSID ()
+  {};
+  inline virtual ~Net_WLANMonitorConfiguration () {};
+
+  bool                       autoAssociate;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _GUID               deviceIdentifier;
+  BOOL                       enableBackgroundScans;
+  BOOL                       enableStreamingMode;
+  WLAN_NOTIFICATION_CALLBACK notificationCB;
+  PVOID                      notificationCBData;
+#else
+  std::string                deviceIdentifier;
+#endif
+  std::string                SSID;
 };
 
 #endif

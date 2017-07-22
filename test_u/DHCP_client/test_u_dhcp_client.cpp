@@ -586,8 +586,6 @@ do_work (bool requestBroadcastReplies_in,
     useLoopback_in;
   connection_configuration.socketHandlerConfiguration.socketConfiguration_2.writeOnly =
     true;
-  connection_configuration.socketHandlerConfiguration.listenerConfiguration =
-    &configuration.listenerConfiguration;
   connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
   connection_configuration.socketHandlerConfiguration.userData =

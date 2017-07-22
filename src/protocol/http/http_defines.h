@@ -36,7 +36,7 @@
 //             prepared for usage by flex: buffers need two trailing '\0's
 //             BEYOND their datas' tail byte (i.e. at positions length() + 1 and
 //             length() + 2)
-#define HTTP_DEFAULT_USE_YY_SCAN_BUFFER           true
+//#define HTTP_DEFAULT_USE_YY_SCAN_BUFFER           true
 
 #define HTTP_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds: 0 --> OFF
 

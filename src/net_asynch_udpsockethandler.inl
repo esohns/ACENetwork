@@ -63,6 +63,31 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::~Net_AsynchUDPSocketHandler_T (
 
 template <typename ConfigurationType>
 void
+Net_AsynchUDPSocketHandler_T<ConfigurationType>::reset ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::reset"));
+
+  ACE_Message_Block message_block;
+
+  int result = OWN_TYPE_T::handle_close (inherited2::handle (),
+                                         ACE_Event_Handler::SIGNAL_MASK);
+  if (result == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(0x%@): \"%m\", continuing\n"),
+                  inherited2::handle ()));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(%d): \"%m\", continuing\n"),
+                  inherited2::handle ()));
+#endif
+
+  OWN_TYPE_T::open (inherited2::handle (),
+                    message_block);
+}
+
+template <typename ConfigurationType>
+void
 Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
                                                        ACE_Message_Block& messageBlock_in)
 {
@@ -283,12 +308,12 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 //  unsigned int so_max_msg_size = Net_Common_Tools::getMaxMsgSize (handle);
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("maximum message size for UDP socket 0x%@: %u byte(s)...\n"),
+//              ACE_TEXT ("maximum message size for UDP socket 0x%@: %u byte(s)\n"),
 //              handle,
 //              so_max_msg_size));
 //#else
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("maximum message size for UDP socket %d: %u byte(s)...\n"),
+//              ACE_TEXT ("maximum message size for UDP socket %d: %u byte(s)\n"),
 //              handle,
 //              so_max_msg_size));
 //#endif
@@ -322,6 +347,8 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
 
   // *BUG*: Posix_Proactor.cpp:1575 should read:
   //        int rc = ::aio_cancel (result->handle_, result);
+  // *BUG*: WIN32_Asynch_IO.cpp:178 should read:
+  //        int const result = (int) ::CancelIoEx (this->handle_, NULL);
   if (!writeOnly_)
   {
     result = inputStream_.cancel ();
@@ -329,7 +356,8 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
     {
       int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if (error != ERROR_IO_PENDING) // 997: happens on Win32
+      if ((error != ERROR_INVALID_ACCESS) && //  12: operation was triggered from a different thread
+          (error != ERROR_IO_PENDING))       // 997: 
 #endif
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%m\" (errno was: %d), continuing\n"),
@@ -343,7 +371,8 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
   {
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (error != ERROR_IO_PENDING) // 997: happens on Win32
+    if ((error != ERROR_INVALID_ACCESS) && //  12: operation was triggered from a different thread
+        (error != ERROR_IO_PENDING))       // 997: 
 #endif
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(): \"%m\" (errno was: %d), continuing\n"),
@@ -406,19 +435,18 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::notify (void)
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::notify"));
 
   int result = -1;
-  ACE_HANDLE handle = inherited2::handle ();
 
   try {
-    result = handle_output (handle);
+    result = handle_output (inherited2::handle ());
   } catch (...) {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_AsynchUDPSocketHandler_T::handle_output(0x%@): \"%m\", continuing\n"),
-                handle));
+                inherited2::handle ()));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_AsynchUDPSocketHandler_T::handle_output(%d): \"%m\", continuing\n"),
-                handle));
+                inherited2::handle ()));
 #endif
     result = -1;
   }
@@ -427,26 +455,26 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::notify (void)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_output(0x%@): \"%m\", continuing\n"),
-                handle));
+                inherited2::handle ()));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_output(%d): \"%m\", continuing\n"),
-                handle));
+                inherited2::handle ()));
 #endif
 
-    int result_2 = handle_close (handle,
+    int result_2 = handle_close (inherited2::handle (),
                                  ACE_Event_Handler::ALL_EVENTS_MASK);
     if (result_2 == -1)
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
-                  handle,
+                  inherited2::handle (),
                   ACE_Event_Handler::ALL_EVENTS_MASK));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(%d,%d): \"%m\", continuing\n"),
-                  handle,
+                  inherited2::handle (),
                   ACE_Event_Handler::ALL_EVENTS_MASK));
 #endif
     } // end IF
@@ -540,15 +568,14 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::handle_write_dgram (const ACE_A
   ACE_Message_Block* message_block_p = result_in.message_block ();
 
   // sanity check
-  //ACE_ASSERT (message_block_p == buffer_);
   if (result_in.success () == 0)
   {
     // connection closed/reset (by peer) ? --> not an error
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ECONNRESET) &&
-        (error != EPIPE)      &&
-        (error != ERROR_INVALID_NETNAME))   // 1214: happens on Win32 (local socket)
-        //(error != ERROR_INVALID_USER_BUFFER)) // 1784: happens on Win32 (invalid buffer)
+    if ((error != EPIPE)                 &&     // 32
+        (error != ERROR_INVALID_NETNAME) &&     // 1214
+        //(error != ERROR_INVALID_USER_BUFFER) && // 1784
+        (error != ECONNRESET))                  // 10054
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: 0x%@): \"%s\", aborting\n"),
                   result_in.handle (),

@@ -45,9 +45,9 @@ class HTTP_ParserDriver_T
  : public HTTP_IParser
 {
  public:
-  HTTP_ParserDriver_T (const std::string&,                      // scanner tables file (if any)
-                       bool = NET_PROTOCOL_DEFAULT_LEX_TRACE,   // debug scanning ?
-                       bool = NET_PROTOCOL_DEFAULT_YACC_TRACE); // debug parsing ?
+  HTTP_ParserDriver_T (const std::string&,                             // scanner tables file (if any)
+                       bool = NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE,   // debug scanning ?
+                       bool = NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE); // debug parsing ?
   virtual ~HTTP_ParserDriver_T ();
 
   // implement (part of) HTTP_IParser

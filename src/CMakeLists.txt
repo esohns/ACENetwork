@@ -135,6 +135,7 @@ set (${PROJECT_NAME}_LIB_SRCS
      net_ipconnection.cpp
      net_ipconnection.h
      net_itransportlayer.h
+     net_iwlanmonitor.h
      net_macros.h
      net_module_sockethandler.cpp
      net_module_sockethandler.h
@@ -199,7 +200,13 @@ set (${PROJECT_NAME}_LIB_SRCS
      net_udpconnection_base.inl
      net_udpsockethandler.cpp
      net_udpsockethandler.h
-     net_udpsockethandler.inl)
+     net_udpsockethandler.inl
+     net_wlaninetmonitor.cpp
+     net_wlaninetmonitor.h
+     net_wlaninetmonitor.inl
+     net_wlanmonitor.cpp
+     net_wlanmonitor.h
+     net_wlanmonitor.inl)
 
 if (WIN32)
  add_definitions (-DWIN32)
@@ -261,6 +268,7 @@ install (FILES
          net_iparser.h
          net_ipconnection.h
          net_itransportlayer.h
+         net_iwlanmonitor.h
          net_macros.h
          net_module_sockethandler.h
          net_module_sockethandler.inl
@@ -303,6 +311,10 @@ install (FILES
          net_udpconnection_base.inl
          net_udpsockethandler.h
          net_udpsockethandler.inl
+         net_wlaninetmonitor.h
+         net_wlaninetmonitor.inl
+         net_wlanmonitor.h
+         net_wlanmonitor.inl
          DESTINATION include)
 install (TARGETS ${PROJECT_NAME}
          EXPORT ${PROJECT_NAME}Targets

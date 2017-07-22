@@ -87,16 +87,27 @@ class Net_Common_Tools
                                      unsigned char[]);   // return value: MAC address
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  static std::string interfaceToString (REFGUID); // interface adapter GUID
-  static bool associateWithWLAN (REFGUID,            // interface adapter GUID
+  static std::string associatedSSID (HANDLE,   // WLAN API client handle
+                                     REFGUID); // interface identifier
+  static std::string interfaceToString (HANDLE,   // WLAN API client handle
+                                        REFGUID); // interface identifier
+  static bool getDeviceSettingBool (HANDLE,   // WLAN API client handle
+                                    REFGUID, // interface identifier
+                                    enum _WLAN_INTF_OPCODE); // code
+  static bool setDeviceSettingBool (HANDLE,                 // WLAN API client handle
+                                    REFGUID,                // interface identifier
+                                    enum _WLAN_INTF_OPCODE, // code
+                                    bool);                  // enable ? : disable
+  //static bool associateWithWLAN (REFGUID,            // interface identifier
 #else
   static bool interfaceIsWireless (const std::string&); // interface identifier
-  static bool associateWithWLAN (const std::string&, // interface adapter
+  static std::string associatedSSID (const std::string&); // interface identifier
+  //static bool associateWithWLAN (const std::string&, // interface adapter
 #endif
-                                 const std::string&, // SSID
-                                 ACE_INET_Addr&,     // return value: peer SAP
-                                 ACE_INET_Addr&,     // return value: local SAP
-                                 bool = true);       // scan for networks ?
+                                 //const std::string&, // SSID
+                                 //ACE_INET_Addr&,     // return value: peer SAP
+                                 //ACE_INET_Addr&,     // return value: local SAP
+                                 //bool = true);       // scan for networks ?
 
   // network layer
   static bool getAddress (std::string&,  // host name
@@ -106,9 +117,9 @@ class Net_Common_Tools
   //         behind a (NATted-) gateway)
   static bool interfaceToExternalIPAddress (const std::string&, // interface identifier
                                             ACE_INET_Addr&);    // return value: external IP address
-  // *NOTE*: on Win32 systems, specify the 'AdapterName', not 'FriendlyName'
-  //         --> use Common_Tools::GUIDToString()
-  static bool interfaceToIPAddress (const std::string&, // interface identifier
+  // *NOTE*: on Win32 systems, specify the 'AdapterName' (not 'FriendlyName')
+  //         --> i.e. use Common_Tools::GUIDToString() on the device identifier
+  static bool interfaceToIPAddress (const std::string&, // device identifier
                                     ACE_INET_Addr&,     // return value: (first) IP address
                                     ACE_INET_Addr&);    // return value: (first) gateway IP address
   static bool IPAddressToInterface (const ACE_INET_Addr&, // IP address
@@ -175,8 +186,12 @@ class Net_Common_Tools
                          bool,                                                          // on ? : off
                          unsigned short = std::numeric_limits<unsigned short>::max ()); // seconds {0     --> send RST on close,
                                                                                         //          65535 --> reuse default/current value}
-  static bool setReuseAddress (ACE_HANDLE,    // socket handle
-                               bool = false); // (try to) set SO_REUSEPORT as well ?
+  static bool setReuseAddress (ACE_HANDLE    // socket handle
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                              );
+#else
+                               , bool = false); // (try to) set SO_REUSEPORT as well ?
+#endif
 
 #if defined (ACE_LINUX)
   static bool enableErrorQueue (ACE_HANDLE); // socket handle

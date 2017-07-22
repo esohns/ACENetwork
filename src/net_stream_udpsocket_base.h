@@ -166,6 +166,8 @@ class Net_StreamUDPSocketBase_T
   Net_StreamUDPSocketBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T& operator= (const Net_StreamUDPSocketBase_T&))
+
+  bool               notify_; // still to notify the processing stream ?
 };
 
 //////////////////////////////////////////
@@ -304,6 +306,8 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   Net_StreamUDPSocketBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T& operator= (const Net_StreamUDPSocketBase_T&))
+
+  bool               notify_; // still to notify the processing stream ?
 };
 
 //////////////////////////////////////////
@@ -440,6 +444,8 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
   Net_StreamUDPSocketBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T& operator= (const Net_StreamUDPSocketBase_T&))
+
+  bool               notify_; // still to notify the processing stream ?
 };
 #endif
 

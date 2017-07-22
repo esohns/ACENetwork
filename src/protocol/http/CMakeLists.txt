@@ -115,6 +115,7 @@ endif ()
 add_library (${PROJECT_NAME}_Protocol_HTTP SHARED
              ${ACENetwork_Protocol_HTTP_SRCS}
              ${ACENetwork_Protocol_HTTP_SCRIPTS})
+set_property (TARGET ${PROJECT_NAME}_Protocol_HTTP PROPERTY FOLDER "protocols")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${PROJECT_NAME}_Protocol_HTTP Common)

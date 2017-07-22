@@ -165,6 +165,9 @@ add_executable (${EXECUTABLE_SOURCE}
                 ${client_SRCS}
                 etc/net_client.glade)
 set_property (TARGET ${EXECUTABLE_SOURCE} PROPERTY FOLDER "test_u")
+if (NOT BUILD_TEST_U AND WIN32)
+ set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD 1)
+endif ()
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE_SOURCE} Common)
@@ -258,6 +261,9 @@ add_executable (${EXECUTABLE_TARGET}
                 ${server_SRCS}
                 etc/net_server.glade)
 set_property (TARGET ${EXECUTABLE_TARGET} PROPERTY FOLDER "test_u")
+if (NOT BUILD_TEST_U AND WIN32)
+ set_target_properties (${EXECUTABLE_TARGET} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD 1)
+endif ()
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE_TARGET} Common)

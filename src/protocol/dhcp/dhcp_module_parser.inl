@@ -45,8 +45,8 @@ DHCP_Module_Parser_T<ACE_SYNCH_USE,
                      SessionMessageType>::DHCP_Module_Parser_T (typename inherited::ISTREAM_T* stream_in)
 #endif
  : inherited (stream_in)
- , driver_ (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
-            NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
+ , driver_ (NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
+            NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
  , isDriverInitialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Parser_T::DHCP_Module_Parser_T"));
@@ -131,7 +131,7 @@ DHCP_Module_Parser_T<ACE_SYNCH_USE,
 
   // append the "\0\0"-sequence, as required by flex
   ACE_ASSERT ((message_inout->capacity () -
-               message_inout->length ()) >= NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE);
+               message_inout->length ()) >= NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
@@ -244,8 +244,8 @@ DHCP_Module_ParserH_T<ACE_SYNCH_USE,
               autoStart_in,
               STREAM_HEADMODULECONCURRENCY_PASSIVE,
               generateSessionMessages_in)
- , driver_ (NET_PROTOCOL_DEFAULT_LEX_TRACE,  // trace scanning ?
-            NET_PROTOCOL_DEFAULT_YACC_TRACE) // trace parsing ?
+ , driver_ (NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
+            NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
  , isDriverInitialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_ParserH_T::DHCP_Module_ParserH_T"));
@@ -367,7 +367,7 @@ DHCP_Module_ParserH_T<ACE_SYNCH_USE,
 
   // append the "\0\0"-sequence, as required by flex
   ACE_ASSERT ((message_inout->capacity () -
-               message_inout->length ()) >= NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE);
+               message_inout->length ()) >= NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was

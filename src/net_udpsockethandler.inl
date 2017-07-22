@@ -107,7 +107,7 @@ Net_UDPSocketHandler_T<SocketType,
 #endif
   ACE_INET_Addr inet_address =
       (writeOnly_ ? (socket_configuration_p->sourcePort ? ACE_INET_Addr (static_cast<u_short> (socket_configuration_p->sourcePort),
-                                                                         static_cast<ACE_UINT32> (INADDR_ANY))
+                                                                         static_cast<ACE_UINT32> (socket_configuration_p->address.get_ip_address ()))
                                                         : ACE_sap_any_cast (const ACE_INET_Addr&))
                   : socket_configuration_p->listenAddress);
   result = inherited2::peer_.open (inet_address,             // SAP

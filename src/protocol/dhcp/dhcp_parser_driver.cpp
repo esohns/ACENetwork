@@ -46,7 +46,7 @@ DHCP_ParserDriver::DHCP_ParserDriver (bool traceScanning_in,
  , scannerState_ (NULL)
  , bufferState_ (NULL)
  , messageQueue_ (NULL)
- , useYYScanBuffer_ (DHCP_DEFAULT_USE_YY_SCAN_BUFFER)
+ , useYYScanBuffer_ (NET_PROTOCOL_PARSER_FLEX_USE_YY_SCAN_BUFFER)
  , initialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_ParserDriver::DHCP_ParserDriver"));
@@ -90,7 +90,7 @@ DHCP_ParserDriver::initialize (const struct Common_ParserConfiguration& configur
     record_ = NULL;
 
     configuration_ = NULL;
-    trace_ = NET_PROTOCOL_DEFAULT_YACC_TRACE;
+    trace_ = NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE;
 
     if (bufferState_)
     {
@@ -100,7 +100,7 @@ DHCP_ParserDriver::initialize (const struct Common_ParserConfiguration& configur
     } // end IF
 
     messageQueue_ = NULL;
-    useYYScanBuffer_ = DHCP_DEFAULT_USE_YY_SCAN_BUFFER;
+    useYYScanBuffer_ = NET_PROTOCOL_PARSER_FLEX_USE_YY_SCAN_BUFFER;
 
     initialized_ = false;
   } // end IF
@@ -330,7 +330,7 @@ DHCP_ParserDriver::scan_begin ()
   {
     bufferState_ =
       DHCP_Scanner__scan_buffer (fragment_->rd_ptr (),
-                                 fragment_->length () + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE,
+                                 fragment_->length () + NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
                                  scannerState_);
   } // end IF
   else
