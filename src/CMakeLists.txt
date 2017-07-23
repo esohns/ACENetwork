@@ -45,6 +45,7 @@ add_definitions (-DACE_HAS_DLL)
 include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
 if (UNIX)
+ pkg_check_modules (PKG_DBUS REQUIRED dbus-1 network-manager-dev)
  pkg_check_modules (PKG_SSL REQUIRED libssl)
 endif ()
 
@@ -81,6 +82,7 @@ add_definitions (-DHAVE_CONFIG_H)
 if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE)
 
+ include_directories (${PKG_DBUS_INCLUDE_DIRS})
  include_directories (${PKG_SSL_INCLUDE_DIRS})
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src)

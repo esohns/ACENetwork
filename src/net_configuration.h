@@ -28,6 +28,8 @@
 #include <cguid.h>
 #include <guiddef.h>
 #include <wlanapi.h>
+#else
+#include <dbus/dbus.h>
 #endif
 
 #include "ace/Basic_Types.h"
@@ -254,6 +256,8 @@ struct Net_WLANMonitorConfiguration
   PVOID                      notificationCBData;
 #else
   std::string                deviceIdentifier;
+  DBusHandleMessageFunction  notificationCB;
+  void*                      notificationCBData;
 #endif
   std::string                SSID;
 };

@@ -29,6 +29,9 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <guiddef.h>
 #include <wlanapi.h>
+#else
+#include <dbus/dbus.h>
+//#include <dbus/dbus-glib.h>
 #endif
 
 #include "ace/Global_Macros.h"
@@ -44,7 +47,16 @@
 
 // forward declarations
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-void WINAPI network_wlan_default_notification_cb (PWLAN_NOTIFICATION_DATA, PVOID);
+void WINAPI
+network_wlan_default_notification_cb (PWLAN_NOTIFICATION_DATA,
+                                      PVOID);
+#else
+void
+network_wlan_dbus_main_wakeup_cb (void*);
+DBusHandlerResult
+network_wlan_dbus_default_filter_cb (struct DBusConnection*,
+                                     struct DBusMessage*,
+                                     void*);
 #endif
 
 template <ACE_SYNCH_DECL,
@@ -58,7 +70,6 @@ class Net_WLANMonitor_T
                             TimePolicyType>
  , public Net_IWLANMonitor_T<AddressType,
                              ConfigurationType>
- , public Net_IWLANCB
 {
   // singleton has access to the ctor/dtors
   friend class ACE_Singleton<Net_WLANMonitor_T<ACE_SYNCH_USE,
@@ -90,6 +101,8 @@ class Net_WLANMonitor_T
   virtual void unsubscribe (Net_IWLANCB*); // existing subscriber
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   inline virtual const HANDLE get_2 () const { return clientHandle_; };
+#else
+  inline virtual const struct DBusConnection* const get_2 () const { return connection_; };
 #endif
   inline virtual bool addresses (AddressType& localSAP_out,                                                                          // return value: local SAP
                                  AddressType& peerSAP_out) const { localSAP_out = localSAP_; peerSAP_out = peerSAP_; return true; }; // return value: peer SAP
@@ -99,6 +112,10 @@ class Net_WLANMonitor_T
   virtual bool associate (const std::string&,  // device identifier
 #endif
                           const std::string&); // SSID
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+//  inline virtual std::string devicePath () const { return deviceDBusPath_; };
+#endif
   virtual std::string SSID () const;
 
  protected:
@@ -115,6 +132,10 @@ class Net_WLANMonitor_T
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HANDLE                                  clientHandle_;
+#else
+  struct DBusConnection*                  connection_;
+//  struct DBusGProxy*                      proxy_;
+  std::string                             deviceDBusPath_;
 #endif
   ConfigurationType*                      configuration_;
   bool                                    isActive_;
@@ -168,6 +189,12 @@ class Net_WLANMonitor_T
   virtual void onScanComplete (REFGUID);            // device identifier
 #else
   virtual void onScanComplete (const std::string&); // device identifier
+#endif
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  // override some ACE_Task_Base methods
+  virtual int svc (void);
 #endif
 
   // helper functions

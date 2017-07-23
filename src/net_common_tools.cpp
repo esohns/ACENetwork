@@ -32,11 +32,11 @@
 #include <mstcpip.h>
 #include <wlanapi.h>
 #else
-#include <ifaddrs.h>
-#include <iwlib.h>
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
 #include <netinet/ether.h>
+#include <ifaddrs.h>
+#include <iwlib.h>
 #endif
 
 #include "ace/Dirent_Selector.h"
@@ -1305,8 +1305,7 @@ Net_Common_Tools::interfaceIsWireless (const std::string& adapter_in)
   if (socket_handle == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::socket(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (adapter_in.c_str ())));
+                ACE_TEXT ("failed to ACE_OS::socket(AF_INET): \"%m\", aborting\n")));
     return false;
   } // end IF
   result_2 = ACE_OS::ioctl (socket_handle,
@@ -1329,7 +1328,8 @@ std::string
 Net_Common_Tools::associatedSSID (HANDLE clientHandle_in,
                                   REFGUID interfaceIdentifier_in)
 #else
-Net_Common_Tools::associatedSSID (const std::string& interfaceIdentifier_in)
+Net_Common_Tools::associatedSSID (//struct DBusConnection* connection_in,
+                                  const std::string& interfaceIdentifier_in)
 #endif
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::associatedSSID"));
@@ -1380,10 +1380,197 @@ Net_Common_Tools::associatedSSID (const std::string& interfaceIdentifier_in)
                  wlan_connection_attributes_p->wlanAssociationAttributes.dot11Ssid.uSSIDLength);
   WlanFreeMemory (data_p);
 #else
+//  ACE_ASSERT (connection_in);
+
+//  std::string device_path_string =
+//      Net_Common_Tools::deviceToDBusPath (connection_in,
+//                                          interfaceIdentifier_in);
+//  ACE_ASSERT (!device_path_string.empty ());
+//  std::string access_point_path_string =
+//      Net_Common_Tools::deviceDBusPathToAccessPointDBusPath (connection_in,
+//                                                             device_path_string);
+//  if (access_point_path_string.empty ())
+//    goto continue_;
+
+//  result =
+//      Net_Common_Tools::accessPointDBusPathToSSID (connection_in,
+//                                                   access_point_path_string);
+
+  int socket_handle = -1;
+  int result_2 = -1;
+  struct iwreq iwreq_s;
+  char essid[IW_ESSID_MAX_SIZE + 1];
+
+  socket_handle = iw_sockets_open ();
+  if (socket_handle == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to iw_sockets_open(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+
+  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  ACE_OS::memset (essid, 0, sizeof (IW_ESSID_MAX_SIZE + 1));
+  iwreq_s.u.essid.pointer = essid;
+  iwreq_s.u.essid.length = IW_ESSID_MAX_SIZE + 1;
+  result_2 = iw_get_ext (socket_handle,
+                         interfaceIdentifier_in.c_str (),
+                         SIOCGIWESSID,
+                         &iwreq_s);
+  if (result_2 < 0)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to iw_get_ext(\"%s\",SIOCGIWESSID): \"%m\", aborting\n"),
+                ACE_TEXT (interfaceIdentifier_in.c_str ())));
+    goto error;
+  } // end IF
+  result.assign (essid, iwreq_s.u.essid.length);
+
+error:
+  if (socket_handle != -1)
+    iw_sockets_close (socket_handle);
+#endif
+
+//continue_:
+  return result;
+}
+
+bool
+Net_Common_Tools::hasSSID (const std::string& interfaceIdentifier_in,
+                           const std::string& SSID_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::associatedSSID"));
+
+  // initialize return value(s)
+  bool result = false;
+
+  // sanity check(s)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  if  ((clientHandle_in == ACE_INVALID_HANDLE) ||
+       InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
+#else
+  if (interfaceIdentifier_in.empty ())
+#endif
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid argument, aborting\n")));
+    return result;
+  } // end IF
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (false);
+
+  ACE_NOTREACHED (return false;)
+#else
+  int result_2 = -1;
+  std::vector<std::string> wireless_device_identifiers_a;
+  int socket_handle = -1;
+  struct iw_range iw_range_s;
+  struct wireless_scan_head wireless_scan_head_s;
+  struct wireless_scan* wireless_scan_p = NULL;
+  bool done = false;
+#if defined (ACE_HAS_GETIFADDRS)
+  struct ifaddrs* ifaddrs_p = NULL;
+#endif
+
+  // step1: retrieve all wireless adapaters
+  if (!interfaceIdentifier_in.empty ())
+  {
+    wireless_device_identifiers_a.push_back (interfaceIdentifier_in);
+    goto continue_;
+  } // end IF
+#if defined (ACE_HAS_GETIFADDRS)
+  result_2 = ::getifaddrs (&ifaddrs_p);
+  if (result_2 == -1)
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to ::getifaddrs(): \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  ACE_ASSERT (ifaddrs_p);
+
+  for (struct ifaddrs* ifaddrs_2 = ifaddrs_p;
+       ifaddrs_2;
+       ifaddrs_2 = ifaddrs_2->ifa_next)
+  {
+//    if ((ifaddrs_2->ifa_flags & IFF_UP) == 0)
+//      continue;
+    if (!ifaddrs_2->ifa_addr)
+      continue;
+    if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
+      continue;
+    if (!Net_Common_Tools::interfaceIsWireless (ifaddrs_2->ifa_name))
+      continue;
+
+    wireless_device_identifiers_a.push_back (ifaddrs_2->ifa_name);
+  } // end FOR
+
+  // clean up
+  ::freeifaddrs (ifaddrs_p);
+#else
   ACE_ASSERT (false);
   ACE_NOTSUP_RETURN (result);
 
   ACE_NOTREACHED (return result;)
+#endif /* ACE_HAS_GETIFADDRS */
+continue_:
+  socket_handle = iw_sockets_open ();
+  if (socket_handle == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to iw_sockets_open(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+
+  for (std::vector<std::string>::const_iterator iterator = wireless_device_identifiers_a.begin ();
+       (iterator != wireless_device_identifiers_a.end ()) && !done;
+       ++iterator)
+  {
+    ACE_OS::memset (&iw_range_s, 0, sizeof (struct iw_range));
+    result_2 = iw_get_range_info (socket_handle,
+                                  (*iterator).c_str (),
+                                  &iw_range_s);
+    if (result_2 < 0)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to iw_get_range_info(): \"%m\", aborting\n")));
+      goto clean;
+    } // end IF
+
+    ACE_OS::memset (&wireless_scan_head_s,
+                    0,
+                    sizeof (struct wireless_scan_head));
+    result_2 = iw_scan (socket_handle,
+                        const_cast<char*> ((*iterator).c_str ()),
+                        iw_range_s.we_version_compiled,
+                        &wireless_scan_head_s);
+    if (result_2 < 0)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to iw_scan(): \"%m\", aborting\n")));
+      goto clean;
+    } // end IF
+    for (wireless_scan_p = wireless_scan_head_s.result;
+         wireless_scan_p;
+         wireless_scan_p = wireless_scan_p->next)
+    {
+      if (!wireless_scan_p->b.essid_on)
+        continue;
+      if (!ACE_OS::strncmp (SSID_in.c_str (),
+                            wireless_scan_p->b.essid,
+                            wireless_scan_p->b.essid_len))
+      { // --> found SSID on adapter
+        result = true;
+        done = true;
+        break;
+      } // end IF
+    } // end FOR
+  } // end FOR
+
+clean:
+  if (socket_handle != -1)
+    iw_sockets_close (socket_handle);
 #endif
 
   return result;
@@ -2034,8 +2221,10 @@ continue_:
                         ifaddrs_2->ifa_name))
       continue;
 
-    if (!ifaddrs_2->ifa_addr) continue;
-    if (ifaddrs_2->ifa_addr->sa_family != AF_INET) continue;
+    if (!ifaddrs_2->ifa_addr)
+      continue;
+    if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
+      continue;
 
     sockaddr_in_p = (struct sockaddr_in*)ifaddrs_2->ifa_addr;
     result = IPAddress_out.set (sockaddr_in_p,
@@ -2058,6 +2247,7 @@ continue_:
 #else
   ACE_ASSERT (false);
   ACE_NOTSUP_RETURN (false);
+
   ACE_NOTREACHED (return false;)
 #endif /* ACE_HAS_GETIFADDRS */
 #endif
@@ -3250,6 +3440,861 @@ Net_Common_Tools::setLoopBackFastPath (ACE_HANDLE handle_in)
               handle_in));
 
   return true;
+}
+#endif
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+bool
+Net_Common_Tools::activateConnection (struct DBusConnection* connection_in,
+                                      const std::string& connectionObjectPath_in,
+                                      const std::string& deviceObjectPath_in,
+                                      const std::string& accessPointObjectPath_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::activateConnection"));
+
+  // initialize return value(s)
+  bool result = false;
+
+  // sanity check(s)
+  ACE_ASSERT (connection_in);
+  ACE_ASSERT (!connectionObjectPath_in.empty ());
+  ACE_ASSERT (!deviceObjectPath_in.empty ());
+  ACE_ASSERT (!accessPointObjectPath_in.empty ());
+
+  struct DBusMessage* message_p =
+      dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SERVICE),
+                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_OBJECT_PATH),
+                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_INTERFACE),
+                                    ACE_TEXT_ALWAYS_CHAR ("ActivateConnection"));
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_new_method_call(ActivateConnection): \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  struct DBusMessage* reply_p = NULL;
+  struct DBusMessageIter iterator;
+  char* object_path_p = NULL;
+  const char* argument_string_p = connectionObjectPath_in.c_str ();
+  dbus_message_iter_init_append (message_p, &iterator);
+  if (!dbus_message_iter_append_basic (&iterator,
+                                       DBUS_TYPE_OBJECT_PATH,
+                                       &argument_string_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  argument_string_p = deviceObjectPath_in.c_str ();
+  dbus_message_iter_init_append (message_p, &iterator);
+  if (!dbus_message_iter_append_basic (&iterator,
+                                       DBUS_TYPE_OBJECT_PATH,
+                                       &argument_string_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  argument_string_p = accessPointObjectPath_in.c_str ();
+  dbus_message_iter_init_append (message_p, &iterator);
+  if (!dbus_message_iter_append_basic (&iterator,
+                                       DBUS_TYPE_OBJECT_PATH,
+                                       &argument_string_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  reply_p = Net_Common_Tools::dBusMessageExchange (connection_in,
+                                                   message_p,
+                                                   -1); // timeout (ms)
+  ACE_ASSERT (!message_p);
+  if (!reply_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  if (!dbus_message_iter_init (reply_p, &iterator))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
+    goto error;
+  } // end IF
+
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_OBJECT_PATH);
+  dbus_message_iter_get_basic (&iterator, &object_path_p);
+  ACE_ASSERT (object_path_p);
+  dbus_message_unref (reply_p); reply_p = NULL;
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: activated connection profile \"%s\" (active connection is: \"%s\")\n"),
+              ACE_TEXT (Net_Common_Tools::deviceDBusPathToIdentifier (connection_in, deviceObjectPath_in).c_str ()),
+              ACE_TEXT (connectionObjectPath_in.c_str ()),
+              ACE_TEXT (object_path_p)));
+
+  result = true;
+
+  goto continue_;
+
+error:
+  if (message_p)
+    dbus_message_unref (message_p);
+  if (reply_p)
+    dbus_message_unref (reply_p);
+
+  return false;
+
+continue_:
+  return result;
+}
+
+struct DBusMessage*
+Net_Common_Tools::dBusMessageExchange (struct DBusConnection* connection_in,
+                                       struct DBusMessage*& message_inout,
+                                       int timeout_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::dBusMessageExchange"));
+
+  // initialize return value(s)
+  struct DBusMessage* result = NULL;
+
+  // sanity check(s)
+  ACE_ASSERT (connection_in);
+  ACE_ASSERT (message_inout);
+
+  struct DBusPendingCall* pending_p = NULL;
+  if (!dbus_connection_send_with_reply (connection_in,
+                                        message_inout,
+                                        &pending_p,
+                                        timeout_in)) // timeout (ms)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_connection_send_with_reply(%d), aborting\n"),
+                timeout_in));
+    goto error;
+  } // end IF
+  ACE_ASSERT (pending_p);
+//  dbus_connection_flush (connection_in);
+  dbus_message_unref (message_inout); message_inout = NULL;
+  dbus_pending_call_block (pending_p);
+  result = dbus_pending_call_steal_reply (pending_p);
+  if (!result)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_pending_call_steal_reply(), aborting\n")));
+    goto error;
+  } // end IF
+  dbus_pending_call_unref (pending_p); pending_p = NULL;
+
+  goto continue_;
+
+error:
+  if (pending_p)
+    dbus_pending_call_unref (pending_p);
+  if (message_inout)
+  {
+    dbus_message_unref (message_inout);
+    message_inout = NULL;
+  } // end IF
+
+continue_:
+  return result;
+}
+
+std::string
+Net_Common_Tools::activeConnectionDBusPathToDeviceDBusPath (struct DBusConnection* connection_in,
+                                                            const std::string& activeConnectionObjectPath_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::activeConnectionDBusPathToDeviceDBusPath"));
+
+  // initialize return value(s)
+  std::string result;
+
+  // sanity check(s)
+  ACE_ASSERT (connection_in);
+  ACE_ASSERT (!activeConnectionObjectPath_in.empty ());
+
+  struct DBusMessage* message_p =
+      dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SERVICE),
+                                    activeConnectionObjectPath_in.c_str (),
+                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
+                                    ACE_TEXT_ALWAYS_CHAR ("Get"));
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_new_method_call(Devices): \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  struct DBusMessage* reply_p = NULL;
+  struct DBusMessageIter iterator, iterator_2;
+  char* object_path_p = NULL;
+  const char* argument_string_p =
+      ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_CONNECTIONACTIVE_INTERFACE);
+  dbus_message_iter_init_append (message_p, &iterator);
+  if (!dbus_message_iter_append_basic (&iterator,
+                                       DBUS_TYPE_STRING,
+                                       &argument_string_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  argument_string_p = ACE_TEXT_ALWAYS_CHAR ("Devices");
+  dbus_message_iter_init_append (message_p, &iterator);
+  if (!dbus_message_iter_append_basic (&iterator,
+                                       DBUS_TYPE_STRING,
+                                       &argument_string_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  reply_p = Net_Common_Tools::dBusMessageExchange (connection_in,
+                                                   message_p,
+                                                   -1); // timeout (ms)
+  ACE_ASSERT (!message_p);
+  if (!reply_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  if (!dbus_message_iter_init (reply_p, &iterator))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
+    goto error;
+  } // end IF
+
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_ARRAY);
+  dbus_message_iter_recurse (&iterator, &iterator_2);
+  do {
+    ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_OBJECT_PATH);
+    dbus_message_iter_get_basic (&iterator_2, &object_path_p);
+    ACE_ASSERT (object_path_p);
+    if (!result.empty ())
+    {
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("active connection \"%s\" uses several devices, returning the first one\n"),
+                  ACE_TEXT (activeConnectionObjectPath_in.c_str ())));
+      break;
+    } // end IF
+    result = object_path_p;
+  } while (dbus_message_iter_next (&iterator));
+  dbus_message_unref (reply_p); reply_p = NULL;
+
+  goto continue_;
+
+error:
+  if (message_p)
+    dbus_message_unref (message_p);
+  if (reply_p)
+    dbus_message_unref (reply_p);
+
+continue_:
+  return result;
+}
+std::string
+Net_Common_Tools::deviceToDBusPath (struct DBusConnection* connection_in,
+                                    const std::string& deviceIdentifier_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::deviceToDBusPath"));
+
+  // initialize return value(s)
+  std::string result;
+
+  // sanity check(s)
+  ACE_ASSERT (connection_in);
+  ACE_ASSERT (!deviceIdentifier_in.empty ());
+
+  struct DBusMessage* reply_p = NULL;
+  struct DBusMessage* message_p =
+      dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SERVICE),
+                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_OBJECT_PATH),
+                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_INTERFACE),
+                                    ACE_TEXT_ALWAYS_CHAR ("GetDeviceByIpIface"));
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_new_method_call(GetDeviceByIpIface): \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  struct DBusMessageIter iterator;
+  char* object_path_p = NULL;
+  dbus_message_iter_init_append (message_p, &iterator);
+  const char* device_identifier_p = deviceIdentifier_in.c_str ();
+  if (!dbus_message_iter_append_basic (&iterator,
+                                       DBUS_TYPE_STRING,
+                                       &device_identifier_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  reply_p = Net_Common_Tools::dBusMessageExchange (connection_in,
+                                                   message_p,
+                                                   -1); // timeout (ms)
+  ACE_ASSERT (!message_p);
+  if (!reply_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  if (!dbus_message_iter_init (reply_p, &iterator))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
+    goto error;
+  } // end IF
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_OBJECT_PATH);
+  dbus_message_iter_get_basic (&iterator, &object_path_p);
+  ACE_ASSERT (object_path_p);
+  result = object_path_p;
+  dbus_message_unref (reply_p); reply_p = NULL;
+
+  goto continue_;
+
+error:
+  if (message_p)
+    dbus_message_unref (message_p);
+  if (reply_p)
+    dbus_message_unref (reply_p);
+
+continue_:
+  return result;
+}
+
+std::string
+Net_Common_Tools::deviceDBusPathToAccessPointDBusPath (struct DBusConnection* connection_in,
+                                                       const std::string& deviceObjectPath_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::deviceDBusPathToAccessPointDBusPath"));
+
+  // initialize return value(s)
+  std::string result;
+
+  // sanity check(s)
+  ACE_ASSERT (connection_in);
+  ACE_ASSERT (!deviceObjectPath_in.empty ());
+
+  struct DBusMessage* reply_p = NULL;
+  struct DBusMessage* message_p =
+      dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SERVICE),
+                                    deviceObjectPath_in.c_str (),
+                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
+                                    ACE_TEXT_ALWAYS_CHAR ("Get"));
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_new_method_call(Get): \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  struct DBusMessageIter iterator, iterator_2;
+  char* object_path_p = NULL;
+  const char* argument_string_p =
+      ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICEWIRELESS_INTERFACE);
+  dbus_message_iter_init_append (message_p, &iterator);
+  if (!dbus_message_iter_append_basic (&iterator,
+                                       DBUS_TYPE_STRING,
+                                       &argument_string_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  argument_string_p = ACE_TEXT_ALWAYS_CHAR ("ActiveAccessPoint");
+  dbus_message_iter_init_append (message_p, &iterator);
+  if (!dbus_message_iter_append_basic (&iterator,
+                                       DBUS_TYPE_STRING,
+                                       &argument_string_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  reply_p = Net_Common_Tools::dBusMessageExchange (connection_in,
+                                                   message_p,
+                                                   -1); // timeout (ms)
+  ACE_ASSERT (!message_p);
+  if (!reply_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  if (!dbus_message_iter_init (reply_p, &iterator))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
+    goto error;
+  } // end IF
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_VARIANT);
+  dbus_message_iter_recurse (&iterator, &iterator_2);
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_OBJECT_PATH);
+  dbus_message_iter_get_basic (&iterator_2, &object_path_p);
+  ACE_ASSERT (object_path_p);
+  result = object_path_p;
+  dbus_message_unref (reply_p); reply_p = NULL;
+
+  goto continue_;
+
+error:
+  if (message_p)
+    dbus_message_unref (message_p);
+  if (reply_p)
+    dbus_message_unref (reply_p);
+
+continue_:
+  return result;
+}
+
+std::string
+Net_Common_Tools::deviceDBusPathToIdentifier (struct DBusConnection* connection_in,
+                                              const std::string& deviceObjectPath_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::deviceDBusPathToIdentifier"));
+
+  // initialize return value(s)
+  std::string result;
+
+  // sanity check(s)
+  ACE_ASSERT (connection_in);
+  ACE_ASSERT (!deviceObjectPath_in.empty ());
+
+  struct DBusMessage* reply_p = NULL;
+  struct DBusMessage* message_p =
+      dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SERVICE),
+                                    deviceObjectPath_in.c_str (),
+                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
+                                    ACE_TEXT_ALWAYS_CHAR ("Get"));
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_new_method_call(Get): \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  struct DBusMessageIter iterator;
+  char* device_identifier_p = NULL;
+  const char* argument_string_p =
+      ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICE_INTERFACE);
+  dbus_message_iter_init_append (message_p, &iterator);
+  if (!dbus_message_iter_append_basic (&iterator,
+                                       DBUS_TYPE_STRING,
+                                       &argument_string_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  argument_string_p = ACE_TEXT_ALWAYS_CHAR ("Interface");
+  dbus_message_iter_init_append (message_p, &iterator);
+  if (!dbus_message_iter_append_basic (&iterator,
+                                       DBUS_TYPE_STRING,
+                                       &argument_string_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  reply_p = Net_Common_Tools::dBusMessageExchange (connection_in,
+                                                   message_p,
+                                                   -1); // timeout (ms)
+  ACE_ASSERT (!message_p);
+  if (!reply_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  if (!dbus_message_iter_init (reply_p, &iterator))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
+    goto error;
+  } // end IF
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_STRING);
+  dbus_message_iter_get_basic (&iterator, &device_identifier_p);
+  ACE_ASSERT (device_identifier_p);
+  result = device_identifier_p;
+  dbus_message_unref (reply_p); reply_p = NULL;
+
+  goto continue_;
+
+error:
+  if (message_p)
+    dbus_message_unref (message_p);
+  if (reply_p)
+    dbus_message_unref (reply_p);
+
+continue_:
+  return result;
+}
+
+std::string
+Net_Common_Tools::accessPointDBusPathToSSID (struct DBusConnection* connection_in,
+                                             const std::string& accessPointObjectPath_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::accessPointDBusPathToSSID"));
+
+  // initialize return value(s)
+  std::string result;
+
+  // sanity check(s)
+  ACE_ASSERT (connection_in);
+  ACE_ASSERT (!accessPointObjectPath_in.empty ());
+
+  struct DBusMessage* reply_p = NULL;
+  struct DBusMessage* message_p =
+      dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SERVICE),
+                                    accessPointObjectPath_in.c_str (),
+                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
+                                    ACE_TEXT_ALWAYS_CHAR ("Get"));
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_new_method_call(Get): \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  struct DBusMessageIter iterator, iterator_2;
+  char character_c = 0;
+  const char* argument_string_p =
+      ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_ACCESSPOINT_INTERFACE);
+  dbus_message_iter_init_append (message_p, &iterator);
+  if (!dbus_message_iter_append_basic (&iterator,
+                                       DBUS_TYPE_STRING,
+                                       &argument_string_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  argument_string_p = ACE_TEXT_ALWAYS_CHAR ("Ssid");
+  dbus_message_iter_init_append (message_p, &iterator);
+  if (!dbus_message_iter_append_basic (&iterator,
+                                       DBUS_TYPE_STRING,
+                                       &argument_string_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  reply_p = Net_Common_Tools::dBusMessageExchange (connection_in,
+                                                   message_p,
+                                                   -1); // timeout (ms)
+  ACE_ASSERT (!message_p);
+  if (!reply_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  if (!dbus_message_iter_init (reply_p, &iterator))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
+    goto error;
+  } // end IF
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_VARIANT);
+  dbus_message_iter_recurse (&iterator, &iterator_2);
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_ARRAY);
+  dbus_message_iter_recurse (&iterator_2, &iterator);
+  do {
+    ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_BYTE);
+    dbus_message_iter_get_basic (&iterator, &character_c);
+    ACE_ASSERT (character_c);
+    result += character_c;
+  } while (dbus_message_iter_next (&iterator));
+  dbus_message_unref (reply_p); reply_p = NULL;
+
+  goto continue_;
+
+error:
+  if (message_p)
+    dbus_message_unref (message_p);
+  if (reply_p)
+    dbus_message_unref (reply_p);
+
+continue_:
+  return result;
+}
+
+std::string
+Net_Common_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_in,
+                                             const std::string& SSID_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::SSIDToAccessPointDBusPath"));
+
+  // initialize return value(s)
+  std::string result;
+
+  // sanity check(s)
+  ACE_ASSERT (connection_in);
+  ACE_ASSERT (!SSID_in.empty ());
+
+  std::string device_object_path_string =
+      Net_Common_Tools::SSIDToDeviceDBusPath (connection_in,
+                                              SSID_in);
+  if (device_object_path_string.empty ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::SSIDToDeviceDBusPath(0x%@,%s), aborting\n"),
+                connection_in,
+                ACE_TEXT (SSID_in.c_str ())));
+    return result;
+  } // end IF
+
+  struct DBusMessage* reply_p = NULL;
+  struct DBusMessage* message_p =
+      dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SERVICE),
+                                    device_object_path_string.c_str (),
+                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICEWIRELESS_INTERFACE),
+                                    ACE_TEXT_ALWAYS_CHAR ("GetAllAccessPoints"));
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_new_method_call(GetAllAccessPoints): \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  struct DBusMessageIter iterator, iterator_2;
+  char* object_path_p = NULL;
+  std::string SSID_string;
+  reply_p = Net_Common_Tools::dBusMessageExchange (connection_in,
+                                                   message_p,
+                                                   -1); // timeout (ms)
+  ACE_ASSERT (!message_p);
+  if (!reply_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  if (!dbus_message_iter_init (reply_p, &iterator))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
+    goto error;
+  } // end IF
+
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_ARRAY);
+  dbus_message_iter_recurse (&iterator, &iterator_2);
+  do {
+    ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_OBJECT_PATH);
+    dbus_message_iter_get_basic (&iterator_2, &object_path_p);
+    ACE_ASSERT (object_path_p);
+    SSID_string = Net_Common_Tools::accessPointDBusPathToSSID (connection_in,
+                                                               object_path_p);
+    if (SSID_string.empty ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::accessPointDBusPathToSSID(\"%s\"), continuing\n"),
+                  ACE_TEXT (object_path_p)));
+      continue;
+    } // end IF
+    if (SSID_string == SSID_in)
+    {
+      result = object_path_p;
+      break;
+    } // end IF
+  } while (dbus_message_iter_next (&iterator));
+  dbus_message_unref (reply_p); reply_p = NULL;
+
+  goto continue_;
+
+error:
+  if (message_p)
+    dbus_message_unref (message_p);
+  if (reply_p)
+    dbus_message_unref (reply_p);
+
+continue_:
+  return result;
+}
+
+std::string
+Net_Common_Tools::SSIDToDeviceDBusPath (struct DBusConnection* connection_in,
+                                        const std::string& SSID_in)
+{
+  // initialize return value(s)
+  std::string result;
+
+  // sanity check(s)
+  ACE_ASSERT (connection_in);
+  ACE_ASSERT (!SSID_in.empty ());
+
+  // step1: retrieve all wireless adapaters
+  std::vector<std::string> wireless_device_identifiers_a;
+#if defined (ACE_HAS_GETIFADDRS)
+  struct ifaddrs* ifaddrs_p = NULL;
+  int result_2 = ::getifaddrs (&ifaddrs_p);
+  if (result_2 == -1)
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to ::getifaddrs(): \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  ACE_ASSERT (ifaddrs_p);
+
+  for (struct ifaddrs* ifaddrs_2 = ifaddrs_p;
+       ifaddrs_2;
+       ifaddrs_2 = ifaddrs_2->ifa_next)
+  {
+//    if ((ifaddrs_2->ifa_flags & IFF_UP) == 0)
+//      continue;
+    if (!ifaddrs_2->ifa_addr)
+      continue;
+    if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
+      continue;
+    if (!Net_Common_Tools::interfaceIsWireless (ifaddrs_2->ifa_name))
+      continue;
+
+    wireless_device_identifiers_a.push_back (ifaddrs_2->ifa_name);
+  } // end FOR
+
+  // clean up
+  ::freeifaddrs (ifaddrs_p);
+#else
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (result);
+
+  ACE_NOTREACHED (return result;)
+#endif /* ACE_HAS_GETIFADDRS */
+
+  // step2: retrieve the wireless adapter(s) that can see the SSID
+  for (std::vector<std::string>::iterator iterator = wireless_device_identifiers_a.begin ();
+       iterator != wireless_device_identifiers_a.end ();
+       ++iterator)
+    if (!Net_Common_Tools::hasSSID (*iterator,
+                                    SSID_in))
+      wireless_device_identifiers_a.erase (iterator);
+  if (wireless_device_identifiers_a.empty ())
+    return result;
+  else if (wireless_device_identifiers_a.size () > 1)
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("found several devices that can see SSID %s, choosing the first one\n"),
+                ACE_TEXT (SSID_in.c_str ())));
+
+  result =
+      Net_Common_Tools::deviceToDBusPath (connection_in,
+                                          wireless_device_identifiers_a.front ());
+
+  return result;
+}
+
+std::string
+Net_Common_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in,
+                                            const std::string& deviceObjectPath_in,
+                                            const std::string& SSID_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::SSIDToConnectionDBusPath"));
+
+  // initialize return value(s)
+  std::string result;
+
+  // sanity check(s)
+  ACE_ASSERT (connection_in);
+  ACE_ASSERT (!deviceObjectPath_in.empty ());
+  ACE_ASSERT (!SSID_in.empty ());
+
+  struct DBusMessage* reply_p = NULL;
+  struct DBusMessage* message_p =
+      dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SERVICE),
+                                    deviceObjectPath_in.c_str (),
+                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
+                                    ACE_TEXT_ALWAYS_CHAR ("Get"));
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_new_method_call(Get): \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  struct DBusMessageIter iterator, iterator_2;
+  std::vector<std::string> connection_paths_a;
+  std::vector<std::string>::const_iterator iterator_3;
+  char* object_path_p = NULL;
+  std::string SSID_string;
+  const char* argument_string_p =
+      ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICE_INTERFACE);
+  dbus_message_iter_init_append (message_p, &iterator);
+  if (!dbus_message_iter_append_basic (&iterator,
+                                       DBUS_TYPE_STRING,
+                                       &argument_string_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  argument_string_p = ACE_TEXT_ALWAYS_CHAR ("AvailableConnections");
+  dbus_message_iter_init_append (message_p, &iterator);
+  if (!dbus_message_iter_append_basic (&iterator,
+                                       DBUS_TYPE_STRING,
+                                       &argument_string_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  reply_p = Net_Common_Tools::dBusMessageExchange (connection_in,
+                                                   message_p,
+                                                   -1); // timeout (ms)
+  ACE_ASSERT (!message_p);
+  if (!reply_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+  if (!dbus_message_iter_init (reply_p, &iterator))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
+    goto error;
+  } // end IF
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_ARRAY);
+  dbus_message_iter_recurse (&iterator, &iterator_2);
+  do {
+    ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_OBJECT_PATH);
+    dbus_message_iter_get_basic (&iterator_2, &object_path_p);
+    ACE_ASSERT (object_path_p);
+    connection_paths_a.push_back (object_path_p);
+  } while (dbus_message_iter_next (&iterator));
+  dbus_message_unref (reply_p); reply_p = NULL;
+
+  iterator_3 = connection_paths_a.begin ();
+  for (;
+       iterator_3 != connection_paths_a.end ();
+       ++iterator_3)
+  {
+    SSID_string = Net_Common_Tools::connectionDBusPathToSSID (connection_in,
+                                                              *iterator_3);
+    if (SSID_string == SSID_in)
+      break;
+  } // end FOR
+  if (iterator_3 == connection_paths_a.end ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%s: no connection profile for SSID %s found, aborting\n"),
+                ACE_TEXT (Net_Common_Tools::deviceDBusPathToIdentifier (connection_in, deviceObjectPath_in).c_str ()),
+                ACE_TEXT (SSID_in.c_str ())));
+    goto error;
+  } // end IF
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: applying connection profile for SSID %s: \"%s\"...\n"),
+              ACE_TEXT (Net_Common_Tools::deviceDBusPathToIdentifier (connection_in, deviceObjectPath_in).c_str ()),
+              ACE_TEXT (SSID_in.c_str ()),
+              ACE_TEXT ((*iterator_3).c_str ())));
+
+  goto continue_;
+
+error:
+  if (message_p)
+    dbus_message_unref (message_p);
+  if (reply_p)
+    dbus_message_unref (reply_p);
+
+continue_:
+  return result;
 }
 #endif
 

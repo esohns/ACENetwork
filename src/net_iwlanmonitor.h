@@ -27,6 +27,8 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <guiddef.h>
+#else
+#include <dbus/dbus.h>
 #endif
 
 #include "common_iget.h"
@@ -67,26 +69,42 @@ class Net_IWLANCB
 #endif
 };
 
-template <typename AddressType,
-          typename ConfigurationType>
-class Net_IWLANMonitor_T
- : public Common_IGetR_T<ConfigurationType>
- , public Common_IInitialize_T<ConfigurationType>
- , public Common_ISubscribe_T<Net_IWLANCB>
+//////////////////////////////////////////
+
+class Net_IWLANMonitorBase
+ : public Net_IWLANCB
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
  , public Common_IGet_2_T<HANDLE>
+#else
+ , public Common_IGetP_2_T<struct DBusConnection>
 #endif
 {
  public:
-  virtual bool addresses (AddressType&,            // return value: local SAP
-                          AddressType&) const = 0; // return value: peer SAP
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual bool associate (REFGUID,                 // device identifier {GUID_NULL: any}
 #else
   virtual bool associate (const std::string&,      // device identifier {"": any}
 #endif
                           const std::string&) = 0; // SSID
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+//  virtual std::string devicePath () const = 0;
+#endif
   virtual std::string SSID () const = 0;
+};
+
+template <typename AddressType,
+          typename ConfigurationType>
+class Net_IWLANMonitor_T
+ : public Net_IWLANMonitorBase
+ , public Common_IGetR_T<ConfigurationType>
+ , public Common_IInitialize_T<ConfigurationType>
+ , public Common_ISubscribe_T<Net_IWLANCB>
+{
+ public:
+  virtual bool addresses (AddressType&,            // return value: local SAP
+                          AddressType&) const = 0; // return value: peer SAP
 };
 
 #endif

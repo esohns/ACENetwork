@@ -24,11 +24,16 @@
 #include <limits>
 #include <string>
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#include <dbus/dbus.h>
+#endif
+
+#include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
 #include "net_common.h"
-//#include "net_exports.h"
 
 //////////////////////////////////////////
 
@@ -37,12 +42,9 @@ enum Net_LinkLayerType  operator++ (enum Net_LinkLayerType& lhs, int);
 
 //////////////////////////////////////////
 
-//class Net_Export Net_Common_Tools
 class Net_Common_Tools
 {
  public:
-  // --- addresses ---
-
   // physical layer
 
   // link layer
@@ -100,8 +102,13 @@ class Net_Common_Tools
                                     bool);                  // enable ? : disable
   //static bool associateWithWLAN (REFGUID,            // interface identifier
 #else
+  // *NOTE*: this tries to call the SIOCGIWNAME ioctl
   static bool interfaceIsWireless (const std::string&); // interface identifier
   static std::string associatedSSID (const std::string&); // interface identifier
+  static bool hasSSID (const std::string&,  // interface identifier
+                       const std::string&); // SSID
+  //  static std::string associatedSSID (struct DBusConnection*, // D-Bus connection handle
+//                                     const std::string&);    // interface identifier
   //static bool associateWithWLAN (const std::string&, // interface adapter
 #endif
                                  //const std::string&, // SSID
@@ -197,6 +204,39 @@ class Net_Common_Tools
   static bool enableErrorQueue (ACE_HANDLE); // socket handle
 #endif
   static int getProtocol (ACE_HANDLE); // socket handle
+
+  // --- D-Bus ---
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  static bool activateConnection (struct DBusConnection*, // D-Bus connection handle
+                                  const std::string&,     // connection object path
+                                  const std::string&,     // device object path
+                                  const std::string&);    // access point object path
+  // *IMPORTANT NOTE* fire-and-forget the second argument
+  static struct DBusMessage* dBusMessageExchange (struct DBusConnection*, // D-Bus connection handle
+                                                  struct DBusMessage*&,   // D-Bus message handle
+                                                  int = DBUS_TIMEOUT_INFINITE); // timeout (ms) {default: block}
+
+  static std::string accessPointDBusPathToSSID (struct DBusConnection*, // D-Bus connection handle
+                                                const std::string&);    // access point object path
+  static std::string activeConnectionDBusPathToDeviceDBusPath (struct DBusConnection*, // D-Bus connection handle
+                                                               const std::string&);    // active connection object path
+  static std::string connectionDBusPathToSSID (struct DBusConnection*, // D-Bus connection handle
+                                               const std::string&);    // connection object path
+  static std::string deviceDBusPathToAccessPointDBusPath (struct DBusConnection*, // D-Bus connection handle
+                                                          const std::string&);    // device object path
+  static std::string deviceDBusPathToIdentifier (struct DBusConnection*, // D-Bus connection handle
+                                                 const std::string&);    // device object path
+  static std::string deviceToDBusPath (struct DBusConnection*, // D-Bus connection handle
+                                       const std::string&);    // device identifier
+  static std::string SSIDToAccessPointDBusPath (struct DBusConnection*, // D-Bus connection handle
+                                                const std::string&);    // SSID
+  static std::string SSIDToDeviceDBusPath (struct DBusConnection*, // D-Bus connection handle
+                                           const std::string&);    // SSID
+  static std::string SSIDToConnectionDBusPath (struct DBusConnection*, // D-Bus connection handle
+                                               const std::string&,     // device object path
+                                               const std::string&);    // SSID
+#endif
 
   // --- miscellaneous ---
 
