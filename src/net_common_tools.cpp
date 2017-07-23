@@ -4184,7 +4184,6 @@ Net_Common_Tools::SSIDToDeviceDBusPath (struct DBusConnection* connection_in,
 
 std::string
 Net_Common_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in,
-                                            const std::string& deviceObjectPath_in,
                                             const std::string& SSID_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::SSIDToConnectionDBusPath"));
@@ -4194,13 +4193,24 @@ Net_Common_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in
 
   // sanity check(s)
   ACE_ASSERT (connection_in);
-  ACE_ASSERT (!deviceObjectPath_in.empty ());
   ACE_ASSERT (!SSID_in.empty ());
+
+  std::string device_object_path_string =
+      Net_Common_Tools::SSIDToDeviceDBusPath (connection_in,
+                                              SSID_in);
+  if (device_object_path_string.empty ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::SSIDToDeviceDBusPath(0x%@,%s), aborting\n"),
+                connection_in,
+                ACE_TEXT (SSID_in.c_str ())));
+    return result;
+  } // end IF
 
   struct DBusMessage* reply_p = NULL;
   struct DBusMessage* message_p =
       dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SERVICE),
-                                    deviceObjectPath_in.c_str (),
+                                    device_object_path_string.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
                                     ACE_TEXT_ALWAYS_CHAR ("Get"));
   if (!message_p)
@@ -4275,15 +4285,17 @@ Net_Common_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: no connection profile for SSID %s found, aborting\n"),
-                ACE_TEXT (Net_Common_Tools::deviceDBusPathToIdentifier (connection_in, deviceObjectPath_in).c_str ()),
+                ACE_TEXT (Net_Common_Tools::deviceDBusPathToIdentifier (connection_in, device_object_path_string).c_str ()),
                 ACE_TEXT (SSID_in.c_str ())));
     goto error;
   } // end IF
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%s: applying connection profile for SSID %s: \"%s\"...\n"),
-              ACE_TEXT (Net_Common_Tools::deviceDBusPathToIdentifier (connection_in, deviceObjectPath_in).c_str ()),
-              ACE_TEXT (SSID_in.c_str ()),
-              ACE_TEXT ((*iterator_3).c_str ())));
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("%s: applying connection profile for SSID %s: \"%s\"...\n"),
+//              ACE_TEXT (Net_Common_Tools::deviceDBusPathToIdentifier (connection_in, device_object_path_string).c_str ()),
+//              ACE_TEXT (SSID_in.c_str ()),
+//              ACE_TEXT ((*iterator_3).c_str ())));
+
+  result = *iterator_3;
 
   goto continue_;
 

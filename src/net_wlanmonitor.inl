@@ -793,46 +793,45 @@ error:
   return false;
 #else
   // step1: retrieve available and matching connection profile(s)
-  std::vector<std::string> connection_profiles_a;
+//  std::vector<std::string> connection_profiles_a;
   std::string device_object_path_string, connection_object_path_string;
   std::string access_point_object_path_string;
-  for (DEVICEIDENTIFIERS_ITERATOR_T iterator = devices.begin ();
-       iterator != devices.end ();
-       ++iterator)
-  {
-    device_object_path_string =
-        (deviceIdentifier_in.empty () ? Net_Common_Tools::deviceToDBusPath (connection_,
-                                                                            *iterator)
-                                      : deviceDBusPath_);
-    if (device_object_path_string.empty ())
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::deviceToDBusPath(0x%@,\"%s\"), aborting\n"),
-                  connection_,
-                  ACE_TEXT ((*iterator).c_str ())));
-      goto error;
-    } // end IF
+//  for (DEVICEIDENTIFIERS_ITERATOR_T iterator = devices.begin ();
+//       iterator != devices.end ();
+//       ++iterator)
+//  {
     connection_object_path_string =
         Net_Common_Tools::SSIDToConnectionDBusPath (connection_,
-                                                    device_object_path_string,
                                                     SSID_in);
     if (connection_object_path_string.empty ())
-      continue;
-    connection_profiles_a.push_back (connection_object_path_string);
-  } // end FOR
-  if (connection_profiles_a.empty ())
+//      continue;
+//    connection_profiles_a.push_back (connection_object_path_string);
+//  } // end FOR
+//  if (connection_profiles_a.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("found no connection profiles (SSID was: %s), aborting\n"),
                 ACE_TEXT (SSID_in.c_str ())));
     goto error;
   } // end IF
-  else if (connection_profiles_a.size () > 1)
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("found several connection profiles for SSID %s, activating the first one\n"),
-                ACE_TEXT (SSID_in.c_str ())));
+//  else if (connection_profiles_a.size () > 1)
+//    ACE_DEBUG ((LM_WARNING,
+//                ACE_TEXT ("found several connection profiles for SSID %s, activating the first one\n"),
+//                ACE_TEXT (SSID_in.c_str ())));
+//  connection_object_path_string = connection_profiles_a.front ();
 
-  connection_object_path_string = connection_profiles_a.front ();
+  device_object_path_string =
+      Net_Common_Tools::SSIDToDeviceDBusPath (connection_,
+                                              SSID_in);
+  if (device_object_path_string.empty ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::SSIDToDeviceDBusPath(0x%@,%s), aborting\n"),
+                connection_,
+                ACE_TEXT (SSID_in.c_str ())));
+    goto error;
+  } // end IF
+
   access_point_object_path_string =
       Net_Common_Tools::SSIDToAccessPointDBusPath (connection_,
                                                    SSID_in);
@@ -857,6 +856,12 @@ error:
                 ACE_TEXT (access_point_object_path_string.c_str ())));
     goto error;
   } // end IF
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("failed to Net_Common_Tools::activateConnection(0x%@,\"%s\",\"%s\",\"%s\"), aborting\n"),
+              connection_,
+              ACE_TEXT (connection_object_path_string.c_str ()),
+              ACE_TEXT (Net_Common_Tools::deviceDBusPathToIdentifier (connection_,device_object_path_string).c_str ()),
+              ACE_TEXT (access_point_object_path_string.c_str ())));
 
   goto continue_;
 

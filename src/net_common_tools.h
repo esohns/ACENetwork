@@ -234,7 +234,6 @@ class Net_Common_Tools
   static std::string SSIDToDeviceDBusPath (struct DBusConnection*, // D-Bus connection handle
                                            const std::string&);    // SSID
   static std::string SSIDToConnectionDBusPath (struct DBusConnection*, // D-Bus connection handle
-                                               const std::string&,     // device object path
                                                const std::string&);    // SSID
 #endif
 
