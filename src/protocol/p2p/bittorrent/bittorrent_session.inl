@@ -1616,7 +1616,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::error"));
 
-  std::string message_text = BitTorrent_Tools::Record2String (record_in);
+  std::string message_text = BitTorrent_Tools::RecordToString (record_in);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("received error message: \"%s\"\n"),
               ACE_TEXT (message_text.c_str ())));
@@ -1670,7 +1670,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::log"));
 
-  std::string message_text = BitTorrent_Tools::Record2String (record_in);
+  std::string message_text = BitTorrent_Tools::RecordToString (record_in);
   log (std::string (), // --> server log
        message_text);
 }

@@ -33,6 +33,7 @@
 
 #include "bittorrent_common.h"
 #include "bittorrent_exports.h"
+#include "bittorrent_tools.h"
 //#include "bittorrent_stream_common.h"
 
 // forward declaration(s)
@@ -121,7 +122,7 @@ class BitTorrent_Message_T
   virtual ~BitTorrent_Message_T ();
 
   //virtual enum BitTorrent_MessageType command () const; // return value: message type
-  inline static std::string Command2String (enum BitTorrent_MessageType type_in) { return BitTorrent_Tools::TypeToString (type_in); };
+  inline static std::string CommandToString (enum BitTorrent_MessageType type_in) { return BitTorrent_Tools::TypeToString (type_in); };
 
   // implement Common_IDumpState
   virtual void dump_state () const;

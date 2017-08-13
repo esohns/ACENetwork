@@ -29,7 +29,6 @@
 
 #include "bittorrent_common.h"
 #include "bittorrent_defines.h"
-#include "bittorrent_tools.h"
 
 template <typename SessionDataType,
           typename UserDataType>

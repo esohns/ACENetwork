@@ -22,6 +22,7 @@
 
 #include "common_timer_manager_common.h"
 
+#include "stream_dec_common.h"
 #include "stream_dec_tools.h"
 
 #include "net_defines.h"

@@ -337,7 +337,7 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
   if (inherited2::trace_)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
-                ACE_TEXT (BitTorrent_Tools::Record2String (record_r).c_str ())));
+                ACE_TEXT (BitTorrent_Tools::RecordToString (record_r).c_str ())));
 
   // set new head fragment ?
   ACE_Message_Block* message_block_p = headFragment_;
@@ -409,7 +409,7 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
   if (inherited2::trace_)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
-                ACE_TEXT (BitTorrent_Tools::HandShake2String (*handshake_inout).c_str ())));
+                ACE_TEXT (BitTorrent_Tools::HandShakeToString (*handshake_inout).c_str ())));
 
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
       const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
