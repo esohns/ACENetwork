@@ -24,7 +24,7 @@
 #include "ace/Global_Macros.h"
 
 #include "stream_headmoduletask_base.h"
-#include "stream_statistichandler.h"
+//#include "stream_statistichandler.h"
 #include "stream_task_base_synch.h"
 
 #include "dhcp_defines.h"
@@ -115,7 +115,8 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,          // session data
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StatisticHandlerType>
 class DHCP_Module_ParserH_T
  : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
@@ -129,6 +130,7 @@ class DHCP_Module_ParserH_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
+                                      StatisticHandlerType,
                                       struct Stream_UserData>
 {
   typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
@@ -143,6 +145,7 @@ class DHCP_Module_ParserH_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
+                                      StatisticHandlerType,
                                       struct Stream_UserData> inherited;
 
  public:
@@ -154,7 +157,7 @@ class DHCP_Module_ParserH_T
 #endif
                          bool = false,                   // auto-start ?
                          bool = true);                   // generate session messages ?
-  virtual ~DHCP_Module_ParserH_T ();
+  inline virtual ~DHCP_Module_ParserH_T () {};
 
   // *PORTABILITY*: for some reason, this base class member is not exposed
   //                (MSVC/gcc)
@@ -170,7 +173,8 @@ class DHCP_Module_ParserH_T
                                     SessionDataType,
                                     SessionDataContainerType,
                                     StatisticContainerType,
-                                    Stream_UserData>::initialize;
+                                    StatisticHandlerType,
+                                    struct Stream_UserData>::initialize;
 
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const ConfigurationType&,
@@ -193,13 +197,8 @@ class DHCP_Module_ParserH_T
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_ParserH_T& operator= (const DHCP_Module_ParserH_T&))
 
   // convenience types
-  typedef Stream_StatisticHandler_Reactor_T<StatisticContainerType> STATISTICHANDLER_T;
+  //typedef Stream_StatisticHandler_Reactor_T<StatisticContainerType> STATISTICHANDLER_T;
   typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
-//  typedef typename DataMessageType::DATA_T DATA_CONTAINER_T;
-//  typedef typename DataMessageType::DATA_T::DATA_T DATA_T;
-
-  // helper methods
-  //bool putStatisticMessage (const StatisticContainerType&) const;
 
   // driver
   DHCP_ParserDriver driver_;

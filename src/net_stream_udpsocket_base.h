@@ -48,6 +48,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           ////////////////////////////////
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
@@ -63,6 +64,7 @@ class Net_StreamUDPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType>
 {
   friend class ACE_Connector<Net_StreamUDPSocketBase_T<HandlerType,
@@ -70,6 +72,7 @@ class Net_StreamUDPSocketBase_T
                                                        ConfigurationType,
                                                        StateType,
                                                        StatisticContainerType,
+                                                       StatisticHandlerType,
                                                        HandlerConfigurationType,
                                                        StreamType,
                                                        UserDataType,
@@ -114,6 +117,7 @@ class Net_StreamUDPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType> CONNECTION_BASE_T;
 
  protected:
@@ -158,6 +162,7 @@ class Net_StreamUDPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType> inherited2;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
@@ -177,6 +182,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           ////////////////////////////////
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
@@ -192,6 +198,7 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -203,6 +210,7 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType>
 {
   friend class ACE_Connector<Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
@@ -211,6 +219,7 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                                                        ConfigurationType,
                                                        StateType,
                                                        StatisticContainerType,
+                                                       StatisticHandlerType,
                                                        HandlerConfigurationType,
                                                        StreamType,
                                                        UserDataType,
@@ -259,6 +268,7 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType> CONNECTION_BASE_T;
 
  protected:
@@ -298,6 +308,7 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType> inherited2;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
@@ -319,6 +330,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           ////////////////////////////////
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
@@ -333,6 +345,7 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -343,6 +356,7 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType>
 {
   friend class ACE_Connector<Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
@@ -350,6 +364,7 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                                        ConfigurationType,
                                                        StateType,
                                                        StatisticContainerType,
+                                                       StatisticHandlerType,
                                                        HandlerConfigurationType,
                                                        StreamType,
                                                        UserDataType,
@@ -398,6 +413,7 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType> CONNECTION_BASE_T;
 
  protected:
@@ -436,6 +452,7 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType> inherited2;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.

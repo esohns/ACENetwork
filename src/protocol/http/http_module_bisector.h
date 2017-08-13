@@ -52,7 +52,8 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,          // session data
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StatisticHandlerType>
 class HTTP_Module_Bisector_T
  : public Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
                                       TimePolicyType,
@@ -66,12 +67,33 @@ class HTTP_Module_Bisector_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
-                                      Stream_UserData>
+                                      StatisticHandlerType,
+                                      struct Stream_UserData>
 {
+  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
+                                      TimePolicyType,
+                                      ControlMessageType,
+                                      DataMessageType,
+                                      SessionMessageType,
+                                      ConfigurationType,
+                                      StreamControlType,
+                                      StreamNotificationType,
+                                      StreamStateType,
+                                      SessionDataType,
+                                      SessionDataContainerType,
+                                      StatisticContainerType,
+                                      StatisticHandlerType,
+                                      struct Stream_UserData> inherited;
+
  public:
-  HTTP_Module_Bisector_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
-                          bool = false,              // auto-start ?
-                          bool = true);              // generate session messages ?
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  HTTP_Module_Bisector_T (ISTREAM_T*,                     // stream handle
+#else
+  HTTP_Module_Bisector_T (typename inherited::ISTREAM_T*, // stream handle
+#endif
+                          bool = false,                   // auto-start ?
+                          bool = true);                   // generate session messages ?
   virtual ~HTTP_Module_Bisector_T ();
 
 //#if defined (__GNUG__) || defined (_MSC_VER)
@@ -82,7 +104,8 @@ class HTTP_Module_Bisector_T
 #endif
 
   // override (part of) Stream_IModuleHandler_T
-  virtual bool initialize (const ConfigurationType&);
+  virtual bool initialize (const ConfigurationType&,
+                           Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
@@ -98,20 +121,6 @@ class HTTP_Module_Bisector_T
   //virtual void report () const;
 
  private:
-  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
-                                      TimePolicyType,
-                                      ControlMessageType,
-                                      DataMessageType,
-                                      SessionMessageType,
-                                      ConfigurationType,
-                                      StreamControlType,
-                                      StreamNotificationType,
-                                      StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
-                                      StatisticContainerType,
-                                      Stream_UserData> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Bisector_T ())
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Bisector_T (const HTTP_Module_Bisector_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Module_Bisector_T& operator= (const HTTP_Module_Bisector_T&))

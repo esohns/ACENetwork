@@ -34,7 +34,7 @@
 #include "stream_statemachine_control.h"
 #include "stream_streammodule_base.h"
 
-#include "net_module_runtimestatistic.h"
+#include "stream_stat_statistic_report.h"
 
 #include "http_codes.h"
 #include "http_common.h"
@@ -53,6 +53,7 @@ template <typename StreamStateType,
           typename ConfigurationType,
           ////////////////////////////////
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           ////////////////////////////////
           typename ModuleHandlerConfigurationType,
           ////////////////////////////////
@@ -103,7 +104,7 @@ class HTTP_Stream_T
 
  public:
   HTTP_Stream_T ();
-  virtual ~HTTP_Stream_T ();
+  inline virtual ~HTTP_Stream_T () { inherited::shutdown (); };
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ModuleList_t&, // return value: module list
@@ -142,6 +143,7 @@ class HTTP_Stream_T
                                 SessionDataType,
                                 SessionDataContainerType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 UserDataType> PARSER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
@@ -154,22 +156,28 @@ class HTTP_Stream_T
                                 STREAMER_T,
                                 PARSER_T> MODULE_MARSHAL_T;
 
-  typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
-                                            Common_TimePolicy_t,
-                                            ModuleHandlerConfigurationType,
-                                            ControlMessageType,
-                                            DataMessageType,
-                                            SessionMessageType,
-                                            HTTP_Method_t,
-                                            HTTP_RuntimeStatistic_t> STATISTIC_READER_T;
-  typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
-                                            Common_TimePolicy_t,
-                                            ModuleHandlerConfigurationType,
-                                            ControlMessageType,
-                                            DataMessageType,
-                                            SessionMessageType,
-                                            HTTP_Method_t,
-                                            HTTP_RuntimeStatistic_t> STATISTIC_WRITER_T;
+  typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+                                                        Common_TimePolicy_t,
+                                                        ModuleHandlerConfigurationType,
+                                                        ControlMessageType,
+                                                        DataMessageType,
+                                                        SessionMessageType,
+                                                        HTTP_Method_t,
+                                                        HTTP_Statistic_t,
+                                                        StatisticHandlerType,
+                                                        SessionDataType,
+                                                        SessionDataContainerType> STATISTIC_READER_T;
+  typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+                                                        Common_TimePolicy_t,
+                                                        ModuleHandlerConfigurationType,
+                                                        ControlMessageType,
+                                                        DataMessageType,
+                                                        SessionMessageType,
+                                                        HTTP_Method_t,
+                                                        HTTP_Statistic_t,
+                                                        StatisticHandlerType,
+                                                        SessionDataType,
+                                                        SessionDataContainerType> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 Stream_SessionId_t,

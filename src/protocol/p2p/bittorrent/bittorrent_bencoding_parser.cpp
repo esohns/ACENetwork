@@ -429,35 +429,35 @@ namespace yy {
       case 8: // "list"
 
 
-        { debug_stream () << BitTorrent_Tools::List2String (*(yysym.value.lval)); }
+        { debug_stream () << BitTorrent_Tools::ListToString (*(yysym.value.lval)); }
 
         break;
 
       case 9: // "dictionary"
 
 
-        { debug_stream () << BitTorrent_Tools::Dictionary2String (*(yysym.value.dval)); }
+        { debug_stream () << BitTorrent_Tools::DictionaryToString (*(yysym.value.dval)); }
 
         break;
 
       case 11: // bencoding
 
 
-        { debug_stream () << BitTorrent_Tools::Dictionary2String (*(yysym.value.dval)); }
+        { debug_stream () << BitTorrent_Tools::DictionaryToString (*(yysym.value.dval)); }
 
         break;
 
       case 13: // list_items
 
 
-        { debug_stream () << BitTorrent_Tools::List2String (*(yysym.value.lval)); }
+        { debug_stream () << BitTorrent_Tools::ListToString (*(yysym.value.lval)); }
 
         break;
 
       case 17: // dictionary_items
 
 
-        { debug_stream () << BitTorrent_Tools::Dictionary2String (*(yysym.value.dval)); }
+        { debug_stream () << BitTorrent_Tools::DictionaryToString (*(yysym.value.dval)); }
 
         break;
 

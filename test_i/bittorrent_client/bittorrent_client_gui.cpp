@@ -111,7 +111,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-d              : debug [")
-            << (NET_PROTOCOL_DEFAULT_LEX_TRACE || NET_PROTOCOL_DEFAULT_YACC_TRACE)
+            << (NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE || NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   path = configuration_path;
@@ -198,7 +198,7 @@ do_processArguments (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE);
 
   debug_out                      =
-    (NET_PROTOCOL_DEFAULT_LEX_TRACE || NET_PROTOCOL_DEFAULT_YACC_TRACE);
+    (NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE || NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE);
 
   UIRCFile_out                   = configuration_path;
   UIRCFile_out                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -1108,7 +1108,7 @@ ACE_TMAIN (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_CNF_DEFAULT_INI_FILE);
 
   bool debug                                 =
-    (NET_PROTOCOL_DEFAULT_LEX_TRACE || NET_PROTOCOL_DEFAULT_YACC_TRACE);
+    (NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE || NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE);
 
   std::string rc_file_name                 = configuration_path;
   rc_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;

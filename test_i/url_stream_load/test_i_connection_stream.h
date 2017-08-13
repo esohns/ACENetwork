@@ -51,7 +51,7 @@ class Test_I_ConnectionStream
                         enum Stream_StateMachine_ControlState,
                         struct Test_I_URLStreamLoad_StreamState,
                         struct Test_I_URLStreamLoad_StreamConfiguration,
-                        HTTP_RuntimeStatistic_t,
+                        HTTP_Statistic_t,
                         struct Test_I_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
@@ -69,7 +69,7 @@ class Test_I_ConnectionStream
                         enum Stream_StateMachine_ControlState,
                         struct Test_I_URLStreamLoad_StreamState,
                         struct Test_I_URLStreamLoad_StreamConfiguration,
-                        HTTP_RuntimeStatistic_t,
+                        HTTP_Statistic_t,
                         struct Test_I_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
@@ -92,7 +92,7 @@ class Test_I_ConnectionStream
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
-  virtual bool collect (HTTP_RuntimeStatistic_t&); // return value: statistic data
+  virtual bool collect (HTTP_Statistic_t&); // return value: statistic data
   virtual void report () const;
 
   // *TODO*: re-consider this API

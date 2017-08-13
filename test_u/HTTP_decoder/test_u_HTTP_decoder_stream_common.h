@@ -39,8 +39,6 @@
 #include "http_common.h"
 #include "http_configuration.h"
 
-//#include "test_u_common.h"
-//#include "test_u_connection_common.h"
 #include "test_u_stream_common.h"
 
 // forward declarations
@@ -96,7 +94,7 @@ struct Test_U_ConnectionState;
 typedef Net_IConnection_T<ACE_INET_Addr,
                           struct Test_U_ConnectionConfiguration,
                           struct Test_U_ConnectionState,
-                          HTTP_RuntimeStatistic_t> Test_U_IConnection_t;
+                          HTTP_Statistic_t> Test_U_IConnection_t;
 struct Test_U_ConnectionConfiguration;
 typedef std::map<std::string,
                  struct Test_U_ConnectionConfiguration> Test_U_ConnectionConfigurations_t;
@@ -104,12 +102,12 @@ typedef Test_U_ConnectionConfigurations_t::iterator Test_U_ConnectionConfigurati
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
-                                 HTTP_RuntimeStatistic_t,
+                                 HTTP_Statistic_t,
                                  struct Test_U_UserData> Test_U_ConnectionManager_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
-                                 HTTP_RuntimeStatistic_t,
+                                 HTTP_Statistic_t,
                                  struct Test_U_UserData> Test_U_IConnectionManager_t;
 //extern const char stream_name_string_[];
 struct Test_U_AllocatorConfiguration;
@@ -131,12 +129,13 @@ struct Test_U_ModuleHandlerConfiguration
    , connectionManager (NULL)
    , dumpFileName ()
    , hostName ()
-   , inbound (true)
    , printProgressDot (true)
    , streamConfiguration (NULL)
    , targetFileName ()
    , URL ()
-  {};
+  {
+    inbound = true;
+  };
 
   struct Test_U_Configuration*       configuration;
   Test_U_IConnection_t*              connection; // TCP target/IO module
@@ -144,7 +143,6 @@ struct Test_U_ModuleHandlerConfiguration
   Test_U_IConnectionManager_t*       connectionManager; // TCP IO module
   std::string                        dumpFileName; // file writer module (HTTP)
   std::string                        hostName; // net source module
-  bool                               inbound; // net io module
   bool                               printProgressDot; // file writer module
   Test_U_StreamConfiguration_t*      streamConfiguration;
   std::string                        targetFileName; // file writer module (HTML)

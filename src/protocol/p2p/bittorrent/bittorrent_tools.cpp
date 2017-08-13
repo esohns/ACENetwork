@@ -19,12 +19,13 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include "ace/Synch.h"
 #include "bittorrent_tools.h"
 
 #include <regex>
 #include <sstream>
 
-#include <openssl/sha.h>
+#include "openssl/sha.h"
 
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"
@@ -37,16 +38,15 @@
 #include "libACENetwork_config.h"
 #endif
 
-#include "ace/Synch.h"
 #include "bittorrent_bencoding_scanner.h"
 #include "bittorrent_bencoding_parser_driver.h"
 #include "bittorrent_defines.h"
 #include "bittorrent_stream_common.h"
 
 std::string
-BitTorrent_Tools::HandShake2String (const struct BitTorrent_PeerHandShake& peerHandshake_in)
+BitTorrent_Tools::HandShakeToString (const struct BitTorrent_PeerHandShake& peerHandshake_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::HandShake2String"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::HandShakeToString"));
 
   std::string result;
   std::ostringstream converter;
@@ -54,9 +54,9 @@ BitTorrent_Tools::HandShake2String (const struct BitTorrent_PeerHandShake& peerH
   return result;
 }
 std::string
-BitTorrent_Tools::Record2String (const struct BitTorrent_PeerRecord& peerRecord_in)
+BitTorrent_Tools::RecordToString (const struct BitTorrent_PeerRecord& peerRecord_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::Record2String"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::RecordToString"));
 
   std::string result;
   std::ostringstream converter;
@@ -65,9 +65,9 @@ BitTorrent_Tools::Record2String (const struct BitTorrent_PeerRecord& peerRecord_
 }
 
 std::string
-BitTorrent_Tools::Type2String (enum BitTorrent_MessageType& type_in)
+BitTorrent_Tools::TypeToString (enum BitTorrent_MessageType& type_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::Type2String"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::TypeToString"));
 
   // initialize result
   std::string result = ACE_TEXT_ALWAYS_CHAR ("INVALID/UNKNOWN");
@@ -105,9 +105,9 @@ BitTorrent_Tools::Type2String (enum BitTorrent_MessageType& type_in)
 }
 
 std::string
-BitTorrent_Tools::MetaInfo2InfoHash (const Bencoding_Dictionary_t& metaInfo_out)
+BitTorrent_Tools::MetaInfoToInfoHash (const Bencoding_Dictionary_t& metaInfo_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::MetaInfo2InfoHash"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::MetaInfoToInfoHash"));
 
   std::string result;
 
@@ -140,9 +140,9 @@ BitTorrent_Tools::MetaInfo2InfoHash (const Bencoding_Dictionary_t& metaInfo_out)
 }
 
 unsigned int
-BitTorrent_Tools::MetaInfo2Length (const Bencoding_Dictionary_t& metaInfo_in)
+BitTorrent_Tools::MetaInfoToLength (const Bencoding_Dictionary_t& metaInfo_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::MetaInfo2Length"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::MetaInfoToLength"));
 
   std::string key = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_METAINFO_INFO_KEY);
 //  Bencoding_DictionaryIterator_t iterator = metaInfo_in.find (&key);
@@ -414,9 +414,9 @@ BitTorrent_Tools::torrentSupportsScrape (const std::string& announceURL_in)
                                ++position) == position);
 }
 std::string
-BitTorrent_Tools::AnnounceURL2ScrapeURL (const std::string& announceURL_in)
+BitTorrent_Tools::AnnounceURLToScrapeURL (const std::string& announceURL_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::AnnounceURL2ScrapeURL"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::AnnounceURLToScrapeURL"));
 
   std::string result;
 
@@ -443,9 +443,9 @@ BitTorrent_Tools::AnnounceURL2ScrapeURL (const std::string& announceURL_in)
 }
 
 std::string
-BitTorrent_Tools::Dictionary2String (const Bencoding_Dictionary_t& dictionary_in)
+BitTorrent_Tools::DictionaryToString (const Bencoding_Dictionary_t& dictionary_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::Dictionary2String"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::DictionaryToString"));
 
   std::string result (ACE_TEXT_ALWAYS_CHAR ("dictionary:\n"));
 
@@ -476,12 +476,12 @@ BitTorrent_Tools::Dictionary2String (const Bencoding_Dictionary_t& dictionary_in
       }
       case Bencoding_Element::BENCODING_TYPE_LIST:
       {
-        result += BitTorrent_Tools::List2String (*(*iterator).second->list);
+        result += BitTorrent_Tools::ListToString (*(*iterator).second->list);
         break;
       }
       case Bencoding_Element::BENCODING_TYPE_DICTIONARY:
       {
-        result += BitTorrent_Tools::Dictionary2String (*(*iterator).second->dictionary);
+        result += BitTorrent_Tools::DictionaryToString (*(*iterator).second->dictionary);
         break;
       }
       default:
@@ -497,9 +497,9 @@ BitTorrent_Tools::Dictionary2String (const Bencoding_Dictionary_t& dictionary_in
   return result;
 }
 std::string
-BitTorrent_Tools::List2String (const Bencoding_List_t& list_in)
+BitTorrent_Tools::ListToString (const Bencoding_List_t& list_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::List2String"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::ListToString"));
 
   std::string result (ACE_TEXT_ALWAYS_CHAR ("list:\n"));
 
@@ -526,12 +526,12 @@ BitTorrent_Tools::List2String (const Bencoding_List_t& list_in)
       }
       case Bencoding_Element::BENCODING_TYPE_LIST:
       {
-        result += BitTorrent_Tools::List2String (*(*iterator)->list);
+        result += BitTorrent_Tools::ListToString (*(*iterator)->list);
         break;
       }
       case Bencoding_Element::BENCODING_TYPE_DICTIONARY:
       {
-        result += BitTorrent_Tools::Dictionary2String (*(*iterator)->dictionary);
+        result += BitTorrent_Tools::DictionaryToString (*(*iterator)->dictionary);
         break;
       }
       default:
@@ -548,11 +548,11 @@ BitTorrent_Tools::List2String (const Bencoding_List_t& list_in)
 }
 
 std::string
-BitTorrent_Tools::MetaInfo2String (const Bencoding_Dictionary_t& metaInfo_in)
+BitTorrent_Tools::MetaInfoToString (const Bencoding_Dictionary_t& metaInfo_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::MetaInfo2String"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Tools::MetaInfoToString"));
 
-  return BitTorrent_Tools::Dictionary2String (metaInfo_in);
+  return BitTorrent_Tools::DictionaryToString (metaInfo_in);
 }
 
 std::string

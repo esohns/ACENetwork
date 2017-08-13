@@ -31,14 +31,17 @@
 #include "irc_stream.h"
 #include "irc_stream_common.h"
 
-//#include "IRC_client_configuration.h"
-#include "IRC_client_sessionmessage.h"
 #include "IRC_client_stream_common.h"
 
-class IRC_Client_Stream
+// forward declarations
+class IRC_Client_SessionMessage;
+
+template <typename StatisticHandlerType>
+class IRC_Client_Stream_T
  : public IRC_Stream_T<struct IRC_Client_StreamState,
                        struct IRC_Client_StreamConfiguration,
-                       IRC_RuntimeStatistic_t,
+                       IRC_Statistic_t,
+                       StatisticHandlerType,
                        struct IRC_Client_ModuleHandlerConfiguration,
                        struct IRC_Client_SessionData,
                        IRC_Client_SessionData_t,
@@ -49,7 +52,8 @@ class IRC_Client_Stream
 {
   typedef IRC_Stream_T<struct IRC_Client_StreamState,
                        struct IRC_Client_StreamConfiguration,
-                       IRC_RuntimeStatistic_t,
+                       IRC_Statistic_t,
+                       StatisticHandlerType,
                        struct IRC_Client_ModuleHandlerConfiguration,
                        struct IRC_Client_SessionData,
                        IRC_Client_SessionData_t,
@@ -59,22 +63,35 @@ class IRC_Client_Stream
                        struct IRC_Client_UserData> inherited;
 
  public:
-  IRC_Client_Stream (); // name
-  virtual ~IRC_Client_Stream ();
+  IRC_Client_Stream_T (); // name
+  virtual ~IRC_Client_Stream_T ();
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ModuleList_t&, // return value: module list
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual bool initialize (const CONFIGURATION_T&); // configuration
+#else
   virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
+#endif
 
   // *TODO*: remove this API
   void ping ();
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream (const IRC_Client_Stream&))
-  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream& operator= (const IRC_Client_Stream&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream_T (const IRC_Client_Stream_T&))
+  ACE_UNIMPLEMENTED_FUNC (IRC_Client_Stream_T& operator= (const IRC_Client_Stream_T&))
 };
+
+// include template definition
+#include "IRC_client_stream.inl"
+
+//////////////////////////////////////////
+
+typedef IRC_Client_Stream_T<IRC_StatisticHandler_Reactor_t> IRC_Client_Stream_t;
+typedef IRC_Client_Stream_T<IRC_StatisticHandler_Proactor_t> IRC_Client_AsynchStream_t;
 
 #endif

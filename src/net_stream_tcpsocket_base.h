@@ -45,6 +45,7 @@ template <typename HandlerType,
           typename ConfigurationType, // connection-
           typename StateType, // connection-
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename StreamType,
           ////////////////////////////////
           typename UserDataType,
@@ -57,6 +58,7 @@ class Net_StreamTCPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType>
 {
   //friend class ACE_Acceptor<Net_StreamTCPSocketBase_T<HandlerType,
@@ -124,6 +126,7 @@ class Net_StreamTCPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType> CONNECTION_BASE_T;
 
  protected:
@@ -163,6 +166,7 @@ class Net_StreamTCPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType> inherited2;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.

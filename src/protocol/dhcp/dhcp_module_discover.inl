@@ -1024,7 +1024,8 @@ template <ACE_SYNCH_DECL,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StatisticHandlerType>
 DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         TimePolicyType,
                         ControlMessageType,
@@ -1036,13 +1037,14 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         StreamStateType,
                         SessionDataType,
                         SessionDataContainerType,
+                        StatisticContainerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                        StatisticContainerType>::DHCP_Module_DiscoverH_T (ISTREAM_T* stream_in,
+                        StatisticHandlerType>::DHCP_Module_DiscoverH_T (ISTREAM_T* stream_in,
 #else
-                        StatisticContainerType>::DHCP_Module_DiscoverH_T (typename inherited::ISTREAM_T* stream_in,
+                        StatisticHandlerType>::DHCP_Module_DiscoverH_T (typename inherited::ISTREAM_T* stream_in,
 #endif
-                                                                          bool autoStart_in,
-                                                                          bool generateSessionMessages_in)
+                                                                        bool autoStart_in,
+                                                                        bool generateSessionMessages_in)
  : inherited (stream_in,
               autoStart_in,
               STREAM_HEADMODULECONCURRENCY_PASSIVE,
@@ -1064,36 +1066,8 @@ template <ACE_SYNCH_DECL,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType>
-DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
-                        TimePolicyType,
-                        ControlMessageType,
-                        DataMessageType,
-                        SessionMessageType,
-                        ConfigurationType,
-                        StreamControlType,
-                        StreamNotificationType,
-                        StreamStateType,
-                        SessionDataType,
-                        SessionDataContainerType,
-                        StatisticContainerType>::~DHCP_Module_DiscoverH_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::~DHCP_Module_DiscoverH_T"));
-
-}
-
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename ConfigurationType,
-          typename StreamControlType,
-          typename StreamNotificationType,
-          typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StatisticHandlerType>
 bool
 DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         TimePolicyType,
@@ -1106,8 +1080,9 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         StreamStateType,
                         SessionDataType,
                         SessionDataContainerType,
-                        StatisticContainerType>::initialize (const ConfigurationType& configuration_in,
-                                                             Stream_IAllocator* allocator_in)
+                        StatisticContainerType,
+                        StatisticHandlerType>::initialize (const ConfigurationType& configuration_in,
+                                                           Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::initialize"));
 
@@ -1135,7 +1110,8 @@ template <ACE_SYNCH_DECL,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StatisticHandlerType>
 void
 DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         TimePolicyType,
@@ -1148,8 +1124,9 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         StreamStateType,
                         SessionDataType,
                         SessionDataContainerType,
-                        StatisticContainerType>::handleDataMessage (DataMessageType*& message_inout,
-                                                                    bool& passMessageDownstream_out)
+                        StatisticContainerType,
+                        StatisticHandlerType>::handleDataMessage (DataMessageType*& message_inout,
+                                                                  bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::handleDataMessage"));
 
@@ -1168,7 +1145,8 @@ template <ACE_SYNCH_DECL,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StatisticHandlerType>
 void
 DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         TimePolicyType,
@@ -1181,8 +1159,9 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         StreamStateType,
                         SessionDataType,
                         SessionDataContainerType,
-                        StatisticContainerType>::handleSessionMessage (SessionMessageType*& message_inout,
-                                                                       bool& passMessageDownstream_out)
+                        StatisticContainerType,
+                        StatisticHandlerType>::handleSessionMessage (SessionMessageType*& message_inout,
+                                                                     bool& passMessageDownstream_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::handleSessionMessage"));
 
@@ -1225,7 +1204,8 @@ template <ACE_SYNCH_DECL,
           typename StreamStateType,
           typename SessionDataType,
           typename SessionDataContainerType,
-          typename StatisticContainerType>
+          typename StatisticContainerType,
+          typename StatisticHandlerType>
 bool
 DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         TimePolicyType,
@@ -1238,7 +1218,8 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
                         StreamStateType,
                         SessionDataType,
                         SessionDataContainerType,
-                        StatisticContainerType>::collect (StatisticContainerType& data_out)
+                        StatisticContainerType,
+                        StatisticHandlerType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::collect"));
 

@@ -38,6 +38,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ProtocolHeaderType,
           typename UserDataType>
 Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
@@ -51,6 +52,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
+                              StatisticHandlerType,
                               ProtocolHeaderType,
                               UserDataType>::Net_Module_TCPSocketHandler_T (ISTREAM_T* stream_in,
                                                                             bool generateSessionMessages_in)
@@ -77,6 +79,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ProtocolHeaderType,
           typename UserDataType>
 Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
@@ -90,6 +93,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
+                              StatisticHandlerType,
                               ProtocolHeaderType,
                               UserDataType>::~Net_Module_TCPSocketHandler_T ()
 {
@@ -110,6 +114,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ProtocolHeaderType,
           typename UserDataType>
 bool
@@ -124,12 +129,12 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
+                              StatisticHandlerType,
                               ProtocolHeaderType,
-                              UserDataType>::initialize (const ConfigurationType& configuration_in)
+                              UserDataType>::initialize (const ConfigurationType& configuration_in,
+                                                         Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_TCPSocketHandler_T::initialize"));
-
-  bool result = false;
 
   if (inherited::isInitialized_)
   {
@@ -140,12 +145,8 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
     currentBuffer_ = NULL;
   } // end IF
 
-  result = inherited::initialize (configuration_in);
-  if (!result)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_HeadModuleTaskBase_T::initialize(): \"%m\", aborting\n")));
-
-  return result;
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 template <ACE_SYNCH_DECL,
@@ -159,6 +160,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ProtocolHeaderType,
           typename UserDataType>
 void
@@ -173,6 +175,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
+                              StatisticHandlerType,
                               ProtocolHeaderType,
                               UserDataType>::handleDataMessage (DataMessageType*& message_inout,
                                                                 bool& passMessageDownstream_out)
@@ -227,6 +230,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ProtocolHeaderType,
           typename UserDataType>
 void
@@ -241,6 +245,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
+                              StatisticHandlerType,
                               ProtocolHeaderType,
                               UserDataType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                                    bool& passMessageDownstream_out)
@@ -323,6 +328,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ProtocolHeaderType,
           typename UserDataType>
 bool
@@ -337,6 +343,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
+                              StatisticHandlerType,
                               ProtocolHeaderType,
                               UserDataType>::collect (StatisticContainerType& data_out)
 {
@@ -403,6 +410,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ProtocolHeaderType,
           typename UserDataType>
 bool
@@ -417,6 +425,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
+                              StatisticHandlerType,
                               ProtocolHeaderType,
                               UserDataType>::bisectMessages (DataMessageType*& message_out)
 {
@@ -645,6 +654,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               ControlMessageType,
@@ -657,6 +667,7 @@ Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
+                              StatisticHandlerType,
                               UserDataType>::Net_Module_UDPSocketHandler_T (ACE_SYNCH_MUTEX_T* lock_in,
                                                                             bool autoStart_in,
                                                                             bool generateSessionMessages_in)
@@ -679,35 +690,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename UserDataType>
-Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
-                              ControlMessageType,
-                              DataMessageType,
-                              SessionMessageType,
-                              ConfigurationType,
-                              StreamControlType,
-                              StreamNotificationType,
-                              StreamStateType,
-                              SessionDataType,
-                              SessionDataContainerType,
-                              StatisticContainerType,
-                              UserDataType>::~Net_Module_UDPSocketHandler_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::~Net_Module_UDPSocketHandler_T"));
-
-}
-
-template <ACE_SYNCH_DECL,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename ConfigurationType,
-          typename StreamControlType,
-          typename StreamNotificationType,
-          typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 bool
 Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
@@ -721,24 +704,18 @@ Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
-                              UserDataType>::initialize (const ConfigurationType& configuration_in)
+                              StatisticHandlerType,
+                              UserDataType>::initialize (const ConfigurationType& configuration_in,
+                                                         Stream_IAllocator* allocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::initialize"));
 
-  bool result = false;
-
   if (inherited::initialized_)
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("re-initializing...\n")));
   } // end IF
 
-  result = inherited::initialize (configuration_in);
-  if (!result)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Stream_HeadModuleTaskBase_T::initialize(): \"%m\", aborting\n")));
-
-  return result;
+  return inherited::initialize (configuration_in,
+                                allocator_in);
 }
 
 //template <typename StreamStateType,
@@ -765,6 +742,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 void
 Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
@@ -778,6 +756,7 @@ Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
+                              StatisticHandlerType,
                               UserDataType>::handleDataMessage (DataMessageType*& message_inout,
                                                                 bool& passMessageDownstream_out)
 {
@@ -813,6 +792,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 void
 Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
@@ -826,6 +806,7 @@ Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
+                              StatisticHandlerType,
                               UserDataType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                                    bool& passMessageDownstream_out)
 {
@@ -906,6 +887,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 bool
 Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
@@ -919,6 +901,7 @@ Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
+                              StatisticHandlerType,
                               UserDataType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::collect"));
@@ -982,12 +965,9 @@ Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
 //   // init return value(s)
 //   Net_Message* message_out = NULL;
 //
-//   try
-//   {
+//   try {
 //     message_out = static_cast<Net_Message*> (//inherited::allocator_->malloc (requestedSize_in));
-//   }
-//   catch (...)
-//   {
+//   } catch (...) {
 //     ACE_DEBUG ((LM_ERROR,
 //                 ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
 //                 requestedSize_in));

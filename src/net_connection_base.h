@@ -27,7 +27,6 @@
 #include "common_referencecounter_base.h"
 
 #include "stream_common.h"
-#include "stream_statistichandler.h"
 
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
@@ -39,6 +38,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           ////////////////////////////////
           typename UserDataType>
 class Net_ConnectionBase_T
@@ -104,11 +104,12 @@ class Net_ConnectionBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType> OWN_TYPE_T;
 
   // timer
-  Stream_StatisticHandler_Reactor_t statisticCollectHandler_;
-  long                              statisticCollectHandlerID_;
+  StatisticHandlerType statisticCollectHandler_;
+  long                 statisticCollectHandlerID_;
 };
 
 // include template definition

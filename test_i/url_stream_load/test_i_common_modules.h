@@ -30,7 +30,8 @@
 #include "stream_streammodule_base.h"
 
 #include "stream_misc_dump.h"
-#include "stream_misc_statistic_report.h"
+
+#include "stream_stat_statistic_report.h"
 
 #include "net_connection_manager.h"
 
@@ -48,7 +49,7 @@ class Test_I_Message;
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  struct Test_I_URLStreamLoad_ConnectionConfiguration,
                                  struct HTTP_ConnectionState,
-                                 HTTP_RuntimeStatistic_t,
+                                 HTTP_Statistic_t,
                                  struct HTTP_Stream_UserData> Test_I_ConnectionManager_t;
 
 // declare module(s)
@@ -69,31 +70,69 @@ typedef HTTP_Module_ParserH_T<ACE_MT_SYNCH,
                               struct Test_I_URLStreamLoad_StreamState,
                               struct Test_I_URLStreamLoad_SessionData,
                               Test_I_URLStreamLoad_SessionData_t,
-                              HTTP_RuntimeStatistic_t,
+                              HTTP_Statistic_t,
+                              HTTP_StatisticHandler_Reactor_t,
                               struct HTTP_Stream_UserData> Test_I_HTTPParser;
+typedef HTTP_Module_ParserH_T<ACE_MT_SYNCH,
+                              Common_TimePolicy_t,
+                              Test_I_ControlMessage_t,
+                              Test_I_Message,
+                              Test_I_SessionMessage,
+                              struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                              enum Stream_ControlType,
+                              enum Stream_SessionMessageType,
+                              struct Test_I_URLStreamLoad_StreamState,
+                              struct Test_I_URLStreamLoad_SessionData,
+                              Test_I_URLStreamLoad_SessionData_t,
+                              HTTP_Statistic_t,
+                              HTTP_StatisticHandler_Proactor_t,
+                              struct HTTP_Stream_UserData> Test_I_AsynchHTTPParser;
 
-typedef Stream_Module_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                    Common_TimePolicy_t,
                                                    struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
                                                    Test_I_ControlMessage_t,
                                                    Test_I_Message,
                                                    Test_I_SessionMessage,
                                                    HTTP_Method_t,
-                                                   HTTP_RuntimeStatistic_t,
+                                                   HTTP_Statistic_t,
+                                                   HTTP_StatisticHandler_Reactor_t,
                                                    struct Test_I_URLStreamLoad_SessionData,
                                                    Test_I_URLStreamLoad_SessionData_t> Test_I_StatisticReport_ReaderTask_t;
-typedef Stream_Module_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                    Common_TimePolicy_t,
                                                    struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
                                                    Test_I_ControlMessage_t,
                                                    Test_I_Message,
                                                    Test_I_SessionMessage,
                                                    HTTP_Method_t,
-                                                   HTTP_RuntimeStatistic_t,
+                                                   HTTP_Statistic_t,
+                                                   HTTP_StatisticHandler_Reactor_t,
                                                    struct Test_I_URLStreamLoad_SessionData,
                                                    Test_I_URLStreamLoad_SessionData_t> Test_I_StatisticReport_WriterTask_t;
+typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+                                                   Common_TimePolicy_t,
+                                                   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                                                   Test_I_ControlMessage_t,
+                                                   Test_I_Message,
+                                                   Test_I_SessionMessage,
+                                                   HTTP_Method_t,
+                                                   HTTP_Statistic_t,
+                                                   HTTP_StatisticHandler_Proactor_t,
+                                                   struct Test_I_URLStreamLoad_SessionData,
+                                                   Test_I_URLStreamLoad_SessionData_t> Test_I_StatisticReport_AsynchReaderTask_t;
+typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+                                                   Common_TimePolicy_t,
+                                                   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
+                                                   Test_I_ControlMessage_t,
+                                                   Test_I_Message,
+                                                   Test_I_SessionMessage,
+                                                   HTTP_Method_t,
+                                                   HTTP_Statistic_t,
+                                                   HTTP_StatisticHandler_Proactor_t,
+                                                   struct Test_I_URLStreamLoad_SessionData,
+                                                   Test_I_URLStreamLoad_SessionData_t> Test_I_StatisticReport_AsynchWriterTask_t;
 
-// declare module(s)
 DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,                // session data type
                           enum Stream_SessionMessageType,                         // session event type
                           struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
@@ -101,6 +140,13 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,              
                           Test_I_HTTPStreamer,                                    // reader type
                           Test_I_HTTPParser,                                      // writer type
                           Test_I_HTTPMarshal);                                    // name
+DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,                // session data type
+                          enum Stream_SessionMessageType,                         // session event type
+                          struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
+                          Test_I_IStreamNotify_t,                                 // stream notification interface type
+                          Test_I_HTTPStreamer,                                    // reader type
+                          Test_I_AsynchHTTPParser,                                // writer type
+                          Test_I_AsynchHTTPMarshal);                              // name
 
 DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,                // session data type
                           enum Stream_SessionMessageType,                         // session event type
@@ -109,5 +155,12 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,              
                           Test_I_StatisticReport_ReaderTask_t,                    // reader type
                           Test_I_StatisticReport_WriterTask_t,                    // writer type
                           Test_I_StatisticReport);                                // name
+DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,                // session data type
+                          enum Stream_SessionMessageType,                         // session event type
+                          struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
+                          Test_I_IStreamNotify_t,                                 // stream notification interface type
+                          Test_I_StatisticReport_AsynchReaderTask_t,              // reader type
+                          Test_I_StatisticReport_AsynchWriterTask_t,              // writer type
+                          Test_I_AsynchStatisticReport);                          // name
 
 #endif

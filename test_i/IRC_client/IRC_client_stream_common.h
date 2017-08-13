@@ -38,7 +38,7 @@
 #include "stream_session_data.h"
 
 #include "irc_icontrol.h"
-//#include "irc_message.h"
+#include "irc_common.h"
 #include "irc_record.h"
 #include "irc_stream_common.h"
 

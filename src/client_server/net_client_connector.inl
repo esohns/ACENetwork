@@ -420,7 +420,7 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Client_Connector_T::activate_svc_handler(), (address was: \"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to Net_Client_Connector_T::activate_svc_handler(), (address was: %s): \"%m\", aborting\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     return ACE_INVALID_HANDLE;
   } // end IF

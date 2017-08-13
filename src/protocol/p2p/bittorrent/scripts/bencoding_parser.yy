@@ -213,9 +213,9 @@ void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
 /*%printer    { yyoutput << $$; } <*>;*/
 %printer    { debug_stream () << $$; } <ival>
 %printer    { debug_stream () << *$$; } <sval>
-/*%printer    { yyoutput << BitTorrent_Tools::List2String (*$$); } <eval>*/
-%printer    { debug_stream () << BitTorrent_Tools::List2String (*$$); } <lval>
-%printer    { debug_stream () << BitTorrent_Tools::Dictionary2String (*$$); } <dval>
+/*%printer    { yyoutput << BitTorrent_Tools::ListToString (*$$); } <eval>*/
+%printer    { debug_stream () << BitTorrent_Tools::ListToString (*$$); } <lval>
+%printer    { debug_stream () << BitTorrent_Tools::DictionaryToString (*$$); } <dval>
 
 %%
 %start            bencoding;
@@ -344,7 +344,7 @@ dictionary_value: "string" {
                                 ACE_TEXT ("[dictionary: %@] key: \"%s\": \"%s\"\n"),
                                 &dictionary_r,
                                 ACE_TEXT (key_string_p->c_str ()),
-                                ACE_TEXT (BitTorrent_Tools::List2String (*$3).c_str ()))); }*/
+                                ACE_TEXT (BitTorrent_Tools::ListToString (*$3).c_str ()))); }*/
                   | "dictionary"  {
                     parser->pushDictionary ($1); }
                   dictionary_items "dictionary_end" {
@@ -368,7 +368,7 @@ dictionary_value: "string" {
                                 ACE_TEXT ("[dictionary: %@] key: \"%s\": \"%s\"\n"),
                                 &dictionary_r,
                                 ACE_TEXT (key_string_p->c_str ()),
-                                ACE_TEXT (BitTorrent_Tools::Dictionary2String (*$3).c_str ()))); }*/
+                                ACE_TEXT (BitTorrent_Tools::DictionaryToString (*$3).c_str ()))); }*/
 %%
 
 void

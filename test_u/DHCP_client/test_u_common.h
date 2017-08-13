@@ -80,7 +80,7 @@ struct Test_U_AllocatorConfiguration
   {
     // *NOTE*: this facilitates (message block) data buffers to be scanned with
     //         'flex's yy_scan_buffer() method
-    paddingBytes = NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE;
+    paddingBytes = NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
   };
 };
 
@@ -119,7 +119,7 @@ struct Test_U_ConnectionState;
 typedef Net_IConnection_T<ACE_INET_Addr,
                           struct Test_U_ConnectionConfiguration,
                           struct Test_U_ConnectionState,
-                          DHCP_RuntimeStatistic_t> Test_U_IConnection_t;
+                          DHCP_Statistic_t> Test_U_IConnection_t;
 
 struct Test_U_DHCPClient_SessionData
  : Test_U_StreamSessionData
@@ -170,7 +170,7 @@ typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 //typedef Net_IConnectionManager_T<ACE_INET_Addr,
 //                                 Test_U_Configuration,
 //                                 Test_U_ConnectionState,
-//                                 DHCP_RuntimeStatistic_t,
+//                                 DHCP_Statistic_t,
 //                                 Test_U_UserData> Test_U_IConnectionManager_t;
 
 // forward declarations
@@ -191,20 +191,19 @@ struct Test_U_StreamModuleHandlerConfiguration
    , broadcastConnection (NULL)
    , connectionConfigurations (NULL)
    //, contextID (0)
-   , inbound (true)
-   , passive (false)
    , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
-  {};
+  {
+    inbound = true;
+    passive = false;
+  };
 
   Test_U_IConnection_t*              broadcastConnection; // UDP target/net IO module
   Test_U_ConnectionConfigurations_t* connectionConfigurations;
   //struct Test_U_Configuration*              configuration;
   //guint                                     contextID;
-  bool                               inbound; // net IO module
-  bool                               passive; // UDP target module
   Test_U_StreamConfiguration_t*      streamConfiguration; // dhcp discover module
   Test_U_ISessionNotify_t*           subscriber;
   Test_U_Subscribers_t*              subscribers;
@@ -238,8 +237,6 @@ struct Test_U_ListenerConfiguration
 typedef Net_IListener_T<struct Test_U_ListenerConfiguration,
                         struct Test_U_SocketHandlerConfiguration> Test_U_IListener_t;
 
-typedef Common_IStatistic_T<DHCP_RuntimeStatistic_t> Test_U_StatisticReportingHandler_t;
-
 struct Test_U_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
@@ -250,9 +247,9 @@ struct Test_U_SignalHandlerConfiguration
    , statisticReportingTimerID (-1)
   {};
 
-  Test_U_IListener_t*                 listener;
-  Test_U_StatisticReportingHandler_t* statisticReportingHandler;
-  long                                statisticReportingTimerID;
+  Test_U_IListener_t*               listener;
+  DHCP_StatisticReportingHandler_t* statisticReportingHandler;
+  long                              statisticReportingTimerID;
 };
 
 struct Test_U_StreamConfiguration
@@ -332,7 +329,7 @@ struct Test_U_GTK_ProgressData
 //  GdkCursorType                      cursorType;
   struct Common_UI_GTKState* GTKState;
   Test_U_PendingActions_t    pendingActions;
-  DHCP_RuntimeStatistic_t    statistic;
+  DHCP_Statistic_t           statistic;
   unsigned int               transferred; // byte(s)
 };
 

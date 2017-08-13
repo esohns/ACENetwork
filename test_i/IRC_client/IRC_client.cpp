@@ -449,7 +449,7 @@ connection_setup_curses_function (void* arg_in)
   IRC_Client_IStreamConnection_t* istream_connection_p = NULL;
   bool result_2 = false;
   const Stream_Module_t* module_p = NULL;
-  const IRC_Client_Stream* stream_p = NULL;
+  Stream_IStream_t* stream_p = NULL;
   IRC_IControl* icontrol_p = NULL;
   IRC_IRegistrationStateMachine_t* iregistration_p = NULL;
   ACE_Time_Value deadline = ACE_Time_Value::zero;
@@ -505,13 +505,8 @@ connection_setup_curses_function (void* arg_in)
                 connection_p));
     goto clean_up;
   } // end IF
-  stream_p = &istream_connection_p->stream ();
-  for (Stream_Iterator_t iterator (*stream_p);
-       (iterator.next (module_p) != 0);
-       iterator.advance ())
-    if (ACE_OS::strcmp (module_p->name (),
-                        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME)) == 0)
-      break;
+  module_p =
+    stream_p->find (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -559,20 +554,17 @@ connection_setup_curses_function (void* arg_in)
   // *NOTE*: cannot use COMMON_TIME_NOW, as this is a high precision monotonous
   //         clock... --> use standard getimeofday
   deadline = ACE_OS::gettimeofday () + delay;
-  try
-  {
-    result_2 = iregistration_p->wait (REGISTRATION_STATE_FINISHED,
+  try {
+    result_2 = iregistration_p->wait (IRC_REGISTRATION_STATE_FINISHED,
                                       &deadline);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IRegistration_t::wait(%#T), continuing\n"),
                 &delay));
     result_2 = false;
   }
   if (!result_2 ||
-      (iregistration_p->current () != REGISTRATION_STATE_FINISHED))
+      (iregistration_p->current () != IRC_REGISTRATION_STATE_FINISHED))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to IRC_Client_IRegistration_t::wait(%#T), aborting\n"),
@@ -589,16 +581,13 @@ connection_setup_curses_function (void* arg_in)
   if (channel_string.find ('#', 0) != 0)
     channel_string.insert (channel_string.begin (), '#');
   // sanity check(s): larger than IRC_CLIENT_CNF_IRC_MAX_CHANNEL_LENGTH characters ?
-  // *TODO*: support the CHANNELLEN=xxx "feature" of the server...
+  // *TODO*: support the CHANNELLEN=xxx "feature" of the server
   if (channel_string.size () > IRC_PRT_MAXIMUM_CHANNEL_LENGTH)
     channel_string.resize (IRC_PRT_MAXIMUM_CHANNEL_LENGTH);
   channels.push_back (channel_string);
-  try
-  {
+  try {
     icontrol_p->join (channels, keys);
-  }
-  catch (...)
-  {
+  } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::join(\"%s\"), aborting\n"),
                 ACE_TEXT (channel_string.c_str ())));
@@ -710,8 +699,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   ACE_ASSERT (iterator != configuration_in.streamConfiguration.end ());
 
   IRC_Client_Module_IRCHandler_Module IRC_handler (NULL,
-                                                   ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
-                                                   NULL);
+                                                   ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME));
   IRC_Client_Module_IRCHandler* IRCHandler_impl_p = NULL;
   IRCHandler_impl_p =
     dynamic_cast<IRC_Client_Module_IRCHandler*> (IRC_handler.writer ());
@@ -1241,7 +1229,7 @@ ACE_TMAIN (int argc_in,
 
   // initialize protocol configuration
   Stream_CachedAllocatorHeap_T<struct IRC_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                                  IRC_MAXIMUM_FRAME_SIZE + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE);
+                                                                                  IRC_MAXIMUM_FRAME_SIZE + NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,

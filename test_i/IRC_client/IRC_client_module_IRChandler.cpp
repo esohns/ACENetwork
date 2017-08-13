@@ -74,7 +74,7 @@ IRC_Client_Module_IRCHandler::initialize (const struct IRC_Client_ModuleHandlerC
 
     { // synch access to state machine
       ACE_GUARD_RETURN (ACE_SYNCH_NULL_MUTEX, aGuard, *inherited2::stateLock_, false);
-      inherited2::state_ = REGISTRATION_STATE_NICK;
+      inherited2::state_ = IRC_REGISTRATION_STATE_NICK;
     } // end lock scope
     initialRegistration_ = true;
     receivedInitialNotice_ = false;
@@ -128,10 +128,10 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
           if (initialRegistration_)
           {
             initialRegistration_ = false;
-            if (!inherited2::change (REGISTRATION_STATE_FINISHED))
+            if (!inherited2::change (IRC_REGISTRATION_STATE_FINISHED))
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("failed to Common_IStateMachine_T::change(\"%s\"), continuing\n"),
-                          ACE_TEXT (inherited2::state2String (REGISTRATION_STATE_FINISHED).c_str ())));
+                          ACE_TEXT (inherited2::stateToString (IRC_REGISTRATION_STATE_FINISHED).c_str ())));
           } // end IF
 
           // *WARNING*: falls through !
@@ -189,7 +189,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
           ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("[%u]: received unknown (numeric) command/reply: \"%s\" (%u), continuing\n"),
                       message_inout->id (),
-                      ACE_TEXT (IRC_Tools::Command2String (data_r.command_.numeric).c_str ()),
+                      ACE_TEXT (IRC_Tools::CommandToString (data_r.command_.numeric).c_str ()),
                       data_r.command_.numeric));
           break;
         }
@@ -199,7 +199,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
     }
     case IRC_Record::Command::STRING:
     {
-      switch (IRC_Tools::Command2Type (*data_r.command_.string))
+      switch (IRC_Tools::CommandToType (*data_r.command_.string))
       {
         case IRC_Record::NICK:
         {
@@ -325,7 +325,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
               break;
             } // end IF
             ACE_NEW_NORETURN (reply_p->command_.string,
-                              std::string (IRC_Message::CommandType2String (IRC_Record::PONG)));
+                              std::string (IRC_Message::CommandTypeToString (IRC_Record::PONG)));
             if (!reply_p->command_.string)
             {
               ACE_DEBUG ((LM_CRITICAL,
@@ -460,9 +460,8 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
             inherited::configuration_->protocolConfiguration->loginOptions.nickname;
       } // end lock scope
 
-      // step1: remember connection has been opened...
+      // step1: remember connection has been opened
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, conditionLock_);
-
         connectionIsAlive_ = true;
 
         // signal any waiter(s)
@@ -485,7 +484,6 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
 
       // remember connection has been closed
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, conditionLock_);
-
         connectionIsAlive_ = false;
 
         // signal any waiter(s)
@@ -524,7 +522,6 @@ IRC_Client_Module_IRCHandler::registerc (const struct IRC_LoginOptions& loginOpt
 
   // step1: ...is done ?
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, conditionLock_, false);
-
     if (!connectionIsAlive_)
     {
       //ACE_DEBUG ((LM_DEBUG,
@@ -558,7 +555,7 @@ IRC_Client_Module_IRCHandler::registerc (const struct IRC_LoginOptions& loginOpt
 
       // *TODO*: wait for NOTICE ?
       //ACE_DEBUG ((LM_DEBUG,
-      //            ACE_TEXT ("waiting for initial NOTICE...\n")));
+      //            ACE_TEXT ("waiting for initial NOTICE\n")));
 
 //       ACE_DEBUG((LM_DEBUG,
 //                  ACE_TEXT("proceeding...\n")));
@@ -568,7 +565,7 @@ IRC_Client_Module_IRCHandler::registerc (const struct IRC_LoginOptions& loginOpt
 //   if (!receivedInitialNotice_)
 //   {
 //     ACE_DEBUG((LM_DEBUG,
-//                ACE_TEXT("waiting for connection...\n")));
+//                ACE_TEXT("waiting for connection\n")));
 //
 //     // *NOTE*: can happen when trying to register IMMEDIATELY after connecting
 //     // --> allow a little delay for the welcome NOTICE to arrive before proceeding
@@ -591,7 +588,7 @@ IRC_Client_Module_IRCHandler::registerc (const struct IRC_LoginOptions& loginOpt
 //     } // end IF
 //
 //     ACE_DEBUG((LM_DEBUG,
-//                 ACE_TEXT("proceeding...\n")));
+//                 ACE_TEXT("proceeding\n")));
 //   } // end IF
 
   // step3a: initialize PASS
@@ -870,8 +867,8 @@ IRC_Client_Module_IRCHandler::mode (const std::string& target_in,
   message_p->parameters_.push_back (mode_string);
   // append any parameters
   message_p->parameters_.insert (message_p->parameters_.end (),
-                            parameters_in.begin (),
-                            parameters_in.end ());
+                                 parameters_in.begin (),
+                                 parameters_in.end ());
 
   // step2: send it upstream
   sendMessage (message_p);
@@ -1196,16 +1193,15 @@ IRC_Client_Module_IRCHandler::dump_state () const
 }
 
 void
-IRC_Client_Module_IRCHandler::onChange (IRC_RegistrationState newState_in)
+IRC_Client_Module_IRCHandler::onChange (enum IRC_RegistrationStateType newState_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::onChange"));
 
   int result = -1;
 
-  if (newState_in == REGISTRATION_STATE_FINISHED)
+  if (newState_in == IRC_REGISTRATION_STATE_FINISHED)
   {
     ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, conditionLock_);
-
     result = condition_.broadcast ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
@@ -1320,7 +1316,7 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
   } // end IF
 
 //   ACE_DEBUG ((LM_DEBUG,
-//               ACE_TEXT ("pushed message...\n")));
+//               ACE_TEXT ("pushed message\n")));
 }
 
 ACE_Task<ACE_MT_SYNCH,

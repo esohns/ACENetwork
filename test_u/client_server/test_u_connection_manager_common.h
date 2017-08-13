@@ -45,13 +45,13 @@ struct Test_U_UserData;
 typedef Net_IConnectionManager_T<Net_Netlink_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
-                                 Net_RuntimeStatistic_t,
+                                 Net_Statistic_t,
                                  struct Test_U_UserData> Test_U_INetlinkConnectionManager_t;
 #endif
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
-                                 Net_RuntimeStatistic_t,
+                                 Net_Statistic_t,
                                  struct Test_U_UserData> Test_U_IInetConnectionManager_t;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -59,13 +59,13 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 typedef Net_Connection_Manager_T<Net_Netlink_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
-                                 Net_RuntimeStatistic_t,
+                                 Net_Statistic_t,
                                  struct Test_U_UserData> Test_U_NetlinkConnectionManager_t;
 #endif
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
-                                 Net_RuntimeStatistic_t,
+                                 Net_Statistic_t,
                                  struct Test_U_UserData> Test_U_InetConnectionManager_t;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

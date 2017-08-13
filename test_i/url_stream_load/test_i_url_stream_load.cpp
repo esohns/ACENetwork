@@ -102,7 +102,7 @@ do_print_usage (const std::string& programName_in)
   std::cout << ACE_TEXT_ALWAYS_CHAR ("currently available options:")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-d        : debug parser [")
-            << NET_PROTOCOL_DEFAULT_YACC_TRACE
+            << NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
   std::string configuration_path = path;
@@ -194,7 +194,7 @@ do_process_arguments (int argc_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   showConsole_out = false;
 #endif
-  debugParser_out = NET_PROTOCOL_DEFAULT_YACC_TRACE;
+  debugParser_out = NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE;
   GtkRcFileName_out = configuration_directory;
   GtkRcFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   GtkRcFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_DEFAULT_RC_FILE);
@@ -515,9 +515,7 @@ do_work (bool debugParser_in,
   Test_I_EventHandler event_handler (&CBData_in);
   std::string module_name = ACE_TEXT_ALWAYS_CHAR ("EventHandler");
   Test_I_Module_EventHandler_Module event_handler_module (NULL,
-                                                          module_name,
-                                                          NULL,
-                                                          true);
+                                                          module_name);
 
   Stream_AllocatorHeap_T<struct Test_I_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (CBData_in.configuration->streamConfiguration.allocatorConfiguration_))
@@ -917,7 +915,7 @@ ACE_TMAIN (int argc_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   show_console = false;
 #endif
-  debug_parser = NET_PROTOCOL_DEFAULT_YACC_TRACE;
+  debug_parser = NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE;
   path =
     Common_File_Tools::getWorkingDirectory ();
   configuration_path = path;

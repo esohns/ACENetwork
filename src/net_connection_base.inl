@@ -30,11 +30,13 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 Net_ConnectionBase_T<AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
+                     StatisticHandlerType,
                      UserDataType>::Net_ConnectionBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                           const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (1,    // initial count
@@ -54,10 +56,12 @@ Net_ConnectionBase_T<AddressType,
   {
     // schedule regular statistic collection
     ACE_ASSERT (statisticCollectHandlerID_ == -1);
-    ACE_Event_Handler* handler_p = &statisticCollectHandler_;
+    typename StatisticHandlerType::HANDLER_T* handler_p =
+      &statisticCollectHandler_;
     Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
     ACE_ASSERT (timer_manager_p);
+    ACE_ASSERT (timer_manager_p->isRunning ());
     statisticCollectHandlerID_ =
       timer_manager_p->schedule_timer (handler_p,                                        // event handler
                                        NULL,                                             // argument
@@ -68,7 +72,7 @@ Net_ConnectionBase_T<AddressType,
                   ACE_TEXT ("failed to Common_Timer_Manager::schedule_timer(), continuing\n")));
 //    else
 //      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("scheduled statistics collecting timer (ID: %d, interval: %#T)...\n"),
+//                  ACE_TEXT ("scheduled statistics collecting timer (ID: %d, interval: %#T)\n"),
 //                  statisticCollectHandlerID_,
 //                  &statisticCollectionInterval_in));
   } // end IF
@@ -98,11 +102,13 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 Net_ConnectionBase_T<AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
+                     StatisticHandlerType,
                      UserDataType>::~Net_ConnectionBase_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::~Net_ConnectionBase_T"));
@@ -136,12 +142,14 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 bool
 Net_ConnectionBase_T<AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
+                     StatisticHandlerType,
 //#if defined (__GNUG__)
                      UserDataType>::registerc (ICONNECTION_T* connection_in)
 //#else
@@ -223,12 +231,14 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 void
 Net_ConnectionBase_T<AddressType,
                      ConfigurationType,
                      StateType,
                      StatisticContainerType,
+                     StatisticHandlerType,
                      UserDataType>::deregister ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::deregister"));

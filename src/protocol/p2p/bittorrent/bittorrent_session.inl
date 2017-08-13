@@ -102,9 +102,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   ACE_NEW_NORETURN (peerHandlerModule_,
                     PEER_MESSAGEHANDLER_MODULE_T (NULL,
-                                                  ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
-                                                  NULL,
-                                                  false));
+                                                  ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME)));
   if (!peerHandlerModule_)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -113,9 +111,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   } // end IF
   ACE_NEW_NORETURN (trackerHandlerModule_,
                     TRACKER_MESSAGEHANDLER_MODULE_T (NULL,
-                                                     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME),
-                                                     NULL,
-                                                     false));
+                                                     ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_HANDLER_MODULE_NAME)));
   if (!trackerHandlerModule_)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -448,7 +444,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     ACE_ASSERT (inherited::state_.metaInfo);
 
     record_p->info_hash =
-        BitTorrent_Tools::MetaInfo2InfoHash (*inherited::state_.metaInfo);
+        BitTorrent_Tools::MetaInfoToInfoHash (*inherited::state_.metaInfo);
     record_p->peer_id = inherited::state_.peerId;
   } // end lock scope
 
@@ -711,14 +707,14 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                 ACE_TEXT (*(*iterator).second->string->c_str ())));
     goto error;
   } // end IF
-  record_p->URI = BitTorrent_Tools::AnnounceURL2ScrapeURL (record_p->URI);
+  record_p->URI = BitTorrent_Tools::AnnounceURLToScrapeURL (record_p->URI);
 
   // step4: send request to the tracker
   record_p->method = HTTP_Codes::HTTP_METHOD_GET;
   record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
 
   record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_INFO_HASH_HEADER),
-                                         HTTP_Tools::URLEncode (BitTorrent_Tools::MetaInfo2InfoHash (*inherited::configuration_->metaInfo))));
+                                         HTTP_Tools::URLEncode (BitTorrent_Tools::MetaInfoToInfoHash (*inherited::configuration_->metaInfo))));
 
 #ifdef HAVE_CONFIG_H
   user_agent  = ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME);
@@ -770,7 +766,6 @@ allocate:
   data_container_p = NULL;
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-
     ACE_ASSERT (inherited::state_.trackerConnectionId);
     tracker_connection_id = inherited::state_.trackerConnectionId;
   } // end lock scope
@@ -1093,7 +1088,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   inherited::connect (id_in);
 
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%s: new tracker connection (id: %d)...\n"),
+              ACE_TEXT ("%s: new tracker connection (id: %d)\n"),
               ACE::basename (metaInfoFileName_.c_str (),
                              ACE_DIRECTORY_SEPARATOR_CHAR),
               id_in));
@@ -1149,7 +1144,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   inherited::disconnect (id_in);
 
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%s: tracker connection closed (id was: %d)...\n"),
+              ACE_TEXT ("%s: tracker connection closed (id was: %d)\n"),
               ACE::basename (metaInfoFileName_.c_str (),
                              ACE_DIRECTORY_SEPARATOR_CHAR),
               id_in));
@@ -1492,7 +1487,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 #if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s\n"),
-              ACE_TEXT (BitTorrent_Tools::HandShake2String (record_in).c_str ())));
+              ACE_TEXT (BitTorrent_Tools::HandShakeToString (record_in).c_str ())));
 #endif
 }
 template <typename PeerHandlerConfigurationType,
@@ -1547,7 +1542,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 #if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s\n"),
-              ACE_TEXT (BitTorrent_Tools::Record2String (record_in).c_str ())));
+              ACE_TEXT (BitTorrent_Tools::RecordToString (record_in).c_str ())));
 #endif
 
   switch (record_in.type)

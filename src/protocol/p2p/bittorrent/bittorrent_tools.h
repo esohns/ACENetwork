@@ -36,18 +36,18 @@ class BitTorrent_Export BitTorrent_Tools
   inline virtual ~BitTorrent_Tools () {};
 
   // debug info
-  static std::string Dictionary2String (const Bencoding_Dictionary_t&);
-  static std::string List2String (const Bencoding_List_t&);
-  static std::string MetaInfo2String (const Bencoding_Dictionary_t&);
+  static std::string DictionaryToString (const Bencoding_Dictionary_t&);
+  static std::string ListToString (const Bencoding_List_t&);
+  static std::string MetaInfoToString (const Bencoding_Dictionary_t&);
 
-  static std::string HandShake2String (const struct BitTorrent_PeerHandShake&);
-  static std::string Record2String (const struct BitTorrent_PeerRecord&);
+  static std::string HandShakeToString (const struct BitTorrent_PeerHandShake&);
+  static std::string RecordToString (const struct BitTorrent_PeerRecord&);
 
-  static std::string Type2String (enum BitTorrent_MessageType&);
+  static std::string TypeToString (enum BitTorrent_MessageType&);
 
   // *NOTE*: this returns the 'info_hash' tracker HTTP request value
-  static std::string MetaInfo2InfoHash (const Bencoding_Dictionary_t&); // metainfo
-  static unsigned int MetaInfo2Length (const Bencoding_Dictionary_t&); // metainfo
+  static std::string MetaInfoToInfoHash (const Bencoding_Dictionary_t&); // metainfo
+  static unsigned int MetaInfoToLength (const Bencoding_Dictionary_t&); // metainfo
 
   // *IMPORTANT NOTE*: caller needs to free the return value (second argument)
   static bool parseMetaInfoFile (const struct Common_ParserConfiguration&, // parser configuration
@@ -65,7 +65,7 @@ class BitTorrent_Export BitTorrent_Tools
 
   // *NOTE*: see also: https://wiki.theory.org/BitTorrentSpecification#Overview
   static bool torrentSupportsScrape (const std::string&); // announce URI
-  static std::string AnnounceURL2ScrapeURL (const std::string&); // announce URI
+  static std::string AnnounceURLToScrapeURL (const std::string&); // announce URI
 
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Tools ())

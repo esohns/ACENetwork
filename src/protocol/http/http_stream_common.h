@@ -111,19 +111,15 @@ struct HTTP_ModuleHandlerConfiguration
    //////////////////////////////////////
    , crunchMessages (HTTP_DEFAULT_CRUNCH_MESSAGES)
    , printProgressDot (false)
-   , pushStatisticMessages (true)
    //, protocolConfiguration (NULL)
    , URL ()
   {
     printFinalReport = true;
   };
 
-  bool                               crunchMessages; // http parser module
-  bool                               printProgressDot; // file writer module
-  bool                               pushStatisticMessages;
-
-  //struct HTTP_ProtocolConfiguration* protocolConfiguration;
-  std::string                        URL;
+  bool        crunchMessages; // http parser module
+  bool        printProgressDot; // file writer module
+  std::string URL;
 };
 
 //struct HTTP_ProtocolConfiguration;

@@ -38,6 +38,7 @@
 
 #include "irc_codes.h"
 #include "irc_defines.h"
+#include "irc_icontrol.h"
 #include "irc_tools.h"
 
 template <typename ConnectionType,
@@ -733,7 +734,7 @@ IRC_Session_T<ConnectionType,
         {
           ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("invalid/unknown (numeric) command/reply (was: \"%s\" (%u)), continuing\n"),
-                      ACE_TEXT (IRC_Tools::Command2String (record_r.command_.numeric).c_str ()),
+                      ACE_TEXT (IRC_Tools::CommandToString (record_r.command_.numeric).c_str ()),
                       record_r.command_.numeric));
 
           record_r.dump_state ();
@@ -747,7 +748,7 @@ IRC_Session_T<ConnectionType,
     case IRC_Record::Command::STRING:
     {
       IRC_Record::CommandType command =
-        IRC_Tools::Command2Type (*record_r.command_.string);
+        IRC_Tools::CommandToType (*record_r.command_.string);
       switch (command)
       {
         case IRC_Record::NICK:
@@ -1222,7 +1223,7 @@ IRC_Session_T<ConnectionType,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::error"));
 
-  std::string message_text = IRC_Tools::Record2String (record_r);
+  std::string message_text = IRC_Tools::RecordToString (record_r);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("received error message: \"%s\"\n"),
               ACE_TEXT (message_text.c_str ())));
@@ -1313,7 +1314,7 @@ IRC_Session_T<ConnectionType,
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::log"));
 
-  std::string message_text = IRC_Tools::Record2String (record_r);
+  std::string message_text = IRC_Tools::RecordToString (record_r);
   log (std::string (), // --> server log
        message_text);
 }

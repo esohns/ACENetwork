@@ -50,12 +50,12 @@ struct DHCP_Stream_UserData;
 //typedef Net_IConnection_T<ACE_INET_Addr,
 //                          struct DHCP_Configuration,
 //                          struct DHCP_ConnectionState,
-//                          DHCP_RuntimeStatistic_t,
+//                          DHCP_Statistic_t,
 //                          DHCP_Stream> DHCP_IConnection_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct DHCP_Configuration,
                                  struct DHCP_ConnectionState,
-                                 DHCP_RuntimeStatistic_t,
+                                 DHCP_Statistic_t,
                                  struct DHCP_Stream_UserData> DHCP_IConnection_Manager_t;
 
 //typedef Common_INotify_T<unsigned int,
@@ -140,7 +140,6 @@ struct DHCP_ModuleHandlerConfiguration
    , connectionConfigurations (NULL)
    , printProgressDot (DHCP_DEFAULT_PRINT_PROGRESSDOT)
    , protocolConfiguration (NULL)
-   , pushStatisticMessages (true)
   {
     crunchMessages = DHCP_DEFAULT_CRUNCH_MESSAGES; // dhcp parser module
     printFinalReport = true;
@@ -150,7 +149,6 @@ struct DHCP_ModuleHandlerConfiguration
   DHCP_ConnectionConfigurations_t*   connectionConfigurations;
   bool                               printProgressDot; // file writer module
   struct DHCP_ProtocolConfiguration* protocolConfiguration;
-  bool                               pushStatisticMessages;
 };
 typedef std::map<std::string,
                  struct DHCP_ModuleHandlerConfiguration*> DHCP_ModuleHandlerConfigurations_t;

@@ -204,10 +204,10 @@ void BitTorrent_Export yyprint (FILE*, yytokentype, YYSTYPE);*/
 /* %printer                  { yyoutput << *$$; } <sval>
 %printer                  { debug_stream () << $$; }  <ival> */
 /*%printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), $$->version.c_str ()); } <handshake>
-%printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), BitTorrent_Tools::Type2String ($$->type).c_str ()); } <record>
+%printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %s"), BitTorrent_Tools::TypeToString ($$->type).c_str ()); } <record>
 %printer    { ACE_OS::fprintf (yyoutput, ACE_TEXT (" %d"), $$); } <size>*/
-%printer    { debug_stream () << BitTorrent_Tools::HandShake2String (*$$); } <handshake>
-%printer    { debug_stream () << BitTorrent_Tools::Record2String (*$$); } <record>
+%printer    { debug_stream () << BitTorrent_Tools::HandShakeToString (*$$); } <handshake>
+%printer    { debug_stream () << BitTorrent_Tools::RecordToString (*$$); } <record>
 %printer    { debug_stream () << $$; } <size>
 /*%destructor { delete $$; $$ = NULL; } <handshake>*/
 /*%destructor { delete $$; $$ = NULL; } <record>*/

@@ -135,7 +135,7 @@ class Net_WLANMonitor_T
 #else
   struct DBusConnection*                  connection_;
 //  struct DBusGProxy*                      proxy_;
-  std::string                             deviceDBusPath_;
+//  std::string                             deviceDBusPath_;
 #endif
   ConfigurationType*                      configuration_;
   bool                                    isActive_;

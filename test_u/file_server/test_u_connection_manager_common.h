@@ -37,19 +37,17 @@
 #include "file_server_connection_common.h"
 
 // forward declarations
-//struct FileServer_ConnectionConfiguration;
-//struct FileServer_ConnectionState;
 struct FileServer_UserData;
 
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct FileServer_ConnectionConfiguration,
                                  struct FileServer_ConnectionState,
-                                 Net_RuntimeStatistic_t,
+                                 Net_Statistic_t,
                                  struct FileServer_UserData> FileServer_IInetConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  struct FileServer_ConnectionConfiguration,
                                  struct FileServer_ConnectionState,
-                                 Net_RuntimeStatistic_t,
+                                 Net_Statistic_t,
                                  struct FileServer_UserData> FileServer_InetConnectionManager_t;
 
 typedef ACE_Singleton<FileServer_InetConnectionManager_t,

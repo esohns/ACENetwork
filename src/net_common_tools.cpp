@@ -34,6 +34,8 @@
 #else
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
+#include <linux/netlink.h>
+#include <linux/rtnetlink.h>
 #include <netinet/ether.h>
 #include <ifaddrs.h>
 #include <iwlib.h>
@@ -1424,7 +1426,9 @@ Net_Common_Tools::associatedSSID (//struct DBusConnection* connection_in,
                 ACE_TEXT (interfaceIdentifier_in.c_str ())));
     goto error;
   } // end IF
-  result.assign (essid, iwreq_s.u.essid.length);
+  // *NOTE*: the length iwreq_s.u.essid.length is wrong
+//  result.assign (essid, iwreq_s.u.essid.length);
+  result = essid;
 
 error:
   if (socket_handle != -1)
@@ -1436,7 +1440,12 @@ error:
 }
 
 bool
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+Net_Common_Tools::hasSSID (HANDLE clientHandle_in,
+                           REFGUID interfaceIdentifier_in,
+#else
 Net_Common_Tools::hasSSID (const std::string& interfaceIdentifier_in,
+#endif
                            const std::string& SSID_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::associatedSSID"));
@@ -2048,13 +2057,13 @@ clean:
 bool
 Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_in,
                                         ACE_INET_Addr& IPAddress_out,
-                                        ACE_INET_Addr& GatewayIPAddress_out)
+                                        ACE_INET_Addr& gatewayIPAddress_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceToIPAddress"));
 
   // initialize return value(s)
   IPAddress_out.reset ();
-  GatewayIPAddress_out.reset ();
+  gatewayIPAddress_out.reset ();
 
   std::string interface_identifier_string = interfaceIdentifier_in;
   if (interface_identifier_string.empty ())
@@ -2176,7 +2185,7 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
     } // end IF
     socket_address_p = &gateway_address_p->Address;
     sockaddr_in_p = (struct sockaddr_in*)socket_address_p->lpSockaddr;
-    result = GatewayIPAddress_out.set (sockaddr_in_p,
+    result = gatewayIPAddress_out.set (sockaddr_in_p,
                                        socket_address_p->iSockaddrLength);
     if (result == -1)
     {
@@ -2226,7 +2235,7 @@ continue_:
     if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
       continue;
 
-    sockaddr_in_p = (struct sockaddr_in*)ifaddrs_2->ifa_addr;
+    sockaddr_in_p = reinterpret_cast<struct sockaddr_in*> (ifaddrs_2->ifa_addr);
     result = IPAddress_out.set (sockaddr_in_p,
                                 sizeof (struct sockaddr_in));
     if (result == -1)
@@ -2250,6 +2259,9 @@ continue_:
 
   ACE_NOTREACHED (return false;)
 #endif /* ACE_HAS_GETIFADDRS */
+
+    gatewayIPAddress_out =
+      Net_Common_Tools::getGateway (interfaceIdentifier_in);
 #endif
 
 //  result = IPAddress_out.addr_to_string (buffer,
@@ -3315,35 +3327,7 @@ Net_Common_Tools::setReuseAddress (ACE_HANDLE handle_in
   } // end IF
 #endif
 
-  // validate result
-  optval = 0;
-  result = ACE_OS::getsockopt (handle_in,
-                               SOL_SOCKET,
-                               SO_REUSEADDR,
-                               reinterpret_cast<char*> (&optval),
-                               &optlen);
-  if (result)
-  {
-    // *PORTABILITY*
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,SO_REUSEADDR): \"%m\", aborting\n"),
-                handle_in));
-#else
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%d,SO_REUSEADDR): \"%m\", aborting\n"),
-                handle_in));
-#endif
-    return false;
-  } // end IF
-
-  //ACE_DEBUG((LM_DEBUG,
-  //           ACE_TEXT("setsockopt(%d,SO_REUSEADDR): %s\n"),
-  //           handle_in,
-  //           (keepAlive_in ? ((optval == 1) ? "on" : "off")
-  //                         : ((optval == 0) ? "off" : "on"))));
-
-  return (optval == 1);
+  return true;
 }
 
 #if defined (ACE_LINUX)
@@ -3527,11 +3511,11 @@ Net_Common_Tools::activateConnection (struct DBusConnection* connection_in,
   dbus_message_iter_get_basic (&iterator, &object_path_p);
   ACE_ASSERT (object_path_p);
   dbus_message_unref (reply_p); reply_p = NULL;
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%s: activated connection profile \"%s\" (active connection is: \"%s\")\n"),
-              ACE_TEXT (Net_Common_Tools::deviceDBusPathToIdentifier (connection_in, deviceObjectPath_in).c_str ()),
-              ACE_TEXT (connectionObjectPath_in.c_str ()),
-              ACE_TEXT (object_path_p)));
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("%s: activated connection profile \"%s\" (active connection is: \"%s\")\n"),
+//              ACE_TEXT (Net_Common_Tools::deviceDBusPathToIdentifier (connection_in, deviceObjectPath_in).c_str ()),
+//              ACE_TEXT (connectionObjectPath_in.c_str ()),
+//              ACE_TEXT (object_path_p)));
 
   result = true;
 
@@ -3847,6 +3831,10 @@ error:
     dbus_message_unref (reply_p);
 
 continue_:
+  // *NOTE*: the D-Bus protocol defines "/" to be an invalid/unkown object path
+  if (!ACE_OS::strcmp (result.c_str (), ACE_TEXT_ALWAYS_CHAR ("/")))
+    result.resize (0);
+
   return result;
 }
 
@@ -3875,7 +3863,8 @@ Net_Common_Tools::deviceDBusPathToIdentifier (struct DBusConnection* connection_
                 ACE_TEXT ("failed to dbus_message_new_method_call(Get): \"%m\", aborting\n")));
     return result;
   } // end IF
-  struct DBusMessageIter iterator;
+  struct DBusMessageIter iterator, iterator_2;
+//  char character_c = 0;
   char* device_identifier_p = NULL;
   const char* argument_string_p =
       ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICE_INTERFACE);
@@ -3914,8 +3903,11 @@ Net_Common_Tools::deviceDBusPathToIdentifier (struct DBusConnection* connection_
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_STRING);
-  dbus_message_iter_get_basic (&iterator, &device_identifier_p);
+//  character_c = dbus_message_iter_get_arg_type (&iterator);
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_VARIANT);
+  dbus_message_iter_recurse (&iterator, &iterator_2);
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_STRING);
+  dbus_message_iter_get_basic (&iterator_2, &device_identifier_p);
   ACE_ASSERT (device_identifier_p);
   result = device_identifier_p;
   dbus_message_unref (reply_p); reply_p = NULL;
@@ -4021,6 +4013,139 @@ continue_:
 }
 
 std::string
+Net_Common_Tools::connectionDBusPathToSSID (struct DBusConnection* connection_in,
+                                            const std::string& connectionObjectPath_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::connectionDBusPathToSSID"));
+
+  // initialize return value(s)
+  std::string result;
+
+  // sanity check(s)
+  ACE_ASSERT (connection_in);
+  ACE_ASSERT (!connectionObjectPath_in.empty ());
+
+  struct DBusMessage* reply_p = NULL;
+  struct DBusMessage* message_p =
+  dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SERVICE),
+                                connectionObjectPath_in.c_str (),
+                                ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SETTINGSCONNECTION_INTERFACE),
+                                ACE_TEXT_ALWAYS_CHAR ("GetSettings"));
+  if (!message_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_new_method_call(GetSettings): \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  struct DBusMessageIter iterator, iterator_2, iterator_3, iterator_4;
+  struct DBusMessageIter iterator_5, iterator_6, iterator_7;
+  const char* key_string_p, *key_string_2 = NULL;
+  DBusBasicValue value_u;
+  reply_p = Net_Common_Tools::dBusMessageExchange (connection_in,
+                                                   message_p,
+                                                   -1); // timeout (ms)
+  ACE_ASSERT (!message_p);
+  if (!reply_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
+  goto error;
+  } // end IF
+  // *NOTE*: the schema is a{sa{sv}}
+  if (!dbus_message_iter_init (reply_p, &iterator))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
+    goto error;
+  } // end IF
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_ARRAY);
+  dbus_message_iter_recurse (&iterator, &iterator_2);
+  do {
+    // connection settings --> wireless settings --> IPv4 configuration --> ...
+    ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_DICT_ENTRY);
+    dbus_message_iter_recurse (&iterator_2, &iterator_3);
+    ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_3) == DBUS_TYPE_STRING);
+    key_string_p = NULL;
+    dbus_message_iter_get_basic (&iterator_3, &key_string_p);
+    ACE_ASSERT (key_string_p);
+    if (ACE_OS::strcmp (key_string_p, ACE_TEXT_ALWAYS_CHAR ("802-11-wireless")))
+      continue;
+    dbus_message_iter_next (&iterator_3);
+    ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_3) == DBUS_TYPE_ARRAY);
+    dbus_message_iter_recurse (&iterator_3, &iterator_4);
+    do
+    {
+      ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_4) == DBUS_TYPE_DICT_ENTRY);
+      dbus_message_iter_recurse (&iterator_4, &iterator_5);
+      ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_5) == DBUS_TYPE_STRING);
+      key_string_2 = NULL;
+      dbus_message_iter_get_basic (&iterator_5, &key_string_2);
+      ACE_ASSERT (key_string_2);
+      dbus_message_iter_next (&iterator_5);
+      ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_5) == DBUS_TYPE_VARIANT);
+      dbus_message_iter_recurse (&iterator_5, &iterator_6);
+      switch (dbus_message_iter_get_arg_type (&iterator_6))
+      {
+        case DBUS_TYPE_BOOLEAN:
+        case DBUS_TYPE_BYTE:
+        case DBUS_TYPE_INT16:
+        case DBUS_TYPE_UINT16:
+        case DBUS_TYPE_INT32:
+        case DBUS_TYPE_UINT32:
+        case DBUS_TYPE_INT64:
+        case DBUS_TYPE_UINT64:
+        case DBUS_TYPE_DOUBLE:
+        case DBUS_TYPE_STRING:
+        case DBUS_TYPE_OBJECT_PATH:
+        case DBUS_TYPE_SIGNATURE:
+        case DBUS_TYPE_UNIX_FD:
+        {
+          dbus_message_iter_get_basic (&iterator_6, &value_u);
+          break;
+        }
+        case DBUS_TYPE_ARRAY:
+        {
+          dbus_message_iter_recurse (&iterator_6, &iterator_7);
+          if (!ACE_OS::strcmp (key_string_2, ACE_TEXT_ALWAYS_CHAR ("ssid")))
+          { ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_7) == DBUS_TYPE_BYTE);
+            char character_c = 0;
+            do
+            {
+              dbus_message_iter_get_basic (&iterator_7, &character_c);
+              result += character_c;
+            } while (dbus_message_iter_next (&iterator_7));
+
+            goto done;
+          } // end IF
+
+          break;
+        }
+        default:
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("invalid/unknown argument type (was: %d), continuing\n"),
+                      dbus_message_iter_get_arg_type (&iterator_6)));
+          break;
+        }
+      } // end SWITCH
+    } while (dbus_message_iter_next (&iterator_4));
+  } while (dbus_message_iter_next (&iterator_2));
+done:
+  dbus_message_unref (reply_p); reply_p = NULL;
+
+  goto continue_;
+
+error:
+  if (message_p)
+    dbus_message_unref (message_p);
+  if (reply_p)
+    dbus_message_unref (reply_p);
+
+continue_:
+  return result;
+}
+
+std::string
 Net_Common_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_in,
                                              const std::string& SSID_in)
 {
@@ -4097,7 +4222,7 @@ Net_Common_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_i
       result = object_path_p;
       break;
     } // end IF
-  } while (dbus_message_iter_next (&iterator));
+  } while (dbus_message_iter_next (&iterator_2));
   dbus_message_unref (reply_p); reply_p = NULL;
 
   goto continue_;
@@ -4208,43 +4333,51 @@ Net_Common_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in
   } // end IF
 
   struct DBusMessage* reply_p = NULL;
+  // *NOTE*: a better alternative would be to retrieve the
+  //        'AvailableConnections' property of the device; this seems to be
+  //        broken at the moment *TODO*
+  //        --> retrieve all connections
   struct DBusMessage* message_p =
       dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SERVICE),
-                                    device_object_path_string.c_str (),
-                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
-                                    ACE_TEXT_ALWAYS_CHAR ("Get"));
+//                                    device_object_path_string.c_str (),
+                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SETTINGS_OBJECT_PATH),
+//                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
+                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SETTINGS_INTERFACE),
+//                                    ACE_TEXT_ALWAYS_CHAR ("Get"));
+                                    ACE_TEXT_ALWAYS_CHAR ("ListConnections"));
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_new_method_call(Get): \"%m\", aborting\n")));
     return result;
   } // end IF
-  struct DBusMessageIter iterator, iterator_2;
+//  struct DBusMessageIter iterator;
+  struct DBusMessageIter iterator_2, iterator_3;
   std::vector<std::string> connection_paths_a;
-  std::vector<std::string>::const_iterator iterator_3;
+  std::vector<std::string>::const_iterator iterator_4;
   char* object_path_p = NULL;
   std::string SSID_string;
-  const char* argument_string_p =
-      ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICE_INTERFACE);
-  dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
-    goto error;
-  } // end IF
-  argument_string_p = ACE_TEXT_ALWAYS_CHAR ("AvailableConnections");
-  dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
-    goto error;
-  } // end IF
+  //  const char* argument_string_p =
+//      ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICE_INTERFACE);
+//  dbus_message_iter_init_append (message_p, &iterator);
+//  if (!dbus_message_iter_append_basic (&iterator,
+//                                       DBUS_TYPE_STRING,
+//                                       &argument_string_p))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+//    goto error;
+//  } // end IF
+//  argument_string_p = ACE_TEXT_ALWAYS_CHAR ("AvailableConnections");
+//  dbus_message_iter_init_append (message_p, &iterator);
+//  if (!dbus_message_iter_append_basic (&iterator,
+//                                       DBUS_TYPE_STRING,
+//                                       &argument_string_p))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
+//    goto error;
+//  } // end IF
   reply_p = Net_Common_Tools::dBusMessageExchange (connection_in,
                                                    message_p,
                                                    -1); // timeout (ms)
@@ -4255,47 +4388,39 @@ Net_Common_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in
                 ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  if (!dbus_message_iter_init (reply_p, &iterator))
+//  if (!dbus_message_iter_init (reply_p, &iterator))
+  if (!dbus_message_iter_init (reply_p, &iterator_2))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_ARRAY);
-  dbus_message_iter_recurse (&iterator, &iterator_2);
+//  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_VARIANT);
+//  dbus_message_iter_recurse (&iterator, &iterator_2);
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_ARRAY);
+  dbus_message_iter_recurse (&iterator_2, &iterator_3);
   do {
-    ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_OBJECT_PATH);
-    dbus_message_iter_get_basic (&iterator_2, &object_path_p);
+    ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_3) == DBUS_TYPE_OBJECT_PATH);
+    dbus_message_iter_get_basic (&iterator_3, &object_path_p);
     ACE_ASSERT (object_path_p);
     connection_paths_a.push_back (object_path_p);
-  } while (dbus_message_iter_next (&iterator));
+  } while (dbus_message_iter_next (&iterator_3));
   dbus_message_unref (reply_p); reply_p = NULL;
 
-  iterator_3 = connection_paths_a.begin ();
+  iterator_4 = connection_paths_a.begin ();
   for (;
-       iterator_3 != connection_paths_a.end ();
-       ++iterator_3)
+       iterator_4 != connection_paths_a.end ();
+       ++iterator_4)
   {
     SSID_string = Net_Common_Tools::connectionDBusPathToSSID (connection_in,
-                                                              *iterator_3);
+                                                              *iterator_4);
     if (SSID_string == SSID_in)
       break;
   } // end FOR
-  if (iterator_3 == connection_paths_a.end ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: no connection profile for SSID %s found, aborting\n"),
-                ACE_TEXT (Net_Common_Tools::deviceDBusPathToIdentifier (connection_in, device_object_path_string).c_str ()),
-                ACE_TEXT (SSID_in.c_str ())));
+  if (iterator_4 == connection_paths_a.end ())
     goto error;
-  } // end IF
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("%s: applying connection profile for SSID %s: \"%s\"...\n"),
-//              ACE_TEXT (Net_Common_Tools::deviceDBusPathToIdentifier (connection_in, device_object_path_string).c_str ()),
-//              ACE_TEXT (SSID_in.c_str ()),
-//              ACE_TEXT ((*iterator_3).c_str ())));
 
-  result = *iterator_3;
+  result = *iterator_4;
 
   goto continue_;
 
@@ -4360,3 +4485,240 @@ Net_Common_Tools::URLToHostName (const std::string& URL_in,
 
   return result;
 }
+
+//////////////////////////////////////////
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+ACE_INET_Addr
+Net_Common_Tools::getGateway (const std::string& interfaceIdentifier_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getGateway"));
+
+  ACE_INET_Addr result;
+
+  // sanity check(s)
+  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+
+  // *IMPORTANT NOTE*: the linux kernel does not maintain specific network
+  //                   infrastructure information apart from its routing tables.
+  //                   The routing tables are initialized and manipulated from
+  //                   user space libraries and programs (i.e. glibc, dhclient,
+  //                   etc.) using the Netlink protocol.
+  //                   --> retrieve/parse the routing table entries to extract
+  //                       the gateway address(es)
+  // *TODO*: encapsulate the sockets/networking code with ACE
+
+  int socket_handle = ACE_OS::socket (PF_NETLINK,     // protocol family
+                                      SOCK_DGRAM,     // type
+                                      NETLINK_ROUTE); // protocol
+  if (socket_handle < 0)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::socket(PF_NETLINK,NETLINK_ROUTE): \"%m\", aborting\n")));
+    return result;
+  } // end IF
+
+  char buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  struct nlmsghdr* nl_message_header_p =
+      reinterpret_cast<struct nlmsghdr*> (buffer);
+  struct rtmsg* rt_message_p =
+      static_cast<struct rtmsg*> (NLMSG_DATA (nl_message_header_p));
+  struct rtattr* rt_attribute_p = NULL;
+  nl_message_header_p->nlmsg_len = NLMSG_LENGTH (sizeof (struct rtmsg));
+  nl_message_header_p->nlmsg_type = RTM_GETROUTE;
+  nl_message_header_p->nlmsg_flags = NLM_F_DUMP | NLM_F_REQUEST;
+  int message_sequence_i = 0;
+  pid_t pid_i = ACE_OS::getpid ();
+  nl_message_header_p->nlmsg_seq = message_sequence_i++;
+  nl_message_header_p->nlmsg_pid = pid_i;
+
+  unsigned int received_bytes = 0;
+  char* buffer_p = buffer;
+  int length_i = 0;
+  bool done, skip = false;
+  ACE_INET_Addr current_interface_address;
+  std::string current_interface_string;
+
+  int flags = 0;
+  // send request
+  int result_2 = ACE_OS::send (socket_handle,
+                               reinterpret_cast<char*> (nl_message_header_p),
+                               nl_message_header_p->nlmsg_len,
+                               flags);
+  if ((result_2 < 0) ||
+      (static_cast<__u32> (result_2) != nl_message_header_p->nlmsg_len))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::send(%d,%u): \"%m\", aborting\n"),
+                socket_handle,
+                nl_message_header_p->nlmsg_len));
+    goto clean;
+  } // end IF
+
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  // receive reply/ies
+  do
+  { ACE_ASSERT (received_bytes < BUFSIZ);
+    result_2 = ACE_OS::recv (socket_handle,
+                             buffer_p,
+                             BUFSIZ - received_bytes);
+    if (result_2 < 0)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::recv(%d): \"%m\", aborting\n"),
+                  socket_handle));
+      goto clean;
+    } // end IF
+    nl_message_header_p = reinterpret_cast<struct nlmsghdr*> (buffer_p);
+
+    if ((NLMSG_OK (nl_message_header_p, result_2) == 0) ||
+        (nl_message_header_p->nlmsg_type == NLMSG_ERROR))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("error in Netlink message, aborting\n")));
+      goto clean;
+    } // end IF
+    if (nl_message_header_p->nlmsg_type == NLMSG_DONE)
+      break;
+
+    buffer_p += result_2;
+    received_bytes += result_2;
+
+    if ((nl_message_header_p->nlmsg_flags & NLM_F_MULTI) == 0)
+      break;
+  } while ((nl_message_header_p->nlmsg_seq != static_cast<__u32> (message_sequence_i)) ||
+           (nl_message_header_p->nlmsg_pid != static_cast<__u32> (pid_i)));
+
+  // parse routing tables entries
+  done = false;
+  for (nl_message_header_p = reinterpret_cast<struct nlmsghdr*> (buffer);
+       NLMSG_OK (nl_message_header_p, received_bytes) && !done;
+       nl_message_header_p = NLMSG_NEXT (nl_message_header_p, received_bytes))
+  {
+    current_interface_address.reset ();
+    current_interface_string.resize (0);
+
+    rt_message_p =
+        static_cast<struct rtmsg*> (NLMSG_DATA (nl_message_header_p));
+    ACE_ASSERT (rt_message_p);
+
+    // inspect only AF_INET-specific rules from the main table
+    if ((rt_message_p->rtm_family != AF_INET) ||
+        (rt_message_p->rtm_table != RT_TABLE_MAIN))
+      continue;
+
+    // *NOTE*: the attributes don't seem to appear in any specfic order; retain
+    //         address information until the device has been identified, and
+    //         vice versa
+    rt_attribute_p = static_cast<struct rtattr*> (RTM_RTA (rt_message_p));
+    ACE_ASSERT (rt_attribute_p);
+    length_i = RTM_PAYLOAD (nl_message_header_p);
+    skip = false;
+    for (;
+         RTA_OK (rt_attribute_p, length_i) && !skip;
+         rt_attribute_p = RTA_NEXT (rt_attribute_p, length_i))
+    {
+      switch (rt_attribute_p->rta_type)
+      {
+        case RTA_IIF:
+        case RTA_OIF:
+        {
+          char buffer_2[IF_NAMESIZE];
+          ACE_OS::memset (buffer_2, 0, sizeof (buffer_2));
+          if (!::if_indextoname (*static_cast<int*> (RTA_DATA (rt_attribute_p)),
+                                 buffer_2))
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to if_indextoname(): \"%m\", continuing\n")));
+            break;
+          } // end IF
+          current_interface_string = buffer_2;
+          if (!ACE_OS::strcmp (interfaceIdentifier_in.c_str (),
+                               buffer_2))
+          {
+            if (!current_interface_address.is_any ())
+            {
+              result = current_interface_address;
+              skip = true;
+              done = true; // done
+            } // end IF
+          } // end IF
+          else
+            skip = true; // rule applies to a different interface --> skip ahead
+          break;
+        }
+        case RTA_DST:
+        {
+          in_addr_t inet_address = 0;
+          ACE_OS::memcpy (&inet_address,
+                          RTA_DATA (rt_attribute_p),
+                          sizeof (in_addr_t));
+          ACE_INET_Addr inet_address_2;
+          result_2 = inet_address_2.set (static_cast<u_short> (0),
+                                         inet_address,
+                                         0, // already in network byte order
+                                         0);
+          if (result_2 == -1)
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
+            break;
+          } // end IF
+          if (!inet_address_2.is_any ())
+            skip = true; // apparently the gateway address is only set on rules
+                         // with destination 0.0.0.0
+          break;
+        }
+        case RTA_GATEWAY:
+        {
+          in_addr_t inet_address = 0;
+          ACE_OS::memcpy (&inet_address,
+                          RTA_DATA (rt_attribute_p),
+                          sizeof (in_addr_t));
+          result_2 =
+              current_interface_address.set (static_cast<u_short> (0),
+                                             inet_address,
+                                             0, // already in network byte order
+                                             0);
+          if (result_2 == -1)
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
+            break;
+          } // end IF
+
+          if (!ACE_OS::strcmp (current_interface_string.c_str (),
+                               interfaceIdentifier_in.c_str ()))
+          {
+            result = current_interface_address;
+            skip = true; // skip
+            done = true; // done
+          } // end IF
+          break;
+        }
+        default:
+        {
+//          ACE_DEBUG ((LM_DEBUG,
+//                      ACE_TEXT ("found attribute (type was: %d)\n"),
+//                      rt_attribute_p->rta_type));
+          break;
+        }
+      } // end SWITCH
+    } // end FOR
+  } // end FOR
+
+clean:
+  if (socket_handle != ACE_INVALID_HANDLE)
+  {
+    result_2 = ACE_OS::close (socket_handle);
+    if (result_2 == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
+                  socket_handle));
+  } // end IF
+
+  return result;
+}
+#endif

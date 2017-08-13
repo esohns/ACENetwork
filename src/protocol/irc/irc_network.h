@@ -45,7 +45,12 @@
 #include "net_client_connector.h"
 
 #include "irc_common.h"
+//#include "irc_control.h"
+#include "irc_defines.h"
 #include "irc_stream_common.h"
+
+// forward declarations
+class IRC_IControl;
 
 struct IRC_ConnectionConfiguration;
 struct IRC_SocketHandlerConfiguration
@@ -90,15 +95,14 @@ struct IRC_ConnectionState
 {
   inline IRC_ConnectionState ()
    : Net_ConnectionState ()
-   , configuration (NULL)
+   //, configuration (NULL)
    , controller (NULL)
-   , currentStatistic ()
+   , statistic ()
   {};
 
-  struct IRC_Configuration* configuration;
+  //struct IRC_Configuration* configuration;
   IRC_IControl*             controller;
-
-  IRC_RuntimeStatistic_t    currentStatistic;
+  IRC_Statistic_t           statistic;
 };
 
 struct IRC_SessionState
@@ -126,12 +130,12 @@ struct IRC_SessionState
 //typedef Net_IConnection_T<ACE_INET_Addr,
 //                          struct IRC_Configuration,
 //                          struct IRC_ConnectionState,
-//                          IRC_RuntimeStatistic_t,
+//                          IRC_Statistic_t,
 //                          IRC_Stream> IRC_IConnection_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct IRC_ConnectionConfiguration,
                                  struct IRC_ConnectionState,
-                                 IRC_RuntimeStatistic_t,
+                                 IRC_Statistic_t,
                                  struct Stream_UserData> IRC_IConnection_Manager_t;
 
 //////////////////////////////////////////
@@ -141,7 +145,8 @@ typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct IRC_SocketHandle
                                   ACE_INET_Addr,
                                   struct IRC_ConnectionConfiguration,
                                   struct IRC_ConnectionState,
-                                  IRC_RuntimeStatistic_t,
+                                  IRC_Statistic_t,
+                                  IRC_StatisticHandler_Reactor_t,
                                   IRC_Stream_t,
                                   struct Stream_UserData,
                                   struct Stream_ModuleConfiguration,
@@ -150,7 +155,8 @@ typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<struct IRC_
                                         ACE_INET_Addr,
                                         struct IRC_ConnectionConfiguration,
                                         struct IRC_ConnectionState,
-                                        IRC_RuntimeStatistic_t,
+                                        IRC_Statistic_t,
+                                        IRC_StatisticHandler_Proactor_t,
                                         IRC_Stream_t,
                                         struct Stream_UserData,
                                         struct Stream_ModuleConfiguration,
@@ -158,7 +164,7 @@ typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<struct IRC_
 typedef Net_TCPConnectionBase_T<IRC_TCPHandler_t,
                                 struct IRC_ConnectionConfiguration,
                                 struct IRC_ConnectionState,
-                                IRC_RuntimeStatistic_t,
+                                IRC_Statistic_t,
                                 struct IRC_SocketHandlerConfiguration,
                                 struct IRC_ListenerConfiguration,
                                 IRC_Stream_t,
@@ -166,7 +172,7 @@ typedef Net_TCPConnectionBase_T<IRC_TCPHandler_t,
 typedef Net_AsynchTCPConnectionBase_T<IRC_AsynchTCPHandler_t,
                                       struct IRC_ConnectionConfiguration,
                                       struct IRC_ConnectionState,
-                                      IRC_RuntimeStatistic_t,
+                                      IRC_Statistic_t,
                                       struct IRC_SocketHandlerConfiguration,
                                       struct IRC_ListenerConfiguration,
                                       IRC_Stream_t,
@@ -177,11 +183,11 @@ typedef Net_AsynchTCPConnectionBase_T<IRC_AsynchTCPHandler_t,
 typedef Net_IConnection_T<ACE_INET_Addr,
                           struct IRC_ConnectionConfiguration,
                           struct IRC_ConnectionState,
-                          IRC_RuntimeStatistic_t> IRC_IConnection_t;
+                          IRC_Statistic_t> IRC_IConnection_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 struct IRC_ConnectionConfiguration,
                                 struct IRC_ConnectionState,
-                                IRC_RuntimeStatistic_t,
+                                IRC_Statistic_t,
                                 struct Net_SocketConfiguration,
                                 struct IRC_SocketHandlerConfiguration,
                                 IRC_Stream_t,
@@ -190,7 +196,7 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
 //                       struct Net_SocketConfiguration,
 //                       struct IRC_ConnectionConfiguration,
 //                       struct IRC_ConnectionState,
-//                       IRC_RuntimeStatistic_t,
+//                       IRC_Statistic_t,
 //                       IRC_Stream> IRC_ISession_t;
 
 //////////////////////////////////////////
@@ -202,7 +208,7 @@ typedef Net_Client_Connector_T<IRC_TCPConnection_t,
                                ACE_INET_Addr,
                                struct IRC_ConnectionConfiguration,
                                struct IRC_ConnectionState,
-                               IRC_RuntimeStatistic_t,
+                               IRC_Statistic_t,
                                struct Net_TCPSocketConfiguration,
                                struct IRC_SocketHandlerConfiguration,
                                IRC_Stream_t,
@@ -211,7 +217,7 @@ typedef Net_Client_AsynchConnector_T<IRC_AsynchTCPConnection_t,
                                      ACE_INET_Addr,
                                      struct IRC_ConnectionConfiguration,
                                      struct IRC_ConnectionState,
-                                     IRC_RuntimeStatistic_t,
+                                     IRC_Statistic_t,
                                      struct Net_TCPSocketConfiguration,
                                      struct IRC_SocketHandlerConfiguration,
                                      IRC_Stream_t,
@@ -222,12 +228,12 @@ typedef Net_Client_AsynchConnector_T<IRC_AsynchTCPConnection_t,
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct IRC_ConnectionConfiguration,
                                  struct IRC_ConnectionState,
-                                 IRC_RuntimeStatistic_t,
+                                 IRC_Statistic_t,
                                  struct Stream_UserData> IRC_IConnection_Manager_t;
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  struct IRC_ConnectionConfiguration,
                                  struct IRC_ConnectionState,
-                                 IRC_RuntimeStatistic_t,
+                                 IRC_Statistic_t,
                                  struct Stream_UserData> IRC_Connection_Manager_t;
 
 typedef ACE_Singleton<IRC_Connection_Manager_t,

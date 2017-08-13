@@ -20,8 +20,6 @@
 #include "stdafx.h"
 
 #include "ace/Synch.h"
-#include "stream_misc_messagehandler.h"
-
 #include "bittorrent_session.h"
 
 ACE_THR_FUNC_RETURN

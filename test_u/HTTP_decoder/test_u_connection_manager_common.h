@@ -38,12 +38,12 @@ struct Test_U_UserData;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
-                                 HTTP_RuntimeStatistic_t,
+                                 HTTP_Statistic_t,
                                  struct Test_U_UserData> Test_U_IConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
-                                 HTTP_RuntimeStatistic_t,
+                                 HTTP_Statistic_t,
                                  struct Test_U_UserData> Test_U_ConnectionManager_t;
 
 typedef ACE_Singleton<Test_U_ConnectionManager_t,

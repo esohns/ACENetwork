@@ -39,7 +39,7 @@
 
 #include "IRC_client_common.h"
 #include "IRC_client_defines.h"
-#include "IRC_client_network.h"
+//#include "IRC_client_network.h"
 #include "IRC_client_stream_common.h"
 
 // forward declarations
@@ -54,12 +54,12 @@ struct IRC_Client_UserData;
 //typedef Net_IConnection_T<ACE_INET_Addr,
 //                          struct IRC_Client_ConnectionConfiguration,
 //                          struct IRC_Client_ConnectionState,
-//                          IRC_Client_RuntimeStatistic_t,
+//                          IRC_Statistic_t,
 //                          IRC_Client_Stream> IRC_Client_IConnection_t;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct IRC_Client_ConnectionConfiguration,
                                  struct IRC_Client_SessionState,
-                                 IRC_RuntimeStatistic_t,
+                                 IRC_Statistic_t,
                                  struct IRC_Client_UserData> IRC_Client_IConnection_Manager_t;
 
 //struct IRC_Client_ConnectorConfiguration
@@ -71,10 +71,10 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 //   //, statisticCollectionInterval (0)
 //  {};
 //
-//  //struct IRC_Client_Configuration*              configuration;
-//  IRC_Client_IConnection_Manager_t*      connectionManager;
+//  //struct IRC_Client_Configuration*            configuration;
+//  IRC_Client_IConnection_Manager_t*             connectionManager;
 //  struct IRC_Client_SocketHandlerConfiguration* socketHandlerConfiguration;
-//  unsigned int                           statisticCollectionInterval; // statistics collecting interval (second(s)) [0: off]
+//  unsigned int                                  statisticCollectionInterval; // statistics collecting interval (second(s)) [0: off]
 //};
 
 struct IRC_Client_ConnectionConfiguration;

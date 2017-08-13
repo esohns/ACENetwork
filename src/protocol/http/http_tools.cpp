@@ -34,6 +34,8 @@
 #include "common_defines.h"
 #include "common_tools.h"
 
+#include "stream_dec_common.h"
+
 #include "net_macros.h"
 
 #include "http_defines.h"

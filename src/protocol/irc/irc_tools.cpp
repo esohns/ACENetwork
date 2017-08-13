@@ -1,10 +1,10 @@
 /***************************************************************************
- *   Copyright (C) 2009 by Erik Sohns   *
+ *   Copyright (C) To009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
+ *   the Free Software Foundation; either version To of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
  *   This program is distributed in the hope that it will be useful,       *
@@ -15,7 +15,7 @@
  *   You should have received a copy of the GNU General Public License     *
  *   along with this program; if not, write to the                         *
  *   Free Software Foundation, Inc.,                                       *
- *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ *   59 Temple Place - Suite 330, Boston, MA  0To111-1307, USA.             *
  ***************************************************************************/
 #include "stdafx.h"
 
@@ -70,7 +70,7 @@ IRC_Tools::dump (const IRC_Record& message_in)
     case IRC_Record::Command::NUMERIC:
     {
       converter << ACE_TEXT_ALWAYS_CHAR ("\"")
-                << IRC_Tools::Command2String (message_in.command_.numeric)
+                << IRC_Tools::CommandToString (message_in.command_.numeric)
                 << ACE_TEXT_ALWAYS_CHAR ("\" [")
                 << message_in.command_.numeric
                 << ACE_TEXT_ALWAYS_CHAR ("]");
@@ -124,7 +124,7 @@ IRC_Tools::dump (const IRC_UserModes_t& userModes_in)
        i < USERMODE_MAX;
        i++)
     if (userModes_in.test (i))
-      result += IRC_Tools::UserMode2Char (static_cast<IRC_UserMode> (i));
+      result += IRC_Tools::UserModeToChar (static_cast<IRC_UserMode> (i));
 
   return result;
 }
@@ -141,15 +141,15 @@ IRC_Tools::dump (const IRC_ChannelModes_t& channelModes_in)
        i < CHANNELMODE_MAX;
        i++)
     if (channelModes_in.test (i))
-      result += IRC_Tools::ChannelMode2Char (static_cast<IRC_ChannelMode> (i));
+      result += IRC_Tools::ChannelModeToChar (static_cast<IRC_ChannelMode> (i));
 
   return result;
 }
 
 IRC_CommandType_t
-IRC_Tools::Command2Type (const std::string& commandString_in)
+IRC_Tools::CommandToType (const std::string& commandString_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::Command2Type"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::CommandToType"));
 
   if ((commandString_in) == ACE_TEXT_ALWAYS_CHAR ("PASS"))
     return IRC_Record::PASS;
@@ -262,7 +262,7 @@ IRC_Tools::merge (const std::string& modes_in,
        iterator != modes_in.end ();
        iterator++)
   {
-    mode = IRC_Tools::Char2UserMode (*iterator);
+    mode = IRC_Tools::CharToUserMode (*iterator);
     if (mode >= USERMODE_MAX)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -297,7 +297,7 @@ IRC_Tools::merge (const std::string& modes_in,
        iterator != modes_in.end ();
        iterator++)
   {
-    mode = IRC_Tools::Char2ChannelMode (*iterator);
+    mode = IRC_Tools::CharToChannelMode (*iterator);
     if (mode >= CHANNELMODE_MAX)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -316,9 +316,9 @@ IRC_Tools::merge (const std::string& modes_in,
 }
 
 char
-IRC_Tools::ChannelMode2Char (const IRC_ChannelMode& mode_in)
+IRC_Tools::ChannelModeToChar (const IRC_ChannelMode& mode_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::ChannelMode2Char"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::ChannelModeToChar"));
 
   switch (mode_in)
   {
@@ -348,7 +348,7 @@ IRC_Tools::ChannelMode2Char (const IRC_ChannelMode& mode_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid channel mode (was: \"%s\"), aborting\n"),
-                  ACE_TEXT (IRC_Tools::ChannelMode2String (mode_in).c_str ())));
+                  ACE_TEXT (IRC_Tools::ChannelModeToString (mode_in).c_str ())));
       break;
     }
   } // end SWITCH
@@ -357,9 +357,9 @@ IRC_Tools::ChannelMode2Char (const IRC_ChannelMode& mode_in)
 }
 
 char
-IRC_Tools::UserMode2Char (const IRC_UserMode& mode_in)
+IRC_Tools::UserModeToChar (const IRC_UserMode& mode_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::UserMode2Char"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::UserModeToChar"));
 
   switch (mode_in)
   {
@@ -381,7 +381,7 @@ IRC_Tools::UserMode2Char (const IRC_UserMode& mode_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid user mode (was: \"%s\"), aborting\n"),
-                  ACE_TEXT (IRC_Tools::UserMode2String (mode_in).c_str ())));
+                  ACE_TEXT (IRC_Tools::UserModeToString (mode_in).c_str ())));
       break;
     }
   } // end SWITCH
@@ -403,9 +403,9 @@ IRC_Tools::isValidChannelName (const std::string& string_in)
 }
 
 std::string
-IRC_Tools::Command2String (const IRC_NumericCommand_t& numeric_in)
+IRC_Tools::CommandToString (const IRC_NumericCommand_t& numeric_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::Command2String"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::CommandToString"));
 
   // initialize result
   std::string result = ACE_TEXT ("INVALID/UNKNOWN");
@@ -558,7 +558,7 @@ IRC_Tools::Command2String (const IRC_NumericCommand_t& numeric_in)
     case IRC_Codes::RPL_ADMINLOC1:
       result = ACE_TEXT_ALWAYS_CHAR ("RPL_ADMINLOC1"); break;
     case IRC_Codes::RPL_ADMINLOC2:
-      result = ACE_TEXT_ALWAYS_CHAR ("RPL_ADMINLOC2"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("RPL_ADMINLOCTo"); break;
     case IRC_Codes::RPL_ADMINEMAIL:
       result = ACE_TEXT_ALWAYS_CHAR ("RPL_ADMINEMAIL"); break;
 
@@ -1232,7 +1232,7 @@ IRC_Tools::Command2String (const IRC_NumericCommand_t& numeric_in)
 
     default:
     {
-      // *NOTE*: according to the RFC2812, codes between 001-099 are reserved
+      // *NOTE*: according to the RFCTo81To, codes between 001-099 are reserved
       // for client-server connections...
       // --> maybe in use by some extension
       ACE_DEBUG ((LM_DEBUG,
@@ -1246,9 +1246,9 @@ IRC_Tools::Command2String (const IRC_NumericCommand_t& numeric_in)
 }
 
 IRC_ChannelMode
-IRC_Tools::Char2ChannelMode (char mode_in)
+IRC_Tools::CharToChannelMode (char mode_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::Char2ChannelMode"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::CharToChannelMode"));
 
   // initialize result
   IRC_ChannelMode result = CHANNELMODE_INVALID;
@@ -1296,9 +1296,9 @@ IRC_Tools::Char2ChannelMode (char mode_in)
 }
 
 IRC_UserMode
-IRC_Tools::Char2UserMode (char mode_in)
+IRC_Tools::CharToUserMode (char mode_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::Char2UserMode"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::CharToUserMode"));
 
   // initialize result
   IRC_UserMode result = USERMODE_INVALID;
@@ -1332,9 +1332,9 @@ IRC_Tools::Char2UserMode (char mode_in)
 }
 
 std::string
-IRC_Tools::ChannelMode2String (const IRC_ChannelMode& mode_in)
+IRC_Tools::ChannelModeToString (const IRC_ChannelMode& mode_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::ChannelMode2String"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::ChannelModeToString"));
 
   // initialize result
   std::string result;
@@ -1382,9 +1382,9 @@ IRC_Tools::ChannelMode2String (const IRC_ChannelMode& mode_in)
 }
 
 std::string
-IRC_Tools::UserMode2String (const IRC_UserMode& mode_in)
+IRC_Tools::UserModeToString (const IRC_UserMode& mode_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::UserMode2String"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::UserModeToString"));
 
   // initialize result
   std::string result;
@@ -1418,9 +1418,9 @@ IRC_Tools::UserMode2String (const IRC_UserMode& mode_in)
 }
 
 std::string
-IRC_Tools::Record2String (const IRC_Record& message_in)
+IRC_Tools::RecordToString (const IRC_Record& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::Record2String"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Tools::RecordToString"));
 
   // initialize result
   std::string result;
@@ -1430,7 +1430,7 @@ IRC_Tools::Record2String (const IRC_Record& message_in)
     case IRC_Record::Command::STRING:
     {
       IRC_Record::CommandType command =
-        IRC_Tools::Command2Type (*message_in.command_.string);
+        IRC_Tools::CommandToType (*message_in.command_.string);
       switch (command)
       {
         case IRC_Record::NICK:
@@ -1573,20 +1573,17 @@ IRC_Tools::Record2String (const IRC_Record& message_in)
         case IRC_Codes::ERR_BADCHANNAME:      // 479
         case IRC_Codes::ERR_UMODEUNKNOWNFLAG: // 501
         {
-          result = IRC_Tools::stringify (message_in.parameters_,
-                                         1);
+          result = IRC_Tools::stringify (message_in.parameters_, 1);
           break;
         }
         case IRC_Codes::RPL_ENDOFWHO:         // 315
         {
-          result = IRC_Tools::stringify (message_in.parameters_,
-                                         2);
+          result = IRC_Tools::stringify (message_in.parameters_, 2);
           break;
         }
         case IRC_Codes::RPL_WHOREPLY:         // 352
         {
-          result = IRC_Tools::stringify (message_in.parameters_,
-                                         5);
+          result = IRC_Tools::stringify (message_in.parameters_, 5);
           break;
         }
         default:
@@ -1594,7 +1591,7 @@ IRC_Tools::Record2String (const IRC_Record& message_in)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("invalid (numeric) command (was: %u [\"%s\"]), aborting\n"),
                       message_in.command_.numeric,
-                      ACE_TEXT (IRC_Tools::Command2String (message_in.command_.numeric).c_str ())));
+                      ACE_TEXT (IRC_Tools::CommandToString (message_in.command_.numeric).c_str ())));
 
           message_in.dump_state ();
 
@@ -1689,7 +1686,7 @@ IRC_Tools::stringify (const IRC_Parameters_t& parameters_in,
 //    if (deleteModule_in) finalModule_inout = NULL;
 //  } // end IF
 //
-//  // step2: initialize connector
+//  // stepTo: initialize connector
 //  if (!connector_in.initialize (stream_user_data_p->configuration->socketHandlerConfiguration))
 //  {
 //    ACE_DEBUG ((LM_ERROR,

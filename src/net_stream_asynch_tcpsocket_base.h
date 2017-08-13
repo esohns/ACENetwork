@@ -41,6 +41,7 @@ template <typename HandlerType,
           typename ConfigurationType, // connection-
           typename StateType, // connection-
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename StreamType,
           ////////////////////////////////
           typename UserDataType,
@@ -54,6 +55,7 @@ class Net_StreamAsynchTCPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType>
 {
  public:
@@ -61,6 +63,7 @@ class Net_StreamAsynchTCPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType> CONNECTION_BASE_T;
 
   inline virtual ~Net_StreamAsynchTCPSocketBase_T () {};
@@ -121,6 +124,7 @@ class Net_StreamAsynchTCPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType> inherited3;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T ())

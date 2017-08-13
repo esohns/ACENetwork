@@ -49,16 +49,14 @@
 #include "file_server_connection_common.h"
 #include "file_server_stream_common.h"
 
-typedef Common_IStatistic_T<Net_RuntimeStatistic_t> FileServer_StatisticReportingHandler_t;
-
 // forward declarations
 struct FileServer_ConnectionConfiguration;
-struct FileServer_StreamConfiguration;
+struct FileServer_ConnectionState;
 struct FileServer_UserData;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct FileServer_ConnectionConfiguration,
                                  struct FileServer_ConnectionState,
-                                 Net_RuntimeStatistic_t,
+                                 Net_Statistic_t,
                                  struct FileServer_UserData> FileServer_IInetConnectionManager_t;
 class Test_U_SessionMessage;
 class Test_U_Message;
@@ -90,9 +88,9 @@ struct FileServer_SignalHandlerConfiguration
    , statisticReportingTimerID (-1)
   {};
 
-  Test_U_IListener_t*                     listener;
-  FileServer_StatisticReportingHandler_t* statisticReportingHandler;
-  long                                    statisticReportingTimerID;
+  Test_U_IListener_t*              listener;
+  Net_StatisticReportingHandler_t* statisticReportingHandler;
+  long                             statisticReportingTimerID;
 };
 
 struct FileServer_Configuration
@@ -150,7 +148,6 @@ struct FileServer_GTK_CBData
   {};
 
   struct FileServer_Configuration* configuration;
-
   FileServer_Subscribers_t         subscribers;
 };
 

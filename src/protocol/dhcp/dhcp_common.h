@@ -34,6 +34,8 @@
 #include "stream_data_base.h"
 #include "stream_isessionnotify.h"
 
+#include "stream_stat_statistic_handler.h"
+
 #include "net_common.h"
 
 #include "dhcp_codes.h"
@@ -52,7 +54,11 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                     DHCP_Record,
                                     DHCP_SessionMessage> DHCP_ISessionNotify_t;
 
-typedef Stream_Statistic DHCP_RuntimeStatistic_t;
+typedef struct Stream_Statistic DHCP_Statistic_t;
+typedef Common_IStatistic_T<DHCP_Statistic_t> DHCP_StatisticReportingHandler_t;
+
+typedef Stream_StatisticHandler_Reactor_T<DHCP_Statistic_t> DHCP_StatisticHandler_Reactor_t;
+typedef Stream_StatisticHandler_Proactor_T<DHCP_Statistic_t> DHCP_StatisticHandler_Proactor_t;
 
 // convenient type definitions
 typedef DHCP_Codes::OpType DHCP_Op_t;

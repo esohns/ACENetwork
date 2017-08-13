@@ -49,7 +49,7 @@ class Test_U_InboundConnectionStream
                         enum Stream_StateMachine_ControlState,
                         struct Test_U_StreamState,
                         struct Test_U_StreamConfiguration,
-                        DHCP_RuntimeStatistic_t,
+                        DHCP_Statistic_t,
                         struct Test_U_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_U_StreamModuleHandlerConfiguration,
@@ -67,7 +67,7 @@ class Test_U_InboundConnectionStream
                         enum Stream_StateMachine_ControlState,
                         struct Test_U_StreamState,
                         struct Test_U_StreamConfiguration,
-                        DHCP_RuntimeStatistic_t,
+                        DHCP_Statistic_t,
                         struct Test_U_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_U_StreamModuleHandlerConfiguration,
@@ -90,7 +90,7 @@ class Test_U_InboundConnectionStream
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
-  virtual bool collect (DHCP_RuntimeStatistic_t&); // return value: statistic data
+  virtual bool collect (DHCP_Statistic_t&); // return value: statistic data
   virtual void report () const;
 
   // *TODO*: re-consider this API
@@ -112,7 +112,7 @@ class Test_U_OutboundConnectionStream
                         enum Stream_StateMachine_ControlState,
                         struct Test_U_StreamState,
                         struct Test_U_StreamConfiguration,
-                        DHCP_RuntimeStatistic_t,
+                        DHCP_Statistic_t,
                         struct Test_U_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_U_StreamModuleHandlerConfiguration,
@@ -130,7 +130,7 @@ class Test_U_OutboundConnectionStream
                         enum Stream_StateMachine_ControlState,
                         struct Test_U_StreamState,
                         struct Test_U_StreamConfiguration,
-                        DHCP_RuntimeStatistic_t,
+                        DHCP_Statistic_t,
                         struct Test_U_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_U_StreamModuleHandlerConfiguration,
@@ -153,7 +153,7 @@ class Test_U_OutboundConnectionStream
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
-  virtual bool collect (DHCP_RuntimeStatistic_t&); // return value: statistic data
+  virtual bool collect (DHCP_Statistic_t&); // return value: statistic data
   virtual void report () const;
 
   // *TODO*: re-consider this API

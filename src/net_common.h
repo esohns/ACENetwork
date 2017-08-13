@@ -29,7 +29,11 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
+#include "common_istatistic.h"
+
 #include "stream_common.h"
+
+#include "stream_stat_statistic_handler.h"
 
 // forward declarations
 template <typename ConfigurationType>
@@ -144,7 +148,12 @@ enum Net_Connection_Status
   NET_CONNECTION_STATUS_MAX
 };
 
-typedef Stream_Statistic Net_RuntimeStatistic_t;
+typedef Stream_Statistic Net_Statistic_t;
+
+typedef Common_IStatistic_T<Net_Statistic_t> Net_StatisticReportingHandler_t;
+typedef Stream_StatisticHandler_Proactor_T<Net_Statistic_t> Net_StatisticHandlerProactor_t;
+typedef Stream_StatisticHandler_Reactor_T<Net_Statistic_t> Net_StatisticHandlerReactor_t;
+
 #if defined (ACE_HAS_NETLINK)
 typedef Net_ITransportLayer_T<struct Net_NetlinkSocketConfiguration> Net_INetlinkTransportLayer_t;
 #endif
@@ -165,18 +174,17 @@ typedef unsigned int Net_ConnectionId_t;
 struct Net_ConnectionState
 {
   inline Net_ConnectionState ()
-   : status (NET_CONNECTION_STATUS_INVALID)
-   , currentStatistic ()
-   , lastCollectionTimestamp (ACE_Time_Value::zero)
+   : lastCollectionTimestamp (ACE_Time_Value::zero)
    , lock ()
+   , statistic ()
+   , status (NET_CONNECTION_STATUS_INVALID)
    , userData (NULL)
   {};
 
-  enum Net_Connection_Status status;
-
-  Net_RuntimeStatistic_t     currentStatistic;
   ACE_Time_Value             lastCollectionTimestamp;
   ACE_SYNCH_MUTEX            lock;
+  Net_Statistic_t            statistic;
+  enum Net_Connection_Status status;
 
   struct Net_UserData*       userData;
 };

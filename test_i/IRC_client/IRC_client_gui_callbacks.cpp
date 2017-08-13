@@ -160,7 +160,7 @@ connection_setup_function (void* arg_in)
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   bool result_2 = false;
   IRC_IControl* icontrol_p = NULL;
-  const IRC_Client_Stream* stream_p = NULL;
+  const typename Stream_IStream_t::STREAM_T* stream_p = NULL;
   const Stream_Module_t* module_p = NULL;
   const Stream_Module_t* current_p = NULL;
   Stream_Module_t* tail_p = NULL;
@@ -341,7 +341,8 @@ connection_failed:
        iterator_2.next (current_p) != 0;
        iterator_2.advance ())
   {
-    tail_p = const_cast<IRC_Client_Stream*> (stream_p)->tail ();
+    tail_p =
+      const_cast<typename Stream_IStream_t::STREAM_T*> (stream_p)->tail ();
     if (current_p != tail_p)
       module_p = current_p;
   } // end FOR
@@ -2781,13 +2782,13 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
   string_list_t parameters;
   try {
     data_p->controller->mode (connection_state_r.nickName,               // user mode
-                              IRC_Tools::UserMode2Char (mode),           // corresponding mode char
+                              IRC_Tools::UserModeToChar (mode),          // corresponding mode char
                               !connection_state_r.userModes.test (mode), // enable ?
                               parameters);                               // parameters
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::mode(\"%s\"), continuing\n"),
-                ACE_TEXT (IRC_Tools::UserMode2String (mode).c_str ())));
+                ACE_TEXT (IRC_Tools::UserModeToString (mode).c_str ())));
   }
 }
 
@@ -3203,14 +3204,14 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
   } // end IF
 
   try {
-    data_p->controller->mode (data_p->id,                         // channel name
-                              IRC_Tools::ChannelMode2Char (mode), // corresponding mode char
-                              !data_p->channelModes.test (mode),  // enable ?
-                              parameters);                        // parameters
+    data_p->controller->mode (data_p->id,                          // channel name
+                              IRC_Tools::ChannelModeToChar (mode), // corresponding mode char
+                              !data_p->channelModes.test (mode),   // enable ?
+                              parameters);                         // parameters
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in IRC_Client_IIRCControl::mode(\"%s\"), continuing\n"),
-                ACE_TEXT (IRC_Tools::ChannelMode2String (mode).c_str ())));
+                ACE_TEXT (IRC_Tools::ChannelModeToString (mode).c_str ())));
   }
 }
 
@@ -3750,7 +3751,7 @@ action_ban_cb (GtkAction* action_in,
 
     try {
       data_p->controller->mode (data_p->id,
-                                IRC_Tools::ChannelMode2Char (CHANNELMODE_BAN),
+                                IRC_Tools::ChannelModeToChar (CHANNELMODE_BAN),
                                 true,
                                 parameters);
     } catch (...) {

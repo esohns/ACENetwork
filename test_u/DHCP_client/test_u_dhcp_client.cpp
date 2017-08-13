@@ -105,7 +105,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-d          : debug parser [")
-            << NET_PROTOCOL_DEFAULT_YACC_TRACE
+            << NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
   std::string configuration_path = path;
@@ -202,7 +202,7 @@ do_processArguments (int argc_in,
 
   // initialize results
   requestBroadcastReplies_out = DHCP_DEFAULT_FLAGS_BROADCAST;
-  debugParser_out = NET_PROTOCOL_DEFAULT_YACC_TRACE;
+  debugParser_out = NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE;
   std::string configuration_path = path;
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
@@ -533,9 +533,7 @@ do_work (bool requestBroadcastReplies_in,
 
   Test_U_EventHandler ui_event_handler (&CBData_in);
   Test_U_Module_EventHandler_Module event_handler (NULL,
-                                                   ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
-                                                   NULL,
-                                                   true);
+                                                   ACE_TEXT_ALWAYS_CHAR ("EventHandler"));
   //Test_U_Stream_t stream;
   //Test_U_AsynchStream_t asynch_stream;
   //Test_U_StreamBase_t* stream_p = &stream;
@@ -745,12 +743,12 @@ do_work (bool requestBroadcastReplies_in,
   struct Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
-  Stream_StatisticHandler_Reactor_t statistic_handler (ACTION_REPORT,
-                                                       connection_manager_p,
-                                                       false);
-  //Stream_StatisticHandler_Proactor_t statistic_handler_proactor (ACTION_REPORT,
-  //                                                               connection_manager_p,
-  //                                                               false);
+  DHCP_StatisticHandler_Reactor_t statistic_handler (ACTION_REPORT,
+                                                     connection_manager_p,
+                                                     false);
+  DHCP_StatisticHandler_Proactor_t statistic_handler_proactor (ACTION_REPORT,
+                                                               connection_manager_p,
+                                                               false);
   long timer_id = -1;
   if (statisticReportingInterval_in)
   {
@@ -1316,7 +1314,7 @@ ACE_TMAIN (int argc_in,
 
   // step1a set defaults
   bool request_broadcast_replies = DHCP_DEFAULT_FLAGS_BROADCAST;
-  bool debug_parser = NET_PROTOCOL_DEFAULT_YACC_TRACE;
+  bool debug_parser = NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE;
   std::string configuration_path = path;
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
@@ -1331,7 +1329,7 @@ ACE_TMAIN (int argc_in,
   ui_definition_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   ui_definition_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GLADE_FILE);
   bool log_to_file = false;
-  std::string interface;
+  std::string interface_string;
   bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   bool use_thread_pool = NET_EVENT_USE_THREAD_POOL;
   bool send_request_on_offer =
@@ -1353,7 +1351,7 @@ ACE_TMAIN (int argc_in,
                             output_file,
                             ui_definition_file,
                             log_to_file,
-                            interface,
+                            interface_string,
                             use_loopback,
                             use_thread_pool,
                             send_request_on_offer,
@@ -1394,7 +1392,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("the select()-based reactor is not reentrant, using the thread-pool reactor instead...\n")));
     use_thread_pool = true;
   } // end IF
-  if ((ui_definition_file.empty () && interface.empty ())                  ||
+  if ((ui_definition_file.empty () && interface_string.empty ())           ||
       (!ui_definition_file.empty () &&
        !Common_File_Tools::isReadable (ui_definition_file))                ||
       (!gtk_rc_file.empty () &&
@@ -1595,7 +1593,7 @@ ACE_TMAIN (int argc_in,
            debug_parser,
            output_file,
            ui_definition_file,
-           interface,
+           interface_string,
            use_loopback,
            use_thread_pool,
            send_request_on_offer,

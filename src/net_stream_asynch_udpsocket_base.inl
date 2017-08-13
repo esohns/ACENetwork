@@ -37,6 +37,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -48,13 +49,17 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
                                 ModuleConfigurationType,
                                 ModuleHandlerConfigurationType>::Net_StreamAsynchUDPSocketBase_T (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                                                                   const ACE_Time_Value& statisticCollectionInterval_in)
- : inherited4 (interfaceHandle_in,
+ : inherited ()
+ , inherited2 ()
+ , inherited3 ()
+ , inherited4 (interfaceHandle_in,
                statisticCollectionInterval_in)
  , stream_ ()
  /////////////////////////////////////////
@@ -70,33 +75,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-Net_StreamAsynchUDPSocketBase_T<HandlerType,
-                                SocketType,
-                                AddressType,
-                                ConfigurationType,
-                                StateType,
-                                StatisticContainerType,
-                                HandlerConfigurationType,
-                                StreamType,
-                                UserDataType,
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::~Net_StreamAsynchUDPSocketBase_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::~Net_StreamAsynchUDPSocketBase_T"));
-
-}
-
-template <typename HandlerType,
-          typename SocketType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -109,6 +88,66 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
+                                HandlerConfigurationType,
+                                StreamType,
+                                UserDataType,
+                                ModuleConfigurationType,
+                                ModuleHandlerConfigurationType>::reset ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::reset"));
+
+  ACE_Message_Block message_block;
+  ACE_HANDLE handle_h = inherited::SVC_HANDLER_T::handle ();
+
+  int result = inherited::handle_close (handle_h,
+                                        ACE_Event_Handler::SIGNAL_MASK);
+  if (result == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to HandlerType::handle_close(0x%@): \"%m\", continuing\n"),
+                  handle_h));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to HandlerType::handle_close(%d): \"%m\", continuing\n"),
+                  handle_h));
+#endif
+  result = inherited2::close ();
+  if (result == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to HandlerType::handle_close(0x%@): \"%m\", continuing\n"),
+                  handle_h));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to HandlerType::handle_close(%d): \"%m\", continuing\n"),
+                  handle_h));
+#endif
+
+  OWN_TYPE_T::open (ACE_INVALID_HANDLE,
+                    message_block);
+}
+
+template <typename HandlerType,
+          typename SocketType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename StatisticHandlerType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename UserDataType,
+          typename ModuleConfigurationType,
+          typename ModuleHandlerConfigurationType>
+void
+Net_StreamAsynchUDPSocketBase_T<HandlerType,
+                                SocketType,
+                                AddressType,
+                                ConfigurationType,
+                                StateType,
+                                StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -134,6 +173,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 #endif
   bool handle_manager = false;
   bool handle_socket = false;
+  bool decrease_reference_count = socket_configuration_p->writeOnly;
 
   // sanity check(s)
   ACE_ASSERT (socket_configuration_p);
@@ -193,66 +233,84 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   inherited::open (inherited2::get_handle (),
                    messageBlock_in);
 
-  // step5: register with the connection manager (if any)
-#if defined (__GNUG__)
-  if (!inherited4::registerc (this))
-#else
-  if (!inherited4::registerc ())
-#endif
+  // step5: register with the connection manager (if any) ?
+  if (!inherited4::isRegistered_)
   {
-    // *NOTE*: perhaps max# connections has been reached
-    //ACE_DEBUG ((LM_ERROR,
-    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
-    goto error;
+#if defined (__GNUG__)
+    if (!inherited4::registerc (this))
+#else
+    if (!inherited4::registerc ())
+#endif
+    {
+      // *NOTE*: perhaps max# connections has been reached
+      //ACE_DEBUG ((LM_ERROR,
+      //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+      goto error;
+    } // end IF
   } // end IF
   handle_manager = true;
 
-  // step3: initialize/start stream
+  // step3: initialize/start stream ?
   // step3a: connect the stream head message queue with this handler; the queue
   //         will forward outbound data to handle_output ()
   inherited4::configuration_->streamConfiguration->configuration_.notificationStrategy =
     this;
 
-  // step3d: initialize stream
-  // *TODO*: this clearly is a design glitch
-  inherited4::configuration_->streamConfiguration->configuration_.sessionID =
+  // step3d: initialize stream ?
+  if (stream_.isRunning ())
+  {
+    // *NOTE*: connection already initialized, do not adjust the reference count
+    decrease_reference_count = false;
+
+    // update session id
+    const typename StreamType::SESSION_DATA_CONTAINER_T& session_data_container_r =
+      stream_.get ();
+    typename StreamType::SESSION_DATA_T& session_data_r =
+      const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_r.get ());
+    ACE_ASSERT (session_data_r.lock);
+    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_r.lock);
+      session_data_r.sessionID =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      reinterpret_cast<size_t> (inherited::handle ()); // (== socket handle)
+        reinterpret_cast<size_t> (inherited::handle ()); // (== socket handle)
 #else
-      static_cast<size_t> (inherited::handle ()); // (== socket handle)
+        static_cast<size_t> (inherited::handle ()); // (== socket handle)
 #endif
-  if (!stream_.initialize (*inherited4::configuration_->streamConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize processing stream, aborting\n")));
-    goto error;
+    } // end lock scope
   } // end IF
-  //session_data_container_p = stream_.get ();
-  //ACE_ASSERT (session_data_container_p);
-  //session_data_p = &session_data_container_p->get ();
-  //// *TODO*: remove type inferences
-  //const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
-  //    &const_cast<StateType&> (inherited4::state ());
-  //stream_.dump_state ();
-
-  // step3e: start stream
-  stream_.start ();
-  if (!stream_.isRunning ())
+  else
   {
-    // *NOTE*: most likely, this happened because the stream failed to
-    //         initialize
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to start processing stream, aborting\n")));
-    goto error;
+    // *TODO*: this clearly is a design glitch
+    inherited4::configuration_->streamConfiguration->configuration_.sessionID =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        reinterpret_cast<size_t> (inherited::handle ()); // (== socket handle)
+#else
+        static_cast<size_t> (inherited::handle ()); // (== socket handle)
+#endif
+    if (!stream_.initialize (*inherited4::configuration_->streamConfiguration))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to initialize processing stream, aborting\n")));
+      goto error;
+    } // end IF
+
+    // step3e: start stream
+    stream_.start ();
+    if (!stream_.isRunning ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to start processing stream, aborting\n")));
+      goto error;
+    } // end IF
   } // end IF
 
-  // step4: start reading (need to pass any data ?)
+  // step4: start reading ?
   if (!socket_configuration_p->writeOnly)
   {
     if (messageBlock_in.length () == 0)
       inherited::initiate_read_dgram ();
     else
     {
+      // forward data argument
       ACE_Message_Block* message_block_p = messageBlock_in.duplicate ();
       if (!message_block_p)
       {
@@ -260,7 +318,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                     ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
         goto error;
       } // end IF
-      // fake a result to emulate regular behavior...
+      // fake a result to emulate regular behavior
       ACE_Proactor* proactor_p = inherited::proactor ();
       ACE_ASSERT (proactor_p);
       ACE_Asynch_Read_Dgram_Result_Impl* fake_result_p =
@@ -284,7 +342,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       // <complete> for Accept would have already moved the <wr_ptr>
       // forward; update it to the beginning position
       message_block_p->wr_ptr (message_block_p->wr_ptr () - bytes_transferred);
-      // invoke ourselves (see handle_read_stream)
+      // invoke 'this' (see handle_read_stream())
       fake_result_p->complete (message_block_p->length (), // bytes read
                                1,                          // success
                                NULL,                       // ACT
@@ -296,10 +354,18 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     // *NOTE*: registered with the proactor at this point
     //         --> data may start arriving at handle_input ()
   } // end IF
-  if (socket_configuration_p->writeOnly)
-    this->decrease (); // float the connection (connection manager)
-                       //ACE_ASSERT (this->count () == 2); // connection manager & read operation
-                       //                                     (+ stream module(s))
+
+  // step5: 'float' the connection
+  if (decrease_reference_count)
+  {
+    this->decrease ();
+    //ACE_ASSERT (this->count () == 1); // connection manager (+ stream module(s))
+  } // end IF
+  else
+  {
+    //ACE_ASSERT (this->count () == 2); // connection manager + read operation
+    //                                     (+ stream module(s))
+  } // end ELSE
 
   inherited4::state_.status = NET_CONNECTION_STATUS_OK;
 
@@ -325,7 +391,8 @@ error:
   if (handle_manager)
     inherited4::deregister (); // <-- should 'delete this'
 
-  this->decrease ();
+  if (decrease_reference_count)
+    this->decrease ();
 }
 
 template <typename HandlerType,
@@ -334,6 +401,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -346,6 +414,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -359,8 +428,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   int result = -1;
   Stream_Base_t* upstream_p = stream_.upStream ();
   Stream_Base_t* stream_p = (upstream_p ? upstream_p : &stream_);
-  ACE_Message_Block* message_block_p, *message_block_2 = NULL;
+  ACE_Message_Block* message_block_p, *message_block_2, *message_block_3 = NULL;
   size_t bytes_sent = 0;
+  ssize_t result_2 = 0;
 
   // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
   //                   been notified
@@ -381,7 +451,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     length = message_block_2->length ();
     if (length > inherited::PDUSize_)
     {
-      ACE_Message_Block* message_block_3 = message_block_2->duplicate ();
+      message_block_3 = message_block_2->duplicate ();
       if (unlikely (!message_block_3))
       {
         ACE_DEBUG ((LM_ERROR,
@@ -418,7 +488,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     } // end WHILE
     if (message_block_2)
     {
-      ACE_Message_Block* message_block_3 = message_block_p;
+      message_block_3 = message_block_p;
       while (message_block_3->cont () != message_block_2)
         message_block_3 = message_block_3->cont ();
       message_block_3->cont (NULL);
@@ -427,7 +497,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     this->increase ();
     inherited::counter_.increase ();
 send:
-    ssize_t result_2 =
+    result_2 =
       inherited::outputStream_.send (message_block_p,                      // data
                                      bytes_sent,                           // #bytes sent
                                      0,                                    // flags
@@ -453,10 +523,6 @@ send:
 
       return -1;
     } // end IF
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("sent %u byte(s) to %s\n"),
-                bytes_sent,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::address_).c_str ())));
     message_block_p = message_block_2;
   } while (message_block_p);
 
@@ -469,6 +535,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -481,6 +548,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -543,6 +611,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -555,6 +624,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -611,6 +681,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -623,6 +694,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -644,6 +716,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -656,6 +729,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -678,6 +752,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -690,6 +765,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -741,6 +817,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -753,6 +830,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -784,6 +862,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -796,6 +875,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -823,6 +903,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -835,6 +916,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -859,6 +941,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -871,6 +954,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -893,6 +977,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -905,6 +990,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -1040,6 +1126,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -1052,6 +1139,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -1072,6 +1160,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -1083,6 +1172,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -1103,33 +1193,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType,
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
-                                Net_SOCK_Netlink,
-                                AddressType,
-                                ConfigurationType,
-                                StateType,
-                                StatisticContainerType,
-                                HandlerConfigurationType,
-                                StreamType,
-                                UserDataType,
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>::~Net_StreamAsynchUDPSocketBase_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::~Net_StreamAsynchUDPSocketBase_T"));
-
-//  if (buffer_)
-//    buffer_->release ();
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -1142,6 +1206,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -1299,6 +1364,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -1311,6 +1377,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -1375,6 +1442,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -1387,6 +1455,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -1441,6 +1510,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -1453,6 +1523,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -1495,6 +1566,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -1507,6 +1579,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -1522,6 +1595,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -1534,6 +1608,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -1552,6 +1627,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -1564,10 +1640,10 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
-//                                ModuleConfigurationType>::close (u_long arg_in)
                                 ModuleConfigurationType,
                                 ModuleHandlerConfigurationType>::close ()
 {
@@ -1604,6 +1680,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -1616,6 +1693,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -1637,6 +1715,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -1649,6 +1728,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -1671,6 +1751,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -1683,6 +1764,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -1703,6 +1785,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -1715,6 +1798,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,
@@ -1750,7 +1834,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                 ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
 
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("connection [id: %u [%d]]: \"%s\" <--> \"%s\"\n"),
+              ACE_TEXT ("connection [id: %u [%d]]: %s <--> %s\n"),
               id (), handle,
               ACE_TEXT (local_address_string.c_str ()),
               buffer));
@@ -1760,6 +1844,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType,
@@ -1772,6 +1857,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 HandlerConfigurationType,
                                 StreamType,
                                 UserDataType,

@@ -64,33 +64,25 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_ProtocolHandler_Module (this,
-                                                        ACE_TEXT_ALWAYS_CHAR ("ProtocolHandler"),
-                                                        NULL,
-                                                        false),
+                                                        ACE_TEXT_ALWAYS_CHAR ("ProtocolHandler")),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_StatisticReport_Module (this,
-                                                        ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
-                                                        NULL,
-                                                        false),
+                                                        ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_HeaderParser_Module (this,
-                                                     ACE_TEXT_ALWAYS_CHAR ("HeaderParser"),
-                                                     NULL,
-                                                     false),
+                                                     ACE_TEXT_ALWAYS_CHAR ("HeaderParser")),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_TCPSocketHandler_Module (this,
-                                                         ACE_TEXT_ALWAYS_CHAR ("SocketHandler"),
-                                                         NULL,
-                                                         false),
+                                                         ACE_TEXT_ALWAYS_CHAR ("SocketHandler")),
                   false);
   modules_out.push_back (module_p);
 
@@ -221,7 +213,7 @@ Test_U_Stream::ping ()
 }
 
 bool
-Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
+Test_U_Stream::collect (Net_Statistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::collect"));
 
@@ -231,17 +223,17 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
   int result = -1;
 
   Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic")));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT ("RuntimeStatistic")));
+                ACE_TEXT ("StatisticReport")));
     return false;
   } // end IF
-  Test_U_Module_StatisticReport_WriterTask_t* runtimeStatistic_impl =
+  Test_U_Module_StatisticReport_WriterTask_t* statistic_report_impl =
     dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
-  if (!runtimeStatistic_impl)
+  if (!statistic_report_impl)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t> failed, aborting\n")));
@@ -262,12 +254,12 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
     } // end IF
   } // end IF
 
-  session_data_r.currentStatistic.timeStamp = COMMON_TIME_NOW;
+  session_data_r.statistic.timeStamp = COMMON_TIME_NOW;
 
   // delegate to the statistics module
   bool result_2 = false;
   try {
-    result_2 = runtimeStatistic_impl->collect (data_out);
+    result_2 = statistic_report_impl->collect (data_out);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), continuing\n")));
@@ -276,7 +268,7 @@ Test_U_Stream::collect (Net_RuntimeStatistic_t& data_out)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_IStatistic_T::collect(), aborting\n")));
   else
-    session_data_r.currentStatistic = data_out;
+    session_data_r.statistic = data_out;
 
   if (session_data_r.lock)
   {
@@ -294,9 +286,9 @@ Test_U_Stream::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::report"));
 
-//   Net_Module_Statistic_ReaderTask_t* runtimeStatistic_impl = NULL;
-//   runtimeStatistic_impl = dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//runtimeStatistic_.writer ());
-//   if (!runtimeStatistic_impl)
+//   Net_Module_Statistic_ReaderTask_t* statistic_report_impl = NULL;
+//   statistic_report_impl = dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//runtimeStatistic_.writer ());
+//   if (!statistic_report_impl)
 //   {
 //     ACE_DEBUG ((LM_ERROR,
 //                 ACE_TEXT ("dynamic_cast<Net_Module_Statistic_ReaderTask_t> failed, returning\n")));
@@ -305,7 +297,7 @@ Test_U_Stream::report () const
 //   } // end IF
 //
 //   // delegate to this module...
-//   return (runtimeStatistic_impl->report ());
+//   return (statistic_report_impl->report ());
 
   // just a dummy
   ACE_ASSERT (false);

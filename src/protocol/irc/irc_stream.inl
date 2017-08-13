@@ -25,6 +25,7 @@
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -35,6 +36,7 @@ template <typename StreamStateType,
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
              StatisticContainerType,
+             StatisticHandlerType,
              ModuleHandlerConfigurationType,
              SessionDataType,
              SessionDataContainerType,
@@ -51,6 +53,7 @@ IRC_Stream_T<StreamStateType,
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -61,6 +64,7 @@ template <typename StreamStateType,
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
              StatisticContainerType,
+             StatisticHandlerType,
              ModuleHandlerConfigurationType,
              SessionDataType,
              SessionDataContainerType,
@@ -112,6 +116,7 @@ IRC_Stream_T<StreamStateType,
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -123,6 +128,7 @@ bool
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
              StatisticContainerType,
+             StatisticHandlerType,
              ModuleHandlerConfigurationType,
              SessionDataType,
              SessionDataContainerType,
@@ -231,6 +237,7 @@ error:
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -242,6 +249,7 @@ bool
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
              StatisticContainerType,
+             StatisticHandlerType,
              ModuleHandlerConfigurationType,
              SessionDataType,
              SessionDataContainerType,
@@ -288,7 +296,7 @@ IRC_Stream_T<StreamStateType,
     } // end IF
   } // end IF
 
-  session_data_r.currentStatistic.timeStamp = COMMON_TIME_NOW;
+  session_data_r.statistic.timeStamp = COMMON_TIME_NOW;
 
   // delegate to the statistic module
   bool result_2 = false;
@@ -302,7 +310,7 @@ IRC_Stream_T<StreamStateType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_IStatistic_T::collect(), aborting\n")));
   else
-    session_data_r.currentStatistic = data_out;
+    session_data_r.statistic = data_out;
 
   if (session_data_r.lock)
   {
@@ -318,6 +326,7 @@ IRC_Stream_T<StreamStateType,
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -329,6 +338,7 @@ void
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
              StatisticContainerType,
+             StatisticHandlerType,
              ModuleHandlerConfigurationType,
              SessionDataType,
              SessionDataContainerType,

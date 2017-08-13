@@ -34,9 +34,10 @@
 #include "stream_common.h"
 #include "stream_istreamcontrol.h"
 #include "stream_resetcounterhandler.h"
-#include "stream_statistichandler.h"
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
+
+#include "stream_stat_statistic_handler.h"
 
 #include "net_defines.h"
 

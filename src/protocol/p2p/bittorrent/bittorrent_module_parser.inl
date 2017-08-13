@@ -437,6 +437,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
@@ -450,6 +451,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
+                            StatisticHandlerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                             UserDataType>::BitTorrent_Module_ParserH_T (ISTREAM_T* stream_in)
 #else
@@ -480,6 +482,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
@@ -493,6 +496,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
+                            StatisticHandlerType,
                             UserDataType>::~BitTorrent_Module_ParserH_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::~BitTorrent_Module_ParserH_T"));
@@ -513,6 +517,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 bool
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
@@ -527,6 +532,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
+                            StatisticHandlerType,
                             UserDataType>::initialize (const ConfigurationType& configuration_in,
                                                       Stream_IAllocator* allocator_in)
 {
@@ -573,6 +579,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 void
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
@@ -587,6 +594,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
+                            StatisticHandlerType,
                             UserDataType>::handleDataMessage (DataMessageType*& message_inout,
                                                               bool& passMessageDownstream_out)
 {
@@ -749,6 +757,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 void
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
@@ -763,6 +772,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
+                            StatisticHandlerType,
                             UserDataType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                                  bool& passMessageDownstream_out)
 {
@@ -847,6 +857,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 bool
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
@@ -861,6 +872,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
+                            StatisticHandlerType,
                             UserDataType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::collect"));
@@ -897,6 +909,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 void
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
@@ -911,6 +924,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
+                            StatisticHandlerType,
                             UserDataType>::record (struct BitTorrent_PeerRecord*& record_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::record"));
@@ -930,7 +944,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
   if (inherited2::trace_)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
-                ACE_TEXT (BitTorrent_Tools::Record2String (*data_r.peerRecord).c_str ())));
+                ACE_TEXT (BitTorrent_Tools::RecordToString (*data_r.peerRecord).c_str ())));
 
   // set new head fragment ?
   ACE_Message_Block* message_block_p = headFragment_;
@@ -988,6 +1002,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 void
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
@@ -1002,6 +1017,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
+                            StatisticHandlerType,
                             UserDataType>::handshake (struct BitTorrent_PeerHandShake*& handShake_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::handshake"));
@@ -1022,7 +1038,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
   if (inherited2::trace_)
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
-                ACE_TEXT (BitTorrent_Tools::HandShake2String (*data_r.handShakeRecord).c_str ())));
+                ACE_TEXT (BitTorrent_Tools::HandShakeToString (*data_r.handShakeRecord).c_str ())));
 
   // step1: set session data
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =

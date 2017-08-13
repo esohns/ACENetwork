@@ -263,7 +263,7 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
                         ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
         } // end IF
 
-        CBData_->progressData.statistic = (*iterator).second->currentStatistic;
+        CBData_->progressData.statistic = (*iterator).second->statistic;
 
         if ((*iterator).second->lock)
         {
@@ -489,7 +489,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
 #if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s\n"),
-              ACE_TEXT (BitTorrent_Tools::Dictionary2String (*parser.bencoding_).c_str ())));
+              ACE_TEXT (BitTorrent_Tools::DictionaryToString (*parser.bencoding_).c_str ())));
 #endif
 
   try {
@@ -500,9 +500,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   }
 
   if (CBData_)
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
     CBData_->progressData.transferred += message_in.total_length ();
     CBData_->eventStack.push_back (COMMON_UI_EVENT_DATA);
   } // end lock scope
@@ -544,7 +542,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
                         ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
         } // end IF
 
-        CBData_->progressData.statistic = (*iterator).second->currentStatistic;
+        CBData_->progressData.statistic = (*iterator).second->statistic;
 
         if ((*iterator).second->lock)
         {

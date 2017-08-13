@@ -392,7 +392,8 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICE_INTERFACE),
                                    ACE_TEXT_ALWAYS_CHAR ("StateChanged")))
   {
-    ACE_UINT32 state_previous, state_current, reason;
+    NMDeviceState state_previous, state_current;
+    NMDeviceStateReason reason;
     if (!dbus_message_get_args (message_in,
                                 &error_s,
                                 DBUS_TYPE_UINT32,
@@ -416,12 +417,24 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
     device_identifier_string =
         Net_Common_Tools::deviceDBusPathToIdentifier (connection_in,
                                                       device_path_string);
+    ACE_ASSERT (!device_identifier_string.empty ());
     access_point_path_string =
         Net_Common_Tools::deviceDBusPathToAccessPointDBusPath (connection_in,
                                                                device_path_string);
+    if (access_point_path_string.empty ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::deviceDBusPathToAccessPointDBusPath(\"%s\"), aborting\n"),
+                  ACE_TEXT (device_path_string.c_str ())));
+
+      dbus_error_free (&error_s);
+
+      goto continue_;
+    } // end IF
     SSID_string =
         Net_Common_Tools::accessPointDBusPathToSSID (connection_in,
                                                      access_point_path_string);
+    ACE_ASSERT (!SSID_string.empty ());
     switch (state_current)
     {
       case NM_DEVICE_STATE_IP_CONFIG:
@@ -485,7 +498,8 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
                                    ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_CONNECTIONACTIVE_INTERFACE),
                                    ACE_TEXT_ALWAYS_CHAR ("StateChanged")))
   {
-    ACE_UINT32 state_current, reason;
+    NMActiveConnectionState state_current;
+    ACE_UINT32 reason;
     if (!dbus_message_get_args (message_in,
                                 &error_s,
                                 DBUS_TYPE_UINT32,

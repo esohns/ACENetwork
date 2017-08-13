@@ -28,7 +28,7 @@
 #include "stream_common.h"
 #include "stream_streammodule_base.h"
 
-#include "net_module_runtimestatistic.h"
+//#include "net_module_runtimestatistic.h"
 
 #include "dhcp_codes.h"
 #include "dhcp_common.h"

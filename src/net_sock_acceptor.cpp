@@ -31,13 +31,13 @@
 
 Net_SOCK_Acceptor::Net_SOCK_Acceptor ()
 {
-  NET_TRACE (ACE_TEXT ("Net_SOCK_Acceptor::Net_SOCK_Acceptor"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_Acceptor::Net_SOCK_Acceptor"));
 
 }
 
 Net_SOCK_Acceptor::~Net_SOCK_Acceptor ()
 {
-  NET_TRACE (ACE_TEXT ("Net_SOCK_Acceptor::~Net_SOCK_Acceptor"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_Acceptor::~Net_SOCK_Acceptor"));
 
 }
 
@@ -48,7 +48,7 @@ Net_SOCK_Acceptor::open (const ACE_Addr &localAddress_in,
                          int backLog_in,
                          int protocol_in)
 {
-  NET_TRACE (ACE_TEXT ("Net_SOCK_Acceptor::open"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_Acceptor::open"));
 
   // *NOTE*: essentially follows functionality of ACE_SOCK_Acceptor
   int result = -1;
@@ -87,7 +87,7 @@ Net_SOCK_Acceptor::shared_open (const ACE_Addr& localAddress_in,
                                 int protocolFamily_in,
                                 int backLog_in)
 {
-  NET_TRACE (ACE_TEXT ("Net_SOCK_Acceptor::shared_open"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_Acceptor::shared_open"));
 
   int result = -1;
   ACE_HANDLE handle = this->get_handle ();

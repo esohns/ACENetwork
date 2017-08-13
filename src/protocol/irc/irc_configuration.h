@@ -100,11 +100,9 @@ struct IRC_ModuleHandlerConfiguration
   inline IRC_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    , connectionConfigurations (NULL)
-   , inbound (true)
-   , printProgressDot (false)
-   , pushStatisticMessages (true)
-   , streamConfiguration (NULL)
    , protocolConfiguration (NULL)
+   , printProgressDot (false)
+   , streamConfiguration (NULL)
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_CONCURRENT;
 
@@ -113,16 +111,14 @@ struct IRC_ModuleHandlerConfiguration
     // *WARNING*: currently, this does NOT work with multithreaded streams
     //            --> USE WITH CAUTION !
     crunchMessages = IRC_DEFAULT_CRUNCH_MESSAGES;
-
+    inbound = true;
     passive = false;
   };
 
-  IRC_ConnectionConfigurations_t*     connectionConfigurations;
-  bool                                inbound; // statistic/IO module
-  bool                                printProgressDot; // file writer module
-  bool                                pushStatisticMessages; // statistic module
-  struct IRC_StreamConfiguration*     streamConfiguration;
-  struct IRC_ProtocolConfiguration*   protocolConfiguration;
+  IRC_ConnectionConfigurations_t*   connectionConfigurations;
+  struct IRC_ProtocolConfiguration* protocolConfiguration;
+  bool                              printProgressDot; // file writer module
+  struct IRC_StreamConfiguration*   streamConfiguration;
 };
 typedef std::map<std::string,
                  struct IRC_ModuleHandlerConfiguration> IRC_ModuleHandlerConfigurations_t;

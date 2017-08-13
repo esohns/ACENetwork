@@ -34,7 +34,7 @@
 #include "stream_statemachine_control.h"
 #include "stream_streammodule_base.h"
 
-#include "net_module_runtimestatistic.h"
+#include "stream_stat_statistic_report.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_exports.h"
@@ -44,8 +44,7 @@
 #include "bittorrent_module_streamer.h"
 
 // forward declarations
-typedef Stream_INotify_T<Stream_SessionMessageType> BitTorrent_INotify_t;
-typedef Stream_Statistic BitTorrent_RuntimeStatistic_t;
+typedef Stream_INotify_T<enum Stream_SessionMessageType> BitTorrent_INotify_t;
 
 extern BitTorrent_Export const char stream_bittorrent_stream_name_string_[];
 
@@ -54,6 +53,7 @@ template <typename StreamStateType,
           typename ConfigurationType,
           ////////////////////////////////
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           ////////////////////////////////
           typename ModuleHandlerConfigurationType,
           ////////////////////////////////
@@ -134,6 +134,7 @@ class BitTorrent_PeerStream_T
   typedef BitTorrent_PeerStream_T<StreamStateType,
                                   ConfigurationType,
                                   StatisticContainerType,
+                                  StatisticHandlerType,
                                   ModuleHandlerConfigurationType,
                                   SessionDataType,
                                   SessionDataContainerType,
@@ -175,6 +176,7 @@ class BitTorrent_PeerStream_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
+                                      StatisticHandlerType,
                                       UserDataType> PARSER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
@@ -196,22 +198,28 @@ class BitTorrent_PeerStream_T
   //                                       ModuleHandlerConfigurationType,
   //                                       PARSER_T> MODULE_PARSER_T;
 
-  typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
-                                            Common_TimePolicy_t,
-                                            ModuleHandlerConfigurationType,
-                                            ControlMessageType,
-                                            DataMessageType,
-                                            SessionMessageType,
-                                            enum BitTorrent_MessageType,
-                                            BitTorrent_RuntimeStatistic_t> STATISTIC_READER_T;
-  typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
-                                            Common_TimePolicy_t,
-                                            ModuleHandlerConfigurationType,
-                                            ControlMessageType,
-                                            DataMessageType,
-                                            SessionMessageType,
-                                            enum BitTorrent_MessageType,
-                                            BitTorrent_RuntimeStatistic_t> STATISTIC_WRITER_T;
+  typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+                                                        Common_TimePolicy_t,
+                                                        ModuleHandlerConfigurationType,
+                                                        ControlMessageType,
+                                                        DataMessageType,
+                                                        SessionMessageType,
+                                                        enum BitTorrent_MessageType,
+                                                        BitTorrent_Statistic_t,
+                                                        StatisticHandlerType,
+                                                        SessionDataType,
+                                                        SessionDataContainerType> STATISTIC_READER_T;
+  typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+                                                        Common_TimePolicy_t,
+                                                        ModuleHandlerConfigurationType,
+                                                        ControlMessageType,
+                                                        DataMessageType,
+                                                        SessionMessageType,
+                                                        enum BitTorrent_MessageType,
+                                                        BitTorrent_Statistic_t,
+                                                        StatisticHandlerType,
+                                                        SessionDataType,
+                                                        SessionDataContainerType> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 Stream_SessionId_t,                // session id type
@@ -222,31 +230,6 @@ class BitTorrent_PeerStream_T
                                 BitTorrent_INotify_t,              // stream notification interface type
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;
-
-//  typedef BitTorrent_Module_PeerHandler_T<ACE_INET_Addr,
-//                                          ModuleHandlerConfigurationType,
-//                                          BitTorrent_RuntimeStatistic_t,
-//                                          ControlMessageType,
-//                                          DataMessageType,
-//                                          SessionMessageType,
-//                                          SessionDataType,
-//                                          OWN_TYPE_T,
-//                                          enum Stream_StateMachine_ControlState,
-//                                          struct Net_SocketConfiguration,
-//                                          HandlerConfigurationType,
-//                                          ConnectionConfigurationType,
-//                                          ConnectionStateType,
-//                                          SessionStateType,
-//                                          CBDataType> HANDLER_T;
-//  typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
-//                                         Common_TimePolicy_t,
-//                                         Stream_SessionId_t,                // session id type
-//                                         SessionDataType,                   // session data type
-//                                         enum Stream_SessionMessageType,    // session event type
-//                                         struct Stream_ModuleConfiguration,
-//                                         ModuleHandlerConfigurationType,
-//                                         BitTorrent_INotify_t,              // stream notification interface type
-//                                         HANDLER_T> MODULE_HANDLER_T;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_PeerStream_T (const BitTorrent_PeerStream_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_PeerStream_T& operator= (const BitTorrent_PeerStream_T&))

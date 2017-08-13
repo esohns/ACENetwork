@@ -57,7 +57,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
  , clientHandle_ (ACE_INVALID_HANDLE)
 #else
  , connection_ (NULL)
- , deviceDBusPath_ ()
+// , deviceDBusPath_ ()
  // , proxy_ (NULL)
 #endif
  , isActive_ (false)
@@ -207,6 +207,12 @@ continue_:
 
   struct DBusError error_s;
   dbus_error_init (&error_s);
+  std::string match_rule_string =
+      ACE_TEXT_ALWAYS_CHAR ("type='signal',sender='");
+  match_rule_string +=
+      ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SERVICE);
+  match_rule_string += ACE_TEXT_ALWAYS_CHAR ("'");
+  ACE_ASSERT (match_rule_string.size () <= DBUS_MAXIMUM_MATCH_RULE_LENGTH);
   connection_ = dbus_bus_get_private (DBUS_BUS_SYSTEM,
                                       &error_s);
   if (!connection_ ||
@@ -230,8 +236,29 @@ continue_:
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_connection_add_filter(): \"%m\", returning\n")));
-    return;
+    goto error;
   } // end IF
+
+  // subscribe to all networkmanager signals
+  // *NOTE*: according to the API documentation, this call should block until
+  //         the dbus server acknowleges the request (which should actually
+  //         hang, as the message processing loop has not started yet, see:
+  //         svc()). However, this seems to work as needed anyway
+  // *TODO*: find out why
+  dbus_bus_add_match (connection_,
+                      match_rule_string.c_str (),
+                      &error_s);
+  if (dbus_error_is_set (&error_s))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_bus_add_match(): \"%s\", returning\n"),
+                ACE_TEXT (error_s.message)));
+
+    dbus_error_free (&error_s);
+
+    goto error;
+  } // end IF
+
   //  proxy_ =
   //      dbus_g_proxy_new_for_name (connection_,
   //                                 ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SERVICE),
@@ -263,27 +290,46 @@ continue_:
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_TaskBase_T::start(): \"%m\", returning\n")));
-    return;
+    goto error;
   } // end IF
+  dbus_connection_flush (connection_);
 
-  if (!configuration_->deviceIdentifier.empty ())
-  {
-    deviceDBusPath_ =
-        Net_Common_Tools::deviceToDBusPath (connection_,
-                                            configuration_->deviceIdentifier);
-    if (deviceDBusPath_.empty ())
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::deviceToDBusPath(%@,\"%s\"), returning\n"),
-                  connection_,
-                  ACE_TEXT (configuration_->deviceIdentifier.c_str ())));
-      return;
-    } // end IF
+//  if (!configuration_->deviceIdentifier.empty ())
+//  {
+//    deviceDBusPath_ =
+//        Net_Common_Tools::deviceToDBusPath (connection_,
+//                                            configuration_->deviceIdentifier);
+//    if (deviceDBusPath_.empty ())
+//    {
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to Net_Common_Tools::deviceToDBusPath(%@,\"%s\"), returning\n"),
+//                  connection_,
+//                  ACE_TEXT (configuration_->deviceIdentifier.c_str ())));
+//      return;
+//    } // end IF
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("device \"%s\" D-Bus object path is \"%s\"\n"),
 //              ACE_TEXT (configuration_->deviceIdentifier.c_str ()),
 //              ACE_TEXT (deviceDBusPath_.c_str ())));
+//  } // end IF
+
+  goto continue_;
+
+error:
+  if (connection_)
+  {
+    dbus_connection_close (connection_);
+    int result = inherited::wait ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_TaskBase_T::wait(): \"%m\", continuing\n")));
+    dbus_connection_unref (connection_);
+    connection_ = NULL;
   } // end IF
+
+  return;
+
+continue_:
 #endif
 
   isActive_ = true;
@@ -333,7 +379,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
                 ACE_TEXT ("failed to Common_TaskBase_T::wait(): \"%m\", continuing\n")));
   dbus_connection_unref (connection_);
   connection_ = NULL;
-  deviceDBusPath_.resize (0);
+//  deviceDBusPath_.resize (0);
 #endif
 
 #if defined (_DEBUG)
@@ -366,7 +412,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
     ACE_ASSERT (clientHandle_ == ACE_INVALID_HANDLE);
 #else
     ACE_ASSERT (!connection_);
-    ACE_ASSERT (deviceDBusPath_.empty ());
+//    ACE_ASSERT (deviceDBusPath_.empty ());
 #endif
 
     localSAP_.reset ();
@@ -838,7 +884,7 @@ error:
   if (access_point_object_path_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::SSIDToAccessPointDBusPath(0x%@,%s), aborting\n"),
+                ACE_TEXT ("failed to Net_Common_Tools::SSIDToAccessPointDBusPath(%@,%s), aborting\n"),
                 connection_,
                 ACE_TEXT (SSID_in.c_str ())));
     goto error;
@@ -857,11 +903,10 @@ error:
     goto error;
   } // end IF
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("failed to Net_Common_Tools::activateConnection(0x%@,\"%s\",\"%s\",\"%s\"), aborting\n"),
-              connection_,
+              ACE_TEXT ("activated connection configuration \"%s\" (device: \"%s\", SSID: %s)\n"),
               ACE_TEXT (connection_object_path_string.c_str ()),
               ACE_TEXT (Net_Common_Tools::deviceDBusPathToIdentifier (connection_,device_object_path_string).c_str ()),
-              ACE_TEXT (access_point_object_path_string.c_str ())));
+              ACE_TEXT (SSID_in.c_str ())));
 
   goto continue_;
 
@@ -887,16 +932,15 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 {
   // sanity check(s)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-   ACE_ASSERT (clientHandle_ != ACE_INVALID_HANDLE);
+  ACE_ASSERT (clientHandle_ != ACE_INVALID_HANDLE);
 #endif
-   ACE_ASSERT (configuration_);
-   ACE_ASSERT (connection_);
+  ACE_ASSERT (configuration_);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-   return Net_Common_Tools::associatedSSID (clientHandle_,
-                                            configuration_->deviceIdentifier);
+  return Net_Common_Tools::associatedSSID (clientHandle_,
+                                           configuration_->deviceIdentifier);
 #else
-   return Net_Common_Tools::associatedSSID (configuration_->deviceIdentifier);
+  return Net_Common_Tools::associatedSSID (configuration_->deviceIdentifier);
 #endif
 }
 
@@ -946,16 +990,21 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 
   // sanity check(s)
   if (!success_in)
-  {
+  { // *TODO*: this also happens when the device has been disconnected
+    //         - manually (i.e. by the user)
+    //         - while it is switching to a different SSID (auto-connect)
+    //         - ...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("\"%s\": failed to associate with SSID %s, retrying...\n"),
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
                 ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ()),
-#else
-                ACE_TEXT (deviceIdentifier_in.c_str ()),
-
-#endif
                 ACE_TEXT (configuration_->SSID.c_str ())));
+#else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("\"%s\": failed to associate with SSID %s, retrying...\n"),
+                ACE_TEXT (deviceIdentifier_in.c_str ()),
+                ACE_TEXT (configuration_->SSID.c_str ())));
+#endif
 
     if (!associate (deviceIdentifier_in,
                     configuration_->SSID))
@@ -1008,10 +1057,10 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
               ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ()),
               ACE_TEXT (SSID_in.c_str ())));
 #else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("\"%s\": associated with SSID %s\n"),
-              ACE_TEXT (deviceIdentifier_in.c_str ()),
-              ACE_TEXT (SSID_in.c_str ())));
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("\"%s\": associated with SSID %s\n"),
+//              ACE_TEXT (deviceIdentifier_in.c_str ()),
+//              ACE_TEXT (SSID_in.c_str ())));
 #endif
 }
 template <ACE_SYNCH_DECL,
@@ -1242,7 +1291,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   do
   {
     if (!dbus_connection_read_write_dispatch (connection_,
-                                              100)) // timeout (ms)
+                                              10)) // timeout (ms)
       break;
 
     do

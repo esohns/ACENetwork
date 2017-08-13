@@ -42,12 +42,12 @@ struct Test_I_UserData;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct Test_I_URLStreamLoad_ConnectionConfiguration,
                                  struct HTTP_ConnectionState,
-                                 HTTP_RuntimeStatistic_t,
+                                 HTTP_Statistic_t,
                                  struct HTTP_Stream_UserData> Test_I_IConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  struct Test_I_URLStreamLoad_ConnectionConfiguration,
                                  struct HTTP_ConnectionState,
-                                 HTTP_RuntimeStatistic_t,
+                                 HTTP_Statistic_t,
                                  struct HTTP_Stream_UserData> Test_I_ConnectionManager_t;
 
 typedef ACE_Singleton<Test_I_ConnectionManager_t,

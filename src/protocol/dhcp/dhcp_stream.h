@@ -33,7 +33,7 @@
 #include "stream_statemachine_control.h"
 #include "stream_streammodule_base.h"
 
-#include "net_module_runtimestatistic.h"
+#include "stream_stat_statistic_report.h"
 
 #include "dhcp_common.h"
 //#include "dhcp_module_bisector.h"
@@ -48,6 +48,7 @@ template <typename StreamStateType,
           typename ConfigurationType,
           ////////////////////////////////
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           ////////////////////////////////
           typename ModuleHandlerConfigurationType,
           ////////////////////////////////
@@ -96,7 +97,7 @@ class DHCP_Stream_T
 
  public:
   DHCP_Stream_T ();
-  virtual ~DHCP_Stream_T ();
+  inline virtual ~DHCP_Stream_T () { inherited::shutdown (); };
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ModuleList_t&, // return value: module list
@@ -144,7 +145,8 @@ class DHCP_Stream_T
                                 StreamStateType,
                                 SessionDataType,
                                 SessionDataContainerType,
-                                StatisticContainerType> PARSER_T;
+                                StatisticContainerType,
+                                StatisticHandlerType> PARSER_T;
   //typedef Stream_StreamModule_T<ACE_MT_SYNCH,
   //                              Common_TimePolicy_t,
   //                              struct Stream_ModuleConfiguration,
@@ -172,22 +174,28 @@ class DHCP_Stream_T
   //                                       ModuleHandlerConfigurationType,
   //                                       PARSER_T> MODULE_PARSER_T;
 
-  typedef Net_Module_Statistic_ReaderTask_T<ACE_MT_SYNCH,
-                                            Common_TimePolicy_t,
-                                            ModuleHandlerConfigurationType,
-                                            ControlMessageType,
-                                            DataMessageType,
-                                            SessionMessageType,
-                                            DHCP_MessageType_t,
-                                            DHCP_RuntimeStatistic_t> STATISTIC_READER_T;
-  typedef Net_Module_Statistic_WriterTask_T<ACE_MT_SYNCH,
-                                            Common_TimePolicy_t,
-                                            ModuleHandlerConfigurationType,
-                                            ControlMessageType,
-                                            DataMessageType,
-                                            SessionMessageType,
-                                            DHCP_MessageType_t,
-                                            DHCP_RuntimeStatistic_t> STATISTIC_WRITER_T;
+  typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+                                                        Common_TimePolicy_t,
+                                                        ModuleHandlerConfigurationType,
+                                                        ControlMessageType,
+                                                        DataMessageType,
+                                                        SessionMessageType,
+                                                        DHCP_MessageType_t,
+                                                        DHCP_Statistic_t,
+                                                        StatisticHandlerType,
+                                                        SessionDataType,
+                                                        SessionDataContainerType> STATISTIC_READER_T;
+  typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+                                                        Common_TimePolicy_t,
+                                                        ModuleHandlerConfigurationType,
+                                                        ControlMessageType,
+                                                        DataMessageType,
+                                                        SessionMessageType,
+                                                        DHCP_MessageType_t,
+                                                        DHCP_Statistic_t,
+                                                        StatisticHandlerType,
+                                                        SessionDataType,
+                                                        SessionDataContainerType> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 Stream_SessionId_t,                // session id type
@@ -208,7 +216,7 @@ class DHCP_Stream_T
   // modules
   MODULE_MARSHAL_T   marshal_;
   //MODULE_PARSER_T    parser_;
-  MODULE_STATISTIC_T runtimeStatistic_;
+  MODULE_STATISTIC_T statistic_;
   // *NOTE*: the final module needs to be supplied to the stream from outside,
   //         otherwise data might be lost if event dispatch runs in (a) separate
   //         thread(s)

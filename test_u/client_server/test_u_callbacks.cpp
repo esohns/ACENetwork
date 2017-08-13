@@ -61,7 +61,8 @@ idle_update_log_display_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_log_display_cb"));
 
-  Test_U_GTK_CBData* data_p = static_cast<Test_U_GTK_CBData*> (userData_in);
+  struct Test_U_GTK_CBData* data_p =
+    static_cast<struct Test_U_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -83,9 +84,7 @@ idle_update_log_display_cb (gpointer userData_in)
                                 &text_iterator);
 
   gchar* converted_text = NULL;
-  { // synch access
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
-
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
     // sanity check
     if (data_p->logStack.empty ())
       return G_SOURCE_CONTINUE;
@@ -134,7 +133,7 @@ idle_update_log_display_cb (gpointer userData_in)
     //  // scroll the mark onscreen
     //  gtk_text_view_scroll_mark_onscreen (view_p,
     //                                      text_mark_p);
-  GtkAdjustment* adjustment_p =
+  struct _GtkAdjustment* adjustment_p =
     GTK_ADJUSTMENT (gtk_builder_get_object ((*iterator).second.second,
                                             ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_ADJUSTMENT_NAME)));
   ACE_ASSERT (adjustment_p);
@@ -149,7 +148,8 @@ idle_update_info_display_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_info_display_cb"));
 
-  Test_U_GTK_CBData* data_p = static_cast<Test_U_GTK_CBData*> (userData_in);
+  struct Test_U_GTK_CBData* data_p =
+    static_cast<struct Test_U_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -256,8 +256,8 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_client_UI_cb"));
 
-  Test_U_Client_GTK_CBData* data_p =
-    static_cast<Test_U_Client_GTK_CBData*> (userData_in);
+  struct Test_U_Client_GTK_CBData* data_p =
+    static_cast<struct Test_U_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -373,7 +373,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   //  ACE_ASSERT (buffer_p);
   ////  gtk_text_view_set_buffer (view_p, buffer_p);
 
-  PangoFontDescription* font_description_p =
+  struct _PangoFontDescription* font_description_p =
     pango_font_description_from_string (ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_PANGO_LOG_FONT_DESCRIPTION));
   if (!font_description_p)
   {
@@ -383,7 +383,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
     return G_SOURCE_REMOVE;
   } // end IF
     // apply font
-  GtkRcStyle* rc_style_p = gtk_rc_style_new ();
+  struct _GtkRcStyle* rc_style_p = gtk_rc_style_new ();
   if (!rc_style_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -391,7 +391,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
     return G_SOURCE_REMOVE;
   } // end IF
   rc_style_p->font_desc = font_description_p;
-  GdkColor base_colour, text_colour;
+  struct _GdkColor base_colour, text_colour;
   gdk_color_parse (ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_PANGO_LOG_COLOR_BASE),
                    &base_colour);
   rc_style_p->base[GTK_STATE_NORMAL] = base_colour;
@@ -416,9 +416,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   //  g_object_unref (buffer_p);
 
   // step5: initialize updates
-  {
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
-
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
     // schedule asynchronous updates of the log view
     guint event_source_id = g_timeout_add_seconds (1,
                                                    idle_update_log_display_cb,
@@ -634,8 +632,8 @@ idle_update_progress_client_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_progress_client_cb"));
 
-  Test_U_GTK_ProgressData* data_p =
-    static_cast<Test_U_GTK_ProgressData*> (userData_in);
+  struct Test_U_GTK_ProgressData* data_p =
+    static_cast<struct Test_U_GTK_ProgressData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -695,8 +693,8 @@ idle_initialize_server_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_server_UI_cb"));
 
-  Test_U_Server_GTK_CBData* data_p =
-    static_cast<Test_U_Server_GTK_CBData*> (userData_in);
+  struct Test_U_Server_GTK_CBData* data_p =
+    static_cast<struct Test_U_Server_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -793,7 +791,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   //                               TRUE);
   //  g_object_unref (buffer_p);
 
-  PangoFontDescription* font_description_p =
+  struct _PangoFontDescription* font_description_p =
     pango_font_description_from_string (ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_PANGO_LOG_FONT_DESCRIPTION));
   if (!font_description_p)
   {
@@ -803,7 +801,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
     return G_SOURCE_REMOVE;
   } // end IF
   // apply font
-  GtkRcStyle* rc_style_p = gtk_rc_style_new ();
+  struct _GtkRcStyle* rc_style_p = gtk_rc_style_new ();
   if (!rc_style_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -811,7 +809,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
     return G_SOURCE_REMOVE;
   } // end IF
   rc_style_p->font_desc = font_description_p;
-  GdkColor base_colour, text_colour;
+  struct _GdkColor base_colour, text_colour;
   gdk_color_parse (ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_PANGO_LOG_COLOR_BASE),
                    &base_colour);
   rc_style_p->base[GTK_STATE_NORMAL] = base_colour;
@@ -827,9 +825,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   g_object_unref (rc_style_p);
 
   // step4: initialize updates
-  {
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
-
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
     // schedule asynchronous updates of the log view
     guint event_source_id = g_timeout_add_seconds (1,
                                                    idle_update_log_display_cb,
@@ -994,8 +990,8 @@ idle_update_progress_server_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_progress_server_cb"));
 
-  Test_U_GTK_ProgressData* data_p =
-    static_cast<Test_U_GTK_ProgressData*> (userData_in);
+  struct Test_U_GTK_ProgressData* data_p =
+    static_cast<struct Test_U_GTK_ProgressData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1151,7 +1147,7 @@ button_ping_clicked_cb (GtkWidget* widget_in,
 
   // grab a (random) connection handler
   int index = 0;
-  // *PORTABILITY*: outside glibc, this is not very portable...
+  // *PORTABILITY*: outside glibc, this is not very portable
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
   index = ((::random () % number_of_connections) + 1);
 #else
@@ -1161,7 +1157,7 @@ button_ping_clicked_cb (GtkWidget* widget_in,
   index = ((ACE_OS::rand_r (&usecs) % number_of_connections) + 1);
 #endif
 
-  Test_U_InetConnectionManager_t::CONNECTION_T* connection_base_p =
+  typename Test_U_InetConnectionManager_t::CONNECTION_T* connection_base_p =
       TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->operator[] (index - 1);
   if (!connection_base_p)
   {
@@ -1192,7 +1188,7 @@ button_ping_clicked_cb (GtkWidget* widget_in,
     return FALSE;
   }
   //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("session %u: sent ping...\n"),
+  //            ACE_TEXT ("session %u: sent ping\n"),
   //            connection_base_p->id ()));
 
   // clean up
@@ -1210,8 +1206,8 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   int result = -1;
 
   ACE_UNUSED_ARG (widget_in);
-  Test_U_Client_GTK_CBData* data_p =
-    static_cast<Test_U_Client_GTK_CBData*> (userData_in);
+  struct Test_U_Client_GTK_CBData* data_p =
+    static_cast<struct Test_U_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1301,8 +1297,8 @@ radiobutton_mode_toggled_cb (GtkWidget* widget_in,
 
   int result = -1;
 
-  Test_U_Client_GTK_CBData* data_p =
-    static_cast<Test_U_Client_GTK_CBData*> (userData_in);
+  struct Test_U_Client_GTK_CBData* data_p =
+    static_cast<struct Test_U_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (widget_in);
@@ -1367,8 +1363,8 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::togglebutton_listen_toggled_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  Test_U_Server_GTK_CBData* data_p =
-    static_cast<Test_U_Server_GTK_CBData*> (userData_in);
+  struct Test_U_Server_GTK_CBData* data_p =
+    static_cast<struct Test_U_Server_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1430,8 +1426,8 @@ spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_connections_value_changed_client_cb"));
 
-  Test_U_Client_GTK_CBData* data_p =
-    static_cast<Test_U_Client_GTK_CBData*> (userData_in);
+  struct Test_U_Client_GTK_CBData* data_p =
+    static_cast<struct Test_U_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (spinButton_in);
@@ -1472,9 +1468,7 @@ spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
 
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), true);
 
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
-
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
     data_p->progressEventSourceID =
       //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
       //                 idle_update_progress_cb,
@@ -1523,8 +1517,8 @@ spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_connections_value_changed_server_cb"));
 
-  Test_U_Server_GTK_CBData* data_p =
-    static_cast<Test_U_Server_GTK_CBData*> (userData_in);
+  struct Test_U_Server_GTK_CBData* data_p =
+    static_cast<struct Test_U_Server_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (spinButton_in);
@@ -1552,9 +1546,7 @@ spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
 
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), true);
 
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
-
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
     data_p->progressEventSourceID =
       //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
       //                 idle_update_progress_cb,
@@ -1604,8 +1596,8 @@ spinbutton_ping_interval_value_changed_client_cb (GtkSpinButton* spinButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_ping_interval_value_changed_client_cb"));
 
-  Test_U_Client_GTK_CBData* data_p =
-    static_cast<Test_U_Client_GTK_CBData*> (userData_in);
+  struct Test_U_Client_GTK_CBData* data_p =
+    static_cast<struct Test_U_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (spinButton_in);
@@ -1621,8 +1613,8 @@ spinbutton_ping_interval_value_changed_server_cb (GtkSpinButton* spinButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_ping_interval_value_changed_server_cb"));
 
-  Test_U_Server_GTK_CBData* data_p =
-    static_cast<Test_U_Server_GTK_CBData*> (userData_in);
+  struct Test_U_Server_GTK_CBData* data_p =
+    static_cast<struct Test_U_Server_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (spinButton_in);
@@ -1640,7 +1632,8 @@ button_clear_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_clear_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  Test_U_GTK_CBData* data_p = static_cast<Test_U_GTK_CBData*> (userData_in);
+  struct Test_U_GTK_CBData* data_p =
+    static_cast<struct Test_U_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1671,7 +1664,8 @@ button_about_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_about_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  Test_U_GTK_CBData* data_p = static_cast<Test_U_GTK_CBData*> (userData_in);
+  struct Test_U_GTK_CBData* data_p =
+    static_cast<struct Test_U_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);

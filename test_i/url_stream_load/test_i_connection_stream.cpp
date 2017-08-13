@@ -55,40 +55,31 @@ Test_I_ConnectionStream::load (Stream_ModuleList_t& modules_out,
 
   Stream_Module_t* module_p = NULL;
   //ACE_NEW_RETURN (module_p,
-  //                Test_I_Module_Dump_Module (ACE_TEXT_ALWAYS_CHAR ("Dump"),
-  //                                           NULL,
-  //                                           false),
+  //                Test_I_Module_Dump_Module (this,
+  //                                           ACE_TEXT_ALWAYS_CHAR ("Dump")),
   //                false);
   //modules_out.push_back (module_p);
   //module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_Module_HTMLParser_Module (this,
-                                                   ACE_TEXT_ALWAYS_CHAR ("HTMLParser"),
-                                                   NULL,
-                                                   false),
+                                                   ACE_TEXT_ALWAYS_CHAR ("HTMLParser")),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_StatisticReport_Module (this,
-                                                 ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
-                                                 NULL,
-                                                 false),
+                                                 ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_I_HTTPMarshal_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR ("Marshal"),
-                                             NULL,
-                                             false),
+                                             ACE_TEXT_ALWAYS_CHAR ("Marshal")),
                   false);
   modules_out.push_back (module_p);
 //  module_p = NULL;
 //  ACE_NEW_RETURN (module_p,
-//                  Test_I_Net_IO_Module (ACE_TEXT_ALWAYS_CHAR ("NetIO"),
-//                                        NULL,
-//                                        false),
+//                  Test_I_Net_IO_Module (ACE_TEXT_ALWAYS_CHAR ("NetIO")),
 //                  false);
 //  modules_out.push_back (module_p);
 

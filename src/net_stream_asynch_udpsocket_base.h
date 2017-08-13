@@ -48,6 +48,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           ///////////////////////////////
           typename HandlerConfigurationType, // socket-
           ///////////////////////////////
@@ -65,6 +66,7 @@ class Net_StreamAsynchUDPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType>
 {
  public:
@@ -72,9 +74,14 @@ class Net_StreamAsynchUDPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType> CONNECTION_BASE_T;
 
-  virtual ~Net_StreamAsynchUDPSocketBase_T ();
+  inline virtual ~Net_StreamAsynchUDPSocketBase_T () {};
+
+  // implement Common_IReset
+  // *NOTE*: use this to modify the source/target address after initialization
+  virtual void reset ();
 
   // override some service methods
   virtual void open (ACE_HANDLE,          // (socket) handle
@@ -132,7 +139,22 @@ class Net_StreamAsynchUDPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType> inherited4;
+
+  // convenient types
+  typedef Net_StreamAsynchUDPSocketBase_T<HandlerType,
+                                          SocketType,
+                                          AddressType,
+                                          ConfigurationType,
+                                          StateType,
+                                          StatisticContainerType,
+                                          StatisticHandlerType,
+                                          HandlerConfigurationType,
+                                          StreamType,
+                                          UserDataType,
+                                          ModuleConfigurationType,
+                                          ModuleHandlerConfigurationType> OWN_TYPE_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T (const Net_StreamAsynchUDPSocketBase_T&))
@@ -150,6 +172,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           ///////////////////////////////
           typename HandlerConfigurationType, // socket-
           ///////////////////////////////
@@ -165,6 +188,7 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                                       ConfigurationType,
                                       StateType,
                                       StatisticContainerType,
+                                      StatisticHandlerType,
                                       HandlerConfigurationType,
                                       StreamType,
                                       UserDataType,
@@ -177,6 +201,7 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType>
 {
  public:
@@ -184,9 +209,10 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType> CONNECTION_BASE_T;
 
-  virtual ~Net_StreamAsynchUDPSocketBase_T ();
+  inline virtual ~Net_StreamAsynchUDPSocketBase_T () {};
 
   // override some service methods
   virtual void open (ACE_HANDLE,          // (socket) handle
@@ -236,6 +262,7 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
+                               StatisticHandlerType,
                                UserDataType> inherited4;
 
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchUDPSocketBase_T ())

@@ -48,13 +48,11 @@
 #include "test_u_connection_manager_common.h"
 #include "test_u_gtk_common.h"
 
-typedef Common_IStatistic_T<Net_RuntimeStatistic_t> Test_U_Server_StatisticReportingHandler_t;
-
 // forward declarations
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
-                                 Net_RuntimeStatistic_t,
+                                 Net_Statistic_t,
                                  struct Test_U_UserData> Test_U_IInetConnectionManager_t;
 class Test_U_SessionMessage;
 class Test_U_Message;
@@ -74,9 +72,9 @@ struct Test_U_Server_SignalHandlerConfiguration
    , statisticReportingTimerID (-1)
   {};
 
-  Test_U_IListener_t*                        listener;
-  Test_U_Server_StatisticReportingHandler_t* statisticReportingHandler;
-  long                                       statisticReportingTimerID;
+  Test_U_IListener_t*              listener;
+  Net_StatisticReportingHandler_t* statisticReportingHandler;
+  long                             statisticReportingTimerID;
 };
 
 struct Test_U_Server_ListenerConfiguration

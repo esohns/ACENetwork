@@ -24,12 +24,11 @@
 #include <bitset>
 #include <string>
 
-#include "ace/Synch_Traits.h"
-#include "ace/Time_Value.h"
+#include "stream_common.h"
 
-#include "net_common.h"
+#include "stream_stat_statistic_handler.h"
 
-#include "irc_icontrol.h"
+//#include "irc_icontrol.h"
 
 // forward declarations
 struct IRC_Configuration;
@@ -174,6 +173,11 @@ struct IRC_LoginOptions
   std::string channel;
 };
 
-typedef Stream_Statistic IRC_RuntimeStatistic_t;
+//////////////////////////////////////////
+
+typedef struct Stream_Statistic IRC_Statistic_t;
+
+typedef Stream_StatisticHandler_Reactor_T<IRC_Statistic_t> IRC_StatisticHandler_Reactor_t;
+typedef Stream_StatisticHandler_Proactor_T<IRC_Statistic_t> IRC_StatisticHandler_Proactor_t;
 
 #endif

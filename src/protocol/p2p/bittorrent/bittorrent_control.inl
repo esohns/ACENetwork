@@ -24,6 +24,8 @@
 #include "ace/OS_Memory.h"
 #include "ace/Time_Value.h"
 
+#include "stream_dec_common.h"
+
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -163,7 +165,7 @@ BitTorrent_Control_T<SessionAsynchType,
 #if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s\n"),
-              ACE_TEXT (BitTorrent_Tools::MetaInfo2String (*configuration_->metaInfo).c_str ())));
+              ACE_TEXT (BitTorrent_Tools::MetaInfoToString (*configuration_->metaInfo).c_str ())));
 #endif
 
   // step2: create/initialize session
@@ -239,7 +241,7 @@ BitTorrent_Control_T<SessionAsynchType,
   record_p->version = HTTP_Codes::HTTP_VERSION_1_1;
 
   record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_INFO_HASH_HEADER),
-                                         HTTP_Tools::URLEncode (BitTorrent_Tools::MetaInfo2InfoHash (*configuration_->metaInfo))));
+                                         HTTP_Tools::URLEncode (BitTorrent_Tools::MetaInfoToInfoHash (*configuration_->metaInfo))));
   record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PEER_ID_HEADER),
                                          HTTP_Tools::URLEncode (session_state_p->peerId)));
   converter << BITTORRENT_DEFAULT_PORT;
@@ -252,7 +254,7 @@ BitTorrent_Control_T<SessionAsynchType,
                                          converter.str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));
   converter.clear ();
-  converter << BitTorrent_Tools::MetaInfo2Length (*configuration_->metaInfo);
+  converter << BitTorrent_Tools::MetaInfoToLength (*configuration_->metaInfo);
   record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_LEFT_HEADER),
                                          converter.str ()));
   converter.str (ACE_TEXT_ALWAYS_CHAR (""));

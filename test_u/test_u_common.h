@@ -23,6 +23,8 @@
 
 #include "ace/config-lite.h"
 
+#include "stream_stat_statistic_handler.h"
+
 #include "net_common.h"
 #include "net_configuration.h"
 
@@ -35,6 +37,12 @@ extern unsigned int random_seed;
 extern struct random_data random_data;
 extern char random_state_buffer[];
 #endif
+
+typedef Stream_Statistic Test_U_Statistic_t;
+
+typedef Common_IStatistic_T<Test_U_Statistic_t> Test_U_StatisticReportingHandler_t;
+typedef Stream_StatisticHandler_Proactor_T<Test_U_Statistic_t> Test_U_StatisticHandlerProactor_t;
+typedef Stream_StatisticHandler_Reactor_T<Test_U_Statistic_t> Test_U_StatisticHandlerReactor_t;
 
 struct Test_U_ConnectionConfiguration;
 struct Test_U_UserData

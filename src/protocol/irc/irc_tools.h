@@ -50,18 +50,18 @@ class IRC_Export IRC_Tools
   static std::string dump (const IRC_UserModes_t&);
   static std::string dump (const IRC_ChannelModes_t&);
 
-  static std::string Command2String (const IRC_NumericCommand_t&);
-  static std::string ChannelMode2String (const IRC_ChannelMode&);
-  static std::string UserMode2String (const IRC_UserMode&);
-  static std::string Record2String (const IRC_Record&);
+  static std::string CommandToString (const IRC_NumericCommand_t&);
+  static std::string ChannelModeToString (const IRC_ChannelMode&);
+  static std::string UserModeToString (const IRC_UserMode&);
+  static std::string RecordToString (const IRC_Record&);
 
-  static IRC_CommandType_t Command2Type (const std::string&);
+  static IRC_CommandType_t CommandToType (const std::string&);
   static unsigned int merge (const std::string&, // mode string (e.g. "+i")
                              IRC_UserModes_t&);  // input/return value: (merged) user modes
   static unsigned int merge (const std::string&,   // mode string (e.g. "+i")
                              IRC_ChannelModes_t&); // input/return value: (merged) channel modes
-  static char ChannelMode2Char (const IRC_ChannelMode&);
-  static char UserMode2Char (const IRC_UserMode&);
+  static char ChannelModeToChar (const IRC_ChannelMode&);
+  static char UserModeToChar (const IRC_UserMode&);
 
   static bool isValidChannelName (const std::string&); // string
 
@@ -80,8 +80,8 @@ class IRC_Export IRC_Tools
   ACE_UNIMPLEMENTED_FUNC (IRC_Tools& operator= (const IRC_Tools&))
 
   // helper methods
-  static IRC_UserMode Char2UserMode (char);
-  static IRC_ChannelMode Char2ChannelMode (char);
+  static IRC_UserMode CharToUserMode (char);
+  static IRC_ChannelMode CharToChannelMode (char);
   static std::string stringify (const IRC_Parameters_t&, // parameters
                                 int = 0);                // starting index (-1: LAST parameter)
 };

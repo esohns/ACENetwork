@@ -154,6 +154,8 @@ using namespace std;
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
+#include "stream_dec_common.h"
+
 #include "net_macros.h"
 
 #include "http_common.h"

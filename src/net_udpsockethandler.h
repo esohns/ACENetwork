@@ -23,12 +23,11 @@
 
 #include "ace/Global_Macros.h"
 #include "ace/Reactor_Notification_Strategy.h"
-#include "ace/SOCK_CODgram.h"
-#include "ace/SOCK_Dgram.h"
 #include "ace/SOCK_Dgram_Bcast.h"
 #include "ace/Svc_Handler.h"
 #include "ace/Synch_Traits.h"
 
+#include "net_sock_dgram.h"
 #include "net_sockethandler_base.h"
 
 /////////////////////////////////////////
@@ -42,16 +41,6 @@ class Net_SOCK_Dgram_Bcast
  private:
   typedef ACE_SOCK_Dgram_Bcast inherited;
 };
-class Net_SOCK_Dgram
- : public ACE_SOCK_Dgram
-{
- public:
-  using ACE_SOCK::get_remote_addr;
-
- private:
-  typedef ACE_SOCK_Dgram inherited;
-};
-typedef ACE_SOCK_CODgram Net_SOCK_CODgram;
 
 /////////////////////////////////////////
 

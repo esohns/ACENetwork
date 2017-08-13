@@ -105,17 +105,6 @@ BitTorrent_Message_T<SessionDataType,
 
 template <typename SessionDataType,
           typename UserDataType>
-std::string
-BitTorrent_Message_T<SessionDataType,
-                     UserDataType>::Command2String (enum BitTorrent_MessageType type_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::Command2String"));
-
-  return BitTorrent_Tools::Type2String (type_in);
-}
-
-template <typename SessionDataType,
-          typename UserDataType>
 void
 BitTorrent_Message_T<SessionDataType,
                      UserDataType>::dump_state () const
@@ -133,7 +122,7 @@ BitTorrent_Message_T<SessionDataType,
               ACE_TEXT ("***** Message (ID: %u, %u byte(s)) *****\n%s"),
               inherited::id (),
               inherited::total_length (),
-              ACE_TEXT (BitTorrent_Tools::Record2String (record_r).c_str ())));
+              ACE_TEXT (BitTorrent_Tools::RecordToString (record_r).c_str ())));
 }
 
 template <typename SessionDataType,

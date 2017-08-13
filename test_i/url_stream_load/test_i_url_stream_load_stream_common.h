@@ -72,7 +72,7 @@ struct Test_I_URLStreamLoad_ConnectionConfiguration;
 typedef Net_IConnection_T<ACE_INET_Addr,
                           struct Test_I_URLStreamLoad_ConnectionConfiguration,
                           struct HTTP_ConnectionState,
-                          HTTP_RuntimeStatistic_t> Test_I_IConnection_t;
+                          HTTP_Statistic_t> Test_I_IConnection_t;
 
 struct HTTP_Record;
 struct Test_I_MessageData
@@ -171,18 +171,17 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
    : HTTP_ModuleHandlerConfiguration ()
    , connectionConfigurations (NULL)
    //, contextID (0)
-   , inbound (true)
    , mode (STREAM_MODULE_HTMLPARSER_MODE_SAX)
    , subscriber (NULL)
    , subscribers (NULL)
    , targetFileName ()
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
+    inbound = true;
   };
 
   Test_I_URLStreamLoad_ConnectionConfigurations_t* connectionConfigurations;
   //guint                                   contextID;
-  bool                                             inbound; // net IO module
   enum Stream_Module_HTMLParser_Mode               mode; // HTML parser module
   Test_I_ISessionNotify_t*                         subscriber;
   Test_I_Subscribers_t*                            subscribers;

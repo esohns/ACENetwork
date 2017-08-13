@@ -44,7 +44,7 @@ struct FileServer_ConnectionConfiguration;
 typedef Net_IConnection_T<ACE_INET_Addr,
                           struct FileServer_ConnectionConfiguration,
                           struct FileServer_ConnectionState,
-                          Net_RuntimeStatistic_t> FileServer_IConnection_t;
+                          Net_Statistic_t> FileServer_IConnection_t;
 
 struct FileServer_SessionData
  : Test_U_StreamSessionData
@@ -87,7 +87,7 @@ class Test_U_UDPStream;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 struct FileServer_ConnectionConfiguration,
                                 struct FileServer_ConnectionState,
-                                Net_RuntimeStatistic_t,
+                                Net_Statistic_t,
                                 struct Net_SocketConfiguration,
                                 struct FileServer_SocketHandlerConfiguration,
                                 Test_U_UDPStream,
@@ -98,7 +98,7 @@ typedef FileServer_ConnectionConfigurations_t::iterator FileServer_ConnectionCon
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct FileServer_ConnectionConfiguration,
                                  struct FileServer_ConnectionState,
-                                 Net_RuntimeStatistic_t,
+                                 Net_Statistic_t,
                                  struct FileServer_UserData> FileServer_IInetConnectionManager_t;
 //extern const char stream_name_string_[];
 struct FileServer_StreamConfiguration;
@@ -117,24 +117,22 @@ struct Test_U_ModuleHandlerConfiguration
    , connectionConfigurations (NULL)
    , connectionManager (NULL)
    , fileName ()
-   , inbound (true)
    , outboundQueue (NULL)
    , program (FILE_SERVER_DEFAULT_MPEG_TS_PROGRAM_NUMBER)
-   , pushStatisticMessages (true)
    , streamConfiguration (NULL)
    , streamType (FILE_SERVER_DEFAULT_MPEG_TS_STREAM_TYPE)
    , subscriber (NULL)
    , subscribers (NULL)
-  {};
+  {
+    inbound = true;
+  };
 
   FileServer_UDPIStreamConnection_t*     connection;               // net target module
   FileServer_ConnectionConfigurations_t* connectionConfigurations; // net target module
   FileServer_IInetConnectionManager_t*   connectionManager;        // net target module
   std::string                            fileName;                 // file reader module
-  bool                                   inbound;                  // statistic/IO module
   Stream_IMessageQueue*                  outboundQueue;            // event handler module
   unsigned int                           program;                  // MPEG TS decoder module
-  bool                                   pushStatisticMessages;    // statistic/file source module
   FileServer_StreamConfiguration_t*      streamConfiguration;      // net target module
   unsigned int                           streamType;               // MPEG TS decoder module
   FileServer_ISessionNotify_t*           subscriber;               // event handler module

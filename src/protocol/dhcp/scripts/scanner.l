@@ -76,9 +76,9 @@ extern void DHCP_Scanner_set_column (int, yyscan_t);
 
 /* *NOTE*: see RFC 1531 page 13ff. */
 OCTET          [\x00-\xFF]
-STRING         [[:alpha:]\x00]
+/* STRING         [[:alpha:]\x00] */
 /* DIGIT          [[:digit:]] */
-NUL            [\x00]
+/* NUL            [\x00] */
 
 %s             header
 %s             op

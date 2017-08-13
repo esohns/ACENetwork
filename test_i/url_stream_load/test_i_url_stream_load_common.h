@@ -27,6 +27,8 @@
 #include "stream_control_message.h"
 #include "stream_messageallocatorheap_base.h"
 
+#include "http_common.h"
+
 #include "test_i_common.h"
 #include "test_i_gtk_common.h"
 
@@ -36,8 +38,8 @@
 class Test_I_Message;
 class Test_I_SessionMessage;
 
-typedef HTTP_RuntimeStatistic_t Test_I_URLStreamLoad_RuntimeStatistic_t;
-typedef Common_IStatistic_T<Test_I_URLStreamLoad_RuntimeStatistic_t> Test_I_URLStreamLoad_StatisticReportingHandler_t;
+//typedef HTTP_Statistic_t Test_I_URLStreamLoad_Statistic_t;
+//typedef Common_IStatistic_T<Test_I_URLStreamLoad_Statistic_t> Test_I_URLStreamLoad_StatisticReportingHandler_t;
 
 struct Test_I_URLStreamLoad_SignalHandlerConfiguration
  : Test_I_SignalHandlerConfiguration
@@ -47,7 +49,7 @@ struct Test_I_URLStreamLoad_SignalHandlerConfiguration
    , statisticReportingHandler (NULL)
   {};
 
-  Test_I_URLStreamLoad_StatisticReportingHandler_t* statisticReportingHandler;
+  HTTP_StatisticReportingHandler_t* statisticReportingHandler;
 };
 
 struct Test_I_URLStreamLoad_Configuration
@@ -69,7 +71,7 @@ struct Test_I_URLStreamLoad_Configuration
   // **************************** stream data **********************************
   Test_I_URLStreamLoad_StreamConfiguration_t             streamConfiguration;
   // *************************** protocol data *********************************
-  //struct HTTP_ProtocolConfiguration        protocolConfiguration;
+  //struct HTTP_ProtocolConfiguration                      protocolConfiguration;
 
   struct HTTP_Stream_UserData                            userData;
 };
@@ -97,7 +99,7 @@ struct Test_I_URLStreamLoad_GTK_ProgressData
    , transferred (0)
   {};
 
-//  HTTP_RuntimeStatistic_t statistic;
+//  HTTP_Statistic_t statistic;
   unsigned int transferred; // byte(s)
 };
 

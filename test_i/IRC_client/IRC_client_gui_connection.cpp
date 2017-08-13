@@ -1306,7 +1306,7 @@ IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
         {
           ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("invalid/unknown (numeric) command/reply (was: \"%s\" (%u)), continuing\n"),
-                      ACE_TEXT (IRC_Tools::Command2String (record_r.command_.numeric).c_str ()),
+                      ACE_TEXT (IRC_Tools::CommandToString (record_r.command_.numeric).c_str ()),
                       record_r.command_.numeric));
 
           message_in.dump_state ();
@@ -1320,7 +1320,7 @@ IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
     case IRC_Record::Command::STRING:
     {
       IRC_Record::CommandType command =
-        IRC_Tools::Command2Type (*record_r.command_.string);
+        IRC_Tools::CommandToType (*record_r.command_.string);
       switch (command)
       {
         case IRC_Record::NICK:
@@ -1905,7 +1905,7 @@ IRC_Client_GUI_Connection::log (const IRC_Record& message_in)
     MESSAGE_HANDLERSITERATOR_T handler_iterator =
       messageHandlers_.find (std::string ());
     ACE_ASSERT (handler_iterator != messageHandlers_.end ());
-    (*handler_iterator).second->queueForDisplay (IRC_Tools::Record2String (message_in));
+    (*handler_iterator).second->queueForDisplay (IRC_Tools::RecordToString (message_in));
   } // end lock scope
 }
 

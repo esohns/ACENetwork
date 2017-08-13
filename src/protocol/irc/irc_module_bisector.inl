@@ -44,6 +44,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       TimePolicyType,
@@ -57,6 +58,7 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
+                      StatisticHandlerType,
                       UserDataType>::IRC_Module_Bisector_T (ISTREAM_T* stream_in,
                                                             bool generateSessionMessages_in)
  : inherited (stream_in,
@@ -92,6 +94,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       TimePolicyType,
@@ -105,6 +108,7 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
+                      StatisticHandlerType,
                       UserDataType>::~IRC_Module_Bisector_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::~IRC_Module_Bisector_T"));
@@ -130,6 +134,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 bool
 IRC_Module_Bisector_T<ACE_SYNCH_USE,
@@ -144,6 +149,7 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
+                      StatisticHandlerType,
                       UserDataType>::initialize (const ConfigurationType& configuration_in,
                                                  Stream_IAllocator* allocator_in)
 {
@@ -211,6 +217,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 void
 IRC_Module_Bisector_T<ACE_SYNCH_USE,
@@ -225,6 +232,7 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
+                      StatisticHandlerType,
                       UserDataType>::handleDataMessage (DataMessageType*& message_inout,
                                                         bool& passMessageDownstream_out)
 {
@@ -451,6 +459,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 void
 IRC_Module_Bisector_T<ACE_SYNCH_USE,
@@ -465,6 +474,7 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
+                      StatisticHandlerType,
                       UserDataType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                            bool& passMessageDownstream_out)
 {
@@ -519,6 +529,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 bool
 IRC_Module_Bisector_T<ACE_SYNCH_USE,
@@ -533,6 +544,7 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
+                      StatisticHandlerType,
                       UserDataType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::collect"));
@@ -667,6 +679,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 bool
 IRC_Module_Bisector_T<ACE_SYNCH_USE,
@@ -681,6 +694,7 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
+                      StatisticHandlerType,
                       UserDataType>::scan_begin (char* data_in,
                                                  size_t length_in)
 {
@@ -730,6 +744,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename UserDataType>
 void
 IRC_Module_Bisector_T<ACE_SYNCH_USE,
@@ -744,6 +759,7 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                       SessionDataType,
                       SessionDataContainerType,
                       StatisticContainerType,
+                      StatisticHandlerType,
                       UserDataType>::scan_end ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Bisector_T::scan_end"));

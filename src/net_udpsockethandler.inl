@@ -105,11 +105,36 @@ Net_UDPSocketHandler_T<SocketType,
     handle_privileges = true;
   } // end IF
 #endif
-  ACE_INET_Addr inet_address =
-      (writeOnly_ ? (socket_configuration_p->sourcePort ? ACE_INET_Addr (static_cast<u_short> (socket_configuration_p->sourcePort),
-                                                                         static_cast<ACE_UINT32> (socket_configuration_p->address.get_ip_address ()))
-                                                        : ACE_sap_any_cast (const ACE_INET_Addr&))
-                  : socket_configuration_p->listenAddress);
+  ACE_INET_Addr inet_address = ACE_sap_any_cast (const ACE_INET_Addr&);
+  if (writeOnly_)
+  {
+    if (socket_configuration_p->sourcePort)
+    {
+      std::string interface_identifier;
+      if (!Net_Common_Tools::IPAddressToInterface (socket_configuration_p->address,
+                                                   interface_identifier))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_Common_Tools::IPAddressToInterface(%s): \"%m\", aborting\n"),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->address).c_str ())));
+        goto error;
+      } // end IF
+      ACE_INET_Addr gateway_address;
+      if (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
+                                                   inet_address,
+                                                   gateway_address))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(%s): \"%m\", aborting\n"),
+                    ACE_TEXT (interface_identifier.c_str ())));
+        goto error;
+      } // end IF
+      inet_address.set_port_number (static_cast<u_short> (socket_configuration_p->sourcePort),
+                                    1);
+    } // end IF
+  } // end IF
+  else
+    inet_address = socket_configuration_p->listenAddress;
   result = inherited2::peer_.open (inet_address,             // SAP
                                    ACE_PROTOCOL_FAMILY_INET, // protocol family
                                    0,                        // protocol
@@ -273,12 +298,12 @@ Net_UDPSocketHandler_T<SocketType,
 //  unsigned int so_max_msg_size = Net_Common_Tools::getMaxMsgSize (handle);
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("maximum message size for UDP socket 0x%@: %u byte(s)...\n"),
+//              ACE_TEXT ("maximum message size for UDP socket 0x%@: %u byte(s)\n"),
 //              handle,
 //              so_max_msg_size));
 //#else
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("maximum message size for UDP socket %d: %u byte(s)...\n"),
+//              ACE_TEXT ("maximum message size for UDP socket %d: %u byte(s)\n"),
 //              handle,
 //              so_max_msg_size));
 //#endif

@@ -25,6 +25,7 @@
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -34,6 +35,7 @@ template <typename StreamStateType,
 DHCP_Stream_T<StreamStateType,
               ConfigurationType,
               StatisticContainerType,
+              StatisticHandlerType,
               ModuleHandlerConfigurationType,
               SessionDataType,
               SessionDataContainerType,
@@ -47,9 +49,9 @@ DHCP_Stream_T<StreamStateType,
  //, parser_ (ACE_TEXT_ALWAYS_CHAR ("Parser"),
  //           NULL,
  //           false)
- , runtimeStatistic_ (ACE_TEXT_ALWAYS_CHAR ("RuntimeStatistic"),
-                      NULL,
-                      false)
+ , statistic_ (ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
+               NULL,
+               false)
 //, handler_ (ACE_TEXT_ALWAYS_CHAR ("Handler"),
 //            NULL,
 //            false)
@@ -61,31 +63,7 @@ DHCP_Stream_T<StreamStateType,
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
-          typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
-DHCP_Stream_T<StreamStateType,
-              ConfigurationType,
-              StatisticContainerType,
-              ModuleHandlerConfigurationType,
-              SessionDataType,
-              SessionDataContainerType,
-              ControlMessageType,
-              DataMessageType,
-              SessionMessageType>::~DHCP_Stream_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("DHCP_Stream_T::~DHCP_Stream_T"));
-
-  // *NOTE*: this implements an ordered shutdown on destruction
-  inherited::shutdown ();
-}
-
-template <typename StreamStateType,
-          typename ConfigurationType,
-          typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -96,6 +74,7 @@ bool
 DHCP_Stream_T<StreamStateType,
               ConfigurationType,
               StatisticContainerType,
+              StatisticHandlerType,
               ModuleHandlerConfigurationType,
               SessionDataType,
               SessionDataContainerType,
@@ -108,7 +87,7 @@ DHCP_Stream_T<StreamStateType,
 
   deleteModules_out = false;
 
-  modules_out.push_back (&runtimeStatistic_);
+  modules_out.push_back (&statistic_);
   //modules_out.push_back (&parser_);
   modules_out.push_back (&marshal_);
   //modules_out.push_back (&handler_);
@@ -119,6 +98,7 @@ DHCP_Stream_T<StreamStateType,
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -129,6 +109,7 @@ bool
 DHCP_Stream_T<StreamStateType,
               ConfigurationType,
               StatisticContainerType,
+              StatisticHandlerType,
               ModuleHandlerConfigurationType,
               SessionDataType,
               SessionDataContainerType,
@@ -205,15 +186,15 @@ DHCP_Stream_T<StreamStateType,
   //   } // end IF
 
   // ******************* Runtime Statistics ************************
-  //STATISTIC_WRITER_T* runtimeStatistic_impl_p =
+  //STATISTIC_WRITER_T* statistic_report_impl_p =
   //  dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
-  //if (!runtimeStatistic_impl_p)
+  //if (!statistic_report_impl_p)
   //{
   //  ACE_DEBUG ((LM_ERROR,
   //              ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n")));
   //  return false;
   //} // end IF
-  //if (!runtimeStatistic_impl_p->initialize (configuration_in.statisticReportingInterval,
+  //if (!statistic_report_impl_p->initialize (configuration_in.statisticReportingInterval,
   //                                          configuration_in.messageAllocator))
   //{
   //  ACE_DEBUG ((LM_ERROR,
@@ -307,6 +288,7 @@ DHCP_Stream_T<StreamStateType,
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -317,6 +299,7 @@ bool
 DHCP_Stream_T<StreamStateType,
               ConfigurationType,
               StatisticContainerType,
+              StatisticHandlerType,
               ModuleHandlerConfigurationType,
               SessionDataType,
               SessionDataContainerType,
@@ -326,23 +309,23 @@ DHCP_Stream_T<StreamStateType,
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Stream_T::collect"));
 
-  STATISTIC_WRITER_T* runtimeStatistic_impl_p = NULL;
-  runtimeStatistic_impl_p =
-    dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
-  if (!runtimeStatistic_impl_p)
+  STATISTIC_WRITER_T* statistic_report_impl_p =
+    dynamic_cast<STATISTIC_WRITER_T*> (statistic_.writer ());
+  if (!statistic_report_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<Stream_Statistic_StatisticReport_WriterTask_T> failed, aborting\n")));
     return false;
   } // end IF
 
   // delegate to this module
-  return runtimeStatistic_impl_p->collect (data_out);
+  return statistic_report_impl_p->collect (data_out);
 }
 
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -353,6 +336,7 @@ void
 DHCP_Stream_T<StreamStateType,
               ConfigurationType,
               StatisticContainerType,
+              StatisticHandlerType,
               ModuleHandlerConfigurationType,
               SessionDataType,
               SessionDataContainerType,
@@ -384,6 +368,7 @@ DHCP_Stream_T<StreamStateType,
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -394,6 +379,7 @@ void
 DHCP_Stream_T<StreamStateType,
               ConfigurationType,
               StatisticContainerType,
+              StatisticHandlerType,
               ModuleHandlerConfigurationType,
               SessionDataType,
               SessionDataContainerType,

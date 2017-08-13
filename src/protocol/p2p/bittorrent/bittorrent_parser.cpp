@@ -545,84 +545,84 @@ namespace yy {
       case 3: // "handshake"
 
 
-        { debug_stream () << BitTorrent_Tools::HandShake2String (*(yysym.value.handshake)); }
+        { debug_stream () << BitTorrent_Tools::HandShakeToString (*(yysym.value.handshake)); }
 
         break;
 
       case 4: // "bitfield"
 
 
-        { debug_stream () << BitTorrent_Tools::Record2String (*(yysym.value.record)); }
+        { debug_stream () << BitTorrent_Tools::RecordToString (*(yysym.value.record)); }
 
         break;
 
       case 5: // "cancel"
 
 
-        { debug_stream () << BitTorrent_Tools::Record2String (*(yysym.value.record)); }
+        { debug_stream () << BitTorrent_Tools::RecordToString (*(yysym.value.record)); }
 
         break;
 
       case 6: // "choke"
 
 
-        { debug_stream () << BitTorrent_Tools::Record2String (*(yysym.value.record)); }
+        { debug_stream () << BitTorrent_Tools::RecordToString (*(yysym.value.record)); }
 
         break;
 
       case 7: // "have"
 
 
-        { debug_stream () << BitTorrent_Tools::Record2String (*(yysym.value.record)); }
+        { debug_stream () << BitTorrent_Tools::RecordToString (*(yysym.value.record)); }
 
         break;
 
       case 8: // "interested"
 
 
-        { debug_stream () << BitTorrent_Tools::Record2String (*(yysym.value.record)); }
+        { debug_stream () << BitTorrent_Tools::RecordToString (*(yysym.value.record)); }
 
         break;
 
       case 9: // "keep-alive"
 
 
-        { debug_stream () << BitTorrent_Tools::Record2String (*(yysym.value.record)); }
+        { debug_stream () << BitTorrent_Tools::RecordToString (*(yysym.value.record)); }
 
         break;
 
       case 10: // "not_interested"
 
 
-        { debug_stream () << BitTorrent_Tools::Record2String (*(yysym.value.record)); }
+        { debug_stream () << BitTorrent_Tools::RecordToString (*(yysym.value.record)); }
 
         break;
 
       case 11: // "piece"
 
 
-        { debug_stream () << BitTorrent_Tools::Record2String (*(yysym.value.record)); }
+        { debug_stream () << BitTorrent_Tools::RecordToString (*(yysym.value.record)); }
 
         break;
 
       case 12: // "port"
 
 
-        { debug_stream () << BitTorrent_Tools::Record2String (*(yysym.value.record)); }
+        { debug_stream () << BitTorrent_Tools::RecordToString (*(yysym.value.record)); }
 
         break;
 
       case 13: // "request"
 
 
-        { debug_stream () << BitTorrent_Tools::Record2String (*(yysym.value.record)); }
+        { debug_stream () << BitTorrent_Tools::RecordToString (*(yysym.value.record)); }
 
         break;
 
       case 14: // "unchoke"
 
 
-        { debug_stream () << BitTorrent_Tools::Record2String (*(yysym.value.record)); }
+        { debug_stream () << BitTorrent_Tools::RecordToString (*(yysym.value.record)); }
 
         break;
 

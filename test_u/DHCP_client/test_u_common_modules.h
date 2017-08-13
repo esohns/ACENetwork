@@ -30,7 +30,8 @@
 #include "stream_streammodule_base.h"
 
 #include "stream_misc_dump.h"
-#include "stream_misc_statistic_report.h"
+
+#include "stream_stat_statistic_report.h"
 
 #include "stream_module_io.h"
 
@@ -53,7 +54,7 @@ class Test_U_Message;
 typedef Net_Connection_Manager_T<ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
-                                 DHCP_RuntimeStatistic_t,
+                                 DHCP_Statistic_t,
                                  struct Test_U_UserData> Test_U_ConnectionManager_t;
 
 // declare module(s)
@@ -67,7 +68,8 @@ typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
                                      struct Test_U_StreamState,
                                      struct Test_U_DHCPClient_SessionData,
                                      Test_U_DHCPClient_SessionData_t,
-                                     DHCP_RuntimeStatistic_t,
+                                     DHCP_Statistic_t,
+                                     DHCP_StatisticHandler_Reactor_t,
                                      ACE_INET_Addr,
                                      Test_U_ConnectionManager_t,
                                      struct Test_U_UserData> Test_U_Module_Net_Writer_t;
@@ -81,10 +83,41 @@ typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      struct Test_U_StreamState,
                                      struct Test_U_DHCPClient_SessionData,
                                      Test_U_DHCPClient_SessionData_t,
-                                     DHCP_RuntimeStatistic_t,
+                                     DHCP_Statistic_t,
+                                     DHCP_StatisticHandler_Reactor_t,
                                      ACE_INET_Addr,
                                      Test_U_ConnectionManager_t,
                                      struct Test_U_UserData> Test_U_Module_Net_Reader_t;
+typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
+                                     Test_U_ControlMessage_t,
+                                     Test_U_Message,
+                                     Test_U_SessionMessage,
+                                     struct Test_U_StreamModuleHandlerConfiguration,
+                                     enum Stream_ControlType,
+                                     enum Stream_SessionMessageType,
+                                     struct Test_U_StreamState,
+                                     struct Test_U_DHCPClient_SessionData,
+                                     Test_U_DHCPClient_SessionData_t,
+                                     DHCP_Statistic_t,
+                                     DHCP_StatisticHandler_Proactor_t,
+                                     ACE_INET_Addr,
+                                     Test_U_ConnectionManager_t,
+                                     struct Test_U_UserData> Test_U_Module_Net_AsynchWriter_t;
+typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
+                                     Test_U_ControlMessage_t,
+                                     Test_U_Message,
+                                     Test_U_SessionMessage,
+                                     struct Test_U_StreamModuleHandlerConfiguration,
+                                     enum Stream_ControlType,
+                                     enum Stream_SessionMessageType,
+                                     struct Test_U_StreamState,
+                                     struct Test_U_DHCPClient_SessionData,
+                                     Test_U_DHCPClient_SessionData_t,
+                                     DHCP_Statistic_t,
+                                     DHCP_StatisticHandler_Proactor_t,
+                                     ACE_INET_Addr,
+                                     Test_U_ConnectionManager_t,
+                                     struct Test_U_UserData> Test_U_Module_Net_AsynchReader_t;
 
 typedef DHCP_Module_Discover_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
@@ -107,7 +140,21 @@ typedef DHCP_Module_DiscoverH_T<ACE_MT_SYNCH,
                                 struct Test_U_StreamState,
                                 struct Test_U_DHCPClient_SessionData,
                                 Test_U_DHCPClient_SessionData_t,
-                                DHCP_RuntimeStatistic_t> Test_U_Module_DHCPDiscoverH;
+                                DHCP_Statistic_t,
+                                DHCP_StatisticHandler_Reactor_t> Test_U_Module_DHCPDiscoverH;
+typedef DHCP_Module_DiscoverH_T<ACE_MT_SYNCH,
+                                Common_TimePolicy_t,
+                                Test_U_ControlMessage_t,
+                                Test_U_Message,
+                                Test_U_SessionMessage,
+                                struct Test_U_StreamModuleHandlerConfiguration,
+                                enum Stream_ControlType,
+                                enum Stream_SessionMessageType,
+                                struct Test_U_StreamState,
+                                struct Test_U_DHCPClient_SessionData,
+                                Test_U_DHCPClient_SessionData_t,
+                                DHCP_Statistic_t,
+                                DHCP_StatisticHandler_Proactor_t> Test_U_Module_AsynchDHCPDiscoverH;
 
 //typedef DHCP_Module_Bisector_T<ACE_SYNCH_MUTEX,
 //                               ACE_MT_SYNCH,
@@ -118,7 +165,7 @@ typedef DHCP_Module_DiscoverH_T<ACE_MT_SYNCH,
 //                               struct Test_U_StreamState,
 //                               struct Test_U_DHCPClient_SessionData,
 //                               Test_U_DHCPClient_SessionData_t,
-//                               DHCP_RuntimeStatistic_t> Test_U_Module_Bisector;
+//                               DHCP_Statistic_t> Test_U_Module_Bisector;
 
 typedef DHCP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
@@ -142,28 +189,52 @@ typedef DHCP_Module_Parser_T<ACE_MT_SYNCH,
 //                              struct Test_U_StreamState,
 //                              struct Test_U_DHCPClient_SessionData,
 //                              Test_U_DHCPClient_SessionData_t,
-//                              DHCP_RuntimeStatistic_t> Test_U_Module_Parser;
+//                              DHCP_Statistic_t> Test_U_Module_Parser;
 
-typedef Stream_Module_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                    Common_TimePolicy_t,
                                                    struct Test_U_StreamModuleHandlerConfiguration,
                                                    Test_U_ControlMessage_t,
                                                    Test_U_Message,
                                                    Test_U_SessionMessage,
                                                    DHCP_MessageType_t,
-                                                   DHCP_RuntimeStatistic_t,
+                                                   DHCP_Statistic_t,
+                                                   DHCP_StatisticHandler_Reactor_t,
                                                    struct Test_U_DHCPClient_SessionData,
                                                    Test_U_DHCPClient_SessionData_t> Test_U_Module_StatisticReport_ReaderTask_t;
-typedef Stream_Module_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                    Common_TimePolicy_t,
                                                    struct Test_U_StreamModuleHandlerConfiguration,
                                                    Test_U_ControlMessage_t,
                                                    Test_U_Message,
                                                    Test_U_SessionMessage,
                                                    DHCP_MessageType_t,
-                                                   DHCP_RuntimeStatistic_t,
+                                                   DHCP_Statistic_t,
+                                                   DHCP_StatisticHandler_Reactor_t,
                                                    struct Test_U_DHCPClient_SessionData,
                                                    Test_U_DHCPClient_SessionData_t> Test_U_Module_StatisticReport_WriterTask_t;
+typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+                                                   Common_TimePolicy_t,
+                                                   struct Test_U_StreamModuleHandlerConfiguration,
+                                                   Test_U_ControlMessage_t,
+                                                   Test_U_Message,
+                                                   Test_U_SessionMessage,
+                                                   DHCP_MessageType_t,
+                                                   DHCP_Statistic_t,
+                                                   DHCP_StatisticHandler_Proactor_t,
+                                                   struct Test_U_DHCPClient_SessionData,
+                                                   Test_U_DHCPClient_SessionData_t> Test_U_Module_StatisticReport_AsynchReaderTask_t;
+typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+                                                   Common_TimePolicy_t,
+                                                   struct Test_U_StreamModuleHandlerConfiguration,
+                                                   Test_U_ControlMessage_t,
+                                                   Test_U_Message,
+                                                   Test_U_SessionMessage,
+                                                   DHCP_MessageType_t,
+                                                   DHCP_Statistic_t,
+                                                   DHCP_StatisticHandler_Proactor_t,
+                                                   struct Test_U_DHCPClient_SessionData,
+                                                   Test_U_DHCPClient_SessionData_t> Test_U_Module_StatisticReport_AsynchWriterTask_t;
 
 typedef Stream_Module_Dump_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
@@ -193,6 +264,11 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_DHCPClient_SessionData,           //
                               struct Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
                               Test_U_IStreamNotify_t,                         // stream notification interface type
                               Test_U_Module_DHCPDiscoverH);                   // writer type
+DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_DHCPClient_SessionData,           // session data type
+                              enum Stream_SessionMessageType,                 // session event type
+                              struct Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
+                              Test_U_IStreamNotify_t,                         // stream notification interface type
+                              Test_U_Module_AsynchDHCPDiscoverH);             // writer type
 DATASTREAM_MODULE_OUTPUT_ONLY (struct Test_U_DHCPClient_SessionData,           // session data type
                                enum Stream_SessionMessageType,                 // session event type
                                struct Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
@@ -205,6 +281,7 @@ DATASTREAM_MODULE_DUPLEX (struct Test_U_DHCPClient_SessionData,           // ses
                           Test_U_Module_Streamer,                         // reader type
                           Test_U_Module_Parser,                           // writer type
                           Test_U_Module_Marshal);                         // name
+
 //DATASTREAM_MODULE_INPUT_ONLY (ACE_MT_SYNCH,                            // task synch type
 //                              Common_TimePolicy_t,                     // time policy
 //                              struct Stream_ModuleConfiguration,              // module configuration type
@@ -217,7 +294,14 @@ DATASTREAM_MODULE_DUPLEX (struct Test_U_DHCPClient_SessionData,           // ses
                           Test_U_IStreamNotify_t,                         // stream notification interface type
                           Test_U_Module_StatisticReport_ReaderTask_t,     // reader type
                           Test_U_Module_StatisticReport_WriterTask_t,     // writer type
-                          Test_U_Module_StatisticReport);                 // name
+                          Test_U_Module_StatisticReport);                   // name
+DATASTREAM_MODULE_DUPLEX (struct Test_U_DHCPClient_SessionData,             // session data type
+                          enum Stream_SessionMessageType,                   // session event type
+                          struct Test_U_StreamModuleHandlerConfiguration,   // module handler configuration type
+                          Test_U_IStreamNotify_t,                           // stream notification interface type
+                          Test_U_Module_StatisticReport_AsynchReaderTask_t, // reader type
+                          Test_U_Module_StatisticReport_AsynchWriterTask_t, // writer type
+                          Test_U_Module_AsynchStatisticReport);             // name
 
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_DHCPClient_SessionData,           // session data type
                               enum Stream_SessionMessageType,                 // session event type

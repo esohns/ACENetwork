@@ -48,7 +48,7 @@ struct Net_UserData;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct Net_ConnectionConfiguration,
                                  struct Net_ConnectionState,
-                                 Net_RuntimeStatistic_t,
+                                 Net_Statistic_t,
                                  struct Net_UserData> Net_IInetConnectionManager_t;
 
 struct Net_SocketConfigurationBase
@@ -74,7 +74,6 @@ struct Net_NetlinkSocketConfiguration
    , address ()
    , protocol (NET_PROTOCOL_DEFAULT_NETLINK)
   {};
-  inline virtual ~Net_NetlinkSocketConfiguration () {};
 
   Net_Netlink_Addr address;
   int              protocol;
@@ -102,7 +101,6 @@ struct Net_TCPSocketConfiguration
                     ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
     } // end IF
   };
-  inline virtual ~Net_TCPSocketConfiguration () {};
 
   ACE_INET_Addr address;
   bool          linger;
@@ -138,7 +136,6 @@ struct Net_UDPSocketConfiguration
                     ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
     } // end IF
   };
-  inline virtual ~Net_UDPSocketConfiguration () {};
 
   ACE_INET_Addr address;
   // *IMPORTANT NOTE*: set this for asynchronous event dispatch; the socket
@@ -245,7 +242,6 @@ struct Net_WLANMonitorConfiguration
 #endif
    , SSID ()
   {};
-  inline virtual ~Net_WLANMonitorConfiguration () {};
 
   bool                       autoAssociate;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

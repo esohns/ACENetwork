@@ -25,7 +25,7 @@
 #include "ace/Synch_Traits.h"
 
 #include "stream_headmoduletask_base.h"
-#include "stream_statistichandler.h"
+//#include "stream_statistichandler.h"
 #include "stream_task_base_asynch.h"
 //#include "stream_task_base_synch.h"
 
@@ -125,6 +125,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           ////////////////////////////////
           typename UserDataType>
 class HTTP_Module_ParserH_T
@@ -140,6 +141,7 @@ class HTTP_Module_ParserH_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
+                                      StatisticHandlerType,
                                       UserDataType>
  , public HTTP_ParserDriver_T<SessionMessageType>
 {
@@ -155,6 +157,7 @@ class HTTP_Module_ParserH_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
+                                      StatisticHandlerType,
                                       UserDataType> inherited;
 
  public:
@@ -179,6 +182,7 @@ class HTTP_Module_ParserH_T
                                     SessionDataType,
                                     SessionDataContainerType,
                                     StatisticContainerType,
+                                    StatisticHandlerType,
                                     UserDataType>::set;
 
   // override (part of) Stream_IModuleHandler_T

@@ -1,10 +1,10 @@
 %top{
-#include "bittorrent_common.h"
-#include "bittorrent_exports.h"
-#include "ace/Synch.h"
-#include "bittorrent_iparser.h"
+//#include "bittorrent_common.h"
+//#include "bittorrent_exports.h"
+//#include "bittorrent_iparser.h"
 #undef YYTOKENTYPE
 //#undef PARSER_HEADER_H
+#include "ace/Synch.h"
 #include "bittorrent_parser.h"
 
 typedef void* yyscan_t;

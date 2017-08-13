@@ -63,31 +63,6 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::~Net_AsynchUDPSocketHandler_T (
 
 template <typename ConfigurationType>
 void
-Net_AsynchUDPSocketHandler_T<ConfigurationType>::reset ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::reset"));
-
-  ACE_Message_Block message_block;
-
-  int result = OWN_TYPE_T::handle_close (inherited2::handle (),
-                                         ACE_Event_Handler::SIGNAL_MASK);
-  if (result == -1)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(0x%@): \"%m\", continuing\n"),
-                  inherited2::handle ()));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_AsynchUDPSocketHandler_T::handle_close(%d): \"%m\", continuing\n"),
-                  inherited2::handle ()));
-#endif
-
-  OWN_TYPE_T::open (inherited2::handle (),
-                    message_block);
-}
-
-template <typename ConfigurationType>
-void
 Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
                                                        ACE_Message_Block& messageBlock_in)
 {
@@ -122,7 +97,7 @@ Net_AsynchUDPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
     ((handle_in != ACE_INVALID_HANDLE) ? NET_PROTOCOL_DEFAULT_UDP_BUFFER_SIZE
                                        : Net_Common_Tools::getMTU (handle_in));
   //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("maximum message size: %u...\n"),
+  //            ACE_TEXT ("maximum message size: %u\n"),
   //            PDUSize_));
   writeOnly_ = socket_configuration_p->writeOnly;
 

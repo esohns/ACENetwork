@@ -33,7 +33,7 @@
 #include "stream_statemachine_control.h"
 #include "stream_streammodule_base.h"
 
-#include "stream_misc_statistic_report.h"
+#include "stream_stat_statistic_report.h"
 
 #include "irc_common.h"
 #include "irc_exports.h"
@@ -50,6 +50,7 @@ template <typename StreamStateType,
           typename ConfigurationType,
           ////////////////////////////////
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           ///////////////////////////////
           typename ModuleHandlerConfigurationType,
           ////////////////////////////////
@@ -140,6 +141,7 @@ class IRC_Stream_T
                                 SessionDataType,
                                 SessionDataContainerType,
                                 StatisticContainerType,
+                                StatisticHandlerType,
                                 UserDataType> BISECTOR_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
@@ -168,26 +170,28 @@ class IRC_Stream_T
                                          IRC_Stream_INotify_t,           // stream notification interface type
                                          PARSER_T> MODULE_PARSER_T;
 
-  typedef Stream_Module_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
-                                                     Common_TimePolicy_t,
-                                                     ModuleHandlerConfigurationType,
-                                                     ControlMessageType,
-                                                     DataMessageType,
-                                                     SessionMessageType,
-                                                     IRC_CommandType_t,
-                                                     IRC_RuntimeStatistic_t,
-                                                     SessionDataType,
-                                                     SessionDataContainerType> STATISTIC_READER_T;
-  typedef Stream_Module_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
-                                                     Common_TimePolicy_t,
-                                                     ModuleHandlerConfigurationType,
-                                                     ControlMessageType,
-                                                     DataMessageType,
-                                                     SessionMessageType,
-                                                     IRC_CommandType_t,
-                                                     IRC_RuntimeStatistic_t,
-                                                     SessionDataType,
-                                                     SessionDataContainerType> STATISTIC_WRITER_T;
+  typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+                                                        Common_TimePolicy_t,
+                                                        ModuleHandlerConfigurationType,
+                                                        ControlMessageType,
+                                                        DataMessageType,
+                                                        SessionMessageType,
+                                                        IRC_CommandType_t,
+                                                        IRC_Statistic_t,
+                                                        StatisticHandlerType,
+                                                        SessionDataType,
+                                                        SessionDataContainerType> STATISTIC_READER_T;
+  typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+                                                        Common_TimePolicy_t,
+                                                        ModuleHandlerConfigurationType,
+                                                        ControlMessageType,
+                                                        DataMessageType,
+                                                        SessionMessageType,
+                                                        IRC_CommandType_t,
+                                                        IRC_Statistic_t,
+                                                        StatisticHandlerType,
+                                                        SessionDataType,
+                                                        SessionDataContainerType> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 Stream_SessionId_t,             // session id type

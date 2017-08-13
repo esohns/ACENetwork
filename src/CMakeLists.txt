@@ -45,7 +45,7 @@ add_definitions (-DACE_HAS_DLL)
 include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
 if (UNIX)
- pkg_check_modules (PKG_DBUS REQUIRED dbus-1 network-manager-dev)
+ pkg_check_modules (PKG_DBUS REQUIRED dbus-1 NetworkManager)
  pkg_check_modules (PKG_SSL REQUIRED libssl)
 endif ()
 
@@ -87,6 +87,8 @@ if (UNIX)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src/modules/lib)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src/modules/stat)
 elseif (WIN32)
  include_directories ($ENV{ACE_ROOT})
 
@@ -95,6 +97,8 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/ui)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src/modules/lib)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src/modules/stat)
 endif ()
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/..)
@@ -162,6 +166,8 @@ set (${PROJECT_NAME}_LIB_SRCS
      net_sock_acceptor.h
      net_sock_connector.cpp
      net_sock_connector.h
+     net_sock_dgram.cpp
+     net_sock_dgram.h
      net_sockethandler_base.cpp
      net_sockethandler_base.h
      net_sockethandler_base.inl
@@ -287,6 +293,7 @@ install (FILES
          net_session_base.inl
          net_sock_acceptor.h
          net_sock_connector.h
+         net_sock_dgram.h
          net_sockethandler_base.h
          net_sockethandler_base.inl
          net_streamconnection_base.h

@@ -51,11 +51,11 @@ struct BitTorrent_Client_PeerConnectionState;
 typedef Net_IConnection_T<ACE_INET_Addr,
                           struct BitTorrent_Client_PeerConnectionConfiguration,
                           struct BitTorrent_Client_PeerConnectionState,
-                          BitTorrent_RuntimeStatistic_t> BitTorrent_Client_IPeerConnection_t;
+                          BitTorrent_Statistic_t> BitTorrent_Client_IPeerConnection_t;
 //typedef Net_IConnection_T<ACE_INET_Addr,
 //                          struct BitTorrent_Client_TrackerConnectionConfiguration,
 //                          struct BitTorrent_Client_ConnectionState,
-//                          BitTorrent_RuntimeStatistic_t> BitTorrent_Client_ITrackerConnection_t;
+//                          BitTorrent_Statistic_t> BitTorrent_Client_ITrackerConnection_t;
 template <typename SessionInterfaceType,
           typename ConnectionType,
           typename ConnectionCBDataType>

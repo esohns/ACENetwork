@@ -32,13 +32,13 @@
 
 Net_SOCK_Connector::Net_SOCK_Connector ()
 {
-  NET_TRACE (ACE_TEXT ("Net_SOCK_Connector::Net_SOCK_Connector"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_Connector::Net_SOCK_Connector"));
 
 }
 
 Net_SOCK_Connector::~Net_SOCK_Connector ()
 {
-  NET_TRACE (ACE_TEXT ("Net_SOCK_Connector::~Net_SOCK_Connector"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_Connector::~Net_SOCK_Connector"));
 
 }
 
@@ -52,7 +52,7 @@ Net_SOCK_Connector::connect (ACE_SOCK_Stream& stream_in,
                              int permissions_in,
                              int protocol_in)
 {
-  NET_TRACE (ACE_TEXT ("Net_SOCK_Connector::connect"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_Connector::connect"));
 
   ACE_UNUSED_ARG (flags_in);
   ACE_UNUSED_ARG (permissions_in);
@@ -177,7 +177,7 @@ Net_SOCK_Connector::shared_connect_start (ACE_SOCK_Stream& stream_in,
                                           const ACE_Addr& localAddress_in,
                                           const ACE_Addr& remoteAddress_in)
 {
-  NET_TRACE (ACE_TEXT ("Net_SOCK_Connector::shared_connect_start"));
+  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_Connector::shared_connect_start"));
 
   int result = -1;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -283,7 +283,7 @@ close:
 //                                              const ACE_Time_Value* timeout_in,
 //                                              int result_in)
 //{
-//  NET_TRACE (ACE_TEXT ("Net_SOCK_Connector::shared_connect_finish"));
+//  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_Connector::shared_connect_finish"));
 //
 //  // Save/restore errno.
 //  ACE_Errno_Guard error (errno);
@@ -356,13 +356,13 @@ close:
 
 //Net_SOCK_SSL_Connector::Net_SOCK_SSL_Connector ()
 //{
-//  NET_TRACE (ACE_TEXT ("Net_SOCK_SSL_Connector::Net_SOCK_SSL_Connector"));
+//  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_SSL_Connector::Net_SOCK_SSL_Connector"));
 //
 //}
 //
 //Net_SOCK_SSL_Connector::~Net_SOCK_SSL_Connector ()
 //{
-//  NET_TRACE (ACE_TEXT ("Net_SOCK_SSL_Connector::~Net_SOCK_SSL_Connector"));
+//  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_SSL_Connector::~Net_SOCK_SSL_Connector"));
 //
 //}
 //
@@ -375,7 +375,7 @@ close:
 //                                 int flags_in,
 //                                 int permissions_in)
 //{
-//  NET_TRACE (ACE_TEXT ("Net_SOCK_SSL_Connector::connect"));
+//  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_SSL_Connector::connect"));
 //
 //  // Take into account the time to complete the basic TCP handshake
 //  // and the SSL handshake.
@@ -444,7 +444,7 @@ close:
 //                                 int reuseAddr_in,
 //                                 int /* perms */)
 //{
-//  NET_TRACE ("Net_SOCK_SSL_Connector::connect");
+//  NETWORK_TRACE ("Net_SOCK_SSL_Connector::connect");
 //
 //  if (this->shared_open (stream_in,
 //                         remoteAddress_in.get_type (),
@@ -475,7 +475,7 @@ close:
 //                                              const ACE_Addr& localAddress_in,
 //                                              const ACE_Addr& remoteAddress_in)
 //{
-//  NET_TRACE (ACE_TEXT ("Net_SOCK_SSL_Connector::shared_connect_start"));
+//  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_SSL_Connector::shared_connect_start"));
 //
 //  int result = -1;
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)

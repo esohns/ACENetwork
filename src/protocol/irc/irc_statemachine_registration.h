@@ -25,44 +25,43 @@
 
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
-#include "ace/Null_Mutex.h"
 
 #include "common_statemachine_base.h"
 
 #include "irc_exports.h"
 
-enum IRC_RegistrationState
+enum IRC_RegistrationStateType
 {
-  REGISTRATION_STATE_INVALID = -1,
-  REGISTRATION_STATE_PASS = 0,
-  REGISTRATION_STATE_NICK,
-  REGISTRATION_STATE_USER,
-  REGISTRATION_STATE_FINISHED,
+  IRC_REGISTRATION_STATE_INVALID = -1,
+  IRC_REGISTRATION_STATE_PASS = 0,
+  IRC_REGISTRATION_STATE_NICK,
+  IRC_REGISTRATION_STATE_USER,
+  IRC_REGISTRATION_STATE_FINISHED,
   ////////////////////////////////////////
-  REGISTRATION_STATE_MAX
+  IRC_REGISTRATION_STATE_MAX
 };
 
 class IRC_Export IRC_StateMachine_Registration
  : public Common_StateMachine_Base_T<ACE_NULL_SYNCH,
-                                     IRC_RegistrationState>
+                                     enum IRC_RegistrationStateType>
 {
  public:
   IRC_StateMachine_Registration ();
-  virtual ~IRC_StateMachine_Registration ();
+  inline virtual ~IRC_StateMachine_Registration () {};
 
   // implement (part of) Common_IStateMachine_T
   virtual void initialize ();
-  virtual void reset ();
-  virtual std::string state2String (IRC_RegistrationState) const;
+  inline virtual void reset () { initialize (); };
+  virtual std::string stateToString (enum IRC_RegistrationStateType) const;
 
  protected:
   // implement (part of) Common_IStateMachine_T
   // *NOTE*: only derived classes can change state
-  virtual bool change (IRC_RegistrationState); // new state
+  virtual bool change (enum IRC_RegistrationStateType); // new state
 
  private:
   typedef Common_StateMachine_Base_T<ACE_NULL_SYNCH,
-                                     IRC_RegistrationState> inherited;
+                                     enum IRC_RegistrationStateType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (IRC_StateMachine_Registration (const IRC_StateMachine_Registration&))
   ACE_UNIMPLEMENTED_FUNC (IRC_StateMachine_Registration& operator= (const IRC_StateMachine_Registration&))
@@ -70,7 +69,7 @@ class IRC_Export IRC_StateMachine_Registration
   ACE_SYNCH_NULL_MUTEX lock_;
 };
 
-// convenient typedef
-typedef Common_IStateMachine_T<IRC_RegistrationState> IRC_IRegistrationStateMachine_t;
+// convenient types
+typedef Common_IStateMachine_T<enum IRC_RegistrationStateType> IRC_IRegistrationStateMachine_t;
 
 #endif

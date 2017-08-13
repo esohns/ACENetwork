@@ -55,48 +55,36 @@ Test_U_InboundConnectionStream::load (Stream_ModuleList_t& modules_out,
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_Dump_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR ("Dump"),
-                                             NULL,
-                                             false),
+                                             ACE_TEXT_ALWAYS_CHAR ("Dump")),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_DHCPDiscover_Module (this,
-                                                     ACE_TEXT_ALWAYS_CHAR ("DHCPDiscover"),
-                                                     NULL,
-                                                     false),
+                                                     ACE_TEXT_ALWAYS_CHAR ("DHCPDiscover")),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_StatisticReport_Module (this,
-                                                        ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
-                                                        NULL,
-                                                        false),
+                                                        ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
                   false);
   modules_out.push_back (module_p);
 //  module_p = NULL;
 //  ACE_NEW_RETURN (module_p,
-//                  Test_U_Module_Parser_Module (ACE_TEXT_ALWAYS_CHAR ("Parser"),
-//                                               NULL,
-//                                               false),
+//                  Test_U_Module_Parser_Module (ACE_TEXT_ALWAYS_CHAR ("Parser")),
 //                  false);
 //  modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_Marshal_Module (this,
-                                                ACE_TEXT_ALWAYS_CHAR ("Marshal"),
-                                                NULL,
-                                                false),
+                                                ACE_TEXT_ALWAYS_CHAR ("Marshal")),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_Net_IO_Module (this,
-                                               ACE_TEXT_ALWAYS_CHAR ("NetIO"),
-                                               NULL,
-                                               false),
+                                               ACE_TEXT_ALWAYS_CHAR ("NetIO")),
                   false);
   modules_out.push_back (module_p);
 
@@ -206,7 +194,7 @@ failed:
 }
 
 bool
-Test_U_InboundConnectionStream::collect (DHCP_RuntimeStatistic_t& data_out)
+Test_U_InboundConnectionStream::collect (DHCP_Statistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_InboundConnectionStream::collect"));
 
@@ -226,9 +214,9 @@ Test_U_InboundConnectionStream::collect (DHCP_RuntimeStatistic_t& data_out)
                 ACE_TEXT ("StatisticReport")));
     return false;
   } // end IF
-  Test_U_Module_StatisticReport_WriterTask_t* runtimeStatistic_impl =
+  Test_U_Module_StatisticReport_WriterTask_t* statistic_report_impl =
     dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
-  if (!runtimeStatistic_impl)
+  if (!statistic_report_impl)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t> failed, aborting\n")));
@@ -247,12 +235,12 @@ Test_U_InboundConnectionStream::collect (DHCP_RuntimeStatistic_t& data_out)
     } // end IF
   } // end IF
 
-  session_data_r.currentStatistic.timeStamp = COMMON_TIME_NOW;
+  session_data_r.statistic.timeStamp = COMMON_TIME_NOW;
 
   // delegate to the statistics module
   bool result_2 = false;
   try {
-    result_2 = runtimeStatistic_impl->collect (data_out);
+    result_2 = statistic_report_impl->collect (data_out);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), continuing\n")));
@@ -261,7 +249,7 @@ Test_U_InboundConnectionStream::collect (DHCP_RuntimeStatistic_t& data_out)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_IStatistic_T::collect(), aborting\n")));
   else
-    session_data_r.currentStatistic = data_out;
+    session_data_r.statistic = data_out;
 
   if (session_data_r.lock)
   {
@@ -279,9 +267,9 @@ Test_U_InboundConnectionStream::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_InboundConnectionStream::report"));
 
-  //   Net_Module_Statistic_ReaderTask_t* runtimeStatistic_impl = NULL;
-  //   runtimeStatistic_impl = dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//runtimeStatistic_.writer ());
-  //   if (!runtimeStatistic_impl)
+  //   Net_Module_Statistic_ReaderTask_t* statistic_report_impl = NULL;
+  //   statistic_report_impl = dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//runtimeStatistic_.writer ());
+  //   if (!statistic_report_impl)
   //   {
   //     ACE_DEBUG ((LM_ERROR,
   //                 ACE_TEXT ("dynamic_cast<Net_Module_Statistic_ReaderTask_t> failed, returning\n")));
@@ -290,7 +278,7 @@ Test_U_InboundConnectionStream::report () const
   //   } // end IF
   //
   //   // delegate to this module...
-  //   return (runtimeStatistic_impl->report ());
+  //   return (statistic_report_impl->report ());
 
   ACE_ASSERT (false);
   ACE_NOTSUP;
@@ -338,25 +326,19 @@ Test_U_OutboundConnectionStream::load (Stream_ModuleList_t& modules_out,
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_StatisticReport_Module (this,
-                                                        ACE_TEXT_ALWAYS_CHAR ("StatisticReport"),
-                                                        NULL,
-                                                        false),
+                                                        ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_Streamer_Module (this,
-                                                 ACE_TEXT_ALWAYS_CHAR ("Marshal"),
-                                                 NULL,
-                                                 false),
+                                                 ACE_TEXT_ALWAYS_CHAR ("Marshal")),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_Net_IO_Module (this,
-                                               ACE_TEXT_ALWAYS_CHAR ("NetIO"),
-                                               NULL,
-                                               false),
+                                               ACE_TEXT_ALWAYS_CHAR ("NetIO")),
                   false);
   modules_out.push_back (module_p);
 
@@ -461,7 +443,7 @@ failed:
 }
 
 bool
-Test_U_OutboundConnectionStream::collect (DHCP_RuntimeStatistic_t& data_out)
+Test_U_OutboundConnectionStream::collect (DHCP_Statistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_OutboundConnectionStream::collect"));
 
@@ -481,9 +463,9 @@ Test_U_OutboundConnectionStream::collect (DHCP_RuntimeStatistic_t& data_out)
                 ACE_TEXT ("StatisticReport")));
     return false;
   } // end IF
-  Test_U_Module_StatisticReport_WriterTask_t* runtimeStatistic_impl =
+  Test_U_Module_StatisticReport_WriterTask_t* statistic_report_impl =
     dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
-  if (!runtimeStatistic_impl)
+  if (!statistic_report_impl)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t> failed, aborting\n")));
@@ -502,12 +484,12 @@ Test_U_OutboundConnectionStream::collect (DHCP_RuntimeStatistic_t& data_out)
     } // end IF
   } // end IF
 
-  session_data_r.currentStatistic.timeStamp = COMMON_TIME_NOW;
+  session_data_r.statistic.timeStamp = COMMON_TIME_NOW;
 
-  // delegate to the statistics module...
+  // delegate to the statistic module
   bool result_2 = false;
   try {
-    result_2 = runtimeStatistic_impl->collect (data_out);
+    result_2 = statistic_report_impl->collect (data_out);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), continuing\n")));
@@ -516,7 +498,7 @@ Test_U_OutboundConnectionStream::collect (DHCP_RuntimeStatistic_t& data_out)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_IStatistic_T::collect(), aborting\n")));
   else
-    session_data_r.currentStatistic = data_out;
+    session_data_r.statistic = data_out;
 
   if (session_data_r.lock)
   {
@@ -534,17 +516,17 @@ Test_U_OutboundConnectionStream::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_OutboundConnectionStream::report"));
 
-  //   Net_Module_Statistic_ReaderTask_t* runtimeStatistic_impl = NULL;
-  //   runtimeStatistic_impl = dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//runtimeStatistic_.writer ());
-  //   if (!runtimeStatistic_impl)
+  //   Net_Module_Statistic_ReaderTask_t* statistic_report_impl =
+  //     dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//statistic_.writer ());
+  //   if (!statistic_report_impl)
   //   {
   //     ACE_DEBUG ((LM_ERROR,
   //                 ACE_TEXT ("dynamic_cast<Net_Module_Statistic_ReaderTask_t> failed, returning\n")));
   //     return;
   //   } // end IF
   //
-  //   // delegate to this module...
-  //   return (runtimeStatistic_impl->report ());
+  //   // delegate to this module
+  //   return (statistic_report_impl->report ());
 
   ACE_ASSERT (false);
   ACE_NOTSUP;

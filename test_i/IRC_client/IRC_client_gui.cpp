@@ -1289,7 +1289,7 @@ ACE_TMAIN (int argc_in,
 
   // initialize protocol configuration
   Stream_CachedAllocatorHeap_T<struct IRC_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                                  IRC_MAXIMUM_FRAME_SIZE + NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE);
+                                                                                  IRC_MAXIMUM_FRAME_SIZE + NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,

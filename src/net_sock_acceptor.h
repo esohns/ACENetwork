@@ -27,7 +27,7 @@
 #include "ace/SOCK_Acceptor.h"
 #include "ace/SOCK_Stream.h"
 
-#include "net_exports.h"
+//#include "net_exports.h"
 
 // forward declarations
 class ACE_Time_Value;

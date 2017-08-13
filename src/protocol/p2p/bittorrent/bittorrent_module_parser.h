@@ -27,7 +27,7 @@
 #include "ace/Synch_Traits.h"
 
 #include "stream_headmoduletask_base.h"
-#include "stream_statistichandler.h"
+//#include "stream_statistichandler.h"
 #include "stream_task_base_asynch.h"
 
 #include "bittorrent_defines.h"
@@ -136,6 +136,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           ////////////////////////////////
           typename UserDataType>
 class BitTorrent_Module_ParserH_T
@@ -151,6 +152,7 @@ class BitTorrent_Module_ParserH_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
+                                      StatisticHandlerType,
                                       UserDataType>
  , public BitTorrent_ParserDriver_T<DataMessageType,
                                     SessionMessageType>
@@ -167,6 +169,7 @@ class BitTorrent_Module_ParserH_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
+                                      StatisticHandlerType,
                                       UserDataType> inherited;
 
  public:
@@ -191,6 +194,7 @@ class BitTorrent_Module_ParserH_T
                                     SessionDataType,
                                     SessionDataContainerType,
                                     StatisticContainerType,
+                                    StatisticHandlerType,
                                     UserDataType>::set;
 
   // override (part of) Stream_IModuleHandler_T

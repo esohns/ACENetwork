@@ -28,17 +28,11 @@
 #include "net_macros.h"
 
 IRC_StateMachine_Registration::IRC_StateMachine_Registration ()
- : inherited (&lock_,                  // lock handle
-              REGISTRATION_STATE_PASS) // (initial) state
+ : inherited (&lock_,                      // lock handle
+              IRC_REGISTRATION_STATE_PASS) // (initial) state
  , lock_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_StateMachine_Registration::IRC_StateMachine_Registration"));
-
-}
-
-IRC_StateMachine_Registration::~IRC_StateMachine_Registration ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_StateMachine_Registration::~IRC_StateMachine_Registration"));
 
 }
 
@@ -47,21 +41,13 @@ IRC_StateMachine_Registration::initialize ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_StateMachine_Registration::initialize"));
 
-  if (!change (REGISTRATION_STATE_PASS))
+  if (!change (IRC_REGISTRATION_STATE_PASS))
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_StateMachine_Registration::change(REGISTRATION_STATE_PASS), continuing\n")));
-}
-
-void
-IRC_StateMachine_Registration::reset ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_StateMachine_Registration::reset"));
-
-  initialize ();
+                ACE_TEXT ("failed to IRC_StateMachine_Registration::change(IRC_REGISTRATION_STATE_PASS), continuing\n")));
 }
 
 bool
-IRC_StateMachine_Registration::change (IRC_RegistrationState newState_in)
+IRC_StateMachine_Registration::change (enum IRC_RegistrationStateType newState_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_StateMachine_Registration::change"));
 
@@ -73,13 +59,13 @@ IRC_StateMachine_Registration::change (IRC_RegistrationState newState_in)
 
   switch (inherited::state_)
   {
-    case REGISTRATION_STATE_PASS:
+    case IRC_REGISTRATION_STATE_PASS:
     {
       switch (newState_in)
       {
         // good case
-        case REGISTRATION_STATE_NICK:
-        case REGISTRATION_STATE_FINISHED:
+        case IRC_REGISTRATION_STATE_NICK:
+        case IRC_REGISTRATION_STATE_FINISHED:
         {
 //           ACE_DEBUG ((LM_DEBUG,
 //                       ACE_TEXT ("state switch: PASS --> %s\n"),
@@ -90,20 +76,20 @@ IRC_StateMachine_Registration::change (IRC_RegistrationState newState_in)
           return true;
         }
         // error case
-        case REGISTRATION_STATE_PASS:
-        case REGISTRATION_STATE_USER:
+        case IRC_REGISTRATION_STATE_PASS:
+        case IRC_REGISTRATION_STATE_USER:
         default:
           break;
       } // end SWITCH
 
       break;
     }
-    case REGISTRATION_STATE_NICK:
+    case IRC_REGISTRATION_STATE_NICK:
     {
       switch (newState_in)
       {
         // good case
-        case REGISTRATION_STATE_USER:
+        case IRC_REGISTRATION_STATE_USER:
         {
           //           ACE_DEBUG ((LM_DEBUG,
           //                       ACE_TEXT ("state switch: NICK --> USER\n")));
@@ -113,21 +99,21 @@ IRC_StateMachine_Registration::change (IRC_RegistrationState newState_in)
           return true;
         }
         // error case
-        case REGISTRATION_STATE_PASS:
-        case REGISTRATION_STATE_NICK:
-        case REGISTRATION_STATE_FINISHED:
+        case IRC_REGISTRATION_STATE_PASS:
+        case IRC_REGISTRATION_STATE_NICK:
+        case IRC_REGISTRATION_STATE_FINISHED:
         default:
           break;
       } // end SWITCH
 
       break;
     }
-    case REGISTRATION_STATE_USER:
+    case IRC_REGISTRATION_STATE_USER:
     {
       switch (newState_in)
       {
         // good case
-        case REGISTRATION_STATE_FINISHED:
+        case IRC_REGISTRATION_STATE_FINISHED:
         {
 //           ACE_DEBUG ((LM_DEBUG,
 //                       ACE_TEXT ("state switch: USER --> FINISHED\n")));
@@ -137,23 +123,23 @@ IRC_StateMachine_Registration::change (IRC_RegistrationState newState_in)
           return true;
         }
         // error case
-        case REGISTRATION_STATE_PASS:
-        case REGISTRATION_STATE_NICK:
-        case REGISTRATION_STATE_USER:
+        case IRC_REGISTRATION_STATE_PASS:
+        case IRC_REGISTRATION_STATE_NICK:
+        case IRC_REGISTRATION_STATE_USER:
         default:
           break;
       } // end SWITCH
 
       break;
     }
-    case REGISTRATION_STATE_FINISHED:
+    case IRC_REGISTRATION_STATE_FINISHED:
     {
       switch (newState_in)
       {
         // *IMPORTANT NOTE*: the whole stream needs to re-initialize BEFORE this
-        //                   happens...
+        //                   happens
         // good case
-        case REGISTRATION_STATE_PASS:
+        case IRC_REGISTRATION_STATE_PASS:
         {
           //ACE_DEBUG ((LM_DEBUG,
           //            ACE_TEXT ("state switch: FINISHED --> PASS\n")));
@@ -163,9 +149,9 @@ IRC_StateMachine_Registration::change (IRC_RegistrationState newState_in)
           return true;
         }
         // error case
-        case REGISTRATION_STATE_NICK:
-        case REGISTRATION_STATE_USER:
-        case REGISTRATION_STATE_FINISHED:
+        case IRC_REGISTRATION_STATE_NICK:
+        case IRC_REGISTRATION_STATE_USER:
+        case IRC_REGISTRATION_STATE_FINISHED:
         default:
           break;
       } // end SWITCH
@@ -177,42 +163,30 @@ IRC_StateMachine_Registration::change (IRC_RegistrationState newState_in)
   } // end SWITCH
   ACE_DEBUG ((LM_ERROR,
               ACE_TEXT ("unknown/invalid state switch: \"%s\" --> \"%s\" --> check implementation !, aborting\n"),
-              ACE_TEXT (state2String (inherited::state_).c_str ()),
-              ACE_TEXT (state2String (newState_in).c_str ())));
+              ACE_TEXT (stateToString (inherited::state_).c_str ()),
+              ACE_TEXT (stateToString (newState_in).c_str ())));
 
   return false;
 }
 
 std::string
-IRC_StateMachine_Registration::state2String (IRC_RegistrationState state_in) const
+IRC_StateMachine_Registration::stateToString (enum IRC_RegistrationStateType state_in) const
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_StateMachine_Registration::state2String"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_StateMachine_Registration::stateToString"));
 
   // initialize return value(s)
   std::string result = ACE_TEXT_ALWAYS_CHAR ("INVALID");
 
   switch (state_in)
   {
-    case REGISTRATION_STATE_NICK:
-    {
-      result = ACE_TEXT_ALWAYS_CHAR ("NICK");
-      break;
-    }
-    case REGISTRATION_STATE_PASS:
-    {
-      result = ACE_TEXT_ALWAYS_CHAR ("PASS");
-      break;
-    }
-    case REGISTRATION_STATE_USER:
-    {
-      result = ACE_TEXT_ALWAYS_CHAR ("USER");
-      break;
-    }
-    case REGISTRATION_STATE_FINISHED:
-    {
-      result = ACE_TEXT_ALWAYS_CHAR ("FINISHED");
-      break;
-    }
+    case IRC_REGISTRATION_STATE_NICK:
+      result = ACE_TEXT_ALWAYS_CHAR ("NICK"); break;
+    case IRC_REGISTRATION_STATE_PASS:
+      result = ACE_TEXT_ALWAYS_CHAR ("PASS"); break;
+    case IRC_REGISTRATION_STATE_USER:
+      result = ACE_TEXT_ALWAYS_CHAR ("USER"); break;
+    case IRC_REGISTRATION_STATE_FINISHED:
+      result = ACE_TEXT_ALWAYS_CHAR ("FINISHED"); break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,

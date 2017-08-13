@@ -21,19 +21,15 @@
 #ifndef TEST_U_STREAM_COMMON_H
 #define TEST_U_STREAM_COMMON_H
 
-//#include <list>
-
 #include "stream_common.h"
 #include "stream_inotify.h"
-//#include "stream_isessionnotify.h"
 #include "stream_session_data.h"
 
+#include "net_common.h"
+
 // forward declarations
-typedef Stream_Statistic Net_RuntimeStatistic_t;
 struct Net_ConnectionState;
 struct Test_U_UserData;
-//class Test_U_Message;
-//class Test_U_SessionMessage;
 
 struct Test_U_StreamSessionData
  : Stream_SessionData
@@ -41,13 +37,12 @@ struct Test_U_StreamSessionData
   inline Test_U_StreamSessionData ()
    : Stream_SessionData ()
    , connectionState (NULL)
-   , currentStatistic ()
+   , statistic ()
    , userData (NULL)
   {};
 
   struct Net_ConnectionState* connectionState;
-
-  Net_RuntimeStatistic_t      currentStatistic;
+  Net_Statistic_t             statistic;
 
   struct Test_U_UserData*     userData;
 };
@@ -58,11 +53,11 @@ struct Test_U_StreamState
 {
   inline Test_U_StreamState ()
    : Stream_State ()
-   , currentSessionData (NULL)
+   , sessionData (NULL)
    , userData (NULL)
   {};
 
-  struct Test_U_StreamSessionData* currentSessionData;
+  struct Test_U_StreamSessionData* sessionData;
 
   struct Test_U_UserData*          userData;
 };

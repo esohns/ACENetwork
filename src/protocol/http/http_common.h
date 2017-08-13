@@ -28,6 +28,8 @@
 #include "stream_data_base.h"
 #include "stream_isessionnotify.h"
 
+#include "stream_stat_statistic_handler.h"
+
 #include "net_common.h"
 
 #include "http_codes.h"
@@ -45,7 +47,11 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                     struct HTTP_Record,
                                     HTTP_SessionMessage> HTTP_ISessionNotify_t;
 
-typedef Stream_Statistic HTTP_RuntimeStatistic_t;
+typedef struct Stream_Statistic HTTP_Statistic_t;
+typedef Common_IStatistic_T<HTTP_Statistic_t> HTTP_StatisticReportingHandler_t;
+
+typedef Stream_StatisticHandler_Reactor_T<HTTP_Statistic_t> HTTP_StatisticHandler_Reactor_t;
+typedef Stream_StatisticHandler_Proactor_T<HTTP_Statistic_t> HTTP_StatisticHandler_Proactor_t;
 
 typedef std::map<std::string, std::string> HTTP_Headers_t;
 typedef HTTP_Headers_t::const_iterator HTTP_HeadersConstIterator_t;

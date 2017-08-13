@@ -91,6 +91,9 @@ class Net_Common_Tools
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   static std::string associatedSSID (HANDLE,   // WLAN API client handle
                                      REFGUID); // interface identifier
+  static bool hasSSID (HANDLE,              // WLAN API client handle
+                       REFGUID,             // interface identifier
+                       const std::string&); // SSID
   static std::string interfaceToString (HANDLE,   // WLAN API client handle
                                         REFGUID); // interface identifier
   static bool getDeviceSettingBool (HANDLE,   // WLAN API client handle
@@ -119,6 +122,14 @@ class Net_Common_Tools
   // network layer
   static bool getAddress (std::string&,  // host name
                           std::string&); // dotted-decimal
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  // *NOTE*: 'gateway' really means the 'next hop' router with regard to some
+  //         policy (e.g. routing table entry metric/priority/...).
+  //         Consequently, this API is non-functional at this point
+  static ACE_INET_Addr getGateway (const std::string&); // interface identifier
+#endif
 
   // *NOTE*: this returns the external (i.e. routable) IP address (for clients
   //         behind a (NATted-) gateway)

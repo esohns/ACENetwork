@@ -84,7 +84,7 @@ IRC_Message::command () const
   switch (data_.command_.discriminator)
   {
     case IRC_Record::Command::STRING:
-      return IRC_Tools::Command2Type (*data_.command_.string);
+      return IRC_Tools::CommandToType (*data_.command_.string);
     case IRC_Record::Command::NUMERIC:
       return static_cast<IRC_CommandType_t> (data_.command_.numeric);
     default:
@@ -211,15 +211,15 @@ allocate:
     } // end IF
   } // end IF
 
-  // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)...
+  // *NOTE*: if "this" is initialized, so is the "clone" (and vice-versa)
 
   return message_p;
 }
 
 std::string
-IRC_Message::CommandType2String(const IRC_CommandType_t& commandType_in)
+IRC_Message::CommandTypeToString(const IRC_CommandType_t& commandType_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Message::CommandType2String"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Message::CommandTypeToString"));
 
   std::string result = ACE_TEXT ("INVALID/UNKNOWN");
 
@@ -314,7 +314,7 @@ IRC_Message::CommandType2String(const IRC_CommandType_t& commandType_in)
     {
       // try numeric conversion
       result =
-        IRC_Tools::Command2String (static_cast<IRC_NumericCommand_t> (commandType_in));
+        IRC_Tools::CommandToString (static_cast<IRC_NumericCommand_t> (commandType_in));
       break;
     }
   } // end SWITCH

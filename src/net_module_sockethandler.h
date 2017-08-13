@@ -48,6 +48,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           ////////////////////////////////
           typename ProtocolHeaderType,
           ////////////////////////////////
@@ -65,6 +66,7 @@ class Net_Module_TCPSocketHandler_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
+                                      StatisticHandlerType,
                                       UserDataType>
 {
  public:
@@ -91,16 +93,17 @@ class Net_Module_TCPSocketHandler_T
                                     SessionDataType,
                                     SessionDataContainerType,
                                     StatisticContainerType,
+                                    StatisticHandlerType,
                                     UserDataType>::initialize;
   using Stream_StateMachine_Control_T<ACE_SYNCH_USE>::initialize;
 #endif
 
   // override (part of) Stream_IModuleHandler_T
-  virtual bool initialize (const ConfigurationType&);
+  virtual bool initialize (const ConfigurationType&,
+                           Stream_IAllocator* = NULL);
 
   // info
   bool isInitialized () const;
-//  unsigned int getSessionID () const;
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
@@ -126,16 +129,15 @@ class Net_Module_TCPSocketHandler_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
+                                      StatisticHandlerType,
                                       UserDataType> inherited;
 
-//  ACE_UNIMPLEMENTED_FUNC (Net_Module_TCPSocketHandler_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Module_TCPSocketHandler_T (const Net_Module_TCPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Module_TCPSocketHandler_T& operator= (const Net_Module_TCPSocketHandler_T&))
 
   // helper methods
   bool bisectMessages (DataMessageType*&); // return value: complete message (chain)
-//   Net_Message* allocateMessage(const unsigned int&); // requested size
-  bool putStatisticMessage (const StatisticContainerType&) const; // statistics info
+  //bool putStatisticMessage (const StatisticContainerType&) const; // statistics info
 
   // protocol
   DataMessageType* currentBuffer_;
@@ -161,6 +163,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
           typename StatisticContainerType,
+          typename StatisticHandlerType,
           ////////////////////////////////
           typename UserDataType>
 class Net_Module_UDPSocketHandler_T
@@ -176,20 +179,21 @@ class Net_Module_UDPSocketHandler_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
+                                      StatisticHandlerType,
                                       UserDataType>
 {
  public:
   Net_Module_UDPSocketHandler_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
                                  bool = false,              // auto-start ?
                                  bool = true);              // generate session messages ?
-  virtual ~Net_Module_UDPSocketHandler_T ();
+  inline virtual ~Net_Module_UDPSocketHandler_T () {};
 
   // override (part of) Stream_IModuleHandler_T
-  virtual bool initialize (const ConfigurationType&);
+  virtual bool initialize (const ConfigurationType&,
+                           Stream_IAllocator* = NULL);
 
   // info
   bool isInitialized () const;
-//  unsigned int getSessionID () const;
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle
@@ -215,14 +219,11 @@ class Net_Module_UDPSocketHandler_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
+                                      StatisticHandlerType,
                                       UserDataType> inherited;
 
-//  ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T (const Net_Module_UDPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T& operator= (const Net_Module_UDPSocketHandler_T&))
-
-  //// helper methods
-  //bool putStatisticMessage (const StatisticContainerType&) const; // statistic info
 };
 
 // include template definition

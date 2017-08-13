@@ -31,6 +31,10 @@
 #include "ace/config-macros.h"
 #include "ace/OS.h"
 
+#include "stream_common.h"
+
+#include "stream_stat_statistic_handler.h"
+
 #include "bittorrent_defines.h"
 
 //struct string_p_hash
@@ -180,5 +184,12 @@ enum BitTorrent_Event
   BITTORRENT_EVENT_MAX,
   BITTORRENT_EVENT_INVALID,
 };
+
+//////////////////////////////////////////
+
+typedef struct Stream_Statistic BitTorrent_Statistic_t;
+
+typedef Stream_StatisticHandler_Reactor_T<BitTorrent_Statistic_t> BitTorrent_StatisticHandler_Reactor_t;
+typedef Stream_StatisticHandler_Proactor_T<BitTorrent_Statistic_t> BitTorrent_StatisticHandler_Proactor_t;
 
 #endif

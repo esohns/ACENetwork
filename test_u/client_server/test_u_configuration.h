@@ -53,7 +53,7 @@ class Test_U_SessionMessage;
 typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
-                                 Net_RuntimeStatistic_t,
+                                 Net_Statistic_t,
                                  struct Test_U_UserData> Test_U_IInetConnectionManager_t;
 
 struct Test_U_ProtocolConfiguration
@@ -92,26 +92,19 @@ struct Test_U_ModuleHandlerConfiguration
 {
   inline Test_U_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
-   , inbound (false)
    //, printProgressDot (false)
    , protocolConfiguration (NULL)
-   , pushStatisticMessages (true)
    , streamConfiguration (NULL)
    , sessionData (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
   {};
 
-  bool                                 inbound; // statistic/IO module
   //bool                             printProgressDot; // file writer module
   struct Test_U_ProtocolConfiguration* protocolConfiguration; // protocol handler
-  bool                                 pushStatisticMessages; // statistic module
-
   Test_U_StreamConfiguration_t*        streamConfiguration;
-
   // *TODO*: remove this (--> session message data)
   struct Test_U_StreamSessionData*     sessionData;
-
   Test_U_ISessionNotify_t*             subscriber;
   Test_U_Subscribers_t*                subscribers;
 };

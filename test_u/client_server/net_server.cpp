@@ -465,9 +465,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   Test_U_EventHandler ui_event_handler (&CBData_in);
   Test_U_Module_EventHandler_Module event_handler (NULL,
-                                                   ACE_TEXT_ALWAYS_CHAR ("EventHandler"),
-                                                   NULL,
-                                                   true);
+                                                   ACE_TEXT_ALWAYS_CHAR ("EventHandler"));
   Test_U_Module_EventHandler* event_handler_p =
     dynamic_cast<Test_U_Module_EventHandler*> (event_handler.writer ());
   if (!event_handler_p)
@@ -567,9 +565,12 @@ do_work (unsigned int maximumNumberOfConnections_in,
   Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
-  Stream_StatisticHandler_Reactor_t statistic_handler (ACTION_REPORT,
-                                                       TEST_U_CONNECTIONMANAGER_SINGLETON::instance (),
-                                                       false);
+  Net_StatisticHandlerReactor_t statistic_handler (ACTION_REPORT,
+                                                   TEST_U_CONNECTIONMANAGER_SINGLETON::instance (),
+                                                   false);
+  Net_StatisticHandlerProactor_t statistic_handler_proactor (ACTION_REPORT,
+                                                             TEST_U_CONNECTIONMANAGER_SINGLETON::instance (),
+                                                             false);
   long timer_id = -1;
   if (statisticReportingInterval_in)
   {

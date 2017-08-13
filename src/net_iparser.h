@@ -47,8 +47,6 @@ class Net_IScanner_T
  , public Common_ISetP_T<ParserInterfaceType>
 {
  public:
-  inline virtual ~Net_IScanner_T () {};
-
   // *NOTE*: this is the C-ish interface (not needed by C++ scanners)
   virtual void debug (yyscan_t,  // state handle
                       bool) = 0; // toggle
@@ -104,8 +102,6 @@ class Net_IRecordParser_T
   // convenient types
   typedef Net_IParser_T<ConfigurationType> IPARSER_T;
 
-  inline virtual ~Net_IRecordParser_T () {};
-
   virtual RecordType& current () = 0;
 
   virtual bool hasFinished () const = 0;
@@ -124,8 +120,6 @@ class Net_IStreamParser_T
  : public Net_IParser_T<ConfigurationType>
 {
  public:
-  inline virtual ~Net_IStreamParser_T () {};
-
   virtual RecordType& current () = 0;
 
   ////////////////////////////////////////

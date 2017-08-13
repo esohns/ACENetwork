@@ -44,10 +44,7 @@
 
 #include "test_u_common.h"
 
-//#include "test_u_connection_common.h"
 #include "test_u_HTTP_decoder_stream_common.h"
-
-//#include "test_u_connection_common.h"
 
 struct Test_U_StreamConfiguration;
 struct Test_U_HTTPDecoder_UserData
@@ -66,7 +63,7 @@ struct Test_U_AllocatorConfiguration
   {
     // *NOTE*: this facilitates (message block) data buffers to be scanned with
     //         'flex's yy_scan_buffer() method
-    paddingBytes = NET_PROTOCOL_FLEX_BUFFER_BOUNDARY_SIZE;
+    paddingBytes = NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
   };
 };
 
