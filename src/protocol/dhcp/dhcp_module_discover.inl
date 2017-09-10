@@ -587,7 +587,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
         //         when a connection handles several consecutive sessions,
         //         and/or each session needs a reference to its' own specific
         //         and/or 'unique' ID...)
-        if (inherited::configuration_->streamConfiguration->configuration_.sessionID)
+        if (inherited::configuration_->streamConfiguration->configuration_.sessionId)
         {
           // *NOTE*: this may have to wait for the connection to finish
           //         initializing
@@ -597,7 +597,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
           {
             if (!session_data_r.broadcastConnection)
               session_data_r.broadcastConnection =
-                connection_manager_p->get (static_cast<Net_ConnectionId_t> (inherited::configuration_->streamConfiguration->configuration_.sessionID));
+                connection_manager_p->get (static_cast<Net_ConnectionId_t> (inherited::configuration_->streamConfiguration->configuration_.sessionId));
             if (!session_data_r.broadcastConnection)
               continue;
 
@@ -610,7 +610,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("%s: failed to retrieve connection handle (handle was: %u), aborting\n"),
                         ACE_TEXT (inherited::mod_->name ()),
-                        inherited::configuration_->streamConfiguration->configuration_.sessionID));
+                        inherited::configuration_->streamConfiguration->configuration_.sessionId));
             goto error;
           } // end IF
 

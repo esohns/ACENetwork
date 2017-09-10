@@ -97,7 +97,7 @@ class Test_U_Module_ProtocolHandler
   bool                automaticPong_;
   unsigned int        counter_;
   bool                printPongDot_;
-  unsigned int        sessionID_;
+  Stream_SessionId_t  sessionId_;
 };
 
 // declare module

@@ -795,11 +795,13 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
       // retain session ID for reporting
       ACE_ASSERT (inherited::streamState_);
       ACE_ASSERT (inherited::streamState_->sessionData);
-      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *(inherited::streamState_->sessionData->lock));
-      inherited::streamState_->sessionData->sessionID =
-          session_data_r.sessionID;
+      ACE_ASSERT (inherited::streamState_->sessionData->lock);
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *(inherited::streamState_->sessionData->lock));
+        inherited::streamState_->sessionData->sessionId =
+          session_data_r.sessionId;
+      } // end lock scope
 
-      // start profile timer...
+      //// start profile timer
       //profile_.start ();
 
       break;
@@ -817,10 +819,9 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
     case STREAM_SESSION_MESSAGE_END:
     {
       // *NOTE*: only process the first 'session end' message (see above: 2566)
-      {
-        ACE_Guard<ACE_SYNCH_MUTEX> aGuard (inherited::lock_);
-
-        if (inherited::sessionEndProcessed_) break; // done
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
+        if (inherited::sessionEndProcessed_)
+          break; // done
         inherited::sessionEndProcessed_ = true;
       } // end lock scope
 

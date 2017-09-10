@@ -163,7 +163,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   bool handle_socket = false;
   const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
       NULL;
-  const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
+  typename StreamType::SESSION_DATA_T* session_data_p = NULL;
 
   // step0: initialize this
   // *IMPORTANT NOTE*: enable the reference counting policy, as this will
@@ -192,62 +192,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   serializeOutput_ =
     inherited2::configuration_->streamConfiguration->configuration_.serializeOutput;
 
-  // step1: register with the connection manager (if any)
-  // *IMPORTANT NOTE*: register with the connection manager FIRST, otherwise
-  //                   a race condition might occur when using multi-threaded
-  //                   proactors/reactors
-  if (!inherited2::registerc ())
-  {
-    // *NOTE*: perhaps max# connections has been reached
-    //ACE_DEBUG ((LM_ERROR,
-    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
-    goto error;
-  } // end IF
-  handle_manager = true;
-
-  // step2: initialize/start stream
-
-  // step2a: connect stream head message queue with the reactor notification
-  //         pipe ?
-  // *TODO*: remove type inferences
-  if (!inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection)
-    inherited2::configuration_->streamConfiguration->configuration_.notificationStrategy =
-      &(inherited::notificationStrategy_);
-
-  // step2c: initialize stream
-  // *TODO*: remove type inferences
-  inherited2::configuration_->streamConfiguration->configuration_.sessionID =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    reinterpret_cast<size_t> (inherited::get_handle ()); // (== socket handle)
-#else
-    static_cast<size_t> (inherited::get_handle ()); // (== socket handle)
-#endif
-  if (!stream_.initialize (*(inherited2::configuration_->streamConfiguration)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize processing stream, aborting\n")));
-    goto error;
-  } // end IF
-  session_data_container_p = &stream_.get ();
-  ACE_ASSERT (session_data_container_p);
-  session_data_p = &session_data_container_p->get ();
-  // *TODO*: remove type inferences
-  const_cast<typename StreamType::SESSION_DATA_T*> (session_data_p)->connectionState =
-      &const_cast<StateType&> (inherited2::state ());
-  //stream_.dump_state ();
-
-  // step2d: start stream
-  stream_.start ();
-  if (!stream_.isRunning ())
-  {
-    // *NOTE*: most likely, this happened because the stream failed to
-    //         initialize
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to start processing stream, aborting\n")));
-    goto error;
-  } // end IF
-
-  // step3: tweak socket, register I/O handle with the reactor, ...
+  // step1: tweak socket, register I/O handle with the reactor, ...
   // *NOTE*: as soon as this returns, data starts arriving at handle_input()
   result =
     inherited::open (&inherited2::configuration_->socketHandlerConfiguration);
@@ -268,6 +213,59 @@ Net_StreamTCPSocketBase_T<HandlerType,
   } // end IF
   handle_socket = true;
 
+  // step2: register with the connection manager (if any)
+  // *IMPORTANT NOTE*: register with the connection manager FIRST, otherwise
+  //                   a race condition might occur when using multi-threaded
+  //                   proactors/reactors
+  if (!inherited2::registerc ())
+  {
+    // *NOTE*: perhaps max# connections has been reached
+    //ACE_DEBUG ((LM_ERROR,
+    //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
+    goto error;
+  } // end IF
+  handle_manager = true;
+
+  // step3: initialize/start stream
+
+  // step3a: connect stream head message queue with the reactor notification
+  //         pipe ?
+  // *TODO*: remove type inferences
+  if (!inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection)
+    inherited2::configuration_->streamConfiguration->configuration_.notificationStrategy =
+      &(inherited::notificationStrategy_);
+
+  // step3c: initialize stream
+  inherited2::state_.handle = inherited::get_handle ();
+  if (!stream_.initialize (*(inherited2::configuration_->streamConfiguration)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize processing stream, aborting\n")));
+    goto error;
+  } // end IF
+  // update session data
+  // *TODO*: remove type inferences
+  session_data_container_p = &stream_.get ();
+  ACE_ASSERT (session_data_container_p);
+  session_data_p =
+    &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->get ());
+  ACE_ASSERT (session_data_p->lock);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, *session_data_p->lock, -1);
+    session_data_p->connectionState = &(inherited2::state_);
+  } // end lock scope
+  //stream_.dump_state ();
+
+  // step2d: start stream
+  stream_.start ();
+  if (!stream_.isRunning ())
+  {
+    // *NOTE*: most likely, this happened because the stream failed to
+    //         initialize
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to start processing stream, aborting\n")));
+    goto error;
+  } // end IF
+
   inherited2::state_.status = NET_CONNECTION_STATUS_OK;
 
   return 0;
@@ -282,7 +280,8 @@ error:
   if (handle_manager)
     inherited2::deregister ();
 
-  // *TODO*: remove type inference
+  // *TODO*: remove type inferences
+  inherited2::state_.handle = ACE_INVALID_HANDLE;
   inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
 
   return -1;

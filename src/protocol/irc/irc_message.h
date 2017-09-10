@@ -66,9 +66,10 @@ class IRC_Export IRC_Message
  public:
   IRC_Message (unsigned int); // size
   // *NOTE*: to be used by allocators
-  IRC_Message (ACE_Data_Block*, // data block to use
-               ACE_Allocator*,  // message allocator
-               bool = true);    // increment running message counter ?
+  IRC_Message (Stream_SessionId_t, // session id
+               ACE_Data_Block*,    // data block to use
+               ACE_Allocator*,     // message allocator
+               bool = true);       // increment running message counter ?
   //IRC_Message(ACE_Allocator*); // message allocator
   virtual ~IRC_Message();
 

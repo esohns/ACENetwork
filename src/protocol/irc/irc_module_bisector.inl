@@ -498,16 +498,14 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
           session_data_container_r.get ();
       // sanity check(s)
       ACE_ASSERT (inherited::streamState_);
-      ACE_ASSERT (inherited::streamState_->currentSessionData);
-      ACE_ASSERT (inherited::streamState_->currentSessionData->lock);
-
-      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *(inherited::streamState_->currentSessionData->lock));
-
-        inherited::streamState_->currentSessionData->sessionID =
-          session_data_r.sessionID;
+      ACE_ASSERT (inherited::streamState_->sessionData);
+      ACE_ASSERT (inherited::streamState_->sessionData->lock);
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *(inherited::streamState_->sessionData->lock));
+        inherited::streamState_->currentSessionData->sessionId =
+          session_data_r.sessionId;
       } // end lock scope
 
-      // start profile timer...
+      //// start profile timer
       //profile_.start ();
 
       break;

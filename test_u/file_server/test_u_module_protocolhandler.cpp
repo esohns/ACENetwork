@@ -39,7 +39,7 @@
 Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler (ISTREAM_T* stream_in)
  : inherited (stream_in)
  , counter_ (1)
- , sessionID_ (0)
+ , sessionId_ (0)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler"));
 
@@ -60,7 +60,7 @@ Test_U_Module_ProtocolHandler::initialize (const struct Stream_ModuleHandlerConf
   if (inherited::isInitialized_)
   {
     counter_ = 1;
-    sessionID_ = 0;
+    sessionId_ = 0;
   } // end IF
 
   return inherited::initialize (configuration_in,
@@ -100,7 +100,7 @@ Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& mes
           message_inout->get ();
       const struct FileServer_SessionData& session_data_r =
           session_data_container_r.get ();
-      sessionID_ = session_data_r.sessionID;
+      sessionId_ = session_data_r.sessionId;
 
       break;
     }

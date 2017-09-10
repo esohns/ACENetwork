@@ -657,8 +657,8 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("\"%s\": failed to ::WlanGetAvailableNetworkList(0x%@): \"%s\", aborting\n"),
-                  clientHandle_,
                   ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, *iterator).c_str ()),
+                  clientHandle_,
                   ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
       goto error;
     } // end IF

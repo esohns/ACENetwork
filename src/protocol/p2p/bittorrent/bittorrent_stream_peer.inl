@@ -192,14 +192,12 @@ BitTorrent_PeerStream_T<StreamStateType,
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
+
+  // sanity check(s)
   ACE_ASSERT (inherited::sessionData_);
+
   session_data_p =
     &const_cast<SessionDataType&> (inherited::sessionData_->get ());
-
-  session_data_p->sessionID = configuration_in.configuration_.sessionID;
-
-  // ---------------------------------------------------------------------------
-  //  configuration_in.moduleConfiguration.streamState = &state_;
 
   // ---------------------------------------------------------------------------
 

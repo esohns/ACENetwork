@@ -167,6 +167,8 @@ IRC_Stream_T<StreamStateType,
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
+
+  // sanity check(s)
   ACE_ASSERT (inherited::sessionData_);
 
   // things to be done here:
@@ -175,11 +177,6 @@ IRC_Stream_T<StreamStateType,
   // - push them onto the stream (tail-first) !
   session_data_p =
       &const_cast<SessionDataType&> (inherited::sessionData_->get ());
-  inherited::state_.currentSessionData = session_data_p;
-  session_data_p->sessionID = configuration_in.configuration_.sessionID;
-
-//  ACE_ASSERT (configuration_in.moduleConfiguration);
-//  configuration_in.moduleConfiguration->streamState = &inherited::state_;
 
   // ---------------------------------------------------------------------------
 

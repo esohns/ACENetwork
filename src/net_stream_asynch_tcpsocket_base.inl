@@ -97,6 +97,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   ACE_ASSERT (inherited3::configuration_->streamConfiguration);
 
   // *TODO*: remove type inferences
+  inherited3::state_.handle = handle_in;
   if (unlikely (!inherited::initialize (inherited3::configuration_->socketHandlerConfiguration)))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -126,25 +127,22 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
   inherited3::configuration_->streamConfiguration->configuration_.notificationStrategy =
     this;
 
-  // *TODO*: remove type inferences
-  inherited3::configuration_->streamConfiguration->configuration_.sessionID =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    reinterpret_cast<size_t> (handle_in); // (== socket handle)
-#else
-    static_cast<size_t> (handle_in); // (== socket handle)
-#endif
   if (unlikely (!stream_.initialize (*(inherited3::configuration_->streamConfiguration))))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize processing stream, aborting\n")));
     goto error;
   } // end IF
+  // update session data
+  // *TODO*: remove type inferences
   session_data_container_p = &stream_.get ();
   ACE_ASSERT (session_data_container_p);
   session_data_p =
     &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->get ());
-  session_data_p->connectionState =
-    &const_cast<StateType&> (inherited3::state ());
+  ACE_ASSERT (session_data_p->lock);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_p->lock);
+    session_data_p->connectionState = &(inherited3::state_);
+  } // end lock scope
   //stream_.dump_state ();
 
   // step2d: start stream
@@ -230,12 +228,14 @@ error:
 
   if (handle_socket)
   {
-    result = inherited::handle_close (inherited::handle (),
+    result = inherited::handle_close (inherited3::state_.handle,
                                       ACE_Event_Handler::ALL_EVENTS_MASK);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
   } // end IF
+  inherited3::state_.handle = ACE_INVALID_HANDLE;
+  inherited3::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
 
   if (handle_manager)
     inherited3::deregister ();

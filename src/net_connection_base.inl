@@ -72,7 +72,7 @@ Net_ConnectionBase_T<AddressType,
                   ACE_TEXT ("failed to Common_Timer_Manager::schedule_timer(), continuing\n")));
 //    else
 //      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("scheduled statistics collecting timer (ID: %d, interval: %#T)\n"),
+//                  ACE_TEXT ("scheduled statistic collecting timer (ID: %d, interval: %#T)\n"),
 //                  statisticCollectHandlerID_,
 //                  &statisticCollectionInterval_in));
   } // end IF
@@ -81,8 +81,7 @@ Net_ConnectionBase_T<AddressType,
   if (manager_)
   {
     try {
-      // (try to) get (default) configuration/user data from the connection
-      // manager
+      // get (default) configuration/user data from the connection manager
       // *TODO*: remove type inference
       manager_->get (configuration_,
                      state_.userData);
@@ -114,6 +113,8 @@ Net_ConnectionBase_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::~Net_ConnectionBase_T"));
 
   int result = -1;
+
+  state_.handle = ACE_INVALID_HANDLE;
 
   // clean up timer, if necessary
   if (statisticCollectHandlerID_ != -1)
@@ -159,7 +160,6 @@ Net_ConnectionBase_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::registerc"));
 
   ICONNECTION_T* iconnection_p = NULL;
-  ACE_HANDLE handle = ACE_INVALID_HANDLE;
   AddressType local_address, remote_address;
 
   // sanity check(s)
@@ -193,11 +193,11 @@ Net_ConnectionBase_T<AddressType,
 //#if defined (__GNUG__)
     // *WORKAROUND*: see header
     ACE_ASSERT (iconnection_p);
-    iconnection_p->info (handle,
+    iconnection_p->info (state_.handle,
                          local_address,
                          remote_address);
 //#else
-    //      this->info (handle,
+    //      this->info (state_.handle,
     //                  local_address,
     //                  remote_address);
 //#endif
@@ -210,14 +210,14 @@ Net_ConnectionBase_T<AddressType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("registered connection [0x%@/0x%@]: %s <--> %s (total: %d)\n"),
-              this, handle,
+              this, state_.handle,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address).c_str ()),
               manager_->count ()));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("registered connection [%@/%d]: %s <--> %s (total: %d)\n"),
-              this, handle,
+              this, state_.handle,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address).c_str ()),
               manager_->count ()));
@@ -243,43 +243,45 @@ Net_ConnectionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::deregister"));
 
-  if (manager_ && isRegistered_)
-  {
-    ACE_HANDLE handle = ACE_INVALID_HANDLE;
-    AddressType local_address, remote_address;
-    try {
-      this->info (handle,
-                  local_address,
-                  remote_address);
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection_T::info(), continuing\n")));
-    }
+  // sanity check(s)
+  if (!manager_ ||
+      !isRegistered_)
+    return;
 
-    OWN_TYPE_T* this_p = this;
-    unsigned int number_of_connections = manager_->count () - 1;
+  ACE_HANDLE handle = ACE_INVALID_HANDLE;
+  AddressType local_address, remote_address;
+  try {
+    this->info (handle,
+                local_address,
+                remote_address);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IConnection_T::info(), continuing\n")));
+  }
 
-    // (try to) de-register with the connection manager
-    isRegistered_ = false;
-    // *IMPORTANT NOTE*: may delete 'this'
-    try {
-      manager_->deregister (this);
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnectionManager_T::deregister(), continuing\n")));
-    }
+  OWN_TYPE_T* this_p = this;
+  unsigned int number_of_connections = manager_->count () - 1;
 
-    // *PORTABILITY*
+  // (try to) de-register with the connection manager
+  isRegistered_ = false;
+  // *IMPORTANT NOTE*: may delete 'this'
+  try {
+    manager_->deregister (this);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_IConnectionManager_T::deregister(), continuing\n")));
+  }
+
+  // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("deregistered connection [0x%@/0x%@] (total: %u)\n"),
-                this_p, handle,
-                number_of_connections));
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("deregistered connection [0x%@/0x%@] (total: %u)\n"),
+              this_p, handle,
+              number_of_connections));
 #else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("deregistered connection [%@/%d] (total: %d)\n"),
-                this_p, handle,
-                number_of_connections));
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("deregistered connection [%@/%d] (total: %d)\n"),
+              this_p, handle,
+              number_of_connections));
 #endif
-  } // end IF
 }

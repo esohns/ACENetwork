@@ -29,10 +29,10 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 void WINAPI
-network_wlan_default_notification_cb (PWLAN_NOTIFICATION_DATA data_in,
+network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
                                       PVOID context_in)
 {
-//  NETWORK_TRACE (ACE_TEXT ("network_wlan_default_notification_cb"));
+  NETWORK_TRACE (ACE_TEXT ("network_wlan_default_notification_cb"));
 
   // sanity check(s)
   ACE_ASSERT (data_in);
@@ -242,7 +242,7 @@ network_wlan_default_notification_cb (PWLAN_NOTIFICATION_DATA data_in,
         default:
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("invalid/unknown notification code (was: %d), returning\n"),
+                      ACE_TEXT ("invalid/unknown ACM notification code (was: %d), returning\n"),
                       data_in->NotificationCode));
           return;
         }
@@ -251,6 +251,79 @@ network_wlan_default_notification_cb (PWLAN_NOTIFICATION_DATA data_in,
       break;
     }
     case WLAN_NOTIFICATION_SOURCE_MSM:
+    { ACE_ASSERT (data_in->pData);
+      struct _WLAN_MSM_NOTIFICATION_DATA* wlan_msm_notification_data_p =
+        static_cast<struct _WLAN_MSM_NOTIFICATION_DATA*> (data_in->pData);
+
+      switch (data_in->NotificationCode)
+      {
+        case wlan_notification_msm_associating:
+          notification_string =
+            ACE_TEXT_ALWAYS_CHAR ("wlan_notification_msm_associating");
+          break;
+        case wlan_notification_msm_associated:
+          notification_string =
+            ACE_TEXT_ALWAYS_CHAR ("wlan_notification_msm_associated");
+          break;
+        case wlan_notification_msm_authenticating:
+          notification_string =
+            ACE_TEXT_ALWAYS_CHAR ("wlan_notification_msm_authenticating");
+          break;
+        case wlan_notification_msm_connected:
+          notification_string =
+            ACE_TEXT_ALWAYS_CHAR ("wlan_notification_msm_connected");
+          break;
+        case wlan_notification_msm_roaming_start:
+          notification_string =
+            ACE_TEXT_ALWAYS_CHAR ("wlan_notification_msm_roaming_start");
+          break;
+        case wlan_notification_msm_roaming_end:
+          notification_string =
+            ACE_TEXT_ALWAYS_CHAR ("wlan_notification_msm_roaming_end");
+          break;
+        case wlan_notification_msm_radio_state_change:
+          notification_string =
+            ACE_TEXT_ALWAYS_CHAR ("wlan_notification_msm_radio_state_change");
+          break;
+        case wlan_notification_msm_signal_quality_change:
+          notification_string =
+            ACE_TEXT_ALWAYS_CHAR ("wlan_notification_msm_signal_quality_change");
+          break;
+        case wlan_notification_msm_disassociating:
+          notification_string =
+            ACE_TEXT_ALWAYS_CHAR ("wlan_notification_msm_disassociating");
+          break;
+        case wlan_notification_msm_disconnected:
+          notification_string =
+            ACE_TEXT_ALWAYS_CHAR ("wlan_notification_msm_disconnected");
+          break;
+        case wlan_notification_msm_peer_join:
+          notification_string =
+            ACE_TEXT_ALWAYS_CHAR ("wlan_notification_msm_peer_join");
+          break;
+        case wlan_notification_msm_peer_leave:
+          notification_string =
+            ACE_TEXT_ALWAYS_CHAR ("wlan_notification_msm_peer_leave");
+          break;
+        case wlan_notification_msm_adapter_removal:
+          notification_string =
+            ACE_TEXT_ALWAYS_CHAR ("wlan_notification_msm_adapter_removal");
+          break;
+        case wlan_notification_msm_adapter_operation_mode_change:
+          notification_string =
+            ACE_TEXT_ALWAYS_CHAR ("wlan_notification_msm_adapter_operation_mode_change");
+          break;
+        default:
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("invalid/unknown MSM notification code (was: %d), returning\n"),
+                      data_in->NotificationCode));
+          return;
+        }
+      } // end SWITCH
+
+      break;
+    }
     case WLAN_NOTIFICATION_SOURCE_SECURITY:
     case WLAN_NOTIFICATION_SOURCE_IHV:
     case WLAN_NOTIFICATION_SOURCE_HNWK:

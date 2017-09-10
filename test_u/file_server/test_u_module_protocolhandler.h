@@ -82,8 +82,8 @@ class Test_U_Module_ProtocolHandler
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler (const Test_U_Module_ProtocolHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler& operator= (const Test_U_Module_ProtocolHandler&))
 
-  unsigned int counter_;
-  unsigned int sessionID_;
+  unsigned int       counter_;
+  Stream_SessionId_t sessionId_;
 };
 
 // declare module

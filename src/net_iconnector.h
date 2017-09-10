@@ -33,13 +33,10 @@ template <typename AddressType>
 class Net_IConnectorBase_T
 {
  public:
-  virtual ~Net_IConnectorBase_T () {};
-
   virtual enum Net_TransportLayerType transportLayer () const = 0;
-  virtual bool useReactor () const = 0; // ? : uses proactor
+  virtual bool useReactor () const = 0; // ? : uses proactor (i.e. operation is asynchronous)
 
-  virtual void abort () = 0; // shutdown
-  virtual ACE_HANDLE connect (const AddressType&) = 0;
+  virtual ACE_HANDLE connect (const AddressType&) = 0; // return value: (asynchronous ? connect- : socket-) handle
 };
 
 //////////////////////////////////////////
@@ -52,21 +49,24 @@ class Net_IConnector_T
  , public Common_IInitialize_T<ConfigurationType>
 {
  public:
-  virtual ~Net_IConnector_T () {};
+  inline virtual ~Net_IConnector_T () {};
 };
 
-//template <typename AddressType,
-//          typename ConfigurationType>
-//class Net_IAsynchConnector_T
-//{
-// public:
-//  virtual ~Net_IAsynchConnector_T () {};
-//
-//  virtual const ConfigurationType* getConfiguration () const = 0;
-//
-//  virtual void abort () = 0; // shutdown
-//  virtual connect (const AddressType&) = 0;
-//};
+template <typename AddressType,
+          typename ConfigurationType>
+class Net_IAsynchConnector_T
+ : public Net_IConnector_T<AddressType,
+                           ConfigurationType>
+{
+ public:
+  virtual void abort () = 0; // --> cancel
+  virtual int wait (ACE_HANDLE,                                        // connect handle
+                    const ACE_Time_Value& = ACE_Time_Value::zero) = 0; // block : (relative-) timeout
+
+  ////////////////////////////////////////
+  virtual void onConnect (ACE_HANDLE, // connect handle
+                          int) = 0;   // success ? 0 : errno
+};
 
 //////////////////////////////////////////
 

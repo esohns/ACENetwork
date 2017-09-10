@@ -177,8 +177,8 @@ add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${ACENetwork_Protocol_EXE_SRCS})
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
-if (NOT BUILD_TEST_U AND WIN32)
- set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD 1)
+if (WIN32 AND NOT ${BUILD_TEST_U})
+ set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
 endif ()
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)

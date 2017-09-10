@@ -85,6 +85,10 @@ Net_Client_Connector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
 
+  int result = inherited::close ();
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Connector::close(): \"%m\", continuing\n")));
 }
 
 template <typename HandlerType,
@@ -131,36 +135,6 @@ Net_Client_Connector_T<HandlerType,
   delete handler_p;
 
   return result;
-}
-
-template <typename HandlerType,
-          typename ConnectorType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-void
-Net_Client_Connector_T<HandlerType,
-                       ConnectorType,
-                       AddressType,
-                       ConfigurationType,
-                       StateType,
-                       StatisticContainerType,
-                       SocketConfigurationType,
-                       HandlerConfigurationType,
-                       StreamType,
-                       UserDataType>::abort ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::abort"));
-
-  int result = inherited::close ();
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Connector::close(): \"%m\", continuing\n")));
 }
 
 template <typename HandlerType,
@@ -345,35 +319,6 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 
   if (!connectionManager_)
     connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
-}
-
-template <typename HandlerType,
-          typename ConnectorType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
-                                               ConfigurationType,
-                                               StateType,
-                                               StatisticContainerType,
-                                               HandlerConfigurationType,
-                                               StreamType,
-                                               UserDataType>,
-                       ConnectorType,
-                       ACE_INET_Addr,
-                       ConfigurationType,
-                       StateType,
-                       StatisticContainerType,
-                       struct Net_UDPSocketConfiguration,
-                       HandlerConfigurationType,
-                       StreamType,
-                       UserDataType>::~Net_Client_Connector_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
-
 }
 
 template <typename HandlerType,
@@ -648,29 +593,6 @@ Net_Client_Connector_T<HandlerType,
 
   if (!connectionManager_)
     connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
-}
-
-template <typename HandlerType,
-          typename ConnectorType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-Net_Client_Connector_T<HandlerType,
-                       ConnectorType,
-                       Net_Netlink_Addr,
-                       ConfigurationType,
-                       StateType,
-                       StatisticContainerType,
-                       struct Net_NetlinkSocketConfiguration,
-                       HandlerConfigurationType,
-                       StreamType,
-                       UserDataType>::~Net_Client_Connector_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
-
 }
 
 template <typename HandlerType,

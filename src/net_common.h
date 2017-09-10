@@ -174,13 +174,15 @@ typedef unsigned int Net_ConnectionId_t;
 struct Net_ConnectionState
 {
   inline Net_ConnectionState ()
-   : lastCollectionTimestamp (ACE_Time_Value::zero)
+   : handle (ACE_INVALID_HANDLE)
+   , lastCollectionTimestamp (ACE_Time_Value::zero)
    , lock ()
    , statistic ()
    , status (NET_CONNECTION_STATUS_INVALID)
    , userData (NULL)
   {};
 
+  ACE_HANDLE                 handle;
   ACE_Time_Value             lastCollectionTimestamp;
   ACE_SYNCH_MUTEX            lock;
   Net_Statistic_t            statistic;

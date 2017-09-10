@@ -139,7 +139,7 @@ class IRC_Client_Module_IRCHandler
   virtual void onChange (enum IRC_RegistrationStateType); // new state
 
   // helper methods
-  IRC_Record* allocateMessage (IRC_Record::CommandType); // command
+  IRC_Record* allocateMessage (IRC_CommandType_t); // command
 
   // *NOTE*: "fire-and-forget" - the argument is consumed
   void sendMessage (IRC_Record*&); // command handle

@@ -383,6 +383,284 @@ Net_Common_Tools::matchIPAddress (std::string& address_in)
   return true;
 }
 
+bool
+Net_Common_Tools::isLocal (const ACE_INET_Addr& address_in)
+{
+  NETWORK_TRACE ("Net_Common_Tools::isLocal");
+
+  // sanity check(s)
+  if (address_in.is_any () ||
+      address_in.is_loopback ())
+    return true;
+
+  // retrieve all assigned local addresses
+  ACE_INET_Addr local_ip_address;
+  //ACE_INET_Addr network_address;
+  std::vector<ACE_INET_Addr> local_ip_addresses_a;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  //ULONG flags = (GAA_FLAG_INCLUDE_PREFIX             |
+  //               GAA_FLAG_INCLUDE_WINS_INFO          |
+  //               GAA_FLAG_INCLUDE_GATEWAYS           |
+  //               GAA_FLAG_INCLUDE_ALL_INTERFACES     |
+  //               GAA_FLAG_INCLUDE_ALL_COMPARTMENTS   |
+  //               GAA_FLAG_INCLUDE_TUNNEL_BINDINGORDER);
+  //struct _IP_ADAPTER_ADDRESSES_LH* ip_adapter_addresses_p = NULL;
+  //ULONG buffer_length = 0;
+  //ULONG result =
+  //  GetAdaptersAddresses (AF_UNSPEC,              // Family
+  //                        flags,                  // Flags
+  //                        NULL,                   // Reserved
+  //                        ip_adapter_addresses_p, // AdapterAddresses
+  //                        &buffer_length);        // SizePointer
+  //if (result != ERROR_BUFFER_OVERFLOW)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
+  //              ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
+  //  return false;
+  //} // end IF
+  //ACE_ASSERT (buffer_length);
+  //ip_adapter_addresses_p =
+  //  static_cast<struct _IP_ADAPTER_ADDRESSES_LH*> (ACE_MALLOC_FUNC (buffer_length));
+  //if (!ip_adapter_addresses_p)
+  //{
+  //  ACE_DEBUG ((LM_CRITICAL,
+  //              ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+  //  return false;
+  //} // end IF
+  //result =
+  //  GetAdaptersAddresses (AF_UNSPEC,              // Family
+  //                        flags,                  // Flags
+  //                        NULL,                   // Reserved
+  //                        ip_adapter_addresses_p, // AdapterAddresses
+  //                        &buffer_length);        // SizePointer
+  //if (result != NO_ERROR)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
+  //              ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
+
+  //  // clean up
+  //  ACE_FREE_FUNC (ip_adapter_addresses_p);
+
+  //  return false;
+  //} // end IF
+
+  //struct _IP_ADAPTER_ADDRESSES_LH* ip_adapter_addresses_2 =
+  //  ip_adapter_addresses_p;
+  //struct _IP_ADAPTER_UNICAST_ADDRESS_LH* unicast_address_p = NULL;
+  //struct _IP_ADAPTER_GATEWAY_ADDRESS_LH* gateway_address_p = NULL;
+  //struct _SOCKET_ADDRESS* socket_address_p = NULL;
+  //struct sockaddr_in* sockaddr_in_p = NULL;
+  //do
+  //{
+  //  unicast_address_p = ip_adapter_addresses_2->FirstUnicastAddress;
+  //  ACE_ASSERT (unicast_address_p);
+  //  do
+  //  {
+  //    socket_address_p = &unicast_address_p->Address;
+  //    ACE_ASSERT (socket_address_p->lpSockaddr);
+  //    if (socket_address_p->lpSockaddr->sa_family != AF_INET)
+  //      continue;
+
+  //    sockaddr_in_p = (struct sockaddr_in*)socket_address_p->lpSockaddr;
+  //    netmask_mask = std::numeric_limits<ACE_UINT32>::max ();
+  //    netmask_mask = netmask_mask << ((4 * 8) - unicast_address_p->OnLinkPrefixLength);
+  //    netmask = sockaddr_in_p->sin_addr.S_un.S_addr & netmask_mask;
+  //    adapter_ip_netmasks_a.push_back (netmask);
+
+  //    result = network_address.set (static_cast<u_short> (0),
+  //                                  netmask,
+  //                                  1,
+  //                                  0);
+  //    if (result == -1)
+  //    {
+  //      ACE_DEBUG ((LM_ERROR,
+  //                  ACE_TEXT ("failed to ACE_INET_Addr::set(0,%u): \"%m\", aborting\n"),
+  //                  netmask));
+
+  //      // clean up
+  //      ACE_FREE_FUNC (ip_adapter_addresses_p);
+
+  //      return false;
+  //    } // end IF
+  //    ACE_DEBUG ((LM_DEBUG,
+  //                ACE_TEXT ("found ip address on network %s\n"),
+  //                ACE_TEXT (Net_Common_Tools::IPAddressToString (network_address).c_str ())));
+
+  //    unicast_address_p = unicast_address_p->Next;
+  //  } while (unicast_address_p);
+  //  ip_adapter_addresses_2 = ip_adapter_addresses_2->Next;
+  //} while (ip_adapter_addresses_2);
+
+  //// clean up
+  //ACE_FREE_FUNC (ip_adapter_addresses_p);
+
+  struct _MIB_IPADDRTABLE* table_p = NULL;
+  DWORD table_size = 0;
+  DWORD result = 0;
+  //IN_ADDR ip_address;
+
+  table_p =
+    static_cast<struct _MIB_IPADDRTABLE*> (HeapAlloc (GetProcessHeap (),
+                                                      0,
+                                                      sizeof (struct _MIB_IPADDRTABLE)));
+  if (!table_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::HeapAlloc(%u): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Tools::errorToString (::GetLastError ()).c_str ())));
+    return false; // *TODO*: this could lead to false negatives
+  } // end IF
+  // step1: determine size of the table
+  result = GetIpAddrTable (table_p, &table_size, FALSE);
+  if (!table_p ||
+      (result != ERROR_INSUFFICIENT_BUFFER))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::GetIpAddrTable(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Tools::errorToString (::GetLastError ()).c_str ())));
+
+    HeapFree (GetProcessHeap (), 0, table_p);
+
+    return false; // *TODO*: this could lead to false negatives
+  } // end IF
+  HeapFree (GetProcessHeap (), 0, table_p);
+  table_p = NULL;
+  table_p =
+    static_cast<struct _MIB_IPADDRTABLE*> (HeapAlloc (GetProcessHeap (),
+                                                      0,
+                                                      table_size));
+  if (!table_p)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::HeapAlloc(%u): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Tools::errorToString (::GetLastError ()).c_str ())));
+    return false; // *TODO*: this could lead to false negatives
+  } // end IF
+  // step2: get the actual table data
+  result = GetIpAddrTable (table_p, &table_size, FALSE);
+  if (result != NO_ERROR)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::GetIpAddrTable(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
+
+    HeapFree (GetProcessHeap (), 0, table_p);
+
+    return false; // *TODO*: this could lead to false negatives
+  } // end IF
+
+  for (DWORD i = 0;
+       i < table_p->dwNumEntries;
+       ++i)
+  {
+    //printf("\tType and State[%d]:", i);
+    //if (pIPAddrTable->table[i].wType & MIB_IPADDR_PRIMARY)
+    //    printf("\tPrimary IP Address");
+    //if (pIPAddrTable->table[i].wType & MIB_IPADDR_DYNAMIC)
+    //    printf("\tDynamic IP Address");
+    //if (pIPAddrTable->table[i].wType & MIB_IPADDR_DISCONNECTED)
+    //    printf("\tAddress is on disconnected interface");
+    //if (pIPAddrTable->table[i].wType & MIB_IPADDR_DELETED)
+    //    printf("\tAddress is being deleted");
+    //if (pIPAddrTable->table[i].wType & MIB_IPADDR_TRANSIENT)
+    //    printf("\tTransient address");
+
+    result =
+      local_ip_address.set (static_cast<u_short> (0),
+                            table_p->table[i].dwAddr,
+                            0, // already in network byte order
+                            0);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(0,%u): \"%m\", aborting\n"),
+                  table_p->table[i].dwAddr));
+
+      // clean up
+      HeapFree (GetProcessHeap (), 0, table_p);
+
+      return false;
+    } // end IF
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("found ip address %s on network %s\n"),
+    //            ACE_TEXT (ACE_OS::inet_ntoa (ip_address)),
+    //            ACE_TEXT (Net_Common_Tools::IPAddressToString (network_address, true).c_str ())));
+
+    local_ip_addresses_a.push_back (local_ip_address);
+  } // end FOR
+
+  HeapFree (GetProcessHeap (), 0, table_p);
+#else
+#if defined (ACE_HAS_GETIFADDRS)
+  struct ifaddrs* ifaddrs_p = NULL;
+  struct in_addr in_addr_s;
+  int result = ::getifaddrs (&ifaddrs_p);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to ::getifaddrs(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+  ACE_ASSERT (ifaddrs_p);
+
+  struct sockaddr_in* sockaddr_in_p, *sockaddr_in_2 = NULL;
+  for (struct ifaddrs* ifaddrs_2 = ifaddrs_p;
+       ifaddrs_2;
+       ifaddrs_2 = ifaddrs_2->ifa_next)
+  {
+    if (!ifaddrs_2->ifa_addr)
+      continue;
+    if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
+      continue;
+
+    sockaddr_in_p = reinterpret_cast<struct sockaddr_in*> (ifaddrs_2->ifa_addr);
+    sockaddr_in_2 =
+        reinterpret_cast<struct sockaddr_in*> (ifaddrs_2->ifa_netmask);
+    in_addr_s = sockaddr_in_p->sin_addr;
+    in_addr_s.s_addr &= sockaddr_in_2->sin_addr.s_addr;
+    sockaddr_in_2 =
+        reinterpret_cast<struct sockaddr_in*> (ifaddrs_2->ifa_netmask);
+    result =
+      local_ip_address.set (static_cast<u_short> (0),
+                            sockaddr_in_p->sin_addr.s_addr,
+                            0, // already in network byte order
+                            0);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(0,%u): \"%m\", aborting\n"),
+                  sockaddr_in_p->sin_addr.s_addr));
+      return false;
+    } // end IF
+    //ACE_DEBUG ((LM_DEBUG,
+    //            ACE_TEXT ("found ip address %s on network %s\n"),
+    //            ACE_TEXT (ACE_OS::inet_ntoa (in_addr_s)),
+    //            ACE_TEXT (Net_Common_Tools::IPAddressToString (local_ip_address, true).c_str ())));
+
+    local_ip_addresses_a.push_back (local_ip_address);
+  } // end FOR
+
+  // clean up
+  ::freeifaddrs (ifaddrs_p);
+#else
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (false);
+
+  ACE_NOTREACHED (return false;)
+#endif /* ACE_HAS_GETIFADDRS */
+#endif
+
+  for (std::vector<ACE_INET_Addr>::const_iterator iterator = local_ip_addresses_a.begin ();
+       iterator != local_ip_addresses_a.end ();
+       ++iterator)
+    if (address_in.get_ip_address () == (*iterator).get_ip_address ())
+      return true;
+
+  return false;
+}
+
 ACE_INET_Addr
 Net_Common_Tools::stringToIPAddress (std::string& address_in)
 {
@@ -2151,7 +2429,7 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
     if (!unicast_address_p)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("adapter \"%s:\"\"%s\" does not currently have any unicast IPv4 address, aborting\n"),
+                  ACE_TEXT ("adapter \"%s\":\"%s\" does not currently have any unicast IPv4 address, aborting\n"),
                   ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->FriendlyName),
                   ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->Description)));
 
@@ -2178,7 +2456,7 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
     if (!gateway_address_p)
     {
       ACE_DEBUG ((LM_WARNING,
-                  ACE_TEXT ("adapter \"%s:\"\"%s\" does not currently have any gateway IPv4 address, continuing\n"),
+                  ACE_TEXT ("adapter \"%s\":\"%s\" does not currently have any gateway IPv4 address, continuing\n"),
                   ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->FriendlyName),
                   ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->Description)));
       break;
@@ -3412,11 +3690,10 @@ Net_Common_Tools::setLoopBackFastPath (ACE_HANDLE handle_in)
                    NULL, NULL);               // overlapped / function
   if (result == SOCKET_ERROR)
   {
-    DWORD error = ::GetLastError ();
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::ioctl(0x%@,SIO_LOOPBACK_FAST_PATH): \"%s\", aborting\n"),
                 handle_in,
-                ACE_TEXT (Common_Tools::errorToString (error).c_str ())));
+                ACE_TEXT (Common_Tools::errorToString (::GetLastError ()).c_str ())));
     return false;
   } // end IF
   ACE_DEBUG ((LM_DEBUG,

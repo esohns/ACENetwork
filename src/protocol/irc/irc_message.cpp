@@ -45,10 +45,12 @@ IRC_Message::IRC_Message (const IRC_Message& message_in)
 
 }
 
-IRC_Message::IRC_Message (ACE_Data_Block* dataBlock_in,
+IRC_Message::IRC_Message (Stream_SessionId_t sessionId_in,
+                          ACE_Data_Block* dataBlock_in,
                           ACE_Allocator* messageAllocator_in,
                           bool incrementMessageCounter_in)
- : inherited (dataBlock_in,
+ : inherited (sessionId_in,
+              dataBlock_in,
               messageAllocator_in,
               incrementMessageCounter_in)
 {

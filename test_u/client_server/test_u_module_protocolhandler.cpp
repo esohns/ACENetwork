@@ -45,7 +45,7 @@ Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler (ISTREAM_T* stream_
  , automaticPong_ (true)
  , counter_ (1)
  , printPongDot_ (false)
- , sessionID_ (0)
+ , sessionId_ (0)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler"));
 
@@ -67,12 +67,12 @@ Test_U_Module_ProtocolHandler::~Test_U_Module_ProtocolHandler ()
     if (result <= 0)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("session %u: failed to cancel \"ping\" timer (ID: %d): \"%m\", continuing\n"),
-                  sessionID_,
+                  sessionId_,
                   pingTimerID_));
     else
       ACE_DEBUG ((LM_WARNING,
                   ACE_TEXT ("session %u: cancelled \"ping\" timer (ID: %d) --> check implementation !\n"),
-                  sessionID_,
+                  sessionId_,
                   pingTimerID_));
   } // end IF
 }
@@ -113,7 +113,7 @@ Test_U_Module_ProtocolHandler::initialize (const struct Test_U_ModuleHandlerConf
     automaticPong_ = true;
     counter_ = 1;
     printPongDot_ = false;
-    sessionID_ = 0;
+    sessionId_ = 0;
   } // end IF
 
   // *TODO*: remove type inferences
@@ -232,16 +232,16 @@ Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& mes
   {
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
-      // retain session ID for reporting...
+      // retain session id for reporting
       const Test_U_StreamSessionData_t& session_data_container_r =
           message_inout->get ();
-      const Test_U_StreamSessionData& session_data_r =
+      const struct Test_U_StreamSessionData& session_data_r =
           session_data_container_r.get ();
-      sessionID_ = session_data_r.sessionID;
+      sessionId_ = session_data_r.sessionId;
 
       if (pingInterval_ != ACE_Time_Value::zero)
       {
-        // schedule ping interval timer...
+        // schedule ping interval timer
         ACE_ASSERT (pingTimerID_ == -1);
         ACE_Event_Handler* handler_p = &pingHandler_;
         pingTimerID_ =
@@ -253,12 +253,12 @@ Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& mes
         {
            ACE_DEBUG ((LM_ERROR,
                        ACE_TEXT ("session %u: failed to schedule \"ping\" timer: \"%m\", returning\n"),
-                       sessionID_));
+                       sessionId_));
            return;
         } // end IF
         ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("session %u: scheduled \"ping\" timer (id: %d), interval: %#T...\n"),
-                    sessionID_,
+                    ACE_TEXT ("session %u: scheduled \"ping\" timer (id: %d), interval: %#T\n"),
+                    sessionId_,
                     pingTimerID_,
                     &pingInterval_));
       } // end IF
@@ -276,12 +276,12 @@ Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& mes
         if (result <= 0)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("session %u: failed to cancel \"ping\" timer (id: %d): \"%m\", continuing\n"),
-                      sessionID_,
+                      sessionId_,
                       pingTimerID_));
         else
           ACE_DEBUG ((LM_DEBUG,
                       ACE_TEXT ("session %u: cancelled \"ping\" timer (id: %d)\n"),
-                      sessionID_,
+                      sessionId_,
                       pingTimerID_));
         pingTimerID_ = -1;
       } // end IF
@@ -335,8 +335,8 @@ Test_U_Module_ProtocolHandler::handleTimeout (const void* arg_in)
     return;
   } // end IF
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("session %u: scheduled ping message...\n"),
-//              sessionID_));
+//              ACE_TEXT ("session %u: scheduled ping message\n"),
+//              sessionId_));
 }
 
 void

@@ -54,9 +54,15 @@ class Net_Client_Connector_T
  , public Net_IConnector_T<AddressType,
                            ConfigurationType>
 {
+  typedef ACE_Connector<HandlerType,
+                        ConnectorType> inherited;
+
  public:
+  // convenient types
   typedef AddressType ADDRESS_T;
   typedef StreamType STREAM_T;
+  typedef ACE_Connector<HandlerType,
+                        ConnectorType> CONNECTOR_T;
 
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
@@ -84,6 +90,8 @@ class Net_Client_Connector_T
 
   typedef Net_IConnector_T<AddressType,
                            ConfigurationType> ICONNECTOR_T;
+  typedef Net_IAsynchConnector_T<AddressType,
+                                 ConfigurationType> IASYNCH_CONNECTOR_T;
 
   Net_Client_Connector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
                           const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
@@ -92,12 +100,9 @@ class Net_Client_Connector_T
   // implement Net_Client_IConnector_T
   virtual enum Net_TransportLayerType transportLayer () const;
   inline virtual bool useReactor () const { return true; };
-
   // *NOTE*: handlers retrieve the configuration object with get ()
   inline virtual const ConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; };
-
-  virtual void abort ();
   virtual ACE_HANDLE connect (const AddressType&);
 
  protected:
@@ -107,9 +112,6 @@ class Net_Client_Connector_T
   virtual int make_svc_handler (HandlerType*&);
 
  private:
-  typedef ACE_Connector<HandlerType,
-                        ConnectorType> inherited;
-
   // convenient types
   typedef Net_Client_Connector_T<HandlerType,
                                  ConnectorType,
@@ -204,28 +206,23 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 
   typedef Net_IConnector_T<ACE_INET_Addr,
                            ConfigurationType> ICONNECTOR_T;
+  typedef Net_IAsynchConnector_T<ACE_INET_Addr,
+                                 ConfigurationType> IASYNCH_CONNECTOR_T;
 
   Net_Client_Connector_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
                           const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  virtual ~Net_Client_Connector_T ();
+  inline virtual ~Net_Client_Connector_T () {};
 
   // implement Net_Client_IConnector_T
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_UDP; };
   inline virtual bool useReactor () const { return true; };
-
   // *NOTE*: handlers retrieve the configuration object with get ()
   inline virtual const ConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; };
-
-  // *NOTE*: this is just a stub
-  inline virtual void abort () { };
-  // specialize (part of) Net_Client_IConnector_T
+  // specialize (part of) Net_IConnector_T
   virtual ACE_HANDLE connect (const ACE_INET_Addr&);
 
  protected:
-  //typedef ACE_Connector<CONNECTION_T,
-  //                      ACE_SOCK_CONNECTOR> ACE_CONNECTOR_T;
-
   // override default activation strategy
   virtual int activate_svc_handler (CONNECTION_T*);
   // override default instantiation strategy
@@ -249,6 +246,24 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   //                                 int);
 
  private:
+  // convenient types
+  typedef Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
+                                                         ConfigurationType,
+                                                         StateType,
+                                                         StatisticContainerType,
+                                                         HandlerConfigurationType,
+                                                         StreamType,
+                                                         UserDataType>,
+                                 ConnectorType,
+                                 ACE_INET_Addr,
+                                 ConfigurationType,
+                                 StateType,
+                                 StatisticContainerType,
+                                 struct Net_UDPSocketConfiguration,
+                                 HandlerConfigurationType,
+                                 StreamType,
+                                 UserDataType> OWN_TYPE_T;
+
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
@@ -321,21 +336,19 @@ class Net_Client_Connector_T<HandlerType,
 
   typedef Net_IConnector_T<Net_Netlink_Addr,
                            ConfigurationType> ICONNECTOR_T;
+  typedef Net_IAsynchConnector_T<Net_Netlink_Addr,
+                                 ConfigurationType> IASYNCH_CONNECTOR_T;
 
   Net_Client_Connector_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
                           const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  virtual ~Net_Client_Connector_T ();
+  inline virtual ~Net_Client_Connector_T () {};
 
-  // implement Net_Client_IConnector_T
+  // implement Net_IConnector_T
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_NETLINK; };
   inline virtual bool useReactor () const { return true; };
-
   // *NOTE*: handlers retrieve the configuration object with get ()
   inline virtual const ConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; };
-
-  // *NOTE*: this is just a stub
-  inline virtual void abort () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
   virtual ACE_HANDLE connect (const Net_Netlink_Addr&);
 
  protected:

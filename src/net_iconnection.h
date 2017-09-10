@@ -54,7 +54,8 @@ class Net_IConnection_T
  , public Common_IDumpState
 {
  public:
-  inline virtual ~Net_IConnection_T () {};
+  // convenient types
+  typedef StateType STATE_T;
 
   virtual void info (ACE_HANDLE&,             // return value: I/O handle
                      AddressType&,            // return value: local SAP
@@ -133,8 +134,6 @@ class Net_ISocketConnection_T
 //                            StateType,
 //                            StatisticContainerType> ICONNECTION_T;
 
-  virtual ~Net_ISocketConnection_T () {};
-
   virtual const HandlerConfigurationType& get () = 0;
 
   // *IMPORTANT NOTE*: fire-and-forget API
@@ -163,10 +162,8 @@ class Net_IStreamConnection_T
  , public Stream_IMessageQueue
 {
  public:
-  // convenience types
+  // convenient types
   typedef StreamType STREAM_T;
-
-  virtual ~Net_IStreamConnection_T () {};
 
   virtual const StreamType& stream () const = 0;
 
@@ -180,8 +177,6 @@ template <typename AddressType>
 class Net_ISessionBase_T
 {
  public:
-  virtual ~Net_ISessionBase_T () {};
-
   virtual void connect (const AddressType&) = 0; // peer address
   virtual void disconnect (const AddressType&) = 0; // peer address
 
@@ -215,8 +210,6 @@ class Net_ISession_T
 // : public typename StreamType::IDATA_NOTIFY_T
 {
  public:
-  virtual ~Net_ISession_T () {};
-
   virtual const StateType& state () const = 0;
 
 //  // convenient types

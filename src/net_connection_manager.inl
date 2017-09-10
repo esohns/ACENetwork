@@ -870,7 +870,7 @@ Net_Connection_Manager_T<AddressType,
     } // end IF
 
     ACE_DEBUG ((LM_INFO,
-                ACE_TEXT ("*** RUNTIME STATISTICS ***\n--> [%u] connection(s) <--\n# data messages: %u (avg.: %u)\ndata: %.0f (avg.: %.2f) bytes\n*** RUNTIME STATISTICS ***\\END\n"),
+                ACE_TEXT ("*** STATISTIC ***\n--> [%u] connection(s) <--\n# data messages: %u (avg.: %u)\ndata: %.0f (avg.: %.2f) bytes\n*** RUNTIME STATISTICS ***\\END\n"),
                 connections_.size (),
                 result.dataMessages,
                 (connections_.size () ? (result.dataMessages / connections_.size ())

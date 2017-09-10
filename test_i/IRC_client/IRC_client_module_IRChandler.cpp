@@ -1210,7 +1210,7 @@ IRC_Client_Module_IRCHandler::onChange (enum IRC_RegistrationStateType newState_
 }
 
 IRC_Record*
-IRC_Client_Module_IRCHandler::allocateMessage (IRC_Record::CommandType type_in)
+IRC_Client_Module_IRCHandler::allocateMessage (IRC_CommandType_t type_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::allocateMessage"));
 
@@ -1226,7 +1226,7 @@ IRC_Client_Module_IRCHandler::allocateMessage (IRC_Record::CommandType type_in)
     return NULL;
   } // end IF
   ACE_NEW_NORETURN (message_p->command_.string,
-                    std::string (IRC_Message::CommandType2String (type_in)));
+                    std::string (IRC_Message::CommandTypeToString (type_in)));
   if (!message_p->command_.string)
   {
     ACE_DEBUG ((LM_CRITICAL,

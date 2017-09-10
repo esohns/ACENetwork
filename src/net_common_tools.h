@@ -26,7 +26,7 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-#include <dbus/dbus.h>
+#include "dbus/dbus.h"
 #endif
 
 #include "ace/config-lite.h"
@@ -157,6 +157,7 @@ class Net_Common_Tools
   static bool matchIPAddress (std::string&); // dotted-decimal
   // *NOTE*: (see also: ace/INET_Addr.h:237)
   static ACE_INET_Addr stringToIPAddress (std::string&); // host name (DNS name or dotted-decimal)
+  static bool isLocal (const ACE_INET_Addr&);
 
   // transport layer
   static std::string TransportLayerTypeToString (enum Net_TransportLayerType);

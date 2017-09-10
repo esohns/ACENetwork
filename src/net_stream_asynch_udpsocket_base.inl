@@ -221,6 +221,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 #endif
   handle_socket = true;
   inherited::handle (inherited2::get_handle ());
+  inherited4::state_.handle = inherited2::get_handle ();
 
   // step2a: initialize base-class
   if (!inherited::initialize (inherited4::configuration_->socketHandlerConfiguration))
@@ -261,37 +262,25 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   {
     // *NOTE*: connection already initialized, do not adjust the reference count
     decrease_reference_count = false;
-
-    // update session id
-    const typename StreamType::SESSION_DATA_CONTAINER_T& session_data_container_r =
-      stream_.get ();
-    typename StreamType::SESSION_DATA_T& session_data_r =
-      const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_r.get ());
-    ACE_ASSERT (session_data_r.lock);
-    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_r.lock);
-      session_data_r.sessionID =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-        reinterpret_cast<size_t> (inherited::handle ()); // (== socket handle)
-#else
-        static_cast<size_t> (inherited::handle ()); // (== socket handle)
-#endif
-    } // end lock scope
   } // end IF
   else
   {
-    // *TODO*: this clearly is a design glitch
-    inherited4::configuration_->streamConfiguration->configuration_.sessionID =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-        reinterpret_cast<size_t> (inherited::handle ()); // (== socket handle)
-#else
-        static_cast<size_t> (inherited::handle ()); // (== socket handle)
-#endif
     if (!stream_.initialize (*inherited4::configuration_->streamConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize processing stream, aborting\n")));
       goto error;
     } // end IF
+    // update session data
+    const typename StreamType::SESSION_DATA_CONTAINER_T& session_data_container_r =
+      stream_.get ();
+    typename StreamType::SESSION_DATA_T& session_data_r =
+      const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_r.get ());
+    ACE_ASSERT (session_data_r.lock);
+    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_r.lock);
+      session_data_r.connectionState = &(inherited4::state_);
+    } // end lock scope
+    //stream_.dump_state ();
 
     // step3e: start stream
     stream_.start ();
@@ -381,12 +370,14 @@ error:
 
   if (handle_socket)
   {
-    result = inherited::handle_close (inherited2::get_handle (),
+    result = inherited::handle_close (inherited4::state_.handle,
                                       ACE_Event_Handler::ALL_EVENTS_MASK);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to HandlerType::handle_close(): \"%m\", continuing\n")));
   } // end IF
+  inherited4::state_.handle = ACE_INVALID_HANDLE;
+  inherited4::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
 
   if (handle_manager)
     inherited4::deregister (); // <-- should 'delete this'

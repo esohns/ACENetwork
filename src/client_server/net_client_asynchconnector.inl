@@ -45,10 +45,12 @@ Net_Client_AsynchConnector_T<HandlerType,
                              UserDataType>::Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* connectionManager_in,
                                                                           const ACE_Time_Value& statisticCollectionInterval_in)
  : configuration_ (NULL)
- , connectHandle_ (ACE_INVALID_HANDLE)
  , connectionManager_ (connectionManager_in)
+ , handles_ ()
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
  , SAP_ ()
+ , condition_ (lock_)
+ , lock_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
@@ -87,6 +89,12 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::~Net_Client_AsynchConnector_T"));
 
+  //for (HANDLE_TO_ERROR_MAP_ITERATOR_T iterator = handles_.begin ();
+  //     iterator != handles_.end ();
+  //     ++iterator)
+  //  abort ((*iterator).first);
+  if (!handles_.empty ())
+    abort ();
 }
 
 template <typename HandlerType,
@@ -154,18 +162,17 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
 
-  SAP_ = address_in;
-
   int result = -1;
 
-  ICONNECTOR_T* iconnector_p = this;
-  const void* act_p = iconnector_p;
-  connectHandle_ = ACE_INVALID_HANDLE;
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, ACE_INVALID_HANDLE);
+    SAP_ = address_in;
+  } // end lock scope
+
   result =
-      connect (address_in,                            // remote address
-               ACE_sap_any_cast (const AddressType&), // local address
-               1,                                     // SO_REUSEADDR ?
-               act_p);                                // asynchronous completion token
+    connect (address_in,                         // remote address
+             ACE_sap_any_cast (AddressType&),    // local address
+             1,                                  // SO_REUSEADDR ?
+             static_cast<ICONNECTOR_T*> (this)); // asynchronous completion token
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -173,17 +180,138 @@ Net_Client_AsynchConnector_T<HandlerType,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ())));
     return ACE_INVALID_HANDLE;
   } // end IF
-  ACE_ASSERT (connectHandle_ != ACE_INVALID_HANDLE);
 
-  //ACE_HANDLE return_value = ACE_INVALID_HANDLE;
-  //ACE_Asynch_Connect& asynch_connect_r =
-  //    inherited::asynch_connect ();
-  //ACE_Asynch_Operation_Impl* asynch_operation_impl_p =
-  //    asynch_connect_r.implementation ();
-  //ACE_ASSERT (asynch_operation_impl_p);
-  //ACE_UNUSED_ARG (return_value);
+  return reinterpret_cast<ACE_HANDLE> (result);
+}
 
-  return connectHandle_;
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename UserDataType>
+int
+Net_Client_AsynchConnector_T<HandlerType,
+                             AddressType,
+                             ConfigurationType,
+                             StateType,
+                             StatisticContainerType,
+                             SocketConfigurationType,
+                             HandlerConfigurationType,
+                             StreamType,
+                             UserDataType>::connect (const AddressType& remoteAddress_in,
+                                                     const AddressType& localAddress_in,
+                                                     int reuseAddress_in,
+                                                     const void* act_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
+
+  int result = -1;
+  ACE_Asynch_Connect& connect_r = inherited::asynch_connect ();
+  //ACE_Asynch_Connect_Impl* connect_p =
+  //  dynamic_cast<ACE_Asynch_Connect_Impl*> (connect_r.implementation ());
+  //ACE_ASSERT (connect_p);
+  // *NOTE*: some socket options need to be set before connect()ing
+  //         --> set these here (this implements the shared_connect_start()
+  //             method of ACE_SOCK_Connector (see: SOCK_Connector.h:301) for
+  //             synchronous connects
+  int protocol_family_i = remoteAddress_in.get_type ();
+  ACE_HANDLE socket_h = ACE_OS::socket (protocol_family_i, // domain
+                                        SOCK_STREAM,       // type
+                                        0);                // protocol
+  int one = 1;
+  HANDLE_TO_ERROR_MAP_ITERATOR_T iterator;
+
+  if (socket_h == ACE_INVALID_HANDLE)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::socket(%d,%d,0): \"%m\", aborting\n"),
+                remoteAddress_in.get_type (), SOCK_STREAM));
+    return -1;
+  } // end IF
+
+  // set socket options
+  if (reuseAddress_in)
+  { ACE_ASSERT (protocol_family_i != PF_UNIX);
+    result = ACE_OS::setsockopt (socket_h,
+                                 SOL_SOCKET,
+                                 SO_REUSEADDR,
+                                 reinterpret_cast<char*> (&one),
+                                 sizeof (int));
+    if (result == -1)
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,SO_REUSEADDR): \"%m\", aborting\n"),
+                  socket_h));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::setsockopt(%d,SO_REUSEADDR): \"%m\", aborting\n"),
+                  socket_h));
+#endif
+      goto error;
+    } // end IF
+  } // end IF
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // enable SIO_LOOPBACK_FAST_PATH on Win32
+  if ((protocol_family_i == ACE_ADDRESS_FAMILY_INET) &&
+      remoteAddress_in.is_loopback ()                &&
+      NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH)
+    if (!Net_Common_Tools::setLoopBackFastPath (socket_h))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::setLoopBackFastPath(0x%@): \"%m\", aborting\n"),
+                  socket_h));
+      goto error;
+    } // end IF
+#endif
+
+  ///////////////////////////////////////
+
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, -1);
+    handles_.insert (std::make_pair (socket_h, -1));
+  } // end lock scope
+  result = connect_r.connect (socket_h,
+                              remoteAddress_in,
+                              localAddress_in,
+                              reuseAddress_in,
+                              act_in,
+                              0,
+                              COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
+  if (result == -1)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Connect_Impl::connect(%s): \"%m\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (remoteAddress_in).c_str ())));
+    goto error;
+  } // end IF
+
+  return reinterpret_cast<int> (socket_h);
+
+error:
+  result = ACE_OS::closesocket (socket_h);
+  if (result == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
+                socket_h));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                socket_h));
+#endif
+
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, -1);
+    iterator = handles_.find (socket_h);
+    if (iterator != handles_.end ())
+      handles_.erase (iterator);
+  } // end lock scope
+
+  return -1;
 }
 
 template <typename HandlerType,
@@ -234,107 +362,85 @@ Net_Client_AsynchConnector_T<HandlerType,
                              SocketConfigurationType,
                              HandlerConfigurationType,
                              StreamType,
-                             UserDataType>::connect (const AddressType& remoteAddress_in,
-                                                     const AddressType& localAddress_in,
-                                                     int reuseAddr_in,
-                                                     const void* act_in)
+                             UserDataType>::wait (ACE_HANDLE handle_in,
+                                                  const ACE_Time_Value& relativeTimeout_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::wait"));
 
   int result = -1;
-  ACE_Asynch_Connect& connect_r = inherited::asynch_connect ();
-  //ACE_Asynch_Connect_Impl* connect_p =
-  //  dynamic_cast<ACE_Asynch_Connect_Impl*> (connect_r.implementation ());
-  //ACE_ASSERT (connect_p);
+  ACE_Time_Value absolute_timeout = ACE_Time_Value::zero;
+  ACE_Time_Value* timeout_p =
+    ((relativeTimeout_in != ACE_Time_Value::zero) ? &absolute_timeout : NULL);
+  HANDLE_TO_ERROR_MAP_ITERATOR_T iterator;
 
-  // *NOTE*: some socket options need to be set before connect()ing
-  //         --> set these here (this implements the shared_connect_start()
-  //             method of ACE_SOCK_Connector (see: SOCK_Connector.h:301) for
-  //             synchronous connects
-  int protocol_family = remoteAddress_in.get_type ();
-  connectHandle_ = ACE_OS::socket (protocol_family,
-                                   SOCK_STREAM, // TCP
-                                   0);
-  if (connectHandle_ == ACE_INVALID_HANDLE)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::socket(%d,%d,0): \"%m\", aborting\n"),
-                protocol_family, SOCK_STREAM));
-    return -1;
-  } // end IF
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, -1);
+    iterator = handles_.find (handle_in);
+    if (iterator == handles_.end ()) // --> nothing to do
+      return 0; // *TODO*: race condition; result could be a false positive
 
-  // Reuse the address
-  int one = 1;
-  if (reuseAddr_in &&
-      (protocol_family != PF_UNIX))
-  {
-    result = ACE_OS::setsockopt (connectHandle_,
-                                 SOL_SOCKET,
-                                 SO_REUSEADDR,
-                                 reinterpret_cast<const char*> (&one),
-                                 sizeof (one));
+    if (relativeTimeout_in != ACE_Time_Value::zero)
+      absolute_timeout = COMMON_TIME_NOW + relativeTimeout_in;
+    result = condition_.wait (timeout_p);
     if (result == -1)
     {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,SO_REUSEADDR): \"%m\", aborting\n"),
-                  connectHandle_));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::setsockopt(%d,SO_REUSEADDR): \"%m\", aborting\n"),
-                  connectHandle_));
-#endif
-      goto close;
+      int error = ACE_OS::last_error ();
+      if (error != ETIME)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Condition::wait(): \"%m\", returning\n")));
+      else
+      {
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("failed to ACE_Condition::wait(): \"%m\", returning\n")));
+        result = ETIME;
+      } // end ELSE
+      goto continue_;
     } // end IF
-  } // end IF
 
-  ///////////////////////////////////////
+    result = (*iterator).second;
+  } // end lock scope
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  // enable SIO_LOOPBACK_FAST_PATH on Win32
-  if ((remoteAddress_in.get_type () == ACE_ADDRESS_FAMILY_INET) &&
-      remoteAddress_in.is_loopback ()                           &&
-      NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH)
-    if (!Net_Common_Tools::setLoopBackFastPath (connectHandle_))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setLoopBackFastPath(0x%@): \"%m\", aborting\n"),
-                  connectHandle_));
-      goto close;
-    } // end IF
-#endif
+continue_:
+  return result;
+}
 
-  result = connect_r.connect (connectHandle_,
-                              remoteAddress_in,
-                              localAddress_in,
-                              reuseAddr_in,
-                              act_in,
-                              0,
-                              COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Connect_Impl::connect(%s): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (remoteAddress_in).c_str ())));
-    goto close;
-  } // end IF
+template <typename HandlerType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename UserDataType>
+void
+Net_Client_AsynchConnector_T<HandlerType,
+                             AddressType,
+                             ConfigurationType,
+                             StateType,
+                             StatisticContainerType,
+                             SocketConfigurationType,
+                             HandlerConfigurationType,
+                             StreamType,
+                             UserDataType>::onConnect (ACE_HANDLE connectHandle_in,
+                                                       int error_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::onConnect"));
 
-  return 0;
-
-close:
-  result = ACE_OS::closesocket (connectHandle_);
-  if (result == -1)
+  //if (error_in != ECONNREFUSED) // happens intermittently on Win32
+  if (error_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
-                reinterpret_cast<size_t> (connectHandle_)));
+                ACE_TEXT ("0x%@: failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
+                connectHandle_in,
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (SAP_).c_str ()),
+                ACE::sock_error (static_cast<int> (error_in))));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                connectHandle_));
+                ACE_TEXT ("%d: failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
+                connectHandle_in,
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (SAP_).c_str ()),
+                ACE_TEXT (ACE_OS::strerror (error_in))));
 #endif
-
-  return -1;
 }
 
 template <typename HandlerType,
@@ -361,41 +467,51 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::validate_connection"));
 
+  ACE_UNUSED_ARG (remoteSAP_in);
   ACE_UNUSED_ARG (localSAP_in);
 
-  // *NOTE*: on error addresses are not passed through
-  // *TODO*: in case of errors, addresses are not supplied
+  // *NOTE*: on error addresses are not passed in
+  // *TODO*: on error addresses are not passed in
 
   int result = -1;
-  unsigned long error = 0;
+  ICONNECTOR_T* iconnector_p =
+    const_cast<ICONNECTOR_T*> (reinterpret_cast<const ICONNECTOR_T*> (result_in.act ()));
+  ACE_ASSERT (iconnector_p);
+  HANDLE_TO_ERROR_MAP_ITERATOR_T iterator;
 
-  // success ?
-  result = result_in.success ();
-  if (result != 1)
-  {
-    error = result_in.error ();
+  // prevent race condition in wait()
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, -1);
+    iterator = handles_.find (result_in.connect_handle ());
+    ACE_ASSERT (iterator != handles_.end ());
+    (*iterator).second =
+      ((result_in.success () == 0) ? static_cast<int> (result_in.error ()) : 0);
+  } // end lock scope
+  // signal completion
+  result = condition_.broadcast ();
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Condition::broadcast(): \"%m\", continuing\n")));
 
-    AddressType peer_address = remoteSAP_in;
-    if (error)
-    { // sanity check(s)
-      ACE_ASSERT (remoteSAP_in.is_any ());
-      peer_address = SAP_;
-    } // end IF
-    //if (error != ECONNREFUSED) // happens intermittently on Win32
+  result =
+    ((result_in.success () == 0) ? static_cast<int> (result_in.error ()) : 0);
+  try {
+    iconnector_p->onConnect (result_in.connect_handle (),
+                             result);
+  } catch (...) {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ()),
-                ACE::sock_error (static_cast<int> (error))));
+                ACE_TEXT ("caught exception in Net_IAsynchConnector_T::onConnect(0x%@,%d), continuing\n"),
+                result_in.connect_handle (),
+                result));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ()),
-                ACE_TEXT (ACE_OS::strerror (error))));
+                ACE_TEXT ("caught exception in Net_IAsynchConnector_T::onConnect(%d,%d), continuing\n"),
+                result_in.connect_handle (),
+                result));
 #endif
-  } // end IF
+  }
 
-  return ((result == 0) ? -1 : 0);
+  return ((result_in.success () == 0) ? -1 : 0);
 }
 
 template <typename HandlerType,
@@ -600,67 +716,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
-Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
-                                                           ConfigurationType,
-                                                           StateType,
-                                                           StatisticContainerType,
-                                                           HandlerConfigurationType,
-                                                           StreamType,
-                                                           UserDataType>,
-                             ACE_INET_Addr,
-                             ConfigurationType,
-                             StateType,
-                             StatisticContainerType,
-                             struct Net_UDPSocketConfiguration,
-                             HandlerConfigurationType,
-                             StreamType,
-                             UserDataType>::~Net_Client_AsynchConnector_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::~Net_Client_AsynchConnector_T"));
-
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-void
-Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
-                                                           ConfigurationType,
-                                                           StateType,
-                                                           StatisticContainerType,
-                                                           HandlerConfigurationType,
-                                                           StreamType,
-                                                           UserDataType>,
-                             ACE_INET_Addr,
-                             ConfigurationType,
-                             StateType,
-                             StatisticContainerType,
-                             struct Net_UDPSocketConfiguration,
-                             HandlerConfigurationType,
-                             StreamType,
-                             UserDataType>::abort ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::abort"));
-
-  int result = -1;
-
-  result = inherited::cancel ();
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Connector::cancel(): \"%m\", continuing\n")));
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
 int
 Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                                            ConfigurationType,
@@ -758,7 +813,8 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 
   // pre-initialize the connection handler
   // *TODO*: remove type inference
-  handler_p->set (NET_ROLE_CLIENT);
+  handler_p->set (Net_Common_Tools::isLocal (address_in) ? NET_ROLE_SERVER
+                                                         : NET_ROLE_CLIENT);
 
   ICONNECTOR_T* iconnector_p = this;
   const void* act_p = iconnector_p;
@@ -770,7 +826,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
   handler_p->open (ACE_INVALID_HANDLE,
                    message_block);
 
-  return 0;
+  return handler_p->handle ();
 }
 
 template <typename HandlerType,
@@ -859,55 +915,6 @@ Net_Client_AsynchConnector_T<HandlerType,
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Connector::open(): \"%m\", continuing\n")));
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-Net_Client_AsynchConnector_T<HandlerType,
-                             Net_Netlink_Addr,
-                             ConfigurationType,
-                             StateType,
-                             StatisticContainerType,
-                             struct Net_NetlinkSocketConfiguration,
-                             HandlerConfigurationType,
-                             StreamType,
-                             UserDataType>::~Net_Client_AsynchConnector_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::~Net_Client_AsynchConnector_T"));
-
-}
-
-template <typename HandlerType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
-void
-Net_Client_AsynchConnector_T<HandlerType,
-                             Net_Netlink_Addr,
-                             ConfigurationType,
-                             StateType,
-                             StatisticContainerType,
-                             struct Net_NetlinkSocketConfiguration,
-                             HandlerConfigurationType,
-                             StreamType,
-                             UserDataType>::abort ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::abort"));
-
-  int result = -1;
-
-  result = inherited::cancel ();
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Connector::cancel(): \"%m\", continuing\n")));
 }
 
 template <typename HandlerType,
