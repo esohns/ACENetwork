@@ -57,18 +57,20 @@ class BitTorrent_Bencoding_ParserDriver_T
                               SessionMessageType> PARSER_BASE_T;
 
   // implement (part of) BitTorrent_Bencoding_IParser
-  using PARSER_BASE_T::initialize;
   using PARSER_BASE_T::buffer;
-  using PARSER_BASE_T::debugScanner;
+//  using PARSER_BASE_T::debug;
   using PARSER_BASE_T::isBlocking;
   using PARSER_BASE_T::offset;
-  using PARSER_BASE_T::parse;
   using PARSER_BASE_T::switchBuffer;
   using PARSER_BASE_T::waitBuffer;
+//  virtual void error (const std::string&); // message
+
+  using PARSER_BASE_T::initialize;
+  virtual void dump_state () const;
+  using PARSER_BASE_T::parse;
 //  virtual void error (const YYLTYPE&,      // location
   virtual void error (const yy::location&, // location
                       const std::string&); // message
-//  virtual void error (const std::string&); // message
   inline virtual Bencoding_Dictionary_t& current () { ACE_ASSERT (bencoding_); return *bencoding_; };
   inline virtual bool hasFinished () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
   virtual void record (Bencoding_Dictionary_t*&); // data record
@@ -84,8 +86,6 @@ class BitTorrent_Bencoding_ParserDriver_T
   inline virtual void pushList (Bencoding_List_t* list_in) { lists_.push (list_in); };
 //  inline virtual const Bencoding_Dictionary_t& get () const { return *dictionaries_.top (); };
 //  inline virtual const Bencoding_List_t& get () const { return *lists_.top (); };
-
-  virtual void dump_state () const;
 
   Bencoding_Dictionary_t*             bencoding_;
 

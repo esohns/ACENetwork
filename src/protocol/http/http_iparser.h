@@ -24,24 +24,23 @@
 #include <string>
 
 #include "common.h"
+#include "common_iscanner.h"
 
 #include "net_iparser.h"
 
 #include "http_common.h"
 
 class HTTP_IParser
- : public Net_IRecordParser_T<struct Common_ParserConfiguration,
-                              struct HTTP_Record>
- , public Net_IScanner_T<HTTP_IParser>
+ : public Net_IYaccRecordParser_T<struct Common_ParserConfiguration,
+                                  struct HTTP_Record>
+ , public Common_ILexScanner_T<HTTP_IParser>
 {
  public:
   // convenient types
-  typedef Net_IRecordParser_T<struct Common_ParserConfiguration,
-                              struct HTTP_Record> IPARSER_T;
+  typedef Net_IYaccRecordParser_T<struct Common_ParserConfiguration,
+                                  struct HTTP_Record> IPARSER_T;
 
   using IPARSER_T::error;
-
-  inline virtual ~HTTP_IParser () {};
 
   ////////////////////////////////////////
   // callbacks

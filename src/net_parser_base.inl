@@ -219,10 +219,10 @@ Net_CppParserBase_T<ConfigurationType,
 
   int result = -1;
   bool do_scan_end = false;
-  if (!scan_begin ())
+  if (!begin (NULL, 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_CppParserBase_T::scan_begin(), aborting\n")));
+                ACE_TEXT ("failed to Common_IScannerBase::begin(), aborting\n")));
     goto error;
   } // end IF
   do_scan_end = true;
@@ -241,7 +241,7 @@ Net_CppParserBase_T<ConfigurationType,
     result = parser_.parse ();
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in ParserType::parse(), continuing\n")));
+                ACE_TEXT ("caught exception in Common_IParser_T::parse(), continuing\n")));
     result = 1;
   }
   switch (result)
@@ -253,21 +253,21 @@ Net_CppParserBase_T<ConfigurationType,
     { // *NOTE*: most probable reason: connection
       //         has been closed --> session end
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("failed to parse BitTorrent PDU (result was: %d), aborting\n"),
+                  ACE_TEXT ("failed to parse PDU (result was: %d), aborting\n"),
                   result));
       goto error;
     }
   } // end SWITCH
 
   // finalize buffer/scanner
-  scan_end ();
+  end ();
   do_scan_end = false;
 
   goto continue_;
 
 error:
   if (do_scan_end)
-    scan_end ();
+    end ();
   fragment_ = NULL;
 
 continue_:
@@ -301,7 +301,7 @@ Net_CppParserBase_T<ConfigurationType,
 //              ACE_TEXT (message_in.c_str ())));
   ACE_DEBUG ((LM_ERROR,
 //              ACE_TEXT ("failed to parse \"%s\" (@%s): \"%s\"\n"),
-              ACE_TEXT ("failed to BitTorrent_Parser::parse(): \"%s\"\n"),
+              ACE_TEXT ("failed to Common_IParser_T::parse(): \"%s\"\n"),
 //              std::string (fragment_->rd_ptr (), fragment_->length ()).c_str (),
 //              converter.str ().c_str (),
               message_in.c_str ()));
@@ -354,7 +354,7 @@ Net_CppParserBase_T<ConfigurationType,
     {
       // *NOTE*: most probable reason: received session end
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("no data after Net_CppParserBase_T::wait(), aborting\n")));
+                  ACE_TEXT ("no data after Common_IScannerBase::waitBuffer(), aborting\n")));
       return false;
     } // end IF
   } // end IF
@@ -368,7 +368,7 @@ Net_CppParserBase_T<ConfigurationType,
   // switch to the next fragment
 
   // clean state
-  scan_end ();
+  end ();
 
   // initialize next buffer
 
@@ -378,15 +378,12 @@ Net_CppParserBase_T<ConfigurationType,
   *(fragment_->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
 
-  if (!scan_begin ())
+  if (!begin (NULL, 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_CppParserBase_T::scan_begin(), aborting\n")));
+                ACE_TEXT ("failed to Common_IScannerBase::begin(), aborting\n")));
     return false;
   } // end IF
-
-  //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("switched input buffers...\n")));
 
   return true;
 }
@@ -500,11 +497,15 @@ Net_CppParserBase_T<ConfigurationType,
                     ParserType,
                     ParserInterfaceType,
                     ArgumentType,
-                    SessionMessageType>::scan_begin ()
+                    SessionMessageType>::begin (const char* buffer_in,
+                                                unsigned int bufferSize_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_CppParserBase_T::scan_begin"));
+  NETWORK_TRACE (ACE_TEXT ("Net_CppParserBase_T::begin"));
 
 //  static int counter = 1;
+
+  ACE_UNUSED_ARG (buffer_in);
+  ACE_UNUSED_ARG (bufferSize_in);
 
   // sanity check(s)
   ACE_ASSERT (!buffer_);
@@ -517,7 +518,7 @@ Net_CppParserBase_T<ConfigurationType,
   scanner_.switch_streams (&stream_, NULL);
 
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("parsing fragment #%d --> %d byte(s)...\n"),
+//              ACE_TEXT ("parsing fragment #%d --> %d byte(s)\n"),
 //              counter++,
 //              fragment_->length ()));
 
@@ -536,9 +537,9 @@ Net_CppParserBase_T<ConfigurationType,
                     ParserType,
                     ParserInterfaceType,
                     ArgumentType,
-                    SessionMessageType>::scan_end ()
+                    SessionMessageType>::end ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_CppParserBase_T::scan_end"));
+  NETWORK_TRACE (ACE_TEXT ("Net_CppParserBase_T::end"));
 
   // sanity check(s)
   if (!buffer_)
@@ -579,6 +580,12 @@ Net_ParserBase_T<ConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("Net_ParserBase_T::Net_ParserBase_T"));
 
   ACE_UNUSED_ARG (traceScanning_in);
+
+  parser_.set_debug_level (traceParsing_in ? 1 : 0);
+#if YYDEBUG
+//  yydebug = (trace_ ? 1 : 0);
+//  yysetdebug (trace_ ? 1 : 0);
+#endif
 }
 
 template <typename ConfigurationType,
@@ -599,21 +606,21 @@ Net_ParserBase_T<ConfigurationType,
   {
     ACE_ASSERT (state_);
     try {
-      destroy (state_,
-               buffer_);
+      this->destroy (state_,
+                     buffer_);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IScanner_T::destroy(): \"%m\", continuing\n")));
+                  ACE_TEXT ("caught exception in Common_ILexScanner_T::destroy(): \"%m\", continuing\n")));
     }
   } // end IF
 
   if (state_)
   {
     try {
-      finalize (state_);
+      this->finalize (state_);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IScanner_T::finalize(): \"%m\", continuing\n")));
+                  ACE_TEXT ("caught exception in Common_ILexScanner_T::finalize(): \"%m\", continuing\n")));
     }
   } // end IF
 }
@@ -646,21 +653,21 @@ Net_ParserBase_T<ConfigurationType,
     {
       ACE_ASSERT (state_);
       try {
-        destroy (state_,
-                 buffer_);
+        this->destroy (state_,
+                       buffer_);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Net_IScanner_T::destroy(): \"%m\", continuing\n")));
+                    ACE_TEXT ("caught exception in Common_ILexScanner_T::destroy(): \"%m\", continuing\n")));
       }
       buffer_ = NULL;
     } // end IF
     if (state_)
     {
       try {
-        finalize (state_);
+        this->finalize (state_);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Net_IScanner_T::finalize(): \"%m\", continuing\n")));
+                    ACE_TEXT ("caught exception in Common_ILexScanner_T::finalize(): \"%m\", continuing\n")));
       }
       state_ = NULL;
     } // end IF
@@ -684,12 +691,12 @@ Net_ParserBase_T<ConfigurationType,
     result = initialize (state_);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IScanner_T::initialize(): \"%m\", continuing\n")));
+                ACE_TEXT ("caught exception in Common_ILexScanner_T::initialize(): \"%m\", continuing\n")));
   }
   if (!result)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_IScanner_T::initialize(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to Common_ILexScanner_T::initialize(): \"%m\", aborting\n")));
     return false;
   } // end IF
   ACE_ASSERT (state_);
@@ -701,7 +708,7 @@ Net_ParserBase_T<ConfigurationType,
            configuration_->debugScanner);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IScanner_T::debug(): \"%m\", continuing\n")));
+                ACE_TEXT ("caught exception in Common_ILexScanner_T::debug(): \"%m\", continuing\n")));
   }
 #if YYDEBUG
   parser_.set_debug_level (trace_ ? 1 : 0);
@@ -741,7 +748,7 @@ Net_ParserBase_T<ConfigurationType,
 //              ACE_TEXT (message_in.c_str ())));
   ACE_DEBUG ((LM_ERROR,
 //              ACE_TEXT ("failed to parse \"%s\" (@%s): \"%s\"\n"),
-              ACE_TEXT ("failed to BitTorrent_Parser::parse(): \"%s\"\n"),
+              ACE_TEXT ("failed to Common_IScannerBase::parse(): \"%s\"\n"),
 //              std::string (fragment_->rd_ptr (), fragment_->length ()).c_str (),
 //              converter.str ().c_str (),
               message_in.c_str ()));
@@ -787,10 +794,10 @@ Net_ParserBase_T<ConfigurationType,
 
   int result = -1;
   bool do_scan_end = false;
-  if (!scan_begin ())
+  if (!begin (NULL, 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ParserBase_T::scan_begin(), aborting\n")));
+                ACE_TEXT ("failed to Common_IScannerBase::begin(), aborting\n")));
     goto error;
   } // end IF
   do_scan_end = true;
@@ -809,7 +816,7 @@ Net_ParserBase_T<ConfigurationType,
     result = parser_.parse ();
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in ParserType::parse(), continuing\n")));
+                ACE_TEXT ("caught exception in Common_IParser_T::parse(), continuing\n")));
     result = 1;
   }
   switch (result)
@@ -821,21 +828,21 @@ Net_ParserBase_T<ConfigurationType,
     { // *NOTE*: most probable reason: connection
       //         has been closed --> session end
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("failed to parse BitTorrent PDU (result was: %d), aborting\n"),
+                  ACE_TEXT ("failed to parse PDU (result was: %d), aborting\n"),
                   result));
       goto error;
     }
   } // end SWITCH
 
   // finalize buffer/scanner
-  scan_end ();
+  end ();
   do_scan_end = false;
 
   goto continue_;
 
 error:
   if (do_scan_end)
-    scan_end ();
+    end ();
   fragment_ = NULL;
 
 continue_:
@@ -871,7 +878,7 @@ Net_ParserBase_T<ConfigurationType,
     {
       // *NOTE*: most probable reason: received session end
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("no data after Net_ParserBase_T::waitBuffer(), aborting\n")));
+                  ACE_TEXT ("no data after Common_IScannerBase::waitBuffer(), aborting\n")));
       return false;
     } // end IF
   } // end IF
@@ -885,7 +892,7 @@ Net_ParserBase_T<ConfigurationType,
   // switch to the next fragment
 
   // clean state
-  scan_end ();
+  end ();
 
   // initialize next buffer
 
@@ -895,15 +902,12 @@ Net_ParserBase_T<ConfigurationType,
   *(fragment_->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
 
-  if (!scan_begin ())
+  if (!begin (NULL, 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_ParserBase_T::scan_begin(), aborting\n")));
+                ACE_TEXT ("failed to Common_IScannerBase::begin(), aborting\n")));
     return false;
   } // end IF
-
-  //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("switched input buffers...\n")));
 
   return true;
 }
@@ -1013,11 +1017,15 @@ Net_ParserBase_T<ConfigurationType,
                  ParserType,
                  ParserInterfaceType,
                  ArgumentType,
-                 SessionMessageType>::scan_begin ()
+                 SessionMessageType>::begin (const char* buffer_in,
+                                             unsigned int bufferSize_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ParserBase_T::scan_begin"));
 
-  static int counter = 1;
+//  static int counter = 1;
+
+  ACE_UNUSED_ARG (buffer_in);
+  ACE_UNUSED_ARG (bufferSize_in);
 
   // sanity check(s)
   ACE_ASSERT (!buffer_);
@@ -1031,16 +1039,16 @@ Net_ParserBase_T<ConfigurationType,
   }
   catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IScanner_T::create(): \"%m\", continuing\n")));
+                ACE_TEXT ("caught exception in Common_ILexScanner_T::create(): \"%m\", continuing\n")));
   }
   if (!buffer_)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_IScanner_T::create(): \"%m\", aborting\n")));
-  else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("parsing fragment #%d --> %d byte(s)...\n"),
-                counter++,
-                fragment_->length ()));
+                ACE_TEXT ("failed to Common_ILexScanner_T::create(): \"%m\", aborting\n")));
+//  else
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("parsing fragment #%d --> %d byte(s)\n"),
+//                counter++,
+//                fragment_->length ()));
 
   return (buffer_ != NULL);
 }
@@ -1055,9 +1063,9 @@ Net_ParserBase_T<ConfigurationType,
                  ParserType,
                  ParserInterfaceType,
                  ArgumentType,
-                 SessionMessageType>::scan_end ()
+                 SessionMessageType>::end ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_ParserBase_T::scan_end"));
+  NETWORK_TRACE (ACE_TEXT ("Net_ParserBase_T::end"));
 
   // sanity check(s)
   if (!buffer_)
@@ -1065,11 +1073,11 @@ Net_ParserBase_T<ConfigurationType,
 
   // clean buffer
   try {
-    destroy (state_,
-             buffer_);
+    this->destroy (state_,
+                   buffer_);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IScanner_T::destroy(): \"%m\", continuing\n")));
+                ACE_TEXT ("caught exception in Common_ILexScanner_T::destroy(): \"%m\", continuing\n")));
   }
   buffer_ = NULL;
 }

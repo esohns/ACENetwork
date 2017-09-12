@@ -24,6 +24,7 @@
 #include <string>
 
 #include "common.h"
+#include "common_iscanner.h"
 //#include "common_iget.h"
 
 #include "net_iparser.h"
@@ -31,15 +32,13 @@
 #include "bittorrent_common.h"
 
 class BitTorrent_Bencoding_IParser
- : public Net_IRecordParser_T<struct Common_ParserConfiguration,
-                              Bencoding_Dictionary_t>
- , virtual public Net_IScanner_T<BitTorrent_Bencoding_IParser>
+ : public Net_IYaccRecordParser_T<struct Common_ParserConfiguration,
+                                  Bencoding_Dictionary_t>
+ , virtual public Common_ILexScanner_T<BitTorrent_Bencoding_IParser>
 // , public Common_IGet_T<Bencoding_Dictionary_t>
 // , public Common_IGet_T<Bencoding_List_t>
 {
  public:
-  virtual ~BitTorrent_Bencoding_IParser () {};
-
   using IPARSER_T::error;
 //  using Common_IScanner::error;
 
@@ -56,20 +55,18 @@ class BitTorrent_Bencoding_IParser
 
 template <typename RecordType>
 class BitTorrent_IParser_T
- : public Net_IStreamParser_T<struct Common_ParserConfiguration,
-                              RecordType>
- , virtual public Net_IScanner_T<BitTorrent_IParser_T<RecordType> >
+ : public Net_IYaccStreamParser_T<struct Common_ParserConfiguration,
+                                  RecordType>
+ , virtual public Common_ILexScanner_T<BitTorrent_IParser_T<RecordType> >
 {
  public:
   // convenient types
-  typedef Net_IStreamParser_T<struct Common_ParserConfiguration,
-                              RecordType> IPARSER_T;
-  typedef Net_IScanner_T<BitTorrent_IParser_T<RecordType> > ISCANNER_T;
+  typedef Net_IYaccStreamParser_T<struct Common_ParserConfiguration,
+                                  RecordType> IPARSER_T;
+  typedef Common_ILexScanner_T<BitTorrent_IParser_T<RecordType> > ISCANNER_T;
 
   using IPARSER_T::error;
   using ISCANNER_T::error;
-
-  virtual ~BitTorrent_IParser_T () {};
 
   ////////////////////////////////////////
   // callbacks
@@ -79,9 +76,9 @@ class BitTorrent_IParser_T
 
 //////////////////////////////////////////
 
-typedef Net_IScanner_T<BitTorrent_Bencoding_IParser> BitTorrent_Bencoding_IScanner_t;
+typedef Common_ILexScanner_T<BitTorrent_Bencoding_IParser> BitTorrent_Bencoding_IScanner_t;
 
 typedef BitTorrent_IParser_T<struct BitTorrent_PeerRecord> BitTorrent_IParser_t;
-typedef Net_IScanner_T<BitTorrent_IParser_t> BitTorrent_IScanner_t;
+typedef Common_ILexScanner_T<BitTorrent_IParser_t> BitTorrent_IScanner_t;
 
 #endif

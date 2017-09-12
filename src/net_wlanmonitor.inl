@@ -60,15 +60,15 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 // , deviceDBusPath_ ()
  // , proxy_ (NULL)
 #endif
+ , configuration_ (NULL)
  , isActive_ (false)
+ , isInitialized_ (false)
  , localSAP_ ()
  , peerSAP_ ()
  , lock_ ()
  , subscribers_ ()
  , userData_ (NULL)
  /////////////////////////////////////////
- , configuration_ (NULL)
- , isInitialized_ (false)
  , queue_ (STREAM_QUEUE_MAX_SLOTS)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::Net_WLANMonitor_T"));
