@@ -245,10 +245,10 @@ Net_StreamTCPSocketBase_T<HandlerType,
   } // end IF
   // update session data
   // *TODO*: remove type inferences
-  session_data_container_p = &stream_.get ();
+  session_data_container_p = &stream_.getR ();
   ACE_ASSERT (session_data_container_p);
   session_data_p =
-    &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->get ());
+    &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
   ACE_ASSERT (session_data_p->lock);
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, *session_data_p->lock, -1);
     session_data_p->connectionState = &(inherited2::state_);

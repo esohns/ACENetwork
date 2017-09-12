@@ -99,7 +99,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     return;
 
   session_data_p =
-      &const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
+      &const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
   if (!session_data_p->broadcastConnection)
     return;
@@ -236,10 +236,10 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::sessionData_);
   ACE_ASSERT (message_inout->isInitialized ());
 
-  const typename DataMessageType::DATA_T& data_r = message_inout->get ();
+  const typename DataMessageType::DATA_T& data_r = message_inout->getR ();
 
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
+    const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
   // sanity check(s)
   ACE_ASSERT (session_data_r.broadcastConnection);
@@ -530,7 +530,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 
       // step1: retrieve a handle to the session data
       typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-        const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
+        const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
       // step2: set up a (UDP) connection ?
       int result = -1;
@@ -762,7 +762,7 @@ continue_2:
     case STREAM_SESSION_MESSAGE_END:
     {
       typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-        const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
+        const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
       if (!session_data_r.broadcastConnection)
         goto continue_3;

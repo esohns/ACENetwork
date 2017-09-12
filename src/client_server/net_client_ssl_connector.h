@@ -83,14 +83,14 @@ class Net_Client_SSL_Connector_T
 
   Net_Client_SSL_Connector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
                               const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  virtual ~Net_Client_SSL_Connector_T ();
+  inline virtual ~Net_Client_SSL_Connector_T () {};
 
   // implement Net_Client_IConnector_T
   virtual enum Net_TransportLayerType transportLayer () const;
   inline virtual bool useReactor () const { return true; };
 
   // *NOTE*: handlers retrieve the configuration object with get ()
-  inline virtual const ConfigurationType& get () const { return configuration_; };
+  inline virtual const ConfigurationType& getR () const { return configuration_; };
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = configuration_in; configuration_.socketHandlerConfiguration.connectionConfiguration = &configuration_; return true; };
 
   virtual void abort ();

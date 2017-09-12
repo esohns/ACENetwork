@@ -76,7 +76,7 @@ class HTTP_Message_T
   virtual ~HTTP_Message_T ();
 
   virtual HTTP_Method_t command () const; // return value: message type
-  static std::string Command2String (HTTP_Method_t);
+  static std::string CommandToString (HTTP_Method_t);
 
   // implement Common_IDumpState
   virtual void dump_state () const;
@@ -106,10 +106,12 @@ class HTTP_Message_T
 
  protected:
   // *NOTE*: to be used by allocators
-  HTTP_Message_T (ACE_Data_Block*, // data block to use
-                  ACE_Allocator*,  // message allocator
-                  bool = true);    // increment running message counter ?
-  //   HTTP_Message_T (ACE_Allocator*); // message allocator
+  HTTP_Message_T (Stream_SessionId_t,
+                  ACE_Data_Block*,    // data block to use
+                  ACE_Allocator*,     // message allocator
+                  bool = true);       // increment running message counter ?
+  //   HTTP_Message_T (Stream_SessionId_t,
+//                     ACE_Allocator*); // message allocator
 
   // copy ctor to be used by duplicate() and child classes
   // --> uses an (incremented refcount of) the same datablock ("shallow copy")

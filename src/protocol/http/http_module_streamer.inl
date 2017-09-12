@@ -107,9 +107,9 @@ HTTP_Module_Streamer_T<ACE_SYNCH_USE,
   // serialize structured data
   // --> create the appropriate bytestream corresponding to its elements
   const typename DataMessageType::DATA_T& data_container_r =
-      message_inout->get ();
+      message_inout->getR ();
   typename DataMessageType::DATA_T::DATA_T& data_r =
-        const_cast<typename DataMessageType::DATA_T::DATA_T&> (data_container_r.get ());
+        const_cast<typename DataMessageType::DATA_T::DATA_T&> (data_container_r.getR ());
   std::string buffer;
   bool is_request = true;
   std::ostringstream converter;

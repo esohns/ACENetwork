@@ -125,7 +125,7 @@ Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURAT
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
   session_data_p =
-    &const_cast<struct Test_U_DHCPClient_SessionData&> (inherited::sessionData_->get ());
+    &const_cast<struct Test_U_DHCPClient_SessionData&> (inherited::sessionData_->getR ());
   iterator =
     const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.end ());
@@ -156,7 +156,7 @@ Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURAT
                 ACE_TEXT (stream_name_string_)));
     goto failed;
   } // end IF
-  netIO_impl_p->set (&(inherited::state_));
+  netIO_impl_p->setP (&(inherited::state_));
 
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
@@ -203,7 +203,7 @@ Test_U_InboundConnectionStream::collect (DHCP_Statistic_t& data_out)
 
   int result = -1;
   struct Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<struct Test_U_DHCPClient_SessionData&> (inherited::sessionData_->get ());
+    const_cast<struct Test_U_DHCPClient_SessionData&> (inherited::sessionData_->getR ());
 
   Stream_Module_t* module_p =
     const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
@@ -377,7 +377,7 @@ Test_U_OutboundConnectionStream::initialize (const typename inherited::CONFIGURA
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
   session_data_p =
-    &const_cast<struct Test_U_DHCPClient_SessionData&> (inherited::sessionData_->get ());
+    &const_cast<struct Test_U_DHCPClient_SessionData&> (inherited::sessionData_->getR ());
   iterator =
     const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.end ());
@@ -405,7 +405,7 @@ Test_U_OutboundConnectionStream::initialize (const typename inherited::CONFIGURA
                 ACE_TEXT ("dynamic_cast<Test_U_Module_Net_Writer_t> failed, aborting\n")));
     goto failed;
   } // end IF
-  netIO_impl_p->set (&(inherited::state_));
+  netIO_impl_p->setP (&(inherited::state_));
 
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
@@ -452,7 +452,7 @@ Test_U_OutboundConnectionStream::collect (DHCP_Statistic_t& data_out)
 
   int result = -1;
   struct Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<struct Test_U_DHCPClient_SessionData&> (inherited::sessionData_->get ());
+    const_cast<struct Test_U_DHCPClient_SessionData&> (inherited::sessionData_->getR ());
 
   Stream_Module_t* module_p =
     const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));

@@ -100,8 +100,7 @@ class Net_Client_Connector_T
   // implement Net_Client_IConnector_T
   virtual enum Net_TransportLayerType transportLayer () const;
   inline virtual bool useReactor () const { return true; };
-  // *NOTE*: handlers retrieve the configuration object with get ()
-  inline virtual const ConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; };
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; };
   virtual ACE_HANDLE connect (const AddressType&);
 
@@ -217,7 +216,7 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_UDP; };
   inline virtual bool useReactor () const { return true; };
   // *NOTE*: handlers retrieve the configuration object with get ()
-  inline virtual const ConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; };
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; };
   // specialize (part of) Net_IConnector_T
   virtual ACE_HANDLE connect (const ACE_INET_Addr&);
@@ -347,7 +346,7 @@ class Net_Client_Connector_T<HandlerType,
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_NETLINK; };
   inline virtual bool useReactor () const { return true; };
   // *NOTE*: handlers retrieve the configuration object with get ()
-  inline virtual const ConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; };
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; };
   virtual ACE_HANDLE connect (const Net_Netlink_Addr&);
 

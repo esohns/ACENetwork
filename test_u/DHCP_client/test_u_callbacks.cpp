@@ -1158,10 +1158,10 @@ allocate:
   Test_U_InboundConnectionStream& stream_r =
       const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   const Test_U_DHCPClient_SessionData_t* session_data_container_p =
-    &stream_r.get ();
+    &stream_r.getR ();
   ACE_ASSERT (session_data_container_p);
   struct Test_U_DHCPClient_SessionData& session_data_r =
-      const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
+      const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->getR ());
   session_data_r.timeStamp = state_r.timeStamp;
   session_data_r.xid = DHCP_record.xid;
 
@@ -1225,10 +1225,10 @@ action_inform_activate_cb (GtkAction* action_in,
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   const Test_U_DHCPClient_SessionData_t* session_data_container_p =
-      &stream_r.get ();
+      &stream_r.getR ();
   ACE_ASSERT (session_data_container_p);
   struct Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
+    const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->getR ());
   Test_U_ConnectionConfigurationIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
@@ -1358,10 +1358,10 @@ action_request_activate_cb (GtkAction* action_in,
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   const Test_U_DHCPClient_SessionData_t* session_data_container_p =
-      &stream_r.get ();
+      &stream_r.getR ();
   ACE_ASSERT (session_data_container_p);
   struct Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
+    const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->getR ());
   Test_U_ConnectionConfigurationIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
@@ -1473,10 +1473,10 @@ action_release_activate_cb (GtkAction* action_in,
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
   const Test_U_DHCPClient_SessionData_t* session_data_container_p =
-    &stream_r.get ();
+    &stream_r.getR ();
   ACE_ASSERT (session_data_container_p);
   struct Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
+    const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->getR ());
   Test_U_ConnectionConfigurationIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
@@ -1866,10 +1866,6 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to \"%s\", returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
-
-      // clean up
-      iconnector_p->abort ();
-
       goto continue_;
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1992,10 +1988,6 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
-
-      // clean up
-      iconnector_p->abort ();
-
       goto continue_;
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

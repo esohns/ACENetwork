@@ -115,7 +115,7 @@ BitTorrent_Message_T<SessionDataType,
     return;
   ACE_ASSERT (inherited::data_);
 
-  const struct BitTorrent_PeerRecord& record_r = inherited::data_->get ();
+  const struct BitTorrent_PeerRecord& record_r = inherited::data_->getR ();
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("***** Message (ID: %u, %u byte(s)) *****\n%s"),

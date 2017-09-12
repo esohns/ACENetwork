@@ -54,11 +54,13 @@ HTTP_Message_T<AllocatorConfigurationType,
 template <typename AllocatorConfigurationType,
           typename MessageType>
 HTTP_Message_T<AllocatorConfigurationType,
-               MessageType>::HTTP_Message_T (ACE_Data_Block* dataBlock_in,
+               MessageType>::HTTP_Message_T (Stream_SessionId_t sessionId_in,
+                                             ACE_Data_Block* dataBlock_in,
                                              ACE_Allocator* messageAllocator_in,
                                              bool incrementMessageCounter_in)
- : inherited (dataBlock_in,               // use (don't own !) this data block
-              messageAllocator_in,        // allocator
+ : inherited (sessionId_in,
+              dataBlock_in,               // use (don't own !) this data block
+              messageAllocator_in,        // message block allocator
               incrementMessageCounter_in) // increment message counter ?
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::HTTP_Message_T"));
@@ -106,9 +108,9 @@ template <typename AllocatorConfigurationType,
           typename MessageType>
 std::string
 HTTP_Message_T<AllocatorConfigurationType,
-               MessageType>::Command2String (HTTP_Method_t method_in)
+               MessageType>::CommandToString (HTTP_Method_t method_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::Command2String"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::CommandToString"));
 
   return (method_in == HTTP_Codes::HTTP_METHOD_INVALID ? ACE_TEXT_ALWAYS_CHAR (HTTP_COMMAND_STRING_RESPONSE)
                                                        : HTTP_Tools::MethodToString (method_in));

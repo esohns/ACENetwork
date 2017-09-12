@@ -61,7 +61,7 @@ class Net_ConnectionBase_T
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   // implement (part of) Net_IConnection_T
-  inline virtual const ConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; };
   // *NOTE*: when using a connection manager, the (default) configuration is
   //         retrieved in the ctor
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; };

@@ -962,7 +962,6 @@ do_work (bool requestBroadcastReplies_in,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
 
       // clean up
-      iconnector_p->abort ();
       connection_manager_p->abort ();
 
       return;
@@ -1012,13 +1011,12 @@ do_work (bool requestBroadcastReplies_in,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
 
       // clean up
-      iconnector_p->abort ();
       connection_manager_p->abort ();
 
       return;
     } // end IF
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%d: listening to (UDP) %s...\n"),
+                ACE_TEXT ("%d: listening to (UDP) %s\n"),
                 iconnection_p->id (),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
 
@@ -1122,10 +1120,10 @@ allocate:
     Test_U_OutboundConnectionStream& stream_r =
         const_cast<Test_U_OutboundConnectionStream&> (istream_connection_p->stream ());
     const Test_U_DHCPClient_SessionData_t* session_data_container_p =
-        &stream_r.get ();
+        &stream_r.getR ();
     ACE_ASSERT (session_data_container_p);
     struct Test_U_DHCPClient_SessionData& session_data_r =
-        const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->get ());
+        const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->getR ());
     session_data_r.timeStamp = state_r.timeStamp;
     session_data_r.xid = DHCP_record.xid;
 

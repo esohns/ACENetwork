@@ -70,9 +70,9 @@ class BitTorrent_Export BitTorrent_Bencoding_Scanner
   inline virtual bool switchBuffer (bool unlink_in = false) { ACE_ASSERT (parser_); return parser_->switchBuffer (unlink_in); };
   inline virtual void waitBuffer () { ACE_ASSERT (parser_); return parser_->waitBuffer (); };
   inline virtual void error (const std::string& errorString_in) { ACE_ASSERT (parser_); parser_->error (yy::location (), errorString_in); };
-  inline virtual void set (BitTorrent_Bencoding_IParser* parser_in) { parser_ = parser_in; };
-  inline virtual void debug (yyscan_t,
-                             bool) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual const BitTorrent_Bencoding_IParser* const getP () const { return parser_; };
+  inline virtual void setP (BitTorrent_Bencoding_IParser* parser_in) { parser_ = parser_in; };
+  inline virtual void debug (yyscan_t, bool) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
   inline virtual bool initialize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
   inline virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
   inline virtual struct yy_buffer_state* create (yyscan_t, char*, size_t) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) };

@@ -76,7 +76,7 @@ class Net_Server_SSL_Listener_T
   inline virtual bool isRunning () const { return isListening_; };
   inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
-  virtual const HandlerConfigurationType& get () const;
+  inline virtual const HandlerConfigurationType& getR () const { ACE_ASSERT (configuration_); return configuration_->socketHandlerConfiguration; };
   //virtual bool initialize (const HandlerConfigurationType&);
   virtual bool initialize (const ConfigurationType&);
   inline virtual bool useReactor () const { return true; };

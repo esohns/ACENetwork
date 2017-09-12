@@ -329,10 +329,10 @@ HTTP_ParserDriver_T<SessionMessageType>::parse (ACE_Message_Block* data_in)
     goto error;
   } // end IF
 
-  if (!scan_begin ())
+  if (!begin (NULL, 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to HTTP_ParserDriver_T::scan_begin(), aborting\n")));
+                ACE_TEXT ("failed to HTTP_ParserDriver_T::begin(), aborting\n")));
     goto error;
   } // end IF
   do_scan_end = true;
@@ -369,14 +369,14 @@ HTTP_ParserDriver_T<SessionMessageType>::parse (ACE_Message_Block* data_in)
   } // end SWITCH
 
   // finalize buffer/scanner
-  scan_end ();
+  end ();
   do_scan_end = false;
 
   goto continue_;
 
 error:
   if (do_scan_end)
-    scan_end ();
+    end ();
   fragment_ = NULL;
 
 continue_:
@@ -415,7 +415,7 @@ HTTP_ParserDriver_T<SessionMessageType>::switchBuffer (bool unlink_in)
   // switch to the next fragment
 
   // clean state
-  scan_end ();
+  end ();
 
   // initialize next buffer
 
@@ -425,15 +425,12 @@ HTTP_ParserDriver_T<SessionMessageType>::switchBuffer (bool unlink_in)
   *(fragment_->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
 
-  if (!scan_begin ())
+  if (!begin (NULL, 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to HTTP_ParserDriver_T::scan_begin(), aborting\n")));
+                ACE_TEXT ("failed to HTTP_ParserDriver_T::begin(), aborting\n")));
     return false;
   } // end IF
-
-  //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("switched input buffers...\n")));
 
   return true;
 }
@@ -534,11 +531,15 @@ HTTP_ParserDriver_T<SessionMessageType>::dump_state () const
 
 template <typename SessionMessageType>
 bool
-HTTP_ParserDriver_T<SessionMessageType>::scan_begin ()
+HTTP_ParserDriver_T<SessionMessageType>::begin (const char* buffer_in,
+                                                unsigned int bufferSize_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::scan_begin"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::begin"));
 
 //  static int counter = 1;
+
+  ACE_UNUSED_ARG (buffer_in);
+  ACE_UNUSED_ARG (bufferSize_in);
 
   // sanity check(s)
   ACE_ASSERT (!bufferState_);
@@ -568,22 +569,18 @@ HTTP_ParserDriver_T<SessionMessageType>::scan_begin ()
     return false;
   } // end IF
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("parsing fragment #%d --> %d byte(s)...\n"),
+//              ACE_TEXT ("parsing fragment #%d --> %d byte(s)\n"),
 //              counter++,
 //              fragment_->length ()));
-
-//  // *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
-//  HTTP_Scanner__switch_to_buffer (bufferState_,
-//                                  scannerState_);
 
   return true;
 }
 
 template <typename SessionMessageType>
 void
-HTTP_ParserDriver_T<SessionMessageType>::scan_end ()
+HTTP_ParserDriver_T<SessionMessageType>::end ()
 {
-  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::scan_end"));
+  NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::end"));
 
   // sanity check(s)
   ACE_ASSERT (bufferState_);

@@ -64,29 +64,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
-Net_Client_SSL_Connector_T<HandlerType,
-                           ConnectorType,
-                           AddressType,
-                           ConfigurationType,
-                           StateType,
-                           StatisticContainerType,
-                           HandlerConfigurationType,
-                           StreamType,
-                           UserDataType>::~Net_Client_SSL_Connector_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Client_SSL_Connector_T::~Net_Client_SSL_Connector_T"));
-
-}
-
-template <typename HandlerType,
-          typename ConnectorType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
 Net_TransportLayerType
 Net_Client_SSL_Connector_T<HandlerType,
                            ConnectorType,

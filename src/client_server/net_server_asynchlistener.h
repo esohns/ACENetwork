@@ -89,7 +89,7 @@ class Net_Server_AsynchListener_T
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  virtual const HandlerConfigurationType& get () const; // return value: socket handler configuration
+  inline virtual const HandlerConfigurationType& getR () const { ACE_ASSERT (configuration_); return configuration_->socketHandlerConfiguration; };
   //virtual bool initialize (const HandlerConfigurationType&);
   virtual bool initialize (const ConfigurationType&); // configuration
   inline virtual bool useReactor () const { return false; };

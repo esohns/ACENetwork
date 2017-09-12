@@ -183,7 +183,7 @@ class HTTP_Module_ParserH_T
                                     SessionDataContainerType,
                                     StatisticContainerType,
                                     StatisticHandlerType,
-                                    UserDataType>::set;
+                                    UserDataType>::setP;
 
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const ConfigurationType&,

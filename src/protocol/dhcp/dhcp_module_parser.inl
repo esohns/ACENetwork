@@ -139,7 +139,7 @@ DHCP_Module_Parser_T<ACE_SYNCH_USE,
 //  DATA_CONTAINER_T& data_container_r =
 //    const_cast<DATA_CONTAINER_T&> (message_inout->get ());
 //  DATA_T& data_r = const_cast<DATA_T&> (data_container_r.get ());
-  DATA_T& data_r = const_cast<DATA_T&> (message_inout->get ());
+  DATA_T& data_r = const_cast<DATA_T&> (message_inout->getR ());
 //  if (!data_r.DHCPRecord)
 //  {
 //    ACE_NEW_NORETURN (data_r.DHCPRecord,

@@ -57,7 +57,7 @@ Net_CppParserBase_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_CppParserBase_T::Net_CppParserBase_T"));
 
-  scanner_.set (this);
+  scanner_.setP (this);
 
   scanner_.set_debug (traceScanning_in ? 1 : 0);
   parser_.set_debug_level (traceParsing_in ? 1 : 0);

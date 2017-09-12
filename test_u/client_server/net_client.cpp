@@ -673,7 +673,6 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
     // clean up
     timer_manager_p->stop ();
-    connector_p->abort ();
 
     return;
   } // end IF
@@ -687,7 +686,6 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
     // clean up
     timer_manager_p->stop ();
-    connector_p->abort ();
 
     return;
   } // end IF
@@ -719,7 +717,6 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
       // clean up
       timer_manager_p->stop ();
-      connector_p->abort ();
 
       return;
     } // end IF
@@ -733,7 +730,6 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
 
       // clean up
       timer_manager_p->stop ();
-      connector_p->abort ();
       CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);
 
       return;
@@ -762,7 +758,6 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
     if (!UIDefinitionFile_in.empty ())
       CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
     timer_manager_p->stop ();
-    connector_p->abort ();
 
     return;
   } // end IF
@@ -812,7 +807,6 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
       //				g_source_remove(*iterator);
       //		} // end lock scope
       timer_manager_p->stop ();
-      connector_p->abort ();
 
       return;
     } // end IF

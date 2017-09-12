@@ -372,14 +372,14 @@ Net_StreamConnectionBase_T<HandlerType,
     {
       ICONNECTOR_T* iconnector_p = static_cast<ICONNECTOR_T*> (arg_in);
       ACE_ASSERT (iconnector_p);
-      configuration_p = &const_cast<ConfigurationType&> (iconnector_p->get ());
+      configuration_p = &const_cast<ConfigurationType&> (iconnector_p->getR ());
       break;
     }
     case NET_ROLE_SERVER:
     {
       ILISTENER_T* ilistener_p = static_cast<ILISTENER_T*> (arg_in);
       ACE_ASSERT (ilistener_p);
-      configuration_p = &const_cast<ConfigurationType&> (ilistener_p->get ());
+      configuration_p = &const_cast<ConfigurationType&> (ilistener_p->getR ());
       break;
     }
     default:
@@ -657,14 +657,14 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
       const ICONNECTOR_T* iconnector_p =
         static_cast<const ICONNECTOR_T*> (act_in);
       ACE_ASSERT (iconnector_p);
-      configuration_p = &const_cast<ConfigurationType&> (iconnector_p->get ());
+      configuration_p = &const_cast<ConfigurationType&> (iconnector_p->getR ());
       break;
     }
     case NET_ROLE_SERVER:
     {
       const ILISTENER_T* ilistener_p = static_cast<const ILISTENER_T*> (act_in);
       ACE_ASSERT (ilistener_p);
-      configuration_p = &const_cast<ConfigurationType&> (ilistener_p->get ());
+      configuration_p = &const_cast<ConfigurationType&> (ilistener_p->getR ());
       break;
     }
     default:

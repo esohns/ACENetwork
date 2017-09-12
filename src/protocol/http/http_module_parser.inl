@@ -707,7 +707,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
       // sanity check(s)
       ACE_ASSERT (inherited::sessionData_);
 
-      const SessionDataType& session_data_r = inherited::sessionData_->get ();
+      const SessionDataType& session_data_r = inherited::sessionData_->getR ();
 
       // retain session ID for reporting
       ACE_ASSERT (inherited::streamState_);
@@ -857,7 +857,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
   // set session data format
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
+      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
   HTTP_HeadersIterator_t iterator =
       record_inout->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
@@ -886,10 +886,11 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
     goto error;
   } // end IF
-  data_container_p->set (record_inout);
+  data_container_p->setPR (record_inout);
   record_inout = NULL;
   data_container_2 = data_container_p;
   headFragment_->initialize (data_container_2,
+                             headFragment_->sessionId (),
                              NULL);
 
   // make sure the whole fragment chain references the same data record
@@ -900,6 +901,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
     data_container_p->increase ();
     data_container_2 = data_container_p;
     message_p->initialize (data_container_2,
+                           headFragment_->sessionId (),
                            NULL);
     message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE

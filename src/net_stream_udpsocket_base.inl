@@ -208,10 +208,10 @@ Net_StreamUDPSocketBase_T<HandlerType,
   } // end IF
   // update session data
   // *TODO*: remove type inferences
-  session_data_container_p = &stream_.get ();
+  session_data_container_p = &stream_.getR ();
   ACE_ASSERT (session_data_container_p);
   session_data_p =
-    &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->get ());
+    &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
   ACE_ASSERT (session_data_p->lock);
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, *session_data_p->lock, -1);
     session_data_p->connectionState = &(inherited2::state_);
@@ -577,10 +577,10 @@ Net_StreamUDPSocketBase_T<HandlerType,
   {
     // *TODO*: remove type inferences
     const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
-        &stream_.get ();
+        &stream_.getR ();
     ACE_ASSERT (session_data_container_p);
     typename StreamType::SESSION_DATA_T& session_data_r =
-        const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->get ());
+        const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
     if (session_data_r.lock)
     {
       result = session_data_r.lock->acquire ();
@@ -1651,10 +1651,10 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   } // end IF
   // update session data
   // *TODO*: remove type inferences
-  session_data_container_p = &stream_.get ();
+  session_data_container_p = &stream_.getR ();
   ACE_ASSERT (session_data_container_p);
   session_data_p =
-    &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->get ());
+    &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
   ACE_ASSERT (session_data_p->lock);
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_p->lock);
     session_data_p->connectionState = &(inherited2::state_);
@@ -2012,10 +2012,10 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   {
     // *TODO*: remove type inferences
     const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
-        &stream_.get ();
+        &stream_.getR ();
     ACE_ASSERT (session_data_container_p);
     typename StreamType::SESSION_DATA_T& session_data_r =
-        const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->get ());
+        const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
     if (session_data_r.lock)
     {
       result = session_data_r.lock->acquire ();

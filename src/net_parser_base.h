@@ -76,7 +76,8 @@ class Net_CppParserBase_T
   virtual void finalize (yyscan_t& state_in) { scanner_.finalize (state_in); };
   inline virtual struct yy_buffer_state* create (yyscan_t state_in, char* buffer_in, size_t size_in) { return scanner_.create (state_in, buffer_in, size_in); };
   inline virtual void destroy (yyscan_t state_in, struct yy_buffer_state*& buffer_inout) { scanner_.destroy (state_in, buffer_inout); };
-  inline virtual void set (ParserInterfaceType* interfaceHandle_in) { scanner_.set (interfaceHandle_in); };
+  inline virtual const ParserInterfaceType* const getP () const { return this; };
+  inline virtual void setP (ParserInterfaceType* interfaceHandle_in) { scanner_.setP (interfaceHandle_in); };
 
  protected:
   ConfigurationType*      configuration_;

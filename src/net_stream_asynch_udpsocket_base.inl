@@ -273,9 +273,9 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     } // end IF
     // update session data
     const typename StreamType::SESSION_DATA_CONTAINER_T& session_data_container_r =
-      stream_.get ();
+      stream_.getR ();
     typename StreamType::SESSION_DATA_T& session_data_r =
-      const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_r.get ());
+      const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_r.getR ());
     ACE_ASSERT (session_data_r.lock);
     { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_r.lock);
       session_data_r.connectionState = &(inherited4::state_);

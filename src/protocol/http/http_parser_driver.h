@@ -61,6 +61,10 @@ class HTTP_ParserDriver_T
   virtual void error (const std::string&); // message
   inline virtual void offset (unsigned int offset_in) { offset_ += offset_in; }; // offset (increment)
   inline virtual unsigned int offset () const { return offset_; };
+  virtual bool begin (const char*,   // buffer handle
+                      unsigned int); // buffer size
+  virtual void end ();
+  inline virtual const HTTP_IParser* const getP () const { return this; };
   virtual bool parse (ACE_Message_Block*); // data buffer handle
   virtual bool switchBuffer (bool = false); // unlink current fragment ?
   // *NOTE*: (waits for and) appends the next data chunk to fragment_;
@@ -91,11 +95,7 @@ class HTTP_ParserDriver_T
 
   inline virtual YY_BUFFER_STATE create (yyscan_t, char*, size_t) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) };
   inline virtual void destroy (yyscan_t, struct yy_buffer_state*&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
-  inline virtual void set (HTTP_IParser*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
-
-  // helper methods
-  bool scan_begin ();
-  void scan_end ();
+  inline virtual void setP (HTTP_IParser*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   bool                               blockInParse_;
   bool                               isFirst_;

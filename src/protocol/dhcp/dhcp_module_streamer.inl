@@ -114,7 +114,7 @@ DHCP_Module_Streamer_T<ACE_SYNCH_USE,
 //  const typename DataMessageType::DATA_T::DATA_T& data_r =
 //        data_container_r.get ();
   const typename DataMessageType::DATA_T& data_r =
-      message_inout->get ();
+      message_inout->getR ();
   result =
     message_inout->copy (reinterpret_cast<const char*> (&data_r.op),
                          1);

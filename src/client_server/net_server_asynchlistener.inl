@@ -282,30 +282,6 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
-const HandlerConfigurationType&
-Net_Server_AsynchListener_T<HandlerType,
-                            AddressType,
-                            ConfigurationType,
-                            StateType,
-                            HandlerConfigurationType,
-                            StreamType,
-                            UserDataType>::get () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::get"));
-
-  // sanity check(s)
-  ACE_ASSERT (configuration_);
-
-  return configuration_->socketHandlerConfiguration;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename HandlerConfigurationType,
-          typename StreamType,
-          typename UserDataType>
 bool
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
