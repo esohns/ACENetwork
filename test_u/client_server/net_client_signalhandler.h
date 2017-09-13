@@ -22,6 +22,7 @@
 #define TEST_U_CLIENT_SIGNALHANDLER_H
 
 #include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
 
 #include "common_isignal.h"
 #include "common_signalhandler.h"
@@ -34,7 +35,10 @@ class Test_U_Client_SignalHandler
 {
  public:
   Test_U_Client_SignalHandler ();
-  virtual ~Test_U_Client_SignalHandler ();
+  inline virtual ~Test_U_Client_SignalHandler () {};
+
+  // override Common_IInitialize_T
+  virtual bool initialize (const struct Test_U_Client_SignalHandlerConfiguration&);
 
   // implement Common_ISignal
   virtual void handle (int); // signal
@@ -44,6 +48,11 @@ class Test_U_Client_SignalHandler
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Client_SignalHandler (const Test_U_Client_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Client_SignalHandler& operator= (const Test_U_Client_SignalHandler&))
+
+  long                 actionTimerId_;
+  ACE_INET_Addr        address_;
+  Test_U_IConnector_t* connector_;
+  bool                 useReactor_;
 };
 
 #endif

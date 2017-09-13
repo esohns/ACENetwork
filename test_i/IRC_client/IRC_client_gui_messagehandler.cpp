@@ -527,7 +527,7 @@ IRC_Client_GUI_MessageHandler::~IRC_Client_GUI_MessageHandler ()
     removed_events++;
   if (removed_events)
     ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("%s: removed %u queued event(s)...\n"),
+                ACE_TEXT ("%s: removed %u queued event(s)\n"),
                 (isServerLog () ? ACE_TEXT (IRC_CLIENT_GUI_GTK_LABEL_DEF_LOG_TEXT)
                                 : ACE_TEXT (CBData_.id.c_str ())),
                 removed_events));
@@ -535,39 +535,14 @@ IRC_Client_GUI_MessageHandler::~IRC_Client_GUI_MessageHandler ()
 //    CBData_.GTKState->eventSourceIds.erase (CBData_.eventSourceID);
 }
 
-const IRC_Client_GTK_HandlerCBData&
-IRC_Client_GUI_MessageHandler::get () const
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::get"));
-
-  return CBData_;
-}
-
-bool
-IRC_Client_GUI_MessageHandler::isPrivateDialog () const
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::isPrivateDialog"));
-
-  return isPrivateDialog_;
-}
-
-bool
-IRC_Client_GUI_MessageHandler::isServerLog () const
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::isServerLog"));
-
-  return CBData_.id.empty ();
-}
-
 void
 IRC_Client_GUI_MessageHandler::queueForDisplay (const std::string& text_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_MessageHandler::queueForDisplay"));
 
-  // synch access
-  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (messageQueueLock_);
-
-  messageQueue_.push_front (text_in);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, messageQueueLock_);
+    messageQueue_.push_front (text_in);
+  } // end lock scope
 }
 
 void

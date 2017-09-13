@@ -121,8 +121,8 @@ IRC_Client_Stream_T<StatisticHandlerType>::initialize (const typename inherited:
   // - initialize modules
   // - push them onto the stream (tail-first) !
   session_data_p =
-      &const_cast<struct IRC_Client_SessionData&> (inherited::sessionData_->get ());
-  inherited::state_.currentSessionData = session_data_p;
+      &const_cast<struct IRC_Client_SessionData&> (inherited::sessionData_->getR ());
+  inherited::state_.sessionData = session_data_p;
   //session_data_p->sessionID = configuration_in.sessionID;
 
 //  ACE_ASSERT (configuration_in.moduleConfiguration);
@@ -149,7 +149,7 @@ IRC_Client_Stream_T<StatisticHandlerType>::initialize (const typename inherited:
                 ACE_TEXT (stream_irc_stream_name_string_)));
     goto error;
   } // end IF
-  bisector_impl_p->set (&(inherited::state_));
+  bisector_impl_p->setP (&(inherited::state_));
 
   // enqueue the module
   // *NOTE*: push()ing the module will open() it

@@ -208,7 +208,7 @@ Test_U_Module_ProtocolHandler::handleDataMessage (Test_U_Message*& message_inout
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("[%u]: unknown/invalid message type (was: \"%s\"), returning\n"),
                   message_inout->id (),
-                  ACE_TEXT (Test_U_Message::CommandType2String (message_header.messageType).c_str ())));
+                  ACE_TEXT (Test_U_Message::CommandTypeToString (message_header.messageType).c_str ())));
       return;
     }
   } // end SWITCH
@@ -234,9 +234,9 @@ Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& mes
     {
       // retain session id for reporting
       const Test_U_StreamSessionData_t& session_data_container_r =
-          message_inout->get ();
+          message_inout->getR ();
       const struct Test_U_StreamSessionData& session_data_r =
-          session_data_container_r.get ();
+          session_data_container_r.getR ();
       sessionId_ = session_data_r.sessionId;
 
       if (pingInterval_ != ACE_Time_Value::zero)

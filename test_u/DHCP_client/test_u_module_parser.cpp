@@ -21,21 +21,21 @@
 
 #include "test_i_module_databasewriter.h"
 
-#include "stream_macros.h"
-
 #include "stream_module_db_tools.h"
+
+#include "net_macros.h"
 
 Test_I_Stream_Module_DataBaseWriter::Test_I_Stream_Module_DataBaseWriter ()
  : inherited ()
  //, commit_ (false)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Module_DataBaseWriter::Test_I_Stream_Module_DataBaseWriter"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Module_DataBaseWriter::Test_I_Stream_Module_DataBaseWriter"));
 
 }
 
 Test_I_Stream_Module_DataBaseWriter::~Test_I_Stream_Module_DataBaseWriter ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Module_DataBaseWriter::~Test_I_Stream_Module_DataBaseWriter"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Module_DataBaseWriter::~Test_I_Stream_Module_DataBaseWriter"));
 
 }
 
@@ -43,7 +43,7 @@ void
 Test_I_Stream_Module_DataBaseWriter::handleSessionMessage (Test_I_Stream_SessionMessage*& message_inout,
                                                            bool& passMessageDownstream_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Module_DataBaseWriter::handleSessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Module_DataBaseWriter::handleSessionMessage"));
 
   int result = -1;
 

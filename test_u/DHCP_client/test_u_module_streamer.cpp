@@ -25,21 +25,20 @@
 
 #include "ace/Date_Time.h"
 
-#include "stream_macros.h"
-
 #include "net_common_tools.h"
+#include "net_macros.h"
 
 Test_I_Stream_Module_HTMLWriter::Test_I_Stream_Module_HTMLWriter ()
  : inherited ()
  , fileWritten_ (false)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLWriter::Test_I_Stream_Module_HTMLWriter"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLWriter::Test_I_Stream_Module_HTMLWriter"));
 
 }
 
 Test_I_Stream_Module_HTMLWriter::~Test_I_Stream_Module_HTMLWriter ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLWriter::~Test_I_Stream_Module_HTMLWriter"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLWriter::~Test_I_Stream_Module_HTMLWriter"));
 
   // clean up
   if (inherited::document_)
@@ -53,7 +52,7 @@ void
 Test_I_Stream_Module_HTMLWriter::handleSessionMessage (Test_I_Stream_SessionMessage*& message_inout,
                                                        bool& passMessageDownstream_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLWriter::handleSessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLWriter::handleSessionMessage"));
 
   int result = -1;
 

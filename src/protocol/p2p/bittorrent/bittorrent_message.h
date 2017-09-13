@@ -115,14 +115,15 @@ class BitTorrent_Message_T
  public:
   BitTorrent_Message_T (unsigned int); // size
   // *NOTE*: to be used by allocators
-  BitTorrent_Message_T (ACE_Data_Block*, // data block to use
+  BitTorrent_Message_T (Stream_SessionId_t,
+                        ACE_Data_Block*, // data block to use
                         ACE_Allocator*,  // message allocator
                         bool = true);    // increment running message counter ?
   //   BitTorrent_Message (ACE_Allocator*); // message allocator
-  virtual ~BitTorrent_Message_T ();
+  inline virtual ~BitTorrent_Message_T () {};
 
   //virtual enum BitTorrent_MessageType command () const; // return value: message type
-  inline static std::string CommandToString (enum BitTorrent_MessageType type_in) { return BitTorrent_Tools::TypeToString (type_in); };
+  inline static std::string CommandTypeToString (enum BitTorrent_MessageType type_in) { return BitTorrent_Tools::TypeToString (type_in); };
 
   // implement Common_IDumpState
   virtual void dump_state () const;
@@ -190,18 +191,19 @@ class BitTorrent_TrackerMessage_T
  public:
   BitTorrent_TrackerMessage_T (unsigned int); // size
   // *NOTE*: to be used by message allocators
-  BitTorrent_TrackerMessage_T (ACE_Data_Block*, // data block
-                               ACE_Allocator*,  // message allocator
-                               bool = true);    // increment running message counter ?
+  BitTorrent_TrackerMessage_T (Stream_SessionId_t,
+                               ACE_Data_Block*,    // data block to use
+                               ACE_Allocator*,     // message allocator
+                               bool = true);       // increment running message counter ?
   //BitTorrent_TrackerMessage_T (ACE_Allocator*); // message allocator
-  virtual ~BitTorrent_TrackerMessage_T ();
+  inline virtual ~BitTorrent_TrackerMessage_T () {};
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
   // *NOTE*: this uses our allocator (if any) to create a new message
   virtual ACE_Message_Block* duplicate (void) const;
 
-//  static std::string CommandType2String (HTTP_Method_t);
+//  static std::string CommandTypeToString (HTTP_Method_t);
 
  protected:
   // copy ctor to be used by duplicate() and child classes

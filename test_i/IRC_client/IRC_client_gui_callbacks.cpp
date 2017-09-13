@@ -372,7 +372,7 @@ connection_failed:
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->lock, std::numeric_limits<void*>::max ());
 #endif
     // *TODO*: who deletes the module ? (the stream won't do it !)
-    data_p->CBData->connections.insert (std::make_pair (connection_p->get ().timeStamp,
+    data_p->CBData->connections.insert (std::make_pair (connection_p->getR ().timeStamp,
                                                         connection_p));
   } // end lock scope
 
@@ -400,7 +400,7 @@ connection_failed:
 #else
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->lock, std::numeric_limits<void*>::max ());
 #endif
-    data_p->CBData->connections.erase (connection_p->get ().timeStamp);
+    data_p->CBData->connections.erase (connection_p->getR ().timeStamp);
 
     goto remove_page;
   } // end IF
@@ -1067,8 +1067,8 @@ done:
   number_of_pages = gtk_notebook_get_n_pages (notebook_p);
   if ((number_of_pages == 1) && data_p->connection->closing_)
   {
-    IRC_Client_GTK_ConnectionCBData* cb_data_p =
-        &const_cast<IRC_Client_GTK_ConnectionCBData&> (data_p->connection->get ());
+    struct IRC_Client_GTK_ConnectionCBData* cb_data_p =
+        &const_cast<struct IRC_Client_GTK_ConnectionCBData&> (data_p->connection->getR ());
     cb_data_p->eventSourceID =
       g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
                        idle_remove_connection_cb,
@@ -1738,9 +1738,9 @@ button_connect_clicked_cb (GtkWidget* widget_in,
            iterator_2 != data_p->connections.end ();
            ++iterator_2)
       {
-        const IRC_Client_GTK_ConnectionCBData& connection_data_r =
-          (*iterator_2).second->get ();
-        const IRC_Client_SessionState& connection_state_r =
+        const struct IRC_Client_GTK_ConnectionCBData& connection_data_r =
+          (*iterator_2).second->getR ();
+        const struct IRC_Client_SessionState& connection_state_r =
           (*iterator_2).second->state ();
         // *TODO*: the structure of the tab (label) is an implementation detail
         //         and should be encapsulated by the connection...
@@ -2092,7 +2092,8 @@ button_send_clicked_cb (GtkWidget* widget_in,
                 ACE_TEXT ("failed to IRC_Client_GUI_Connection::getActiveHandler(), returning\n")));
     return;
   } // end IF
-  const IRC_Client_GTK_HandlerCBData& cb_data_r = message_handler_p->get ();
+  const struct IRC_Client_GTK_HandlerCBData& cb_data_r =
+      message_handler_p->getR ();
   std::string active_id = cb_data_r.id;
 
   // step3: pass data to controller
@@ -2100,8 +2101,8 @@ button_send_clicked_cb (GtkWidget* widget_in,
   receivers.push_back (active_id);
   //IRC_Client_IIRCControl* controller_p =
   //  (*connections_iterator).second->getController ();
-  const IRC_Client_GTK_ConnectionCBData& connection_data_r =
-    connection_p->get ();
+  const struct IRC_Client_GTK_ConnectionCBData& connection_data_r =
+    connection_p->getR ();
   ACE_ASSERT (connection_data_r.controller);
   try {
     connection_data_r.controller->send (receivers,
@@ -3138,8 +3139,8 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
 
   // *TODO*: there must be a better way to do this
   //         (see: IRC_client_messagehandler.cpp:480)
-  const IRC_Client_GTK_ConnectionCBData& connection_data_r =
-    data_p->connection->get ();
+  const struct IRC_Client_GTK_ConnectionCBData& connection_data_r =
+    data_p->connection->getR ();
   std::string builder_label = connection_data_r.timeStamp;
   builder_label += ACE_TEXT_ALWAYS_CHAR ("::");
   builder_label += page_tab_label_string;
@@ -3248,8 +3249,8 @@ topic_clicked_cb (GtkWidget* widget_in,
 
   // *TODO*: there must be a better way to do this
   //         (see: IRC_client_messagehandler.cpp:480)
-  const IRC_Client_GTK_ConnectionCBData& connection_data_r =
-    data_p->connection->get ();
+  const struct IRC_Client_GTK_ConnectionCBData& connection_data_r =
+    data_p->connection->getR ();
   std::string builder_label = connection_data_r.timeStamp;
   builder_label += ACE_TEXT_ALWAYS_CHAR ("::");
   builder_label += page_tab_label_string;

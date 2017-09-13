@@ -1475,9 +1475,7 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   ACE_ASSERT (CBData_.GTKState);
   ACE_ASSERT (CBData_.session);
 
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
-
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
     // step1: close connections
     CBData_.session->close (false);
 

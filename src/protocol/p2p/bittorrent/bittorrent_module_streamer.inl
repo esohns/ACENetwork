@@ -57,23 +57,6 @@ template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType>
-BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
-                             TimePolicyType,
-                             ConfigurationType,
-                             ControlMessageType,
-                             DataMessageType,
-                             SessionMessageType>::~BitTorrent_Module_Streamer_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_Streamer_T::~BitTorrent_Module_Streamer_T"));
-
-}
-
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename ConfigurationType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType>
 void
 BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
                              TimePolicyType,
@@ -98,9 +81,9 @@ BitTorrent_Module_Streamer_T<ACE_SYNCH_USE,
   // serialize structured data
   // --> create the appropriate bytestream corresponding to its elements
   const typename DataMessageType::DATA_T& data_container_r =
-      message_inout->get ();
+      message_inout->getR ();
   const typename DataMessageType::DATA_T::DATA_T& record_r =
-        data_container_r.get ();
+        data_container_r.getR ();
 
   // sanity check(s)
   ACE_ASSERT ((record_r.handShakeRecord || record_r.peerRecord) &&

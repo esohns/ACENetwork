@@ -458,7 +458,7 @@ IRC_Session_T<ConnectionType,
   ACE_UNUSED_ARG (sessionID_in);
 
   // *TODO*: remove type inference
-  const IRC_Record& record_r = message_in.get ();
+  const IRC_Record& record_r = message_in.getR ();
   switch (record_r.command_.discriminator)
   {
     case IRC_Record::Command::NUMERIC:
@@ -1040,7 +1040,7 @@ IRC_Session_T<ConnectionType,
             static_cast<typename inherited::ICONNECTOR_T*> (arg_in);
       ACE_ASSERT (iconnector_p);
       connection_configuration_p =
-        &const_cast<ConnectionConfigurationType&> (iconnector_p->get ());
+        &const_cast<ConnectionConfigurationType&> (iconnector_p->getR ());
       break;
     }
     case NET_ROLE_SERVER:
@@ -1049,7 +1049,7 @@ IRC_Session_T<ConnectionType,
           static_cast<typename inherited::ILISTENER_T*> (arg_in);
       ACE_ASSERT (ilistener_p);
       connection_configuration_p =
-        &const_cast<ConnectionConfigurationType&> (ilistener_p->get ());
+        &const_cast<ConnectionConfigurationType&> (ilistener_p->getR ());
       break;
     }
     default:

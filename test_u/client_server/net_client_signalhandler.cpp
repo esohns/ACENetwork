@@ -39,15 +39,27 @@
 
 Test_U_Client_SignalHandler::Test_U_Client_SignalHandler ()
  : inherited (this) // event handler handle
+ , actionTimerId_ (-1)
+ , address_ ()
+ , connector_ (NULL)
+ , useReactor_ (NET_EVENT_USE_REACTOR)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Client_SignalHandler::Test_U_Client_SignalHandler"));
 
 }
 
-Test_U_Client_SignalHandler::~Test_U_Client_SignalHandler ()
+bool
+Test_U_Client_SignalHandler::initialize (const struct Test_U_Client_SignalHandlerConfiguration& configuration_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_SignalHandler::~Test_U_Client_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_SignalHandler::handleSignal"));
 
+  // *TODO*: remove type inference
+  actionTimerId_ = configuration_in.actionTimerId;
+  address_ = configuration_in.peerAddress;
+  connector_ = configuration_in.connector;
+  useReactor_ = configuration_in.useReactor;
+
+  return inherited::initialize (configuration_in);
 }
 
 void
@@ -71,13 +83,12 @@ Test_U_Client_SignalHandler::handle (int signal_in)
     case SIGQUIT:
 #endif
     {
-//       // *PORTABILITY*: tracing in a signal handler context is not portable
-//       // *TODO*
+      // *PORTABILITY*: tracing in a signal handler context is not portable
+      // *TODO*
       //ACE_DEBUG((LM_DEBUG,
-      //           ACE_TEXT("shutting down...\n")));
+      //           ACE_TEXT("shutting down\n")));
 
       shutdown = true;
-
       break;
     }
 // *PORTABILITY*: on Windows SIGUSRx are not defined
@@ -87,10 +98,8 @@ Test_U_Client_SignalHandler::handle (int signal_in)
 #else
     case SIGBREAK:
 #endif
-    {
-      // (try to) connect to server
+    { // (try to) connect to server
       connect = true;
-
       break;
     }
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
@@ -98,10 +107,8 @@ Test_U_Client_SignalHandler::handle (int signal_in)
     case SIGUSR2:
 #endif
     case SIGTERM:
-    {
-      // abort a connection
+    { // abort a connection
       abort = true;
-
       break;
     }
     default:
@@ -123,31 +130,32 @@ Test_U_Client_SignalHandler::handle (int signal_in)
 
   // connect ?
   if (connect &&
-      inherited::configuration_->connector)
+      connector_)
   {
+    // sanity check(s)
+    ACE_ASSERT (inherited::configuration_);
     ACE_ASSERT (inherited::configuration_->connectionConfiguration);
+
     ACE_HANDLE handle = ACE_INVALID_HANDLE;
     try {
-      inherited::configuration_->connector->initialize (*inherited::configuration_->connectionConfiguration);
-      handle =
-        inherited::configuration_->connector->connect (inherited::configuration_->peerAddress);
+      connector_->initialize (*inherited::configuration_->connectionConfiguration);
+      handle = connector_->connect (address_);
     } catch (...) {
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_Client_IConnector::connect(): \"%m\", continuing\n")));
+                  ACE_TEXT ("caught exception in Net_IConnector::connect(): \"%m\", continuing\n")));
     }
     if (handle == ACE_INVALID_HANDLE)
     {
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Client_IConnector::connect(%s): \"%m\", continuing\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::configuration_->peerAddress).c_str ())));
+                  ACE_TEXT ("failed to Net_IConnector::connect(%s): \"%m\", continuing\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (address_).c_str ())));
     } // end IF
   } // end IF
 
-//check_shutdown:
   // ...shutdown ?
   if (shutdown)
   {
@@ -163,31 +171,35 @@ Test_U_Client_SignalHandler::handle (int signal_in)
 //    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
 
     // step2: stop action timer (if any)
-    if (inherited::configuration_->actionTimerId >= 0)
+    if (actionTimerId_ >= 0)
     {
       const void* act_p = NULL;
       result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (inherited::configuration_->actionTimerId,
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (actionTimerId_,
                                                                     &act_p);
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       if (result <= 0)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to cancel action timer (ID: %d): \"%m\", continuing\n"),
-                    inherited::configuration_->actionTimerId));
-      inherited::configuration_->actionTimerId = -1;
+                    actionTimerId_));
+      actionTimerId_ = -1;
     } // end IF
 
     // step3: cancel connection attempts (if any)
-    if (inherited::configuration_->connector)
+    if (connector_ &&
+        !useReactor_)
     {
+      Test_U_IAsynchConnector_t* iasynch_connector_p =
+          dynamic_cast<Test_U_IAsynchConnector_t*> (connector_);
+      ACE_ASSERT (iasynch_connector_p);
       try {
-        inherited::configuration_->connector->abort ();
+        iasynch_connector_p->abort ();
       } catch (...) {
         // *PORTABILITY*: tracing in a signal handler context is not portable
         // *TODO*
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Test_U_Client_IConnector_t::abort(), continuing\n")));
+                    ACE_TEXT ("caught exception in Net_IAsynchConnector_T::abort(), continuing\n")));
       }
     } // end IF
 
@@ -196,8 +208,8 @@ Test_U_Client_SignalHandler::handle (int signal_in)
     iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (true,                                   // stop reactor ?
-                                         !inherited::configuration_->useReactor, // stop proactor ?
-                                         -1);                                    // group ID (--> don't block !)
+    Common_Tools::finalizeEventDispatch (true,         // stop reactor ?
+                                         !useReactor_, // stop proactor ?
+                                         -1);          // group ID (--> don't block !)
   } // end IF
 }

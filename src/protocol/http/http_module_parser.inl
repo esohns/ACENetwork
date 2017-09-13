@@ -333,7 +333,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
   // set session data format
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
+      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
   HTTP_HeadersIterator_t iterator =
       record_inout->headers.find (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_CONTENT_ENCODING_STRING));
@@ -362,8 +362,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
     goto error;
   } // end IF
-  data_container_p->set (record_inout);
-  record_inout = NULL;
+  data_container_p->setPR (record_inout);
+  ACE_ASSERT (!record_inout);
   data_container_2 = data_container_p;
   headFragment_->initialize (data_container_2,
                              NULL);

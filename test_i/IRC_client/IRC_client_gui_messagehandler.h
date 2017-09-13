@@ -64,10 +64,10 @@ class IRC_Client_GUI_MessageHandler
   virtual ~IRC_Client_GUI_MessageHandler ();
 
   // implement Common_IGet_T
-  virtual const IRC_Client_GTK_HandlerCBData& get () const;
+  inline virtual const IRC_Client_GTK_HandlerCBData& getR () const { return CBData_; };
 
-  bool isPrivateDialog () const;
-  bool isServerLog () const;
+  inline bool isPrivateDialog () const { return isPrivateDialog_; };
+  inline bool isServerLog () const { return CBData_.id.empty (); };
 
   // *WARNING*: to be called from gtk_main context ONLY (trigger with
   //            g_idle_add())

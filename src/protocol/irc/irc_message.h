@@ -71,9 +71,7 @@ class IRC_Export IRC_Message
                ACE_Allocator*,     // message allocator
                bool = true);       // increment running message counter ?
   //IRC_Message(ACE_Allocator*); // message allocator
-  virtual ~IRC_Message();
-
-  virtual IRC_CommandType_t command () const; // return value: message type
+  inline virtual ~IRC_Message() {};
 
   // implement Common_IDumpState
   virtual void dump_state () const;
@@ -83,6 +81,7 @@ class IRC_Export IRC_Message
   // *NOTE*: this uses our allocator (if any) to create a new message
   virtual ACE_Message_Block* duplicate (void) const;
 
+  virtual IRC_CommandType_t command () const; // return value: message type
   static std::string CommandTypeToString (const IRC_CommandType_t&);
 
  protected:

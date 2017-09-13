@@ -98,8 +98,8 @@ HTTP_Message_T<AllocatorConfigurationType,
   if (!inherited::isInitialized_)
     return HTTP_Codes::HTTP_METHOD_INVALID;
 
-  const typename inherited::DATA_T& data_container_r = inherited::get ();
-  const struct HTTP_Record& record_r = data_container_r.get ();
+  const typename inherited::DATA_T& data_container_r = inherited::getR ();
+  const struct HTTP_Record& record_r = data_container_r.getR ();
 
   return record_r.method;
 }
@@ -125,8 +125,8 @@ HTTP_Message_T<AllocatorConfigurationType,
   NETWORK_TRACE (ACE_TEXT ("HTTP_Message_T::dump_state"));
 
   std::ostringstream converter;
-  const typename inherited::DATA_T& data_container_r = inherited::get ();
-  const struct HTTP_Record& record_r = data_container_r.get ();
+  const typename inherited::DATA_T& data_container_r = inherited::getR ();
+  const struct HTTP_Record& record_r = data_container_r.getR ();
 
   // count continuations
   unsigned int count = 1;

@@ -609,7 +609,7 @@ IRC_Client_GUI_Connection::finalize (bool lockedAccess_in)
       if ((*iterator_2).second->isServerLog ())
         continue;
 
-      cb_data_p = &(*iterator_2).second->get ();
+      cb_data_p = &(*iterator_2).second->getR ();
       ACE_ASSERT (cb_data_p);
 
       iterator = CBData_.GTKState->builders.find (cb_data_p->builderLabel);
@@ -741,7 +741,7 @@ IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
     return;
   } // end IF
 
-  const IRC_Record& record_r = message_in.get ();
+  const IRC_Record& record_r = message_in.getR ();
   switch (record_r.command_.discriminator)
   {
     case IRC_Record::Command::NUMERIC:
@@ -1651,14 +1651,6 @@ IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
   ACE_UNUSED_ARG (sessionMessage_in);
 }
 
-const IRC_Client_GTK_ConnectionCBData&
-IRC_Client_GUI_Connection::get () const
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::get"));
-
-  return CBData_;
-}
-
 IRC_Client_GUI_MessageHandler*
 IRC_Client_GUI_Connection::getHandler (const std::string& id_in)
 {
@@ -1820,7 +1812,7 @@ IRC_Client_GUI_Connection::close ()
          iterator++)
     {
       cb_data_p =
-          &const_cast<IRC_Client_GTK_HandlerCBData&> ((*iterator).second->get ());
+          &const_cast<struct IRC_Client_GTK_HandlerCBData&> ((*iterator).second->getR ());
       ACE_ASSERT (cb_data_p);
       cb_data_p->eventSourceID =
         g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
@@ -2163,7 +2155,7 @@ IRC_Client_GUI_Connection::terminateMessageHandler (const std::string& id_in,
     } // end IF
     ACE_ASSERT ((*iterator_2).second);
     cb_data_p =
-        &const_cast<IRC_Client_GTK_HandlerCBData&> ((*iterator_2).second->get ());
+        &const_cast<IRC_Client_GTK_HandlerCBData&> ((*iterator_2).second->getR ());
     messageHandlers_.erase (iterator_2);
   } // end lock scope
   ACE_ASSERT (cb_data_p);

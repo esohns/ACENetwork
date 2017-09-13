@@ -51,16 +51,6 @@ set (${PROJECT_NAME}_Protocol_IRC_SRCS
      irc_icontrol.h
      irc_message.cpp
      irc_message.h
-     irc_parser.cpp
-     irc_parser.h
-     irc_parser_driver.cpp
-     irc_parser_driver.h
-     irc_record.cpp
-     irc_record.h
-     irc_scanner.cpp
-     irc_scanner.h
-     irc_message.cpp
-     irc_message.h
      irc_module_parser.cpp
      irc_module_parser.h
      irc_module_parser.inl
@@ -71,6 +61,14 @@ set (${PROJECT_NAME}_Protocol_IRC_SRCS
      irc_module_streamer.h
      irc_module_streamer.inl
      irc_network.h
+     irc_parser.cpp
+     irc_parser.h
+     irc_parser_driver.cpp
+     irc_parser_driver.h
+     irc_record.cpp
+     irc_record.h
+     irc_scanner.cpp
+     irc_scanner.h
      irc_session.cpp
      irc_session.h
      irc_session.inl
@@ -140,11 +138,6 @@ install (FILES
          irc_exports.h
          irc_icontrol.h
          irc_message.h
-         irc_parser.h
-         irc_parser_driver.h
-         irc_record.h
-         irc_scanner.h
-         irc_message.h
          irc_module_parser.h
          irc_module_parser.inl
          irc_module_bisector.h
@@ -152,6 +145,10 @@ install (FILES
          irc_module_streamer.h
          irc_module_streamer.inl
          irc_network.h
+         irc_parser.h
+         irc_parser_driver.h
+         irc_record.h
+         irc_scanner.h
          irc_session.h
          irc_session.inl
          irc_sessionmessage.h

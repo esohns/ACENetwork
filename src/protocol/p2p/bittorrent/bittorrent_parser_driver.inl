@@ -48,15 +48,6 @@ BitTorrent_ParserDriver_T<MessageType,
 
 template <typename MessageType,
           typename SessionMessageType>
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::~BitTorrent_ParserDriver_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::~BitTorrent_ParserDriver_T"));
-
-}
-
-template <typename MessageType,
-          typename SessionMessageType>
 void
 BitTorrent_ParserDriver_T<MessageType,
                           SessionMessageType>::error (const yy::location& location_in,

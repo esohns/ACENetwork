@@ -101,7 +101,7 @@ IRC_Client_Module_IRCHandler::handleDataMessage (IRC_Message*& message_inout,
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->protocolConfiguration);
 
-  const IRC_Record& data_r = message_inout->get ();
+  const IRC_Record& data_r = message_inout->getR ();
 //   try {
 //     data_r.dump_state ();
 //   } catch (...) {
@@ -450,12 +450,11 @@ IRC_Client_Module_IRCHandler::handleSessionMessage (IRC_Client_SessionMessage*& 
       ACE_ASSERT (inherited::configuration_->protocolConfiguration);
 
       const IRC_Client_SessionData_t& session_data_container_r =
-          message_inout->get ();
-      const IRC_Client_SessionData& session_data_r =
-          session_data_container_r.get ();
+          message_inout->getR ();
+      const struct IRC_Client_SessionData& session_data_r =
+          session_data_container_r.getR ();
       ACE_ASSERT (session_data_r.connectionState);
-      {
-        ACE_Guard<ACE_SYNCH_MUTEX> aGuard (session_data_r.connectionState->lock);
+      { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, session_data_r.connectionState->lock);
         session_data_r.connectionState->nickName =
             inherited::configuration_->protocolConfiguration->loginOptions.nickname;
       } // end lock scope

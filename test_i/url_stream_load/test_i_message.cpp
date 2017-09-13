@@ -45,16 +45,10 @@ Test_I_MessageDataContainer::Test_I_MessageDataContainer (struct Test_I_MessageD
 
 }
 
-Test_I_MessageDataContainer::~Test_I_MessageDataContainer ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_MessageDataContainer::~Test_I_MessageDataContainer"));
-
-}
-
 void
-Test_I_MessageDataContainer::set (struct HTTP_Record*& record_inout)
+Test_I_MessageDataContainer::setPR (struct HTTP_Record*& record_inout)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_I_MessageDataContainer::Test_I_MessageDataContainer"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_MessageDataContainer::setPR"));
 
   struct Test_I_MessageData* data_p = NULL;
   ACE_NEW_NORETURN (data_p,
@@ -68,7 +62,7 @@ Test_I_MessageDataContainer::set (struct HTTP_Record*& record_inout)
   data_p->HTTPRecord = record_inout;
   record_inout = NULL;
 
-  inherited::set (data_p);
+  inherited::setPR (data_p);
 }
 
 //////////////////////////////////////////
@@ -87,11 +81,13 @@ Test_I_Message::Test_I_Message (const Test_I_Message& message_in)
 
 }
 
-Test_I_Message::Test_I_Message (ACE_Data_Block* dataBlock_in,
+Test_I_Message::Test_I_Message (Stream_SessionId_t sessionId_in,
+                                ACE_Data_Block* dataBlock_in,
                                 ACE_Allocator* messageAllocator_in,
                                 bool incrementMessageCounter_in)
- : inherited (dataBlock_in,        // use (don't own (!) memory of-) this data block
-              messageAllocator_in, // re-use the same allocator
+ : inherited (sessionId_in,
+              dataBlock_in,               // use (don't own (!) memory of-) this data block
+              messageAllocator_in,        // message block allocator
               incrementMessageCounter_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_Message::Test_I_Message"));
@@ -105,13 +101,6 @@ Test_I_Message::Test_I_Message (ACE_Data_Block* dataBlock_in,
 //
 //}
 
-Test_I_Message::~Test_I_Message ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_Message::~Test_I_Message"));
-
-  // *NOTE*: will be called just BEFORE this is passed back to the allocator
-}
-//
 //DHCP_MessageType_t
 //Test_I_Message::command () const
 //{

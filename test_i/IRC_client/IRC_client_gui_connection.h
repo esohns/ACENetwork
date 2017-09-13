@@ -79,7 +79,7 @@ class IRC_Client_GUI_Connection
                        const IRC_Client_SessionMessage&);
 
   // implement Common_IGet_T
-  virtual const struct IRC_Client_GTK_ConnectionCBData& get () const;
+  inline virtual const struct IRC_Client_GTK_ConnectionCBData& getR () const { return CBData_; };
 
   // *NOTE*: a return value of -1 indicates non-existence
   gint exists (const std::string&, // channel/nick

@@ -51,7 +51,6 @@
 #include "common_ui_gtk_manager_common.h"
 
 #include "stream_allocatorheap.h"
-#include "stream_macros.h"
 
 #include "stream_file_sink.h"
 
@@ -61,6 +60,7 @@
 
 #include "net_common_tools.h"
 #include "net_defines.h"
+#include "net_macros.h"
 
 #include "net_client_defines.h"
 
@@ -85,7 +85,7 @@ const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("DHCPClientStream");
 void
 do_printUsage (const std::string& programName_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::do_printUsage"));
+  NETWORK_TRACE (ACE_TEXT ("::do_printUsage"));
 
   // enable verbatim boolean output
   std::cout.setf (std::ios::boolalpha);
@@ -195,7 +195,7 @@ do_processArguments (int argc_in,
                      bool& printVersionAndExit_out,
                      unsigned int& numberOfDispatchThreads_out)
 {
-  STREAM_TRACE (ACE_TEXT ("::do_processArguments"));
+  NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
 
   std::string path =
     Common_File_Tools::getWorkingDirectory ();
@@ -374,7 +374,7 @@ do_initializeSignals (bool allowUserRuntimeConnect_in,
                       ACE_Sig_Set& signals_out,
                       ACE_Sig_Set& ignoredSignals_out)
 {
-  STREAM_TRACE (ACE_TEXT ("::do_initializeSignals"));
+  NETWORK_TRACE (ACE_TEXT ("::do_initializeSignals"));
 
   int result = -1;
 
@@ -459,7 +459,7 @@ do_work (bool requestBroadcastReplies_in,
          Common_SignalActions_t& previousSignalActions_inout,
          Test_U_SignalHandler& signalHandler_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::do_work"));
+  NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   int result = -1;
 
@@ -1236,7 +1236,7 @@ allocate:
 void
 do_printVersion (const std::string& programName_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::do_printVersion"));
+  NETWORK_TRACE (ACE_TEXT ("::do_printVersion"));
 
   std::ostringstream converter;
 
@@ -1285,7 +1285,7 @@ int
 ACE_TMAIN (int argc_in,
            ACE_TCHAR* argv_in[])
 {
-  STREAM_TRACE (ACE_TEXT ("::main"));
+  NETWORK_TRACE (ACE_TEXT ("::main"));
 
   int result = -1;
 

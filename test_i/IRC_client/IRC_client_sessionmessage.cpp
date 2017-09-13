@@ -27,10 +27,12 @@
 
 #include "net_macros.h"
 
-IRC_Client_SessionMessage::IRC_Client_SessionMessage (enum Stream_SessionMessageType messageType_in,
+IRC_Client_SessionMessage::IRC_Client_SessionMessage (Stream_SessionId_t sessionId_in,
+                                                      enum Stream_SessionMessageType messageType_in,
                                                       IRC_Client_SessionData_t*& sessionData_inout,
                                                       struct IRC_Client_UserData* userData_in)
- : inherited (messageType_in,
+ : inherited (sessionId_in,
+              messageType_in,
               sessionData_inout,
               userData_in)
 {
@@ -45,25 +47,23 @@ IRC_Client_SessionMessage::IRC_Client_SessionMessage (const IRC_Client_SessionMe
 
 }
 
-IRC_Client_SessionMessage::IRC_Client_SessionMessage (ACE_Allocator* messageAllocator_in)
- : inherited (messageAllocator_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_SessionMessage::IRC_Client_SessionMessage"));
-
-}
-
-IRC_Client_SessionMessage::IRC_Client_SessionMessage (ACE_Data_Block* dataBlock_in,
+IRC_Client_SessionMessage::IRC_Client_SessionMessage (Stream_SessionId_t sessionId_in,
                                                       ACE_Allocator* messageAllocator_in)
- : inherited (dataBlock_in,
+ : inherited (sessionId_in,
               messageAllocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SessionMessage::IRC_Client_SessionMessage"));
 
 }
 
-IRC_Client_SessionMessage::~IRC_Client_SessionMessage ()
+IRC_Client_SessionMessage::IRC_Client_SessionMessage (Stream_SessionId_t sessionId_in,
+                                                      ACE_Data_Block* dataBlock_in,
+                                                      ACE_Allocator* messageAllocator_in)
+ : inherited (sessionId_in,
+              dataBlock_in,
+              messageAllocator_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_SessionMessage::~IRC_Client_SessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("IRC_Client_SessionMessage::IRC_Client_SessionMessage"));
 
 }
 

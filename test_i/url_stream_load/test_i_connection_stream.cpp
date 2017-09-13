@@ -121,7 +121,7 @@ Test_I_ConnectionStream::initialize (const typename inherited::CONFIGURATION_T& 
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
   session_data_p =
-    &const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->get ());
+    &const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->getR ());
   iterator =
       const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.end ());
@@ -152,7 +152,7 @@ Test_I_ConnectionStream::initialize (const typename inherited::CONFIGURATION_T& 
                 ACE_TEXT (module_p->name ())));
     goto failed;
   } // end IF
-  parser_impl_p->set (&(inherited::state_));
+  parser_impl_p->setP (&(inherited::state_));
 
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
@@ -199,7 +199,7 @@ Test_I_ConnectionStream::collect (Test_I_RuntimeStatistic_t& data_out)
 
   int result = -1;
   struct Test_I_URLStreamLoad_SessionData& session_data_r =
-    const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->get ());
+    const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->getR ());
 
   Stream_Module_t* module_p =
     const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));

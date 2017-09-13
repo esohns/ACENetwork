@@ -206,7 +206,9 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
   //         side and either:
   //         - make the parser more intelligent
   //         - bisect any list items in a post-processing step...
-  message_p->initialize (*container_p);
+  message_p->initialize (*container_p,
+                         message_p->sessionId (),
+                         NULL);
 
   // *NOTE*: message has assumed control over "container"...
 
@@ -218,7 +220,7 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
 //              message_p->length (),
 //              std::string(message_p->rd_ptr(), message_p->length()).c_str()));
 
-  driver_.initialize (const_cast<IRC_Record&> (message_p->get ()),
+  driver_.initialize (const_cast<IRC_Record&> (message_p->getR ()),
                       debugScanner_,
                       debugParser_);
   if (!driver_.parse (message_p,        // data block

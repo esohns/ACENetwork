@@ -28,14 +28,14 @@
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
-#include "stream_macros.h"
+#include "net_macros.h"
 
 void
 errorCallback (void* userData_in,
                const char* message_in,
                ...)
 {
-  STREAM_TRACE (ACE_TEXT ("::errorCallback"));
+  NETWORK_TRACE (ACE_TEXT ("::errorCallback"));
 
   Test_I_SAXParserContext* data_p =
       static_cast<Test_I_SAXParserContext*> (userData_in);
@@ -64,7 +64,7 @@ void
 structuredErrorCallback (void* userData_in,
                          xmlErrorPtr error_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::structuredErrorCallback"));
+  NETWORK_TRACE (ACE_TEXT ("::structuredErrorCallback"));
 
   ACE_DEBUG ((LM_ERROR,
               ACE_TEXT ("structuredErrorCallback: %s\n"),
@@ -74,13 +74,13 @@ structuredErrorCallback (void* userData_in,
 Test_I_Stream_Module_HTMLParser::Test_I_Stream_Module_HTMLParser ()
  : inherited ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLParser::Test_I_Stream_Module_HTMLParser"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLParser::Test_I_Stream_Module_HTMLParser"));
 
 }
 
 Test_I_Stream_Module_HTMLParser::~Test_I_Stream_Module_HTMLParser ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLParser::~Test_I_Stream_Module_HTMLParser"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLParser::~Test_I_Stream_Module_HTMLParser"));
 
 }
 
@@ -88,7 +88,7 @@ void
 Test_I_Stream_Module_HTMLParser::handleDataMessage (Test_I_Stream_Message*& message_inout,
                                                     bool& passMessageDownstream_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLParser::handleDataMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLParser::handleDataMessage"));
 
   int result = -1;
 
@@ -135,7 +135,7 @@ void
 Test_I_Stream_Module_HTMLParser::handleSessionMessage (Test_I_Stream_SessionMessage*& message_inout,
                                                        bool& passMessageDownstream_out)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLParser::handleSessionMessage"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLParser::handleSessionMessage"));
 
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
@@ -198,7 +198,7 @@ Test_I_Stream_Module_HTMLParser::handleSessionMessage (Test_I_Stream_SessionMess
 bool
 Test_I_Stream_Module_HTMLParser::initialize (const Test_I_Stream_ModuleHandlerConfiguration& configuration_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLParser::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLParser::initialize"));
 
   // sanity check(s)
   ACE_ASSERT (configuration_in.mode == STREAM_MODULE_HTMLPARSER_SAX);
@@ -221,7 +221,7 @@ Test_I_Stream_Module_HTMLParser::initialize (const Test_I_Stream_ModuleHandlerCo
 bool
 Test_I_Stream_Module_HTMLParser::initializeSAXParser ()
 {
-  STREAM_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLParser::initializeSAXParser"));
+  NETWORK_TRACE (ACE_TEXT ("Test_I_Stream_Module_HTMLParser::initializeSAXParser"));
 
   // set necessary SAX parser callbacks
   // *IMPORTANT NOTE*: the default SAX callbacks expect xmlParserCtxtPtr as user
@@ -254,14 +254,14 @@ Test_I_Stream_Module_HTMLParser::initializeSAXParser ()
 void
 startDocument (void* userData_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::startDocument"));
+  NETWORK_TRACE (ACE_TEXT ("::startDocument"));
 
   ACE_UNUSED_ARG (userData_in);
 }
 void
 endDocument (void* userData_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::endDocument"));
+  NETWORK_TRACE (ACE_TEXT ("::endDocument"));
 
   ACE_UNUSED_ARG (userData_in);
 }
@@ -270,7 +270,7 @@ characters (void* userData_in,
             const xmlChar* string_in,
             int length_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::characters"));
+  NETWORK_TRACE (ACE_TEXT ("::characters"));
 
   Test_I_SAXParserContext* data_p =
       static_cast<Test_I_SAXParserContext*> (userData_in);
@@ -353,7 +353,7 @@ startElement (void* userData_in,
               const xmlChar* name_in,
               const xmlChar** attributes_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::startElement"));
+  NETWORK_TRACE (ACE_TEXT ("::startElement"));
 
   Test_I_SAXParserContext* data_p =
       static_cast<Test_I_SAXParserContext*> (userData_in);
@@ -490,7 +490,7 @@ void
 endElement (void* userData_in,
             const xmlChar* name_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::endElement"));
+  NETWORK_TRACE (ACE_TEXT ("::endElement"));
 
   Test_I_SAXParserContext* data_p =
       static_cast<Test_I_SAXParserContext*> (userData_in);
@@ -577,7 +577,7 @@ endElement (void* userData_in,
 //getEntity (void* userData_in,
 //           const xmlChar* name_in)
 //{
-//  STREAM_TRACE (ACE_TEXT ("::getEntity"));
+//  NETWORK_TRACE (ACE_TEXT ("::getEntity"));
 
 //  ACE_UNUSED_ARG (userData_in);
 //  ACE_UNUSED_ARG (name_in);

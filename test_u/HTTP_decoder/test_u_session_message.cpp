@@ -26,10 +26,12 @@
 
 #include "stream_macros.h"
 
-Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionMessageType messageType_in,
+Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionId_t sessionId_in,
+                                              enum Stream_SessionMessageType messageType_in,
                                               Test_U_HTTPDecoder_SessionData_t*& sessionData_in,
                                               Test_U_UserData* userData_in)
- : inherited (messageType_in,
+ : inherited (sessionId_in,
+              messageType_in,
               sessionData_in,
               userData_in)
 {
@@ -44,25 +46,23 @@ Test_U_SessionMessage::Test_U_SessionMessage (const Test_U_SessionMessage& messa
 
 }
 
-Test_U_SessionMessage::Test_U_SessionMessage (ACE_Allocator* messageAllocator_in)
- : inherited (messageAllocator_in) // message block allocator
-{
-  STREAM_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
-
-}
-
-Test_U_SessionMessage::Test_U_SessionMessage (ACE_Data_Block* dataBlock_in,
+Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionId_t sessionId_in,
                                               ACE_Allocator* messageAllocator_in)
- : inherited (dataBlock_in,        // use (don't own (!) memory of-) this data block
-              messageAllocator_in) // re-use the same allocator
+ : inherited (sessionId_in,
+              messageAllocator_in) // message block allocator
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
 
 }
 
-Test_U_SessionMessage::~Test_U_SessionMessage ()
+Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionId_t sessionId_in,
+                                              ACE_Data_Block* dataBlock_in,
+                                              ACE_Allocator* messageAllocator_in)
+ : inherited (sessionId_in,
+              dataBlock_in,        // use (don't own (!) memory of-) this data block
+              messageAllocator_in) // message block allocator
 {
-  STREAM_TRACE (ACE_TEXT ("Test_U_SessionMessage::~Test_U_SessionMessage"));
+  STREAM_TRACE (ACE_TEXT ("Test_U_SessionMessage::Test_U_SessionMessage"));
 
 }
 

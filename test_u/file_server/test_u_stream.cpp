@@ -128,7 +128,7 @@ Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configurat
   ACE_ASSERT (inherited::sessionData_);
 
   session_data_p =
-      &const_cast<struct FileServer_SessionData&> (inherited::sessionData_->get ());
+      &const_cast<struct FileServer_SessionData&> (inherited::sessionData_->getR ());
   //session_data_p->sessionID = configuration_in.sessionID;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;
@@ -155,7 +155,7 @@ Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configurat
                 ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
-  net_io_impl_p->set (&(inherited::state_));
+  net_io_impl_p->setP (&(inherited::state_));
 
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
@@ -218,7 +218,7 @@ Test_U_Stream::collect (Net_Statistic_t& data_out)
 
   // synch access
   struct FileServer_SessionData& session_data_r =
-      const_cast<struct FileServer_SessionData&> (inherited::sessionData_->get ());
+      const_cast<struct FileServer_SessionData&> (inherited::sessionData_->getR ());
   if (session_data_r.lock)
   {
     result = session_data_r.lock->acquire ();
@@ -378,7 +378,7 @@ Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configu
   ACE_ASSERT (inherited::sessionData_);
 
   session_data_p =
-      &const_cast<struct FileServer_SessionData&> (inherited::sessionData_->get ());
+      &const_cast<struct FileServer_SessionData&> (inherited::sessionData_->getR ());
   //session_data_p->sessionID = configuration_in.sessionID;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;
@@ -405,7 +405,7 @@ Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configu
                 ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
-  file_source_impl_p->set (&(inherited::state_));
+  file_source_impl_p->setP (&(inherited::state_));
 
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a
@@ -468,7 +468,7 @@ Test_U_UDPStream::collect (Net_Statistic_t& data_out)
 
   // synch access
   struct FileServer_SessionData& session_data_r =
-      const_cast<struct FileServer_SessionData&> (inherited::sessionData_->get ());
+      const_cast<struct FileServer_SessionData&> (inherited::sessionData_->getR ());
   if (session_data_r.lock)
   {
     result = session_data_r.lock->acquire ();

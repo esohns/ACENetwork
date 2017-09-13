@@ -42,17 +42,17 @@ template <ACE_SYNCH_DECL,
 
 class Test_I_MessageDataContainer
  : public Stream_DataBase_T<struct Test_I_MessageData>
- , public Common_ISetPP_T<struct HTTP_Record>
+ , public Common_ISetPR_T<struct HTTP_Record>
 {
  public:
    Test_I_MessageDataContainer ();
   // *IMPORTANT NOTE*: fire-and-forget API
   Test_I_MessageDataContainer (struct Test_I_MessageData*&, // data handle
                                bool = true);                // delete in dtor ?
-  virtual ~Test_I_MessageDataContainer ();
+  inline virtual ~Test_I_MessageDataContainer () {};
 
   // implement Common_ISetPP_T
-  virtual void set (struct HTTP_Record*&);
+  virtual void setPR (struct HTTP_Record*&);
 
  private:
   typedef Stream_DataBase_T<struct Test_I_MessageData> inherited;
@@ -78,7 +78,7 @@ class Test_I_Message
 
  public:
   Test_I_Message (unsigned int); // size
-  virtual ~Test_I_Message ();
+  inline virtual ~Test_I_Message () {};
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
@@ -98,9 +98,10 @@ class Test_I_Message
 
   ACE_UNIMPLEMENTED_FUNC (Test_I_Message ())
   // *NOTE*: to be used by message allocators
-  Test_I_Message (ACE_Data_Block*, // data block
-                  ACE_Allocator*,  // message allocator
-                  bool = true);    // increment running message counter ?
+  Test_I_Message (Stream_SessionId_t,
+                  ACE_Data_Block*,    // data block to use
+                  ACE_Allocator*,     // message block allocator
+                  bool = true);       // increment running message counter ?
   //Test_I_Message (ACE_Allocator*); // message allocator
   ACE_UNIMPLEMENTED_FUNC (Test_I_Message& operator= (const Test_I_Message&))
 };

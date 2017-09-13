@@ -97,9 +97,9 @@ Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& mes
     {
       // retain session ID for reporting
       const FileServer_SessionData_t& session_data_container_r =
-          message_inout->get ();
+          message_inout->getR ();
       const struct FileServer_SessionData& session_data_r =
-          session_data_container_r.get ();
+          session_data_container_r.getR ();
       sessionId_ = session_data_r.sessionId;
 
       break;

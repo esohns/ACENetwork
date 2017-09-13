@@ -117,7 +117,7 @@ IRC_Module_Streamer_T<ACE_SYNCH_USE,
   //                   NUL or CR or LF>
 
   // prefix
-  const IRC_Record& data_r = message_inout->get ();
+  const IRC_Record& data_r = message_inout->getR ();
   if (!data_r.prefix_.origin.empty ())
   {
     // prefix the prefix

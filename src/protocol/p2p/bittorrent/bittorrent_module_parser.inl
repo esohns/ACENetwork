@@ -790,7 +790,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
       // sanity check(s)
       ACE_ASSERT (inherited::sessionData_);
 
-      const SessionDataType& session_data_r = inherited::sessionData_->get ();
+      const SessionDataType& session_data_r = inherited::sessionData_->getR ();
 
       // retain session ID for reporting
       ACE_ASSERT (inherited::streamState_);
@@ -935,8 +935,8 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
   ACE_ASSERT (headFragment_);
 
   DATA_CONTAINER_T& data_container_r =
-      const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
-  DATA_T& data_r = const_cast<DATA_T&> (data_container_r.get ());
+      const_cast<DATA_CONTAINER_T&> (headFragment_->getR ());
+  DATA_T& data_r = const_cast<DATA_T&> (data_container_r.getR ());
   ACE_ASSERT (!data_r.peerRecord);
   data_r.peerRecord = record_inout;
   record_inout = NULL;
@@ -1029,8 +1029,8 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
   ACE_ASSERT (handShake_inout);
 
   DATA_CONTAINER_T& data_container_r =
-      const_cast<DATA_CONTAINER_T&> (headFragment_->get ());
-  DATA_T& data_r = const_cast<DATA_T&> (data_container_r.get ());
+      const_cast<DATA_CONTAINER_T&> (headFragment_->getR ());
+  DATA_T& data_r = const_cast<DATA_T&> (data_container_r.getR ());
   ACE_ASSERT (!data_r.handShakeRecord);
   data_r.handShakeRecord = handShake_inout;
   handShake_inout = NULL;
@@ -1043,7 +1043,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
 
   // step1: set session data
   typename SessionMessageType::DATA_T::DATA_T& session_data_r =
-      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->get ());
+      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
   // sanity check(s)
   // *TODO*: remove type inference

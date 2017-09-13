@@ -42,22 +42,17 @@ Test_U_Message::Test_U_Message (const Test_U_Message& message_in)
 
 }
 
-Test_U_Message::Test_U_Message (ACE_Data_Block* dataBlock_in,
+Test_U_Message::Test_U_Message (Stream_SessionId_t sessionId_in,
+                                ACE_Data_Block* dataBlock_in,
                                 ACE_Allocator* messageAllocator_in,
                                 bool incrementMessageCounter_in)
- : inherited (dataBlock_in,               // use (don't own !) this data block
-              messageAllocator_in,        // allocator
-              incrementMessageCounter_in) // increment the message ID ?
+ : inherited (sessionId_in,
+              dataBlock_in,               // use (don't own !) this data block
+              messageAllocator_in,        // message block allocator
+              incrementMessageCounter_in) // increment the message id ?
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Message::Test_U_Message"));
 
-}
-
-Test_U_Message::~Test_U_Message ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::~Test_U_Message"));
-
-  // *NOTE*: will be called just BEFORE this is passed back to the allocator
 }
 
 ACE_Message_Block*

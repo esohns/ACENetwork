@@ -53,7 +53,7 @@ class Test_U_Message
 
  public:
   Test_U_Message (unsigned int); // size
-  virtual ~Test_U_Message ();
+  inline virtual ~Test_U_Message () {};
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
@@ -76,9 +76,10 @@ class Test_U_Message
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Message ())
   // *NOTE*: to be used by message allocators
-  Test_U_Message (ACE_Data_Block*, // data block
-                  ACE_Allocator*,  // message allocator
-                  bool = true);    // increment running message counter ?
+  Test_U_Message (Stream_SessionId_t,
+                  ACE_Data_Block*,    // data block to use
+                  ACE_Allocator*,     // message block allocator
+                  bool = true);       // increment running message counter ?
   //Test_U_Message (ACE_Allocator*); // message allocator
   ACE_UNIMPLEMENTED_FUNC (Test_U_Message& operator= (const Test_U_Message&))
 };

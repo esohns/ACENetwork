@@ -71,15 +71,18 @@ class IRC_SessionMessage_T
  //                                             OWN_TYPE_T>;
 
  public:
-  // *NOTE*: assume lifetime responsibility for the second argument !
-  IRC_SessionMessage_T (enum Stream_SessionMessageType, // session message type
+  // *NOTE*: assume lifetime responsibility for the third argument !
+  IRC_SessionMessage_T (Stream_SessionId_t,
+                        enum Stream_SessionMessageType,
                         SessionDataType*&,              // session data container handle
-                        UserDataType*);                 // user data handle
+                        UserDataType*);
     // *NOTE*: to be used by message allocators
-  IRC_SessionMessage_T (ACE_Allocator*); // message allocator
-  IRC_SessionMessage_T (ACE_Data_Block*, // data block
+  IRC_SessionMessage_T (Stream_SessionId_t,
                         ACE_Allocator*); // message allocator
-  virtual ~IRC_SessionMessage_T ();
+  IRC_SessionMessage_T (Stream_SessionId_t,
+                        ACE_Data_Block*, // data block to use
+                        ACE_Allocator*); // message allocator
+  inline virtual ~IRC_SessionMessage_T () {};
 
   // override from ACE_Message_Block
   // *WARNING*: any children need to override this as well

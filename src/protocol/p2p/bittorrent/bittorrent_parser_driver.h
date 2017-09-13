@@ -45,7 +45,7 @@ class BitTorrent_ParserDriver_T
  public:
   BitTorrent_ParserDriver_T (bool,  // debug scanning ?
                              bool); // debug parsing ?
-  virtual ~BitTorrent_ParserDriver_T ();
+  inline virtual ~BitTorrent_ParserDriver_T () {};
 
   // convenient types
   typedef Net_ParserBase_T<struct Common_ParserConfiguration,
@@ -57,7 +57,7 @@ class BitTorrent_ParserDriver_T
   // implement (part of) BitTorrent_IParser
   using PARSER_BASE_T::initialize;
   using PARSER_BASE_T::buffer;
-  using PARSER_BASE_T::debugScanner;
+//  using PARSER_BASE_T::debug;
   using PARSER_BASE_T::isBlocking;
   using PARSER_BASE_T::offset;
   using PARSER_BASE_T::parse;
@@ -92,8 +92,9 @@ class BitTorrent_ParserDriver_T
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver_T (const BitTorrent_ParserDriver_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver_T& operator= (const BitTorrent_ParserDriver_T&))
 
-  // implement Net_IScanner_T
-  virtual void set (BitTorrent_IParser_t*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  // implement Common_ILexScanner_T
+  inline virtual const BitTorrent_IParser_t* const getP () const { return this; };
+  inline virtual void setP (BitTorrent_IParser_t*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
   virtual void debug (yyscan_t, // state handle
                       bool);    // toggle
   virtual bool initialize (yyscan_t&); // return value: state handle

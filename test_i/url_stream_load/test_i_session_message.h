@@ -54,12 +54,13 @@ class Test_I_SessionMessage
  public:
   // *NOTE*: assumes responsibility for the second argument !
   // *TODO*: (using gcc) cannot pass reference to pointer for some reason
-  Test_I_SessionMessage (enum Stream_SessionMessageType,       // session message type
+  Test_I_SessionMessage (Stream_SessionId_t,
+                         enum Stream_SessionMessageType,
                          Test_I_URLStreamLoad_SessionData_t*&, // session data container handle
-                         struct HTTP_Stream_UserData*);        // user data handle
+                         struct HTTP_Stream_UserData*);
   // copy ctor to be used by duplicate()
   Test_I_SessionMessage (const Test_I_SessionMessage&);
-  virtual ~Test_I_SessionMessage ();
+  inline virtual ~Test_I_SessionMessage () {};
 
   // overloaded from ACE_Message_Block
   virtual ACE_Message_Block* duplicate (void) const;
@@ -72,8 +73,10 @@ class Test_I_SessionMessage
 
   // *NOTE*: these may be used by message allocators
   // *WARNING*: these ctors are NOT threadsafe
-  Test_I_SessionMessage (ACE_Allocator*); // message allocator
-  Test_I_SessionMessage (ACE_Data_Block*, // data block
+  Test_I_SessionMessage (Stream_SessionId_t,
+                         ACE_Allocator*); // message allocator
+  Test_I_SessionMessage (Stream_SessionId_t,
+                         ACE_Data_Block*, // data block to use
                          ACE_Allocator*); // message allocator
 
   ACE_UNIMPLEMENTED_FUNC (Test_I_SessionMessage ())

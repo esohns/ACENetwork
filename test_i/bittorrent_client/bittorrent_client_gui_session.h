@@ -69,7 +69,7 @@ class BitTorrent_Client_GUI_Session_T
   void close ();
 
   // implement Common_IGet_T
-  inline virtual const ConnectionCBDataType& get () const { return CBData_; };
+  inline virtual const ConnectionCBDataType& getR () const { return CBData_; };
 
   // *WARNING*: callers may need protection from:
   //            - the thread(s) servicing the UI (GTK) event loop

@@ -51,15 +51,18 @@ class Test_U_SessionMessage
                                                  Test_U_SessionMessage>;
 
  public:
-  // *NOTE*: assumes responsibility for the second argument !
-  Test_U_SessionMessage (enum Stream_SessionMessageType, // session message type
+  // *NOTE*: assumes responsibility for the third argument !
+  Test_U_SessionMessage (Stream_SessionId_t,
+                         enum Stream_SessionMessageType,
                          FileServer_SessionData_t*&,     // session data handle
-                         struct FileServer_UserData*);   // user data handle
+                         struct FileServer_UserData*);
   // *NOTE*: to be used by message allocators
-  Test_U_SessionMessage (ACE_Allocator*); // message allocator
-  Test_U_SessionMessage (ACE_Data_Block*, // data block
+  Test_U_SessionMessage (Stream_SessionId_t,
                          ACE_Allocator*); // message allocator
-  virtual ~Test_U_SessionMessage ();
+  Test_U_SessionMessage (Stream_SessionId_t,
+                         ACE_Data_Block*, // data block to use
+                         ACE_Allocator*); // message allocator
+  inline virtual ~Test_U_SessionMessage () {};
 
   // override from ACE_Message_Block
   // *WARNING*: any children need to override this as well

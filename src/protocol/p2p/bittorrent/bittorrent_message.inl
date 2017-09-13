@@ -54,11 +54,13 @@ BitTorrent_Message_T<SessionDataType,
 template <typename SessionDataType,
           typename UserDataType>
 BitTorrent_Message_T<SessionDataType,
-                     UserDataType>::BitTorrent_Message_T (ACE_Data_Block* dataBlock_in,
+                     UserDataType>::BitTorrent_Message_T (Stream_SessionId_t sessionId_in,
+                                                          ACE_Data_Block* dataBlock_in,
                                                           ACE_Allocator* messageAllocator_in,
                                                           bool incrementMessageCounter_in)
- : inherited (dataBlock_in,               // use (don't own !) this data block
-              messageAllocator_in,        // allocator
+ : inherited (sessionId_in,
+              dataBlock_in,               // use (don't own !) this data block
+              messageAllocator_in,        // message block allocator
               incrementMessageCounter_in) // increment message counter ?
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::BitTorrent_Message_T"));
@@ -73,16 +75,6 @@ BitTorrent_Message_T<SessionDataType,
 //   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::BitTorrent_Message_T"));
 //
 // }
-
-template <typename SessionDataType,
-          typename UserDataType>
-BitTorrent_Message_T<SessionDataType,
-                     UserDataType>::~BitTorrent_Message_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Message_T::~BitTorrent_Message_T"));
-
-  // *NOTE*: will be called just BEFORE this is passed back to the allocator
-}
 
 //template <typename SessionDataType,
 //          typename UserDataType>
@@ -235,11 +227,13 @@ BitTorrent_TrackerMessage_T<SessionDataType,
 template <typename SessionDataType,
           typename UserDataType>
 BitTorrent_TrackerMessage_T<SessionDataType,
-                            UserDataType>::BitTorrent_TrackerMessage_T (ACE_Data_Block* dataBlock_in,
+                            UserDataType>::BitTorrent_TrackerMessage_T (Stream_SessionId_t sessionId_in,
+                                                                        ACE_Data_Block* dataBlock_in,
                                                                         ACE_Allocator* messageAllocator_in,
                                                                         bool incrementMessageCounter_in)
- : inherited (dataBlock_in,        // use (don't own (!) memory of-) this data block
-              messageAllocator_in, // re-use the same allocator
+ : inherited (sessionId_in,
+              dataBlock_in,               // use (don't own (!) memory of-) this data block
+              messageAllocator_in,        // message block allocator
               incrementMessageCounter_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::BitTorrent_TrackerMessage_T"));
@@ -252,15 +246,6 @@ BitTorrent_TrackerMessage_T<SessionDataType,
 //  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::BitTorrent_TrackerMessage_T"));
 //
 //}
-
-template <typename SessionDataType,
-          typename UserDataType>
-BitTorrent_TrackerMessage_T<SessionDataType,
-                            UserDataType>::~BitTorrent_TrackerMessage_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::~BitTorrent_TrackerMessage_T"));
-
-}
 
 template <typename SessionDataType,
           typename UserDataType>
@@ -322,9 +307,9 @@ BitTorrent_TrackerMessage_T<SessionDataType,
 }
 
 //std::string
-//BitTorrent_TrackerMessage_T::CommandType2String (HTTP_Method_t method_in)
+//BitTorrent_TrackerMessage_T::CommandTypeToString (HTTP_Method_t method_in)
 //{
-//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::CommandType2String"));
+//  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerMessage_T::CommandTypeToString"));
 
 //  return (method_in == HTTP_Codes::HTTP_METHOD_INVALID ? ACE_TEXT_ALWAYS_CHAR (HTTP_COMMAND_STRING_RESPONSE)
 //                                                       : HTTP_Tools::Method2String (method_in));

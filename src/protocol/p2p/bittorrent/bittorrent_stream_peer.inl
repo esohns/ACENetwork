@@ -197,7 +197,7 @@ BitTorrent_PeerStream_T<StreamStateType,
   ACE_ASSERT (inherited::sessionData_);
 
   session_data_p =
-    &const_cast<SessionDataType&> (inherited::sessionData_->get ());
+    &const_cast<SessionDataType&> (inherited::sessionData_->getR ());
 
   // ---------------------------------------------------------------------------
 
@@ -271,7 +271,7 @@ BitTorrent_PeerStream_T<StreamStateType,
                 ACE_TEXT ("dynamic_cast<BitTorrent_Module_Parser_T*> failed, aborting\n")));
     goto error;
   } // end IF
-  parser_impl_p->set (&(inherited::state_));
+  parser_impl_p->setP (&(inherited::state_));
 
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a

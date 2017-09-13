@@ -688,7 +688,7 @@ Net_ParserBase_T<ConfigurationType,
 
   bool result = false;
   try {
-    result = initialize (state_);
+    result = this->initialize (state_);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_ILexScanner_T::initialize(): \"%m\", continuing\n")));
@@ -704,8 +704,8 @@ Net_ParserBase_T<ConfigurationType,
 
   // trace ?
   try {
-    debug (state_,
-           configuration_->debugScanner);
+    this->debug (state_,
+                 configuration_->debugScanner);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_ILexScanner_T::debug(): \"%m\", continuing\n")));

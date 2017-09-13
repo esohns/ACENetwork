@@ -1577,7 +1577,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   bool handle_socket = false;
   const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
     NULL;
-  const typename StreamType::SESSION_DATA_T* session_data_p = NULL;
+  typename StreamType::SESSION_DATA_T* session_data_p = NULL;
   ACE_Reactor* reactor_p = inherited::reactor ();
   ACE_ASSERT (reactor_p);
 
@@ -1656,7 +1656,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   session_data_p =
     &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
   ACE_ASSERT (session_data_p->lock);
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_p->lock);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, *session_data_p->lock, -1);
     session_data_p->connectionState = &(inherited2::state_);
   } // end lock scope
   //stream_.dump_state ();

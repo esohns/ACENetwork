@@ -114,7 +114,7 @@ BitTorrent_Client_UI_Tools::current (const Common_UI_GTKState& GTKState_in,
        ++iterator_2)
   {
     const struct BitTorrent_Client_GTK_SessionCBData& data_r =
-      (*iterator_2).second->get ();
+      (*iterator_2).second->getR ();
     Common_UI_GTKBuildersConstIterator_t iterator_3 =
       GTKState_in.builders.find (data_r.label);
     if (iterator_3 == GTKState_in.builders.end ())

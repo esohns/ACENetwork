@@ -176,7 +176,7 @@ IRC_Stream_T<StreamStateType,
   // - initialize modules
   // - push them onto the stream (tail-first) !
   session_data_p =
-      &const_cast<SessionDataType&> (inherited::sessionData_->get ());
+      &const_cast<SessionDataType&> (inherited::sessionData_->getR ());
 
   // ---------------------------------------------------------------------------
 
@@ -200,7 +200,7 @@ IRC_Stream_T<StreamStateType,
                 ACE_TEXT (stream_irc_stream_name_string_)));
     goto error;
   } // end IF
-  bisector_impl_p->set (&(inherited::state_));
+  bisector_impl_p->setP (&(inherited::state_));
 
   // enqueue the module
   // *NOTE*: push()ing the module will open() it
@@ -262,7 +262,7 @@ IRC_Stream_T<StreamStateType,
 
   int result = -1;
   SessionDataType& session_data_r =
-    const_cast<SessionDataType&> (inherited::sessionData_->get ());
+    const_cast<SessionDataType&> (inherited::sessionData_->getR ());
   Stream_Module_t* module_p =
     const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
   if (!module_p)

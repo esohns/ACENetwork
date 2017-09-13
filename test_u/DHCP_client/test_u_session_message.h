@@ -54,12 +54,13 @@ class Test_U_SessionMessage
  public:
   // *NOTE*: assumes responsibility for the second argument !
   // *TODO*: (using gcc) cannot pass reference to pointer for some reason
-  Test_U_SessionMessage (enum Stream_SessionMessageType,    // session message type
+  Test_U_SessionMessage (Stream_SessionId_t,
+                         enum Stream_SessionMessageType,
                          Test_U_DHCPClient_SessionData_t*&, // session data container handle
-                         struct Test_U_UserData*);          // user data handle
+                         struct Test_U_UserData*);
   // copy ctor to be used by duplicate()
   Test_U_SessionMessage (const Test_U_SessionMessage&);
-  virtual ~Test_U_SessionMessage ();
+  inline virtual ~Test_U_SessionMessage () {};
 
   // overloaded from ACE_Message_Block
   virtual ACE_Message_Block* duplicate (void) const;
@@ -72,9 +73,11 @@ class Test_U_SessionMessage
 
   // *NOTE*: these may be used by message allocators
   // *WARNING*: these ctors are NOT threadsafe
-  Test_U_SessionMessage (ACE_Allocator*); // message allocator
-  Test_U_SessionMessage (ACE_Data_Block*, // data block
-                         ACE_Allocator*); // message allocator
+  Test_U_SessionMessage (Stream_SessionId_t,
+                         ACE_Allocator*);    // message allocator
+  Test_U_SessionMessage (Stream_SessionId_t,
+                         ACE_Data_Block*,    // data block to use
+                         ACE_Allocator*);    // message allocator
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_SessionMessage ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_SessionMessage& operator= (const Test_U_SessionMessage&))

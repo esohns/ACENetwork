@@ -1092,10 +1092,6 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, aborting\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
-
-      // clean up
-      iconnector_p->abort ();
-
       goto error;
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1147,7 +1143,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
       goto error;
     } // end IF
     // *IMPORTANT NOTE*: fire-and-forget API (HTTP_record_p)
-    message_data_p->set (HTTP_record_p);
+    message_data_p->setPR (HTTP_record_p);
 
     ACE_ASSERT ((*iterator_2).second.messageAllocator);
 allocate:

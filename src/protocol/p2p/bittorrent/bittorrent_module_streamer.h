@@ -64,7 +64,7 @@ class BitTorrent_Module_Streamer_T
 #else
   BitTorrent_Module_Streamer_T (typename inherited::ISTREAM_T*); // stream handle
 #endif
-  virtual ~BitTorrent_Module_Streamer_T ();
+  inline virtual ~BitTorrent_Module_Streamer_T () {};
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (DataMessageType*&, // data message handle

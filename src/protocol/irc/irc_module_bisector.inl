@@ -493,9 +493,9 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
     {
       // retain session ID for reporting
       const SessionDataContainerType& session_data_container_r =
-          message_inout->get ();
+          message_inout->getR ();
       const SessionDataType& session_data_r =
-          session_data_container_r.get ();
+          session_data_container_r.getR ();
       // sanity check(s)
       ACE_ASSERT (inherited::streamState_);
       ACE_ASSERT (inherited::streamState_->sessionData);

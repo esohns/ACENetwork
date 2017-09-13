@@ -150,7 +150,7 @@ Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configurat
                 ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
-  socketHandler_impl_p->set (&(inherited::state_));
+  socketHandler_impl_p->setP (&(inherited::state_));
   socketHandler_impl_p->initialize ();
 
   // *NOTE*: push()ing the module will open() it
@@ -242,7 +242,7 @@ Test_U_Stream::collect (Net_Statistic_t& data_out)
 
   // synch access
   Test_U_StreamSessionData& session_data_r =
-      const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->get ());
+      const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->getR ());
   if (session_data_r.lock)
   {
     result = session_data_r.lock->acquire ();

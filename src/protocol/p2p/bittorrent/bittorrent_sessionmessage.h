@@ -86,15 +86,18 @@ class BitTorrent_SessionMessage_T
   //                                                                         UserDataType> >;
 
  public:
-  // *NOTE*: assume lifetime responsibility for the second argument !
-  BitTorrent_SessionMessage_T (enum Stream_SessionMessageType,          // session message type
+  // *NOTE*: assume lifetime responsibility for the third argument !
+  BitTorrent_SessionMessage_T (Stream_SessionId_t,
+                               enum Stream_SessionMessageType,
                                Stream_SessionData_T<SessionDataType>*&, // session data container handle
-                               UserDataType*);                          // user data handle
+                               UserDataType*);
     // *NOTE*: to be used by message allocators
-  BitTorrent_SessionMessage_T (ACE_Allocator*); // message allocator
-  BitTorrent_SessionMessage_T (ACE_Data_Block*, // data block
+  BitTorrent_SessionMessage_T (Stream_SessionId_t,
                                ACE_Allocator*); // message allocator
-  virtual ~BitTorrent_SessionMessage_T ();
+  BitTorrent_SessionMessage_T (Stream_SessionId_t,
+                               ACE_Data_Block*, // data block to use
+                               ACE_Allocator*); // message allocator
+  inline virtual ~BitTorrent_SessionMessage_T () {};
 
   // override from ACE_Message_Block
   // *WARNING*: any children need to override this as well

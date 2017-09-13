@@ -129,6 +129,9 @@ class Net_ParserBase_T
  : public ParserInterfaceType
 {
  public:
+  // convenient types
+  typedef ParserInterfaceType IPARSER_T;
+
   Net_ParserBase_T (bool,  // debug scanning ?
                     bool); // debug parsing ?
   virtual ~Net_ParserBase_T ();
@@ -154,6 +157,10 @@ class Net_ParserBase_T
   virtual bool switchBuffer (bool = false); // unlink current fragment ?
   virtual void waitBuffer ();
   virtual void error (const std::string&); // message
+  using typename IPARSER_T::ISCANNER_T::initialize;
+  using typename IPARSER_T::ISCANNER_T::finalize;
+  using typename IPARSER_T::ISCANNER_T::debug;
+  using typename IPARSER_T::ISCANNER_T::destroy;
 //  inline virtual void debug (yyscan_t, bool) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 //  inline virtual bool initialize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
 //  inline virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };

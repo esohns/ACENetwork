@@ -202,8 +202,8 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
 
   const typename BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
                                       UserDataType>::DATA_T& data_container_r =
-      message_in.get ();
-  const struct BitTorrent_PeerRecord& record_r = data_container_r.get ();
+      message_in.getR ();
+  const struct BitTorrent_PeerRecord& record_r = data_container_r.getR ();
   try {
     session_->notify (record_r,
                       (record_r.type == BITTORRENT_MESSAGETYPE_PIECE) ? &const_cast<BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
@@ -458,8 +458,8 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   ACE_ASSERT (session_);
 
 #if defined (_DEBUG)
-  const typename MESSAGE_T::DATA_T& data_container_r = message_in.get ();
-  const struct HTTP_Record& record_r = data_container_r.get ();
+  const typename MESSAGE_T::DATA_T& data_container_r = message_in.getR ();
+  const struct HTTP_Record& record_r = data_container_r.getR ();
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s\n"),
               ACE_TEXT (HTTP_Tools::dump (record_r).c_str ())));

@@ -128,7 +128,7 @@ Test_U_Stream_T<StatisticHandlerType>::initialize (const typename inherited::CON
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
   struct Test_U_HTTPDecoder_SessionData& session_data_r =
-      const_cast<struct Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->get ());
+      const_cast<struct Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->getR ());
   //session_data_r.sessionID = configuration_in.sessionID;
   // *TODO*: remove type inferences
   //session_data_r.targetFileName =
@@ -186,7 +186,7 @@ Test_U_Stream_T<StatisticHandlerType>::initialize (const typename inherited::CON
                 ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
-  IOWriter_impl_p->set (&(inherited::state_));
+  IOWriter_impl_p->setP (&(inherited::state_));
 
   IOReader_impl_p = dynamic_cast<READER_T*> (module_p->reader ());
   if (!IOReader_impl_p)
@@ -282,7 +282,7 @@ Test_U_Stream_T<StatisticHandlerType>::collect (Net_Statistic_t& data_out)
 
   // synch access
   struct Test_U_HTTPDecoder_SessionData& session_data_r =
-      const_cast<struct Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->get ());
+      const_cast<struct Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->getR ());
   if (session_data_r.lock)
   {
     result = session_data_r.lock->acquire ();

@@ -41,7 +41,7 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
   std::string string_buffer;
 
   string_buffer = ACE_TEXT_ALWAYS_CHAR ("op: \t");
-  string_buffer += DHCP_Tools::Op2String (record_in.op);
+  string_buffer += DHCP_Tools::OpToString (record_in.op);
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("\n");
   string_buffer += ACE_TEXT_ALWAYS_CHAR ("htype: \t");
   converter << static_cast<unsigned int> (record_in.htype);
@@ -116,8 +116,8 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
   {
     option_type = static_cast<DHCP_Codes::OptionType> ((*iterator).first);
     field_type =
-      DHCP_Tools::Option2FieldType (option_type);
-    string_buffer += DHCP_Tools::Option2String (option_type);
+      DHCP_Tools::OptionToFieldType (option_type);
+    string_buffer += DHCP_Tools::OptionToString (option_type);
     string_buffer += ACE_TEXT_ALWAYS_CHAR (" (");
     converter.str (ACE_TEXT_ALWAYS_CHAR (""));
     converter.clear ();
@@ -157,7 +157,7 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
       {
         DHCP_Codes::MessageType message_type =
             static_cast<DHCP_Codes::MessageType> (*reinterpret_cast<const unsigned char*> ((*iterator).second.c_str ()));
-        string_buffer += DHCP_Tools::MessageType2String (message_type);
+        string_buffer += DHCP_Tools::MessageTypeToString (message_type);
         break;
       }
       case DHCP_Codes::DHCP_OPTION_FIELDTYPE_STRING:
@@ -223,9 +223,9 @@ DHCP_Tools::dump (const DHCP_Record& record_in)
 }
 
 std::string
-DHCP_Tools::Op2String (DHCP_Op_t op_in)
+DHCP_Tools::OpToString (DHCP_Op_t op_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::Op2String"));
+  NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::OpToString"));
 
   // initialize result
   std::string result = ACE_TEXT_ALWAYS_CHAR ("INVALID/UNKNOWN");

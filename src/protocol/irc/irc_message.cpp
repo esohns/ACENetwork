@@ -67,13 +67,6 @@ IRC_Message::IRC_Message (Stream_SessionId_t sessionId_in,
 //
 // }
 
-IRC_Message::~IRC_Message ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Message::~IRC_Message"));
-
-  // *NOTE*: will be called just BEFORE this is passed back to the allocator
-}
-
 IRC_CommandType_t
 IRC_Message::command () const
 {

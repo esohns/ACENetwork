@@ -29,10 +29,12 @@
 template <typename SessionDataType,
           typename UserDataType>
 BitTorrent_SessionMessage_T<SessionDataType,
-                            UserDataType>::BitTorrent_SessionMessage_T (enum Stream_SessionMessageType messageType_in,
+                            UserDataType>::BitTorrent_SessionMessage_T (Stream_SessionId_t sessionId_in,
+                                                                        enum Stream_SessionMessageType messageType_in,
                                                                         Stream_SessionData_T<SessionDataType>*& sessionData_inout,
                                                                         UserDataType* userData_in)
- : inherited (messageType_in,
+ : inherited (sessionId_in,
+              messageType_in,
               sessionData_inout,
               userData_in)
 {
@@ -54,19 +56,9 @@ BitTorrent_SessionMessage_T<SessionDataType,
 template <typename SessionDataType,
           typename UserDataType>
 BitTorrent_SessionMessage_T<SessionDataType,
-                            UserDataType>::BitTorrent_SessionMessage_T (ACE_Allocator* messageAllocator_in)
- : inherited (messageAllocator_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_SessionMessage_T::BitTorrent_SessionMessage_T"));
-
-}
-
-template <typename SessionDataType,
-          typename UserDataType>
-BitTorrent_SessionMessage_T<SessionDataType,
-                            UserDataType>::BitTorrent_SessionMessage_T (ACE_Data_Block* dataBlock_in,
+                            UserDataType>::BitTorrent_SessionMessage_T (Stream_SessionId_t sessionId_in,
                                                                         ACE_Allocator* messageAllocator_in)
- : inherited (dataBlock_in,
+ : inherited (sessionId_in,
               messageAllocator_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_SessionMessage_T::BitTorrent_SessionMessage_T"));
@@ -76,9 +68,14 @@ BitTorrent_SessionMessage_T<SessionDataType,
 template <typename SessionDataType,
           typename UserDataType>
 BitTorrent_SessionMessage_T<SessionDataType,
-                            UserDataType>::~BitTorrent_SessionMessage_T ()
+                            UserDataType>::BitTorrent_SessionMessage_T (Stream_SessionId_t sessionId_in,
+                                                                        ACE_Data_Block* dataBlock_in,
+                                                                        ACE_Allocator* messageAllocator_in)
+ : inherited (sessionId_in,
+              dataBlock_in,
+              messageAllocator_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_SessionMessage_T::~BitTorrent_SessionMessage_T"));
+  NETWORK_TRACE (ACE_TEXT ("BitTorrent_SessionMessage_T::BitTorrent_SessionMessage_T"));
 
 }
 

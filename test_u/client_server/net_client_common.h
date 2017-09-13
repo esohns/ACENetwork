@@ -52,6 +52,8 @@ class Test_U_Message;
 class Test_U_Client_TimeoutHandler;
 typedef Net_IConnector_T<ACE_INET_Addr,
                          struct Test_U_ConnectionConfiguration> Test_U_IConnector_t;
+typedef Net_IAsynchConnector_T<ACE_INET_Addr,
+                               struct Test_U_ConnectionConfiguration> Test_U_IAsynchConnector_t;
 
 struct Test_U_Client_ConnectorConfiguration
 {

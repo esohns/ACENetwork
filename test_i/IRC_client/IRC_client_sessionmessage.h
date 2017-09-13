@@ -42,15 +42,18 @@ class IRC_Client_SessionMessage
 //  friend class Stream_MessageAllocatorHeapBase<Net_Message, Net_SessionMessage>;
 
  public:
-  // *NOTE*: assume lifetime responsibility for the second argument !
-  IRC_Client_SessionMessage (enum Stream_SessionMessageType, // session message type
+  // *NOTE*: assume lifetime responsibility for the third argument !
+  IRC_Client_SessionMessage (Stream_SessionId_t,
+                             enum Stream_SessionMessageType,
                              IRC_Client_SessionData_t*&,     // session data container handle
-                             struct IRC_Client_UserData*);   // user data handle
+                             struct IRC_Client_UserData*);
   // *NOTE*: to be used by message allocators
-  IRC_Client_SessionMessage (ACE_Allocator*); // message allocator
-  IRC_Client_SessionMessage (ACE_Data_Block*, // data block
+  IRC_Client_SessionMessage (Stream_SessionId_t,
                              ACE_Allocator*); // message allocator
-  virtual ~IRC_Client_SessionMessage ();
+  IRC_Client_SessionMessage (Stream_SessionId_t,
+                             ACE_Data_Block*, // data block to use
+                             ACE_Allocator*); // message allocator
+  inline virtual ~IRC_Client_SessionMessage () {};
 
   // override from ACE_Message_Block
   // *WARNING*: any children need to override this as well
