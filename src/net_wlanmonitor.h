@@ -95,14 +95,14 @@ class Net_WLANMonitor_T
   inline void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   // implement Net_IWLANMonitor_T
-  inline virtual const ConfigurationType& get () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; };
   virtual bool initialize (const ConfigurationType&); // configuration handle
   virtual void subscribe (Net_IWLANCB*);   // new subscriber
   virtual void unsubscribe (Net_IWLANCB*); // existing subscriber
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inline virtual const HANDLE get_2 () const { return clientHandle_; };
+  inline virtual const HANDLE get () const { return clientHandle_; };
 #else
-  inline virtual const struct DBusConnection* const get_2 () const { return connection_; };
+  inline virtual const struct DBusConnection* const getP () const { return connection_; };
 #endif
   inline virtual bool addresses (AddressType& localSAP_out,                                                                          // return value: local SAP
                                  AddressType& peerSAP_out) const { localSAP_out = localSAP_; peerSAP_out = peerSAP_; return true; }; // return value: peer SAP

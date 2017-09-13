@@ -74,9 +74,9 @@ class Net_IWLANCB
 class Net_IWLANMonitorBase
  : public Net_IWLANCB
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
- , public Common_IGet_2_T<HANDLE>
+ , public Common_IGet_T<HANDLE>
 #else
- , public Common_IGetP_2_T<struct DBusConnection>
+ , public Common_IGetP_T<struct DBusConnection>
 #endif
 {
  public:
