@@ -78,10 +78,10 @@ class DHCP_Message_T
                          MessageType> OWN_TYPE_T;
 
   DHCP_Message_T (unsigned int); // size
-  virtual ~DHCP_Message_T ();
+  inline virtual ~DHCP_Message_T () {};
 
   virtual DHCP_MessageType_t command () const; // return value: message type
-  static std::string Command2String (DHCP_MessageType_t);
+  static std::string CommandToString (DHCP_MessageType_t);
 
   // implement Common_IDumpState
   virtual void dump_state () const;
@@ -93,9 +93,10 @@ class DHCP_Message_T
 
  protected:
   // *NOTE*: to be used by allocators
-  DHCP_Message_T (ACE_Data_Block*, // data block to use
-                  ACE_Allocator*,  // message allocator
-                  bool = true);    // increment running message counter ?
+  DHCP_Message_T (Stream_SessionId_t,
+                  ACE_Data_Block*,    // data block to use
+                  ACE_Allocator*,     // message allocator
+                  bool = true);       // increment running message counter ?
 //   DHCP_Message_T (ACE_Allocator*); // message allocator
 
   // copy ctor to be used by duplicate() and derived classes

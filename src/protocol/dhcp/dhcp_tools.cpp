@@ -248,9 +248,9 @@ DHCP_Tools::Op2String (DHCP_Op_t op_in)
   return result;
 }
 std::string
-DHCP_Tools::Option2String (DHCP_Option_t option_in)
+DHCP_Tools::OptionToString (DHCP_Option_t option_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::Option2String"));
+  NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::OptionToString"));
 
   // initialize result
   std::string result = ACE_TEXT_ALWAYS_CHAR ("INVALID/UNKNOWN");
@@ -319,9 +319,9 @@ DHCP_Tools::Option2String (DHCP_Option_t option_in)
   return result;
 }
 std::string
-DHCP_Tools::MessageType2String (DHCP_MessageType_t type_in)
+DHCP_Tools::MessageTypeToString (DHCP_MessageType_t type_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::MessageType2String"));
+  NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::MessageTypeToString"));
 
   // initialize result
   std::string result = ACE_TEXT_ALWAYS_CHAR ("INVALID/UNKNOWN");
@@ -381,9 +381,9 @@ DHCP_Tools::MessageType2String (DHCP_MessageType_t type_in)
 }
 
 DHCP_MessageType_t
-DHCP_Tools::MessageType2Type (const std::string& type_in)
+DHCP_Tools::MessageTypeToType (const std::string& type_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::MessageType2Type"));
+  NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::MessageTypeToType"));
 
   // sanity check(s)
   ACE_ASSERT (type_in.size () == 1);
@@ -394,9 +394,9 @@ DHCP_Tools::MessageType2Type (const std::string& type_in)
 }
 
 DHCP_OptionFieldType_t
-DHCP_Tools::Option2FieldType (DHCP_Option_t option_in)
+DHCP_Tools::OptionToFieldType (DHCP_Option_t option_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::Option2FieldType"));
+  NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::OptionToFieldType"));
 
   switch (option_in)
   {
@@ -420,7 +420,7 @@ DHCP_Tools::Option2FieldType (DHCP_Option_t option_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown option (was: \"%s\"), aborting\n"),
-                  ACE_TEXT (DHCP_Tools::Option2String (option_in).c_str ())));
+                  ACE_TEXT (DHCP_Tools::OptionToString (option_in).c_str ())));
       break;
     }
   } // end SWITCH

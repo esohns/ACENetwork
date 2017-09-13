@@ -52,11 +52,13 @@ DHCP_Message_T<AllocatorConfigurationType,
 template <typename AllocatorConfigurationType,
           typename MessageType>
 DHCP_Message_T<AllocatorConfigurationType,
-               MessageType>::DHCP_Message_T (ACE_Data_Block* dataBlock_in,
+               MessageType>::DHCP_Message_T (Stream_SessionId_t sessionId_in,
+                                             ACE_Data_Block* dataBlock_in,
                                              ACE_Allocator* messageAllocator_in,
                                              bool incrementMessageCounter_in)
- : inherited (dataBlock_in,               // use (don't own !) this data block
-              messageAllocator_in,        // allocator
+ : inherited (sessionId_in,
+              dataBlock_in,               // use (don't own !) this data block
+              messageAllocator_in,        // message block allocator
               incrementMessageCounter_in) // increment message counter ?
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::DHCP_Message_T"));
@@ -74,16 +76,6 @@ DHCP_Message_T<AllocatorConfigurationType,
 
 template <typename AllocatorConfigurationType,
           typename MessageType>
-DHCP_Message_T<AllocatorConfigurationType,
-               MessageType>::~DHCP_Message_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::~DHCP_Message_T"));
-
-  // *NOTE*: will be called just BEFORE this is passed back to the allocator
-}
-
-template <typename AllocatorConfigurationType,
-          typename MessageType>
 DHCP_MessageType_t
 DHCP_Message_T<AllocatorConfigurationType,
                MessageType>::command () const
@@ -98,18 +90,18 @@ DHCP_Message_T<AllocatorConfigurationType,
     inherited::data_.options.find (DHCP_Codes::DHCP_OPTION_DHCP_MESSAGETYPE);
   ACE_ASSERT (iterator != inherited::data_.options.end ());
 
-  return DHCP_Tools::MessageType2Type ((*iterator).second);
+  return DHCP_Tools::MessageTypeToType ((*iterator).second);
 }
 
 template <typename AllocatorConfigurationType,
           typename MessageType>
 std::string
 DHCP_Message_T<AllocatorConfigurationType,
-               MessageType>::Command2String (DHCP_MessageType_t type_in)
+               MessageType>::CommandToString (DHCP_MessageType_t type_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::Command2String"));
+  NETWORK_TRACE (ACE_TEXT ("DHCP_Message_T::CommandToString"));
 
-  return DHCP_Tools::MessageType2String (type_in);
+  return DHCP_Tools::MessageTypeToString (type_in);
 }
 
 template <typename AllocatorConfigurationType,

@@ -54,7 +54,7 @@ class Test_U_Message
   virtual ~Test_U_Message ();
 
   inline virtual int command () const { return ACE_Message_Block::MB_DATA; };
-  inline static std::string CommandType2String (int) { return ACE_TEXT_ALWAYS_CHAR ("DATA"); };
+  inline static std::string CommandTypeToString (int) { return ACE_TEXT_ALWAYS_CHAR ("DATA"); };
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
