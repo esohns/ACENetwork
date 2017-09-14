@@ -128,7 +128,8 @@ class Net_Common_Tools
   // *NOTE*: 'gateway' really means the 'next hop' router with regard to some
   //         policy (e.g. routing table entry metric/priority/...).
   //         Consequently, this API is non-functional at this point
-  static ACE_INET_Addr getGateway (const std::string&); // interface identifier
+  static ACE_INET_Addr getGateway (const std::string&,      // interface identifier
+                                   struct DBusConnection*); // D-Bus connection handle
 #endif
 
   // *NOTE*: this returns the external (i.e. routable) IP address (for clients
@@ -137,9 +138,13 @@ class Net_Common_Tools
                                             ACE_INET_Addr&);    // return value: external IP address
   // *NOTE*: on Win32 systems, specify the 'AdapterName' (not 'FriendlyName')
   //         --> i.e. use Common_Tools::GUIDToString() on the device identifier
-  static bool interfaceToIPAddress (const std::string&, // device identifier
-                                    ACE_INET_Addr&,     // return value: (first) IP address
-                                    ACE_INET_Addr&);    // return value: (first) gateway IP address
+  static bool interfaceToIPAddress (const std::string&,     // device identifier
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                                    struct DBusConnection*, // D-Bus connection handle
+#endif
+                                    ACE_INET_Addr&,         // return value: (first) IP address
+                                    ACE_INET_Addr&);        // return value: (first) gateway IP address
   static bool IPAddressToInterface (const ACE_INET_Addr&, // IP address
                                     std::string&);        // return value: interface identifier
 
@@ -233,14 +238,20 @@ class Net_Common_Tools
                                                 const std::string&);    // access point object path
   static std::string activeConnectionDBusPathToDeviceDBusPath (struct DBusConnection*, // D-Bus connection handle
                                                                const std::string&);    // active connection object path
+  static std::string activeConnectionDBusPathToIPv4ConfigDBusPath (struct DBusConnection*, // D-Bus connection handle
+                                                                   const std::string&);    // connection object path
   static std::string connectionDBusPathToSSID (struct DBusConnection*, // D-Bus connection handle
                                                const std::string&);    // connection object path
   static std::string deviceDBusPathToAccessPointDBusPath (struct DBusConnection*, // D-Bus connection handle
                                                           const std::string&);    // device object path
   static std::string deviceDBusPathToIdentifier (struct DBusConnection*, // D-Bus connection handle
                                                  const std::string&);    // device object path
+  static std::string deviceDBusPathToIPv4ConfigDBusPath (struct DBusConnection*, // D-Bus connection handle
+                                                         const std::string&);    // device object path
   static std::string deviceToDBusPath (struct DBusConnection*, // D-Bus connection handle
                                        const std::string&);    // device identifier
+  static std::string IPv4ConfigDBusPathToGateway (struct DBusConnection*, // D-Bus connection handle
+                                                  const std::string&);    // IPv4Config object path
   static std::string SSIDToAccessPointDBusPath (struct DBusConnection*, // D-Bus connection handle
                                                 const std::string&);    // SSID
   static std::string SSIDToDeviceDBusPath (struct DBusConnection*, // D-Bus connection handle

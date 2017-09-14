@@ -87,6 +87,7 @@ Net_WLANInetMonitor_T<ACE_SYNCH_USE,
   if (!Net_Common_Tools::interfaceToIPAddress (Common_Tools::GUIDToString (deviceIdentifier_in),
 #else
   if (!Net_Common_Tools::interfaceToIPAddress (deviceIdentifier_in,
+                                               inherited::connection_,
 #endif
                                                inherited::localSAP_,
                                                inherited::peerSAP_))

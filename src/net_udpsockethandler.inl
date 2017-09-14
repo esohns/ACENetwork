@@ -121,6 +121,10 @@ Net_UDPSocketHandler_T<SocketType,
       } // end IF
       ACE_INET_Addr gateway_address;
       if (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                                                   NULL,
+#endif
                                                    inet_address,
                                                    gateway_address))
       {
