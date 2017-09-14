@@ -33,7 +33,8 @@
 class HTTP_IParser
  : public Net_IYaccRecordParser_T<struct Common_ParserConfiguration,
                                   struct HTTP_Record>
- , public Common_ILexScanner_T<HTTP_IParser>
+ , public Common_ILexScanner_T<struct Common_ScannerState,
+                               HTTP_IParser>
 {
  public:
   // convenient types

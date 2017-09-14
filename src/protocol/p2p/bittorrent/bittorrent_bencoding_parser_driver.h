@@ -38,11 +38,20 @@ template <typename SessionMessageType>
 class BitTorrent_Bencoding_ParserDriver_T
  : public Net_CppParserBase_T<struct Common_ParserConfiguration,
                               BitTorrent_Bencoding_Scanner,
+                              struct Common_ScannerState,
                               yy::BitTorrent_Bencoding_Parser,
                               BitTorrent_Bencoding_IParser,
                               std::string,
                               SessionMessageType>
 {
+  typedef Net_CppParserBase_T<struct Common_ParserConfiguration,
+                              BitTorrent_Bencoding_Scanner,
+                              struct Common_ScannerState,
+                              yy::BitTorrent_Bencoding_Parser,
+                              BitTorrent_Bencoding_IParser,
+                              std::string,
+                              SessionMessageType> inherited;
+
  public:
   BitTorrent_Bencoding_ParserDriver_T (bool,  // debug scanning ?
                                        bool); // debug parsing ?
@@ -51,6 +60,7 @@ class BitTorrent_Bencoding_ParserDriver_T
   // convenient types
   typedef Net_CppParserBase_T<struct Common_ParserConfiguration,
                               BitTorrent_Bencoding_Scanner,
+                              struct Common_ScannerState,
                               yy::BitTorrent_Bencoding_Parser,
                               BitTorrent_Bencoding_IParser,
                               std::string,
@@ -90,13 +100,6 @@ class BitTorrent_Bencoding_ParserDriver_T
   Bencoding_Dictionary_t*             bencoding_;
 
  private:
-  typedef Net_CppParserBase_T<struct Common_ParserConfiguration,
-                              BitTorrent_Bencoding_Scanner,
-                              yy::BitTorrent_Bencoding_Parser,
-                              BitTorrent_Bencoding_IParser,
-                              std::string,
-                              SessionMessageType> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_ParserDriver_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_ParserDriver_T (const BitTorrent_Bencoding_ParserDriver_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Bencoding_ParserDriver_T& operator= (const BitTorrent_Bencoding_ParserDriver_T&))

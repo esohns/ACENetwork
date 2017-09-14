@@ -39,13 +39,15 @@ typedef void* yyscan_t;
 
 template <typename ConfigurationType,
           typename ScannerType, // (f/)lex-
+          typename ScannerStateType, // implements struct Common_ScannerState
           typename ParserType, // yacc/bison-
-          typename ParserInterfaceType, // derived from Common_IParser_T
+          typename ParserInterfaceType, // implements Common_IParser_T
           typename ArgumentType, // yacc/bison-
           typename SessionMessageType>
 class Net_CppParserBase_T
  : public ParserInterfaceType
- , virtual public Common_ILexScanner_T<ParserInterfaceType>
+ , virtual public Common_ILexScanner_T<ScannerStateType,
+                                       ParserInterfaceType>
 {
  public:
   Net_CppParserBase_T (bool,  // debug scanning ?
@@ -60,6 +62,9 @@ class Net_CppParserBase_T
   inline virtual void error (const yy::location&, const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; };
 
   // implement (part of) Common_ILexScanner_T
+  inline virtual const ScannerStateType& getR_2 () const { return scannerState_; };
+  inline virtual const ParserInterfaceType* const getP_2 () const { return this; };
+  inline virtual void setP (ParserInterfaceType* interfaceHandle_in) { scanner_.setP (interfaceHandle_in); };
   inline virtual ACE_Message_Block* buffer () { return fragment_; };
 //  inline virtual bool debug () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
   inline virtual bool isBlocking () const { return blockInParse_; };
@@ -72,12 +77,11 @@ class Net_CppParserBase_T
   virtual void waitBuffer ();
   virtual void error (const std::string&); // message
   inline virtual void debug (yyscan_t state_in, bool toggle_in) { scanner_ .debug (state_in, toggle_in); };
-  inline virtual bool initialize (yyscan_t& state_in) { return scanner_.initialize (state_in); };
+  inline virtual bool initialize (yyscan_t& state_in, ScannerStateType* state2_in) { return scanner_.initialize (state_in, state2_in); };
   virtual void finalize (yyscan_t& state_in) { scanner_.finalize (state_in); };
   inline virtual struct yy_buffer_state* create (yyscan_t state_in, char* buffer_in, size_t size_in) { return scanner_.create (state_in, buffer_in, size_in); };
   inline virtual void destroy (yyscan_t state_in, struct yy_buffer_state*& buffer_inout) { scanner_.destroy (state_in, buffer_inout); };
-  inline virtual const ParserInterfaceType* const getP () const { return this; };
-  inline virtual void setP (ParserInterfaceType* interfaceHandle_in) { scanner_.setP (interfaceHandle_in); };
+  inline virtual bool lex () { return scanner_.lex (); };
 
  protected:
   ConfigurationType*      configuration_;
@@ -91,6 +95,7 @@ class Net_CppParserBase_T
 
   // scanner
   ScannerType             scanner_;
+  ScannerStateType        scannerState_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_CppParserBase_T ())
@@ -122,7 +127,7 @@ class Net_CppParserBase_T
 
 template <typename ConfigurationType,
           typename ParserType, // yacc/bison-
-          typename ParserInterfaceType, // derived from Net_IParser_T
+          typename ParserInterfaceType, // implements Common_IParser_T
           typename ArgumentType, // yacc/bison-
           typename SessionMessageType>
 class Net_ParserBase_T
