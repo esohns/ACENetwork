@@ -2545,8 +2545,6 @@ continue_:
 
   ACE_NOTREACHED (return false;)
 #endif /* ACE_HAS_GETIFADDRS */
-  // sanity check(s)
-  ACE_ASSERT (connection_in);
 
   gatewayIPAddress_out =
       Net_Common_Tools::getGateway (interfaceIdentifier_in,
@@ -3874,11 +3872,45 @@ continue_:
   return result;
 }
 
-std::string
-Net_Common_Tools::activeConnectionDBusPathToIPv4ConfigDBusPath (struct DBusConnection* connection_in,
-                                                                const std::string& activeConnectionObjectPath_in)
+bool
+Net_Common_Tools::dBusMessageValidate (struct DBusMessageIter& iterator_in,
+                                       int expectedType_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::activeConnectionDBusPathToIPv4ConfigDBusPath"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::dBusMessageValidate"));
+
+  if (dbus_message_iter_get_arg_type (&iterator_in) == expectedType_in)
+    return true;
+
+  char* signature_string_p = dbus_message_iter_get_signature (&iterator_in);
+  ACE_ASSERT (signature_string_p);
+  bool is_error = !ACE_OS::strcmp (ACE_TEXT_ALWAYS_CHAR ("s"),
+                                   signature_string_p);
+  char* error_string_p = NULL;
+  if (is_error)
+  {
+    dbus_message_iter_get_basic (&iterator_in, &error_string_p);
+    ACE_ASSERT (error_string_p);
+  } // end IF
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("unexpected dbus message type (was: %c, expected: %c%s%s%s%s%s, aborting\n"),
+              dbus_message_iter_get_arg_type (&iterator_in), expectedType_in,
+              (is_error ? ACE_TEXT ("; signature: ") : ACE_TEXT (")")),
+              (is_error ? ACE_TEXT (signature_string_p) : ACE_TEXT ("")),
+              (is_error ? ACE_TEXT ("): \"") : ACE_TEXT ("")),
+              (is_error ? ACE_TEXT (error_string_p) : ACE_TEXT ("")),
+              (is_error ? ACE_TEXT ("\"") : ACE_TEXT (""))));
+
+  // clean up
+  dbus_free (signature_string_p);
+
+  return false;
+}
+
+std::string
+Net_Common_Tools::activeConnectionDBusPathToIp4ConfigDBusPath (struct DBusConnection* connection_in,
+                                                               const std::string& activeConnectionObjectPath_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::activeConnectionDBusPathToIp4ConfigDBusPath"));
 
   // initialize return value(s)
   std::string result;
@@ -3912,7 +3944,7 @@ Net_Common_Tools::activeConnectionDBusPathToIPv4ConfigDBusPath (struct DBusConne
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  argument_string_p = ACE_TEXT_ALWAYS_CHAR ("IPv4Config");
+  argument_string_p = ACE_TEXT_ALWAYS_CHAR ("Ip4Config");
   dbus_message_iter_init_append (message_p, &iterator);
   if (!dbus_message_iter_append_basic (&iterator,
                                        DBUS_TYPE_STRING,
@@ -4123,21 +4155,21 @@ continue_:
 }
 
 std::string
-Net_Common_Tools::IPv4ConfigDBusPathToGateway (struct DBusConnection* connection_in,
-                                               const std::string& IPv4ConfigObjectPath_in)
+Net_Common_Tools::Ip4ConfigDBusPathToGateway (struct DBusConnection* connection_in,
+                                              const std::string& Ip4ConfigObjectPath_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::IPv4ConfigDBusPathToGateway"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::Ip4ConfigDBusPathToGateway"));
 
   // initialize return value(s)
   std::string result;
 
   // sanity check(s)
   ACE_ASSERT (connection_in);
-  ACE_ASSERT (!IPv4ConfigObjectPath_in.empty ());
+  ACE_ASSERT (!Ip4ConfigObjectPath_in.empty ());
 
   struct DBusMessage* message_p =
   dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SERVICE),
-                                IPv4ConfigObjectPath_in.c_str (),
+                                Ip4ConfigObjectPath_in.c_str (),
                                 ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
                                 ACE_TEXT_ALWAYS_CHAR ("Get"));
   if (!message_p)
@@ -4147,10 +4179,11 @@ Net_Common_Tools::IPv4ConfigDBusPathToGateway (struct DBusConnection* connection
     return result;
   } // end IF
   struct DBusMessage* reply_p = NULL;
-  struct DBusMessageIter iterator;
+  struct DBusMessageIter iterator, iterator_2;
   char* string_p = NULL;
+  char character_c = 0;
   const char* argument_string_p =
-      ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_CONNECTIONACTIVE_INTERFACE);
+      ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_IP4CONFIG_INTERFACE);
   dbus_message_iter_init_append (message_p, &iterator);
   if (!dbus_message_iter_append_basic (&iterator,
                                        DBUS_TYPE_STRING,
@@ -4187,8 +4220,11 @@ Net_Common_Tools::IPv4ConfigDBusPathToGateway (struct DBusConnection* connection
     goto error;
   } // end IF
 
-  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_STRING);
-  dbus_message_iter_get_basic (&iterator, &string_p);
+  character_c = dbus_message_iter_get_arg_type (&iterator);
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_VARIANT);
+  dbus_message_iter_recurse (&iterator, &iterator_2);
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_STRING);
+  dbus_message_iter_get_basic (&iterator_2, &string_p);
   ACE_ASSERT (string_p);
   result = string_p;
   dbus_message_unref (reply_p); reply_p = NULL;
@@ -4269,7 +4305,9 @@ Net_Common_Tools::deviceDBusPathToAccessPointDBusPath (struct DBusConnection* co
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_VARIANT);
+  if (!Net_Common_Tools::dBusMessageValidate (iterator,
+                                              DBUS_TYPE_VARIANT))
+    goto error;
   dbus_message_iter_recurse (&iterator, &iterator_2);
   ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_OBJECT_PATH);
   dbus_message_iter_get_basic (&iterator_2, &object_path_p);
@@ -4294,10 +4332,10 @@ continue_:
 }
 
 std::string
-Net_Common_Tools::deviceDBusPathToIPv4ConfigDBusPath (struct DBusConnection* connection_in,
+Net_Common_Tools::deviceDBusPathToIp4ConfigDBusPath (struct DBusConnection* connection_in,
                                                       const std::string& deviceObjectPath_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::deviceDBusPathToIPv4ConfigDBusPath"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::deviceDBusPathToIp4ConfigDBusPath"));
 
   // initialize return value(s)
   std::string result;
@@ -4318,10 +4356,10 @@ Net_Common_Tools::deviceDBusPathToIPv4ConfigDBusPath (struct DBusConnection* con
                 ACE_TEXT ("failed to dbus_message_new_method_call(Get): \"%m\", aborting\n")));
     return result;
   } // end IF
-  struct DBusMessageIter iterator;
+  struct DBusMessageIter iterator, iterator_2;
   char* object_path_p = NULL;
   const char* argument_string_p =
-      ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICEWIRELESS_INTERFACE);
+      ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICE_INTERFACE);
   dbus_message_iter_init_append (message_p, &iterator);
   if (!dbus_message_iter_append_basic (&iterator,
                                        DBUS_TYPE_STRING,
@@ -4331,7 +4369,7 @@ Net_Common_Tools::deviceDBusPathToIPv4ConfigDBusPath (struct DBusConnection* con
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  argument_string_p = ACE_TEXT_ALWAYS_CHAR ("IPv4Config");
+  argument_string_p = ACE_TEXT_ALWAYS_CHAR ("Ip4Config");
   dbus_message_iter_init_append (message_p, &iterator);
   if (!dbus_message_iter_append_basic (&iterator,
                                        DBUS_TYPE_STRING,
@@ -4357,8 +4395,11 @@ Net_Common_Tools::deviceDBusPathToIPv4ConfigDBusPath (struct DBusConnection* con
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_OBJECT_PATH);
-  dbus_message_iter_get_basic (&iterator, &object_path_p);
+  // *NOTE*: contrary to the documentation, the type is 'vo', not 'o'
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_VARIANT);
+  dbus_message_iter_recurse (&iterator, &iterator_2);
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_OBJECT_PATH);
+  dbus_message_iter_get_basic (&iterator_2, &object_path_p);
   ACE_ASSERT (object_path_p);
   result = object_path_p;
   dbus_message_unref (reply_p); reply_p = NULL;
@@ -4405,7 +4446,6 @@ Net_Common_Tools::deviceDBusPathToIdentifier (struct DBusConnection* connection_
     return result;
   } // end IF
   struct DBusMessageIter iterator, iterator_2;
-//  char character_c = 0;
   char* device_identifier_p = NULL;
   const char* argument_string_p =
       ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICE_INTERFACE);
@@ -4444,8 +4484,9 @@ Net_Common_Tools::deviceDBusPathToIdentifier (struct DBusConnection* connection_
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-//  character_c = dbus_message_iter_get_arg_type (&iterator);
-  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_VARIANT);
+  if (!Net_Common_Tools::dBusMessageValidate (iterator,
+                                              DBUS_TYPE_VARIANT))
+    goto error;
   dbus_message_iter_recurse (&iterator, &iterator_2);
   ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_STRING);
   dbus_message_iter_get_basic (&iterator_2, &device_identifier_p);
@@ -5261,16 +5302,15 @@ clean:
                   socket_handle));
   } // end IF
 
-  // *IMPORTANT NOTE*: as of kernel 3.16.0, dhclient does not seem to add
+  // *IMPORTANT NOTE*: (as of kernel 3.16.0,x) dhclient apparently does not add
   //                   wireless gateway information to the routing table
-  //                   reliably (i.e. Gateway is '*')
+  //                   reliably (i.e. Gateway is '*'). Specifically, when there
+  //                   already is a gateway configured on a different interface
   //                   --> try DBus instead
   if (result.is_any () &&
-      Net_Common_Tools::interfaceIsWireless (interfaceIdentifier_in))
+      Net_Common_Tools::interfaceIsWireless (interfaceIdentifier_in) &&
+      connection_in)
   {
-    // sanity check(s)
-    ACE_ASSERT (connection_in);
-
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("\"%s\": failed to retrieve gateway from kernel, trying dbus...\n"),
                 ACE_TEXT (interfaceIdentifier_in.c_str ())));
@@ -5286,35 +5326,35 @@ clean:
       return result;
     } // end IF
     result_string =
-        Net_Common_Tools::deviceDBusPathToIPv4ConfigDBusPath (connection_in,
-                                                              result_string);
+        Net_Common_Tools::deviceDBusPathToIp4ConfigDBusPath (connection_in,
+                                                             result_string);
     if (result_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::deviceDBusPathToIPv4ConfigDBusPath(\"%s\",\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_Common_Tools::deviceDBusPathToIp4ConfigDBusPath(\"%s\",\"%s\"), aborting\n"),
                   ACE_TEXT (interfaceIdentifier_in.c_str ()),
                   ACE_TEXT (result_string.c_str ())));
       return result;
     } // end IF
     result_string =
-        Net_Common_Tools::IPv4ConfigDBusPathToGateway (connection_in,
-                                                       result_string);
+        Net_Common_Tools::Ip4ConfigDBusPathToGateway (connection_in,
+                                                      result_string);
     if (result_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::IPv4ConfigDBusPathToGateway(\"%s\",\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_Common_Tools::Ip4ConfigDBusPathToGateway(\"%s\",\"%s\"), aborting\n"),
                   ACE_TEXT (interfaceIdentifier_in.c_str ()),
                   ACE_TEXT (result_string.c_str ())));
       return result;
     } // end IF
-    result_2 = result.set_address (result_string.c_str (),
-                                   result_string.size (),
-                                   1,
-                                   0);
-    if (result_string.empty ())
+    result_2 = result.set (0,
+                           result_string.c_str (),
+                           1,
+                           AF_INET);
+    if (result_2 == -1)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set_address(\"%s\"): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
                   ACE_TEXT (result_string.c_str ())));
       return result;
     } // end IF

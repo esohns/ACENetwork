@@ -233,25 +233,27 @@ class Net_Common_Tools
   static struct DBusMessage* dBusMessageExchange (struct DBusConnection*, // D-Bus connection handle
                                                   struct DBusMessage*&,   // D-Bus message handle
                                                   int = DBUS_TIMEOUT_INFINITE); // timeout (ms) {default: block}
+  static bool dBusMessageValidate (struct DBusMessageIter&,  // D-Bus message iterator
+                                   int = DBUS_TYPE_INVALID); // expected type
 
   static std::string accessPointDBusPathToSSID (struct DBusConnection*, // D-Bus connection handle
                                                 const std::string&);    // access point object path
   static std::string activeConnectionDBusPathToDeviceDBusPath (struct DBusConnection*, // D-Bus connection handle
                                                                const std::string&);    // active connection object path
-  static std::string activeConnectionDBusPathToIPv4ConfigDBusPath (struct DBusConnection*, // D-Bus connection handle
-                                                                   const std::string&);    // connection object path
+  static std::string activeConnectionDBusPathToIp4ConfigDBusPath (struct DBusConnection*, // D-Bus connection handle
+                                                                  const std::string&);    // connection object path
   static std::string connectionDBusPathToSSID (struct DBusConnection*, // D-Bus connection handle
                                                const std::string&);    // connection object path
   static std::string deviceDBusPathToAccessPointDBusPath (struct DBusConnection*, // D-Bus connection handle
                                                           const std::string&);    // device object path
   static std::string deviceDBusPathToIdentifier (struct DBusConnection*, // D-Bus connection handle
                                                  const std::string&);    // device object path
-  static std::string deviceDBusPathToIPv4ConfigDBusPath (struct DBusConnection*, // D-Bus connection handle
-                                                         const std::string&);    // device object path
+  static std::string deviceDBusPathToIp4ConfigDBusPath (struct DBusConnection*, // D-Bus connection handle
+                                                        const std::string&);    // device object path
   static std::string deviceToDBusPath (struct DBusConnection*, // D-Bus connection handle
                                        const std::string&);    // device identifier
-  static std::string IPv4ConfigDBusPathToGateway (struct DBusConnection*, // D-Bus connection handle
-                                                  const std::string&);    // IPv4Config object path
+  static std::string Ip4ConfigDBusPathToGateway (struct DBusConnection*, // D-Bus connection handle
+                                                 const std::string&);    // IPv4Config object path
   static std::string SSIDToAccessPointDBusPath (struct DBusConnection*, // D-Bus connection handle
                                                 const std::string&);    // SSID
   static std::string SSIDToDeviceDBusPath (struct DBusConnection*, // D-Bus connection handle
