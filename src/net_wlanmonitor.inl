@@ -856,7 +856,7 @@ error:
 //  if (connection_profiles_a.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("found no connection profiles (SSID was: %s), aborting\n"),
+                ACE_TEXT ("failed to Net_Common_Tools::SSIDToConnectionDBusPath(%s), aborting\n"),
                 ACE_TEXT (SSID_in.c_str ())));
     goto error;
   } // end IF
