@@ -176,8 +176,6 @@ struct IRC_LoginOptions
 //////////////////////////////////////////
 
 typedef struct Stream_Statistic IRC_Statistic_t;
-
-typedef Stream_StatisticHandler_Reactor_T<IRC_Statistic_t> IRC_StatisticHandler_Reactor_t;
-typedef Stream_StatisticHandler_Proactor_T<IRC_Statistic_t> IRC_StatisticHandler_Proactor_t;
+typedef Stream_StatisticHandler_T<IRC_Statistic_t> IRC_StatisticHandler_t;
 
 #endif

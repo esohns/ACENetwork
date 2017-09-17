@@ -151,8 +151,7 @@ enum Net_Connection_Status
 typedef Stream_Statistic Net_Statistic_t;
 
 typedef Common_IStatistic_T<Net_Statistic_t> Net_StatisticReportingHandler_t;
-typedef Stream_StatisticHandler_Proactor_T<Net_Statistic_t> Net_StatisticHandlerProactor_t;
-typedef Stream_StatisticHandler_Reactor_T<Net_Statistic_t> Net_StatisticHandlerReactor_t;
+typedef Stream_StatisticHandler_T<Net_Statistic_t> Net_StatisticHandler_t;
 
 #if defined (ACE_HAS_NETLINK)
 typedef Net_ITransportLayer_T<struct Net_NetlinkSocketConfiguration> Net_INetlinkTransportLayer_t;
@@ -162,7 +161,7 @@ typedef Net_ITransportLayer_T<struct Net_UDPSocketConfiguration> Net_IUDPTranspo
 
 struct Net_UserData
 {
-  inline Net_UserData ()
+  Net_UserData ()
    : userData (NULL)
   {};
 
@@ -173,7 +172,7 @@ typedef unsigned int Net_ConnectionId_t;
 
 struct Net_ConnectionState
 {
-  inline Net_ConnectionState ()
+  Net_ConnectionState ()
    : handle (ACE_INVALID_HANDLE)
    , lastCollectionTimestamp (ACE_Time_Value::zero)
    , lock ()

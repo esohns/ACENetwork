@@ -22,11 +22,13 @@
 #define NET_CONNECTION_BASE_H
 
 #include "ace/Global_Macros.h"
+#include "ace/Singleton.h"
+#include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
 #include "common_referencecounter_base.h"
 
-#include "stream_common.h"
+#include "stream_stat_statistic_handler.h"
 
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
@@ -38,7 +40,7 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
           typename UserDataType>
 class Net_ConnectionBase_T
@@ -48,6 +50,8 @@ class Net_ConnectionBase_T
                                     StateType,
                                     StatisticContainerType>
 {
+  typedef Common_ReferenceCounterBase inherited;
+
  public:
   // convenient types
   typedef Net_IConnection_T<AddressType,
@@ -66,7 +70,7 @@ class Net_ConnectionBase_T
   //         retrieved in the ctor
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; };
   inline virtual const StateType& state () const { return state_; };
-  inline virtual Net_Connection_Status status () const { return state_.status; };
+  inline virtual enum Net_Connection_Status status () const { return state_.status; };
 
  protected:
   Net_ConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
@@ -93,7 +97,10 @@ class Net_ConnectionBase_T
   ICONNECTION_MANAGER_T* manager_;
 
  private:
-  typedef Common_ReferenceCounterBase inherited;
+  // convenient types
+  typedef ACE_Singleton<TimerManagerType,
+                        ACE_SYNCH_MUTEX> TIMER_MANAGER_SINGLETON_T;
+  typedef Stream_StatisticHandler_T<StatisticContainerType> STATISTIC_HANDLER_T;
 
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&))
@@ -104,12 +111,12 @@ class Net_ConnectionBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StatisticHandlerType,
+                               TimerManagerType,
                                UserDataType> OWN_TYPE_T;
 
   // timer
-  StatisticHandlerType statisticCollectHandler_;
-  long                 statisticCollectHandlerID_;
+  STATISTIC_HANDLER_T    statisticHandler_;
+  long                   timerId_;
 };
 
 // include template definition

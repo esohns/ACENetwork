@@ -20,8 +20,6 @@
 
 #include "ace/Log_Msg.h"
 
-#include "common_timer_manager_common.h"
-
 #include "stream_defines.h"
 #include "stream_session_message_base.h"
 
@@ -38,7 +36,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename ProtocolHeaderType,
           typename UserDataType>
 Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
@@ -52,7 +50,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
-                              StatisticHandlerType,
+                              TimerManagerType,
                               ProtocolHeaderType,
                               UserDataType>::Net_Module_TCPSocketHandler_T (ISTREAM_T* stream_in,
                                                                             bool generateSessionMessages_in)
@@ -79,7 +77,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename ProtocolHeaderType,
           typename UserDataType>
 Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
@@ -93,7 +91,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
-                              StatisticHandlerType,
+                              TimerManagerType,
                               ProtocolHeaderType,
                               UserDataType>::~Net_Module_TCPSocketHandler_T ()
 {
@@ -114,7 +112,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename ProtocolHeaderType,
           typename UserDataType>
 bool
@@ -129,7 +127,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
-                              StatisticHandlerType,
+                              TimerManagerType,
                               ProtocolHeaderType,
                               UserDataType>::initialize (const ConfigurationType& configuration_in,
                                                          Stream_IAllocator* allocator_in)
@@ -160,7 +158,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename ProtocolHeaderType,
           typename UserDataType>
 void
@@ -175,7 +173,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
-                              StatisticHandlerType,
+                              TimerManagerType,
                               ProtocolHeaderType,
                               UserDataType>::handleDataMessage (DataMessageType*& message_inout,
                                                                 bool& passMessageDownstream_out)
@@ -209,7 +207,8 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
       if (result == -1)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Task::put_next(): \"%m\", continuing\n")));
+                    ACE_TEXT ("%s: failed to ACE_Task::put_next(): \"%m\", continuing\n"),
+                    inherited::mod_->name ()));
 
         // clean up
         message_p->release ();
@@ -230,7 +229,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename ProtocolHeaderType,
           typename UserDataType>
 void
@@ -245,7 +244,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
-                              StatisticHandlerType,
+                              TimerManagerType,
                               ProtocolHeaderType,
                               UserDataType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                                    bool& passMessageDownstream_out)
@@ -265,28 +264,33 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
   {
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
+      // schedule regular statistic collection ?
       // *TODO*: remove type inference
       if (inherited::configuration_->statisticReportingInterval !=
           ACE_Time_Value::zero)
-      {
-        // schedule regular statistic collection
+      { ACE_ASSERT (inherited::timerId_ == -1);
+        typename TimerManagerType::INTERFACE_T* itimer_manager_p =
+            (inherited::configuration_->timerManager ? inherited::configuration_->timerManager
+                                                     : inherited::TIMER_MANAGER_SINGLETON_T::instance ());
+        ACE_ASSERT (itimer_manager_p);
         ACE_Time_Value interval (STREAM_DEFAULT_STATISTIC_COLLECTION_INTERVAL, 0);
         ACE_ASSERT (inherited::timerID_ == -1);
-        ACE_Event_Handler* handler_p = &(inherited::statisticCollectionHandler_);
-        inherited::timerID_ =
-            COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                  // event handler
-                                                                        NULL,                       // argument
-                                                                        COMMON_TIME_NOW + interval, // first wakeup time
-                                                                        interval);                  // interval
-        if (inherited::timerID_ == -1)
+        inherited::timerId_ =
+            itimer_manager_p->schedule_timer (&(inherited::statisticHandler_), // event handler handle
+                                              NULL,                            // asynchronous completion token
+                                              COMMON_TIME_NOW + interval,      // first wakeup time
+                                              interval);                       // interval
+        if (inherited::timerId_ == -1)
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to Common_Timer_Manager::schedule_timer(): \"%m\", aborting\n")));
-          return;
+                      ACE_TEXT ("%s: failed to Common_ITimer::schedule_timer(%#T): \"%m\", aborting\n"),
+                      inherited::mod_->name (),
+                      &interval));
+          goto error;
         } // end IF
 //        ACE_DEBUG ((LM_DEBUG,
-//                    ACE_TEXT ("scheduled statistic collecting timer (ID: %d) for interval %#T...\n"),
-//                    timerID_,
+//                    ACE_TEXT ("scheduled statistic collecting timer (ID: %d) for interval %#T\n"),
+//                    timerId_,
 //                    &interval));
       } // end IF
 
@@ -294,20 +298,29 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
 //      profile_.start ();
 
       break;
+
+error:
+      inherited::notify (STREAM_SESSION_MESSAGE_ABORT);
+
+      break;
     }
     case STREAM_SESSION_MESSAGE_END:
     {
       if (inherited::timerID_ != -1)
       {
+        typename TimerManagerType::INTERFACE_T* itimer_manager_p =
+            (inherited::configuration_->timerManager ? inherited::configuration_->timerManager
+                                                     : inherited::TIMER_MANAGER_SINGLETON_T::instance ());
+        ACE_ASSERT (itimer_manager_p);
         const void* act_p = NULL;
-        result =
-            COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (inherited::timerID_,
-                                                                      &act_p);
+        result = itimer_manager_p->cancel_timer (inherited::timerID_,
+                                                 &act_p);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
-                      inherited::timerID_));
-        inherited::timerID_ = -1;
+                      ACE_TEXT ("%s: failed to Common_ITimer::cancel_timer(%d): \"%m\", continuing\n"),
+                      inherited::mod_->name (),
+                      inherited::timerId_));
+        inherited::timerId_ = -1;
       } // end IF
 
       break;
@@ -328,7 +341,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename ProtocolHeaderType,
           typename UserDataType>
 bool
@@ -343,7 +356,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
-                              StatisticHandlerType,
+                              TimerManagerType,
                               ProtocolHeaderType,
                               UserDataType>::collect (StatisticContainerType& data_out)
 {
@@ -365,7 +378,8 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
   if (!inherited::putStatisticMessage (data_out)) // data container
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Module_TCPSocketHandler_T::putStatisticMessage(), aborting\n")));
+                ACE_TEXT ("%s: failed to Net_Module_TCPSocketHandler_T::putStatisticMessage(), aborting\n"),
+                inherited::mod_->name ()));
     return false;
   } // end IF
 
@@ -396,6 +410,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
 //
 //  ACE_ASSERT (false);
 //  ACE_NOTSUP;
+//
 //  ACE_NOTREACHED (return;)
 //}
 
@@ -410,7 +425,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename ProtocolHeaderType,
           typename UserDataType>
 bool
@@ -425,7 +440,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
-                              StatisticHandlerType,
+                              TimerManagerType,
                               ProtocolHeaderType,
                               UserDataType>::bisectMessages (DataMessageType*& message_out)
 {
@@ -528,7 +543,8 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
     if (!new_head_p)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to DataMessageType::duplicate(): \"%m\", aborting\n")));
+                  ACE_TEXT ("%s: failed to DataMessageType::duplicate(): \"%m\", aborting\n"),
+                  inherited::mod_->name ()));
       return false;
     } // end IF
     // ...and adjust rd_ptr to point to the beginning of the next message
@@ -552,95 +568,6 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
   return true;
 }
 
-//template <typename StreamStateType,
-//          typename SessionDataType,          // session data
-//          typename SessionDataContainerType, // (reference counted)
-//          typename SessionMessageType,
-//          typename DataMessageType>
-// Net_Message*
-// Net_Module_TCPSocketHandler_T::allocateMessage (unsigned int requestedSize_in)
-// {
-//NETWORK_TRACE (ACE_TEXT ("Net_Module_TCPSocketHandler_T::allocateMessage"));
-//
-//   // init return value(s)
-//   Net_Message* message_out = NULL;
-//
-//   try
-//   {
-//     message_out = static_cast<Net_Message*> (//inherited::allocator_->malloc (requestedSize_in));
-//   }
-//   catch (...)
-//   {
-//     ACE_DEBUG ((LM_ERROR,
-//                 ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
-//                 requestedSize_in));
-//   }
-//   if (!message_out)
-//   {
-//     ACE_DEBUG ((LM_ERROR,
-//                 ACE_TEXT ("failed to Stream_IAllocator::malloc(%u), aborting\n"),
-//                 requestedSize_in));
-//   } // end IF
-//
-//   return message_out;
-// }
-
-//template <ACE_SYNCH_DECL,
-//          typename SessionMessageType,
-//          typename DataMessageType,
-//          typename ConfigurationType,
-//          typename StreamStateType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename StatisticContainerType,
-//          typename ProtocolHeaderType>
-//bool
-//Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
-//                           SessionMessageType,
-//                           DataMessageType,
-//                           ConfigurationType,
-//                           StreamStateType,
-//                           SessionDataType,
-//                           SessionDataContainerType,
-//                           StatisticContainerType,
-//                           ProtocolHeaderType>::putStatisticMessage (const StatisticContainerType& statisticData_in) const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Module_TCPSocketHandler_T::putStatisticMessage"));
-//
-//  // sanity check(s)
-//  ACE_ASSERT (inherited::sessionData_);
-//  // *TODO*: remove type inferences
-//  ACE_ASSERT (inherited::configuration_);
-//  ACE_ASSERT (inherited::configuration_->streamConfiguration);
-//
-//  // step1: update session state
-//  // *TODO*: remove type inferences
-//  SessionDataType& session_data_r =
-//      const_cast<SessionDataType&> (inherited::sessionData_->get ());
-//  session_data_r.currentStatistic = statisticData_in;
-//
-//  // *TODO*: attach stream state information to the session data
-//
-////  // step2: create session data object container
-////  SessionDataContainerType* session_data_p = NULL;
-////  ACE_NEW_NORETURN (session_data_p,
-////                    SessionDataContainerType (inherited::sessionData_,
-////                                              false));
-////  if (!session_data_p)
-////  {
-////    ACE_DEBUG ((LM_CRITICAL,
-////                ACE_TEXT ("failed to allocate SessionDataContainerType: \"%m\", aborting\n")));
-////    return false;
-////  } // end IF
-//
-//  // step3: send the statistic data downstream
-//  // *NOTE*: fire-and-forget session_data_p here
-//  // *TODO*: remove type inference
-//  return inherited::putSessionMessage (STREAM_SESSION_STATISTIC,
-//                                       *inherited::sessionData_,
-//                                       inherited::configuration_->streamConfiguration->messageAllocator);
-//}
-
 /////////////////////////////////////////
 
 template <ACE_SYNCH_DECL,
@@ -654,7 +581,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename UserDataType>
 Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               ControlMessageType,
@@ -667,7 +594,7 @@ Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
-                              StatisticHandlerType,
+                              TimerManagerType,
                               UserDataType>::Net_Module_UDPSocketHandler_T (ACE_SYNCH_MUTEX_T* lock_in,
                                                                             bool autoStart_in,
                                                                             bool generateSessionMessages_in)
@@ -690,7 +617,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename UserDataType>
 bool
 Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
@@ -704,7 +631,7 @@ Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
-                              StatisticHandlerType,
+                              TimerManagerType,
                               UserDataType>::initialize (const ConfigurationType& configuration_in,
                                                          Stream_IAllocator* allocator_in)
 {
@@ -731,6 +658,56 @@ Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
 //  return inherited::sessionID_;
 //}
 
+//template <ACE_SYNCH_DECL,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType,
+//          typename ConfigurationType,
+//          typename StreamControlType,
+//          typename StreamNotificationType,
+//          typename StreamStateType,
+//          typename SessionDataType,
+//          typename SessionDataContainerType,
+//          typename StatisticContainerType,
+//          typename TimerManagerType,
+//          typename UserDataType>
+//void
+//Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
+//                              ControlMessageType,
+//                              DataMessageType,
+//                              SessionMessageType,
+//                              ConfigurationType,
+//                              StreamControlType,
+//                              StreamNotificationType,
+//                              StreamStateType,
+//                              SessionDataType,
+//                              SessionDataContainerType,
+//                              StatisticContainerType,
+//                              TimerManagerType,
+//                              UserDataType>::handleDataMessage (DataMessageType*& message_inout,
+//                                                                bool& passMessageDownstream_out)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::handleDataMessage"));
+
+////  // init return value(s), default behavior is to pass all messages along...
+////  // --> don't want that !
+////  passMessageDownstream_out = false;
+
+////  // sanity check(s)
+////  ACE_ASSERT (message_inout);
+////  ACE_ASSERT (isInitialized_);
+
+////  // --> push it downstream...
+////  if (inherited::put_next (message_inout, NULL) == -1)
+////  {
+////    ACE_DEBUG ((LM_ERROR,
+////                ACE_TEXT ("failed to ACE_Task::put_next(): \"%m\", continuing\n")));
+
+////    // clean up
+////    message_inout->release ();
+////  } // end IF
+//}
+
 template <ACE_SYNCH_DECL,
           typename ControlMessageType,
           typename DataMessageType,
@@ -742,7 +719,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename UserDataType>
 void
 Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
@@ -756,57 +733,7 @@ Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
-                              StatisticHandlerType,
-                              UserDataType>::handleDataMessage (DataMessageType*& message_inout,
-                                                                bool& passMessageDownstream_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::handleDataMessage"));
-
-//  // init return value(s), default behavior is to pass all messages along...
-//  // --> don't want that !
-//  passMessageDownstream_out = false;
-
-//  // sanity check(s)
-//  ACE_ASSERT (message_inout);
-//  ACE_ASSERT (isInitialized_);
-
-//  // --> push it downstream...
-//  if (inherited::put_next (message_inout, NULL) == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Task::put_next(): \"%m\", continuing\n")));
-
-//    // clean up
-//    message_inout->release ();
-//  } // end IF
-}
-
-template <ACE_SYNCH_DECL,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename ConfigurationType,
-          typename StreamControlType,
-          typename StreamNotificationType,
-          typename StreamStateType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename StatisticContainerType,
-          typename StatisticHandlerType,
-          typename UserDataType>
-void
-Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
-                              ControlMessageType,
-                              DataMessageType,
-                              SessionMessageType,
-                              ConfigurationType,
-                              StreamControlType,
-                              StreamNotificationType,
-                              StreamStateType,
-                              SessionDataType,
-                              SessionDataContainerType,
-                              StatisticContainerType,
-                              StatisticHandlerType,
+                              TimerManagerType,
                               UserDataType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                                    bool& passMessageDownstream_out)
 {
@@ -816,34 +743,40 @@ Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
   ACE_UNUSED_ARG (passMessageDownstream_out);
 
   // sanity check(s)
-  ACE_ASSERT (inherited::configuration_.streamConfiguration);
-  ACE_ASSERT (inherited::initialized_);
+  ACE_ASSERT (inherited::configuration_);
 
   switch (message_inout->getType ())
   {
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
-      if (inherited::configuration_.streamConfiguration->statisticReportingInterval)
-      {
-        // schedule regular statistics collection...
+      // sanity check(s)
+      ACE_ASSERT (inherited::configuration_->streamConfiguration);
+
+      // schedule regular statistic collection ?
+      if (inherited::configuration_->streamConfiguration->statisticReportingInterval)
+      { ACE_ASSERT (inherited::timerId_ == -1);
+        typename TimerManagerType::INTERFACE_T* itimer_manager_p =
+            (inherited::configuration_->timerManager ? inherited::configuration_->timerManager
+                                                     : inherited::TIMER_MANAGER_SINGLETON_T::instance ());
+        ACE_ASSERT (itimer_manager_p);
         ACE_Time_Value interval (STREAM_DEFAULT_STATISTIC_COLLECTION_INTERVAL,
                                  0);
-        ACE_ASSERT (inherited::timerID_ == -1);
-        ACE_Event_Handler* handler_p =
-            &(inherited::statisticCollectionHandler_);
-        inherited::timerID_ =
-            COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                  // event handler
-                                                                        NULL,                       // argument
-                                                                        COMMON_TIME_NOW + interval, // first wakeup time
-                                                                        interval);                  // interval
-        if (inherited::timerID_ == -1)
+        ACE_ASSERT (inherited::timerId_ == -1);
+        inherited::timerId_ =
+            itimer_manager_p->schedule_timer (&(inherited::statisticHandler_), // event handler handle
+                                              NULL,                            // asynchronous completion token
+                                              COMMON_TIME_NOW + interval,      // first wakeup time
+                                              interval);                       // interval
+        if (inherited::timerId_ == -1)
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to Common_Timer_Manager::schedule_timer(): \"%m\", returning\n")));
-          return;
+                      ACE_TEXT ("%s: failed to Common_ITimer::schedule_timer(%#T): \"%m\", aborting\n"),
+                      inherited::mod_->name (),
+                      &interval));
+          goto error;
         } // end IF
 //        ACE_DEBUG ((LM_DEBUG,
-//                    ACE_TEXT ("scheduled statistics collecting timer (ID: %d) for interval %#T...\n"),
+//                    ACE_TEXT ("scheduled statistic collecting timer (id: %d) for interval %#T\n"),
 //                    timerID_,
 //                    &interval));
       } // end IF
@@ -852,21 +785,30 @@ Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
 //      profile_.start ();
 
       break;
+
+error:
+      inherited::notify (STREAM_SESSION_MESSAGE_ABORT);
+
+      break;
     }
     case STREAM_SESSION_MESSAGE_END:
     {
-      if (inherited::timerID_ != -1)
+      if (inherited::timerId_ != -1)
       {
         int result = -1;
+        typename TimerManagerType::INTERFACE_T* itimer_manager_p =
+            (inherited::configuration_->timerManager ? inherited::configuration_->timerManager
+                                                     : inherited::TIMER_MANAGER_SINGLETON_T::instance ());
+        ACE_ASSERT (itimer_manager_p);
         const void* act_p = NULL;
-        result =
-            COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (inherited::timerID_,
-                                                                      &act_p);
+        result = itimer_manager_p->cancel_timer (inherited::timerId_,
+                                                 &act_p);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", continuing\n"),
+                      ACE_TEXT ("%s: failed to Common_ITimer::cancel_timer(%d): \"%m\", continuing\n"),
+                      inherited::mod_->name (),
                       inherited::timerID_));
-        inherited::timerID_ = -1;
+        inherited::timerId_ = -1;
       } // end IF
 
       break;
@@ -887,7 +829,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename UserDataType>
 bool
 Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
@@ -901,7 +843,7 @@ Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
                               SessionDataType,
                               SessionDataContainerType,
                               StatisticContainerType,
-                              StatisticHandlerType,
+                              TimerManagerType,
                               UserDataType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_UDPSocketHandler_T::collect"));
@@ -916,8 +858,8 @@ Net_Module_UDPSocketHandler_T<ACE_SYNCH_USE,
   //         (and propagate it downstream ?)
 
   // step1: send the container downstream
-  if (!inherited::putStatisticsMessage (data_out,               // data container
-                                        COMMON_TIME_NOW)) // timestamp
+  if (!inherited::putStatisticMessage (data_out,               // data container
+                                       COMMON_TIME_NOW)) // timestamp
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to putSessionMessage(SESSION_STATISTICS), aborting\n")));

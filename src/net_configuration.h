@@ -29,13 +29,15 @@
 #include <guiddef.h>
 #include <wlanapi.h>
 #else
-#include <dbus/dbus.h>
+#include "dbus/dbus.h"
 #endif
 
 #include "ace/Basic_Types.h"
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
 #include "ace/Time_Value.h"
+
+#include "common_timer_common.h"
 
 #include "net_common.h"
 #include "net_defines.h"
@@ -53,7 +55,7 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 
 struct Net_SocketConfigurationBase
 {
-  inline Net_SocketConfigurationBase ()
+  Net_SocketConfigurationBase ()
    : bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
    , networkInterface (ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET))
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
@@ -69,7 +71,7 @@ struct Net_SocketConfigurationBase
 struct Net_NetlinkSocketConfiguration
  : Net_SocketConfigurationBase
 {
-  inline Net_NetlinkSocketConfiguration ()
+  Net_NetlinkSocketConfiguration ()
    : Net_SocketConfigurationBase ()
    , address ()
    , protocol (NET_PROTOCOL_DEFAULT_NETLINK)
@@ -83,7 +85,7 @@ struct Net_NetlinkSocketConfiguration
 struct Net_TCPSocketConfiguration
  : Net_SocketConfigurationBase
 {
-  inline Net_TCPSocketConfiguration ()
+  Net_TCPSocketConfiguration ()
    : Net_SocketConfigurationBase ()
    , address (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
               static_cast<ACE_UINT32> (INADDR_ANY))
@@ -109,7 +111,7 @@ struct Net_TCPSocketConfiguration
 struct Net_UDPSocketConfiguration
  : Net_SocketConfigurationBase
 {
-  inline Net_UDPSocketConfiguration ()
+  Net_UDPSocketConfiguration ()
    : Net_SocketConfigurationBase ()
    , address (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
               static_cast<ACE_UINT32> (INADDR_ANY))
@@ -157,7 +159,7 @@ struct Net_UDPSocketConfiguration
 struct Net_ConnectionConfiguration;
 struct Net_SocketHandlerConfiguration
 {
-  inline Net_SocketHandlerConfiguration ()
+  Net_SocketHandlerConfiguration ()
    : connectionConfiguration (NULL)
    , socketConfiguration (NULL)
    , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
@@ -177,7 +179,7 @@ struct Net_SocketHandlerConfiguration
 
 struct Net_ListenerConfiguration
 {
-  inline Net_ListenerConfiguration ()
+  Net_ListenerConfiguration ()
    : addressFamily (ACE_ADDRESS_FAMILY_INET)
    , socketHandlerConfiguration ()
   {};
@@ -187,14 +189,16 @@ struct Net_ListenerConfiguration
 };
 
 struct Stream_Configuration;
+class Common_ITimer;
 struct Net_ConnectionConfiguration
 {
-  inline Net_ConnectionConfiguration ()
+  Net_ConnectionConfiguration ()
    : connectionManager (NULL)
    , messageAllocator (NULL)
    , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , socketHandlerConfiguration ()
    , streamConfiguration (NULL)
+   , timerManager (NULL)
    , userData (NULL)
   {};
 
@@ -206,6 +210,7 @@ struct Net_ConnectionConfiguration
   unsigned int                          PDUSize; // package data unit size
   struct Net_SocketHandlerConfiguration socketHandlerConfiguration;
   struct Stream_Configuration*          streamConfiguration;
+  Common_ITimer_t*                      timerManager;
 
   struct Net_UserData*                  userData;
 };
@@ -216,7 +221,7 @@ typedef Net_ConnectionConfigurations_t::iterator Net_ConnectionConfigurationIter
 struct Common_ParserConfiguration;
 struct Net_SessionConfiguration
 {
-  inline Net_SessionConfiguration ()
+  Net_SessionConfiguration ()
    : parserConfiguration (NULL)
    , useReactor (NET_EVENT_USE_REACTOR)
   {};
@@ -229,7 +234,7 @@ struct Net_SessionConfiguration
 
 struct Net_WLANMonitorConfiguration
 {
-  inline Net_WLANMonitorConfiguration ()
+  Net_WLANMonitorConfiguration ()
    : autoAssociate (false)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
    , deviceIdentifier (GUID_NULL)

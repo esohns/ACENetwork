@@ -188,8 +188,6 @@ enum BitTorrent_Event
 //////////////////////////////////////////
 
 typedef struct Stream_Statistic BitTorrent_Statistic_t;
-
-typedef Stream_StatisticHandler_Reactor_T<BitTorrent_Statistic_t> BitTorrent_StatisticHandler_Reactor_t;
-typedef Stream_StatisticHandler_Proactor_T<BitTorrent_Statistic_t> BitTorrent_StatisticHandler_Proactor_t;
+typedef Stream_StatisticHandler_T<BitTorrent_Statistic_t> BitTorrent_StatisticHandler_t;
 
 #endif

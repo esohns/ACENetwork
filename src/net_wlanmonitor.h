@@ -25,13 +25,16 @@
 #include <string>
 
 #include "ace/config-lite.h"
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include <vector>
+
 #include <guiddef.h>
 #include <wlanapi.h>
 #else
-#include <dbus/dbus.h>
-//#include <dbus/dbus-glib.h>
+#include <map>
+
+#include "dbus/dbus.h"
+//#include "dbus/dbus-glib.h"
 #endif
 
 #include "ace/Global_Macros.h"
@@ -96,6 +99,11 @@ class Net_WLANMonitor_T
 
   // implement Net_IWLANMonitor_T
   inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; };
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  virtual const std::string& get1R (const std::string&) const;
+  inline virtual void set2R (const std::string& key_in, const std::string& value_in) { identifierToObjectPath_.insert (std::make_pair (key_in, value_in)); };
+#endif
   virtual bool initialize (const ConfigurationType&); // configuration handle
   virtual void subscribe (Net_IWLANCB*);   // new subscriber
   virtual void unsubscribe (Net_IWLANCB*); // existing subscriber
@@ -124,9 +132,19 @@ class Net_WLANMonitor_T
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   typedef std::vector<struct _GUID> DEVICEIDENTIFIERS_T;
 #else
-  typedef std::vector<std::string> DEVICEIDENTIFIERS_T;
+  // key: identifier, value: DBus object path
+  typedef std::map<std::string, std::string> DEVICEIDENTIFIERS_T;
+  typedef std::pair<std::string, std::string> DEVICEIDENTIFIERS_PAIR_T;
+  struct DEVICEIDENTIFIERS_FIND_S
+   : public std::binary_function<DEVICEIDENTIFIERS_PAIR_T,
+                                 std::string,
+                                 bool>
+  {
+    inline bool operator() (const DEVICEIDENTIFIERS_PAIR_T& entry_in, std::string value_in) const { return entry_in.second == value_in; };
+  };
+  typedef DEVICEIDENTIFIERS_T::const_iterator DEVICEIDENTIFIERS_CONSTITERATOR_T;
 #endif
-  typedef DEVICEIDENTIFIERS_T::const_iterator DEVICEIDENTIFIERS_ITERATOR_T;
+  typedef DEVICEIDENTIFIERS_T::iterator DEVICEIDENTIFIERS_ITERATOR_T;
 
   Net_WLANMonitor_T ();
 
@@ -134,8 +152,8 @@ class Net_WLANMonitor_T
   HANDLE                                  clientHandle_;
 #else
   struct DBusConnection*                  connection_;
+  DEVICEIDENTIFIERS_T                     identifierToObjectPath_;
 //  struct DBusGProxy*                      proxy_;
-//  std::string                             deviceDBusPath_;
 #endif
   ConfigurationType*                      configuration_;
   bool                                    isActive_;

@@ -65,8 +65,6 @@ class Net_IConnectionManager_T
                             StateType,
                             StatisticContainerType> CONNECTION_T;
 
-  virtual ~Net_IConnectionManager_T () {};
-
   virtual void set (const ConfigurationType&, // connection handler (default)
                                               // configuration
                     UserDataType*) = 0;       // (stream) user data

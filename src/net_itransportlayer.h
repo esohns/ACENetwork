@@ -29,8 +29,6 @@ template <typename ConfigurationType> // socket-
 class Net_ILinkLayer_T
 {
  public:
-  inline virtual ~Net_ILinkLayer_T () {};
-
   // information
   // *TODO*: move this somewhere else
   virtual enum Common_DispatchType dispatch () = 0;
@@ -48,8 +46,6 @@ class Net_IIPLinkLayer_T
  : public Net_ILinkLayer_T<ConfigurationType>
 {
  public:
-  inline virtual ~Net_IIPLinkLayer_T () {};
-
   // *NOTE*: this is an ICMP function
   virtual void ping () = 0;
 };
@@ -61,8 +57,6 @@ class Net_ITransportLayer_T
  : public Net_ILinkLayer_T<ConfigurationType>
 {
  public:
-  inline virtual ~Net_ITransportLayer_T () {};
-
   // information
   virtual enum Net_TransportLayerType transportLayer () = 0;
 };

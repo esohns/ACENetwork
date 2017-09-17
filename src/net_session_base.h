@@ -44,13 +44,13 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
-          typename ConnectionType, // derived from Net_IConnection_T
-          typename ConnectionManagerType, // derived from Net_IConnectionManager_T
+          typename ConnectionType, // implements Net_IConnection_T
+          typename ConnectionManagerType, // implements Net_IConnectionManager_T
           typename ConnectorType,
           ////////////////////////////////
           typename ConfigurationType,
           typename StateType,
-          typename SessionInterfaceType> // derived from Net_ISession_T
+          typename SessionInterfaceType> // implements Net_ISession_T
 class Net_SessionBase_T
  : public SessionInterfaceType
 {

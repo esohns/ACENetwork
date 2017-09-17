@@ -47,10 +47,7 @@ class Net_IConnector_T
  : public Net_IConnectorBase_T<AddressType>
  , public Common_IGetR_T<ConfigurationType>
  , public Common_IInitialize_T<ConfigurationType>
-{
- public:
-  inline virtual ~Net_IConnector_T () {};
-};
+{};
 
 template <typename AddressType,
           typename ConfigurationType>

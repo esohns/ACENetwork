@@ -57,7 +57,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
  , clientHandle_ (ACE_INVALID_HANDLE)
 #else
  , connection_ (NULL)
-// , deviceDBusPath_ ()
+ , identifierToObjectPath_ ()
  // , proxy_ (NULL)
 #endif
  , configuration_ (NULL)
@@ -207,6 +207,7 @@ continue_:
 
   struct DBusError error_s;
   dbus_error_init (&error_s);
+  std::string device_path_string;
   std::string match_rule_string =
       ACE_TEXT_ALWAYS_CHAR ("type='signal',sender='");
   match_rule_string +=
@@ -229,6 +230,33 @@ continue_:
   dbus_connection_set_exit_on_disconnect (connection_,
                                           false);
 
+  // initialize cache
+  ACE_ASSERT (identifierToObjectPath_.empty ());
+  // convert device identifier to object path ?
+  if (!configuration_->deviceIdentifier.empty ())
+    identifierToObjectPath_.insert (std::make_pair (configuration_->deviceIdentifier,
+                                                    device_path_string));
+  else
+    identifierToObjectPath_ = getDevices ();
+  for (DEVICEIDENTIFIERS_ITERATOR_T iterator = identifierToObjectPath_.begin ();
+       iterator != identifierToObjectPath_.end ();
+       ++iterator)
+  {
+    (*iterator).second =
+        Net_Common_Tools::deviceToDBusPath (connection_,
+                                            (*iterator).first);
+    if ((*iterator).second.empty ())
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::deviceToDBusPath(\"%s\"), continuing\n"),
+                  ACE_TEXT ((*iterator).first).c_str ()));
+    else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("\"%s\": DBus object path is: \"%s\"\n"),
+                  ACE_TEXT ((*iterator).first.c_str ()),
+                  ACE_TEXT ((*iterator).second.c_str ())));
+  } // end FOR
+
+  // subscribe to all networkmanager signals
   if (!dbus_connection_add_filter (connection_,
                                    configuration_->notificationCB,
                                    configuration_->notificationCBData,
@@ -238,8 +266,6 @@ continue_:
                 ACE_TEXT ("failed to dbus_connection_add_filter(): \"%m\", returning\n")));
     goto error;
   } // end IF
-
-  // subscribe to all networkmanager signals
   // *NOTE*: according to the API documentation, this call should block until
   //         the dbus server acknowleges the request (which should actually
   //         hang, as the message processing loop has not started yet, see:
@@ -285,6 +311,7 @@ continue_:
 //                                            connection_,
 //                                            NULL);
 
+  // dispatch DBus messages in a dedicated thread
   inherited::start ();
   if (!inherited::isRunning ())
   {
@@ -293,25 +320,6 @@ continue_:
     goto error;
   } // end IF
   dbus_connection_flush (connection_);
-
-//  if (!configuration_->deviceIdentifier.empty ())
-//  {
-//    deviceDBusPath_ =
-//        Net_Common_Tools::deviceToDBusPath (connection_,
-//                                            configuration_->deviceIdentifier);
-//    if (deviceDBusPath_.empty ())
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to Net_Common_Tools::deviceToDBusPath(%@,\"%s\"), returning\n"),
-//                  connection_,
-//                  ACE_TEXT (configuration_->deviceIdentifier.c_str ())));
-//      return;
-//    } // end IF
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("device \"%s\" D-Bus object path is \"%s\"\n"),
-//              ACE_TEXT (configuration_->deviceIdentifier.c_str ()),
-//              ACE_TEXT (deviceDBusPath_.c_str ())));
-//  } // end IF
 
   goto continue_;
 
@@ -389,6 +397,39 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   isActive_ = false;
 }
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename AddressType,
+          typename ConfigurationType,
+          typename UserDataType>
+const std::string&
+Net_WLANMonitor_T<ACE_SYNCH_USE,
+                  TimePolicyType,
+                  AddressType,
+                  ConfigurationType,
+                  UserDataType>::get1R (const std::string& value_in) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::get1R"));
+
+  std::string result;
+
+  DEVICEIDENTIFIERS_CONSTITERATOR_T iterator =
+    std::find_if (identifierToObjectPath_.begin (), identifierToObjectPath_.end (),
+                  std::bind2nd (DEVICEIDENTIFIERS_FIND_S (),
+                                value_in));
+  if (iterator == identifierToObjectPath_.end ())
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("device object path not found (was: \"%s\"), aborting\n"),
+                ACE_TEXT (value_in.c_str ())));
+  else
+    result = (*iterator).first;
+
+  return result;
+}
+#endif
+
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename AddressType,
@@ -412,7 +453,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
     ACE_ASSERT (clientHandle_ == ACE_INVALID_HANDLE);
 #else
     ACE_ASSERT (!connection_);
-//    ACE_ASSERT (deviceDBusPath_.empty ());
+    identifierToObjectPath_.clear ();
 #endif
 
     localSAP_.reset ();
@@ -438,8 +479,8 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("D-Bus signal callback not specified, using default implementation\n")));
     configuration_->notificationCB = network_wlan_dbus_default_filter_cb;
-    Net_IWLANMonitorBase* iwlanmonitorbase_p = this;
-    configuration_->notificationCBData = iwlanmonitorbase_p;
+    configuration_->notificationCBData =
+        static_cast<Net_IWLANMonitorBase*> (this);
 #endif
   } // end IF
   else
@@ -603,6 +644,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   } // end IF
 
   DEVICEIDENTIFIERS_T devices;
+  DEVICEIDENTIFIERS_ITERATOR_T iterator;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   if (InlineIsEqualGUID (deviceIdentifier_in, GUID_NULL))
 #else
@@ -610,8 +652,9 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 #endif
     devices = getDevices ();
   else
-    devices.push_back (deviceIdentifier_in);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+    devices.push_back (deviceIdentifier_in);
+
   // sanity check(s)
   ACE_ASSERT (clientHandle_ != ACE_INVALID_HANDLE);
 
@@ -838,56 +881,66 @@ error:
 
   return false;
 #else
+    devices.insert (std::make_pair (deviceIdentifier_in, ACE_TEXT_ALWAYS_CHAR ("")));
+
   // step1: retrieve available and matching connection profile(s)
-//  std::vector<std::string> connection_profiles_a;
   std::string device_object_path_string, connection_object_path_string;
   std::string access_point_object_path_string;
-//  for (DEVICEIDENTIFIERS_ITERATOR_T iterator = devices.begin ();
-//       iterator != devices.end ();
-//       ++iterator)
-//  {
-    connection_object_path_string =
-        Net_Common_Tools::SSIDToConnectionDBusPath (connection_,
-                                                    SSID_in);
-    if (connection_object_path_string.empty ())
-//      continue;
-//    connection_profiles_a.push_back (connection_object_path_string);
-//  } // end FOR
-//  if (connection_profiles_a.empty ())
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::SSIDToConnectionDBusPath(%s), aborting\n"),
-                ACE_TEXT (SSID_in.c_str ())));
-    goto error;
-  } // end IF
-//  else if (connection_profiles_a.size () > 1)
-//    ACE_DEBUG ((LM_WARNING,
-//                ACE_TEXT ("found several connection profiles for SSID %s, activating the first one\n"),
-//                ACE_TEXT (SSID_in.c_str ())));
-//  connection_object_path_string = connection_profiles_a.front ();
+  DEVICEIDENTIFIERS_ITERATOR_T iterator_2;
+  iterator = devices.begin ();
 
+next:
+  if (iterator == devices.end ())
+    goto error; // --> failed
+
+  // check cache first
+  iterator_2 = identifierToObjectPath_.find ((*iterator).first);
+  if (iterator_2 != identifierToObjectPath_.end ())
+  {
+    device_object_path_string = (*iterator_2).second;
+    goto retrieve_access_point;
+  } // end IF
   device_object_path_string =
       Net_Common_Tools::SSIDToDeviceDBusPath (connection_,
                                               SSID_in);
   if (device_object_path_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::SSIDToDeviceDBusPath(0x%@,%s), aborting\n"),
+                ACE_TEXT ("failed to Net_Common_Tools::SSIDToDeviceDBusPath(0x%@,%s), continuing\n"),
                 connection_,
                 ACE_TEXT (SSID_in.c_str ())));
-    goto error;
+    ++iterator;
+    goto next;
   } // end IF
 
+retrieve_access_point:
   access_point_object_path_string =
       Net_Common_Tools::SSIDToAccessPointDBusPath (connection_,
+                                                   device_object_path_string,
                                                    SSID_in);
   if (access_point_object_path_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::SSIDToAccessPointDBusPath(%@,%s), aborting\n"),
+                ACE_TEXT ("failed to Net_Common_Tools::SSIDToAccessPointDBusPath(0x%@,\"%s\",%s), continuing\n"),
                 connection_,
+                ACE_TEXT (device_object_path_string.c_str ()),
                 ACE_TEXT (SSID_in.c_str ())));
-    goto error;
+    ++iterator;
+    goto next;
+  } // end IF
+  connection_object_path_string =
+      Net_Common_Tools::SSIDToConnectionDBusPath (connection_,
+                                                  device_object_path_string,
+                                                  SSID_in);
+  if (connection_object_path_string.empty ())
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::SSIDToConnectionDBusPath(0x%@,\"%s\",%s), continuing\n"),
+                connection_,
+                ACE_TEXT (device_object_path_string.c_str ()),
+                ACE_TEXT (SSID_in.c_str ())));
+    ++iterator;
+    goto next;
   } // end IF
   if (!Net_Common_Tools::activateConnection (connection_,
                                              connection_object_path_string,
@@ -895,17 +948,18 @@ error:
                                              access_point_object_path_string))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::activateConnection(0x%@,\"%s\",\"%s\",\"%s\"), aborting\n"),
+                ACE_TEXT ("failed to Net_Common_Tools::activateConnection(0x%@,\"%s\",\"%s\",\"%s\"), continuing\n"),
                 connection_,
                 ACE_TEXT (connection_object_path_string.c_str ()),
-                ACE_TEXT (Net_Common_Tools::deviceDBusPathToIdentifier (connection_,device_object_path_string).c_str ()),
+                ACE_TEXT ((*iterator).first.c_str ()),
                 ACE_TEXT (access_point_object_path_string.c_str ())));
-    goto error;
+    ++iterator;
+    goto next;
   } // end IF
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("activated connection configuration \"%s\" (device: \"%s\", SSID: %s)\n"),
               ACE_TEXT (connection_object_path_string.c_str ()),
-              ACE_TEXT (Net_Common_Tools::deviceDBusPathToIdentifier (connection_,device_object_path_string).c_str ()),
+              ACE_TEXT ((*iterator).first.c_str ()),
               ACE_TEXT (SSID_in.c_str ())));
 
   goto continue_;
@@ -1319,7 +1373,7 @@ template <ACE_SYNCH_DECL,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 std::vector<struct _GUID>
 #else
-std::vector<std::string>
+std::map<std::string, std::string>
 #endif
 Net_WLANMonitor_T<ACE_SYNCH_USE,
                   TimePolicyType,
@@ -1416,7 +1470,8 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
     if (!Net_Common_Tools::interfaceIsWireless (ifaddrs_2->ifa_name))
       continue;
 
-    result.push_back (ifaddrs_2->ifa_name);
+    result.insert (std::make_pair (ifaddrs_2->ifa_name,
+                                   ACE_TEXT_ALWAYS_CHAR ("")));
   } // end FOR
 
   // clean up

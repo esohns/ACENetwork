@@ -48,7 +48,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
           typename ProtocolHeaderType,
           ////////////////////////////////
@@ -66,7 +66,7 @@ class Net_Module_TCPSocketHandler_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
-                                      StatisticHandlerType,
+                                      TimerManagerType,
                                       UserDataType>
 {
  public:
@@ -93,7 +93,7 @@ class Net_Module_TCPSocketHandler_T
                                     SessionDataType,
                                     SessionDataContainerType,
                                     StatisticContainerType,
-                                    StatisticHandlerType,
+                                    TimerManagerType,
                                     UserDataType>::initialize;
   using Stream_StateMachine_Control_T<ACE_SYNCH_USE>::initialize;
 #endif
@@ -129,7 +129,7 @@ class Net_Module_TCPSocketHandler_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
-                                      StatisticHandlerType,
+                                      TimerManagerType,
                                       UserDataType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Module_TCPSocketHandler_T (const Net_Module_TCPSocketHandler_T&))
@@ -163,7 +163,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           ////////////////////////////////
           typename UserDataType>
 class Net_Module_UDPSocketHandler_T
@@ -179,7 +179,7 @@ class Net_Module_UDPSocketHandler_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
-                                      StatisticHandlerType,
+                                      TimerManagerType,
                                       UserDataType>
 {
  public:
@@ -219,7 +219,7 @@ class Net_Module_UDPSocketHandler_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
-                                      StatisticHandlerType,
+                                      TimerManagerType,
                                       UserDataType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T (const Net_Module_UDPSocketHandler_T&))

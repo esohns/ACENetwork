@@ -244,8 +244,8 @@ class Net_Common_Tools
                                                                   const std::string&);    // connection object path
   static std::string connectionDBusPathToSSID (struct DBusConnection*, // D-Bus connection handle
                                                const std::string&);    // connection object path
-  static std::string deviceDBusPathToAccessPointDBusPath (struct DBusConnection*, // D-Bus connection handle
-                                                          const std::string&);    // device object path
+  static std::string deviceDBusPathToActiveAccessPointDBusPath (struct DBusConnection*, // D-Bus connection handle
+                                                                const std::string&);    // device object path
   static std::string deviceDBusPathToIdentifier (struct DBusConnection*, // D-Bus connection handle
                                                  const std::string&);    // device object path
   static std::string deviceDBusPathToIp4ConfigDBusPath (struct DBusConnection*, // D-Bus connection handle
@@ -255,10 +255,12 @@ class Net_Common_Tools
   static std::string Ip4ConfigDBusPathToGateway (struct DBusConnection*, // D-Bus connection handle
                                                  const std::string&);    // IPv4Config object path
   static std::string SSIDToAccessPointDBusPath (struct DBusConnection*, // D-Bus connection handle
+                                                const std::string&,     // device object path
                                                 const std::string&);    // SSID
   static std::string SSIDToDeviceDBusPath (struct DBusConnection*, // D-Bus connection handle
                                            const std::string&);    // SSID
   static std::string SSIDToConnectionDBusPath (struct DBusConnection*, // D-Bus connection handle
+                                               const std::string&,     // device object path
                                                const std::string&);    // SSID
 #endif
 

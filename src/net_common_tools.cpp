@@ -4242,10 +4242,10 @@ continue_:
 }
 
 std::string
-Net_Common_Tools::deviceDBusPathToAccessPointDBusPath (struct DBusConnection* connection_in,
-                                                       const std::string& deviceObjectPath_in)
+Net_Common_Tools::deviceDBusPathToActiveAccessPointDBusPath (struct DBusConnection* connection_in,
+                                                             const std::string& deviceObjectPath_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::deviceDBusPathToAccessPointDBusPath"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::deviceDBusPathToActiveAccessPointDBusPath"));
 
   // initialize return value(s)
   std::string result;
@@ -4729,6 +4729,7 @@ continue_:
 
 std::string
 Net_Common_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_in,
+                                             const std::string& deviceObjectPath_in,
                                              const std::string& SSID_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::SSIDToAccessPointDBusPath"));
@@ -4741,8 +4742,9 @@ Net_Common_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_i
   ACE_ASSERT (!SSID_in.empty ());
 
   std::string device_object_path_string =
-      Net_Common_Tools::SSIDToDeviceDBusPath (connection_in,
-                                              SSID_in);
+      (deviceObjectPath_in.empty () ? Net_Common_Tools::SSIDToDeviceDBusPath (connection_in,
+                                                                              SSID_in)
+                                    : deviceObjectPath_in);
   if (device_object_path_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
@@ -4882,15 +4884,13 @@ Net_Common_Tools::SSIDToDeviceDBusPath (struct DBusConnection* connection_in,
                 ACE_TEXT ("found several devices that can see SSID %s, choosing the first one\n"),
                 ACE_TEXT (SSID_in.c_str ())));
 
-  result =
-      Net_Common_Tools::deviceToDBusPath (connection_in,
-                                          wireless_device_identifiers_a.front ());
-
-  return result;
+  return Net_Common_Tools::deviceToDBusPath (connection_in,
+                                             wireless_device_identifiers_a.front ());
 }
 
 std::string
 Net_Common_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in,
+                                            const std::string& deviceObjectPath_in,
                                             const std::string& SSID_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::SSIDToConnectionDBusPath"));
@@ -4903,8 +4903,9 @@ Net_Common_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in
   ACE_ASSERT (!SSID_in.empty ());
 
   std::string device_object_path_string =
-      Net_Common_Tools::SSIDToDeviceDBusPath (connection_in,
-                                              SSID_in);
+      (deviceObjectPath_in.empty () ? Net_Common_Tools::SSIDToDeviceDBusPath (connection_in,
+                                                                              SSID_in)
+                                    : deviceObjectPath_in);
   if (device_object_path_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,

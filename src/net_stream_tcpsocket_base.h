@@ -45,7 +45,7 @@ template <typename HandlerType,
           typename ConfigurationType, // connection-
           typename StateType, // connection-
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType, // implements Common_ITimer
           typename StreamType,
           ////////////////////////////////
           typename UserDataType,
@@ -58,7 +58,7 @@ class Net_StreamTCPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StatisticHandlerType,
+                               TimerManagerType,
                                UserDataType>
 {
   //friend class ACE_Acceptor<Net_StreamTCPSocketBase_T<HandlerType,
@@ -126,7 +126,7 @@ class Net_StreamTCPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StatisticHandlerType,
+                               TimerManagerType,
                                UserDataType> CONNECTION_BASE_T;
 
  protected:
@@ -148,8 +148,8 @@ class Net_StreamTCPSocketBase_T
   Net_StreamTCPSocketBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
                              const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
 
-  ACE_Message_Block* currentReadBuffer_;
-  ACE_Message_Block* currentWriteBuffer_;
+  ACE_Message_Block* readBuffer_;
+  ACE_Message_Block* writeBuffer_;
   ACE_SYNCH_MUTEX    sendLock_;
   // *IMPORTANT NOTE*: in a threaded environment, workers may (!) dispatch the
   //                   reactor notification queue concurrently (most notably,
@@ -166,7 +166,7 @@ class Net_StreamTCPSocketBase_T
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
-                               StatisticHandlerType,
+                               TimerManagerType,
                                UserDataType> inherited2;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.

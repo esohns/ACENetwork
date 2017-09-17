@@ -24,12 +24,13 @@
 #include <string>
 
 #include "ace/config-lite.h"
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <guiddef.h>
 #else
-#include <dbus/dbus.h>
+#include "dbus/dbus.h"
 #endif
+
+#include "ace/INET_Addr.h"
 
 #include "common_iget.h"
 #include "common_iinitialize.h"
@@ -99,6 +100,11 @@ template <typename AddressType,
 class Net_IWLANMonitor_T
  : public Net_IWLANMonitorBase
  , public Common_IGetR_T<ConfigurationType>
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+ , public Common_IGet1R_T<std::string> // cache access
+ , public Common_ISet2R_T<std::string> // cache access
+#endif
  , public Common_IInitialize_T<ConfigurationType>
  , public Common_ISubscribe_T<Net_IWLANCB>
 {
@@ -106,5 +112,10 @@ class Net_IWLANMonitor_T
   virtual bool addresses (AddressType&,            // return value: local SAP
                           AddressType&) const = 0; // return value: peer SAP
 };
+
+//////////////////////////////////////////
+
+//typedef Net_IWLANMonitor_T<ACE_INET_Addr,
+//                           struct Net_WLANMonitorConfiguration> Net_IInetWLANMonitor_t;
 
 #endif

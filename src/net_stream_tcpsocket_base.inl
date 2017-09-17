@@ -35,7 +35,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -45,7 +45,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -54,8 +54,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
  : inherited ()
  , inherited2 (interfaceHandle_in,
                statisticCollectionInterval_in)
- , currentReadBuffer_ (NULL)
- , currentWriteBuffer_ (NULL)
+ , readBuffer_ (NULL)
+ , writeBuffer_ (NULL)
  , sendLock_ ()
  , serializeOutput_ (false)
  , stream_ ()
@@ -70,7 +70,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -80,7 +80,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -88,8 +88,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
  : inherited ()
  , inherited2 (NULL,
                0)
- , currentReadBuffer_ (NULL)
- , currentWriteBuffer_ (NULL)
+ , readBuffer_ (NULL)
+ , writeBuffer_ (NULL)
  , sendLock_ ()
  , serializeOutput_ (false)
  , stream_ ()
@@ -104,7 +104,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -114,7 +114,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -122,10 +122,10 @@ Net_StreamTCPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamTCPSocketBase_T::~Net_StreamTCPSocketBase_T"));
 
-  if (currentReadBuffer_)
-    currentReadBuffer_->release ();
-  if (currentWriteBuffer_)
-    currentWriteBuffer_->release ();
+  if (readBuffer_)
+    readBuffer_->release ();
+  if (writeBuffer_)
+    writeBuffer_->release ();
 }
 
 template <typename HandlerType,
@@ -133,7 +133,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -144,7 +144,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -292,7 +292,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -303,7 +303,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -402,7 +402,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -413,7 +413,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -429,13 +429,13 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // sanity check
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration);
-  ACE_ASSERT (!currentReadBuffer_);
+  ACE_ASSERT (!readBuffer_);
 
   // read some data from the socket
   // *TODO*: remove type inference
-  currentReadBuffer_ =
+  readBuffer_ =
     allocateMessage (inherited2::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize);
-  if (likely (!currentReadBuffer_))
+  if (likely (!readBuffer_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
@@ -446,7 +446,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
   // read some data from the socket
 retry:
   bytes_received =
-    inherited::peer_.recv (currentReadBuffer_->wr_ptr (),                                                              // buffer
+    inherited::peer_.recv (readBuffer_->wr_ptr (),                                                              // buffer
                            inherited2::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize, // #bytes to read
                            0);                                                                                         // flags
   switch (bytes_received)
@@ -477,8 +477,8 @@ retry:
                     handle_in));
 
       // clean up
-      currentReadBuffer_->release ();
-      currentReadBuffer_ = NULL;
+      readBuffer_->release ();
+      readBuffer_ = NULL;
 
       // *TODO*: remove type inference
       if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
@@ -500,8 +500,8 @@ retry:
 #endif
 
       // clean up
-      currentReadBuffer_->release ();
-      currentReadBuffer_ = NULL;
+      readBuffer_->release ();
+      readBuffer_ = NULL;
 
       // *TODO*: remove type inference
       if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
@@ -517,7 +517,7 @@ retry:
 //                   bytes_received));
 
       // adjust write pointer
-      currentReadBuffer_->wr_ptr (static_cast<size_t> (bytes_received));
+      readBuffer_->wr_ptr (static_cast<size_t> (bytes_received));
 
       break;
     }
@@ -525,7 +525,7 @@ retry:
 
   // push the buffer onto the stream for processing
   // *NOTE*: the stream assumes ownership of the buffer
-  result = stream_.put (currentReadBuffer_);
+  result = stream_.put (readBuffer_);
   if (unlikely (result == -1))
   {
     int error = ACE_OS::last_error ();
@@ -534,12 +534,12 @@ retry:
                   ACE_TEXT ("failed to ACE_Stream::put(): \"%m\", aborting\n")));
 
     // clean up
-    //currentReadBuffer_->release ();
-    currentReadBuffer_ = NULL;
+    //readBuffer_->release ();
+    readBuffer_ = NULL;
 
     return -1; // <-- remove 'this' from dispatch
   } // end IF
-  currentReadBuffer_ = NULL;
+  readBuffer_ = NULL;
 
   return result;
 }
@@ -549,7 +549,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -560,7 +560,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -598,14 +598,14 @@ Net_StreamTCPSocketBase_T<HandlerType,
     } // end IF
   } // end IF
 
-  if (likely (!currentWriteBuffer_))
+  if (likely (!writeBuffer_))
   {
     // send next data chunk from the stream
     // *IMPORTANT NOTE*: should NEVER block, as available outbound data has
     //                   been notified to the reactor
     result =
-      (unlikely (inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection) ? inherited::getq (currentWriteBuffer_, NULL)
-                                                                                                : stream_.get (currentWriteBuffer_, NULL));
+      (unlikely (inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection) ? inherited::getq (writeBuffer_, NULL)
+                                                                                                : stream_.get (writeBuffer_, NULL));
     if (unlikely (result == -1))
     {
       // *NOTE*: a number of issues can occur here:
@@ -620,20 +620,20 @@ Net_StreamTCPSocketBase_T<HandlerType,
       goto release;
     } // end IF
   } // end IF
-  ACE_ASSERT (currentWriteBuffer_);
+  ACE_ASSERT (writeBuffer_);
   result = 0;
 
   // finished ?
   if (unlikely (inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection))
-    if (currentWriteBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
+    if (writeBuffer_->msg_type () == ACE_Message_Block::MB_STOP)
     {
       //       ACE_DEBUG ((LM_DEBUG,
       //                   ACE_TEXT ("[%u]: finished sending...\n"),
       //                   peer_.get_handle ()));
 
       // clean up
-      currentWriteBuffer_->release ();
-      currentWriteBuffer_ = NULL;
+      writeBuffer_->release ();
+      writeBuffer_ = NULL;
 
       result = -1; // <-- remove 'this' from dispatch
 
@@ -647,12 +647,12 @@ Net_StreamTCPSocketBase_T<HandlerType,
   //         --> use 'traditional' method for now
   //size_t bytes_transferred = 0;
   //bytes_sent =
-  //    inherited::peer_.send_n (currentWriteBuffer_, // buffer
+  //    inherited::peer_.send_n (writeBuffer_, // buffer
   //                             NULL,                // timeout
   //                             &bytes_transferred); // bytes transferred
   bytes_sent =
-    inherited::peer_.send_n (currentWriteBuffer_->rd_ptr (),                    // buffer
-                             static_cast<int> (currentWriteBuffer_->length ()), // bytes to send
+    inherited::peer_.send_n (writeBuffer_->rd_ptr (),                    // buffer
+                             static_cast<int> (writeBuffer_->length ()), // bytes to send
                              (int)0);                                           // flags
   switch (bytes_sent)
   {
@@ -678,8 +678,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
                     ACE_TEXT ("failed to ACE_SOCK_Stream::send_n(): \"%m\", aborting\n")));
 
       // clean up
-      currentWriteBuffer_->release ();
-      currentWriteBuffer_ = NULL;
+      writeBuffer_->release ();
+      writeBuffer_ = NULL;
 
       // *TODO*: remove type inference
       if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
@@ -703,8 +703,8 @@ Net_StreamTCPSocketBase_T<HandlerType,
 #endif
 
       // clean up
-      currentWriteBuffer_->release ();
-      currentWriteBuffer_ = NULL;
+      writeBuffer_->release ();
+      writeBuffer_ = NULL;
 
       // *TODO*: remove type inference
       if (likely (inherited2::state_.status == NET_CONNECTION_STATUS_OK))
@@ -722,20 +722,20 @@ Net_StreamTCPSocketBase_T<HandlerType,
 //                  inherited::peer_.get_handle ()));
 
       // finished with this buffer ?
-      currentWriteBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
-      if (unlikely (currentWriteBuffer_->length () > 0))
+      writeBuffer_->rd_ptr (static_cast<size_t> (bytes_sent));
+      if (unlikely (writeBuffer_->length () > 0))
         break; // there's more data
 
       // clean up
-      currentWriteBuffer_->release ();
-      currentWriteBuffer_ = NULL;
+      writeBuffer_->release ();
+      writeBuffer_ = NULL;
 
       break;
     }
   } // end SWITCH
 
   // immediately reschedule handler ?
-  if (unlikely (currentWriteBuffer_))
+  if (unlikely (writeBuffer_))
     result = 1; // <-- reschedule 'this' immediately
 
 release:
@@ -755,7 +755,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -766,7 +766,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -898,7 +898,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -909,7 +909,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -929,7 +929,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -940,7 +940,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -964,7 +964,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -975,7 +975,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -1024,7 +1024,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -1035,7 +1035,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -1055,7 +1055,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -1066,7 +1066,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -1087,7 +1087,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -1098,7 +1098,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -1134,7 +1134,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -1145,7 +1145,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -1168,7 +1168,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -1179,7 +1179,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -1200,7 +1200,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -1211,7 +1211,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,
@@ -1237,7 +1237,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename StreamType,
           typename UserDataType,
           typename ModuleConfigurationType,
@@ -1248,7 +1248,7 @@ Net_StreamTCPSocketBase_T<HandlerType,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
-                          StatisticHandlerType,
+                          TimerManagerType,
                           StreamType,
                           UserDataType,
                           ModuleConfigurationType,

@@ -34,8 +34,6 @@ class Net_IListener_T
  , public Common_IInitialize_T<ConfigurationType>
 {
  public:
-  virtual ~Net_IListener_T () {};
-
   //virtual bool initialize (const ConnectionConfigurationType&) = 0;
 
   virtual bool useReactor () const = 0; // ? : uses proactor
