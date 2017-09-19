@@ -103,21 +103,15 @@ class Net_Common_Tools
                                     REFGUID,                // interface identifier
                                     enum _WLAN_INTF_OPCODE, // code
                                     bool);                  // enable ? : disable
-  //static bool associateWithWLAN (REFGUID,            // interface identifier
 #else
-  // *NOTE*: this tries to call the SIOCGIWNAME ioctl
-  static bool interfaceIsWireless (const std::string&); // interface identifier
   static std::string associatedSSID (const std::string&); // interface identifier
-  static bool hasSSID (const std::string&,  // interface identifier
-                       const std::string&); // SSID
   //  static std::string associatedSSID (struct DBusConnection*, // D-Bus connection handle
 //                                     const std::string&);    // interface identifier
-  //static bool associateWithWLAN (const std::string&, // interface adapter
+  static bool hasSSID (const std::string&,  // interface identifier
+                       const std::string&); // SSID
+  // *NOTE*: this merely (tries to) call the SIOCGIWNAME ioctl
+  static bool interfaceIsWLAN (const std::string&); // interface identifier
 #endif
-                                 //const std::string&, // SSID
-                                 //ACE_INET_Addr&,     // return value: peer SAP
-                                 //ACE_INET_Addr&,     // return value: local SAP
-                                 //bool = true);       // scan for networks ?
 
   // network layer
   static bool getAddress (std::string&,  // host name

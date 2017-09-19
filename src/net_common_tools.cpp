@@ -1566,9 +1566,9 @@ Net_Common_Tools::setDeviceSettingBool (HANDLE clientHandle_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 bool
-Net_Common_Tools::interfaceIsWireless (const std::string& adapter_in)
+Net_Common_Tools::interfaceIsWLAN (const std::string& adapter_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceIsWireless"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceIsWLAN"));
 
   // sanity check(s)
   ACE_ASSERT (!adapter_in.empty ());
@@ -1592,6 +1592,7 @@ Net_Common_Tools::interfaceIsWireless (const std::string& adapter_in)
                 ACE_TEXT ("failed to ACE_OS::socket(AF_INET): \"%m\", aborting\n")));
     return false;
   } // end IF
+  // verify the presence of Wireless Extensions
   result_2 = ACE_OS::ioctl (socket_handle,
                             SIOCGIWNAME,
                             &request_s);
@@ -1791,7 +1792,7 @@ Net_Common_Tools::hasSSID (const std::string& interfaceIdentifier_in,
       continue;
     if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
       continue;
-    if (!Net_Common_Tools::interfaceIsWireless (ifaddrs_2->ifa_name))
+    if (!Net_Common_Tools::interfaceIsWLAN (ifaddrs_2->ifa_name))
       continue;
 
     wireless_device_identifiers_a.push_back (ifaddrs_2->ifa_name);
@@ -1866,475 +1867,6 @@ clean:
 
   return result;
 }
-
-//bool
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//Net_Common_Tools::associateWithWLAN (REFGUID adapter_in,
-//#else
-//Net_Common_Tools::associateWithWLAN (const std::string& adapter_in,
-//#endif
-//                                     const std::string& SSID_in,
-//                                     ACE_INET_Addr& peerSAP_out,
-//                                     ACE_INET_Addr& localSAP_out,
-//                                     bool scanForNetworks_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::associateWithWLAN"));
-//
-//  // sanity check(s)
-//  ACE_ASSERT (!SSID_in.empty ());
-//
-//  // initialize return value(s)
-//  peerSAP_out.reset ();
-//  localSAP_out.reset ();
-//
-//  bool result = false;
-//  unsigned int retries = 0;
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  HANDLE handle_client = NULL;
-//  // *TODO*: support WinXP
-//  DWORD maximum_client_version =
-//    WLAN_API_MAKE_VERSION (2, 0); // *NOTE*: 1 for <= WinXP_SP2
-//  DWORD current_version = 0;
-//  DWORD result_2 = 0;
-//  PWLAN_INTERFACE_INFO_LIST interface_list_p = NULL;
-//  PWLAN_INTERFACE_INFO interface_info_p = NULL;
-//  //std::string interface_state_string;
-//  struct _DOT11_SSID ssid_s;
-//  ACE_OS::memset (&ssid_s, 0, sizeof (struct _DOT11_SSID));
-//  ACE_ASSERT (SSID_in.size () <= DOT11_SSID_MAX_LENGTH);
-//  ssid_s.uSSIDLength = SSID_in.size ();
-//  ACE_OS::memcpy (ssid_s.ucSSID,
-//                  SSID_in.c_str (),
-//                  SSID_in.size ());
-//  PWLAN_RAW_DATA raw_data_p = NULL;
-//  //DWORD notification_mask = WLAN_NOTIFICATION_SOURCE_ACM;
-//  DWORD notification_mask = WLAN_NOTIFICATION_SOURCE_ALL;
-//  DWORD previous_notification_mask = 0;
-//  //PWLAN_BSS_LIST wlan_bss_list_p = NULL;
-//  //PWLAN_BSS_ENTRY wlan_bss_entry_p = NULL;
-//  DWORD flags =
-//    (WLAN_AVAILABLE_NETWORK_INCLUDE_ALL_ADHOC_PROFILES        |
-//     WLAN_AVAILABLE_NETWORK_INCLUDE_ALL_MANUAL_HIDDEN_PROFILES);
-//  PWLAN_AVAILABLE_NETWORK_LIST wlan_network_list_p = NULL;
-//  PWLAN_AVAILABLE_NETWORK wlan_network_p = NULL;
-//  //std::string phy_type_string;
-//  //std::string SSID_string;
-//  //std::string bss_network_type_string;
-//  struct _WLAN_CONNECTION_PARAMETERS wlan_connection_parameters_s;
-//  ACE_SYNCH_MUTEX mutex;
-//  ACE_SYNCH_CONDITION condition (mutex);
-//  ACE_Time_Value wlan_ssid_scan_timeout (NET_PROTOCOL_WIN32_WLAN_SCAN_TIMEOUT,
-//                                         0);
-//  ACE_Time_Value timeout;
-//  int result_3 = -1;
-//
-//  result_2 = WlanOpenHandle (maximum_client_version,
-//                             NULL,
-//                             &current_version,
-//                             &handle_client);
-//  if (result_2 != ERROR_SUCCESS)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ::WlanOpenHandle(): \"%s\", aborting\n"),
-//                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
-//    return false;
-//  } // end IF
-//  result_2 = WlanRegisterNotification (handle_client,
-//                                       notification_mask,
-//                                       FALSE,
-//                                       network_wlan_notification_cb,
-//                                       static_cast<PVOID> (&condition),
-//                                       NULL,
-//                                       &previous_notification_mask);
-//  if (result_2 != ERROR_SUCCESS)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ::WlanRegisterNotification(): \"%s\", aborting\n"),
-//                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
-//    goto error;
-//  } // end IF
-//  result_2 = WlanEnumInterfaces (handle_client,
-//                                 NULL,
-//                                 &interface_list_p);
-//  if (result_2 != ERROR_SUCCESS)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ::WlanEnumInterfaces(): \"%s\", aborting\n"),
-//                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
-//    goto error;
-//  } // end IF
-//  ACE_ASSERT (interface_list_p);
-//
-//  //ACE_DEBUG ((LM_DEBUG,
-//  //            ACE_TEXT ("found %u wireless adapter(s)\n"),
-//  //            interface_list_p->dwNumberOfItems));
-//  for (DWORD i = 0;
-//       i < interface_list_p->dwNumberOfItems;
-//       ++i)
-//  {
-//    interface_info_p = &interface_list_p->InterfaceInfo[i];
-//    //switch (interface_info_p->isState)
-//    //{
-//    //  case wlan_interface_state_not_ready:
-//    //    interface_state_string = ACE_TEXT_ALWAYS_CHAR ("not ready"); break;
-//    //  case wlan_interface_state_connected:
-//    //    interface_state_string = ACE_TEXT_ALWAYS_CHAR ("connected"); break;
-//    //  case wlan_interface_state_ad_hoc_network_formed:
-//    //    interface_state_string = ACE_TEXT_ALWAYS_CHAR ("first node in a ad hoc network"); break;
-//    //  case wlan_interface_state_disconnecting:
-//    //    interface_state_string = ACE_TEXT_ALWAYS_CHAR ("disconnecting"); break;
-//    //  case wlan_interface_state_disconnected:
-//    //    interface_state_string = ACE_TEXT_ALWAYS_CHAR ("not connected"); break;
-//    //  case wlan_interface_state_associating:
-//    //    interface_state_string = ACE_TEXT_ALWAYS_CHAR ("attempting to associate with a network"); break;
-//    //  case wlan_interface_state_discovering:
-//    //    interface_state_string = ACE_TEXT_ALWAYS_CHAR ("auto configuration is discovering settings for the network"); break;
-//    //  case wlan_interface_state_authenticating:
-//    //    interface_state_string = ACE_TEXT_ALWAYS_CHAR ("in process of authenticating"); break;
-//    //  default:
-//    //    interface_state_string = ACE_TEXT_ALWAYS_CHAR ("unknown state"); break;
-//    //} // end SWITCH
-//    //ACE_DEBUG ((LM_DEBUG,
-//    //            ACE_TEXT ("[#%u] %s: \"%s\": %s\n"),
-//    //            i + 1,
-//    //            ACE_TEXT (Common_Tools::GUIDToString (interface_info_p->InterfaceGuid).c_str ()),
-//    //            ACE_TEXT_WCHAR_TO_TCHAR (interface_info_p->strInterfaceDescription),
-//    //            ACE_TEXT (interface_state_string.c_str ())));
-//
-//    if (!InlineIsEqualGUID (adapter_in, GUID_NULL) &&
-//        !InlineIsEqualGUID (adapter_in, interface_info_p->InterfaceGuid))
-//      continue;
-//
-//check_networks:
-//    //result_2 = WlanGetNetworkBssList (handle_client,
-//    //                                  &interface_info_p->InterfaceGuid,
-//    //                                  &ssid_s,
-//    //                                  dot11_BSS_type_any,
-//    //                                  FALSE,
-//    //                                  NULL,
-//    //                                  &wlan_bss_list_p);
-//    result_2 = WlanGetAvailableNetworkList (handle_client,
-//                                            &interface_info_p->InterfaceGuid,
-//                                            flags,
-//                                            NULL,
-//                                            &wlan_network_list_p);
-//    if (result_2 != ERROR_SUCCESS)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("\"%s\": failed to ::WlanGetAvailableNetworkList(): \"%s\", aborting\n"),
-//                  ACE_TEXT_WCHAR_TO_TCHAR (interface_info_p->strInterfaceDescription),
-//                  ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
-//      goto error;
-//    } // end IF
-//    //ACE_ASSERT (wlan_bss_list_p);
-//    ACE_ASSERT (wlan_network_list_p);
-//    //ACE_DEBUG ((LM_DEBUG,
-//    //            ACE_TEXT ("found %u BSSs for wireless adapter \"%s\"\n"),
-//    //            wlan_bss_list_p->dwNumberOfItems,
-//    //            ACE_TEXT_WCHAR_TO_TCHAR (interface_info_p->strInterfaceDescription)));
-//    //ACE_DEBUG ((LM_DEBUG,
-//    //            ACE_TEXT ("found %u network(s) for wireless adapter \"%s\"\n"),
-//    //            wlan_network_list_p->dwNumberOfItems,
-//    //            ACE_TEXT_WCHAR_TO_TCHAR (interface_info_p->strInterfaceDescription)));
-//
-//    for (DWORD j = 0;
-//         //j < wlan_bss_list_p->dwNumberOfItems;
-//         j < wlan_network_list_p->dwNumberOfItems;
-//         ++j)
-//    {
-//      //wlan_bss_entry_p = &wlan_bss_list_p->wlanBssEntries[j];
-//      wlan_network_p = &wlan_network_list_p->Network[j];
-//      //switch (wlan_bss_entry_p->dot11BssPhyType)
-//      //{
-//      //  case dot11_phy_type_fhss:
-//      //    phy_type_string = ACE_TEXT_ALWAYS_CHAR ("FHSS"); break;
-//      //  case dot11_phy_type_dsss:
-//      //    phy_type_string = ACE_TEXT_ALWAYS_CHAR ("DSSS"); break;
-//      //  case dot11_phy_type_irbaseband:
-//      //    phy_type_string = ACE_TEXT_ALWAYS_CHAR ("IR baseband"); break;
-//      //  case dot11_phy_type_ofdm:
-//      //    phy_type_string = ACE_TEXT_ALWAYS_CHAR ("OFDM"); break;
-//      //  case dot11_phy_type_hrdsss:
-//      //    phy_type_string = ACE_TEXT_ALWAYS_CHAR ("high-rate DSSS"); break;
-//      //  case dot11_phy_type_erp:
-//      //    phy_type_string = ACE_TEXT_ALWAYS_CHAR ("ERP"); break;
-//      //  case dot11_phy_type_ht:
-//      //    phy_type_string = ACE_TEXT_ALWAYS_CHAR ("802.11n PHY"); break;
-//      //  case dot11_phy_type_vht:
-//      //    phy_type_string = ACE_TEXT_ALWAYS_CHAR ("802.11ac PHY"); break;
-//      //  case dot11_phy_type_IHV_start:
-//      //  case dot11_phy_type_IHV_end:
-//      //  case dot11_phy_type_unknown:
-//      //  //case dot11_phy_type_any:
-//      //  default:
-//      //    phy_type_string = ACE_TEXT_ALWAYS_CHAR ("unknown PHY type"); break;
-//      //} // end SWITCH
-//      //switch (wlan_bss_entry_p->dot11BssType)
-//      //SSID_string.assign (reinterpret_cast<CHAR*> (wlan_network_p->dot11Ssid.ucSSID),
-//      //                    static_cast<std::string::size_type> (wlan_network_p->dot11Ssid.uSSIDLength));
-//      //switch (wlan_network_p->dot11BssType)
-//      //{
-//      //  case dot11_BSS_type_infrastructure:
-//      //    bss_network_type_string = ACE_TEXT_ALWAYS_CHAR ("infrastructure"); break;
-//      //  case dot11_BSS_type_independent:
-//      //    bss_network_type_string = ACE_TEXT_ALWAYS_CHAR ("ad-hoc"); break;
-//      //  case dot11_BSS_type_any:
-//      //  default:
-//      //    bss_network_type_string = ACE_TEXT_ALWAYS_CHAR ("unknown type"); break;
-//      //} // end SWITCH
-//      // *TODO*: report all available information here
-//      //ACE_DEBUG ((LM_DEBUG,
-//      //            ACE_TEXT ("[#%u] PHY %u; type: %s: AP MAC: %s; AP type: %s; RSSI: %d (dBm); link quality %u%%; in region domain: %s; beacon interval (us): %u; channel center frequency (kHz): %u\n"),
-//      //            j + 1,
-//      //            wlan_bss_entry_p->uPhyId,
-//      //            ACE_TEXT (phy_type_string.c_str ()),
-//      //            ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (wlan_bss_entry_p->dot11Bssid,
-//      //                                                                  NET_LINKLAYER_802_11).c_str ()),
-//      //            ACE_TEXT (bss_network_type_string.c_str ()),
-//      //            ACE_TEXT (Common_Tools::GUIDToString (interface_info_p->InterfaceGuid).c_str ()),
-//      //            ACE_TEXT_WCHAR_TO_TCHAR (interface_info_p->strInterfaceDescription),
-//      //            ACE_TEXT (interface_state_string.c_str ()),
-//      //            wlan_bss_entry_p->lRssi, wlan_bss_entry_p->uLinkQuality,
-//      //            (wlan_bss_entry_p->bInRegDomain ? ACE_TEXT ("true") : ACE_TEXT ("false")),
-//      //            wlan_bss_entry_p->usBeaconPeriod * 1024,
-//      //            wlan_bss_entry_p->ulChCenterFrequency));
-//      //ACE_DEBUG ((LM_DEBUG,
-//      //            ACE_TEXT ("[#%u] profile \"%s\"; SSID: \"%s\"; type: %s; connectable: \"%s\"%s; signal quality %d%% [RSSI: %d (dBm)]; security enabled: \"%s\"\n"),
-//      //            j + 1,
-//      //            (wlan_network_p->strProfileName ? ACE_TEXT_WCHAR_TO_TCHAR (wlan_network_p->strProfileName) : ACE_TEXT ("N/A")),
-//      //            ACE_TEXT (SSID_string.c_str ()),
-//      //            ACE_TEXT (bss_network_type_string.c_str ()),
-//      //            (wlan_network_p->bNetworkConnectable ? ACE_TEXT ("yes") : ACE_TEXT ("no")),
-//      //            (wlan_network_p->bNetworkConnectable ? ACE_TEXT ("") : ACE_TEXT (" [reason]")),
-//      //            wlan_network_p->wlanSignalQuality, (-100 + static_cast<int> (static_cast<float> (wlan_network_p->wlanSignalQuality) * ::abs ((-100.0F - -50.0F) / 100.0F))),
-//      //            (wlan_network_p->bSecurityEnabled ? ACE_TEXT ("yes") : ACE_TEXT ("no"))));
-//
-//      if (ACE_OS::memcmp (SSID_in.c_str (),
-//                          wlan_network_p->dot11Ssid.ucSSID,
-//                          //wlan_bss_entry_p->dot11Ssid.ucSSID,
-//                          SSID_in.size ()))
-//        continue;
-//
-//      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("\"%s\": found SSID (was: \"%s\"), connecting...\n"),
-//                  ACE_TEXT_WCHAR_TO_TCHAR (interface_info_p->strInterfaceDescription),
-//                  ACE_TEXT (SSID_in.c_str ())));
-//
-//      ACE_OS::memset (&wlan_connection_parameters_s,
-//                      0,
-//                      sizeof (struct _WLAN_CONNECTION_PARAMETERS));
-//      wlan_connection_parameters_s.dot11BssType = dot11_BSS_type_infrastructure;
-//      //wlan_connection_parameters_s.dwFlags = 0;
-//      //wlan_connection_parameters_s.pDesiredBssidList = NULL;
-//      wlan_connection_parameters_s.pDot11Ssid = &ssid_s;
-//      //wlan_connection_parameters_s.strProfile = NULL;
-//      wlan_connection_parameters_s.wlanConnectionMode =
-//        wlan_connection_mode_discovery_unsecure;
-//      result_2 = WlanConnect (handle_client,
-//                              &interface_info_p->InterfaceGuid,
-//                              &wlan_connection_parameters_s,
-//                              NULL);
-//      if (result_2 != ERROR_SUCCESS)
-//      {
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("\"%s\": failed to ::WlanConnect(\"%s\"): \"%s\", aborting\n"),
-//                    ACE_TEXT_WCHAR_TO_TCHAR (interface_info_p->strInterfaceDescription),
-//                    ACE_TEXT (SSID_in.c_str ()),
-//                    ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
-//        goto error;
-//      } // end IF
-//      //ACE_DEBUG ((LM_DEBUG,
-//      //            ACE_TEXT ("associated with SSID %s via WLAN interface %s\n"),
-//      //            ACE_TEXT (SSID_in.c_str ()),
-//      //            ACE_TEXT_WCHAR_TO_TCHAR (interface_info_p->strInterfaceDescription)));
-//
-//      goto done;
-//    } // end FOR
-//    //WlanFreeMemory (wlan_bss_list_p);
-//    //wlan_bss_list_p = NULL;
-//    WlanFreeMemory (wlan_network_list_p);
-//    wlan_network_list_p = NULL;
-//  } // end FOR
-//
-//  // SSID not found --> scan for networks ?
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("SSID (was: \"%s\") not found on WLAN interface \"%s\"%s\n"),
-//              ACE_TEXT (SSID_in.c_str ()),
-//              ACE_TEXT_WCHAR_TO_TCHAR (interface_info_p->strInterfaceDescription),
-//              (scanForNetworks_in ? ((retries == NET_PROTOCOL_WLAN_SCAN_RETRIES) ? ACE_TEXT (", giving up")
-//                                                                                 : ACE_TEXT (", scanning..."))
-//                                  : ACE_TEXT (", aborting"))));
-//  if (!scanForNetworks_in ||
-//      (retries == NET_PROTOCOL_WLAN_SCAN_RETRIES))
-//    goto error;
-//  ++retries;
-//
-//  // *NOTE*: this function returns immediately
-//  result_2 = WlanScan (handle_client,
-//                       &interface_info_p->InterfaceGuid,
-//                       NULL, // *NOTE*: support WinXP
-//                       //&ssid_s,
-//                       raw_data_p,
-//                       NULL);
-//  if (result_2 != ERROR_SUCCESS)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ::WlanScan(): \"%s\", aborting\n"),
-//                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
-//    goto error;
-//  } // end IF
-//  // *NOTE*: on Win32 platforms, the network scan takes <=4 seconds ('Windows
-//  //         logo' requirement, see also:
-//  //         https://msdn.microsoft.com/en-us/library/windows/desktop/ms706783(v=vs.85).aspx)
-//  timeout = COMMON_TIME_NOW + wlan_ssid_scan_timeout;
-//  result_3 = condition.wait (&timeout);
-//  if (result_3 == -1)
-//  {
-//    int error = ACE_OS::last_error ();
-//    if (error != ETIME) // ETIME: 137
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_Condition::wait(%#T): \"%m\", aborting\n"),
-//                  &wlan_ssid_scan_timeout));
-//    goto error;
-//  } // end IF
-//  goto check_networks;
-//
-//done:
-//  // *NOTE*: that the DHCP transactions may not have completed at this stage, so
-//  //         the address information might not be up to date yet
-//  // *TODO*: sleep a meaningful amount of time here
-//  if (!Net_Common_Tools::interfaceToIPAddress (Common_Tools::GUIDToString (interface_info_p->InterfaceGuid),
-//                                               localSAP_out,
-//                                               peerSAP_out))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), aborting\n"),
-//                ACE_TEXT_WCHAR_TO_TCHAR (interface_info_p->strInterfaceDescription)));
-//    goto error;
-//  } // end IF
-//
-//  result = true;
-//
-//error:
-//  if (interface_list_p)
-//    WlanFreeMemory (interface_list_p);
-//  //if (wlan_bss_list_p)
-//  //  WlanFreeMemory (wlan_bss_list_p);
-//  if (wlan_network_list_p)
-//    WlanFreeMemory (wlan_network_list_p);
-//  result_2 = WlanCloseHandle (handle_client,
-//                              NULL);
-//  if (result_2 != ERROR_SUCCESS)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ::WlanCloseHandle(): \"%s\", continuing\n"),
-//                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
-//
-//  return result;
-//#else
-//  int socket_handle = -1;
-//  int result_2 = -1;
-//  struct iwreq iwreq_s;
-//  char essid[IW_ESSID_MAX_SIZE + 1];
-//  struct iw_range iw_range_s;
-//  struct wireless_scan_head wireless_scan_head_s;
-//  struct wireless_scan* wireless_scan_p = NULL;
-//
-//  socket_handle = iw_sockets_open ();
-//  if (socket_handle == -1)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to iw_sockets_open(): \"%m\", aborting\n")));
-//    goto clean;
-//  } // end IF
-//
-//  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
-//  ACE_OS::memset (essid, 0, sizeof (IW_ESSID_MAX_SIZE + 1));
-//  iwreq_s.u.essid.pointer = essid;
-//  iwreq_s.u.essid.length = IW_ESSID_MAX_SIZE + 1;
-//  result_2 = iw_get_ext (socket_handle,
-//                         adapter_in.c_str (),
-//                         SIOCGIWESSID,
-//                         &iwreq_s);
-//  if (result_2 < 0)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to iw_get_ext(%s,SIOCGIWESSID): \"%m\", aborting\n"),
-//                ACE_TEXT (adapter_in.c_str ())));
-//    goto clean;
-//  } // end IF
-//  if (!ACE_OS::memcmp (SSID_in.c_str (),
-//                       iwreq_s.u.essid.pointer,
-//                       iwreq_s.u.essid.length))
-//  { // --> already connected, nothing to do
-//    result = true;
-//    goto clean;
-//  } // end IF
-//
-//  ACE_OS::memset (&iw_range_s, 0, sizeof (struct iw_range));
-//  result_2 = iw_get_range_info (socket_handle,
-//                                adapter_in.c_str (),
-//                                &iw_range_s);
-//  if (result_2 < 0)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to iw_get_range_info(): \"%m\", aborting\n")));
-//    goto clean;
-//  } // end IF
-//  ACE_OS::memset (&wireless_scan_head_s, 0, sizeof (struct wireless_scan_head));
-//
-//scan:
-//  result_2 = iw_scan (socket_handle,
-//                      const_cast<char*> (adapter_in.c_str ()),
-//                      iw_range_s.we_version_compiled,
-//                      &wireless_scan_head_s);
-//  if (result_2 < 0)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to iw_scan(): \"%m\", aborting\n")));
-//    goto clean;
-//  } // end IF
-//  for (wireless_scan_p = wireless_scan_head_s.result;
-//       wireless_scan_p;
-//       wireless_scan_p = wireless_scan_p->next)
-//  {
-//    if (!wireless_scan_p->b.essid_on)
-//      continue;
-//    if (!ACE_OS::strncmp (SSID_in.c_str (),
-//                          wireless_scan_p->b.essid,
-//                          wireless_scan_p->b.essid_len))
-//    { // --> found SSID on adapter
-//      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("\"%s\": found SSID (was: \"%s\"), connecting...\n"),
-//                  ACE_TEXT (adapter_in.c_str ()),
-//                  ACE_TEXT (SSID_in.c_str ())));
-//
-//      result = true;
-//      goto clean;
-//    } // end IF
-//  } // end FOR
-//  // SSID not found --> scan for networks ?
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("SSID (was: \"%s\") not found on WLAN interface \"%s\"%s\n"),
-//              ACE_TEXT (SSID_in.c_str ()),
-//              ACE_TEXT (adapter_in.c_str ()),
-//              (scanForNetworks_in ? ((retries == NET_PROTOCOL_WLAN_SCAN_RETRIES) ? ACE_TEXT (", giving up")
-//                                                                                 : ACE_TEXT (", scanning..."))
-//                                  : ACE_TEXT (", aborting"))));
-//  if (!scanForNetworks_in ||
-//      (retries == NET_PROTOCOL_WLAN_SCAN_RETRIES))
-//    goto clean;
-//  ++retries;
-//  goto scan;
-//
-//clean:
-//  iw_sockets_close (socket_handle);
-////  if (result_2 == -1)
-////    ACE_DEBUG ((LM_ERROR,
-////                ACE_TEXT ("failed to iw_sockets_close(): \"%m\", continuing\n")));
-//
-//  return result;
-//#endif
-//}
 
 bool
 Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_in,
@@ -3892,9 +3424,9 @@ Net_Common_Tools::dBusMessageValidate (struct DBusMessageIter& iterator_in,
     ACE_ASSERT (error_string_p);
   } // end IF
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("unexpected dbus message type (was: %c, expected: %c%s%s%s%s%s, aborting\n"),
+              ACE_TEXT ("unexpected dbus message argument type (was: %c, expected: %c%s%s%s%s%s, aborting\n"),
               dbus_message_iter_get_arg_type (&iterator_in), expectedType_in,
-              (is_error ? ACE_TEXT ("; signature: ") : ACE_TEXT (")")),
+              (is_error ? ACE_TEXT ("; message signature: ") : ACE_TEXT (")")),
               (is_error ? ACE_TEXT (signature_string_p) : ACE_TEXT ("")),
               (is_error ? ACE_TEXT ("): \"") : ACE_TEXT ("")),
               (is_error ? ACE_TEXT (error_string_p) : ACE_TEXT ("")),
@@ -4855,7 +4387,7 @@ Net_Common_Tools::SSIDToDeviceDBusPath (struct DBusConnection* connection_in,
       continue;
     if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
       continue;
-    if (!Net_Common_Tools::interfaceIsWireless (ifaddrs_2->ifa_name))
+    if (!Net_Common_Tools::interfaceIsWLAN (ifaddrs_2->ifa_name))
       continue;
 
     wireless_device_identifiers_a.push_back (ifaddrs_2->ifa_name);
@@ -5308,8 +4840,8 @@ clean:
   //                   reliably (i.e. Gateway is '*'). Specifically, when there
   //                   already is a gateway configured on a different interface
   //                   --> try DBus instead
-  if (result.is_any () &&
-      Net_Common_Tools::interfaceIsWireless (interfaceIdentifier_in) &&
+  if (result.is_any ()                                           &&
+      Net_Common_Tools::interfaceIsWLAN (interfaceIdentifier_in) &&
       connection_in)
   {
     ACE_DEBUG ((LM_DEBUG,

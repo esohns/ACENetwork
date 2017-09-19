@@ -419,12 +419,12 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
     std::find_if (identifierToObjectPath_.begin (), identifierToObjectPath_.end (),
                   std::bind2nd (DEVICEIDENTIFIERS_FIND_S (),
                                 value_in));
-  if (iterator == identifierToObjectPath_.end ())
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("device object path not found (was: \"%s\"), aborting\n"),
-                ACE_TEXT (value_in.c_str ())));
-  else
+  if (iterator != identifierToObjectPath_.end ())
     result = (*iterator).first;
+//  else
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("device object path not found (was: \"%s\"), aborting\n"),
+//                ACE_TEXT (value_in.c_str ())));
 
   return result;
 }
@@ -1467,7 +1467,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
       continue;
     if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
       continue;
-    if (!Net_Common_Tools::interfaceIsWireless (ifaddrs_2->ifa_name))
+    if (!Net_Common_Tools::interfaceIsWLAN (ifaddrs_2->ifa_name))
       continue;
 
     result.insert (std::make_pair (ifaddrs_2->ifa_name,

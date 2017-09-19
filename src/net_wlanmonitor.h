@@ -122,7 +122,7 @@ class Net_WLANMonitor_T
                           const std::string&); // SSID
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-//  inline virtual std::string devicePath () const { return deviceDBusPath_; };
+  inline virtual std::string deviceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->deviceIdentifier; };
 #endif
   virtual std::string SSID () const;
 
