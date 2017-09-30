@@ -315,7 +315,7 @@ Net_Server_AsynchListener_T<HandlerType,
                             StateType,
                             HandlerConfigurationType,
                             StreamType,
-                            UserDataType>::open (const ACE_INET_Addr& listenAddress_in,
+                            UserDataType>::open (const AddressType& listenAddress_in,
                                                  size_t numberOfBytesToRead_in,
                                                  bool passAddresses_in,
                                                  int backLog_in,
@@ -328,7 +328,7 @@ Net_Server_AsynchListener_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Server_AsynchListener_T::open"));
 
   int result = -1;
-  static ACE_INET_Addr SAP_any (ACE_sap_any_cast (const ACE_INET_Addr&));
+  static AddressType SAP_any (ACE_sap_any_cast (const AddressType&));
   bool close_accept = false;
   int nunber_of_initial_accepts = numberOfInitialAccepts_in;
 

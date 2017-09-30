@@ -274,7 +274,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
                                                      : inherited::TIMER_MANAGER_SINGLETON_T::instance ());
         ACE_ASSERT (itimer_manager_p);
         ACE_Time_Value interval (STREAM_DEFAULT_STATISTIC_COLLECTION_INTERVAL, 0);
-        ACE_ASSERT (inherited::timerID_ == -1);
+        ACE_ASSERT (inherited::timerId_ == -1);
         inherited::timerId_ =
             itimer_manager_p->schedule_timer (&(inherited::statisticHandler_), // event handler handle
                                               NULL,                            // asynchronous completion token
@@ -306,14 +306,14 @@ error:
     }
     case STREAM_SESSION_MESSAGE_END:
     {
-      if (inherited::timerID_ != -1)
+      if (inherited::timerId_ != -1)
       {
         typename TimerManagerType::INTERFACE_T* itimer_manager_p =
             (inherited::configuration_->timerManager ? inherited::configuration_->timerManager
                                                      : inherited::TIMER_MANAGER_SINGLETON_T::instance ());
         ACE_ASSERT (itimer_manager_p);
         const void* act_p = NULL;
-        result = itimer_manager_p->cancel_timer (inherited::timerID_,
+        result = itimer_manager_p->cancel_timer (inherited::timerId_,
                                                  &act_p);
         if (result == -1)
           ACE_DEBUG ((LM_ERROR,

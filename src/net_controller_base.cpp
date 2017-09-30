@@ -31,19 +31,13 @@ Net_Controller_Base::Net_Controller_Base ()
 
 }
 
-Net_Controller_Base::~Net_Controller_Base ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Controller_Base::~Net_Controller_Base"));
-
-}
-
 void
 Net_Controller_Base::start ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Controller_Base::start"));
 
-  ACE_DEBUG ((LM_NOTICE,
-              ACE_TEXT ("%D: starting...\n")));
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%D: starting\n")));
 }
 
 void
@@ -55,8 +49,8 @@ Net_Controller_Base::stop (bool waitForCompletion_in,
   ACE_UNUSED_ARG (waitForCompletion_in);
   ACE_UNUSED_ARG (lockedAccess_in);
 
-  ACE_DEBUG ((LM_NOTICE,
-              ACE_TEXT ("%D: stopping...\n")));
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%D: stopping\n")));
 }
 
 bool
@@ -64,11 +58,9 @@ Net_Controller_Base::isRunning () const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Controller_Base::isRunning"));
 
-  ACE_DEBUG ((LM_NOTICE,
-              ACE_TEXT ("%D: isRunning ?...\n")));
-
   // *TODO*
   ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (false);
 
-  return true;
+  ACE_NOTREACHED (return true;)
 }

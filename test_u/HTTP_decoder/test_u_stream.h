@@ -27,6 +27,7 @@
 #include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
+#include "common_timer_manager_common.h"
 
 #include "stream_base.h"
 #include "stream_common.h"
@@ -50,7 +51,7 @@ class Test_U_SessionMessage;
 
 extern const char stream_name_string_[];
 
-template <typename StatisticHandlerType>
+template <typename TimerManagerType> // implements Common_ITimer
 class Test_U_Stream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
@@ -119,7 +120,7 @@ class Test_U_Stream_T
                                        struct Test_U_HTTPDecoder_SessionData,
                                        Test_U_HTTPDecoder_SessionData_t,
                                        HTTP_Statistic_t,
-                                       StatisticHandlerType,
+                                       TimerManagerType,
                                        ACE_INET_Addr,
                                        Test_U_ConnectionManager_t,
                                        struct Test_U_UserData> WRITER_T;
@@ -134,7 +135,7 @@ class Test_U_Stream_T
                                        struct Test_U_HTTPDecoder_SessionData,
                                        Test_U_HTTPDecoder_SessionData_t,
                                        HTTP_Statistic_t,
-                                       StatisticHandlerType,
+                                       TimerManagerType,
                                        ACE_INET_Addr,
                                        Test_U_ConnectionManager_t,
                                        struct Test_U_UserData> READER_T;
@@ -158,7 +159,6 @@ class Test_U_Stream_T
 
 //////////////////////////////////////////
 
-typedef Test_U_Stream_T<HTTP_StatisticHandler_Reactor_t> Test_U_Stream_t;
-typedef Test_U_Stream_T<HTTP_StatisticHandler_Proactor_t> Test_U_AsynchStream_t;
+typedef Test_U_Stream_T<Common_Timer_Manager_t> Test_U_Stream_t;
 
 #endif

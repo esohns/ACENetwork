@@ -26,8 +26,6 @@
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 
-#include "common_idumpstate.h"
-
 #include "net_ilistener.h"
 
 template <typename HandlerType,
@@ -47,8 +45,10 @@ class Net_Server_Listener_T
                        AcceptorType>
  , public Net_IListener_T<ConfigurationType, 
                           HandlerConfigurationType>
- , public Common_IDumpState
 {
+  typedef ACE_Acceptor<HandlerType,
+                       AcceptorType> inherited;
+
   // singleton needs access to the ctor/dtors
   friend class ACE_Singleton<Net_Server_Listener_T<HandlerType,
                                                    AcceptorType,
@@ -61,6 +61,17 @@ class Net_Server_Listener_T
                              ACE_SYNCH_RECURSIVE_MUTEX>;
 
  public:
+  // convenient types
+  typedef ACE_Singleton<Net_Server_Listener_T<HandlerType,
+                                              AcceptorType,
+                                              AddressType,
+                                              ConfigurationType,
+                                              StateType,
+                                              HandlerConfigurationType,
+                                              StreamType,
+                                              UserDataType>,
+                        ACE_SYNCH_RECURSIVE_MUTEX> SINGLETON_T;
+
   inline bool isInitialized () const { return isInitialized_; };
 
   // override some methods from ACE_Acceptor
@@ -76,7 +87,7 @@ class Net_Server_Listener_T
   inline virtual bool isRunning () const { return isListening_; };
   inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
-  inline virtual const HandlerConfigurationType& getR () const { ACE_ASSERT (configuration_); return configuration_->socketHandlerConfiguration; };
+  inline virtual const HandlerConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); return configuration_->socketHandlerConfiguration; };
   //virtual bool initialize (const HandlerConfigurationType&);
   virtual bool initialize (const ConfigurationType&);
   inline virtual bool useReactor () const { return true; };
@@ -93,9 +104,7 @@ class Net_Server_Listener_T
   virtual int activate_svc_handler (HandlerType*);
 
  private:
-  typedef ACE_Acceptor<HandlerType,
-                       AcceptorType> inherited;
-
+  // convenient types
   typedef Net_IListener_T<ConfigurationType,
                           HandlerConfigurationType> ILISTENER_T;
 

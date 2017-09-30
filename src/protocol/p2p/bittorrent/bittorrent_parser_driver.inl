@@ -118,7 +118,7 @@ BitTorrent_ParserDriver_T<MessageType,
   // sanity check(s)
   ACE_ASSERT (record_inout);
 
-
+  ACE_ASSERT (false);
 
   record_inout = NULL;
 }
@@ -133,72 +133,11 @@ BitTorrent_ParserDriver_T<MessageType,
   // sanity check(s)
   ACE_ASSERT (handShake_inout);
 
-
+  ACE_ASSERT (false);
 
   handShake_inout = NULL;
 }
 
-template <typename MessageType,
-          typename SessionMessageType>
-void
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::dump_state () const
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::dump_state"));
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
-}
-
-template <typename MessageType,
-          typename SessionMessageType>
-void
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::debug (yyscan_t state_in,
-                                                      bool toggle_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::debug"));
-
-  BitTorrent_Scanner_set_debug ((toggle_in ? 1 : 0),
-                                state_in);
-}
-template <typename MessageType,
-          typename SessionMessageType>
-bool
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::initialize (yyscan_t& state_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::initialize"));
-
-  // sanity check(s)
-  ACE_ASSERT (!state_out);
-
-  int result = BitTorrent_Scanner_lex_init (&state_out);
-  if (result)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to BitTorrent_Scanner_lex_init(): \"%m\", continuing\n")));
-
-  return (result == 0);
-}
-template <typename MessageType,
-          typename SessionMessageType>
-void
-BitTorrent_ParserDriver_T<MessageType,
-                          SessionMessageType>::finalize (yyscan_t& state_inout)
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_ParserDriver_T::finalize"));
-
-  // sanity check(s)
-  ACE_ASSERT (state_inout);
-
-  int result = BitTorrent_Scanner_lex_destroy (state_inout);
-  if (result)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to BitTorrent_Scanner_lex_init(): \"%m\", continuing\n")));
-  state_inout = NULL;
-}
 template <typename MessageType,
           typename SessionMessageType>
 yy_buffer_state*
@@ -232,9 +171,9 @@ BitTorrent_ParserDriver_T<MessageType,
     return NULL;
   } // end IF
 
-  // *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
-  BitTorrent_Scanner__switch_to_buffer (result_p,
-                                        state_in);
+  //// *WARNING*: contrary (!) to the documentation, still need to switch_buffers()...
+  //BitTorrent_Scanner__switch_to_buffer (result_p,
+  //                                      state_in);
 
   return result_p;
 }

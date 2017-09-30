@@ -27,16 +27,16 @@
 //#include "test_u_connection_common.h"
 #include "test_u_session_message.h"
 
-template <typename StatisticHandlerType>
-Test_U_Stream_T<StatisticHandlerType>::Test_U_Stream_T ()
+template <typename TimerManagerType>
+Test_U_Stream_T<TimerManagerType>::Test_U_Stream_T ()
  : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::Test_U_Stream_T"));
 
 }
 
-template <typename StatisticHandlerType>
-Test_U_Stream_T<StatisticHandlerType>::~Test_U_Stream_T ()
+template <typename TimerManagerType>
+Test_U_Stream_T<TimerManagerType>::~Test_U_Stream_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::~Test_U_Stream_T"));
 
@@ -44,9 +44,9 @@ Test_U_Stream_T<StatisticHandlerType>::~Test_U_Stream_T ()
   inherited::shutdown ();
 }
 
-template <typename StatisticHandlerType>
+template <typename TimerManagerType>
 bool
-Test_U_Stream_T<StatisticHandlerType>::load (Stream_ModuleList_t& modules_out,
+Test_U_Stream_T<TimerManagerType>::load (Stream_ModuleList_t& modules_out,
                                              bool& deleteModules_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::load"));
@@ -91,9 +91,9 @@ Test_U_Stream_T<StatisticHandlerType>::load (Stream_ModuleList_t& modules_out,
   return true;
 }
 
-template <typename StatisticHandlerType>
+template <typename TimerManagerType>
 bool
-Test_U_Stream_T<StatisticHandlerType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
+Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::initialize"));
 
@@ -238,9 +238,9 @@ error:
   return result;
 }
 
-template <typename StatisticHandlerType>
+template <typename TimerManagerType>
 void
-Test_U_Stream_T<StatisticHandlerType>::ping ()
+Test_U_Stream_T<TimerManagerType>::ping ()
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::ping"));
 
@@ -250,9 +250,9 @@ Test_U_Stream_T<StatisticHandlerType>::ping ()
   ACE_NOTREACHED (return;)
 }
 
-template <typename StatisticHandlerType>
+template <typename TimerManagerType>
 bool
-Test_U_Stream_T<StatisticHandlerType>::collect (Net_Statistic_t& data_out)
+Test_U_Stream_T<TimerManagerType>::collect (Net_Statistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::collect"));
 
@@ -270,9 +270,9 @@ Test_U_Stream_T<StatisticHandlerType>::collect (Net_Statistic_t& data_out)
                 ACE_TEXT ("StatisticReport")));
     return false;
   } // end IF
-  Test_U_Module_StatisticReport_WriterTask_t* statisticReport_impl =
+  Test_U_Module_StatisticReport_WriterTask_t* statistic_report_impl_p =
     dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
-  if (!statisticReport_impl)
+  if (!statistic_report_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<Stream_Module_StatisticReport_WriterTask_T> failed, aborting\n"),
@@ -300,7 +300,7 @@ Test_U_Stream_T<StatisticHandlerType>::collect (Net_Statistic_t& data_out)
   // delegate to the statistics module
   bool result_2 = false;
   try {
-    result_2 = statisticReport_impl->collect (data_out);
+    result_2 = statistic_report_impl_p->collect (data_out);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: caught exception in Common_IStatistic_T::collect(), continuing\n"),
@@ -325,9 +325,9 @@ Test_U_Stream_T<StatisticHandlerType>::collect (Net_Statistic_t& data_out)
   return result_2;
 }
 
-template <typename StatisticHandlerType>
+template <typename TimerManagerType>
 void
-Test_U_Stream_T<StatisticHandlerType>::report () const
+Test_U_Stream_T<TimerManagerType>::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::report"));
 

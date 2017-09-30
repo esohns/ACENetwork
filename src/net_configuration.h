@@ -64,7 +64,7 @@ struct Net_SocketConfigurationBase
 
   int         bufferSize; // socket buffer size (I/O)
   std::string networkInterface; // NIC identifier
-  bool        useLoopBackDevice;
+  bool        useLoopBackDevice; // (if any)
 };
 
 #if defined (ACE_HAS_NETLINK)
@@ -92,13 +92,14 @@ struct Net_TCPSocketConfiguration
    , linger (NET_SOCKET_DEFAULT_LINGER)
   {
     int result = -1;
-    if (useLoopBackDevice)
+
+    if (unlikely (useLoopBackDevice))
     {
       result = address.set (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
                             static_cast<ACE_UINT32> (INADDR_LOOPBACK),
                             1,
                             0);
-      if (result == -1)
+      if (unlikely (result == -1))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
     } // end IF
@@ -113,8 +114,6 @@ struct Net_UDPSocketConfiguration
 {
   Net_UDPSocketConfiguration ()
    : Net_SocketConfigurationBase ()
-   , address (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
-              static_cast<ACE_UINT32> (INADDR_ANY))
    , connect (NET_SOCKET_DEFAULT_UDP_CONNECT)
    // *PORTABILITY*: (currently,) MS Windows (TM) UDP sockets do not support
    //                SO_LINGER
@@ -122,24 +121,39 @@ struct Net_UDPSocketConfiguration
 #else
    , linger (NET_SOCKET_DEFAULT_LINGER)
 #endif
-   , listenAddress ()
+   , listenAddress (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
+                    static_cast<ACE_UINT32> (INADDR_ANY))
+   , peerAddress (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
+                  static_cast<ACE_UINT32> (INADDR_ANY))
    , sourcePort (0)
-   , writeOnly (false)
+   , writeOnly (false) // *TODO*: remove ASAP
   {
     int result = -1;
-    if (useLoopBackDevice)
+
+    if (unlikely (useLoopBackDevice))
     {
-      result = address.set (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
-                            static_cast<ACE_UINT32> (INADDR_LOOPBACK),
-                            1,
-                            0);
-      if (result == -1)
+      result =
+        listenAddress.set (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
+                           static_cast<ACE_UINT32> (INADDR_LOOPBACK),
+                           1,
+                           0);
+      if (unlikely (result == -1))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
+      result =
+        peerAddress.set (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
+                         static_cast<ACE_UINT32> (INADDR_LOOPBACK),
+                         1,
+                         0);
+      if (unlikely (result == -1))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
     } // end IF
+
+    if (unlikely (writeOnly))
+      listenAddress.reset ();
   };
 
-  ACE_INET_Addr address;
   // *IMPORTANT NOTE*: set this for asynchronous event dispatch; the socket
   //                   needs to be associated with the peer address, as the data
   //                   dispatch happens out of context
@@ -149,8 +163,9 @@ struct Net_UDPSocketConfiguration
   bool          linger;
 #endif
   ACE_INET_Addr listenAddress;
-  ACE_UINT16    sourcePort;
-  bool          writeOnly;
+  ACE_INET_Addr peerAddress;
+  ACE_UINT16    sourcePort; // specify a specific source port (outbound)
+  bool          writeOnly; // *TODO*: remove ASAP
 };
 
 //typedef std::deque<ACE_INET_Addr> Net_InetAddressStack_t;
@@ -237,26 +252,26 @@ struct Net_WLANMonitorConfiguration
   Net_WLANMonitorConfiguration ()
    : autoAssociate (false)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-   , deviceIdentifier (GUID_NULL)
    , enableBackgroundScans (NET_WLANMONITOR_DEFAULT_BACKGROUNDSCANS)
    , enableStreamingMode (NET_WLANMONITOR_DEFAULT_STREAMINGMODE)
+   , interfaceIdentifier (GUID_NULL)
    , notificationCB (NULL)
    , notificationCBData (NULL)
 #else
-   , deviceIdentifier ()
+   , interfaceIdentifier ()
 #endif
    , SSID ()
   {};
 
   bool                       autoAssociate;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  struct _GUID               deviceIdentifier;
   BOOL                       enableBackgroundScans;
   BOOL                       enableStreamingMode;
+  struct _GUID               interfaceIdentifier;
   WLAN_NOTIFICATION_CALLBACK notificationCB;
   PVOID                      notificationCBData;
 #else
-  std::string                deviceIdentifier;
+  std::string                interfaceIdentifier;
   DBusHandleMessageFunction  notificationCB;
   void*                      notificationCBData;
 #endif

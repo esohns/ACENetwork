@@ -65,8 +65,8 @@ struct Test_I_AllocatorConfiguration
   };
 };
 
-typedef Stream_Statistic Test_I_RuntimeStatistic_t;
-typedef Common_IStatistic_T<Test_I_RuntimeStatistic_t> Test_I_StatisticReportingHandler_t;
+typedef Stream_Statistic Test_I_Statistic_t;
+typedef Common_IStatistic_T<Test_I_Statistic_t> Test_I_StatisticReportingHandler_t;
 
 struct Test_I_SignalHandlerConfiguration
   : Common_SignalHandlerConfiguration

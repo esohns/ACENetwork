@@ -25,6 +25,7 @@
 
 #include "common_inotify.h"
 #include "common_time_common.h"
+#include "common_timer_manager_common.h"
 
 #include "stream_common.h"
 #include "stream_control_message.h"
@@ -58,7 +59,7 @@ typedef IRC_SessionMessage_T<IRC_Stream_SessionData_t,
 template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -93,7 +94,7 @@ typedef Stream_INotify_T<enum Stream_SessionMessageType> IRC_Stream_INotify_t;
 struct IRC_Stream_SessionData
  : Stream_SessionData
 {
-  inline IRC_Stream_SessionData ()
+  IRC_Stream_SessionData ()
    : Stream_SessionData ()
    , connectionState (NULL)
    , statistic ()
@@ -110,7 +111,7 @@ struct IRC_Stream_SessionData
 struct IRC_StreamState
  : Stream_State
 {
-  inline IRC_StreamState ()
+  IRC_StreamState ()
    : Stream_State ()
    , currentSessionData (NULL)
    //, userData (NULL)
@@ -140,7 +141,7 @@ typedef Stream_SessionData_T<struct IRC_Stream_SessionData> IRC_Stream_SessionDa
 typedef IRC_Stream_T<struct IRC_StreamState,
                      struct IRC_StreamConfiguration,
                      IRC_Statistic_t,
-                     IRC_StatisticHandler_t,
+                     Common_Timer_Manager_t,
                      struct IRC_ModuleHandlerConfiguration,
                      struct IRC_Stream_SessionData,
                      IRC_Stream_SessionData_t,

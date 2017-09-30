@@ -53,7 +53,7 @@ template <typename StreamStateType,
           typename ConfigurationType,
           ////////////////////////////////
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
           typename ModuleHandlerConfigurationType,
           ////////////////////////////////
@@ -134,7 +134,7 @@ class BitTorrent_PeerStream_T
   typedef BitTorrent_PeerStream_T<StreamStateType,
                                   ConfigurationType,
                                   StatisticContainerType,
-                                  StatisticHandlerType,
+                                  TimerManagerType,
                                   ModuleHandlerConfigurationType,
                                   SessionDataType,
                                   SessionDataContainerType,
@@ -176,7 +176,7 @@ class BitTorrent_PeerStream_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
-                                      StatisticHandlerType,
+                                      TimerManagerType,
                                       UserDataType> PARSER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
@@ -206,7 +206,7 @@ class BitTorrent_PeerStream_T
                                                         SessionMessageType,
                                                         enum BitTorrent_MessageType,
                                                         BitTorrent_Statistic_t,
-                                                        StatisticHandlerType,
+                                                        TimerManagerType,
                                                         SessionDataType,
                                                         SessionDataContainerType> STATISTIC_READER_T;
   typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
@@ -217,7 +217,7 @@ class BitTorrent_PeerStream_T
                                                         SessionMessageType,
                                                         enum BitTorrent_MessageType,
                                                         BitTorrent_Statistic_t,
-                                                        StatisticHandlerType,
+                                                        TimerManagerType,
                                                         SessionDataType,
                                                         SessionDataContainerType> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,

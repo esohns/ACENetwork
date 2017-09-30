@@ -72,30 +72,50 @@ class Net_Common_Tools
   // *TODO*: - the Linux version is incomplete (selects Ethernet/PPP only, and
   //         does not check connectedness yet)
   //         - the Win32 is incomplete (returns first 'connected' interface)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  static struct _GUID getDefaultInterface (enum Net_LinkLayerType = NET_LINKLAYER_802_3);
+#else
   static std::string getDefaultInterface (enum Net_LinkLayerType = NET_LINKLAYER_802_3);
+#endif
   // *NOTE*: queries the system for installed network interfaces, returning the
   //         'default' one (bitmask-version of the above)
   // *TODO*: only Ethernet (IEEE 802.3) and PPP is currently supported
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  static struct _GUID getDefaultInterface (int); // link layer type(s) (bitmask)
+#else
   static std::string getDefaultInterface (int); // link layer type(s) (bitmask)
+#endif
 
   // *NOTE*: make sure the argument points at at least 6 (!) bytes of allocated memory
   static std::string LinkLayerAddressToString (const unsigned char* const, // pointer to physical address data (i.e. START of ethernet header address field !)
                                                enum Net_LinkLayerType = NET_LINKLAYER_802_3);
   static std::string LinkLayerTypeToString (enum Net_LinkLayerType);
-  static std::string EthernetProtocolTypeIDToString (unsigned short); // ethernet frame type (network (== big-endian) byte order !)
+  static std::string EthernetProtocolTypeIdToString (unsigned short); // ethernet frame type (in network (== big-endian) byte order)
 
-    // *WARNING*: ensure that the array argument can hold at least 6 bytes !
+  // *WARNING*: ensure that the array argument can hold at least 6 bytes !
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  static bool interfaceToMACAddress (REFGUID,            // interface identifier
+#else
   static bool interfaceToMACAddress (const std::string&, // interface identifier
+#endif
                                      unsigned char[]);   // return value: MAC address
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // *TODO*: this API is obviously broken (race conditions)
+  //         --> remove ASAP
+  static ULONG interfaceToIndex (REFGUID); // interface identifier
+  static struct _GUID indexToInterface (ULONG); // interface index
+
+  //static std::string WLANInterfaceToString (HANDLE,   // WLAN API client handle
+  //                                          REFGUID); // interface identifier
+  static std::string interfaceToString (REFGUID); // interface identifier
+
   static std::string associatedSSID (HANDLE,   // WLAN API client handle
                                      REFGUID); // interface identifier
   static bool hasSSID (HANDLE,              // WLAN API client handle
                        REFGUID,             // interface identifier
                        const std::string&); // SSID
-  static std::string interfaceToString (HANDLE,   // WLAN API client handle
-                                        REFGUID); // interface identifier
+
   static bool getDeviceSettingBool (HANDLE,   // WLAN API client handle
                                     REFGUID, // interface identifier
                                     enum _WLAN_INTF_OPCODE); // code
@@ -103,6 +123,7 @@ class Net_Common_Tools
                                     REFGUID,                // interface identifier
                                     enum _WLAN_INTF_OPCODE, // code
                                     bool);                  // enable ? : disable
+
 #else
   static std::string associatedSSID (const std::string&); // interface identifier
   //  static std::string associatedSSID (struct DBusConnection*, // D-Bus connection handle
@@ -128,19 +149,26 @@ class Net_Common_Tools
 
   // *NOTE*: this returns the external (i.e. routable) IP address (for clients
   //         behind a (NATted-) gateway)
-  static bool interfaceToExternalIPAddress (const std::string&, // interface identifier
-                                            ACE_INET_Addr&);    // return value: external IP address
-  // *NOTE*: on Win32 systems, specify the 'AdapterName' (not 'FriendlyName')
-  //         --> i.e. use Common_Tools::GUIDToString() on the device identifier
-  static bool interfaceToIPAddress (const std::string&,     // device identifier
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  static bool interfaceToExternalIPAddress (REFGUID,            // interface identifier
 #else
+  static bool interfaceToExternalIPAddress (const std::string&, // interface identifier
+#endif
+                                            ACE_INET_Addr&);    // return value: external IP address
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  static bool interfaceToIPAddress (REFGUID,                // device identifier
+#else
+  static bool interfaceToIPAddress (const std::string&,     // device identifier
                                     struct DBusConnection*, // D-Bus connection handle
 #endif
                                     ACE_INET_Addr&,         // return value: (first) IP address
                                     ACE_INET_Addr&);        // return value: (first) gateway IP address
   static bool IPAddressToInterface (const ACE_INET_Addr&, // IP address
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                                    struct _GUID&);       // return value: interface identifier
+#else
                                     std::string&);        // return value: interface identifier
+#endif
 
   inline static std::string IPAddressToString (const ACE_INET_Addr& address_in,
                                                bool addressOnly_in = false) { return Net_Common_Tools::IPAddressToString ((addressOnly_in ? 0 : ACE_HTONS (address_in.get_port_number ())), ACE_HTONL (address_in.get_ip_address ())); };
@@ -257,10 +285,6 @@ class Net_Common_Tools
                                                const std::string&,     // device object path
                                                const std::string&);    // SSID
 #endif
-
-  // --- miscellaneous ---
-
-//  static Net_IInetConnectionManager_t* getConnectionManager ();
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools ())

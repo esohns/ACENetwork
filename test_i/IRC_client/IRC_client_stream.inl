@@ -25,16 +25,16 @@
 #include "IRC_client_common_modules.h"
 #include "IRC_client_module_IRChandler.h"
 
-template <typename StatisticHandlerType>
-IRC_Client_Stream_T<StatisticHandlerType>::IRC_Client_Stream_T ()
+template <typename TimerManagerType>
+IRC_Client_Stream_T<TimerManagerType>::IRC_Client_Stream_T ()
  : inherited ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream_T::IRC_Client_Stream_T"));
 
 }
 
-template <typename StatisticHandlerType>
-IRC_Client_Stream_T<StatisticHandlerType>::~IRC_Client_Stream_T ()
+template <typename TimerManagerType>
+IRC_Client_Stream_T<TimerManagerType>::~IRC_Client_Stream_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream_T::~IRC_Client_Stream_T"));
 
@@ -42,10 +42,10 @@ IRC_Client_Stream_T<StatisticHandlerType>::~IRC_Client_Stream_T ()
   inherited::shutdown ();
 }
 
-template <typename StatisticHandlerType>
+template <typename TimerManagerType>
 bool
-IRC_Client_Stream_T<StatisticHandlerType>::load (Stream_ModuleList_t& modules_out,
-                                                 bool& delete_out)
+IRC_Client_Stream_T<TimerManagerType>::load (Stream_ModuleList_t& modules_out,
+                                             bool& delete_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream_T::load"));
 
@@ -79,12 +79,12 @@ IRC_Client_Stream_T<StatisticHandlerType>::load (Stream_ModuleList_t& modules_ou
   return true;
 }
 
-template <typename StatisticHandlerType>
+template <typename TimerManagerType>
 bool
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-IRC_Client_Stream_T<StatisticHandlerType>::initialize (const CONFIGURATION_T& configuration_in)
+IRC_Client_Stream_T<TimerManagerType>::initialize (const CONFIGURATION_T& configuration_in)
 #else
-IRC_Client_Stream_T<StatisticHandlerType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
+IRC_Client_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
 #endif
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream_T::initialize"));
@@ -181,9 +181,9 @@ error:
   return false;
 }
 
-template <typename StatisticHandlerType>
+template <typename TimerManagerType>
 void
-IRC_Client_Stream_T<StatisticHandlerType>::ping ()
+IRC_Client_Stream_T<TimerManagerType>::ping ()
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream_T::ping"));
 

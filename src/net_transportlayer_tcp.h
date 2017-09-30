@@ -29,13 +29,13 @@
 class Net_TransportLayer_TCP
  : public Net_InetTransportLayerBase_T<struct Net_TCPSocketConfiguration>
 {
+  typedef Net_InetTransportLayerBase_T<struct Net_TCPSocketConfiguration> inherited;
+
  public:
   Net_TransportLayer_TCP ();
   inline virtual ~Net_TransportLayer_TCP () {};
 
  private:
-  typedef Net_InetTransportLayerBase_T<struct Net_TCPSocketConfiguration> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_TCP (const Net_TransportLayer_TCP&));
   ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_TCP& operator= (const Net_TransportLayer_TCP&));
 };

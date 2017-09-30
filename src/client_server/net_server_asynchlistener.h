@@ -24,13 +24,8 @@
 #include "ace/Asynch_Acceptor.h"
 #include "ace/Asynch_IO.h"
 #include "ace/Global_Macros.h"
-#include "ace/INET_Addr.h"
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
-
-#include "common_idumpstate.h"
-
-#include "stream_common.h"
 
 #include "net_ilistener.h"
 
@@ -49,8 +44,9 @@ class Net_Server_AsynchListener_T
  : public ACE_Asynch_Acceptor<HandlerType>
  , public Net_IListener_T<ConfigurationType,
                           HandlerConfigurationType>
- , public Common_IDumpState
 {
+  typedef ACE_Asynch_Acceptor<HandlerType> inherited;
+
   // singleton needs access to the ctor/dtors
   friend class ACE_Singleton<Net_Server_AsynchListener_T<HandlerType,
                                                          AddressType,
@@ -62,13 +58,15 @@ class Net_Server_AsynchListener_T
                              ACE_SYNCH_RECURSIVE_MUTEX>;
 
  public:
-  //typedef Net_IConnectionManager_T<AddressType,
-  //                                 ConfigurationType,
-  //                                 StateType,
-  //                                 Stream_Statistic,
-  //                                 StreamType,
-  //                                 //////
-  //                                 UserDataType> ICONNECTION_MANAGER_T;
+  // convenient types
+  typedef ACE_Singleton<Net_Server_AsynchListener_T<HandlerType,
+                                                    AddressType,
+                                                    ConfigurationType,
+                                                    StateType,
+                                                    HandlerConfigurationType,
+                                                    StreamType,
+                                                    UserDataType>,
+                        ACE_SYNCH_RECURSIVE_MUTEX> SINGLETON_T;
 
   virtual int accept (size_t = 0,          // bytes to read
                       const void* = NULL); // ACT
@@ -89,7 +87,7 @@ class Net_Server_AsynchListener_T
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  inline virtual const HandlerConfigurationType& getR () const { ACE_ASSERT (configuration_); return configuration_->socketHandlerConfiguration; };
+  inline virtual const HandlerConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); return configuration_->socketHandlerConfiguration; };
   //virtual bool initialize (const HandlerConfigurationType&);
   virtual bool initialize (const ConfigurationType&); // configuration
   inline virtual bool useReactor () const { return false; };
@@ -106,8 +104,6 @@ class Net_Server_AsynchListener_T
   virtual HandlerType* make_handler (void); // return value: socket handler handle
 
  private:
-  typedef ACE_Asynch_Acceptor<HandlerType> inherited;
-
   typedef Net_IListener_T<ConfigurationType,
                           HandlerConfigurationType> ILISTENER_T;
 
@@ -121,7 +117,7 @@ class Net_Server_AsynchListener_T
 
   // override default listen strategy
   // *TODO*: currently tailored for TCP only (see implementation)
-  virtual int open (const ACE_INET_Addr&,             // listen address
+  virtual int open (const AddressType&,               // listen address
                     size_t = 0,                       // #bytes to read
                     bool = false,                     // pass addresses
                     int = ACE_DEFAULT_ASYNCH_BACKLOG, // backlog

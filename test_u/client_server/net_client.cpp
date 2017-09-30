@@ -452,7 +452,7 @@ do_initializeSignals (bool allowUserRuntimeConnect_in,
 }
 
 void
-do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
+do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
          unsigned int maxNumConnections_in,
          const std::string& UIDefinitionFile_in,
          bool useThreadPool_in,
@@ -632,20 +632,19 @@ do_work (Test_U_Client_TimeoutHandler::ActionMode_t actionMode_in,
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
-  Common_TimerConfiguration timer_configuration;
+  struct Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
   if (UIDefinitionFile_in.empty () && (connectionInterval_in > 0))
   {
     // schedule action interval timer
-    ACE_Event_Handler* handler_p = &timeout_handler;
     ACE_Time_Value interval (((actionMode_in == Test_U_Client_TimeoutHandler::ACTION_STRESS) ? (NET_CLIENT_DEF_SERVER_STRESS_INTERVAL / 1000)
                                                                                              : connectionInterval_in),
                              ((actionMode_in == Test_U_Client_TimeoutHandler::ACTION_STRESS) ? ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL % 1000) * 1000)
                                                                                              : 0));
     configuration.signalHandlerConfiguration.actionTimerId =
-        timer_manager_p->schedule_timer (handler_p,                  // event handler
-                                         NULL,                       // ACT
+        timer_manager_p->schedule_timer (&timeout_handler,           // event handler handle
+                                         NULL,                       // asynchronous completion token
                                          COMMON_TIME_NOW + interval, // first wakeup time
                                          interval);                  // interval
     if (configuration.signalHandlerConfiguration.actionTimerId == -1)
@@ -972,7 +971,7 @@ ACE_TMAIN (int argc_in,
 #endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
-  Test_U_Client_TimeoutHandler::ActionMode_t action_mode =
+  enum Test_U_Client_TimeoutHandler::ActionModeType action_mode =
     Test_U_Client_TimeoutHandler::ACTION_NORMAL;
   bool alternating_mode = false;
   unsigned int maximum_number_of_connections =

@@ -25,18 +25,24 @@
 
 #include "common_iinitialize.h"
 
+// forward declarations
+class ACE_Message_Block;
+
 template <typename ConfigurationType>
 class Net_SocketHandlerBase_T
- : public Common_IInitialize_T<ConfigurationType>
+ : virtual public Common_IInitialize_T<ConfigurationType>
 {
  public:
-  virtual ~Net_SocketHandlerBase_T ();
+  inline virtual ~Net_SocketHandlerBase_T () {};
 
   // implement Common_IInitialize_T
   virtual bool initialize (const ConfigurationType&); // handler configuration
 
  protected:
   Net_SocketHandlerBase_T ();
+
+  // helper method(s)
+  ACE_Message_Block* allocateMessage (unsigned int); // requested size
 
   // *TODO*: remove this ASAP
   ConfigurationType* configuration_;
@@ -46,6 +52,14 @@ class Net_SocketHandlerBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase_T (const Net_SocketHandlerBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_SocketHandlerBase_T& operator= (const Net_SocketHandlerBase_T&))
 };
+
+//////////////////////////////////////////
+
+template <typename ConfigurationType>
+class Net_AsynchSocketHandlerBase_T
+ : public Net_SocketHandlerBase_T<ConfigurationType>
+ , protected Net_IAsynchSocketHandler
+{};
 
 // include template definition
 #include "net_sockethandler_base.inl"

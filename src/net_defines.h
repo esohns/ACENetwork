@@ -92,7 +92,7 @@
 #define NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE              ACE_DEFAULT_MAX_SOCKET_BUFSIZ
 #define NET_SOCKET_DEFAULT_TCP_NODELAY                      true  // SO_NODELAY
 #define NET_SOCKET_DEFAULT_TCP_KEEPALIVE                    false // SO_KEEPALIVE
-#define NET_SOCKET_DEFAULT_UDP_CONNECT                      true
+#define NET_SOCKET_DEFAULT_UDP_CONNECT                      false
 
 // connection / handler
 #define NET_CONNECTION_HANDLER_THREAD_NAME                  "connection dispatch"

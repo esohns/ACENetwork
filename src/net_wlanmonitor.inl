@@ -233,8 +233,8 @@ continue_:
   // initialize cache
   ACE_ASSERT (identifierToObjectPath_.empty ());
   // convert device identifier to object path ?
-  if (!configuration_->deviceIdentifier.empty ())
-    identifierToObjectPath_.insert (std::make_pair (configuration_->deviceIdentifier,
+  if (!configuration_->interfaceIdentifier.empty ())
+    identifierToObjectPath_.insert (std::make_pair (configuration_->interfaceIdentifier,
                                                     device_path_string));
   else
     identifierToObjectPath_ = getDevices ();
@@ -578,9 +578,9 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
                   AddressType,
                   ConfigurationType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                  UserDataType>::associate (REFGUID deviceIdentifier_in,
+                  UserDataType>::associate (REFGUID interfaceIdentifier_in,
 #else
-                  UserDataType>::associate (const std::string& deviceIdentifier_in,
+                  UserDataType>::associate (const std::string& interfaceIdentifier_in,
 #endif
                                             const std::string& SSID_in)
 {
@@ -606,38 +606,38 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
     return false;
   } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (!InlineIsEqualGUID (deviceIdentifier_in, GUID_NULL))
+  if (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
 #else
-  if (!deviceIdentifier_in.empty ())
+  if (!interfaceIdentifier_in.empty ())
 #endif
   {
     if (SSID () == SSID_in)
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       if (!Net_Common_Tools::setDeviceSettingBool (clientHandle_,
-                                                   deviceIdentifier_in,
+                                                   interfaceIdentifier_in,
                                                    wlan_intf_opcode_background_scan_enabled,
                                                    false))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("\"%s\": failed to Net_Common_Tools::setDeviceSettingBool(0x%@,%d,true), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                     clientHandle_, wlan_intf_opcode_background_scan_enabled));
       //else
       //  ACE_DEBUG ((LM_DEBUG,
       //              ACE_TEXT ("\"%s\": disabled background scans\n"),
-      //              ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ())));
+      //              ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, interfaceIdentifier_in).c_str ())));
       if (!Net_Common_Tools::setDeviceSettingBool (clientHandle_,
-                                                   deviceIdentifier_in,
+                                                   interfaceIdentifier_in,
                                                    wlan_intf_opcode_media_streaming_mode,
                                                    true))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("\"%s\": failed to Net_Common_Tools::setDeviceSettingBool(0x%@,%d,true), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                     clientHandle_, wlan_intf_opcode_media_streaming_mode));
       //else
       //  ACE_DEBUG ((LM_DEBUG,
       //              ACE_TEXT ("\"%s\": enabled streaming mode\n"),
-      //              ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ())));
+      //              ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, interfaceIdentifier_in).c_str ())));
 #endif
       return true; // already associated, nothing to do
     } // end IF
@@ -646,14 +646,14 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   DEVICEIDENTIFIERS_T devices;
   DEVICEIDENTIFIERS_ITERATOR_T iterator;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (InlineIsEqualGUID (deviceIdentifier_in, GUID_NULL))
+  if (InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
 #else
-  if (deviceIdentifier_in.empty ())
+  if (interfaceIdentifier_in.empty ())
 #endif
     devices = getDevices ();
   else
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    devices.push_back (deviceIdentifier_in);
+    devices.push_back (interfaceIdentifier_in);
 
   // sanity check(s)
   ACE_ASSERT (clientHandle_ != ACE_INVALID_HANDLE);
@@ -700,7 +700,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("\"%s\": failed to ::WlanGetAvailableNetworkList(0x%@): \"%s\", aborting\n"),
-                  ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, *iterator).c_str ()),
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (*iterator).c_str ()),
                   clientHandle_,
                   ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
       goto error;
@@ -818,7 +818,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("\"%s\": failed to ::WlanConnect(0x%@,%s): \"%s\", aborting\n"),
-                    ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, *iterator).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::interfaceToString (*iterator).c_str ()),
                     clientHandle_,
                     ACE_TEXT (SSID_in.c_str ()),
                     ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
@@ -826,7 +826,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
       } // end IF
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("\"%s\": associating with SSID %s...\n"),
-                  ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, *iterator).c_str ()),
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (*iterator).c_str ()),
                   ACE_TEXT (SSID_in.c_str ())));
 
       done = true;
@@ -867,7 +867,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("\"%s\": failed to ::WlanScan(0x%@): \"%s\", aborting\n"),
                   clientHandle_,
-                  ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, *iterator).c_str ()),
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (*iterator).c_str ()),
                   ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
       goto error;
     } // end IF
@@ -881,7 +881,7 @@ error:
 
   return false;
 #else
-    devices.insert (std::make_pair (deviceIdentifier_in, ACE_TEXT_ALWAYS_CHAR ("")));
+    devices.insert (std::make_pair (interfaceIdentifier_in, ACE_TEXT_ALWAYS_CHAR ("")));
 
   // step1: retrieve available and matching connection profile(s)
   std::string device_object_path_string, connection_object_path_string;
@@ -992,9 +992,9 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   return Net_Common_Tools::associatedSSID (clientHandle_,
-                                           configuration_->deviceIdentifier);
+                                           configuration_->interfaceIdentifier);
 #else
-  return Net_Common_Tools::associatedSSID (configuration_->deviceIdentifier);
+  return Net_Common_Tools::associatedSSID (configuration_->interfaceIdentifier);
 #endif
 }
 
@@ -1011,9 +1011,9 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
                   AddressType,
                   ConfigurationType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                  UserDataType>::onAssociate (REFGUID deviceIdentifier_in,
+                  UserDataType>::onAssociate (REFGUID interfaceIdentifier_in,
 #else
-                  UserDataType>::onAssociate (const std::string& deviceIdentifier_in,
+                  UserDataType>::onAssociate (const std::string& interfaceIdentifier_in,
 #endif
                                               const std::string& SSID_in,
                                               bool success_in)
@@ -1032,7 +1032,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
          )
     {
       try {
-        (*(iterator++))->onAssociate (deviceIdentifier_in,
+        (*(iterator++))->onAssociate (interfaceIdentifier_in,
                                       SSID_in,
                                       success_in);
       } catch (...) {
@@ -1051,26 +1051,26 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("\"%s\": failed to associate with SSID %s, retrying...\n"),
-                ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ()),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                 ACE_TEXT (configuration_->SSID.c_str ())));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("\"%s\": failed to associate with SSID %s, retrying...\n"),
-                ACE_TEXT (deviceIdentifier_in.c_str ()),
+                ACE_TEXT (interfaceIdentifier_in.c_str ()),
                 ACE_TEXT (configuration_->SSID.c_str ())));
 #endif
 
-    if (!associate (deviceIdentifier_in,
+    if (!associate (interfaceIdentifier_in,
                     configuration_->SSID))
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s), returning\n"),
-                  ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ()),
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                   ACE_TEXT (configuration_->SSID.c_str ())));
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s), returning\n"),
-                  ACE_TEXT (deviceIdentifier_in.c_str ()),
+                  ACE_TEXT (interfaceIdentifier_in.c_str ()),
                   ACE_TEXT (configuration_->SSID.c_str ())));
 #endif
     return;
@@ -1078,42 +1078,42 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   if (!Net_Common_Tools::setDeviceSettingBool (clientHandle_,
-                                               deviceIdentifier_in,
+                                               interfaceIdentifier_in,
                                                wlan_intf_opcode_background_scan_enabled,
                                                !success_in))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("\"%s\": failed to Net_Common_Tools::setDeviceSettingBool(0x%@,%d,true), continuing\n"),
-                ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ()),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                 clientHandle_, wlan_intf_opcode_background_scan_enabled));
   //else
   //  ACE_DEBUG ((LM_DEBUG,
   //              ACE_TEXT ("\"%s\": %s background scans\n"),
-  //              ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ()),
+  //              ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
   //              (success_in ? ACE_TEXT ("disabled") : ACE_TEXT ("enabled"))));
   if (!Net_Common_Tools::setDeviceSettingBool (clientHandle_,
-                                               deviceIdentifier_in,
+                                               interfaceIdentifier_in,
                                                wlan_intf_opcode_media_streaming_mode,
                                                success_in))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("\"%s\": failed to Net_Common_Tools::setDeviceSettingBool(0x%@,%d,true), continuing\n"),
-                ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ()),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                 clientHandle_, wlan_intf_opcode_media_streaming_mode));
   //else
   //  ACE_DEBUG ((LM_DEBUG,
   //              ACE_TEXT ("\"%s\": %s streaming mode\n"),
-  //              ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ()),
+  //              ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
   //              (success_in ? ACE_TEXT ("enabled") : ACE_TEXT ("disabled"))));
 #endif
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\"%s\": associated with SSID %s\n"),
-              ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ()),
+              ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
               ACE_TEXT (SSID_in.c_str ())));
 #else
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("\"%s\": associated with SSID %s\n"),
-//              ACE_TEXT (deviceIdentifier_in.c_str ()),
+//              ACE_TEXT (interfaceIdentifier_in.c_str ()),
 //              ACE_TEXT (SSID_in.c_str ())));
 #endif
 }
@@ -1128,9 +1128,9 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
                   AddressType,
                   ConfigurationType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                  UserDataType>::onConnect (REFGUID deviceIdentifier_in,
+                  UserDataType>::onConnect (REFGUID interfaceIdentifier_in,
 #else
-                  UserDataType>::onConnect (const std::string& deviceIdentifier_in,
+                  UserDataType>::onConnect (const std::string& interfaceIdentifier_in,
 #endif
                                             const std::string& SSID_in,
                                             bool success_in)
@@ -1149,7 +1149,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
          )
     {
       try {
-        (*(iterator++))->onConnect (deviceIdentifier_in,
+        (*(iterator++))->onConnect (interfaceIdentifier_in,
                                     SSID_in,
                                     success_in);
       } catch (...) {
@@ -1164,9 +1164,9 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   //  return;
 
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  if (!Net_Common_Tools::interfaceToIPAddress (Common_Tools::GUIDToString (deviceIdentifier_in),
+//  if (!Net_Common_Tools::interfaceToIPAddress (Common_Tools::GUIDToString (interfaceIdentifier_in),
 //#else
-//  if (!Net_Common_Tools::interfaceToIPAddress (deviceIdentifier_in,
+//  if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
 //#endif
 //                                               localSAP_,
 //                                               peerSAP_))
@@ -1174,11 +1174,11 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //    ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
-//                ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ())));
+//                ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, interfaceIdentifier_in).c_str ())));
 //#else
 //    ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
-//                ACE_TEXT (deviceIdentifier_in.c_str ())));
+//                ACE_TEXT (interfaceIdentifier_in.c_str ())));
 //#endif
 //    return;
 //  } // end IF
@@ -1186,14 +1186,14 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("\"%s\": connected to SSID %s: %s <---> %s\n"),
-//              ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ()),
+//              ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, interfaceIdentifier_in).c_str ()),
 //              ACE_TEXT (SSID_in.c_str ()),
 //              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_).c_str ()),
 //              ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_).c_str ())));
 //#else
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("\"%s\": connected to SSID %s: %s <---> %s\n"),
-//              ACE_TEXT (deviceIdentifier_in.c_str ()),
+//              ACE_TEXT (interfaceIdentifier_in.c_str ()),
 //              ACE_TEXT (SSID_in.c_str ()),
 //              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_).c_str ()),
 //              ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_).c_str ())));
@@ -1210,9 +1210,9 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
                   AddressType,
                   ConfigurationType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                  UserDataType>::onHotPlug (REFGUID deviceIdentifier_in,
+                  UserDataType>::onHotPlug (REFGUID interfaceIdentifier_in,
 #else
-                  UserDataType>::onHotPlug (const std::string& deviceIdentifier_in,
+                  UserDataType>::onHotPlug (const std::string& interfaceIdentifier_in,
 #endif
                                             bool enabled_in)
 {
@@ -1230,7 +1230,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
          )
     {
       try {
-        (*(iterator++))->onHotPlug (deviceIdentifier_in,
+        (*(iterator++))->onHotPlug (interfaceIdentifier_in,
                                     enabled_in);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
@@ -1242,12 +1242,12 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\"%s\": interface %s\n"),
-              ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ()),
+              ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
               (enabled_in ? ACE_TEXT ("enabled") : ACE_TEXT ("disabled/removed"))));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\"%s\": interface %s\n"),
-              ACE_TEXT (deviceIdentifier_in.c_str ()),
+              ACE_TEXT (interfaceIdentifier_in.c_str ()),
               (enabled_in ? ACE_TEXT ("enabled") : ACE_TEXT ("disabled/removed"))));
 #endif
 }
@@ -1262,9 +1262,9 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
                   AddressType,
                   ConfigurationType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                  UserDataType>::onScanComplete (REFGUID deviceIdentifier_in)
+                  UserDataType>::onScanComplete (REFGUID interfaceIdentifier_in)
 #else
-                  UserDataType>::onScanComplete (const std::string& deviceIdentifier_in)
+                  UserDataType>::onScanComplete (const std::string& interfaceIdentifier_in)
 #endif
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::onScanComplete"));
@@ -1281,7 +1281,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
          )
     {
       try {
-        (*(iterator++))->onScanComplete (deviceIdentifier_in);
+        (*(iterator++))->onScanComplete (interfaceIdentifier_in);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("caught exception in Net_IWLANCB::onScanComplete(), continuing\n")));
@@ -1297,17 +1297,17 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
       !configuration_->autoAssociate)
     return;
 
-  if (!associate (deviceIdentifier_in,
+  if (!associate (interfaceIdentifier_in,
                   configuration_->SSID))
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s), returning\n"),
-                ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, deviceIdentifier_in).c_str ()),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                 ACE_TEXT (configuration_->SSID.c_str ())));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s), returning\n"),
-                ACE_TEXT (deviceIdentifier_in.c_str ()),
+                ACE_TEXT (interfaceIdentifier_in.c_str ()),
                 ACE_TEXT (configuration_->SSID.c_str ())));
 #endif
 }

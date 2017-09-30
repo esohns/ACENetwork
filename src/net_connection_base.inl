@@ -19,9 +19,6 @@
  ***************************************************************************/
 
 #include "ace/Log_Msg.h"
-#include "ace/OS.h"
-
-#include "common_timer_manager_common.h"
 
 #include "net_common_tools.h"
 #include "net_macros.h"
@@ -65,18 +62,14 @@ Net_ConnectionBase_T<AddressType,
                   ACE_TEXT ("caught exception in Net_IConnectionManager_T::get(), continuing\n")));
     }
   } // end IF
-//  // register with the connection manager, if any
-//  if (!registerc ())
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), continuing\n")));
 
   if (statisticCollectionInterval_in != ACE_Time_Value::zero)
   {
     // schedule regular statistic collection
     typename TimerManagerType::INTERFACE_T* itimer_manager_p =
         (configuration_ ? (configuration_->timerManager ? configuration_->timerManager
-                                                        : TIMER_MANAGER_SINGLETON_T::instance ())
-                        : TIMER_MANAGER_SINGLETON_T::instance ());
+                                                        : TimerManagerType::SINGLETON_T::instance ())
+                        : TimerManagerType::SINGLETON_T::instance ());
     ACE_ASSERT (itimer_manager_p);
     timerId_ =
       itimer_manager_p->schedule_timer (&statisticHandler_,                               // event handler
@@ -117,8 +110,8 @@ Net_ConnectionBase_T<AddressType,
   {
     typename TimerManagerType::INTERFACE_T* itimer_manager_p =
         (configuration_ ? (configuration_->timerManager ? configuration_->timerManager
-                                                        : TIMER_MANAGER_SINGLETON_T::instance ())
-                        : TIMER_MANAGER_SINGLETON_T::instance ());
+                                                        : TimerManagerType::SINGLETON_T::instance ())
+                        : TimerManagerType::SINGLETON_T::instance ());
     ACE_ASSERT (itimer_manager_p);
     const void* act_p = NULL;
     result = itimer_manager_p->cancel_timer (timerId_,
@@ -132,9 +125,6 @@ Net_ConnectionBase_T<AddressType,
 //                  ACE_TEXT ("cancelled statistic timer (id was: %d)\n"),
 //                  timerId_));
   } // end IF
-
-//  // deregister with the connection manager, if any
-//  deregister ();
 }
 
 template <typename AddressType,
@@ -149,30 +139,20 @@ Net_ConnectionBase_T<AddressType,
                      StateType,
                      StatisticContainerType,
                      TimerManagerType,
-//#if defined (__GNUG__)
-                     UserDataType>::registerc (ICONNECTION_T* connection_in)
-//#else
-//                     UserDataType>::registerc ()
-//#endif
+                     UserDataType>::registerc ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::registerc"));
 
-  ICONNECTION_T* iconnection_p = NULL;
   AddressType local_address, remote_address;
 
   // sanity check(s)
   ACE_ASSERT (!isRegistered_);
   if (!manager_)
-    goto continue_; // nothing to do
+    return false; // nothing to do
 
   // (try to) register with the connection manager
-  //iconnection_p = this;
-//#if defined (__GNUG__)
-  // *WORKAROUND*: see header
-  iconnection_p = (connection_in ? connection_in : this);
-//#endif
   try {
-    isRegistered_ = manager_->registerc (iconnection_p);
+    isRegistered_ = manager_->registerc (this);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_IConnectionManager_T::registerc(), continuing\n")));
@@ -188,17 +168,9 @@ Net_ConnectionBase_T<AddressType,
   } // end IF
 
   try {
-//#if defined (__GNUG__)
-    // *WORKAROUND*: see header
-    ACE_ASSERT (iconnection_p);
-    iconnection_p->info (state_.handle,
-                         local_address,
-                         remote_address);
-//#else
-    //      this->info (state_.handle,
-    //                  local_address,
-    //                  remote_address);
-//#endif
+    info (state_.handle,
+          local_address,
+          remote_address);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_IConnection_T::info(), aborting\n")));
@@ -221,7 +193,6 @@ Net_ConnectionBase_T<AddressType,
               manager_->count ()));
 #endif
 
-continue_:
   return true;
 }
 
@@ -249,15 +220,14 @@ Net_ConnectionBase_T<AddressType,
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   AddressType local_address, remote_address;
   try {
-    this->info (handle,
-                local_address,
-                remote_address);
+    info (handle,
+          local_address,
+          remote_address);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_IConnection_T::info(), continuing\n")));
   }
 
-  OWN_TYPE_T* this_p = this;
   unsigned int number_of_connections = manager_->count () - 1;
 
   // (try to) de-register with the connection manager
@@ -274,12 +244,83 @@ Net_ConnectionBase_T<AddressType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("deregistered connection [0x%@/0x%@] (total: %u)\n"),
-              this_p, handle,
+              this, handle,
               number_of_connections));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("deregistered connection [%@/%d] (total: %d)\n"),
-              this_p, handle,
+              this, handle,
               number_of_connections));
 #endif
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename TimerManagerType,
+          typename UserDataType>
+ACE_Message_Block*
+Net_ConnectionBase_T<AddressType,
+                     ConfigurationType,
+                     StateType,
+                     StatisticContainerType,
+                     TimerManagerType,
+                     UserDataType>::allocateMessage (unsigned int requestedSize_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::allocateMessage"));
+
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (configuration_->streamConfiguration);
+
+  // initialize return value(s)
+  ACE_Message_Block* message_block_p = NULL;
+
+//  if (inherited::configuration_->messageAllocator)
+  if (configuration_->streamConfiguration->configuration_.messageAllocator)
+  {
+allocate:
+    try {
+      message_block_p =
+        static_cast<ACE_Message_Block*> (configuration_->streamConfiguration->configuration_.messageAllocator->malloc (requestedSize_in));
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
+                  requestedSize_in));
+      return NULL;
+    }
+
+    // keep retrying ?
+    if (!message_block_p &&
+        !configuration_->streamConfiguration->configuration_.messageAllocator->block ())
+      goto allocate;
+  } // end IF
+  else
+    ACE_NEW_NORETURN (message_block_p,
+                      ACE_Message_Block (requestedSize_in,
+                                         ACE_Message_Block::MB_DATA,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         NULL,
+                                         ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                         ACE_Time_Value::zero,
+                                         ACE_Time_Value::max_time,
+                                         NULL,
+                                         NULL));
+  if (!message_block_p)
+  {
+    if (configuration_->streamConfiguration->configuration_.messageAllocator)
+    {
+      if (configuration_->streamConfiguration->configuration_.messageAllocator->block ())
+        ACE_DEBUG ((LM_CRITICAL,
+                    ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+    } // end IF
+    else
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+  } // end IF
+
+  return message_block_p;
 }

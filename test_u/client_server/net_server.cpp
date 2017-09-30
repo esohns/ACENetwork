@@ -565,21 +565,17 @@ do_work (unsigned int maximumNumberOfConnections_in,
   Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
-  Net_StatisticHandlerReactor_t statistic_handler (ACTION_REPORT,
-                                                   TEST_U_CONNECTIONMANAGER_SINGLETON::instance (),
-                                                   false);
-  Net_StatisticHandlerProactor_t statistic_handler_proactor (ACTION_REPORT,
-                                                             TEST_U_CONNECTIONMANAGER_SINGLETON::instance (),
-                                                             false);
+  Net_StatisticHandler_t statistic_handler (ACTION_REPORT,
+                                            TEST_U_CONNECTIONMANAGER_SINGLETON::instance (),
+                                            false);
   long timer_id = -1;
   if (statisticReportingInterval_in)
   {
-    ACE_Event_Handler* handler_p = &statistic_handler;
     ACE_Time_Value interval (statisticReportingInterval_in,
                              0);
     timer_id =
-      timer_manager_p->schedule_timer (handler_p,                  // event handler
-                                       NULL,                       // ACT
+      timer_manager_p->schedule_timer (&statistic_handler,         // event handler handle
+                                       NULL,                       // asynchronous completion token
                                        COMMON_TIME_NOW + interval, // first wakeup time
                                        interval);                  // interval
     if (timer_id == -1)

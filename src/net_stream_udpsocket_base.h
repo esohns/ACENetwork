@@ -22,25 +22,21 @@
 #define NET_STREAM_UDPSOCKET_BASE_H
 
 #include "ace/Connector.h"
-#include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
-#include "ace/Notification_Strategy.h"
 #include "ace/SOCK_Connector.h"
 #include "ace/Synch_Traits.h"
-#include "ace/Time_Value.h"
 
-#include "common_time_common.h"
-
-#include "stream_imodule.h"
-
-#include "net_connection_base.h"
-#include "net_iconnectionmanager.h"
+#include "net_common.h"
+#include "net_iconnection.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #include "net_netlinksockethandler.h"
 #endif
 #include "net_udpsockethandler.h"
+
+// forward declarations
+class ACE_Notification_Strategy;
 
 template <typename HandlerType,
           ////////////////////////////////
@@ -48,51 +44,47 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename HandlerConfigurationType, // socket-
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
           ////////////////////////////////
-          typename StreamType,
-          ////////////////////////////////
-          typename UserDataType,
-          ////////////////////////////////
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename UserDataType>
 class Net_StreamUDPSocketBase_T
  : public HandlerType
- , public Net_ConnectionBase_T<AddressType,
-                               ConfigurationType,
-                               StateType,
-                               StatisticContainerType,
-                               StatisticHandlerType,
-                               UserDataType>
+ , virtual public Net_ISocketConnection_T<AddressType,
+                                          ConfigurationType,
+                                          StateType,
+                                          StatisticContainerType,
+                                          SocketConfigurationType,
+                                          HandlerConfigurationType>
 {
+  typedef HandlerType inherited;
+
   friend class ACE_Connector<Net_StreamUDPSocketBase_T<HandlerType,
                                                        AddressType,
                                                        ConfigurationType,
                                                        StateType,
                                                        StatisticContainerType,
-                                                       StatisticHandlerType,
+                                                       TimerManagerType,
+                                                       SocketConfigurationType,
                                                        HandlerConfigurationType,
-                                                       StreamType,
-                                                       UserDataType,
-                                                       ModuleConfigurationType,
-                                                       ModuleHandlerConfigurationType>,
+                                                       UserDataType>,
                              ACE_SOCK_CONNECTOR>;
 
  public:
   virtual ~Net_StreamUDPSocketBase_T ();
 
-  // *NOTE*: enqueue any received data onto our stream for further processing
+  // implement/override some ACE_Event_Handler methods
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
-  // *NOTE*: send any enqueued data back to the client
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: this is called when:
   // - handle_xxx() returns -1
   virtual int handle_close (ACE_HANDLE,
                             ACE_Reactor_Mask);
 
-  // implement (part of) Net_IConnection_T
+  // implement (part of) Net_ISocketConnection_T
+  virtual void dump_state () const;
   virtual void info (ACE_HANDLE&,         // return value: handle
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
@@ -102,77 +94,31 @@ class Net_StreamUDPSocketBase_T
   inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
 #endif
   inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); };
-  inline virtual const StreamType& stream () const { return stream_; };
   virtual void close ();
-  virtual void waitForCompletion (bool = true); // wait for any worker
-                                                // thread(s) ?
-
-  // *NOTE*: delegate these to the stream
-  virtual bool collect (StatisticContainerType&); // return value: statistic data
-  virtual void report () const;
-  virtual void dump_state () const;
-
-  // convenient types
-  typedef Net_ConnectionBase_T<AddressType,
-                               ConfigurationType,
-                               StateType,
-                               StatisticContainerType,
-                               StatisticHandlerType,
-                               UserDataType> CONNECTION_BASE_T;
+  virtual void waitForCompletion (bool = true); // wait for thread(s) ?
 
  protected:
-  typedef Net_IConnectionManager_T<AddressType,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
-  typedef Stream_IModule_T<Stream_SessionId_t,
-                           typename StreamType::SESSION_DATA_T,
-                           enum Stream_SessionMessageType,
-                           ACE_MT_SYNCH,
-                           Common_TimePolicy_t,
-                           ModuleConfigurationType,
-                           ModuleHandlerConfigurationType> IMODULE_T;
+  Net_StreamUDPSocketBase_T ();
 
-  Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
-                             const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-
-  // override some task-based members
+  // override some ACE_Svc_Handler members
   virtual int open (void* = NULL); // args
   virtual int close (u_long = 0); // args (reason)
 
   // helper method(s)
-  ACE_Message_Block* allocateMessage (unsigned int); // requested size
 #if defined (ACE_LINUX)
   void processErrorQueue ();
 #endif
 
-  ACE_Message_Block* currentWriteBuffer_;
+  ACE_Message_Block* writeBuffer_;
   ACE_SYNCH_MUTEX    sendLock_;
   // *IMPORTANT NOTE*: in a threaded environment, workers may (!) dispatch the
   //                   reactor notification queue concurrently (most notably,
   //                   ACE_TP_Reactor) --> enforce proper serialization
   bool               serializeOutput_;
 
-  StreamType         stream_;
-
  private:
-  typedef HandlerType inherited;
-  typedef Net_ConnectionBase_T<AddressType,
-                               ConfigurationType,
-                               StateType,
-                               StatisticContainerType,
-                               StatisticHandlerType,
-                               UserDataType> inherited2;
-
-  // *TODO*: if there is no default ctor, MSVC will not compile this code.
-  //         For some reason, the compiler will not accept the overloaded
-  //         make_svc_handler() method of ACE_Connector/ACE_Acceptor
-  Net_StreamUDPSocketBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T& operator= (const Net_StreamUDPSocketBase_T&))
-
-  bool               notify_; // still to notify the processing stream ?
 };
 
 //////////////////////////////////////////
@@ -182,68 +128,63 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename HandlerConfigurationType, // socket-
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
           ////////////////////////////////
-          typename StreamType,
-          ////////////////////////////////
-          typename UserDataType,
-          ////////////////////////////////
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
-class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
-                                                       HandlerConfigurationType>,
+          typename UserDataType>
+class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
+                                                       HandlerConfigurationType,
+                                                       Net_SOCK_CODgram>,
                                 AddressType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
-                                StatisticHandlerType,
+                                TimerManagerType,
+                                SocketConfigurationType,
                                 HandlerConfigurationType,
-                                StreamType,
-                                UserDataType,
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>
- : public Net_UDPSocketHandler_T<Net_SOCK_CODgram,
-                                 HandlerConfigurationType>
- , public Net_ConnectionBase_T<AddressType,
-                               ConfigurationType,
-                               StateType,
-                               StatisticContainerType,
-                               StatisticHandlerType,
-                               UserDataType>
+                                UserDataType>
+ : public Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
+                                 HandlerConfigurationType,
+                                 Net_SOCK_CODgram>
+ , virtual public Net_ISocketConnection_T<AddressType,
+                                          ConfigurationType,
+                                          StateType,
+                                          StatisticContainerType,
+                                          SocketConfigurationType,
+                                          HandlerConfigurationType>
 {
-  friend class ACE_Connector<Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
-                                                                              HandlerConfigurationType>,
+  typedef Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
+                                 HandlerConfigurationType,
+                                 Net_SOCK_CODgram> inherited;
+
+  friend class ACE_Connector<Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
+                                                                              HandlerConfigurationType,
+                                                                              Net_SOCK_CODgram>,
                                                        AddressType,
                                                        ConfigurationType,
                                                        StateType,
                                                        StatisticContainerType,
-                                                       StatisticHandlerType,
+                                                       TimerManagerType,
+                                                       SocketConfigurationType,
                                                        HandlerConfigurationType,
-                                                       StreamType,
-                                                       UserDataType,
-                                                       ModuleConfigurationType,
-                                                       ModuleHandlerConfigurationType>,
+                                                       UserDataType>,
                              ACE_SOCK_CONNECTOR>;
 
  public:
   virtual ~Net_StreamUDPSocketBase_T ();
 
-  // override some task-based members
-  virtual int open (void* = NULL); // args
-  virtual int close (u_long = 0); // args (reason)
-
-  // *NOTE*: enqueue any received data onto our stream for further processing
+  // implement/override some ACE_Event_Handler methods
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
-  // *NOTE*: send any enqueued data back to the client...
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: this is called when:
   // - handle_xxx() returns -1
   virtual int handle_close (ACE_HANDLE,
                             ACE_Reactor_Mask);
 
-  // implement (part of) Net_IConnection_T
+  // implement (part of) Net_ISocketConnection_T
+  virtual void dump_state () const;
   virtual void info (ACE_HANDLE&,         // return value: handle
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
@@ -253,72 +194,31 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
 #endif
   inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); };
-  inline virtual const StreamType& stream () const { return stream_; };
   virtual void close ();
-  virtual void waitForCompletion (bool = true); // wait for any worker
-                                                // thread(s) ?
-
-  // *NOTE*: delegate these to the stream
-  virtual bool collect (StatisticContainerType&); // return value: statistic data
-  virtual void report () const;
-  virtual void dump_state () const;
-
-  // convenient types
-  typedef Net_ConnectionBase_T<AddressType,
-                               ConfigurationType,
-                               StateType,
-                               StatisticContainerType,
-                               StatisticHandlerType,
-                               UserDataType> CONNECTION_BASE_T;
+  virtual void waitForCompletion (bool = true); // wait for thread(s) ?
 
  protected:
-  typedef Net_IConnectionManager_T<AddressType,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
-  typedef Stream_IModule_T<Stream_SessionId_t,
-                           typename StreamType::SESSION_DATA_T,
-                           enum Stream_SessionMessageType,
-                           ACE_MT_SYNCH,
-                           Common_TimePolicy_t,
-                           ModuleConfigurationType,
-                           ModuleHandlerConfigurationType> IMODULE_T;
+  Net_StreamUDPSocketBase_T ();
 
-  Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
-                             const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
+  // override some ACE_Svc_Handler members
+  virtual int open (void* = NULL); // args
+  virtual int close (u_long = 0); // args (reason)
 
-  ACE_Message_Block* currentWriteBuffer_;
+  // helper method(s)
+#if defined (ACE_LINUX)
+  void processErrorQueue ();
+#endif
+
+  ACE_Message_Block* writeBuffer_;
   ACE_SYNCH_MUTEX    sendLock_;
   // *IMPORTANT NOTE*: in a threaded environment, workers may (!) dispatch the
   //                   reactor notification queue concurrently (most notably,
   //                   ACE_TP_Reactor) --> enforce proper serialization
   bool               serializeOutput_;
 
-  StreamType         stream_;
-
-  // helper method(s)
-  ACE_Message_Block* allocateMessage (unsigned int); // requested size
-  void processErrorQueue ();
-
  private:
-  typedef Net_UDPSocketHandler_T<Net_SOCK_CODgram,
-                                 HandlerConfigurationType> inherited;
-  typedef Net_ConnectionBase_T<AddressType,
-                               ConfigurationType,
-                               StateType,
-                               StatisticContainerType,
-                               StatisticHandlerType,
-                               UserDataType> inherited2;
-
-  // *TODO*: if there is no default ctor, MSVC will not compile this code.
-  //         For some reason, the compiler will not accept the overloaded
-  //         make_svc_handler() method of ACE_Connector/ACE_Acceptor
-  Net_StreamUDPSocketBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T& operator= (const Net_StreamUDPSocketBase_T&))
-
-  bool               notify_; // still to notify the processing stream ?
 };
 
 //////////////////////////////////////////
@@ -330,65 +230,55 @@ template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename HandlerConfigurationType, // socket-
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
           ////////////////////////////////
-          typename StreamType,
-          ////////////////////////////////
-          typename UserDataType,
-          ////////////////////////////////
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename UserDataType>
 class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                                 AddressType,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
-                                StatisticHandlerType,
+                                TimerManagerType,
+                                SocketConfigurationType,
                                 HandlerConfigurationType,
-                                StreamType,
-                                UserDataType,
-                                ModuleConfigurationType,
-                                ModuleHandlerConfigurationType>
+                                UserDataType>
  : public Net_NetlinkSocketHandler_T<HandlerConfigurationType>
- , public Net_ConnectionBase_T<AddressType,
-                               ConfigurationType,
-                               StateType,
-                               StatisticContainerType,
-                               StatisticHandlerType,
-                               UserDataType>
+ , virtual public Net_ISocketConnection_T<AddressType,
+                                          ConfigurationType,
+                                          StateType,
+                                          StatisticContainerType,
+                                          SocketConfigurationType,
+                                          HandlerConfigurationType>
 {
+  typedef Net_NetlinkSocketHandler_T<HandlerConfigurationType> inherited;
+
   friend class ACE_Connector<Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                                                        AddressType,
                                                        ConfigurationType,
                                                        StateType,
                                                        StatisticContainerType,
-                                                       StatisticHandlerType,
+                                                       TimerManagerType,
+                                                       SocketConfigurationType,
                                                        HandlerConfigurationType,
-                                                       StreamType,
-                                                       UserDataType,
-                                                       ModuleConfigurationType,
-                                                       ModuleHandlerConfigurationType>,
+                                                       UserDataType>,
                              ACE_SOCK_CONNECTOR>;
 
  public:
   virtual ~Net_StreamUDPSocketBase_T ();
 
-  // override some task-based members
-  virtual int open (void* = NULL); // args
-  virtual int close (u_long = 0); // args (reason)
-
-  // *NOTE*: enqueue any received data onto our stream for further processing
+  // implement/override some ACE_Event_Handler methods
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
-  // *NOTE*: send any enqueued data back to the client...
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: this is called when:
   // - handle_xxx() returns -1
   virtual int handle_close (ACE_HANDLE,
                             ACE_Reactor_Mask);
 
-  // implement (part of) Net_IConnection_T
+  // implement (part of) Net_ISocketConnection_T
+  virtual void dump_state () const;
   virtual void info (ACE_HANDLE&,         // return value: handle
                      AddressType&,        // return value: local SAP
                      AddressType&) const; // return value: remote SAP
@@ -398,71 +288,31 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
   inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
 #endif
   inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); };
-  inline virtual const StreamType& stream () const { return stream_; };
   virtual void close ();
-  virtual void waitForCompletion (bool = true); // wait for any worker
-                                                // thread(s) ?
-
-  // *NOTE*: delegate these to the stream
-  virtual bool collect (StatisticContainerType&); // return value: statistic data
-  virtual void report () const;
-  virtual void dump_state () const;
-
-  // convenient types
-  typedef Net_ConnectionBase_T<AddressType,
-                               ConfigurationType,
-                               StateType,
-                               StatisticContainerType,
-                               StatisticHandlerType,
-                               UserDataType> CONNECTION_BASE_T;
+  virtual void waitForCompletion (bool = true); // wait for thread(s) ?
 
  protected:
-  typedef Net_IConnectionManager_T<AddressType,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
-  typedef Stream_IModule_T<Stream_SessionId_t,
-                           typename StreamType::SESSION_DATA_T,
-                           enum Stream_SessionMessageType,
-                           ACE_MT_SYNCH,
-                           Common_TimePolicy_t,
-                           ModuleConfigurationType,
-                           ModuleHandlerConfigurationType> IMODULE_T;
+  Net_StreamUDPSocketBase_T ();
 
-  Net_StreamUDPSocketBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
-                             const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
+  // override some ACE_Svc_Handler members
+  virtual int open (void* = NULL); // args
+  virtual int close (u_long = 0); // args (reason)
 
-  ACE_Message_Block* currentWriteBuffer_;
+  // helper method(s)
+#if defined (ACE_LINUX)
+  void processErrorQueue ();
+#endif
+
+  ACE_Message_Block* writeBuffer_;
   ACE_SYNCH_MUTEX    sendLock_;
   // *IMPORTANT NOTE*: in a threaded environment, workers may (!) dispatch the
   //                   reactor notification queue concurrently (most notably,
   //                   ACE_TP_Reactor) --> enforce proper serialization
   bool               serializeOutput_;
 
-  StreamType         stream_;
-
-  // helper method(s)
-  ACE_Message_Block* allocateMessage (unsigned int); // requested size
-  void processErrorQueue ();
-
  private:
-  typedef Net_NetlinkSocketHandler_T<HandlerConfigurationType> inherited;
-  typedef Net_ConnectionBase_T<AddressType,
-                               ConfigurationType,
-                               StateType,
-                               StatisticContainerType,
-                               StatisticHandlerType,
-                               UserDataType> inherited2;
-
-  // *TODO*: if there is no default ctor, MSVC will not compile this code.
-  //         For some reason, the compiler will not accept the overloaded
-  //         make_svc_handler() method of ACE_Connector/ACE_Acceptor
-  Net_StreamUDPSocketBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T (const Net_StreamUDPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamUDPSocketBase_T& operator= (const Net_StreamUDPSocketBase_T&))
-
-  bool               notify_; // still to notify the processing stream ?
 };
 #endif
 

@@ -31,6 +31,8 @@
 #include "ace/SSL/SSL_SOCK_Connector.h"
 #include "ace/SSL/SSL_SOCK_Stream.h"
 
+#include "common_timer_manager_common.h"
+
 #include "stream_common.h"
 
 #include "stream_module_io_stream.h"
@@ -87,7 +89,7 @@ typedef Stream_Configuration_T<//stream_name_string_,
 struct Test_I_URLStreamLoad_ConnectionConfiguration
  : Net_ConnectionConfiguration
 {
-  inline Test_I_URLStreamLoad_ConnectionConfiguration ()
+  Test_I_URLStreamLoad_ConnectionConfiguration ()
     : Net_ConnectionConfiguration ()
     , connectionManager (NULL)
     , socketHandlerConfiguration ()
@@ -130,7 +132,7 @@ typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct HTTP_SocketHandl
                                   struct Test_I_URLStreamLoad_ConnectionConfiguration,
                                   struct HTTP_ConnectionState,
                                   HTTP_Statistic_t,
-                                  HTTP_StatisticHandler_Reactor_t,
+                                  Common_Timer_Manager_t,
                                   Test_I_ConnectionStream,
                                   struct HTTP_Stream_UserData,
                                   struct Stream_ModuleConfiguration,
@@ -141,7 +143,7 @@ typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct HTTP_SocketHandl
                                   struct Test_I_URLStreamLoad_ConnectionConfiguration,
                                   struct HTTP_ConnectionState,
                                   HTTP_Statistic_t,
-                                  HTTP_StatisticHandler_Reactor_t,
+                                  Common_Timer_Manager_t,
                                   Test_I_ConnectionStream,
                                   struct HTTP_Stream_UserData,
                                   struct Stream_ModuleConfiguration,
@@ -151,7 +153,7 @@ typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<struct HTTP
                                         struct Test_I_URLStreamLoad_ConnectionConfiguration,
                                         struct HTTP_ConnectionState,
                                         HTTP_Statistic_t,
-                                        HTTP_StatisticHandler_Proactor_t,
+                                        Common_Timer_Manager_t,
                                         Test_I_ConnectionStream,
                                         struct HTTP_Stream_UserData,
                                         struct Stream_ModuleConfiguration,

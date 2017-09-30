@@ -29,6 +29,8 @@
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_timer_manager_common.h"
+
 #include "irc_common.h"
 #include "irc_network.h"
 
@@ -44,7 +46,7 @@ struct IRC_Client_ConnectionConfiguration;
 struct IRC_Client_SocketHandlerConfiguration
  : IRC_SocketHandlerConfiguration
 {
-  inline IRC_Client_SocketHandlerConfiguration ()
+  IRC_Client_SocketHandlerConfiguration ()
    : IRC_SocketHandlerConfiguration ()
    ///////////////////////////////////////
    , connectionConfiguration (NULL)
@@ -60,7 +62,7 @@ struct IRC_StreamConfiguration;
 struct IRC_Client_ConnectionConfiguration
  : IRC_ConnectionConfiguration
 {
-  inline IRC_Client_ConnectionConfiguration ()
+  IRC_Client_ConnectionConfiguration ()
    : IRC_ConnectionConfiguration ()
    ///////////////////////////////////////
    , cursesState (NULL)
@@ -88,7 +90,7 @@ typedef IRC_Client_ConnectionConfigurations_t::iterator IRC_Client_ConnectionCon
 struct IRC_Client_ConnectionState
  : IRC_ConnectionState
 {
-  inline IRC_Client_ConnectionState ()
+  IRC_Client_ConnectionState ()
    : IRC_ConnectionState ()
    , configuration (NULL)
    , controller (NULL)
@@ -105,7 +107,7 @@ struct IRC_Client_ConnectionState
 struct IRC_Client_SessionState
  : IRC_Client_ConnectionState
 {
-  inline IRC_Client_SessionState ()
+  IRC_Client_SessionState ()
    : IRC_Client_ConnectionState ()
    , away (false)
    , channel ()
@@ -132,7 +134,7 @@ typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct IRC_Client_Socke
                                   struct IRC_Client_ConnectionConfiguration,
                                   struct IRC_Client_SessionState,
                                   IRC_Statistic_t,
-                                  IRC_StatisticHandler_Reactor_t,
+                                  Common_Timer_Manager_t,
                                   IRC_Client_Stream_t,
                                   struct IRC_Client_UserData,
                                   struct Stream_ModuleConfiguration,
@@ -142,8 +144,8 @@ typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<struct IRC_
                                         struct IRC_Client_ConnectionConfiguration,
                                         struct IRC_Client_SessionState,
                                         IRC_Statistic_t,
-                                        IRC_StatisticHandler_Proactor_t,
-                                        IRC_Client_AsynchStream_t,
+                                        Common_Timer_Manager_t,
+                                        IRC_Client_Stream_t,
                                         struct IRC_Client_UserData,
                                         struct Stream_ModuleConfiguration,
                                         struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_AsynchTCPHandler_t;
@@ -161,7 +163,7 @@ typedef Net_AsynchTCPConnectionBase_T<IRC_Client_AsynchTCPHandler_t,
                                       IRC_Statistic_t,
                                       struct IRC_Client_SocketHandlerConfiguration,
                                       struct IRC_Client_ListenerConfiguration,
-                                      IRC_Client_AsynchStream_t,
+                                      IRC_Client_Stream_t,
                                       struct IRC_Client_UserData> IRC_Client_AsynchTCPConnection_t;
 
 //////////////////////////////////////////
@@ -207,7 +209,7 @@ typedef Net_Client_AsynchConnector_T<IRC_Client_AsynchTCPConnection_t,
                                      IRC_Statistic_t,
                                      struct Net_TCPSocketConfiguration,
                                      struct IRC_Client_SocketHandlerConfiguration,
-                                     IRC_Client_AsynchStream_t,
+                                     IRC_Client_Stream_t,
                                      struct IRC_Client_UserData> IRC_Client_AsynchConnector_t;
 
 //////////////////////////////////////////

@@ -38,14 +38,13 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::Net_AsynchTCPSocketHandler_T ()
  , inherited2 ()
  , inherited3 (NULL,                          // event handler handle
                ACE_Event_Handler::WRITE_MASK) // mask
- , allocator_ (NULL)
  , counter_ (0) // initial count
  , inputStream_ ()
  , outputStream_ ()
  , partialWrite_ (false)
  , PDUSize_ (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
  , localSAP_ ()
- , remoteSAP_ ()
+ , peerSAP_ ()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
  , writeHandle_ (ACE_INVALID_HANDLE)
@@ -118,7 +117,6 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
   } // end IF
 #endif
 
-  allocator_ = inherited::configuration_->connectionConfiguration->messageAllocator;
   PDUSize_ = inherited::configuration_->connectionConfiguration->PDUSize;
 
   // step1: tweak socket
@@ -302,29 +300,6 @@ close:
 }
 
 template <typename ConfigurationType>
-void
-Net_AsynchTCPSocketHandler_T<ConfigurationType>::addresses (const ACE_INET_Addr& remoteAddress_in,
-                                                            const ACE_INET_Addr& localAddress_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::addresses"));
-
-  localSAP_ = localAddress_in;
-  remoteSAP_ = remoteAddress_in;
-}
-
-//template <typename ConfigurationType>
-//void
-//Net_AsynchTCPSocketHandler_T<ConfigurationType>::act (const void* act_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::act"));
-//
-//  const ConfigurationType* configuration_p =
-//    reinterpret_cast<const ConfigurationType*> (act_in);
-//  ACE_ASSERT (configuration_p);
-//  inherited::initialize (*configuration_p);
-//}
-
-template <typename ConfigurationType>
 int
 Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle_in,
                                                                ACE_Reactor_Mask mask_in)
@@ -445,76 +420,6 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::notify (void)
   } // end IF
 
   return result;
-}
-template <typename ConfigurationType>
-int
-Net_AsynchTCPSocketHandler_T<ConfigurationType>::notify (ACE_Event_Handler* handler_in,
-                                                         ACE_Reactor_Mask mask_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::notify"));
-
-  ACE_UNUSED_ARG (handler_in);
-  ACE_UNUSED_ARG (mask_in);
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (-1);
-
-  ACE_NOTREACHED (return -1;)
-}
-
-template <typename ConfigurationType>
-ACE_Message_Block*
-Net_AsynchTCPSocketHandler_T<ConfigurationType>::allocateMessage (unsigned int requestedSize_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::allocateMessage"));
-
-  // initialize return value(s)
-  ACE_Message_Block* message_block_p = NULL;
-
-  if (likely (allocator_))
-  {
-allocate:
-    try {
-      message_block_p =
-        static_cast<ACE_Message_Block*> (allocator_->malloc (requestedSize_in));
-    } catch (...) {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Stream_IAllocator::malloc(0), aborting\n")));
-      return NULL;
-    }
-
-    // keep retrying ?
-    if (unlikely (!message_block_p &&
-                  !allocator_->block ()))
-      goto allocate;
-  } // end IF
-  else
-    ACE_NEW_NORETURN (message_block_p,
-                      ACE_Message_Block (requestedSize_in,
-                                         ACE_Message_Block::MB_DATA,
-                                         NULL,
-                                         NULL,
-                                         NULL,
-                                         NULL,
-                                         ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                                         ACE_Time_Value::zero,
-                                         ACE_Time_Value::max_time,
-                                         NULL,
-                                         NULL));
-  if (unlikely (!message_block_p))
-  {
-    if (allocator_)
-    {
-      if (allocator_->block ())
-        ACE_DEBUG ((LM_CRITICAL,
-                    ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-    } // end IF
-    else
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-  } // end IF
-
-  return message_block_p;
 }
 
 template <typename ConfigurationType>
@@ -661,9 +566,9 @@ continue_:
 
 template <typename ConfigurationType>
 bool
-Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read_stream ()
+Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::initiate_read_stream"));
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::initiate_read"));
 
   // allocate a data buffer
   ACE_Message_Block* message_block_p = allocateMessage (PDUSize_);

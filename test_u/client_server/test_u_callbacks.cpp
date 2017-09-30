@@ -312,7 +312,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
                              std::numeric_limits<double>::max ());
 
   // step3: initialize options
-  Test_U_Client_TimeoutHandler::ActionMode_t action_mode =
+  enum Test_U_Client_TimeoutHandler::ActionModeType action_mode =
     data_p->configuration->timeoutHandler->mode ();
   std::string radio_button_name;
   switch (action_mode)
@@ -1222,18 +1222,17 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   // schedule action interval timer ?
   if (data_p->configuration->signalHandlerConfiguration.actionTimerId == -1)
   {
-    ACE_Event_Handler* handler_p = data_p->configuration->timeoutHandler;
     ACE_Time_Value interval = ACE_Time_Value::max_time;
     switch (data_p->configuration->timeoutHandler->mode ())
     {
-      case Test_U_Client_TimeoutHandler::ActionMode_t::ACTION_ALTERNATING:
-      case Test_U_Client_TimeoutHandler::ActionMode_t::ACTION_NORMAL:
+      case Test_U_Client_TimeoutHandler::ActionModeType::ACTION_ALTERNATING:
+      case Test_U_Client_TimeoutHandler::ActionModeType::ACTION_NORMAL:
       {
         interval.set ((NET_CLIENT_DEF_SERVER_TEST_INTERVAL / 1000),
                       ((NET_CLIENT_DEF_SERVER_TEST_INTERVAL % 1000) * 1000));
         break;
       }
-      case Test_U_Client_TimeoutHandler::ActionMode_t::ACTION_STRESS:
+      case Test_U_Client_TimeoutHandler::ActionModeType::ACTION_STRESS:
       {
         interval.set ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL / 1000),
                       ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL % 1000) * 1000));
@@ -1248,10 +1247,10 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
       }
     } // end SWITCH
     data_p->configuration->signalHandlerConfiguration.actionTimerId =
-      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                  // event handler
-                                                                  NULL,                       // ACT
-                                                                  COMMON_TIME_NOW + interval, // first wakeup time
-                                                                  interval);                  // interval
+      COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (data_p->configuration->timeoutHandler, // event handler handle
+                                                                  NULL,                                  // asynchronous completion token
+                                                                  COMMON_TIME_NOW + interval,            // first wakeup time
+                                                                  interval);                             // interval
     if (data_p->configuration->signalHandlerConfiguration.actionTimerId == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1312,7 +1311,7 @@ radiobutton_mode_toggled_cb (GtkWidget* widget_in,
   if (!gtk_toggle_button_get_active (toggle_button_p))
     return FALSE;
 
-  Test_U_Client_TimeoutHandler::ActionMode_t mode =
+  enum Test_U_Client_TimeoutHandler::ActionModeType mode =
     Test_U_Client_TimeoutHandler::ACTION_INVALID;
   GtkButton* button_p = GTK_BUTTON (widget_in);
   ACE_ASSERT (button_p);

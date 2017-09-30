@@ -174,7 +174,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionID_in,
                       ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
       } // end IF
 
-      CBData_->progressData.statistic = (*iterator).second->currentStatistic;
+      CBData_->progressData.statistic = (*iterator).second->statistic;
 
       if ((*iterator).second->lock)
       {

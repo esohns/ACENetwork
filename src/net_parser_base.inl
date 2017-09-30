@@ -707,7 +707,7 @@ Net_ParserBase_T<ConfigurationType,
 
   bool result = false;
   try {
-    result = this->initialize (state_);
+    result = this->initialize (state_, NULL);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_ILexScanner_T::initialize(): \"%m\", continuing\n")));

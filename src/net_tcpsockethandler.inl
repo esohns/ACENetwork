@@ -29,10 +29,12 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-template <typename ConfigurationType,
-          typename StreamType>
-Net_TCPSocketHandler_T<ConfigurationType,
-                       StreamType>::Net_TCPSocketHandler_T ()//MANAGER_T* manager_in)
+template <ACE_SYNCH_DECL,
+          typename StreamType,
+          typename ConfigurationType>
+Net_TCPSocketHandler_T<ACE_SYNCH_USE,
+                       StreamType,
+                       ConfigurationType>::Net_TCPSocketHandler_T ()//MANAGER_T* manager_in)
  : inherited ()
  , inherited2 (NULL,                     // thread manager
                NULL,                     // message queue
@@ -43,26 +45,6 @@ Net_TCPSocketHandler_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::Net_TCPSocketHandler_T"));
 
-}
-
-template <typename ConfigurationType,
-          typename StreamType>
-Net_TCPSocketHandler_T<ConfigurationType,
-                       StreamType>::~Net_TCPSocketHandler_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::~Net_TCPSocketHandler_T"));
-
-  //int result = -1;
-
-  //// need to close the socket (see handle_close() below) ?
-  //if (inherited2::reference_counting_policy ().value () ==
-  //    ACE_Event_Handler::Reference_Counting_Policy::ENABLED)
-  //{
-  //  result = inherited2::peer_.close ();
-  //  if (result == -1)
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to ACE_SOCK_IO::close(): \"%m\", continuing\n")));
-  //} // end IF
 }
 
 //ACE_Event_Handler::Reference_Count
@@ -89,11 +71,13 @@ Net_TCPSocketHandler_T<ConfigurationType,
 //  return 0;
 //}
 
-template <typename ConfigurationType,
-          typename StreamType>
+template <ACE_SYNCH_DECL,
+          typename StreamType,
+          typename ConfigurationType>
 int
-Net_TCPSocketHandler_T<ConfigurationType,
-                       StreamType>::open (void* arg_in)
+Net_TCPSocketHandler_T<ACE_SYNCH_USE,
+                       StreamType,
+                       ConfigurationType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::open"));
 
@@ -220,12 +204,14 @@ Net_TCPSocketHandler_T<ConfigurationType,
   return result;
 }
 
-template <typename ConfigurationType,
-          typename StreamType>
+template <ACE_SYNCH_DECL,
+          typename StreamType,
+          typename ConfigurationType>
 int
-Net_TCPSocketHandler_T<ConfigurationType,
-                       StreamType>::handle_close (ACE_HANDLE handle_in,
-                                                  ACE_Reactor_Mask mask_in)
+Net_TCPSocketHandler_T<ACE_SYNCH_USE,
+                       StreamType,
+                       ConfigurationType>::handle_close (ACE_HANDLE handle_in,
+                                                         ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::handle_close"));
 
@@ -335,9 +321,11 @@ Net_TCPSocketHandler_T<ConfigurationType,
 
 //////////////////////////////////////////
 
-template <typename ConfigurationType>
-Net_TCPSocketHandler_T<ConfigurationType,
-                       ACE_SSL_SOCK_Stream>::Net_TCPSocketHandler_T ()//MANAGER_T* manager_in)
+template <ACE_SYNCH_DECL,
+          typename ConfigurationType>
+Net_TCPSocketHandler_T<ACE_SYNCH_USE,
+                       ACE_SSL_SOCK_Stream,
+                       ConfigurationType>::Net_TCPSocketHandler_T ()//MANAGER_T* manager_in)
  : inherited ()
  , inherited2 (NULL,                     // thread manager
                NULL,                     // message queue
@@ -348,25 +336,6 @@ Net_TCPSocketHandler_T<ConfigurationType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::Net_TCPSocketHandler_T"));
 
-}
-
-template <typename ConfigurationType>
-Net_TCPSocketHandler_T<ConfigurationType,
-                       ACE_SSL_SOCK_Stream>::~Net_TCPSocketHandler_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::~Net_TCPSocketHandler_T"));
-
-  //int result = -1;
-
-  //// need to close the socket (see handle_close() below) ?
-  //if (inherited2::reference_counting_policy ().value () ==
-  //    ACE_Event_Handler::Reference_Counting_Policy::ENABLED)
-  //{
-  //  result = inherited2::peer_.close ();
-  //  if (result == -1)
-  //    ACE_DEBUG ((LM_ERROR,
-  //                ACE_TEXT ("failed to ACE_SOCK_IO::close(): \"%m\", continuing\n")));
-  //} // end IF
 }
 
 //ACE_Event_Handler::Reference_Count
@@ -393,10 +362,12 @@ Net_TCPSocketHandler_T<ConfigurationType,
 //  return 0;
 //}
 
-template <typename ConfigurationType>
+template <ACE_SYNCH_DECL,
+          typename ConfigurationType>
 int
-Net_TCPSocketHandler_T<ConfigurationType,
-                       ACE_SSL_SOCK_Stream>::open (void* arg_in)
+Net_TCPSocketHandler_T<ACE_SYNCH_USE,
+                       ACE_SSL_SOCK_Stream,
+                       ConfigurationType>::open (void* arg_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::open"));
 
@@ -533,11 +504,13 @@ Net_TCPSocketHandler_T<ConfigurationType,
   return result;
 }
 
-template <typename ConfigurationType>
+template <ACE_SYNCH_DECL,
+          typename ConfigurationType>
 int
-Net_TCPSocketHandler_T<ConfigurationType,
-                       ACE_SSL_SOCK_Stream>::handle_close (ACE_HANDLE handle_in,
-                                                           ACE_Reactor_Mask mask_in)
+Net_TCPSocketHandler_T<ACE_SYNCH_USE,
+                       ACE_SSL_SOCK_Stream,
+                       ConfigurationType>::handle_close (ACE_HANDLE handle_in,
+                                                         ACE_Reactor_Mask mask_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::handle_close"));
 

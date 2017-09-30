@@ -25,26 +25,25 @@
 #include "ace/Synch_Traits.h"
 
 #include "common_itask.h"
-//#include "common_itaskcontrol.h"
 
 class Net_Controller_Base
- //: public Common_ITaskControl
- : public Common_ITaskControl_T<ACE_MT_SYNCH>
+ : public Common_ITask_T<ACE_MT_SYNCH,
+                         Common_ILock_T<ACE_MT_SYNCH> >
 {
+  typedef Common_ITask_T<ACE_MT_SYNCH,
+                         Common_ILock_T<ACE_MT_SYNCH> > inherited;
+
  public:
   Net_Controller_Base ();
   virtual ~Net_Controller_Base ();
 
-  // implement Common_IControl
+  // implement Common_ITask_T
   virtual void start ();
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
   virtual bool isRunning () const;
 
  private:
-  //typedef Common_ITaskControl inherited;
-  typedef Common_ITaskControl_T<ACE_MT_SYNCH> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Net_Controller_Base (const Net_Controller_Base&));
   ACE_UNIMPLEMENTED_FUNC (Net_Controller_Base& operator= (const Net_Controller_Base&));
 };

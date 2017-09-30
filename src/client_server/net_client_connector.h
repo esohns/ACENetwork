@@ -26,6 +26,8 @@
 #include "ace/INET_Addr.h"
 #include "ace/Time_Value.h"
 
+#include "common_timer_manager_common.h"
+
 #include "stream_statemachine_control.h"
 
 #include "net_common.h"
@@ -34,7 +36,8 @@
 #include "net_iconnector.h"
 #include "net_udpconnection_base.h"
 
-template <typename HandlerType,
+template <ACE_SYNCH_DECL, // 'send' lock strategy
+          typename HandlerType, // implements Net_ConnectionBase_T
           typename ConnectorType, // ACE_SOCK_CONNECTOR
           ////////////////////////////////
           typename AddressType,
@@ -112,7 +115,8 @@ class Net_Client_Connector_T
 
  private:
   // convenient types
-  typedef Net_Client_Connector_T<HandlerType,
+  typedef Net_Client_Connector_T<ACE_SYNCH_USE,
+                                 HandlerType,
                                  ConnectorType,
                                  AddressType,
                                  ConfigurationType,
@@ -137,7 +141,8 @@ class Net_Client_Connector_T
 //////////////////////////////////////////
 
 // (partial) specializations (for UDP)
-template <typename HandlerType,
+template <ACE_SYNCH_DECL, // 'send' lock strategy
+          typename HandlerType, // implements Net_ConnectionBase_T
           typename ConnectorType, // ACE_SOCK_CONNECTOR
           ////////////////////////////////
           typename ConfigurationType, // connection-
@@ -149,12 +154,15 @@ template <typename HandlerType,
           typename StreamType,
           ////////////////////////////////
           typename UserDataType>
-class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
+class Net_Client_Connector_T<ACE_SYNCH_USE,
+                             Net_UDPConnectionBase_T<ACE_SYNCH_USE,
+                                                     HandlerType,
                                                      ConfigurationType,
                                                      StateType,
                                                      StatisticContainerType,
                                                      HandlerConfigurationType,
                                                      StreamType,
+                                                     Common_Timer_Manager_t,
                                                      UserDataType>,
                              ConnectorType,
                              ACE_INET_Addr,
@@ -176,12 +184,14 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
-  typedef Net_UDPConnectionBase_T<HandlerType,
+  typedef Net_UDPConnectionBase_T<ACE_SYNCH_USE,
+                                  HandlerType,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,
                                   HandlerConfigurationType,
                                   StreamType,
+                                  Common_Timer_Manager_t,
                                   UserDataType> CONNECTION_T;
   typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                   ConfigurationType,
@@ -246,12 +256,15 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 
  private:
   // convenient types
-  typedef Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
+  typedef Net_Client_Connector_T<ACE_SYNCH_USE,
+                                 Net_UDPConnectionBase_T<ACE_SYNCH_USE,
+                                                         HandlerType,
                                                          ConfigurationType,
                                                          StateType,
                                                          StatisticContainerType,
                                                          HandlerConfigurationType,
                                                          StreamType,
+                                                         Common_Timer_Manager_t,
                                                          UserDataType>,
                                  ConnectorType,
                                  ACE_INET_Addr,
@@ -280,7 +293,8 @@ class Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 
 #if defined (ACE_HAS_NETLINK)
 // partial specialization (for Netlink)
-template <typename HandlerType,
+template <ACE_SYNCH_DECL, // 'send' lock strategy
+          typename HandlerType, // implements Net_ConnectionBase_T
           typename ConnectorType, // ACE_SOCK_CONNECTOR
           ////////////////////////////////
           typename ConfigurationType, // connection-
@@ -292,7 +306,8 @@ template <typename HandlerType,
           typename StreamType,
           ////////////////////////////////
           typename UserDataType>
-class Net_Client_Connector_T<HandlerType,
+class Net_Client_Connector_T<ACE_SYNCH_USE,
+                             HandlerType,
                              ConnectorType,
                              Net_Netlink_Addr,
                              ConfigurationType,

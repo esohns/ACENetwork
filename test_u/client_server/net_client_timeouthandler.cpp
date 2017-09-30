@@ -34,12 +34,12 @@
 #include "test_u_defines.h"
 #include "test_u_sessionmessage.h"
 
-Test_U_Client_TimeoutHandler::Test_U_Client_TimeoutHandler (ActionMode_t mode_in,
+Test_U_Client_TimeoutHandler::Test_U_Client_TimeoutHandler (enum ActionModeType mode_in,
                                                             unsigned int maximumNumberOfConnections_in,
                                                             const ACE_INET_Addr& remoteSAP_in,
                                                             Test_U_IConnector_t* connector_in)
- : inherited (NULL,                           // default reactor
-              ACE_Event_Handler::LO_PRIORITY) // priority
+ : inherited (this,  // dispatch interface
+              false) // invoke only once ?
  , alternatingModeState_ (ALTERNATING_STATE_CONNECT)
  , connector_ (connector_in)
  , lock_ ()
@@ -77,54 +77,41 @@ Test_U_Client_TimeoutHandler::Test_U_Client_TimeoutHandler (ActionMode_t mode_in
   randomGenerator_ = std::bind (randomDistribution_, randomEngine_);
 }
 
-Test_U_Client_TimeoutHandler::~Test_U_Client_TimeoutHandler ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_TimeoutHandler::~Test_U_Client_TimeoutHandler"));
-
-}
-
 void
-Test_U_Client_TimeoutHandler::mode (ActionMode_t mode_in)
+Test_U_Client_TimeoutHandler::mode (enum ActionModeType mode_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Client_TimeoutHandler::mode"));
 
   ACE_ASSERT (mode_in < ACTION_MAX);
 
-  {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     mode_ = mode_in;
   } // end lock scope
 }
 
-Test_U_Client_TimeoutHandler::ActionMode_t
+enum Test_U_Client_TimeoutHandler::ActionModeType
 Test_U_Client_TimeoutHandler::mode () const
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Client_TimeoutHandler::mode"));
 
   // initialize return value(s)
-  ActionMode_t result = ACTION_INVALID;
+  enum ActionModeType result = ACTION_INVALID;
 
-  {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, ACTION_INVALID);
     result = mode_;
   } // end lock scope
 
   return result;
 }
 
-int
-Test_U_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
-                                              const void* arg_in)
+void
+Test_U_Client_TimeoutHandler::handle (const void* arg_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_TimeoutHandler::handle_timeout"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_TimeoutHandler::handle"));
 
-  int result = -1;
-
-  ACE_UNUSED_ARG (tv_in);
   ACE_UNUSED_ARG (arg_in);
 
+  int result = -1;
   int index = 0;
   Test_U_InetConnectionManager_t::CONNECTION_T* abort_connection_p = NULL;
   Test_U_InetConnectionManager_t::CONNECTION_T* ping_connection_p = NULL;
@@ -149,7 +136,7 @@ Test_U_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         if (number_of_connections == 0)
         {
           connection_manager_p->unlock ();
-          return 0;
+          return;
         } // end IF
 
         // grab a (random) connection handler
@@ -176,13 +163,13 @@ Test_U_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         if (!ping_connection_p)
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to retrieve connection #%d/%d, aborting\n"),
+                      ACE_TEXT ("failed to retrieve connection #%d/%d, returning\n"),
                       index, number_of_connections));
 
           // clean up
           connection_manager_p->unlock ();
 
-          return -1;
+          return;
         } // end IF
 
         do_ping = true;
@@ -235,13 +222,13 @@ Test_U_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
             if (!abort_connection_p)
             {
               ACE_DEBUG ((LM_ERROR,
-                          ACE_TEXT ("failed to retrieve connection #%d/%d, aborting\n"),
+                          ACE_TEXT ("failed to retrieve connection #%d/%d, returning\n"),
                           index, number_of_connections));
 
               // clean up
               connection_manager_p->unlock ();
 
-              return -1;
+              return;
             } // end IF
 
             do_abort = true;
@@ -251,20 +238,20 @@ Test_U_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
           default:
           {
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("unknown/invalid alternating state (was: %d), aborting\n"),
+                        ACE_TEXT ("unknown/invalid alternating state (was: %d), returning\n"),
                         alternatingModeState_));
 
             // clean up
             connection_manager_p->unlock ();
 
-            return -1;
+            return;
           }
         } // end SWITCH
 
         // cycle mode
         int temp = alternatingModeState_;
         alternatingModeState_ =
-          static_cast<Test_U_Client_TimeoutHandler::AlternatingModeState_t> (++temp);
+          static_cast<enum Test_U_Client_TimeoutHandler::AlternatingModeStateType> (++temp);
         if (alternatingModeState_ == ALTERNATING_STATE_MAX)
           alternatingModeState_ = ALTERNATING_STATE_CONNECT;
 
@@ -304,12 +291,12 @@ Test_U_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         if (result == -1)
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ::random_r(): \"%s\", aborting\n")));
+                      ACE_TEXT ("failed to ::random_r(): \"%s\", returning\n")));
 
           // clean up
           TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
 
-          return -1;
+          return;
         } // end IF
         index = (index % number_of_connections);
 #endif
@@ -317,13 +304,13 @@ Test_U_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
         if (!ping_connection_p)
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to retrieve connection #%d/%d, aborting\n"),
+                      ACE_TEXT ("failed to retrieve connection #%d/%d, returning\n"),
                       index, number_of_connections));
 
           // clean up
           connection_manager_p->unlock ();
 
-          return -1;
+          return;
         } // end IF
 
         do_ping = true;
@@ -333,13 +320,13 @@ Test_U_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
       default:
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("unknown/invalid mode (was: %d), aborting\n"),
+                    ACE_TEXT ("unknown/invalid mode (was: %d), returning\n"),
                     mode_));
 
         // clean up
         connection_manager_p->unlock ();
 
-        return -1;
+        return;
       }
     } // end SWITCH
   } // end lock scope
@@ -354,14 +341,14 @@ Test_U_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
       abort_connection_p->close ();
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection_T::close(), aborting\n")));
+                  ACE_TEXT ("caught exception in Net_IConnection_T::close(), returning\n")));
 
       // clean up
       abort_connection_p->decrease ();
       if (ping_connection_p)
         ping_connection_p->decrease ();
 
-      return -1;
+      return;
     }
 
     // clean up
@@ -382,13 +369,13 @@ Test_U_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
       handle = connector_->connect (peerAddress_);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_Client_IConnector_t::connect(), aborting\n")));
+                  ACE_TEXT ("caught exception in Net_Client_IConnector_t::connect(), returning\n")));
 
       // clean up
       if (ping_connection_p)
         ping_connection_p->decrease ();
 
-      return -1;
+      return;
     }
     if (handle == ACE_INVALID_HANDLE)
       ACE_DEBUG ((LM_ERROR,
@@ -403,30 +390,28 @@ Test_U_Client_TimeoutHandler::handle_timeout (const ACE_Time_Value& tv_in,
     if (!iping_p)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to dynamic_cast<Net_IPing>(0x%@), aborting\n"),
+                  ACE_TEXT ("failed to dynamic_cast<Net_IPing>(0x%@), returning\n"),
                   ping_connection_p));
 
       // clean up
       ping_connection_p->decrease ();
 
-      return -1;
+      return;
     } // end IF
 
     try {
       iping_p->ping ();
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IPing::ping(), aborting\n")));
+                  ACE_TEXT ("caught exception in Net_IPing::ping(), returning\n")));
 
       // clean up
       ping_connection_p->decrease ();
 
-      return -1;
+      return;
     }
 
     // clean up
     ping_connection_p->decrease ();
   } // end IF
-
-  return 0;
 }

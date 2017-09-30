@@ -32,43 +32,41 @@
 
 #include "net_sockethandler_base.h"
 
-// forward declarations
-class Stream_IAllocator;
-
 template <typename ConfigurationType>
 class Net_AsynchTCPSocketHandler_T
- : public Net_SocketHandlerBase_T<ConfigurationType>
- , public ACE_Service_Handler
+ : public Net_AsynchSocketHandlerBase_T<ConfigurationType>
+ , public ACE_Service_Handler // implements ACE_Handler
  , public ACE_Notification_Strategy
 {
+  typedef Net_AsynchSocketHandlerBase_T<ConfigurationType> inherited;
+  typedef ACE_Service_Handler inherited2;
+  typedef ACE_Notification_Strategy inherited3;
+
  public:
   virtual ~Net_AsynchTCPSocketHandler_T ();
 
-  // override some ACE_Service_Handler methods
+  // override (part of) ACE_Service_Handler
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
-  virtual void addresses (const ACE_INET_Addr&,  // remote address
-                          const ACE_INET_Addr&); // local address
-  //virtual void act (const void*); // act
+  inline virtual void addresses (const ACE_INET_Addr& peerAddress_in, const ACE_INET_Addr& localAddress_in) { peerSAP_ = peerAddress_in; localSAP_ = localAddress_in; };
 
-  virtual int handle_output (ACE_HANDLE) = 0; // (socket) handle
+  // implement (part of) Net_IAsynchSocketHandler
   // *NOTE*: this cancels all outstanding asynchronous operations
   virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
-  // implement ACE_Notification_Strategy
-  virtual int notify (void);
-
  protected:
+  // convenient types
+  typedef Net_AsynchSocketHandlerBase_T<ConfigurationType> SOCKETHANDLER_BASE_T;
+
   Net_AsynchTCPSocketHandler_T ();
 
   // override some ACE_Handler methods
   virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
 
-  // helper method(s)
-  bool initiate_read_stream ();
+  // implement (part of) Net_IAsynchSocketHandler
+  virtual bool initiate_read ();
 
-  Stream_IAllocator*                  allocator_;
   // the number of open write (i.e. send) requests
   mutable Common_ReferenceCounterBase counter_;
   ACE_Asynch_Read_Stream              inputStream_;
@@ -76,26 +74,19 @@ class Net_AsynchTCPSocketHandler_T
   bool                                partialWrite_;
   unsigned int                        PDUSize_;
   ACE_INET_Addr                       localSAP_;
-  ACE_INET_Addr                       remoteSAP_;
+  ACE_INET_Addr                       peerSAP_;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   ACE_HANDLE                          writeHandle_;
 #endif
 
  private:
-  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
-  typedef ACE_Service_Handler inherited2;
-  typedef ACE_Notification_Strategy inherited3;
-
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPSocketHandler_T (const Net_AsynchTCPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchTCPSocketHandler_T& operator= (const Net_AsynchTCPSocketHandler_T&))
 
-  // implement ACE_Notification_Strategy
-  virtual int notify (ACE_Event_Handler*, // event handler handle
-                      ACE_Reactor_Mask);  // mask
-
-  // helper method(s)
-  ACE_Message_Block* allocateMessage (unsigned int); // requested size
+  // implement/hide ACE_Notification_Strategy
+  virtual int notify (void);
+  inline virtual int notify (ACE_Event_Handler*, ACE_Reactor_Mask) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) };
 };
 
 // include template definition

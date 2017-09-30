@@ -36,62 +36,71 @@
 // forward declarations
 class Stream_IAllocator;
 
-template <typename ConfigurationType>
+template <typename SocketType, // implements ACE_SOCK
+          typename ConfigurationType>
 class Net_AsynchUDPSocketHandler_T
- : public Net_SocketHandlerBase_T<ConfigurationType>
+ : public Net_AsynchSocketHandlerBase_T<ConfigurationType>
+ , public SocketType
  , public ACE_Service_Handler
  , public ACE_Notification_Strategy
+ // *NOTE*: use this to modify the source/target address after initialization
  , public Common_IReset
 {
+  typedef Net_AsynchSocketHandlerBase_T<ConfigurationType> inherited;
+  typedef SocketType inherited2;
+  typedef ACE_Service_Handler inherited3;
+  typedef ACE_Notification_Strategy inherited4;
+
  public:
   virtual ~Net_AsynchUDPSocketHandler_T ();
 
-  // override some handler method(s)
+  // override (part of) ACE_Service_Handler
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
-  virtual void addresses (const ACE_INET_Addr&,  // remote address
-                          const ACE_INET_Addr&); // local address
-  virtual void handle_wakeup ();
+  inline virtual void addresses (const ACE_INET_Addr& peerSap_in, const ACE_INET_Addr& localSAP_in) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual ACE_HANDLE handle (void) const { return SocketType::get_handle (); };
+  inline virtual void handle (ACE_HANDLE handle_in) { inherited3::handle (handle_in); };
 
-  // implement ACE_Notification_Strategy
-  virtual int notify (void);
-  virtual int notify (ACE_Event_Handler*, // event handler handle
-                      ACE_Reactor_Mask);  // mask
+  // implement (part of) Net_IAsynchSocketHandler
+  // *NOTE*: this cancels all outstanding asynchronous operations
+  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
+                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
  protected:
-  Net_AsynchUDPSocketHandler_T ();
-
   // convenient types
+  typedef SocketType SOCKET_T;
   typedef ACE_Service_Handler SVC_HANDLER_T;
 
-  // helper method(s)
-  bool initiate_read_dgram ();
-  virtual int handle_close (ACE_HANDLE handle_in,                                           // (socket) handle
-                            ACE_Reactor_Mask mask_in = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
-  virtual int handle_output (ACE_HANDLE) = 0; // (socket) handle
+  Net_AsynchUDPSocketHandler_T ();
 
+  // override (part of) ACE_Service_Handler
   virtual void handle_write_dgram (const ACE_Asynch_Write_Dgram::Result&); // result
 
+  // implement (part of) Net_IAsynchSocketHandler
+  virtual bool initiate_read ();
+
   ACE_INET_Addr               address_;
-  Stream_IAllocator*          allocator_;
-  //ACE_Message_Block*          buffer_;
   // the number of open write (i.e. send) requests
   Common_ReferenceCounterBase counter_;
+#if defined (ACE_LINUX)
+  bool                        errorQueue_;
+#endif
   ACE_Asynch_Read_Dgram       inputStream_;
   ACE_Asynch_Write_Dgram      outputStream_;
   unsigned int                PDUSize_;
-  bool                        writeOnly_;
+  // *NOTE*: used for read-write connections (i.e. NET_ROLE_CLIENT) only
+  ACE_HANDLE                  writeHandle_;
 
  private:
-  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
-  typedef ACE_Service_Handler inherited2;
-  typedef ACE_Notification_Strategy inherited3;
-
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler_T (const Net_AsynchUDPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler_T& operator= (const Net_AsynchUDPSocketHandler_T&))
 
-  // helper method(s)
-  ACE_Message_Block* allocateMessage (unsigned int); // requested size
+  // override/hide (part of) ACE_Service_Handler
+  virtual void handle_wakeup ();
+
+  // implement/hide ACE_Notification_Strategy
+  virtual int notify (void);
+  inline virtual int notify (ACE_Event_Handler*, ACE_Reactor_Mask) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) };
 };
 
 // include template definiton

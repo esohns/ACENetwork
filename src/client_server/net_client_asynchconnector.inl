@@ -678,6 +678,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                                            StatisticContainerType,
                                                            HandlerConfigurationType,
                                                            StreamType,
+                                                           Common_Timer_Manager_t,
                                                            UserDataType>,
                              ACE_INET_Addr,
                              ConfigurationType,
@@ -723,6 +724,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                                            StatisticContainerType,
                                                            HandlerConfigurationType,
                                                            StreamType,
+                                                           Common_Timer_Manager_t,
                                                            UserDataType>,
                              ACE_INET_Addr,
                              ConfigurationType,
@@ -787,6 +789,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                                            StatisticContainerType,
                                                            HandlerConfigurationType,
                                                            StreamType,
+                                                           Common_Timer_Manager_t,
                                                            UserDataType>,
                              ACE_INET_Addr,
                              ConfigurationType,
@@ -812,15 +815,14 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
   ACE_ASSERT (handler_p);
 
   // pre-initialize the connection handler
-  // *TODO*: remove type inference
-  handler_p->set (Net_Common_Tools::isLocal (address_in) ? NET_ROLE_SERVER
-                                                         : NET_ROLE_CLIENT);
+  handler_p->set (Net_Common_Tools::isLocal (address_in) ? NET_ROLE_CLIENT
+                                                         : NET_ROLE_SERVER);
 
   ICONNECTOR_T* iconnector_p = this;
   const void* act_p = iconnector_p;
   handler_p->act (act_p);
 
-  // *NOTE*: the handler registers with the reactor and will be freed (or
+  // *NOTE*: the handler registers with the proactor and will be freed (or
   //         recycled) automatically
   ACE_Message_Block message_block;
   handler_p->open (ACE_INVALID_HANDLE,
@@ -842,6 +844,7 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
                               StatisticContainerType,
                               HandlerConfigurationType,
                               StreamType,
+                              Common_Timer_Manager_t,
                               UserDataType>*
 Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                                            ConfigurationType,
@@ -849,6 +852,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                                            StatisticContainerType,
                                                            HandlerConfigurationType,
                                                            StreamType,
+                                                           Common_Timer_Manager_t,
                                                            UserDataType>,
                              ACE_INET_Addr,
                              ConfigurationType,

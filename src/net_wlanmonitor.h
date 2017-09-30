@@ -41,7 +41,7 @@
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 
-#include "common_iinitialize.h"
+#include "common_ilock.h"
 #include "common_task_base.h"
 
 #include "stream_messagequeue.h"
@@ -70,10 +70,15 @@ template <ACE_SYNCH_DECL,
           typename UserDataType>
 class Net_WLANMonitor_T
  : public Common_TaskBase_T<ACE_SYNCH_USE,
-                            TimePolicyType>
+                            TimePolicyType,
+                            Common_ILock_T<ACE_SYNCH_USE> >
  , public Net_IWLANMonitor_T<AddressType,
                              ConfigurationType>
 {
+  typedef Common_TaskBase_T<ACE_SYNCH_USE,
+                            TimePolicyType,
+                            Common_ILock_T<ACE_SYNCH_USE> > inherited;
+
   // singleton has access to the ctor/dtors
   friend class ACE_Singleton<Net_WLANMonitor_T<ACE_SYNCH_USE,
                                                TimePolicyType,
@@ -90,15 +95,14 @@ class Net_WLANMonitor_T
 
   virtual ~Net_WLANMonitor_T ();
 
-  // override (part of) Common_ITask_T
+  // override (part of) Common_ITaskControl_T
   virtual void start ();
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
   inline bool isRunning () const { return isActive_; };
-  inline void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   // implement Net_IWLANMonitor_T
-  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; };
+  inline virtual const ConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); return *configuration_; };
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   virtual const std::string& get1R (const std::string&) const;
@@ -169,8 +173,7 @@ class Net_WLANMonitor_T
   UserDataType*                           userData_;
 
  private:
-  typedef Common_TaskBase_T<ACE_SYNCH_USE,
-                            TimePolicyType> inherited;
+  // comvenient types
   typedef Stream_MessageQueue_T<ACE_SYNCH_USE,
                                 TimePolicyType,
                                 ACE_Message_Block> MESSAGEQUEUE_T;
@@ -214,6 +217,13 @@ class Net_WLANMonitor_T
   // override some ACE_Task_Base methods
   virtual int svc (void);
 #endif
+
+  // hide/override (part of) Common_TaskBase_T
+  using inherited::lock;
+  using inherited::unlock;
+  using inherited::getR;
+  inline void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline void wait () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   // helper functions
   DEVICEIDENTIFIERS_T getDevices () const;

@@ -32,6 +32,7 @@
 #include <sstream>
 
 #include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
 #include "common_defines.h"
 #include "common_tools.h"

@@ -35,7 +35,8 @@
 #include "net_streamconnection_base.h"
 #include "net_transportlayer_udp.h"
 
-template <typename HandlerType,
+template <ACE_SYNCH_DECL, // 'send' lock strategy
+          typename HandlerType, // implements Net_UDPSocketHandler_T
           ////////////////////////////////
           typename ConfigurationType,
           typename StateType,
@@ -45,9 +46,12 @@ template <typename HandlerType,
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
+          typename TimerManagerType, // implements Common_ITimer
+          ////////////////////////////////
           typename UserDataType>
 class Net_UDPConnectionBase_T
- : public Net_StreamConnectionBase_T<HandlerType,
+ : public Net_StreamConnectionBase_T<ACE_SYNCH_USE,
+                                     HandlerType,
                                      ACE_INET_Addr,
                                      ConfigurationType,
                                      StateType,
@@ -57,20 +61,40 @@ class Net_UDPConnectionBase_T
                                      struct Net_ListenerConfiguration,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
+                                     TimerManagerType,
                                      UserDataType>
  , public Net_TransportLayer_UDP
 {
-  friend class ACE_Connector<Net_UDPConnectionBase_T<HandlerType,
+  typedef Net_StreamConnectionBase_T<ACE_SYNCH_USE,
+                                     HandlerType,
+                                     ACE_INET_Addr,
+                                     ConfigurationType,
+                                     StateType,
+                                     StatisticContainerType,
+                                     struct Net_UDPSocketConfiguration,
+                                     HandlerConfigurationType,
+                                     struct Net_ListenerConfiguration,
+                                     StreamType,
+                                     enum Stream_StateMachine_ControlState,
+                                     TimerManagerType,
+                                     UserDataType> inherited;
+  typedef Net_TransportLayer_UDP inherited2;
+
+  friend class ACE_Connector<Net_UDPConnectionBase_T<ACE_SYNCH_USE,
+                                                     HandlerType,
                                                      ConfigurationType,
                                                      StateType,
                                                      StatisticContainerType,
                                                      HandlerConfigurationType,
                                                      StreamType,
+                                                     TimerManagerType,
                                                      UserDataType>,
                              ACE_SOCK_CONNECTOR>;
 
  public:
-  typedef Net_StreamConnectionBase_T<HandlerType,
+  // convenient types
+  typedef Net_StreamConnectionBase_T<ACE_SYNCH_USE,
+                                     HandlerType,
                                      ACE_INET_Addr,
                                      ConfigurationType,
                                      StateType,
@@ -80,8 +104,8 @@ class Net_UDPConnectionBase_T
                                      struct Net_ListenerConfiguration,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
+                                     TimerManagerType,
                                      UserDataType> STREAM_CONNECTION_BASE_T;
-
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
@@ -90,42 +114,18 @@ class Net_UDPConnectionBase_T
 
   Net_UDPConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
                            const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  virtual ~Net_UDPConnectionBase_T ();
+  inline virtual ~Net_UDPConnectionBase_T () {};
 
-  // override / implement (part of) Net_IInetTransportLayer
-  //typedef Net_ConnectionBase_T<ACE_INET_Addr,
-  //                             Net_Configuration,
-  //                             StateType,
-  //                             Stream_Statistic,
-  //                             Net_Stream,
-  //                             //////////
-  //                             UserDataType> CONNECTION_BASE_T;
-  //using CONNECTION_BASE_T::get;
+  // override some ACE_Event_Handler methods
+  // *NOTE*: stream any received data for further processing
+  virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
+  // *NOTE*: send stream data to the peer
+  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
 
-  //using Net_SocketConnectionBase_T::inherited::Net_ConnectionBase_T::initialize;
-  //using Net_SocketConnectionBase_T::inherited::Net_ConnectionBase_T::finalize;
-//  using Net_SocketConnectionBase_T::info;
-  //virtual void info (ACE_HANDLE&,           // return value: handle
-  //                   ACE_INET_Addr&,        // return value: local SAP
-  //                   ACE_INET_Addr&) const; // return value: remote SAP
-
-  //// override / implement (part of) Net_IConnection_T
-  //virtual int close (u_long = 0); // reason
+  // implement Common_IReset
+  virtual void reset ();
 
  private:
-  typedef Net_StreamConnectionBase_T<HandlerType,
-                                     ACE_INET_Addr,
-                                     ConfigurationType,
-                                     StateType,
-                                     StatisticContainerType,
-                                     struct Net_UDPSocketConfiguration,
-                                     HandlerConfigurationType,
-                                     struct Net_ListenerConfiguration,
-                                     StreamType,
-                                     enum Stream_StateMachine_ControlState,
-                                     UserDataType> inherited;
-  typedef Net_TransportLayer_UDP inherited2;
-
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
   //         For some reason, the compiler will not accept the overloaded
   //         make_svc_handler() method of ACE_Connector/ACE_Acceptor
@@ -136,7 +136,7 @@ class Net_UDPConnectionBase_T
 
 //////////////////////////////////////////
 
-template <typename HandlerType,
+template <typename HandlerType, // implements Net_AsynchUDPSocketHandler_T
           ////////////////////////////////
           typename ConfigurationType,
           typename StateType,
@@ -145,6 +145,8 @@ template <typename HandlerType,
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,
+          ////////////////////////////////
+          typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
           typename UserDataType>
 class Net_AsynchUDPConnectionBase_T
@@ -158,18 +160,10 @@ class Net_AsynchUDPConnectionBase_T
                                            struct Net_ListenerConfiguration,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
+                                           TimerManagerType,
                                            UserDataType>
  , public Net_TransportLayer_UDP
 {
-  friend class ACE_Asynch_Connector<Net_AsynchUDPConnectionBase_T<HandlerType,
-                                                                  ConfigurationType,
-                                                                  StateType,
-                                                                  StatisticContainerType,
-                                                                  HandlerConfigurationType,
-                                                                  StreamType,
-                                                                  UserDataType> >;
-
- public:
   typedef Net_AsynchStreamConnectionBase_T<HandlerType,
                                            ACE_INET_Addr,
                                            ConfigurationType,
@@ -180,8 +174,33 @@ class Net_AsynchUDPConnectionBase_T
                                            struct Net_ListenerConfiguration,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
-                                           UserDataType> STREAM_CONNECTION_BASE_T;
+                                           TimerManagerType,
+                                           UserDataType> inherited;
+  typedef Net_TransportLayer_UDP inherited2;
 
+  friend class ACE_Asynch_Connector<Net_AsynchUDPConnectionBase_T<HandlerType,
+                                                                  ConfigurationType,
+                                                                  StateType,
+                                                                  StatisticContainerType,
+                                                                  HandlerConfigurationType,
+                                                                  StreamType,
+                                                                  TimerManagerType,
+                                                                  UserDataType> >;
+
+ public:
+  // convenient types
+  typedef Net_AsynchStreamConnectionBase_T<HandlerType,
+                                           ACE_INET_Addr,
+                                           ConfigurationType,
+                                           StateType,
+                                           StatisticContainerType,
+                                           struct Net_UDPSocketConfiguration,
+                                           HandlerConfigurationType,
+                                           struct Net_ListenerConfiguration,
+                                           StreamType,
+                                           enum Stream_StateMachine_ControlState,
+                                           TimerManagerType,
+                                           UserDataType> STREAM_CONNECTION_BASE_T;
   typedef Net_IConnectionManager_T<ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
@@ -190,36 +209,31 @@ class Net_AsynchUDPConnectionBase_T
 
   Net_AsynchUDPConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
                                  const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  virtual ~Net_AsynchUDPConnectionBase_T ();
+  inline virtual ~Net_AsynchUDPConnectionBase_T () {};
 
-  // override / implement (part of) Net_IInetTransportLayer
-  //using Net_AsynchSocketConnectionBase_T::inherited::Net_ConnectionBase_T::initialize;
-  //using Net_AsynchSocketConnectionBase_T::inherited::Net_ConnectionBase_T::finalize;
-//  using Net_AsynchSocketConnectionBase_T::info;
-  //virtual void info (ACE_HANDLE&,           // return value: handle
-  //                   ACE_INET_Addr&,        // return value: local SAP
-  //                   ACE_INET_Addr&) const; // return value: remote SAP
+  // override some ACE_Event_Handler methods
+  // *NOTE*: send stream data to the peer
+  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
+
+  // implement (part of) Net_IStreamConnection_T
+  // *IMPORTANT NOTE*: for write-only connections, this returns the outbound
+  //                   socket handle, else the inbound socket handle
+  virtual void info (ACE_HANDLE&,           // return value: handle
+                     ACE_INET_Addr&,        // return value: local SAP
+                     ACE_INET_Addr&) const; // return value: peer SAP
+
+  // implement Common_IReset
+  virtual void reset ();
 
  private:
-  typedef Net_AsynchStreamConnectionBase_T<HandlerType,
-                                           ACE_INET_Addr,
-                                           ConfigurationType,
-                                           StateType,
-                                           StatisticContainerType,
-                                           struct Net_UDPSocketConfiguration,
-                                           HandlerConfigurationType,
-                                           struct Net_ListenerConfiguration,
-                                           StreamType,
-                                           enum Stream_StateMachine_ControlState,
-                                           UserDataType> inherited;
-  typedef Net_TransportLayer_UDP inherited2;
-
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
   //         For some reason, the compiler will not accept the overloaded
-  //         make_handler() method of ACE_AsynchConnector/ACE_AsynchAcceptor
+  //         make_svc_handler() method of ACE_Asynch_Connector/ACE_Asynch_Acceptor
   Net_AsynchUDPConnectionBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnectionBase_T (const Net_AsynchUDPConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnectionBase_T& operator= (const Net_AsynchUDPConnectionBase_T&))
+
+  using inherited2::initialize;
 };
 
 // include template definition

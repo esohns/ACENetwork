@@ -19,6 +19,8 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <sstream>
+
 #include "ace/Synch.h"
 #include "irc_tools.h"
 

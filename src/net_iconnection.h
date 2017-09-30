@@ -42,16 +42,31 @@ enum Net_Connection_Status;
 
 //////////////////////////////////////////
 
+class Net_IAsynchSocketHandler
+{
+ public:
+  virtual bool initiate_read () = 0;
+
+  // *NOTE*: this cancels all outstanding asynchronous operations
+  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                            // handle
+                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK) = 0; // event mask
+
+  ////////////////////////////////////////
+  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE) = 0; // handle
+};
+
+//////////////////////////////////////////
+
 template <typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType>
 class Net_IConnection_T
- : public Common_IGetR_T<ConfigurationType>
+ : public virtual Common_IReferenceCount
+ , public virtual Common_IStatistic_T<StatisticContainerType>
  , public Common_IInitialize_T<ConfigurationType>
- , public Common_IStatistic_T<StatisticContainerType>
- , virtual public Common_IReferenceCount
- , public Common_IDumpState
+ , public Common_IGetR_T<ConfigurationType>
+ , public virtual Common_IDumpState
 {
  public:
   // convenient types
@@ -103,38 +118,21 @@ template <typename AddressType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType> // socket-
 class Net_ISocketConnection_T
- : virtual public Net_IConnection_T<AddressType,
+ : public virtual Net_IConnection_T<AddressType,
                                     ConfigurationType,
                                     StateType,
                                     StatisticContainerType>
- , virtual public Net_ITransportLayer_T<SocketConfigurationType>
- // *NOTE*: this next line wouldn't compile (with MSVC)
- // *EXPLANATION*: apparently, on function signatures, the standard stipulates
- //                (in 14.5.5.1):
- //                "The types of its parameters and, if the function is a class
- //                member, the cv- qualifiers (if any) on the function itself
- //                and the class in which the member function is declared. The
- //                signature of a function template specialization includes the
- //                types of its template arguments...."
- //                Note that specifically, this does NOT include the return
- //                types.
- //                Here, this probably means that Net_ISocketConnection_T::get
- //                is not considered to be a distinct function, but rather an
- //                overload (here: override) of Net_IConnection_T::get.
- //                [Note that for differing return types, this would be allowed,
- //                if the return types were covariant. This explains the
- //                somewhat misleading error message returned by MSVC.]
- //, public Common_IGetR_T<HandlerConfigurationType>
- , public Common_IInitialize_T<HandlerConfigurationType>
+ , public virtual Net_ITransportLayer_T<SocketConfigurationType>
+ , public virtual Common_IInitialize_T<HandlerConfigurationType>
+ , public Common_IGetR_2_T<HandlerConfigurationType>
 {
  public:
-//  // convenient types
-//  typedef Net_IConnection_T<AddressType,
-//                            ConfigurationType,
-//                            StateType,
-//                            StatisticContainerType> ICONNECTION_T;
-
-  virtual const HandlerConfigurationType& get () = 0;
+  // convenient types
+  typedef Net_IConnection_T<AddressType,
+                            ConfigurationType,
+                            StateType,
+                            StatisticContainerType> ICONNECTION_T;
+  typedef Net_ITransportLayer_T<SocketConfigurationType> ITRANSPORTLAYER_T;
 
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&) = 0;
@@ -153,7 +151,7 @@ template <typename AddressType,
           typename StreamType,
           typename StreamStatusType>
 class Net_IStreamConnection_T
- : virtual public Net_ISocketConnection_T<AddressType,
+ : public virtual Net_ISocketConnection_T<AddressType,
                                           ConfigurationType,
                                           StateType,
                                           StatisticContainerType,
@@ -164,6 +162,12 @@ class Net_IStreamConnection_T
  public:
   // convenient types
   typedef StreamType STREAM_T;
+  typedef Net_ISocketConnection_T<AddressType,
+                                  ConfigurationType,
+                                  StateType,
+                                  StatisticContainerType,
+                                  SocketConfigurationType,
+                                  HandlerConfigurationType> ISOCKETCONNECTION_T;
 
   virtual const StreamType& stream () const = 0;
 

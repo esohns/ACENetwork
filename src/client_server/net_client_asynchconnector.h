@@ -27,6 +27,8 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
+#include "common_timer_manager_common.h"
+
 #include "stream_statemachine_common.h"
 
 #include "net_common.h"
@@ -173,6 +175,7 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                                                  StatisticContainerType,
                                                                  HandlerConfigurationType,
                                                                  StreamType,
+                                                                 Common_Timer_Manager_t,
                                                                  UserDataType>,
                                    ACE_INET_Addr,
                                    ConfigurationType,
@@ -188,6 +191,7 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                                              StatisticContainerType,
                                                              HandlerConfigurationType,
                                                              StreamType,
+                                                             Common_Timer_Manager_t,
                                                              UserDataType> >
  , public Net_IAsynchConnector_T<ACE_INET_Addr,
                                  ConfigurationType>
@@ -198,6 +202,7 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                                              StatisticContainerType,
                                                              HandlerConfigurationType,
                                                              StreamType,
+                                                             Common_Timer_Manager_t,
                                                              UserDataType> > inherited;
 
  public:
@@ -214,6 +219,7 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                         StatisticContainerType,
                                         HandlerConfigurationType,
                                         StreamType,
+                                        Common_Timer_Manager_t,
                                         UserDataType> CONNECTION_T;
   typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                   ConfigurationType,
@@ -250,6 +256,17 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; };
   inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_UDP; };
   inline virtual bool useReactor () const { return false; };
+  // *NOTE*: UDP is a datagram-based protocol. The Berkeley (datagram) socket
+  //         API is essentially stateless from a user-space perspective (send/
+  //         recv only) and thus does not translate to a client/server role
+  //         concept very intuitively; some conceptual varnish is in order
+  // *CONCEPT*: if the user provides a 'remote' socket address, then the
+  //            connection will be 'write-only' (i.e. does not register with the
+  //            proactor immediately), and assigned a 'server' role. Otherwise
+  //            the connection is assumed to be 'read-write' and assigned a
+  //            'client' role. Note that 'client' connections currently need two
+  //            distinct sockets to implement 'read-write' semantics and may (!)
+  //            therefore also maintain two socket handles
   virtual ACE_HANDLE connect (const ACE_INET_Addr&);
   inline virtual void abort () {};
   inline virtual int wait (ACE_HANDLE handle_in, const ACE_Time_Value& timeout_in = ACE_Time_Value::zero) { ACE_UNUSED_ARG (timeout_in); return ((handle_in != ACE_INVALID_HANDLE) ? 0 : -1); }; // block : (relative-) timeout
@@ -263,6 +280,7 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                         StatisticContainerType,
                                         HandlerConfigurationType,
                                         StreamType,
+                                        Common_Timer_Manager_t,
                                         UserDataType>* make_handler (void);
 
   ConfigurationType*     configuration_; // connection-

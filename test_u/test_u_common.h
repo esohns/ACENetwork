@@ -38,17 +38,15 @@ extern struct random_data random_data;
 extern char random_state_buffer[];
 #endif
 
-typedef Stream_Statistic Test_U_Statistic_t;
-
+typedef struct Stream_Statistic Test_U_Statistic_t;
 typedef Common_IStatistic_T<Test_U_Statistic_t> Test_U_StatisticReportingHandler_t;
-typedef Stream_StatisticHandler_Proactor_T<Test_U_Statistic_t> Test_U_StatisticHandlerProactor_t;
-typedef Stream_StatisticHandler_Reactor_T<Test_U_Statistic_t> Test_U_StatisticHandlerReactor_t;
+typedef Stream_StatisticHandler_T<Test_U_Statistic_t> Test_U_StatisticHandler_t;
 
 struct Test_U_ConnectionConfiguration;
 struct Test_U_UserData
  : Net_UserData
 {
-  inline Test_U_UserData ()
+  Test_U_UserData ()
    : Net_UserData ()
    , connectionConfiguration (NULL)
   {};

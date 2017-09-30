@@ -406,7 +406,7 @@ template <typename AddressType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
-bool
+void
 Net_Connection_Manager_T<AddressType,
                          ConfigurationType,
                          StateType,
@@ -419,7 +419,7 @@ Net_Connection_Manager_T<AddressType,
   bool found = false;
   int result = -1;
 
-  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
+  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
          iterator.next (connection_p);
          iterator.advance ())
@@ -437,10 +437,10 @@ Net_Connection_Manager_T<AddressType,
       // *NOTE*: most probably cause: handle already deregistered (--> check
       //         implementation !)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("connection (id was: %u) handle (was: 0x%@) not found, aborting\n"),
+                  ACE_TEXT ("connection (id was: %u) handle (was: 0x%@) not found, returning\n"),
                   connection_in->id (),
                   connection_in));
-      return false;
+      return;
     } // end IF
     ACE_ASSERT (connection_p);
 
@@ -461,8 +461,6 @@ Net_Connection_Manager_T<AddressType,
                     ACE_TEXT ("failed to ACE_Condition::broadcast(): \"%m\", continuing\n")));
     } // end IF
   } // end lock scope
-
-  return true;
 }
 
 template <typename AddressType,

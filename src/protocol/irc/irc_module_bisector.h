@@ -54,7 +54,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataContainerType, // session message payload (reference counted)
           ////////////////////////////////
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           ////////////////////////////////
           typename UserDataType>
 class IRC_Module_Bisector_T
@@ -70,7 +70,7 @@ class IRC_Module_Bisector_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
-                                      StatisticHandlerType,
+                                      TimerManagerType,
                                       UserDataType>
 {
  public:
@@ -96,7 +96,7 @@ class IRC_Module_Bisector_T
                                     SessionDataType,
                                     SessionDataContainerType,
                                     StatisticContainerType,
-                                    StatisticHandlerType,
+                                    TimerManagerType,
                                     UserDataType>::initialize;
 
   // override (part of) Stream_IModuleHandler_T
@@ -127,7 +127,7 @@ class IRC_Module_Bisector_T
                                       SessionDataType,
                                       SessionDataContainerType,
                                       StatisticContainerType,
-                                      StatisticHandlerType,
+                                      TimerManagerType,
                                       UserDataType> inherited;
 
 //  ACE_UNIMPLEMENTED_FUNC (IRC_Module_Bisector_T ())

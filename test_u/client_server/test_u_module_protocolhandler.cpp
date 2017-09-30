@@ -243,10 +243,9 @@ Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& mes
       {
         // schedule ping interval timer
         ACE_ASSERT (pingTimerID_ == -1);
-        ACE_Event_Handler* handler_p = &pingHandler_;
         pingTimerID_ =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (handler_p,                       // event handler
-                                                                      NULL,                            // ACT
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (&pingHandler_,                   // event handler handle
+                                                                      NULL,                            // asynchronous completion token
                                                                       COMMON_TIME_NOW + pingInterval_, // first wakeup time
                                                                       pingInterval_);                  // interval
         if (pingTimerID_ == -1)
@@ -294,9 +293,9 @@ Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& mes
 }
 
 void
-Test_U_Module_ProtocolHandler::handleTimeout (const void* arg_in)
+Test_U_Module_ProtocolHandler::handle (const void* arg_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::handleTimeout"));
+  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_ProtocolHandler::handle"));
 
   ACE_UNUSED_ARG (arg_in);
 

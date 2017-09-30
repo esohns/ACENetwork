@@ -29,6 +29,8 @@
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_timer_manager_common.h"
+
 #include "net_asynch_tcpsockethandler.h"
 #include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
@@ -237,7 +239,7 @@ typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct BitTorrent_Clien
                                   struct BitTorrent_Client_PeerConnectionConfiguration,
                                   struct BitTorrent_Client_PeerConnectionState,
                                   BitTorrent_Statistic_t,
-                                  BitTorrent_StatisticHandler_Reactor_t,
+                                  Common_Timer_Manager_t,
                                   BitTorrent_Client_PeerStream_t,
                                   struct BitTorrent_Client_PeerUserData,
                                   struct Stream_ModuleConfiguration,
@@ -247,7 +249,7 @@ typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<struct BitT
                                         struct BitTorrent_Client_PeerConnectionConfiguration,
                                         struct BitTorrent_Client_PeerConnectionState,
                                         BitTorrent_Statistic_t,
-                                        BitTorrent_StatisticHandler_Proactor_t,
+                                        Common_Timer_Manager_t,
                                         BitTorrent_Client_PeerStream_t,
                                         struct BitTorrent_Client_PeerUserData,
                                         struct Stream_ModuleConfiguration,
@@ -277,7 +279,7 @@ typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct BitTorrent_Clien
                                   struct BitTorrent_Client_TrackerConnectionConfiguration,
                                   struct BitTorrent_Client_TrackerConnectionState,
                                   BitTorrent_Statistic_t,
-                                  BitTorrent_StatisticHandler_Reactor_t,
+                                  Common_Timer_Manager_t,
                                   BitTorrent_Client_TrackerStream_t,
                                   struct BitTorrent_Client_TrackerUserData,
                                   struct Stream_ModuleConfiguration,
@@ -287,7 +289,7 @@ typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<struct BitT
                                         struct BitTorrent_Client_TrackerConnectionConfiguration,
                                         struct BitTorrent_Client_TrackerConnectionState,
                                         BitTorrent_Statistic_t,
-                                        BitTorrent_StatisticHandler_Proactor_t,
+                                        Common_Timer_Manager_t,
                                         BitTorrent_Client_TrackerStream_t,
                                         struct BitTorrent_Client_TrackerUserData,
                                         struct Stream_ModuleConfiguration,

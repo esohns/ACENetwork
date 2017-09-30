@@ -59,7 +59,7 @@ class IRC_Message;
 struct IRC_Client_StreamState
  : IRC_StreamState
 {
-  inline IRC_Client_StreamState ()
+  IRC_Client_StreamState ()
    : IRC_StreamState ()
    , currentSessionData (NULL)
    , userData (NULL)
@@ -93,7 +93,7 @@ typedef Stream_Configuration_T<//stream_name_string_,
 struct IRC_Client_ModuleHandlerConfiguration
  : IRC_ModuleHandlerConfiguration
 {
-  inline IRC_Client_ModuleHandlerConfiguration ()
+  IRC_Client_ModuleHandlerConfiguration ()
    : IRC_ModuleHandlerConfiguration ()
    ///////////////////////////////////////
    , connectionConfigurations (NULL)
@@ -115,7 +115,7 @@ struct IRC_Client_ModuleHandlerConfiguration;
 struct IRC_Client_StreamConfiguration
  : Stream_Configuration
 {
-  inline IRC_Client_StreamConfiguration ()
+  IRC_Client_StreamConfiguration ()
    : Stream_Configuration ()
    , protocolConfiguration (NULL)
    , userData (NULL)

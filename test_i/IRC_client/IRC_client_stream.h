@@ -25,6 +25,8 @@
 
 #include "ace/Global_Macros.h"
 
+#include "common_timer_manager_common.h"
+
 #include "irc_common.h"
 #include "irc_configuration.h"
 #include "irc_message.h"
@@ -36,12 +38,12 @@
 // forward declarations
 class IRC_Client_SessionMessage;
 
-template <typename StatisticHandlerType>
+template <typename TimerManagerType> // implements Common_ITimer
 class IRC_Client_Stream_T
  : public IRC_Stream_T<struct IRC_Client_StreamState,
                        struct IRC_Client_StreamConfiguration,
                        IRC_Statistic_t,
-                       StatisticHandlerType,
+                       TimerManagerType,
                        struct IRC_Client_ModuleHandlerConfiguration,
                        struct IRC_Client_SessionData,
                        IRC_Client_SessionData_t,
@@ -53,7 +55,7 @@ class IRC_Client_Stream_T
   typedef IRC_Stream_T<struct IRC_Client_StreamState,
                        struct IRC_Client_StreamConfiguration,
                        IRC_Statistic_t,
-                       StatisticHandlerType,
+                       TimerManagerType,
                        struct IRC_Client_ModuleHandlerConfiguration,
                        struct IRC_Client_SessionData,
                        IRC_Client_SessionData_t,
@@ -91,7 +93,6 @@ class IRC_Client_Stream_T
 
 //////////////////////////////////////////
 
-typedef IRC_Client_Stream_T<IRC_StatisticHandler_Reactor_t> IRC_Client_Stream_t;
-typedef IRC_Client_Stream_T<IRC_StatisticHandler_Proactor_t> IRC_Client_AsynchStream_t;
+typedef IRC_Client_Stream_T<Common_Timer_Manager_t> IRC_Client_Stream_t;
 
 #endif

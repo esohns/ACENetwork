@@ -43,7 +43,7 @@ class Net_SOCK_Connector
 {
  public:
   Net_SOCK_Connector ();
-  virtual ~Net_SOCK_Connector ();
+  inline virtual ~Net_SOCK_Connector () {};
 
   int connect (ACE_SOCK_Stream&,                    // stream
                const ACE_Addr&,                     // remote address

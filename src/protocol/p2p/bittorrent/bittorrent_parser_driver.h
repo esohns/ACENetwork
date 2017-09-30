@@ -76,7 +76,7 @@ class BitTorrent_ParserDriver_T
   virtual void record (struct BitTorrent_PeerRecord*&); // data record
   virtual void handshake (struct BitTorrent_PeerHandShake*&); // handshake
 
-  virtual void dump_state () const;
+  inline virtual void dump_state () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   struct BitTorrent_PeerHandShake* handShake_;
   struct BitTorrent_PeerRecord*    record_;
@@ -93,17 +93,17 @@ class BitTorrent_ParserDriver_T
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver_T& operator= (const BitTorrent_ParserDriver_T&))
 
   // implement Common_ILexScanner_T
-  inline virtual const BitTorrent_IParser_t* const getP () const { return this; };
+  inline virtual const struct Common_ScannerState& getR_3 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (struct Common_ScannerState ()); ACE_NOTREACHED (return struct Common_ScannerState ();) };
+  inline virtual const BitTorrent_IParser_t* const getP_2 () const { return this; };
   inline virtual void setP (BitTorrent_IParser_t*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
-  virtual void debug (yyscan_t, // state handle
-                      bool);    // toggle
-  virtual bool initialize (yyscan_t&); // return value: state handle
-  virtual void finalize (yyscan_t&);   // state handle
+  inline virtual void debug (yyscan_t state_in, bool toggle_in) { BitTorrent_Scanner_set_debug ((toggle_in ? 1 : 0), state_in); };
+  inline virtual bool initialize (yyscan_t& state_inout, struct Common_ScannerState* scannerState_in) { ACE_UNUSED_ARG (scannerState_in); return (BitTorrent_Scanner_lex_init_extra (this, &state_inout) == 0); };
+  inline virtual void finalize (yyscan_t& state_inout) { int result = BitTorrent_Scanner_lex_destroy (state_inout); state_inout = NULL; };
   virtual struct yy_buffer_state* create (yyscan_t, // state handle
                                           char*,    // buffer handle
                                           size_t);  // buffer size
-  inline virtual void destroy (yyscan_t state_in,
-                               struct yy_buffer_state*& buffer_inout) { BitTorrent_Scanner__delete_buffer (buffer_inout, state_in); buffer_inout = NULL; };
+  inline virtual void destroy (yyscan_t state_in, struct yy_buffer_state*& buffer_inout) { BitTorrent_Scanner__delete_buffer (buffer_inout, state_in); buffer_inout = NULL; };
+  inline virtual bool lex () { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
 };
 
 // include template definition

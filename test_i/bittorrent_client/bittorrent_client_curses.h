@@ -27,15 +27,15 @@
 #include "ace/Synch_Traits.h"
 
 #if defined (_MSC_VER)
-#include <curses.h>
+#include "curses.h"
 #else
-#include <ncurses.h>
+#include "ncurses.h"
 // *NOTE*: the ncurses "timeout" macros conflicts with
 //         ACE_Synch_Options::timeout. Since not currently used, it's safe to
 //         undefine
 #undef timeout
 #endif
-#include <panel.h>
+#include "panel.h"
 
 #include "common.h"
 
@@ -55,7 +55,7 @@ typedef BitTorrent_Client_CursesMessages_t::iterator BitTorrent_Client_CursesMes
 
 struct BitTorrent_Client_CursesState
 {
-  inline BitTorrent_Client_CursesState ()
+  BitTorrent_Client_CursesState ()
    : activePanel ()
    , input (NULL)
    , log (NULL)
@@ -87,20 +87,20 @@ struct BitTorrent_Client_CursesState
 
   // session
   BitTorrent_Client_CursesMessages_t         backLog;
-  BitTorrent_Client_SessionState*            sessionState;
+  struct BitTorrent_Client_SessionState*     sessionState;
 };
 
-bool curses_download (const std::string&,              // metainfo file URI
-                      BitTorrent_Client_CursesState&); // state
-void curses_log (const std::string&,             // metainfo file URI
-                 const std::string&,             // text
-                 BitTorrent_Client_CursesState&, // state
-                 bool = true);                   // lock ?
-bool curses_main (BitTorrent_Client_CursesState&, // state
-                  BitTorrent_Client_IControl_t*); // controller
-bool curses_stop (const std::string&,              // metainfo file URI
-                  BitTorrent_Client_CursesState&); // state
-bool curses_upload (const std::string&,              // metainfo file URI
-                    BitTorrent_Client_CursesState&); // state
+bool curses_download (const std::string&,                     // metainfo file URI
+                      struct BitTorrent_Client_CursesState&); // state
+void curses_log (const std::string&,                    // metainfo file URI
+                 const std::string&,                    // text
+                 struct BitTorrent_Client_CursesState&, // state
+                 bool = true);                          // lock ?
+bool curses_main (struct BitTorrent_Client_CursesState&, // state
+                  BitTorrent_Client_IControl_t*);        // controller
+bool curses_stop (const std::string&,                     // metainfo file URI
+                  struct BitTorrent_Client_CursesState&); // state
+bool curses_upload (const std::string&,                     // metainfo file URI
+                    struct BitTorrent_Client_CursesState&); // state
 
 #endif

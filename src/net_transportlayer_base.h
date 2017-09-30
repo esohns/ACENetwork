@@ -26,30 +26,30 @@
 #include "common.h"
 
 #include "net_common.h"
+#if defined (ACE_HAS_NETLINK)
 #include "net_configuration.h"
-#include "net_exports.h"
+#endif
 #include "net_itransportlayer.h"
 
 template <typename ConfigurationType> // socket-
 class Net_InetTransportLayerBase_T
- : virtual public Net_ITransportLayer_T<ConfigurationType>
+ : public virtual Net_ITransportLayer_T<ConfigurationType>
 {
  public:
   inline virtual ~Net_InetTransportLayerBase_T () {};
 
   // implement (part of) Net_ITransportLayer_T
-  inline virtual void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
   inline virtual enum Common_DispatchType dispatch () { return dispatch_; };
   inline virtual enum Net_ClientServerRole role () { return role_; };
+  virtual bool initialize (enum Common_DispatchType,
+                           enum Net_ClientServerRole,
+                           const ConfigurationType&);
   inline virtual enum Net_TransportLayerType transportLayer () { return transportLayer_; };
 
  protected:
   Net_InetTransportLayerBase_T (enum Net_TransportLayerType);
 
   // implement (part of) Net_ITransportLayer_T
-  virtual bool initialize (enum Common_DispatchType,
-                           enum Net_ClientServerRole,
-                           const ConfigurationType&);
   inline virtual void finalize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   enum Common_DispatchType    dispatch_;
@@ -74,15 +74,15 @@ class Net_NetlinkTransportLayer_Base
   // implement (part of) Net_ITransportLayer_T
   inline virtual enum Common_DispatchType dispatch () { return dispatch_; };
   inline virtual enum Net_ClientServerRole role () { return role_; };
+  virtual bool initialize (enum Common_DispatchType,
+                           enum Net_ClientServerRole,
+                           const struct Net_NetlinkSocketConfiguration&);
   inline virtual enum Net_TransportLayerType transportLayer () { return transportLayer_; };
 
  protected:
   Net_NetlinkTransportLayer_Base ();
 
   // implement (part of) Net_ITransportLayer_T
-  virtual bool initialize (enum Common_DispatchType,
-                           enum Net_ClientServerRole,
-                           const struct Net_NetlinkSocketConfiguration&);
   inline virtual void finalize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   enum Common_DispatchType    dispatch_;

@@ -31,13 +31,18 @@
 
 #include "net_sockethandler_base.h"
 
-template <typename ConfigurationType,
-          typename StreamType>
+template <ACE_SYNCH_DECL,
+          typename StreamType,
+          typename ConfigurationType>
 class Net_TCPSocketHandler_T
  : public Net_SocketHandlerBase_T<ConfigurationType>
  , public ACE_Svc_Handler<StreamType,
-                          ACE_MT_SYNCH>
+                          ACE_SYNCH_USE>
 {
+  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
+  typedef ACE_Svc_Handler<StreamType,
+                          ACE_SYNCH_USE> inherited2;
+
  public:
   // override some task-based members
   virtual int open (void* = NULL); // args
@@ -48,15 +53,11 @@ class Net_TCPSocketHandler_T
 
  protected:
   Net_TCPSocketHandler_T ();
-  virtual ~Net_TCPSocketHandler_T ();
+  inline virtual ~Net_TCPSocketHandler_T () {};
 
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
-  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
-  typedef ACE_Svc_Handler<StreamType,
-                          ACE_MT_SYNCH> inherited2;
-
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T (const Net_TCPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T& operator= (const Net_TCPSocketHandler_T&))
 };
@@ -64,13 +65,19 @@ class Net_TCPSocketHandler_T
 //////////////////////////////////////////
 
 // partial specialization (for SSL)
-template <typename ConfigurationType>
-class Net_TCPSocketHandler_T<ConfigurationType,
-                             ACE_SSL_SOCK_Stream>
+template <ACE_SYNCH_DECL,
+          typename ConfigurationType>
+class Net_TCPSocketHandler_T<ACE_SYNCH_USE,
+                             ACE_SSL_SOCK_Stream,
+                             ConfigurationType>
  : public Net_SocketHandlerBase_T<ConfigurationType>
  , public ACE_Svc_Handler<ACE_SSL_SOCK_Stream,
-                          ACE_MT_SYNCH>
+                          ACE_SYNCH_USE>
 {
+  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
+  typedef ACE_Svc_Handler<ACE_SSL_SOCK_Stream,
+                          ACE_SYNCH_USE> inherited2;
+
  public:
   // override some task-based members
   virtual int open (void* = NULL); // args
@@ -81,15 +88,11 @@ class Net_TCPSocketHandler_T<ConfigurationType,
 
  protected:
   Net_TCPSocketHandler_T ();
-  virtual ~Net_TCPSocketHandler_T ();
+  inline virtual ~Net_TCPSocketHandler_T () {};
 
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
  private:
-  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
-  typedef ACE_Svc_Handler<ACE_SSL_SOCK_Stream,
-                          ACE_MT_SYNCH> inherited2;
-
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T (const Net_TCPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_TCPSocketHandler_T& operator= (const Net_TCPSocketHandler_T&))
 };

@@ -71,7 +71,7 @@ class BitTorrent_Export BitTorrent_Bencoding_Scanner
   // *NOTE*: to be invoked by the scanner (ONLY !)
   inline virtual void offset (unsigned int offset_in) { ACE_ASSERT (parser_); parser_->offset (offset_in); };
   inline virtual void error (const std::string& errorString_in) { ACE_ASSERT (parser_); parser_->error (yy::location (), errorString_in); };
-  inline virtual const struct Common_ScannerState& getR_2 () const { return state_; };
+  inline virtual const struct Common_ScannerState& getR_3 () const { return state_; };
   inline virtual const BitTorrent_Bencoding_IParser* const getP_2 () const { return parser_; };
   inline virtual void setP (BitTorrent_Bencoding_IParser* parser_in) { parser_ = parser_in; };
   inline virtual void debug (yyscan_t, bool) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };

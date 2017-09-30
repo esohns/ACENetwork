@@ -22,116 +22,82 @@
 #define NET_STREAM_ASYNCH_TCPSOCKET_BASE_H
 
 #include "ace/Asynch_IO.h"
-#include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
+#include "ace/SOCK_Stream.h"
+#include "ace/Svc_Handler.h"
 #include "ace/Synch_Traits.h"
-#include "ace/Time_Value.h"
 
-#include "common_time_common.h"
+#include "net_common.h"
+#include "net_iconnection.h"
 
-#include "stream_imodule.h"
+// forward declarations
+class ACE_Notification_Strategy;
 
-#include "net_connection_base.h"
-#include "net_iconnectionmanager.h"
-
-template <typename HandlerType,
+template <typename HandlerType, // implements ACE_Service_Handler
           ////////////////////////////////
           typename AddressType,
           typename ConfigurationType, // connection-
           typename StateType, // connection-
           typename StatisticContainerType,
-          typename StatisticHandlerType,
-          typename StreamType,
+          typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
-          typename UserDataType,
+          typename SocketConfigurationType,
+          typename HandlerConfigurationType,
           ////////////////////////////////
-          typename ModuleConfigurationType,
-          typename ModuleHandlerConfigurationType>
+          typename UserDataType>
 class Net_StreamAsynchTCPSocketBase_T
  : public HandlerType
- , public ACE_Event_Handler
- , public Net_ConnectionBase_T<AddressType,
-                               ConfigurationType,
-                               StateType,
-                               StatisticContainerType,
-                               StatisticHandlerType,
-                               UserDataType>
+ , public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
+ , virtual public Net_ISocketConnection_T<AddressType,
+                                          ConfigurationType,
+                                          StateType,
+                                          StatisticContainerType,
+                                          SocketConfigurationType,
+                                          HandlerConfigurationType>
 {
- public:
-  typedef Net_ConnectionBase_T<AddressType,
-                               ConfigurationType,
-                               StateType,
-                               StatisticContainerType,
-                               StatisticHandlerType,
-                               UserDataType> CONNECTION_BASE_T;
+  typedef HandlerType inherited;
+  typedef ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> inherited2;
 
+ public:
   inline virtual ~Net_StreamAsynchTCPSocketBase_T () {};
 
-  // implement some task methods
-  int close (u_long = 0); // reason
-  // override some service handler methods
+  // override some ACE_Service_Handler methods
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
-  //virtual void act (const void*); // (user) data handle
-  // implement some event handler methods
+  // implement some ACE_Task methods
+  //inline virtual int close (u_long reason_in = 0) { close (); };
+
+  // implement/override some ACE_Event_Handler methods
+  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE); // (socket) handle
   virtual int handle_close (ACE_HANDLE,        // (socket) handle
                             ACE_Reactor_Mask); // (select) mask
-  virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE); // (socket) handle
 
-  // implement (part of) Net_IConnection_T
-  virtual void info (ACE_HANDLE&,         // return value: handle
-                     AddressType&,        // return value: local SAP
-                     AddressType&) const; // return value: remote SAP
-  virtual Net_ConnectionId_t id () const;
+  // implement (part of) Net_ISocketConnection_T
+  virtual void dump_state () const;
+  inline virtual void info (ACE_HANDLE& handle_out, AddressType& localSAP_out, AddressType& peerSAP_out) const { handle_out = inherited::handle (); localSAP_out = inherited::localSAP_; peerSAP_out = inherited::peerSAP_; };
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  inline virtual Net_ConnectionId_t id () const { return reinterpret_cast<Net_ConnectionId_t> (inherited::handle ()); };
+#else
+  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::handle ()); };
+#endif
   inline virtual ACE_Notification_Strategy* notification () { return this; };
   virtual void close ();
-  virtual void waitForCompletion (bool = true); // wait for any worker
-                                                // thread(s) ?
-
-  // *NOTE*: delegate these to the stream
-  virtual bool collect (StatisticContainerType&); // return value: statistic data
-  virtual void report () const;
-  virtual void dump_state () const;
+  virtual void waitForCompletion (bool = true); // wait for thread(s) ?
 
  protected:
-  typedef Net_IConnectionManager_T<AddressType,
-                                   ConfigurationType,
-                                   StateType,
-                                   StatisticContainerType,
-                                   UserDataType> ICONNECTION_MANAGER_T;
-  typedef Stream_IModule_T<Stream_SessionId_t,
-                           typename StreamType::SESSION_DATA_T,
-                           Stream_SessionMessageType,
-                           ACE_MT_SYNCH,
-                           Common_TimePolicy_t,
-                           ModuleConfigurationType,
-                           ModuleHandlerConfigurationType> IMODULE_T;
+  // convenient types
+  typedef HandlerType HANDLER_T;
 
-  Net_StreamAsynchTCPSocketBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
-                                   const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-
-  // implement some handler methods
-  virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
-  virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
-
-  StreamType stream_;
+  Net_StreamAsynchTCPSocketBase_T ();
 
  private:
-  typedef HandlerType inherited;
-  typedef ACE_Event_Handler inherited2;
-  typedef Net_ConnectionBase_T<AddressType,
-                               ConfigurationType,
-                               StateType,
-                               StatisticContainerType,
-                               StatisticHandlerType,
-                               UserDataType> inherited3;
-
-  ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T (const Net_StreamAsynchTCPSocketBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamAsynchTCPSocketBase_T& operator= (const Net_StreamAsynchTCPSocketBase_T&))
 
-  bool       notify_; // still to notify the processing stream ?
+  // implement some ACE_Handler methods
+  virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result
+  virtual void handle_write_stream (const ACE_Asynch_Write_Stream::Result&); // result
 };
 
 // include template definition

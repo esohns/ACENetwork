@@ -25,21 +25,26 @@
 #include <random>
 #include <string>
 
-#include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
+
+#include "common_itimerhandler.h"
+#include "common_timerhandler.h"
 
 #include "test_u_stream.h"
 
 #include "net_client_connector_common.h"
 
 class Test_U_Client_TimeoutHandler
- : public ACE_Event_Handler
+ : public Common_TimerHandler
+ , public Common_ITimerHandler
 {
+  typedef Common_TimerHandler inherited;
+
  public:
-  enum ActionMode_t
+  enum ActionModeType
   {
     ACTION_NORMAL = 0,
     ACTION_ALTERNATING,
@@ -51,7 +56,7 @@ class Test_U_Client_TimeoutHandler
     ACTION_INVALID = -1
   };
 
-  enum AlternatingModeState_t
+  enum AlternatingModeStateType
   {
     ALTERNATING_STATE_CONNECT = 0,
     ALTERNATING_STATE_ABORT,
@@ -60,31 +65,28 @@ class Test_U_Client_TimeoutHandler
     ALTERNATING_STATE_INVALID = -1
   };
 
-  Test_U_Client_TimeoutHandler (ActionMode_t,          // mode
+  Test_U_Client_TimeoutHandler (enum ActionModeType,   // mode
                                 unsigned int,          // max #connections
                                 const ACE_INET_Addr&,  // remote SAP
                                 Test_U_IConnector_t*); // connector
-  virtual ~Test_U_Client_TimeoutHandler ();
+  inline virtual ~Test_U_Client_TimeoutHandler () {};
 
-  void mode (ActionMode_t);
-  ActionMode_t mode () const;
+  void mode (enum ActionModeType);
+  enum ActionModeType mode () const;
 
   // implement specific behaviour
-  virtual int handle_timeout (const ACE_Time_Value&, // current time
-                              const void*);          // asynchronous completion token
+  virtual void handle (const void*); // asynchronous completion token
 
  private:
-  typedef ACE_Event_Handler inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Test_U_Client_TimeoutHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Client_TimeoutHandler (const Test_U_Client_TimeoutHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Client_TimeoutHandler& operator= (const Test_U_Client_TimeoutHandler&))
 
-  AlternatingModeState_t             alternatingModeState_;
+  enum AlternatingModeStateType      alternatingModeState_;
   Test_U_IConnector_t*               connector_;
   mutable ACE_SYNCH_MUTEX            lock_;
   unsigned int                       maximumNumberOfConnections_;
-  ActionMode_t                       mode_;
+  enum ActionModeType                mode_;
   ACE_INET_Addr                      peerAddress_;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else

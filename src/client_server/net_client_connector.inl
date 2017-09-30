@@ -25,7 +25,8 @@
 #include "net_common_tools.h"
 #include "net_macros.h"
 
-template <typename HandlerType,
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
           typename ConnectorType,
           typename AddressType,
           typename ConfigurationType,
@@ -35,7 +36,8 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
-Net_Client_Connector_T<HandlerType,
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       HandlerType,
                        ConnectorType,
                        AddressType,
                        ConfigurationType,
@@ -62,7 +64,8 @@ Net_Client_Connector_T<HandlerType,
     connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 }
 
-template <typename HandlerType,
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
           typename ConnectorType,
           typename AddressType,
           typename ConfigurationType,
@@ -72,7 +75,8 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
-Net_Client_Connector_T<HandlerType,
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       HandlerType,
                        ConnectorType,
                        AddressType,
                        ConfigurationType,
@@ -91,7 +95,8 @@ Net_Client_Connector_T<HandlerType,
                 ACE_TEXT ("failed to ACE_Connector::close(): \"%m\", continuing\n")));
 }
 
-template <typename HandlerType,
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
           typename ConnectorType,
           typename AddressType,
           typename ConfigurationType,
@@ -102,7 +107,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType>
 Net_TransportLayerType
-Net_Client_Connector_T<HandlerType,
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       HandlerType,
                        ConnectorType,
                        AddressType,
                        ConfigurationType,
@@ -137,7 +143,8 @@ Net_Client_Connector_T<HandlerType,
   return result;
 }
 
-template <typename HandlerType,
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
           typename ConnectorType,
           typename AddressType,
           typename ConfigurationType,
@@ -148,7 +155,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType>
 ACE_HANDLE
-Net_Client_Connector_T<HandlerType,
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       HandlerType,
                        ConnectorType,
                        AddressType,
                        ConfigurationType,
@@ -188,7 +196,8 @@ Net_Client_Connector_T<HandlerType,
   return handler_p->get_handle ();
 }
 
-template <typename HandlerType,
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
           typename ConnectorType,
           typename AddressType,
           typename ConfigurationType,
@@ -199,7 +208,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType>
 int
-Net_Client_Connector_T<HandlerType,
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       HandlerType,
                        ConnectorType,
                        AddressType,
                        ConfigurationType,
@@ -246,7 +256,8 @@ Net_Client_Connector_T<HandlerType,
   else
     return 0;
 }
-template <typename HandlerType,
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
           typename ConnectorType,
           typename AddressType,
           typename ConfigurationType,
@@ -257,7 +268,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType>
 int
-Net_Client_Connector_T<HandlerType,
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       HandlerType,
                        ConnectorType,
                        AddressType,
                        ConfigurationType,
@@ -286,7 +298,8 @@ Net_Client_Connector_T<HandlerType,
 
 /////////////////////////////////////////
 
-template <typename HandlerType,
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
           typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
@@ -294,12 +307,15 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
-Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       Net_UDPConnectionBase_T<ACE_SYNCH_USE,
+                                               HandlerType,
                                                ConfigurationType,
                                                StateType,
                                                StatisticContainerType,
                                                HandlerConfigurationType,
                                                StreamType,
+                                               Common_Timer_Manager_t,
                                                UserDataType>,
                        ConnectorType,
                        ACE_INET_Addr,
@@ -321,7 +337,8 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
     connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 }
 
-template <typename HandlerType,
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
           typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
@@ -330,12 +347,15 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType>
 ACE_HANDLE
-Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       Net_UDPConnectionBase_T<ACE_SYNCH_USE,
+                                               HandlerType,
                                                ConfigurationType,
                                                StateType,
                                                StatisticContainerType,
                                                HandlerConfigurationType,
                                                StreamType,
+                                               Common_Timer_Manager_t,
                                                UserDataType>,
                        ConnectorType,
                        ACE_INET_Addr,
@@ -373,7 +393,8 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   return handler_p->get_handle ();
 }
 
-template <typename HandlerType,
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
           typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
@@ -382,12 +403,15 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType>
 int
-Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       Net_UDPConnectionBase_T<ACE_SYNCH_USE,
+                                               HandlerType,
                                                ConfigurationType,
                                                StateType,
                                                StatisticContainerType,
                                                HandlerConfigurationType,
                                                StreamType,
+                                               Common_Timer_Manager_t,
                                                UserDataType>,
                        ConnectorType,
                        ACE_INET_Addr,
@@ -435,7 +459,8 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
   else
     return 0;
 }
-template <typename HandlerType,
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
           typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
@@ -444,12 +469,15 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType>
 int
-Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       Net_UDPConnectionBase_T<ACE_SYNCH_USE,
+                                               HandlerType,
                                                ConfigurationType,
                                                StateType,
                                                StatisticContainerType,
                                                HandlerConfigurationType,
                                                StreamType,
+                                               Common_Timer_Manager_t,
                                                UserDataType>,
                        ConnectorType,
                        ACE_INET_Addr,
@@ -566,7 +594,8 @@ Net_Client_Connector_T<Net_UDPConnectionBase_T<HandlerType,
 /////////////////////////////////////////
 
 #if defined (ACE_HAS_NETLINK)
-template <typename HandlerType,
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
           typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
@@ -574,7 +603,8 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
-Net_Client_Connector_T<HandlerType,
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       HandlerType,
                        ConnectorType,
                        Net_Netlink_Addr,
                        ConfigurationType,
@@ -595,7 +625,8 @@ Net_Client_Connector_T<HandlerType,
     connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 }
 
-template <typename HandlerType,
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
           typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
@@ -604,7 +635,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType>
 ACE_HANDLE
-Net_Client_Connector_T<HandlerType,
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       HandlerType,
                        ConnectorType,
                        Net_Netlink_Addr,
                        ConfigurationType,
@@ -643,7 +675,8 @@ Net_Client_Connector_T<HandlerType,
   return handler_p->get_handle ();
 }
 
-template <typename HandlerType,
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
           typename ConnectorType,
           typename ConfigurationType,
           typename StateType,
@@ -652,7 +685,8 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType>
 int
-Net_Client_Connector_T<HandlerType,
+Net_Client_Connector_T<ACE_SYNCH_USE,
+                       HandlerType,
                        ConnectorType,
                        Net_Netlink_Addr,
                        ConfigurationType,

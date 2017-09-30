@@ -26,14 +26,17 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
+#include "common_isubscribe.h"
 #include "common_referencecounter_base.h"
 
 #include "stream_stat_statistic_handler.h"
 
+#include "net_connection_manager.h"
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
 
 // forward declarations
+class ACE_Message_Block;
 enum Net_Connection_Status;
 
 template <typename AddressType,
@@ -49,11 +52,18 @@ class Net_ConnectionBase_T
                                     ConfigurationType,
                                     StateType,
                                     StatisticContainerType>
+ , public Common_IRegister
 {
   typedef Common_ReferenceCounterBase inherited;
 
  public:
   // convenient types
+  typedef Common_ReferenceCounterBase REFERENCECOUNTER_T;
+  typedef Net_Connection_Manager_T<AddressType,
+                                   ConfigurationType,
+                                   StateType,
+                                   StatisticContainerType,
+                                   UserDataType> CONNECTION_MANAGER_T;
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
                             StateType,
@@ -65,30 +75,30 @@ class Net_ConnectionBase_T
                                    UserDataType> ICONNECTION_MANAGER_T;
 
   // implement (part of) Net_IConnection_T
-  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; };
+  using REFERENCECOUNTER_T::decrease;
+  using REFERENCECOUNTER_T::increase;
+  // missing: Common_IStatistic_T
   // *NOTE*: when using a connection manager, the (default) configuration is
   //         retrieved in the ctor
   inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); return true; };
+  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; };
+  // missing: Common_IDumpState
+  // missing: info
+  // missing: id
+  // missing: notification
   inline virtual const StateType& state () const { return state_; };
   inline virtual enum Net_Connection_Status status () const { return state_.status; };
+  // missing: close
+  // missing: waitForCompletion
 
  protected:
   Net_ConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
                         const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   virtual ~Net_ConnectionBase_T ();
 
-  // (de-)register with the connection manager (if any)
-//#if defined (__GNUG__)
-//  // *WORKAROUND*: the GNU linker (as of g++ 4.9.2) generates broken code ("pure
-//  //               virtual method called" for
-//  //               Common_IReferenceCount::increase()) when passing 'this' (i.e.
-//  //               the default) to the network managers' registerc() method
-//  //               --> pass in the 'correct' handle as a workaround
-  bool registerc (ICONNECTION_T* = NULL);
-//#else
-//  bool registerc ();
-//#endif
-  void deregister ();
+  // implement Common_IRegister
+  virtual bool registerc ();
+  virtual void deregister ();
 
   ConfigurationType*     configuration_;
   StateType              state_;
@@ -98,21 +108,20 @@ class Net_ConnectionBase_T
 
  private:
   // convenient types
-  typedef ACE_Singleton<TimerManagerType,
-                        ACE_SYNCH_MUTEX> TIMER_MANAGER_SINGLETON_T;
   typedef Stream_StatisticHandler_T<StatisticContainerType> STATISTIC_HANDLER_T;
-
-  ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T ())
-  ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&))
-  ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T& operator= (const Net_ConnectionBase_T&))
-
-  // convenient types
   typedef Net_ConnectionBase_T<AddressType,
                                ConfigurationType,
                                StateType,
                                StatisticContainerType,
                                TimerManagerType,
                                UserDataType> OWN_TYPE_T;
+
+  ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T ())
+  ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T (const Net_ConnectionBase_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_ConnectionBase_T& operator= (const Net_ConnectionBase_T&))
+
+  // helper methods
+  ACE_Message_Block* allocateMessage (unsigned int); // requested size
 
   // timer
   STATISTIC_HANDLER_T    statisticHandler_;

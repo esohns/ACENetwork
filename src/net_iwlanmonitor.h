@@ -99,7 +99,7 @@ template <typename AddressType,
           typename ConfigurationType>
 class Net_IWLANMonitor_T
  : public Net_IWLANMonitorBase
- , public Common_IGetR_T<ConfigurationType>
+ , public Common_IGetR_2_T<ConfigurationType>
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
  , public Common_IGet1R_T<std::string> // cache access

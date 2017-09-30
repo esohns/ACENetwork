@@ -53,7 +53,7 @@ template <typename StreamStateType,
           typename ConfigurationType,
           ////////////////////////////////
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
           typename ModuleHandlerConfigurationType,
           ////////////////////////////////
@@ -143,7 +143,7 @@ class HTTP_Stream_T
                                 SessionDataType,
                                 SessionDataContainerType,
                                 StatisticContainerType,
-                                StatisticHandlerType,
+                                TimerManagerType,
                                 UserDataType> PARSER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
@@ -164,7 +164,7 @@ class HTTP_Stream_T
                                                         SessionMessageType,
                                                         HTTP_Method_t,
                                                         HTTP_Statistic_t,
-                                                        StatisticHandlerType,
+                                                        TimerManagerType,
                                                         SessionDataType,
                                                         SessionDataContainerType> STATISTIC_READER_T;
   typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
@@ -175,7 +175,7 @@ class HTTP_Stream_T
                                                         SessionMessageType,
                                                         HTTP_Method_t,
                                                         HTTP_Statistic_t,
-                                                        StatisticHandlerType,
+                                                        TimerManagerType,
                                                         SessionDataType,
                                                         SessionDataContainerType> STATISTIC_WRITER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,

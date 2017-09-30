@@ -77,7 +77,26 @@ class Net_Connection_Manager_T
   // configuration / initialization
   void initialize (unsigned int); // maximum number of concurrent connections
 
-  // implement Net_IConnectionManager_T
+  // implement (part of) Net_IConnectionManager_T
+  virtual bool lock (bool = true); // block ?
+  virtual int unlock (bool = false); // unblock ?
+  inline virtual const typename ITASKCONTROL_T::MUTEX_T& getR () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (typename ITASKCONTROL_T::MUTEX_T ()); ACE_NOTREACHED (return typename ITASKCONTROL_T::MUTEX_T ();) };
+  virtual void start ();
+  virtual void stop (bool = true,  // wait for completion ?
+                     bool = true); // locked access ?
+  virtual bool isRunning () const;
+  virtual void wait () const;
+  virtual void dump_state () const;
+  virtual void abort (enum Net_Connection_AbortStrategy); // strategy
+                                                          // *IMPORTANT NOTE*: passing 'true' will hog the CPU --> use wait() instead
+  virtual void abort (bool = false); // wait for completion ?
+  virtual unsigned int count () const; // return value: # of connections
+                                       // *IMPORTANT NOTE*: this API really makes sense only AFTER stop() has been
+                                       //                   invoked, i.e. when new connections will be rejected;
+                                       //                   otherwise this may block indefinetly
+  virtual bool registerc (ICONNECTION_T*); // connection handle
+  virtual void deregister (ICONNECTION_T*); // connection handle
+
   // *WARNING*: these two methods are NOT (!) re-entrant. If you want to set a
   //            specific configuration /user data per connection, use the
   //            locking API (see below)
@@ -87,46 +106,14 @@ class Net_Connection_Manager_T
   virtual void get (ConfigurationType*&, // return value: (default)
                                          // connection handler configuration
                     UserDataType*&);     // return value: (stream) user data
-
   virtual ICONNECTION_T* operator[] (unsigned int) const; // index
   virtual ICONNECTION_T* get (Net_ConnectionId_t) const; // id
   virtual ICONNECTION_T* get (const AddressType&, // address
                               bool = true) const; // peer ?
-
-  virtual bool registerc (ICONNECTION_T*); // connection handle
-  virtual bool deregister (ICONNECTION_T*); // connection handle
-
-  // implement Net_IConnectionManagerBase
-  virtual void abort (enum Net_Connection_AbortStrategy); // strategy
-  // *IMPORTANT NOTE*: passing 'true' will hog the CPU --> use wait() instead
-  virtual void abort (bool = false); // wait for completion ?
-  virtual unsigned int count () const; // return value: # of connections
-  // *IMPORTANT NOTE*: this API really makes sense only AFTER stop() has been
-  //                   invoked, i.e. when new connections will be rejected;
-  //                   otherwise this may block indefinetly
-  virtual void wait () const;
-
-  // ---------------------------------------------------------------------------
-
-  // implement Common_ITaskControl_T
-  virtual void start ();
-  virtual void stop (bool = true,  // wait for completion ?
-                     bool = true); // locked access ?
-  virtual bool isRunning () const;
-  inline void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
-
-  // implement Common_ILock
-  virtual bool lock (bool = true); // block ?
-  virtual int unlock (bool = false); // unblock ?
+  virtual ICONNECTION_T* get (ACE_HANDLE) const; // socket handle
 
   // implement (part of) Common_IStatistic_T
   virtual void report () const;
-
-  // implement Common_IDumpState
-  virtual void dump_state () const;
-
- protected:
-  virtual ICONNECTION_T* get (ACE_HANDLE) const; // socket handle
 
  private:
   Net_Connection_Manager_T ();
@@ -145,8 +132,8 @@ class Net_Connection_Manager_T
   typedef ACE_DLList_Iterator<ICONNECTION_T> CONNECTION_CONTAINER_ITERATOR_T;
   typedef ACE_DLList_Reverse_Iterator<ICONNECTION_T> CONNECTION_CONTAINER_REVERSEITERATOR_T;
 
-  // implement (part of) Common_IControl
-  inline virtual void initialize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  // override/hide (part of) Common_ITaskControl
+  inline void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   // implement (part of) Common_IStatistic_T
   // *WARNING*: this assumes lock_ is being held

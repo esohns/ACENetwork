@@ -67,9 +67,6 @@ class Test_U_Module_ProtocolHandler
   virtual void handleSessionMessage (Test_U_SessionMessage*&, // session message handle
                                      bool&);                  // return value: pass message downstream ?
 
-  // implement Common_ITimerHandler
-  virtual void handleTimeout (const void*); // asynchronous completion token
-
   // implement Common_IDumpState
   virtual void dump_state () const;
 
@@ -88,6 +85,9 @@ class Test_U_Module_ProtocolHandler
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler (const Test_U_Module_ProtocolHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler& operator= (const Test_U_Module_ProtocolHandler&))
+
+  // implement Common_ITimerHandler
+  virtual void handle (const void*); // asynchronous completion token
 
   // timer
   Common_TimerHandler pingHandler_;

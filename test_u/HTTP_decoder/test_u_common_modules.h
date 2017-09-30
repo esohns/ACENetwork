@@ -24,6 +24,7 @@
 #include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
+#include "common_timer_manager_common.h"
 
 #include "stream_common.h"
 #include "stream_session_data.h"
@@ -84,7 +85,7 @@ typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       Test_U_SessionMessage,
                                                       HTTP_Method_t,
                                                       HTTP_Statistic_t,
-                                                      HTTP_StatisticHandler_Reactor_t,
+                                                      Common_Timer_Manager_t,
                                                       struct Test_U_HTTPDecoder_SessionData,
                                                       Test_U_HTTPDecoder_SessionData_t> Test_U_Module_StatisticReport_ReaderTask_t;
 typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
@@ -95,31 +96,31 @@ typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       Test_U_SessionMessage,
                                                       HTTP_Method_t,
                                                       HTTP_Statistic_t,
-                                                      HTTP_StatisticHandler_Reactor_t,
+                                                      Common_Timer_Manager_t,
                                                       struct Test_U_HTTPDecoder_SessionData,
                                                       Test_U_HTTPDecoder_SessionData_t> Test_U_Module_StatisticReport_WriterTask_t;
-typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
-                                                      Common_TimePolicy_t,
-                                                      struct Test_U_ModuleHandlerConfiguration,
-                                                      Test_U_ControlMessage_t,
-                                                      Test_U_Message,
-                                                      Test_U_SessionMessage,
-                                                      HTTP_Method_t,
-                                                      HTTP_Statistic_t,
-                                                      HTTP_StatisticHandler_Proactor_t,
-                                                      struct Test_U_HTTPDecoder_SessionData,
-                                                      Test_U_HTTPDecoder_SessionData_t> Test_U_Module_StatisticReport_AsynchReaderTask_t;
-typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
-                                                      Common_TimePolicy_t,
-                                                      struct Test_U_ModuleHandlerConfiguration,
-                                                      Test_U_ControlMessage_t,
-                                                      Test_U_Message,
-                                                      Test_U_SessionMessage,
-                                                      HTTP_Method_t,
-                                                      HTTP_Statistic_t,
-                                                      HTTP_StatisticHandler_Proactor_t,
-                                                      struct Test_U_HTTPDecoder_SessionData,
-                                                      Test_U_HTTPDecoder_SessionData_t> Test_U_Module_StatisticReport_AsynchWriterTask_t;
+//typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+//                                                      Common_TimePolicy_t,
+//                                                      struct Test_U_ModuleHandlerConfiguration,
+//                                                      Test_U_ControlMessage_t,
+//                                                      Test_U_Message,
+//                                                      Test_U_SessionMessage,
+//                                                      HTTP_Method_t,
+//                                                      HTTP_Statistic_t,
+//                                                      HTTP_StatisticHandler_Proactor_t,
+//                                                      struct Test_U_HTTPDecoder_SessionData,
+//                                                      Test_U_HTTPDecoder_SessionData_t> Test_U_Module_StatisticReport_AsynchReaderTask_t;
+//typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+//                                                      Common_TimePolicy_t,
+//                                                      struct Test_U_ModuleHandlerConfiguration,
+//                                                      Test_U_ControlMessage_t,
+//                                                      Test_U_Message,
+//                                                      Test_U_SessionMessage,
+//                                                      HTTP_Method_t,
+//                                                      HTTP_Statistic_t,
+//                                                      HTTP_StatisticHandler_Proactor_t,
+//                                                      struct Test_U_HTTPDecoder_SessionData,
+//                                                      Test_U_HTTPDecoder_SessionData_t> Test_U_Module_StatisticReport_AsynchWriterTask_t;
 
 typedef Stream_Module_FileWriter_T<ACE_MT_SYNCH,
                                    Common_TimePolicy_t,
@@ -157,13 +158,13 @@ DATASTREAM_MODULE_DUPLEX (struct Test_U_HTTPDecoder_SessionData,      // session
                           Test_U_Module_StatisticReport_ReaderTask_t, // reader type
                           Test_U_Module_StatisticReport_WriterTask_t, // writer type
                           Test_U_Module_StatisticReport);             // name
-DATASTREAM_MODULE_DUPLEX (struct Test_U_HTTPDecoder_SessionData,            // session data type
-                          enum Stream_SessionMessageType,                   // session event type
-                          struct Test_U_ModuleHandlerConfiguration,         // module handler configuration type
-                          Test_U_IStreamNotify_t,                           // stream notification interface type
-                          Test_U_Module_StatisticReport_AsynchReaderTask_t, // reader type
-                          Test_U_Module_StatisticReport_AsynchWriterTask_t, // writer type
-                          Test_U_Module_AsynchStatisticReport);             // name
+//DATASTREAM_MODULE_DUPLEX (struct Test_U_HTTPDecoder_SessionData,            // session data type
+//                          enum Stream_SessionMessageType,                   // session event type
+//                          struct Test_U_ModuleHandlerConfiguration,         // module handler configuration type
+//                          Test_U_IStreamNotify_t,                           // stream notification interface type
+//                          Test_U_Module_StatisticReport_AsynchReaderTask_t, // reader type
+//                          Test_U_Module_StatisticReport_AsynchWriterTask_t, // writer type
+//                          Test_U_Module_AsynchStatisticReport);             // name
 
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_HTTPDecoder_SessionData,    // session data type
                               enum Stream_SessionMessageType,           // session event type

@@ -29,6 +29,8 @@
 #include "ace/Time_Value.h"
 #include "ace/SSL/SSL_SOCK_Connector.h"
 
+#include "common_timer_manager_common.h"
+
 #include "stream_common.h"
 
 #include "net_asynch_tcpsockethandler.h"
@@ -52,7 +54,7 @@
 typedef HTTP_Stream_T<struct HTTP_StreamState,
                       struct HTTP_StreamConfiguration,
                       HTTP_Statistic_t,
-                      HTTP_StatisticHandler_Reactor_t,
+                      Common_Timer_Manager_t,
                       struct HTTP_ModuleHandlerConfiguration,
                       struct HTTP_Stream_SessionData,
                       HTTP_Stream_SessionData_t,
@@ -60,17 +62,17 @@ typedef HTTP_Stream_T<struct HTTP_StreamState,
                       HTTP_Message_t,
                       HTTP_SessionMessage,
                       struct HTTP_Stream_UserData> HTTP_Stream_t;
-typedef HTTP_Stream_T<struct HTTP_StreamState,
-                      struct HTTP_StreamConfiguration,
-                      HTTP_Statistic_t,
-                      HTTP_StatisticHandler_Proactor_t,
-                      struct HTTP_ModuleHandlerConfiguration,
-                      struct HTTP_Stream_SessionData,
-                      HTTP_Stream_SessionData_t,
-                      ACE_Message_Block,
-                      HTTP_Message_t,
-                      HTTP_SessionMessage,
-                      struct HTTP_Stream_UserData> HTTP_AsynchStream_t;
+//typedef HTTP_Stream_T<struct HTTP_StreamState,
+//                      struct HTTP_StreamConfiguration,
+//                      HTTP_Statistic_t,
+//                      HTTP_StatisticHandler_Proactor_t,
+//                      struct HTTP_ModuleHandlerConfiguration,
+//                      struct HTTP_Stream_SessionData,
+//                      HTTP_Stream_SessionData_t,
+//                      ACE_Message_Block,
+//                      HTTP_Message_t,
+//                      HTTP_SessionMessage,
+//                      struct HTTP_Stream_UserData> HTTP_AsynchStream_t;
 
 //struct HTTP_ConnectionConfiguration;
 struct HTTP_ConnectionState
@@ -113,7 +115,7 @@ typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct HTTP_SocketHandl
                                   struct Net_ConnectionConfiguration,
                                   struct HTTP_ConnectionState,
                                   HTTP_Statistic_t,
-                                  HTTP_StatisticHandler_Reactor_t,
+                                  Common_Timer_Manager_t,
                                   HTTP_Stream_t,
                                   struct HTTP_Stream_UserData,
                                   struct Stream_ModuleConfiguration,
@@ -123,8 +125,8 @@ typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<struct HTTP
                                         struct Net_ConnectionConfiguration,
                                         struct HTTP_ConnectionState,
                                         HTTP_Statistic_t,
-                                        HTTP_StatisticHandler_Proactor_t,
-                                        HTTP_AsynchStream_t,
+                                        Common_Timer_Manager_t,
+                                        HTTP_Stream_t,
                                         struct HTTP_Stream_UserData,
                                         struct Stream_ModuleConfiguration,
                                         struct HTTP_ModuleHandlerConfiguration> HTTP_AsynchTCPHandler_t;

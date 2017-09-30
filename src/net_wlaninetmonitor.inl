@@ -48,9 +48,9 @@ Net_WLANInetMonitor_T<ACE_SYNCH_USE,
                       TimePolicyType,
                       ConfigurationType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                      UserDataType>::onConnect (REFGUID deviceIdentifier_in,
+                      UserDataType>::onConnect (REFGUID interfaceIdentifier_in,
 #else
-                      UserDataType>::onConnect (const std::string& deviceIdentifier_in,
+                      UserDataType>::onConnect (const std::string& interfaceIdentifier_in,
 #endif
                                                 const std::string& SSID_in,
                                                 bool success_in)
@@ -69,7 +69,7 @@ Net_WLANInetMonitor_T<ACE_SYNCH_USE,
          )
     {
       try {
-        (*(iterator++))->onConnect (deviceIdentifier_in,
+        (*(iterator++))->onConnect (interfaceIdentifier_in,
                                     SSID_in,
                                     success_in);
       } catch (...) {
@@ -84,9 +84,9 @@ Net_WLANInetMonitor_T<ACE_SYNCH_USE,
     return;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (!Net_Common_Tools::interfaceToIPAddress (Common_Tools::GUIDToString (deviceIdentifier_in),
+  if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
 #else
-  if (!Net_Common_Tools::interfaceToIPAddress (deviceIdentifier_in,
+  if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
                                                inherited::connection_,
 #endif
                                                inherited::localSAP_,
@@ -95,11 +95,11 @@ Net_WLANInetMonitor_T<ACE_SYNCH_USE,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
-                ACE_TEXT (Net_Common_Tools::interfaceToString (inherited::clientHandle_, deviceIdentifier_in).c_str ())));
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ())));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
-                ACE_TEXT (deviceIdentifier_in.c_str ())));
+                ACE_TEXT (interfaceIdentifier_in.c_str ())));
 #endif
     return;
   } // end IF
@@ -107,14 +107,14 @@ Net_WLANInetMonitor_T<ACE_SYNCH_USE,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\"%s\": connected to SSID %s: %s <---> %s\n"),
-              ACE_TEXT (Net_Common_Tools::interfaceToString (inherited::clientHandle_, deviceIdentifier_in).c_str ()),
+              ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
               ACE_TEXT (SSID_in.c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\"%s\": connected to SSID %s: %s <---> %s\n"),
-              ACE_TEXT (deviceIdentifier_in.c_str ()),
+              ACE_TEXT (interfaceIdentifier_in.c_str ()),
               ACE_TEXT (SSID_in.c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));

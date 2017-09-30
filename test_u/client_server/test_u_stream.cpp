@@ -198,18 +198,18 @@ Test_U_Stream::ping ()
                 ACE_TEXT ("ProtocolHandler")));
     return;
   } // end IF
-  Test_U_Module_ProtocolHandler* protocolHandler_impl_p = NULL;
-  protocolHandler_impl_p =
-    dynamic_cast<Test_U_Module_ProtocolHandler*> (module_p->writer ());
-  if (!protocolHandler_impl_p)
+  Common_ITimerHandler* itimer_handler_p =
+    dynamic_cast<Common_ITimerHandler*> (module_p->writer ());
+  if (!itimer_handler_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_ProtocolHandler> failed, returning\n")));
+                ACE_TEXT ("dynamic_cast<Common_ITimerHandler>(0x%@) failed, returning\n"),
+                module_p->writer ()));
     return;
   } // end IF
 
   // delegate to this module
-  protocolHandler_impl_p->handleTimeout (NULL);
+  itimer_handler_p->handle (NULL);
 }
 
 bool
@@ -231,9 +231,9 @@ Test_U_Stream::collect (Net_Statistic_t& data_out)
                 ACE_TEXT ("StatisticReport")));
     return false;
   } // end IF
-  Test_U_Module_StatisticReport_WriterTask_t* statistic_report_impl =
+  Test_U_Module_StatisticReport_WriterTask_t* statistic_report_impl_p =
     dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
-  if (!statistic_report_impl)
+  if (!statistic_report_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t> failed, aborting\n")));
@@ -259,7 +259,7 @@ Test_U_Stream::collect (Net_Statistic_t& data_out)
   // delegate to the statistics module
   bool result_2 = false;
   try {
-    result_2 = statistic_report_impl->collect (data_out);
+    result_2 = statistic_report_impl_p->collect (data_out);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), continuing\n")));
@@ -286,9 +286,9 @@ Test_U_Stream::report () const
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::report"));
 
-//   Net_Module_Statistic_ReaderTask_t* statistic_report_impl = NULL;
-//   statistic_report_impl = dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//runtimeStatistic_.writer ());
-//   if (!statistic_report_impl)
+//   Net_Module_Statistic_ReaderTask_t* statistic_report_impl_p = NULL;
+//   statistic_report_impl_p = dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//runtimeStatistic_.writer ());
+//   if (!statistic_report_impl_p)
 //   {
 //     ACE_DEBUG ((LM_ERROR,
 //                 ACE_TEXT ("dynamic_cast<Net_Module_Statistic_ReaderTask_t> failed, returning\n")));
@@ -297,7 +297,7 @@ Test_U_Stream::report () const
 //   } // end IF
 //
 //   // delegate to this module...
-//   return (statistic_report_impl->report ());
+//   return (statistic_report_impl_p->report ());
 
   // just a dummy
   ACE_ASSERT (false);

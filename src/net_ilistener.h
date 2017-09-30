@@ -21,6 +21,7 @@
 #ifndef NET_ILISTENER_H
 #define NET_ILISTENER_H
 
+#include "common_idumpstate.h"
 #include "common_iget.h"
 #include "common_iinitialize.h"
 #include "common_itask.h"
@@ -28,10 +29,12 @@
 template <typename ConfigurationType,
           typename ConnectionConfigurationType>
 class Net_IListener_T
- : public Common_ITaskControl_T<ACE_MT_SYNCH>
- , public Common_IGetR_T<ConnectionConfigurationType>
+ : public Common_ITask_T<ACE_MT_SYNCH,
+                         Common_ILock_T<ACE_MT_SYNCH> >
+ , public Common_IGetR_2_T<ConnectionConfigurationType>
  //, public Common_IInitialize_T<ConnectionConfigurationType>
  , public Common_IInitialize_T<ConfigurationType>
+ , public Common_IDumpState
 {
  public:
   //virtual bool initialize (const ConnectionConfigurationType&) = 0;

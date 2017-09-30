@@ -29,13 +29,13 @@
 class Net_TransportLayer_UDP
  : public Net_InetTransportLayerBase_T<struct Net_UDPSocketConfiguration>
 {
+  typedef Net_InetTransportLayerBase_T<struct Net_UDPSocketConfiguration> inherited;
+
  public:
   Net_TransportLayer_UDP ();
   inline virtual ~Net_TransportLayer_UDP () {};
 
  private:
-  typedef Net_InetTransportLayerBase_T<struct Net_UDPSocketConfiguration> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_UDP (const Net_TransportLayer_UDP&))
   ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_UDP& operator= (const Net_TransportLayer_UDP&))
 };

@@ -24,6 +24,7 @@
 #include "ace/Global_Macros.h"
 #include "ace/SOCK_CODgram.h"
 #include "ace/SOCK_Dgram.h"
+#include "ace/SOCK_Dgram_Bcast.h"
 
 class Net_SOCK_Dgram
  : public ACE_SOCK_Dgram
@@ -56,6 +57,8 @@ class Net_SOCK_Dgram
 class Net_SOCK_CODgram
  : public ACE_SOCK_CODgram
 {
+  typedef ACE_SOCK_CODgram inherited;
+
  public:
   Net_SOCK_CODgram ();
   virtual ~Net_SOCK_CODgram ();
@@ -74,10 +77,19 @@ class Net_SOCK_CODgram
 #endif
 
  private:
-  typedef ACE_SOCK_CODgram inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Net_SOCK_CODgram (const Net_SOCK_CODgram&))
   ACE_UNIMPLEMENTED_FUNC (Net_SOCK_CODgram& operator= (const Net_SOCK_CODgram&))
+};
+
+/////////////////////////////////////////
+
+class Net_SOCK_Dgram_Bcast
+ : public ACE_SOCK_Dgram_Bcast
+{
+  typedef ACE_SOCK_Dgram_Bcast inherited;
+
+ public:
+  using ACE_SOCK::get_remote_addr;
 };
 
 #endif

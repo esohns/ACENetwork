@@ -23,28 +23,30 @@
 
 #include "common_idumpstate.h"
 #include "common_ilock.h"
-#include "common_itask.h"
+#include "common_isubscribe.h"
+#include "common_itaskcontrol.h"
 
 #include "net_common.h"
 #include "net_iconnection.h"
 
 class Net_IConnectionManagerBase
- : public Common_ITaskControl_T<ACE_MT_SYNCH>
- , public Common_ILock
+ : public Common_ITaskControl_T<ACE_MT_SYNCH,
+                                Common_ILock_T<ACE_MT_SYNCH> >
  , public Common_IDumpState
 {
  public:
-  inline virtual ~Net_IConnectionManagerBase () {};
+  // convenient types
+  typedef Common_ITaskControl_T<ACE_MT_SYNCH,
+                                Common_ILock_T<ACE_MT_SYNCH> > ITASKCONTROL_T;
 
   virtual void abort (enum Net_Connection_AbortStrategy) = 0;
   virtual void abort (bool = false) = 0; // wait for completion ? (see wait())
 
   virtual unsigned int count () const = 0; // return value: # of connections
-  // *IMPORTANT NOTE*: this API really makes sense only AFTER stop() has been
-  //                   invoked, i.e. when new connections will be rejected;
-  //                   otherwise this may block indefinetly
 
-  virtual void wait () const = 0;
+  // *NOTE*: the inherited wait() API really makes sense only AFTER stop() has
+  //         been invoked, i.e. when new connections will be rejected; otherwise
+  //         this may block indefinitely
 };
 
 //////////////////////////////////////////
@@ -57,6 +59,10 @@ template <typename AddressType,
           typename UserDataType>
 class Net_IConnectionManager_T
  : public Net_IConnectionManagerBase
+ , public Common_IRegister_T<Net_IConnection_T<AddressType,
+                                               ConfigurationType,
+                                               StateType,
+                                               StatisticContainerType> >
 {
  public:
   // convenience types
@@ -78,10 +84,6 @@ class Net_IConnectionManager_T
   //virtual CONNECTION_T* get (ACE_HANDLE) const = 0; // socket handle
   virtual CONNECTION_T* get (const AddressType&,     // address
                              bool = true) const = 0; // peer address ? : local address
-
-  // *NOTE*: 'register' is a reserved keyword
-  virtual bool registerc (CONNECTION_T*) = 0; // connection handle
-  virtual bool deregister (CONNECTION_T*) = 0; // connection handle
 };
 
 #endif

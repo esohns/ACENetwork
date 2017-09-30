@@ -53,7 +53,7 @@ typedef Net_Client_AsynchConnector_T<IRC_Client_AsynchTCPConnection_t,
                                      IRC_Statistic_t,
                                      struct Net_TCPSocketConfiguration,
                                      struct IRC_Client_SocketHandlerConfiguration,
-                                     IRC_Client_AsynchStream_t,
+                                     IRC_Client_Stream_t,
                                      struct IRC_Client_UserData> IRC_Client_AsynchConnector_t;
 
 typedef IRC_Session_T<IRC_Client_TCPConnection_t,
@@ -102,7 +102,7 @@ typedef Net_Client_AsynchConnector_T<IRC_Client_AsynchIRCSession_t,
                                      IRC_Statistic_t,
                                      struct Net_TCPSocketConfiguration,
                                      struct IRC_Client_SocketHandlerConfiguration,
-                                     IRC_Client_AsynchStream_t,
+                                     IRC_Client_Stream_t,
                                      struct IRC_Client_UserData> IRC_Client_AsynchSessionConnector_t;
 
 #endif

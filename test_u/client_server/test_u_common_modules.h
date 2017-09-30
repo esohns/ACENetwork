@@ -25,6 +25,7 @@
 #include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
+#include "common_timer_manager_common.h"
 
 #include "stream_streammodule_base.h"
 
@@ -54,33 +55,33 @@ typedef Net_Module_TCPSocketHandler_T<ACE_MT_SYNCH,
                                       struct Test_U_StreamSessionData,
                                       Test_U_StreamSessionData_t,
                                       Net_Statistic_t,
-                                      Net_StatisticHandlerReactor_t,
+                                      Common_Timer_Manager_t,
                                       Net_Remote_Comm::MessageHeader,
                                       struct Test_U_UserData> Test_U_Module_TCPSocketHandler;
-typedef Net_Module_TCPSocketHandler_T<ACE_MT_SYNCH,
-                                      Test_U_ControlMessage_t,
-                                      Test_U_Message,
-                                      Test_U_SessionMessage,
-                                      struct Test_U_ModuleHandlerConfiguration,
-                                      enum Stream_ControlType,
-                                      enum Stream_SessionMessageType,
-                                      struct Test_U_StreamState,
-                                      struct Test_U_StreamSessionData,
-                                      Test_U_StreamSessionData_t,
-                                      Net_Statistic_t,
-                                      Net_StatisticHandlerProactor_t,
-                                      Net_Remote_Comm::MessageHeader,
-                                      struct Test_U_UserData> Test_U_Module_AsynchTCPSocketHandler;
+//typedef Net_Module_TCPSocketHandler_T<ACE_MT_SYNCH,
+//                                      Test_U_ControlMessage_t,
+//                                      Test_U_Message,
+//                                      Test_U_SessionMessage,
+//                                      struct Test_U_ModuleHandlerConfiguration,
+//                                      enum Stream_ControlType,
+//                                      enum Stream_SessionMessageType,
+//                                      struct Test_U_StreamState,
+//                                      struct Test_U_StreamSessionData,
+//                                      Test_U_StreamSessionData_t,
+//                                      Net_Statistic_t,
+//                                      Net_StatisticHandlerProactor_t,
+//                                      Net_Remote_Comm::MessageHeader,
+//                                      struct Test_U_UserData> Test_U_Module_AsynchTCPSocketHandler;
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
                               enum Stream_SessionMessageType,           // session event type
                               struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
                               Test_U_IStreamNotify_t,                   // stream notification interface type
                               Test_U_Module_TCPSocketHandler);          // writer type
-DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
-                              enum Stream_SessionMessageType,           // session event type
-                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
-                              Test_U_IStreamNotify_t,                   // stream notification interface type
-                              Test_U_Module_AsynchTCPSocketHandler);    // writer type
+//DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
+//                              enum Stream_SessionMessageType,           // session event type
+//                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+//                              Test_U_IStreamNotify_t,                   // stream notification interface type
+//                              Test_U_Module_AsynchTCPSocketHandler);    // writer type
 
 typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
@@ -90,7 +91,7 @@ typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       Test_U_SessionMessage,
                                                       Net_MessageType_t,
                                                       Net_Statistic_t,
-                                                      Net_StatisticHandlerReactor_t,
+                                                      Common_Timer_Manager_t,
                                                       struct Test_U_StreamSessionData,
                                                       Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_ReaderTask_t;
 typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
@@ -101,31 +102,31 @@ typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       Test_U_SessionMessage,
                                                       Net_MessageType_t,
                                                       Net_Statistic_t,
-                                                      Net_StatisticHandlerReactor_t,
+                                                      Common_Timer_Manager_t,
                                                       struct Test_U_StreamSessionData,
                                                       Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_WriterTask_t;
-typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
-                                                      Common_TimePolicy_t,
-                                                      struct Test_U_ModuleHandlerConfiguration,
-                                                      Test_U_ControlMessage_t,
-                                                      Test_U_Message,
-                                                      Test_U_SessionMessage,
-                                                      Net_MessageType_t,
-                                                      Net_Statistic_t,
-                                                      Net_StatisticHandlerProactor_t,
-                                                      struct Test_U_StreamSessionData,
-                                                      Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_AsynchReaderTask_t;
-typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
-                                                      Common_TimePolicy_t,
-                                                      struct Test_U_ModuleHandlerConfiguration,
-                                                      Test_U_ControlMessage_t,
-                                                      Test_U_Message,
-                                                      Test_U_SessionMessage,
-                                                      Net_MessageType_t,
-                                                      Net_Statistic_t,
-                                                      Net_StatisticHandlerProactor_t,
-                                                      struct Test_U_StreamSessionData,
-                                                      Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_AsynchWriterTask_t;
+//typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
+//                                                      Common_TimePolicy_t,
+//                                                      struct Test_U_ModuleHandlerConfiguration,
+//                                                      Test_U_ControlMessage_t,
+//                                                      Test_U_Message,
+//                                                      Test_U_SessionMessage,
+//                                                      Net_MessageType_t,
+//                                                      Net_Statistic_t,
+//                                                      Net_StatisticHandlerProactor_t,
+//                                                      struct Test_U_StreamSessionData,
+//                                                      Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_AsynchReaderTask_t;
+//typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
+//                                                      Common_TimePolicy_t,
+//                                                      struct Test_U_ModuleHandlerConfiguration,
+//                                                      Test_U_ControlMessage_t,
+//                                                      Test_U_Message,
+//                                                      Test_U_SessionMessage,
+//                                                      Net_MessageType_t,
+//                                                      Net_Statistic_t,
+//                                                      Net_StatisticHandlerProactor_t,
+//                                                      struct Test_U_StreamSessionData,
+//                                                      Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_AsynchWriterTask_t;
 DATASTREAM_MODULE_DUPLEX (struct Test_U_StreamSessionData,            // session data type
                           enum Stream_SessionMessageType,             // session event type
                           struct Test_U_ModuleHandlerConfiguration,   // module handler configuration type
@@ -133,12 +134,12 @@ DATASTREAM_MODULE_DUPLEX (struct Test_U_StreamSessionData,            // session
                           Test_U_Module_StatisticReport_ReaderTask_t, // reader type
                           Test_U_Module_StatisticReport_WriterTask_t, // writer type
                           Test_U_Module_StatisticReport);             // name
-DATASTREAM_MODULE_DUPLEX (struct Test_U_StreamSessionData,                  // session data type
-                          enum Stream_SessionMessageType,                   // session event type
-                          struct Test_U_ModuleHandlerConfiguration,         // module handler configuration type
-                          Test_U_IStreamNotify_t,                           // stream notification interface type
-                          Test_U_Module_StatisticReport_AsynchReaderTask_t, // reader type
-                          Test_U_Module_StatisticReport_AsynchWriterTask_t, // writer type
-                          Test_U_Module_AsynchStatisticReport);             // name
+//DATASTREAM_MODULE_DUPLEX (struct Test_U_StreamSessionData,                  // session data type
+//                          enum Stream_SessionMessageType,                   // session event type
+//                          struct Test_U_ModuleHandlerConfiguration,         // module handler configuration type
+//                          Test_U_IStreamNotify_t,                           // stream notification interface type
+//                          Test_U_Module_StatisticReport_AsynchReaderTask_t, // reader type
+//                          Test_U_Module_StatisticReport_AsynchWriterTask_t, // writer type
+//                          Test_U_Module_AsynchStatisticReport);             // name
 
 #endif

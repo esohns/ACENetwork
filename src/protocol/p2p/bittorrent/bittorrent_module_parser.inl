@@ -437,7 +437,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename UserDataType>
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
@@ -451,7 +451,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
-                            StatisticHandlerType,
+                            TimerManagerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                             UserDataType>::BitTorrent_Module_ParserH_T (ISTREAM_T* stream_in)
 #else
@@ -482,7 +482,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename UserDataType>
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             TimePolicyType,
@@ -496,7 +496,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
-                            StatisticHandlerType,
+                            TimerManagerType,
                             UserDataType>::~BitTorrent_Module_ParserH_T ()
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::~BitTorrent_Module_ParserH_T"));
@@ -517,7 +517,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename UserDataType>
 bool
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
@@ -532,7 +532,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
-                            StatisticHandlerType,
+                            TimerManagerType,
                             UserDataType>::initialize (const ConfigurationType& configuration_in,
                                                       Stream_IAllocator* allocator_in)
 {
@@ -579,7 +579,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename UserDataType>
 void
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
@@ -594,7 +594,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
-                            StatisticHandlerType,
+                            TimerManagerType,
                             UserDataType>::handleDataMessage (DataMessageType*& message_inout,
                                                               bool& passMessageDownstream_out)
 {
@@ -757,7 +757,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename UserDataType>
 void
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
@@ -772,7 +772,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
-                            StatisticHandlerType,
+                            TimerManagerType,
                             UserDataType>::handleSessionMessage (SessionMessageType*& message_inout,
                                                                  bool& passMessageDownstream_out)
 {
@@ -858,7 +858,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename UserDataType>
 bool
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
@@ -873,7 +873,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
-                            StatisticHandlerType,
+                            TimerManagerType,
                             UserDataType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::collect"));
@@ -910,7 +910,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename UserDataType>
 void
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
@@ -925,7 +925,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
-                            StatisticHandlerType,
+                            TimerManagerType,
                             UserDataType>::record (struct BitTorrent_PeerRecord*& record_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::record"));
@@ -1003,7 +1003,7 @@ template <ACE_SYNCH_DECL,
           typename SessionDataType,
           typename SessionDataContainerType,
           typename StatisticContainerType,
-          typename StatisticHandlerType,
+          typename TimerManagerType,
           typename UserDataType>
 void
 BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
@@ -1018,7 +1018,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
                             SessionDataType,
                             SessionDataContainerType,
                             StatisticContainerType,
-                            StatisticHandlerType,
+                            TimerManagerType,
                             UserDataType>::handshake (struct BitTorrent_PeerHandShake*& handShake_inout)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::handshake"));

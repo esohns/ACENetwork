@@ -1,3 +1,4 @@
+
 /***************************************************************************
  *   Copyright (C) 2010 by Erik Sohns   *
  *   erik.sohns@web.de   *
@@ -22,39 +23,34 @@
 #define NET_UDP_SOCKETHANDLER_T_H
 
 #include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
 #include "ace/Reactor_Notification_Strategy.h"
-#include "ace/SOCK_Dgram_Bcast.h"
 #include "ace/Svc_Handler.h"
 #include "ace/Synch_Traits.h"
+
+#include "common_iinitialize.h"
 
 #include "net_sock_dgram.h"
 #include "net_sockethandler_base.h"
 
-/////////////////////////////////////////
-
-class Net_SOCK_Dgram_Bcast
- : public ACE_SOCK_Dgram_Bcast
-{
- public:
-  using ACE_SOCK::get_remote_addr;
-
- private:
-  typedef ACE_SOCK_Dgram_Bcast inherited;
-};
-
-/////////////////////////////////////////
-
-template <typename SocketType,
+template <ACE_SYNCH_DECL,
+          typename SocketType,
           typename ConfigurationType>
 class Net_UDPSocketHandler_T
  : public Net_SocketHandlerBase_T<ConfigurationType>
  , public ACE_Svc_Handler<SocketType,
-                          ACE_MT_SYNCH>
+                          ACE_SYNCH_USE>
+ // *NOTE*: use this to modify the source/target address after initialization
+ , public Common_IReset
 {
+  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
+  typedef ACE_Svc_Handler<SocketType,
+                          ACE_SYNCH_USE> inherited2;
+
  public:
   // convenient types
   typedef ACE_Svc_Handler<SocketType,
-                          ACE_MT_SYNCH> SVC_HANDLER_T;
+                          ACE_SYNCH_USE> SVC_HANDLER_T;
 
   //// override some event handler methods
   //virtual ACE_Event_Handler::Reference_Count add_reference (void);
@@ -82,14 +78,10 @@ class Net_UDPSocketHandler_T
   bool                              errorQueue_;
 #endif
   ACE_Reactor_Notification_Strategy notificationStrategy_;
-
-  bool                              writeOnly_;
+  // *NOTE*: used for read-write connections (i.e. NET_ROLE_CLIENT) only
+  ACE_HANDLE                        writeHandle_;
 
  private:
-  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
-  typedef ACE_Svc_Handler<SocketType,
-                          ACE_MT_SYNCH> inherited2;
-
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T& operator= (const Net_UDPSocketHandler_T&))
 };
@@ -97,17 +89,23 @@ class Net_UDPSocketHandler_T
 /////////////////////////////////////////
 
 // partial specialization (for connected sockets)
-template <typename ConfigurationType>
-class Net_UDPSocketHandler_T<Net_SOCK_CODgram,
+template <ACE_SYNCH_DECL,
+          typename ConfigurationType>
+class Net_UDPSocketHandler_T<ACE_SYNCH_USE,
+                             Net_SOCK_CODgram,
                              ConfigurationType>
  : public Net_SocketHandlerBase_T<ConfigurationType>
  , public ACE_Svc_Handler<Net_SOCK_CODgram,
-                          ACE_MT_SYNCH>
+                          ACE_SYNCH_USE>
 {
+  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
+  typedef ACE_Svc_Handler<Net_SOCK_CODgram,
+                          ACE_SYNCH_USE> inherited2;
+
  public:
   // convenient types
   typedef ACE_Svc_Handler<Net_SOCK_CODgram,
-                          ACE_MT_SYNCH> SVC_HANDLER_T;
+                          ACE_SYNCH_USE> SVC_HANDLER_T;
 
   //// override some event handler methods
   //virtual ACE_Event_Handler::Reference_Count add_reference (void);
@@ -128,7 +126,7 @@ class Net_UDPSocketHandler_T<Net_SOCK_CODgram,
 
  protected:
   Net_UDPSocketHandler_T ();
-  virtual ~Net_UDPSocketHandler_T ();
+  inline virtual ~Net_UDPSocketHandler_T () {};
 
   ACE_INET_Addr                     address_;
 #if defined (ACE_LINUX)
@@ -139,10 +137,6 @@ class Net_UDPSocketHandler_T<Net_SOCK_CODgram,
   bool                              writeOnly_;
 
  private:
-  typedef Net_SocketHandlerBase_T<ConfigurationType> inherited;
-  typedef ACE_Svc_Handler<Net_SOCK_CODgram,
-                          ACE_MT_SYNCH> inherited2;
-
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T& operator= (const Net_UDPSocketHandler_T&))
 };
