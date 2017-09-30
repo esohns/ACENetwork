@@ -606,7 +606,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   int result = -1;
 
   try {
-    result = handle_output (writeHandle_);
+    result = this->handle_output (writeHandle_);
   } catch (...) {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
@@ -666,7 +666,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   size_t bytes_received = 0;
 
   // step1: allocate a data buffer
-  ACE_Message_Block* message_block_p = allocateMessage (PDUSize_);
+  ACE_Message_Block* message_block_p = this->allocateMessage (PDUSize_);
   if (unlikely (!message_block_p))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -783,7 +783,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
       if (unlikely (message_block_p->length () > 0))
       {
         // --> reschedule
-        result = handle_output (result_in.handle ());
+        result = this->handle_output (result_in.handle ());
         if (unlikely (result == -1))
         {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

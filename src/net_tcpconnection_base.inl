@@ -121,7 +121,7 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to allocateMessage(%u), aborting\n"),
-                id (),
+                this->id (),
                 inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize));
     return -1; // <-- remove 'this' from dispatch
   } // end IF
@@ -163,7 +163,7 @@ retry:
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to ACE_(SSL_)SOCK_Stream::recv() (handle was: %d): \"%m\", aborting\n"),
-                    id (),
+                    this->id (),
                     handle_in));
 #endif
 
@@ -187,7 +187,7 @@ retry:
 #else
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("%u: socket (handle was: %d) has been closed by the peer\n"),
-                  id (),
+                  this->id (),
                   handle_in));
 #endif
 
@@ -223,7 +223,7 @@ retry:
     if (error != ESHUTDOWN) // 10058: queue has been deactivate()d
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u/%s: failed to ACE_Stream::put(): \"%m\", aborting\n"),
-                  id (),
+                  this->id (),
                   ACE_TEXT (inherited::stream_.name ().c_str ())));
 
     // clean up
@@ -298,7 +298,7 @@ Net_TCPConnectionBase_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.useThreadPerConnection ? ACE_TEXT ("%u: failed to ACE_Task::getq(): \"%m\", aborting\n")
                                                                                                                    : ACE_TEXT ("%u: failed to ACE_Stream::get(): \"%m\", aborting\n")),
-                  id ()));
+                  this->id ()));
     return -1; // <-- remove 'this' from dispatch
   } // end IF
 continue_:
@@ -361,7 +361,7 @@ continue_:
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to ACE_SOCK_Stream::send_n() (handle was: %d): \"%m\", aborting\n"),
-                    id (),
+                    this->id (),
                     handle_in));
 #endif
 
@@ -387,8 +387,8 @@ continue_:
                   handle_in));
 #else
       ACE_DEBUG ((LM_DEBUG,
-                  id (),
                   ACE_TEXT ("%u: socket (handle was: %d) has been closed by the peer\n"),
+                  this->id (),
                   handle_in));
 #endif
 
@@ -522,7 +522,8 @@ Net_AsynchTCPConnectionBase_T<HandlerType,
   ACE_UNUSED_ARG (handle_in);
 
   int result = -1;
-  Stream_Base_t* stream_p = inherited::stream_.upStream ();
+  typename StreamType::ISTREAM_T::STREAM_T* stream_p =
+      inherited::stream_.upStream ();
   ACE_Message_Block* message_block_p = NULL;
 
   // *TODO*: this is obviously flaky; remove ASAP
@@ -543,7 +544,7 @@ Net_AsynchTCPConnectionBase_T<HandlerType,
     if (error != ESHUTDOWN) // 108
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u/%s: failed to ACE_Stream::get(): \"%m\", aborting\n"),
-                  id (),
+                  this->id (),
                   ACE_TEXT (inherited::stream_.name ().c_str ())));
     return -1;
   } // end IF
@@ -586,7 +587,7 @@ send:
 #endif
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: failed to ACE_Asynch_Write_Stream::writev(%u): \"%m\", aborting\n"),
-                  id (),
+                  this->id (),
                   message_block_p->total_length ()));
 
     // clean up

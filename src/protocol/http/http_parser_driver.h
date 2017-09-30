@@ -25,6 +25,8 @@
 
 #include "ace/Global_Macros.h"
 
+#include "common.h"
+
 #include "http_exports.h"
 #include "http_iparser.h"
 #include "http_parser.h"
@@ -88,7 +90,7 @@ class HTTP_ParserDriver_T
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T (const HTTP_ParserDriver_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_ParserDriver_T& operator= (const HTTP_ParserDriver_T&))
 
-  inline virtual const struct Common_ScannerState& getR_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (struct Common_ScannerState ()); ACE_NOTREACHED (return struct Common_ScannerState ();) };
+  inline virtual const Common_ScannerState& getR_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (Common_ScannerState ()); ACE_NOTREACHED (return Common_ScannerState ();) };
   inline virtual void setP (HTTP_IParser*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
   inline virtual void debug (yyscan_t state_in, bool toggle_in) { HTTP_Scanner_set_debug ((toggle_in ? 1 : 0), state_in); };
   inline virtual bool initialize (yyscan_t&, struct Common_ScannerState*) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };

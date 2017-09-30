@@ -168,9 +168,9 @@ Net_ConnectionBase_T<AddressType,
   } // end IF
 
   try {
-    info (state_.handle,
-          local_address,
-          remote_address);
+    this->info (state_.handle,
+                local_address,
+                remote_address);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_IConnection_T::info(), aborting\n")));
@@ -220,9 +220,9 @@ Net_ConnectionBase_T<AddressType,
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   AddressType local_address, remote_address;
   try {
-    info (handle,
-          local_address,
-          remote_address);
+    this->info (handle,
+                local_address,
+                remote_address);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_IConnection_T::info(), continuing\n")));

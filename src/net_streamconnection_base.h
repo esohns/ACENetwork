@@ -150,7 +150,8 @@ class Net_StreamConnectionBase_T
                            ConfigurationType> ICONNECTOR_T;
   typedef Net_IListener_T<ListenerConfigurationType,
                           ConfigurationType> ILISTENER_T;
-  typedef Net_IConnectionManager_T<AddressType,
+  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                   AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
@@ -293,7 +294,8 @@ class Net_AsynchStreamConnectionBase_T
                            ConfigurationType> ICONNECTOR_T;
   typedef Net_IListener_T<ListenerConfigurationType,
                           ConfigurationType> ILISTENER_T;
-  typedef Net_IConnectionManager_T<AddressType,
+  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                   AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,

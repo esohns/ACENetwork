@@ -31,14 +31,16 @@
 #include "net_iconnection.h"
 #include "net_iconnectionmanager.h"
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType, // connection-
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
           typename UserDataType>
 class Net_Connection_Manager_T
- : public Net_IConnectionManager_T<AddressType,
+ : public Net_IConnectionManager_T<ACE_SYNCH_USE,
+                                   AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
@@ -46,19 +48,21 @@ class Net_Connection_Manager_T
  , public Common_IStatistic_T<StatisticContainerType>
 {
   // singleton has access to the ctor/dtors
-  friend class ACE_Singleton<Net_Connection_Manager_T<AddressType,
+  friend class ACE_Singleton<Net_Connection_Manager_T<ACE_SYNCH_USE,
+                                                      AddressType,
                                                       ConfigurationType,
                                                       StateType,
                                                       StatisticContainerType,
                                                       UserDataType>,
-                             ACE_SYNCH_MUTEX>;
+                             ACE_SYNCH_MUTEX_T>;
 
  public:
   // convenience types
   typedef ConfigurationType CONFIGURATION_T;
   typedef StateType STATE_T;
   typedef UserDataType USERDATA_T;
-  typedef Net_IConnectionManager_T<AddressType,
+  typedef Net_IConnectionManager_T<ACE_SYNCH_USE,
+                                   AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
@@ -67,12 +71,13 @@ class Net_Connection_Manager_T
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
-  typedef ACE_Singleton<Net_Connection_Manager_T<AddressType,
+  typedef ACE_Singleton<Net_Connection_Manager_T<ACE_SYNCH_USE,
+                                                 AddressType,
                                                  ConfigurationType,
                                                  StateType,
                                                  StatisticContainerType,
                                                  UserDataType>,
-                        ACE_SYNCH_MUTEX> SINGLETON_T;
+                        ACE_SYNCH_MUTEX_T> SINGLETON_T;
 
   // configuration / initialization
   void initialize (unsigned int); // maximum number of concurrent connections
@@ -80,7 +85,7 @@ class Net_Connection_Manager_T
   // implement (part of) Net_IConnectionManager_T
   virtual bool lock (bool = true); // block ?
   virtual int unlock (bool = false); // unblock ?
-  inline virtual const typename ITASKCONTROL_T::MUTEX_T& getR () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (typename ITASKCONTROL_T::MUTEX_T ()); ACE_NOTREACHED (return typename ITASKCONTROL_T::MUTEX_T ();) };
+  inline virtual const typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T& getR () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T ()); ACE_NOTREACHED (return typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T ();) };
   virtual void start ();
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
@@ -122,7 +127,8 @@ class Net_Connection_Manager_T
   virtual ~Net_Connection_Manager_T ();
 
   // convenient types
-  typedef Net_Connection_Manager_T<AddressType,
+  typedef Net_Connection_Manager_T<ACE_SYNCH_USE,
+                                   AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,

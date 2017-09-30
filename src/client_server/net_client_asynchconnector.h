@@ -75,12 +75,14 @@ class Net_Client_AsynchConnector_T
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
-  typedef Net_Connection_Manager_T<AddressType,
+  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                   AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
                                    UserDataType> CONNECTION_MANAGER_T;
-  typedef Net_IConnectionManager_T<AddressType,
+  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                   AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
@@ -230,12 +232,14 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
-  typedef Net_Connection_Manager_T<ACE_INET_Addr,
+  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                   ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
                                    UserDataType> CONNECTION_MANAGER_T;
-  typedef Net_IConnectionManager_T<ACE_INET_Addr,
+  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                   ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
@@ -348,12 +352,14 @@ class Net_Client_AsynchConnector_T<HandlerType,
                                   StreamType,
                                   enum Stream_StateMachine_ControlState> ISTREAM_CONNECTION_T;
 
-  typedef Net_Connection_Manager_T<Net_Netlink_Addr,
+  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                   Net_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
                                    UserDataType> CONNECTION_MANAGER_T;
-  typedef Net_IConnectionManager_T<Net_Netlink_Addr,
+  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                   Net_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,

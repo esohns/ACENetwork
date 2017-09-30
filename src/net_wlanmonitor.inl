@@ -102,10 +102,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   if (connection_)
   {
     dbus_connection_close (connection_);
-    int result = inherited::wait ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_TaskBase_T::wait(): \"%m\", continuing\n")));
+    inherited::wait ();
     dbus_connection_unref (connection_);
   } // end IF
 #endif
@@ -238,7 +235,7 @@ continue_:
                                                     device_path_string));
   else
     identifierToObjectPath_ = getDevices ();
-  for (DEVICEIDENTIFIERS_ITERATOR_T iterator = identifierToObjectPath_.begin ();
+  for (INTERFACEIDENTIFIERS_ITERATOR_T iterator = identifierToObjectPath_.begin ();
        iterator != identifierToObjectPath_.end ();
        ++iterator)
   {
@@ -327,10 +324,7 @@ error:
   if (connection_)
   {
     dbus_connection_close (connection_);
-    int result = inherited::wait ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_TaskBase_T::wait(): \"%m\", continuing\n")));
+    inherited::wait ();
     dbus_connection_unref (connection_);
     connection_ = NULL;
   } // end IF
@@ -381,10 +375,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   ACE_ASSERT (connection_);
 
   dbus_connection_close (connection_);
-  int result = inherited::wait ();
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_TaskBase_T::wait(): \"%m\", continuing\n")));
+  inherited::wait ();
   dbus_connection_unref (connection_);
   connection_ = NULL;
 //  deviceDBusPath_.resize (0);
@@ -415,9 +406,9 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 
   std::string result;
 
-  DEVICEIDENTIFIERS_CONSTITERATOR_T iterator =
+  INTERFACEIDENTIFIERS_CONSTITERATOR_T iterator =
     std::find_if (identifierToObjectPath_.begin (), identifierToObjectPath_.end (),
-                  std::bind2nd (DEVICEIDENTIFIERS_FIND_S (),
+                  std::bind2nd (INTERFACEIDENTIFIERS_FIND_S (),
                                 value_in));
   if (iterator != identifierToObjectPath_.end ())
     result = (*iterator).first;
@@ -643,8 +634,8 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
     } // end IF
   } // end IF
 
-  DEVICEIDENTIFIERS_T devices;
-  DEVICEIDENTIFIERS_ITERATOR_T iterator;
+  INTERFACEIDENTIFIERS_T devices;
+  INTERFACEIDENTIFIERS_ITERATOR_T iterator;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   if (InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
 #else
@@ -679,7 +670,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   struct _WLAN_CONNECTION_PARAMETERS wlan_connection_parameters_s;
   bool done = false;
 
-  for (DEVICEIDENTIFIERS_ITERATOR_T iterator = devices.begin ();
+  for (INTERFACEIDENTIFIERS_ITERATOR_T iterator = devices.begin ();
        iterator != devices.end ();
        ++iterator)
   {
@@ -850,7 +841,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 
   struct _WLAN_RAW_DATA raw_data_s;
   ACE_OS::memset (&raw_data_s, 0, sizeof (struct _WLAN_RAW_DATA));
-  for (DEVICEIDENTIFIERS_ITERATOR_T iterator = devices.begin ();
+  for (INTERFACEIDENTIFIERS_ITERATOR_T iterator = devices.begin ();
        iterator != devices.end ();
        ++iterator)
   {
@@ -886,7 +877,7 @@ error:
   // step1: retrieve available and matching connection profile(s)
   std::string device_object_path_string, connection_object_path_string;
   std::string access_point_object_path_string;
-  DEVICEIDENTIFIERS_ITERATOR_T iterator_2;
+  INTERFACEIDENTIFIERS_ITERATOR_T iterator_2;
   iterator = devices.begin ();
 
 next:
@@ -1383,7 +1374,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::getDevices"));
 
-  DEVICEIDENTIFIERS_T result;
+  INTERFACEIDENTIFIERS_T result;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   // sanity check(s)

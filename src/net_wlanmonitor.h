@@ -126,7 +126,7 @@ class Net_WLANMonitor_T
                           const std::string&); // SSID
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  inline virtual std::string deviceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->deviceIdentifier; };
+  inline virtual std::string interfaceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->interfaceIdentifier; };
 #endif
   virtual std::string SSID () const;
 
@@ -134,21 +134,21 @@ class Net_WLANMonitor_T
   // convenient types
   typedef typename SUBSCRIBERS_T::iterator SUBSCRIBERS_ITERATOR_T;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  typedef std::vector<struct _GUID> DEVICEIDENTIFIERS_T;
+  typedef std::vector<struct _GUID> INTERFACEIDENTIFIERS_T;
 #else
   // key: identifier, value: DBus object path
-  typedef std::map<std::string, std::string> DEVICEIDENTIFIERS_T;
-  typedef std::pair<std::string, std::string> DEVICEIDENTIFIERS_PAIR_T;
-  struct DEVICEIDENTIFIERS_FIND_S
-   : public std::binary_function<DEVICEIDENTIFIERS_PAIR_T,
+  typedef std::map<std::string, std::string> INTERFACEIDENTIFIERS_T;
+  typedef std::pair<std::string, std::string> INTERFACEIDENTIFIERS_PAIR_T;
+  struct INTERFACEIDENTIFIERS_FIND_S
+   : public std::binary_function<INTERFACEIDENTIFIERS_PAIR_T,
                                  std::string,
                                  bool>
   {
-    inline bool operator() (const DEVICEIDENTIFIERS_PAIR_T& entry_in, std::string value_in) const { return entry_in.second == value_in; };
+    inline bool operator() (const INTERFACEIDENTIFIERS_PAIR_T& entry_in, std::string value_in) const { return entry_in.second == value_in; };
   };
-  typedef DEVICEIDENTIFIERS_T::const_iterator DEVICEIDENTIFIERS_CONSTITERATOR_T;
+  typedef INTERFACEIDENTIFIERS_T::const_iterator INTERFACEIDENTIFIERS_CONSTITERATOR_T;
 #endif
-  typedef DEVICEIDENTIFIERS_T::iterator DEVICEIDENTIFIERS_ITERATOR_T;
+  typedef INTERFACEIDENTIFIERS_T::iterator INTERFACEIDENTIFIERS_ITERATOR_T;
 
   Net_WLANMonitor_T ();
 
@@ -156,7 +156,7 @@ class Net_WLANMonitor_T
   HANDLE                                  clientHandle_;
 #else
   struct DBusConnection*                  connection_;
-  DEVICEIDENTIFIERS_T                     identifierToObjectPath_;
+  INTERFACEIDENTIFIERS_T                  identifierToObjectPath_;
 //  struct DBusGProxy*                      proxy_;
 #endif
   ConfigurationType*                      configuration_;
@@ -226,7 +226,7 @@ class Net_WLANMonitor_T
   inline void wait () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   // helper functions
-  DEVICEIDENTIFIERS_T getDevices () const;
+  INTERFACEIDENTIFIERS_T getDevices () const;
 
   MESSAGEQUEUE_T                          queue_;
 };

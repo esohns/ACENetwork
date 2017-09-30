@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "ace/Log_Msg.h"
+#include "ace/Proactor.h"
 #include "ace/Stream.h"
 
 #include "stream_common.h"
@@ -77,7 +78,7 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 
   int result = -1;
   bool handle_socket = false;
-  const ConfigurationType& configuration_r = getR ();
+  const ConfigurationType& configuration_r = this->getR ();
 
   // step1: initialize base-class(es), tweak socket, initialize I/O, ...
   // *TODO*: remove type inferences
@@ -660,7 +661,7 @@ close:
                 ACE_TEXT ("failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n")));
   } // end IF
 
-  decrease ();
+  this->decrease ();
 }
 
 template <typename HandlerType,
@@ -723,5 +724,5 @@ Net_StreamAsynchTCPSocketBase_T<HandlerType,
 //    } // end IF
 
 continue_:
-  decrease ();
+  this->decrease ();
 }

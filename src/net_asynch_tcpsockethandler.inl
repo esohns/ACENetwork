@@ -386,7 +386,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::notify (void)
   int result = -1;
 
   try {
-    result = handle_output (inherited2::handle ());
+    result = this->handle_output (inherited2::handle ());
   } catch (...) {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
@@ -571,7 +571,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::initiate_read ()
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPSocketHandler_T::initiate_read"));
 
   // allocate a data buffer
-  ACE_Message_Block* message_block_p = allocateMessage (PDUSize_);
+  ACE_Message_Block* message_block_p = this->allocateMessage (PDUSize_);
   if (unlikely (!message_block_p))
   {
     ACE_DEBUG ((LM_ERROR,

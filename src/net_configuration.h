@@ -47,7 +47,8 @@
 class Stream_IAllocator;
 struct Net_ConnectionConfiguration;
 struct Net_UserData;
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct Net_ConnectionConfiguration,
                                  struct Net_ConnectionState,
                                  Net_Statistic_t,

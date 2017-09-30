@@ -27,6 +27,8 @@
 #include "ace/Global_Macros.h"
 #include "ace/SOCK_Connector.h"
 
+#include "common_timer_manager_common.h"
+
 #include "stream_statemachine_control.h"
 
 #include "net_common.h"
@@ -49,7 +51,8 @@ template <typename HandlerType,
           ////////////////////////////////
           typename UserDataType>
 class Net_NetlinkConnection_T
- : public Net_StreamConnectionBase_T<HandlerType,
+ : public Net_StreamConnectionBase_T<ACE_NULL_SYNCH,
+                                     HandlerType,
                                      Net_Netlink_Addr,
                                      ConfigurationType,
                                      StateType,
@@ -59,9 +62,25 @@ class Net_NetlinkConnection_T
                                      struct Net_ListenerConfiguration,
                                      StreamType,
                                      enum Stream_StateMachine_ControlState,
+                                     Common_Timer_Manager_t,
                                      UserDataType>
  , public Net_TransportLayer_Netlink
 {
+  typedef Net_StreamConnectionBase_T<ACE_NULL_SYNCH,
+                                     HandlerType,
+                                     Net_Netlink_Addr,
+                                     ConfigurationType,
+                                     StateType,
+                                     StatisticContainerType,
+                                     struct Net_SocketConfiguration,
+                                     HandlerConfigurationType,
+                                     struct Net_ListenerConfiguration,
+                                     StreamType,
+                                     enum Stream_StateMachine_ControlState,
+                                     Common_Timer_Manager_t,
+                                     UserDataType> inherited;
+  typedef Net_TransportLayer_Netlink inherited2;
+
   friend class ACE_Connector<Net_NetlinkConnection_T<HandlerType,
                                                      ConfigurationType,
                                                      StateType,
@@ -72,7 +91,8 @@ class Net_NetlinkConnection_T
                              ACE_SOCK_CONNECTOR>;
 
  public:
-  typedef Net_IConnectionManager_T<Net_Netlink_Addr,
+  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                   Net_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
@@ -105,19 +125,6 @@ class Net_NetlinkConnection_T
    virtual void dump_state () const;
 
  private:
-  typedef Net_StreamConnectionBase_T<HandlerType,
-                                     Net_Netlink_Addr,
-                                     ConfigurationType,
-                                     StateType,
-                                     StatisticContainerType,
-                                     struct Net_SocketConfiguration,
-                                     HandlerConfigurationType,
-                                     struct Net_ListenerConfiguration,
-                                     StreamType,
-                                     enum Stream_StateMachine_ControlState,
-                                     UserDataType> inherited;
-  typedef Net_TransportLayer_Netlink inherited2;
-
   // *TODO*: remove this ASAP
   Net_NetlinkConnection_T ();
 //  ACE_UNIMPLEMENTED_FUNC (Net_NetlinkConnection_T ())
@@ -150,9 +157,24 @@ class Net_AsynchNetlinkConnection_T
                                            struct Net_ListenerConfiguration,
                                            StreamType,
                                            enum Stream_StateMachine_ControlState,
+                                           Common_Timer_Manager_t,
                                            UserDataType>
  , public Net_TransportLayer_Netlink
 {
+  typedef Net_AsynchStreamConnectionBase_T<HandlerType,
+                                           Net_Netlink_Addr,
+                                           ConfigurationType,
+                                           StateType,
+                                           StatisticContainerType,
+                                           struct Net_SocketConfiguration,
+                                           HandlerConfigurationType,
+                                           struct Net_ListenerConfiguration,
+                                           StreamType,
+                                           enum Stream_StateMachine_ControlState,
+                                           Common_Timer_Manager_t,
+                                           UserDataType> inherited;
+  typedef Net_TransportLayer_Netlink inherited2;
+
   friend class ACE_Asynch_Connector<Net_AsynchNetlinkConnection_T<HandlerType,
                                                                   ConfigurationType,
                                                                   StateType,
@@ -162,7 +184,9 @@ class Net_AsynchNetlinkConnection_T
                                                                   UserDataType> >;
 
  public:
-  typedef Net_IConnectionManager_T<Net_Netlink_Addr,
+  // convenient types
+  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                   Net_Netlink_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
@@ -196,19 +220,6 @@ class Net_AsynchNetlinkConnection_T
                               ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK);
 
  private:
-  typedef Net_AsynchStreamConnectionBase_T<HandlerType,
-                                           Net_Netlink_Addr,
-                                           ConfigurationType,
-                                           StateType,
-                                           StatisticContainerType,
-                                           struct Net_SocketConfiguration,
-                                           HandlerConfigurationType,
-                                           struct Net_ListenerConfiguration,
-                                           StreamType,
-                                           enum Stream_StateMachine_ControlState,
-                                           UserDataType> inherited;
-  typedef Net_TransportLayer_Netlink inherited2;
-
   // *TODO*: remove this ASAP
   Net_AsynchNetlinkConnection_T ();
   //  ACE_UNIMPLEMENTED_FUNC (Net_AsynchNetlinkConnection_T ())

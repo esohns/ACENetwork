@@ -29,15 +29,16 @@
 #include "net_common.h"
 #include "net_iconnection.h"
 
-class Net_IConnectionManagerBase
- : public Common_ITaskControl_T<ACE_MT_SYNCH,
-                                Common_ILock_T<ACE_MT_SYNCH> >
+template <ACE_SYNCH_DECL>
+class Net_IConnectionManagerBase_T
+ : public Common_ITaskControl_T<ACE_SYNCH_USE,
+                                Common_ILock_T<ACE_SYNCH_USE> >
  , public Common_IDumpState
 {
  public:
   // convenient types
-  typedef Common_ITaskControl_T<ACE_MT_SYNCH,
-                                Common_ILock_T<ACE_MT_SYNCH> > ITASKCONTROL_T;
+  typedef Common_ITaskControl_T<ACE_SYNCH_USE,
+                                Common_ILock_T<ACE_SYNCH_USE> > ITASKCONTROL_T;
 
   virtual void abort (enum Net_Connection_AbortStrategy) = 0;
   virtual void abort (bool = false) = 0; // wait for completion ? (see wait())
@@ -51,14 +52,15 @@ class Net_IConnectionManagerBase
 
 //////////////////////////////////////////
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType, // connection-
           typename StatisticContainerType,
           ////////////////////////////////
           typename UserDataType>
 class Net_IConnectionManager_T
- : public Net_IConnectionManagerBase
+ : public Net_IConnectionManagerBase_T<ACE_SYNCH_USE>
  , public Common_IRegister_T<Net_IConnection_T<AddressType,
                                                ConfigurationType,
                                                StateType,
@@ -66,6 +68,7 @@ class Net_IConnectionManager_T
 {
  public:
   // convenience types
+  typedef Net_IConnectionManagerBase_T<ACE_SYNCH_USE> BASE_T;
   typedef Net_IConnection_T<AddressType,
                             ConfigurationType,
                             StateType,

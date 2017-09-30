@@ -28,12 +28,14 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -51,12 +53,14 @@ Net_Connection_Manager_T<AddressType,
 
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -80,13 +84,15 @@ Net_Connection_Manager_T<AddressType,
     abort ();
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 void
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -101,13 +107,15 @@ Net_Connection_Manager_T<AddressType,
 //               maximumNumberOfConnections_));
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 bool
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -124,13 +132,15 @@ Net_Connection_Manager_T<AddressType,
 
   return (result == 0);
 }
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 int
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -151,13 +161,15 @@ Net_Connection_Manager_T<AddressType,
   return 0;
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 void
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -174,13 +186,15 @@ Net_Connection_Manager_T<AddressType,
   isInitialized_ = true;
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 void
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -198,7 +212,8 @@ Net_Connection_Manager_T<AddressType,
   userData_out = userData_;
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -207,7 +222,8 @@ Net_IConnection_T<AddressType,
                   ConfigurationType,
                   StateType,
                   StatisticContainerType>*
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -239,7 +255,8 @@ Net_Connection_Manager_T<AddressType,
   return connection_p;
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -248,7 +265,8 @@ Net_IConnection_T<AddressType,
                   ConfigurationType,
                   StateType,
                   StatisticContainerType>*
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -263,7 +281,8 @@ Net_Connection_Manager_T<AddressType,
 #endif
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -272,7 +291,8 @@ Net_IConnection_T<AddressType,
                   ConfigurationType,
                   StateType,
                   StatisticContainerType>*
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -315,7 +335,8 @@ Net_Connection_Manager_T<AddressType,
   return connection_p;
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -324,7 +345,8 @@ Net_IConnection_T<AddressType,
                   ConfigurationType,
                   StateType,
                   StatisticContainerType>*
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -364,13 +386,15 @@ Net_Connection_Manager_T<AddressType,
   return connection_p;
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 bool
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -401,13 +425,15 @@ Net_Connection_Manager_T<AddressType,
   return true;
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 void
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -463,13 +489,15 @@ Net_Connection_Manager_T<AddressType,
   } // end lock scope
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 unsigned int
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -486,13 +514,15 @@ Net_Connection_Manager_T<AddressType,
   return result;
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 void
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -505,13 +535,15 @@ Net_Connection_Manager_T<AddressType,
   isActive_ = true;
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 void
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -545,13 +577,15 @@ Net_Connection_Manager_T<AddressType,
   } // end IF
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 bool
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -568,13 +602,15 @@ Net_Connection_Manager_T<AddressType,
   return result;
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 void
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -597,13 +633,15 @@ Net_Connection_Manager_T<AddressType,
     }
   } // end SWITCH
 }
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 void
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -674,13 +712,15 @@ begin:
   } // end IF
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 void
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -705,13 +745,15 @@ Net_Connection_Manager_T<AddressType,
   } // end lock scope
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 void
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -750,13 +792,15 @@ Net_Connection_Manager_T<AddressType,
   connection_p->decrease ();
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 void
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -796,13 +840,15 @@ Net_Connection_Manager_T<AddressType,
   connection_p->decrease ();
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 bool
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -840,13 +886,15 @@ Net_Connection_Manager_T<AddressType,
   return true;
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 void
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
@@ -879,13 +927,15 @@ Net_Connection_Manager_T<AddressType,
   } // end lock scope
 }
 
-template <typename AddressType,
+template <ACE_SYNCH_DECL,
+          typename AddressType,
           typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename UserDataType>
 void
-Net_Connection_Manager_T<AddressType,
+Net_Connection_Manager_T<ACE_SYNCH_USE,
+                         AddressType,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,

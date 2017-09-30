@@ -106,7 +106,8 @@ class Net_UDPConnectionBase_T
                                      enum Stream_StateMachine_ControlState,
                                      TimerManagerType,
                                      UserDataType> STREAM_CONNECTION_BASE_T;
-  typedef Net_IConnectionManager_T<ACE_INET_Addr,
+  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                   ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
@@ -201,7 +202,8 @@ class Net_AsynchUDPConnectionBase_T
                                            enum Stream_StateMachine_ControlState,
                                            TimerManagerType,
                                            UserDataType> STREAM_CONNECTION_BASE_T;
-  typedef Net_IConnectionManager_T<ACE_INET_Addr,
+  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                   ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,

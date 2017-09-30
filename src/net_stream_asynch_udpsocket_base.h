@@ -119,8 +119,7 @@ class Net_StreamAsynchUDPSocketBase_T
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 // partial specialization (for Netlink)
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType, // implements Common_ITimer
@@ -130,8 +129,7 @@ template <typename AddressType,
           ////////////////////////////////
           typename UserDataType>
 class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
-                                      Net_SOCK_Netlink,
-                                      AddressType,
+                                      Net_Netlink_Addr,
                                       ConfigurationType,
                                       StateType,
                                       StatisticContainerType,
@@ -142,7 +140,7 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
  : public Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>
  , public Net_SOCK_Netlink
  , public ACE_Svc_Handler<Net_SOCK_Netlink, ACE_NULL_SYNCH>
- , virtual public Net_ISocketConnection_T<AddressType,
+ , virtual public Net_ISocketConnection_T<Net_Netlink_Addr,
                                           ConfigurationType,
                                           StateType,
                                           StatisticContainerType,
@@ -151,7 +149,8 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
 {
   typedef Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType> inherited;
   typedef Net_SOCK_Netlink inherited2;
-  typedef ACE_Svc_Handler<Net_SOCK_Netlink, ACE_NULL_SYNCH> inherited3;
+  typedef ACE_Svc_Handler<Net_SOCK_Netlink,
+                          ACE_NULL_SYNCH> inherited3;
 
  public:
   inline virtual ~Net_StreamAsynchUDPSocketBase_T () {};
@@ -168,10 +167,10 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
 
   // implement (part of) Net_ISocketConnection_T
   virtual void dump_state () const;
-  virtual void info (ACE_HANDLE&,         // return value: handle
-                     AddressType&,        // return value: local SAP
-                     AddressType&) const; // return value: remote SAP
-  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited2::handle ()); };
+  virtual void info (ACE_HANDLE&,              // return value: handle
+                     Net_Netlink_Addr&,        // return value: local SAP
+                     Net_Netlink_Addr&) const; // return value: remote SAP
+  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited2::get_handle ()); };
   inline virtual ACE_Notification_Strategy* notification () { return this; };
   virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for any worker
@@ -179,13 +178,13 @@ class Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerCo
 
  protected:
   // convenient types
-  typedef HandlerType HANDLER_T;
+  typedef Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType> HANDLER_T;
 
   Net_StreamAsynchUDPSocketBase_T ();
 
  private:
   // convenient types
-  typedef Net_ISocketConnection_T<AddressType,
+  typedef Net_ISocketConnection_T<Net_Netlink_Addr,
                                   ConfigurationType,
                                   StateType,
                                   StatisticContainerType,

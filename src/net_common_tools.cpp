@@ -1088,7 +1088,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), aborting\n"),
-                ACE_TEXT (interfinterface_identifier.c_str ())));
+                ACE_TEXT (interface_identifier.c_str ())));
 #endif
     return false;
   } // end IF
@@ -1956,23 +1956,23 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct _GUID interface_identifier = interfaceIdentifier_in;
   if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
-#else
-  std::string interface_identifier = interfaceIdentifier_in;
-  if (unlikely (interface_identifier.empty ()))
-#endif
     interface_identifier = Net_Common_Tools::getDefaultInterface ();
-
+#else
+  std::string interface_identifier_string = interfaceIdentifier_in;
+  if (unlikely (interface_identifier_string.empty ()))
+    interface_identifier_string = Net_Common_Tools::getDefaultInterface ();
+#endif
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   // sanity check(s)
-  ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
+  ACE_ASSERT (!InlineIsEqualGUID (interface_identifier, GUID_NULL));
 
   NET_IFINDEX interface_index =
-    Net_Common_Tools::interfaceToIndex (interfaceIdentifier_in);
+    Net_Common_Tools::interfaceToIndex (interface_identifier);
   if (unlikely (!interface_index))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIndex(%s), aborting\n"),
-                ACE_TEXT (Common_Tools::GUIDToString (interfaceIdentifier_in).c_str ())));
+                ACE_TEXT (Common_Tools::GUIDToString (interface_identifier).c_str ())));
     return false;
   } // end IF
 
@@ -2536,7 +2536,7 @@ error:
                     ACE_TEXT ("failed to ACE_OS::system(\"%s\"): \"%m\" (result was: %d), aborting\n"),
                     ACE_TEXT (command_line_string.c_str ()),
                     WEXITSTATUS (result_2)));
-        return result;
+        return ACE_TEXT_ALWAYS_CHAR ("");
       } // end IF
       unsigned char* data_p = NULL;
       if (unlikely (!Common_File_Tools::load (filename_string,
@@ -2545,7 +2545,7 @@ error:
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Common_File_Tools::load(\"%s\"): \"%m\", aborting\n"),
                     ACE_TEXT (filename_string.c_str ())));
-        return result;
+        return ACE_TEXT_ALWAYS_CHAR ("");
       } // end IF
       if (unlikely (!Common_File_Tools::deleteFile (filename_string)))
         ACE_DEBUG ((LM_ERROR,
@@ -2558,14 +2558,16 @@ error:
     //              ACE_TEXT ("ip data: \"%s\"\n"),
     //              ACE_TEXT (route_record_string.c_str ())));
 
+      std::string result;
       std::istringstream converter;
       char buffer [BUFSIZ];
       std::string regex_string =
           ACE_TEXT_ALWAYS_CHAR ("^default via ([[:digit:].]+) dev ([[:alnum:]]+)(?:.*)$");
       std::regex regex (regex_string);
-      std::smatch match_results;
+      std::cmatch match_results;
       converter.str (route_record_string);
-      do {
+      do
+      {
         converter.getline (buffer, sizeof (buffer));
         if (unlikely (!std::regex_match (buffer,
                                          match_results,
@@ -2585,14 +2587,14 @@ error:
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to retrieve default interface from route data (was: \"%s\"), aborting\n"),
                     ACE_TEXT (route_record_string.c_str ())));
-        return result;
+        return ACE_TEXT_ALWAYS_CHAR ("");
       } // end IF
       //ACE_DEBUG ((LM_DEBUG,
       //            ACE_TEXT ("default interface: \"%s\" (gateway: %s)\n"),
       //            ACE_TEXT (result.c_str ()),
       //            ACE_TEXT (match_results[1].str ().c_str ())));
+      return result;
 #endif
-      break;
     }
     case NET_LINKLAYER_ATM:
     case NET_LINKLAYER_FDDI:
@@ -2604,7 +2606,6 @@ error:
 #else
       ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
 #endif
-
       ACE_NOTREACHED (break;)
     }
     default:
@@ -3877,7 +3878,7 @@ Net_Common_Tools::Ip4ConfigDBusPathToGateway (struct DBusConnection* connection_
   struct DBusMessage* reply_p = NULL;
   struct DBusMessageIter iterator, iterator_2;
   char* string_p = NULL;
-  char character_c = 0;
+//  char character_c = 0;
   const char* argument_string_p =
       ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_IP4CONFIG_INTERFACE);
   dbus_message_iter_init_append (message_p, &iterator);
@@ -3916,7 +3917,7 @@ Net_Common_Tools::Ip4ConfigDBusPathToGateway (struct DBusConnection* connection_
     goto error;
   } // end IF
 
-  character_c = dbus_message_iter_get_arg_type (&iterator);
+//  character_c = dbus_message_iter_get_arg_type (&iterator);
   ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_VARIANT);
   dbus_message_iter_recurse (&iterator, &iterator_2);
   ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_STRING);

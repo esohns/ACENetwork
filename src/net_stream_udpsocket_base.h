@@ -226,8 +226,7 @@ class Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 // partial specialization (for Netlink)
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType, // implements Common_ITimer
@@ -237,7 +236,7 @@ template <typename AddressType,
           ////////////////////////////////
           typename UserDataType>
 class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                                AddressType,
+                                Net_Netlink_Addr,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
@@ -246,7 +245,7 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
                                 HandlerConfigurationType,
                                 UserDataType>
  : public Net_NetlinkSocketHandler_T<HandlerConfigurationType>
- , virtual public Net_ISocketConnection_T<AddressType,
+ , virtual public Net_ISocketConnection_T<Net_Netlink_Addr,
                                           ConfigurationType,
                                           StateType,
                                           StatisticContainerType,
@@ -256,7 +255,7 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
   typedef Net_NetlinkSocketHandler_T<HandlerConfigurationType> inherited;
 
   friend class ACE_Connector<Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                                                       AddressType,
+                                                       Net_Netlink_Addr,
                                                        ConfigurationType,
                                                        StateType,
                                                        StatisticContainerType,
@@ -279,9 +278,9 @@ class Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationT
 
   // implement (part of) Net_ISocketConnection_T
   virtual void dump_state () const;
-  virtual void info (ACE_HANDLE&,         // return value: handle
-                     AddressType&,        // return value: local SAP
-                     AddressType&) const; // return value: remote SAP
+  virtual void info (ACE_HANDLE&,              // return value: handle
+                     Net_Netlink_Addr&,        // return value: local SAP
+                     Net_Netlink_Addr&) const; // return value: remote SAP
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   inline virtual Net_ConnectionId_t id () const { return reinterpret_cast<Net_ConnectionId_t> (inherited::SVC_HANDLER_T::get_handle ()); };
 #else

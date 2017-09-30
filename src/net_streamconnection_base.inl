@@ -151,6 +151,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
   bool handle_manager = false;
   bool handle_stream = false;
+  ICONNECTOR_T* iconnector_p = NULL;
+  ILISTENER_T* ilistener_p = NULL;
+  int result = -1;
 
   // *TODO*: remove type inferences
   const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
@@ -163,28 +166,53 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
   // *TODO*: remove type inference
   ConfigurationType* configuration_p = NULL;
-  switch (role ())
+  switch (this->transportLayer ())
   {
-    case NET_ROLE_CLIENT:
+    case NET_TRANSPORTLAYER_TCP:
     {
-      ICONNECTOR_T* iconnector_p = static_cast<ICONNECTOR_T*> (arg_in);
-      ACE_ASSERT (iconnector_p);
-      configuration_p = &const_cast<ConfigurationType&> (iconnector_p->getR ());
+      switch (this->role ())
+      {
+        case NET_ROLE_CLIENT:
+        {
+          iconnector_p = static_cast<ICONNECTOR_T*> (arg_in);
+          ACE_ASSERT (iconnector_p);
+          configuration_p =
+              &const_cast<ConfigurationType&> (iconnector_p->getR ());
+          break;
+        }
+        case NET_ROLE_SERVER:
+        {
+          ilistener_p = static_cast<ILISTENER_T*> (arg_in);
+          ACE_ASSERT (ilistener_p);
+          configuration_p =
+              &const_cast<ConfigurationType&> (ilistener_p->getR_2 ());
+          break;
+        }
+        default:
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("%u: invalid/unknown role (was: %d), aborting\n"),
+                      id (),
+                      this->role ()));
+          goto error;
+        }
+      } // end SWITCH
       break;
     }
-    case NET_ROLE_SERVER:
+    case NET_TRANSPORTLAYER_UDP:
     {
-      ILISTENER_T* ilistener_p = static_cast<ILISTENER_T*> (arg_in);
-      ACE_ASSERT (ilistener_p);
-      configuration_p = &const_cast<ConfigurationType&> (ilistener_p->getR_2 ());
+      iconnector_p = static_cast<ICONNECTOR_T*> (arg_in);
+      ACE_ASSERT (iconnector_p);
+      configuration_p =
+          &const_cast<ConfigurationType&> (iconnector_p->getR ());
       break;
     }
     default:
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: invalid/unknown role (was: %d), aborting\n"),
+                  ACE_TEXT ("%u: invalid/unknown transport layer (was: %d), aborting\n"),
                   id (),
-                  role ()));
+                  this->transportLayer ()));
       goto error;
     }
   } // end SWITCH
@@ -199,7 +227,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
   // step1: initialize/tweak socket, register reading data with reactor, ...
   // *TODO*: remove type inference
-  int result = inherited::open (configuration_p);
+  result = inherited::open (configuration_p);
   if (result == -1)
   {
     // *NOTE*: this can happen when the connection handle is still registered
@@ -1162,7 +1190,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   //         established (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
 #if defined (ACE_LINUX)
   // *TODO*: remove type inference
-  if (inherited::state_.status == NET_CONNECTION_STATUS_OK)
+  if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
   {
     ACE_HANDLE handle = inherited::get_handle ();
     ACE_ASSERT (handle != ACE_INVALID_HANDLE);
@@ -1520,11 +1548,11 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   ConfigurationType* configuration_p = NULL;
   const ICONNECTOR_T* iconnector_p = NULL;
   const ILISTENER_T* ilistener_p = NULL;
-  switch (transportLayer ())
+  switch (this->transportLayer ())
   {
     case NET_TRANSPORTLAYER_TCP:
     {
-      switch (role ())
+      switch (this->role ())
       {
         case NET_ROLE_CLIENT:
         {
@@ -1547,7 +1575,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("%u: invalid/unknown role (was: %d), returning\n"),
                       id (),
-                      role ()));
+                      this->role ()));
           return;
         }
       } // end SWITCH
@@ -1567,7 +1595,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: invalid/unknown transport layer (was: %d), returning\n"),
                   id (),
-                  transportLayer ()));
+                  this->transportLayer ()));
       return;
     }
   } // end SWITCH
@@ -1966,9 +1994,9 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   AddressType local_address, peer_address;
-  info (handle,
-        local_address,
-        peer_address);
+  this->info (handle,
+              local_address,
+              peer_address);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
@@ -2111,7 +2139,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   // *TODO*: remove type inference
   if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
   {
-    ACE_HANDLE handle = inherited::get_handle ();
+    ACE_HANDLE handle = inherited::handle ();
     ACE_ASSERT (handle != ACE_INVALID_HANDLE);
     bool no_delay = Net_Common_Tools::getNoDelay (handle);
     Net_Common_Tools::setNoDelay (handle, true);
@@ -2584,7 +2612,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                 id ()));
   } // end IF
 
-  decrease ();
+  this->decrease ();
 }
 
 template <typename HandlerType,
@@ -2742,7 +2770,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                 ACE_Event_Handler::ALL_EVENTS_MASK));
 #endif
 
-  decrease ();
+  this->decrease ();
 }
 
 template <typename HandlerType,
@@ -2814,7 +2842,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 //  } // end IF
 
 //continue_:
-  decrease ();
+  this->decrease ();
 }
 
 template <typename HandlerType,
@@ -2847,5 +2875,5 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   inherited::handle_write_dgram (result_in);
 
-  decrease ();
+  this->decrease ();
 }

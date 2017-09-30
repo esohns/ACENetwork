@@ -28,6 +28,8 @@
 
 #include "location.hh"
 
+#include "common.h"
+
 #include "net_parser_base.h"
 
 #include "bittorrent_parser.h"
@@ -93,7 +95,7 @@ class BitTorrent_ParserDriver_T
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_ParserDriver_T& operator= (const BitTorrent_ParserDriver_T&))
 
   // implement Common_ILexScanner_T
-  inline virtual const struct Common_ScannerState& getR_3 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (struct Common_ScannerState ()); ACE_NOTREACHED (return struct Common_ScannerState ();) };
+  inline virtual const Common_ScannerState& getR_3 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (Common_ScannerState ()); ACE_NOTREACHED (return Common_ScannerState ();) };
   inline virtual const BitTorrent_IParser_t* const getP_2 () const { return this; };
   inline virtual void setP (BitTorrent_IParser_t*) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
   inline virtual void debug (yyscan_t state_in, bool toggle_in) { BitTorrent_Scanner_set_debug ((toggle_in ? 1 : 0), state_in); };

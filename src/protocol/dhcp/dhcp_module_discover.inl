@@ -306,9 +306,9 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   socket_configuration_p =
     dynamic_cast<struct Net_UDPSocketConfiguration*> ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration);
   ACE_ASSERT (socket_configuration_p);
-  address = socket_configuration_p->address;
+  address = socket_configuration_p->peerAddress;
   write_only = socket_configuration_p->writeOnly;
-  socket_configuration_p->address = session_data_r.serverAddress;
+  socket_configuration_p->peerAddress = session_data_r.serverAddress;
   socket_configuration_p->writeOnly = true;
 
   // step2ab: set up the connection manager
@@ -374,7 +374,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   } // end IF
 
   // step2e: reset the connection configuration
-  socket_configuration_p->address = address;
+  socket_configuration_p->peerAddress = address;
   socket_configuration_p->writeOnly = write_only;
   inherited::configuration_->streamConfiguration->configuration_.cloneModule =
     clone_module;
@@ -388,7 +388,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 error:
   if (reset_configuration)
   {
-    socket_configuration_p->address = address;
+    socket_configuration_p->peerAddress = address;
     socket_configuration_p->writeOnly = write_only;
     inherited::configuration_->streamConfiguration->configuration_.cloneModule =
       clone_module;
@@ -672,14 +672,14 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
       //                           configuration_->userData);
 
       broadcastConnectionHandle_ =
-          this->connect (socket_configuration_p->address,
+          this->connect (socket_configuration_p->peerAddress,
                          use_reactor);
       if (broadcastConnectionHandle_ == ACE_INVALID_HANDLE)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: failed to connect to %s, aborting\n"),
                     inherited::mod_->name (),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->address).c_str ())));
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->peerAddress).c_str ())));
         goto error;
       } // end IF
       if (use_reactor)
@@ -691,13 +691,13 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
 #endif
       else
         session_data_r.broadcastConnection =
-            connection_manager_p->get (socket_configuration_p->address);
+            connection_manager_p->get (socket_configuration_p->peerAddress);
       if (!session_data_r.broadcastConnection)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%s: failed to connect to %s, aborting\n"),
                     inherited::mod_->name (),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->address).c_str ())));
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->peerAddress).c_str ())));
         goto error;
       } // end IF
 

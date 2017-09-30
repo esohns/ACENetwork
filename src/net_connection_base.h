@@ -59,7 +59,8 @@ class Net_ConnectionBase_T
  public:
   // convenient types
   typedef Common_ReferenceCounterBase REFERENCECOUNTER_T;
-  typedef Net_Connection_Manager_T<AddressType,
+  typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                   AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,
@@ -68,7 +69,8 @@ class Net_ConnectionBase_T
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
-  typedef Net_IConnectionManager_T<AddressType,
+  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                   AddressType,
                                    ConfigurationType,
                                    StateType,
                                    StatisticContainerType,

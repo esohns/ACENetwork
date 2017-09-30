@@ -198,13 +198,16 @@ Net_StreamUDPSocketBase_T<HandlerType,
   // *WARNING*: this has some implications (see close() below)
   // *TODO*: remove type inference
   if (likely (!configuration_p->socketHandlerConfiguration.useThreadPerConnection))
-    decrease ();
+    this->decrease ();
 
   return 0;
 
 error:
   if (handle_reactor)
   {
+    ACE_Reactor* reactor_p = inherited::reactor ();
+    ACE_ASSERT (reactor_p);
+
     result = reactor_p->remove_handler (this,
                                         (ACE_Event_Handler::READ_MASK |
                                          ACE_Event_Handler::DONT_CALL));
@@ -386,7 +389,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
   int result = -1;
   ssize_t bytes_received = -1;
   ACE_INET_Addr peer_address;
-  const ConfigurationType& configuration_r = getR ();
+  const ConfigurationType& configuration_r = this->getR ();
   bool enqueue = true;
   ACE_Message_Block* buffer_p = NULL;
 
@@ -768,7 +771,7 @@ Net_StreamUDPSocketBase_T<HandlerType,
                                              //     select failed (EBADF see Select_Reactor_T.cpp) /
                                              //     user abort
     {
-      const ConfigurationType& configuration_r = getR ();
+      const ConfigurationType& configuration_r = this->getR ();
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
@@ -1349,13 +1352,16 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
   // *NOTE*: let the reactor manage this handler...
   // *WARNING*: this has some implications (see close() below)
   if (likely (!configuration_p->socketHandlerConfiguration.useThreadPerConnection))
-    decrease ();
+    this->decrease ();
 
   return 0;
 
 error:
   if (handle_reactor)
   {
+    ACE_Reactor* reactor_p = inherited::reactor ();
+    ACE_ASSERT (reactor_p);
+
     result = reactor_p->remove_handler (this,
                                         (ACE_Event_Handler::READ_MASK |
                                          ACE_Event_Handler::DONT_CALL));
@@ -1536,7 +1542,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
   int result = -1;
   ssize_t bytes_received = -1;
   ACE_INET_Addr peer_address;
-  const ConfigurationType& configuration_r = getR ();
+  const ConfigurationType& configuration_r = this->getR ();
   bool enqueue = true;
   ACE_Message_Block* buffer_p = NULL;
 
@@ -1582,7 +1588,6 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
   ACE_ASSERT (buffer_p);
 
   // read a datagram from the socket
-  ssize_t bytes_received = -1;
   bytes_received =
     inherited::peer_.recv (buffer_p->wr_ptr (),   // buffer
                            buffer_p->capacity (), // buffer size
@@ -1915,7 +1920,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
                                              //     select failed (EBADF see Select_Reactor_T.cpp) /
                                              //     user abort
     {
-      const ConfigurationType& configuration_r = getR ();
+      const ConfigurationType& configuration_r = this->getR ();
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
@@ -1989,11 +1994,11 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to HandlerType::handle_close(0x%@,%d): \"%m\", continuing\n"),
-                handle, mask_in));
+                handle_in, mask_in));
 #else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
-                handle, mask_in));
+                handle_in, mask_in));
 #endif
   } // end IF
   inherited::set_handle (handle_in); // used for debugging purposes only
@@ -2144,7 +2149,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
   //         established (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
 #if defined (ACE_LINUX)
   // *TODO*: remove type inference
-  if (inherited2::state_.status == NET_CONNECTION_STATUS_OK)
+  if (inherited::state_.status == NET_CONNECTION_STATUS_OK)
   {
     ACE_HANDLE handle = inherited::get_handle ();
     ACE_ASSERT (handle != ACE_INVALID_HANDLE);
@@ -2332,8 +2337,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
 /////////////////////////////////////////
 
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -2341,7 +2345,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                          AddressType,
+                          Net_Netlink_Addr,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
@@ -2358,8 +2362,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -2367,7 +2370,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                          AddressType,
+                          Net_Netlink_Addr,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
@@ -2382,8 +2385,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
     writeBuffer_->release ();
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -2392,7 +2394,7 @@ template <typename AddressType,
           typename UserDataType>
 int
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                          AddressType,
+                          Net_Netlink_Addr,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
@@ -2492,7 +2494,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   // *NOTE*: let the reactor manage this handler...
   // *WARNING*: this has some implications (see close() below)
   if (likely (!configuration_p->socketHandlerConfiguration.useThreadPerConnection))
-    decrease ();
+    this->decrease ();
 
   return 0;
 
@@ -2515,8 +2517,7 @@ error:
   return -1;
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -2525,7 +2526,7 @@ template <typename AddressType,
           typename UserDataType>
 int
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                          AddressType,
+                          Net_Netlink_Addr,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
@@ -2626,8 +2627,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   return result;
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -2636,7 +2636,7 @@ template <typename AddressType,
           typename UserDataType>
 int
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                          AddressType,
+                          Net_Netlink_Addr,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
@@ -2650,7 +2650,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   int result = -1;
   ssize_t bytes_received = -1;
   ACE_INET_Addr peer_address;
-  const ConfigurationType& configuration_r = getR ();
+  const ConfigurationType& configuration_r = this->getR ();
   bool enqueue = true;
   ACE_Message_Block* buffer_p = NULL;
 
@@ -2776,8 +2776,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
   return 0;
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -2786,7 +2785,7 @@ template <typename AddressType,
           typename UserDataType>
 int
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                          AddressType,
+                          Net_Netlink_Addr,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
@@ -2958,8 +2957,7 @@ release:
   return result;
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -2968,7 +2966,7 @@ template <typename AddressType,
           typename UserDataType>
 int
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                          AddressType,
+                          Net_Netlink_Addr,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
@@ -2995,7 +2993,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                                              //     select failed (EBADF see Select_Reactor_T.cpp) /
                                              //     user abort
     {
-      const ConfigurationType& configuration_r = getR ();
+      const ConfigurationType& configuration_r = this->getR ();
 
       // step2: purge any pending notifications ?
       // *TODO*: remove type inference
@@ -3062,23 +3060,16 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                                     mask_in);
   if (unlikely (result == -1))
   {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_NetlinkSocketHandler_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
-                handle, mask_in));
-#else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_NetlinkSocketHandler_T::handle_close(%d,%d): \"%m\", continuing\n"),
-                handle, mask_in));
-#endif
+                handle_in, mask_in));
   } // end IF
   inherited::set_handle (handle_in); // used for debugging purposes only
 
   return result;
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -3087,7 +3078,7 @@ template <typename AddressType,
           typename UserDataType>
 void
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                          AddressType,
+                          Net_Netlink_Addr,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
@@ -3095,14 +3086,14 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                           SocketConfigurationType,
                           HandlerConfigurationType,
                           UserDataType>::info (ACE_HANDLE& handle_out,
-                                               AddressType& localSAP_out,
-                                               AddressType& remoteSAP_out) const
+                                               Net_Netlink_Addr& localSAP_out,
+                                               Net_Netlink_Addr& remoteSAP_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::info"));
 
   int result = -1;
   int error = 0;
-  const ConfigurationType& configuration_r = getR ();
+  const ConfigurationType& configuration_r = this->getR ();
 
   handle_out = inherited::SVC_HANDLER_T::get_handle ();
   localSAP_out.reset ();
@@ -3126,8 +3117,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
     configuration_r.socketHandlerConfiguration.socketConfiguration.address;
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -3136,7 +3126,7 @@ template <typename AddressType,
           typename UserDataType>
 void
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                          AddressType,
+                          Net_Netlink_Addr,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
@@ -3155,8 +3145,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
                 ACE_TEXT ("failed to Net_StreamUDPSocketBase_T::close(NET_CONNECTION_CLOSE_REASON_USER_ABORT): \"%m\", continuing\n")));
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -3165,7 +3154,7 @@ template <typename AddressType,
           typename UserDataType>
 void
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                          AddressType,
+                          Net_Netlink_Addr,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
@@ -3208,8 +3197,7 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 #endif
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -3218,7 +3206,7 @@ template <typename AddressType,
           typename UserDataType>
 void
 Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
-                          AddressType,
+                          Net_Netlink_Addr,
                           ConfigurationType,
                           StateType,
                           StatisticContainerType,
@@ -3229,17 +3217,37 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamUDPSocketBase_T::dump_state"));
 
+  int result = -1;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  AddressType local_address, peer_address;
+  Net_Netlink_Addr local_address, peer_address;
   info (handle,
         local_address,
         peer_address);
 
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  std::string local_address_string;
+  result = local_address.addr_to_string (buffer,
+                                         sizeof (buffer),
+                                         1);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+  else
+    local_address_string = buffer;
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  result = peer_address.addr_to_string (buffer,
+                                        sizeof (buffer),
+                                        1);
+  if (result == -1)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [id: %u [%d]]: %s <--> %s\n"),
               id (), handle,
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (local_inet_address).c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_inet_address).c_str ())));
+              ACE_TEXT (local_address_string.c_str ()),
+              buffer));
 }
 
 #endif

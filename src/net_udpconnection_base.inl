@@ -74,7 +74,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::Net_UDPConnectionBase_T"));
 
   ACE_ASSERT (false);
-  ACE_NOTSUP:
+  ACE_NOTSUP;
 
   ACE_NOTREACHED (return;)
 }
@@ -117,7 +117,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to allocateMessage(%u), aborting\n"),
-                id (),
+                this->id (),
                 inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize));
     return -1; // <-- remove 'this' from dispatch
   } // end IF
@@ -192,7 +192,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
     if (error != ESHUTDOWN) // 10058: queue has been deactivate()d
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u/%s: failed to ACE_Stream::put(): \"%m\", aborting\n"),
-                  id (),
+                  this->id (),
                   ACE_TEXT (inherited::stream_.name ().c_str ())));
 
     // clean up
@@ -266,7 +266,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.useThreadPerConnection ? ACE_TEXT ("%u: failed to ACE_Task::getq(): \"%m\", aborting\n")
                                                                                                                    : ACE_TEXT ("%u: failed to ACE_Stream::get(): \"%m\", aborting\n")),
-                  id ()));
+                  this->id ()));
     return -1; // <-- remove 'this' from dispatch
   } // end IF
 //continue_:
@@ -333,7 +333,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
       } // end IF
 #if defined (ACE_LINUX)
       if (inherited::errorQueue_)
-        processErrorQueue ();
+        this->processErrorQueue ();
 #endif
 
       // clean up
@@ -433,7 +433,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
   if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: failed to ACE_Svc_Handler::close(): \"%m\", continuing\n"),
-                  id ()));
+                  this->id ()));
   if (likely (inherited::writeHandle_ != ACE_INVALID_HANDLE))
   {
     result = ACE_OS::closesocket (inherited::writeHandle_);
@@ -445,7 +445,7 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                    id (), inherited::writeHandle_));
+                    this->id (), inherited::writeHandle_));
 #endif
   } // end IF
   inherited::writeHandle_ = ACE_INVALID_HANDLE;
@@ -551,7 +551,7 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
     if (error != ESHUTDOWN) // 108
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u/%s: failed to ACE_Stream::get(): \"%m\", aborting\n"),
-                  id (),
+                  this->id (),
                   ACE_TEXT (inherited::stream_.name ().c_str ())));
     return -1;
   } // end IF
@@ -607,7 +607,7 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
       message_block_3->cont (NULL);
     } // end IF
 
-    increase ();
+    this->increase ();
     inherited::counter_.increase ();
 send:
     // *NOTE*: this is a fire-and-forget API for message_block_p
@@ -634,7 +634,7 @@ send:
 
       // clean up
       message_block_p->release ();
-      decrease ();
+      this->decrease ();
       inherited::counter_.decrease ();
 
       return -1;
@@ -754,14 +754,14 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
-                  id (),
+                  this->id (),
                   handle_h, ACE_Event_Handler::SIGNAL_MASK));
 #endif
   result = inherited::SOCKET_T::close ();
   if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: failed to HandlerType::SocketType::close(): \"%m\", continuing\n"),
-                  id ()));
+                  this->id ()));
   if (likely (inherited::writeHandle_ != ACE_INVALID_HANDLE))
   {
     result = ACE_OS::closesocket (inherited::writeHandle_);
@@ -773,7 +773,7 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                    id (), inherited::writeHandle_));
+                    this->id (), inherited::writeHandle_));
 #endif
     inherited::writeHandle_ = ACE_INVALID_HANDLE;
   } // end IF

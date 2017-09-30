@@ -620,7 +620,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   ACE_ASSERT (socket_configuration_p);
 
   // *TODO*: remove type inferences
-  address_ = socket_configuration_p->address;
+  address_ = socket_configuration_p->peerAddress;
   writeOnly_ = socket_configuration_p->writeOnly;
 
   // step1: open socket ?

@@ -90,7 +90,7 @@ class Net_IWLANMonitorBase
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  virtual std::string deviceIdentifier () const = 0;
+  virtual std::string interfaceIdentifier () const = 0;
 #endif
   virtual std::string SSID () const = 0;
 };

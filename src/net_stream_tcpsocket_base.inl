@@ -19,6 +19,9 @@
  ***************************************************************************/
 
 #include "ace/Log_Msg.h"
+#include "ace/Reactor.h"
+#include "ace/Svc_Handler.h"
+#include "ace/Thread.h"
 
 #include "net_common_tools.h"
 #include "net_defines.h"
@@ -321,7 +324,7 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
 
   int result = -1;
   ssize_t bytes_received = -1;
-  const ConfigurationType& configuration_r = getR ();
+  const ConfigurationType& configuration_r = this->getR ();
 
   // sanity check
   ACE_ASSERT (configuration_r.streamConfiguration);
@@ -571,7 +574,7 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
       } // end IF
 #if defined (ACE_LINUX)
       if (inherited::errorQueue_)
-        processErrorQueue ();
+        this->processErrorQueue ();
 #endif
 
       // clean up
@@ -688,7 +691,7 @@ Net_StreamTCPSocketBase_T<ACE_SYNCH_USE,
                                              //     select failed (EBADF see Select_Reactor_T.cpp) /
                                              //     user abort
     {
-      const ConfigurationType& configuration_r = getR ();
+      const ConfigurationType& configuration_r = this->getR ();
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference

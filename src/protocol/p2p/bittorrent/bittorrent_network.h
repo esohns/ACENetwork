@@ -311,22 +311,26 @@ typedef Net_Client_AsynchConnector_T<BitTorrent_TrackerAsynchTCPConnection_t,
 
 //////////////////////////////////////////
 
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct BitTorrent_PeerConnectionConfiguration,
                                  struct BitTorrent_PeerConnectionState,
                                  BitTorrent_Statistic_t,
                                  struct BitTorrent_UserData> BitTorrent_IPeerConnection_Manager_t;
-typedef Net_Connection_Manager_T<ACE_INET_Addr,
+typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct BitTorrent_PeerConnectionConfiguration,
                                  struct BitTorrent_PeerConnectionState,
                                  BitTorrent_Statistic_t,
                                  struct BitTorrent_UserData> BitTorrent_PeerConnection_Manager_t;
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct BitTorrent_TrackerConnectionConfiguration,
                                  struct BitTorrent_TrackerConnectionState,
                                  BitTorrent_Statistic_t,
                                  struct BitTorrent_UserData> BitTorrent_ITrackerConnection_Manager_t;
-typedef Net_Connection_Manager_T<ACE_INET_Addr,
+typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct BitTorrent_TrackerConnectionConfiguration,
                                  struct BitTorrent_TrackerConnectionState,
                                  BitTorrent_Statistic_t,

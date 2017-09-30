@@ -87,7 +87,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 #endif
   bool handle_socket = false;
   bool decrease_reference_count = false;
-  const ConfigurationType& configuration_r = getR ();
+  const ConfigurationType& configuration_r = this->getR ();
   struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
 
   // step0: initialize base-class
@@ -231,7 +231,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   // *TODO*: this looks wrong...
   if (unlikely (decrease_reference_count))
   {
-    decrease ();
+    this->decrease ();
     //ACE_ASSERT (this->count () == 1); // connection manager (+ stream module(s))
   } // end IF
   else
@@ -268,7 +268,7 @@ error:
 
   // *TODO*: this looks wrong...
   if (decrease_reference_count)
-    decrease ();
+    this->decrease ();
 }
 
 template <typename HandlerType,
@@ -303,7 +303,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
   // *IMPORTANT NOTE*: this should NEVER block, as available outbound data has
   //                   been notified
-  result = inherited3::getq (message_block_p, NULL);
+  result = inherited2::getq (message_block_p, NULL);
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -362,7 +362,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
       message_block_3->cont (NULL);
     } // end IF
 
-    increase ();
+    this->increase ();
     inherited::counter_.increase ();
 send:
     // *NOTE*: this is a fire-and-forget API for message_block_p
@@ -387,7 +387,7 @@ send:
 
       // clean up
       message_block_p->release ();
-      decrease ();
+      this->decrease ();
       inherited::counter_.decrease ();
 
       return -1;
@@ -486,7 +486,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   localSAP_out.reset ();
   remoteSAP_out.reset ();
 
-  result = inherited2::get_local_addr (localSAP_out);
+  result = inherited::get_local_addr (localSAP_out);
   if (unlikely (result == -1))
   {
     error = ACE_OS::last_error ();
@@ -502,7 +502,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
     remoteSAP_out = inherited::address_;
   else
   {
-    result = inherited2::get_remote_addr (remoteSAP_out);
+    result = inherited::get_remote_addr (remoteSAP_out);
     if (unlikely (result == -1))
     {
       error = ACE_OS::last_error ();
@@ -684,7 +684,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   //         placing of the data onto the wire can be established
   //         (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
 #if defined (ACE_LINUX)
-  ACE_HANDLE handle = inherited2::handle ();
+  ACE_HANDLE handle = inherited::handle ();
   if (likely (handle != ACE_INVALID_HANDLE))
   {
     bool no_delay = Net_Common_Tools::getNoDelay (handle);
@@ -827,7 +827,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 //                   result_in.bytes_transferred ()));
 
       // enqueue the buffer for processing
-      result = inherited3::putq (result_in.message_block (), NULL);
+      result = inherited2::putq (result_in.message_block (), NULL);
       if (unlikely (result == -1))
       {
         ACE_DEBUG ((LM_ERROR,
@@ -876,7 +876,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
                 ACE_Event_Handler::ALL_EVENTS_MASK));
 #endif
 
-  decrease ();
+  this->decrease ();
 }
 
 template <typename HandlerType,
@@ -902,15 +902,14 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::handle_write_dgram"));
 
   inherited::handle_write_dgram (result_in);
-  decrease ();
+  this->decrease ();
 }
 
 //////////////////////////////////////////
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -918,8 +917,7 @@ template <typename AddressType,
           typename HandlerConfigurationType,
           typename UserDataType>
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
-                                Net_SOCK_Netlink,
-                                AddressType,
+                                Net_Netlink_Addr,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
@@ -935,8 +933,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -945,8 +942,7 @@ template <typename AddressType,
           typename UserDataType>
 void
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
-                                Net_SOCK_Netlink,
-                                AddressType,
+                                Net_Netlink_Addr,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
@@ -962,7 +958,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   int result = -1;
   bool handle_socket = false;
-  const ConfigurationType& configuration_r = getR ();
+  const ConfigurationType& configuration_r = this->getR ();
   struct Net_NetlinkSocketConfiguration* socket_configuration_p = NULL;
 
   // sanity check(s)
@@ -975,24 +971,22 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   // sanity check(s)
   ACE_ASSERT (socket_configuration_p);
 
-  decrease_reference_count = socket_configuration_p->writeOnly;
-
   // step1: open socket
   result =
-      inherited2::open (socket_configuration_p->address,          // (local) SAP
-                        ACE_PROTOCOL_FAMILY_NETLINK,              // protocol family
-                        socket_configuration_p->netlinkProtocol); // protocol
-                        // NETLINK_USERSOCK);                                             // protocol
-                        //NETLINK_GENERIC);                                              // protocol
+      inherited::open (socket_configuration_p->address,   // (local) SAP
+                       ACE_PROTOCOL_FAMILY_NETLINK,       // protocol family
+                       socket_configuration_p->protocol); // protocol
+                       // NETLINK_USERSOCK);                                             // protocol
+                       //NETLINK_GENERIC);                                              // protocol
   if (unlikely (result == -1))
   {
     ACE_TCHAR buffer[BUFSIZ];
     ACE_OS::memset (buffer, 0, sizeof (buffer));
-    // *TODO*: find a replacement for ACE_Netlink_Addr::addr_to_string
+    // *TODO*: find a replacement for Net_Netlink_Addr::addr_to_string
     if (socket_configuration_p->address.addr_to_string (buffer,
                                                         sizeof (buffer)) == -1)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+                  ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketType::open(%s): \"%m\", aborting\n"),
                 buffer));
@@ -1098,8 +1092,7 @@ error:
   } // end IF
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -1108,8 +1101,7 @@ template <typename AddressType,
           typename UserDataType>
 int
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
-                                Net_SOCK_Netlink,
-                                AddressType,
+                                Net_Netlink_Addr,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
@@ -1124,7 +1116,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   int result = -1;
   ACE_Message_Block* message_block_p = NULL;
-  AddressType peer_address;
+  Net_Netlink_Addr peer_address;
   size_t bytes_sent = 0;
   ssize_t result_2 = -1;
 
@@ -1158,7 +1150,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
     // clean up
     message_block_p->release ();
-    decrease ();
+    this->decrease ();
     inherited::counter_.decrease ();
 
     return -1;
@@ -1167,8 +1159,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   return 0;
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -1177,8 +1168,7 @@ template <typename AddressType,
           typename UserDataType>
 int
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
-                                Net_SOCK_Netlink,
-                                AddressType,
+                                Net_Netlink_Addr,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
@@ -1214,13 +1204,12 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   // step5: release a reference
   // *IMPORTANT NOTE*: may 'delete this'
-  decrease ();
+  this->decrease ();
 
   return result;
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -1229,8 +1218,7 @@ template <typename AddressType,
           typename UserDataType>
 void
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
-                                Net_SOCK_Netlink,
-                                AddressType,
+                                Net_Netlink_Addr,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
@@ -1238,8 +1226,8 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                 SocketConfigurationType,
                                 HandlerConfigurationType,
                                 UserDataType>::info (ACE_HANDLE& handle_out,
-                                                     AddressType& localSAP_out,
-                                                     AddressType& remoteSAP_out) const
+                                                     Net_Netlink_Addr& localSAP_out,
+                                                     Net_Netlink_Addr& remoteSAP_out) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::info"));
 
@@ -1254,7 +1242,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 //                ACE_TEXT ("failed to ACE_INET_Addr::set(0, %d): \"%m\", continuing\n"),
 //                INADDR_NONE));
   localSAP_out = ACE_Addr::sap_any;
-  if (likely (!inherited4::writeOnly_))
+  if (likely (!inherited::writeOnly_))
   {
     result = inherited2::get_local_addr (localSAP_out);
     if (unlikely (result == -1))
@@ -1268,11 +1256,10 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                     ACE_TEXT ("failed to Net_SOCK_Netlink::get_local_addr(): \"%m\", continuing\n")));
     } // end IF
   } // end IF
-  remoteSAP_out = inherited4::address_;
+  remoteSAP_out = inherited::address_;
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -1281,8 +1268,7 @@ template <typename AddressType,
           typename UserDataType>
 int
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
-                                Net_SOCK_Netlink,
-                                AddressType,
+                                Net_Netlink_Addr,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
@@ -1306,8 +1292,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   return 0;
 }
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -1316,8 +1301,7 @@ template <typename AddressType,
           typename UserDataType>
 void
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
-                                Net_SOCK_Netlink,
-                                AddressType,
+                                Net_Netlink_Addr,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
@@ -1331,7 +1315,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   int result = -1;
 
   // step1: shutdown operations
-  ACE_HANDLE handle = inherited2::handle ();
+  ACE_HANDLE handle = inherited::handle ();
   // *NOTE*: may 'delete this'
   result = handle_close (handle,
                          ACE_Event_Handler::ALL_EVENTS_MASK);
@@ -1350,8 +1334,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   } // end IF
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -1360,8 +1343,7 @@ template <typename AddressType,
           typename UserDataType>
 void
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
-                                Net_SOCK_Netlink,
-                                AddressType,
+                                Net_Netlink_Addr,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
@@ -1376,10 +1358,10 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   ACE_Time_Value one_second (1, 0);
 
   // sanity check(s)
-  ACE_ASSERT (inherited2::msg_queue_);
+  ACE_ASSERT (inherited::msg_queue_);
 
   // step1: wait for the queue to flush
-  while (!inherited2::msg_queue_->is_empty ())
+  while (!inherited::msg_queue_->is_empty ())
   {
     result = ACE_OS::sleep (one_second);
     if (unlikely (result == -1))
@@ -1395,7 +1377,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   //         placing of the data onto the wire can be established
   //         (see also: http://stackoverflow.com/questions/855544/is-there-a-way-to-flush-a-posix-socket)
 #if defined (ACE_LINUX)
-  ACE_HANDLE handle = inherited2::handle ();
+  ACE_HANDLE handle = inherited::handle ();
   if (likely (handle != ACE_INVALID_HANDLE))
   {
     bool no_delay = Net_Common_Tools::getNoDelay (handle);
@@ -1405,8 +1387,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 #endif
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -1415,8 +1396,7 @@ template <typename AddressType,
           typename UserDataType>
 void
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
-                                Net_SOCK_Netlink,
-                                AddressType,
+                                Net_Netlink_Addr,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,
@@ -1429,7 +1409,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   int result = -1;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
-  AddressType local_address, peer_address;
+  Net_Netlink_Addr local_address, peer_address;
   info (handle,
         local_address,
         peer_address);
@@ -1442,7 +1422,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                          1);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
+                ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
   else
     local_address_string = buffer;
   ACE_OS::memset (buffer, 0, sizeof (buffer));
@@ -1451,7 +1431,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                                         1);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to AddressType::addr_to_string(): \"%m\", continuing\n")));
+                ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("connection [id: %u [%d]]: %s <--> %s\n"),
@@ -1460,8 +1440,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
               buffer));
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
+template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
           typename TimerManagerType,
@@ -1470,8 +1449,7 @@ template <typename AddressType,
           typename UserDataType>
 void
 Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigurationType>,
-                                Net_SOCK_Netlink,
-                                AddressType,
+                                Net_Netlink_Addr,
                                 ConfigurationType,
                                 StateType,
                                 StatisticContainerType,

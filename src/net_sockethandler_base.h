@@ -25,6 +25,8 @@
 
 #include "common_iinitialize.h"
 
+#include "net_iconnection.h"
+
 // forward declarations
 class ACE_Message_Block;
 
