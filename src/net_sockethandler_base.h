@@ -32,7 +32,8 @@ class ACE_Message_Block;
 
 template <typename ConfigurationType>
 class Net_SocketHandlerBase_T
- : virtual public Common_IInitialize_T<ConfigurationType>
+ : virtual public Net_ISocketHandler
+ , virtual public Common_IInitialize_T<ConfigurationType>
 {
  public:
   inline virtual ~Net_SocketHandlerBase_T () {};
@@ -43,8 +44,8 @@ class Net_SocketHandlerBase_T
  protected:
   Net_SocketHandlerBase_T ();
 
-  // helper method(s)
-  ACE_Message_Block* allocateMessage (unsigned int); // requested size
+  // implement Net_ISocketHandler
+  virtual ACE_Message_Block* allocateMessage (unsigned int); // requested size
 
   // *TODO*: remove this ASAP
   ConfigurationType* configuration_;

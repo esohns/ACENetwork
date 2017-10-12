@@ -130,8 +130,6 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ########### next target ###############
 set (client_SRCS
-     stdafx.cpp
-     stdafx.h
      net_client.cpp
      net_client_common.h
      net_client_connector_common.h
@@ -139,6 +137,8 @@ set (client_SRCS
      net_client_signalhandler.h
      net_client_timeouthandler.cpp
      net_client_timeouthandler.h
+     stdafx.cpp
+     stdafx.h
      test_u_callbacks.cpp
      test_u_callbacks.h
      test_u_common_modules.h
@@ -162,7 +162,9 @@ set (client_SRCS
      test_u_stream.h
      test_u_socket_common.h
      test_u_tcpconnection.cpp
-     test_u_tcpconnection.h)
+     test_u_tcpconnection.h
+     test_u_udpconnection.cpp
+     test_u_udpconnection.h)
 
 set (EXECUTABLE_SOURCE client)
 add_executable (${EXECUTABLE_SOURCE}
@@ -216,7 +218,7 @@ target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME})
 # add PCH
 set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
 set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-#cotire (${EXECUTABLE_SOURCE})
+cotire (${EXECUTABLE_SOURCE})
 
 install (TARGETS ${EXECUTABLE_SOURCE}
          EXPORT ${PROJECT_NAME}Targets
@@ -234,6 +236,8 @@ set (server_SRCS
      net_server_listener_common.h
      net_server_signalhandler.cpp
      net_server_signalhandler.h
+     stdafx.cpp
+     stdafx.h
      test_u_callbacks.cpp
      test_u_callbacks.h
      test_u_common_modules.h
@@ -258,8 +262,8 @@ set (server_SRCS
      test_u_socket_common.h
      test_u_tcpconnection.cpp
      test_u_tcpconnection.h
-     stdafx.cpp
-     stdafx.h)
+     test_u_udpconnection.cpp
+     test_u_udpconnection.h)
 
 set (EXECUTABLE_TARGET server)
 add_executable (${EXECUTABLE_TARGET}
@@ -314,7 +318,7 @@ target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Server)
 # add PCH
 set_target_properties (${EXECUTABLE_TARGET} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
 set_target_properties (${EXECUTABLE_TARGET} PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
-cotire (${EXECUTABLE_SOURCE} ${EXECUTABLE_TARGET})
+cotire (${EXECUTABLE_TARGET})
 
 install (TARGETS ${EXECUTABLE_TARGET}
          EXPORT ${PROJECT_NAME}Targets

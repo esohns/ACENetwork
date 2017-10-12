@@ -256,7 +256,7 @@ Test_U_Stream::collect (Net_Statistic_t& data_out)
 
   session_data_r.statistic.timeStamp = COMMON_TIME_NOW;
 
-  // delegate to the statistics module
+  // delegate to the statistic module
   bool result_2 = false;
   try {
     result_2 = statistic_report_impl_p->collect (data_out);
@@ -264,7 +264,7 @@ Test_U_Stream::collect (Net_Statistic_t& data_out)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), continuing\n")));
   }
-  if (!result)
+  if (!result_2)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_IStatistic_T::collect(), aborting\n")));
   else

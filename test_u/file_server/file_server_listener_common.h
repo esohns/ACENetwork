@@ -43,7 +43,7 @@ typedef Net_Server_AsynchListener_T<Test_U_AsynchTCPConnection,
                                     ACE_INET_Addr,
                                     struct FileServer_ListenerConfiguration,
                                     struct FileServer_ConnectionState,
-                                    struct FileServer_SocketHandlerConfiguration,
+                                    struct FileServer_ConnectionConfiguration,
                                     Test_U_Stream,
                                     struct FileServer_UserData> FileServer_AsynchListener_t;
 typedef Net_Server_Listener_T<Test_U_TCPConnection,
@@ -51,7 +51,7 @@ typedef Net_Server_Listener_T<Test_U_TCPConnection,
                               ACE_INET_Addr,
                               struct FileServer_ListenerConfiguration,
                               struct FileServer_ConnectionState,
-                              struct FileServer_SocketHandlerConfiguration,
+                              struct FileServer_ConnectionConfiguration,
                               Test_U_Stream,
                               struct FileServer_UserData> FileServer_Listener_t;
 

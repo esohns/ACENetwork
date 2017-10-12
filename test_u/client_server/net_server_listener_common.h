@@ -27,13 +27,16 @@
 
 #include "net_common.h"
 
+#include "net_client_asynchconnector.h"
 #include "net_server_asynchlistener.h"
 #include "net_server_common.h"
+#include "net_client_connector.h"
 #include "net_server_listener.h"
 
 #include "test_u_connection_common.h"
 #include "test_u_stream_common.h"
 #include "test_u_tcpconnection.h"
+#include "test_u_udpconnection.h"
 
 // foward declarations
 class Test_U_Stream;
@@ -42,7 +45,7 @@ typedef Net_Server_AsynchListener_T<Test_U_AsynchTCPConnection,
                                     ACE_INET_Addr,
                                     struct Test_U_Server_ListenerConfiguration,
                                     struct Test_U_ConnectionState,
-                                    struct Test_U_SocketHandlerConfiguration,
+                                    struct Test_U_ConnectionConfiguration,
                                     Test_U_Stream,
                                     struct Test_U_UserData> Test_U_Server_AsynchListener_t;
 typedef Net_Server_Listener_T<Test_U_TCPConnection,
@@ -50,9 +53,30 @@ typedef Net_Server_Listener_T<Test_U_TCPConnection,
                               ACE_INET_Addr,
                               struct Test_U_Server_ListenerConfiguration,
                               struct Test_U_ConnectionState,
-                              struct Test_U_SocketHandlerConfiguration,
+                              struct Test_U_ConnectionConfiguration,
                               Test_U_Stream,
                               struct Test_U_UserData> Test_U_Server_Listener_t;
+
+typedef Net_Client_AsynchConnector_T<Test_U_AsynchUDPConnection,
+                                     ACE_INET_Addr,
+                                     struct Test_U_ConnectionConfiguration,
+                                     struct Test_U_ConnectionState,
+                                     Test_U_Statistic_t,
+                                     struct Net_UDPSocketConfiguration,
+                                     struct Test_U_SocketHandlerConfiguration,
+                                     Test_U_Stream,
+                                     struct Test_U_UserData> Test_U_Server_AsynchUDPConnector_t;
+typedef Net_Client_Connector_T<ACE_MT_SYNCH,
+                               Test_U_UDPConnection,
+                               ACE_SOCK_CONNECTOR,
+                               ACE_INET_Addr,
+                               struct Test_U_ConnectionConfiguration,
+                               struct Test_U_ConnectionState,
+                               Test_U_Statistic_t,
+                               struct Net_UDPSocketConfiguration,
+                               struct Test_U_SocketHandlerConfiguration,
+                               Test_U_Stream,
+                               struct Test_U_UserData> Test_U_Server_UDPConnector_t;
 
 typedef ACE_Singleton<Test_U_Server_AsynchListener_t,
                       ACE_SYNCH_RECURSIVE_MUTEX> TEST_U_SERVER_ASYNCHLISTENER_SINGLETON;

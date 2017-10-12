@@ -31,7 +31,6 @@
 
 class IRC_Client_SignalHandler
  : public Common_SignalHandler_T<IRC_Client_SignalHandlerConfiguration>
- , public Common_ISignal
 {
  public:
   IRC_Client_SignalHandler (bool = NET_EVENT_USE_REACTOR, // use reactor ?

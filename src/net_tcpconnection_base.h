@@ -272,12 +272,20 @@ class Net_AsynchTCPConnectionBase_T
                                  const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   inline virtual ~Net_AsynchTCPConnectionBase_T () {};
 
+  // override (part of) ACE_Service_Handler
+  virtual void open (ACE_HANDLE,          // handle
+                     ACE_Message_Block&); // (initial) data (if any)
+
   // override some ACE_Event_Handler methods
   // *NOTE*: send stream data to the peer
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
 
   // implement (part of) Net_IStreamConnection_T
   inline virtual void info (ACE_HANDLE& handle_out, ACE_INET_Addr& localSAP_out, ACE_INET_Addr& peerSAP_out) const { handle_out = inherited::handle (); localSAP_out = inherited::localSAP_; peerSAP_out = inherited::peerSAP_; };
+
+ protected:
+  // *IMPORTANT NOTE*: supports synchronicity-agnostic connections
+  inline virtual int open (void* = NULL) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
 
  private:
   // *TODO*: if there is no default ctor, MSVC will not compile this code.

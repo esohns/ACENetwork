@@ -71,7 +71,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   bool do_abort = false;
 
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
-    if (!connections_.is_empty ())
+    if (!unlikely (connections_.is_empty ()))
     {
       ACE_DEBUG ((LM_WARNING,
                   ACE_TEXT ("%u remaining connection(s) in dtor, continuing\n"),
@@ -80,7 +80,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
     } // end IF
   } // end lock scope
 
-  if (do_abort)
+  if (unlikely (do_abort))
     abort ();
 }
 
@@ -126,7 +126,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   ACE_UNUSED_ARG (block_in);
 
   int result = lock_.acquire ();
-  if (result == -1)
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SYNCH_RECURSIVE_MUTEX::acquire(): \"%m\", aborting\n")));
 
@@ -151,7 +151,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   ACE_UNUSED_ARG (unblock_in);
 
   int result = lock_.release ();
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SYNCH_RECURSIVE_MUTEX::release(): \"%m\", aborting\n")));
@@ -240,7 +240,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
          iterator.advance (), index++)
       if (index == index_in)
         break;
-    if (!connection_p)
+    if (unlikely (!connection_p))
     {
       //    ACE_DEBUG ((LM_ERROR,
       //                ACE_TEXT ("invalid index (was: %u), aborting\n"),
@@ -316,7 +316,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
 #endif
         break;
     } // end FOR
-    if (connection_p)
+    if (likely (connection_p))
       connection_p->increase (); // increase reference count
     else
     {
@@ -373,7 +373,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
 
       connection_p = NULL;
     } // end FOR
-    if (connection_p)
+    if (likely (connection_p))
       connection_p->increase (); // increase reference count
     //else
     //{
@@ -403,8 +403,8 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::registerc"));
 
   { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_, false);
-    if (!isActive_ || // --> currently rejecting new connections
-        (connections_.size () >= maximumNumberOfConnections_))
+    if (unlikely (!isActive_ || // --> currently rejecting new connections
+                  (connections_.size () >= maximumNumberOfConnections_)))
       return false;
 
     try {
@@ -414,7 +414,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
                   ACE_TEXT ("caught exception in Net_IConnection_T::increase(), aborting\n")));
       return false;
     }
-    if (!connections_.insert_tail (connection_in))
+    if (!unlikely (connections_.insert_tail (connection_in)))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_DLList::insert_tail(): \"%m\", aborting\n")));
@@ -453,12 +453,12 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
       {
         found = true;
         result = iterator.remove ();
-        if (result == -1)
+        if (unlikely (result == -1))
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_DLList_Iterator::remove(): \"%m\", continuing\n")));
         break;
       } // end IF
-    if (!found)
+    if (unlikely (!found))
     {
       // *NOTE*: most probably cause: handle already deregistered (--> check
       //         implementation !)
@@ -479,10 +479,10 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
     }
 
     // iff there are no more connections, signal any waiters
-    if (connections_.is_empty () == 1)
+    if (connections_.is_empty ())
     {
       result = condition_.broadcast ();
-      if (result == -1)
+      if (unlikely (result == -1))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Condition::broadcast(): \"%m\", continuing\n")));
     } // end IF
@@ -559,7 +559,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   if (lockedAccess_in)
   {
     result = lock_.acquire ();
-    if (result == -1)
+    if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SYNCH_RECURSIVE_MUTEX::acquire(): \"%m\", continuing\n")));
   } // end IF
@@ -571,7 +571,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   if (lockedAccess_in)
   {
     result = lock_.release ();
-    if (result == -1)
+    if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SYNCH_RECURSIVE_MUTEX::release(): \"%m\", continuing\n")));
   } // end IF
@@ -649,9 +649,9 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::abort"));
 
-  bool is_first = true;
   ICONNECTION_T* connection_p = NULL;
-  CONNECTION_CONTAINER_T connections;
+  CONNECTION_CONTAINER_T connections_a;
+  bool is_first_b = true;
 
 begin:
   // step1: gather a set of open connection handles
@@ -659,12 +659,10 @@ begin:
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
          iterator.next (connection_p);
          iterator.advance ())
-    {
-      ACE_ASSERT (connection_p);
-
+    { ACE_ASSERT (connection_p);
       connection_p->increase ();
 
-      if (!connections.insert_tail (connection_p))
+      if (unlikely (!connections_a.insert_tail (connection_p)))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_DLList::insert_tail(): \"%m\", returning\n")));
@@ -676,12 +674,12 @@ begin:
       } // end IF
     } // end FOR
   } // end lock scope
-  if (connections.is_empty () == 1)
+  if (unlikely (connections_a.is_empty ()))
     return;
 
   // step2: close all connections
   connection_p = NULL;
-  for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections);
+  for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_a);
        iterator.next (connection_p);
        iterator.advance ())
   { ACE_ASSERT (connection_p);
@@ -689,25 +687,26 @@ begin:
       connection_p->close ();
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
+                  ACE_TEXT ("%u: caught exception in Net_IConnection_T::close(), continuing\n"),
+                  connection_p->id ()));
     }
 
     connection_p->decrease ();
     connection_p = NULL;
   } // end FOR
-  if (is_first)
+  // debug info
+  if (is_first_b)
   {
-    is_first = false;
+    is_first_b = false;
 
-    if (connections.size ())
+    if (likely (connections_a.size ()))
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("closed %u connection(s)\n"),
-                  connections.size ()));
+                  connections_a.size ()));
   } // end IF
-
-  if (waitForCompletion_in)
+  if (unlikely (waitForCompletion_in))
   {
-    connections.reset ();
+    connections_a.reset ();
     goto begin;
   } // end IF
 }
@@ -731,14 +730,14 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   int result = -1;
 
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
-    while (connections_.is_empty () == 0)
-    {
+    while (!connections_.is_empty ())
+    { // debug info
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("waiting for (count: %u) connection(s)...\n"),
+                  ACE_TEXT ("waiting for %u connection(s)...\n"),
                   connections_.size ()));
 
       result = condition_.wait ();
-      if (result == -1)
+      if (unlikely (result == -1))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_SYNCH_RECURSIVE_CONDITION::wait(): \"%m\", continuing\n")));
     } // end WHILE
@@ -767,12 +766,12 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   // *NOTE*: when using single-threaded reactors, close()ing the connection
   //         inside the lock scope may lead to deadlock
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
-    if (connections_.is_empty () == 1)
+    if (unlikely (connections_.is_empty ()))
       return;
 
     // close "oldest" connection --> list head
     result = connections_.get (connection_p, 0);
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_DLList::get(0): \"%m\", returning\n")));
@@ -787,7 +786,8 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
     connection_p->close ();
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
+                ACE_TEXT ("%u: caught exception in Net_IConnection_T::close(), continuing\n"),
+                connection_p->id ()));
   }
   connection_p->decrease ();
 }
@@ -814,13 +814,13 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
   // *NOTE*: when using single-threaded reactors, close()ing the connection
   //         inside the lock scope may lead to deadlock
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
-    if (connections_.is_empty () == 1)
+    if (unlikely (connections_.is_empty ()))
       return;
 
     // close "newest" connection --> list tail
     CONNECTION_CONTAINER_REVERSEITERATOR_T iterator (connections_);
     result = iterator.next (connection_p);
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_DLList_Reverse_Iterator::next(): \"%m\", returning\n")));
@@ -835,7 +835,8 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
     connection_p->close ();
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Net_IConnection_T::close(), continuing\n")));
+                ACE_TEXT ("%u: caught exception in Net_IConnection_T::close(), continuing\n"),
+                connection_p->id ()));
   }
   connection_p->decrease ();
 }
@@ -870,16 +871,18 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (connections_);
          iterator.next (connection_p);
          iterator.advance ())
-    {
+    { ACE_ASSERT (connection_p);
       ACE_OS::memset (&statistic, 0, sizeof (statistic));
       try { // collect information
         connection_p->collect (statistic);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Common_IStatistic::collect(), continuing\n")));
+                    ACE_TEXT ("%u: caught exception in Common_IStatistic::collect(), continuing\n"),
+                    connection_p->id ()));
       }
 
       data_out += statistic;
+      connection_p = NULL;
     } // end FOR
   //} // end lock scope
 
@@ -908,7 +911,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
 
   { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, lock_);
     // aggregate data from active connections
-    if (!const_cast<OWN_TYPE_T*> (this)->collect (result))
+    if (unlikely (!const_cast<OWN_TYPE_T*> (this)->collect (result)))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_IStatistic::collect(), returning\n")));
@@ -916,7 +919,7 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
     } // end IF
 
     ACE_DEBUG ((LM_INFO,
-                ACE_TEXT ("*** STATISTIC ***\n--> [%u] connection(s) <--\n# data messages: %u (avg.: %u)\ndata: %.0f (avg.: %.2f) bytes\n*** RUNTIME STATISTICS ***\\END\n"),
+                ACE_TEXT ("*** CONNECTION STATISTIC ***\n--> [%u] connection(s) <--\n# data messages: %u (avg.: %u)\ndata: %.0f (avg.: %.2f) bytes\n*** CONNECTION STATISTIC ***\\END\n"),
                 connections_.size (),
                 result.dataMessages,
                 (connections_.size () ? (result.dataMessages / connections_.size ())
@@ -948,13 +951,15 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
     for (CONNECTION_CONTAINER_ITERATOR_T iterator (const_cast<CONNECTION_CONTAINER_T&> (connections_));
          iterator.next (connection_p);
          iterator.advance ())
-    {
+    { ACE_ASSERT (connection_p);
       try { // dump connection information
         connection_p->dump_state ();
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Net_IConnection_T::dump_state(), continuing\n")));
+                    ACE_TEXT ("%u: caught exception in Net_IConnection_T::dump_state(), continuing\n"),
+                    connection_p->id ()));
       }
+      connection_p = NULL;
     } // end FOR
   } // end lock scope
 }

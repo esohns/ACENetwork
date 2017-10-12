@@ -47,12 +47,6 @@ Test_U_TCPConnection::Test_U_TCPConnection ()
 
 }
 
-Test_U_TCPConnection::~Test_U_TCPConnection ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_TCPConnection::~Test_U_TCPConnection"));
-
-}
-
 //////////////////////////////////////////
 
 Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
@@ -69,11 +63,5 @@ Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection ()
               ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection"));
-
-}
-
-Test_U_AsynchTCPConnection::~Test_U_AsynchTCPConnection ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::~Test_U_AsynchTCPConnection"));
 
 }

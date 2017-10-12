@@ -601,17 +601,17 @@ do_work (
   if (useUDP_in)
   {
     result =
-      configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.set (listeningPortNumber_in,
-                                                                                                        static_cast<ACE_UINT32> (INADDR_ANY),
-                                                                                                        1,
-                                                                                                        0);
+      configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_3.listenAddress.set (listeningPortNumber_in,
+                                                                                                                                       static_cast<ACE_UINT32> (INADDR_ANY),
+                                                                                                                                       1,
+                                                                                                                                       0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
       goto error;
     } // end IF
-    configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.writeOnly =
+    configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_3.writeOnly =
       true;
   } // end IF
   // ****************** connection configuration data **************************
@@ -712,10 +712,21 @@ do_work (
   if (useLoopBack_in)
   {
     result =
-      configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.set (listeningPortNumber_in,
-                                                                                                        INADDR_LOOPBACK,
-                                                                                                        1,
-                                                                                                        0);
+      configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.set (listeningPortNumber_in,
+                                                                                                                                 INADDR_LOOPBACK,
+                                                                                                                                 1,
+                                                                                                                                 0);
+    if (result == -1)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+      goto error;
+    } // end IF
+    result =
+      configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_3.listenAddress.set (listeningPortNumber_in,
+                                                                                                                                       INADDR_LOOPBACK,
+                                                                                                                                       1,
+                                                                                                                                       0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -724,8 +735,12 @@ do_work (
     } // end IF
   } // end IF
   else
-    configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.set_port_number (listeningPortNumber_in,
-                                                                                                                  1);
+  {
+    configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.set_port_number (listeningPortNumber_in,
+                                                                                                                                           1);
+    configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_3.listenAddress.set_port_number (listeningPortNumber_in,
+                                                                                                                                                 1);
+  } // end ELSE
   configuration.listenerConfiguration.connectionManager = connection_manager_p;
   //configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;
 

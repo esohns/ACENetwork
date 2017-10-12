@@ -506,6 +506,119 @@ template <typename HandlerType,
           typename StreamType,
           typename TimerManagerType,
           typename UserDataType>
+void
+Net_AsynchTCPConnectionBase_T<HandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              HandlerConfigurationType,
+                              ListenerConfigurationType,
+                              StreamType,
+                              TimerManagerType,
+                              UserDataType>::open (ACE_HANDLE handle_in,
+                                                   ACE_Message_Block& messageBlock_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchTCPConnectionBase_T::open"));
+
+  int result = -1;
+
+  // step1: initialize asynchronous I/O
+  inherited::open (handle_in,
+                   messageBlock_in);
+  if (unlikely (inherited::state_.status != NET_CONNECTION_STATUS_OK))
+    goto error;
+
+  // step2: start reading (need to pass any data ?)
+  if (likely (!messageBlock_in.length ()))
+  {
+    if (unlikely (!inherited::initiate_read ()))
+    {
+      int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if ((error != ENXIO)                 && // 6    : happens on Win32
+          (error != EFAULT)                && // 14   : *TODO*: happens on Win32
+          (error != ERROR_UNEXP_NET_ERR)   && // 59   : *TODO*: happens on Win32
+          (error != ERROR_NETNAME_DELETED) && // 64   : happens on Win32
+          (error != ENOTSOCK)              && // 10038: local close()
+          (error != ECONNRESET))              // 10054: reset by peer
+#else
+      if (error != ECONNRESET) // 104: reset by peer
+#endif
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(): \"%m\", aborting\n"),
+                    id ()));
+      goto error;
+    } // end IF
+  } // end IF
+  else
+  {
+    ACE_Message_Block* duplicate_p = messageBlock_in.duplicate ();
+    if (!duplicate_p)
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
+      goto error;
+    } // end IF
+    // fake a result to emulate regular behavior
+    ACE_Proactor* proactor_p = inherited::proactor ();
+    ACE_ASSERT (proactor_p);
+    ACE_Asynch_Read_Stream_Result_Impl* fake_result_p =
+        proactor_p->create_asynch_read_stream_result (inherited::proxy (),                            // handler proxy
+                                                      handle_in,                                      // socket handle
+                                                      *duplicate_p,                                   // buffer
+                                                      static_cast<u_long> (duplicate_p->capacity ()), // (maximum) #bytes to read
+                                                      NULL,                                           // ACT
+                                                      ACE_INVALID_HANDLE,                             // event
+                                                      0,                                              // priority
+                                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);           // signal number
+    if (!fake_result_p)
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Proactor::create_asynch_read_stream_result: \"%m\", aborting\n")));
+      goto error;
+    } // end IF
+    size_t bytes_transferred = duplicate_p->length ();
+    // <complete> for Accept would have already moved the <wr_ptr>
+    // forward; update it to the beginning position
+    duplicate_p->wr_ptr (duplicate_p->wr_ptr () - bytes_transferred);
+    // invoke ourselves (see handle_read_stream())
+    fake_result_p->complete (duplicate_p->length (), // bytes read
+                             1,                      // success
+                             NULL,                   // ACT
+                             0);                     // error
+
+    // clean up
+    delete fake_result_p;
+  } // end ELSE
+  //ACE_ASSERT (this->count () == 2); // connection manager, read operation
+  //                                     (+ stream module(s))
+
+  return;
+
+error:
+  result = inherited::handle_close (handle_in,
+                                    ACE_Event_Handler::ALL_EVENTS_MASK);
+  if (result == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT ("failed to Net_AsynchStreamConnectionBase_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
+                handle_in, ACE_Event_Handler::ALL_EVENTS_MASK));
+#else
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT ("failed to Net_AsynchStreamConnectionBase_T::handle_close(%d,%d): \"%m\", continuing\n"),
+                handle_in, ACE_Event_Handler::ALL_EVENTS_MASK));
+#endif
+}
+
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename HandlerConfigurationType,
+          typename ListenerConfigurationType,
+          typename StreamType,
+          typename TimerManagerType,
+          typename UserDataType>
 int
 Net_AsynchTCPConnectionBase_T<HandlerType,
                               ConfigurationType,
@@ -553,7 +666,6 @@ Net_AsynchTCPConnectionBase_T<HandlerType,
   // start (asynchronous) write
   inherited::increase ();
   inherited::counter_.increase ();
-send:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result =
     inherited::outputStream_.writev (*message_block_p,                     // data
@@ -562,6 +674,7 @@ send:
                                      0,                                    // priority
                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal number
 #else
+send:
   result =
     inherited::outputStream_.write (*message_block_p,                     // data
                                     message_block_p->total_length (),     // #bytes to write

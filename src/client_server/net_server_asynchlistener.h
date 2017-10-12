@@ -35,7 +35,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           ////////////////////////////////
-          typename HandlerConfigurationType, // socket-
+          typename ConnectionConfigurationType,
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
@@ -43,7 +43,7 @@ template <typename HandlerType,
 class Net_Server_AsynchListener_T
  : public ACE_Asynch_Acceptor<HandlerType>
  , public Net_IListener_T<ConfigurationType,
-                          HandlerConfigurationType>
+                          ConnectionConfigurationType>
 {
   typedef ACE_Asynch_Acceptor<HandlerType> inherited;
 
@@ -52,7 +52,7 @@ class Net_Server_AsynchListener_T
                                                          AddressType,
                                                          ConfigurationType,
                                                          StateType,
-                                                         HandlerConfigurationType,
+                                                         ConnectionConfigurationType,
                                                          StreamType,
                                                          UserDataType>,
                              ACE_SYNCH_RECURSIVE_MUTEX>;
@@ -63,7 +63,7 @@ class Net_Server_AsynchListener_T
                                                     AddressType,
                                                     ConfigurationType,
                                                     StateType,
-                                                    HandlerConfigurationType,
+                                                    ConnectionConfigurationType,
                                                     StreamType,
                                                     UserDataType>,
                         ACE_SYNCH_RECURSIVE_MUTEX> SINGLETON_T;
@@ -75,27 +75,26 @@ class Net_Server_AsynchListener_T
                                    const ACE_INET_Addr&,             // remote address
                                    const ACE_INET_Addr&);            // local address
   // default behavior: delegate to baseclass
-  inline virtual int should_reissue_accept (void) { return inherited::should_reissue_accept (); };
+  inline virtual int should_reissue_accept (void) { return inherited::should_reissue_accept (); }
 
   // implement Net_IListener_T
   // *WARNING*: this API is NOT re-entrant !
   virtual void start ();
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
-  inline virtual bool isRunning () const { return isListening_; };
-  inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual bool isRunning () const { return isListening_; }
 
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  inline virtual const HandlerConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); return configuration_->socketHandlerConfiguration; };
-  //virtual bool initialize (const HandlerConfigurationType&);
+  inline virtual const ConnectionConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); ACE_ASSERT (configuration_->connectionConfiguration); return *(configuration_->connectionConfiguration); }
+  //virtual bool initialize (const ConnectionConfigurationType&);
   virtual bool initialize (const ConfigurationType&); // configuration
-  inline virtual bool useReactor () const { return false; };
+  inline virtual bool useReactor () const { return false; }
 
-  inline bool isInitialized () const { return isInitialized_; };
+  inline bool isInitialized () const { return isInitialized_; }
 
   // implement Common_IDumpState
-  inline virtual void dump_state () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void dump_state () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  protected:
   // override default accept strategy
@@ -105,15 +104,22 @@ class Net_Server_AsynchListener_T
 
  private:
   typedef Net_IListener_T<ConfigurationType,
-                          HandlerConfigurationType> ILISTENER_T;
+                          ConnectionConfigurationType> ILISTENER_T;
 
   Net_Server_AsynchListener_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_Server_AsynchListener_T (const Net_Server_AsynchListener_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Server_AsynchListener_T& operator= (const Net_Server_AsynchListener_T&))
   virtual ~Net_Server_AsynchListener_T ();
 
+  // implement (part of) Net_IListener_T
+  inline virtual bool lock (bool = true) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  inline virtual int unlock (bool = false) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
+  inline virtual const ACE_SYNCH_MUTEX& getR () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_SYNCH_MUTEX ()); ACE_NOTREACHED (return ACE_SYNCH_MUTEX ();) }
+  inline virtual void idle () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+
   // implement (part of) Common_IControl_T
-  inline virtual void initialize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void initialize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
   // override default listen strategy
   // *TODO*: currently tailored for TCP only (see implementation)

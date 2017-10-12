@@ -21,7 +21,7 @@
 #ifndef NET_CALLBACKS_H
 #define NET_CALLBACKS_H
 
-#include <gtk/gtk.h>
+#include "gtk/gtk.h"
 
 //------------------------------------------------------------------------------
 
@@ -34,6 +34,7 @@ gboolean idle_update_info_display_cb (gpointer);
 
 gboolean idle_initialize_client_UI_cb (gpointer);
 gboolean idle_update_progress_client_cb (gpointer);
+gboolean idle_end_session_client_cb (gpointer);
 
 //////////////////////////////////////////
 

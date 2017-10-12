@@ -57,7 +57,7 @@ typedef Net_IAsynchConnector_T<ACE_INET_Addr,
 
 struct Test_U_Client_ConnectorConfiguration
 {
-  inline Test_U_Client_ConnectorConfiguration ()
+  Test_U_Client_ConnectorConfiguration ()
    : connectionManager (NULL)
    , socketHandlerConfiguration (NULL)
    //, statisticCollectionInterval (0)
@@ -71,13 +71,12 @@ struct Test_U_Client_ConnectorConfiguration
 struct Test_U_Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
-  inline Test_U_Client_SignalHandlerConfiguration ()
+  Test_U_Client_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    , actionTimerId (-1)
    , connectionConfiguration (NULL)
    , connector (NULL)
    , messageAllocator (NULL)
-   , peerAddress ()
    , statisticReportingInterval (0)
   {};
 
@@ -85,14 +84,13 @@ struct Test_U_Client_SignalHandlerConfiguration
   struct Test_U_ConnectionConfiguration* connectionConfiguration;
   Test_U_IConnector_t*                   connector;
   Stream_IAllocator*                     messageAllocator;
-  ACE_INET_Addr                          peerAddress;
   unsigned int                           statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
 };
 
 struct Test_U_Client_Configuration
  : Test_U_Configuration
 {
-  inline Test_U_Client_Configuration ()
+  Test_U_Client_Configuration ()
    : Test_U_Configuration ()
    , signalHandlerConfiguration ()
    , timeoutHandler (NULL)
@@ -130,7 +128,7 @@ typedef Common_ISubscribe_T<Test_U_ISessionNotify_t> Test_U_ISubscribe_t;
 struct Test_U_Client_GTK_CBData
  : Test_U_GTK_CBData
 {
-  inline Test_U_Client_GTK_CBData ()
+  Test_U_Client_GTK_CBData ()
    : Test_U_GTK_CBData ()
    , configuration (NULL)
    , subscribers ()

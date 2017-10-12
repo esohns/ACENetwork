@@ -66,7 +66,8 @@ class Test_U_InboundConnectionStream;
 //typedef Stream_SessionData_T<Test_U_StreamSessionData> Test_U_StreamSessionData_t;
 //struct Test_U_StreamState;
 //struct Test_U_UserData;
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
                                  DHCP_Statistic_t,
@@ -79,7 +80,7 @@ struct Test_U_ConnectionConfiguration;
 struct Test_U_SocketHandlerConfiguration
  : DHCP_SocketHandlerConfiguration
 {
-  inline Test_U_SocketHandlerConfiguration ()
+  Test_U_SocketHandlerConfiguration ()
    : DHCP_SocketHandlerConfiguration ()
    ///////////////////////////////////////
    , connectionConfiguration (NULL)
@@ -103,7 +104,7 @@ typedef Stream_Configuration_T<//stream_name_string_,
 struct Test_U_ConnectionConfiguration
  : DHCP_ConnectionConfiguration
 {
-  inline Test_U_ConnectionConfiguration ()
+  Test_U_ConnectionConfiguration ()
    : DHCP_ConnectionConfiguration ()
    ///////////////////////////////////////
    , connectionManager (NULL)
@@ -125,7 +126,7 @@ typedef Test_U_ConnectionConfigurations_t::iterator Test_U_ConnectionConfigurati
 struct Test_U_ConnectionState
  : DHCP_ConnectionState
 {
-  inline Test_U_ConnectionState ()
+  Test_U_ConnectionState ()
    : DHCP_ConnectionState ()
    , configuration (NULL)
    , userData (NULL)
@@ -162,161 +163,97 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
 //////////////////////////////////////////
 
 // inbound
-typedef Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
-                                                         struct Test_U_SocketHandlerConfiguration>,
-                                  ACE_INET_Addr,
-                                  struct Test_U_ConnectionConfiguration,
-                                  struct Test_U_ConnectionState,
-                                  DHCP_Statistic_t,
-                                  Common_Timer_Manager_t,
-                                  struct Test_U_SocketHandlerConfiguration,
-                                  Test_U_InboundConnectionStream,
-                                  struct Test_U_UserData,
-                                  struct Stream_ModuleConfiguration,
-                                  struct Test_U_StreamModuleHandlerConfiguration> Test_U_HandlerBcast_t;
-typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<struct Test_U_SocketHandlerConfiguration>,
-                                        Net_SOCK_Dgram_Bcast,
-                                        ACE_INET_Addr,
-                                        struct Test_U_ConnectionConfiguration,
-                                        struct Test_U_ConnectionState,
-                                        DHCP_Statistic_t,
-                                        Common_Timer_Manager_t,
-                                        struct Test_U_SocketHandlerConfiguration,
-                                        Test_U_InboundConnectionStream,
-                                        struct Test_U_UserData,
-                                        struct Stream_ModuleConfiguration,
-                                        struct Test_U_StreamModuleHandlerConfiguration> Test_U_AsynchHandlerBcast_t;
-typedef Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_Dgram,
-                                                         struct Test_U_SocketHandlerConfiguration>,
-                                  ACE_INET_Addr,
-                                  struct Test_U_ConnectionConfiguration,
-                                  struct Test_U_ConnectionState,
-                                  DHCP_Statistic_t,
-                                  Common_Timer_Manager_t,
-                                  struct Test_U_SocketHandlerConfiguration,
-                                  Test_U_InboundConnectionStream,
-                                  struct Test_U_UserData,
-                                  struct Stream_ModuleConfiguration,
-                                  struct Test_U_StreamModuleHandlerConfiguration> Test_U_Handler_t;
-typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<struct Test_U_SocketHandlerConfiguration>,
-                                        Net_SOCK_Dgram,
-                                        ACE_INET_Addr,
-                                        struct Test_U_ConnectionConfiguration,
-                                        struct Test_U_ConnectionState,
-                                        DHCP_Statistic_t,
-                                        Common_Timer_Manager_t,
-                                        struct Test_U_SocketHandlerConfiguration,
-                                        Test_U_InboundConnectionStream,
-                                        struct Test_U_UserData,
-                                        struct Stream_ModuleConfiguration,
-                                        struct Test_U_StreamModuleHandlerConfiguration> Test_U_AsynchHandler_t;
+typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
+                               Net_SOCK_Dgram_Bcast,
+                               struct Test_U_SocketHandlerConfiguration> Test_U_SocketHandlerBcast_t;
+typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
+                                     struct Test_U_SocketHandlerConfiguration> Test_U_AsynchSocketHandlerBcast_t;
+typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
+                               Net_SOCK_Dgram,
+                               struct Test_U_SocketHandlerConfiguration> Test_U_SocketHandler_t;
+typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram,
+                                     struct Test_U_SocketHandlerConfiguration> Test_U_AsynchSocketHandler_t;
 
-typedef Net_UDPConnectionBase_T<Test_U_HandlerBcast_t,
+typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
+                                Test_U_SocketHandlerBcast_t,
                                 struct Test_U_ConnectionConfiguration,
                                 struct Test_U_ConnectionState,
                                 DHCP_Statistic_t,
                                 struct Test_U_SocketHandlerConfiguration,
                                 Test_U_InboundConnectionStream,
+                                Common_Timer_Manager_t,
                                 struct Test_U_UserData> Test_U_ConnectionBcast_t;
-typedef Net_AsynchUDPConnectionBase_T<Test_U_AsynchHandlerBcast_t,
+typedef Net_AsynchUDPConnectionBase_T<Test_U_AsynchSocketHandlerBcast_t,
                                       struct Test_U_ConnectionConfiguration,
                                       struct Test_U_ConnectionState,
                                       DHCP_Statistic_t,
                                       struct Test_U_SocketHandlerConfiguration,
                                       Test_U_InboundConnectionStream,
+                                      Common_Timer_Manager_t,
                                       struct Test_U_UserData> Test_U_AsynchConnectionBcast_t;
-typedef Net_UDPConnectionBase_T<Test_U_Handler_t,
+typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
+                                Test_U_SocketHandler_t,
                                 struct Test_U_ConnectionConfiguration,
                                 struct Test_U_ConnectionState,
                                 DHCP_Statistic_t,
                                 struct Test_U_SocketHandlerConfiguration,
                                 Test_U_InboundConnectionStream,
+                                Common_Timer_Manager_t,
                                 struct Test_U_UserData> Test_U_Connection_t;
-typedef Net_AsynchUDPConnectionBase_T<Test_U_AsynchHandler_t,
+typedef Net_AsynchUDPConnectionBase_T<Test_U_AsynchSocketHandler_t,
                                       struct Test_U_ConnectionConfiguration,
                                       struct Test_U_ConnectionState,
                                       DHCP_Statistic_t,
                                       struct Test_U_SocketHandlerConfiguration,
                                       Test_U_InboundConnectionStream,
+                                      Common_Timer_Manager_t,
                                       struct Test_U_UserData> Test_U_AsynchConnection_t;
 
 // outbound
-typedef Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
-                                                         struct Test_U_SocketHandlerConfiguration>,
-                                  ACE_INET_Addr,
-                                  struct Test_U_ConnectionConfiguration,
-                                  struct Test_U_ConnectionState,
-                                  DHCP_Statistic_t,
-                                  Common_Timer_Manager_t,
-                                  struct Test_U_SocketHandlerConfiguration,
-                                  Test_U_OutboundConnectionStream,
-                                  struct Test_U_UserData,
-                                  struct Stream_ModuleConfiguration,
-                                  struct Test_U_StreamModuleHandlerConfiguration> Test_U_OutboundHandlerBcast_t;
-typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<struct Test_U_SocketHandlerConfiguration>,
-                                        Net_SOCK_Dgram_Bcast,
-                                        ACE_INET_Addr,
-                                        struct Test_U_ConnectionConfiguration,
-                                        struct Test_U_ConnectionState,
-                                        DHCP_Statistic_t,
-                                        Common_Timer_Manager_t,
-                                        struct Test_U_SocketHandlerConfiguration,
-                                        Test_U_OutboundConnectionStream,
-                                        struct Test_U_UserData,
-                                        struct Stream_ModuleConfiguration,
-                                        struct Test_U_StreamModuleHandlerConfiguration> Test_U_OutboundAsynchHandlerBcast_t;
-typedef Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<Net_SOCK_CODgram,
-                                                         struct Test_U_SocketHandlerConfiguration>,
-                                  ACE_INET_Addr,
-                                  struct Test_U_ConnectionConfiguration,
-                                  struct Test_U_ConnectionState,
-                                  DHCP_Statistic_t,
-                                  Common_Timer_Manager_t,
-                                  struct Test_U_SocketHandlerConfiguration,
-                                  Test_U_OutboundConnectionStream,
-                                  struct Test_U_UserData,
-                                  struct Stream_ModuleConfiguration,
-                                  struct Test_U_StreamModuleHandlerConfiguration> Test_U_OutboundHandler_t;
-typedef Net_StreamAsynchUDPSocketBase_T<Net_AsynchUDPSocketHandler_T<struct Test_U_SocketHandlerConfiguration>,
-                                        Net_SOCK_CODgram,
-                                        ACE_INET_Addr,
-                                        struct Test_U_ConnectionConfiguration,
-                                        struct Test_U_ConnectionState,
-                                        DHCP_Statistic_t,
-                                        Common_Timer_Manager_t,
-                                        struct Test_U_SocketHandlerConfiguration,
-                                        Test_U_OutboundConnectionStream,
-                                        struct Test_U_UserData,
-                                        struct Stream_ModuleConfiguration,
-                                        struct Test_U_StreamModuleHandlerConfiguration> Test_U_OutboundAsynchHandler_t;
+typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
+                               Net_SOCK_Dgram_Bcast,
+                               struct Test_U_SocketHandlerConfiguration> Test_U_OutboundSocketHandlerBcast_t;
+typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
+                                     struct Test_U_SocketHandlerConfiguration> Test_U_OutboundAsynchSocketHandlerBcast_t;
+typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
+                               Net_SOCK_CODgram,
+                               struct Test_U_SocketHandlerConfiguration> Test_U_OutboundSocketHandler_t;
+typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_CODgram,
+                                     struct Test_U_SocketHandlerConfiguration> Test_U_OutboundAsynchSocketHandler_t;
 
-typedef Net_UDPConnectionBase_T<Test_U_OutboundHandlerBcast_t,
+typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
+                                Test_U_OutboundSocketHandlerBcast_t,
                                 struct Test_U_ConnectionConfiguration,
                                 struct Test_U_ConnectionState,
                                 DHCP_Statistic_t,
                                 struct Test_U_SocketHandlerConfiguration,
                                 Test_U_OutboundConnectionStream,
+                                Common_Timer_Manager_t,
                                 struct Test_U_UserData> Test_U_OutboundConnectionBcast_t;
-typedef Net_AsynchUDPConnectionBase_T<Test_U_OutboundAsynchHandlerBcast_t,
+typedef Net_AsynchUDPConnectionBase_T<Test_U_OutboundAsynchSocketHandlerBcast_t,
                                       struct Test_U_ConnectionConfiguration,
                                       struct Test_U_ConnectionState,
                                       DHCP_Statistic_t,
                                       struct Test_U_SocketHandlerConfiguration,
                                       Test_U_OutboundConnectionStream,
+                                      Common_Timer_Manager_t,
                                       struct Test_U_UserData> Test_U_OutboundAsynchConnectionBcast_t;
-typedef Net_UDPConnectionBase_T<Test_U_OutboundHandler_t,
+typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
+                                Test_U_OutboundSocketHandler_t,
                                 struct Test_U_ConnectionConfiguration,
                                 struct Test_U_ConnectionState,
                                 DHCP_Statistic_t,
                                 struct Test_U_SocketHandlerConfiguration,
                                 Test_U_OutboundConnectionStream,
+                                Common_Timer_Manager_t,
                                 struct Test_U_UserData> Test_U_OutboundConnection_t;
-typedef Net_AsynchUDPConnectionBase_T<Test_U_OutboundAsynchHandler_t,
+typedef Net_AsynchUDPConnectionBase_T<Test_U_OutboundAsynchSocketHandler_t,
                                       struct Test_U_ConnectionConfiguration,
                                       struct Test_U_ConnectionState,
                                       DHCP_Statistic_t,
                                       struct Test_U_SocketHandlerConfiguration,
                                       Test_U_OutboundConnectionStream,
+                                      Common_Timer_Manager_t,
                                       struct Test_U_UserData> Test_U_OutboundAsynchConnection_t;
 
 //////////////////////////////////////////
@@ -336,7 +273,8 @@ typedef Net_Client_AsynchConnector_T<Test_U_AsynchConnectionBcast_t,
                                      struct Test_U_SocketHandlerConfiguration,
                                      Test_U_InboundConnectionStream,
                                      struct Test_U_UserData> Test_U_AsynchConnectorBcast_t;
-typedef Net_Client_Connector_T<Test_U_ConnectionBcast_t,
+typedef Net_Client_Connector_T<ACE_MT_SYNCH,
+                               Test_U_ConnectionBcast_t,
                                Net_SOCK_Connector,
                                ACE_INET_Addr,
                                struct Test_U_ConnectionConfiguration,
@@ -355,7 +293,8 @@ typedef Net_Client_AsynchConnector_T<Test_U_AsynchConnection_t,
                                      struct Test_U_SocketHandlerConfiguration,
                                      Test_U_InboundConnectionStream,
                                      struct Test_U_UserData> Test_U_AsynchConnector_t;
-typedef Net_Client_Connector_T<Test_U_Connection_t,
+typedef Net_Client_Connector_T<ACE_MT_SYNCH,
+                               Test_U_Connection_t,
                                Net_SOCK_Connector,
                                ACE_INET_Addr,
                                struct Test_U_ConnectionConfiguration,
@@ -376,7 +315,8 @@ typedef Net_Client_AsynchConnector_T<Test_U_OutboundAsynchConnectionBcast_t,
                                      struct Test_U_SocketHandlerConfiguration,
                                      Test_U_OutboundConnectionStream,
                                      struct Test_U_UserData> Test_U_OutboundAsynchConnectorBcast_t;
-typedef Net_Client_Connector_T<Test_U_OutboundConnectionBcast_t,
+typedef Net_Client_Connector_T<ACE_MT_SYNCH,
+                               Test_U_OutboundConnectionBcast_t,
                                Net_SOCK_Connector,
                                ACE_INET_Addr,
                                struct Test_U_ConnectionConfiguration,
@@ -395,7 +335,8 @@ typedef Net_Client_AsynchConnector_T<Test_U_OutboundAsynchConnection_t,
                                      struct Test_U_SocketHandlerConfiguration,
                                      Test_U_OutboundConnectionStream,
                                      struct Test_U_UserData> Test_U_OutboundAsynchConnector_t;
-typedef Net_Client_Connector_T<Test_U_OutboundConnection_t,
+typedef Net_Client_Connector_T<ACE_MT_SYNCH,
+                               Test_U_OutboundConnection_t,
                                Net_SOCK_Connector,
                                ACE_INET_Addr,
                                struct Test_U_ConnectionConfiguration,

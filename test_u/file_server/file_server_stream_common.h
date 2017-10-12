@@ -49,7 +49,7 @@ typedef Net_IConnection_T<ACE_INET_Addr,
 struct FileServer_SessionData
  : Test_U_StreamSessionData
 {
-  inline FileServer_SessionData ()
+  FileServer_SessionData ()
    : Test_U_StreamSessionData ()
    , connection (NULL)
    , userData (NULL)
@@ -64,7 +64,7 @@ typedef Stream_SessionData_T<struct FileServer_SessionData> FileServer_SessionDa
 struct FileServer_StreamState
  : Test_U_StreamState
 {
-  inline FileServer_StreamState ()
+  FileServer_StreamState ()
    : Test_U_StreamState ()
    , currentSessionData (NULL)
    , userData (NULL)
@@ -95,7 +95,8 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
 typedef std::map<std::string,
                  struct FileServer_ConnectionConfiguration> FileServer_ConnectionConfigurations_t;
 typedef FileServer_ConnectionConfigurations_t::iterator FileServer_ConnectionConfigurationIterator_t;
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct FileServer_ConnectionConfiguration,
                                  struct FileServer_ConnectionState,
                                  Net_Statistic_t,
@@ -111,7 +112,7 @@ typedef Stream_Configuration_T<//stream_name_string_,
 struct Test_U_ModuleHandlerConfiguration
  : Stream_ModuleHandlerConfiguration
 {
-  inline Test_U_ModuleHandlerConfiguration ()
+  Test_U_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    , connection (NULL)
    , connectionConfigurations (NULL)
@@ -142,7 +143,7 @@ struct Test_U_ModuleHandlerConfiguration
 struct FileServer_StreamConfiguration
  : Stream_Configuration
 {
-  inline FileServer_StreamConfiguration ()
+  FileServer_StreamConfiguration ()
    : Stream_Configuration ()
    , useReactor (NET_EVENT_USE_REACTOR)
    , userData (NULL)

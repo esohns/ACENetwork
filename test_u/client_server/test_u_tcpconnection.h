@@ -31,6 +31,8 @@
 #include "ace/SOCK_Connector.h"
 #include "ace/Time_Value.h"
 
+#include "common_timer_manager_common.h"
+
 #include "net_tcpconnection_base.h"
 
 #include "net_client_common.h"
@@ -43,21 +45,35 @@
 class Test_U_Stream;
 
 class Test_U_TCPConnection
- : public Net_TCPConnectionBase_T<Test_U_TCPHandler_t,
+ : public Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
+                                  Test_U_TCPSocketHandler_t,
                                   struct Test_U_ConnectionConfiguration,
                                   struct Test_U_ConnectionState,
                                   Net_Statistic_t,
                                   struct Test_U_SocketHandlerConfiguration,
                                   struct Test_U_ListenerConfiguration,
                                   Test_U_Stream,
+                                  Common_Timer_Manager_t,
                                   struct Test_U_UserData>
  , public Net_IPing
 {
+  typedef Net_TCPConnectionBase_T<ACE_NULL_SYNCH,
+                                  Test_U_TCPSocketHandler_t,
+                                  struct Test_U_ConnectionConfiguration,
+                                  struct Test_U_ConnectionState,
+                                  Net_Statistic_t,
+                                  struct Test_U_SocketHandlerConfiguration,
+                                  struct Test_U_ListenerConfiguration,
+                                  Test_U_Stream,
+                                  Common_Timer_Manager_t,
+                                  struct Test_U_UserData> inherited;
+
   friend class ACE_Acceptor<Test_U_TCPConnection, ACE_SOCK_ACCEPTOR>;
   friend class ACE_Connector<Test_U_TCPConnection, ACE_SOCK_CONNECTOR>;
 
  public:
-  typedef Net_IConnectionManager_T<ACE_INET_Addr,
+  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                   ACE_INET_Addr,
                                    struct Test_U_ConnectionConfiguration,
                                    struct Test_U_ConnectionState,
                                    Net_Statistic_t,
@@ -65,21 +81,12 @@ class Test_U_TCPConnection
 
   Test_U_TCPConnection (ICONNECTION_MANAGER_T*,                        // connection manager handle
                         const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  virtual ~Test_U_TCPConnection ();
+  inline virtual ~Test_U_TCPConnection () {};
 
   // implement Net_IPing
-  virtual void ping ();
+  inline virtual void ping () { inherited::stream_.ping (); }
 
  private:
-  typedef Net_TCPConnectionBase_T<Test_U_TCPHandler_t,
-                                  struct Test_U_ConnectionConfiguration,
-                                  struct Test_U_ConnectionState,
-                                  Net_Statistic_t,
-                                  struct Test_U_SocketHandlerConfiguration,
-                                  struct Test_U_ListenerConfiguration,
-                                  Test_U_Stream,
-                                  struct Test_U_UserData> inherited;
-
   // *TODO*: if there is no default ctor, MSVC will not compile this code.
   //         For some reason, the compiler will not accept the overloaded
   //         make_svc_handler() method of ACE_Connector/ACE_Acceptor
@@ -91,13 +98,14 @@ class Test_U_TCPConnection
 //////////////////////////////////////////
 
 class Test_U_AsynchTCPConnection
- : public Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPHandler_t,
+ : public Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPSocketHandler_t,
                                         struct Test_U_ConnectionConfiguration,
                                         struct Test_U_ConnectionState,
                                         Net_Statistic_t,
                                         struct Test_U_SocketHandlerConfiguration,
                                         struct Test_U_ListenerConfiguration,
                                         Test_U_Stream,
+                                        Common_Timer_Manager_t,
                                         struct Test_U_UserData>
  , public Net_IPing
 {
@@ -105,7 +113,8 @@ class Test_U_AsynchTCPConnection
  friend class ACE_Asynch_Connector<Test_U_AsynchTCPConnection>;
 
  public:
-  typedef Net_IConnectionManager_T<ACE_INET_Addr,
+  typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                   ACE_INET_Addr,
                                    struct Test_U_ConnectionConfiguration,
                                    struct Test_U_ConnectionState,
                                    Net_Statistic_t,
@@ -113,19 +122,20 @@ class Test_U_AsynchTCPConnection
 
   Test_U_AsynchTCPConnection (ICONNECTION_MANAGER_T*,                        // connection manager handle
                               const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  virtual ~Test_U_AsynchTCPConnection ();
+  inline virtual ~Test_U_AsynchTCPConnection () {};
 
   // implement Net_IPing
-  virtual void ping ();
+  inline virtual void ping () { inherited::stream_.ping (); };
 
  private:
-  typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPHandler_t,
+  typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPSocketHandler_t,
                                         struct Test_U_ConnectionConfiguration,
                                         struct Test_U_ConnectionState,
                                         Net_Statistic_t,
                                         struct Test_U_SocketHandlerConfiguration,
                                         struct Test_U_ListenerConfiguration,
                                         Test_U_Stream,
+                                        Common_Timer_Manager_t,
                                         struct Test_U_UserData> inherited;
 
   // *TODO*: if there is no default ctor, MSVC will not compile this code.

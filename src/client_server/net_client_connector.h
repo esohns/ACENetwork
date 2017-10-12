@@ -142,7 +142,7 @@ class Net_Client_Connector_T
 
 //////////////////////////////////////////
 
-// (partial) specializations (for UDP)
+// specialization (for UDP)
 template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename HandlerType, // implements Net_ConnectionBase_T
           typename ConnectorType, // ACE_SOCK_CONNECTOR
@@ -157,15 +157,7 @@ template <ACE_SYNCH_DECL, // 'send' lock strategy
           ////////////////////////////////
           typename UserDataType>
 class Net_Client_Connector_T<ACE_SYNCH_USE,
-                             Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-                                                     HandlerType,
-                                                     ConfigurationType,
-                                                     StateType,
-                                                     StatisticContainerType,
-                                                     HandlerConfigurationType,
-                                                     StreamType,
-                                                     Common_Timer_Manager_t,
-                                                     UserDataType>,
+                             HandlerType,
                              ConnectorType,
                              ACE_INET_Addr,
                              ConfigurationType,
@@ -186,15 +178,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
-  typedef Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-                                  HandlerType,
-                                  ConfigurationType,
-                                  StateType,
-                                  StatisticContainerType,
-                                  HandlerConfigurationType,
-                                  StreamType,
-                                  Common_Timer_Manager_t,
-                                  UserDataType> CONNECTION_T;
+  typedef HandlerType CONNECTION_T;
   typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                   ConfigurationType,
                                   StateType,
@@ -222,7 +206,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   typedef Net_IAsynchConnector_T<ACE_INET_Addr,
                                  ConfigurationType> IASYNCH_CONNECTOR_T;
 
-  Net_Client_Connector_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+  Net_Client_Connector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
                           const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   inline virtual ~Net_Client_Connector_T () {};
 
@@ -261,15 +245,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
  private:
   // convenient types
   typedef Net_Client_Connector_T<ACE_SYNCH_USE,
-                                 Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-                                                         HandlerType,
-                                                         ConfigurationType,
-                                                         StateType,
-                                                         StatisticContainerType,
-                                                         HandlerConfigurationType,
-                                                         StreamType,
-                                                         Common_Timer_Manager_t,
-                                                         UserDataType>,
+                                 HandlerType,
                                  ConnectorType,
                                  ACE_INET_Addr,
                                  ConfigurationType,
@@ -280,7 +256,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                                  StreamType,
                                  UserDataType> OWN_TYPE_T;
 
-  ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ())
+  //ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T ())
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T (const Net_Client_Connector_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Client_Connector_T& operator= (const Net_Client_Connector_T&))
 
@@ -296,7 +272,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
 //////////////////////////////////////////
 
 #if defined (ACE_HAS_NETLINK)
-// partial specialization (for Netlink)
+// specialization (for Netlink)
 template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename HandlerType, // implements Net_ConnectionBase_T
           typename ConnectorType, // ACE_SOCK_CONNECTOR
@@ -359,7 +335,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   typedef Net_IAsynchConnector_T<Net_Netlink_Addr,
                                  ConfigurationType> IASYNCH_CONNECTOR_T;
 
-  Net_Client_Connector_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
+  Net_Client_Connector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
                           const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   inline virtual ~Net_Client_Connector_T () {};
 

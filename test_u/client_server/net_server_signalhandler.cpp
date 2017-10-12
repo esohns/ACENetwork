@@ -41,16 +41,9 @@
 #include "test_u_connection_manager_common.h"
 
 Test_U_Server_SignalHandler::Test_U_Server_SignalHandler ()
- : inherited (this) // event handler handle
+ : inherited (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Server_SignalHandler::Test_U_Server_SignalHandler"));
-
-//  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
-}
-
-Test_U_Server_SignalHandler::~Test_U_Server_SignalHandler ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Server_SignalHandler::~Test_U_Server_SignalHandler"));
 
 }
 
@@ -149,24 +142,24 @@ Test_U_Server_SignalHandler::handle (int signal_in)
     } // end IF
 
     // step3: stop timer
-    if (inherited::configuration_->statisticReportingTimerID >= 0)
+    if (inherited::configuration_->statisticReportingTimerId >= 0)
     {
       const void* act_p = NULL;
       result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (inherited::configuration_->statisticReportingTimerID,
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (inherited::configuration_->statisticReportingTimerId,
                                                               &act_p);
       if (result <= 0)
       {
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", returning\n"),
-                    inherited::configuration_->statisticReportingTimerID));
+                    inherited::configuration_->statisticReportingTimerId));
 
         // clean up
-        inherited::configuration_->statisticReportingTimerID = -1;
+        inherited::configuration_->statisticReportingTimerId = -1;
 
         return;
       } // end IF
-      inherited::configuration_->statisticReportingTimerID = -1;
+      inherited::configuration_->statisticReportingTimerId = -1;
     } // end IF
 
     // step4: stop accepting connections, abort open connections

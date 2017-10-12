@@ -18,6 +18,11 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
+#if defined (ACE_LINUX)
+#include "linux/errqueue.h"
+#include "netinet/ip_icmp.h"
+#endif
+
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 
@@ -434,24 +439,153 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: failed to ACE_Svc_Handler::close(): \"%m\", continuing\n"),
                   this->id ()));
-  if (likely (inherited::writeHandle_ != ACE_INVALID_HANDLE))
+  if (likely (inherited::HANDLER_T::writeHandle_ != ACE_INVALID_HANDLE))
   {
     result = ACE_OS::closesocket (inherited::writeHandle_);
     if (unlikely (result == -1))
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
-                    id (), inherited::writeHandle_));
+                    id (), inherited::HANDLER_T::writeHandle_));
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                     this->id (), inherited::writeHandle_));
 #endif
   } // end IF
-  inherited::writeHandle_ = ACE_INVALID_HANDLE;
+  inherited::HANDLER_T::writeHandle_ = ACE_INVALID_HANDLE;
 
   inherited::open (inherited::CONNECTION_BASE_T::configuration_);
 }
+
+#if defined (ACE_LINUX)
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename TimerManagerType,
+          typename UserDataType>
+void
+Net_UDPConnectionBase_T<ACE_SYNCH_USE,
+                        HandlerType,
+                        ConfigurationType,
+                        StateType,
+                        StatisticContainerType,
+                        HandlerConfigurationType,
+                        StreamType,
+                        TimerManagerType,
+                        UserDataType>::processErrorQueue ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::processErrorQueue"));
+
+  ssize_t result = -1;
+
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  struct iovec iovec_a[1];
+  iovec_a[0].iov_base = buffer;
+  iovec_a[0].iov_len = sizeof (buffer);
+  ACE_INET_Addr socket_address;
+  ACE_TCHAR buffer_2[BUFSIZ];
+  ACE_OS::memset (buffer_2, 0, sizeof (buffer_2));
+//  result = inherited::peer_.recv (iovec_a, 1,
+//                                  socket_address,
+//                                  MSG_ERRQUEUE);
+
+  struct msghdr msghdr_s;
+  msghdr_s.msg_iov = iovec_a;
+  msghdr_s.msg_iovlen = 1;
+#if defined (ACE_HAS_SOCKADDR_MSG_NAME)
+  msghdr_s.msg_name =
+      static_cast<struct sockaddr*> (socket_address.get_addr ());
+#else
+  msghdr_s.msg_name = static_cast<char*> (socket_address.get_addr ());
+#endif /* ACE_HAS_SOCKADDR_MSG_NAME */
+  msghdr_s.msg_namelen = socket_address.get_addr_size ();
+
+#if defined (ACE_HAS_4_4BSD_SENDMSG_RECVMSG)
+  msghdr_s.msg_control = buffer_2;
+  msghdr_s.msg_controllen = sizeof (buffer_2);
+#elif !defined ACE_LACKS_SENDMSG
+  msghdr_s.msg_accrights = 0;
+  msghdr_s.msg_accrightslen = 0;
+#endif /* ACE_HAS_4_4BSD_SENDMSG_RECVMSG */
+
+  result = ACE_OS::recvmsg (inherited::peer_.get_handle (),
+                            &msghdr_s,
+                            MSG_ERRQUEUE | MSG_WAITALL);
+  if (result == -1)
+  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("%t: failed to ACE_SOCK_Dgram::recv(%d,MSG_ERRQUEUE): \"%m\", returning\n"),
+//                inherited::peer_.get_handle ()));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%t: failed to ACE_OS::recvmsg(%d,MSG_ERRQUEUE): \"%m\", returning\n"),
+                inherited::peer_.get_handle ()));
+    return;
+  } // end IF
+  socket_address.set_size (msghdr_s.msg_namelen);
+  socket_address.set_type (static_cast<struct sockaddr_in*> (socket_address.get_addr ())->sin_family);
+
+  struct sock_extended_err* sock_err_p = NULL;
+  for (struct cmsghdr* cmsghdr_p = CMSG_FIRSTHDR (&msghdr_s);
+       cmsghdr_p;
+       cmsghdr_p = CMSG_NXTHDR (&msghdr_s, cmsghdr_p))
+  {
+    if ((cmsghdr_p->cmsg_level != SOL_IP) || // IPPROTO_IP
+        (cmsghdr_p->cmsg_type  != IP_RECVERR))
+      continue;
+
+    sock_err_p =
+        reinterpret_cast<struct sock_extended_err*> (CMSG_DATA (cmsghdr_p));
+    if (!sock_err_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%t: failed to retrieve socket error: \"%m\", continuing\n"),
+                  inherited::peer_.get_handle ()));
+      continue;
+    } // end IF
+
+    switch (sock_err_p->ee_origin)
+    {
+      case SO_EE_ORIGIN_NONE:
+        break;
+      case SO_EE_ORIGIN_LOCAL:
+        break;
+      case SO_EE_ORIGIN_ICMP:
+      {
+        switch (sock_err_p->ee_type)
+        {
+          case ICMP_NET_UNREACH:
+            break;
+          case ICMP_HOST_UNREACH:
+            break;
+          default:
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("%t: invalid/unknown ICMP error (was: %d), continuing\n"),
+                        sock_err_p->ee_type));
+            break;
+          }
+        } // end SWITCH
+        break;
+      }
+      case SO_EE_ORIGIN_ICMP6:
+        break;
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%t: invalid/unknown error origin (was: %d), continuing\n"),
+                    sock_err_p->ee_origin));
+        break;
+      }
+    } // end SWITCH
+  } // end FOR
+}
+#endif
 
 /////////////////////////////////////////
 
@@ -504,6 +638,117 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
   ACE_NOTSUP;
 
   ACE_NOTREACHED (return;)
+}
+
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename TimerManagerType,
+          typename UserDataType>
+void
+Net_AsynchUDPConnectionBase_T<HandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              HandlerConfigurationType,
+                              StreamType,
+                              TimerManagerType,
+                              UserDataType>::open (ACE_HANDLE handle_in,
+                                                   ACE_Message_Block& messageBlock_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::open"));
+
+  int result = -1;
+
+  // step1: initialize asynchronous I/O
+  inherited::open (handle_in,
+                   messageBlock_in);
+  if (unlikely (inherited::state_.status != NET_CONNECTION_STATUS_OK))
+    goto error;
+
+  // step2: start reading (need to pass any data ?)
+  if (likely (!messageBlock_in.length ()))
+  {
+    if (unlikely (!initiate_read ()))
+    {
+      int error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if ((error != ENXIO)                 && // 6    : happens on Win32
+          (error != EFAULT)                && // 14   : *TODO*: happens on Win32
+          (error != ERROR_UNEXP_NET_ERR)   && // 59   : *TODO*: happens on Win32
+          (error != ERROR_NETNAME_DELETED) && // 64   : happens on Win32
+          (error != ENOTSOCK)              && // 10038: local close()
+          (error != ECONNRESET))              // 10054: reset by peer
+#else
+      if (error != ECONNRESET) // 104: reset by peer
+#endif
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(): \"%m\", aborting\n"),
+                    id ()));
+      goto error;
+    } // end IF
+  } // end IF
+  else
+  {
+    ACE_Message_Block* duplicate_p = messageBlock_in.duplicate ();
+    if (!duplicate_p)
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", aborting\n")));
+      goto error;
+    } // end IF
+    // fake a result to emulate regular behavior
+    ACE_Proactor* proactor_p = inherited::proactor ();
+    ACE_ASSERT (proactor_p);
+    ACE_Asynch_Read_Stream_Result_Impl* fake_result_p =
+        proactor_p->create_asynch_read_stream_result (inherited::proxy (),                            // handler proxy
+                                                      handle_in,                                      // socket handle
+                                                      *duplicate_p,                                   // buffer
+                                                      static_cast<u_long> (duplicate_p->capacity ()), // (maximum) #bytes to read
+                                                      NULL,                                           // ACT
+                                                      ACE_INVALID_HANDLE,                             // event
+                                                      0,                                              // priority
+                                                      COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);           // signal number
+    if (!fake_result_p)
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Proactor::create_asynch_read_stream_result: \"%m\", aborting\n")));
+      goto error;
+    } // end IF
+    size_t bytes_transferred = duplicate_p->length ();
+    // <complete> for Accept would have already moved the <wr_ptr>
+    // forward; update it to the beginning position
+    duplicate_p->wr_ptr (duplicate_p->wr_ptr () - bytes_transferred);
+    // invoke ourselves (see handle_read_stream())
+    fake_result_p->complete (duplicate_p->length (), // bytes read
+                             1,                      // success
+                             NULL,                   // ACT
+                             0);                     // error
+
+    // clean up
+    delete fake_result_p;
+  } // end ELSE
+  //ACE_ASSERT (this->count () == 2); // connection manager, read operation
+  //                                     (+ stream module(s))
+
+  return;
+
+error:
+  result = inherited::handle_close (handle_in,
+                                    ACE_Event_Handler::ALL_EVENTS_MASK);
+  if (result == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT ("failed to Net_AsynchStreamConnectionBase_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
+                handle_in, ACE_Event_Handler::ALL_EVENTS_MASK));
+#else
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT ("failed to Net_AsynchStreamConnectionBase_T::handle_close(%d,%d): \"%m\", continuing\n"),
+                handle_in, ACE_Event_Handler::ALL_EVENTS_MASK));
+#endif
 }
 
 template <typename HandlerType,
@@ -609,7 +854,10 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
 
     this->increase ();
     inherited::counter_.increase ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 send:
+#endif
     // *NOTE*: this is a fire-and-forget API for message_block_p
     result_2 =
       inherited::outputStream_.send (message_block_p,                      // data
@@ -781,3 +1029,172 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
   inherited::open (ACE_INVALID_HANDLE,
                    message_block);
 }
+
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename TimerManagerType,
+          typename UserDataType>
+bool
+Net_AsynchUDPConnectionBase_T<HandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              HandlerConfigurationType,
+                              StreamType,
+                              TimerManagerType,
+                              UserDataType>::initiate_read ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::initiate_read"));
+
+  inherited::increase ();
+  if (unlikely (!inherited::initiate_read ()))
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(0x%@): \"%m\", continuing\n"),
+                    id (), inherited::writeHandle_));
+#else
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(%d): \"%m\", continuing\n"),
+                    this->id (), inherited::writeHandle_));
+#endif
+
+    // clean up
+    inherited::decrease ();
+
+    return false;
+  } // end IF
+
+  return true;
+}
+
+#if defined (ACE_LINUX)
+template <typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename TimerManagerType,
+          typename UserDataType>
+void
+Net_AsynchUDPConnectionBase_T<HandlerType,
+                              ConfigurationType,
+                              StateType,
+                              StatisticContainerType,
+                              HandlerConfigurationType,
+                              StreamType,
+                              TimerManagerType,
+                              UserDataType>::processErrorQueue ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::processErrorQueue"));
+
+  ssize_t result = -1;
+
+  ACE_TCHAR buffer[BUFSIZ];
+  ACE_OS::memset (buffer, 0, sizeof (buffer));
+  struct iovec iovec_a[1];
+  iovec_a[0].iov_base = buffer;
+  iovec_a[0].iov_len = sizeof (buffer);
+  ACE_INET_Addr socket_address;
+  ACE_TCHAR buffer_2[BUFSIZ];
+  ACE_OS::memset (buffer_2, 0, sizeof (buffer_2));
+//  result = inherited::peer_.recv (iovec_a, 1,
+//                                  socket_address,
+//                                  MSG_ERRQUEUE);
+
+  struct msghdr msghdr_s;
+  msghdr_s.msg_iov = iovec_a;
+  msghdr_s.msg_iovlen = 1;
+#if defined (ACE_HAS_SOCKADDR_MSG_NAME)
+  msghdr_s.msg_name =
+      static_cast<struct sockaddr*> (socket_address.get_addr ());
+#else
+  msghdr_s.msg_name = static_cast<char*> (socket_address.get_addr ());
+#endif /* ACE_HAS_SOCKADDR_MSG_NAME */
+  msghdr_s.msg_namelen = socket_address.get_addr_size ();
+
+#if defined (ACE_HAS_4_4BSD_SENDMSG_RECVMSG)
+  msghdr_s.msg_control = buffer_2;
+  msghdr_s.msg_controllen = sizeof (buffer_2);
+#elif !defined ACE_LACKS_SENDMSG
+  msghdr_s.msg_accrights = 0;
+  msghdr_s.msg_accrightslen = 0;
+#endif /* ACE_HAS_4_4BSD_SENDMSG_RECVMSG */
+
+  result = ACE_OS::recvmsg (inherited::peer_.get_handle (),
+                            &msghdr_s,
+                            MSG_ERRQUEUE | MSG_WAITALL);
+  if (result == -1)
+  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("%t: failed to ACE_SOCK_Dgram::recv(%d,MSG_ERRQUEUE): \"%m\", returning\n"),
+//                inherited::peer_.get_handle ()));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%t: failed to ACE_OS::recvmsg(%d,MSG_ERRQUEUE): \"%m\", returning\n"),
+                inherited::peer_.get_handle ()));
+    return;
+  } // end IF
+  socket_address.set_size (msghdr_s.msg_namelen);
+  socket_address.set_type (static_cast<struct sockaddr_in*> (socket_address.get_addr ())->sin_family);
+
+  struct sock_extended_err* sock_err_p = NULL;
+  for (struct cmsghdr* cmsghdr_p = CMSG_FIRSTHDR (&msghdr_s);
+       cmsghdr_p;
+       cmsghdr_p = CMSG_NXTHDR (&msghdr_s, cmsghdr_p))
+  {
+    if ((cmsghdr_p->cmsg_level != SOL_IP) || // IPPROTO_IP
+        (cmsghdr_p->cmsg_type  != IP_RECVERR))
+      continue;
+
+    sock_err_p =
+        reinterpret_cast<struct sock_extended_err*> (CMSG_DATA (cmsghdr_p));
+    if (!sock_err_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%t: failed to retrieve socket error: \"%m\", continuing\n"),
+                  inherited::peer_.get_handle ()));
+      continue;
+    } // end IF
+
+    switch (sock_err_p->ee_origin)
+    {
+      case SO_EE_ORIGIN_NONE:
+        break;
+      case SO_EE_ORIGIN_LOCAL:
+        break;
+      case SO_EE_ORIGIN_ICMP:
+      {
+        switch (sock_err_p->ee_type)
+        {
+          case ICMP_NET_UNREACH:
+            break;
+          case ICMP_HOST_UNREACH:
+            break;
+          default:
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("%t: invalid/unknown ICMP error (was: %d), continuing\n"),
+                        sock_err_p->ee_type));
+            break;
+          }
+        } // end SWITCH
+        break;
+      }
+      case SO_EE_ORIGIN_ICMP6:
+        break;
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("%t: invalid/unknown error origin (was: %d), continuing\n"),
+                    sock_err_p->ee_origin));
+        break;
+      }
+    } // end SWITCH
+  } // end FOR
+}
+#endif

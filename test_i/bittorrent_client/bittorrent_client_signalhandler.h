@@ -34,7 +34,6 @@
 
 class BitTorrent_Client_SignalHandler
  : public Common_SignalHandler_T<struct BitTorrent_Client_SignalHandlerConfiguration>
- , public Common_ISignal
 {
  public:
   BitTorrent_Client_SignalHandler (bool = NET_EVENT_USE_REACTOR,      // use reactor ?

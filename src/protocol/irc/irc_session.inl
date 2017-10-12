@@ -118,7 +118,7 @@ IRC_Session_T<ConnectionType,
 
   int result = -1;
 
-  if (inputHandler_)
+  if (unlikely (inputHandler_))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     // *NOTE*: the input handler runs in a dedicated (detached) thread; there is
@@ -130,7 +130,7 @@ IRC_Session_T<ConnectionType,
 #else
     result = inputHandler_->handle_close (ACE_INVALID_HANDLE,
                                           ACE_Event_Handler::ALL_EVENTS_MASK);
-    if (result == -1)
+    if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to IRC_Client_InputHandler::handle_close(): \"%m\", continuing\n")));
 
@@ -138,7 +138,7 @@ IRC_Session_T<ConnectionType,
 #endif
   } // end IF
 
-  if (close_)
+  if (unlikely (close_))
   {
     //result = file_.close ();
     //if (result == -1)
@@ -209,7 +209,7 @@ IRC_Session_T<ConnectionType,
     if (ACE_OS::strcmp (module_p->name (),
                         ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME)) == 0)
       break;
-  if (!module_p)
+  if (unlikely (!module_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("module \"%s\" not found, returning\n"),
@@ -223,7 +223,7 @@ IRC_Session_T<ConnectionType,
   inherited::state_.controller =
 //    dynamic_cast<ControllerType*> (const_cast<typename inherited::CONNECTION_BASE_T::STREAM_T::MODULE_T*> (module_p)->writer ());
       dynamic_cast<IRC_IControl*> (const_cast<typename inherited::STREAM_CONNECTION_BASE_T::STREAM_T::MODULE_T*> (module_p)->writer ());
-  if (!inherited::state_.controller)
+  if (unlikely (!inherited::state_.controller))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<IRC_IControl*> failed, returning\n"),
@@ -1051,7 +1051,7 @@ IRC_Session_T<ConnectionType,
           static_cast<typename inherited::ILISTENER_T*> (arg_in);
       ACE_ASSERT (ilistener_p);
       connection_configuration_p =
-        &const_cast<ConnectionConfigurationType&> (ilistener_p->getR ());
+        &const_cast<ConnectionConfigurationType&> (ilistener_p->getR_2 ());
       break;
     }
     default:

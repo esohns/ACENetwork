@@ -96,8 +96,9 @@ set (${PROJECT_NAME}_Protocol_IRC_SCRIPTS
 
 # *NOTE*: generate .def file and export all symbols on Windows
 if (WIN32)
- set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+ set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
  source_group (scripts FILES ${PROJECT_NAME}_Protocol_IRC_SCRIPTS)
+ source_group (exports FILES etc/exports.def)
 endif ()
 
 add_library (${PROJECT_NAME}_Protocol_IRC SHARED
@@ -121,6 +122,7 @@ endif ()
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
+set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
 cotire (${PROJECT_NAME}_Protocol_IRC)
 
 # add all targets to the build-tree export set

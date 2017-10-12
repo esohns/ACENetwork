@@ -33,15 +33,17 @@
 #include "net_common_tools.h"
 #include "net_macros.h"
 
-//#include "test_u_stream.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_sessionmessage.h"
 
+#include "net_client_common.h"
+
 Test_U_Client_SignalHandler::Test_U_Client_SignalHandler ()
- : inherited (this) // event handler handle
- , actionTimerId_ (-1)
+ : inherited (NULL)
  , address_ ()
  , connector_ (NULL)
+ , hasUI_ (false)
+ , timerId_ (-1)
  , useReactor_ (NET_EVENT_USE_REACTOR)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Client_SignalHandler::Test_U_Client_SignalHandler"));
@@ -54,9 +56,9 @@ Test_U_Client_SignalHandler::initialize (const struct Test_U_Client_SignalHandle
   NETWORK_TRACE (ACE_TEXT ("Test_U_Client_SignalHandler::handleSignal"));
 
   // *TODO*: remove type inference
-  actionTimerId_ = configuration_in.actionTimerId;
-  address_ = configuration_in.peerAddress;
   connector_ = configuration_in.connector;
+  hasUI_ = configuration_in.hasUI;
+  timerId_ = configuration_in.actionTimerId;
   useReactor_ = configuration_in.useReactor;
 
   return inherited::initialize (configuration_in);
@@ -68,6 +70,9 @@ Test_U_Client_SignalHandler::handle (int signal_in)
   NETWORK_TRACE (ACE_TEXT ("Test_U_Client_SignalHandler::handleSignal"));
 
   int result = -1;
+  Common_Timer_Manager_t* timer_manager_p =
+    COMMON_TIMERMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (timer_manager_p);
   Test_U_IInetConnectionManager_t* iconnection_manager_p =
       TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
@@ -138,7 +143,6 @@ Test_U_Client_SignalHandler::handle (int signal_in)
 
     ACE_HANDLE handle = ACE_INVALID_HANDLE;
     try {
-      connector_->initialize (*inherited::configuration_->connectionConfiguration);
       handle = connector_->connect (address_);
     } catch (...) {
       // *PORTABILITY*: tracing in a signal handler context is not portable
@@ -171,20 +175,21 @@ Test_U_Client_SignalHandler::handle (int signal_in)
 //    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
 
     // step2: stop action timer (if any)
-    if (actionTimerId_ >= 0)
+    if (timerId_ >= 0)
     {
       const void* act_p = NULL;
-      result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (actionTimerId_,
-                                                                    &act_p);
+      result = timer_manager_p->cancel_timer (timerId_,
+                                              &act_p);
       // *PORTABILITY*: tracing in a signal handler context is not portable
       // *TODO*
       if (result <= 0)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to cancel action timer (ID: %d): \"%m\", continuing\n"),
-                    actionTimerId_));
-      actionTimerId_ = -1;
+                    ACE_TEXT ("failed to Common_ITimer_T::cancel_timer(%d): \"%m\", continuing\n"),
+                    timerId_));
+      timerId_ = -1;
     } // end IF
+    timer_manager_p->stop (false, // wait for completion ?
+                           true); // N/A
 
     // step3: cancel connection attempts (if any)
     if (connector_ &&
@@ -204,12 +209,17 @@ Test_U_Client_SignalHandler::handle (int signal_in)
     } // end IF
 
     // step4: stop accepting connections, abort open connections
-    iconnection_manager_p->stop (false, true);
+    iconnection_manager_p->stop (false, // wait for completion ?
+                                 true); // N/A
     iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
     Common_Tools::finalizeEventDispatch (true,         // stop reactor ?
                                          !useReactor_, // stop proactor ?
                                          -1);          // group ID (--> don't block !)
+
+    // step6: stop UI ?
+    if (hasUI_)
+      CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
   } // end IF
 }

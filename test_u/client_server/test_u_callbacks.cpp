@@ -686,6 +686,38 @@ idle_update_progress_client_cb (gpointer userData_in)
   return (done ? G_SOURCE_REMOVE : G_SOURCE_CONTINUE);
 }
 
+gboolean
+idle_end_session_client_cb (gpointer userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::idle_end_session_client_cb"));
+
+  struct Test_U_GTK_CBData* data_p =
+    static_cast<struct Test_U_GTK_CBData*> (userData_in);
+
+  // sanity check(s)
+  ACE_ASSERT (data_p);
+
+  // synch access
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
+
+//  int result = -1;
+  Common_UI_GTKBuildersIterator_t iterator =
+    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  // sanity check(s)
+  ACE_ASSERT (iterator != data_p->builders.end ());
+
+  // step1: done ?
+  bool done = false;
+  GtkSpinButton* spin_button_p =
+    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                             ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
+  ACE_ASSERT (spin_button_p);
+  if (!gtk_spin_button_get_value_as_int (spin_button_p))
+    done = true;
+
+  return G_SOURCE_REMOVE;
+}
+
 //////////////////////////////////////////
 
 gboolean
@@ -763,9 +795,11 @@ idle_initialize_server_UI_cb (gpointer userData_in)
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_PROGRESSBAR_NAME)));
   ACE_ASSERT (progress_bar_p);
-  gtk_progress_bar_set_text (progress_bar_p, ACE_TEXT_ALWAYS_CHAR (""));
+  gtk_progress_bar_set_text (progress_bar_p,
+                             ACE_TEXT_ALWAYS_CHAR (""));
   gint width, height;
-  gtk_widget_get_size_request (GTK_WIDGET (progress_bar_p), &width, &height);
+  gtk_widget_get_size_request (GTK_WIDGET (progress_bar_p),
+                               &width, &height);
   gtk_progress_bar_set_pulse_step (progress_bar_p,
                                    1.0 / static_cast<double> (width));
 
@@ -863,7 +897,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
                                         ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_BUTTON_REPORT_NAME)));
   ACE_ASSERT (button_p);
   gtk_widget_set_sensitive (GTK_WIDGET (button_p),
-    data_p->allowUserRuntimeStatistic);
+                            data_p->allowUserRuntimeStatistic);
 
   // step6: (auto-)connect signals/slots
   // *NOTE*: glade_xml_signal_connect_data does not work reliably
@@ -1063,7 +1097,7 @@ idle_update_progress_server_cb (gpointer userData_in)
 extern "C"
 {
 #endif /* __cplusplus */
-G_MODULE_EXPORT gint
+gint
 button_connect_clicked_cb (GtkWidget* widget_in,
                            gpointer userData_in)
 {
@@ -1091,7 +1125,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   return FALSE;
 } // button_connect_clicked_cb
 
-G_MODULE_EXPORT gint
+gint
 button_close_clicked_cb (GtkWidget* widget_in,
                          gpointer userData_in)
 {
@@ -1116,7 +1150,7 @@ button_close_clicked_cb (GtkWidget* widget_in,
   return FALSE;
 } // button_close_clicked_cb
 
-G_MODULE_EXPORT gint
+gint
 button_close_all_clicked_cb (GtkWidget* widget_in,
                              gpointer userData_in)
 {
@@ -1130,7 +1164,7 @@ button_close_all_clicked_cb (GtkWidget* widget_in,
   return FALSE;
 } // button_close_all_clicked_cb
 
-G_MODULE_EXPORT gint
+gint
 button_ping_clicked_cb (GtkWidget* widget_in,
                         gpointer userData_in)
 {
@@ -1197,7 +1231,7 @@ button_ping_clicked_cb (GtkWidget* widget_in,
   return FALSE;
 } // button_ping_clicked_cb
 
-G_MODULE_EXPORT gint
+gint
 togglebutton_test_toggled_cb (GtkWidget* widget_in,
                               gpointer userData_in)
 {
@@ -1288,7 +1322,7 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   return FALSE;
 }
 
-G_MODULE_EXPORT gint
+gint
 radiobutton_mode_toggled_cb (GtkWidget* widget_in,
                              gpointer userData_in)
 {
@@ -1355,7 +1389,7 @@ radiobutton_mode_toggled_cb (GtkWidget* widget_in,
 
 // -----------------------------------------------------------------------------
 
-G_MODULE_EXPORT gint
+gint
 togglebutton_listen_toggled_cb (GtkWidget* widget_in,
                                 gpointer userData_in)
 {
@@ -1392,7 +1426,7 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
   return FALSE;
 } // togglebutton_listen_toggled_cb
 
-G_MODULE_EXPORT gint
+gint
 button_report_clicked_cb (GtkWidget* widget_in,
                           gpointer userData_in)
 {
@@ -1419,7 +1453,7 @@ button_report_clicked_cb (GtkWidget* widget_in,
 
 // -----------------------------------------------------------------------------
 
-G_MODULE_EXPORT void
+void
 spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
                                                 gpointer userData_in)
 {
@@ -1439,7 +1473,7 @@ spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
 
   gint value = gtk_spin_button_get_value_as_int (spinButton_in);
   if (value == 0)
-    data_p->progressEventSourceID = 0;
+    data_p->progressEventSourceId = 0;
 
   // step1: update buttons
   GtkWidget* widget_p = NULL;
@@ -1462,13 +1496,13 @@ spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
   } // end IF
 
   // step2: start progress reporting ?
-  if ((value != 1) || data_p->progressEventSourceID)
+  if ((value != 1) || data_p->progressEventSourceId)
     goto continue_;
 
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), true);
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
-    data_p->progressEventSourceID =
+    data_p->progressEventSourceId =
       //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
       //                 idle_update_progress_cb,
       //                 &data_p->progressData,
@@ -1478,8 +1512,8 @@ spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
                           idle_update_progress_client_cb,
                           &data_p->progressData,
                           NULL);
-    if (data_p->progressEventSourceID > 0)
-      data_p->eventSourceIds.insert (data_p->progressEventSourceID);
+    if (data_p->progressEventSourceId > 0)
+      data_p->eventSourceIds.insert (data_p->progressEventSourceId);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1510,7 +1544,7 @@ continue_:
     gtk_spin_button_set_value (spin_button_p, 0.0);
   } // end IF
 } // spinbutton_connections_value_changed_client_cb
-G_MODULE_EXPORT void
+void
 spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
                                                 gpointer userData_in)
 {
@@ -1530,7 +1564,7 @@ spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
 
   gint value = gtk_spin_button_get_value_as_int (spinButton_in);
   if (value == 0)
-    data_p->progressEventSourceID = 0;
+    data_p->progressEventSourceId = 0;
 
   // step1: update buttons
   GtkWidget* widget_p = NULL;
@@ -1540,13 +1574,13 @@ spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
   ACE_ASSERT (progress_bar_p);
 
   // step2: start progress reporting ?
-  if ((value != 1) || data_p->progressEventSourceID)
+  if ((value != 1) || data_p->progressEventSourceId)
     goto continue_;
 
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), true);
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
-    data_p->progressEventSourceID =
+    data_p->progressEventSourceId =
       //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
       //                 idle_update_progress_cb,
       //                 &data_p->progressData,
@@ -1556,8 +1590,8 @@ spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
                           idle_update_progress_server_cb,
                           &data_p->progressData,
                           NULL);
-    if (data_p->progressEventSourceID > 0)
-      data_p->eventSourceIds.insert (data_p->progressEventSourceID);
+    if (data_p->progressEventSourceId > 0)
+      data_p->eventSourceIds.insert (data_p->progressEventSourceId);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1589,7 +1623,7 @@ continue_:
   } // end IF
 } // spinbutton_connections_value_changed_server_cb
 
-G_MODULE_EXPORT void
+void
 spinbutton_ping_interval_value_changed_client_cb (GtkSpinButton* spinButton_in,
                                                   gpointer userData_in)
 {
@@ -1606,7 +1640,7 @@ spinbutton_ping_interval_value_changed_client_cb (GtkSpinButton* spinButton_in,
   gint value = gtk_spin_button_get_value_as_int (spinButton_in);
   data_p->configuration->protocolConfiguration.pingInterval.set_msec (value);
 } // spinbutton_ping_interval_value_changed_client_cb
-G_MODULE_EXPORT void
+void
 spinbutton_ping_interval_value_changed_server_cb (GtkSpinButton* spinButton_in,
                                                   gpointer userData_in)
 {
@@ -1624,7 +1658,7 @@ spinbutton_ping_interval_value_changed_server_cb (GtkSpinButton* spinButton_in,
   data_p->configuration->protocolConfiguration.pingInterval.set_msec (value);
 } // spinbutton_ping_interval_value_changed_server_cb
 
-G_MODULE_EXPORT gint
+gint
 button_clear_clicked_cb (GtkWidget* widget_in,
                          gpointer userData_in)
 {
@@ -1656,7 +1690,7 @@ button_clear_clicked_cb (GtkWidget* widget_in,
   return FALSE;
 }
 
-G_MODULE_EXPORT gint
+gint
 button_about_clicked_cb (GtkWidget* widget_in,
                          gpointer userData_in)
 {
@@ -1700,7 +1734,7 @@ button_about_clicked_cb (GtkWidget* widget_in,
   return FALSE;
 } // button_about_clicked_cb
 
-G_MODULE_EXPORT gint
+gint
 button_quit_clicked_cb (GtkWidget* widget_in,
                         gpointer userData_in)
 {

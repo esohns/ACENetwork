@@ -21,9 +21,12 @@
 
 #include "net_server_common_tools.h"
 
+#include <sstream>
+
 #include "ace/ACE.h"
 #include "ace/Dirent_Selector.h"
 #include "ace/Log_Msg.h"
+#include "ace/OS.h"
 
 #include "common_defines.h"
 #include "common_file_tools.h"
@@ -46,16 +49,10 @@ Net_Server_Common_Tools::selector (const dirent* dirEntry_in)
   //                   log files: "<PREFIX>[_<NUMBER>]<SUFFIX>"
 
   // sanity check --> prefix ok ?
-  if (ACE_OS::strncmp (dirEntry_in->d_name,
-                       ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX),
-                       ACE_OS::strlen (ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX))) != 0)
-  {
-    //     ACE_DEBUG((LM_DEBUG,
-    //                ACE_TEXT("ignoring \"%s\"...\n"),
-    //                dirEntry_in->d_name));
-
+  if (likely (ACE_OS::strncmp (dirEntry_in->d_name,
+                               ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX),
+                               ACE_OS::strlen (ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX)))))
     return 0;
-  } // end IF
 
   return 1;
 }

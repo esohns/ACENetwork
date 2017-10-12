@@ -31,8 +31,9 @@
 
 class Test_U_Client_SignalHandler
  : public Common_SignalHandler_T<struct Test_U_Client_SignalHandlerConfiguration>
- , public Common_ISignal
 {
+  typedef Common_SignalHandler_T<struct Test_U_Client_SignalHandlerConfiguration> inherited;
+
  public:
   Test_U_Client_SignalHandler ();
   inline virtual ~Test_U_Client_SignalHandler () {};
@@ -44,14 +45,13 @@ class Test_U_Client_SignalHandler
   virtual void handle (int); // signal
 
  private:
-  typedef Common_SignalHandler_T<struct Test_U_Client_SignalHandlerConfiguration> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Test_U_Client_SignalHandler (const Test_U_Client_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Client_SignalHandler& operator= (const Test_U_Client_SignalHandler&))
 
-  long                 actionTimerId_;
   ACE_INET_Addr        address_;
   Test_U_IConnector_t* connector_;
+  bool                 hasUI_;
+  long                 timerId_;
   bool                 useReactor_;
 };
 

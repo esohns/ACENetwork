@@ -29,6 +29,8 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
+#include "net_client_defines.h"
+
 #include "test_u_connection_common.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
@@ -36,7 +38,6 @@
 
 Test_U_Client_TimeoutHandler::Test_U_Client_TimeoutHandler (enum ActionModeType mode_in,
                                                             unsigned int maximumNumberOfConnections_in,
-                                                            const ACE_INET_Addr& remoteSAP_in,
                                                             Test_U_IConnector_t* connector_in)
  : inherited (this,  // dispatch interface
               false) // invoke only once ?
@@ -45,7 +46,6 @@ Test_U_Client_TimeoutHandler::Test_U_Client_TimeoutHandler (enum ActionModeType 
  , lock_ ()
  , maximumNumberOfConnections_ (maximumNumberOfConnections_in)
  , mode_ (mode_in)
- , peerAddress_ (remoteSAP_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
  , randomStateInitializationBuffer_ ()
@@ -122,22 +122,24 @@ Test_U_Client_TimeoutHandler::handle (const void* arg_in)
   bool do_ping = false;
   Test_U_IInetConnectionManager_t* connection_manager_p =
     TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+
+  // sanity check(s)
+  ACE_ASSERT (connector_);
   ACE_ASSERT (connection_manager_p);
+
+  const typename Test_U_IConnector_t::CONFIGURATION_T& configuration_r =
+    connector_->getR ();
+  unsigned int number_of_connections = 0;
+
   connection_manager_p->lock ();
-  unsigned int number_of_connections = connection_manager_p->count ();
-
-  {
-    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (lock_);
-
+  number_of_connections = connection_manager_p->count ();
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     switch (mode_)
     {
       case ACTION_NORMAL:
       {
         if (number_of_connections == 0)
-        {
-          connection_manager_p->unlock ();
-          return;
-        } // end IF
+          goto continue_;
 
         // grab a (random) connection handler
         // *PORTABILITY*: outside glibc, this is not very portable...
@@ -150,12 +152,8 @@ Test_U_Client_TimeoutHandler::handle (const void* arg_in)
         if (result == -1)
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ::random_r(): \"%s\", aborting\n")));
-
-          // clean up
-          connection_manager_p->unlock ();
-
-          return -1;
+                      ACE_TEXT ("failed to ::random_r(): \"%s\", returning\n")));
+          goto continue_;
         } // end IF
         index = (index % number_of_connections);
 #endif
@@ -165,11 +163,7 @@ Test_U_Client_TimeoutHandler::handle (const void* arg_in)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to retrieve connection #%d/%d, returning\n"),
                       index, number_of_connections));
-
-          // clean up
-          connection_manager_p->unlock ();
-
-          return;
+          goto continue_;
         } // end IF
 
         do_ping = true;
@@ -209,12 +203,8 @@ Test_U_Client_TimeoutHandler::handle (const void* arg_in)
             if (result == -1)
             {
               ACE_DEBUG ((LM_ERROR,
-                          ACE_TEXT ("failed to ::random_r(): \"%s\", aborting\n")));
-
-              // clean up
-              connection_manager_p->unlock ();
-
-              return -1;
+                          ACE_TEXT ("failed to ::random_r(): \"%s\", returning\n")));
+              goto continue_;
             } // end IF
             index = (index % number_of_connections);
 #endif
@@ -224,11 +214,7 @@ Test_U_Client_TimeoutHandler::handle (const void* arg_in)
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("failed to retrieve connection #%d/%d, returning\n"),
                           index, number_of_connections));
-
-              // clean up
-              connection_manager_p->unlock ();
-
-              return;
+              goto continue_;
             } // end IF
 
             do_abort = true;
@@ -240,11 +226,7 @@ Test_U_Client_TimeoutHandler::handle (const void* arg_in)
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("unknown/invalid alternating state (was: %d), returning\n"),
                         alternatingModeState_));
-
-            // clean up
-            connection_manager_p->unlock ();
-
-            return;
+            goto continue_;
           }
         } // end SWITCH
 
@@ -292,11 +274,7 @@ Test_U_Client_TimeoutHandler::handle (const void* arg_in)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ::random_r(): \"%s\", returning\n")));
-
-          // clean up
-          TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->unlock ();
-
-          return;
+          goto continue_;
         } // end IF
         index = (index % number_of_connections);
 #endif
@@ -306,11 +284,7 @@ Test_U_Client_TimeoutHandler::handle (const void* arg_in)
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to retrieve connection #%d/%d, returning\n"),
                       index, number_of_connections));
-
-          // clean up
-          connection_manager_p->unlock ();
-
-          return;
+          goto continue_;
         } // end IF
 
         do_ping = true;
@@ -322,14 +296,12 @@ Test_U_Client_TimeoutHandler::handle (const void* arg_in)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("unknown/invalid mode (was: %d), returning\n"),
                     mode_));
-
-        // clean up
-        connection_manager_p->unlock ();
-
-        return;
+        goto continue_;
       }
     } // end SWITCH
   } // end lock scope
+
+continue_:
   connection_manager_p->unlock ();
 
   // -------------------------------------
@@ -363,13 +335,43 @@ Test_U_Client_TimeoutHandler::handle (const void* arg_in)
 
   if (do_connect)
   {
+    ACE_INET_Addr peer_address;
+    switch (connector_->transportLayer ())
+    {
+      case NET_TRANSPORTLAYER_TCP:
+      {
+        peer_address =
+          configuration_r.socketHandlerConfiguration.socketConfiguration_2.address;
+        break;
+      }
+      case NET_TRANSPORTLAYER_UDP:
+      {
+        peer_address =
+          configuration_r.socketHandlerConfiguration.socketConfiguration_3.peerAddress;
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown transport layer (was: %d), returning\n"),
+                    connector_->transportLayer ()));
+
+        // clean up
+        if (ping_connection_p)
+          ping_connection_p->decrease ();
+
+        return;
+      }
+    } // end SWITCH
+
+    ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
     ACE_ASSERT (connector_);
-    ACE_HANDLE handle = ACE_INVALID_HANDLE;
     try {
-      handle = connector_->connect (peerAddress_);
+      handle_h = connector_->connect (peer_address);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_Client_IConnector_t::connect(), returning\n")));
+                  ACE_TEXT ("caught exception in Net_IConnector_t::connect(%s), returning\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
 
       // clean up
       if (ping_connection_p)
@@ -377,10 +379,59 @@ Test_U_Client_TimeoutHandler::handle (const void* arg_in)
 
       return;
     }
-    if (handle == ACE_INVALID_HANDLE)
+    if (handle_h == ACE_INVALID_HANDLE)
+    {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Client_IConnector::connect(%s), continuing\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peerAddress_).c_str ())));
+                  ACE_TEXT ("failed to Net_IConnector::connect(%s), returning\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
+
+      // clean up
+      if (ping_connection_p)
+        ping_connection_p->decrease ();
+
+      return;
+    } // end IF
+    typename Test_U_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
+      NULL;
+    if (connector_->useReactor ())
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      iconnection_p =
+        connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
+#else
+      iconnection_p =
+        iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
+#endif
+    } // end IF
+    else
+    {
+      // step1: wait for the connection to register with the manager
+      // *TODO*: avoid these tight loops
+      ACE_Time_Value timeout (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT, 0);
+      ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
+      // *TODO*: this may not be accurate/applicable for/to all protocols
+      do
+      {
+        // *TODO*: avoid these tight loops
+        iconnection_p = connection_manager_p->get (peer_address,
+                                                   true);
+        if (iconnection_p)
+          break;
+      } while (COMMON_TIME_NOW < deadline);
+    } // end ELSE
+    if (!iconnection_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to connect to %s, returning\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
+
+      // clean up
+      if (ping_connection_p)
+        ping_connection_p->decrease ();
+
+      return;
+    } // end IF
+    iconnection_p->decrease ();
   } // end IF
 
   if (do_ping)

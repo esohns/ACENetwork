@@ -90,7 +90,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::~Net_Client_Connector_T"));
 
   int result = inherited::close ();
-  if (result == -1)
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Connector::close(): \"%m\", continuing\n")));
 }
@@ -126,7 +126,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
   // *TODO*: find a better way to do this
   HandlerType* handler_p = NULL;
   int result_2 = const_cast<OWN_TYPE_T*> (this)->make_svc_handler (handler_p);
-  if (result_2 == -1)
+  if (unlikely (result_2 == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_Connector_T<Net_UDPConnection_T>::make_svc_handler(): \"%m\", aborting\n")));
@@ -184,7 +184,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                           1,                               // re-use address (SO_REUSEADDR) ?
                           O_RDWR,                          // flags
                           0);                              // perms
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Connector::connect(%s): \"%m\", aborting\n"),
@@ -244,7 +244,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   // We are connected now, so try to open things up.
   ICONNECTOR_T* iconnector_p = this;
-  if (error || handler_in->open (iconnector_p) == -1)
+  if (unlikely (error || handler_in->open (iconnector_p) == -1))
   {
     // Make sure to close down the <svc_handler> to avoid descriptor
     // leaks.
@@ -289,7 +289,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
   ACE_NEW_NORETURN (handler_out,
                     HandlerType (connectionManager_,
                                  statisticCollectionInterval_));
-  if (!handler_out)
+  if (unlikely (!handler_out))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 
@@ -308,15 +308,7 @@ template <ACE_SYNCH_DECL,
           typename StreamType,
           typename UserDataType>
 Net_Client_Connector_T<ACE_SYNCH_USE,
-                       Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-                                               HandlerType,
-                                               ConfigurationType,
-                                               StateType,
-                                               StatisticContainerType,
-                                               HandlerConfigurationType,
-                                               StreamType,
-                                               Common_Timer_Manager_t,
-                                               UserDataType>,
+                       HandlerType,
                        ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
@@ -348,15 +340,7 @@ template <ACE_SYNCH_DECL,
           typename UserDataType>
 ACE_HANDLE
 Net_Client_Connector_T<ACE_SYNCH_USE,
-                       Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-                                               HandlerType,
-                                               ConfigurationType,
-                                               StateType,
-                                               StatisticContainerType,
-                                               HandlerConfigurationType,
-                                               StreamType,
-                                               Common_Timer_Manager_t,
-                                               UserDataType>,
+                       HandlerType,
                        ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
@@ -373,7 +357,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   CONNECTION_T* handler_p = NULL;
   result = make_svc_handler (handler_p);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_Connector_T<Net_UDPConnection_T>::make_svc_handler(): \"%m\", aborting\n")));
@@ -381,8 +365,12 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
   } // end IF
   ACE_ASSERT (handler_p);
 
+  // pre-initialize the connection handler
+  handler_p->set (Net_Common_Tools::isLocal (address_in) ? NET_ROLE_CLIENT
+                                                         : NET_ROLE_SERVER);
+
   result = activate_svc_handler (handler_p);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_Connector_T::activate_svc_handler(), (address was: %s): \"%m\", aborting\n"),
@@ -404,15 +392,7 @@ template <ACE_SYNCH_DECL,
           typename UserDataType>
 int
 Net_Client_Connector_T<ACE_SYNCH_USE,
-                       Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-                                               HandlerType,
-                                               ConfigurationType,
-                                               StateType,
-                                               StatisticContainerType,
-                                               HandlerConfigurationType,
-                                               StreamType,
-                                               Common_Timer_Manager_t,
-                                               UserDataType>,
+                       HandlerType,
                        ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
@@ -424,10 +404,6 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
                        UserDataType>::activate_svc_handler (CONNECTION_T* handler_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_Connector_T::activate_svc_handler"));
-
-  // pre-initialize the connection handler
-  // *TODO*: remove type inference
-  handler_in->set (NET_ROLE_CLIENT);
 
   // *IMPORTANT NOTE*: this bit is mostly copy/pasted from Connector.cpp:251
 
@@ -447,7 +423,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   // We are connected now, so try to open things up.
   ICONNECTOR_T* iconnector_p = this;
-  if (error || handler_in->open (iconnector_p) == -1)
+  if (unlikely (error || handler_in->open (iconnector_p) == -1))
   {
     // Make sure to close down the <svc_handler> to avoid descriptor
     // leaks.
@@ -470,15 +446,7 @@ template <ACE_SYNCH_DECL,
           typename UserDataType>
 int
 Net_Client_Connector_T<ACE_SYNCH_USE,
-                       Net_UDPConnectionBase_T<ACE_SYNCH_USE,
-                                               HandlerType,
-                                               ConfigurationType,
-                                               StateType,
-                                               StatisticContainerType,
-                                               HandlerConfigurationType,
-                                               StreamType,
-                                               Common_Timer_Manager_t,
-                                               UserDataType>,
+                       HandlerType,
                        ConnectorType,
                        ACE_INET_Addr,
                        ConfigurationType,
@@ -498,7 +466,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
   ACE_NEW_NORETURN (handler_out,
                     CONNECTION_T (connectionManager_,
                                   statisticCollectionInterval_));
-  if (!handler_out)
+  if (unlikely (!handler_out))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 
@@ -654,7 +622,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   HandlerType* handler_p = NULL;
   result = make_svc_handler (handler_p);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_Connector_T::make_svc_handler(): \"%m\", aborting\n")));
@@ -664,7 +632,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   ICONNECTOR_T* iconnector_p = this;
   result = handler_p->open (iconnector_p);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to HandlerType::open(%s): \"%m\", aborting\n"),
@@ -706,7 +674,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
   ACE_NEW_NORETURN (handler_out,
                     HandlerType (connectionManager_,
                                  statisticCollectionInterval_));
-  if (!handler_out)
+  if (unlikely (!handler_out))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 

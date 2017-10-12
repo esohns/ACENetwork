@@ -65,10 +65,10 @@ class Net_ConnectionBase_T
                                    StateType,
                                    StatisticContainerType,
                                    UserDataType> CONNECTION_MANAGER_T;
-  typedef Net_IConnection_T<AddressType,
-                            ConfigurationType,
-                            StateType,
-                            StatisticContainerType> ICONNECTION_T;
+  //typedef Net_IConnection_T<AddressType,
+  //                          ConfigurationType,
+  //                          StateType,
+  //                          StatisticContainerType> ICONNECTION_T;
   typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                    AddressType,
                                    ConfigurationType,

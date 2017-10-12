@@ -185,7 +185,7 @@ DHCP_Stream_T<StreamStateType,
   //     return false;
   //   } // end IF
 
-  // ******************* Runtime Statistics ************************
+  // ******************* Statistic ************************
   //STATISTIC_WRITER_T* statistic_report_impl_p =
   //  dynamic_cast<STATISTIC_WRITER_T*> (runtimeStatistic_.writer ());
   //if (!statistic_report_impl_p)

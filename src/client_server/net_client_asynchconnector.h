@@ -153,8 +153,8 @@ class Net_Client_AsynchConnector_T
                                    const AddressType&,                // remote address
                                    const AddressType&);               // local address
 
-  ACE_SYNCH_CONDITION condition_;
-  ACE_SYNCH_MUTEX     lock_;
+  ACE_SYNCH_CONDITION    condition_;
+  ACE_SYNCH_MUTEX        lock_;
 };
 
 //////////////////////////////////////////
@@ -171,14 +171,7 @@ template <typename HandlerType,
           typename StreamType,
           ////////////////////////////////
           typename UserDataType>
-class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
-                                                                 ConfigurationType,
-                                                                 StateType,
-                                                                 StatisticContainerType,
-                                                                 HandlerConfigurationType,
-                                                                 StreamType,
-                                                                 Common_Timer_Manager_t,
-                                                                 UserDataType>,
+class Net_Client_AsynchConnector_T<HandlerType,
                                    ACE_INET_Addr,
                                    ConfigurationType,
                                    StateType,
@@ -187,25 +180,11 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                                    HandlerConfigurationType,
                                    StreamType,
                                    UserDataType>
- : public ACE_Asynch_Connector<Net_AsynchUDPConnectionBase_T<HandlerType,
-                                                             ConfigurationType,
-                                                             StateType,
-                                                             StatisticContainerType,
-                                                             HandlerConfigurationType,
-                                                             StreamType,
-                                                             Common_Timer_Manager_t,
-                                                             UserDataType> >
+ : public ACE_Asynch_Connector<HandlerType>
  , public Net_IAsynchConnector_T<ACE_INET_Addr,
                                  ConfigurationType>
 {
-  typedef ACE_Asynch_Connector<Net_AsynchUDPConnectionBase_T<HandlerType,
-                                                             ConfigurationType,
-                                                             StateType,
-                                                             StatisticContainerType,
-                                                             HandlerConfigurationType,
-                                                             StreamType,
-                                                             Common_Timer_Manager_t,
-                                                             UserDataType> > inherited;
+  typedef ACE_Asynch_Connector<HandlerType> inherited;
 
  public:
   typedef ACE_INET_Addr ADDRESS_T;
@@ -215,14 +194,7 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
-  typedef Net_AsynchUDPConnectionBase_T<HandlerType,
-                                        ConfigurationType,
-                                        StateType,
-                                        StatisticContainerType,
-                                        HandlerConfigurationType,
-                                        StreamType,
-                                        Common_Timer_Manager_t,
-                                        UserDataType> CONNECTION_T;
+  typedef HandlerType CONNECTION_T;
   typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                   ConfigurationType,
                                   StateType,
@@ -278,14 +250,7 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 
  protected:
   // override default creation strategy
-  virtual Net_AsynchUDPConnectionBase_T<HandlerType,
-                                        ConfigurationType,
-                                        StateType,
-                                        StatisticContainerType,
-                                        HandlerConfigurationType,
-                                        StreamType,
-                                        Common_Timer_Manager_t,
-                                        UserDataType>* make_handler (void);
+  virtual HandlerType* make_handler (void);
 
   ConfigurationType*     configuration_; // connection-
   ICONNECTION_MANAGER_T* connectionManager_;
@@ -303,6 +268,9 @@ class Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
   virtual int validate_connection (const ACE_Asynch_Connect::Result&, // result
                                    const ACE_INET_Addr&,              // remote address
                                    const ACE_INET_Addr&);             // local address
+
+  ACE_SYNCH_CONDITION    condition_;
+  ACE_SYNCH_MUTEX        lock_;
 };
 
 //////////////////////////////////////////
@@ -406,6 +374,9 @@ class Net_Client_AsynchConnector_T<HandlerType,
   virtual int validate_connection (const ACE_Asynch_Connect::Result&, // result
                                    const Net_Netlink_Addr&,           // remote address
                                    const Net_Netlink_Addr&);          // local address
+
+  ACE_SYNCH_CONDITION    condition_;
+  ACE_SYNCH_MUTEX        lock_;
 };
 #endif
 

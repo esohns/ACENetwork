@@ -40,6 +40,9 @@
 #include "common_timer_common.h"
 
 #include "net_common.h"
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include "net_common_tools.h"
+#endif
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
 
@@ -58,14 +61,27 @@ struct Net_SocketConfigurationBase
 {
   Net_SocketConfigurationBase ()
    : bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
-   , networkInterface (ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET))
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+   , interfaceIdentifier (GUID_NULL)
+#else
+   , interfaceIdentifier (ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET))
+#endif
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
-  {};
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    interfaceIdentifier =
+      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
+#endif
+  };
   inline virtual ~Net_SocketConfigurationBase () {};
 
   int         bufferSize; // socket buffer size (I/O)
-  std::string networkInterface; // NIC identifier
-  bool        useLoopBackDevice; // (if any)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _GUID interfaceIdentifier; // NIC-
+#else
+  std::string  interfaceIdentifier; // NIC-
+#endif
+  bool         useLoopBackDevice;   // (if any)
 };
 
 #if defined (ACE_HAS_NETLINK)
@@ -193,17 +209,6 @@ struct Net_SocketHandlerConfiguration
   struct Net_UserData*                userData;
 };
 
-struct Net_ListenerConfiguration
-{
-  Net_ListenerConfiguration ()
-   : addressFamily (ACE_ADDRESS_FAMILY_INET)
-   , socketHandlerConfiguration ()
-  {};
-
-  int                                   addressFamily;
-  struct Net_SocketHandlerConfiguration socketHandlerConfiguration;
-};
-
 struct Stream_Configuration;
 class Common_ITimer;
 struct Net_ConnectionConfiguration
@@ -244,6 +249,17 @@ struct Net_SessionConfiguration
 
   struct Common_ParserConfiguration* parserConfiguration;
   bool                               useReactor;
+};
+
+struct Net_ListenerConfiguration
+{
+  Net_ListenerConfiguration ()
+   : addressFamily (ACE_ADDRESS_FAMILY_INET)
+   , connectionConfiguration (NULL)
+  {};
+
+  int                                 addressFamily;
+  struct Net_ConnectionConfiguration* connectionConfiguration;
 };
 
 //////////////////////////////////////////

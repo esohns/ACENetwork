@@ -93,7 +93,7 @@ set (${PROJECT_NAME}_Protocol_DCHP_SCRIPTS
 
 # *NOTE*: generate .def file and export all symbols on Windows
 if (WIN32)
- set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+# set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
  source_group (scripts FILES ${PROJECT_NAME}_Protocol_DCHP_SCRIPTS)
 endif ()
 
@@ -120,7 +120,7 @@ endif ()
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#cotire (${PROJECT_NAME}_Protocol_DHCP)
+cotire (${PROJECT_NAME}_Protocol_DHCP)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_Protocol_DHCP

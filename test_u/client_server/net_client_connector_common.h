@@ -31,6 +31,7 @@
 #include "test_u_configuration.h"
 #include "test_u_connection_common.h"
 #include "test_u_tcpconnection.h"
+#include "test_u_udpconnection.h"
 
 // forward declarations
 class Test_U_Stream;
@@ -49,7 +50,8 @@ typedef Net_Client_AsynchConnector_T<Test_U_AsynchTCPConnection,
                                      struct Test_U_SocketHandlerConfiguration,
                                      Test_U_Stream,
                                      struct Test_U_UserData> Test_U_Client_TCP_AsynchConnector_t;
-typedef Net_Client_Connector_T<Test_U_TCPConnection,
+typedef Net_Client_Connector_T<ACE_MT_SYNCH,
+                               Test_U_TCPConnection,
                                ACE_SOCK_CONNECTOR,
                                ACE_INET_Addr,
                                struct Test_U_ConnectionConfiguration,
@@ -59,24 +61,26 @@ typedef Net_Client_Connector_T<Test_U_TCPConnection,
                                struct Test_U_SocketHandlerConfiguration,
                                Test_U_Stream,
                                struct Test_U_UserData> Test_U_Client_TCP_Connector_t;
-//typedef Net_Client_AsynchConnector_T<Test_U_AsynchUDPConnection,
-//                                     ACE_INET_Addr,
-//                                     struct Test_U_ConnectionConfiguration,
-//                                     struct Test_U_ConnectionState,
-//                                     Net_Statistic_t,
-//                                     struct Net_UDPSocketConfiguration,
-//                                     struct Test_U_SocketHandlerConfiguration,
-//                                     Test_U_Stream,
-//                                     struct Test_U_UserData> Test_U_Client_UDP_AsynchConnector_t;
-//typedef Net_Client_Connector_T<Test_U_UDPConnection,
-//                               ACE_SOCK_CONNECTOR,
-//                               ACE_INET_Addr,
-//                               struct Test_U_ConnectionConfiguration,
-//                               struct Test_U_ConnectionState,
-//                               Net_Statistic_t,
-//                               struct Net_UDPSocketConfiguration,
-//                               struct Test_U_SocketHandlerConfiguration,
-//                               Test_U_Stream,
-//                               struct Test_U_UserData> Test_U_Client_UDP_Connector_t;
+
+typedef Net_Client_AsynchConnector_T<Test_U_AsynchUDPConnection,
+                                     ACE_INET_Addr,
+                                     struct Test_U_ConnectionConfiguration,
+                                     struct Test_U_ConnectionState,
+                                     Net_Statistic_t,
+                                     struct Net_UDPSocketConfiguration,
+                                     struct Test_U_SocketHandlerConfiguration,
+                                     Test_U_Stream,
+                                     struct Test_U_UserData> Test_U_Client_UDP_AsynchConnector_t;
+typedef Net_Client_Connector_T<ACE_MT_SYNCH,
+                               Test_U_UDPConnection,
+                               ACE_SOCK_CONNECTOR,
+                               ACE_INET_Addr,
+                               struct Test_U_ConnectionConfiguration,
+                               struct Test_U_ConnectionState,
+                               Net_Statistic_t,
+                               struct Net_UDPSocketConfiguration,
+                               struct Test_U_SocketHandlerConfiguration,
+                               Test_U_Stream,
+                               struct Test_U_UserData> Test_U_Client_UDP_Connector_t;
 
 #endif

@@ -50,7 +50,8 @@ struct Test_U_ConnectionState;
 class Test_U_Message;
 class Test_U_SessionMessage;
 
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
                                  Net_Statistic_t,
@@ -58,7 +59,7 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 
 struct Test_U_ProtocolConfiguration
 {
-  inline Test_U_ProtocolConfiguration ()
+  Test_U_ProtocolConfiguration ()
    : PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , pingInterval (ACE_Time_Value::zero)
    , pingAutoAnswer (true)
@@ -90,7 +91,7 @@ typedef Stream_Configuration_T<//stream_name_string_,
 struct Test_U_ModuleHandlerConfiguration
  : Stream_ModuleHandlerConfiguration
 {
-  inline Test_U_ModuleHandlerConfiguration ()
+  Test_U_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    //, printProgressDot (false)
    , protocolConfiguration (NULL)
@@ -98,7 +99,9 @@ struct Test_U_ModuleHandlerConfiguration
    , sessionData (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
-  {};
+  {
+    concurrency = STREAM_HEADMODULECONCURRENCY_CONCURRENT;
+  };
 
   //bool                             printProgressDot; // file writer module
   struct Test_U_ProtocolConfiguration* protocolConfiguration; // protocol handler
@@ -112,7 +115,7 @@ struct Test_U_ModuleHandlerConfiguration
 struct Test_U_StreamConfiguration
  : Stream_Configuration
 {
-  inline Test_U_StreamConfiguration ()
+  Test_U_StreamConfiguration ()
    : Stream_Configuration ()
    , userData (NULL)
   {};
@@ -123,7 +126,7 @@ struct Test_U_StreamConfiguration
 //struct Test_U_ConnectionConfiguration;
 struct Test_U_Configuration
 {
-  inline Test_U_Configuration ()
+  Test_U_Configuration ()
    : connectionConfigurations ()
    , streamConfiguration ()
    , protocolConfiguration ()

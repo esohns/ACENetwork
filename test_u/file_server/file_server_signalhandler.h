@@ -35,7 +35,6 @@
 
 class FileServer_SignalHandler
  : public Common_SignalHandler_T<struct FileServer_SignalHandlerConfiguration>
- , public Common_ISignal
 {
  public:
   FileServer_SignalHandler ();

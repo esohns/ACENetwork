@@ -126,15 +126,15 @@ class Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 
  protected:
   Net_UDPSocketHandler_T ();
-  inline virtual ~Net_UDPSocketHandler_T () {};
+  virtual ~Net_UDPSocketHandler_T ();
 
   ACE_INET_Addr                     address_;
 #if defined (ACE_LINUX)
   bool                              errorQueue_;
 #endif
   ACE_Reactor_Notification_Strategy notificationStrategy_;
-
-  bool                              writeOnly_;
+  // *NOTE*: used for read-write connections (i.e. NET_ROLE_CLIENT) only
+  ACE_HANDLE                        writeHandle_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_UDPSocketHandler_T (const Net_UDPSocketHandler_T&))

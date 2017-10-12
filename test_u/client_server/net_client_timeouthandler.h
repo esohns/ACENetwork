@@ -67,7 +67,6 @@ class Test_U_Client_TimeoutHandler
 
   Test_U_Client_TimeoutHandler (enum ActionModeType,   // mode
                                 unsigned int,          // max #connections
-                                const ACE_INET_Addr&,  // remote SAP
                                 Test_U_IConnector_t*); // connector
   inline virtual ~Test_U_Client_TimeoutHandler () {};
 
@@ -87,7 +86,6 @@ class Test_U_Client_TimeoutHandler
   mutable ACE_SYNCH_MUTEX            lock_;
   unsigned int                       maximumNumberOfConnections_;
   enum ActionModeType                mode_;
-  ACE_INET_Addr                      peerAddress_;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   char                               randomStateInitializationBuffer_[BUFSIZ];

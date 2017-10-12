@@ -315,6 +315,9 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
           notification_string =
             ACE_TEXT_ALWAYS_CHAR ("wlan_notification_msm_adapter_operation_mode_change");
           break;
+        case 57: // *TODO*: happens on Win10; find out what this means
+        case 59: // *TODO*: happens on Win10; find out what this means
+          return;
         default:
         {
           ACE_DEBUG ((LM_ERROR,
@@ -558,7 +561,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       goto continue_;
     } // end IF
     if (ACE_OS::strcmp (device_identifier_string.c_str (),
-                        iwlanmonitorbase_p->deviceIdentifier ().c_str ()))
+                        iwlanmonitorbase_p->interfaceIdentifier ().c_str ()))
       goto continue_; // --> not interested
     // *NOTE*: this may fail if the device has-/is- disconnect-ed/-ing
     if (state_current == NM_DEVICE_STATE_IP_CONFIG)

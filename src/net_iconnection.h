@@ -42,7 +42,14 @@ enum Net_Connection_Status;
 
 //////////////////////////////////////////
 
+class Net_ISocketHandler
+{
+ public:
+  virtual ACE_Message_Block* allocateMessage (unsigned int) = 0; // requested size
+};
+
 class Net_IAsynchSocketHandler
+ : virtual public Net_ISocketHandler
 {
  public:
   virtual bool initiate_read () = 0;
@@ -132,7 +139,7 @@ class Net_ISocketConnection_T
                             ConfigurationType,
                             StateType,
                             StatisticContainerType> ICONNECTION_T;
-  typedef Net_ITransportLayer_T<SocketConfigurationType> ITRANSPORTLAYER_T;
+  typedef Net_ITransportLayer_T<SocketConfigurationType> ITRANSPORT_LAYER_T;
 
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&) = 0;
@@ -167,7 +174,7 @@ class Net_IStreamConnection_T
                                   StateType,
                                   StatisticContainerType,
                                   SocketConfigurationType,
-                                  HandlerConfigurationType> ISOCKETCONNECTION_T;
+                                  HandlerConfigurationType> ISOCKET_CONNECTION_T;
 
   virtual const StreamType& stream () const = 0;
 

@@ -82,6 +82,7 @@ class Net_StreamConnectionBase_T
  public:
   // convenient types
   typedef AddressType addr_type; // required by ACE_Connector
+  typedef HandlerType HANDLER_T;
   typedef Net_ConnectionBase_T<AddressType,
                                ConfigurationType,
                                StateType,
@@ -95,7 +96,7 @@ class Net_StreamConnectionBase_T
                                   SocketConfigurationType,
                                   HandlerConfigurationType,
                                   StreamType,
-                                  StreamStatusType> ISTREAMCONNECTION_T;
+                                  StreamStatusType> ISTREAM_CONNECTION_T;
 
   virtual ~Net_StreamConnectionBase_T ();
 
@@ -110,37 +111,37 @@ class Net_StreamConnectionBase_T
   //virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: this is called when:
   // - handle_xxx() (see above) returns -1
-  virtual int handle_close (ACE_HANDLE,
-                            ACE_Reactor_Mask);
+  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
+                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
   // implement (part of) Net_IStreamConnection_T
   //inline virtual unsigned int increase () { return CONNECTION_BASE_T::REFERENCECOUNTER_T::increase (); };
   //inline virtual unsigned int decrease () { return CONNECTION_BASE_T::REFERENCECOUNTER_T::decrease (); };
-  inline virtual bool collect (StatisticContainerType& statistic_out) { return stream_.collect (statistic_out); }; // return value: statistic data
-  inline virtual void report () const { return stream_.report (); };
+  inline virtual bool collect (StatisticContainerType& statistic_out) { return stream_.collect (statistic_out); }
+  inline virtual void report () const { return stream_.report (); }
   //using CONNECTION_BASE_T::getR;
   virtual void dump_state () const;
   virtual void info (ACE_HANDLE&,
                      AddressType&,
                      AddressType&) const;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inline virtual Net_ConnectionId_t id () const { return reinterpret_cast<Net_ConnectionId_t> (inherited::get_handle ()); };
+  inline virtual Net_ConnectionId_t id () const { return reinterpret_cast<Net_ConnectionId_t> (inherited::get_handle ()); }
 #else
-  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::get_handle ()); };
+  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::get_handle ()); }
 #endif
-  inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); };
-  inline virtual void close ();
+  inline virtual ACE_Notification_Strategy* notification () { return &(inherited::notificationStrategy_); }
+  virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
   // -------------------------------------
   virtual void set (enum Net_ClientServerRole);
-  inline virtual const HandlerConfigurationType& getR_2 () const { ACE_ASSERT (inherited::configuration_); return *inherited::configuration_; };
+  inline virtual const HandlerConfigurationType& getR_2 () const { ACE_ASSERT (inherited::configuration_); return *inherited::configuration_; }
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&);
   // -------------------------------------
-  inline virtual unsigned int flush (bool flushSessionMessages_in = false) { return stream_.flush (false, flushSessionMessages_in, false); };
+  inline virtual unsigned int flush (bool flushSessionMessages_in = false) { return stream_.flush (false, flushSessionMessages_in, false); }
   // *NOTE*: this waits for outbound (!) data only
-  inline virtual void waitForIdleState () const { stream_.waitForIdleState (); };
-  inline virtual const StreamType& stream () const { return stream_; };
+  inline virtual void waitForIdleState () const { stream_.idle (); }
+  inline virtual const StreamType& stream () const { return stream_; }
   virtual bool wait (StreamStatusType,
                      const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
 
@@ -160,8 +161,11 @@ class Net_StreamConnectionBase_T
   Net_StreamConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
                               const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
 
-  // helper methods
-  ACE_Message_Block* allocateMessage (unsigned int); // requested size
+  // override (part of) Net_ISocketHandler
+  virtual ACE_Message_Block* allocateMessage (unsigned int); // requested size
+
+  // *IMPORTANT NOTE*: stub to facilitate connection handler encapsulation
+  virtual void open (ACE_HANDLE, ACE_Message_Block&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return); }
 
   Stream_IAllocator* allocator_;
   StreamType         stream_;
@@ -175,11 +179,7 @@ class Net_StreamConnectionBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_StreamConnectionBase_T (const Net_StreamConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_StreamConnectionBase_T& operator= (const Net_StreamConnectionBase_T&))
 
-  using ISTREAMCONNECTION_T::ISOCKETCONNECTION_T::ITRANSPORTLAYER_T::initialize;
-
-  // helper methods
-  // *IMPORTANT NOTE*: stub to facilitate connection handler encapsulation
-  virtual void open (ACE_HANDLE, ACE_Message_Block&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return); };
+  using ISTREAM_CONNECTION_T::ISOCKET_CONNECTION_T::ITRANSPORT_LAYER_T::initialize;
 
   bool               notify_; // still to notify the processing stream ?
 };
@@ -244,7 +244,7 @@ class Net_AsynchStreamConnectionBase_T
                                   SocketConfigurationType,
                                   HandlerConfigurationType,
                                   StreamType,
-                                  StreamStatusType> ISTREAMCONNECTION_T;
+                                  StreamStatusType> ISTREAM_CONNECTION_T;
 
   inline virtual ~Net_AsynchStreamConnectionBase_T () {};
 
@@ -258,8 +258,8 @@ class Net_AsynchStreamConnectionBase_T
   //virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
   // *NOTE*: this is called when:
   // - handle_xxx() (see above) returns -1
-  virtual int handle_close (ACE_HANDLE,
-                            ACE_Reactor_Mask);
+  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
+                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
   // implement (part of) Net_IStreamConnection_T
   inline virtual bool collect (StatisticContainerType& statistic_out) { return stream_.collect (statistic_out); }; // return value: statistic data
@@ -304,8 +304,12 @@ class Net_AsynchStreamConnectionBase_T
   Net_AsynchStreamConnectionBase_T (ICONNECTION_MANAGER_T*,                        // connection manager handle
                                     const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
 
-  // helper methods
-  ACE_Message_Block* allocateMessage (unsigned int); // requested size
+  // override (part of) Net_ISocketHandler
+  virtual ACE_Message_Block* allocateMessage (unsigned int); // requested size
+
+  // *IMPORTANT NOTE*: supports synchronicity-agnostic connections
+  inline virtual int open (void* = NULL) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
+  inline virtual int close (u_long = 0) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
 
   Stream_IAllocator* allocator_;
   StreamType         stream_;
@@ -315,11 +319,7 @@ class Net_AsynchStreamConnectionBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchStreamConnectionBase_T (const Net_AsynchStreamConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchStreamConnectionBase_T& operator= (const Net_AsynchStreamConnectionBase_T&))
 
-  using ISTREAMCONNECTION_T::ISOCKETCONNECTION_T::ITRANSPORTLAYER_T::initialize;
-
-  // helper methods
-  // *IMPORTANT NOTE*: stub to facilitate connection handler encapsulation
-  inline virtual int open (void*) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) };
+  using ISTREAM_CONNECTION_T::ISOCKET_CONNECTION_T::ITRANSPORT_LAYER_T::initialize;
 
   // override some ACE_Handler methods
   virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&); // result

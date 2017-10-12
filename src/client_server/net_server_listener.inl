@@ -34,7 +34,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_Server_Listener_T<HandlerType,
@@ -42,7 +42,7 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      HandlerConfigurationType,
+                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::Net_Server_Listener_T ()
  : inherited (NULL, // use global (default) reactor
@@ -63,7 +63,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_Server_Listener_T<HandlerType,
@@ -71,7 +71,7 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      HandlerConfigurationType,
+                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::~Net_Server_Listener_T ()
 {
@@ -79,7 +79,7 @@ Net_Server_Listener_T<HandlerType,
 
   int result = -1;
 
-  if (isSuspended_)
+  if (unlikely (isSuspended_))
   {
     result = inherited::resume ();
     if (result == -1)
@@ -87,7 +87,7 @@ Net_Server_Listener_T<HandlerType,
                   ACE_TEXT ("failed to ACE_Acceptor::resume(): \"%m\", continuing\n")));
   } // end IF
 
-  if (isOpen_)
+  if (unlikely (isOpen_))
   {
     result = inherited::close ();
     if (result == -1)
@@ -101,7 +101,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -110,14 +110,14 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      HandlerConfigurationType,
+                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::handle_accept_error (void)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Server_Listener_T::handle_accept_error"));
 
   ACE_DEBUG ((LM_WARNING,
-              ACE_TEXT ("failed to accept connection...\n")));
+              ACE_TEXT ("failed to accept connection, continuing\n")));
 
 #if defined (_DEBUG)
   inherited::dump ();
@@ -132,7 +132,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -141,7 +141,7 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      HandlerConfigurationType,
+                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::start ()
 {
@@ -150,22 +150,23 @@ Net_Server_Listener_T<HandlerType,
   int result = -1;
 
   // sanity check(s)
-  if (!isInitialized_)
+  if (unlikely (!isInitialized_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("not initialized, returning\n")));
     return;
   } // end IF
-  if (isListening_)
+  if (unlikely (isListening_))
     return; // nothing to do
 
-  if (hasChanged_)
+  if (unlikely (hasChanged_))
   {
     //ACE_DEBUG ((LM_DEBUG,
-    //            ACE_TEXT ("configuration has changed, stopping...\n")));
+    //            ACE_TEXT ("configuration has changed, stopping\n")));
     hasChanged_ = false;
 
-    if (isSuspended_) stop ();
+    if (isSuspended_)
+      stop ();
 
     if (isOpen_)
     {
@@ -184,7 +185,7 @@ Net_Server_Listener_T<HandlerType,
     } // end IF
   } // end IF
 
-  if (isOpen_)
+  if (unlikely (isOpen_))
   {
     // already open --> resume listening
 
@@ -210,14 +211,16 @@ Net_Server_Listener_T<HandlerType,
   // not running --> start listening
   // sanity check(s)
   ACE_ASSERT (configuration_);
+  ACE_ASSERT (configuration_->connectionConfiguration);
+
   // *TODO*: remove type inferences
-  if (configuration_->socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice)
+  if (unlikely (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice))
   {
     result =
-      configuration_->socketHandlerConfiguration.socketConfiguration_2.address.set (configuration_->socketHandlerConfiguration.socketConfiguration_2.address.get_port_number (), // port
-                                                                                    INADDR_LOOPBACK,                                                                             // IP address
-                                                                                    1,                                                                                           // encode ?
-                                                                                    0);                                                                                          // map ?
+      configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.set (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.get_port_number (), // port
+                                                                                                             INADDR_LOOPBACK,                                                                                                      // IP address
+                                                                                                             1,                                                                                                                    // encode ?
+                                                                                                             0);                                                                                                                   // map ?
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -226,13 +229,13 @@ Net_Server_Listener_T<HandlerType,
     } // end IF
   } // end IF
   result =
-    inherited::open (configuration_->socketHandlerConfiguration.socketConfiguration_2.address, // local address
-                     ACE_Reactor::instance (),                                                 // corresp. reactor
-                     ACE_NONBLOCK,                                                             // flags (use non-blocking sockets !)
-                     //0,                                                                      // flags (default is blocking sockets)
-                     1,                                                                        // always accept ALL pending connections
-                     1);                                                                       // try to re-use address
-  if (result == -1)
+    inherited::open (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address, // local address
+                     ACE_Reactor::instance (),                                                                          // reactor handle
+                     ACE_NONBLOCK,                                                                                      // flags (use non-blocking sockets)
+                     //0,                                                                                               // flags (default is blocking sockets)
+                     1,                                                                                                 // always accept all pending connections
+                     1);                                                                                                // (try to) re-use address
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Acceptor::open(): \"%m\", returning\n")));
@@ -241,14 +244,14 @@ Net_Server_Listener_T<HandlerType,
   isOpen_ = true;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("0x%@: started listening: %s...\n"),
+              ACE_TEXT ("0x%@: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%d: started listening: %s...\n"),
+              ACE_TEXT ("%d: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
 #endif
 
   isListening_ = true;
@@ -259,7 +262,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -268,7 +271,7 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      HandlerConfigurationType,
+                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::stop (bool waitForCompletion_in,
                                            bool lockedAccess_in)
@@ -279,20 +282,21 @@ Net_Server_Listener_T<HandlerType,
   ACE_UNUSED_ARG (lockedAccess_in);
 
   // sanity check(s)
-  if (!isListening_) return; // nothing to do
+  if (unlikely (!isListening_))
+    return; // nothing to do
   ACE_ASSERT (isOpen_);
 
   int result = inherited::suspend ();
-  if (result == -1)
+  if (unlikely (result == -1))
   {
-    ACE_DEBUG((LM_ERROR,
+    ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT("failed to ACE_Acceptor::suspend(): \"%m\", returning\n")));
     return;
   } // end IF
   isSuspended_ = true;
 
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("suspended listening...\n")));
+              ACE_TEXT ("suspended listening\n")));
 
   isListening_ = false;
 }
@@ -302,7 +306,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 bool
@@ -311,7 +315,7 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      HandlerConfigurationType,
+                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::initialize (const ConfigurationType& configuration_in)
 {
@@ -329,7 +333,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -338,7 +342,7 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      HandlerConfigurationType,
+                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::dump_state () const
 {
@@ -348,13 +352,15 @@ Net_Server_Listener_T<HandlerType,
 
   ACE_TCHAR* buffer_p = NULL;
   result = inherited::info (&buffer_p, BUFSIZ);
-  if ((result == -1) || !buffer_p)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Acceptor::info(): \"%m\", returning\n")));
     return;
   } // end IF
-  ACE_DEBUG ((LM_DEBUG,
+  ACE_ASSERT (buffer_p);
+
+  ACE_DEBUG ((LM_INFO,
               ACE_TEXT ("%s\n"),
               buffer_p));
 
@@ -367,7 +373,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -376,7 +382,7 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      HandlerConfigurationType,
+                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::make_svc_handler (HandlerType*& handler_out)
 {
@@ -387,13 +393,14 @@ Net_Server_Listener_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
+  ACE_ASSERT (configuration_->connectionConfiguration);
 
   // default behavior
   // *TODO*: remove type inferences
   ACE_NEW_NORETURN (handler_out,
                     HandlerType (configuration_->connectionManager,
-                                 configuration_->socketHandlerConfiguration.statisticReportingInterval));
-  if (!handler_out)
+                                 configuration_->connectionConfiguration->socketHandlerConfiguration.statisticReportingInterval));
+  if (unlikely (!handler_out))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 
@@ -405,7 +412,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -414,7 +421,7 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      HandlerConfigurationType,
+                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::accept_svc_handler (HandlerType* handler_in)
 {
@@ -432,7 +439,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -441,7 +448,7 @@ Net_Server_Listener_T<HandlerType,
                       AddressType,
                       ConfigurationType,
                       StateType,
-                      HandlerConfigurationType,
+                      ConnectionConfigurationType,
                       StreamType,
                       UserDataType>::activate_svc_handler (HandlerType* svc_handler)
 {
@@ -467,7 +474,7 @@ Net_Server_Listener_T<HandlerType,
   if (result == 0 && svc_handler->open (ilistener_p) == -1)
     result = -1;
 
-  if (result == -1)
+  if (unlikely (result == -1))
     // The connection was already made; so this close is a "normal" close
     // operation.
     svc_handler->close (NORMAL_CLOSE_OPERATION);

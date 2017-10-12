@@ -41,7 +41,7 @@ Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler (ISTREAM_T* stream_
  , pingHandler_ (this,  // dispatch ourselves
                  false) // ping peer at regular intervals...
  , pingInterval_ (ACE_Time_Value::zero) // [0: --> OFF]
- , pingTimerID_ (-1)
+ , pingTimerId_ (-1)
  , automaticPong_ (true)
  , counter_ (1)
  , printPongDot_ (false)
@@ -58,22 +58,24 @@ Test_U_Module_ProtocolHandler::~Test_U_Module_ProtocolHandler ()
   int result = -1;
 
   // clean up timer if necessary
-  if (pingTimerID_ != -1)
+  if (pingTimerId_ != -1)
   {
     const void* act_p = NULL;
     result =
-        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (pingTimerID_,
+        COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (pingTimerId_,
                                                                   &act_p);
     if (result <= 0)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("session %u: failed to cancel \"ping\" timer (ID: %d): \"%m\", continuing\n"),
+                  ACE_TEXT ("%s: session %u: failed to cancel \"ping\" timer (id: %d): \"%m\", continuing\n"),
+                  inherited::mod_->name (),
                   sessionId_,
-                  pingTimerID_));
+                  pingTimerId_));
     else
       ACE_DEBUG ((LM_WARNING,
-                  ACE_TEXT ("session %u: cancelled \"ping\" timer (ID: %d) --> check implementation !\n"),
+                  ACE_TEXT ("%s: session %u: cancelled \"ping\" timer (id: %d) in dtor --> check implementation !\n"),
+                  inherited::mod_->name (),
                   sessionId_,
-                  pingTimerID_));
+                  pingTimerId_));
   } // end IF
 }
 
@@ -92,21 +94,23 @@ Test_U_Module_ProtocolHandler::initialize (const struct Test_U_ModuleHandlerConf
   if (inherited::isInitialized_)
   {
     // reset state
-    if (pingTimerID_ != -1)
+    if (pingTimerId_ != -1)
     {
       const void* act_p = NULL;
       result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (pingTimerID_,
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (pingTimerId_,
                                                                     &act_p);
       if (result <= 0)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to cancel \"ping\" timer (ID: %d): \"%m\", continuing\n"),
-                    pingTimerID_));
+                    ACE_TEXT ("%s: failed to cancel \"ping\" timer (id: %d): \"%m\", continuing\n"),
+                    inherited::mod_->name (),
+                    pingTimerId_));
       //else
       //  ACE_DEBUG ((LM_DEBUG,
-      //              ACE_TEXT ("cancelled \"ping\" timer (ID: %d)\n"),
-      //              pingTimerID_));
-      pingTimerID_ = -1;
+      //              ACE_TEXT ("%s: cancelled \"ping\" timer (id: %d)\n"),
+      //              inherited::mod_->name (),
+      //              pingTimerId_));
+      pingTimerId_ = -1;
     } // end IF
     pingInterval_ = ACE_Time_Value::zero;
 
@@ -155,11 +159,12 @@ Test_U_Module_ProtocolHandler::handleDataMessage (Test_U_Message*& message_inout
         // step0: create reply structure
         // --> get a message buffer
         Test_U_Message* message_p =
-            allocateMessage (sizeof (Net_Remote_Comm::PongMessage));
+            inherited::allocateMessage (sizeof (Net_Remote_Comm::PongMessage));
         if (!message_p)
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to allocate reply message(%u), returning\n"),
+                      ACE_TEXT ("%s: failed to allocate reply message(%u), returning\n"),
+                      inherited::mod_->name (),
                       sizeof (Net_Remote_Comm::PongMessage)));
           return;
         } // end IF
@@ -177,7 +182,8 @@ Test_U_Module_ProtocolHandler::handleDataMessage (Test_U_Message*& message_inout
         if (result == -1)
         {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_Task::reply(): \"%m\", returning\n")));
+                      ACE_TEXT ("%s: failed to ACE_Task::reply(): \"%m\", returning\n"),
+                      inherited::mod_->name ()));
 
           // clean up
           message_p->release ();
@@ -191,8 +197,9 @@ Test_U_Module_ProtocolHandler::handleDataMessage (Test_U_Message*& message_inout
     case Net_Remote_Comm::NET_MESSAGE_PONG:
     {
       //ACE_DEBUG ((LM_DEBUG,
-      //            ACE_TEXT ("received PONG (connection ID: %u)...\n"),
-      //            sessionID_));
+      //            ACE_TEXT ("%s: received PONG (connection id: %u)\n"),
+      //            inherited::mod_->name (),
+      //            sessionId_));
 
       if (printPongDot_)
       {
@@ -206,8 +213,9 @@ Test_U_Module_ProtocolHandler::handleDataMessage (Test_U_Message*& message_inout
     default:
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("[%u]: unknown/invalid message type (was: \"%s\"), returning\n"),
-                  message_inout->id (),
+                  ACE_TEXT ("%s: [%u/%u]: unknown/invalid message type (was: \"%s\"), returning\n"),
+                  inherited::mod_->name (),
+                  message_inout->sessionId (), message_inout->id (),
                   ACE_TEXT (Test_U_Message::CommandTypeToString (message_header.messageType).c_str ())));
       return;
     }
@@ -242,23 +250,25 @@ Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& mes
       if (pingInterval_ != ACE_Time_Value::zero)
       {
         // schedule ping interval timer
-        ACE_ASSERT (pingTimerID_ == -1);
-        pingTimerID_ =
+        ACE_ASSERT (pingTimerId_ == -1);
+        pingTimerId_ =
           COMMON_TIMERMANAGER_SINGLETON::instance ()->schedule_timer (&pingHandler_,                   // event handler handle
                                                                       NULL,                            // asynchronous completion token
                                                                       COMMON_TIME_NOW + pingInterval_, // first wakeup time
                                                                       pingInterval_);                  // interval
-        if (pingTimerID_ == -1)
+        if (pingTimerId_ == -1)
         {
            ACE_DEBUG ((LM_ERROR,
-                       ACE_TEXT ("session %u: failed to schedule \"ping\" timer: \"%m\", returning\n"),
+                       ACE_TEXT ("%s: session %u: failed to schedule \"ping\" timer: \"%m\", returning\n"),
+                       inherited::mod_->name (),
                        sessionId_));
            return;
         } // end IF
         ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("session %u: scheduled \"ping\" timer (id: %d), interval: %#T\n"),
+                    ACE_TEXT ("%s: session %u: scheduled \"ping\" timer (id: %d), interval: %#T\n"),
+                    inherited::mod_->name (),
                     sessionId_,
-                    pingTimerID_,
+                    pingTimerId_,
                     &pingInterval_));
       } // end IF
 
@@ -266,23 +276,25 @@ Test_U_Module_ProtocolHandler::handleSessionMessage (Test_U_SessionMessage*& mes
     }
     case STREAM_SESSION_MESSAGE_END:
     {
-      if (pingTimerID_ != -1)
+      if (pingTimerId_ != -1)
       {
         const void* act_p = NULL;
         result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (pingTimerID_,
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel_timer (pingTimerId_,
                                                                     &act_p);
         if (result <= 0)
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("session %u: failed to cancel \"ping\" timer (id: %d): \"%m\", continuing\n"),
+                      ACE_TEXT ("%s: session %u: failed to cancel \"ping\" timer (id: %d): \"%m\", continuing\n"),
+                      inherited::mod_->name (),
                       sessionId_,
-                      pingTimerID_));
+                      pingTimerId_));
         else
           ACE_DEBUG ((LM_DEBUG,
-                      ACE_TEXT ("session %u: cancelled \"ping\" timer (id: %d)\n"),
+                      ACE_TEXT ("%s: session %u: cancelled \"ping\" timer (id: %d)\n"),
+                      inherited::mod_->name (),
                       sessionId_,
-                      pingTimerID_));
-        pingTimerID_ = -1;
+                      pingTimerId_));
+        pingTimerId_ = -1;
       } // end IF
 
       break;
@@ -301,11 +313,12 @@ Test_U_Module_ProtocolHandler::handle (const void* arg_in)
 
   // step0: get a message buffer
   Test_U_Message* message_p =
-      allocateMessage (sizeof (Net_Remote_Comm::PingMessage));
+      inherited::allocateMessage (sizeof (Net_Remote_Comm::PingMessage));
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to allocate ping message(%u), returning\n"),
+                ACE_TEXT ("%s: failed to allocate ping message(%u), returning\n"),
+                inherited::mod_->name (),
                 sizeof (Net_Remote_Comm::PingMessage)));
     return;
   } // end IF
@@ -326,7 +339,8 @@ Test_U_Module_ProtocolHandler::handle (const void* arg_in)
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Task::reply(): \"%m\", returning\n")));
+                ACE_TEXT ("%s: failed to ACE_Task::reply(): \"%m\", returning\n"),
+                inherited::mod_->name ()));
 
     // clean up
     message_p->release ();
@@ -334,7 +348,8 @@ Test_U_Module_ProtocolHandler::handle (const void* arg_in)
     return;
   } // end IF
 //  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("session %u: scheduled ping message\n"),
+//              ACE_TEXT ("%s: session %u: scheduled ping message\n"),
+//              inherited::mod_->name (),
 //              sessionId_));
 }
 
@@ -345,9 +360,9 @@ Test_U_Module_ProtocolHandler::dump_state () const
 
 //   ACE_DEBUG ((LM_DEBUG,
 //               ACE_TEXT (" ***** MODULE: \"%s\" state *****\n"),
-//               ACE_TEXT (inherited::name ())));
+//               inherited::mod_->name ()));
 //
 //   ACE_DEBUG ((LM_DEBUG,
 //               ACE_TEXT (" ***** MODULE: \"%s\" state *****\\END\n"),
-//               ACE_TEXT (inherited::name ())));
+//               inherited::mod_->name ()));
 }

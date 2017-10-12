@@ -61,14 +61,15 @@ typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
 struct Test_U_HTTPDecoder_SessionData
  : Test_U_StreamSessionData
 {
-  inline Test_U_HTTPDecoder_SessionData ()
+  Test_U_HTTPDecoder_SessionData ()
    : Test_U_StreamSessionData ()
    , connectionState (NULL)
    , format (STREAM_COMPRESSION_FORMAT_NONE)
    , targetFileName ()
    , userData (NULL)
   {};
-  inline Test_U_HTTPDecoder_SessionData& operator= (Test_U_HTTPDecoder_SessionData& rhs_in)
+  
+  Test_U_HTTPDecoder_SessionData& operator= (Test_U_HTTPDecoder_SessionData& rhs_in)
   {
     Test_U_StreamSessionData::operator= (rhs_in);
 
@@ -99,12 +100,14 @@ struct Test_U_ConnectionConfiguration;
 typedef std::map<std::string,
                  struct Test_U_ConnectionConfiguration> Test_U_ConnectionConfigurations_t;
 typedef Test_U_ConnectionConfigurations_t::iterator Test_U_ConnectionConfigurationIterator_t;
-typedef Net_Connection_Manager_T<ACE_INET_Addr,
+typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
                                  HTTP_Statistic_t,
                                  struct Test_U_UserData> Test_U_ConnectionManager_t;
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
                                  HTTP_Statistic_t,
@@ -121,7 +124,7 @@ typedef Stream_Configuration_T<//stream_name_string_,
 struct Test_U_ModuleHandlerConfiguration
  : HTTP_ModuleHandlerConfiguration
 {
-  inline Test_U_ModuleHandlerConfiguration ()
+  Test_U_ModuleHandlerConfiguration ()
    : HTTP_ModuleHandlerConfiguration ()
    , configuration (NULL)
    , connection (NULL)
@@ -152,7 +155,7 @@ struct Test_U_ModuleHandlerConfiguration
 struct Test_U_StreamConfiguration
  : HTTP_StreamConfiguration
 {
-  inline Test_U_StreamConfiguration ()
+  Test_U_StreamConfiguration ()
    : HTTP_StreamConfiguration ()
    , userData (NULL)
   {};
@@ -163,7 +166,7 @@ struct Test_U_StreamConfiguration
 struct Test_U_HTTPDecoder_StreamState
  : Test_U_StreamState
 {
-  inline Test_U_HTTPDecoder_StreamState ()
+  Test_U_HTTPDecoder_StreamState ()
    : Test_U_StreamState ()
    , currentSessionData (NULL)
   {};

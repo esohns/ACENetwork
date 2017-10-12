@@ -196,7 +196,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   } // end IF
 #endif
   result =
-    inherited2::open (SAP,                      // SAP
+    inherited2::open (SAP,                      // (local) SAP
                       ACE_PROTOCOL_FAMILY_INET, // protocol family
                       0,                        // protocol
                       1);                       // reuse_addr
@@ -249,18 +249,23 @@ Net_AsynchUDPSocketHandler_T<SocketType,
                     source_SAP.get_addr_size ());
     if (unlikely (result == -1))
     {
+      int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::bind(0x%@,%s): \"%m\", aborting\n"),
-                  writeHandle_,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+      if (error != WSAEINVAL) // 10022: socket already bound
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::bind(0x%@,%s): \"%m\", aborting\n"),
+                    writeHandle_,
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
 #else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", aborting\n"),
-                  writeHandle_,
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", aborting\n"),
+                    writeHandle_,
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
 #endif
-      goto error;
+        goto error;
+      } // end IF
     } // end IF
   } // end IF
 
@@ -299,13 +304,13 @@ Net_AsynchUDPSocketHandler_T<SocketType,
     } // end IF
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("0x%@: associated datagram socket to %s\n"),
-//                handle_in,
+//                ACE_TEXT ("0x%@: connected datagram socket to %s\n"),
+//                writeHandle_,
 //                ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->peerAddress).c_str ())));
 //#else
 //    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("%d: associated datagram socket to %s\n"),
-//                handle_in,
+//                ACE_TEXT ("%d: connected datagram socket to %s\n"),
+//                writeHandle_,
 //                ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->peerAddress).c_str ())));
 //#endif
   } // end IF
@@ -523,10 +528,15 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       if ((error != ERROR_INVALID_ACCESS) && //  12: operation was triggered from a different thread
           (error != ERROR_IO_PENDING))       // 997: 
-#endif
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%m\" (errno was: %d), continuing\n"),
-                    error));
+                    ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(0x%@): \"%s\", continuing\n"),
+                    handle_in,
+                    ACE_TEXT (Common_Tools::errorToString (error, false).c_str ())));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(%d): \"%m\", continuing\n"),
+                  handle_in));
+#endif
       result = -1;
     } // end IF
   } // end IF
@@ -539,10 +549,15 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     if ((error != ERROR_INVALID_ACCESS) && //  12: operation was triggered from a different thread
         (error != ERROR_IO_PENDING))       // 997: 
-#endif
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(): \"%m\" (errno was: %d), continuing\n"),
-                  error));
+                  ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(0x%@): \"%s\", continuing\n"),
+                  handle_in,
+                  ACE_TEXT (Common_Tools::errorToString (error, false).c_str ())));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(%d): \"%m\", continuing\n"),
+                handle_in));
+#endif
     result_2 = -1;
   } // end IF
 
@@ -683,7 +698,7 @@ receive:
                        bytes_received,                       // #bytes received
                        0,                                    // flags
                        ACE_PROTOCOL_FAMILY_INET,             // protocol family
-                       NULL,                                 // ACT
+                       NULL,                                 // asynchronous completion token
                        0,                                    // priority
                        COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
   if (unlikely (result == -1))
@@ -721,42 +736,58 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::handle_write_dgram"));
 
   int result = -1;
-
-  size_t bytes_transferred = result_in.bytes_transferred ();
   bool close = false;
-  unsigned long error = result_in.error ();
-  ACE_Message_Block* message_block_p = result_in.message_block ();
 
   // sanity check
   if (unlikely (!result_in.success ()))
   {
-    // connection closed/reset (by peer) ? --> not an error
+    struct sockaddr_in socket_address_s;
+    int socket_address_length = sizeof (struct sockaddr_in);
+    ACE_OS::memset (&socket_address_s, 0, sizeof (struct sockaddr));
+    result =
+      ACE_OS::getsockname (result_in.handle (),
+                           reinterpret_cast<struct sockaddr*> (&socket_address_s),
+                           &socket_address_length);
+    if (result == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::getsockname(0x%@): \"%m\", continuing\n"),
+                  result_in.handle ()));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::getsockname(%d): \"%m\", continuing\n"),
+                  result_in.handle ()));
+#endif
+    ACE_INET_Addr inet_address (&socket_address_s, sizeof (struct sockaddr_in));
+
+    unsigned long error = result_in.error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     if ((error != EPIPE)                 &&     // 32
-        (error != ERROR_INVALID_NETNAME) &&     // 1214
+        //(error != ERROR_INVALID_NETNAME) &&     // 1214: most probable reason: socket not connect()ed to a valid address
         //(error != ERROR_INVALID_USER_BUFFER) && // 1784
         (error != ECONNRESET))                  // 10054
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to write to output stream (handle was: 0x%@): \"%s\", aborting\n"),
+                  ACE_TEXT ("failed to write to output stream (handle was: 0x%@, address: %s): \"%s\", aborting\n"),
                   result_in.handle (),
-                  ACE::sock_error (static_cast<int> (error))));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address).c_str ()),
+                  ACE_TEXT (Common_Tools::errorToString (static_cast<DWORD> (error), false).c_str ())));
 #else
     if ((error != ECONNRESET) &&
         (error != EPIPE)      &&
         (error != EBADF)) // 9 happens on Linux (local close())
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to write to output stream (handle was: %d): \"%s\", aborting\n"),
+                  ACE_TEXT ("failed to write to output stream (handle was: %d, address: %s): \"%s\", aborting\n"),
                   result_in.handle (),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address).c_str ()),
                   ACE_TEXT (ACE_OS::strerror (error))));
 #endif
   } // end IF
 
-  switch (static_cast<int> (bytes_transferred))
+  switch (static_cast<int> (result_in.bytes_transferred ()))
   {
     case -1:
     case 0:
     {
-      // connection closed/reset (by peer) ? --> not an error
       ACE_ASSERT (!result_in.success ());
       //      error = result_in.error ();
 //      if ((error != ECONNRESET) &&
@@ -774,17 +805,19 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 //                    ACE_TEXT (ACE_OS::strerror (error))));
 //#endif
       close = true;
-      goto release;
+      break;
     }
     // *** GOOD CASES ***
     default:
     {
       // finished with this buffer ?
-      if (unlikely (message_block_p->length () > 0))
+      if (unlikely (result_in.message_block ()->length () > 0))
       {
         // --> reschedule
+        // *TODO*: this is broken
+        ACE_ASSERT (false);
         result = this->handle_output (result_in.handle ());
-        if (unlikely (result == -1))
+        if (result == -1)
         {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           ACE_DEBUG ((LM_ERROR,
@@ -796,22 +829,16 @@ Net_AsynchUDPSocketHandler_T<SocketType,
                       result_in.handle ()));
 #endif
           close = true;
-          goto release;
         } // end IF
-
-        goto continue_; // done
       } // end IF
 
       break;
     }
   } // end SWITCH
 
-release:
-  message_block_p->release ();
-  //buffer_ = NULL;
+  result_in.message_block ()->release ();
 
-continue_:
-  if (close)
+  if (unlikely (close))
   {
     result = handle_close (result_in.handle (),
                            ACE_Event_Handler::ALL_EVENTS_MASK);

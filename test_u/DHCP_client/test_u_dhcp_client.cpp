@@ -137,10 +137,13 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-n[[STRING]]: network interface [\"")
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-n[[STRING]]: interface identifier [\"")
             << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
+#endif
   // *TODO*: this doesn't really make sense (see '-n' option)
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-o          : use loopback [")
             << NET_INTERFACE_DEFAULT_USE_LOOPBACK
@@ -185,7 +188,11 @@ do_processArguments (int argc_in,
                      std::string& fileName_out,
                      std::string& UIDefinitonFileName_out,
                      bool& logToFile_out,
-                     std::string& interface_out,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                     struct _GUID& interfaceIdentifier_out,
+#else
+                     std::string& interfaceIdentifier_out,
+#endif
                      bool& useLoopback_out,
                      bool& useThreadPool_out,
                      bool& sendRequestOnOffer_out,
@@ -217,7 +224,13 @@ do_processArguments (int argc_in,
   UIDefinitonFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIDefinitonFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GLADE_FILE);
   logToFile_out = false;
-  interface_out = ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  interfaceIdentifier_out =
+    Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
+#else
+  interfaceIdentifier_out =
+    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
+#endif
   useLoopback_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   useThreadPool_out = NET_EVENT_USE_THREAD_POOL;
   sendRequestOnOffer_out = TEST_U_DEFAULT_DHCP_SEND_REQUEST_ON_OFFER;
@@ -230,7 +243,11 @@ do_processArguments (int argc_in,
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                              ACE_TEXT ("bde:f::g::lopqrs:tvx:"),
+#else
                               ACE_TEXT ("bde:f::g::ln::opqrs:tvx:"),
+#endif
                               1,                         // skip command name
                               1,                         // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -280,15 +297,18 @@ do_processArguments (int argc_in,
         logToFile_out = true;
         break;
       }
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
       case 'n':
       {
         ACE_TCHAR* opt_arg = argumentParser.opt_arg ();
         if (opt_arg)
-          interface_out = ACE_TEXT_ALWAYS_CHAR (opt_arg);
+          interfaceIdentifier_out = ACE_TEXT_ALWAYS_CHAR (opt_arg);
         else
-          interface_out.clear ();
+          interfaceIdentifier_out.clear ();
         break;
       }
+#endif
       case 'o':
       {
         useLoopback_out = true;
@@ -446,7 +466,11 @@ do_work (bool requestBroadcastReplies_in,
          bool debugParser_in,
          const std::string& fileName_in,
          const std::string& UIDefinitionFileName_in,
-         const std::string& networkInterface_in,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+         REFGUID interfaceIdentifier_in,
+#else
+         const std::string& interfaceIdentifier_in,
+#endif
          bool useLoopback_in,
          bool useThreadPool_in,
          bool sendRequestOnOffer_in,
@@ -567,10 +591,10 @@ do_work (bool requestBroadcastReplies_in,
   //               packets are (at least) sent out on the correct subnet
   struct Test_U_ConnectionConfiguration connection_configuration;
   result =
-    connection_configuration.socketHandlerConfiguration.socketConfiguration_2.address.set (static_cast<u_short> (DHCP_DEFAULT_SERVER_PORT),
-                                                                                           static_cast<ACE_UINT32> (INADDR_BROADCAST),
-                                                                                           1,
-                                                                                           0);
+    connection_configuration.socketHandlerConfiguration.socketConfiguration_2.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_SERVER_PORT),
+                                                                                                 static_cast<ACE_UINT32> (INADDR_BROADCAST),
+                                                                                                 1,
+                                                                                                 0);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -578,8 +602,8 @@ do_work (bool requestBroadcastReplies_in,
     return;
   } // end IF
 
-  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.networkInterface =
-    networkInterface_in;
+  connection_configuration.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier =
+    interfaceIdentifier_in;
   connection_configuration.socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice =
     useLoopback_in;
   connection_configuration.socketHandlerConfiguration.socketConfiguration_2.writeOnly =
@@ -642,32 +666,42 @@ do_work (bool requestBroadcastReplies_in,
   // ********************* listener configuration data *************************
   if (useLoopback_in)
     result =
-      configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.set (DHCP_DEFAULT_CLIENT_PORT,
-                                                                                                        ACE_LOCALHOST,
-                                                                                                        1,
-                                                                                                        ACE_ADDRESS_FAMILY_INET);
-  else if (!networkInterface_in.empty ())
+      configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress.set (DHCP_DEFAULT_CLIENT_PORT,
+                                                                                                            ACE_LOCALHOST,
+                                                                                                            1,
+                                                                                                            ACE_ADDRESS_FAMILY_INET);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  else if (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
+#else
+  else if (!interfaceIdentifier_in.empty ())
+#endif
   {
     ACE_INET_Addr gateway_address;
-    if (!Net_Common_Tools::interfaceToIPAddress (networkInterface_in,
-                                                 configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address,
+    if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
+                                                 configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress,
                                                  gateway_address))
     {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), continuing\n"),
-                  ACE_TEXT (networkInterface_in.c_str ())));
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ())));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), continuing\n"),
+                  ACE_TEXT (interfaceIdentifier_in.c_str ())));
+#endif
       result = -1;
     } // end IF
-    configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.set_port_number (DHCP_DEFAULT_CLIENT_PORT,
-                                                                                                                  1);
+    configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress.set_port_number (DHCP_DEFAULT_CLIENT_PORT,
+                                                                                                                      1);
     result = 0;
   } // end ELSE IF
   else
     result =
-      configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-                                                                                                        static_cast<ACE_UINT32> (INADDR_ANY),
-                                                                                                        1,
-                                                                                                        0);
+      configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+                                                                                                            static_cast<ACE_UINT32> (INADDR_ANY),
+                                                                                                            1,
+                                                                                                            0);
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -678,10 +712,10 @@ do_work (bool requestBroadcastReplies_in,
   if (requestBroadcastReplies_in)
   {
     result =
-      configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-                                                                                                        static_cast<ACE_UINT32> (INADDR_NONE),
-                                                                                                        1,
-                                                                                                        0);
+      configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+                                                                                                            static_cast<ACE_UINT32> (INADDR_NONE),
+                                                                                                            1,
+                                                                                                            0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -838,12 +872,12 @@ do_work (bool requestBroadcastReplies_in,
     return;
   } // end IF
   handle =
-    iconnector_p->connect ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address);
+    iconnector_p->connect ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress);
   if (handle == ACE_INVALID_HANDLE)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
     return;
   } // end IF
   if (iconnector_p->useReactor ())
@@ -868,7 +902,7 @@ do_work (bool requestBroadcastReplies_in,
     do
     {
       (*iterator_2).second.broadcastConnection =
-          connection_manager_p->get ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address);
+          connection_manager_p->get ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress);
       if ((*iterator_2).second.broadcastConnection)
         break;
     } while (COMMON_TIME_NOW < deadline);
@@ -877,7 +911,7 @@ do_work (bool requestBroadcastReplies_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
     return;
   } // end IF
   // step1b: wait for the connection to finish initializing
@@ -893,7 +927,7 @@ do_work (bool requestBroadcastReplies_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize connection to %s (status was: %d), returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ()),
                 status));
     return;
   } // end IF
@@ -912,7 +946,7 @@ do_work (bool requestBroadcastReplies_in,
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%u: connected to %s\n"),
               (*iterator_2).second.broadcastConnection->id (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
 
   // step1ca: reinitialize connection manager
   (*iterator).second.socketHandlerConfiguration.socketConfiguration_2.writeOnly =
@@ -950,12 +984,12 @@ do_work (bool requestBroadcastReplies_in,
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
     configuration.handle =
-        iconnector_p->connect (configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address);
+        iconnector_p->connect (configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress);
     if (configuration.handle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
 
       // clean up
       connection_manager_p->abort ();
@@ -985,7 +1019,7 @@ do_work (bool requestBroadcastReplies_in,
       do
       {
         iconnection_p =
-          connection_manager_p->get (configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address);
+          connection_manager_p->get (configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress);
         if (iconnection_p)
         {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1004,7 +1038,7 @@ do_work (bool requestBroadcastReplies_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
 
       // clean up
       connection_manager_p->abort ();
@@ -1014,7 +1048,7 @@ do_work (bool requestBroadcastReplies_in,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: listening to (UDP) %s\n"),
                 iconnection_p->id (),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
 
     // step2: send DHCP request
 //    ACE_NEW_NORETURN (message_data_p,
@@ -1075,7 +1109,7 @@ allocate:
     DHCP_record.xid = DHCP_Tools::generateXID ();
     if (configuration.protocolConfiguration.requestBroadcastReplies)
       DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-    if (!Net_Common_Tools::interfaceToMACAddress ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.networkInterface,
+    if (!Net_Common_Tools::interfaceToMACAddress ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
                                                   DHCP_record.chaddr))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1171,10 +1205,7 @@ allocate:
     //ACE_UNUSED_ARG (was_visible_b);
 #endif
 
-    result = TEST_U_UI_GTK_MANAGER_SINGLETON::instance ()->wait ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to ACE_Task_Base::wait (): \"%m\", continuing\n")));
+    TEST_U_UI_GTK_MANAGER_SINGLETON::instance ()->wait ();
   } // end IF
 
   Common_Tools::dispatchEvents (useReactor_in,
@@ -1323,7 +1354,11 @@ ACE_TMAIN (int argc_in,
   ui_definition_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   ui_definition_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GLADE_FILE);
   bool log_to_file = false;
-  std::string interface_string;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _GUID interface_identifier = GUID_NULL;
+#else
+  std::string interface_identifier_string;
+#endif
   bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   bool use_thread_pool = NET_EVENT_USE_THREAD_POOL;
   bool send_request_on_offer =
@@ -1345,7 +1380,11 @@ ACE_TMAIN (int argc_in,
                             output_file,
                             ui_definition_file,
                             log_to_file,
-                            interface_string,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                            interface_identifier,
+#else
+                            interface_identifier_string,
+#endif
                             use_loopback,
                             use_thread_pool,
                             send_request_on_offer,
@@ -1386,7 +1425,11 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("the select()-based reactor is not reentrant, using the thread-pool reactor instead...\n")));
     use_thread_pool = true;
   } // end IF
-  if ((ui_definition_file.empty () && interface_string.empty ())           ||
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  if ((ui_definition_file.empty () && InlineIsEqualGUID (interface_identifier, GUID_NULL)) ||
+#else
+  if ((ui_definition_file.empty () && interface_identifier_string.empty ())           ||
+#endif
       (!ui_definition_file.empty () &&
        !Common_File_Tools::isReadable (ui_definition_file))                ||
       (!gtk_rc_file.empty () &&
@@ -1587,7 +1630,11 @@ ACE_TMAIN (int argc_in,
            debug_parser,
            output_file,
            ui_definition_file,
-           interface_string,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+           interface_identifier,
+#else
+           interface_identifier_string,
+#endif
            use_loopback,
            use_thread_pool,
            send_request_on_offer,

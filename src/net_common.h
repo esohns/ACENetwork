@@ -36,6 +36,8 @@
 #include "stream_stat_statistic_handler.h"
 
 // forward declarations
+template <ACE_SYNCH_DECL>
+class Net_IConnectionManagerBase_T;
 template <typename ConfigurationType>
 class Net_ITransportLayer_T;
 #if defined (ACE_HAS_NETLINK)
@@ -70,7 +72,7 @@ enum Net_TransportLayerType
 {
   NET_TRANSPORTLAYER_INVALID = -1,
   NET_TRANSPORTLAYER_IP_CAST = 0, // 'pseudo' (LAN-only, no flow control)
-#if defined (ACE_LINUX)
+#if defined (ACE_HAS_NETLINK)
   NET_TRANSPORTLAYER_NETLINK, // 'pseudo' ((Linux-)host only, no flow control) kernel<->user space protocol
 #endif
   NET_TRANSPORTLAYER_TCP,
@@ -209,5 +211,7 @@ class Net_Netlink_Addr
   typedef ACE_Netlink_Addr inherited;
 };
 #endif /* ACE_HAS_NETLINK */
+
+typedef Net_IConnectionManagerBase_T<ACE_MT_SYNCH> Net_IConnectionManagerBase_t;
 
 #endif

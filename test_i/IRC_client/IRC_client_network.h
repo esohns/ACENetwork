@@ -128,42 +128,29 @@ struct IRC_Client_SessionState
 
 //////////////////////////////////////////
 
-typedef Net_StreamTCPSocketBase_T<Net_TCPSocketHandler_T<struct IRC_Client_SocketHandlerConfiguration,
-                                                         ACE_SOCK_STREAM>,
-                                  ACE_INET_Addr,
-                                  struct IRC_Client_ConnectionConfiguration,
-                                  struct IRC_Client_SessionState,
-                                  IRC_Statistic_t,
-                                  Common_Timer_Manager_t,
-                                  IRC_Client_Stream_t,
-                                  struct IRC_Client_UserData,
-                                  struct Stream_ModuleConfiguration,
-                                  struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_TCPHandler_t;
-typedef Net_StreamAsynchTCPSocketBase_T<Net_AsynchTCPSocketHandler_T<struct IRC_Client_SocketHandlerConfiguration>,
-                                        ACE_INET_Addr,
-                                        struct IRC_Client_ConnectionConfiguration,
-                                        struct IRC_Client_SessionState,
-                                        IRC_Statistic_t,
-                                        Common_Timer_Manager_t,
-                                        IRC_Client_Stream_t,
-                                        struct IRC_Client_UserData,
-                                        struct Stream_ModuleConfiguration,
-                                        struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_AsynchTCPHandler_t;
-typedef Net_TCPConnectionBase_T<IRC_Client_TCPHandler_t,
+typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
+                               ACE_SOCK_STREAM,
+                               struct IRC_Client_SocketHandlerConfiguration> IRC_Client_TCPSocketHandler_t;
+typedef Net_AsynchTCPSocketHandler_T<struct IRC_Client_SocketHandlerConfiguration> IRC_Client_AsynchTCPSocketHandler_t;
+
+typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
+                                IRC_Client_TCPSocketHandler_t,
                                 struct IRC_Client_ConnectionConfiguration,
                                 struct IRC_Client_SessionState,
                                 IRC_Statistic_t,
                                 struct IRC_Client_SocketHandlerConfiguration,
                                 struct IRC_Client_ListenerConfiguration,
                                 IRC_Client_Stream_t,
+                                Common_Timer_Manager_t,
                                 struct IRC_Client_UserData> IRC_Client_TCPConnection_t;
-typedef Net_AsynchTCPConnectionBase_T<IRC_Client_AsynchTCPHandler_t,
+typedef Net_AsynchTCPConnectionBase_T<IRC_Client_AsynchTCPSocketHandler_t,
                                       struct IRC_Client_ConnectionConfiguration,
                                       struct IRC_Client_SessionState,
                                       IRC_Statistic_t,
                                       struct IRC_Client_SocketHandlerConfiguration,
                                       struct IRC_Client_ListenerConfiguration,
                                       IRC_Client_Stream_t,
+                                      Common_Timer_Manager_t,
                                       struct IRC_Client_UserData> IRC_Client_AsynchTCPConnection_t;
 
 //////////////////////////////////////////
@@ -192,7 +179,8 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
 typedef Net_IConnector_T<ACE_INET_Addr,
                          struct IRC_Client_ConnectionConfiguration> IRC_Client_IConnector_t;
 
-typedef Net_Client_Connector_T<IRC_Client_TCPConnection_t,
+typedef Net_Client_Connector_T<ACE_MT_SYNCH,
+                               IRC_Client_TCPConnection_t,
                                ACE_SOCK_CONNECTOR,
                                ACE_INET_Addr,
                                struct IRC_Client_ConnectionConfiguration,
@@ -214,12 +202,14 @@ typedef Net_Client_AsynchConnector_T<IRC_Client_AsynchTCPConnection_t,
 
 //////////////////////////////////////////
 
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct IRC_Client_ConnectionConfiguration,
                                  struct IRC_Client_SessionState,
                                  IRC_Statistic_t,
                                  struct IRC_Client_UserData> IRC_Client_IConnection_Manager_t;
-typedef Net_Connection_Manager_T<ACE_INET_Addr,
+typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct IRC_Client_ConnectionConfiguration,
                                  struct IRC_Client_SessionState,
                                  IRC_Statistic_t,

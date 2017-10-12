@@ -35,7 +35,7 @@ template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
           ////////////////////////////////
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           ////////////////////////////////
           typename StreamType,
           ////////////////////////////////
@@ -44,7 +44,7 @@ class Net_Server_SSL_Listener_T
  : public ACE_Acceptor<HandlerType,
                        AcceptorType>
  , public Net_IListener_T<ConfigurationType, 
-                          HandlerConfigurationType>
+                          ConnectionConfigurationType>
 {
   typedef ACE_Acceptor<HandlerType,
                        AcceptorType> inherited;
@@ -55,7 +55,7 @@ class Net_Server_SSL_Listener_T
                                                        AddressType,
                                                        ConfigurationType,
                                                        StateType,
-                                                       HandlerConfigurationType,
+                                                       ConnectionConfigurationType,
                                                        StreamType,
                                                        UserDataType>,
                              ACE_SYNCH_RECURSIVE_MUTEX>;
@@ -67,7 +67,7 @@ class Net_Server_SSL_Listener_T
                                                   AddressType,
                                                   ConfigurationType,
                                                   StateType,
-                                                  HandlerConfigurationType,
+                                                  ConnectionConfigurationType,
                                                   StreamType,
                                                   UserDataType>,
                         ACE_SYNCH_RECURSIVE_MUTEX> SINGLETON_T;
@@ -84,13 +84,12 @@ class Net_Server_SSL_Listener_T
   virtual void start ();
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
-  inline virtual bool isRunning () const { return isListening_; };
-  inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual bool isRunning () const { return isListening_; }
 
-  inline virtual const HandlerConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); return configuration_->socketHandlerConfiguration; };
-  //virtual bool initialize (const HandlerConfigurationType&);
+  inline virtual const ConnectionConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); ACE_ASSERT (configuration_->connectionConfiguration); return *(configuration_->connectionConfiguration); }
+  //virtual bool initialize (const ConnectionConfigurationType&);
   virtual bool initialize (const ConfigurationType&);
-  inline virtual bool useReactor () const { return true; };
+  inline virtual bool useReactor () const { return true; }
 
   // implement Common_IDumpState
   virtual void dump_state () const;
@@ -105,15 +104,22 @@ class Net_Server_SSL_Listener_T
 
  private:
   typedef Net_IListener_T<ConfigurationType,
-                          HandlerConfigurationType> ILISTENER_T;
+                          ConnectionConfigurationType> ILISTENER_T;
 
   Net_Server_SSL_Listener_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_Server_SSL_Listener_T (const Net_Server_SSL_Listener_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Server_SSL_Listener_T& operator= (const Net_Server_SSL_Listener_T&))
   virtual ~Net_Server_SSL_Listener_T ();
 
+  // implement (part of) Net_IListener_T
+  inline virtual bool lock (bool = true) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  inline virtual int unlock (bool = false) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
+  inline virtual const ACE_SYNCH_MUTEX& getR () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_SYNCH_MUTEX ()); ACE_NOTREACHED (return ACE_SYNCH_MUTEX ();) }
+  inline virtual void idle () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+
   // implement (part of) Common_IControl_T
-  inline virtual void initialize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void initialize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
   ConfigurationType* configuration_;
   bool               hasChanged_;

@@ -39,12 +39,14 @@
 // forward declarations
 struct Test_I_UserData;
 
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct Test_I_URLStreamLoad_ConnectionConfiguration,
                                  struct HTTP_ConnectionState,
                                  HTTP_Statistic_t,
                                  struct HTTP_Stream_UserData> Test_I_IConnectionManager_t;
-typedef Net_Connection_Manager_T<ACE_INET_Addr,
+typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct Test_I_URLStreamLoad_ConnectionConfiguration,
                                  struct HTTP_ConnectionState,
                                  HTTP_Statistic_t,

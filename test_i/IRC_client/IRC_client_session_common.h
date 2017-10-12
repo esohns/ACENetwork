@@ -36,7 +36,8 @@
 #include "IRC_client_stream.h"
 #include "IRC_client_stream_common.h"
 
-typedef Net_Client_Connector_T<IRC_Client_TCPConnection_t,
+typedef Net_Client_Connector_T<ACE_MT_SYNCH,
+                               IRC_Client_TCPConnection_t,
                                ACE_SOCK_CONNECTOR,
                                ACE_INET_Addr,
                                struct IRC_Client_ConnectionConfiguration,
@@ -85,7 +86,8 @@ typedef IRC_Session_T<IRC_Client_AsynchTCPConnection_t,
                       struct IRC_Client_InputHandlerConfiguration,
                       IRC_Client_IOStream_t> IRC_Client_AsynchIRCSession_t;
 
-typedef Net_Client_Connector_T<IRC_Client_IRCSession_t,
+typedef Net_Client_Connector_T<ACE_MT_SYNCH,
+                               IRC_Client_IRCSession_t,
                                ACE_SOCK_CONNECTOR,
                                ACE_INET_Addr,
                                struct IRC_Client_ConnectionConfiguration,

@@ -370,7 +370,7 @@ idle_initialize_ui_cb (gpointer userData_in)
                              0.0,
                              std::numeric_limits<double>::max ());
   gtk_spin_button_set_value (spin_button_p,
-                             static_cast<gdouble> (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.get_port_number ()));
+                             static_cast<gdouble> (data_p->configuration->listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.get_port_number ()));
 
   GtkFileChooserButton* file_chooser_button_p =
     GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -811,8 +811,8 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
       GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_GTK_SPINBUTTON_PORT_NAME)));
     ACE_ASSERT (spin_button_p);
-    data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.set_port_number (static_cast<u_short> (gtk_spin_button_get_value_as_int (spin_button_p)),
-                                                                                                                           1);
+    data_p->configuration->listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.set_port_number (static_cast<u_short> (gtk_spin_button_get_value_as_int (spin_button_p)),
+                                                                                                                                                    1);
 
     GtkFileChooserButton* file_chooser_button_p =
       GTK_FILE_CHOOSER_BUTTON (gtk_builder_get_object ((*iterator).second.second,

@@ -232,7 +232,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   gtk_spin_button_set_value (spin_button_p,
-                             static_cast<double> ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address.get_port_number ()));
+                             static_cast<double> ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress.get_port_number ()));
 
   GtkListStore* list_store_p =
     GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
@@ -590,7 +590,11 @@ idle_initialize_UI_cb (gpointer userData_in)
     gtk_tree_model_iter_n_children (GTK_TREE_MODEL (list_store_p), NULL);
   if (n_rows)
   {
-    if ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.networkInterface.empty ())
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if (InlineIsEqualGUID ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier, GUID_NULL))
+#else
+    if ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.empty ())
+#endif
       gtk_combo_box_set_active (combo_box_p, 0);
     else
     {
@@ -604,6 +608,10 @@ idle_initialize_UI_cb (gpointer userData_in)
         return G_SOURCE_REMOVE;
       } // end IF
       GValue value = {0,};
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      std::string interface_identifier_string =
+        Common_Tools::GUIDToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier);
+#endif
       do
       {
         gtk_tree_model_get_value (tree_model_p,
@@ -614,7 +622,11 @@ idle_initialize_UI_cb (gpointer userData_in)
                                   0, &value);
 #endif
         ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
-        if (ACE_OS::strcmp ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.networkInterface.c_str (),
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        if (ACE_OS::strcmp (interface_identifier_string.c_str (),
+#else
+        if (ACE_OS::strcmp ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str (),
+#endif
                             g_value_get_string (&value)) == 0)
         {
           // clean up
@@ -1066,8 +1078,8 @@ action_discover_activate_cb (GtkAction* action_in,
   Test_U_ConnectionConfigurationIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
-  (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address.set_port_number (port_number,
-                                                                                                 1);
+  (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress.set_port_number (port_number,
+                                                                                                     1);
 
   // retrieve buffer
   spin_button_p =
@@ -1097,7 +1109,7 @@ allocate:
   DHCP_record.xid = DHCP_Tools::generateXID ();
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-  if (!Net_Common_Tools::interfaceToMACAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.networkInterface,
+  if (!Net_Common_Tools::interfaceToMACAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
                                                 DHCP_record.chaddr))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1219,8 +1231,8 @@ action_inform_activate_cb (GtkAction* action_in,
   Test_U_IInboundStreamConnection_t* istream_connection_2 =
     dynamic_cast<Test_U_IInboundStreamConnection_t*> (iconnection_p);
   ACE_ASSERT (istream_connection_2);
-  Test_U_ConnectionState& state_r =
-    const_cast<Test_U_ConnectionState&> (istream_connection_2->state ());
+  struct Test_U_ConnectionState& state_r =
+    const_cast<struct Test_U_ConnectionState&> (istream_connection_2->state ());
 
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
@@ -1275,17 +1287,23 @@ allocate:
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
   ACE_INET_Addr IP_address, gateway_address;
-  if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.networkInterface,
+  if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
                                                IP_address,
                                                gateway_address))
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
-                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.networkInterface.c_str ())));
+                ACE_TEXT (Net_Common_Tools::interfaceToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier))));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
+                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ())));
+#endif
     return;
   } // end IF
   DHCP_record.ciaddr = IP_address.get_ip_address ();
-  if (!Net_Common_Tools::interfaceToMACAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.networkInterface,
+  if (!Net_Common_Tools::interfaceToMACAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
                                                 DHCP_record.chaddr))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1398,7 +1416,7 @@ allocate:
   } // end IF
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-  if (!Net_Common_Tools::interfaceToMACAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.networkInterface,
+  if (!Net_Common_Tools::interfaceToMACAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
                                                 DHCP_record.chaddr))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1522,17 +1540,23 @@ allocate:
     session_data_r.xid = DHCP_record.xid;
   } // end IF
   ACE_INET_Addr IP_address, gateway_address;
-  if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.networkInterface,
+  if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
                                                IP_address,
                                                gateway_address))
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
-                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.networkInterface.c_str ())));
+                ACE_TEXT (Net_Common_Tools::interfaceToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier))));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
+                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ())));
+#endif
     return;
   } // end IF
   DHCP_record.ciaddr = IP_address.get_ip_address ();
-  if (!Net_Common_Tools::interfaceToMACAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.networkInterface,
+  if (!Net_Common_Tools::interfaceToMACAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
                                                 DHCP_record.chaddr))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1633,10 +1657,18 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
                             0, &value);
 #endif
   ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
-  data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.networkInterface =
+  data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    Common_Tools::StringToGUID (g_value_get_string (&value));
+#else
       g_value_get_string (&value);
-  (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.networkInterface =
+#endif
+  (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    Common_Tools::StringToGUID (g_value_get_string (&value));
+#else
     g_value_get_string (&value);
+#endif
   g_value_unset (&value);
 }
 
@@ -1781,16 +1813,16 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       false;
     //data_p->configuration->listenerConfiguration.address = (ACE_INET_Addr&)ACE_Addr::sap_any;
     int result =
-      (*iterator_3).second.socketHandlerConfiguration.socketConfiguration_2.address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+      (*iterator_3).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                                                                                         // *IMPORTANT NOTE*: this needs to be INADDR_ANY (0.0.0.0) (instead of
                                                                                         //                   255.255.255.255: why ?)
-                                                                                        static_cast<ACE_UINT32> (INADDR_ANY),
+                                                                                             static_cast<ACE_UINT32> (INADDR_ANY),
 #else
-                                                                                        static_cast<ACE_UINT32> (INADDR_BROADCAST),
+                                                                                             static_cast<ACE_UINT32> (INADDR_BROADCAST),
 #endif
-                                                                                        1,
-                                                                                        0);
+                                                                                             1,
+                                                                                             0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1820,7 +1852,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 
     // step2: connect
     data_p->configuration->broadcastHandle =
-        iconnector_p->connect (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address);
+        iconnector_p->connect (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress);
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
     if (!data_p->configuration->useReactor)
@@ -1839,7 +1871,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       do
       {
         iconnection_p =
-            connection_manager_p->get (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address,
+            connection_manager_p->get (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress,
                                        false);
         if (iconnection_p)
         {
@@ -1858,26 +1890,26 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to connect to %s (timed out at: %#T), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ()),
                     &timeout));
     } // end IF
     if (data_p->configuration->broadcastHandle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to \"%s\", returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
       goto continue_;
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("0x%@: opened UDP socket: %s...\n"),
+                ACE_TEXT ("0x%@: opened UDP socket: %s\n"),
                 data_p->configuration->broadcastHandle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
 #else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("%d: opened UDP socket: %s...\n"),
+                ACE_TEXT ("%d: opened UDP socket: %s\n"),
                 data_p->configuration->broadcastHandle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
 #endif
 
     // connect (unicast)
@@ -1898,32 +1930,42 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 
     if (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice)
       result =
-        data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+        data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
                                                                                                                    static_cast<ACE_UINT32> (INADDR_LOOPBACK),
                                                                                                                    1,
                                                                                                                    0);
-    else if (!data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.networkInterface.empty ())
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    else if (!InlineIsEqualGUID (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier, GUID_NULL))
+#else
+    else if (!data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.empty ())
+#endif
     {
       ACE_INET_Addr gateway_address;
-      if (!Net_Common_Tools::interfaceToIPAddress (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.networkInterface,
-                                                   data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address,
+      if (!Net_Common_Tools::interfaceToIPAddress (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
+                                                   data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress,
                                                    gateway_address))
       {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), continuing\n"),
-                    ACE_TEXT (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.networkInterface.c_str ())));
+                    ACE_TEXT (Net_Common_Tools::interfaceToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier).c_str ())));
+#else
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), continuing\n"),
+                    ACE_TEXT (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ())));
+#endif
         result = -1;
       } // end IF
-      data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.set_port_number (DHCP_DEFAULT_CLIENT_PORT,
-                                                                                                                             1);
+      data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress.set_port_number (DHCP_DEFAULT_CLIENT_PORT,
+                                                                                                                                 1);
       result = 0;
     } // end ELSE IF
     else
       result =
-        data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-                                                                                                                   static_cast<ACE_UINT32> (INADDR_ANY),
-                                                                                                                   1,
-                                                                                                                   0);
+        data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+                                                                                                                       static_cast<ACE_UINT32> (INADDR_ANY),
+                                                                                                                       1,
+                                                                                                                       0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1942,7 +1984,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
 
     // step2: connect
     data_p->configuration->handle =
-        iconnector_p->connect (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address);
+        iconnector_p->connect (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress);
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
     if (!data_p->configuration->useReactor)
@@ -1961,7 +2003,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       do
       {
         iconnection_p =
-            connection_manager_p->get (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address,
+            connection_manager_p->get (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress,
                                        false);
         if (iconnection_p)
         {
@@ -1980,26 +2022,26 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to connect to \"%s\" (timed out at: %#T), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ()),
                     &timeout));
     } // end IF
     if (data_p->configuration->handle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
       goto continue_;
     } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("0x%@: opened UDP socket: %s...\n"),
                 data_p->configuration->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
 #else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%d: opened UDP socket: %s...\n"),
                 data_p->configuration->handle,
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
 #endif
 
     failed = false;

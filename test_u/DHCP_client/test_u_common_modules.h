@@ -52,7 +52,8 @@
 // forward declarations
 class Test_U_SessionMessage;
 class Test_U_Message;
-typedef Net_Connection_Manager_T<ACE_INET_Addr,
+typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
                                  DHCP_Statistic_t,

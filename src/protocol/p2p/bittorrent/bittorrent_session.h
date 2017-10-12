@@ -40,6 +40,7 @@
 // forward declarations
 class ACE_Message_Block;
 
+//ACE_THR_FUNC_RETURN BitTorrent_Export session_setup_function (void*);
 ACE_THR_FUNC_RETURN BitTorrent_Export session_setup_function (void*);
 
 template <typename PeerHandlerConfigurationType, // socket-

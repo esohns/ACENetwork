@@ -36,8 +36,8 @@ template <typename ConfigurationType>
 Net_AsynchTCPSocketHandler_T<ConfigurationType>::Net_AsynchTCPSocketHandler_T ()
  : inherited ()
  , inherited2 ()
- , inherited3 (NULL,                          // event handler handle
-               ACE_Event_Handler::WRITE_MASK) // mask
+ , inherited3 (NULL,                                                         // event handler handle
+               ACE_Event_Handler::READ_MASK | ACE_Event_Handler::WRITE_MASK) // mask
  , counter_ (0) // initial count
  , inputStream_ ()
  , outputStream_ ()
@@ -91,7 +91,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 
   int result = -1;
   int error = 0;
-  ACE_Proactor* proactor_p = NULL;
+  ACE_Proactor* proactor_p = inherited2::proactor ();
 
   // sanity checks
   ACE_ASSERT (inherited::configuration_);
@@ -113,7 +113,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::dup(%d): \"%m\", aborting\n"),
                 handle_in));
-    goto close;
+    goto error;
   } // end IF
 #endif
 
@@ -163,7 +163,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(0x%@,%s), aborting\n"),
-                  handle_,
+                  handle_in,
                   (NET_SOCKET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true")
                                                   : ACE_TEXT ("false"))));
 #else
@@ -173,7 +173,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
                 (NET_SOCKET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true")
                                                 : ACE_TEXT ("false"))));
 #endif
-    goto close;
+    goto error;
   } // end IF
   if (unlikely (!Net_Common_Tools::setKeepAlive (handle_in,
                                                  NET_SOCKET_DEFAULT_TCP_KEEPALIVE)))
@@ -195,7 +195,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
                                                     : ACE_TEXT ("false"))));
 #endif
     } // end IF
-    goto close;
+    goto error;
   } // end IF
   if (unlikely (!Net_Common_Tools::setLinger (handle_in,
                                               socket_configuration_p->linger,
@@ -218,7 +218,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
                                                   : ACE_TEXT ("false"))));
 #endif
     } // end IF
-    goto close;
+    goto error;
   } // end IF
 
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -232,7 +232,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
 //                ACE_TEXT ("failed to GetCommTimeouts(0x%@): \"%s\", aborting\n"),
 //                handle_in,
 //                ACE_TEXT (Common_Tools::error2String (error).c_str ())));
-//    goto close;
+//    goto error;
 //  } // end IF
 //#endif
 
@@ -254,7 +254,7 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
                 ACE_TEXT ("failed to ACE_Asynch_Read_Stream::open(%d): \"%m\", aborting\n"),
                 handle_in));
 #endif
-    goto close;
+    goto error;
   } // end IF
   result = outputStream_.open (*this,        // event handler
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -275,12 +275,12 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::open (ACE_HANDLE handle_in,
                 ACE_TEXT ("failed to ACE_Asynch_Write_Stream::open(%d): \"%m\", aborting\n"),
                 writeHandle_));
 #endif
-    goto close;
+    goto error;
   } // end IF
 
   return;
 
-close:
+error:
   result = handle_close (handle_in,
                          ACE_Event_Handler::ALL_EVENTS_MASK);
   if (result == -1)
@@ -288,13 +288,11 @@ close:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_close(0x%@,%d): \"%m\", continuing\n"),
-                handle_in,
-                ACE_Event_Handler::ALL_EVENTS_MASK));
+                handle_in, ACE_Event_Handler::ALL_EVENTS_MASK));
 #else
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchTCPSocketHandler_T::handle_close(%d,%d): \"%m\", continuing\n"),
-                handle_in,
-                ACE_Event_Handler::ALL_EVENTS_MASK));
+                handle_in, ACE_Event_Handler::ALL_EVENTS_MASK));
 #endif
   } // end IF
 }
@@ -315,10 +313,10 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
   {
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ENOENT)                  && // 2   : *TODO*
-        (error != ENOMEM)                  && // 12  : [server: local close()] *TODO*: ?
+    if ((error != ENOMEM)                  && // 12  : [client: remote close()]
         (error != ERROR_OPERATION_ABORTED) && // 995 : [server: local close()] *TODO*: ?
         (error != ERROR_IO_PENDING)        && // 997 :
+        (error != ERROR_NOT_FOUND)         && // 1168: [client: local close()]
         (error != ERROR_CONNECTION_ABORTED))  // 1236: [client: local close()]
 #else
     if (error == EINPROGRESS) result = 0; // --> AIO_CANCELED
@@ -339,9 +337,10 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
   {
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ENOENT)                  && // 2   : *TODO*
-        (error != ENOMEM)                  && // 12  : [server: local close()] *TODO*: ?
+    if ((error != ENOMEM)                  && // 12  : [client: remote close()]
+        (error != ERROR_OPERATION_ABORTED) && // 995 : [server: local close()] *TODO*: ?
         (error != ERROR_IO_PENDING)        && // 997 :
+        (error != ERROR_NOT_FOUND)         && // 1168: [client: local close()]
         (error != ERROR_CONNECTION_ABORTED))  // 1236: [client: local close()]
 #else
     if (error == EINPROGRESS) result_2 = 0; // --> AIO_CANCELED

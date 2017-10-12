@@ -26,9 +26,11 @@
 #include "stream_headmoduletask_base.h"
 #include "stream_streammodule_base.h"
 
+#include "irc_exports.h"
+
 //// define/declare the lexer's prototype (see irc_bisector.h)
 typedef void* yyscan_t;
-extern int IRC_Bisector_lex (yyscan_t);
+IRC_Export int IRC_Bisector_lex (yyscan_t);
 //// *TODO*: this should be part of irc_bisector.h
 //#define YY_DECL extern int IRC_Bisector_lex (yyscan_t)
 //YY_DECL;

@@ -34,19 +34,18 @@
 #include "net_server_common.h"
 
 class Test_U_Server_SignalHandler
- : public Common_SignalHandler_T<Test_U_Server_SignalHandlerConfiguration>
- , public Common_ISignal
+ : public Common_SignalHandler_T<struct Test_U_Server_SignalHandlerConfiguration>
 {
+  typedef Common_SignalHandler_T<struct Test_U_Server_SignalHandlerConfiguration> inherited;
+
  public:
   Test_U_Server_SignalHandler ();
-  virtual ~Test_U_Server_SignalHandler ();
+  inline virtual ~Test_U_Server_SignalHandler () {};
 
   // implement Common_ISignal
   virtual void handle (int); // signal
 
  private:
-  typedef Common_SignalHandler_T<Test_U_Server_SignalHandlerConfiguration> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Test_U_Server_SignalHandler (const Test_U_Server_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Server_SignalHandler& operator= (const Test_U_Server_SignalHandler&))
 };

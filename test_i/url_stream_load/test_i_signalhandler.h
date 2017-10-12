@@ -30,7 +30,6 @@
 
 class Test_I_SignalHandler
  : public Common_SignalHandler_T<struct Test_I_SignalHandlerConfiguration>
- , public Common_ISignal
 {
  public:
   Test_I_SignalHandler ();

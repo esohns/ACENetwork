@@ -85,7 +85,7 @@ class Net_Connection_Manager_T
   // implement (part of) Net_IConnectionManager_T
   virtual bool lock (bool = true); // block ?
   virtual int unlock (bool = false); // unblock ?
-  inline virtual const typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T& getR () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T ()); ACE_NOTREACHED (return typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T ();) };
+  inline virtual const typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T& getR () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T ()); ACE_NOTREACHED (return typename INTERFACE_T::ITASKCONTROL_T::MUTEX_T ();) }
   virtual void start ();
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
@@ -139,7 +139,8 @@ class Net_Connection_Manager_T
   typedef ACE_DLList_Reverse_Iterator<ICONNECTION_T> CONNECTION_CONTAINER_REVERSEITERATOR_T;
 
   // override/hide (part of) Common_ITaskControl
-  inline void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void idle () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
   // implement (part of) Common_IStatistic_T
   // *WARNING*: this assumes lock_ is being held

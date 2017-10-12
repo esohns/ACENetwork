@@ -53,7 +53,8 @@
 struct FileServer_ConnectionConfiguration;
 struct FileServer_ConnectionState;
 struct FileServer_UserData;
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct FileServer_ConnectionConfiguration,
                                  struct FileServer_ConnectionState,
                                  Net_Statistic_t,
@@ -62,7 +63,7 @@ class Test_U_SessionMessage;
 class Test_U_Message;
 struct FileServer_ListenerConfiguration;
 typedef Net_IListener_T<struct FileServer_ListenerConfiguration,
-                        struct FileServer_SocketHandlerConfiguration> Test_U_IListener_t;
+                        struct FileServer_ConnectionConfiguration> Test_U_IListener_t;
 
 //////////////////////////////////////////
 
@@ -70,7 +71,7 @@ struct FileServer_ConnectionConfiguration;
 struct FileServer_UserData
  : Net_UserData
 {
-  inline FileServer_UserData ()
+  FileServer_UserData ()
    : Net_UserData ()
    //, connectionConfiguration (NULL)
   {};
@@ -81,7 +82,7 @@ struct FileServer_UserData
 struct FileServer_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
-  inline FileServer_SignalHandlerConfiguration ()
+  FileServer_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    , listener (NULL)
    , statisticReportingHandler (NULL)
@@ -96,7 +97,7 @@ struct FileServer_SignalHandlerConfiguration
 struct FileServer_Configuration
  : Test_U_Configuration
 {
-  inline FileServer_Configuration ()
+  FileServer_Configuration ()
    : Test_U_Configuration ()
    , connectionConfigurations ()
    , handle (ACE_INVALID_HANDLE)
@@ -141,7 +142,7 @@ typedef FileServer_Subscribers_t::const_iterator FileServer_SubscribersIterator_
 struct FileServer_GTK_CBData
  : Test_U_GTK_CBData
 {
-  inline FileServer_GTK_CBData ()
+  FileServer_GTK_CBData ()
    : Test_U_GTK_CBData ()
    , configuration (NULL)
    , subscribers ()

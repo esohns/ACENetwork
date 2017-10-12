@@ -56,7 +56,8 @@ struct IRC_Client_UserData;
 //                          struct IRC_Client_ConnectionState,
 //                          IRC_Statistic_t,
 //                          IRC_Client_Stream> IRC_Client_IConnection_t;
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct IRC_Client_ConnectionConfiguration,
                                  struct IRC_Client_SessionState,
                                  IRC_Statistic_t,

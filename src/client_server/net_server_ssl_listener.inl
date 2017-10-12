@@ -34,7 +34,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_Server_SSL_Listener_T<HandlerType,
@@ -42,7 +42,7 @@ Net_Server_SSL_Listener_T<HandlerType,
                           AddressType,
                           ConfigurationType,
                           StateType,
-                          HandlerConfigurationType,
+                          ConnectionConfigurationType,
                           StreamType,
                           UserDataType>::Net_Server_SSL_Listener_T ()
  : inherited (NULL, // use global (default) reactor
@@ -63,7 +63,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_Server_SSL_Listener_T<HandlerType,
@@ -71,7 +71,7 @@ Net_Server_SSL_Listener_T<HandlerType,
                           AddressType,
                           ConfigurationType,
                           StateType,
-                          HandlerConfigurationType,
+                          ConnectionConfigurationType,
                           StreamType,
                           UserDataType>::~Net_Server_SSL_Listener_T ()
 {
@@ -101,7 +101,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -110,7 +110,7 @@ Net_Server_SSL_Listener_T<HandlerType,
                           AddressType,
                           ConfigurationType,
                           StateType,
-                          HandlerConfigurationType,
+                          ConnectionConfigurationType,
                           StreamType,
                           UserDataType>::handle_accept_error (void)
 {
@@ -132,7 +132,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -141,7 +141,7 @@ Net_Server_SSL_Listener_T<HandlerType,
                           AddressType,
                           ConfigurationType,
                           StateType,
-                          HandlerConfigurationType,
+                          ConnectionConfigurationType,
                           StreamType,
                           UserDataType>::start ()
 {
@@ -261,7 +261,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -270,7 +270,7 @@ Net_Server_SSL_Listener_T<HandlerType,
                           AddressType,
                           ConfigurationType,
                           StateType,
-                          HandlerConfigurationType,
+                          ConnectionConfigurationType,
                           StreamType,
                           UserDataType>::stop (bool waitForCompletion_in,
                                                bool lockedAccess_in)
@@ -304,7 +304,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 bool
@@ -313,7 +313,7 @@ Net_Server_SSL_Listener_T<HandlerType,
                           AddressType,
                           ConfigurationType,
                           StateType,
-                          HandlerConfigurationType,
+                          ConnectionConfigurationType,
                           StreamType,
                           UserDataType>::initialize (const ConfigurationType& configuration_in)
 {
@@ -331,7 +331,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -340,7 +340,7 @@ Net_Server_SSL_Listener_T<HandlerType,
                           AddressType,
                           ConfigurationType,
                           StateType,
-                          HandlerConfigurationType,
+                          ConnectionConfigurationType,
                           StreamType,
                           UserDataType>::dump_state () const
 {
@@ -369,7 +369,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -378,7 +378,7 @@ Net_Server_SSL_Listener_T<HandlerType,
                           AddressType,
                           ConfigurationType,
                           StateType,
-                          HandlerConfigurationType,
+                          ConnectionConfigurationType,
                           StreamType,
                           UserDataType>::make_svc_handler (HandlerType*& handler_out)
 {
@@ -407,7 +407,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -416,7 +416,7 @@ Net_Server_SSL_Listener_T<HandlerType,
                           AddressType,
                           ConfigurationType,
                           StateType,
-                          HandlerConfigurationType,
+                          ConnectionConfigurationType,
                           StreamType,
                           UserDataType>::accept_svc_handler (HandlerType* handler_in)
 {
@@ -434,7 +434,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -443,7 +443,7 @@ Net_Server_SSL_Listener_T<HandlerType,
                           AddressType,
                           ConfigurationType,
                           StateType,
-                          HandlerConfigurationType,
+                          ConnectionConfigurationType,
                           StreamType,
                           UserDataType>::activate_svc_handler (HandlerType* svc_handler)
 {

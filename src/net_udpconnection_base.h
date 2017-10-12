@@ -133,6 +133,11 @@ class Net_UDPConnectionBase_T
   Net_UDPConnectionBase_T ();
   ACE_UNIMPLEMENTED_FUNC (Net_UDPConnectionBase_T (const Net_UDPConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_UDPConnectionBase_T& operator= (const Net_UDPConnectionBase_T&))
+
+  // helper method(s)
+#if defined (ACE_LINUX)
+  void processErrorQueue ();
+#endif
 };
 
 //////////////////////////////////////////
@@ -213,6 +218,10 @@ class Net_AsynchUDPConnectionBase_T
                                  const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
   inline virtual ~Net_AsynchUDPConnectionBase_T () {};
 
+  // override (part of) ACE_Service_Handler
+  virtual void open (ACE_HANDLE,          // handle
+                     ACE_Message_Block&); // (initial) data (if any)
+
   // override some ACE_Event_Handler methods
   // *NOTE*: send stream data to the peer
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
@@ -235,7 +244,15 @@ class Net_AsynchUDPConnectionBase_T
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnectionBase_T (const Net_AsynchUDPConnectionBase_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPConnectionBase_T& operator= (const Net_AsynchUDPConnectionBase_T&))
 
-  using inherited2::initialize;
+  //using inherited2::initialize;
+
+  // override (part of) Net_IAsynchSocketHandler
+  virtual bool initiate_read ();
+
+  // helper method(s)
+#if defined (ACE_LINUX)
+  void processErrorQueue ();
+#endif
 };
 
 // include template definition

@@ -13,6 +13,7 @@
 #endif
 
 // C RunTime Header Files
+//#include <sstream>
 #include <string>
 
 #ifdef LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
@@ -21,10 +22,10 @@
 
 // System Library Header Files
 #include "ace/config-lite.h"
-#include "ace/Assert.h"
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
 
+// Library Header Files
 #include "common.h"
 #include "common_macros.h"
 

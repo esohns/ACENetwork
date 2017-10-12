@@ -47,7 +47,8 @@
 // forward declarations
 class Test_I_SessionMessage;
 class Test_I_Message;
-typedef Net_Connection_Manager_T<ACE_INET_Addr,
+typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct Test_I_URLStreamLoad_ConnectionConfiguration,
                                  struct HTTP_ConnectionState,
                                  HTTP_Statistic_t,

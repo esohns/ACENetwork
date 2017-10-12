@@ -41,6 +41,7 @@
 #include "net_common.h"
 #include "net_configuration.h"
 #include "net_iconnectionmanager.h"
+#include "net_iconnector.h"
 #include "net_ilistener.h"
 
 #include "test_u_connection_common.h"
@@ -49,7 +50,8 @@
 #include "test_u_gtk_common.h"
 
 // forward declarations
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct Test_U_ConnectionConfiguration,
                                  struct Test_U_ConnectionState,
                                  Net_Statistic_t,
@@ -58,54 +60,57 @@ class Test_U_SessionMessage;
 class Test_U_Message;
 struct Test_U_Server_ListenerConfiguration;
 typedef Net_IListener_T<struct Test_U_Server_ListenerConfiguration,
-                        struct Test_U_SocketHandlerConfiguration> Test_U_IListener_t;
+                        struct Test_U_ConnectionConfiguration> Test_U_IListener_t;
+typedef Net_IConnector_T<ACE_INET_Addr,
+                         struct Test_U_ConnectionConfiguration> Test_U_IConnector_t;
 
 //////////////////////////////////////////
 
 struct Test_U_Server_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
-  inline Test_U_Server_SignalHandlerConfiguration ()
+  Test_U_Server_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    , listener (NULL)
    , statisticReportingHandler (NULL)
-   , statisticReportingTimerID (-1)
+   , statisticReportingTimerId (-1)
   {};
 
   Test_U_IListener_t*              listener;
   Net_StatisticReportingHandler_t* statisticReportingHandler;
-  long                             statisticReportingTimerID;
+  long                             statisticReportingTimerId;
 };
 
 struct Test_U_Server_ListenerConfiguration
  : Net_ListenerConfiguration
 {
-  inline Test_U_Server_ListenerConfiguration ()
+  Test_U_Server_ListenerConfiguration ()
    : Net_ListenerConfiguration ()
+   , connectionConfiguration (NULL)
    , connectionManager (NULL)
-   , socketHandlerConfiguration ()
 //   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {};
 
-  Test_U_IInetConnectionManager_t*         connectionManager;
-  struct Test_U_SocketHandlerConfiguration socketHandlerConfiguration;
+  struct Test_U_ConnectionConfiguration* connectionConfiguration;
+  Test_U_IInetConnectionManager_t*       connectionManager;
 //  bool                                    useLoopBackDevice;
 };
 
 struct Test_U_Server_Configuration
  : Test_U_Configuration
 {
-  inline Test_U_Server_Configuration ()
+  Test_U_Server_Configuration ()
    : Test_U_Configuration ()
    , allocatorConfiguration ()
+   , connector (NULL)
    , listener (NULL)
    , listenerConfiguration ()
    , signalHandlerConfiguration ()
-   //, socketHandlerConfiguration ()
   {};
 
   struct Stream_AllocatorConfiguration            allocatorConfiguration;
 
+  Test_U_IConnector_t*                            connector;
   Test_U_IListener_t*                             listener;
   struct Test_U_Server_ListenerConfiguration      listenerConfiguration;
 
@@ -135,7 +140,7 @@ typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
 struct Test_U_Server_GTK_CBData
  : Test_U_GTK_CBData
 {
-  inline Test_U_Server_GTK_CBData ()
+  Test_U_Server_GTK_CBData ()
    : Test_U_GTK_CBData ()
    , configuration (NULL)
    , subscribers ()

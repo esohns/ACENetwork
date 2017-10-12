@@ -132,7 +132,12 @@ BitTorrent_Control_T<SessionAsynchType,
   typename SessionType::ISESSION_T* isession_p = NULL;
   SessionStateType* session_state_p = NULL;
   Bencoding_DictionaryIterator_t iterator;
-  std::string interface_string, host_name_string;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _GUID interface_identifier = GUID_NULL;
+#else
+  std::string interface_identifier_string;
+#endif
+  std::string host_name_string;
   ACE_INET_Addr tracker_address, external_ip_address;
   int result = -1;
   typename SessionType::ITRACKER_CONNECTION_T* iconnection_p = NULL;
@@ -190,7 +195,6 @@ BitTorrent_Control_T<SessionAsynchType,
   session_state_p = &const_cast<SessionStateType&> (isession_p->state ());
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-
     sessions_.insert (std::make_pair (metaInfoFileName_in,
                                       isession_p));
   } // end lock scope
@@ -264,12 +268,22 @@ BitTorrent_Control_T<SessionAsynchType,
                                          converter.str ()));
   record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_HEADER),
                                          ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_EVENT_STARTED_STRING)));
-  interface_string = Net_Common_Tools::getDefaultInterface (link_layers);
-  if (!Net_Common_Tools::interfaceToExternalIPAddress (interface_string,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  interface_identifier = Net_Common_Tools::getDefaultInterface (link_layers);
+  if (!Net_Common_Tools::interfaceToExternalIPAddress (interface_identifier,
+                                                       external_ip_address))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), continuing\n"),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
+#else
+  interface_identifier_string =
+    Net_Common_Tools::getDefaultInterface (link_layers);
+  if (!Net_Common_Tools::interfaceToExternalIPAddress (interface_identifier_string,
                                                        external_ip_address))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), continuing\n"),
                 ACE_TEXT (interface_string.c_str ())));
+#endif
   else
     record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_IP_HEADER),
                                            Net_Common_Tools::IPAddressToString (external_ip_address).c_str ()));

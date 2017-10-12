@@ -1,0 +1,23 @@
+core file limits/stack trace dumps are not available on this platform, continuing
+pending signal limits are not available on this platform, continuing
+set locale to "German_Germany.1252"
+Gtk library version: 3.22.6 [age (binary/interface): 2206, 6]
+using Win32 proactor
+using heap timer queue
+(timer dispatch) spawned worker thread (group: 100, id: 1924)
+(event dispatch) spawned 10 worker thread(s) (group: 101):
+#1 10556
+#2 5220
+#3 12876
+#4 7200
+#5 17952
+#6 15484
+#7 15444
+#8 17244
+#9 6124
+#10 9392
+started event dispatch
+0x000004F4: started listening: 0.0.0.0:10001
+loaded widget tree "main": "D:\projects\libACENetwork\test_u\client_server\etc\net_server.glade"
+registered connection [0x06C907B0/0x00000508]: 127.0.0.1:10001 <--> 127.0.0.1:54427 (total: 1)
+session 1: scheduled "ping" timer (id: 4), interval:  01:00:10.000000

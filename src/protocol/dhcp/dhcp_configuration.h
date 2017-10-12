@@ -52,7 +52,8 @@ struct DHCP_Stream_UserData;
 //                          struct DHCP_ConnectionState,
 //                          DHCP_Statistic_t,
 //                          DHCP_Stream> DHCP_IConnection_t;
-typedef Net_IConnectionManager_T<ACE_INET_Addr,
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
                                  struct DHCP_Configuration,
                                  struct DHCP_ConnectionState,
                                  DHCP_Statistic_t,
@@ -66,11 +67,11 @@ typedef Net_IConnectionManager_T<ACE_INET_Addr,
 struct DHCP_SocketHandlerConfiguration
   : Net_SocketHandlerConfiguration
 {
-  inline DHCP_SocketHandlerConfiguration ()
-    : Net_SocketHandlerConfiguration ()
-    ///////////////////////////////////////
-    , socketConfiguration_2 ()
-    , userData (NULL)
+  DHCP_SocketHandlerConfiguration ()
+   : Net_SocketHandlerConfiguration ()
+   ///////////////////////////////////////
+   , socketConfiguration_2 ()
+   , userData (NULL)
   {
     socketConfiguration = &socketConfiguration_2;
   };
@@ -84,7 +85,7 @@ struct DHCP_StreamConfiguration;
 struct DHCP_ConnectionConfiguration
  : Net_ConnectionConfiguration
 {
-  inline DHCP_ConnectionConfiguration ()
+  DHCP_ConnectionConfiguration ()
    : Net_ConnectionConfiguration ()
    ///////////////////////////////////////
    , socketHandlerConfiguration ()
@@ -120,7 +121,7 @@ typedef DHCP_ConnectionConfigurations_t::iterator DHCP_ConnectionConfigurationIt
 
 struct DHCP_ProtocolConfiguration
 {
-  inline DHCP_ProtocolConfiguration ()
+  DHCP_ProtocolConfiguration ()
    : requestBroadcastReplies (DHCP_DEFAULT_FLAGS_BROADCAST)
    , sendRequestOnOffer (false)
   {};
@@ -133,7 +134,7 @@ struct DHCP_StreamConfiguration;
 struct DHCP_ModuleHandlerConfiguration
  : public Stream_ModuleHandlerConfiguration
 {
-  inline DHCP_ModuleHandlerConfiguration ()
+  DHCP_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
    ///////////////////////////////////////
 //   , connection (NULL)
@@ -157,7 +158,7 @@ typedef DHCP_ModuleHandlerConfigurations_t::const_iterator DHCP_ModuleHandlerCon
 struct DHCP_StreamConfiguration
  : Stream_Configuration
 {
-  inline DHCP_StreamConfiguration ()
+  DHCP_StreamConfiguration ()
    : Stream_Configuration ()
    , moduleConfiguration ()
    , moduleHandlerConfigurations ()

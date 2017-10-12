@@ -37,6 +37,8 @@
 #include <stdlib.h>
 /* %endif */
 
+#include "irc_exports.h"
+
 /* %if-tables-serialization */
 /* %endif */
 /* end standard C headers. */
@@ -248,16 +250,16 @@ struct yy_buffer_state
 /* %endif */
 
 void IRC_Bisector_restart (FILE *input_file ,yyscan_t yyscanner );
-void IRC_Bisector__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
+IRC_Export void IRC_Bisector__switch_to_buffer (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
 YY_BUFFER_STATE IRC_Bisector__create_buffer (FILE *file,int size ,yyscan_t yyscanner );
-void IRC_Bisector__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
+IRC_Export void IRC_Bisector__delete_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
 void IRC_Bisector__flush_buffer (YY_BUFFER_STATE b ,yyscan_t yyscanner );
 void IRC_Bisector_push_buffer_state (YY_BUFFER_STATE new_buffer ,yyscan_t yyscanner );
 void IRC_Bisector_pop_buffer_state (yyscan_t yyscanner );
 
 YY_BUFFER_STATE IRC_Bisector__scan_buffer (char *base,yy_size_t size ,yyscan_t yyscanner );
 YY_BUFFER_STATE IRC_Bisector__scan_string (yyconst char *yy_str ,yyscan_t yyscanner );
-YY_BUFFER_STATE IRC_Bisector__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
+IRC_Export YY_BUFFER_STATE IRC_Bisector__scan_bytes (yyconst char *bytes,int len ,yyscan_t yyscanner );
 
 /* %endif */
 
@@ -310,7 +312,7 @@ void IRC_Bisector_free (void * ,yyscan_t yyscanner );
 
 /* %if-reentrant */
 
-int IRC_Bisector_lex_init (yyscan_t* scanner);
+IRC_Export int IRC_Bisector_lex_init (yyscan_t* scanner);
 
 int IRC_Bisector_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 
@@ -321,11 +323,11 @@ int IRC_Bisector_lex_init_extra (YY_EXTRA_TYPE user_defined,yyscan_t* scanner);
 /* Accessor methods to globals.
    These are made visible to non-reentrant scanners for convenience. */
 
-int IRC_Bisector_lex_destroy (yyscan_t yyscanner );
+IRC_Export int IRC_Bisector_lex_destroy (yyscan_t yyscanner );
 
 int IRC_Bisector_get_debug (yyscan_t yyscanner );
 
-void IRC_Bisector_set_debug (int debug_flag ,yyscan_t yyscanner );
+IRC_Export void IRC_Bisector_set_debug (int debug_flag ,yyscan_t yyscanner );
 
 YY_EXTRA_TYPE IRC_Bisector_get_extra (yyscan_t yyscanner );
 
@@ -416,7 +418,7 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #define YY_DECL_IS_OURS 1
 /* %if-c-only Standard (non-C++) definition */
 
-extern int IRC_Bisector_lex (yyscan_t yyscanner);
+IRC_Export int IRC_Bisector_lex (yyscan_t yyscanner);
 
 #define YY_DECL int IRC_Bisector_lex (yyscan_t yyscanner)
 /* %endif */

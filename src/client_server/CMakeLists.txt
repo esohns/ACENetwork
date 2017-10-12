@@ -1,5 +1,3 @@
-cmake_minimum_required (VERSION 2.8)
-
 #include (FindPkgConfig)
 #pkg_check_modules (PKGACE REQUIRED ACE)
 # *TODO*: repair WIN32 pkgconfig support

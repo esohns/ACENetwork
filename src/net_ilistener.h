@@ -24,6 +24,7 @@
 #include "common_idumpstate.h"
 #include "common_iget.h"
 #include "common_iinitialize.h"
+#include "common_ilock.h"
 #include "common_itask.h"
 
 template <typename ConfigurationType,

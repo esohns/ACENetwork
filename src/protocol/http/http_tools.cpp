@@ -581,7 +581,7 @@ HTTP_Tools::URLEncode (const std::string& string_in)
       converter.str (ACE_TEXT_ALWAYS_CHAR (""));
       converter.clear ();
       // *TODO*: there is probably a better way to do this...
-      converter << setw (2)
+      converter << std::setw (2)
                 << static_cast<unsigned short> (*iterator);
       converted_string = converter.str ();
 //      std::transform (converted_string.begin (), converted_string.end (),

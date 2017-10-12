@@ -92,7 +92,7 @@ class Test_U_Module_ProtocolHandler
   // timer
   Common_TimerHandler pingHandler_;
   ACE_Time_Value      pingInterval_;
-  long                pingTimerID_;
+  long                pingTimerId_;
 
   bool                automaticPong_;
   unsigned int        counter_;

@@ -13,30 +13,27 @@
 #endif
 
 // C RunTime Header Files
-#include <bitset>
-#include <functional>
-//#include <iostream>
-#include <set>
-#include <sstream>
+//#include <sstream>
 #include <string>
-#include <map>
-#include <vector>
 
 // System Library Header Files
-//#include "ace/streams.h"
-//#include "ace/ACE.h"
-#include "ace/Assert.h"
-//#include "ace/Lock_Adapter_T.h"
-#include "ace/Log_Msg.h"
-//#include "ace/Malloc_Allocator.h"
-#include "ace/OS.h"
-//#include "ace/Reactor.h"
-//#include "ace/Synch.h"
-//#include "ace/Task.h"
 
 #ifdef LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
-#include <valgrind/valgrind.h>
+#include "valgrind/valgrind.h"
 #endif
 
+// System Library Header Files
+#include "ace/config-lite.h"
+#include "ace/Global_Macros.h"
+#include "ace/Log_Msg.h"
+
+// Library Header Files
+#include "common.h"
+#include "common_macros.h"
+
+#include "stream_common.h"
+#include "stream_macros.h"
+
 // Local Header Files
+#include "net_common.h"
 #include "net_macros.h"

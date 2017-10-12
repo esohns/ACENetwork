@@ -45,14 +45,14 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            HandlerConfigurationType,
+                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::Net_Server_AsynchListener_T ()
  : inherited ()
@@ -69,14 +69,14 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            HandlerConfigurationType,
+                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::~Net_Server_AsynchListener_T ()
 {
@@ -84,10 +84,10 @@ Net_Server_AsynchListener_T<HandlerType,
 
   int result = -1;
 
-  if (isListening_)
+  if (unlikely (isListening_))
   {
     result = inherited::cancel ();
-    if (result == -1)
+    if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Acceptor::cancel(): \"%m\", continuing")));
   } // end IF
@@ -97,7 +97,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -105,7 +105,7 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            HandlerConfigurationType,
+                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::validate_connection (const ACE_Asynch_Accept::Result& result_in,
                                                                 const ACE_INET_Addr& remoteAddress_in,
@@ -118,7 +118,7 @@ Net_Server_AsynchListener_T<HandlerType,
   int result = result_in.success ();
 
   // success ?
-  if (result == 0)
+  if (unlikely (result == 0))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Acceptor::accept(\"%s\"): \"%s\", aborting\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (remoteAddress_in).c_str ()),
@@ -131,7 +131,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -139,7 +139,7 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            HandlerConfigurationType,
+                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::accept (size_t bytesToRead_in,
                                                    const void* act_in)
@@ -163,12 +163,12 @@ Net_Server_AsynchListener_T<HandlerType,
   ACE_Message_Block* message_block_p = NULL;
   // sanity check(s)
   ACE_ASSERT (configuration_);
-  ACE_ASSERT (configuration_->socketHandlerConfiguration.connectionConfiguration);
+  ACE_ASSERT (configuration_->connectionConfiguration);
   // *TODO*: remove type inference
-  if (configuration_->socketHandlerConfiguration.connectionConfiguration->messageAllocator)
+  if (likely (configuration_->connectionConfiguration->messageAllocator))
   {
     typename StreamType::MESSAGE_T* message_p =
-      static_cast<typename StreamType::MESSAGE_T*> (configuration_->socketHandlerConfiguration.connectionConfiguration->messageAllocator->malloc (space_needed));
+      static_cast<typename StreamType::MESSAGE_T*> (configuration_->connectionConfiguration->messageAllocator->malloc (space_needed));
     message_block_p = message_p;
   } // end IF
   else
@@ -184,7 +184,7 @@ Net_Server_AsynchListener_T<HandlerType,
                                          ACE_Time_Value::max_time,
                                          NULL,
                                          NULL));
-  if (!message_block_p)
+  if (unlikely (!message_block_p))
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -250,7 +250,7 @@ Net_Server_AsynchListener_T<HandlerType,
                             COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL, // (real-time) signal
                             //this->addr_family_,                // address family
                             configuration_->addressFamily);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Accept::accept(): \"%m\", aborting\n")));
@@ -279,7 +279,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 bool
@@ -287,7 +287,7 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            HandlerConfigurationType,
+                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::initialize (const ConfigurationType& configuration_in)
 {
@@ -305,7 +305,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 int
@@ -313,7 +313,7 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            HandlerConfigurationType,
+                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::open (const AddressType& listenAddress_in,
                                                  size_t numberOfBytesToRead_in,
@@ -330,7 +330,7 @@ Net_Server_AsynchListener_T<HandlerType,
   int result = -1;
   static AddressType SAP_any (ACE_sap_any_cast (const AddressType&));
   bool close_accept = false;
-  int nunber_of_initial_accepts = numberOfInitialAccepts_in;
+  int number_of_initial_accepts = numberOfInitialAccepts_in;
 
   inherited::proactor (proactor_in);
   inherited::pass_addresses (passAddresses_in);
@@ -347,7 +347,7 @@ Net_Server_AsynchListener_T<HandlerType,
   ACE_HANDLE listen_handle = ACE_OS::socket (address_type, // domain
                                              SOCK_STREAM,  // type
                                              0);           // protocol
-  if (listen_handle == ACE_INVALID_HANDLE)
+  if (unlikely (listen_handle == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::socket(%d,%d,0): \"%m\", aborting\n"),
@@ -367,7 +367,7 @@ Net_Server_AsynchListener_T<HandlerType,
                                  listen_handle, // socket handle
                                  NULL,          // completion key
                                  proactor_in);  // proactor handle
-  if (result == -1)
+  if (unlikely (result == -1))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
@@ -382,7 +382,7 @@ Net_Server_AsynchListener_T<HandlerType,
   } // end IF
 #endif
 
-  if (reuseAddr_in)
+  if (likely (reuseAddr_in))
   {
     // Reuse the address
     int optval = 1;
@@ -391,7 +391,7 @@ Net_Server_AsynchListener_T<HandlerType,
                                  SO_REUSEADDR,
                                  reinterpret_cast<const char*> (&optval),
                                  sizeof (int));
-    if (result == -1)
+    if (unlikely (result == -1))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -408,9 +408,9 @@ Net_Server_AsynchListener_T<HandlerType,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   // enable SIO_LOOPBACK_FAST_PATH on Win32
-  if ((address_type == ACE_ADDRESS_FAMILY_INET) &&
-      listenAddress_in.is_loopback ()           &&
-      NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH)
+  if (unlikely ((address_type == ACE_ADDRESS_FAMILY_INET) &&
+                listenAddress_in.is_loopback ()           &&
+                NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH))
     if (!Net_Common_Tools::setLoopBackFastPath (listen_handle))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -421,7 +421,7 @@ Net_Server_AsynchListener_T<HandlerType,
 #endif
 
   // If port is not specified, bind to any port.
-  if (listenAddress_in == SAP_any)
+  if (unlikely (listenAddress_in == SAP_any))
   //if (listenAddress_in.is_any ())
   {
     result = ACE::bind_port (listen_handle, // handle
@@ -451,7 +451,7 @@ Net_Server_AsynchListener_T<HandlerType,
     ACE_OS::bind (listen_handle,                                                     // handle
                   reinterpret_cast<struct sockaddr*> (listenAddress_in.get_addr ()), // address (handle)
                   listenAddress_in.get_size ());                                     // address length
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     //int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -470,7 +470,7 @@ Net_Server_AsynchListener_T<HandlerType,
 
   // Start listening.
   result = ACE_OS::listen (listen_handle, backLog_in);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
@@ -489,13 +489,13 @@ Net_Server_AsynchListener_T<HandlerType,
   } // end IF
 
   // For the number of <intial_accepts>.
-  if (nunber_of_initial_accepts == -1)
-    nunber_of_initial_accepts = backLog_in;
-  for (int i = 0; i < nunber_of_initial_accepts; i++)
+  if (likely (number_of_initial_accepts == -1))
+    number_of_initial_accepts = backLog_in;
+  for (int i = 0; i < number_of_initial_accepts; i++)
   {
     // Initiate accepts.
     result = this->accept (numberOfBytesToRead_in, NULL);
-    if (result == -1)
+    if (unlikely (result == -1))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -543,7 +543,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -551,7 +551,7 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            HandlerConfigurationType,
+                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::start ()
 {
@@ -560,27 +560,29 @@ Net_Server_AsynchListener_T<HandlerType,
   int result = -1;
 
   // sanity check(s)
-  if (!isInitialized_)
+  if (unlikely (!isInitialized_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("not initialized, returning\n")));
     return;
   } // end IF
-  if (isListening_)
+  if (unlikely (isListening_))
     return; // nothing to do
 
   // not running --> start listening
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
+  ACE_ASSERT (configuration_->connectionConfiguration);
+
   // *TODO*: remove type inferences
-  if (configuration_->socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice)
+  if (unlikely (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice))
   {
     result =
-      configuration_->socketHandlerConfiguration.socketConfiguration_2.address.set (configuration_->socketHandlerConfiguration.socketConfiguration_2.address.get_port_number (), // port
-                                                                                    INADDR_LOOPBACK,                                                                             // IP address
-                                                                                    1,                                                                                           // encode ?
-                                                                                    0);                                                                                          // map ?
+      configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.set (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.get_port_number (), // port
+                                                                                                             INADDR_LOOPBACK,                                                                                                      // address
+                                                                                                             1,                                                                                                                    // encode ?
+                                                                                                             0);                                                                                                                   // map ?
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -589,7 +591,7 @@ Net_Server_AsynchListener_T<HandlerType,
     } // end IF
   } // end IF
   result =
-    open (configuration_->socketHandlerConfiguration.socketConfiguration_2.address, // local SAP
+    open (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address, // local SAP
           0,                                                                        // bytes to read
           1,                                                                        // pass_addresses ?
           ACE_DEFAULT_ASYNCH_BACKLOG,                                               // backlog
@@ -598,18 +600,18 @@ Net_Server_AsynchListener_T<HandlerType,
           true,                                                                     // validate new connections ?
           1,                                                                        // reissue_accept ?
           -1);                                                                      // number of initial accepts
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Server_AsynchListener_T::open(%s): \"%m\", returning\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
     return;
   } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("0x%@: started listening: %s...\n"),
+              ACE_TEXT ("0x%@: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%d: started listening: %s...\n"),
@@ -624,7 +626,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -632,7 +634,7 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            HandlerConfigurationType,
+                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::stop (bool waitForCompletion_in,
                                                  bool lockedAccess_in)
@@ -642,22 +644,23 @@ Net_Server_AsynchListener_T<HandlerType,
   ACE_UNUSED_ARG (waitForCompletion_in);
   ACE_UNUSED_ARG (lockedAccess_in);
 
-  if (!isListening_) return; // nothing to do
+  if (unlikely (!isListening_))
+    return; // nothing to do
 
   int result = -1;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = inherited::cancel ();
-  if (result == -1)
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Acceptor::cancel(): \"%m\", continuing\n")));
   result = ACE_OS::closesocket (inherited::handle ());
-  if (result == -1)
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
                 reinterpret_cast<size_t> (inherited::handle ())));
   inherited::handle (ACE_INVALID_HANDLE);
-  if (false);
+  if (unlikely (false));
 #else
   const ACE_Asynch_Accept& asynch_accept_r = inherited::asynch_accept ();
   ACE_POSIX_Asynch_Accept* posix_asynch_accept_p = NULL;
@@ -670,7 +673,7 @@ Net_Server_AsynchListener_T<HandlerType,
                 asynch_accept_r.implementation ()));
     posix_asynch_accept_p = NULL;
   }
-  if (!posix_asynch_accept_p)
+  if (unlikely (!posix_asynch_accept_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("dynamic_cast<ACE_POSIX_Asynch_Accept*>(%@) failed, aborting\n"),
@@ -678,13 +681,13 @@ Net_Server_AsynchListener_T<HandlerType,
     return;
   }
   result = posix_asynch_accept_p->close ();
-  if (result == -1)
+  if (unlikely (result == -1))
     ACE_DEBUG((LM_ERROR,
                ACE_TEXT ("failed to ACE_POSIX_Asynch_Accept::close(): \"%m\", continuing\n")));
 #endif
   else
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("stopped listening...\n")));
+                ACE_TEXT ("stopped listening\n")));
 
   isListening_ = false;
 }
@@ -693,7 +696,7 @@ template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 void
@@ -701,7 +704,7 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            HandlerConfigurationType,
+                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::handle_accept (const ACE_Asynch_Accept::Result &result)
 {
@@ -713,7 +716,7 @@ Net_Server_AsynchListener_T<HandlerType,
   int error = 0;
 
   // If the asynchronous accept fails.
-  if (!result.success () || result.accept_handle () == ACE_INVALID_HANDLE)
+  if (unlikely (!result.success () || result.accept_handle () == ACE_INVALID_HANDLE))
   {
     error = 1;
   }
@@ -725,12 +728,12 @@ Net_Server_AsynchListener_T<HandlerType,
   // SO_UPDATE_ACCEPT_CONTEXT option. This option initializes the
   // socket so that other Windows Sockets routines to access the
   // socket correctly.
-  if (!error &&
-      ACE_OS::setsockopt (result.accept_handle (),
-                          SOL_SOCKET,
-                          SO_UPDATE_ACCEPT_CONTEXT,
-                          (char *)&listen_handle,
-                          sizeof (listen_handle)) == -1)
+  if (unlikely (!error &&
+                ACE_OS::setsockopt (result.accept_handle (),
+                                    SOL_SOCKET,
+                                    SO_UPDATE_ACCEPT_CONTEXT,
+                                    (char *)&listen_handle,
+                                    sizeof (listen_handle)) == -1))
   {
     error = 1;
   }
@@ -739,43 +742,43 @@ Net_Server_AsynchListener_T<HandlerType,
   // Parse address.
   AddressType local_address;
   AddressType remote_address;
-  if (!error &&
-      (this->validate_new_connection () || this->pass_addresses ()))
-      // Parse the addresses.
-      this->parse_address (result,
-                           remote_address,
-                           local_address);
+  if (likely (!error &&
+              (this->validate_new_connection () || this->pass_addresses ())))
+    // Parse the addresses.
+    this->parse_address (result,
+                          remote_address,
+                          local_address);
 
   // Validate remote address
-  if (!error &&
-      this->validate_new_connection () &&
-      (this->validate_connection (result,
-                                  remote_address, local_address) == -1))
+  if (unlikely (!error &&
+                this->validate_new_connection () &&
+                (this->validate_connection (result,
+                                            remote_address, local_address) == -1)))
   {
     error = 1;
   }
 
   HandlerType *new_handler = 0;
-  if (!error)
+  if (likely (!error))
   {
     // The Template method
     new_handler = this->make_handler ();
-    if (new_handler == 0)
+    if (unlikely (new_handler == 0))
     {
       error = 1;
     }
   }
 
   // If no errors
-  if (!error)
+  if (likely (!error))
   {
     // Update the Proactor unless make_handler() or constructed handler
     // set up its own.
-    if (new_handler->proactor () == 0)
+    if (unlikely (new_handler->proactor () == 0))
       new_handler->proactor (this->proactor ());
 
     // Pass the addresses
-    if (this->pass_addresses ())
+    if (likely (this->pass_addresses ()))
       new_handler->addresses (remote_address,
                               local_address);
 
@@ -783,7 +786,7 @@ Net_Server_AsynchListener_T<HandlerType,
     new_handler->set (NET_ROLE_SERVER);
 
     // Pass the ACT
-    if (result.act () != 0)
+    if (unlikely (result.act () != 0))
       new_handler->act (result.act ());
 
     // Set up the handler's new handle value
@@ -795,9 +798,9 @@ Net_Server_AsynchListener_T<HandlerType,
   }
 
   // On failure, no choice but to close the socket
-  if (error &&
-      result.accept_handle () != ACE_INVALID_HANDLE)
-      ACE_OS::closesocket (result.accept_handle ());
+  if (unlikely (error &&
+                result.accept_handle () != ACE_INVALID_HANDLE))
+    ACE_OS::closesocket (result.accept_handle ());
 
   // Delete the dynamically allocated message_block
   result.message_block ().release ();
@@ -805,22 +808,23 @@ Net_Server_AsynchListener_T<HandlerType,
   // Start off another asynchronous accept to keep the backlog going,
   // unless we closed the listen socket already (from the destructor),
   // or this callback is the result of a canceled/aborted accept.
-  if (this->should_reissue_accept () &&
-      listen_handle != ACE_INVALID_HANDLE
 #if defined (ACE_WIN32)
-      && result.error () != ERROR_OPERATION_ABORTED
+  if (likely (this->should_reissue_accept ()               &&
+              (listen_handle != ACE_INVALID_HANDLE)        &&
+              (result.error () != ERROR_OPERATION_ABORTED)))
 #else
-      && result.error () != ECANCELED
+  if (likely (this->should_reissue_accept ()        &&
+              (listen_handle != ACE_INVALID_HANDLE) &&
+              (result.error () != ECANCELED)))
 #endif
-      )
-      this->accept (this->bytes_to_read (), result.act ());
+    this->accept (this->bytes_to_read (), result.act ());
 }
 
 template <typename HandlerType,
           typename AddressType,
           typename ConfigurationType,
           typename StateType,
-          typename HandlerConfigurationType,
+          typename ConnectionConfigurationType,
           typename StreamType,
           typename UserDataType>
 HandlerType*
@@ -828,7 +832,7 @@ Net_Server_AsynchListener_T<HandlerType,
                             AddressType,
                             ConfigurationType,
                             StateType,
-                            HandlerConfigurationType,
+                            ConnectionConfigurationType,
                             StreamType,
                             UserDataType>::make_handler (void)
 {
@@ -839,12 +843,13 @@ Net_Server_AsynchListener_T<HandlerType,
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
+  ACE_ASSERT (configuration_->connectionConfiguration);
 
   // *TODO*: remove type inferences
   ACE_NEW_NORETURN (connection_p,
                     HandlerType (configuration_->connectionManager,
-                                 configuration_->socketHandlerConfiguration.statisticReportingInterval));
-  if (!connection_p)
+                                 configuration_->connectionConfiguration->socketHandlerConfiguration.statisticReportingInterval));
+  if (unlikely (!connection_p))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 

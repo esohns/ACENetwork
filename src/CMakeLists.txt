@@ -1,10 +1,9 @@
-cmake_minimum_required (VERSION 2.8)
-
 # target system introspection (see configure.ac)
-include (CheckFunctionExists)
-check_function_exists (memset HAVE_FUNC_MEMSET)
-check_function_exists (socket HAVE_FUNC_SOCKET)
-check_function_exists (strerror HAVE_FUNC_STRERROR)
+#include (CheckFunctionExists)
+#include (InstallRequiredSystemLibraries)
+#check_function_exists (memset HAVE_FUNC_MEMSET)
+#check_function_exists (socket HAVE_FUNC_SOCKET)
+#check_function_exists (strerror HAVE_FUNC_STRERROR)
 
 if (UNIX)
 # include (CheckLibraryExists)
@@ -244,7 +243,7 @@ endif ()
 
 # add PCH
 set_target_properties (${PROJECT_NAME} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-#cotire (${PROJECT_NAME})
+cotire (${PROJECT_NAME})
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}

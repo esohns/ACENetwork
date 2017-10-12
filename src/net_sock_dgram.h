@@ -25,6 +25,7 @@
 #include "ace/SOCK_CODgram.h"
 #include "ace/SOCK_Dgram.h"
 #include "ace/SOCK_Dgram_Bcast.h"
+#include "ace/SOCK_Dgram_Mcast.h"
 
 class Net_SOCK_Dgram
  : public ACE_SOCK_Dgram
@@ -65,6 +66,15 @@ class Net_SOCK_CODgram
 
   using ACE_SOCK::get_remote_addr;
 
+  inline ssize_t send (const void* buf,
+                       size_t n,
+                       const ACE_Addr& addr,
+                       int flags = 0) const { ACE_UNUSED_ARG (addr); return inherited::send (buf, n, flags, NULL); };
+  inline ssize_t recv (void*,
+                       size_t,
+                       ACE_Addr&,
+                       int = 0) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) };
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   // *NOTE*: overwrite (part of) ACE_SOCK_Dgram to support pre-bind() socket
@@ -82,6 +92,15 @@ class Net_SOCK_CODgram
 };
 
 /////////////////////////////////////////
+
+class Net_SOCK_Dgram_Mcast
+ : public ACE_SOCK_Dgram_Mcast
+{
+  typedef ACE_SOCK_Dgram_Mcast inherited;
+
+ public:
+  using ACE_SOCK::get_remote_addr;
+};
 
 class Net_SOCK_Dgram_Bcast
  : public ACE_SOCK_Dgram_Bcast

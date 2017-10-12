@@ -1,6 +1,6 @@
 include %ACE_ROOT%\include\makeinclude\platform_win32_msvc.GNU
 
-INSTALL_PREFIX=/usr/local
+#INSTALL_PREFIX=/usr/local
 
 #ace_for_tao=0
 debug=1
@@ -24,19 +24,19 @@ shared_libs=1
 templates=automatic
 threads=1
 #trio=0
-xt=1
-fl=1
-fox=1
+#xt=1
+#fl=1
+#fox=1
 #tk=1
-qt=1
+#qt=1
 ssl=1
 #rapi=1
 #stlport=1
-rwho=1
+#rwho=1
 #pipes=1
 #sctp=openss7
 versioned_so=1
-#wfmo=1
-#winregistry=1
-#winnt=1
+wfmo=1
+winregistry=1
+winnt=1
 link_groups=1

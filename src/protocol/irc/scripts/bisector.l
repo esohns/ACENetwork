@@ -10,6 +10,8 @@ using namespace std;
 #define ACE_IOSFWD_H
 
 //#include "ace/Log_Msg.h"
+
+#include "irc_exports.h"
 %}
 
 %option 8bit align backup batch

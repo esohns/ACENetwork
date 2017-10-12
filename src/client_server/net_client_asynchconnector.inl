@@ -56,14 +56,15 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   int result = -1;
 
-  if (!connectionManager_)
+  if (unlikely (!connectionManager_))
     connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 
   // initialize base class
-  result = inherited::open (true,  // pass addresses ?
-                            NULL,  // default proactor
-                            true); // validate new connections ?
-  if (result == -1)
+  result =
+    inherited::open (true,                      // pass addresses ?
+                     ACE_Proactor::instance (), // default proactor
+                     true);                     // validate new connections ?
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Connector::open(): \"%m\", continuing\n")));
 }
@@ -93,7 +94,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   //     iterator != handles_.end ();
   //     ++iterator)
   //  abort ((*iterator).first);
-  if (!handles_.empty ())
+  if (unlikely (!handles_.empty ()))
     abort ();
 }
 
@@ -123,7 +124,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   // *TODO*: find a better way to do this
   HandlerType* handler_p = const_cast<OWN_TYPE_T*> (this)->make_handler ();
-  if (!handler_p)
+  if (unlikely (!handler_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::make_handler(): \"%m\", aborting\n")));
@@ -173,7 +174,7 @@ Net_Client_AsynchConnector_T<HandlerType,
              ACE_sap_any_cast (AddressType&),    // local address
              1,                                  // SO_REUSEADDR ?
              static_cast<ICONNECTOR_T*> (this)); // asynchronous completion token
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%m\", aborting\n"),
@@ -225,7 +226,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   int one = 1;
   HANDLE_TO_ERROR_MAP_ITERATOR_T iterator;
 
-  if (socket_h == ACE_INVALID_HANDLE)
+  if (unlikely (socket_h == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::socket(%d,%d,0): \"%m\", aborting\n"),
@@ -234,14 +235,14 @@ Net_Client_AsynchConnector_T<HandlerType,
   } // end IF
 
   // set socket options
-  if (reuseAddress_in)
+  if (likely (reuseAddress_in))
   { ACE_ASSERT (protocol_family_i != PF_UNIX);
     result = ACE_OS::setsockopt (socket_h,
                                  SOL_SOCKET,
                                  SO_REUSEADDR,
                                  reinterpret_cast<char*> (&one),
                                  sizeof (int));
-    if (result == -1)
+    if (unlikely (result == -1))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -261,7 +262,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   if ((protocol_family_i == ACE_ADDRESS_FAMILY_INET) &&
       remoteAddress_in.is_loopback ()                &&
       NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH)
-    if (!Net_Common_Tools::setLoopBackFastPath (socket_h))
+    if (unlikely (!Net_Common_Tools::setLoopBackFastPath (socket_h)))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setLoopBackFastPath(0x%@): \"%m\", aborting\n"),
@@ -282,7 +283,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                               act_in,
                               0,
                               COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Connect_Impl::connect(%s): \"%m\", aborting\n"),
@@ -339,7 +340,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   int result = -1;
 
   result = inherited::cancel ();
-  if (result == -1)
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Connector::cancel(): \"%m\", continuing\n")));
 }
@@ -381,7 +382,7 @@ Net_Client_AsynchConnector_T<HandlerType,
     if (relativeTimeout_in != ACE_Time_Value::zero)
       absolute_timeout = COMMON_TIME_NOW + relativeTimeout_in;
     result = condition_.wait (timeout_p);
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       int error = ACE_OS::last_error ();
       if (error != ETIME)
@@ -427,7 +428,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::onConnect"));
 
   //if (error_in != ECONNREFUSED) // happens intermittently on Win32
-  if (error_in)
+  if (unlikely (error_in))
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("0x%@: failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
@@ -488,7 +489,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   } // end lock scope
   // signal completion
   result = condition_.broadcast ();
-  if (result == -1)
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Condition::broadcast(): \"%m\", continuing\n")));
 
@@ -542,51 +543,52 @@ Net_Client_AsynchConnector_T<HandlerType,
   int error = 0;
 
   // If the asynchronous connect fails.
-  if (!result_in.success () ||
-      result_in.connect_handle () == ACE_INVALID_HANDLE)
+  if (unlikely (!result_in.success () ||
+                result_in.connect_handle () == ACE_INVALID_HANDLE))
   {
     error = 1;
   }
 
-  if (result_in.error () != 0)
+  if (unlikely (result_in.error () != 0))
   {
     error = 1;
   }
 
   // set blocking mode
-  if (!error &&
-      ACE::clr_flags
-      (result_in.connect_handle (), ACE_NONBLOCK) != 0)
+  if (unlikely (!error &&
+                (ACE::clr_flags (result_in.connect_handle (),
+                                 ACE_NONBLOCK) != 0)))
   {
     error = 1;
     ACELIB_ERROR ((LM_ERROR,
-      ACE_TEXT ("%p\n"),
-      ACE_TEXT ("ACE_Asynch_Connector::handle_connect : Set blocking mode")));
+                   ACE_TEXT ("%p\n"),
+                   ACE_TEXT ("ACE_Asynch_Connector::handle_connect : Set blocking mode")));
   }
 
   // Parse the addresses.
   AddressType local_address;
   AddressType remote_address;
-  if (!error &&
-      (this->validate_new_connection () || this->pass_addresses ()))
+  if (likely (!error &&
+              (this->validate_new_connection () ||
+               this->pass_addresses ())))
     this->parse_address (result_in,
                          remote_address,
                          local_address);
 
   // Call validate_connection even if there was an error - it's the only
   // way the application can learn the connect disposition.
-  if (this->validate_new_connection () &&
-      this->validate_connection (result_in, remote_address, local_address) == -1)
+  if (unlikely (this->validate_new_connection () &&
+                this->validate_connection (result_in, remote_address, local_address) == -1))
   {
     error = 1;
   }
 
   HandlerType *new_handler = 0;
-  if (!error)
+  if (likely (!error))
   {
     // The Template method
     new_handler = this->make_handler ();
-    if (new_handler == 0)
+    if (unlikely (new_handler == 0))
     {
       error = 1;
       ACELIB_ERROR ((LM_ERROR,
@@ -596,21 +598,21 @@ Net_Client_AsynchConnector_T<HandlerType,
   }
 
   // If no errors
-  if (!error)
+  if (likely (!error))
   {
     // Update the Proactor.
     new_handler->proactor (this->proactor ());
 
     // Pass the addresses
-    if (this->pass_addresses ())
+    if (likely (this->pass_addresses ()))
       new_handler->addresses (remote_address,
-      local_address);
+                              local_address);
 
     // *EDIT*: set role
     new_handler->set (NET_ROLE_CLIENT);
 
     // Pass the ACT
-    if (result_in.act () != 0)
+    if (likely (result_in.act () != 0))
       new_handler->act (result_in.act ());
 
     // Set up the handler's new handle value
@@ -623,9 +625,9 @@ Net_Client_AsynchConnector_T<HandlerType,
   }
 
   // On failure, no choice but to close the socket
-  if (error &&
-      result_in.connect_handle () != ACE_INVALID_HANDLE)
-      ACE_OS::closesocket (result_in.connect_handle ());
+  if (unlikely (error &&
+                (result_in.connect_handle () != ACE_INVALID_HANDLE)))
+    ACE_OS::closesocket (result_in.connect_handle ());
 }
 template <typename HandlerType,
           typename AddressType,
@@ -656,7 +658,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   ACE_NEW_NORETURN (handler_p,
                     HandlerType (connectionManager_,
                                  statisticCollectionInterval_));
-  if (!handler_p)
+  if (unlikely (!handler_p))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 
@@ -672,14 +674,7 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
-Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
-                                                           ConfigurationType,
-                                                           StateType,
-                                                           StatisticContainerType,
-                                                           HandlerConfigurationType,
-                                                           StreamType,
-                                                           Common_Timer_Manager_t,
-                                                           UserDataType>,
+Net_Client_AsynchConnector_T<HandlerType,
                              ACE_INET_Addr,
                              ConfigurationType,
                              StateType,
@@ -693,19 +688,22 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
  , SAP_ ()
+ , condition_ (lock_)
+ , lock_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
   int result = -1;
 
-  if (!connectionManager_)
+  if (unlikely (!connectionManager_))
     connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 
   // initialize base class
-  result = inherited::open (true,  // pass addresses ?
-                            NULL,  // default proactor
-                            true); // validate new connections ?
-  if (result == -1)
+  result =
+    inherited::open (true,                      // pass addresses ?
+                     ACE_Proactor::instance (), // default proactor
+                     true);                     // validate new connections ?
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Connector::open(): \"%m\", continuing\n")));
 }
@@ -718,14 +716,7 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType>
 int
-Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
-                                                           ConfigurationType,
-                                                           StateType,
-                                                           StatisticContainerType,
-                                                           HandlerConfigurationType,
-                                                           StreamType,
-                                                           Common_Timer_Manager_t,
-                                                           UserDataType>,
+Net_Client_AsynchConnector_T<HandlerType,
                              ACE_INET_Addr,
                              ConfigurationType,
                              StateType,
@@ -749,7 +740,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 
   // success ?
   result = result_in.success ();
-  if (result != 1)
+  if (unlikely (result != 1))
   {
     error = result_in.error ();
 
@@ -783,14 +774,7 @@ template <typename HandlerType,
           typename StreamType,
           typename UserDataType>
 ACE_HANDLE
-Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
-                                                           ConfigurationType,
-                                                           StateType,
-                                                           StatisticContainerType,
-                                                           HandlerConfigurationType,
-                                                           StreamType,
-                                                           Common_Timer_Manager_t,
-                                                           UserDataType>,
+Net_Client_AsynchConnector_T<HandlerType,
                              ACE_INET_Addr,
                              ConfigurationType,
                              StateType,
@@ -802,11 +786,13 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
 
-  SAP_ = address_in;
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, ACE_INVALID_HANDLE);
+    SAP_ = address_in;
+  } // end lock scope
 
   CONNECTION_T* handler_p = NULL;
   handler_p = make_handler ();
-  if (!handler_p)
+  if (unlikely (!handler_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T<Net_AsynchUDPConnection_T>::make_handler(): \"%m\", aborting\n")));
@@ -838,22 +824,8 @@ template <typename HandlerType,
           typename HandlerConfigurationType,
           typename StreamType,
           typename UserDataType>
-Net_AsynchUDPConnectionBase_T<HandlerType,
-                              ConfigurationType,
-                              StateType,
-                              StatisticContainerType,
-                              HandlerConfigurationType,
-                              StreamType,
-                              Common_Timer_Manager_t,
-                              UserDataType>*
-Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
-                                                           ConfigurationType,
-                                                           StateType,
-                                                           StatisticContainerType,
-                                                           HandlerConfigurationType,
-                                                           StreamType,
-                                                           Common_Timer_Manager_t,
-                                                           UserDataType>,
+HandlerType*
+Net_Client_AsynchConnector_T<HandlerType,
                              ACE_INET_Addr,
                              ConfigurationType,
                              StateType,
@@ -873,7 +845,7 @@ Net_Client_AsynchConnector_T<Net_AsynchUDPConnectionBase_T<HandlerType,
   ACE_NEW_NORETURN (handler_p,
                     CONNECTION_T (connectionManager_,
                                   statisticCollectionInterval_));
-  if (!handler_p)
+  if (unlikely (!handler_p))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 
@@ -904,19 +876,22 @@ Net_Client_AsynchConnector_T<HandlerType,
  , connectionManager_ (connectionManager_in)
  , statisticCollectionInterval_ (statisticCollectionInterval_in)
  , SAP_ ()
+ , condition_ (lock_)
+ , lock_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::Net_Client_AsynchConnector_T"));
 
   int result = -1;
 
-  if (!connectionManager_)
+  if (unlikely (!connectionManager_))
     connectionManager_ = CONNECTION_MANAGER_T::SINGLETON_T::instance ();
 
   // initialize base class
-  result = inherited::open (true,  // pass addresses ?
-                            NULL,  // default proactor
-                            true); // validate new connections ?
-  if (result == -1)
+  result =
+    inherited::open (true,                      // pass addresses ?
+                     ACE_Proactor::instance (), // default proactor
+                     true);                     // validate new connections ?
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Connector::open(): \"%m\", continuing\n")));
 }
@@ -950,7 +925,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   // success ?
   result = result_in.success ();
-  if (result != 1)
+  if (unlikely (result != 1))
   {
     error = result_in.error ();
 
@@ -995,10 +970,12 @@ Net_Client_AsynchConnector_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Client_AsynchConnector_T::connect"));
 
-  SAP_ = address_in;
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, ACE_INVALID_HANDLE);
+    SAP_ = address_in;
+  } // end lock scope
 
   HandlerType* handler_p = make_handler ();
-  if (!handler_p)
+  if (unlikely (!handler_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::make_handler(): \"%m\", aborting\n")));
@@ -1050,7 +1027,7 @@ Net_Client_AsynchConnector_T<HandlerType,
   ACE_NEW_NORETURN (handler_p,
                     HandlerType (connectionManager_,
                                  statisticCollectionInterval_));
-  if (!handler_p)
+  if (unlikely (!handler_p))
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
 

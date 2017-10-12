@@ -47,7 +47,11 @@ class Net_IConnector_T
  : public Net_IConnectorBase_T<AddressType>
  , public Common_IGetR_T<ConfigurationType>
  , public Common_IInitialize_T<ConfigurationType>
-{};
+{
+ public:
+  // convenient types
+  typedef ConfigurationType CONFIGURATION_T;
+};
 
 template <typename AddressType,
           typename ConfigurationType>

@@ -103,8 +103,8 @@ if (WIN32)
 ## *NOTE*: generate .def file and export all symbols on Windows
 # set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
  source_group (scripts FILES ${PROJECT_NAME}_Protocol_HTTP_SCRIPTS)
- source_group (lex_tables FILES ${PROJECT_NAME}_Protocol_HTTP_TABLES)
- source_group (exports FILES etc/exports.def)
+# source_group (lex_tables FILES ${PROJECT_NAME}_Protocol_HTTP_TABLES)
+# source_group (exports FILES etc/exports.def)
 endif ()
 
 # *NOTE*: this is needed to export yydebug, so it can be imported from template

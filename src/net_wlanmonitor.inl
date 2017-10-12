@@ -1102,10 +1102,10 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
               ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
               ACE_TEXT (SSID_in.c_str ())));
 #else
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("\"%s\": associated with SSID %s\n"),
-//              ACE_TEXT (interfaceIdentifier_in.c_str ()),
-//              ACE_TEXT (SSID_in.c_str ())));
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("\"%s\": associated with SSID %s\n"),
+              ACE_TEXT (interfaceIdentifier_in.c_str ()),
+              ACE_TEXT (SSID_in.c_str ())));
 #endif
 }
 template <ACE_SYNCH_DECL,

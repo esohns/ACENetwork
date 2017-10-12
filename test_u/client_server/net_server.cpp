@@ -70,6 +70,8 @@
 #include "test_u_eventhandler.h"
 #include "test_u_module_eventhandler.h"
 
+#include "net_client_defines.h"
+
 #include "net_server_common.h"
 #include "net_server_common_tools.h"
 #include "net_server_defines.h"
@@ -136,10 +138,13 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [STRING]  : network interface [\"")
+#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#else
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [STRING]  : network interface identifier [\"")
             << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
+#endif
   // *TODO*: this doesn't really make sense (see '-n' option)
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-o           : use loopback [")
             << NET_INTERFACE_DEFAULT_USE_LOOPBACK
@@ -159,6 +164,10 @@ do_printUsage (const std::string& programName_in)
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-t           : trace information")
             << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-u           : use UDP [")
+            << false
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-v           : print version information and exit")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-x [VALUE]   : #dispatch threads [")
@@ -176,13 +185,13 @@ do_processArguments (const int& argc_in,
                      ACE_Time_Value& pingInterval_out,
                      //unsigned int& keepAliveTimeout_out,
                      bool& logToFile_out,
-                     bool& useUDP_out,
                      std::string& networkInterface_out,
                      bool& useLoopBack_out,
                      unsigned short& listeningPortNumber_out,
                      bool& useReactor_out,
                      unsigned int& statisticReportingInterval_out,
                      bool& traceInformation_out,
+                     bool& useUDP_out,
                      bool& printVersionAndExit_out,
                      unsigned int& numberOfDispatchThreads_out)
 {
@@ -214,17 +223,21 @@ do_processArguments (const int& argc_in,
   statisticReportingInterval_out =
       NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out = false;
+  useUDP_out = false;
   printVersionAndExit_out = false;
   numberOfDispatchThreads_out =
     NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
 
-  ACE_Get_Opt argumentParser (argc_in,
-                              argv_in,
-                              ACE_TEXT ("c:g::hi:k:lmn:op:rs:tvx:"));
-
+  ACE_Get_Opt argument_parser (argc_in,                                // argc
+                               argv_in,                                // argv
+                               ACE_TEXT ("c:g::hi:k:lmn:op:rs:tuvx:"), // optstring
+                               1,                                      // skip_args
+                               1,                                      // report_errors
+                               ACE_Get_Opt::PERMUTE_ARGS,              // ordering
+                               0);                                     // long_only
   int option = 0;
   std::stringstream converter;
-  while ((option = argumentParser ()) != EOF)
+  while ((option = argument_parser ()) != EOF)
   {
     switch (option)
     {
@@ -232,13 +245,13 @@ do_processArguments (const int& argc_in,
       {
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter << argumentParser.opt_arg ();
+        converter << argument_parser.opt_arg ();
         converter >> maximumNumberOfConnections_out;
         break;
       }
       case 'g':
       {
-        ACE_TCHAR* opt_arg = argumentParser.opt_arg ();
+        ACE_TCHAR* opt_arg = argument_parser.opt_arg ();
         if (opt_arg)
           UIFile_out = ACE_TEXT_ALWAYS_CHAR (opt_arg);
         else
@@ -255,7 +268,7 @@ do_processArguments (const int& argc_in,
         unsigned int ping_interval = 0;
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter << argumentParser.opt_arg ();
+        converter << argument_parser.opt_arg ();
         converter >> ping_interval;
         pingInterval_out.set (ping_interval / 1000,
                               (ping_interval % 1000) * 1000);
@@ -265,7 +278,7 @@ do_processArguments (const int& argc_in,
 //      {
 //        converter.clear();
 //        converter.str(ACE_TEXT_ALWAYS_CHAR(""));
-//        converter << argumentParser.opt_arg();
+//        converter << argument_parser.opt_arg();
 //        converter >> keepAliveTimeout_out;
 //        break;
 //      }
@@ -282,7 +295,7 @@ do_processArguments (const int& argc_in,
       case 'n':
       {
         networkInterface_out =
-          ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
+          ACE_TEXT_ALWAYS_CHAR (argument_parser.opt_arg ());
         break;
       }
       case 'o':
@@ -294,7 +307,7 @@ do_processArguments (const int& argc_in,
       {
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter << argumentParser.opt_arg ();
+        converter << argument_parser.opt_arg ();
         converter >> listeningPortNumber_out;
         break;
       }
@@ -307,13 +320,18 @@ do_processArguments (const int& argc_in,
       {
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter << argumentParser.opt_arg ();
+        converter << argument_parser.opt_arg ();
         converter >> statisticReportingInterval_out;
         break;
       }
       case 't':
       {
         traceInformation_out = true;
+        break;
+      }
+      case 'u':
+      {
+        useUDP_out = true;
         break;
       }
       case 'v':
@@ -325,7 +343,7 @@ do_processArguments (const int& argc_in,
       {
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-        converter << argumentParser.opt_arg ();
+        converter << argument_parser.opt_arg ();
         converter >> numberOfDispatchThreads_out;
         break;
       }
@@ -334,7 +352,7 @@ do_processArguments (const int& argc_in,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("unrecognized option \"%s\", aborting\n"),
-                    ACE_TEXT (argumentParser.last_option ())));
+                    ACE_TEXT (argument_parser.last_option ())));
         return false;
       }
       default:
@@ -442,14 +460,14 @@ do_work (unsigned int maximumNumberOfConnections_in,
          bool useThreadPool_in,
          const ACE_Time_Value& pingInterval_in,
          //unsigned int keepAliveTimeout_in,
-         bool useUDP_in,
          const std::string& networkInterface_in,
          bool useLoopBack_in,
          unsigned short listeningPortNumber_in,
          bool useReactor_in,
          unsigned int statisticReportingInterval_in,
          unsigned int numberOfDispatchThreads_in,
-         Test_U_Server_GTK_CBData& CBData_in,
+         bool useUDP_in,
+         struct Test_U_Server_GTK_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -458,6 +476,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   int result = -1;
+  Test_U_InetConnectionManager_t* connection_manager_p =
+    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  ACE_ASSERT (connection_manager_p);
 
   // step0a: initialize configuration
   struct Test_U_Server_Configuration configuration;
@@ -488,6 +509,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   // ******************** protocol configuration data **************************
   configuration.protocolConfiguration.pingInterval = pingInterval_in;
+  configuration.protocolConfiguration.printPongMessages =
+    UIDefinitionFile_in.empty ();
   // ********************** stream configuration data **************************
   configuration.streamConfiguration.configuration_.cloneModule =
     !(UIDefinitionFile_in.empty ());
@@ -532,6 +555,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
   ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
   (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
     &((*iterator).second);
+  if (useUDP_in)
+    (*iterator).second.socketHandlerConfiguration.socketConfiguration =
+      &((*iterator).second.socketHandlerConfiguration.socketConfiguration_3);
 
   //  config.delete_module = false;
   // *WARNING*: set at runtime, by the appropriate connection handler
@@ -562,11 +588,11 @@ do_work (unsigned int maximumNumberOfConnections_in,
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
-  Common_TimerConfiguration timer_configuration;
+  struct Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
   Net_StatisticHandler_t statistic_handler (ACTION_REPORT,
-                                            TEST_U_CONNECTIONMANAGER_SINGLETON::instance (),
+                                            connection_manager_p,
                                             false);
   long timer_id = -1;
   if (statisticReportingInterval_in)
@@ -591,18 +617,21 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end IF
 
   // step2: signal handling
-  if (useReactor_in)
-    CBData_in.configuration->listener =
-      TEST_U_SERVER_LISTENER_SINGLETON::instance ();
-  else
-    CBData_in.configuration->listener =
-      TEST_U_SERVER_ASYNCHLISTENER_SINGLETON::instance ();
-  Test_U_Server_SignalHandlerConfiguration signal_handler_configuration;
-  signal_handler_configuration.listener =
-    CBData_in.configuration->listener;
+  struct Test_U_Server_SignalHandlerConfiguration signal_handler_configuration;
+  if (!useUDP_in)
+  {
+    if (useReactor_in)
+      CBData_in.configuration->listener =
+        TEST_U_SERVER_LISTENER_SINGLETON::instance ();
+    else
+      CBData_in.configuration->listener =
+        TEST_U_SERVER_ASYNCHLISTENER_SINGLETON::instance ();
+    signal_handler_configuration.listener =
+      CBData_in.configuration->listener;
+  } // end IF
   signal_handler_configuration.statisticReportingHandler =
-      TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
-  signal_handler_configuration.statisticReportingTimerID = timer_id;
+    connection_manager_p;
+  signal_handler_configuration.statisticReportingTimerId = timer_id;
   signal_handler_configuration.useReactor = useReactor_in;
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {
@@ -629,10 +658,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   } // end IF
 
   // step3: initialize connection manager
-  Test_U_UserData user_data;
-  Test_U_InetConnectionManager_t* connection_manager_p =
-      TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
-  ACE_ASSERT (connection_manager_p);
+  struct Test_U_UserData user_data;
   connection_manager_p->initialize (maximumNumberOfConnections_in);
   connection_manager_p->set ((*iterator).second,
                              &user_data);
@@ -647,6 +673,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   // - dispatch UI events (if any)
 
   // step4a: start GTK event loop ?
+  Test_U_Server_GTK_Manager_t* gtk_manager_p = NULL;
   if (!UIDefinitionFile_in.empty ())
   {
     CBData_in.finalizationHook = idle_finalize_UI_cb;
@@ -657,12 +684,14 @@ do_work (unsigned int maximumNumberOfConnections_in,
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
     CBData_in.userData = &CBData_in;
 
-    SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
+    gtk_manager_p = SERVER_UI_GTK_MANAGER_SINGLETON::instance ();
+    ACE_ASSERT (gtk_manager_p);
+    gtk_manager_p->start ();
     result = ACE_OS::sleep (ACE_Time_Value (1, 0));
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::sleep(): \"%m\", continuing\n")));
-    if (!SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
+    if (!gtk_manager_p->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
@@ -682,7 +711,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
       // clean up
       timer_manager_p->stop ();
-      SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);
+      gtk_manager_p->stop (true);
 
       return;
     } // end IF
@@ -708,21 +737,37 @@ do_work (unsigned int maximumNumberOfConnections_in,
     //				g_source_remove(*iterator);
     //		} // end lock scope
     if (!UIDefinitionFile_in.empty ())
-      SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+      gtk_manager_p->stop ();
     timer_manager_p->stop ();
 
     return;
   } // end IF
 
   // step4c: start listening
+  configuration.listenerConfiguration.connectionConfiguration =
+    &((*iterator).second);
   //if (networkInterface_in.empty ()); // *TODO*
   if (useLoopBack_in)
   {
-    result =
-      configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.set (listeningPortNumber_in,
-                                                                                                        INADDR_LOOPBACK,
-                                                                                                        1,
-                                                                                                        0);
+    if (useUDP_in)
+    {
+      result =
+        (*iterator).second.socketHandlerConfiguration.socketConfiguration_3.listenAddress.set (listeningPortNumber_in,
+                                                                                               INADDR_LOOPBACK,
+                                                                                               1,
+                                                                                               0);
+      result =
+        (*iterator).second.socketHandlerConfiguration.socketConfiguration_3.peerAddress.set (listeningPortNumber_in,
+                                                                                             INADDR_LOOPBACK,
+                                                                                             1,
+                                                                                             0);
+    } // end IF
+    else
+      result =
+        (*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address.set (listeningPortNumber_in,
+                                                                                         INADDR_LOOPBACK,
+                                                                                         1,
+                                                                                         0);
     if (result == -1)
     {
       ACE_DEBUG ((LM_ERROR,
@@ -738,66 +783,170 @@ do_work (unsigned int maximumNumberOfConnections_in,
       //				g_source_remove(*iterator);
       //		} // end lock scope
       if (!UIDefinitionFile_in.empty ())
-        SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+        gtk_manager_p->stop ();
       timer_manager_p->stop ();
 
       return;
     } // end IF
   } // end IF
   else
-    configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.address.set_port_number (listeningPortNumber_in,
-                                                                                                                  1);
+  {
+    if (useUDP_in)
+    {
+      (*iterator).second.socketHandlerConfiguration.socketConfiguration_3.listenAddress.set_port_number (listeningPortNumber_in,
+                                                                                                         1);
+      (*iterator).second.socketHandlerConfiguration.socketConfiguration_3.peerAddress.set_port_number (listeningPortNumber_in,
+                                                                                                       1);
+    } // end IF
+    else
+      (*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address.set_port_number (listeningPortNumber_in,
+                                                                                                   1);
+  } // end ELSE
   configuration.listenerConfiguration.connectionManager = connection_manager_p;
   //configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;
 
-  if (!CBData_in.configuration->listener->initialize (configuration.listenerConfiguration))
+  Test_U_Server_AsynchUDPConnector_t udp_asynch_connector;
+  Test_U_Server_UDPConnector_t udp_connector;
+  if (!useUDP_in)
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize listener, returning\n")));
+    ACE_ASSERT (CBData_in.configuration->listener);
+    if (!CBData_in.configuration->listener->initialize (configuration.listenerConfiguration))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to initialize listener, returning\n")));
 
-    // clean up
-    Common_Tools::finalizeEventDispatch (useReactor_in,
-                                         !useReactor_in,
-                                         group_id);
-    //		{ // synch access
-    //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
+      // clean up
+      Common_Tools::finalizeEventDispatch (useReactor_in,
+                                           !useReactor_in,
+                                           group_id);
+      //		{ // synch access
+      //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
-    //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-    //					 iterator != CBData_in.event_source_ids.end();
-    //					 iterator++)
-    //				g_source_remove(*iterator);
-    //		} // end lock scope
-    if (!UIDefinitionFile_in.empty ())
-      SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
-    timer_manager_p->stop ();
+      //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
+      //					 iterator != CBData_in.event_source_ids.end();
+      //					 iterator++)
+      //				g_source_remove(*iterator);
+      //		} // end lock scope
+      if (!UIDefinitionFile_in.empty ())
+        gtk_manager_p->stop ();
+      timer_manager_p->stop ();
 
-    return;
+      return;
+    } // end IF
+    CBData_in.configuration->listener->start ();
+    if (!CBData_in.configuration->listener->isRunning ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to start listener (port: %u), returning\n"),
+                  listeningPortNumber_in));
+
+      // clean up
+      Common_Tools::finalizeEventDispatch (useReactor_in,
+                                           !useReactor_in,
+                                           group_id);
+      //		{ // synch access
+      //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
+
+      //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
+      //					 iterator != CBData_in.event_source_ids.end();
+      //					 iterator++)
+      //				g_source_remove(*iterator);
+      //		} // end lock scope
+      if (!UIDefinitionFile_in.empty ())
+        gtk_manager_p->stop ();
+      timer_manager_p->stop ();
+
+      return;
+    } // end IF
   } // end IF
-  CBData_in.configuration->listener->start ();
-  if (!CBData_in.configuration->listener->isRunning ())
+  else
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to start listener (port: %u), returning\n"),
-                listeningPortNumber_in));
+    if (useReactor_in)
+      CBData_in.configuration->connector = &udp_connector;
+    else
+      CBData_in.configuration->connector = &udp_asynch_connector;
+    if (!CBData_in.configuration->connector->initialize ((*iterator).second))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to initialize connector, returning\n")));
 
-    // clean up
-    Common_Tools::finalizeEventDispatch (useReactor_in,
-                                         !useReactor_in,
-                                         group_id);
-    //		{ // synch access
-    //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
+      // clean up
+      Common_Tools::finalizeEventDispatch (useReactor_in,
+                                           !useReactor_in,
+                                           group_id);
+      //		{ // synch access
+      //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
-    //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
-    //					 iterator != CBData_in.event_source_ids.end();
-    //					 iterator++)
-    //				g_source_remove(*iterator);
-    //		} // end lock scope
-    if (!UIDefinitionFile_in.empty ())
-      SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
-    timer_manager_p->stop ();
+      //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
+      //					 iterator != CBData_in.event_source_ids.end();
+      //					 iterator++)
+      //				g_source_remove(*iterator);
+      //		} // end lock scope
+      if (!UIDefinitionFile_in.empty ())
+        gtk_manager_p->stop ();
+      timer_manager_p->stop ();
 
-    return;
-  } // end IF
+      return;
+    } // end IF
+
+    ACE_HANDLE handle_h =
+      CBData_in.configuration->connector->connect ((*iterator).second.socketHandlerConfiguration.socketConfiguration_3.listenAddress);
+    typename Test_U_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
+      NULL;
+    if (CBData_in.configuration->connector->useReactor ())
+    {
+      if (handle_h != ACE_INVALID_HANDLE)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        iconnection_p =
+          connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
+#else
+        iconnection_p =
+          iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
+#endif
+    } // end IF
+    else
+    {
+      // step1: wait for the connection to register with the manager
+      // *TODO*: avoid these tight loops
+      ACE_Time_Value timeout (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT, 0);
+      ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
+      // *TODO*: this may not be accurate/applicable for/to all protocols
+      do
+      {
+        // *TODO*: avoid these tight loops
+        iconnection_p =
+          connection_manager_p->get ((*iterator).second.socketHandlerConfiguration.socketConfiguration_3.listenAddress,
+                                     false);
+        if (iconnection_p)
+          break;
+      } while (COMMON_TIME_NOW < deadline);
+    } // end ELSE
+    if (!iconnection_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to connect to %s, returning\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_3.listenAddress).c_str ())));
+
+      // clean up
+      Common_Tools::finalizeEventDispatch (useReactor_in,
+                                           !useReactor_in,
+                                           group_id);
+      //		{ // synch access
+      //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
+
+      //			for (Net_GTK_EventSourceIDsIterator_t iterator = CBData_in.event_source_ids.begin();
+      //					 iterator != CBData_in.event_source_ids.end();
+      //					 iterator++)
+      //				g_source_remove(*iterator);
+      //		} // end lock scope
+      if (!UIDefinitionFile_in.empty ())
+        gtk_manager_p->stop ();
+      timer_manager_p->stop ();
+
+      return;
+    } // end IF
+    iconnection_p->decrease ();
+  } // end ELSE
 
   // *NOTE*: from this point on, clean up any remote connections !
 
@@ -816,7 +965,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   //				g_source_remove(*iterator);
   //		} // end lock scope
   if (!UIDefinitionFile_in.empty ())
-    SERVER_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+    gtk_manager_p->stop ();
   timer_manager_p->stop ();
 
   //// wait for connection processing to complete
@@ -955,7 +1104,6 @@ ACE_TMAIN (int argc_in,
                                 (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL % 1000) * 1000);
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
   bool log_to_file = false;
-  bool use_udp = false;
   std::string network_interface =
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
   bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
@@ -964,6 +1112,7 @@ ACE_TMAIN (int argc_in,
   unsigned int statistic_reporting_interval =
     NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information = false;
+  bool use_UDP = false;
   bool print_version_and_exit = false;
   unsigned int number_of_dispatch_threads =
     NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
@@ -977,13 +1126,13 @@ ACE_TMAIN (int argc_in,
                             ping_interval,
                             //keep_alive_timeout,
                             log_to_file,
-                            use_udp,
                             network_interface,
                             use_loopback,
                             listening_port_number,
                             use_reactor,
                             statistic_reporting_interval,
                             trace_information,
+                            use_UDP,
                             print_version_and_exit,
                             number_of_dispatch_threads))
   {
@@ -1004,7 +1153,7 @@ ACE_TMAIN (int argc_in,
   // *NOTE*: probably requires CAP_NET_BIND_SERVICE
   if (listening_port_number <= 1023)
     ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("using (privileged) port #: %d...\n"),
+                ACE_TEXT ("using (privileged) port #: %d\n"),
                 listening_port_number));
   if (use_reactor && (number_of_dispatch_threads > 1))
     use_thread_pool = true;
@@ -1035,9 +1184,10 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (number_of_dispatch_threads == 0) number_of_dispatch_threads = 1;
+  if (number_of_dispatch_threads == 0)
+    number_of_dispatch_threads = 1;
 
-  Test_U_Server_GTK_CBData gtk_cb_user_data;
+  struct Test_U_Server_GTK_CBData gtk_cb_user_data;
   gtk_cb_user_data.allowUserRuntimeStatistic =
     (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
                                          // iff regular reporting
@@ -1194,13 +1344,13 @@ ACE_TMAIN (int argc_in,
            use_thread_pool,
            ping_interval,
            //keep_alive_timeout,
-           use_udp,
            network_interface,
            use_loopback,
            listening_port_number,
            use_reactor,
            statistic_reporting_interval,
            number_of_dispatch_threads,
+           use_UDP,
            gtk_cb_user_data,
            signal_set,
            ignored_signal_set,
@@ -1215,7 +1365,7 @@ ACE_TMAIN (int argc_in,
   Common_Tools::periodToString (working_time,
                                 working_time_string);
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
+              ACE_TEXT ("total working time (h:m:s.us): \"%s\"\n"),
               ACE_TEXT (working_time_string.c_str ())));
 
   // stop profile timer...

@@ -75,7 +75,7 @@ struct Test_U_StreamConfiguration;
 struct Test_U_AllocatorConfiguration
  : Stream_AllocatorConfiguration
 {
-  inline Test_U_AllocatorConfiguration ()
+  Test_U_AllocatorConfiguration ()
    : Stream_AllocatorConfiguration ()
   {
     // *NOTE*: this facilitates (message block) data buffers to be scanned with
@@ -87,7 +87,7 @@ struct Test_U_AllocatorConfiguration
 struct Test_U_UserData
  : Stream_UserData
 {
-  inline Test_U_UserData ()
+  Test_U_UserData ()
    : Stream_UserData ()
    , connectionConfiguration (NULL)
    , streamConfiguration (NULL)
@@ -124,7 +124,7 @@ typedef Net_IConnection_T<ACE_INET_Addr,
 struct Test_U_DHCPClient_SessionData
  : Test_U_StreamSessionData
 {
-  inline Test_U_DHCPClient_SessionData ()
+  Test_U_DHCPClient_SessionData ()
    : Test_U_StreamSessionData ()
    , broadcastConnection (NULL)
    , connection (NULL)
@@ -134,7 +134,8 @@ struct Test_U_DHCPClient_SessionData
    , timeStamp (ACE_Time_Value::zero)
    , xid (0)
   {};
-  inline struct Test_U_DHCPClient_SessionData& operator= (struct Test_U_DHCPClient_SessionData& rhs_in)
+  
+  struct Test_U_DHCPClient_SessionData& operator= (struct Test_U_DHCPClient_SessionData& rhs_in)
   {
     Test_U_StreamSessionData::operator= (rhs_in);
 
@@ -186,7 +187,7 @@ typedef Stream_Configuration_T<//stream_name_string_,
 struct Test_U_StreamModuleHandlerConfiguration
  : DHCP_ModuleHandlerConfiguration
 {
-  inline Test_U_StreamModuleHandlerConfiguration ()
+  Test_U_StreamModuleHandlerConfiguration ()
    : DHCP_ModuleHandlerConfiguration ()
    , broadcastConnection (NULL)
    , connectionConfigurations (NULL)
@@ -215,17 +216,25 @@ typedef DHCP_ProtocolConfiguration Test_U_ProtocolConfiguration_t;
 struct Test_U_ListenerConfiguration
  : Net_ListenerConfiguration
 {
-  inline Test_U_ListenerConfiguration ()
+  Test_U_ListenerConfiguration ()
    : Net_ListenerConfiguration ()
    , socketHandlerConfiguration ()
    , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
                                  0)
   {
     int result =
-      socketHandlerConfiguration.socketConfiguration_2.address.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-                                                                    static_cast<ACE_UINT32> (INADDR_ANY),
-                                                                    1,
-                                                                    0);
+      socketHandlerConfiguration.socketConfiguration_2.peerAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+                                                                        static_cast<ACE_UINT32> (INADDR_ANY),
+                                                                        1,
+                                                                        0);
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
+    result =
+      socketHandlerConfiguration.socketConfiguration_2.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_SERVER_PORT),
+                                                                          static_cast<ACE_UINT32> (INADDR_ANY),
+                                                                          1,
+                                                                          0);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
@@ -240,7 +249,7 @@ typedef Net_IListener_T<struct Test_U_ListenerConfiguration,
 struct Test_U_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
-  inline Test_U_SignalHandlerConfiguration ()
+  Test_U_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    , listener (NULL)
    , statisticReportingHandler (NULL)
@@ -255,7 +264,7 @@ struct Test_U_SignalHandlerConfiguration
 struct Test_U_StreamConfiguration
  : DHCP_StreamConfiguration
 {
-  inline Test_U_StreamConfiguration ()
+  Test_U_StreamConfiguration ()
    : DHCP_StreamConfiguration ()
    , userData (NULL)
   {};
@@ -266,7 +275,7 @@ struct Test_U_StreamConfiguration
 struct Test_U_DHCPClient_StreamState
  : Test_U_StreamState
 {
-  inline Test_U_DHCPClient_StreamState ()
+  Test_U_DHCPClient_StreamState ()
    : Test_U_StreamState ()
    , currentSessionData (NULL)
   {};
@@ -277,7 +286,7 @@ struct Test_U_DHCPClient_StreamState
 struct Test_U_ConnectionConfiguration;
 struct Test_U_Configuration
 {
-  inline Test_U_Configuration ()
+  Test_U_Configuration ()
    : signalHandlerConfiguration ()
    , connectionConfigurations ()
    , parserConfiguration ()
@@ -316,7 +325,7 @@ typedef std::set<guint> Test_U_CompletedActions_t;
 typedef Test_U_CompletedActions_t::iterator Test_U_CompletedActionsIterator_t;
 struct Test_U_GTK_ProgressData
 {
-  inline Test_U_GTK_ProgressData ()
+  Test_U_GTK_ProgressData ()
    : completedActions ()
 //   , cursorType (GDK_LAST_CURSOR)
    , GTKState (NULL)
@@ -350,7 +359,7 @@ typedef Test_U_GTK_Events_t::const_iterator Test_U_GTK_EventsIterator_t;
 struct Test_U_GTK_CBData
  : Common_UI_GTKState
 {
-  inline Test_U_GTK_CBData ()
+  Test_U_GTK_CBData ()
    : Common_UI_GTKState ()
    , configuration (NULL)
    , eventStack ()
@@ -366,7 +375,7 @@ struct Test_U_GTK_CBData
 
 struct Test_U_ThreadData
 {
-  inline Test_U_ThreadData ()
+  Test_U_ThreadData ()
    : CBData (NULL)
    , eventSourceID (0)
   {};

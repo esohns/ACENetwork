@@ -9,7 +9,6 @@
 #define NOMINMAX
 
 // Windows Header Files
-#define WINVER 0x0602 // MS Windows 8.1
 #include <windows.h>
 
 // *NOTE*: (f)lex generated scanners (re-)define some min/max basic type macros
@@ -19,26 +18,32 @@
 
 // C RunTime Header Files
 // *WORKAROUND*
-#include <iostream>
-using namespace std;
-// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
-//                   a problem in conjunction with the standard include headers
-//                   when ACE_USES_OLD_IOSTREAMS is defined
-//                   --> include the necessary headers manually (see above), and
-//                       prevent ace/iosfwd.h from causing any harm
-#define ACE_IOSFWD_H
-//#include <string>
-
-// System Library Header Files
-//#include "ace/iosfwd.h"
-//#include "ace/streams.h"
-//#include "ace/Log_Msg.h"
-//#include "ace/OS.h"
-//#include "ace/Synch_Traits.h"
+//#include <iostream>
+//using namespace std;
+//// *IMPORTANT NOTE*: several ACE headers inclue ace/iosfwd.h, which introduces
+////                   a problem in conjunction with the standard include headers
+////                   when ACE_USES_OLD_IOSTREAMS is defined
+////                   --> include the necessary headers manually (see above), and
+////                       prevent ace/iosfwd.h from causing any harm
+//#define ACE_IOSFWD_H
+#include <string>
 
 #ifdef LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
-#include <valgrind/valgrind.h>
+#include "valgrind/valgrind.h"
 #endif
 
+// System Library Header Files
+#include "ace/config-lite.h"
+#include "ace/Global_Macros.h"
+#include "ace/Log_Msg.h"
+
+// Library Header Files
+#include "common.h"
+#include "common_macros.h"
+
+#include "stream_common.h"
+#include "stream_macros.h"
+
 // Local Header Files
+#include "net_common.h"
 #include "net_macros.h"

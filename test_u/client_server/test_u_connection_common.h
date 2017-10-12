@@ -36,14 +36,14 @@ struct Test_U_ConnectionConfiguration;
 struct Test_U_SocketHandlerConfiguration
  : Net_SocketHandlerConfiguration
 {
-  inline Test_U_SocketHandlerConfiguration ()
+  Test_U_SocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
    , socketConfiguration_2 ()
    , socketConfiguration_3 ()
    , connectionConfiguration (NULL)
    , userData (NULL)
   {
-    socketConfiguration = &socketConfiguration_2;
+    socketConfiguration = &socketConfiguration_2; // default: TCP socket
   };
 
   struct Net_TCPSocketConfiguration      socketConfiguration_2;
@@ -64,7 +64,7 @@ typedef Stream_Configuration_T<//stream_name_string_,
 struct Test_U_ConnectionConfiguration
  : Net_ConnectionConfiguration
 {
-  inline Test_U_ConnectionConfiguration ()
+  Test_U_ConnectionConfiguration ()
    : Net_ConnectionConfiguration ()
    ///////////////////////////////////////
    , socketHandlerConfiguration ()
@@ -84,7 +84,7 @@ typedef Test_U_ConnectionConfigurations_t::iterator Test_U_ConnectionConfigurati
 struct Test_U_ConnectionState
  : Net_ConnectionState
 {
-  inline Test_U_ConnectionState ()
+  Test_U_ConnectionState ()
    : Net_ConnectionState ()
    , userData (NULL)
   {};

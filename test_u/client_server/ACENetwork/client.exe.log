@@ -1,0 +1,30 @@
+core file limits/stack trace dumps are not available on this platform, continuing
+pending signal limits are not available on this platform, continuing
+set locale to "German_Germany.1252"
+Gtk library version: 3.22.6 [age (binary/interface): 2206, 6]
+using Win32 proactor
+using heap timer queue
+(timer dispatch) spawned worker thread (group: 100, id: 5432)
+ignoring signal "Signal: 21"
+(event dispatch) spawned 3 worker thread(s) (group: 101):
+#1 14888
+#2 11644
+#3 10620
+started event dispatch
+loaded widget tree "main": "D:\projects\libACENetwork\test_u\client_server\etc\net_client.glade"
+2017-10-08 10:53:16.527374: received [21/"Signal: 21"]: SIGBREAK, signalled handle: 0xFFFFFFFF
+enabled SIO_LOOPBACK_FAST_PATH on 0x000004F0
+registered connection [0x06BC9F18/0x000004F0]: 127.0.0.1:54561 <--> 127.0.0.1:10001 (total: 1)
+2017-10-08 10:54:24.590534: received [15/"Signal: 15"]: SIGTERM, signalled handle: 0xFFFFFFFF
+2017-10-08 10:55:44.881850: received [15/"Signal: 15"]: SIGTERM, signalled handle: 0xFFFFFFFF
+failed to ACE_Asynch_Read_Stream::cancel(): "No such device or address" (result was: 2), continuing
+failed to ACE_Asynch_Write_Stream::cancel(): "No such device or address" (result was: 2), continuing
+1264: failed to HandlerType::handle_close(0x000004F0,511): "No error", continuing
+1264: failed to ACE_OS::closesocket(0x000004F0): "handle is not a socket", continuing
+2017-10-08 10:57:19.388106: received [15/"Signal: 15"]: SIGTERM, signalled handle: 0xFFFFFFFF
+failed to ACE_Asynch_Read_Stream::cancel(): "No such device or address" (result was: 2), continuing
+failed to ACE_Asynch_Write_Stream::cancel(): "No such device or address" (result was: 2), continuing
+1264: failed to HandlerType::handle_close(0x000004F0,511): "No error", continuing
+1264: failed to ACE_OS::closesocket(0x000004F0): "handle is not a socket", continuing
+2017-10-08 10:57:33.861297: received [15/"Signal: 15"]: SIGTERM, signalled handle: 0xFFFFFFFF
+failed to ACE_Asynch_Read_Stream::cancel(): "No such device or address" (result was: 2), continuing
