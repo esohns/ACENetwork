@@ -1288,6 +1288,10 @@ allocate:
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
   ACE_INET_Addr IP_address, gateway_address;
   if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                                               NULL,
+#endif
                                                IP_address,
                                                gateway_address))
   {
@@ -1297,8 +1301,9 @@ allocate:
                 ACE_TEXT (Net_Common_Tools::interfaceToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier))));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
-                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ())));
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), returning\n"),
+                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ()),
+                NULL));
 #endif
     return;
   } // end IF
@@ -1541,6 +1546,10 @@ allocate:
   } // end IF
   ACE_INET_Addr IP_address, gateway_address;
   if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                                               NULL,
+#endif
                                                IP_address,
                                                gateway_address))
   {
@@ -1550,8 +1559,9 @@ allocate:
                 ACE_TEXT (Net_Common_Tools::interfaceToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier))));
 #else
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
-                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ())));
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), returning\n"),
+                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ()),
+                NULL));
 #endif
     return;
   } // end IF
@@ -1580,6 +1590,7 @@ allocate:
   //         - 'message'                 (56)
   //         - 'client identifier'       (61)
   message_p->initialize (DHCP_record,
+                         1,
                          NULL);
 
   Test_U_IStreamConnection_t* istream_connection_p =
@@ -1942,6 +1953,10 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     {
       ACE_INET_Addr gateway_address;
       if (!Net_Common_Tools::interfaceToIPAddress (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                                                   NULL,
+#endif
                                                    data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress,
                                                    gateway_address))
       {
@@ -1951,8 +1966,9 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                     ACE_TEXT (Net_Common_Tools::interfaceToString (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier).c_str ())));
 #else
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), continuing\n"),
-                    ACE_TEXT (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ())));
+                    ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), continuing\n"),
+                    ACE_TEXT (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ()),
+                    NULL));
 #endif
         result = -1;
       } // end IF

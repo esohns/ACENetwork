@@ -678,6 +678,10 @@ do_work (bool requestBroadcastReplies_in,
   {
     ACE_INET_Addr gateway_address;
     if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                                                 NULL,
+#endif
                                                  configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress,
                                                  gateway_address))
     {
@@ -687,8 +691,9 @@ do_work (bool requestBroadcastReplies_in,
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ())));
 #else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), continuing\n"),
-                  ACE_TEXT (interfaceIdentifier_in.c_str ())));
+                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), continuing\n"),
+                  ACE_TEXT (interfaceIdentifier_in.c_str ()),
+                  NULL));
 #endif
       result = -1;
     } // end IF

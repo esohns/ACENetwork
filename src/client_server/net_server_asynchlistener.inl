@@ -614,9 +614,9 @@ Net_Server_AsynchListener_T<HandlerType,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("%d: started listening: %s...\n"),
+              ACE_TEXT ("%d: started listening: %s\n"),
               inherited::get_handle (),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
 #endif
 
   isListening_ = true;

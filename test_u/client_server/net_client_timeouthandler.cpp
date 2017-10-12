@@ -400,7 +400,7 @@ continue_:
         connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_h));
 #else
       iconnection_p =
-        iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
+        connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
 #endif
     } // end IF
     else

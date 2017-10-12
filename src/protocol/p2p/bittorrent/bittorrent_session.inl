@@ -487,8 +487,9 @@ allocate:
 
     goto error;
   } // end IF
-  // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
+  // *IMPORTANT NOTE*: fire-and-forget API (data_container_p)
   message_p->initialize (data_container_p,
+                         1,
                          NULL);
 
   iconnection_p = inherited::connectionManager_->get (id_in);
@@ -762,6 +763,7 @@ allocate:
   } // end IF
   // *IMPORTANT NOTE*: fire-and-forget API (data_container_p)
   message_p->initialize (data_container_p,
+                         1,
                          NULL);
   data_container_p = NULL;
 

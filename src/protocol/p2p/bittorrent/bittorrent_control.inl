@@ -282,7 +282,7 @@ BitTorrent_Control_T<SessionAsynchType,
                                                        external_ip_address))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToExternalIPAddress(\"%s\"), continuing\n"),
-                ACE_TEXT (interface_string.c_str ())));
+                ACE_TEXT (interface_identifier_string.c_str ())));
 #endif
   else
     record_p->form.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_IP_HEADER),
@@ -345,6 +345,7 @@ allocate:
   } // end IF
   // *IMPORTANT NOTE*: fire-and-forget API (data_container_p)
   message_p->initialize (data_container_p,
+                         1,
                          NULL);
   ACE_ASSERT (!data_container_p);
 
@@ -388,7 +389,6 @@ allocate:
 error:
   if (remove_session)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-
     SESSIONS_ITERATOR_T iterator = sessions_.find (metaInfoFileName_in);
     if (iterator != sessions_.end ())
       sessions_.erase (iterator);

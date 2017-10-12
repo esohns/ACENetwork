@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "ace/Log_Msg.h"
+#include "ace/Proactor.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
@@ -546,7 +547,7 @@ Net_AsynchTCPConnectionBase_T<HandlerType,
 #endif
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(): \"%m\", aborting\n"),
-                    id ()));
+                    this->id ()));
       goto error;
     } // end IF
   } // end IF

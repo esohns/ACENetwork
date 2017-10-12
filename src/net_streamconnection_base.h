@@ -146,7 +146,7 @@ class Net_StreamConnectionBase_T
                      const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
 
  protected:
-  typedef HandlerType HANDLER_T;
+  // convenient types
   typedef Net_IConnector_T<AddressType,
                            ConfigurationType> ICONNECTOR_T;
   typedef Net_IListener_T<ListenerConfigurationType,

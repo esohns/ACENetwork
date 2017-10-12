@@ -23,8 +23,10 @@
 #include "netinet/ip_icmp.h"
 #endif
 
+#include "ace/Asynch_IO.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
+#include "ace/Proactor.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
@@ -687,7 +689,7 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
 #endif
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(): \"%m\", aborting\n"),
-                    id ()));
+                    this->id ()));
       goto error;
     } // end IF
   } // end IF

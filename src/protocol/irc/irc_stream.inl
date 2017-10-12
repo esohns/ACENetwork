@@ -149,7 +149,7 @@ IRC_Stream_T<StreamStateType,
 //  bool result = false;
   bool setup_pipeline = configuration_in.configuration_.setupPipeline;
   bool reset_setup_pipeline = false;
-  SessionDataType* session_data_p = NULL;
+//  SessionDataType* session_data_p = NULL;
   typename inherited::ISTREAM_T::MODULE_T* module_p = NULL;
   BISECTOR_T* bisector_impl_p = NULL;
 
@@ -175,8 +175,8 @@ IRC_Stream_T<StreamStateType,
   // - create modules (done for the ones "owned" by the stream itself)
   // - initialize modules
   // - push them onto the stream (tail-first) !
-  session_data_p =
-      &const_cast<SessionDataType&> (inherited::sessionData_->getR ());
+//  session_data_p =
+//      &const_cast<SessionDataType&> (inherited::sessionData_->getR ());
 
   // ---------------------------------------------------------------------------
 

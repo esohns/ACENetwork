@@ -258,6 +258,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
                     writeHandle_,
                     ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
 #else
+      ACE_UNUSED_ARG (error);
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", aborting\n"),
@@ -533,6 +534,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
                     handle_in,
                     ACE_TEXT (Common_Tools::errorToString (error, false).c_str ())));
 #else
+      ACE_UNUSED_ARG (error);
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(%d): \"%m\", continuing\n"),
                   handle_in));
@@ -554,6 +556,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
                   handle_in,
                   ACE_TEXT (Common_Tools::errorToString (error, false).c_str ())));
 #else
+    ACE_UNUSED_ARG (error);
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(%d): \"%m\", continuing\n"),
                 handle_in));
