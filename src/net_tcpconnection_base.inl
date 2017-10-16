@@ -145,14 +145,14 @@ retry:
       if (error == EWOULDBLOCK)      // 11: SSL_read() failed (buffer is empty)
         goto retry;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if (//(error != EPIPE)        && // 9    : write() on a close()d socket *TODO*
-          (error != ECONNABORTED) && // 10053: local close()
-          (error != ECONNRESET))     // 10054: peer closed the connection
+      if (//(error != EPIPE)  && // 9    : write() on a close()d socket *TODO*
+          (error != ENOTSOCK) && // 10038: local close()
+          (error != ECONNRESET)) // 10054: peer closed the connection
 #else
-      if ((error != EPIPE)        && // 32: connection reset by peer (write)
-          // -------------------------------------------------------------------
-          (error != EBADF)        && // 9
-          (error != ENOTSOCK)     && // 88
+      if ((error != EPIPE)        && // 32 : connection reset by peer (write)
+          // -----------------------------
+          (error != EBADF)        && // 9  : *TODO*
+          (error != ENOTSOCK)     && // 88 : *TODO*
           (error != ECONNABORTED) && // 103: connection abort()ed locally
           (error != ECONNRESET))     // 104: connection reset by peer (read)
 #endif

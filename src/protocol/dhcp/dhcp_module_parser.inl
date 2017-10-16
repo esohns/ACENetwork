@@ -201,11 +201,11 @@ DHCP_Module_Parser_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (message_inout);
 
-  switch (message_inout->type ())
-  {
-    default:
-      break;
-  } // end SWITCH
+  //switch (message_inout->type ())
+  //{
+  //  default:
+  //    break;
+  //} // end SWITCH
 }
 
 ////////////////////////////////////////////////////////////////////////////////

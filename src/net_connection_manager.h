@@ -114,7 +114,7 @@ class Net_Connection_Manager_T
   virtual ICONNECTION_T* operator[] (unsigned int) const; // index
   virtual ICONNECTION_T* get (Net_ConnectionId_t) const; // id
   virtual ICONNECTION_T* get (const AddressType&, // address
-                              bool = true) const; // peer ?
+                              bool = true) const; // peer address ? : local address
   virtual ICONNECTION_T* get (ACE_HANDLE) const; // socket handle
 
   // implement (part of) Common_IStatistic_T

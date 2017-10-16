@@ -836,7 +836,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 
   // SSID not found --> scan for networks and abort
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("SSID (was: %s) not found, scanning\n"),
+              ACE_TEXT ("SSID (was: %s) not found, scanning...\n"),
               ACE_TEXT (SSID_in.c_str ())));
 
   struct _WLAN_RAW_DATA raw_data_s;

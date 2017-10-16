@@ -123,6 +123,13 @@ class Net_UDPConnectionBase_T
   // *NOTE*: send stream data to the peer
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE);
 
+  // implement (part of) Net_IStreamConnection_T
+  // *IMPORTANT NOTE*: for write-only connections, this returns the outbound
+  //                   socket handle, else the inbound socket handle
+  virtual void info (ACE_HANDLE&,           // return value: handle
+                     ACE_INET_Addr&,        // return value: local SAP
+                     ACE_INET_Addr&) const; // return value: peer SAP
+
   // implement Common_IReset
   virtual void reset ();
 

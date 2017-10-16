@@ -3341,6 +3341,47 @@ Net_Common_Tools::enableErrorQueue (ACE_HANDLE handle_in)
 }
 #endif
 
+ACE_INET_Addr
+Net_Common_Tools::getBoundAddress (ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getBoundAddress"));
+
+  ACE_INET_Addr result;
+  int result_2 = -1;
+  struct sockaddr_in socket_address_s;
+  ACE_OS::memset (&socket_address_s, 0, sizeof (struct sockaddr));
+  int socket_address_length = sizeof (struct sockaddr_in);
+
+  result_2 =
+    ACE_OS::getsockname (handle_in,
+                         reinterpret_cast<struct sockaddr*> (&socket_address_s),
+                         &socket_address_length);
+  if (unlikely (result_2 == -1))
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockname(0x%@): \"%m\", aborting\n"),
+                handle_in));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::getsockname(%d): \"%m\", continuing\n"),
+                handle_in));
+#endif
+    return result;
+  } // end IF
+
+  result_2 = result.set (&socket_address_s,
+                         socket_address_length);
+  if (unlikely (result_2 == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
+    return result;
+  } // end IF
+
+  return result;
+}
+
 int
 Net_Common_Tools::getProtocol (ACE_HANDLE handle_in)
 {
@@ -3370,6 +3411,106 @@ Net_Common_Tools::getProtocol (ACE_HANDLE handle_in)
   } // end IF
 
   return optval;
+}
+
+bool
+Net_Common_Tools::sendDatagram (const ACE_INET_Addr& localSAP_in,
+                                const ACE_INET_Addr& remoteSAP_in,
+                                ACE_Message_Block* messageBlock_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::sendDatagram"));
+
+  bool result = false;
+  int result_2 = -1;
+  ssize_t result_3 = -1;
+  ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
+  size_t bytes_to_send = messageBlock_in->length ();
+    
+  handle_h = ACE_OS::socket (AF_INET,    // family
+                             SOCK_DGRAM, // type
+                             0);         // protocol
+  if (unlikely (handle_h == ACE_INVALID_HANDLE))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::socket(%d,%d,0): \"%m\", aborting\n"),
+                AF_INET, SOCK_DGRAM));
+    return false;
+  } // end IF
+
+  // set source address ?
+  if (unlikely (!localSAP_in.is_any ()))
+  {
+    result_2 =
+      ACE_OS::bind (handle_h,
+                    reinterpret_cast<struct sockaddr*> (localSAP_in.get_addr ()),
+                    localSAP_in.get_addr_size ());
+    if (unlikely (result_2 == -1))
+    {
+      int error = ACE_OS::last_error ();
+      ACE_UNUSED_ARG (error);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::bind(0x%@,%s): \"%m\", aborting\n"),
+                  handle_h,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_in).c_str ())));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", aborting\n"),
+                  handle_h,
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_in).c_str ())));
+#endif
+      goto error;
+    } // end IF
+  } // end IF
+
+  result_3 =
+    ACE_OS::sendto (handle_h,
+                    messageBlock_in->rd_ptr (),
+                    bytes_to_send,
+                    0,
+                    reinterpret_cast<struct sockaddr*> (remoteSAP_in.get_addr ()),
+                    remoteSAP_in.get_addr_size ());
+  if (unlikely (result_3 != bytes_to_send))
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::sendto(0x%@,%s,%u) (result was: %d): \"%m\", aborting\n"),
+                handle_h,
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (remoteSAP_in).c_str ()),
+                bytes_to_send, result_3));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::sendto(%d,%s,%u) (result was: %d): \"%m\", aborting\n"),
+                handle_h,
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (remoteSAP_in).c_str ()),
+                bytes_to_send, result_3));
+#endif
+    goto error;
+  } // end IF
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("dispatched %u byte(s): %s --> %s\n"),
+              bytes_to_send,
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_in).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (remoteSAP_in).c_str ())));
+
+  // *TODO*: shutdown() first ?
+
+  result = true;
+
+error:
+  result_2 = ACE_OS::closesocket (handle_h);
+  if (result_2 == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
+                handle_h));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                handle_h));
+#endif
+
+  return result;
 }
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

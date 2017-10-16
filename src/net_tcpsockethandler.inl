@@ -47,30 +47,6 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
 
 }
 
-//ACE_Event_Handler::Reference_Count
-//Net_TCPSocketHandler_T::add_reference (void)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::add_reference"));
-
-//  inherited::increase ();
-
-//  //return inherited::add_reference ();
-//  return 0;
-//}
-
-//ACE_Event_Handler::Reference_Count
-//Net_TCPSocketHandler_T::remove_reference (void)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_TCPSocketHandler_T::remove_reference"));
-
-//  // *NOTE*: may "delete this"
-//  inherited2::decrease ();
-
-//  //// *NOTE*: may "delete this"
-//  //return inherited::remove_reference ();
-//  return 0;
-//}
-
 template <ACE_SYNCH_DECL,
           typename StreamType,
           typename ConfigurationType>
@@ -99,11 +75,11 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
   // step1: tweak socket
   ACE_HANDLE handle = inherited2::get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
-  if (socket_configuration_p->bufferSize)
+  if (likely (socket_configuration_p->bufferSize))
   {
-    if (!Net_Common_Tools::setSocketBuffer (handle,
-                                            SO_RCVBUF,
-                                            socket_configuration_p->bufferSize))
+    if (unlikely (!Net_Common_Tools::setSocketBuffer (handle,
+                                                      SO_RCVBUF,
+                                                      socket_configuration_p->bufferSize)))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -117,13 +93,13 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
                   socket_configuration_p->bufferSize));
 #endif
     } // end IF
-    if (!Net_Common_Tools::setSocketBuffer (handle,
-                                            SO_SNDBUF,
-                                            socket_configuration_p->bufferSize))
+    if (unlikely (!Net_Common_Tools::setSocketBuffer (handle,
+                                                      SO_SNDBUF,
+                                                      socket_configuration_p->bufferSize)))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_RCVBUF,%u), continuing\n"),
+                  ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(0x%@,SO_SNDBUF,%u), continuing\n"),
                   handle,
                   socket_configuration_p->bufferSize));
 #else
@@ -136,41 +112,59 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
   } // end IF
 
   // disable Nagle's algorithm
-  if (!Net_Common_Tools::setNoDelay (handle,
-                                     NET_SOCKET_DEFAULT_TCP_NODELAY))
+  if (unlikely (!Net_Common_Tools::setNoDelay (handle,
+                                               NET_SOCKET_DEFAULT_TCP_NODELAY)))
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%s) (handle was: 0x%@), aborting\n"),
+                (NET_SOCKET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true") : ACE_TEXT ("false")),
+                handle));
+#else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setNoDelay(%s) (handle was: %d), aborting\n"),
-                (NET_SOCKET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true")
-                                                : ACE_TEXT ("false")),
+                (NET_SOCKET_DEFAULT_TCP_NODELAY ? ACE_TEXT ("true") : ACE_TEXT ("false")),
                 handle));
+#endif
     return -1;
   } // end IF
-  if (!Net_Common_Tools::setKeepAlive (handle,
-                                       NET_SOCKET_DEFAULT_TCP_KEEPALIVE))
+  if (unlikely (!Net_Common_Tools::setKeepAlive (handle,
+                                                 NET_SOCKET_DEFAULT_TCP_KEEPALIVE)))
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%s) (handle was: %d), aborting\n"),
-                (NET_SOCKET_DEFAULT_TCP_KEEPALIVE ? ACE_TEXT ("true")
-                                                  : ACE_TEXT ("false")),
+                ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%s) (handle was: 0x%@), aborting\n"),
+                (NET_SOCKET_DEFAULT_TCP_KEEPALIVE ? ACE_TEXT ("true") : ACE_TEXT ("false")),
                 handle));
+#else
+        ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::setKeepAlive(%s) (handle was: %d), aborting\n"),
+                (NET_SOCKET_DEFAULT_TCP_KEEPALIVE ? ACE_TEXT ("true") : ACE_TEXT ("false")),
+                handle));
+#endif
     return -1;
   } // end IF
-  if (!Net_Common_Tools::setLinger (handle,
-                                    socket_configuration_p->linger,
-                                    std::numeric_limits<unsigned short>::max ()))
+  if (unlikely (!Net_Common_Tools::setLinger (handle,
+                                              socket_configuration_p->linger,
+                                              std::numeric_limits<unsigned short>::max ())))
   {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s,-1) (handle was: 0x%@), aborting\n"),
+                (socket_configuration_p->linger ? ACE_TEXT ("true") : ACE_TEXT ("false")),
+                handle));
+#else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::setLinger(%s, -1) (handle was: %d), aborting\n"),
-                (socket_configuration_p->linger ? ACE_TEXT ("true")
-                                                : ACE_TEXT ("false")),
+                (socket_configuration_p->linger ? ACE_TEXT ("true") : ACE_TEXT ("false")),
                 handle));
+#endif
     return -1;
   } // end IF
 
   // step3: register with the reactor
   result = inherited2::open (arg_in);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     // *NOTE*: this can happen when the connection handle is still registered
     //         with the reactor (i.e. the reactor is still processing events on
@@ -179,15 +173,22 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
     // *NOTE*: more likely, this happened because the (select) reactor is out of
     //         "free" (read) slots
     int error = ACE_OS::last_error ();
-    if (error)
+    ACE_UNUSED_ARG (error);
+    //if (error)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Svc_Handler::open(0x%@/%d): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to ACE_Svc_Handler::open(0x%@) (handle was: 0x%@): \"%m\", aborting\n"),
                   arg_in, handle));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Svc_Handler::open(0x%@) (handle was: %d): \"%m\", aborting\n"),
+                  arg_in, handle));
+#endif
     return -1;
   } // end IF
   // *NOTE*: let the reactor manage this handler
-  if (inherited2::reference_counting_policy ().value () ==
-      ACE_Event_Handler::Reference_Counting_Policy::ENABLED)
+  if (likely (inherited2::reference_counting_policy ().value () ==
+              ACE_Event_Handler::Reference_Counting_Policy::ENABLED))
     inherited2::remove_reference ();
 
   // *NOTE*: registered with the reactor (READ_MASK) at this point
@@ -219,25 +220,25 @@ Net_TCPSocketHandler_T<ACE_SYNCH_USE,
   int result = 0;
 
   // *IMPORTANT NOTE*: due to reference counting, the
-  // ACE_Svc_Handle::shutdown() method will crash, as it references a
+  // ACE_Svc_Handler::shutdown() method will crash, as it references a
   // connection recycler AFTER removing the connection from the reactor (which
   // releases (at least one) reference). In the case that "this" is the final
   // reference, this leads to a crash. (see code)
-  // --> avoid invoking ACE_Svc_Handle::shutdown()
+  // --> avoid invoking ACE_Svc_Handler::shutdown()
   // --> this means that "manual" cleanup is necessary (see below)
 
   // *IMPORTANT NOTE*: due to reference counting, the base-class function is a
-  // NOP (see code) --> this means that clean up is necessary on:
+  //                   NOP (see code) --> this means that clean up is necessary
+  //                   on:
   // - connect failed (e.g. connection refused)
   // - accept failed (e.g. too many connections)
   // - ... ?
 
   switch (mask_in)
   {
-    // *NOTE*: this is already being removed from the reactor (check stack)
-    //         --> just return
+    // *NOTE*: 'this' is already being removed from the reactor
     case ACE_Event_Handler::READ_MASK:       // --> socket has been closed
-      break;
+      break; // --> nothing to do
     case ACE_Event_Handler::WRITE_MASK:      // --> socket has been closed (send failed) (DevPoll)
     case ACE_Event_Handler::EXCEPT_MASK:     // --> socket has been closed (send failed)
       break;

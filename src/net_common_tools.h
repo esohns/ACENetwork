@@ -242,7 +242,14 @@ class Net_Common_Tools
 #if defined (ACE_LINUX)
   static bool enableErrorQueue (ACE_HANDLE); // socket handle
 #endif
+  static ACE_INET_Addr getBoundAddress (ACE_HANDLE);
+
   static int getProtocol (ACE_HANDLE); // socket handle
+
+  // *NOTE*: uses sendto(); does not send message block continuations ATM
+  static bool sendDatagram (const ACE_INET_Addr&, // local SAP (may be 'any')
+                            const ACE_INET_Addr&, // remote SAP
+                            ACE_Message_Block*);  // data
 
   // --- D-Bus ---
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

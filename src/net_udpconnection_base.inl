@@ -430,6 +430,87 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
                         HandlerConfigurationType,
                         StreamType,
                         TimerManagerType,
+                        UserDataType>::info (ACE_HANDLE& handle_out,
+                                             ACE_INET_Addr& localSAP_out,
+                                             ACE_INET_Addr& peerSAP_out) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::info"));
+
+  int result = -1;
+  int error = 0;
+  struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+  // *TODO*: remove type inferences
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.socketConfiguration);
+
+  socket_configuration_p =
+    dynamic_cast<struct Net_UDPSocketConfiguration*> (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.socketConfiguration);
+
+  // sanity check(s)
+  ACE_ASSERT (socket_configuration_p);
+
+  handle_out =
+    (socket_configuration_p->writeOnly ? inherited::writeHandle_ 
+                                       : inherited::peer_.get_handle ());
+  localSAP_out.reset ();
+  peerSAP_out.reset ();
+
+  if (likely (!socket_configuration_p->writeOnly))
+  {
+    result = inherited::peer_.get_local_addr (localSAP_out);
+    if (unlikely (result == -1))
+    {
+      error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if (error != ENOTSOCK) // 10038: Win32: handle is not a socket (i.e. socket already closed)
+#else
+      if (error != EBADF)    //     9: Linux: socket already closed
+#endif
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+    } // end IF
+  } // end IF
+  if (unlikely (socket_configuration_p->writeOnly))
+    peerSAP_out = inherited::address_;
+  else
+  {
+    result = inherited::peer_.get_remote_addr (peerSAP_out);
+    if (unlikely (result == -1))
+    {
+      error = ACE_OS::last_error ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if ((error != ENOTSOCK) && // 10038: Win32: socket already closed
+          (error != ENOTCONN))   // 10057: Win32: not connected
+#else
+      if ((error != EBADF) &&  //   9: Linux: socket already closed
+          (error != ENOTCONN)) // 107: Linux: not connected
+#endif
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_SOCK_Dgram::get_remote_addr(): \"%m\", continuing\n")));
+    } // end IF
+  } // end ELSE
+}
+
+template <ACE_SYNCH_DECL,
+          typename HandlerType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename HandlerConfigurationType,
+          typename StreamType,
+          typename TimerManagerType,
+          typename UserDataType>
+void
+Net_UDPConnectionBase_T<ACE_SYNCH_USE,
+                        HandlerType,
+                        ConfigurationType,
+                        StateType,
+                        StatisticContainerType,
+                        HandlerConfigurationType,
+                        StreamType,
+                        TimerManagerType,
                         UserDataType>::reset ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_UDPConnectionBase_T::reset"));
@@ -664,6 +745,18 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPConnectionBase_T::open"));
 
   int result = -1;
+  struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+  // *TODO*: remove type inferences
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.socketConfiguration);
+
+  socket_configuration_p =
+    dynamic_cast<struct Net_UDPSocketConfiguration*> (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.socketConfiguration);
+
+  // sanity check(s)
+  ACE_ASSERT (socket_configuration_p);
 
   // step1: initialize asynchronous I/O
   inherited::open (handle_in,
@@ -671,7 +764,12 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
   if (unlikely (inherited::state_.status != NET_CONNECTION_STATUS_OK))
     goto error;
 
-  // step2: start reading (need to pass any data ?)
+  // step2: start reading ? (need to pass any data ?)
+  if (unlikely (socket_configuration_p->writeOnly))
+  { ACE_ASSERT (!messageBlock_in.length ());
+    goto continue_;
+  } // end IF
+
   if (likely (!messageBlock_in.length ()))
   {
     if (unlikely (!initiate_read ()))
@@ -736,6 +834,7 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
   //ACE_ASSERT (this->count () == 2); // connection manager, read operation
   //                                     (+ stream module(s))
 
+continue_:
   return;
 
 error:
@@ -920,36 +1019,44 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
   int result = -1;
   int error = 0;
   struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
-  const HandlerConfigurationType& handler_configuration_r =
-    inherited::getR_2 ();
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
+  // *TODO*: remove type inferences
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.socketConfiguration);
 
   socket_configuration_p =
-    dynamic_cast<struct Net_UDPSocketConfiguration*> (handler_configuration_r.socketConfiguration);
+    dynamic_cast<struct Net_UDPSocketConfiguration*> (inherited::CONNECTION_BASE_T::configuration_->socketHandlerConfiguration.socketConfiguration);
 
   // sanity check(s)
   ACE_ASSERT (socket_configuration_p);
 
-  handle_out = inherited::SOCKET_T::get_handle ();
+  handle_out =
+    (socket_configuration_p->writeOnly ? inherited::writeHandle_ 
+                                       : inherited::HANDLER_T::SOCKET_T::get_handle ());
   localSAP_out.reset ();
   peerSAP_out.reset ();
 
-  result = inherited::SOCKET_T::get_local_addr (localSAP_out);
-  if (unlikely (result == -1))
+  if (likely (!socket_configuration_p->writeOnly))
   {
-    error = ACE_OS::last_error ();
+    result = inherited::HANDLER_T::SOCKET_T::get_local_addr (localSAP_out);
+    if (unlikely (result == -1))
+    {
+      error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (error != ENOTSOCK) // 10038: Win32: handle is not a socket (i.e. socket already closed)
+      if (error != ENOTSOCK) // 10038: Win32: handle is not a socket (i.e. socket already closed)
 #else
-    if (error != EBADF)    //     9: Linux: socket already closed
+      if (error != EBADF)    //     9: Linux: socket already closed
 #endif
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_SOCK_Dgram::get_local_addr(): \"%m\", continuing\n")));
+    } // end IF
   } // end IF
   if (unlikely (socket_configuration_p->writeOnly))
     peerSAP_out = inherited::address_;
   else
   {
-    result = inherited::SOCKET_T::get_remote_addr (peerSAP_out);
+    result = inherited::HANDLER_T::SOCKET_T::get_remote_addr (peerSAP_out);
     if (unlikely (result == -1))
     {
       error = ACE_OS::last_error ();
@@ -1056,13 +1163,13 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
   if (unlikely (!inherited::initiate_read ()))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(0x%@): \"%m\", continuing\n"),
-                    id (), inherited::writeHandle_));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(0x%@): \"%m\", continuing\n"),
+                id (), inherited::HANDLER_T::get_handle ()));
 #else
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(%d): \"%m\", continuing\n"),
-                    this->id (), inherited::writeHandle_));
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%u: failed to Net_IAsynchSocketHandler::initiate_read(%d): \"%m\", continuing\n"),
+                this->id (), inherited::HANDLER_T::get_handle ()));
 #endif
 
     // clean up

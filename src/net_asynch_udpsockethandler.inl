@@ -134,7 +134,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
                                                            interface_identifier)))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::IPAddressToInterface(%s): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to Net_Common_Tools::IPAddressToInterface(%s), aborting\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->peerAddress).c_str ())));
       goto error;
     } // end IF
@@ -708,18 +708,22 @@ receive:
   {
     error = ACE_OS::last_error ();
     // *WARNING*: this could fail on multi-threaded proactors
-    if (error == EAGAIN) goto receive; // 11: happens on Linux
+    if (error == EAGAIN) // 11: happens on Linux
+      goto receive;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ENXIO)                && // happens on Win32
-        (error != EFAULT)               && // *TODO*: happens on Win32
-        (error != ERROR_UNEXP_NET_ERR)  && // *TODO*: happens on Win32
-        (error != ERROR_NETNAME_DELETED))  // happens on Win32
+    if ((error != ENXIO)                && // 6 : *TODO*
+        (error != EFAULT)               && // 14: *TODO*
+        (error != ERROR_UNEXP_NET_ERR)  && // 59: *TODO*
+        (error != ERROR_NETNAME_DELETED))  // 64: *TODO*
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("0x%@: failed to ACE_Asynch_Read_Dgram::recv(): \"%m\", aborting\n"),
+                  inherited2::get_handle ()));
 #else
     if (error)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%d: failed to ACE_Asynch_Read_Dgram::recv(): \"%m\", aborting\n"),
+                  inherited2::get_handle ()));
 #endif
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::recv(%u): \"%m\", aborting\n"),
-                PDUSize_));
 
     // clean up
     message_block_p->release ();
@@ -744,25 +748,6 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   // sanity check
   if (unlikely (!result_in.success ()))
   {
-    struct sockaddr_in socket_address_s;
-    int socket_address_length = sizeof (struct sockaddr_in);
-    ACE_OS::memset (&socket_address_s, 0, sizeof (struct sockaddr));
-    result =
-      ACE_OS::getsockname (result_in.handle (),
-                           reinterpret_cast<struct sockaddr*> (&socket_address_s),
-                           &socket_address_length);
-    if (result == -1)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::getsockname(0x%@): \"%m\", continuing\n"),
-                  result_in.handle ()));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::getsockname(%d): \"%m\", continuing\n"),
-                  result_in.handle ()));
-#endif
-    ACE_INET_Addr inet_address (&socket_address_s, sizeof (struct sockaddr_in));
-
     unsigned long error = result_in.error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     if ((error != EPIPE)                 &&     // 32
@@ -771,17 +756,15 @@ Net_AsynchUDPSocketHandler_T<SocketType,
         (error != ECONNRESET))                  // 10054
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: 0x%@, address: %s): \"%s\", aborting\n"),
-                  result_in.handle (),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address).c_str ()),
+                  result_in.handle (), ACE_TEXT (Net_Common_Tools::IPAddressToString (Net_Common_Tools::getBoundAddress (result_in.handle ())).c_str ()),
                   ACE_TEXT (Common_Tools::errorToString (static_cast<DWORD> (error), false).c_str ())));
 #else
     if ((error != ECONNRESET) &&
         (error != EPIPE)      &&
-        (error != EBADF)) // 9 happens on Linux (local close())
+        (error != EBADF))        // 9: Linux (local close())
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: %d, address: %s): \"%s\", aborting\n"),
-                  result_in.handle (),
-                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address).c_str ()),
+                  result_in.handle (), ACE_TEXT (Net_Common_Tools::IPAddressToString (Net_Common_Tools::getBoundAddress (result_in.handle ())).c_str ()),
                   ACE_TEXT (ACE_OS::strerror (error))));
 #endif
   } // end IF

@@ -115,7 +115,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                   id ()));
   } // end IF
 
-  if (writeBuffer_)
+  if (unlikely (writeBuffer_))
     writeBuffer_->release ();
 }
 
@@ -154,6 +154,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   ICONNECTOR_T* iconnector_p = NULL;
   ILISTENER_T* ilistener_p = NULL;
   int result = -1;
+  AddressType local_SAP, peer_SAP;
 
   // *TODO*: remove type inferences
   const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
@@ -217,7 +218,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     }
   } // end SWITCH
   ACE_ASSERT (configuration_p);
-  if (!inherited2::initialize (*configuration_p))
+  if (unlikely (!inherited2::initialize (*configuration_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to Net_ConnectionBase_T::initialize(): \"%m\", aborting\n"),
@@ -228,7 +229,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   // step1: initialize/tweak socket, register reading data with reactor, ...
   // *TODO*: remove type inference
   result = inherited::open (&configuration_p->socketHandlerConfiguration);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     // *NOTE*: this can happen when the connection handle is still registered
     //         with the reactor (i.e. the reactor is still processing events on
@@ -244,7 +245,8 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     //            ACE_TEXT ("failed to HandlerType::open(): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  inherited2::state_.handle = inherited::get_handle ();
+  info (inherited2::state_.handle,
+        local_SAP, peer_SAP);
 
   // step2: register with the connection manager (if any)
   if (unlikely (!inherited2::registerc ()))
@@ -264,14 +266,15 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   if (!inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection)
     inherited2::configuration_->streamConfiguration->configuration_.notificationStrategy =
       &(inherited::notificationStrategy_);
-
-  if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration))))
+  if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration),
+                                     inherited2::state_.handle)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to initialize processing stream, aborting\n"),
                 id ()));
     goto error;
   } // end IF
+
   // update session data
   // *TODO*: remove type inferences
   session_data_container_p = &stream_.getR ();
@@ -280,11 +283,10 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
   ACE_ASSERT (session_data_p->lock);
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, *(session_data_p->lock), -1);
-    session_data_p->connectionState = &(inherited2::state_);
+    session_data_p->connectionStates.insert (std::make_pair (inherited2::state_.handle,
+                                                             &(inherited2::state_)));
   } // end lock scope
-#if defined (_DEBUG)
-    //stream_.dump_state ();
-#endif
+
   // step2d: start stream
   stream_.start ();
   if (unlikely (!stream_.isRunning ()))
@@ -913,7 +915,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                       ACE_Event_Handler::ALL_EVENTS_MASK));
         //else if (result > 0)
         //  ACE_DEBUG ((LM_DEBUG,
-        //              ACE_TEXT ("flushed %d notifications (handle was: %u)\n"),
+        //              ACE_TEXT ("flushed %d notifications (handle was: %d)\n"),
         //              result,
         //              handle_in));
       } // end IF
@@ -963,7 +965,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
                 mask_in));
 #endif
   } // end IF
-  inherited::set_handle (handle_in); // used for debugging purposes only
+  inherited::set_handle (handle_in); // reset for debugging purposes
 
   // step4: deregister with the connection manager (if any)
   if (likely (deregister))
@@ -1069,8 +1071,9 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   {
     error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if (error != ENOTSOCK) // 10038: TCP: socket already closed
 #else
-    if (error != EBADF) // 9: Linux: socket already closed
+    if (error != EBADF)    // 9    : Linux: socket already closed
 #endif
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: failed to ACE_SOCK::get_local_addr(): \"%m\", continuing\n"),
@@ -1082,9 +1085,11 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   {
     error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+    if ((error != ENOTSOCK) && // 10038: (TCP) socket already closed
+        (error != ENOTCONN))   // 10057: (UDP) socket is not connected
 #else
-    if ((error != EBADF) &&  // 9:   Linux: socket already closed
-        (error != ENOTCONN)) // 107: Linux: perhaps UDP ?
+    if ((error != EBADF) &&    // 9    : Linux: socket already closed
+        (error != ENOTCONN))   // 107  : Linux: perhaps UDP ?
 #endif
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%u: failed to ACE_SOCK::get_remote_addr(): \"%m\", continuing\n"),
@@ -1656,6 +1661,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   const typename StreamType::SESSION_DATA_CONTAINER_T* session_data_container_p =
     NULL;
   typename StreamType::SESSION_DATA_T* session_data_p = NULL;
+  AddressType local_SAP, peer_SAP;
 
   // *NOTE*: act() has been called already, Net_ConnectionBase has been
   //         initialized
@@ -1664,7 +1670,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   // *TODO*: remove type inference
   inherited::open (handle_in,
                    messageBlock_in);
-  inherited2::state_.handle = inherited::handle ();
+  this->info (inherited2::state_.handle,
+              local_SAP, peer_SAP);
 
   // step2: register with the connection manager (if any)
   if (unlikely (!inherited2::registerc ()))
@@ -1684,13 +1691,15 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   //         will forward outbound data to handle_output ()
   inherited2::configuration_->streamConfiguration->configuration_.notificationStrategy =
     this;
-  if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration))))
+  if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration),
+                                     inherited2::state_.handle)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to initialize processing stream, aborting\n"),
                 id ()));
     goto error;
   } // end IF
+
   // step2b: update session data
   // *TODO*: remove type inferences
   session_data_container_p = &stream_.getR ();
@@ -1698,11 +1707,10 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
   ACE_ASSERT (session_data_p->lock);
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_p->lock);
-    session_data_p->connectionState = &(inherited2::state_);
+    session_data_p->connectionStates.insert (std::make_pair (inherited2::state_.handle,
+                                                             &(inherited2::state_)));
   } // end lock scope
-#if defined (_DEBUG)
-  //stream_.dump_state ();
-#endif
+
   // step2c: start stream
   stream_.start ();
   if (unlikely (!stream_.isRunning ()))
