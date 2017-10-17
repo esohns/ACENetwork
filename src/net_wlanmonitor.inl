@@ -47,7 +47,11 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
                   UserDataType>::Net_WLANMonitor_T ()
  : inherited (ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_THREAD_NAME), // thread name
               NET_WLANMONITOR_THREAD_GROUP_ID,                    // group id
-              1,                                                  // # thread(s)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+              0,                                                  // # thread(s)
+#else
+              2,                                                  // # thread(s)
+#endif
               false,                                              // auto-start ?
               ////////////////////////////
               //NULL)                                             // queue handle
@@ -65,10 +69,14 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
  , isInitialized_ (false)
  , localSAP_ ()
  , peerSAP_ ()
- , lock_ ()
+ , subscribersLock_ ()
  , subscribers_ ()
  , userData_ (NULL)
  /////////////////////////////////////////
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+ , DBusDispatchStarted_ (false)
+#endif
  , queue_ (STREAM_QUEUE_MAX_SLOTS)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::Net_WLANMonitor_T"));
@@ -99,12 +107,14 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
                   ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
   } // end IF
 #else
-  if (connection_)
-  {
+  if (isActive_)
+  { ACE_ASSERT (connection_);
     dbus_connection_close (connection_);
-    inherited::wait ();
-    dbus_connection_unref (connection_);
+    inherited::stop (true,
+                     true);
   } // end IF
+  if (connection_)
+    dbus_connection_unref (connection_);
 #endif
 }
 
@@ -324,7 +334,8 @@ error:
   if (connection_)
   {
     dbus_connection_close (connection_);
-    inherited::wait ();
+    inherited::stop (true,
+                     true);
     dbus_connection_unref (connection_);
     connection_ = NULL;
   } // end IF
@@ -375,14 +386,11 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   ACE_ASSERT (connection_);
 
   dbus_connection_close (connection_);
-  inherited::wait ();
+  inherited::stop (waitForCompletion_in,
+                   lockedAccess_in);
   dbus_connection_unref (connection_);
   connection_ = NULL;
 //  deviceDBusPath_.resize (0);
-#endif
-
-#if defined (_DEBUG)
-  unsubscribe (this);
 #endif
 
   isActive_ = false;
@@ -449,6 +457,11 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 
     localSAP_.reset ();
     peerSAP_.reset ();
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    DBusDispatchStarted_ = false;
+#endif
 
     isInitialized_ = false;
   } // end IF
@@ -522,7 +535,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
     return;
   } // end IF
 
-  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, lock_);
+  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     subscribers_.push_back (interfaceHandle_in);
   } // end lock scope
 }
@@ -541,7 +554,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::unsubscribe"));
 
-  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, lock_);
+  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     SUBSCRIBERS_ITERATOR_T iterator = subscribers_.begin ();
     for (;
          iterator != subscribers_.end ();
@@ -947,11 +960,11 @@ retrieve_access_point:
     ++iterator;
     goto next;
   } // end IF
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("activated connection configuration \"%s\" (device: \"%s\", SSID: %s)\n"),
-              ACE_TEXT (connection_object_path_string.c_str ()),
-              ACE_TEXT ((*iterator).first.c_str ()),
-              ACE_TEXT (SSID_in.c_str ())));
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("activated connection configuration \"%s\" (device: \"%s\", SSID: %s)\n"),
+//              ACE_TEXT (connection_object_path_string.c_str ()),
+//              ACE_TEXT ((*iterator).first.c_str ()),
+//              ACE_TEXT (SSID_in.c_str ())));
 
   goto continue_;
 
@@ -1012,7 +1025,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::onAssociate"));
 
   // synch access
-  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, lock_);
+  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     // *NOTE*: this works because the lock is recursive
     // *WARNING* if callees unsubscribe() within the callback bad things
     //           happen, as the current iterator is invalidated
@@ -1129,7 +1142,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::onConnect"));
 
   // synch access
-  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, lock_);
+  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     // *NOTE*: this works because the lock is recursive
     // *WARNING* if callees unsubscribe() within the callback bad things
     //           happen, as the current iterator is invalidated
@@ -1174,21 +1187,21 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 //    return;
 //  } // end IF
 
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("\"%s\": connected to SSID %s: %s <---> %s\n"),
-//              ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, interfaceIdentifier_in).c_str ()),
-//              ACE_TEXT (SSID_in.c_str ()),
-//              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_).c_str ()),
-//              ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_).c_str ())));
-//#else
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("\"%s\": connected to SSID %s: %s <---> %s\n"),
-//              ACE_TEXT (interfaceIdentifier_in.c_str ()),
-//              ACE_TEXT (SSID_in.c_str ()),
-//              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_).c_str ()),
-//              ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_).c_str ())));
-//#endif
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("\"%s\": connected to SSID %s: %s <---> %s\n"),
+              ACE_TEXT (Net_Common_Tools::interfaceToString (clientHandle_, interfaceIdentifier_in).c_str ()),
+              ACE_TEXT (SSID_in.c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_).c_str ())));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("\"%s\": connected to SSID %s: %s <---> %s\n"),
+              ACE_TEXT (interfaceIdentifier_in.c_str ()),
+              ACE_TEXT (SSID_in.c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_).c_str ())));
+#endif
 }
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
@@ -1210,7 +1223,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::onHotPlug"));
 
   // synch access
-  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, lock_);
+  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     // *NOTE*: this works because the lock is recursive
     // *WARNING* if callees unsubscribe() within the callback bad things
     //           happen, as the current iterator is invalidated
@@ -1261,7 +1274,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::onScanComplete"));
 
   // synch access
-  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, lock_);
+  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     // *NOTE*: this works because the lock is recursive
     // *WARNING* if callees unsubscribe() within the callback bad things
     //           happen, as the current iterator is invalidated
@@ -1321,35 +1334,98 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::svc"));
 
-  // sanity check(s)
-  ACE_ASSERT (connection_);
-
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("(%s): worker thread (id: %t) starting\n"),
               ACE_TEXT (inherited::threadName_.c_str ())));
 
   DBusDispatchStatus dispatch_status = DBUS_DISPATCH_COMPLETE;
+
+  { ACE_GUARD_RETURN (typename inherited::ITASKCONTROL_T::MUTEX_T, aGuard, inherited::lock_, -1);
+    if (DBusDispatchStarted_)
+      goto monitor_thread;
+    DBusDispatchStarted_ = true;
+  } // end lock scope
+
+  // sanity check(s)
+  ACE_ASSERT (connection_);
+
   // *IMPORTANT NOTE*: do NOT block in dbus_connection_read_write_dispatch until
   //                   there is some way to wake it up externally
   //  while (dbus_connection_read_write_dispatch (connection_,
 //                                              -1)) // block
   do
   {
-    if (!dbus_connection_read_write_dispatch (connection_,
-                                              10)) // timeout (ms)
-      break;
+    if (unlikely (!dbus_connection_read_write_dispatch (connection_,
+                                                        10))) // timeout (ms)
+      break; // done
 
     do
     {
       dispatch_status = dbus_connection_dispatch (connection_);
       if (dispatch_status == DBUS_DISPATCH_DATA_REMAINS)
         continue; // <-- process more data
-      if (dispatch_status != DBUS_DISPATCH_COMPLETE)
+      if (unlikely (dispatch_status != DBUS_DISPATCH_COMPLETE))
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to dbus_connection_dispatch() (status was: %d), continuing\n"),
+                    ACE_TEXT ("(%s): worker thread (id: %t) failed to dbus_connection_dispatch() (status was: %d), continuing\n"),
+                    ACE_TEXT (inherited::threadName_.c_str ()),
                     dispatch_status));
       break;
     } while (true);
+  } while (true);
+
+  return 0;
+
+monitor_thread:
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (!configuration_->SSID.empty ());
+
+  int result = -1;
+  ACE_Time_Value interval (1, 0);
+  ACE_Message_Block* message_block_p = NULL;
+  ACE_Time_Value now = COMMON_TIME_NOW;
+  do
+  {
+    if (configuration_->SSID != Net_Common_Tools::associatedSSID (configuration_->interfaceIdentifier))
+      if (unlikely (!associate (configuration_->interfaceIdentifier,
+                                configuration_->SSID)))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("(%s): worker thread (id: %t) failed to Net_IWLANMonitor_T::associate(\"%s\",%s), retrying in %#T...\n"),
+                    ACE_TEXT (inherited::threadName_.c_str ()),
+                    ACE_TEXT (configuration_->interfaceIdentifier.c_str ()),
+                    ACE_TEXT (configuration_->SSID.c_str ()),
+                    &interval));
+
+    result = ACE_OS::sleep (interval);
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
+                  &interval));
+
+    // done ?
+    result = inherited::getq (message_block_p, &now);
+    if (likely (result == -1))
+    {
+      int error = ACE_OS::last_error ();
+      if (unlikely ((error != EAGAIN) &&
+                    (error != ESHUTDOWN)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", aborting\n")));
+        return -1;
+      } // end IF
+      continue;
+    } // end IF
+    ACE_ASSERT (message_block_p);
+    if (unlikely (message_block_p->msg_type () == ACE_Message_Block::MB_STOP))
+    {
+      // clean up
+      message_block_p->release ();
+
+      break; // done
+    } // end IF
+    message_block_p->release ();
+    message_block_p = NULL;
   } while (true);
 
   return 0;

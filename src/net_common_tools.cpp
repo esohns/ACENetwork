@@ -2914,15 +2914,17 @@ Net_Common_Tools::getMTU (ACE_HANDLE handle_in)
                                &optlen);
   if (result)
   {
-    // *PORTABILITY*
+    int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_UNUSED_ARG (error);
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,IP_MTU): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,SO_MAX_MSG_SIZE): \"%m\", aborting\n"),
                 handle_in));
 #else
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::getsockopt(%d,IP_MTU): \"%m\", aborting\n"),
-                handle_in));
+    if (error != ENOTCONN) // 107
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::getsockopt(%d,IP_MTU): \"%m\", aborting\n"),
+                  handle_in));
 #endif
     return 0;
   } // end IF
@@ -3440,6 +3442,28 @@ Net_Common_Tools::sendDatagram (const ACE_INET_Addr& localSAP_in,
   // set source address ?
   if (unlikely (!localSAP_in.is_any ()))
   {
+    int one = 1;
+    result_2 = ACE_OS::setsockopt (handle_h,
+                                   SOL_SOCKET,
+                                   SO_REUSEADDR,
+                                   reinterpret_cast<char*> (&one),
+                                   sizeof (int));
+    if (unlikely (result_2 == -1))
+    {
+      int error = ACE_OS::last_error ();
+      ACE_UNUSED_ARG (error);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,SO_REUSEADDR): \"%m\", aborting\n"),
+                  handle_h));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::setsockopt(%d,SO_REUSEADDR): \"%m\", aborting\n"),
+                  handle_h));
+#endif
+      goto error;
+    } // end IF
+
     result_2 =
       ACE_OS::bind (handle_h,
                     reinterpret_cast<struct sockaddr*> (localSAP_in.get_addr ()),
@@ -4627,6 +4651,8 @@ Net_Common_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_i
   ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_ARRAY);
   dbus_message_iter_recurse (&iterator, &iterator_2);
   do {
+    if (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_INVALID)
+      break; // device exists, but no SSIDs found --> radio off ?
     ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_OBJECT_PATH);
     dbus_message_iter_get_basic (&iterator_2, &object_path_p);
     ACE_ASSERT (object_path_p);
@@ -4645,7 +4671,8 @@ Net_Common_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_i
       break;
     } // end IF
   } while (dbus_message_iter_next (&iterator_2));
-  dbus_message_unref (reply_p); reply_p = NULL;
+  dbus_message_unref (reply_p);
+  reply_p = NULL;
 
   goto continue_;
 

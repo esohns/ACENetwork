@@ -527,8 +527,8 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
     switch (state_current)
     {
       case NM_DEVICE_STATE_IP_CONFIG:
-//      case NM_DEVICE_STATE_ACTIVATED:
-//      case NM_DEVICE_STATE_DEACTIVATING:
+      case NM_DEVICE_STATE_ACTIVATED:
+      case NM_DEVICE_STATE_DEACTIVATING:
       case NM_DEVICE_STATE_DISCONNECTED:
         break;
       default:
@@ -564,7 +564,8 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
                         iwlanmonitorbase_p->interfaceIdentifier ().c_str ()))
       goto continue_; // --> not interested
     // *NOTE*: this may fail if the device has-/is- disconnect-ed/-ing
-    if (state_current == NM_DEVICE_STATE_IP_CONFIG)
+    if ((state_current == NM_DEVICE_STATE_IP_CONFIG) ||
+        (state_current == NM_DEVICE_STATE_ACTIVATED))
     {
       active_access_point_path_string =
           Net_Common_Tools::deviceDBusPathToActiveAccessPointDBusPath (connection_in,
@@ -602,32 +603,32 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
         }
         break;
       }
-//      case NM_DEVICE_STATE_ACTIVATED:
-//      {
-//        try {
-//          iwlanmonitorbase_p->onConnect (device_identifier_string,
-//                                         SSID_string,
-//                                         true);
-//        } catch (...) {
-//          ACE_DEBUG ((LM_ERROR,
-//                      ACE_TEXT ("caught exception in Net_IWLANCB;;onConnect(), continuing\n")));
-//          goto continue_;
-//        }
-//        break;
-//      }
-//      case NM_DEVICE_STATE_DEACTIVATING:
-//      {
-//        try {
-//          iwlanmonitorbase_p->onConnect (device_identifier_string,
-//                                         SSID_string,
-//                                         false);
-//        } catch (...) {
-//          ACE_DEBUG ((LM_ERROR,
-//                      ACE_TEXT ("caught exception in Net_IWLANCB;;onConnect(), continuing\n")));
-//          goto continue_;
-//        }
-//        break;
-//      }
+      case NM_DEVICE_STATE_ACTIVATED:
+      {
+        try {
+          iwlanmonitorbase_p->onConnect (device_identifier_string,
+                                         SSID_string,
+                                         true);
+        } catch (...) {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("caught exception in Net_IWLANCB;;onConnect(), continuing\n")));
+          goto continue_;
+        }
+        break;
+      }
+      case NM_DEVICE_STATE_DEACTIVATING:
+      {
+        try {
+          iwlanmonitorbase_p->onConnect (device_identifier_string,
+                                         SSID_string,
+                                         false);
+        } catch (...) {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("caught exception in Net_IWLANCB;;onConnect(), continuing\n")));
+          goto continue_;
+        }
+        break;
+      }
       case NM_DEVICE_STATE_DISCONNECTED:
       {
         try {

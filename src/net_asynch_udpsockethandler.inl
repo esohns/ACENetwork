@@ -91,11 +91,13 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 
   ACE_UNUSED_ARG (messageBlock_in);
 
+  static ACE_INET_Addr inet_addr_sap_any (ACE_sap_any_cast (const ACE_INET_Addr&));
   struct Net_UDPSocketConfiguration* socket_configuration_p = NULL;
-  ACE_INET_Addr source_SAP, SAP;
+  ACE_INET_Addr source_SAP;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   int result = -1;
 #if defined (ACE_LINUX)
+  unsigned short port_number = 0;
   bool handle_privileges = false;
 #endif
   bool handle_sockets = false;
@@ -164,9 +166,6 @@ Net_AsynchUDPSocketHandler_T<SocketType,
     source_SAP.set_port_number (static_cast<u_short> (socket_configuration_p->sourcePort),
                                 1);
   } // end IF
-  SAP =
-    (unlikely (socket_configuration_p->writeOnly) ? source_SAP
-                                                  : socket_configuration_p->listenAddress);
 
   // step1: open socket
   // *NOTE*: even if this is a write-only connection, the output stream still
@@ -182,9 +181,13 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   //                       inherited2
   //                       --> maintain one handle
 #if defined (ACE_LINUX)
+  port_number =
+      (socket_configuration_p->writeOnly ? (socket_configuration_p->sourcePort ? source_SAP
+                                                                               : inet_addr_sap_any)
+                                         : socket_configuration_p->listenAddress).get_port_number ();
   // (temporarily) elevate privileges to open system sockets
   if (unlikely (!socket_configuration_p->writeOnly &&
-                (SAP.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT)))
+                (port_number <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT)))
   {
     if (!Common_Tools::setRootPrivileges ())
     {
@@ -196,15 +199,19 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   } // end IF
 #endif
   result =
-    inherited2::open (SAP,                      // (local) SAP
-                      ACE_PROTOCOL_FAMILY_INET, // protocol family
-                      0,                        // protocol
-                      1);                       // reuse_addr
+    inherited2::open ((socket_configuration_p->writeOnly ? (socket_configuration_p->sourcePort ? source_SAP
+                                                                                               : inet_addr_sap_any)
+                                                         : socket_configuration_p->listenAddress), // local SAP
+                      ACE_PROTOCOL_FAMILY_INET,                                                    // protocol family
+                      0,                                                                           // protocol
+                      1);                                                                          // reuse_addr
   if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to SocketType::open(%s): \"%m\", aborting\n"),
-                ACE_TEXT (Net_Common_Tools::IPAddressToString (SAP).c_str ())));
+                ACE_TEXT (Net_Common_Tools::IPAddressToString ((socket_configuration_p->writeOnly ? (socket_configuration_p->sourcePort ? source_SAP
+                                                                                                                                        : inet_addr_sap_any)
+                                                                                                  : socket_configuration_p->listenAddress)).c_str ())));
     goto error;
   } // end IF
 #if defined (ACE_LINUX)
@@ -232,34 +239,28 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 
       goto error;
     } // end IF
-  } // end IF
-  else
-  {
-    inherited3::handle (handle);
-    writeHandle_ = handle;
-  } // end ELSE    
-  handle_sockets = true;
 
-  // set source address ?
-  if (unlikely (socket_configuration_p->sourcePort))
-  {
-    result =
-      ACE_OS::bind (writeHandle_,
-                    reinterpret_cast<struct sockaddr*> (source_SAP.get_addr ()),
-                    source_SAP.get_addr_size ());
-    if (unlikely (result == -1))
+    // set source address ?
+    if (unlikely (socket_configuration_p->sourcePort))
     {
-      int error = ACE_OS::last_error ();
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if (error != WSAEINVAL) // 10022: socket already bound
+      source_SAP.set (static_cast<u_short> (socket_configuration_p->sourcePort),
+                      static_cast<ACE_UINT32> (INADDR_ANY),
+                      1,
+                      0);
+      result =
+        ACE_OS::bind (writeHandle_,
+                      reinterpret_cast<struct sockaddr*> (source_SAP.get_addr ()),
+                      source_SAP.get_addr_size ());
+      if (unlikely (result == -1))
       {
+        int error = ACE_OS::last_error ();
+        ACE_UNUSED_ARG (error);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_OS::bind(0x%@,%s): \"%m\", aborting\n"),
                     writeHandle_,
                     ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
 #else
-      ACE_UNUSED_ARG (error);
-      {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", aborting\n"),
                     writeHandle_,
@@ -269,6 +270,12 @@ Net_AsynchUDPSocketHandler_T<SocketType,
       } // end IF
     } // end IF
   } // end IF
+  else
+  {
+    inherited3::handle (handle);
+    writeHandle_ = handle;
+  } // end ELSE    
+  handle_sockets = true;
 
   // *TODO*: remove type inferences
   address_ = socket_configuration_p->peerAddress;

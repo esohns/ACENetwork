@@ -58,7 +58,7 @@ Net_WLANInetMonitor_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_WLANInetMonitor_T::onConnect"));
 
   // synch access
-  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::lock_);
+  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_);
     // *NOTE*: this works because the lock is recursive
     // *WARNING* if callees unsubscribe() within the callback bad things
     //           happen, as the current iterator is invalidated

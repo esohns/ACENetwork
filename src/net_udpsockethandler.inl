@@ -427,6 +427,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
       // *NOTE*: more likely, this happened because the (select) reactor is out of
       //         "free" (read) slots
       int error = ACE_OS::last_error ();
+      ACE_UNUSED_ARG (error);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Svc_Handler::open(0x%@) (handle was: 0x%@): \"%m\", aborting\n"),

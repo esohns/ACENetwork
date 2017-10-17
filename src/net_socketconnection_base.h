@@ -66,12 +66,12 @@ class Net_SocketConnectionBase_T
   // *IMPORTANT NOTE*: fire-and-forget API
   //virtual bool send (ACE_Message_Block*&);
   virtual void send (ACE_Message_Block*&);
-  virtual const HandlerConfigurationType& get ();
-  virtual bool initialize (const HandlerConfigurationType&); // handler configuration
+  inline virtual const HandlerConfigurationType& get () { return configuration_; };
+  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = configuration_in; return true; };
 
   virtual void set (Net_ClientServerRole);
   //virtual void finalize ();
-  virtual void ping (); // ping the peer !
+  inline virtual void ping () { inherited::stream_.ping (); };
 
 //  // *NOTE*: enqueue any received data onto our stream for further processing
 //  virtual int handle_input(ACE_HANDLE = ACE_INVALID_HANDLE);
@@ -141,7 +141,7 @@ class Net_AsynchSocketConnectionBase_T
                                   HandlerConfigurationType>
 {
  public:
-  virtual ~Net_AsynchSocketConnectionBase_T ();
+  inline virtual ~Net_AsynchSocketConnectionBase_T () {};
 
   // override some ACE_Service_Handler members
   using HandlerType::open;
@@ -153,12 +153,12 @@ class Net_AsynchSocketConnectionBase_T
   //virtual const HandlerConfigurationType& get () const;
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&);
-  virtual const HandlerConfigurationType& get ();
-  virtual bool initialize (const HandlerConfigurationType&); // handler configuration
+  inline virtual const HandlerConfigurationType& get () { return configuration_; };
+  inline virtual bool initialize (const HandlerConfigurationType& configuration_in) { configuration_ = configuration_in; return true; };
 
   virtual void set (Net_ClientServerRole);
   //virtual void finalize ();
-  virtual void ping (); // ping the peer !
+  inline virtual void ping () { inherited::stream_.ping (); };
 
   // convenient typedefs
   typedef Net_ITransportLayer_T<SocketConfigurationType> ITRANSPORTLAYER_T;

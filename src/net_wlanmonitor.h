@@ -167,7 +167,7 @@ class Net_WLANMonitor_T
 
   // *IMPORTANT NOTE*: this must be 'recursive', so that callees may unsubscribe
   //                   from within the notification callbacks
-  typename ACE_SYNCH_USE::RECURSIVE_MUTEX lock_;
+  typename ACE_SYNCH_USE::RECURSIVE_MUTEX subscribersLock_;
   SUBSCRIBERS_T                           subscribers_;
 
   UserDataType*                           userData_;
@@ -228,6 +228,10 @@ class Net_WLANMonitor_T
   // helper functions
   INTERFACEIDENTIFIERS_T getDevices () const;
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  bool                                    DBusDispatchStarted_;
+#endif
   MESSAGEQUEUE_T                          queue_;
 };
 

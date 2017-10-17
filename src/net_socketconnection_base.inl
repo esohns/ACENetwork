@@ -18,9 +18,9 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include <ace/Log_Msg.h>
-#include <ace/SOCK_Stream.h>
-#include <ace/Svc_Handler.h>
+#include "ace/Log_Msg.h"
+#include "ace/SOCK_Stream.h"
+#include "ace/Svc_Handler.h"
 
 #include "common.h"
 
@@ -156,54 +156,6 @@ template <typename HandlerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
-const HandlerConfigurationType&
-Net_SocketConnectionBase_T<HandlerType,
-                           AddressType,
-                           ConfigurationType,
-                           StateType,
-                           StatisticContainerType,
-                           SocketConfigurationType,
-                           HandlerConfigurationType,
-                           //UserDataType>::get () const
-                           UserDataType>::get ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::get"));
-
-  return configuration_;
-}
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
-bool
-Net_SocketConnectionBase_T<HandlerType,
-                           AddressType,
-                           ConfigurationType,
-                           StateType,
-                           StatisticContainerType,
-                           SocketConfigurationType,
-                           HandlerConfigurationType,
-                           UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::initialize"));
-
-  configuration_ = configuration_in;
-
-  return true;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
 void
 Net_SocketConnectionBase_T<HandlerType,
                            AddressType,
@@ -230,29 +182,6 @@ Net_SocketConnectionBase_T<HandlerType,
                                       socket_configuration))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ITransportLayer_T::initialize(), continuing\n")));
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
-void
-Net_SocketConnectionBase_T<HandlerType,
-                           AddressType,
-                           ConfigurationType,
-                           StateType,
-                           StatisticContainerType,
-                           SocketConfigurationType,
-                           HandlerConfigurationType,
-                           UserDataType>::ping ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_SocketConnectionBase_T::ping"));
-
-  inherited::stream_.ping ();
 }
 
 template <typename HandlerType,
@@ -527,27 +456,6 @@ template <typename HandlerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
-Net_AsynchSocketConnectionBase_T<HandlerType,
-                                 AddressType,
-                                 ConfigurationType,
-                                 StateType,
-                                 StatisticContainerType,
-                                 SocketConfigurationType,
-                                 HandlerConfigurationType,
-                                 UserDataType>::~Net_AsynchSocketConnectionBase_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::~Net_AsynchSocketConnectionBase_T"));
-
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
 void
 Net_AsynchSocketConnectionBase_T<HandlerType,
                                  AddressType,
@@ -670,55 +578,6 @@ template <typename HandlerType,
           typename SocketConfigurationType,
           typename HandlerConfigurationType,
           typename UserDataType>
-bool
-Net_AsynchSocketConnectionBase_T<HandlerType,
-                                 AddressType,
-                                 ConfigurationType,
-                                 StateType,
-                                 StatisticContainerType,
-                                 SocketConfigurationType,
-                                 HandlerConfigurationType,
-                                 UserDataType>::initialize (const HandlerConfigurationType& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::initialize"));
-
-  configuration_ = configuration_in;
-
-  return true;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
-const HandlerConfigurationType&
-Net_AsynchSocketConnectionBase_T<HandlerType,
-                                 AddressType,
-                                 ConfigurationType,
-                                 StateType,
-                                 StatisticContainerType,
-                                 SocketConfigurationType,
-                                 HandlerConfigurationType,
-                                 //UserDataType>::get () const
-                                 UserDataType>::get ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::get"));
-
-  return configuration_;
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
 void
 Net_AsynchSocketConnectionBase_T<HandlerType,
                                  AddressType,
@@ -745,29 +604,6 @@ Net_AsynchSocketConnectionBase_T<HandlerType,
                                       *configuration_.socketConfiguration))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_ITransportLayer_T::initialize(), continuing\n")));
-}
-
-template <typename HandlerType,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename SocketConfigurationType,
-          typename HandlerConfigurationType,
-          typename UserDataType>
-void
-Net_AsynchSocketConnectionBase_T<HandlerType,
-                                 AddressType,
-                                 ConfigurationType,
-                                 StateType,
-                                 StatisticContainerType,
-                                 SocketConfigurationType,
-                                 HandlerConfigurationType,
-                                 UserDataType>::ping ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_AsynchSocketConnectionBase_T::ping"));
-
-  inherited::stream_.ping ();
 }
 
 template <typename HandlerType,
