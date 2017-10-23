@@ -3494,7 +3494,7 @@ Net_Common_Tools::sendDatagram (const ACE_INET_Addr& localSAP_in,
                     0,
                     reinterpret_cast<struct sockaddr*> (remoteSAP_in.get_addr ()),
                     remoteSAP_in.get_addr_size ());
-  if (unlikely (result_3 != bytes_to_send))
+  if (unlikely (static_cast<size_t> (result_3) != bytes_to_send))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
@@ -4432,7 +4432,9 @@ Net_Common_Tools::accessPointDBusPathToSSID (struct DBusConnection* connection_i
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_VARIANT);
+  if (!Net_Common_Tools::dBusMessageValidate (iterator,
+                                              DBUS_TYPE_VARIANT))
+    goto error;
   dbus_message_iter_recurse (&iterator, &iterator_2);
   ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_ARRAY);
   dbus_message_iter_recurse (&iterator_2, &iterator);

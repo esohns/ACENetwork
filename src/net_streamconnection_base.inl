@@ -2595,6 +2595,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   // clean up
   result_in.message_block ().release ();
 
+  Net_ConnectionId_t id = this->id ();
   // *WARNING*: most likely 'delete''s 'this'
   result =
       handle_close (result_in.handle (),
@@ -2616,7 +2617,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 //#endif
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to Net_StreamAsynchTCPSocketBase_T::handle_close(): \"%m\", continuing\n"),
-                id ()));
+                id));
   } // end IF
 }
 

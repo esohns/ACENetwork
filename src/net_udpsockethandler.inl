@@ -266,10 +266,6 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
     writeHandle_ = handle;
   handle_sockets = true;
 
-//continue_:
-  // *TODO*: remove type inferences
-  address_ = socket_configuration_p->peerAddress;
-
   // step1: connect ?
   if (unlikely (socket_configuration_p->connect))
   {
@@ -343,6 +339,9 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
     } // end IF
 #endif
   } // end IF
+
+  // *TODO*: remove type inferences
+  address_ = socket_configuration_p->peerAddress;
 
   // step3b: tweak outbound socket
   // *NOTE*: sendto()-ing datagrams larger than SO_SNDBUF will trigger errno
@@ -834,7 +833,6 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
     writeHandle_ = handle;
   handle_sockets = true;
 
-continue_:
   // *TODO*: remove type inferences
   address_ = socket_configuration_p->peerAddress;
 
@@ -947,7 +945,7 @@ continue_:
 //              so_max_msg_size));
 //#endif
 
-    // step3: register with the reactor
+  // step3: register with the reactor
   if (likely (!socket_configuration_p->writeOnly))
   {
     result = inherited2::open (arg_in);

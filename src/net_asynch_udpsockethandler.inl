@@ -277,13 +277,6 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   } // end ELSE    
   handle_sockets = true;
 
-  // *TODO*: remove type inferences
-  address_ = socket_configuration_p->peerAddress;
-  PDUSize_ = Net_Common_Tools::getMTU (handle);
-  //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("maximum message size: %u\n"),
-  //            PDUSize_));
-
   // step0: initialize base class
   inherited3::proactor (proactor_p);
 
@@ -377,6 +370,17 @@ Net_AsynchUDPSocketHandler_T<SocketType,
       goto error;
     } // end IF
   } // end IF
+
+  // *TODO*: remove type inferences
+  address_ = socket_configuration_p->peerAddress;
+  // *NOTE*: IP_MTU works only on connect()ed sockets (see man 7 ip)
+  // *TODO*: to be disambiguated
+  PDUSize_ = Net_Common_Tools::getMTU (handle);
+  if (!PDUSize_) // --> fall back
+    PDUSize_ = socket_configuration_p->bufferSize;
+  //ACE_DEBUG ((LM_DEBUG,
+  //            ACE_TEXT ("maximum message size: %u\n"),
+  //            PDUSize_));
 
   // step4a: tweak outbound socket (if any)
   if (likely (socket_configuration_p->bufferSize))
@@ -557,7 +561,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     if ((error != ERROR_INVALID_ACCESS) && //  12: operation was triggered from a different thread
-        (error != ERROR_IO_PENDING))       // 997: 
+        (error != ERROR_IO_PENDING))       // 997:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(0x%@): \"%s\", continuing\n"),
                   handle_in,
@@ -766,9 +770,9 @@ Net_AsynchUDPSocketHandler_T<SocketType,
                   result_in.handle (), ACE_TEXT (Net_Common_Tools::IPAddressToString (Net_Common_Tools::getBoundAddress (result_in.handle ())).c_str ()),
                   ACE_TEXT (Common_Tools::errorToString (static_cast<DWORD> (error), false).c_str ())));
 #else
-    if ((error != ECONNRESET) &&
-        (error != EPIPE)      &&
-        (error != EBADF))        // 9: Linux (local close())
+    if ((error != EBADF) && // 9 : Linux (local close())
+        (error != EPIPE))   // 32:
+//        (error != EDESTADDRREQ) // 89:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: %d, address: %s): \"%s\", aborting\n"),
                   result_in.handle (), ACE_TEXT (Net_Common_Tools::IPAddressToString (Net_Common_Tools::getBoundAddress (result_in.handle ())).c_str ()),

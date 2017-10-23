@@ -156,7 +156,7 @@ template <typename AddressType,
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,
-          typename StreamStatusType>
+          typename StreamStatusType>         // state machine-
 class Net_IStreamConnection_T
  : public virtual Net_ISocketConnection_T<AddressType,
                                           ConfigurationType,
