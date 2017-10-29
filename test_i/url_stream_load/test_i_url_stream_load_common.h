@@ -44,7 +44,7 @@ class Test_I_SessionMessage;
 struct Test_I_URLStreamLoad_SignalHandlerConfiguration
  : Test_I_SignalHandlerConfiguration
 {
-  inline Test_I_URLStreamLoad_SignalHandlerConfiguration ()
+  Test_I_URLStreamLoad_SignalHandlerConfiguration ()
    : Test_I_SignalHandlerConfiguration ()
    , statisticReportingHandler (NULL)
   {};
@@ -55,7 +55,7 @@ struct Test_I_URLStreamLoad_SignalHandlerConfiguration
 struct Test_I_URLStreamLoad_Configuration
  : Test_I_Configuration
 {
-  inline Test_I_URLStreamLoad_Configuration ()
+  Test_I_URLStreamLoad_Configuration ()
    : Test_I_Configuration ()
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
@@ -93,7 +93,7 @@ typedef Common_ISubscribe_T<Test_I_ISessionNotify_t> Test_I_ISubscribe_t;
 struct Test_I_URLStreamLoad_GTK_ProgressData
  : Test_I_GTK_ProgressData
 {
-  inline Test_I_URLStreamLoad_GTK_ProgressData ()
+  Test_I_URLStreamLoad_GTK_ProgressData ()
    : Test_I_GTK_ProgressData ()
 //   , statistic ()
    , transferred (0)
@@ -106,7 +106,7 @@ struct Test_I_URLStreamLoad_GTK_ProgressData
 struct Test_I_URLStreamLoad_GTK_CBData
  : Test_I_GTK_CBData
 {
-  inline Test_I_URLStreamLoad_GTK_CBData ()
+  Test_I_URLStreamLoad_GTK_CBData ()
    : Test_I_GTK_CBData ()
    , configuration (NULL)
    , handle (ACE_INVALID_HANDLE)

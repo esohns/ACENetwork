@@ -40,7 +40,7 @@ struct BitTorrent_Client_CursesState;
 struct BitTorrent_Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
-  inline BitTorrent_Client_SignalHandlerConfiguration ()
+  BitTorrent_Client_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    , cursesState (NULL)
   {};
@@ -81,43 +81,28 @@ typedef BitTorrent_SessionMessage_T<struct BitTorrent_Client_PeerSessionData,
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
                                 struct BitTorrent_AllocatorConfiguration> BitTorrent_Client_ControlMessage_t;
-template <typename StreamStateType,
-          typename ConfigurationType,
-          typename StatisticContainerType,
-          typename TimerManagerType,
-          typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename ConnectionConfigurationType,
-          typename ConnectionStateType,
-          typename HandlerConfigurationType,
-          typename SessionStateType,
-          typename CBDataType,
-          typename UserDataType>
-class BitTorrent_PeerStream_T;
-typedef BitTorrent_PeerStream_T<struct BitTorrent_Client_PeerStreamState,
-                                struct BitTorrent_Client_PeerStreamConfiguration,
-                                BitTorrent_Statistic_t,
-                                Common_Timer_Manager_t,
-                                struct BitTorrent_Client_PeerModuleHandlerConfiguration,
-                                struct BitTorrent_Client_PeerSessionData,
-                                BitTorrent_Client_PeerSessionData_t,
-                                BitTorrent_Client_ControlMessage_t,
-                                BitTorrent_Client_PeerMessage_t,
-                                BitTorrent_Client_PeerSessionMessage_t,
-                                struct BitTorrent_Client_PeerConnectionConfiguration,
-                                struct BitTorrent_Client_PeerConnectionState,
-                                struct BitTorrent_Client_SocketHandlerConfiguration,
-                                struct BitTorrent_Client_SessionState,
-                                struct BitTorrent_Client_GTK_CBData,
-                                struct BitTorrent_Client_PeerUserData> BitTorrent_Client_PeerStream_t;
+//template <typename StreamStateType,
+//          typename ConfigurationType,
+//          typename StatisticContainerType,
+//          typename TimerManagerType,
+//          typename ModuleHandlerConfigurationType,
+//          typename SessionDataType,
+//          typename SessionDataContainerType,
+//          typename ControlMessageType,
+//          typename DataMessageType,
+//          typename SessionMessageType,
+//          typename ConnectionConfigurationType,
+//          typename ConnectionStateType,
+//          typename HandlerConfigurationType,
+//          typename SessionStateType,
+//          typename CBDataType,
+//          typename ConnectionManagerType,
+//          typename UserDataType>
+//class BitTorrent_PeerStream_T;
 //typedef BitTorrent_PeerStream_T<struct BitTorrent_Client_PeerStreamState,
 //                                struct BitTorrent_Client_PeerStreamConfiguration,
 //                                BitTorrent_Statistic_t,
-//                                BitTorrent_StatisticHandler_Proactor_t,
+//                                Common_Timer_Manager_t,
 //                                struct BitTorrent_Client_PeerModuleHandlerConfiguration,
 //                                struct BitTorrent_Client_PeerSessionData,
 //                                BitTorrent_Client_PeerSessionData_t,
@@ -129,7 +114,8 @@ typedef BitTorrent_PeerStream_T<struct BitTorrent_Client_PeerStreamState,
 //                                struct BitTorrent_Client_SocketHandlerConfiguration,
 //                                struct BitTorrent_Client_SessionState,
 //                                struct BitTorrent_Client_GTK_CBData,
-//                                struct BitTorrent_Client_PeerUserData> BitTorrent_Client_AsynchPeerStream_t;
+//  
+//                                struct BitTorrent_Client_PeerUserData> BitTorrent_Client_PeerStream_t;
 struct BitTorrent_Client_PeerConfigurationConfiguration;
 struct BitTorrent_Client_TrackerConfigurationConfiguration;
 struct BitTorrent_Client_PeerConnectionState;
@@ -155,7 +141,7 @@ typedef BitTorrent_IControl_T<BitTorrent_Client_ISession_t> BitTorrent_Client_IC
 struct BitTorrent_Client_ModuleHandlerConfiguration;
 struct BitTorrent_Client_ThreadData
 {
-  inline BitTorrent_Client_ThreadData ()
+  BitTorrent_Client_ThreadData ()
    : configuration (NULL)
    , controller (NULL)
    , cursesState (NULL)

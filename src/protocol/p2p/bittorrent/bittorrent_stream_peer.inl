@@ -39,6 +39,7 @@ template <typename StreamStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
           typename CBDataType,
+          typename ConnectionManagerType,
           typename UserDataType>
 BitTorrent_PeerStream_T<StreamStateType,
                         ConfigurationType,
@@ -55,6 +56,7 @@ BitTorrent_PeerStream_T<StreamStateType,
                         HandlerConfigurationType,
                         SessionStateType,
                         CBDataType,
+                        ConnectionManagerType,
                         UserDataType>::BitTorrent_PeerStream_T ()
  : inherited ()
 {
@@ -77,6 +79,7 @@ template <typename StreamStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
           typename CBDataType,
+          typename ConnectionManagerType,
           typename UserDataType>
 bool
 BitTorrent_PeerStream_T<StreamStateType,
@@ -94,6 +97,7 @@ BitTorrent_PeerStream_T<StreamStateType,
                         HandlerConfigurationType,
                         SessionStateType,
                         CBDataType,
+                        ConnectionManagerType,
                         UserDataType>::load (Stream_ModuleList_t& modules_out,
                                              bool& deleteModules_out)
 {
@@ -139,6 +143,7 @@ template <typename StreamStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
           typename CBDataType,
+          typename ConnectionManagerType,
           typename UserDataType>
 bool
 BitTorrent_PeerStream_T<StreamStateType,
@@ -156,11 +161,9 @@ BitTorrent_PeerStream_T<StreamStateType,
                         HandlerConfigurationType,
                         SessionStateType,
                         CBDataType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                        UserDataType>::initialize (const CONFIGURATION_T& configuration_in)
-#else
-                        UserDataType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
-#endif
+                        ConnectionManagerType,
+                        UserDataType>::initialize (const CONFIGURATION_T& configuration_in,
+                                                   ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStream_T::initialize"));
 
@@ -182,10 +185,11 @@ BitTorrent_PeerStream_T<StreamStateType,
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
-  if (!inherited::initialize (configuration_in))
+  if (!inherited::initialize (configuration_in,
+                              handle_in))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
+                ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
                 ACE_TEXT (stream_bittorrent_stream_name_string_)));
     goto error;
   } // end IF
@@ -314,6 +318,7 @@ template <typename StreamStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
           typename CBDataType,
+          typename ConnectionManagerType,
           typename UserDataType>
 bool
 BitTorrent_PeerStream_T<StreamStateType,
@@ -331,6 +336,7 @@ BitTorrent_PeerStream_T<StreamStateType,
                         HandlerConfigurationType,
                         SessionStateType,
                         CBDataType,
+                        ConnectionManagerType,
                         UserDataType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStream_T::collect"));

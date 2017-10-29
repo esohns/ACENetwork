@@ -71,7 +71,7 @@ typedef std::vector<IRC_Client_PortRange_t> IRC_Client_PortRanges_t;
 typedef IRC_Client_PortRanges_t::const_iterator IRC_Client_PortRangesIterator_t;
 struct IRC_Client_ConnectionEntry
 {
-  inline IRC_Client_ConnectionEntry ()
+  IRC_Client_ConnectionEntry ()
    : hostName ()
    , ports ()
    , netWork ()
@@ -88,7 +88,7 @@ typedef std::multimap<std::string,
 typedef IRC_Client_Servers_t::const_iterator IRC_Client_ServersIterator_t;
 struct IRC_Client_PhoneBook
 {
-  inline IRC_Client_PhoneBook ()
+  IRC_Client_PhoneBook ()
    : networks ()
    , servers ()
    , timeStamp ()
@@ -109,7 +109,7 @@ typedef ACE_IOStream_alt_T<ACE_FILE_Stream> IRC_Client_IOStream_t;
 
 struct IRC_Client_InputThreadData
 {
-  inline IRC_Client_InputThreadData ()
+  IRC_Client_InputThreadData ()
    : configuration (NULL)
    , cursesState (NULL)
    , groupID (-1)
@@ -126,7 +126,7 @@ struct IRC_Client_InputThreadData
 
 struct IRC_Client_UserData
 {
-  inline IRC_Client_UserData ()
+  IRC_Client_UserData ()
    : connectionConfiguration (NULL)
    , moduleConfiguration (NULL)
    , moduleHandlerConfiguration (NULL)
@@ -142,7 +142,7 @@ struct IRC_Client_UserData
 struct IRC_Client_SessionData
  : IRC_Stream_SessionData
 {
-  inline IRC_Client_SessionData ()
+  IRC_Client_SessionData ()
    : IRC_Stream_SessionData ()
    , connectionState (NULL)
    , userData (NULL)
@@ -159,7 +159,7 @@ struct IRC_Client_CursesState;
 struct IRC_Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
-  inline IRC_Client_SignalHandlerConfiguration ()
+  IRC_Client_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    , connector (NULL)
    , cursesState (NULL)

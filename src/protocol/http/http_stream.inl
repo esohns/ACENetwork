@@ -32,6 +32,7 @@ template <typename StreamStateType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
+          typename ConnectionManagerType,
           typename UserDataType>
 HTTP_Stream_T<StreamStateType,
               ConfigurationType,
@@ -43,6 +44,7 @@ HTTP_Stream_T<StreamStateType,
               ControlMessageType,
               DataMessageType,
               SessionMessageType,
+              ConnectionManagerType,
               UserDataType>::HTTP_Stream_T ()
  : inherited ()
 {
@@ -60,6 +62,7 @@ template <typename StreamStateType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
+          typename ConnectionManagerType,
           typename UserDataType>
 bool
 HTTP_Stream_T<StreamStateType,
@@ -72,6 +75,7 @@ HTTP_Stream_T<StreamStateType,
               ControlMessageType,
               DataMessageType,
               SessionMessageType,
+              ConnectionManagerType,
               UserDataType>::load (Stream_ModuleList_t& modules_out,
                                    bool& deleteModules_out)
 {
@@ -106,6 +110,7 @@ template <typename StreamStateType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
+          typename ConnectionManagerType,
           typename UserDataType>
 bool
 HTTP_Stream_T<StreamStateType,
@@ -118,11 +123,13 @@ HTTP_Stream_T<StreamStateType,
               ControlMessageType,
               DataMessageType,
               SessionMessageType,
+              ConnectionManagerType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-              UserDataType>::initialize (const CONFIGURATION_T& configuration_in)
+              UserDataType>::initialize (const CONFIGURATION_T& configuration_in,
 #else
-              UserDataType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
+              UserDataType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
 #endif
+                                         ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::initialize"));
 
@@ -143,7 +150,8 @@ HTTP_Stream_T<StreamStateType,
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
-  if (!inherited::initialize (configuration_in))
+  if (!inherited::initialize (configuration_in,
+                              handle_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
@@ -271,6 +279,7 @@ template <typename StreamStateType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
+          typename ConnectionManagerType,
           typename UserDataType>
 bool
 HTTP_Stream_T<StreamStateType,
@@ -283,6 +292,7 @@ HTTP_Stream_T<StreamStateType,
               ControlMessageType,
               DataMessageType,
               SessionMessageType,
+              ConnectionManagerType,
               UserDataType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::collect"));

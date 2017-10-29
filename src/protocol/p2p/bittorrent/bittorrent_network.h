@@ -144,7 +144,7 @@ typedef BitTorrent_ISession_T<ACE_INET_Addr,
 struct BitTorrent_PeerConnectionState
  : Net_ConnectionState
 {
-  inline BitTorrent_PeerConnectionState ()
+  BitTorrent_PeerConnectionState ()
    : Net_ConnectionState ()
    , configuration (NULL)
    , connection (NULL)
@@ -160,7 +160,7 @@ struct BitTorrent_PeerConnectionState
 struct BitTorrent_TrackerConnectionState
  : Net_ConnectionState
 {
-  inline BitTorrent_TrackerConnectionState ()
+  BitTorrent_TrackerConnectionState ()
    : Net_ConnectionState ()
    , configuration (NULL)
    , connection (NULL)
@@ -347,7 +347,7 @@ struct BitTorrent_PeerConnectionConfiguration;
 struct BitTorrent_PeerSocketHandlerConfiguration
  : Net_SocketHandlerConfiguration
 {
-  inline BitTorrent_PeerSocketHandlerConfiguration ()
+  BitTorrent_PeerSocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
    , socketConfiguration_2 ()
    , connectionConfiguration (NULL)
@@ -367,7 +367,7 @@ struct BitTorrent_TrackerConnectionConfiguration;
 struct BitTorrent_TrackerSocketHandlerConfiguration
  : Net_SocketHandlerConfiguration
 {
-  inline BitTorrent_TrackerSocketHandlerConfiguration ()
+  BitTorrent_TrackerSocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
    , socketConfiguration_2 ()
    , connectionConfiguration (NULL)
@@ -387,7 +387,7 @@ struct BitTorrent_PeerStreamConfiguration;
 struct BitTorrent_PeerConnectionConfiguration
  : Net_ConnectionConfiguration
 {
-  inline BitTorrent_PeerConnectionConfiguration ()
+  BitTorrent_PeerConnectionConfiguration ()
    : Net_ConnectionConfiguration ()
    ///////////////////////////////////////
    , socketHandlerConfiguration ()
@@ -406,7 +406,7 @@ struct BitTorrent_TrackerStreamConfiguration;
 struct BitTorrent_TrackerConnectionConfiguration
  : Net_ConnectionConfiguration
 {
-  inline BitTorrent_TrackerConnectionConfiguration ()
+  BitTorrent_TrackerConnectionConfiguration ()
    : Net_ConnectionConfiguration ()
    ///////////////////////////////////////
    , socketHandlerConfiguration ()
@@ -426,7 +426,7 @@ typedef std::vector<ACE_INET_Addr> BitTorrent_PeerAddresses_t;
 typedef BitTorrent_PeerAddresses_t::const_iterator BitTorrent_PeerAddressesIterator_t;
 struct BitTorrent_SessionInitiationThreadData
 {
-  inline BitTorrent_SessionInitiationThreadData ()
+  BitTorrent_SessionInitiationThreadData ()
    : addresses (NULL)
    , lock (NULL)
    , session (NULL)
@@ -443,7 +443,7 @@ typedef BitTorrent_IControl_T<BitTorrent_ISession_t> BitTorrent_IControl_t;
 struct BitTorrent_SessionConfiguration
  : Net_SessionConfiguration
 {
-  inline BitTorrent_SessionConfiguration ()
+  BitTorrent_SessionConfiguration ()
    : Net_SessionConfiguration ()
    , connectionManager (NULL)
    , controller_ (NULL)
@@ -470,7 +470,7 @@ struct BitTorrent_SessionConfiguration
 // *NOTE*: see also: https://wiki.theory.org/BitTorrentSpecification#Overview
 struct BitTorrent_PeerStatus
 {
-  inline BitTorrent_PeerStatus ()
+  BitTorrent_PeerStatus ()
    : am_choking (true)
    , am_interested (false)
    , peer_choking (true)
@@ -486,7 +486,7 @@ typedef std::map<Net_ConnectionId_t, struct BitTorrent_PeerStatus> BitTorrent_Pe
 typedef BitTorrent_PeerStatus_t::iterator BitTorrent_PeerStatusIterator_t;
 struct BitTorrent_SessionState
 {
-  inline BitTorrent_SessionState ()
+  BitTorrent_SessionState ()
    : connections ()
    , controller (NULL)
    , fileName ()

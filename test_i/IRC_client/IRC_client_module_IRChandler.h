@@ -55,13 +55,25 @@ class IRC_Client_Module_IRCHandler
                                          IRC_Message,
                                          IRC_Client_SessionMessage,
                                          Stream_SessionId_t,
-                                         struct IRC_Client_SessionData>
+                                         struct IRC_Client_SessionData,
+                                         struct IRC_Client_UserData>
  , public IRC_StateMachine_Registration
  , public IRC_IControl
 {
+  typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+                                         struct IRC_Client_ModuleHandlerConfiguration,
+                                         ACE_Message_Block,
+                                         IRC_Message,
+                                         IRC_Client_SessionMessage,
+                                         Stream_SessionId_t,
+                                         struct IRC_Client_SessionData,
+                                         struct IRC_Client_UserData> inherited;
+  typedef IRC_StateMachine_Registration inherited2;
+
  public:
   IRC_Client_Module_IRCHandler (ISTREAM_T*); // stream handle
-  virtual ~IRC_Client_Module_IRCHandler ();
+  inline virtual ~IRC_Client_Module_IRCHandler () {}
 
   // implement (part of) Common_IStateMachine_T
   virtual bool wait (const ACE_Time_Value* = NULL);
@@ -121,16 +133,6 @@ class IRC_Client_Module_IRCHandler
                    Common_TimePolicy_t>* clone ();
 
  private:
-  typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
-                                         Common_TimePolicy_t,
-                                         struct IRC_Client_ModuleHandlerConfiguration,
-                                         ACE_Message_Block,
-                                         IRC_Message,
-                                         IRC_Client_SessionMessage,
-                                         Stream_SessionId_t,
-                                         struct IRC_Client_SessionData> inherited;
-  typedef IRC_StateMachine_Registration inherited2;
-
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler (const IRC_Client_Module_IRCHandler&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_Module_IRCHandler& operator= (const IRC_Client_Module_IRCHandler&))

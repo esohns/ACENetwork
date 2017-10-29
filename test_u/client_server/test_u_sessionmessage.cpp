@@ -20,6 +20,7 @@
 #include "stdafx.h"
 
 #include "ace/Synch.h"
+#include "test_u_message.h"
 #include "test_u_stream.h"
 #include "test_u_sessionmessage.h"
 

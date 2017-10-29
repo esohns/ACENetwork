@@ -34,6 +34,7 @@
 #include "test_u_connection_common.h"
 #include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
+#include "test_u_message.h"
 #include "test_u_sessionmessage.h"
 
 Test_U_Client_TimeoutHandler::Test_U_Client_TimeoutHandler (enum ActionModeType mode_in,

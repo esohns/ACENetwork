@@ -67,7 +67,7 @@ endif ()
                REQUIRED
                CONFIG
                PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
-               PATH_SUFFIXES libACEStream/cmake
+               PATH_SUFFIXES libACEStream/build libACEStream/cmake
                NO_DEFAULT_PATH)
  if (NOT EXISTS ${ACEStream_DIR})
   message (FATAL_ERROR "could not find package \"ACEStream\", aborting")

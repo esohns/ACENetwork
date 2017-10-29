@@ -47,11 +47,22 @@ class Test_U_Module_EventHandler
                                          Test_U_Message,
                                          Test_U_SessionMessage,
                                          Stream_SessionId_t,
-                                         struct FileServer_SessionData>
+                                         struct FileServer_SessionData,
+                                         struct FileServer_UserData>
 {
+  typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
+                                         Common_TimePolicy_t,
+                                         struct Test_U_ModuleHandlerConfiguration,
+                                         Test_U_ControlMessage_t,
+                                         Test_U_Message,
+                                         Test_U_SessionMessage,
+                                         Stream_SessionId_t,
+                                         struct FileServer_SessionData,
+                                         struct FileServer_UserData> inherited;
+
  public:
   Test_U_Module_EventHandler (ISTREAM_T*); // stream handle
-  virtual ~Test_U_Module_EventHandler ();
+  inline virtual ~Test_U_Module_EventHandler () {}
 
   // override (part of) Stream_IModuleHandler_T
   virtual bool initialize (const struct Test_U_ModuleHandlerConfiguration&,
@@ -67,15 +78,6 @@ class Test_U_Module_EventHandler
                    Common_TimePolicy_t>* clone ();
 
  private:
-  typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
-                                         Common_TimePolicy_t,
-                                         struct Test_U_ModuleHandlerConfiguration,
-                                         Test_U_ControlMessage_t,
-                                         Test_U_Message,
-                                         Test_U_SessionMessage,
-                                         Stream_SessionId_t,
-                                         struct FileServer_SessionData> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler (const Test_U_Module_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Module_EventHandler& operator= (const Test_U_Module_EventHandler&))

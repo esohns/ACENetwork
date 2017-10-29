@@ -37,6 +37,7 @@
 
 #include "test_u_connection_manager_common.h"
 #include "test_u_defines.h"
+#include "test_u_message.h"
 #include "test_u_sessionmessage.h"
 #include "test_u_stream.h"
 

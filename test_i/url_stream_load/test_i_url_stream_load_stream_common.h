@@ -77,21 +77,19 @@ typedef Net_IConnection_T<ACE_INET_Addr,
 struct HTTP_Record;
 struct Test_I_MessageData
 {
-  inline Test_I_MessageData ()
+  Test_I_MessageData ()
    : HTTPRecord (NULL)
    , HTMLDocument (NULL)
   {};
-  inline ~Test_I_MessageData ()
+  ~Test_I_MessageData ()
   {
     if (HTTPRecord)
       delete HTTPRecord;
     if (HTMLDocument)
       xmlFreeDoc (HTMLDocument);
   };
-  inline void operator+= (Test_I_MessageData rhs_in)
-  { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); };
-  inline operator struct HTTP_Record&() const
-  { ACE_ASSERT (HTTPRecord); return *HTTPRecord; };
+  inline void operator+= (Test_I_MessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
+  inline operator struct HTTP_Record&() const { ACE_ASSERT (HTTPRecord); return *HTTPRecord; }
 
   struct HTTP_Record* HTTPRecord;
   xmlDocPtr           HTMLDocument;
@@ -110,7 +108,7 @@ enum Test_I_URLStreamLoad_SAXParserState
 struct Test_I_URLStreamLoad_SAXParserContext
  : Stream_Module_HTMLParser_SAXParserContextBase
 {
-  inline Test_I_URLStreamLoad_SAXParserContext ()
+  Test_I_URLStreamLoad_SAXParserContext ()
    : Stream_Module_HTMLParser_SAXParserContextBase ()
    , sessionData (NULL)
    , state (TEST_I_SAXPARSER_STATE_INVALID)
@@ -125,7 +123,7 @@ struct Test_I_URLStreamLoad_SAXParserContext
 struct Test_I_URLStreamLoad_SessionData
  : Test_I_StreamSessionData
 {
-  inline Test_I_URLStreamLoad_SessionData ()
+  Test_I_URLStreamLoad_SessionData ()
    : Test_I_StreamSessionData ()
    , address (static_cast<u_short> (0),
               static_cast<ACE_UINT32> (INADDR_ANY))
@@ -135,7 +133,7 @@ struct Test_I_URLStreamLoad_SessionData
    , targetFileName ()
    , userData (NULL)
   {};
-  inline struct Test_I_URLStreamLoad_SessionData& operator= (struct Test_I_URLStreamLoad_SessionData& rhs_in)
+  struct Test_I_URLStreamLoad_SessionData& operator= (struct Test_I_URLStreamLoad_SessionData& rhs_in)
   {
     Test_I_StreamSessionData::operator= (rhs_in);
 
@@ -167,7 +165,7 @@ typedef Test_I_Subscribers_t::const_iterator Test_I_SubscribersIterator_t;
 struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
  : HTTP_ModuleHandlerConfiguration
 {
-  inline Test_I_URLStreamLoad_ModuleHandlerConfiguration ()
+  Test_I_URLStreamLoad_ModuleHandlerConfiguration ()
    : HTTP_ModuleHandlerConfiguration ()
    , connectionConfigurations (NULL)
    //, contextID (0)
@@ -191,7 +189,7 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
 struct Test_I_URLStreamLoad_StreamConfiguration
  : HTTP_StreamConfiguration
 {
-  inline Test_I_URLStreamLoad_StreamConfiguration ()
+  Test_I_URLStreamLoad_StreamConfiguration ()
    : HTTP_StreamConfiguration ()
   {};
 };
@@ -205,7 +203,7 @@ typedef Stream_Configuration_T<//stream_name_string_,
 struct Test_I_URLStreamLoad_StreamState
  : Test_I_StreamState
 {
-  inline Test_I_URLStreamLoad_StreamState ()
+  Test_I_URLStreamLoad_StreamState ()
    : Test_I_StreamState ()
    , currentSessionData (NULL)
    , userData (NULL)

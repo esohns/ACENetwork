@@ -66,6 +66,7 @@ template <typename StreamStateType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
+          typename ConnectionManagerType,
           typename UserDataType>
 class IRC_Stream_T;
 struct IRC_StreamConfiguration;
@@ -138,6 +139,19 @@ typedef Stream_SessionData_T<struct IRC_Stream_SessionData> IRC_Stream_SessionDa
 
 //typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
 
+template <ACE_SYNCH_DECL,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename UserDataType>
+class Net_Connection_Manager_T;
+typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
+                                 struct IRC_ConnectionConfiguration,
+                                 struct IRC_ConnectionState,
+                                 IRC_Statistic_t,
+                                 struct Stream_UserData> IRC_Connection_Manager_t;
 typedef IRC_Stream_T<struct IRC_StreamState,
                      struct IRC_StreamConfiguration,
                      IRC_Statistic_t,
@@ -148,18 +162,8 @@ typedef IRC_Stream_T<struct IRC_StreamState,
                      ACE_Message_Block,
                      IRC_Message,
                      IRC_SessionMessage_t,
+                     IRC_Connection_Manager_t,
                      struct Stream_UserData> IRC_Stream_t;
-//typedef IRC_Stream_T<struct IRC_StreamState,
-//                     struct IRC_StreamConfiguration,
-//                     IRC_Statistic_t,
-//                     IRC_StatisticHandler_t,
-//                     struct IRC_ModuleHandlerConfiguration,
-//                     struct IRC_Stream_SessionData,
-//                     IRC_Stream_SessionData_t,
-//                     ACE_Message_Block,
-//                     IRC_Message,
-//                     IRC_SessionMessage_t,
-//                     struct Stream_UserData> IRC_AsynchStream_t;
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                     struct IRC_Stream_SessionData,

@@ -27,13 +27,18 @@
 #include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
+#include "common_timer_manager_common.h"
 
-#include "stream_base.h"
 #include "stream_common.h"
 #include "stream_control_message.h"
 #include "stream_statemachine_control.h"
 
+#include "stream_module_io_stream.h"
+
+#include "net_common.h"
+
 #include "test_u_common.h"
+#include "test_u_connection_manager_common.h"
 #include "test_u_configuration.h"
 
 // forward declarations
@@ -46,41 +51,49 @@ class Test_U_SessionMessage;
 extern const char stream_name_string_[];
 
 class Test_U_Stream
- : public Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct Test_U_StreamState,
-                        struct Test_U_StreamConfiguration,
-                        Net_Statistic_t,
-                        struct Stream_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_ModuleHandlerConfiguration,
-                        struct Test_U_StreamSessionData, // session data
-                        Test_U_StreamSessionData_t,      // session data container (reference counted)
-                        Test_U_ControlMessage_t,
-                        Test_U_Message,
-                        Test_U_SessionMessage>
+ : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct Test_U_StreamState,
+                                        struct Test_U_StreamConfiguration,
+                                        Net_Statistic_t,
+                                        Common_Timer_Manager_t,
+                                        struct Stream_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        struct Test_U_ModuleHandlerConfiguration,
+                                        struct Test_U_StreamSessionData, // session data
+                                        Test_U_StreamSessionData_t,      // session data container (reference counted)
+                                        Test_U_ControlMessage_t,
+                                        Test_U_Message,
+                                        Test_U_SessionMessage,
+                                        ACE_INET_Addr,
+                                        Test_U_InetConnectionManager_t,
+                                        struct Test_U_UserData>
 {
-  typedef Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct Test_U_StreamState,
-                        struct Test_U_StreamConfiguration,
-                        Net_Statistic_t,
-                        struct Stream_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_ModuleHandlerConfiguration,
-                        struct Test_U_StreamSessionData,
-                        Test_U_StreamSessionData_t,
-                        Test_U_ControlMessage_t,
-                        Test_U_Message,
-                        Test_U_SessionMessage> inherited;
+  typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct Test_U_StreamState,
+                                        struct Test_U_StreamConfiguration,
+                                        Net_Statistic_t,
+                                        Common_Timer_Manager_t,
+                                        struct Stream_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        struct Test_U_ModuleHandlerConfiguration,
+                                        struct Test_U_StreamSessionData,
+                                        Test_U_StreamSessionData_t,
+                                        Test_U_ControlMessage_t,
+                                        Test_U_Message,
+                                        Test_U_SessionMessage,
+                                        ACE_INET_Addr,
+                                        Test_U_InetConnectionManager_t,
+                                        struct Test_U_UserData> inherited;
 
  public:
   Test_U_Stream ();
@@ -90,24 +103,25 @@ class Test_U_Stream
   virtual bool load (Stream_ModuleList_t&, // return value: module list
                      bool&);               // return value: delete ?
 
-  // implement Common_IInitialize_T
-  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
-
   // *TODO*: re-consider this API
   void ping ();
+
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual bool initialize (const CONFIGURATION_T&,
+#else
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&,
+#endif
+                           ACE_HANDLE); // socket handle
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
   virtual bool collect (Net_Statistic_t&); // return value: statistic data
-  virtual void report () const;
+  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream (const Test_U_Stream&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream& operator= (const Test_U_Stream&))
-
-  //// finalize stream
-  //// *NOTE*: remove queued modules if something goes wrong during initialize ()
-  //bool finalize (const Test_U_StreamConfiguration&); // configuration
 };
 
 #endif

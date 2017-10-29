@@ -34,15 +34,6 @@ IRC_Client_Stream_T<TimerManagerType>::IRC_Client_Stream_T ()
 }
 
 template <typename TimerManagerType>
-IRC_Client_Stream_T<TimerManagerType>::~IRC_Client_Stream_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream_T::~IRC_Client_Stream_T"));
-
-  // *NOTE*: this implements an ordered shutdown on destruction
-  inherited::shutdown ();
-}
-
-template <typename TimerManagerType>
 bool
 IRC_Client_Stream_T<TimerManagerType>::load (Stream_ModuleList_t& modules_out,
                                              bool& delete_out)
@@ -81,11 +72,8 @@ IRC_Client_Stream_T<TimerManagerType>::load (Stream_ModuleList_t& modules_out,
 
 template <typename TimerManagerType>
 bool
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-IRC_Client_Stream_T<TimerManagerType>::initialize (const CONFIGURATION_T& configuration_in)
-#else
-IRC_Client_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
-#endif
+IRC_Client_Stream_T<TimerManagerType>::initialize (const CONFIGURATION_T& configuration_in,
+                                                   ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream_T::initialize"));
 
@@ -104,10 +92,11 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const typename inherited::CON
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
-  if (!inherited::initialize (configuration_in))
+  if (!inherited::initialize (configuration_in,
+                              handle_in))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
+                ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
                 ACE_TEXT (stream_irc_stream_name_string_)));
     goto error;
   } // end IF
@@ -123,7 +112,7 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const typename inherited::CON
   session_data_p =
       &const_cast<struct IRC_Client_SessionData&> (inherited::sessionData_->getR ());
   inherited::state_.sessionData = session_data_p;
-  //session_data_p->sessionID = configuration_in.sessionID;
+  //session_data_p->sessionId = configuration_in.sessionId;
 
 //  ACE_ASSERT (configuration_in.moduleConfiguration);
 //  configuration_in.moduleConfiguration->streamState = &inherited::state_;

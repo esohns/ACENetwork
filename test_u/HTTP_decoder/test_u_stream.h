@@ -34,6 +34,7 @@
 #include "stream_statemachine_control.h"
 
 #include "stream_module_io.h"
+#include "stream_module_io_stream.h"
 
 #include "stream_stat_statistic_handler.h"
 
@@ -41,6 +42,7 @@
 
 #include "test_u_common.h"
 
+#include "test_u_connection_manager_common.h"
 #include "test_u_HTTP_decoder_common.h"
 #include "test_u_HTTP_decoder_stream_common.h"
 
@@ -53,41 +55,49 @@ extern const char stream_name_string_[];
 
 template <typename TimerManagerType> // implements Common_ITimer
 class Test_U_Stream_T
- : public Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct Test_U_HTTPDecoder_StreamState,
-                        struct Test_U_StreamConfiguration,
-                        HTTP_Statistic_t,
-                        struct Test_U_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_ModuleHandlerConfiguration,
-                        struct Test_U_HTTPDecoder_SessionData,
-                        Test_U_HTTPDecoder_SessionData_t,
-                        Test_U_ControlMessage_t,
-                        Test_U_Message,
-                        Test_U_SessionMessage>
+ : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct Test_U_HTTPDecoder_StreamState,
+                                        struct Test_U_StreamConfiguration,
+                                        HTTP_Statistic_t,
+                                        TimerManagerType,
+                                        struct Test_U_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        struct Test_U_ModuleHandlerConfiguration,
+                                        struct Test_U_HTTPDecoder_SessionData,
+                                        Test_U_HTTPDecoder_SessionData_t,
+                                        Test_U_ControlMessage_t,
+                                        Test_U_Message,
+                                        Test_U_SessionMessage,
+                                        ACE_INET_Addr,
+                                        Test_U_ConnectionManager_t,
+                                        struct Test_U_UserData>
 {
-  typedef Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct Test_U_HTTPDecoder_StreamState,
-                        struct Test_U_StreamConfiguration,
-                        HTTP_Statistic_t,
-                        struct Test_U_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_ModuleHandlerConfiguration,
-                        struct Test_U_HTTPDecoder_SessionData,
-                        Test_U_HTTPDecoder_SessionData_t,
-                        Test_U_ControlMessage_t,
-                        Test_U_Message,
-                        Test_U_SessionMessage> inherited;
+  typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct Test_U_HTTPDecoder_StreamState,
+                                        struct Test_U_StreamConfiguration,
+                                        HTTP_Statistic_t,
+                                        TimerManagerType,
+                                        struct Test_U_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        struct Test_U_ModuleHandlerConfiguration,
+                                        struct Test_U_HTTPDecoder_SessionData,
+                                        Test_U_HTTPDecoder_SessionData_t,
+                                        Test_U_ControlMessage_t,
+                                        Test_U_Message,
+                                        Test_U_SessionMessage,
+                                        ACE_INET_Addr,
+                                        Test_U_ConnectionManager_t,
+                                        struct Test_U_UserData> inherited;
 
  public:
   Test_U_Stream_T ();
@@ -97,16 +107,18 @@ class Test_U_Stream_T
   virtual bool load (Stream_ModuleList_t&, // return value: module list
                      bool&);               // return value: delete modules ?
 
-  // implement Common_IInitialize_T
-  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual bool initialize (const CONFIGURATION_T&,
+#else
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&,
+#endif
+                           ACE_HANDLE);
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
   virtual bool collect (HTTP_Statistic_t&); // return value: statistic data
-  virtual void report () const;
-
-  // *TODO*: re-consider this API
-  void ping ();
+  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
  private:
   typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
@@ -152,6 +164,9 @@ class Test_U_Stream_T
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream_T (const Test_U_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream_T& operator= (const Test_U_Stream_T&))
+
+  // *TODO*: re-consider this API
+  inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
 
 // include template definition

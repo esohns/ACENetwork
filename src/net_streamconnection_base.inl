@@ -2142,8 +2142,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   // step1: wait for the stream to flush
   stream_.wait (waitForThreads_in,
-                false,            // wait for upstream ?
-                false);           // wait for downstream ?
+                false,             // wait for upstream ?
+                false);            // wait for downstream ?
 
   // *NOTE*: all data has been dispatched to the reactor (i.e. kernel)
 

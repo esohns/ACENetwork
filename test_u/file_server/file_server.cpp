@@ -883,7 +883,8 @@ do_work (
       //delete iconnector_p;
 
       Test_U_UDPStream stream;
-      if (!stream.initialize (configuration.streamConfiguration))
+      if (!stream.initialize (configuration.streamConfiguration,
+                              ACE_INVALID_HANDLE))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to initialize stream, aborting\n")));

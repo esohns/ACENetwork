@@ -38,12 +38,6 @@ Test_U_Module_EventHandler::Test_U_Module_EventHandler (ISTREAM_T* stream_in)
 
 }
 
-Test_U_Module_EventHandler::~Test_U_Module_EventHandler ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_EventHandler::~Test_U_Module_EventHandler"));
-
-}
-
 bool
 Test_U_Module_EventHandler::initialize (const struct Test_U_ModuleHandlerConfiguration& configuration_in,
                                         Stream_IAllocator* allocator_in)

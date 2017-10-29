@@ -27,13 +27,17 @@
 #include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
+#include "common_timer_manager_common.h"
 
 #include "stream_base.h"
 #include "stream_common.h"
 #include "stream_control_message.h"
 #include "stream_statemachine_control.h"
 
+#include "stream_module_io_stream.h"
+
 #include "test_u_common.h"
+#include "test_u_connection_manager_common.h"
 #include "test_u_configuration.h"
 
 #include "file_server_stream_common.h"
@@ -48,41 +52,49 @@ typedef Stream_ControlMessage_T<enum Stream_ControlType,
 extern const char stream_name_string_[];
 
 class Test_U_Stream
- : public Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct FileServer_StreamState,
-                        struct FileServer_StreamConfiguration,
-                        Net_Statistic_t,
-                        struct Stream_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_ModuleHandlerConfiguration,
-                        struct FileServer_SessionData,
-                        FileServer_SessionData_t,
-                        Test_U_ControlMessage_t,
-                        Test_U_Message,
-                        Test_U_SessionMessage>
+ : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct FileServer_StreamState,
+                                        struct FileServer_StreamConfiguration,
+                                        Net_Statistic_t,
+                                        Common_Timer_Manager_t,
+                                        struct Stream_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        struct Test_U_ModuleHandlerConfiguration,
+                                        struct FileServer_SessionData,
+                                        FileServer_SessionData_t,
+                                        Test_U_ControlMessage_t,
+                                        Test_U_Message,
+                                        Test_U_SessionMessage,
+                                        ACE_INET_Addr,
+                                        FileServer_InetConnectionManager_t,
+                                        struct FileServer_UserData>
 {
-  typedef Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct FileServer_StreamState,
-                        struct FileServer_StreamConfiguration,
-                        Net_Statistic_t,
-                        struct Stream_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_ModuleHandlerConfiguration,
-                        struct FileServer_SessionData,
-                        FileServer_SessionData_t,
-                        Test_U_ControlMessage_t,
-                        Test_U_Message,
-                        Test_U_SessionMessage> inherited;
+  typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct FileServer_StreamState,
+                                        struct FileServer_StreamConfiguration,
+                                        Net_Statistic_t,
+                                        Common_Timer_Manager_t,
+                                        struct Stream_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        struct Test_U_ModuleHandlerConfiguration,
+                                        struct FileServer_SessionData,
+                                        FileServer_SessionData_t,
+                                        Test_U_ControlMessage_t,
+                                        Test_U_Message,
+                                        Test_U_SessionMessage,
+                                        ACE_INET_Addr,
+                                        FileServer_InetConnectionManager_t,
+                                        struct FileServer_UserData> inherited;
 
  public:
   Test_U_Stream ();
@@ -93,59 +105,68 @@ class Test_U_Stream
                      bool&);               // return value: delete ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
-
-  // *TODO*: re-consider this API
-  //void ping ();
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&,
+                           ACE_HANDLE);
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to the statistic report module
   virtual bool collect (Net_Statistic_t&); // return value: statistic data
-  virtual void report () const;
+  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream (const Test_U_Stream&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream& operator= (const Test_U_Stream&))
+
+  // *TODO*: re-consider this API
+  inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
 
 //////////////////////////////////////////
 
 class Test_U_UDPStream
- : public Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct FileServer_StreamState,
-                        struct FileServer_StreamConfiguration,
-                        Net_Statistic_t,
-                        struct Stream_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_ModuleHandlerConfiguration,
-                        struct FileServer_SessionData,
-                        FileServer_SessionData_t,
-                        Test_U_ControlMessage_t,
-                        Test_U_Message,
-                        Test_U_SessionMessage>
+ : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct FileServer_StreamState,
+                                        struct FileServer_StreamConfiguration,
+                                        Net_Statistic_t,
+                                        Common_Timer_Manager_t,
+                                        struct Stream_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        struct Test_U_ModuleHandlerConfiguration,
+                                        struct FileServer_SessionData,
+                                        FileServer_SessionData_t,
+                                        Test_U_ControlMessage_t,
+                                        Test_U_Message,
+                                        Test_U_SessionMessage,
+                                        ACE_INET_Addr,
+                                        FileServer_InetConnectionManager_t,
+                                        struct FileServer_UserData>
 {
-  typedef Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct FileServer_StreamState,
-                        struct FileServer_StreamConfiguration,
-                        Net_Statistic_t,
-                        struct Stream_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_ModuleHandlerConfiguration,
-                        struct FileServer_SessionData,
-                        FileServer_SessionData_t,
-                        Test_U_ControlMessage_t,
-                        Test_U_Message,
-                        Test_U_SessionMessage> inherited;
+  typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct FileServer_StreamState,
+                                        struct FileServer_StreamConfiguration,
+                                        Net_Statistic_t,
+                                        Common_Timer_Manager_t,
+                                        struct Stream_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        struct Test_U_ModuleHandlerConfiguration,
+                                        struct FileServer_SessionData,
+                                        FileServer_SessionData_t,
+                                        Test_U_ControlMessage_t,
+                                        Test_U_Message,
+                                        Test_U_SessionMessage,
+                                        ACE_INET_Addr,
+                                        FileServer_InetConnectionManager_t,
+                                        struct FileServer_UserData> inherited;
 
  public:
   Test_U_UDPStream ();
@@ -156,19 +177,20 @@ class Test_U_UDPStream
                      bool&);               // return value: delete ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
-
-  // *TODO*: re-consider this API
-  //void ping ();
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&,
+                           ACE_HANDLE);
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to the statistic report module
   virtual bool collect (Net_Statistic_t&); // return value: statistic data
-  virtual void report () const;
+  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_UDPStream (const Test_U_UDPStream&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_UDPStream& operator= (const Test_U_UDPStream&))
+
+  // *TODO*: re-consider this API
+  inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
 
 #endif

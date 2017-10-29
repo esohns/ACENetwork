@@ -28,10 +28,14 @@
 
 #include "common_time_common.h"
 
-#include "stream_base.h"
 #include "stream_common.h"
 
+#include "stream_module_io_stream.h"
+
 #include "test_u_common.h"
+#include "test_u_connection_manager_common.h"
+
+#include "test_u_dhcp_client_common.h"
 
 // forward declarations
 class Stream_IAllocator;
@@ -41,41 +45,49 @@ class Test_U_SessionMessage;
 extern const char stream_name_string_[];
 
 class Test_U_InboundConnectionStream
- : public Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct Test_U_StreamState,
-                        struct Test_U_StreamConfiguration,
-                        DHCP_Statistic_t,
-                        struct Test_U_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_StreamModuleHandlerConfiguration,
-                        struct Test_U_DHCPClient_SessionData,
-                        Test_U_DHCPClient_SessionData_t,
-                        ACE_Message_Block,
-                        Test_U_Message,
-                        Test_U_SessionMessage>
+ : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct Test_U_StreamState,
+                                        struct Test_U_StreamConfiguration,
+                                        DHCP_Statistic_t,
+                                        Common_Timer_Manager_t,
+                                        struct Test_U_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        struct Test_U_StreamModuleHandlerConfiguration,
+                                        struct Test_U_DHCPClient_SessionData, // session data
+                                        Test_U_DHCPClient_SessionData_t,      // session data container (reference counted)
+                                        Test_U_ControlMessage_t,
+                                        Test_U_Message,
+                                        Test_U_SessionMessage,
+                                        ACE_INET_Addr,
+                                        Test_U_ConnectionManager_t,
+                                        struct Test_U_UserData>
 {
-  typedef Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct Test_U_StreamState,
-                        struct Test_U_StreamConfiguration,
-                        DHCP_Statistic_t,
-                        struct Test_U_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_StreamModuleHandlerConfiguration,
-                        struct Test_U_DHCPClient_SessionData,
-                        Test_U_DHCPClient_SessionData_t,
-                        ACE_Message_Block,
-                        Test_U_Message,
-                        Test_U_SessionMessage> inherited;
+  typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct Test_U_StreamState,
+                                        struct Test_U_StreamConfiguration,
+                                        DHCP_Statistic_t,
+                                        Common_Timer_Manager_t,
+                                        struct Test_U_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        struct Test_U_StreamModuleHandlerConfiguration,
+                                        struct Test_U_DHCPClient_SessionData,
+                                        Test_U_DHCPClient_SessionData_t,
+                                        Test_U_ControlMessage_t,
+                                        Test_U_Message,
+                                        Test_U_SessionMessage,
+                                        ACE_INET_Addr,
+                                        Test_U_ConnectionManager_t,
+                                        struct Test_U_UserData> inherited;
 
  public:
   Test_U_InboundConnectionStream ();
@@ -86,59 +98,68 @@ class Test_U_InboundConnectionStream
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&,
+                           ACE_HANDLE);                                // socket handle
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
   virtual bool collect (DHCP_Statistic_t&); // return value: statistic data
-  virtual void report () const;
-
-  // *TODO*: re-consider this API
-  void ping ();
+  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_InboundConnectionStream (const Test_U_InboundConnectionStream&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_InboundConnectionStream& operator= (const Test_U_InboundConnectionStream&))
+
+  // *TODO*: re-consider this API
+  inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
 
 class Test_U_OutboundConnectionStream
- : public Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct Test_U_StreamState,
-                        struct Test_U_StreamConfiguration,
-                        DHCP_Statistic_t,
-                        struct Test_U_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_StreamModuleHandlerConfiguration,
-                        struct Test_U_DHCPClient_SessionData,
-                        Test_U_DHCPClient_SessionData_t,
-                        ACE_Message_Block,
-                        Test_U_Message,
-                        Test_U_SessionMessage>
+ : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct Test_U_StreamState,
+                                        struct Test_U_StreamConfiguration,
+                                        DHCP_Statistic_t,
+                                        Common_Timer_Manager_t,
+                                        struct Test_U_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        struct Test_U_StreamModuleHandlerConfiguration,
+                                        struct Test_U_DHCPClient_SessionData, // session data
+                                        Test_U_DHCPClient_SessionData_t,      // session data container (reference counted)
+                                        Test_U_ControlMessage_t,
+                                        Test_U_Message,
+                                        Test_U_SessionMessage,
+                                        ACE_INET_Addr,
+                                        Test_U_ConnectionManager_t,
+                                        struct Test_U_UserData>
 {
-  typedef Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        struct Test_U_StreamState,
-                        struct Test_U_StreamConfiguration,
-                        DHCP_Statistic_t,
-                        struct Test_U_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        struct Test_U_StreamModuleHandlerConfiguration,
-                        struct Test_U_DHCPClient_SessionData,
-                        Test_U_DHCPClient_SessionData_t,
-                        ACE_Message_Block,
-                        Test_U_Message,
-                        Test_U_SessionMessage> inherited;
+  typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        struct Test_U_StreamState,
+                                        struct Test_U_StreamConfiguration,
+                                        DHCP_Statistic_t,
+                                        Common_Timer_Manager_t,
+                                        struct Test_U_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        struct Test_U_StreamModuleHandlerConfiguration,
+                                        struct Test_U_DHCPClient_SessionData,
+                                        Test_U_DHCPClient_SessionData_t,
+                                        Test_U_ControlMessage_t,
+                                        Test_U_Message,
+                                        Test_U_SessionMessage,
+                                        ACE_INET_Addr,
+                                        Test_U_ConnectionManager_t,
+                                        struct Test_U_UserData> inherited;
 
  public:
   Test_U_OutboundConnectionStream ();
@@ -149,19 +170,20 @@ class Test_U_OutboundConnectionStream
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&,
+                           ACE_HANDLE);                                // socket handle
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
   virtual bool collect (DHCP_Statistic_t&); // return value: statistic data
-  virtual void report () const;
-
-  // *TODO*: re-consider this API
-  void ping ();
+  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream (const Test_U_OutboundConnectionStream&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream& operator= (const Test_U_OutboundConnectionStream&))
+
+  // *TODO*: re-consider this API
+  inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
 
 #endif

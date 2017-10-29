@@ -101,7 +101,7 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
 struct BitTorrent_Client_PeerSocketHandlerConfiguration
  : Net_SocketHandlerConfiguration
 {
-  inline BitTorrent_Client_PeerSocketHandlerConfiguration ()
+  BitTorrent_Client_PeerSocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
    ///////////////////////////////////////
    , socketConfiguration_2 ()
@@ -119,7 +119,7 @@ struct BitTorrent_Client_PeerSocketHandlerConfiguration
 struct BitTorrent_Client_TrackerSocketHandlerConfiguration
  : Net_SocketHandlerConfiguration
 {
-  inline BitTorrent_Client_TrackerSocketHandlerConfiguration ()
+  BitTorrent_Client_TrackerSocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
    ///////////////////////////////////////
    , socketConfiguration_2 ()
@@ -139,7 +139,7 @@ struct BitTorrent_Client_PeerStreamConfiguration;
 struct BitTorrent_Client_PeerConnectionConfiguration
  : BitTorrent_PeerConnectionConfiguration
 {
-  inline BitTorrent_Client_PeerConnectionConfiguration ()
+  BitTorrent_Client_PeerConnectionConfiguration ()
    : BitTorrent_PeerConnectionConfiguration ()
    ///////////////////////////////////////
    , socketHandlerConfiguration ()
@@ -160,7 +160,7 @@ struct BitTorrent_Client_TrackerStreamConfiguration;
 struct BitTorrent_Client_TrackerConnectionConfiguration
  : BitTorrent_TrackerConnectionConfiguration
 {
-  inline BitTorrent_Client_TrackerConnectionConfiguration ()
+  BitTorrent_Client_TrackerConnectionConfiguration ()
    : BitTorrent_TrackerConnectionConfiguration ()
    ///////////////////////////////////////
    , socketHandlerConfiguration ()
@@ -199,7 +199,7 @@ struct BitTorrent_Client_SessionState;
 struct BitTorrent_Client_PeerConnectionState
  : BitTorrent_PeerConnectionState
 {
-  inline BitTorrent_Client_PeerConnectionState ()
+  BitTorrent_Client_PeerConnectionState ()
    : BitTorrent_PeerConnectionState ()
    , configuration (NULL)
    , connection (NULL)
@@ -216,7 +216,7 @@ struct BitTorrent_Client_PeerConnectionState
 struct BitTorrent_Client_TrackerConnectionState
  : BitTorrent_TrackerConnectionState
 {
-  inline BitTorrent_Client_TrackerConnectionState ()
+  BitTorrent_Client_TrackerConnectionState ()
    : BitTorrent_TrackerConnectionState ()
    , configuration (NULL)
    , connection (NULL)

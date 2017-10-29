@@ -42,17 +42,9 @@ class Test_I_Module_EventHandler
                                          Test_I_Message,
                                          Test_I_SessionMessage,
                                          Stream_SessionId_t,
-                                         struct Test_I_URLStreamLoad_SessionData>
+                                         struct Test_I_URLStreamLoad_SessionData,
+                                         struct HTTP_Stream_UserData>
 {
- public:
-  Test_I_Module_EventHandler (ISTREAM_T*); // stream handle
-  virtual ~Test_I_Module_EventHandler ();
-
-  // implement Common_IClone_T
-  virtual ACE_Task<ACE_MT_SYNCH,
-                   Common_TimePolicy_t>* clone ();
-
- private:
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
                                          struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
@@ -60,8 +52,18 @@ class Test_I_Module_EventHandler
                                          Test_I_Message,
                                          Test_I_SessionMessage,
                                          Stream_SessionId_t,
-                                         struct Test_I_URLStreamLoad_SessionData> inherited;
+                                         struct Test_I_URLStreamLoad_SessionData,
+                                         struct HTTP_Stream_UserData> inherited;
 
+ public:
+  Test_I_Module_EventHandler (ISTREAM_T*); // stream handle
+  inline virtual ~Test_I_Module_EventHandler () {}
+
+  // implement Common_IClone_T
+  virtual ACE_Task<ACE_MT_SYNCH,
+                   Common_TimePolicy_t>* clone ();
+
+ private:
   ACE_UNIMPLEMENTED_FUNC (Test_I_Module_EventHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_I_Module_EventHandler (const Test_I_Module_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_Module_EventHandler& operator= (const Test_I_Module_EventHandler&))

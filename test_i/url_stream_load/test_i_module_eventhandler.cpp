@@ -31,12 +31,6 @@ Test_I_Module_EventHandler::Test_I_Module_EventHandler (ISTREAM_T* stream_in)
 
 }
 
-Test_I_Module_EventHandler::~Test_I_Module_EventHandler ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_Module_EventHandler::~Test_I_Module_EventHandler"));
-
-}
-
 ACE_Task<ACE_MT_SYNCH,
          Common_TimePolicy_t>*
 Test_I_Module_EventHandler::clone ()

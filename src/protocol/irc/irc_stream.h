@@ -24,14 +24,16 @@
 #include <string>
 
 #include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 
-#include "stream_base.h"
 #include "stream_common.h"
 #include "stream_statemachine_control.h"
 #include "stream_streammodule_base.h"
+
+#include "stream_module_io_stream.h"
 
 #include "stream_stat_statistic_report.h"
 
@@ -61,67 +63,68 @@ template <typename StreamStateType,
           typename DataMessageType,
           typename SessionMessageType,
           ////////////////////////////////
+          typename ConnectionManagerType,
+          ////////////////////////////////
           typename UserDataType>
 class IRC_Stream_T
- : public Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_irc_stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        StreamStateType,
-                        ConfigurationType,
-                        StatisticContainerType,
-                        struct IRC_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        ModuleHandlerConfigurationType,
-                        SessionDataType,
-                        SessionDataContainerType,
-                        ControlMessageType,
-                        DataMessageType,
-                        SessionMessageType>
+ : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_irc_stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        StreamStateType,
+                                        ConfigurationType,
+                                        StatisticContainerType,
+                                        TimerManagerType,
+                                        struct IRC_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        ModuleHandlerConfigurationType,
+                                        SessionDataType,
+                                        SessionDataContainerType,
+                                        ControlMessageType,
+                                        DataMessageType,
+                                        SessionMessageType,
+                                        ACE_INET_Addr,
+                                        ConnectionManagerType,
+                                        UserDataType>
 {
-  typedef Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_irc_stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        StreamStateType,
-                        ConfigurationType,
-                        StatisticContainerType,
-                        struct IRC_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        ModuleHandlerConfigurationType,
-                        SessionDataType,
-                        SessionDataContainerType,
-                        ControlMessageType,
-                        DataMessageType,
-                        SessionMessageType> inherited;
+  typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_irc_stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        StreamStateType,
+                                        ConfigurationType,
+                                        StatisticContainerType,
+                                        TimerManagerType,
+                                        struct IRC_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        ModuleHandlerConfigurationType,
+                                        SessionDataType,
+                                        SessionDataContainerType,
+                                        ControlMessageType,
+                                        DataMessageType,
+                                        SessionMessageType,
+                                        ACE_INET_Addr,
+                                        ConnectionManagerType,
+                                        UserDataType> inherited;
 
  public:
   IRC_Stream_T ();
-  virtual ~IRC_Stream_T ();
+  inline virtual ~IRC_Stream_T () { inherited::shutdown (); }
 
-  //// implement (part of) Stream_IStreamControlBase
-  //virtual bool load (Stream_ModuleList_t&, // return value: module list
-  //                   bool&);               // return value: delete modules ?
-
-  // implement Common_IInitialize_T
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual bool initialize (const CONFIGURATION_T&); // configuration
-#else
-  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
-#endif
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&,
+                           ACE_HANDLE);
 
   // implement Common_IStatistic_T
-  // *NOTE*: delegate this to rntimeStatistic_
   virtual bool collect (StatisticContainerType&); // return value: statistic data
   // this is just a dummy (use statisticsReportingInterval instead)
-  virtual void report () const;
+  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
+  // convenient types
   typedef IRC_Module_Streamer_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 ModuleHandlerConfigurationType,
@@ -206,8 +209,8 @@ class IRC_Stream_T
   ACE_UNIMPLEMENTED_FUNC (IRC_Stream_T (const IRC_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Stream_T& operator= (const IRC_Stream_T&))
 
-  //// *TODO*: remove this API
-  //void ping ();
+  // *TODO*: re-consider this API
+  inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
 
 // include template definition

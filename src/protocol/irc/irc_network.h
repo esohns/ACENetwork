@@ -58,7 +58,7 @@ struct IRC_ConnectionConfiguration;
 struct IRC_SocketHandlerConfiguration
  : Net_SocketHandlerConfiguration
 {
-  inline IRC_SocketHandlerConfiguration ()
+  IRC_SocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
    ///////////////////////////////////////
    , socketConfiguration_2 ()
@@ -75,7 +75,7 @@ struct IRC_StreamConfiguration;
 struct IRC_ConnectionConfiguration
  : Net_ConnectionConfiguration
 {
-  inline IRC_ConnectionConfiguration ()
+  IRC_ConnectionConfiguration ()
    : Net_ConnectionConfiguration ()
    ///////////////////////////////////////
    , socketHandlerConfiguration ()
@@ -95,7 +95,7 @@ struct IRC_Configuration;
 struct IRC_ConnectionState
  : Net_ConnectionState
 {
-  inline IRC_ConnectionState ()
+  IRC_ConnectionState ()
    : Net_ConnectionState ()
    //, configuration (NULL)
    , controller (NULL)
@@ -110,7 +110,7 @@ struct IRC_ConnectionState
 struct IRC_SessionState
  : IRC_ConnectionState
 {
-  inline IRC_SessionState ()
+  IRC_SessionState ()
    : IRC_ConnectionState ()
    , away (false)
    , channel ()

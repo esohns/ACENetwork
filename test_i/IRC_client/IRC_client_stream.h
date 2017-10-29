@@ -37,6 +37,19 @@
 
 // forward declarations
 class IRC_Client_SessionMessage;
+template <ACE_SYNCH_DECL,
+          typename AddressType,
+          typename ConfigurationType,
+          typename StateType,
+          typename StatisticContainerType,
+          typename UserDataType>
+class Net_Connection_Manager_T;
+typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
+                                 struct IRC_Client_ConnectionConfiguration,
+                                 struct IRC_Client_SessionState,
+                                 IRC_Statistic_t,
+                                 struct IRC_Client_UserData> IRC_Client_Connection_Manager_t;
 
 template <typename TimerManagerType> // implements Common_ITimer
 class IRC_Client_Stream_T
@@ -50,6 +63,7 @@ class IRC_Client_Stream_T
                        IRC_Client_ControlMessage_t,
                        IRC_Message,
                        IRC_Client_SessionMessage,
+                       IRC_Client_Connection_Manager_t,
                        struct IRC_Client_UserData>
 {
   typedef IRC_Stream_T<struct IRC_Client_StreamState,
@@ -62,23 +76,19 @@ class IRC_Client_Stream_T
                        IRC_Client_ControlMessage_t,
                        IRC_Message,
                        IRC_Client_SessionMessage,
+                       IRC_Client_Connection_Manager_t,
                        struct IRC_Client_UserData> inherited;
 
  public:
   IRC_Client_Stream_T (); // name
-  virtual ~IRC_Client_Stream_T ();
+  inline virtual ~IRC_Client_Stream_T () { inherited::shutdown (); }
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ModuleList_t&, // return value: module list
                      bool&);               // return value: delete modules ?
 
-  // implement Common_IInitialize_T
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual bool initialize (const CONFIGURATION_T&); // configuration
-#else
-  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
-#endif
+  virtual bool initialize (const CONFIGURATION_T&,
+                           ACE_HANDLE);
 
   // *TODO*: remove this API
   void ping ();

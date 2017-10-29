@@ -28,11 +28,12 @@
 
 #include "common_time_common.h"
 
-#include "stream_base.h"
 #include "stream_common.h"
 #include "stream_inotify.h"
 #include "stream_statemachine_control.h"
 #include "stream_streammodule_base.h"
+
+#include "stream_module_io_stream.h"
 
 #include "stream_stat_statistic_report.h"
 
@@ -64,43 +65,52 @@ template <typename StreamStateType,
           typename DataMessageType,
           typename SessionMessageType,
           ////////////////////////////////
+          typename ConnectionManagerType,
           typename UserDataType>
 class HTTP_Stream_T
- : public Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_http_stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        StreamStateType,
-                        ConfigurationType,
-                        StatisticContainerType,
-                        struct HTTP_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        ModuleHandlerConfigurationType,
-                        SessionDataType,
-                        SessionDataContainerType,
-                        ControlMessageType,
-                        DataMessageType,
-                        SessionMessageType>
+ : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_http_stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        StreamStateType,
+                                        ConfigurationType,
+                                        StatisticContainerType,
+                                        TimerManagerType,
+                                        struct HTTP_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        ModuleHandlerConfigurationType,
+                                        SessionDataType,
+                                        SessionDataContainerType,
+                                        ControlMessageType,
+                                        DataMessageType,
+                                        SessionMessageType,
+                                        ACE_INET_Addr,
+                                        ConnectionManagerType,
+                                        UserDataType>
 {
-  typedef Stream_Base_T<ACE_MT_SYNCH,
-                        Common_TimePolicy_t,
-                        stream_http_stream_name_string_,
-                        enum Stream_ControlType,
-                        enum Stream_SessionMessageType,
-                        enum Stream_StateMachine_ControlState,
-                        StreamStateType,
-                        ConfigurationType,
-                        StatisticContainerType,
-                        struct HTTP_AllocatorConfiguration,
-                        struct Stream_ModuleConfiguration,
-                        ModuleHandlerConfigurationType,
-                        SessionDataType,
-                        SessionDataContainerType,
-                        ControlMessageType,
-                        DataMessageType,
-                        SessionMessageType> inherited;
+  typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
+                                        Common_TimePolicy_t,
+                                        stream_http_stream_name_string_,
+                                        enum Stream_ControlType,
+                                        enum Stream_SessionMessageType,
+                                        enum Stream_StateMachine_ControlState,
+                                        StreamStateType,
+                                        ConfigurationType,
+                                        StatisticContainerType,
+                                        TimerManagerType,
+                                        struct HTTP_AllocatorConfiguration,
+                                        struct Stream_ModuleConfiguration,
+                                        ModuleHandlerConfigurationType,
+                                        SessionDataType,
+                                        SessionDataContainerType,
+                                        ControlMessageType,
+                                        DataMessageType,
+                                        SessionMessageType,
+                                        ACE_INET_Addr,
+                                        ConnectionManagerType,
+                                        UserDataType> inherited;
 
  public:
   HTTP_Stream_T ();
@@ -110,13 +120,13 @@ class HTTP_Stream_T
   virtual bool load (Stream_ModuleList_t&, // return value: module list
                      bool&);               // return value: delete modules ?
 
-  // override Common_IInitialize_T
   // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual bool initialize (const CONFIGURATION_T&); // configuration
+  virtual bool initialize (const CONFIGURATION_T&,
 #else
-  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&,
 #endif
+                           ACE_HANDLE);
 
   // implement Common_IStatistic_T
   // *NOTE*: delegate this to rntimeStatistic_
@@ -191,6 +201,9 @@ class HTTP_Stream_T
 
   ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T (const HTTP_Stream_T&))
   ACE_UNIMPLEMENTED_FUNC (HTTP_Stream_T& operator= (const HTTP_Stream_T&))
+
+  // *TODO*: re-consider this API
+  inline void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
 
 // include template definition

@@ -94,7 +94,8 @@ Test_U_InboundConnectionStream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
+Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
+                                            ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_InboundConnectionStream::initialize"));
 
@@ -113,7 +114,8 @@ Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURAT
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
-  if (!inherited::initialize (configuration_in))
+  if (!inherited::initialize (configuration_in,
+                              handle_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
@@ -262,41 +264,6 @@ Test_U_InboundConnectionStream::collect (DHCP_Statistic_t& data_out)
   return result_2;
 }
 
-void
-Test_U_InboundConnectionStream::report () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_InboundConnectionStream::report"));
-
-  //   Net_Module_Statistic_ReaderTask_t* statistic_report_impl = NULL;
-  //   statistic_report_impl = dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//runtimeStatistic_.writer ());
-  //   if (!statistic_report_impl)
-  //   {
-  //     ACE_DEBUG ((LM_ERROR,
-  //                 ACE_TEXT ("dynamic_cast<Net_Module_Statistic_ReaderTask_t> failed, returning\n")));
-  //
-  //     return;
-  //   } // end IF
-  //
-  //   // delegate to this module...
-  //   return (statistic_report_impl->report ());
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
-}
-
-void
-Test_U_InboundConnectionStream::ping ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_InboundConnectionStream::ping"));
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 
 Test_U_OutboundConnectionStream::Test_U_OutboundConnectionStream ()
@@ -346,7 +313,8 @@ Test_U_OutboundConnectionStream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_U_OutboundConnectionStream::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
+Test_U_OutboundConnectionStream::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
+                                             ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_OutboundConnectionStream::initialize"));
 
@@ -365,10 +333,11 @@ Test_U_OutboundConnectionStream::initialize (const typename inherited::CONFIGURA
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
-  if (!inherited::initialize (configuration_in))
+  if (!inherited::initialize (configuration_in,
+                              handle_in))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
+                ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
                 ACE_TEXT (stream_name_string_)));
     goto failed;
   } // end IF
@@ -509,38 +478,4 @@ Test_U_OutboundConnectionStream::collect (DHCP_Statistic_t& data_out)
   } // end IF
 
   return result_2;
-}
-
-void
-Test_U_OutboundConnectionStream::report () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_OutboundConnectionStream::report"));
-
-  //   Net_Module_Statistic_ReaderTask_t* statistic_report_impl =
-  //     dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//statistic_.writer ());
-  //   if (!statistic_report_impl)
-  //   {
-  //     ACE_DEBUG ((LM_ERROR,
-  //                 ACE_TEXT ("dynamic_cast<Net_Module_Statistic_ReaderTask_t> failed, returning\n")));
-  //     return;
-  //   } // end IF
-  //
-  //   // delegate to this module
-  //   return (statistic_report_impl->report ());
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
-}
-
-void
-Test_U_OutboundConnectionStream::ping ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_OutboundConnectionStream::ping"));
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
 }

@@ -32,6 +32,7 @@ template <typename StreamStateType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
+          typename ConnectionManagerType,
           typename UserDataType>
 IRC_Stream_T<StreamStateType,
              ConfigurationType,
@@ -43,6 +44,7 @@ IRC_Stream_T<StreamStateType,
              ControlMessageType,
              DataMessageType,
              SessionMessageType,
+             ConnectionManagerType,
              UserDataType>::IRC_Stream_T ()
  : inherited ()
 {
@@ -60,69 +62,7 @@ template <typename StreamStateType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
-          typename UserDataType>
-IRC_Stream_T<StreamStateType,
-             ConfigurationType,
-             StatisticContainerType,
-             TimerManagerType,
-             ModuleHandlerConfigurationType,
-             SessionDataType,
-             SessionDataContainerType,
-             ControlMessageType,
-             DataMessageType,
-             SessionMessageType,
-             UserDataType>::~IRC_Stream_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::~IRC_Stream_T"));
-
-  // *NOTE*: this implements an ordered shutdown on destruction
-  inherited::shutdown ();
-}
-
-//template <typename StreamStateType,
-//          typename ConfigurationType,
-//          typename StatisticContainerType,
-//          typename ModuleHandlerConfigurationType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename ControlMessageType,
-//          typename DataMessageType,
-//          typename SessionMessageType,
-//          typename UserDataType>
-//bool
-//IRC_Stream_T<StreamStateType,
-//             ConfigurationType,
-//             StatisticContainerType,
-//             ModuleHandlerConfigurationType,
-//             SessionDataType,
-//             SessionDataContainerType,
-//             ControlMessageType,
-//             DataMessageType,
-//             SessionMessageType,
-//             UserDataType>::load (Stream_ModuleList_t& modules_out,
-//                                  bool& deleteModules_out)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::load"));
-//
-//  deleteModules_out = false;
-//
-//  modules_out.push_back (&runtimeStatistic_);
-//  modules_out.push_back (&parser_);
-//  modules_out.push_back (&marshal_);
-//
-//  return true;
-//}
-
-template <typename StreamStateType,
-          typename ConfigurationType,
-          typename StatisticContainerType,
-          typename TimerManagerType,
-          typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
+          typename ConnectionManagerType,
           typename UserDataType>
 bool
 IRC_Stream_T<StreamStateType,
@@ -135,11 +75,9 @@ IRC_Stream_T<StreamStateType,
              ControlMessageType,
              DataMessageType,
              SessionMessageType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-             UserDataType>::initialize (const CONFIGURATION_T& configuration_in)
-#else
-             UserDataType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
-#endif
+             ConnectionManagerType,
+             UserDataType>::initialize (const CONFIGURATION_T& configuration_in,
+                                        ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::initialize"));
 
@@ -157,10 +95,11 @@ IRC_Stream_T<StreamStateType,
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
-  if (!inherited::initialize (configuration_in))
+  if (!inherited::initialize (configuration_in,
+                              handle_in))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
+                ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
                 ACE_TEXT (stream_irc_stream_name_string_)));
     goto error;
   } // end IF
@@ -241,6 +180,7 @@ template <typename StreamStateType,
           typename ControlMessageType,
           typename DataMessageType,
           typename SessionMessageType,
+          typename ConnectionManagerType,
           typename UserDataType>
 bool
 IRC_Stream_T<StreamStateType,
@@ -253,6 +193,7 @@ IRC_Stream_T<StreamStateType,
              ControlMessageType,
              DataMessageType,
              SessionMessageType,
+             ConnectionManagerType,
              UserDataType>::collect (StatisticContainerType& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::collect"));
@@ -319,105 +260,3 @@ IRC_Stream_T<StreamStateType,
 
   return result_2;
 }
-
-template <typename StreamStateType,
-          typename ConfigurationType,
-          typename StatisticContainerType,
-          typename TimerManagerType,
-          typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename UserDataType>
-void
-IRC_Stream_T<StreamStateType,
-             ConfigurationType,
-             StatisticContainerType,
-             TimerManagerType,
-             ModuleHandlerConfigurationType,
-             SessionDataType,
-             SessionDataContainerType,
-             ControlMessageType,
-             DataMessageType,
-             SessionMessageType,
-             UserDataType>::report () const
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::report"));
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
-}
-
-//template <typename StreamStateType,
-//          typename ConfigurationType,
-//          typename StatisticContainerType,
-//          typename ModuleHandlerConfigurationType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename ControlMessageType,
-//          typename DataMessageType,
-//          typename SessionMessageType,
-//          typename UserDataType>
-//void
-//IRC_Stream_T<StreamStateType,
-//             ConfigurationType,
-//             StatisticContainerType,
-//             ModuleHandlerConfigurationType,
-//             SessionDataType,
-//             SessionDataContainerType,
-//             ControlMessageType,
-//             DataMessageType,
-//             SessionMessageType,
-//             UserDataType>::ping ()
-//{
-//  NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::ping"));
-//
-//  // delegate to the head module, skip over ACE_Stream_Head...
-//  typename inherited::MODULE_T* module_p = inherited::head ();
-//  if (!module_p)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("no head module found, returning\n")));
-//    return;
-//  } // end IF
-//  module_p = module_p->next ();
-//  if (!module_p)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("no head module found, returning\n")));
-//    return;
-//  } // end IF
-//
-//  // sanity check: head == tail ? --> no modules have been push()ed (yet) !
-//  if (module_p == inherited::tail ())
-//  {
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("no modules have been enqueued yet --> nothing to do !, returning\n")));
-//    return;
-//  } // end IF
-//
-//  typename inherited::ISTREAM_CONTROL_T* control_impl = NULL;
-//  control_impl =
-//      dynamic_cast<typename inherited::ISTREAM_CONTROL_T*> (module_p->reader ());
-//  if (!control_impl)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("%s: dynamic_cast<Stream_IStreamControl> failed, returning\n"),
-//                module_p->name ()));
-//    return;
-//  } // end IF
-//
-//  // *TODO*
-//  try {
-////    control_impl->stop ();
-//  } catch (...) {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("caught exception in Stream_IStreamControl::stop (module: \"%s\"), returning\n"),
-//                module_p->name ()));
-//    return;
-//  }
-//}

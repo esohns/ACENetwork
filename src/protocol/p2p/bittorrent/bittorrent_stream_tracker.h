@@ -56,6 +56,7 @@ template <typename StreamStateType,
           typename SessionStateType,
           typename CBDataType,
           ////////////////////////////////
+          typename ConnectionManagerType,
           typename UserDataType>
 class BitTorrent_TrackerStream_T
  : public HTTP_Stream_T<StreamStateType,
@@ -68,6 +69,7 @@ class BitTorrent_TrackerStream_T
                         ControlMessageType,
                         DataMessageType,
                         SessionMessageType,
+                        ConnectionManagerType,
                         UserDataType>
 {
   typedef HTTP_Stream_T<StreamStateType,
@@ -80,6 +82,7 @@ class BitTorrent_TrackerStream_T
                         ControlMessageType,
                         DataMessageType,
                         SessionMessageType,
+                        ConnectionManagerType,
                         UserDataType> inherited;
 
  public:
@@ -90,13 +93,8 @@ class BitTorrent_TrackerStream_T
   virtual bool load (Stream_ModuleList_t&, // return value: module list
                      bool&);               // return value: delete modules ?
 
-  // override Common_IInitialize_T
-  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual bool initialize (const CONFIGURATION_T&); // configuration
-#else
-  virtual bool initialize (const typename inherited::CONFIGURATION_T&); // configuration
-#endif
+  virtual bool initialize (const typename inherited::CONFIGURATION_T&,
+                           ACE_HANDLE);
 
  private:
   typedef BitTorrent_TrackerStream_T<StreamStateType,
@@ -115,6 +113,7 @@ class BitTorrent_TrackerStream_T
                                      HandlerConfigurationType, // socket-
                                      SessionStateType,
                                      CBDataType,
+                                     ConnectionManagerType,
                                      UserDataType> OWN_TYPE_T;
 
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStream_T (const BitTorrent_TrackerStream_T&))

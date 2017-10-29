@@ -51,12 +51,6 @@ IRC_Client_Module_IRCHandler::IRC_Client_Module_IRCHandler (ISTREAM_T* stream_in
 
 }
 
-IRC_Client_Module_IRCHandler::~IRC_Client_Module_IRCHandler ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_Module_IRCHandler::~IRC_Client_Module_IRCHandler"));
-
-}
-
 bool
 IRC_Client_Module_IRCHandler::initialize (const struct IRC_Client_ModuleHandlerConfiguration& configuration_in,
                                           Stream_IAllocator* allocator_in)

@@ -92,7 +92,8 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
+Test_U_Stream::initialize (const CONFIGURATION_T& configuration_in,
+                           ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::initialize"));
 
@@ -110,10 +111,11 @@ Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configurat
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
-  if (!inherited::initialize (configuration_in))
+  if (!inherited::initialize (configuration_in,
+                              handle_in))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
+                ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
                 ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
@@ -279,28 +281,4 @@ Test_U_Stream::collect (Net_Statistic_t& data_out)
   } // end IF
 
   return result_2;
-}
-
-void
-Test_U_Stream::report () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::report"));
-
-//   Net_Module_Statistic_ReaderTask_t* statistic_report_impl_p = NULL;
-//   statistic_report_impl_p = dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//runtimeStatistic_.writer ());
-//   if (!statistic_report_impl_p)
-//   {
-//     ACE_DEBUG ((LM_ERROR,
-//                 ACE_TEXT ("dynamic_cast<Net_Module_Statistic_ReaderTask_t> failed, returning\n")));
-//
-//     return;
-//   } // end IF
-//
-//   // delegate to this module...
-//   return (statistic_report_impl_p->report ());
-
-  // just a dummy
-  ACE_ASSERT (false);
-
-  ACE_NOTREACHED (return;)
 }

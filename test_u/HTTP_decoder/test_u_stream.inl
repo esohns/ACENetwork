@@ -47,7 +47,7 @@ Test_U_Stream_T<TimerManagerType>::~Test_U_Stream_T ()
 template <typename TimerManagerType>
 bool
 Test_U_Stream_T<TimerManagerType>::load (Stream_ModuleList_t& modules_out,
-                                             bool& deleteModules_out)
+                                         bool& deleteModules_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::load"));
 
@@ -93,7 +93,12 @@ Test_U_Stream_T<TimerManagerType>::load (Stream_ModuleList_t& modules_out,
 
 template <typename TimerManagerType>
 bool
-Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+Test_U_Stream_T<TimerManagerType>::initialize (const CONFIGURATION_T& configuration_in,
+#else
+Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
+#endif
+                                               ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::initialize"));
 
@@ -116,10 +121,11 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
-  if (!inherited::initialize (configuration_in))
+  if (!inherited::initialize (configuration_in,
+                              handle_in))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
+                ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
                 ACE_TEXT (stream_name_string_)));
     return false;
   } // end IF
@@ -239,18 +245,6 @@ error:
 }
 
 template <typename TimerManagerType>
-void
-Test_U_Stream_T<TimerManagerType>::ping ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::ping"));
-
-  ACE_ASSERT (false);
-  ACE_NOTSUP;
-
-  ACE_NOTREACHED (return;)
-}
-
-template <typename TimerManagerType>
 bool
 Test_U_Stream_T<TimerManagerType>::collect (Net_Statistic_t& data_out)
 {
@@ -323,29 +317,4 @@ Test_U_Stream_T<TimerManagerType>::collect (Net_Statistic_t& data_out)
   } // end IF
 
   return result_2;
-}
-
-template <typename TimerManagerType>
-void
-Test_U_Stream_T<TimerManagerType>::report () const
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::report"));
-
-//   Net_Module_Statistic_ReaderTask_t* runtimeStatistic_impl = NULL;
-//   runtimeStatistic_impl = dynamic_cast<Net_Module_Statistic_ReaderTask_t*> (//runtimeStatistic_.writer ());
-//   if (!runtimeStatistic_impl)
-//   {
-//     ACE_DEBUG ((LM_ERROR,
-//                 ACE_TEXT ("dynamic_cast<Net_Module_Statistic_ReaderTask_t> failed, returning\n")));
-//
-//     return;
-//   } // end IF
-//
-//   // delegate to this module
-//   return (runtimeStatistic_impl->report ());
-
-  // just a dummy
-  ACE_ASSERT (false);
-
-  ACE_NOTREACHED (return;)
 }

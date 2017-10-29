@@ -26,7 +26,7 @@ if (UNIX)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/dec)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/dev)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/net)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/stat)
 elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../ffmpeg)
@@ -36,7 +36,7 @@ elseif (WIN32)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src/modules/dec)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src/modules/dev)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src/modules/net)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src/modules/stat)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party)
