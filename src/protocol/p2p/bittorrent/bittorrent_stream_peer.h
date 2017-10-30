@@ -34,7 +34,7 @@
 #include "stream_statemachine_control.h"
 #include "stream_streammodule_base.h"
 
-#include "stream_module_io_stream.h"
+#include "stream_net_io_stream.h"
 
 #include "stream_stat_statistic_report.h"
 

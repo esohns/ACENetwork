@@ -5231,3 +5231,30 @@ clean:
   return result;
 }
 #endif
+
+std::string
+Net_Common_Tools::generateModuleName (const std::string& prefix_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::generateModuleName"));
+
+  std::string result;
+
+  // sanity check(s)
+  ACE_ASSERT (prefix_in.size () <= (BUFSIZ - 6 + 1));
+
+  // *NOTE*: see also: man 3 mkstemp
+  ACE_TCHAR buffer[BUFSIZ];
+  if (unlikely (!prefix_in.empty ()))
+    ACE_OS::strcpy (buffer, prefix_in.c_str ());
+  ACE_OS::strcpy (buffer + prefix_in.size (), ACE_TEXT ("XXXXXX"));
+  ACE_OS::mktemp (buffer);
+  if (unlikely (!ACE_OS::strlen (buffer)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::mktemp(): \"%m\", aborting\n")));
+    return std::string ();
+  } // end IF
+  result = buffer;
+
+  return result;
+}

@@ -158,7 +158,7 @@ BitTorrent_TrackerStream_T<StreamStateType,
                            SessionStateType,
                            CBDataType,
                            ConnectionManagerType,
-                           UserDataType>::initialize (const CONFIGURATION_T& configuration_in,
+                           UserDataType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
                                                       ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::initialize"));

@@ -243,8 +243,9 @@ class Net_Common_Tools
   static bool enableErrorQueue (ACE_HANDLE); // socket handle
 #endif
   static ACE_INET_Addr getBoundAddress (ACE_HANDLE);
-
   static int getProtocol (ACE_HANDLE); // socket handle
+
+  // --- UDP ---
 
   // *NOTE*: uses sendto(); does not send message block continuations ATM
   static bool sendDatagram (const ACE_INET_Addr&, // local SAP (may be 'any')
@@ -292,6 +293,9 @@ class Net_Common_Tools
                                                const std::string&,     // device object path
                                                const std::string&);    // SSID
 #endif
+
+  // stream
+  static std::string generateModuleName (const std::string&); // prefix
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools ())

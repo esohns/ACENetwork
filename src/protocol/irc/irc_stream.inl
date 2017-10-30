@@ -76,7 +76,7 @@ IRC_Stream_T<StreamStateType,
              DataMessageType,
              SessionMessageType,
              ConnectionManagerType,
-             UserDataType>::initialize (const CONFIGURATION_T& configuration_in,
+             UserDataType>::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
                                         ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Stream_T::initialize"));

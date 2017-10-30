@@ -215,6 +215,7 @@ struct Net_ConnectionConfiguration
 {
   Net_ConnectionConfiguration ()
    : connectionManager (NULL)
+   , generateUniqueIOModuleNames (false)
    , messageAllocator (NULL)
    , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , socketHandlerConfiguration ()
@@ -224,6 +225,7 @@ struct Net_ConnectionConfiguration
   {};
 
   Net_IInetConnectionManager_t*         connectionManager;
+  bool                                  generateUniqueIOModuleNames; // stream
   Stream_IAllocator*                    messageAllocator;
   // *NOTE*: applies to the corresponding protocol, if it has fixed size
   //         datagrams; otherwise, this is the size of the individual (opaque)
