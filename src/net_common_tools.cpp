@@ -4701,8 +4701,9 @@ Net_Common_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_i
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-
-  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_ARRAY);
+  if (unlikely (!Net_Common_Tools::dBusMessageValidate (iterator,
+                                                        DBUS_TYPE_ARRAY)))
+    goto error;
   dbus_message_iter_recurse (&iterator, &iterator_2);
   do {
     if (unlikely (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_INVALID))
