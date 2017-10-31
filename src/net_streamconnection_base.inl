@@ -267,8 +267,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
     inherited2::configuration_->streamConfiguration->configuration_.notificationStrategy =
       &(inherited::notificationStrategy_);
   if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration),
-                                     inherited2::state_.handle,
-                                     inherited2::configuration_->generateUniqueIOModuleNames)))
+                                     inherited2::state_.handle)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to initialize processing stream (name was: \"%s\"), aborting\n"),
@@ -1694,8 +1693,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   inherited2::configuration_->streamConfiguration->configuration_.notificationStrategy =
     this;
   if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration),
-                                     inherited2::state_.handle,
-                                     inherited2::configuration_->generateUniqueIOModuleNames)))
+                                     inherited2::state_.handle)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to initialize processing stream (name was: \"%s\"), aborting\n"),

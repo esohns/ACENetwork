@@ -20,7 +20,11 @@
 
 #include "ace/Log_Msg.h"
 
+#include "stream_stat_defines.h"
+
 #include "net_macros.h"
+
+#include "irc_defines.h"
 
 template <typename StreamStateType,
           typename ConfigurationType,
@@ -100,7 +104,7 @@ IRC_Stream_T<StreamStateType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
-                ACE_TEXT (stream_irc_stream_name_string_)));
+                ACE_TEXT (inherited::name_.c_str ())));
     goto error;
   } // end IF
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
@@ -121,13 +125,13 @@ IRC_Stream_T<StreamStateType,
 
   // ******************* Marshal ************************
   module_p =
-    const_cast<typename inherited::ISTREAM_T::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("Marshal")));
+    const_cast<typename inherited::ISTREAM_T::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_MODULE_MARSHAL_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (stream_irc_stream_name_string_),
-                ACE_TEXT ("Marshal")));
+                ACE_TEXT (inherited::name_.c_str ()),
+                ACE_TEXT (IRC_DEFAULT_MODULE_MARSHAL_NAME_STRING)));
     goto error;
   } // end IF
 
@@ -136,7 +140,7 @@ IRC_Stream_T<StreamStateType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<IRC_Module_Bisector_T> failed, aborting\n"),
-                ACE_TEXT (stream_irc_stream_name_string_)));
+                ACE_TEXT (inherited::name_.c_str ())));
     goto error;
   } // end IF
   bisector_impl_p->setP (&(inherited::state_));
@@ -154,7 +158,7 @@ IRC_Stream_T<StreamStateType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (stream_irc_stream_name_string_)));
+                  ACE_TEXT (inherited::name_.c_str ())));
       goto error;
     } // end IF
 
@@ -205,12 +209,12 @@ IRC_Stream_T<StreamStateType,
   SessionDataType& session_data_r =
     const_cast<SessionDataType&> (inherited::sessionData_->getR ());
   Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT ("StatisticReport")));
+                ACE_TEXT (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
     return false;
   } // end IF
   STATISTIC_WRITER_T* statistic_impl_p =

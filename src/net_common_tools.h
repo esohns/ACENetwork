@@ -132,6 +132,7 @@ class Net_Common_Tools
                        const std::string&); // SSID
   // *NOTE*: this merely (tries to) call the SIOCGIWNAME ioctl
   static bool interfaceIsWLAN (const std::string&); // interface identifier
+  static void scan (const std::string&); // interface identifier
 #endif
 
   // network layer
@@ -294,8 +295,8 @@ class Net_Common_Tools
                                                const std::string&);    // SSID
 #endif
 
-  // stream
-  static std::string generateModuleName (const std::string&); // prefix
+//  // stream
+//  static std::string generateUniqueName (const std::string&); // prefix
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools ())

@@ -33,15 +33,18 @@
 #include "stream_statemachine_control.h"
 #include "stream_streammodule_base.h"
 
+#include "stream_stat_common.h"
 #include "stream_stat_statistic_report.h"
 
 #include "dhcp_common.h"
 //#include "dhcp_module_bisector.h"
+#include "dhcp_exports.h"
 #include "dhcp_module_parser.h"
 #include "dhcp_module_streamer.h"
 #include "dhcp_stream_common.h"
 
-extern const char stream_name_string_[];
+extern NET_PROTOCOL_DHCP_Export const char libacenetwork_default_dhcp_marshal_module_name_string[];
+extern NET_PROTOCOL_DHCP_Export const char libacenetwork_default_dhcp_stream_name_string[];
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -61,7 +64,7 @@ template <typename StreamStateType,
 class DHCP_Stream_T
  : public Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        stream_name_string_,
+                        libacenetwork_default_dhcp_stream_name_string,
                         int,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -79,7 +82,7 @@ class DHCP_Stream_T
 {
   typedef Stream_Base_T<ACE_MT_SYNCH,
                         Common_TimePolicy_t,
-                        stream_name_string_,
+                        libacenetwork_default_dhcp_stream_name_string,
                         int,
                         enum Stream_SessionMessageType,
                         enum Stream_StateMachine_ControlState,
@@ -134,6 +137,10 @@ class DHCP_Stream_T
   //                               SessionDataType,
   //                               SessionDataContainerType,
   //                               StatisticContainerType> BISECTOR_T;
+  //typedef DHCP_Module_Parser_T<ACE_MT_SYNCH,
+  //                             Common_TimePolicy_t,
+  //                             SessionMessageType,
+  //                             ProtocolMessageType> PARSER_T;
   typedef DHCP_Module_ParserH_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 ControlMessageType,
@@ -153,6 +160,11 @@ class DHCP_Stream_T
   //                              ModuleHandlerConfigurationType,
   //                              STREAMER_T,
   //                              BISECTOR_T> MODULE_MARSHAL_T;
+  //typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
+  //                                       Common_TimePolicy_t,
+  //                                       Stream_ModuleConfiguration,
+  //                                       ModuleHandlerConfigurationType,
+  //                                       PARSER_T> MODULE_PARSER_T;
   typedef Stream_StreamModule_T<ACE_MT_SYNCH,
                                 Common_TimePolicy_t,
                                 Stream_SessionId_t,                // session id type
@@ -160,19 +172,10 @@ class DHCP_Stream_T
                                 enum Stream_SessionMessageType,    // session event type
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
+                                libacenetwork_default_dhcp_marshal_module_name_string,
                                 DHCP_Stream_INotify_t,             // stream notification interface type
                                 STREAMER_T,
                                 PARSER_T> MODULE_MARSHAL_T;
-
-  //typedef DHCP_Module_Parser_T<ACE_MT_SYNCH,
-  //                             Common_TimePolicy_t,
-  //                             SessionMessageType,
-  //                             ProtocolMessageType> PARSER_T;
-  //typedef Stream_StreamModuleInputOnly_T<ACE_MT_SYNCH,
-  //                                       Common_TimePolicy_t,
-  //                                       Stream_ModuleConfiguration,
-  //                                       ModuleHandlerConfigurationType,
-  //                                       PARSER_T> MODULE_PARSER_T;
 
   typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                         Common_TimePolicy_t,
@@ -203,6 +206,7 @@ class DHCP_Stream_T
                                 enum Stream_SessionMessageType,    // session event type
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
+                                libacestream_default_stat_report_module_name_string,
                                 DHCP_Stream_INotify_t,             // stream notification interface type
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;
@@ -214,13 +218,9 @@ class DHCP_Stream_T
   void ping ();
 
   // modules
-  MODULE_MARSHAL_T   marshal_;
   //MODULE_PARSER_T    parser_;
+  MODULE_MARSHAL_T   marshal_;
   MODULE_STATISTIC_T statistic_;
-  // *NOTE*: the final module needs to be supplied to the stream from outside,
-  //         otherwise data might be lost if event dispatch runs in (a) separate
-  //         thread(s)
-  //   DHCP_Module_Handler_Module handler_;
 };
 
 // include template definition

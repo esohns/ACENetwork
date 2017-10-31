@@ -426,13 +426,14 @@ typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                        Stream_SessionId_t,
                                        struct BitTorrent_PeerSessionData,
                                        struct Stream_UserData> BitTorrent_PeerHandler_t;
-
+extern BitTorrent_Export const char libacenetwork_default_bittorrent_handler_module_name_string[];
 DATASTREAM_MODULE_INPUT_ONLY_T (struct BitTorrent_PeerSessionData,                // session data
                                 enum Stream_SessionMessageType,                   // session event type
                                 struct BitTorrent_PeerModuleHandlerConfiguration, // module handler configuration type
+                                libacenetwork_default_bittorrent_handler_module_name_string, // module name
                                 BitTorrent_INotify_t,                             // stream notification interface type
                                 BitTorrent_PeerHandler_t,                         // writer type
-                                BitTorrent_PeerHandler);                          // name
+                                BitTorrent_PeerHandler);                          // class name
 
 //----------------------------------------
 
@@ -449,8 +450,9 @@ typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
 DATASTREAM_MODULE_INPUT_ONLY_T (struct BitTorrent_TrackerSessionData,                // session data
                                 enum Stream_SessionMessageType,                      // session event type
                                 struct BitTorrent_TrackerModuleHandlerConfiguration, // module handler configuration type
+                                libacenetwork_default_bittorrent_handler_module_name_string, // module name
                                 BitTorrent_INotify_t,                                // stream notification interface type
                                 BitTorrent_TrackerHandler_t,                         // writer type
-                                BitTorrent_TrackerHandler);                          // name
+                                BitTorrent_TrackerHandler);                          // class name
 
 #endif

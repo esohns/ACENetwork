@@ -22,6 +22,8 @@
 #define DHCP_DEFINES_H
 
 // stream
+#define DHCP_DEFAULT_MODULE_MARSHAL_NAME_STRING   "DHCPMarshal"
+#define DHCP_DEFAULT_STREAM_NAME_STRING           "DHCPStream"
 #define DHCP_BUFFER_SIZE                          1024
 
 // "crunch" messages for easier parsing ?

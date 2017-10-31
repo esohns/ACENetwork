@@ -35,6 +35,7 @@
 
 #include "stream_net_io_stream.h"
 
+#include "stream_stat_common.h"
 #include "stream_stat_statistic_report.h"
 
 #include "http_codes.h"
@@ -47,7 +48,8 @@
 // forward declarations
 typedef Stream_INotify_T<enum Stream_SessionMessageType> HTTP_Stream_INotify_t;
 
-extern HTTP_Export const char stream_http_stream_name_string_[];
+extern HTTP_Export const char libacenetwork_default_http_marshal_module_name_string[];
+extern HTTP_Export const char libacenetwork_default_http_stream_name_string[];
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -70,7 +72,7 @@ template <typename StreamStateType,
 class HTTP_Stream_T
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
-                                        stream_http_stream_name_string_,
+                                        libacenetwork_default_http_stream_name_string,
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
@@ -92,7 +94,7 @@ class HTTP_Stream_T
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
-                                        stream_http_stream_name_string_,
+                                        libacenetwork_default_http_stream_name_string,
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
@@ -162,6 +164,7 @@ class HTTP_Stream_T
                                 enum Stream_SessionMessageType,
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
+                                libacenetwork_default_http_marshal_module_name_string,
                                 HTTP_Stream_INotify_t,
                                 STREAMER_T,
                                 PARSER_T> MODULE_MARSHAL_T;
@@ -195,6 +198,7 @@ class HTTP_Stream_T
                                 enum Stream_SessionMessageType,
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
+                                libacestream_default_stat_report_module_name_string,
                                 HTTP_Stream_INotify_t,
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;

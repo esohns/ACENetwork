@@ -22,5 +22,11 @@
 #include "ace/Synch.h"
 #include "dhcp_stream.h"
 
+#include "dhcp_defines.h"
 #include "dhcp_message.h"
 #include "dhcp_sessionmessage.h"
+
+NET_PROTOCOL_DHCP_Export const char libacenetwork_default_dhcp_marshal_module_name_string[] =
+  ACE_TEXT_ALWAYS_CHAR (DHCP_DEFAULT_MODULE_MARSHAL_NAME_STRING);
+NET_PROTOCOL_DHCP_Export const char libacenetwork_default_dhcp_stream_name_string[] =
+  ACE_TEXT_ALWAYS_CHAR (DHCP_DEFAULT_STREAM_NAME_STRING);

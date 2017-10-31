@@ -182,7 +182,7 @@ Net_ConnectionBase_T<AddressType,
               ACE_TEXT ("registered connection [0x%@/0x%@]: %s %s %s (total: %d)\n"),
               this, state_.handle,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
-              (local_address.is_any () ? ACE_TEXT ("-->") : (remote_address.is_any () ? ACE_TEXT ("<--") : ACE_TEXT ("<-->"))),
+              (remote_address.is_any () ? ACE_TEXT ("<--") : (local_address.is_any () ? ACE_TEXT ("-->") :ACE_TEXT ("<-->"))),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address).c_str ()),
               manager_->count ()));
 #else
@@ -190,7 +190,7 @@ Net_ConnectionBase_T<AddressType,
               ACE_TEXT ("registered connection [%@/%d]: %s %s %s (total: %d)\n"),
               this, state_.handle,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (local_address).c_str ()),
-              (local_address.is_any () ? ACE_TEXT ("-->") : (remote_address.is_any () ? ACE_TEXT ("<--") : ACE_TEXT ("<-->"))),
+              (remote_address.is_any () ? ACE_TEXT ("<--") : (local_address.is_any () ? ACE_TEXT ("-->") :ACE_TEXT ("<-->"))),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address).c_str ()),
               manager_->count ()));
 #endif

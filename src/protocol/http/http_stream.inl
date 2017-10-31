@@ -20,7 +20,11 @@
 
 #include "ace/Log_Msg.h"
 
+#include "stream_stat_defines.h"
+
 #include "net_macros.h"
+
+#include "http_defines.h"
 
 template <typename StreamStateType,
           typename ConfigurationType,
@@ -87,13 +91,13 @@ HTTP_Stream_T<StreamStateType,
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   MODULE_STATISTIC_T (this,
-                                      ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
+                                      ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   MODULE_MARSHAL_T (this,
-                                    ACE_TEXT_ALWAYS_CHAR ("Marshal")),
+                                    ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_MARSHAL_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
 
@@ -155,7 +159,7 @@ HTTP_Stream_T<StreamStateType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Base_T::initialize(), aborting\n"),
-                ACE_TEXT (stream_http_stream_name_string_)));
+                ACE_TEXT (inherited::name_.c_str ())));
     return false;
   } // end IF
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
@@ -231,14 +235,14 @@ HTTP_Stream_T<StreamStateType,
 
   // ******************* Marshal ************************
   module_p =
-      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("Marshal")));
+      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_MARSHAL_NAME_STRING)));
   ACE_ASSERT (module_p);
   parser_impl_p = dynamic_cast<PARSER_T*> (module_p->writer ());
   if (!parser_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<HTTP_Module_Parser_T> failed, aborting\n"),
-                ACE_TEXT (stream_http_stream_name_string_)));
+                ACE_TEXT (inherited::name_.c_str ())));
     goto error;
   } // end IF
   parser_impl_p->setP (&(inherited::state_));
@@ -253,7 +257,7 @@ HTTP_Stream_T<StreamStateType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (stream_http_stream_name_string_)));
+                  ACE_TEXT (inherited::name_.c_str ())));
       goto error;
     } // end IF
 
@@ -299,13 +303,13 @@ HTTP_Stream_T<StreamStateType,
 
   typename inherited::MODULE_T* module_p = NULL;
   module_p =
-      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
+      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: module \"%s\" not found, aborting\n"),
-                ACE_TEXT (stream_http_stream_name_string_),
-                ACE_TEXT ("StatisticReport")));
+                ACE_TEXT (inherited::name_.c_str ()),
+                ACE_TEXT (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
     return false;
   } // end IF
   STATISTIC_WRITER_T* statisticReport_impl_p = NULL;
@@ -315,7 +319,7 @@ HTTP_Stream_T<StreamStateType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n"),
-                ACE_TEXT (stream_http_stream_name_string_)));
+                ACE_TEXT (inherited::name_.c_str ())));
     return false;
   } // end IF
 

@@ -39,6 +39,9 @@
 //            cover MORE than one complete message at a time, so this value is
 //            just a (somewhat qualified) proposal
 #define IRC_MAXIMUM_FRAME_SIZE                 512 // bytes
+#define IRC_DEFAULT_MODULE_MARSHAL_NAME_STRING "IRCMarshal"
+#define IRC_DEFAULT_MODULE_PARSER_NAME_STRING  "IRCParser"
+#define IRC_DEFAULT_STREAM_NAME_STRING         "IRCStream"
 
 // "crunch" messages for easier parsing ?
 // *NOTE*: this comes at the cost of alloc/free, memcopy and locking per

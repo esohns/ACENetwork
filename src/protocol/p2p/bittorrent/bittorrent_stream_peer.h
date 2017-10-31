@@ -36,6 +36,7 @@
 
 #include "stream_net_io_stream.h"
 
+#include "stream_stat_common.h"
 #include "stream_stat_statistic_report.h"
 
 #include "bittorrent_common.h"
@@ -48,7 +49,9 @@
 // forward declarations
 typedef Stream_INotify_T<enum Stream_SessionMessageType> BitTorrent_INotify_t;
 
-extern BitTorrent_Export const char stream_bittorrent_stream_name_string_[];
+extern BitTorrent_Export const char libacenetwork_default_bittorrent_marshal_module_name_string[];
+extern BitTorrent_Export const char libacenetwork_default_bittorrent_handler_module_name_string[];
+extern BitTorrent_Export const char libacenetwork_default_bittorrent_stream_name_string[];
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -77,7 +80,7 @@ template <typename StreamStateType,
 class BitTorrent_PeerStream_T
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
-                                        stream_bittorrent_stream_name_string_,
+                                        libacenetwork_default_bittorrent_stream_name_string,
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
@@ -99,7 +102,7 @@ class BitTorrent_PeerStream_T
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
-                                        stream_bittorrent_stream_name_string_,
+                                        libacenetwork_default_bittorrent_stream_name_string,
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
@@ -191,6 +194,7 @@ class BitTorrent_PeerStream_T
                                 enum Stream_SessionMessageType, // session event type
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
+                                libacenetwork_default_bittorrent_marshal_module_name_string,
                                 BitTorrent_INotify_t,           // stream notification interface type
                                 STREAMER_T,
                                 PARSER_T> MODULE_MARSHAL_T;
@@ -233,6 +237,7 @@ class BitTorrent_PeerStream_T
                                 enum Stream_SessionMessageType,    // session event type
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
+                                libacestream_default_stat_report_module_name_string,
                                 BitTorrent_INotify_t,              // stream notification interface type
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;

@@ -35,6 +35,7 @@
 
 #include "stream_net_io_stream.h"
 
+#include "stream_stat_common.h"
 #include "stream_stat_statistic_report.h"
 
 #include "irc_common.h"
@@ -45,7 +46,9 @@
 #include "irc_record.h"
 #include "irc_stream_common.h"
 
-extern IRC_Export const char stream_irc_stream_name_string_[];
+extern IRC_Export const char libacenetwork_default_irc_marshal_module_name_string[];
+extern IRC_Export const char libacenetwork_default_irc_parser_module_name_string[];
+extern IRC_Export const char libacenetwork_default_irc_stream_name_string[];
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -69,7 +72,7 @@ template <typename StreamStateType,
 class IRC_Stream_T
  : public Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
-                                        stream_irc_stream_name_string_,
+                                        libacenetwork_default_irc_stream_name_string,
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
@@ -91,7 +94,7 @@ class IRC_Stream_T
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
                                         Common_TimePolicy_t,
-                                        stream_irc_stream_name_string_,
+                                        libacenetwork_default_irc_stream_name_string,
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
@@ -153,6 +156,7 @@ class IRC_Stream_T
                                 enum Stream_SessionMessageType, // session event type
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
+                                libacenetwork_default_irc_marshal_module_name_string,
                                 IRC_Stream_INotify_t,           // stream notification interface type
                                 STREAMER_T,
                                 BISECTOR_T> MODULE_MARSHAL_T;
@@ -170,6 +174,7 @@ class IRC_Stream_T
                                          enum Stream_SessionMessageType, // session event type
                                          struct Stream_ModuleConfiguration,
                                          ModuleHandlerConfigurationType,
+                                         libacenetwork_default_irc_parser_module_name_string,
                                          IRC_Stream_INotify_t,           // stream notification interface type
                                          PARSER_T> MODULE_PARSER_T;
 
@@ -202,6 +207,7 @@ class IRC_Stream_T
                                 enum Stream_SessionMessageType, // session event type
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
+                                libacestream_default_stat_report_module_name_string,
                                 IRC_Stream_INotify_t,           // stream notification interface type
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;

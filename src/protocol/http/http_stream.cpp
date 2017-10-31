@@ -23,7 +23,10 @@
 //#include "http_scanner.h"
 #include "http_stream.h"
 
+#include "http_defines.h"
 #include "http_exports.h"
 
-HTTP_Export const char stream_http_stream_name_string_[] =
-  ACE_TEXT_ALWAYS_CHAR ("HTTPStream");
+HTTP_Export const char libacenetwork_default_http_marshal_module_name_string[] =
+  ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_MARSHAL_NAME_STRING);
+HTTP_Export const char libacenetwork_default_http_stream_name_string[] =
+  ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_STREAM_NAME_STRING);

@@ -223,7 +223,9 @@ class Net_WLANMonitor_T
   using inherited::unlock;
   using inherited::getR;
   inline void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   inline void wait () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+#endif
 
   // helper functions
   INTERFACEIDENTIFIERS_T getDevices () const;

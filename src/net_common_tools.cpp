@@ -1073,13 +1073,13 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
 
   // step1: determine the 'internal' IP address
   ACE_INET_Addr internal_ip_address, gateway_ip_address;
-  if (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
+  if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-                                               NULL,
+                                                         NULL,
 #endif
-                                               internal_ip_address,
-                                               gateway_ip_address))
+                                                         internal_ip_address,
+                                                         gateway_ip_address)))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
@@ -1221,8 +1221,8 @@ Net_Common_Tools::interfaceToMACAddress (const std::string& interfaceIdentifier_
   //ACE_ASSERT (sizeof (MACAddress_out) >= MAX_ADAPTER_ADDRESS_LENGTH);
 
   NET_IFINDEX interface_index = 0;
-  struct _IP_ADAPTER_INFO* ip_adapter_info_p = NULL;
-  struct _IP_ADAPTER_INFO* ip_adapter_info_2 = NULL;
+  struct _IP_interfaceIdentifier_inFO* ip_interfaceIdentifier_info_p = NULL;
+  struct _IP_interfaceIdentifier_inFO* ip_interfaceIdentifier_info_2 = NULL;
   ULONG buffer_length = 0;
   ULONG result = 0;
 
@@ -1236,7 +1236,7 @@ Net_Common_Tools::interfaceToMACAddress (const std::string& interfaceIdentifier_
     return false;
   } // end IF
 
-  result = GetAdaptersInfo (ip_adapter_info_p, &buffer_length);
+  result = GetAdaptersInfo (ip_interfaceIdentifier_info_p, &buffer_length);
   if (unlikely (result != ERROR_BUFFER_OVERFLOW))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1245,15 +1245,15 @@ Net_Common_Tools::interfaceToMACAddress (const std::string& interfaceIdentifier_
     return false;
   } // end IF
   ACE_ASSERT (buffer_length);
-  ip_adapter_info_p =
-    static_cast<struct _IP_ADAPTER_INFO*> (ACE_MALLOC_FUNC (buffer_length));
-  if (unlikely (!ip_adapter_info_p))
+  ip_interfaceIdentifier_info_p =
+    static_cast<struct _IP_interfaceIdentifier_inFO*> (ACE_MALLOC_FUNC (buffer_length));
+  if (unlikely (!ip_interfaceIdentifier_info_p))
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     return false;
   } // end IF
-  result = GetAdaptersInfo (ip_adapter_info_p,
+  result = GetAdaptersInfo (ip_interfaceIdentifier_info_p,
                             &buffer_length);
   if (unlikely (result != NO_ERROR))
   {
@@ -1262,27 +1262,27 @@ Net_Common_Tools::interfaceToMACAddress (const std::string& interfaceIdentifier_
                 ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
 
     // clean up
-    ACE_FREE_FUNC (ip_adapter_info_p);
+    ACE_FREE_FUNC (ip_interfaceIdentifier_info_p);
 
     return false;
   } // end IF
 
-  ip_adapter_info_2 = ip_adapter_info_p;
+  ip_interfaceIdentifier_info_2 = ip_interfaceIdentifier_info_p;
   do
   {
-    if (static_cast<DWORD> (interface_index) != ip_adapter_info_2->Index)
+    if (static_cast<DWORD> (interface_index) != ip_interfaceIdentifier_info_2->Index)
       goto continue_;
 
-    ACE_OS::memcpy (MACAddress_out, ip_adapter_info_2->Address,
+    ACE_OS::memcpy (MACAddress_out, ip_interfaceIdentifier_info_2->Address,
                     ETH_ALEN);
     break;
 
 continue_:
-    ip_adapter_info_2 = ip_adapter_info_2->Next;
-  } while (ip_adapter_info_2);
+    ip_interfaceIdentifier_info_2 = ip_interfaceIdentifier_info_2->Next;
+  } while (ip_interfaceIdentifier_info_2);
 
   // clean up
-  ACE_FREE_FUNC (ip_adapter_info_p);
+  ACE_FREE_FUNC (ip_interfaceIdentifier_info_p);
 #else
   //  ACE_OS::memset (MACAddress_out, 0, sizeof (MACAddress_out));
   ACE_OS::memset (MACAddress_out, 0, ETH_ALEN);
@@ -1412,8 +1412,8 @@ Net_Common_Tools::interfaceToString (REFGUID interfaceIdentifier_in)
   } // end IF
 
   NET_IFINDEX interface_index = 0;
-  struct _IP_ADAPTER_INFO* ip_adapter_info_p = NULL;
-  struct _IP_ADAPTER_INFO* ip_adapter_info_2 = NULL;
+  struct _IP_interfaceIdentifier_inFO* ip_interfaceIdentifier_info_p = NULL;
+  struct _IP_interfaceIdentifier_inFO* ip_interfaceIdentifier_info_2 = NULL;
   ULONG buffer_length = 0;
   ULONG result_2 = 0;
 
@@ -1426,7 +1426,7 @@ Net_Common_Tools::interfaceToString (REFGUID interfaceIdentifier_in)
     return ACE_TEXT_ALWAYS_CHAR ("");
   } // end IF
 
-  result_2 = GetAdaptersInfo (ip_adapter_info_p, &buffer_length);
+  result_2 = GetAdaptersInfo (ip_interfaceIdentifier_info_p, &buffer_length);
   if (unlikely (result_2 != ERROR_BUFFER_OVERFLOW))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1435,15 +1435,15 @@ Net_Common_Tools::interfaceToString (REFGUID interfaceIdentifier_in)
     return ACE_TEXT_ALWAYS_CHAR ("");
   } // end IF
   ACE_ASSERT (buffer_length);
-  ip_adapter_info_p =
-    static_cast<struct _IP_ADAPTER_INFO*> (ACE_MALLOC_FUNC (buffer_length));
-  if (unlikely (!ip_adapter_info_p))
+  ip_interfaceIdentifier_info_p =
+    static_cast<struct _IP_interfaceIdentifier_inFO*> (ACE_MALLOC_FUNC (buffer_length));
+  if (unlikely (!ip_interfaceIdentifier_info_p))
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     goto error;
   } // end IF
-  result_2 = GetAdaptersInfo (ip_adapter_info_p,
+  result_2 = GetAdaptersInfo (ip_interfaceIdentifier_info_p,
                               &buffer_length);
   if (unlikely (result_2 != NO_ERROR))
   {
@@ -1453,23 +1453,23 @@ Net_Common_Tools::interfaceToString (REFGUID interfaceIdentifier_in)
     goto error;
   } // end IF
 
-  ip_adapter_info_2 = ip_adapter_info_p;
+  ip_interfaceIdentifier_info_2 = ip_interfaceIdentifier_info_p;
   do
   {
-    if (static_cast<DWORD> (interface_index) != ip_adapter_info_2->Index)
+    if (static_cast<DWORD> (interface_index) != ip_interfaceIdentifier_info_2->Index)
       goto continue_;
 
-    result = ip_adapter_info_2->AdapterName;
+    result = ip_interfaceIdentifier_info_2->AdapterName;
 
     break;
 
 continue_:
-    ip_adapter_info_2 = ip_adapter_info_2->Next;
-  } while (ip_adapter_info_2);
+    ip_interfaceIdentifier_info_2 = ip_interfaceIdentifier_info_2->Next;
+  } while (ip_interfaceIdentifier_info_2);
 
 error:
   // clean up
-  ACE_FREE_FUNC (ip_adapter_info_p);
+  ACE_FREE_FUNC (ip_interfaceIdentifier_info_p);
 
   return result;
 }
@@ -1634,13 +1634,13 @@ Net_Common_Tools::indexToInterface (ULONG interfaceIndex_in)
 }
 #else
 bool
-Net_Common_Tools::interfaceIsWLAN (const std::string& adapter_in)
+Net_Common_Tools::interfaceIsWLAN (const std::string& interfaceIdentifier_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceIsWLAN"));
 
   // sanity check(s)
-  ACE_ASSERT (!adapter_in.empty ());
-  ACE_ASSERT (adapter_in.size () <= IFNAMSIZ);
+  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+  ACE_ASSERT (interfaceIdentifier_in.size () <= IFNAMSIZ);
 
   bool result = false;
   int socket_handle = -1;
@@ -1649,7 +1649,7 @@ Net_Common_Tools::interfaceIsWLAN (const std::string& adapter_in)
   int result_2 = -1;
 
   ACE_OS::strncpy (request_s.ifr_name,
-                   adapter_in.c_str (),
+                   interfaceIdentifier_in.c_str (),
                    IFNAMSIZ);
   socket_handle = ACE_OS::socket (AF_INET,
                                   SOCK_STREAM,
@@ -1671,9 +1671,50 @@ Net_Common_Tools::interfaceIsWLAN (const std::string& adapter_in)
   if (unlikely (socket_handle == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::close(\"%s\"): \"%m\", continuing\n"),
-                ACE_TEXT (adapter_in.c_str ())));
+                ACE_TEXT (interfaceIdentifier_in.c_str ())));
 
   return result;
+}
+
+void
+Net_Common_Tools::scan (const std::string& interfaceIdentifier_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::scan"));
+
+  // sanity check(s)
+  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+  ACE_ASSERT (interfaceIdentifier_in.size () <= IFNAMSIZ);
+
+  int socket_handle = -1;
+  struct iwreq request_s;
+  ACE_OS::memset (&request_s, 0, sizeof (struct iwreq));
+  int result_2 = -1;
+
+  ACE_OS::strncpy (request_s.ifr_name,
+                   interfaceIdentifier_in.c_str (),
+                   IFNAMSIZ);
+  socket_handle = ACE_OS::socket (AF_INET,
+                                  SOCK_STREAM,
+                                  0);
+  if (unlikely (socket_handle == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::socket(AF_INET): \"%m\", returning\n")));
+    return;
+  } // end IF
+  result_2 = ACE_OS::ioctl (socket_handle,
+                            SIOCSIWSCAN,
+                            &request_s);
+  if (unlikely (result_2 == 1))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::ioctl(\"%s\",SIOCSIWSCAN): \"%m\", continuing\n"),
+                ACE_TEXT (interfaceIdentifier_in.c_str ())));
+
+  result_2 = ACE_OS::close (socket_handle);
+  if (unlikely (socket_handle == -1))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::close(\"%s\"): \"%m\", continuing\n"),
+                ACE_TEXT (interfaceIdentifier_in.c_str ())));
 }
 #endif
 std::string
@@ -1783,7 +1824,7 @@ Net_Common_Tools::associatedSSID (const std::string& interfaceIdentifier_in)
   result = essid;
 
 error:
-  if (socket_handle != -1)
+  if (likely (socket_handle != -1))
     iw_sockets_close (socket_handle);
 #endif
 
@@ -1807,8 +1848,8 @@ Net_Common_Tools::hasSSID (const std::string& interfaceIdentifier_in,
 
   // sanity check(s)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if  (unlikely ((clientHandle_in == ACE_INVALID_HANDLE) ||
-                 InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL)))
+  if (unlikely ((clientHandle_in == ACE_INVALID_HANDLE) ||
+                InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL)))
 #else
   if (unlikely (interfaceIdentifier_in.empty ()))
 #endif
@@ -1835,7 +1876,7 @@ Net_Common_Tools::hasSSID (const std::string& interfaceIdentifier_in,
   struct ifaddrs* ifaddrs_p = NULL;
 #endif
 
-  // step1: retrieve all wireless adapaters
+  // step1: retrieve all wireless interfaces
   if (likely (!interfaceIdentifier_in.empty ()))
   {
     wireless_device_identifiers_a.push_back (interfaceIdentifier_in);
@@ -1902,6 +1943,7 @@ continue_:
     ACE_OS::memset (&wireless_scan_head_s,
                     0,
                     sizeof (struct wireless_scan_head));
+    // *TODO*: do not use iwlib; talk to the driver directly
     result_2 = iw_scan (socket_handle,
                         const_cast<char*> ((*iterator).c_str ()),
                         iw_range_s.we_version_compiled,
@@ -2110,7 +2152,7 @@ continue_:
 #if defined (ACE_HAS_GETIFADDRS)
   struct ifaddrs* ifaddrs_p = NULL;
   int result = ::getifaddrs (&ifaddrs_p);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to ::getifaddrs(): \"%m\", aborting\n")));
@@ -2139,7 +2181,7 @@ continue_:
     sockaddr_in_p = reinterpret_cast<struct sockaddr_in*> (ifaddrs_2->ifa_addr);
     result = IPAddress_out.set (sockaddr_in_p,
                                 sizeof (struct sockaddr_in));
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
@@ -2201,7 +2243,7 @@ Net_Common_Tools::IPAddressToInterface (const ACE_INET_Addr& IPAddress_in,
 #endif
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (unlikely (Net_Common_Tools::isLocal (IPAddress_in)))
+  if (Net_Common_Tools::isLocal (IPAddress_in))
   {
     struct _IP_ADAPTER_ADDRESSES_LH* ip_adapter_addresses_p = NULL;
     ULONG buffer_length = 0;
@@ -2358,7 +2400,7 @@ continue_:
        ifaddrs_2;
        ifaddrs_2 = ifaddrs_2->ifa_next)
   {
-    if (unlikely (!ifaddrs_2->ifa_addr))
+    if (!ifaddrs_2->ifa_addr)
       continue;
     if (ifaddrs_2->ifa_addr->sa_family != AF_INET)
       continue;
@@ -2422,7 +2464,7 @@ Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
                               NULL,                   // Reserved
                               ip_adapter_addresses_p, // AdapterAddresses
                               &buffer_length);        // SizePointer
-      if (result_2 != ERROR_BUFFER_OVERFLOW)
+      if (unlikely (result_2 != ERROR_BUFFER_OVERFLOW))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
@@ -2432,7 +2474,7 @@ Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
       ACE_ASSERT (buffer_length);
       ip_adapter_addresses_p =
         static_cast<struct _IP_ADAPTER_ADDRESSES_LH*> (ACE_MALLOC_FUNC (buffer_length));
-      if (!ip_adapter_addresses_p)
+      if (unlikely (!ip_adapter_addresses_p))
       {
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
@@ -2444,7 +2486,7 @@ Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
                               NULL,                   // Reserved
                               ip_adapter_addresses_p, // AdapterAddresses
                               &buffer_length);        // SizePointer
-      if (result_2 != NO_ERROR)
+      if (unlikely (result_2 != NO_ERROR))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
@@ -2690,7 +2732,7 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
   if (hostName_inout.empty ())
   {
     // sanity check
-    if (dottedDecimal_inout.empty ())
+    if (unlikely (dottedDecimal_inout.empty ()))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid arguments (hostname/address empty), aborting\n")));
@@ -2698,7 +2740,7 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
     } // end IF
 
     result = inet_address.set (dottedDecimal_inout.c_str (), AF_INET);
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
@@ -2707,7 +2749,7 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
     } // end IF
 
     result = inet_address.get_host_name (buffer, sizeof (buffer));
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::get_host_name(\"%s\"): \"%m\", aborting\n"),
@@ -2723,7 +2765,7 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
                                hostName_inout.c_str (),
                                1,
                                AF_INET);
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
@@ -2732,7 +2774,7 @@ Net_Common_Tools::getAddress (std::string& hostName_inout,
     } // end IF
 
     const char* result_p = inet_address.get_host_addr (buffer, sizeof (buffer));
-    if (!result_p)
+    if (unlikely (!result_p))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::get_host_addr(\"%s\"): \"%m\", aborting\n"),
@@ -2780,7 +2822,7 @@ Net_Common_Tools::setPathMTUDiscovery (ACE_HANDLE handle_in,
                                IP_MTU_DISCOVER,
                                reinterpret_cast<const char*> (&optval),
                                optlen);
-  if (result)
+  if (unlikely (result))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::setsockopt(%d,%s,%d): \"%m\", aborting\n"),
@@ -2810,7 +2852,7 @@ Net_Common_Tools::getPathMTU (const ACE_INET_Addr& destinationAddress_in,
   ACE_HANDLE socket_handle = ACE_OS::socket (ACE_ADDRESS_FAMILY_INET,
                                              SOCK_DGRAM,
                                              0);
-  if (socket_handle == ACE_INVALID_HANDLE)
+  if (unlikely (socket_handle == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::socket(%d,%d,%d): \"%m\", aborting\n"),
@@ -2823,7 +2865,7 @@ Net_Common_Tools::getPathMTU (const ACE_INET_Addr& destinationAddress_in,
   int result_2 = destinationAddress_in.addr_to_string (buffer,
                                                        sizeof (buffer),
                                                        1);
-  if (result_2 == -1)
+  if (unlikely (result_2 == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_INET_Addr::addr_to_string(): \"%m\", continuing\n")));
 
@@ -2833,7 +2875,7 @@ Net_Common_Tools::getPathMTU (const ACE_INET_Addr& destinationAddress_in,
   result_2 = ACE_OS::connect (socket_handle,
                               sockaddr_p,
                               destinationAddress_in.get_addr_size ());
-  if (result_2 == -1)
+  if (unlikely (result_2 == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::connect(%d,%s): \"%m\", aborting\n"),
@@ -2851,7 +2893,7 @@ Net_Common_Tools::getPathMTU (const ACE_INET_Addr& destinationAddress_in,
                                IP_MTU,
                                reinterpret_cast<char*> (&optval),
                                &optlen);
-  if (result)
+  if (unlikely (result))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::getsockopt(%d, %s): \"%m\", aborting\n"),
@@ -2864,7 +2906,7 @@ Net_Common_Tools::getPathMTU (const ACE_INET_Addr& destinationAddress_in,
   MTU_out = optval;
 
 close:
-  if (do_disassociate)
+  if (likely (do_disassociate))
   {
     // *NOTE*: see man connect(2)
     struct sockaddr socket_address = *sockaddr_p;
@@ -2898,7 +2940,7 @@ Net_Common_Tools::getMTU (ACE_HANDLE handle_in)
                                SO_MAX_MSG_SIZE,
                                reinterpret_cast<char*> (&optval),
                                &optlen);
-  if (result)
+  if (unlikely (result))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::getsockopt(0x%@,SO_MAX_MSG_SIZE): \"%m\", aborting\n"),
@@ -2912,7 +2954,7 @@ Net_Common_Tools::getMTU (ACE_HANDLE handle_in)
                                IP_MTU,
                                reinterpret_cast<char*> (&optval),
                                &optlen);
-  if (result)
+  if (unlikely (result))
   {
     int error = ACE_OS::last_error ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -2968,7 +3010,7 @@ Net_Common_Tools::setSocketBuffer (ACE_HANDLE handle_in,
                                optname_in,
                                reinterpret_cast<const char*> (&optval),
                                optlen);
-  if (result)
+  if (unlikely (result))
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -2994,7 +3036,7 @@ Net_Common_Tools::setSocketBuffer (ACE_HANDLE handle_in,
                                optname_in,
                                reinterpret_cast<char*> (&optval),
                                &optlen);
-  if (result)
+  if (unlikely (result))
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -3013,7 +3055,7 @@ Net_Common_Tools::setSocketBuffer (ACE_HANDLE handle_in,
     return false;
   } // end IF
 
-  if (optval != size_in)
+  if (unlikely (optval != size_in))
   {
     // *NOTE*: for some reason, Linux will actually set TWICE the size value
     if (Common_Tools::isLinux () && (optval == (size_in * 2)))
@@ -3063,7 +3105,7 @@ Net_Common_Tools::getNoDelay (ACE_HANDLE handle_in)
                                TCP_NODELAY,
                                reinterpret_cast<char*> (&optval),
                                &optlen);
-  if (result)
+  if (unlikely (result))
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -3095,7 +3137,7 @@ Net_Common_Tools::setNoDelay (ACE_HANDLE handle_in,
                                TCP_NODELAY,
                                reinterpret_cast<const char*> (&optval),
                                optlen);
-  if (result)
+  if (unlikely (result))
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -3117,7 +3159,7 @@ Net_Common_Tools::setNoDelay (ACE_HANDLE handle_in,
                                TCP_NODELAY,
                                reinterpret_cast<char*> (&optval),
                                &optlen);
-  if (result)
+  if (unlikely (result))
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -3155,7 +3197,7 @@ Net_Common_Tools::setKeepAlive (ACE_HANDLE handle_in,
                                SO_KEEPALIVE,
                                reinterpret_cast<char*> (&optval),
                                &optlen);
-  if (result)
+  if (unlikely (result))
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -3176,7 +3218,7 @@ Net_Common_Tools::setKeepAlive (ACE_HANDLE handle_in,
                                SO_KEEPALIVE,
                                reinterpret_cast<const char*> (&optval),
                                optlen);
-  if (result)
+  if (unlikely (result))
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -3214,7 +3256,7 @@ Net_Common_Tools::setLinger (ACE_HANDLE handle_in,
                                SO_LINGER,
                                reinterpret_cast<char*> (&optval),
                                &optlen);
-  if (result)
+  if (unlikely (result))
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -3237,7 +3279,7 @@ Net_Common_Tools::setLinger (ACE_HANDLE handle_in,
                                SO_LINGER,
                                reinterpret_cast<const char*> (&optval),
                                optlen);
-  if (result)
+  if (unlikely (result))
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -3278,7 +3320,7 @@ Net_Common_Tools::setReuseAddress (ACE_HANDLE handle_in
                                SO_REUSEADDR,
                                reinterpret_cast<const char*> (&optval),
                                optlen);
-  if (result)
+  if (unlikely (result))
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -3302,7 +3344,7 @@ Net_Common_Tools::setReuseAddress (ACE_HANDLE handle_in
                                  SO_REUSEPORT,
                                  reinterpret_cast<const char*> (&optval),
                                  optlen);
-    if (result)
+    if (unlikely (result))
     {
       // *PORTABILITY*
       ACE_DEBUG ((LM_ERROR,
@@ -3331,7 +3373,7 @@ Net_Common_Tools::enableErrorQueue (ACE_HANDLE handle_in)
                                IP_RECVERR,
                                reinterpret_cast<char*> (&optval),
                                optlen);
-  if (result)
+  if (unlikely (result))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::setsockopt(%d,IP_RECVERR): \"%m\", aborting\n"),
@@ -3397,7 +3439,7 @@ Net_Common_Tools::getProtocol (ACE_HANDLE handle_in)
                                SO_TYPE, // SO_STYLE
                                reinterpret_cast<char*> (&optval),
                                &optlen);
-  if (result)
+  if (unlikely (result))
   {
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -3523,7 +3565,7 @@ Net_Common_Tools::sendDatagram (const ACE_INET_Addr& localSAP_in,
 
 error:
   result_2 = ACE_OS::closesocket (handle_h);
-  if (result_2 == -1)
+  if (unlikely (result_2 == -1))
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
@@ -3559,7 +3601,7 @@ Net_Common_Tools::setLoopBackFastPath (ACE_HANDLE handle_in)
                    0,                         // size of output buffer
                    &number_of_bytes_returned, // #bytes returned
                    NULL, NULL);               // overlapped / function
-  if (result == SOCKET_ERROR)
+  if (unlikely (result == SOCKET_ERROR))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::ioctl(0x%@,SIO_LOOPBACK_FAST_PATH): \"%s\", aborting\n"),
@@ -3599,7 +3641,7 @@ Net_Common_Tools::activateConnection (struct DBusConnection* connection_in,
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_OBJECT_PATH),
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_INTERFACE),
                                     ACE_TEXT_ALWAYS_CHAR ("ActivateConnection"));
-  if (!message_p)
+  if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_new_method_call(ActivateConnection): \"%m\", aborting\n")));
@@ -3610,9 +3652,9 @@ Net_Common_Tools::activateConnection (struct DBusConnection* connection_in,
   char* object_path_p = NULL;
   const char* argument_string_p = connectionObjectPath_in.c_str ();
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_OBJECT_PATH,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_OBJECT_PATH,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -3620,9 +3662,9 @@ Net_Common_Tools::activateConnection (struct DBusConnection* connection_in,
   } // end IF
   argument_string_p = deviceObjectPath_in.c_str ();
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_OBJECT_PATH,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_OBJECT_PATH,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -3630,9 +3672,9 @@ Net_Common_Tools::activateConnection (struct DBusConnection* connection_in,
   } // end IF
   argument_string_p = accessPointObjectPath_in.c_str ();
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_OBJECT_PATH,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_OBJECT_PATH,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -3642,13 +3684,13 @@ Net_Common_Tools::activateConnection (struct DBusConnection* connection_in,
                                                    message_p,
                                                    -1); // timeout (ms)
   ACE_ASSERT (!message_p);
-  if (!reply_p)
+  if (unlikely (!reply_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  if (!dbus_message_iter_init (reply_p, &iterator))
+  if (unlikely (!dbus_message_iter_init (reply_p, &iterator)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
@@ -3696,25 +3738,34 @@ Net_Common_Tools::dBusMessageExchange (struct DBusConnection* connection_in,
   ACE_ASSERT (message_inout);
 
   struct DBusPendingCall* pending_p = NULL;
-  if (!dbus_connection_send_with_reply (connection_in,
-                                        message_inout,
-                                        &pending_p,
-                                        timeout_in)) // timeout (ms)
+  if (unlikely (!dbus_connection_send_with_reply (connection_in,
+                                                  message_inout,
+                                                  &pending_p,
+                                                  timeout_in))) // timeout (ms)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dbus_connection_send_with_reply(%d), aborting\n"),
+                ACE_TEXT ("failed to dbus_connection_send_with_reply(0x%@,%d), aborting\n"),
+                connection_in,
                 timeout_in));
     goto error;
   } // end IF
-  ACE_ASSERT (pending_p);
+  if (unlikely (!pending_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to dbus_connection_send_with_reply(0x%@,%d), aborting\n"),
+                connection_in,
+                timeout_in));
+    goto error;
+  } // end IF
 //  dbus_connection_flush (connection_in);
   dbus_message_unref (message_inout); message_inout = NULL;
   dbus_pending_call_block (pending_p);
   result = dbus_pending_call_steal_reply (pending_p);
-  if (!result)
+  if (unlikely (!result))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dbus_pending_call_steal_reply(), aborting\n")));
+                ACE_TEXT ("failed to dbus_pending_call_steal_reply(0x%@), aborting\n"),
+                pending_p));
     goto error;
   } // end IF
   dbus_pending_call_unref (pending_p); pending_p = NULL;
@@ -3740,7 +3791,7 @@ Net_Common_Tools::dBusMessageValidate (struct DBusMessageIter& iterator_in,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::dBusMessageValidate"));
 
-  if (dbus_message_iter_get_arg_type (&iterator_in) == expectedType_in)
+  if (likely (dbus_message_iter_get_arg_type (&iterator_in) == expectedType_in))
     return true;
 
   char* signature_string_p = dbus_message_iter_get_signature (&iterator_in);
@@ -3786,7 +3837,7 @@ Net_Common_Tools::activeConnectionDBusPathToIp4ConfigDBusPath (struct DBusConnec
                                     activeConnectionObjectPath_in.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
                                     ACE_TEXT_ALWAYS_CHAR ("Get"));
-  if (!message_p)
+  if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_new_method_call(IPv4Config): \"%m\", aborting\n")));
@@ -3798,9 +3849,9 @@ Net_Common_Tools::activeConnectionDBusPathToIp4ConfigDBusPath (struct DBusConnec
   const char* argument_string_p =
       ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_CONNECTIONACTIVE_INTERFACE);
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_STRING,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -3808,9 +3859,9 @@ Net_Common_Tools::activeConnectionDBusPathToIp4ConfigDBusPath (struct DBusConnec
   } // end IF
   argument_string_p = ACE_TEXT_ALWAYS_CHAR ("Ip4Config");
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_STRING,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -3820,13 +3871,13 @@ Net_Common_Tools::activeConnectionDBusPathToIp4ConfigDBusPath (struct DBusConnec
                                                    message_p,
                                                    -1); // timeout (ms)
   ACE_ASSERT (!message_p);
-  if (!reply_p)
+  if (unlikely (!reply_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  if (!dbus_message_iter_init (reply_p, &iterator))
+  if (unlikely (!dbus_message_iter_init (reply_p, &iterator)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
@@ -3869,7 +3920,7 @@ Net_Common_Tools::activeConnectionDBusPathToDeviceDBusPath (struct DBusConnectio
                                     activeConnectionObjectPath_in.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
                                     ACE_TEXT_ALWAYS_CHAR ("Get"));
-  if (!message_p)
+  if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_new_method_call(Devices): \"%m\", aborting\n")));
@@ -3881,9 +3932,9 @@ Net_Common_Tools::activeConnectionDBusPathToDeviceDBusPath (struct DBusConnectio
   const char* argument_string_p =
       ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_CONNECTIONACTIVE_INTERFACE);
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_STRING,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -3891,9 +3942,9 @@ Net_Common_Tools::activeConnectionDBusPathToDeviceDBusPath (struct DBusConnectio
   } // end IF
   argument_string_p = ACE_TEXT_ALWAYS_CHAR ("Devices");
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_STRING,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -3903,26 +3954,25 @@ Net_Common_Tools::activeConnectionDBusPathToDeviceDBusPath (struct DBusConnectio
                                                    message_p,
                                                    -1); // timeout (ms)
   ACE_ASSERT (!message_p);
-  if (!reply_p)
+  if (unlikely (!reply_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  if (!dbus_message_iter_init (reply_p, &iterator))
+  if (unlikely (!dbus_message_iter_init (reply_p, &iterator)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-
   ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_ARRAY);
   dbus_message_iter_recurse (&iterator, &iterator_2);
   do {
     ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_OBJECT_PATH);
     dbus_message_iter_get_basic (&iterator_2, &object_path_p);
     ACE_ASSERT (object_path_p);
-    if (!result.empty ())
+    if (unlikely (!result.empty ()))
     {
       ACE_DEBUG ((LM_WARNING,
                   ACE_TEXT ("active connection \"%s\" uses several devices, returning the first one\n"),
@@ -3964,7 +4014,7 @@ Net_Common_Tools::deviceToDBusPath (struct DBusConnection* connection_in,
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_OBJECT_PATH),
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_INTERFACE),
                                     ACE_TEXT_ALWAYS_CHAR ("GetDeviceByIpIface"));
-  if (!message_p)
+  if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_new_method_call(GetDeviceByIpIface): \"%m\", aborting\n")));
@@ -3974,9 +4024,9 @@ Net_Common_Tools::deviceToDBusPath (struct DBusConnection* connection_in,
   char* object_path_p = NULL;
   dbus_message_iter_init_append (message_p, &iterator);
   const char* device_identifier_p = interfaceIdentifier_in.c_str ();
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &device_identifier_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_STRING,
+                                                 &device_identifier_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -3986,13 +4036,13 @@ Net_Common_Tools::deviceToDBusPath (struct DBusConnection* connection_in,
                                                    message_p,
                                                    -1); // timeout (ms)
   ACE_ASSERT (!message_p);
-  if (!reply_p)
+  if (unlikely (!reply_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  if (!dbus_message_iter_init (reply_p, &iterator))
+  if (unlikely (!dbus_message_iter_init (reply_p, &iterator)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
@@ -4034,7 +4084,7 @@ Net_Common_Tools::Ip4ConfigDBusPathToGateway (struct DBusConnection* connection_
                                 Ip4ConfigObjectPath_in.c_str (),
                                 ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
                                 ACE_TEXT_ALWAYS_CHAR ("Get"));
-  if (!message_p)
+  if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_new_method_call(Gateway): \"%m\", aborting\n")));
@@ -4047,9 +4097,9 @@ Net_Common_Tools::Ip4ConfigDBusPathToGateway (struct DBusConnection* connection_
   const char* argument_string_p =
       ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_IP4CONFIG_INTERFACE);
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_STRING,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -4057,9 +4107,9 @@ Net_Common_Tools::Ip4ConfigDBusPathToGateway (struct DBusConnection* connection_
   } // end IF
   argument_string_p = ACE_TEXT_ALWAYS_CHAR ("Gateway");
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_STRING,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -4069,13 +4119,13 @@ Net_Common_Tools::Ip4ConfigDBusPathToGateway (struct DBusConnection* connection_
                                                    message_p,
                                                    -1); // timeout (ms)
   ACE_ASSERT (!message_p);
-  if (!reply_p)
+  if (unlikely (!reply_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  if (!dbus_message_iter_init (reply_p, &iterator))
+  if (unlikely (!dbus_message_iter_init (reply_p, &iterator)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
@@ -4122,7 +4172,7 @@ Net_Common_Tools::deviceDBusPathToActiveAccessPointDBusPath (struct DBusConnecti
                                     deviceObjectPath_in.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
                                     ACE_TEXT_ALWAYS_CHAR ("Get"));
-  if (!message_p)
+  if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_new_method_call(Get): \"%m\", aborting\n")));
@@ -4133,9 +4183,9 @@ Net_Common_Tools::deviceDBusPathToActiveAccessPointDBusPath (struct DBusConnecti
   const char* argument_string_p =
       ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICEWIRELESS_INTERFACE);
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_STRING,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -4143,9 +4193,9 @@ Net_Common_Tools::deviceDBusPathToActiveAccessPointDBusPath (struct DBusConnecti
   } // end IF
   argument_string_p = ACE_TEXT_ALWAYS_CHAR ("ActiveAccessPoint");
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_STRING,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -4155,20 +4205,20 @@ Net_Common_Tools::deviceDBusPathToActiveAccessPointDBusPath (struct DBusConnecti
                                                    message_p,
                                                    -1); // timeout (ms)
   ACE_ASSERT (!message_p);
-  if (!reply_p)
+  if (unlikely (!reply_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  if (!dbus_message_iter_init (reply_p, &iterator))
+  if (unlikely (!dbus_message_iter_init (reply_p, &iterator)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-  if (!Net_Common_Tools::dBusMessageValidate (iterator,
-                                              DBUS_TYPE_VARIANT))
+  if (unlikely (!Net_Common_Tools::dBusMessageValidate (iterator,
+                                                        DBUS_TYPE_VARIANT)))
     goto error;
   dbus_message_iter_recurse (&iterator, &iterator_2);
   ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_OBJECT_PATH);
@@ -4187,7 +4237,7 @@ error:
 
 continue_:
   // *NOTE*: the D-Bus protocol defines "/" to be an invalid/unkown object path
-  if (!ACE_OS::strcmp (result.c_str (), ACE_TEXT_ALWAYS_CHAR ("/")))
+  if (unlikely (!ACE_OS::strcmp (result.c_str (), ACE_TEXT_ALWAYS_CHAR ("/"))))
     result.resize (0);
 
   return result;
@@ -4212,7 +4262,7 @@ Net_Common_Tools::deviceDBusPathToIp4ConfigDBusPath (struct DBusConnection* conn
                                     deviceObjectPath_in.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
                                     ACE_TEXT_ALWAYS_CHAR ("Get"));
-  if (!message_p)
+  if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_new_method_call(Get): \"%m\", aborting\n")));
@@ -4223,9 +4273,9 @@ Net_Common_Tools::deviceDBusPathToIp4ConfigDBusPath (struct DBusConnection* conn
   const char* argument_string_p =
       ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICE_INTERFACE);
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_STRING,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -4233,9 +4283,9 @@ Net_Common_Tools::deviceDBusPathToIp4ConfigDBusPath (struct DBusConnection* conn
   } // end IF
   argument_string_p = ACE_TEXT_ALWAYS_CHAR ("Ip4Config");
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_STRING,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -4245,13 +4295,13 @@ Net_Common_Tools::deviceDBusPathToIp4ConfigDBusPath (struct DBusConnection* conn
                                                    message_p,
                                                    -1); // timeout (ms)
   ACE_ASSERT (!message_p);
-  if (!reply_p)
+  if (unlikely (!reply_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  if (!dbus_message_iter_init (reply_p, &iterator))
+  if (unlikely (!dbus_message_iter_init (reply_p, &iterator)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
@@ -4276,7 +4326,7 @@ error:
 
 continue_:
   // *NOTE*: the D-Bus protocol defines "/" to be an invalid/unkown object path
-  if (!ACE_OS::strcmp (result.c_str (), ACE_TEXT_ALWAYS_CHAR ("/")))
+  if (unlikely (!ACE_OS::strcmp (result.c_str (), ACE_TEXT_ALWAYS_CHAR ("/"))))
     result.resize (0);
 
   return result;
@@ -4301,7 +4351,7 @@ Net_Common_Tools::deviceDBusPathToIdentifier (struct DBusConnection* connection_
                                     deviceObjectPath_in.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
                                     ACE_TEXT_ALWAYS_CHAR ("Get"));
-  if (!message_p)
+  if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_new_method_call(Get): \"%m\", aborting\n")));
@@ -4312,9 +4362,9 @@ Net_Common_Tools::deviceDBusPathToIdentifier (struct DBusConnection* connection_
   const char* argument_string_p =
       ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICE_INTERFACE);
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_STRING,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -4322,9 +4372,9 @@ Net_Common_Tools::deviceDBusPathToIdentifier (struct DBusConnection* connection_
   } // end IF
   argument_string_p = ACE_TEXT_ALWAYS_CHAR ("Interface");
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_STRING,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -4334,20 +4384,20 @@ Net_Common_Tools::deviceDBusPathToIdentifier (struct DBusConnection* connection_
                                                    message_p,
                                                    -1); // timeout (ms)
   ACE_ASSERT (!message_p);
-  if (!reply_p)
+  if (unlikely (!reply_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  if (!dbus_message_iter_init (reply_p, &iterator))
+  if (unlikely (!dbus_message_iter_init (reply_p, &iterator)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-  if (!Net_Common_Tools::dBusMessageValidate (iterator,
-                                              DBUS_TYPE_VARIANT))
+  if (unlikely (!Net_Common_Tools::dBusMessageValidate (iterator,
+                                                        DBUS_TYPE_VARIANT)))
     goto error;
   dbus_message_iter_recurse (&iterator, &iterator_2);
   ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_STRING);
@@ -4387,7 +4437,7 @@ Net_Common_Tools::accessPointDBusPathToSSID (struct DBusConnection* connection_i
                                     accessPointObjectPath_in.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
                                     ACE_TEXT_ALWAYS_CHAR ("Get"));
-  if (!message_p)
+  if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_new_method_call(Get): \"%m\", aborting\n")));
@@ -4398,9 +4448,9 @@ Net_Common_Tools::accessPointDBusPathToSSID (struct DBusConnection* connection_i
   const char* argument_string_p =
       ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_ACCESSPOINT_INTERFACE);
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_STRING,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -4408,9 +4458,9 @@ Net_Common_Tools::accessPointDBusPathToSSID (struct DBusConnection* connection_i
   } // end IF
   argument_string_p = ACE_TEXT_ALWAYS_CHAR ("Ssid");
   dbus_message_iter_init_append (message_p, &iterator);
-  if (!dbus_message_iter_append_basic (&iterator,
-                                       DBUS_TYPE_STRING,
-                                       &argument_string_p))
+  if (unlikely (!dbus_message_iter_append_basic (&iterator,
+                                                 DBUS_TYPE_STRING,
+                                                 &argument_string_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
@@ -4420,20 +4470,20 @@ Net_Common_Tools::accessPointDBusPathToSSID (struct DBusConnection* connection_i
                                                    message_p,
                                                    -1); // timeout (ms)
   ACE_ASSERT (!message_p);
-  if (!reply_p)
+  if (unlikely (!reply_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  if (!dbus_message_iter_init (reply_p, &iterator))
+  if (unlikely (!dbus_message_iter_init (reply_p, &iterator)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-  if (!Net_Common_Tools::dBusMessageValidate (iterator,
-                                              DBUS_TYPE_VARIANT))
+  if (unlikely (!Net_Common_Tools::dBusMessageValidate (iterator,
+                                                        DBUS_TYPE_VARIANT)))
     goto error;
   dbus_message_iter_recurse (&iterator, &iterator_2);
   ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_ARRAY);
@@ -4477,7 +4527,7 @@ Net_Common_Tools::connectionDBusPathToSSID (struct DBusConnection* connection_in
                                 connectionObjectPath_in.c_str (),
                                 ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SETTINGSCONNECTION_INTERFACE),
                                 ACE_TEXT_ALWAYS_CHAR ("GetSettings"));
-  if (!message_p)
+  if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_new_method_call(GetSettings): \"%m\", aborting\n")));
@@ -4491,20 +4541,22 @@ Net_Common_Tools::connectionDBusPathToSSID (struct DBusConnection* connection_in
                                                    message_p,
                                                    -1); // timeout (ms)
   ACE_ASSERT (!message_p);
-  if (!reply_p)
+  if (unlikely (!reply_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
   goto error;
   } // end IF
   // *NOTE*: the schema is a{sa{sv}}
-  if (!dbus_message_iter_init (reply_p, &iterator))
+  if (unlikely (!dbus_message_iter_init (reply_p, &iterator)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_ARRAY);
+  if (unlikely (!Net_Common_Tools::dBusMessageValidate (iterator,
+                                                        DBUS_TYPE_ARRAY)))
+    goto error;
   dbus_message_iter_recurse (&iterator, &iterator_2);
   do {
     // connection settings --> wireless settings --> IPv4 configuration --> ...
@@ -4609,7 +4661,7 @@ Net_Common_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_i
       (deviceObjectPath_in.empty () ? Net_Common_Tools::SSIDToDeviceDBusPath (connection_in,
                                                                               SSID_in)
                                     : deviceObjectPath_in);
-  if (device_object_path_string.empty ())
+  if (unlikely (device_object_path_string.empty ()))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::SSIDToDeviceDBusPath(0x%@,%s), aborting\n"),
@@ -4624,7 +4676,7 @@ Net_Common_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_i
                                     device_object_path_string.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICEWIRELESS_INTERFACE),
                                     ACE_TEXT_ALWAYS_CHAR ("GetAllAccessPoints"));
-  if (!message_p)
+  if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_new_method_call(GetAllAccessPoints): \"%m\", aborting\n")));
@@ -4637,13 +4689,13 @@ Net_Common_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_i
                                                    message_p,
                                                    -1); // timeout (ms)
   ACE_ASSERT (!message_p);
-  if (!reply_p)
+  if (unlikely (!reply_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
     goto error;
   } // end IF
-  if (!dbus_message_iter_init (reply_p, &iterator))
+  if (unlikely (!dbus_message_iter_init (reply_p, &iterator)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
@@ -4653,14 +4705,14 @@ Net_Common_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_i
   ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_ARRAY);
   dbus_message_iter_recurse (&iterator, &iterator_2);
   do {
-    if (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_INVALID)
+    if (unlikely (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_INVALID))
       break; // device exists, but no SSIDs found --> radio off ?
     ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_OBJECT_PATH);
     dbus_message_iter_get_basic (&iterator_2, &object_path_p);
     ACE_ASSERT (object_path_p);
     SSID_string = Net_Common_Tools::accessPointDBusPathToSSID (connection_in,
                                                                object_path_p);
-    if (SSID_string.empty ())
+    if (unlikely (SSID_string.empty ()))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::accessPointDBusPathToSSID(\"%s\"), continuing\n"),
@@ -4704,7 +4756,7 @@ Net_Common_Tools::SSIDToDeviceDBusPath (struct DBusConnection* connection_in,
 #if defined (ACE_HAS_GETIFADDRS)
   struct ifaddrs* ifaddrs_p = NULL;
   int result_2 = ::getifaddrs (&ifaddrs_p);
-  if (result_2 == -1)
+  if (unlikely (result_2 == -1))
   {
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to ::getifaddrs(): \"%m\", aborting\n")));
@@ -4773,7 +4825,7 @@ Net_Common_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in
       (deviceObjectPath_in.empty () ? Net_Common_Tools::SSIDToDeviceDBusPath (connection_in,
                                                                               SSID_in)
                                     : deviceObjectPath_in);
-  if (device_object_path_string.empty ())
+  if (unlikely (device_object_path_string.empty ()))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::SSIDToDeviceDBusPath(0x%@,%s), aborting\n"),
@@ -4795,7 +4847,7 @@ Net_Common_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_SETTINGS_INTERFACE),
 //                                    ACE_TEXT_ALWAYS_CHAR ("Get"));
                                     ACE_TEXT_ALWAYS_CHAR ("ListConnections"));
-  if (!message_p)
+  if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_new_method_call(Get): \"%m\", aborting\n")));
@@ -4832,14 +4884,14 @@ Net_Common_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in
                                                    message_p,
                                                    -1); // timeout (ms)
   ACE_ASSERT (!message_p);
-  if (!reply_p)
+  if (unlikely (!reply_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::dBusMessageExchange(-1): \"%m\", aborting\n")));
     goto error;
   } // end IF
 //  if (!dbus_message_iter_init (reply_p, &iterator))
-  if (!dbus_message_iter_init (reply_p, &iterator_2))
+  if (unlikely (!dbus_message_iter_init (reply_p, &iterator_2)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
@@ -4867,7 +4919,7 @@ Net_Common_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in
     if (SSID_string == SSID_in)
       break;
   } // end FOR
-  if (iterator_4 == connection_paths_a.end ())
+  if (unlikely (iterator_4 == connection_paths_a.end ()))
     goto error;
 
   result = *iterator_4;
@@ -4906,10 +4958,10 @@ Net_Common_Tools::URLToHostName (const std::string& URL_in,
       ACE_TEXT_ALWAYS_CHAR ("^([[:alpha:]]+://)?([^\\/\\:]+)(\\:[[:digit:]]{1,5})?(.+)?$");
   std::regex regex (regex_string);
   std::smatch match_results;
-  if (!std::regex_match (URL_in,
-                         match_results,
-                         regex,
-                         std::regex_constants::match_default))
+  if (unlikely (!std::regex_match (URL_in,
+                                   match_results,
+                                   regex,
+                                   std::regex_constants::match_default)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid URL string (was: \"%s\"), aborting\n"),
@@ -4917,7 +4969,7 @@ Net_Common_Tools::URLToHostName (const std::string& URL_in,
     return result;
   } // end IF
   ACE_ASSERT (match_results.ready () && !match_results.empty ());
-  if (!match_results[2].matched)
+  if (unlikely (!match_results[2].matched))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid URL string (was: \"%s\"), aborting\n"),
@@ -4963,7 +5015,7 @@ Net_Common_Tools::getGateway (const std::string& interfaceIdentifier_in,
   int socket_handle = ACE_OS::socket (PF_NETLINK,     // protocol family
                                       SOCK_DGRAM,     // type
                                       NETLINK_ROUTE); // protocol
-  if (socket_handle < 0)
+  if (unlikely (socket_handle < 0))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::socket(PF_NETLINK,NETLINK_ROUTE): \"%m\", aborting\n")));
@@ -4998,8 +5050,8 @@ Net_Common_Tools::getGateway (const std::string& interfaceIdentifier_in,
                                reinterpret_cast<char*> (nl_message_header_p),
                                nl_message_header_p->nlmsg_len,
                                flags);
-  if ((result_2 < 0) ||
-      (static_cast<__u32> (result_2) != nl_message_header_p->nlmsg_len))
+  if (unlikely ((result_2 < 0) ||
+                (static_cast<__u32> (result_2) != nl_message_header_p->nlmsg_len)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::send(%d,%u): \"%m\", aborting\n"),
@@ -5015,7 +5067,7 @@ Net_Common_Tools::getGateway (const std::string& interfaceIdentifier_in,
     result_2 = ACE_OS::recv (socket_handle,
                              buffer_p,
                              BUFSIZ - received_bytes);
-    if (result_2 < 0)
+    if (unlikely (result_2 < 0))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::recv(%d): \"%m\", aborting\n"),
@@ -5024,8 +5076,8 @@ Net_Common_Tools::getGateway (const std::string& interfaceIdentifier_in,
     } // end IF
     nl_message_header_p = reinterpret_cast<struct nlmsghdr*> (buffer_p);
 
-    if ((NLMSG_OK (nl_message_header_p, result_2) == 0) ||
-        (nl_message_header_p->nlmsg_type == NLMSG_ERROR))
+    if (unlikely (!NLMSG_OK (nl_message_header_p, result_2) ||
+                  (nl_message_header_p->nlmsg_type == NLMSG_ERROR)))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("error in Netlink message, aborting\n")));
@@ -5045,7 +5097,7 @@ Net_Common_Tools::getGateway (const std::string& interfaceIdentifier_in,
   // parse routing tables entries
   done = false;
   for (nl_message_header_p = reinterpret_cast<struct nlmsghdr*> (buffer);
-       NLMSG_OK (nl_message_header_p, received_bytes) && !done;
+       (NLMSG_OK (nl_message_header_p, received_bytes) && !done);
        nl_message_header_p = NLMSG_NEXT (nl_message_header_p, received_bytes))
   {
     current_interface_address.reset ();
@@ -5078,8 +5130,8 @@ Net_Common_Tools::getGateway (const std::string& interfaceIdentifier_in,
         {
           char buffer_2[IF_NAMESIZE];
           ACE_OS::memset (buffer_2, 0, sizeof (buffer_2));
-          if (!::if_indextoname (*static_cast<int*> (RTA_DATA (rt_attribute_p)),
-                                 buffer_2))
+          if (unlikely (!::if_indextoname (*static_cast<int*> (RTA_DATA (rt_attribute_p)),
+                                           buffer_2)))
           {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to if_indextoname(): \"%m\", continuing\n")));
@@ -5111,7 +5163,7 @@ Net_Common_Tools::getGateway (const std::string& interfaceIdentifier_in,
                                          inet_address,
                                          0, // already in network byte order
                                          0);
-          if (result_2 == -1)
+          if (unlikely (result_2 == -1))
           {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
@@ -5133,7 +5185,7 @@ Net_Common_Tools::getGateway (const std::string& interfaceIdentifier_in,
                                              inet_address,
                                              0, // already in network byte order
                                              0);
-          if (result_2 == -1)
+          if (unlikely (result_2 == -1))
           {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
@@ -5164,7 +5216,7 @@ clean:
   if (socket_handle != ACE_INVALID_HANDLE)
   {
     result_2 = ACE_OS::close (socket_handle);
-    if (result_2 == -1)
+    if (unlikely (result_2 == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
                   socket_handle));
@@ -5186,7 +5238,7 @@ clean:
     std::string result_string =
         Net_Common_Tools::deviceToDBusPath (connection_in,
                                             interfaceIdentifier_in);
-    if (result_string.empty ())
+    if (unlikely (result_string.empty ()))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::deviceToDBusPath(\"%s\"), aborting\n"),
@@ -5196,7 +5248,7 @@ clean:
     result_string =
         Net_Common_Tools::deviceDBusPathToIp4ConfigDBusPath (connection_in,
                                                              result_string);
-    if (result_string.empty ())
+    if (unlikely (result_string.empty ()))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::deviceDBusPathToIp4ConfigDBusPath(\"%s\",\"%s\"), aborting\n"),
@@ -5207,7 +5259,7 @@ clean:
     result_string =
         Net_Common_Tools::Ip4ConfigDBusPathToGateway (connection_in,
                                                       result_string);
-    if (result_string.empty ())
+    if (unlikely (result_string.empty ()))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::Ip4ConfigDBusPathToGateway(\"%s\",\"%s\"), aborting\n"),
@@ -5219,7 +5271,7 @@ clean:
                            result_string.c_str (),
                            1,
                            AF_INET);
-    if (result_2 == -1)
+    if (unlikely (result_2 == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
@@ -5232,29 +5284,29 @@ clean:
 }
 #endif
 
-std::string
-Net_Common_Tools::generateModuleName (const std::string& prefix_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::generateModuleName"));
+//std::string
+//Net_Common_Tools::generateUniqueName (const std::string& prefix_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::generateUniqueName"));
 
-  std::string result;
+//  std::string result;
 
-  // sanity check(s)
-  ACE_ASSERT (prefix_in.size () <= (BUFSIZ - 6 + 1));
+//  // sanity check(s)
+//  ACE_ASSERT (prefix_in.size () <= (BUFSIZ - 6 + 1));
 
-  // *NOTE*: see also: man 3 mkstemp
-  ACE_TCHAR buffer[BUFSIZ];
-  if (unlikely (!prefix_in.empty ()))
-    ACE_OS::strcpy (buffer, prefix_in.c_str ());
-  ACE_OS::strcpy (buffer + prefix_in.size (), ACE_TEXT ("XXXXXX"));
-  ACE_OS::mktemp (buffer);
-  if (unlikely (!ACE_OS::strlen (buffer)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::mktemp(): \"%m\", aborting\n")));
-    return std::string ();
-  } // end IF
-  result = buffer;
+//  // *NOTE*: see also: man 3 mkstemp
+//  ACE_TCHAR buffer[BUFSIZ];
+//  if (unlikely (!prefix_in.empty ()))
+//    ACE_OS::strcpy (buffer, prefix_in.c_str ());
+//  ACE_OS::strcpy (buffer + prefix_in.size (), ACE_TEXT ("XXXXXX"));
+//  ACE_OS::mktemp (buffer);
+//  if (unlikely (!ACE_OS::strlen (buffer)))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_OS::mktemp(): \"%m\", aborting\n")));
+//    return std::string ();
+//  } // end IF
+//  result = buffer;
 
-  return result;
-}
+//  return result;
+//}

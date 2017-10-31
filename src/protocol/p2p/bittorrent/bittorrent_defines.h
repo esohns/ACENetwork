@@ -24,6 +24,9 @@
 // stream
 // *TODO*: this makes no sense, remove ASAP
 #define BITTORRENT_BUFFER_SIZE                            16384
+#define BITTORRENT_DEFAULT_MODULE_MARSHAL_NAME_STRING     "BitTorrentPeerMarshal"
+#define BITTORRENT_DEFAULT_MODULE_HANDLER_NAME_STRING     "BitTorrentPeerHandler"
+#define BITTORRENT_DEFAULT_STREAM_NAME_STRING             "BitTorrentPeerStream"
 
 // (strip protocol data and) 'crunch' parsed messages for easier downstream
 // processing ?

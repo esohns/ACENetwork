@@ -319,11 +319,11 @@ continue_:
 //                                            NULL);
 
   // dispatch DBus messages in a dedicated thread
-  inherited::start ();
+  inherited::open (NULL);
   if (!inherited::isRunning ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_TaskBase_T::start(): \"%m\", returning\n")));
+                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", returning\n")));
     goto error;
   } // end IF
   dbus_connection_flush (connection_);
@@ -334,8 +334,6 @@ error:
   if (connection_)
   {
     dbus_connection_close (connection_);
-    inherited::stop (true,
-                     true);
     dbus_connection_unref (connection_);
     connection_ = NULL;
   } // end IF
@@ -383,13 +381,8 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   } // end IF
   clientHandle_ = ACE_INVALID_HANDLE;
 #else
-  ACE_ASSERT (connection_);
-
-  dbus_connection_close (connection_);
   inherited::stop (waitForCompletion_in,
                    lockedAccess_in);
-  dbus_connection_unref (connection_);
-  connection_ = NULL;
 //  deviceDBusPath_.resize (0);
 #endif
 
@@ -1347,6 +1340,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
     DBusDispatchStarted_ = true;
   } // end lock scope
 
+//dbus_dispatch_thread:
   // sanity check(s)
   ACE_ASSERT (connection_);
 
@@ -1374,6 +1368,13 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
     } while (true);
   } while (true);
 
+  // clean up
+  dbus_connection_unref (connection_);
+  connection_ = NULL;
+  { ACE_GUARD_RETURN (typename inherited::ITASKCONTROL_T::MUTEX_T, aGuard, inherited::lock_, -1);
+    DBusDispatchStarted_ = false;
+  } // end lock scope
+
   return 0;
 
 monitor_thread:
@@ -1388,6 +1389,15 @@ monitor_thread:
   do
   {
     if (configuration_->SSID != Net_Common_Tools::associatedSSID (configuration_->interfaceIdentifier))
+    {
+      // SSID not found ? --> initiate scan
+      if (unlikely (!Net_Common_Tools::hasSSID (configuration_->interfaceIdentifier,
+                                                configuration_->SSID)))
+      {
+        Net_Common_Tools::scan (configuration_->interfaceIdentifier);
+        goto sleep;
+      } // end IF
+
       if (unlikely (!associate (configuration_->interfaceIdentifier,
                                 configuration_->SSID)))
         ACE_DEBUG ((LM_ERROR,
@@ -1396,7 +1406,9 @@ monitor_thread:
                     ACE_TEXT (configuration_->interfaceIdentifier.c_str ()),
                     ACE_TEXT (configuration_->SSID.c_str ()),
                     &interval));
+    } // end IF
 
+sleep:
     result = ACE_OS::sleep (interval);
     if (unlikely (result == -1))
       ACE_DEBUG ((LM_ERROR,
@@ -1421,6 +1433,10 @@ monitor_thread:
     if (unlikely (message_block_p->msg_type () == ACE_Message_Block::MB_STOP))
     {
       // clean up
+      if (connection_)
+      { // *NOTE*: wakes up the other thread (see above)
+        dbus_connection_close (connection_);
+      } // end IF
       message_block_p->release ();
 
       break; // done

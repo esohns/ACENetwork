@@ -185,7 +185,7 @@ BitTorrent_TrackerStream_T<StreamStateType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to HTTP_Stream_T::initialize(), aborting\n"),
-                ACE_TEXT (stream_http_stream_name_string_)));
+                ACE_TEXT (inherited::name_.c_str ())));
     goto error;
   } // end IF
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
@@ -300,7 +300,7 @@ BitTorrent_TrackerStream_T<StreamStateType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (stream_http_stream_name_string_)));
+                  ACE_TEXT (inherited::name_.c_str ())));
       goto error;
     } // end IF
 

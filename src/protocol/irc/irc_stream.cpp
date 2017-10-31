@@ -22,9 +22,14 @@
 #include "ace/Synch.h"
 #include "irc_stream.h"
 
+#include "irc_defines.h"
 #include "irc_exports.h"
 //#include "irc_message.h"
 //#include "irc_sessionmessage.h"
 
-IRC_Export const char stream_irc_stream_name_string_[] =
-  ACE_TEXT_ALWAYS_CHAR ("IRCStream");
+IRC_Export const char libacenetwork_default_irc_marshal_module_name_string[] =
+  ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_MODULE_MARSHAL_NAME_STRING);
+IRC_Export const char libacenetwork_default_irc_parser_module_name_string[] =
+  ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_MODULE_PARSER_NAME_STRING);
+IRC_Export const char libacenetwork_default_irc_stream_name_string[] =
+  ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_STREAM_NAME_STRING);
