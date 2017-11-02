@@ -258,7 +258,7 @@ continue_:
                   ACE_TEXT ((*iterator).first).c_str ()));
     else
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("\"%s\": DBus object path is: \"%s\"\n"),
+                  ACE_TEXT ("\"%s\": D-Bus object path is: \"%s\"\n"),
                   ACE_TEXT ((*iterator).first.c_str ()),
                   ACE_TEXT ((*iterator).second.c_str ())));
   } // end FOR
@@ -1328,9 +1328,6 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::svc"));
 
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("(%s): worker thread (id: %t) starting\n"),
-              ACE_TEXT (inherited::threadName_.c_str ())));
 
   DBusDispatchStatus dispatch_status = DBUS_DISPATCH_COMPLETE;
 
@@ -1341,6 +1338,11 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   } // end lock scope
 
 //dbus_dispatch_thread:
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("(%s): D-Bus dispatch (group: %d, thread id: %t) starting...\n"),
+              ACE_TEXT (inherited::threadName_.c_str ()),
+              inherited::grp_id_));
+
   // sanity check(s)
   ACE_ASSERT (connection_);
 
@@ -1361,8 +1363,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
         continue; // <-- process more data
       if (unlikely (dispatch_status != DBUS_DISPATCH_COMPLETE))
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("(%s): worker thread (id: %t) failed to dbus_connection_dispatch() (status was: %d), continuing\n"),
-                    ACE_TEXT (inherited::threadName_.c_str ()),
+                    ACE_TEXT ("failed to dbus_connection_dispatch() (status was: %d), continuing\n"),
                     dispatch_status));
       break;
     } while (true);
@@ -1378,6 +1379,11 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   return 0;
 
 monitor_thread:
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("(%s): monitor (group: %d, thread id: %t) starting...\n"),
+              ACE_TEXT (inherited::threadName_.c_str ()),
+              inherited::grp_id_));
+
   // sanity check(s)
   ACE_ASSERT (configuration_);
   ACE_ASSERT (!configuration_->SSID.empty ());
@@ -1401,8 +1407,7 @@ monitor_thread:
       if (unlikely (!associate (configuration_->interfaceIdentifier,
                                 configuration_->SSID)))
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("(%s): worker thread (id: %t) failed to Net_IWLANMonitor_T::associate(\"%s\",%s), retrying in %#T...\n"),
-                    ACE_TEXT (inherited::threadName_.c_str ()),
+                    ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s), retrying in %#T...\n"),
                     ACE_TEXT (configuration_->interfaceIdentifier.c_str ()),
                     ACE_TEXT (configuration_->SSID.c_str ()),
                     &interval));
