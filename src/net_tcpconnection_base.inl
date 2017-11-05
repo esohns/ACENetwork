@@ -636,8 +636,9 @@ Net_AsynchTCPConnectionBase_T<HandlerType,
   ACE_UNUSED_ARG (handle_in);
 
   int result = -1;
+  // *TODO*: always retrieve data from inherited::stream_
   typename StreamType::ISTREAM_T::STREAM_T* stream_p =
-      inherited::stream_.upStream ();
+      inherited::stream_.upstream (true);
   ACE_Message_Block* message_block_p = NULL;
 
   // *TODO*: this is obviously flaky; remove ASAP

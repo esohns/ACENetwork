@@ -875,7 +875,9 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
   ACE_UNUSED_ARG (handle_in);
 
   int result = -1;
-  Stream_Base_t* stream_p = inherited::stream_.upStream ();
+  // *TODO*: always retrieve data from inherited::stream_
+  typename StreamType::ISTREAM_T::STREAM_T* stream_p =
+      inherited::stream_.upstream (true);
   ACE_Message_Block* message_block_p, *message_block_2, *message_block_3 = NULL;
   unsigned int length = 0;
   size_t bytes_sent = 0;
@@ -890,7 +892,7 @@ Net_AsynchUDPConnectionBase_T<HandlerType,
   // dequeue message from the stream
   // *IMPORTANT NOTE*: this should NEVER block as available outbound data has
   //                   been notified
-  result = inherited::stream_.get (message_block_p, NULL);
+  result = stream_p->get (message_block_p, NULL);
   if (unlikely (result == -1))
   {
     int error = ACE_OS::last_error ();
