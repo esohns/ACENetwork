@@ -1673,6 +1673,8 @@ static const flex_int32_t yy_rule_linenum[20] =
 
   #include <sstream>
 
+  #include "net_macros.h"
+
   #include <ace/Synch.h>
   #include "bittorrent_bencoding_parser.h"
   #include "bittorrent_bencoding_scanner.h"

@@ -44,6 +44,10 @@ class Net_IYaccStreamParser_T
  : public Common_IYaccParser_T<ConfigurationType>
 {
  public:
+  // convenient types
+  typedef Net_IYaccStreamParser_T<ConfigurationType,
+                                  RecordType> IPARSER_T;
+
   virtual RecordType& current () = 0;
 
   ////////////////////////////////////////
@@ -62,7 +66,7 @@ class Net_IYaccRecordParser_T
 {
  public:
   // convenient types
-  typedef Net_IYaccStreamParser_T<ConfigurationType,
+  typedef Net_IYaccRecordParser_T<ConfigurationType,
                                   RecordType> IPARSER_T;
 
   virtual bool hasFinished () const = 0;

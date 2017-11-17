@@ -199,16 +199,17 @@ typedef Net_Connections_t::iterator Net_ConnectionsIterator_t;
 class Net_Netlink_Addr
  : public ACE_Netlink_Addr
 {
+  typedef ACE_Netlink_Addr inherited;
+
  public:
   Net_Netlink_Addr& operator= (const ACE_Addr&);
 
   virtual int addr_to_string (ACE_TCHAR[],
                               size_t,
                               int = 1) const;
-  inline bool is_any (void) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
+  inline bool is_any (void) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
 
- private:
-  typedef ACE_Netlink_Addr inherited;
+  inline void reset (void) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
 #endif /* ACE_HAS_NETLINK */
 

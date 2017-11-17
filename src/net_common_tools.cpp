@@ -1073,13 +1073,17 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
 
   // step1: determine the 'internal' IP address
   ACE_INET_Addr internal_ip_address, gateway_ip_address;
-  if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-                                                         NULL,
-#endif
+  if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
                                                          internal_ip_address,
                                                          gateway_ip_address)))
+
+#else
+  if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
+                                                         NULL,
+                                                         internal_ip_address,
+                                                         gateway_ip_address)))
+#endif
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
@@ -1221,8 +1225,8 @@ Net_Common_Tools::interfaceToMACAddress (const std::string& interfaceIdentifier_
   //ACE_ASSERT (sizeof (MACAddress_out) >= MAX_ADAPTER_ADDRESS_LENGTH);
 
   NET_IFINDEX interface_index = 0;
-  struct _IP_interfaceIdentifier_inFO* ip_interfaceIdentifier_info_p = NULL;
-  struct _IP_interfaceIdentifier_inFO* ip_interfaceIdentifier_info_2 = NULL;
+  struct _IP_ADAPTER_INFO* ip_interfaceIdentifier_info_p = NULL;
+  struct _IP_ADAPTER_INFO* ip_interfaceIdentifier_info_2 = NULL;
   ULONG buffer_length = 0;
   ULONG result = 0;
 
@@ -1246,7 +1250,7 @@ Net_Common_Tools::interfaceToMACAddress (const std::string& interfaceIdentifier_
   } // end IF
   ACE_ASSERT (buffer_length);
   ip_interfaceIdentifier_info_p =
-    static_cast<struct _IP_interfaceIdentifier_inFO*> (ACE_MALLOC_FUNC (buffer_length));
+    static_cast<struct _IP_ADAPTER_INFO*> (ACE_MALLOC_FUNC (buffer_length));
   if (unlikely (!ip_interfaceIdentifier_info_p))
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -1412,8 +1416,8 @@ Net_Common_Tools::interfaceToString (REFGUID interfaceIdentifier_in)
   } // end IF
 
   NET_IFINDEX interface_index = 0;
-  struct _IP_interfaceIdentifier_inFO* ip_interfaceIdentifier_info_p = NULL;
-  struct _IP_interfaceIdentifier_inFO* ip_interfaceIdentifier_info_2 = NULL;
+  struct _IP_ADAPTER_INFO* ip_interfaceIdentifier_info_p = NULL;
+  struct _IP_ADAPTER_INFO* ip_interfaceIdentifier_info_2 = NULL;
   ULONG buffer_length = 0;
   ULONG result_2 = 0;
 
@@ -1436,7 +1440,7 @@ Net_Common_Tools::interfaceToString (REFGUID interfaceIdentifier_in)
   } // end IF
   ACE_ASSERT (buffer_length);
   ip_interfaceIdentifier_info_p =
-    static_cast<struct _IP_interfaceIdentifier_inFO*> (ACE_MALLOC_FUNC (buffer_length));
+    static_cast<struct _IP_ADAPTER_INFO*> (ACE_MALLOC_FUNC (buffer_length));
   if (unlikely (!ip_interfaceIdentifier_info_p))
   {
     ACE_DEBUG ((LM_CRITICAL,

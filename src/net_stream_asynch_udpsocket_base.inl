@@ -1328,9 +1328,15 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
   {
     int result_2 = ACE_OS::closesocket (handle);
     if (result_2 == -1)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::closesocket(%u): \"%m\", continuing\n"),
-                  reinterpret_cast<size_t> (handle)));
+                  ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
+                  handle));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                  handle));
+#endif
   } // end IF
 }
 
@@ -1484,7 +1490,7 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 
   switch (result_in.bytes_transferred ())
   {
-    case -1:
+    case UINT32_MAX:
     {
       // connection closed/reset (by peer) ? --> not an error
       unsigned long error = result_in.error ();

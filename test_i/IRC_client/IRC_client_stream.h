@@ -87,7 +87,7 @@ class IRC_Client_Stream_T
   virtual bool load (Stream_ModuleList_t&, // return value: module list
                      bool&);               // return value: delete modules ?
 
-  virtual bool initialize (const CONFIGURATION_T&,
+  virtual bool initialize (const IRC_Client_StreamConfiguration_t&,
                            ACE_HANDLE);
 
   // *TODO*: remove this API

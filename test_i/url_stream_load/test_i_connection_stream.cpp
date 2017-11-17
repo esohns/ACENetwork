@@ -121,7 +121,7 @@ Test_I_ConnectionStream::initialize (const typename inherited::CONFIGURATION_T& 
   ACE_ASSERT (iterator != configuration_in.end ());
   // *TODO*: remove type inferences
   //session_data_p->sessionID = configuration_in.sessionID;
-  session_data_p->targetFileName = (*iterator).second.targetFileName;
+  session_data_p->targetFileName = (*iterator).second.second.targetFileName;
 
   // ---------------------------------------------------------------------------
 

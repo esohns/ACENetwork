@@ -190,9 +190,7 @@ include (CPack)
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cmake-modules")
 include (UseBackportedModules)
 cmake_policy (SET CMP0026 OLD)
-if (WIN32)
- cmake_policy (SET CMP0053 OLD)
-endif ()
+cmake_policy (SET CMP0053 OLD)
 include (CreateLaunchers)
 
 # enable (unit/integration) tests

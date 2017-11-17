@@ -517,7 +517,8 @@ do_work (bool debugParser_in,
   Test_I_Module_EventHandler_Module event_handler_module (NULL,
                                                           module_name);
 
-  Stream_AllocatorHeap_T<struct Test_I_AllocatorConfiguration> heap_allocator;
+  Stream_AllocatorHeap_T<ACE_MT_SYNCH,
+                         struct Test_I_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (CBData_in.configuration->streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -562,6 +563,7 @@ do_work (bool debugParser_in,
   if (debugParser_in)
     CBData_in.configuration->parserConfiguration.debugScanner = true;
   // ********************** module configuration data **************************
+  struct Stream_ModuleConfiguration module_configuration;
   struct Test_I_URLStreamLoad_ModuleHandlerConfiguration modulehandler_configuration;
   modulehandler_configuration.allocatorConfiguration =
     &CBData_in.configuration->streamConfiguration.allocatorConfiguration_;
@@ -586,7 +588,8 @@ do_work (bool debugParser_in,
   CBData_in.configuration->streamConfiguration.configuration_.module =
     &event_handler_module;
   CBData_in.configuration->streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                       modulehandler_configuration));
+                                                                       std::make_pair (module_configuration,
+                                                                                       modulehandler_configuration)));
   CBData_in.configuration->streamConfiguration.configuration_.printFinalReport =
     true;
   CBData_in.configuration->streamConfiguration.configuration_.userData =

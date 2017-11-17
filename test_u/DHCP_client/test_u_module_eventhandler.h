@@ -73,6 +73,7 @@ class Test_U_Module_EventHandler
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_DHCPClient_SessionData,           // session data type
                               enum Stream_SessionMessageType,                 // session event type
                               struct Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_misc_messagehandler_module_name_string,
                               Test_U_IStreamNotify_t,                         // stream notification interface type
                               Test_U_Module_EventHandler);                    // writer type
 

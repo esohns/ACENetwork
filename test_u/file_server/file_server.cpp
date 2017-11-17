@@ -535,7 +535,8 @@ do_work (
     return;
   } // end IF
 
-  Stream_AllocatorHeap_T<struct Stream_AllocatorConfiguration> heap_allocator;
+  Stream_AllocatorHeap_T<ACE_MT_SYNCH,
+                         struct Stream_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration.allocatorConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -550,6 +551,7 @@ do_work (
   // ********************** stream configuration data **************************
 //  configuration.allocatorConfiguration.defaultBufferSize =
 //    bufferSize_in;
+  struct Stream_ModuleConfiguration module_configuration;
   struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
   modulehandler_configuration.allocatorConfiguration =
     &configuration.allocatorConfiguration;
@@ -581,7 +583,8 @@ do_work (
     &message_allocator;
   configuration.streamConfiguration.configuration_.module = &event_handler;
   configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                            modulehandler_configuration));
+                                                            std::make_pair (module_configuration,
+                                                                            modulehandler_configuration)));
 
   //configuration.streamConfiguration.protocolConfiguration =
   //  &configuration.protocolConfiguration;

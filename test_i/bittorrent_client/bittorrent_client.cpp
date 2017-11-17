@@ -538,6 +538,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   if (debugParser_in)
     configuration_in.parserConfiguration.debugScanner = true;
 
+  struct Stream_ModuleConfiguration module_configuration;
   struct BitTorrent_Client_PeerModuleHandlerConfiguration peer_modulehandler_configuration;
   peer_modulehandler_configuration.parserConfiguration =
       &configuration_in.parserConfiguration;
@@ -549,7 +550,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   configuration_in.peerStreamConfiguration.configuration_.messageAllocator =
     &peer_message_allocator;
   configuration_in.peerStreamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                   peer_modulehandler_configuration));
+                                                                   std::make_pair (module_configuration,
+                                                                                   peer_modulehandler_configuration)));
 
   struct BitTorrent_Client_TrackerModuleHandlerConfiguration tracker_modulehandler_configuration;
   tracker_modulehandler_configuration.parserConfiguration =
@@ -562,7 +564,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   configuration_in.trackerStreamConfiguration.configuration_.messageAllocator =
     &tracker_message_allocator;
   configuration_in.trackerStreamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                      tracker_modulehandler_configuration));
+                                                                      std::make_pair (module_configuration,
+                                                                                      tracker_modulehandler_configuration)));
 
   struct BitTorrent_Client_PeerConnectionConfiguration peer_connection_configuration;
   struct BitTorrent_Client_TrackerConnectionConfiguration tracker_connection_configuration;

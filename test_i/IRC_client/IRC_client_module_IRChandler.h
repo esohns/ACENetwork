@@ -161,6 +161,7 @@ class IRC_Client_Module_IRCHandler
 DATASTREAM_MODULE_INPUT_ONLY (struct IRC_Client_SessionData,                // session data type
                               enum Stream_SessionMessageType,               // session event type
                               struct IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_misc_messagehandler_module_name_string,
                               IRC_Client_IStreamNotify_t,                   // stream notification interface type
                               IRC_Client_Module_IRCHandler);                // writer type
 

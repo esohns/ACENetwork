@@ -29,6 +29,13 @@
 #include "stream_common.h"
 #include "stream_headmoduletask_base.h"
 
+#include "net_exports.h"
+
+//extern Net_Export const char libacenetwork_default_tcp_sockethandler_module_name_string[];
+//extern Net_Export const char libacenetwork_default_udp_sockethandler_module_name_string[];
+extern const char libacenetwork_default_tcp_sockethandler_module_name_string[];
+extern const char libacenetwork_default_udp_sockethandler_module_name_string[];
+
 // forward declarations
 class Stream_IAllocator;
 
@@ -69,6 +76,21 @@ class Net_Module_TCPSocketHandler_T
                                       TimerManagerType,
                                       UserDataType>
 {
+  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
+                                      Common_TimePolicy_t,
+                                      ControlMessageType,
+                                      DataMessageType,
+                                      SessionMessageType,
+                                      ConfigurationType,
+                                      StreamControlType,
+                                      StreamNotificationType,
+                                      StreamStateType,
+                                      SessionDataType,
+                                      SessionDataContainerType,
+                                      StatisticContainerType,
+                                      TimerManagerType,
+                                      UserDataType> inherited;
+
  public:
   // convenient types
   typedef Stream_IStream_T<ACE_SYNCH_USE,
@@ -117,21 +139,6 @@ class Net_Module_TCPSocketHandler_T
   //virtual void report () const;
 
  private:
-  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
-                                      Common_TimePolicy_t,
-                                      ControlMessageType,
-                                      DataMessageType,
-                                      SessionMessageType,
-                                      ConfigurationType,
-                                      StreamControlType,
-                                      StreamNotificationType,
-                                      StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
-                                      StatisticContainerType,
-                                      TimerManagerType,
-                                      UserDataType> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Net_Module_TCPSocketHandler_T (const Net_Module_TCPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Module_TCPSocketHandler_T& operator= (const Net_Module_TCPSocketHandler_T&))
 
@@ -182,6 +189,21 @@ class Net_Module_UDPSocketHandler_T
                                       TimerManagerType,
                                       UserDataType>
 {
+  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
+                                      Common_TimePolicy_t,
+                                      ControlMessageType,
+                                      DataMessageType,
+                                      SessionMessageType,
+                                      ConfigurationType,
+                                      StreamControlType,
+                                      StreamNotificationType,
+                                      StreamStateType,
+                                      SessionDataType,
+                                      SessionDataContainerType,
+                                      StatisticContainerType,
+                                      TimerManagerType,
+                                      UserDataType> inherited;
+
  public:
   Net_Module_UDPSocketHandler_T (ACE_SYNCH_MUTEX_T* = NULL, // lock handle (state machine)
                                  bool = false,              // auto-start ?
@@ -207,21 +229,6 @@ class Net_Module_UDPSocketHandler_T
   //virtual void report () const;
 
  private:
-  typedef Stream_HeadModuleTaskBase_T<ACE_SYNCH_USE,
-                                      Common_TimePolicy_t,
-                                      ControlMessageType,
-                                      DataMessageType,
-                                      SessionMessageType,
-                                      ConfigurationType,
-                                      StreamControlType,
-                                      StreamNotificationType,
-                                      StreamStateType,
-                                      SessionDataType,
-                                      SessionDataContainerType,
-                                      StatisticContainerType,
-                                      TimerManagerType,
-                                      UserDataType> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T (const Net_Module_UDPSocketHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_Module_UDPSocketHandler_T& operator= (const Net_Module_UDPSocketHandler_T&))
 };

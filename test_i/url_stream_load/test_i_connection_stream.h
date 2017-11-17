@@ -32,7 +32,7 @@
 
 #include "stream_common.h"
 
-#include "stream_module_io_stream.h"
+#include "stream_net_io_stream.h"
 
 #include "test_i_connection_manager_common.h"
 #include "test_i_url_stream_load_common.h"

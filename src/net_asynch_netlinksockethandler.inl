@@ -323,7 +323,7 @@ Net_AsynchNetlinkSocketHandler_T<ConfigurationType>::handle_write_dgram (const A
 
   switch (bytes_transferred)
   {
-    case -1:
+    case UINT32_MAX: // -1
     case 0:
     {
       // connection closed/reset (by peer) ? --> not an error

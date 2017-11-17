@@ -37,6 +37,8 @@ BitTorrent_Bencoding_Scanner::yylex (yy::BitTorrent_Bencoding_Parser::semantic_t
 
   #include <sstream>
 
+  #include "net_macros.h"
+
   #include "ace/Synch.h"
   #include "bittorrent_bencoding_parser.h"
   #include "bittorrent_bencoding_scanner.h"

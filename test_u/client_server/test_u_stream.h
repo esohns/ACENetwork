@@ -33,7 +33,7 @@
 #include "stream_control_message.h"
 #include "stream_statemachine_control.h"
 
-#include "stream_module_io_stream.h"
+#include "stream_net_io_stream.h"
 
 #include "net_common.h"
 

@@ -34,6 +34,7 @@
 
 #include "net_macros.h"
 
+#include "test_u_defines.h"
 #include "test_u_message.h"
 
 Test_U_Module_ProtocolHandler::Test_U_Module_ProtocolHandler (ISTREAM_T* stream_in)
@@ -366,3 +367,10 @@ Test_U_Module_ProtocolHandler::dump_state () const
 //               ACE_TEXT (" ***** MODULE: \"%s\" state *****\\END\n"),
 //               inherited::mod_->name ()));
 }
+
+//////////////////////////////////////////
+
+//Net_Export const char libacenetwork_default_test_u_protocolhandler_module_name_string[] =
+//  ACE_TEXT_ALWAYS_CHAR (TEST_U_STREAM_MODULE_PROTOCOLHANDLER_NAME);
+const char libacenetwork_default_test_u_protocolhandler_module_name_string[] =
+  ACE_TEXT_ALWAYS_CHAR (TEST_U_STREAM_MODULE_PROTOCOLHANDLER_NAME);

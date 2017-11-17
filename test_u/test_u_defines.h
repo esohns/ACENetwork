@@ -25,6 +25,9 @@
 #define TEST_U_DEFAULT_NUMBER_OF_TP_THREADS         3
 
 // stream
+#define TEST_U_STREAM_MODULE_PROTOCOLHANDLER_NAME   "ProtocolHandler"
+#define TEST_U_STREAM_MODULE_HEADERPARSER_NAME      "HeaderParser"
+
 #define TEST_U_DEFAULT_BUFFER_SIZE                  16384 // bytes
 #define TEST_U_MAX_MESSAGES                         0 // 0 --> no limits
 

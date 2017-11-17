@@ -130,8 +130,14 @@ class BitTorrent_PeerStream_T
   virtual bool load (Stream_ModuleList_t&, // return value: module list
                      bool&);               // return value: delete modules ?
 
+  // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual bool initialize (const CONFIGURATION_T&,
+                           ACE_HANDLE);
+#else
   virtual bool initialize (const typename inherited::CONFIGURATION_T&,
                            ACE_HANDLE);
+#endif
 
   // implement Common_IStatistic_T
   // *NOTE*: delegates to the statistic report module

@@ -445,6 +445,7 @@ do_work (bool useThreadPool_in,
     CBData_in.configuration->trackerConnectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != CBData_in.configuration->trackerConnectionConfigurations.end ());
 
+  struct Stream_ModuleConfiguration module_configuration;
   struct BitTorrent_Client_PeerModuleHandlerConfiguration peer_modulehandler_configuration;
   peer_modulehandler_configuration.statisticReportingInterval =
     (*iterator).second.socketHandlerConfiguration.statisticReportingInterval;
@@ -455,7 +456,8 @@ do_work (bool useThreadPool_in,
 //  peer_modulehandler_configuration.protocolConfiguration =
 //      &CBData_in.configuration->protocolConfiguration;
   CBData_in.configuration->peerStreamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                           peer_modulehandler_configuration));
+                                                                           std::make_pair (module_configuration,
+                                                                                           peer_modulehandler_configuration)));
 
   struct BitTorrent_Client_TrackerModuleHandlerConfiguration tracker_modulehandler_configuration;
   tracker_modulehandler_configuration.statisticReportingInterval =
@@ -465,7 +467,8 @@ do_work (bool useThreadPool_in,
   tracker_modulehandler_configuration.parserConfiguration =
     &CBData_in.configuration->parserConfiguration;
   CBData_in.configuration->trackerStreamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                              tracker_modulehandler_configuration));
+                                                                              std::make_pair (module_configuration,
+                                                                                              tracker_modulehandler_configuration)));
 
   // step2: initialize event dispatch
   struct Common_DispatchThreadData thread_data;

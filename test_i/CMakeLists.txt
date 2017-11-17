@@ -22,8 +22,9 @@ add_subdirectory (bittorrent_client)
 add_subdirectory (IRC_client)
 add_subdirectory (url_stream_load)
 
-add_custom_target (test_i
-                   COMMAND echo building test_i...)
+add_custom_target (test_i ALL
+                   COMMENT "building test_i..."
+                   SOURCES ${ACENetwork_Test_I_SRCS})
 add_dependencies (test_i bittorrent_client bittorrent_client_gui IRC_client IRC_client_gui url_stream_load)
 
 if (NOT ${BUILD_TEST_I})

@@ -93,7 +93,12 @@ class BitTorrent_TrackerStream_T
   virtual bool load (Stream_ModuleList_t&, // return value: module list
                      bool&);               // return value: delete modules ?
 
+// *TODO*: on MSVC 2015u3 the accurate declaration does not compile
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual bool initialize (const CONFIGURATION_T&,
+#else
   virtual bool initialize (const typename inherited::CONFIGURATION_T&,
+#endif
                            ACE_HANDLE);
 
  private:

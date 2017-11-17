@@ -455,7 +455,7 @@ Net_AsynchSSLTCPSocketHandler_T<ConfigurationType>::handle_write_stream (const A
 
   switch (bytes_transferred)
   {
-    case -1:
+    case UINT32_MAX:
     {
       // connection closed/reset (by peer) ? --> not an error
       if ((error != EBADF)                   && // 9        : Linux [client: local close()]

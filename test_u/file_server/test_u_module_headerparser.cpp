@@ -28,18 +28,13 @@
 
 #include "net_macros.h"
 
+#include "test_u_defines.h"
 #include "test_u_message.h"
 
 Test_U_Module_HeaderParser::Test_U_Module_HeaderParser (ISTREAM_T* stream_in)
  : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::Test_U_Module_HeaderParser"));
-
-}
-
-Test_U_Module_HeaderParser::~Test_U_Module_HeaderParser()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::~Test_U_Module_HeaderParser"));
 
 }
 
@@ -56,10 +51,10 @@ Test_U_Module_HeaderParser::handleDataMessage (Test_U_Message*& message_inout,
 //  Net_Remote_Comm::MessageHeader message_header = message_inout->getHeader ();
 
   //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("received protocol message (ID: %u): [length: %u; type: \"%s\"]...\n"),
-  //            message_inout->getID (),
+  //            ACE_TEXT ("received protocol message (ID: %u): [length: %u; type: \"%s\"]\n"),
+  //            message_inout->getId (),
   //            message_header.messageLength,
-  //            ACE_TEXT (Net_Message::CommandType2String (message_header.messageType).c_str ())));
+  //            ACE_TEXT (Net_Message::CommandTypeToString (message_header.messageType).c_str ())));
 }
 
 void
@@ -75,3 +70,10 @@ Test_U_Module_HeaderParser::dump_state () const
 //               ACE_TEXT (" ***** MODULE: \"%s\" state *****\\END\n"),
 //               ACE_TEXT (inherited::name ())));
 }
+
+//////////////////////////////////////////
+
+//Net_Export const char libacenetwork_default_test_u_headerparser_module_name_string[] =
+//  ACE_TEXT_ALWAYS_CHAR (TEST_U_STREAM_MODULE_HEADERPARSER_NAME);
+const char libacenetwork_default_test_u_headerparser_module_name_string[] =
+  ACE_TEXT_ALWAYS_CHAR (TEST_U_STREAM_MODULE_HEADERPARSER_NAME);

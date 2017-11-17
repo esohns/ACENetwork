@@ -94,6 +94,7 @@ typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
 DATASTREAM_MODULE_DUPLEX (struct IRC_Client_SessionData,                // session data type
                           enum Stream_SessionMessageType,               // session event type
                           struct IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
+                          libacenetwork_protocol_default_irc_bisector_module_name_string,
                           IRC_Client_IStreamNotify_t,                   // stream notification interface type
                           IRC_Client_Module_Streamer_t,                 // reader type
                           IRC_Client_Module_Bisector_t,                 // writer type
@@ -101,11 +102,13 @@ DATASTREAM_MODULE_DUPLEX (struct IRC_Client_SessionData,                // sessi
 DATASTREAM_MODULE_INPUT_ONLY (struct IRC_Client_SessionData,                // session data type
                               enum Stream_SessionMessageType,               // session event type
                               struct IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
+                              libacenetwork_protocol_default_irc_parser_module_name_string,
                               IRC_Client_IStreamNotify_t,                   // stream notification interface type
                               IRC_Client_Module_Parser);                    // writer type
 DATASTREAM_MODULE_DUPLEX (struct IRC_Client_SessionData,                // session data type
                           enum Stream_SessionMessageType,               // session event type
                           struct IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
+                          libacestream_default_stat_report_module_name_string,
                           IRC_Client_IStreamNotify_t,                   // stream notification interface type
                           IRC_Client_Module_Statistic_ReaderTask_t,     // reader type
                           IRC_Client_Module_Statistic_WriterTask_t,     // writer type

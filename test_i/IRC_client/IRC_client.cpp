@@ -111,7 +111,7 @@ do_printUsage (const std::string& programName_in)
     ACE_TEXT_ALWAYS_CHAR (TEST_I_DEFAULT_CONFIGURATION_DIRECTORY);
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [FILE]      : configuration file {\"")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-c [FILE] : configuration file {\"")
             << path
             << ACE_TEXT_ALWAYS_CHAR ("\"}")
             << std::endl;
@@ -684,6 +684,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     configuration_in.cursesState = &curses_state;
 
   // step1: initialize IRC handler module
+  struct Stream_ModuleConfiguration module_configuration;
   struct IRC_Client_ModuleHandlerConfiguration modulehandler_configuration;
   modulehandler_configuration.protocolConfiguration =
       &configuration_in.protocolConfiguration;
@@ -693,7 +694,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   //  &configuration_in.streamConfiguration;
 
   configuration_in.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                               modulehandler_configuration));
+                                                               std::make_pair (module_configuration,
+                                                                               modulehandler_configuration)));
   IRC_Client_StreamConfiguration_t::ITERATOR_T iterator =
     configuration_in.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.streamConfiguration.end ());
@@ -848,7 +850,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   input_thread_data.configuration = &configuration_in;
   input_thread_data.groupID = configuration_in.groupID;
   input_thread_data.moduleHandlerConfiguration =
-    const_cast<IRC_Client_ModuleHandlerConfiguration*> (&((*iterator).second));
+    const_cast<IRC_Client_ModuleHandlerConfiguration*> (&((*iterator).second.second));
   if (useCursesLibrary_in)
     input_thread_data.cursesState = &curses_state;
   input_thread_data.useReactor = configuration_in.useReactor;

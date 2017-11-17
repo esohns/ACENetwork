@@ -21,3 +21,8 @@
 
 #include "ace/Synch.h"
 #include "irc_module_parser.h"
+
+#include "irc_defines.h"
+
+IRC_Export const char libacenetwork_protocol_default_irc_parser_module_name_string[] =
+ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_MODULE_PARSER_NAME_STRING);

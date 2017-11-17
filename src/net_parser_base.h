@@ -136,6 +136,7 @@ class Net_ParserBase_T
  public:
   // convenient types
   typedef ParserInterfaceType IPARSER_T;
+  typedef typename ParserInterfaceType::ISCANNER_T ISCANNER_T;
 
   Net_ParserBase_T (bool,  // debug scanning ?
                     bool); // debug parsing ?
@@ -162,15 +163,15 @@ class Net_ParserBase_T
   virtual bool switchBuffer (bool = false); // unlink current fragment ?
   virtual void waitBuffer ();
   virtual void error (const std::string&); // message
-  using typename IPARSER_T::ISCANNER_T::initialize;
-  using typename IPARSER_T::ISCANNER_T::finalize;
-  using typename IPARSER_T::ISCANNER_T::debug;
-  using typename IPARSER_T::ISCANNER_T::destroy;
+//  using typename IPARSER_T::ISCANNER_T::initialize;
+//  using typename IPARSER_T::ISCANNER_T::finalize;
+//  using typename IPARSER_T::ISCANNER_T::debug;
+//  using typename IPARSER_T::ISCANNER_T::destroy;
 //  inline virtual void debug (yyscan_t, bool) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
-//  inline virtual bool initialize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
-//  inline virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual bool initialize (yyscan_t&, struct Common_ScannerState*) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) };
+  inline virtual void finalize (yyscan_t&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 //  inline virtual struct yy_buffer_state* create (yyscan_t, char*, size_t) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) };
-//  inline virtual void destroy (yyscan_t, struct yy_buffer_state*&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void destroy (yyscan_t, struct yy_buffer_state*&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
 
   ConfigurationType*      configuration_;
   ACE_Message_Block*      fragment_;

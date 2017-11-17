@@ -8,15 +8,18 @@
 if (UNIX)
 # include (CheckLibraryExists)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
- find_package (Threads REQUIRED)
+ include (FindThreads)
+ set (CMAKE_THREAD_PREFER_PTHREAD ON)
+ find_package (Threads)
 endif ()
 
 set (ACE_LIB_FILE libACE.so)
 if (UNIX)
  if (DEFINED ENV{ACE_ROOT})
   find_library (ACE_LIBRARY ${ACE_LIB_FILE}
+                HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE
                 PATHS ENV ACE_ROOT
-                PATH_SUFFIXES ace build/linux/ace
+                PATH_SUFFIXES lib
                 DOC "searching for ${ACE_LIB_FILE}")
  else ()
   find_library (ACE_LIBRARY ${ACE_LIB_FILE}
@@ -48,6 +51,10 @@ if (UNIX)
  pkg_check_modules (PKG_SSL REQUIRED libssl)
 endif ()
 
+get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/.. REALPATH DIRECTORY)
+get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
+#message (STATUS "BUILD_PATH_SUFFIX: ${BUILD_PATH_SUFFIX}")
+#message (STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
 #if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
  # stand-alone build
 # message ("stand-alone build")
@@ -56,7 +63,7 @@ endif ()
                REQUIRED
                CONFIG
                PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
-               PATH_SUFFIXES libCommon/cmake
+               PATH_SUFFIXES libCommon/${BUILD_PATH_SUFFIX}
                NO_DEFAULT_PATH)
  if (NOT EXISTS ${Common_DIR})
   message (FATAL_ERROR "could not find package \"Common\", aborting")
@@ -67,7 +74,7 @@ endif ()
                REQUIRED
                CONFIG
                PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
-               PATH_SUFFIXES libACEStream/build libACEStream/cmake
+               PATH_SUFFIXES libACEStream/${BUILD_PATH_SUFFIX}
                NO_DEFAULT_PATH)
  if (NOT EXISTS ${ACEStream_DIR})
   message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
@@ -82,6 +89,8 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE)
 
  include_directories (${PKG_DBUS_INCLUDE_DIRS})
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../dbus)
+ include_directories (/usr/include/NetworkManager)
  include_directories (${PKG_SSL_INCLUDE_DIRS})
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src)
@@ -225,6 +234,15 @@ if (WIN32)
  endif ()
 endif ()
 
+message (STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+set (LLVM_COMPILER_ID_STRING "Clang")
+string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
+string (TOLOWER "${CMAKE_CXX_COMPILER_ID}" CXX_COMPILER_ID_STRING_LOWER)
+if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
+ add_compile_options (-std=c++11 -fPIC)
+ add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
+endif ()
+
 add_library (${PROJECT_NAME} STATIC ${ACENetwork_LIB_SRCS})
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
@@ -234,7 +252,9 @@ add_dependencies (${PROJECT_NAME} ACEStream)
 set_target_properties (${PROJECT_NAME} PROPERTIES DEFINE_SYMBOL NET_BUILD_DLL)
 set_target_properties (${PROJECT_NAME} PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
-if (WIN32)
+if (UNIX)
+ target_link_libraries (${PROJECT_NAME} ${PKG_DBUS_LIBRARIES})
+elseif (WIN32)
  target_link_libraries (${PROJECT_NAME} iphlpapi.lib)
  target_link_libraries (${PROJECT_NAME} Wlanapi.lib)
  target_link_libraries (${PROJECT_NAME} ${ACE_LIBRARY})

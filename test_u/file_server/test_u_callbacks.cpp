@@ -383,7 +383,7 @@ idle_initialize_ui_cb (gpointer userData_in)
   FileServer_StreamConfiguration_t::ITERATOR_T iterator_2 =
     data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.end ());
-  if (!(*iterator_2).second.fileName.empty ())
+  if (!(*iterator_2).second.second.fileName.empty ())
   {
     // *NOTE*: gtk does not complain if the file doesn't exist, but the button
     //         will display "(None)"
@@ -398,13 +398,13 @@ idle_initialize_ui_cb (gpointer userData_in)
     //if (!gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
     //                                              file_uri.c_str ()))
     filename_p =
-      Common_UI_Tools::Locale2UTF8 ((*iterator_2).second.fileName);
+      Common_UI_Tools::Locale2UTF8 ((*iterator_2).second.second.fileName);
     if (!gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_button_p),
                                         filename_p))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to gtk_file_chooser_set_filename(\"%s\"): \"%s\", aborting\n"),
-                  ACE_TEXT ((*iterator_2).second.fileName.c_str ())));
+                  ACE_TEXT ((*iterator_2).second.second.fileName.c_str ())));
 
       // clean up
       g_free (filename_p);
@@ -455,7 +455,7 @@ idle_initialize_ui_cb (gpointer userData_in)
   } // end ELSE
 
   std::string default_folder_uri = ACE_TEXT_ALWAYS_CHAR ("file://");
-  default_folder_uri += (*iterator_2).second.fileName;
+  default_folder_uri += (*iterator_2).second.second.fileName;
   gboolean result_2 =
     gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
                                              default_folder_uri.c_str ());
@@ -843,7 +843,7 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
     FileServer_StreamConfiguration_t::ITERATOR_T iterator_2 =
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.end ());
-    (*iterator_2).second.fileName =
+    (*iterator_2).second.second.fileName =
         Common_UI_Tools::UTF82Locale (filename_p, -1);
     g_free (filename_p);
 

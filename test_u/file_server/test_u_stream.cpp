@@ -102,9 +102,9 @@ Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configurat
   typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
     const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).end ());
-  (*iterator).second.outboundQueue =
+  (*iterator).second.second.outboundQueue =
     dynamic_cast<Stream_IMessageQueue*> (task_p->msg_queue ());
-  ACE_ASSERT ((*iterator).second.outboundQueue);
+  ACE_ASSERT ((*iterator).second.second.outboundQueue);
 
 //  bool result = false;
   bool setup_pipeline = configuration_in.configuration_.setupPipeline;
@@ -331,7 +331,7 @@ Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configu
   typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
     const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).end ());
-  (*iterator).second.stream = this;
+  //(*iterator).second.second.stream = this;
 
   bool result = false;
   bool setup_pipeline = configuration_in.configuration_.setupPipeline;

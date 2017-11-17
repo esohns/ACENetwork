@@ -20,7 +20,10 @@
 #include "stdafx.h"
 
 #include "ace/Synch.h"
+#include "http_module_parser.h"
 
+#include "http_defines.h"
 #include "http_scanner.h"
 
-#include "http_module_parser.h"
+HTTP_Export const char libacenetwork_protocol_default_http_parser_module_name_string[] =
+  ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_PARSER_NAME_STRING);

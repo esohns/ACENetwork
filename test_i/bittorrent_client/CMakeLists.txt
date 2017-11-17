@@ -4,21 +4,19 @@ option (GTK3_SUPPORT "enable Gtk3 support"
 if (UNIX)
  include (CheckLibraryExists)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
- find_package (Threads REQUIRED)
+ set (CMAKE_THREAD_PREFER_PTHREAD ON)
+ find_package (Threads)
  check_library_exists (iwlib iw_sockets_open "" HAVE_LIB_IW)
 endif ()
 
 set (ACE_LIB_FILE libACE.so)
 if (UNIX)
- if (DEFINED ENV{ACE_ROOT})
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                PATHS ENV ACE_ROOT
-                PATH_SUFFIXES ace build/linux/ace
-                DOC "searching for ${ACE_LIB_FILE}")
- else ()
-  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                DOC "searching for ${ACE_LIB_FILE} (system paths)")
- endif ()
+ find_library (ACE_LIBRARY ${ACE_LIB_FILE}
+               HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE /usr/local
+               PATHS ENV ACE_ROOT
+               PATH_SUFFIXES lib
+               DOC "searching for ${ACE_LIB_FILE}"
+               NO_DEFAULT_PATH)
 elseif (WIN32)
  if (CMAKE_BUILD_TYPE STREQUAL Debug)
   set (LIB_FILE_SUFFIX d)
@@ -38,6 +36,8 @@ endif ()
 set (FLEX_LIB_FILE libfl.so)
 if (UNIX)
  find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
+               HINTS /usr/lib
+               PATH_SUFFIXES x86_64-linux-gnu
                DOC "searching for ${FLEX_LIB_FILE} (system paths)")
 elseif (WIN32)
  unset (FLEX_LIB_FILE)
@@ -58,7 +58,7 @@ include (FindPkgConfig)
 if (UNIX)
 # *NOTE*: libCommon requires libcap
  pkg_check_modules (PKG_CAP REQUIRED libcap)
- pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
+ #pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
  pkg_check_modules (PKG_CURSES REQUIRED ncurses panel)
  if (GTK3_SUPPORT)
   pkg_check_modules (PKG_GTK3 REQUIRED gtk+-3.0)
@@ -92,11 +92,13 @@ endif ()
 #include (FindPkgConfig)
 #pkg_check_modules (PKGACE REQUIRED ACE)
 
+get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
+get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
-              PATH_SUFFIXES libCommon/cmake
+              PATH_SUFFIXES libCommon/${BUILD_PATH_SUFFIX}
               NO_DEFAULT_PATH)
 if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
@@ -106,7 +108,7 @@ find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
-              PATH_SUFFIXES libACEStream/cmake
+              PATH_SUFFIXES libACEStream/${BUILD_PATH_SUFFIX}
               NO_DEFAULT_PATH)
 if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
@@ -116,7 +118,7 @@ find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/..
-              PATH_SUFFIXES cmake
+              PATH_SUFFIXES ${BUILD_PATH_SUFFIX}
               NO_DEFAULT_PATH)
 if (NOT EXISTS ${ACENetwork_DIR})
  message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
@@ -226,7 +228,7 @@ target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (UNIX)
  target_link_libraries (${EXECUTABLE} rt)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
- target_link_libraries (${EXECUTABLE} ${PKG_DBUS_LIBRARIES})
+ #target_link_libraries (${EXECUTABLE} ${PKG_DBUS_LIBRARIES})
  target_link_libraries (${EXECUTABLE} iw)
  target_link_libraries (${EXECUTABLE} ${FLEX_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
@@ -238,8 +240,13 @@ elseif (WIN32)
  target_link_libraries (${EXECUTABLE} ${PANEL_LIBRARY})
 endif ()
 target_link_libraries (${EXECUTABLE} Common)
+
 target_link_libraries (${EXECUTABLE} ACEStream)
 target_link_libraries (${EXECUTABLE} ACEStream_Decoder)
+#target_link_libraries (${EXECUTABLE} ACEStream_Miscellaneous)
+target_link_libraries (${EXECUTABLE} ACEStream_Network)
+target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
+
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_BitTorrent)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
@@ -340,7 +347,7 @@ target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
 if (UNIX)
  target_link_libraries (${EXECUTABLE_GUI} rt)
  target_link_libraries (${EXECUTABLE_GUI} ${PKG_CAP_LIBRARIES})
- target_link_libraries (${EXECUTABLE_GUI} ${PKG_DBUS_LIBRARIES})
+ #target_link_libraries (${EXECUTABLE_GUI} ${PKG_DBUS_LIBRARIES})
  target_link_libraries (${EXECUTABLE_GUI} iw)
  target_link_libraries (${EXECUTABLE_GUI} ${FLEX_LIBRARY})
  target_link_libraries (${EXECUTABLE_GUI} X11)

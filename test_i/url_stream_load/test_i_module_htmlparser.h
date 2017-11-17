@@ -108,6 +108,7 @@ class Test_I_Module_HTMLParser
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_I_URLStreamLoad_SessionData,                // session data type
                               enum Stream_SessionMessageType,                         // session event type
                               struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_html_parser_module_name_string,
                               Test_I_IStreamNotify_t,                                 // stream notification interface type
                               Test_I_Module_HTMLParser);                              // writer type
 

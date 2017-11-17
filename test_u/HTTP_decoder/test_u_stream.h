@@ -33,8 +33,8 @@
 #include "stream_common.h"
 #include "stream_statemachine_control.h"
 
-#include "stream_module_io.h"
-#include "stream_module_io_stream.h"
+#include "stream_net_io.h"
+#include "stream_net_io_stream.h"
 
 #include "stream_stat_statistic_handler.h"
 
@@ -158,6 +158,7 @@ class Test_U_Stream_T
                                 enum Stream_SessionMessageType,           // session event type
                                 struct Stream_ModuleConfiguration,        // module configuration type
                                 struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                                libacestream_default_net_io_module_name_string,
                                 Test_U_IStreamNotify_t,                   // stream notification interface type
                                 READER_T,                                 // reader type
                                 WRITER_T> IO_MODULE_T;                    // writer type

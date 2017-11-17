@@ -1806,9 +1806,9 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       connection_manager_p;
     ACE_ASSERT (iconnection_manager_p);
     Test_U_ConnectorBcast_t connector_bcast (iconnection_manager_p,
-                                             (*iterator_2).second.statisticReportingInterval);
+                                             (*iterator_2).second.second.statisticReportingInterval);
     Test_U_AsynchConnectorBcast_t asynch_connector_bcast (iconnection_manager_p,
-                                                          (*iterator_2).second.statisticReportingInterval);
+                                                          (*iterator_2).second.second.statisticReportingInterval);
     //Test_U_Connector_t connector_bcast (iconnection_manager_p,
     //                                    data_p->configuration->streamConfiguration.statisticReportingInterval);
     //Test_U_AsynchConnector_t asynch_connector_bcast (iconnection_manager_p,

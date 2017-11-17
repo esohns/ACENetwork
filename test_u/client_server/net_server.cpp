@@ -496,7 +496,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
     return;
   } // end IF
 
-  Stream_AllocatorHeap_T<struct Stream_AllocatorConfiguration> heap_allocator;
+  Stream_AllocatorHeap_T<ACE_MT_SYNCH,
+                         struct Stream_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration.allocatorConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -520,6 +521,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
     (!UIDefinitionFile_in.empty () ? &event_handler
                                    : NULL);
 
+  struct Stream_ModuleConfiguration module_configuration;
   struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
   modulehandler_configuration.printFinalReport = true;
   modulehandler_configuration.protocolConfiguration =
@@ -533,7 +535,8 @@ do_work (unsigned int maximumNumberOfConnections_in,
   modulehandler_configuration.subscribersLock = &CBData_in.subscribersLock;
 
   configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                            modulehandler_configuration));
+                                                            std::make_pair (module_configuration,
+                                                                            modulehandler_configuration)));
   // *TODO*: is this correct ?
   configuration.streamConfiguration.configuration_.serializeOutput =
     useThreadPool_in;

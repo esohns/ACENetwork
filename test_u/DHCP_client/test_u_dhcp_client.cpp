@@ -544,7 +544,8 @@ do_work (bool requestBroadcastReplies_in,
 //    return;
 //  } // end IF
 
-  Stream_AllocatorHeap_T<struct Test_U_AllocatorConfiguration> heap_allocator;
+  Stream_AllocatorHeap_T<ACE_MT_SYNCH,
+                         struct Test_U_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -634,6 +635,7 @@ do_work (bool requestBroadcastReplies_in,
   configuration.streamConfiguration.configuration_.printFinalReport = true;
 
   // ********************** module configuration data **************************
+  struct Stream_ModuleConfiguration module_configuration;
   struct Test_U_StreamModuleHandlerConfiguration modulehandler_configuration;
   modulehandler_configuration.connectionConfigurations =
     &CBData_in.configuration->connectionConfigurations;
@@ -652,7 +654,8 @@ do_work (bool requestBroadcastReplies_in,
     &CBData_in.subscribersLock;
   modulehandler_configuration.targetFileName = fileName_in;
   configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                            modulehandler_configuration));
+                                                            std::make_pair (module_configuration,
+                                                                            modulehandler_configuration)));
   Test_U_StreamConfiguration_t::ITERATOR_T iterator_2 =
     configuration.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != configuration.streamConfiguration.end ());
@@ -886,7 +889,7 @@ do_work (bool requestBroadcastReplies_in,
     return;
   } // end IF
   if (iconnector_p->useReactor ())
-    (*iterator_2).second.broadcastConnection =
+    (*iterator_2).second.second.broadcastConnection =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle));
 #else
@@ -906,13 +909,13 @@ do_work (bool requestBroadcastReplies_in,
     //              &timeout));
     do
     {
-      (*iterator_2).second.broadcastConnection =
+      (*iterator_2).second.second.broadcastConnection =
           connection_manager_p->get ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress);
-      if ((*iterator_2).second.broadcastConnection)
+      if ((*iterator_2).second.second.broadcastConnection)
         break;
     } while (COMMON_TIME_NOW < deadline);
   } // end IF
-  if (!(*iterator_2).second.broadcastConnection)
+  if (!(*iterator_2).second.second.broadcastConnection)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to connect to %s, returning\n"),
@@ -925,7 +928,7 @@ do_work (bool requestBroadcastReplies_in,
   do
   {
     status =
-      (*iterator_2).second.broadcastConnection->status ();
+      (*iterator_2).second.second.broadcastConnection->status ();
     if (status == NET_CONNECTION_STATUS_OK) break;
   } while (COMMON_TIME_NOW < deadline);
   if (status != NET_CONNECTION_STATUS_OK)
@@ -938,19 +941,19 @@ do_work (bool requestBroadcastReplies_in,
   } // end IF
   // step1c: wait for the connection stream to finish initializing
   istream_connection_p =
-    dynamic_cast<Test_U_IStreamConnection_t*> ((*iterator_2).second.broadcastConnection);
+    dynamic_cast<Test_U_IStreamConnection_t*> ((*iterator_2).second.second.broadcastConnection);
   if (!istream_connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dynamic_cast<Net_IStreamConnection_T>(0x%@), returning\n"),
-                (*iterator_2).second.broadcastConnection));
+                (*iterator_2).second.second.broadcastConnection));
     return;
   } // end IF
   istream_connection_p->wait (STREAM_STATE_RUNNING,
                               NULL); // <-- block
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%u: connected to %s\n"),
-              (*iterator_2).second.broadcastConnection->id (),
+              (*iterator_2).second.second.broadcastConnection->id (),
               ACE_TEXT (Net_Common_Tools::IPAddressToString ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress).c_str ())));
 
   // step1ca: reinitialize connection manager
@@ -1144,7 +1147,7 @@ allocate:
                            NULL);
 
     Test_U_IStreamConnection_t* istream_connection_p =
-      dynamic_cast<Test_U_IStreamConnection_t*> ((*iterator_2).second.broadcastConnection);
+      dynamic_cast<Test_U_IStreamConnection_t*> ((*iterator_2).second.second.broadcastConnection);
     ACE_ASSERT (istream_connection_p);
 
     struct Test_U_ConnectionState& state_r =
@@ -1226,10 +1229,10 @@ allocate:
                                        !useReactor_in,
                                        group_id);
 
-  if ((*iterator_2).second.broadcastConnection)
+  if ((*iterator_2).second.second.broadcastConnection)
   {
 //    configuration.moduleHandlerConfiguration.broadcastConnection->close ();
-    (*iterator_2).second.broadcastConnection->decrease ();
+    (*iterator_2).second.second.broadcastConnection->decrease ();
   } // end IF
   if (iconnection_p)
   {

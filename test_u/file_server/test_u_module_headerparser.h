@@ -29,7 +29,13 @@
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
 
+#include "net_exports.h"
+
+#include "test_u_defines.h"
 #include "test_u_stream_common.h"
+
+//extern Net_Export const char libacenetwork_default_test_u_headerparser_module_name_string[];
+extern const char libacenetwork_default_test_u_headerparser_module_name_string[];
 
 // forward declaration(s)
 class Test_U_Message;
@@ -49,7 +55,7 @@ class Test_U_Module_HeaderParser
 {
  public:
   Test_U_Module_HeaderParser (ISTREAM_T*); // stream handle
-  virtual ~Test_U_Module_HeaderParser ();
+  inline virtual ~Test_U_Module_HeaderParser () {}
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (Test_U_Message*&, // data message handle
@@ -79,6 +85,7 @@ class Test_U_Module_HeaderParser
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
                               enum Stream_SessionMessageType,           // session event type
                               struct Stream_ModuleHandlerConfiguration, // module handler configuration type
+                              libacenetwork_default_test_u_headerparser_module_name_string,
                               Test_U_IStreamNotify_t,                   // stream notification interface type
                               Test_U_Module_HeaderParser);              // writer type
 

@@ -133,7 +133,7 @@ Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURAT
   ACE_ASSERT (iterator != configuration_in.end ());
   // *TODO*: remove type inferences
   //session_data_p->sessionID = configuration_in.sessionID;
-  session_data_p->targetFileName = (*iterator).second.targetFileName;
+  session_data_p->targetFileName = (*iterator).second.second.targetFileName;
 
   // ---------------------------------------------------------------------------
 
@@ -350,7 +350,7 @@ Test_U_OutboundConnectionStream::initialize (const typename inherited::CONFIGURA
   iterator =
     const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.end ());
-  session_data_p->targetFileName = (*iterator).second.targetFileName;
+  session_data_p->targetFileName = (*iterator).second.second.targetFileName;
 
   // ---------------------------------------------------------------------------
 

@@ -319,8 +319,8 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     iterator =
         configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator != configuration_p->streamConfiguration->end ());
-    subscriber_p = (*iterator).second.subscriber;
-    (*iterator).second.subscriber = &peerStreamHandler_;
+    subscriber_p = (*iterator).second.second.subscriber;
+    (*iterator).second.second.subscriber = &peerStreamHandler_;
 
     clone_module =
       configuration_p->streamConfiguration->configuration_.cloneModule;
@@ -348,7 +348,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     ACE_ASSERT (configuration_p->streamConfiguration);
 
     ACE_ASSERT (iterator != configuration_p->streamConfiguration->end ());
-    (*iterator).second.subscriber = subscriber_p;
+    (*iterator).second.second.subscriber = subscriber_p;
 
     configuration_p->streamConfiguration->configuration_.cloneModule =
       clone_module;
@@ -890,9 +890,9 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     iterator =
         configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator != configuration_p->streamConfiguration->end ());
-    subscriber_p = (*iterator).second.subscriber;
+    subscriber_p = (*iterator).second.second.subscriber;
     ACE_ASSERT (!subscriber_p);
-    (*iterator).second.subscriber = &trackerStreamHandler_;
+    (*iterator).second.second.subscriber = &trackerStreamHandler_;
 
     clone_module =
       configuration_p->streamConfiguration->configuration_.cloneModule;
@@ -1022,7 +1022,7 @@ error:
     ACE_ASSERT (configuration_p->streamConfiguration);
 
     ACE_ASSERT (iterator != configuration_p->streamConfiguration->end ());
-    (*iterator).second.subscriber = subscriber_p;
+    (*iterator).second.second.subscriber = subscriber_p;
 
     configuration_p->streamConfiguration->configuration_.cloneModule =
       clone_module;

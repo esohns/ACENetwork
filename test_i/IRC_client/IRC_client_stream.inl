@@ -72,7 +72,7 @@ IRC_Client_Stream_T<TimerManagerType>::load (Stream_ModuleList_t& modules_out,
 
 template <typename TimerManagerType>
 bool
-IRC_Client_Stream_T<TimerManagerType>::initialize (const CONFIGURATION_T& configuration_in,
+IRC_Client_Stream_T<TimerManagerType>::initialize (const IRC_Client_StreamConfiguration_t& configuration_in,
                                                    ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_Stream_T::initialize"));
@@ -89,7 +89,7 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const CONFIGURATION_T& config
   IRC_Client_Module_Bisector_t* bisector_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<IRC_Client_StreamConfiguration_t&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -97,10 +97,10 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const CONFIGURATION_T& config
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_Module_Net_IO_Stream_T::initialize(), aborting\n"),
-                ACE_TEXT (stream_irc_stream_name_string_)));
+                ACE_TEXT (libacenetwork_default_irc_stream_name_string)));
     goto error;
   } // end IF
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<IRC_Client_StreamConfiguration_t&> (configuration_in).configuration_.setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
@@ -125,7 +125,7 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const CONFIGURATION_T& config
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (stream_irc_stream_name_string_),
+                ACE_TEXT (libacenetwork_default_irc_stream_name_string),
                 ACE_TEXT ("Marshal")));
     goto error;
   } // end IF
@@ -135,7 +135,7 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const CONFIGURATION_T& config
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: dynamic_cast<IRC_Module_Bisector_T> failed, aborting\n"),
-                ACE_TEXT (stream_irc_stream_name_string_)));
+                ACE_TEXT (libacenetwork_default_irc_stream_name_string)));
     goto error;
   } // end IF
   bisector_impl_p->setP (&(inherited::state_));
@@ -153,7 +153,7 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const CONFIGURATION_T& config
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to set up pipeline, aborting\n"),
-                  ACE_TEXT (stream_irc_stream_name_string_)));
+                  ACE_TEXT (libacenetwork_default_irc_stream_name_string)));
       goto error;
     } // end IF
 
@@ -164,7 +164,7 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const CONFIGURATION_T& config
 
 error:
   if (reset_setup_pipeline)
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+    const_cast<IRC_Client_StreamConfiguration_t&> (configuration_in).configuration_.setupPipeline =
       setup_pipeline;
 
   return false;

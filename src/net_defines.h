@@ -145,4 +145,7 @@
 #define NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL     0  // seconds [0: off]
 #define NET_STREAM_DEFAULT_NAME                             "NetStream"
 
+#define NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING "SocketHandler"
+
+
 #endif

@@ -125,6 +125,12 @@ struct IRC_Client_StreamConfiguration
 
   struct IRC_Client_UserData*       userData;
 };
+//extern const char stream_name_string_[];
+typedef Stream_Configuration_T<//stream_name_string_,
+                               struct IRC_AllocatorConfiguration,
+                               struct IRC_Client_StreamConfiguration,
+                               struct Stream_ModuleConfiguration,
+                               struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_StreamConfiguration_t;
 
 typedef Stream_SessionData_T<struct IRC_Client_SessionData> IRC_Client_SessionData_t;
 

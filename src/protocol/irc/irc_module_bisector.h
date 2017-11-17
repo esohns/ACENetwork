@@ -28,6 +28,8 @@
 
 #include "irc_exports.h"
 
+extern IRC_Export const char libacenetwork_protocol_default_irc_bisector_module_name_string[];
+
 //// define/declare the lexer's prototype (see irc_bisector.h)
 typedef void* yyscan_t;
 IRC_Export int IRC_Bisector_lex (yyscan_t);

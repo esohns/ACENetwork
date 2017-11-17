@@ -32,6 +32,8 @@
 #include "stream_streammodule_base.h"
 #include "stream_task_base_synch.h"
 
+#include "net_exports.h"
+
 //#include "test_u_sessionmessage.h"
 #include "test_u_stream_common.h"
 
@@ -39,6 +41,9 @@
 class Stream_IAllocator;
 class Test_U_Message;
 class Test_U_SessionMessage;
+
+//extern Net_Export const char libacenetwork_default_test_u_protocolhandler_module_name_string[];
+extern const char libacenetwork_default_test_u_protocolhandler_module_name_string[];
 
 class Test_U_Module_ProtocolHandler
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
@@ -104,6 +109,7 @@ class Test_U_Module_ProtocolHandler
 DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
                               enum Stream_SessionMessageType,           // session event type
                               struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                              libacenetwork_default_test_u_protocolhandler_module_name_string,
                               Test_U_IStreamNotify_t,                   // stream notification interface type
                               Test_U_Module_ProtocolHandler);           // writer type
 

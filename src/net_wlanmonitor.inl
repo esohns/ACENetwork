@@ -97,7 +97,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::~Net_WLANMonitor_T"));
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (clientHandle_ != ACE_INVALID_HANDLE)
+  if (unlikely (clientHandle_ != ACE_INVALID_HANDLE))
   {
     DWORD result = WlanCloseHandle (clientHandle_, NULL);
     if (result != ERROR_SUCCESS)
@@ -107,13 +107,13 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
                   ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
   } // end IF
 #else
-  if (isActive_)
+  if (unlikely (isActive_))
   { ACE_ASSERT (connection_);
     dbus_connection_close (connection_);
     inherited::stop (true,
                      true);
   } // end IF
-  if (connection_)
+  if (unlikely (connection_))
     dbus_connection_unref (connection_);
 #endif
 }
@@ -133,13 +133,13 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::start"));
 
   // sanity check(s)
-  if (!isInitialized_)
+  if (unlikely (!isInitialized_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("not initialized, returning\n")));
     return;
   } // end IF
-  if (isActive_)
+  if (unlikely (isActive_))
   {
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("already started, returning\n")));
@@ -163,7 +163,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
                            NULL,
                            &current_version,
                            &clientHandle_);
-  if (result != ERROR_SUCCESS)
+  if (unlikely (result != ERROR_SUCCESS))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::WlanOpenHandle(): \"%s\", returning\n"),
@@ -182,7 +182,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
                                      configuration_->notificationCBData,
                                      NULL,
                                      &previous_notification_mask);
-  if (result != ERROR_SUCCESS)
+  if (unlikely (result != ERROR_SUCCESS))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::WlanRegisterNotification(): \"%s\", aborting\n"),
@@ -223,8 +223,8 @@ continue_:
   ACE_ASSERT (match_rule_string.size () <= DBUS_MAXIMUM_MATCH_RULE_LENGTH);
   connection_ = dbus_bus_get_private (DBUS_BUS_SYSTEM,
                                       &error_s);
-  if (!connection_ ||
-      dbus_error_is_set (&error_s))
+  if (unlikely (!connection_ ||
+                dbus_error_is_set (&error_s)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_bus_get_private(DBUS_BUS_SYSTEM): \"%s\", returning\n"),
@@ -252,7 +252,7 @@ continue_:
     (*iterator).second =
         Net_Common_Tools::deviceToDBusPath (connection_,
                                             (*iterator).first);
-    if ((*iterator).second.empty ())
+    if (unlikely ((*iterator).second.empty ()))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::deviceToDBusPath(\"%s\"), continuing\n"),
                   ACE_TEXT ((*iterator).first).c_str ()));
@@ -264,10 +264,10 @@ continue_:
   } // end FOR
 
   // subscribe to all networkmanager signals
-  if (!dbus_connection_add_filter (connection_,
-                                   configuration_->notificationCB,
-                                   configuration_->notificationCBData,
-                                   NULL))
+  if (unlikely (!dbus_connection_add_filter (connection_,
+                                             configuration_->notificationCB,
+                                             configuration_->notificationCBData,
+                                             NULL)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_connection_add_filter(): \"%m\", returning\n")));
@@ -281,7 +281,7 @@ continue_:
   dbus_bus_add_match (connection_,
                       match_rule_string.c_str (),
                       &error_s);
-  if (dbus_error_is_set (&error_s))
+  if (unlikely (dbus_error_is_set (&error_s)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_bus_add_match(): \"%s\", returning\n"),
@@ -320,7 +320,7 @@ continue_:
 
   // dispatch DBus messages in a dedicated thread
   inherited::open (NULL);
-  if (!inherited::isRunning ())
+  if (unlikely (!inherited::isRunning ()))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", returning\n")));
@@ -371,7 +371,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   ACE_ASSERT (clientHandle_ != ACE_INVALID_HANDLE);
 
   DWORD result = WlanCloseHandle (clientHandle_, NULL);
-  if (result != ERROR_SUCCESS)
+  if (unlikely (result != ERROR_SUCCESS))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::WlanCloseHandle(0x%@): \"%s\", returning\n"),
@@ -436,7 +436,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::initialize"));
 
-  if (isInitialized_)
+  if (unlikely (isInitialized_))
   {
     if (isActive_)
       stop (true,
@@ -488,12 +488,12 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("D-Bus signal callback specified, disabled event subscription\n")));
 #endif
-  if (
+  if (unlikely (
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       configuration_->SSID.empty () ||
-      (configuration_->SSID.size () > DOT11_SSID_MAX_LENGTH))
+      (configuration_->SSID.size () > DOT11_SSID_MAX_LENGTH)))
 #else
-      configuration_->SSID.empty ())
+      configuration_->SSID.empty ()))
 #endif
   {
     ACE_DEBUG ((LM_ERROR,
@@ -520,7 +520,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::subscribe"));
 
   // sanity check(s)
-  if (!interfaceHandle_in)
+  if (unlikely (!interfaceHandle_in))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid argument (was: 0x%@), returning\n"),
@@ -584,19 +584,19 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("Net_WLANMonitor_T::associate"));
 
   // sanity check(s)
-  if (
+  if (unlikely (
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       SSID_in.empty () ||
-      (SSID_in.size () > DOT11_SSID_MAX_LENGTH))
+      (SSID_in.size () > DOT11_SSID_MAX_LENGTH)))
 #else
-      SSID_in.empty ())
+      SSID_in.empty ()))
 #endif
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid argument, aborting\n")));
     return false;
   } // end IF
-  if (!isActive_)
+  if (unlikely (!isActive_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("not running, aborting\n")));
@@ -693,7 +693,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
                                    flags,
                                    NULL,
                                    &wlan_network_list_p);
-    if (result != ERROR_SUCCESS)
+    if (unlikely (result != ERROR_SUCCESS))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("\"%s\": failed to ::WlanGetAvailableNetworkList(0x%@): \"%s\", aborting\n"),
@@ -811,7 +811,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
                             &(*iterator),
                             &wlan_connection_parameters_s,
                             NULL);
-      if (result != ERROR_SUCCESS)
+      if (unlikely (result != ERROR_SUCCESS))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("\"%s\": failed to ::WlanConnect(0x%@,%s): \"%s\", aborting\n"),
@@ -859,7 +859,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
                        NULL, // *NOTE*: support WinXP
                        //&raw_data_s,
                        NULL);
-    if (result != ERROR_SUCCESS)
+    if (unlikely (result != ERROR_SUCCESS))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("\"%s\": failed to ::WlanScan(0x%@): \"%s\", aborting\n"),
@@ -900,7 +900,7 @@ next:
   device_object_path_string =
       Net_Common_Tools::SSIDToDeviceDBusPath (connection_,
                                               SSID_in);
-  if (device_object_path_string.empty ())
+  if (unlikely (device_object_path_string.empty ()))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::SSIDToDeviceDBusPath(0x%@,%s), continuing\n"),
@@ -915,7 +915,7 @@ retrieve_access_point:
       Net_Common_Tools::SSIDToAccessPointDBusPath (connection_,
                                                    device_object_path_string,
                                                    SSID_in);
-  if (access_point_object_path_string.empty ())
+  if (unlikely (access_point_object_path_string.empty ()))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::SSIDToAccessPointDBusPath(0x%@,\"%s\",%s), continuing\n"),
@@ -929,7 +929,7 @@ retrieve_access_point:
       Net_Common_Tools::SSIDToConnectionDBusPath (connection_,
                                                   device_object_path_string,
                                                   SSID_in);
-  if (connection_object_path_string.empty ())
+  if (unlikely (connection_object_path_string.empty ()))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::SSIDToConnectionDBusPath(0x%@,\"%s\",%s), continuing\n"),
@@ -939,10 +939,10 @@ retrieve_access_point:
     ++iterator;
     goto next;
   } // end IF
-  if (!Net_Common_Tools::activateConnection (connection_,
-                                             connection_object_path_string,
-                                             device_object_path_string,
-                                             access_point_object_path_string))
+  if (unlikely (!Net_Common_Tools::activateConnection (connection_,
+                                                       connection_object_path_string,
+                                                       device_object_path_string,
+                                                       access_point_object_path_string)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::activateConnection(0x%@,\"%s\",\"%s\",\"%s\"), continuing\n"),
@@ -1057,8 +1057,8 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
                 ACE_TEXT (configuration_->SSID.c_str ())));
 #endif
 
-    if (!associate (interfaceIdentifier_in,
-                    configuration_->SSID))
+    if (unlikely (!associate (interfaceIdentifier_in,
+                              configuration_->SSID)))
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s), returning\n"),
@@ -1074,10 +1074,10 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (!Net_Common_Tools::setDeviceSettingBool (clientHandle_,
-                                               interfaceIdentifier_in,
-                                               wlan_intf_opcode_background_scan_enabled,
-                                               !success_in))
+  if (unlikely (!Net_Common_Tools::setDeviceSettingBool (clientHandle_,
+                                                         interfaceIdentifier_in,
+                                                         wlan_intf_opcode_background_scan_enabled,
+                                                         !success_in)))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("\"%s\": failed to Net_Common_Tools::setDeviceSettingBool(0x%@,%d,true), continuing\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
@@ -1087,10 +1087,10 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   //              ACE_TEXT ("\"%s\": %s background scans\n"),
   //              ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
   //              (success_in ? ACE_TEXT ("disabled") : ACE_TEXT ("enabled"))));
-  if (!Net_Common_Tools::setDeviceSettingBool (clientHandle_,
-                                               interfaceIdentifier_in,
-                                               wlan_intf_opcode_media_streaming_mode,
-                                               success_in))
+  if (unlikely (!Net_Common_Tools::setDeviceSettingBool (clientHandle_,
+                                                         interfaceIdentifier_in,
+                                                         wlan_intf_opcode_media_streaming_mode,
+                                                         success_in)))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("\"%s\": failed to Net_Common_Tools::setDeviceSettingBool(0x%@,%d,true), continuing\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
@@ -1288,15 +1288,15 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   } // end lock scope
 
   // sanity check(s)
-  if (!isInitialized_ || !isActive_)
+  if (unlikely (!isInitialized_ || !isActive_))
     return;
   ACE_ASSERT (configuration_);
   if ((SSID () == configuration_->SSID) ||
       !configuration_->autoAssociate)
     return;
 
-  if (!associate (interfaceIdentifier_in,
-                  configuration_->SSID))
+  if (unlikely (!associate (interfaceIdentifier_in,
+                            configuration_->SSID)))
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s), returning\n"),
@@ -1346,14 +1346,10 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (connection_);
 
-  // *IMPORTANT NOTE*: do NOT block in dbus_connection_read_write_dispatch until
-  //                   there is some way to wake it up externally
-  //  while (dbus_connection_read_write_dispatch (connection_,
-//                                              -1)) // block
   do
   {
     if (unlikely (!dbus_connection_read_write_dispatch (connection_,
-                                                        10))) // timeout (ms)
+                                                        -1))) // timeout (ms)
       break; // done
 
     do
@@ -1482,7 +1478,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
   DWORD result_2 = WlanEnumInterfaces (clientHandle_,
                                        NULL,
                                        &interface_list_p);
-  if (result_2 != ERROR_SUCCESS)
+  if (unlikely (result_2 != ERROR_SUCCESS))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::WlanEnumInterfaces(0x%@): \"%s\", aborting\n"),
@@ -1538,7 +1534,7 @@ Net_WLANMonitor_T<ACE_SYNCH_USE,
 #if defined (ACE_HAS_GETIFADDRS)
   struct ifaddrs* ifaddrs_p = NULL;
   int result_2 = ::getifaddrs (&ifaddrs_p);
-  if (result_2 == -1)
+  if (unlikely (result_2 == -1))
   {
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to ::getifaddrs(): \"%m\", aborting\n")));

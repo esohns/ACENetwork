@@ -150,7 +150,7 @@ connection_setup_function (void* arg_in)
   IRC_Client_StreamConfiguration_t::ITERATOR_T iterator_2 =
     data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.end ());
-  (*iterator_2).second.subscriber = connection_p;
+  (*iterator_2).second.second.subscriber = connection_p;
 
   // *WARNING*: beyond this point, need to remove the connection page !
   //            --> goto remove_page
@@ -175,9 +175,9 @@ connection_setup_function (void* arg_in)
     IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
   IRC_Client_Connector_t connector (connection_manager_p,
-                                    (*iterator_2).second.statisticReportingInterval);
+                                    (*iterator_2).second.second.statisticReportingInterval);
   IRC_Client_AsynchConnector_t asynch_connector (connection_manager_p,
-                                                 (*iterator_2).second.statisticReportingInterval);
+                                                 (*iterator_2).second.second.statisticReportingInterval);
   IRC_Client_IConnector_t* connector_p = &connector;
   if (!data_p->configuration->useReactor)
     connector_p = &asynch_connector;

@@ -441,6 +441,7 @@ do_work (bool useThreadPool_in,
     CBData_in.configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != CBData_in.configuration->connectionConfigurations.end ());
 
+  struct Stream_ModuleConfiguration module_configuration;
   struct IRC_Client_ModuleHandlerConfiguration modulehandler_configuration;
   modulehandler_configuration.connectionConfigurations =
     &CBData_in.configuration->connectionConfigurations;
@@ -453,7 +454,8 @@ do_work (bool useThreadPool_in,
   modulehandler_configuration.streamConfiguration =
     &CBData_in.configuration->streamConfiguration;
   CBData_in.configuration->streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                       modulehandler_configuration));
+                                                                       std::make_pair (module_configuration,
+                                                                                       modulehandler_configuration)));
 
   //IRC_Client_Module_IRCHandler_Module IRC_handler (ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_HANDLER_MODULE_NAME),
   //                                                 NULL,

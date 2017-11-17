@@ -40,6 +40,12 @@ class BitTorrent_Bencoding_IParser
 // , public Common_IGet_T<Bencoding_List_t>
 {
  public:
+  // convenient types
+  typedef Net_IYaccRecordParser_T<struct Common_ParserConfiguration,
+                                  Bencoding_Dictionary_t> IPARSER_T;
+  typedef Common_ILexScanner_T<struct Common_ScannerState,
+                               BitTorrent_Bencoding_IParser> ISCANNER_T;
+
   using IPARSER_T::error;
 //  using Common_IScanner::error;
 
@@ -69,7 +75,7 @@ class BitTorrent_IParser_T
                                BitTorrent_IParser_T<RecordType> > ISCANNER_T;
 
   using IPARSER_T::error;
-  using ISCANNER_T::error;
+//  using ISCANNER_T::error;
 
   ////////////////////////////////////////
   // callbacks

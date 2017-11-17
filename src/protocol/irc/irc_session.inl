@@ -1084,10 +1084,10 @@ IRC_Session_T<ConnectionType,
       inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->end ());
   } // end ELSE
-  (*iterator).second.subscriber = this;
-  (*iterator).second.userData =
+  (*iterator).second.second.subscriber = this;
+  (*iterator).second.second.userData =
     connection_configuration_p->socketHandlerConfiguration.userData;
-  ACE_ASSERT ((*iterator).second.userData);
+  ACE_ASSERT ((*iterator).second.second.userData);
 //  const IRC_ConnectionState& connection_state_r = inherited::state ();
 //  module_handler_configuration_p->userData->connectionState =
 //      &const_cast<IRC_ConnectionState&> (connection_state_r);
@@ -1181,7 +1181,7 @@ IRC_Session_T<ConnectionType,
   iterator =
       inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->end ());
-  (*iterator).second.subscriber = this;
+  (*iterator).second.second.subscriber = this;
 //  ACE_ASSERT (module_handler_configuration_p->userData);
 //  const IRC_ConnectionState& connection_state_r = inherited::state ();
 //  module_handler_configuration_p->userData->connectionState =

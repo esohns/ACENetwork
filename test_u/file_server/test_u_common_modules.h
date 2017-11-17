@@ -34,8 +34,8 @@
 
 #include "stream_file_source.h"
 
-#include "stream_module_io.h"
-#include "stream_module_target.h"
+#include "stream_net_io.h"
+#include "stream_net_target.h"
 
 #include "stream_stat_statistic_report.h"
 
@@ -82,50 +82,14 @@ typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
                                      ACE_INET_Addr,
                                      FileServer_InetConnectionManager_t,
                                      struct FileServer_UserData> Test_U_Module_Net_Reader_t;
-//typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
-//                                     Test_U_ControlMessage_t,
-//                                     Test_U_Message,
-//                                     Test_U_SessionMessage,
-//                                     struct Test_U_ModuleHandlerConfiguration,
-//                                     enum Stream_ControlType,
-//                                     enum Stream_SessionMessageType,
-//                                     struct FileServer_StreamState,
-//                                     struct FileServer_SessionData,
-//                                     FileServer_SessionData_t,
-//                                     Net_Statistic_t,
-//                                     Net_StatisticHandlerProactor_t,
-//                                     ACE_INET_Addr,
-//                                     FileServer_InetConnectionManager_t,
-//                                     struct FileServer_UserData> Test_U_Module_Net_AsynchWriter_t;
-//typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
-//                                     Test_U_ControlMessage_t,
-//                                     Test_U_Message,
-//                                     Test_U_SessionMessage,
-//                                     struct Test_U_ModuleHandlerConfiguration,
-//                                     enum Stream_ControlType,
-//                                     enum Stream_SessionMessageType,
-//                                     struct FileServer_StreamState,
-//                                     struct FileServer_SessionData,
-//                                     FileServer_SessionData_t,
-//                                     Net_Statistic_t,
-//                                     Net_StatisticHandlerProactor_t,
-//                                     ACE_INET_Addr,
-//                                     FileServer_InetConnectionManager_t,
-//                                     struct FileServer_UserData> Test_U_Module_Net_AsynchReader_t;
 DATASTREAM_MODULE_DUPLEX (struct FileServer_SessionData,            // session data type
                           enum Stream_SessionMessageType,           // session event type
                           struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                          libacestream_default_net_io_module_name_string,
                           Test_U_IStreamNotify_t,                   // stream notification interface type
                           Test_U_Module_Net_Reader_t,               // reader type
                           Test_U_Module_Net_Writer_t,               // writer type
                           Test_U_Net_IO);                           // name
-//DATASTREAM_MODULE_DUPLEX (struct FileServer_SessionData,            // session data type
-//                          enum Stream_SessionMessageType,           // session event type
-//                          struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
-//                          Test_U_IStreamNotify_t,                   // stream notification interface type
-//                          Test_U_Module_Net_AsynchReader_t,         // reader type
-//                          Test_U_Module_Net_AsynchWriter_t,         // writer type
-//                          Test_U_Net_AsynchIO);                     // name
 
 typedef Stream_Module_Net_Target_T<ACE_MT_SYNCH,
                                    Common_TimePolicy_t,
@@ -150,11 +114,13 @@ typedef Stream_Module_Net_Target_T<ACE_MT_SYNCH,
 DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type
                               enum Stream_SessionMessageType,           // session event type
                               struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_net_target_module_name_string,
                               Test_U_IStreamNotify_t,                   // stream notification interface type
                               Test_U_Module_Net_UDPTarget);             // writer type
 DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type
                               enum Stream_SessionMessageType,           // session event type
                               struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_net_target_module_name_string,
                               Test_U_IStreamNotify_t,                   // stream notification interface type
                               Test_U_Module_Net_AsynchUDPTarget);       // writer type
 
@@ -180,42 +146,14 @@ typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       Common_Timer_Manager_t,
                                                       struct FileServer_SessionData,
                                                       FileServer_SessionData_t> Test_U_Module_StatisticReport_WriterTask_t;
-//typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
-//                                                      Common_TimePolicy_t,
-//                                                      struct Test_U_ModuleHandlerConfiguration,
-//                                                      Test_U_ControlMessage_t,
-//                                                      Test_U_Message,
-//                                                      Test_U_SessionMessage,
-//                                                      int,
-//                                                      Net_Statistic_t,
-//                                                      Net_StatisticHandlerProactor_t,
-//                                                      struct FileServer_SessionData,
-//                                                      FileServer_SessionData_t> Test_U_Module_StatisticReport_AsynchReaderTask_t;
-//typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
-//                                                      Common_TimePolicy_t,
-//                                                      struct Test_U_ModuleHandlerConfiguration,
-//                                                      Test_U_ControlMessage_t,
-//                                                      Test_U_Message,
-//                                                      Test_U_SessionMessage,
-//                                                      int,
-//                                                      Net_Statistic_t,
-//                                                      Net_StatisticHandlerProactor_t,
-//                                                      struct FileServer_SessionData,
-//                                                      FileServer_SessionData_t> Test_U_Module_StatisticReport_AsynchWriterTask_t;
 DATASTREAM_MODULE_DUPLEX (struct FileServer_SessionData,              // session data type
                           enum Stream_SessionMessageType,             // session event type
                           struct Test_U_ModuleHandlerConfiguration,   // module handler configuration type
+                          libacestream_default_stat_report_module_name_string,
                           Test_U_IStreamNotify_t,                     // stream notification interface type
                           Test_U_Module_StatisticReport_ReaderTask_t, // reader type
                           Test_U_Module_StatisticReport_WriterTask_t, // writer type
                           Test_U_StatisticReport);                    // name
-//DATASTREAM_MODULE_DUPLEX (struct FileServer_SessionData,                    // session data type
-//                          enum Stream_SessionMessageType,                   // session event type
-//                          struct Test_U_ModuleHandlerConfiguration,         // module handler configuration type
-//                          Test_U_IStreamNotify_t,                           // stream notification interface type
-//                          Test_U_Module_StatisticReport_AsynchReaderTask_t, // reader type
-//                          Test_U_Module_StatisticReport_AsynchWriterTask_t, // writer type
-//                          Test_U_AsynchStatisticReport);                    // name
 
 typedef Stream_Decoder_MPEG_TS_Decoder_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
@@ -227,13 +165,9 @@ typedef Stream_Decoder_MPEG_TS_Decoder_T<ACE_MT_SYNCH,
 DATASTREAM_MODULE_OUTPUT_ONLY (struct FileServer_SessionData,            // session data type
                                enum Stream_SessionMessageType,           // session event type
                                struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                               libacestream_default_dec_mpeg_ts_module_name_string,
                                Test_U_IStreamNotify_t,                   // stream notification interface type
                                Test_U_MPEG_TS_Decoder);                  // reader type
-//DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type
-//                              enum Stream_SessionMessageType,           // session event type
-//                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
-//                              Test_U_IStreamNotify_t,                   // stream notification interface type
-//                              Test_U_MPEG_TS_Decoder);                  // writer type
 
 typedef Stream_Module_FileReader_Writer_T<ACE_MT_SYNCH,
                                           Common_TimePolicy_t,
@@ -243,12 +177,6 @@ typedef Stream_Module_FileReader_Writer_T<ACE_MT_SYNCH,
                                           Test_U_SessionMessage,
                                           struct FileServer_SessionData,
                                           struct FileServer_UserData> Test_U_FileReader;
-DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type
-                              enum Stream_SessionMessageType,           // session event type
-                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
-                              Test_U_IStreamNotify_t,                   // stream notification interface type
-                              Test_U_FileReader);                       // writer type
-
 typedef Stream_Module_FileReaderH_T<ACE_MT_SYNCH,
                                     Test_U_ControlMessage_t,
                                     Test_U_Message,
@@ -262,28 +190,17 @@ typedef Stream_Module_FileReaderH_T<ACE_MT_SYNCH,
                                     Net_Statistic_t,
                                     Common_Timer_Manager_t,
                                     struct FileServer_UserData> Test_U_FileReaderH;
-//typedef Stream_Module_FileReaderH_T<ACE_MT_SYNCH,
-//                                    Test_U_ControlMessage_t,
-//                                    Test_U_Message,
-//                                    Test_U_SessionMessage,
-//                                    struct Test_U_ModuleHandlerConfiguration,
-//                                    enum Stream_ControlType,
-//                                    enum Stream_SessionMessageType,
-//                                    struct FileServer_StreamState,
-//                                    struct FileServer_SessionData,
-//                                    FileServer_SessionData_t,
-//                                    Net_Statistic_t,
-//                                    Net_StatisticHandlerProactor_t,
-//                                    struct FileServer_UserData> Test_U_AsynchFileReaderH;
 DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type
                               enum Stream_SessionMessageType,           // session event type
                               struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_file_source_module_name_string,
+                              Test_U_IStreamNotify_t,                   // stream notification interface type
+                              Test_U_FileReader);                       // writer type
+DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type
+                              enum Stream_SessionMessageType,           // session event type
+                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                              libacestream_default_file_source_module_name_string,
                               Test_U_IStreamNotify_t,                   // stream notification interface type
                               Test_U_FileReaderH);                      // writer type
-//DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // session data type
-//                              enum Stream_SessionMessageType,           // session event type
-//                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
-//                              Test_U_IStreamNotify_t,                   // stream notification interface type
-//                              Test_U_AsynchFileReaderH);                // writer type
 
 #endif

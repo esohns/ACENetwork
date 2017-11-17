@@ -28,18 +28,13 @@
 
 #include "net_macros.h"
 
+#include "test_u_defines.h"
 #include "test_u_message.h"
 
 Test_U_Module_HeaderParser::Test_U_Module_HeaderParser (ISTREAM_T* stream_in)
  : inherited (stream_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::Test_U_Module_HeaderParser"));
-
-}
-
-Test_U_Module_HeaderParser::~Test_U_Module_HeaderParser()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::~Test_U_Module_HeaderParser"));
 
 }
 
@@ -90,3 +85,10 @@ Test_U_Module_HeaderParser::dump_state () const
 //               ACE_TEXT (" ***** MODULE: \"%s\" state *****\\END\n"),
 //               ACE_TEXT (inherited::name ())));
 }
+
+//////////////////////////////////////////
+
+//Net_Export const char libacenetwork_default_test_u_headerparser_module_name_string[] =
+//  ACE_TEXT_ALWAYS_CHAR (TEST_U_STREAM_MODULE_HEADERPARSER_NAME);
+const char libacenetwork_default_test_u_headerparser_module_name_string[] =
+  ACE_TEXT_ALWAYS_CHAR (TEST_U_STREAM_MODULE_HEADERPARSER_NAME);

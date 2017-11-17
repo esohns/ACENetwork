@@ -21,3 +21,8 @@
 
 #include "ace/Synch.h"
 #include "dhcp_module_parser.h"
+
+#include "dhcp_defines.h"
+
+NET_PROTOCOL_DHCP_Export const char libacenetwork_protocol_default_dhcp_parser_module_name_string[] =
+  ACE_TEXT_ALWAYS_CHAR (DHCP_DEFAULT_MODULE_PARSER_NAME_STRING);

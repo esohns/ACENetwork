@@ -201,9 +201,11 @@ class BitTorrent_Session_T
                                             CBDataType> TRACKER_HANDLER_T;
 
   typedef typename std::map<std::string,
-                            PeerModuleHandlerConfigurationType>::iterator PEERMODULEHANDLERCONFIGURATIONITERATOR_T;
+                            std::pair <struct Stream_ModuleConfiguration,
+                                       PeerModuleHandlerConfigurationType> >::iterator PEERMODULEHANDLERCONFIGURATIONITERATOR_T;
   typedef typename std::map<std::string,
-                            TrackerModuleHandlerConfigurationType>::iterator TRACKERMODULEHANDLERCONFIGURATIONITERATOR_T;
+                            std::pair <struct Stream_ModuleConfiguration,
+                                       TrackerModuleHandlerConfigurationType> >::iterator TRACKERMODULEHANDLERCONFIGURATIONITERATOR_T;
 
   // implement/override (part of) BitTorrent_ISession_T
   virtual void connect (Net_ConnectionId_t);

@@ -475,7 +475,8 @@ do_work (unsigned int bufferSize_in,
   struct Test_U_Configuration configuration;
   configuration.useReactor = useReactor_in;
 
-  Stream_AllocatorHeap_T<struct Test_U_AllocatorConfiguration> heap_allocator;
+  Stream_AllocatorHeap_T<ACE_MT_SYNCH,
+                         struct Test_U_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -531,6 +532,7 @@ do_work (unsigned int bufferSize_in,
 
   // ********************** stream configuration data **************************
   // ********************** module configuration data **************************
+  struct Stream_ModuleConfiguration module_configuration;
   struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
   //configuration.moduleHandlerConfiguration.allocatorConfiguration =
   //  &configuration.allocatorConfiguration;
@@ -564,7 +566,8 @@ do_work (unsigned int bufferSize_in,
     &message_allocator;
   configuration.streamConfiguration.configuration_.printFinalReport = true;
   configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                            modulehandler_configuration));
+                                                            std::make_pair (module_configuration,
+                                                                            modulehandler_configuration)));
 
   // step0b: initialize event dispatch
   struct Common_DispatchThreadData thread_data;

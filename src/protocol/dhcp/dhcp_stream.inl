@@ -146,7 +146,7 @@ DHCP_Stream_T<StreamStateType,
       const_cast<SessionDataType&> (inherited::sessionData_->get ());
   session_data_r.sessionID = configuration_in.configuration_.sessionID;
 
-  int result = -1;
+//  int result = -1;
   typename inherited::MODULE_T* module_p = NULL;
 
 //  ACE_ASSERT (configuration_in.moduleConfiguration);

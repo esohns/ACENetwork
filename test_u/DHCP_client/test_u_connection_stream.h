@@ -30,7 +30,7 @@
 
 #include "stream_common.h"
 
-#include "stream_module_io_stream.h"
+#include "stream_net_io_stream.h"
 
 #include "test_u_common.h"
 #include "test_u_connection_manager_common.h"
