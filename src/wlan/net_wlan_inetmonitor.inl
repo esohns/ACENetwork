@@ -26,14 +26,16 @@
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
+          enum Net_WLAN_MonitorAPI MonitorAPI_e,
           typename UserDataType>
-Net_WLANInetMonitor_T<ACE_SYNCH_USE,
-                      TimePolicyType,
-                      ConfigurationType,
-                      UserDataType>::Net_WLANInetMonitor_T ()
+Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
+                       TimePolicyType,
+                       ConfigurationType,
+                       MonitorAPI_e,
+                       UserDataType>::Net_WLAN_InetMonitor_T ()
  : inherited ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLANInetMonitor_T::Net_WLANInetMonitor_T"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_InetMonitor_T::Net_WLAN_InetMonitor_T"));
 
 }
 
@@ -42,20 +44,22 @@ Net_WLANInetMonitor_T<ACE_SYNCH_USE,
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
+          enum Net_WLAN_MonitorAPI MonitorAPI_e,
           typename UserDataType>
 void
-Net_WLANInetMonitor_T<ACE_SYNCH_USE,
-                      TimePolicyType,
-                      ConfigurationType,
+Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
+                       TimePolicyType,
+                       ConfigurationType,
+                       MonitorAPI_e,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                      UserDataType>::onConnect (REFGUID interfaceIdentifier_in,
+                       UserDataType>::onConnect (REFGUID interfaceIdentifier_in,
 #else
-                      UserDataType>::onConnect (const std::string& interfaceIdentifier_in,
+                       UserDataType>::onConnect (const std::string& interfaceIdentifier_in,
 #endif
-                                                const std::string& SSID_in,
-                                                bool success_in)
+                                                 const std::string& SSID_in,
+                                                 bool success_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLANInetMonitor_T::onConnect"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_InetMonitor_T::onConnect"));
 
   // synch access
   { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_);
@@ -87,7 +91,6 @@ Net_WLANInetMonitor_T<ACE_SYNCH_USE,
   if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
 #else
   if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
-                                               inherited::connection_,
 #endif
                                                inherited::localSAP_,
                                                inherited::peerSAP_))

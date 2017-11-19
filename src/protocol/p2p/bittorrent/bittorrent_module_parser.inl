@@ -931,8 +931,9 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Module_ParserH_T::record"));
 
   // sanity check(s)
-  ACE_ASSERT (record_inout);
+  ACE_ASSERT (inherited::sessionData_);
   ACE_ASSERT (headFragment_);
+  ACE_ASSERT (record_inout);
 
   DATA_CONTAINER_T& data_container_r =
       const_cast<DATA_CONTAINER_T&> (headFragment_->getR ());
@@ -946,6 +947,10 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
     ACE_DEBUG ((LM_INFO,
                 ACE_TEXT ("%s"),
                 ACE_TEXT (BitTorrent_Tools::RecordToString (*data_r.peerRecord).c_str ())));
+
+  // step1: set session data
+  typename SessionMessageType::DATA_T::DATA_T& session_data_r =
+      const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
   // set new head fragment ?
   ACE_Message_Block* message_block_p = headFragment_;
@@ -976,6 +981,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
     data_container_r.increase ();
     DATA_CONTAINER_T* data_container_2 = &data_container_r;
     message_p->initialize (data_container_2,
+                           session_data_r.sessionId,
                            NULL);
     message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE
@@ -1089,6 +1095,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
     data_container_r.increase ();
     DATA_CONTAINER_T* data_container_2 = &data_container_r;
     message_p->initialize (data_container_2,
+                           session_data_r.sessionId,
                            NULL);
     message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE

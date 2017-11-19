@@ -141,16 +141,9 @@ Net_AsynchUDPSocketHandler_T<SocketType,
       goto error;
     } // end IF
     ACE_INET_Addr gateway_address;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
     if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
                                                            source_SAP,
                                                            gateway_address)))
-#else
-    if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
-                                                           NULL,
-                                                           source_SAP,
-                                                           gateway_address)))
-#endif
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,

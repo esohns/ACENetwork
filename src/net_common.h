@@ -116,7 +116,7 @@ enum Net_ClientServerRole
 //  NET_STREAM_CONTROL_INVALID
 //};
 
-enum Net_Connection_AbortStrategy
+enum Net_Connection_AbortStrategy : int
 {
   NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST = 0,
   NET_CONNECTION_ABORT_STRATEGY_RECENT_MOST,
@@ -126,7 +126,7 @@ enum Net_Connection_AbortStrategy
 };
 
 // *NOTE*: this extends ACE_Svc_Handler_Close (see Svc_Handler.h)
-enum Net_Connection_CloseReason
+enum Net_Connection_CloseReason : int
 {
   NET_CONNECTION_CLOSE_REASON_INVALID = -1,
   ////////////////////////////////////////
@@ -136,7 +136,7 @@ enum Net_Connection_CloseReason
   NET_CONNECTION_CLOSE_REASON_MAX
 };
 
-enum Net_Connection_Status
+enum Net_Connection_Status : int
 {
   NET_CONNECTION_STATUS_INVALID = -1,
   ////////////////////////////////////////

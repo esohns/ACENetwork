@@ -1245,11 +1245,14 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (inherited::configuration_->connectionConfigurations);
+  ACE_ASSERT (inherited::sessionData_);
   ACE_ASSERT (record_inout);
 
   IRC_Client_ConnectionConfigurationIterator_t iterator =
     inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != inherited::configuration_->connectionConfigurations->end ());
+  struct IRC_Client_SessionData& session_data_r =
+      const_cast<struct IRC_Client_SessionData&> (inherited::sessionData_->getR ());
 
   // step1: allocate a message buffer
   IRC_Message* message_p =
@@ -1271,6 +1274,7 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
   // step2: attach the command
   // *NOTE*: message assumes control over command_in
   message_p->initialize (*record_inout,
+                         session_data_r.sessionId,
                          NULL);
   // --> bye bye...
   record_inout = NULL;

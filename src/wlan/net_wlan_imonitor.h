@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_IWLANMONITOR_T_H
-#define NET_IWLANMONITOR_T_H
+#ifndef NET_WLAN_IMONITOR_T_H
+#define NET_WLAN_IMONITOR_T_H
 
 #include <string>
 
@@ -30,13 +30,13 @@
 #include "dbus/dbus.h"
 #endif
 
-#include "ace/INET_Addr.h"
+//#include "ace/INET_Addr.h"
 
 #include "common_iget.h"
 #include "common_iinitialize.h"
 #include "common_isubscribe.h"
 
-class Net_IWLANCB
+class Net_WLAN_IMonitorCB
 {
  public:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -72,8 +72,8 @@ class Net_IWLANCB
 
 //////////////////////////////////////////
 
-class Net_IWLANMonitorBase
- : public Net_IWLANCB
+class Net_WLAN_IMonitorBase
+ : public Net_WLAN_IMonitorCB
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
  , public Common_IGet_T<HANDLE>
 #else
@@ -89,6 +89,7 @@ class Net_IWLANMonitorBase
                           const std::string&) = 0; // SSID
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual REFGUID interfaceIdentifier () const = 0;
 #else
   virtual std::string interfaceIdentifier () const = 0;
 #endif
@@ -97,8 +98,8 @@ class Net_IWLANMonitorBase
 
 template <typename AddressType,
           typename ConfigurationType>
-class Net_IWLANMonitor_T
- : public Net_IWLANMonitorBase
+class Net_WLAN_IMonitor_T
+ : public Net_WLAN_IMonitorBase
  , public Common_IGetR_2_T<ConfigurationType>
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -106,7 +107,7 @@ class Net_IWLANMonitor_T
  , public Common_ISet2R_T<std::string> // cache access
 #endif
  , public Common_IInitialize_T<ConfigurationType>
- , public Common_ISubscribe_T<Net_IWLANCB>
+ , public Common_ISubscribe_T<Net_WLAN_IMonitorCB>
 {
  public:
   virtual bool addresses (AddressType&,            // return value: local SAP
@@ -115,7 +116,7 @@ class Net_IWLANMonitor_T
 
 //////////////////////////////////////////
 
-//typedef Net_IWLANMonitor_T<ACE_INET_Addr,
-//                           struct Net_WLANMonitorConfiguration> Net_IInetWLANMonitor_t;
+//typedef Net_WLAN_IMonitor_T<ACE_INET_Addr,
+//                            struct Net_WLANMonitorConfiguration> Net_IInetWLANMonitor_t;
 
 #endif

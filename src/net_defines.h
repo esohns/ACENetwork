@@ -105,34 +105,6 @@
 #define NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT               60 // second(s)
 #define NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL      1  // second(s)
 
-// WLAN monitor
-#define NET_WLANMONITOR_SSID_SCAN_RETRIES                   3
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#define NET_WLANMONITOR_WIN32_SSID_SCAN_TIMEOUT             4 // seconds
-#else
-#define NET_WLANMONITOR_DBUS_NETWORKMANAGER_SERVICE                      "org.freedesktop.NetworkManager"
-#define NET_WLANMONITOR_DBUS_NETWORKMANAGER_INTERFACE                    "org.freedesktop.NetworkManager"
-#define NET_WLANMONITOR_DBUS_NETWORKMANAGER_ACCESSPOINT_INTERFACE        "org.freedesktop.NetworkManager.AccessPoint"
-#define NET_WLANMONITOR_DBUS_NETWORKMANAGER_CONNECTIONACTIVE_INTERFACE   "org.freedesktop.NetworkManager.Connection.Active"
-#define NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICE_INTERFACE             "org.freedesktop.NetworkManager.Device"
-#define NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICEWIRELESS_INTERFACE     "org.freedesktop.NetworkManager.Device.Wireless"
-#define NET_WLANMONITOR_DBUS_NETWORKMANAGER_IP4CONFIG_INTERFACE          "org.freedesktop.NetworkManager.IP4Config"
-#define NET_WLANMONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE         "org.freedesktop.DBus.Properties"
-#define NET_WLANMONITOR_DBUS_NETWORKMANAGER_SETTINGS_INTERFACE           "org.freedesktop.NetworkManager.Settings"
-#define NET_WLANMONITOR_DBUS_NETWORKMANAGER_SETTINGSCONNECTION_INTERFACE "org.freedesktop.NetworkManager.Settings.Connection"
-#define NET_WLANMONITOR_DBUS_NETWORKMANAGER_OBJECT_PATH                  "/org/freedesktop/NetworkManager"
-#define NET_WLANMONITOR_DBUS_NETWORKMANAGER_ACCESSPOINT_OBJECT_PATH      "/org/freedesktop/NetworkManager/AccessPoint"
-#define NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICE_OBJECT_PATH           "/org/freedesktop/NetworkManager/Device"
-#define NET_WLANMONITOR_DBUS_NETWORKMANAGER_SETTINGS_OBJECT_PATH         "/org/freedesktop/NetworkManager/Settings"
-#define NET_WLANMONITOR_DBUS_NETWORKMANAGER_WIRELESS_OBJECT_PATH         "/org/freedesktop/NetworkManager/Device/Wireless"
-#endif
-#define NET_WLANMONITOR_THREAD_NAME                         "WLAN monitor"
-#define NET_WLANMONITOR_THREAD_GROUP_ID                     21
-
-// *NOTE*: 'background' refers to an associated state
-#define NET_WLANMONITOR_DEFAULT_BACKGROUNDSCANS             false
-#define NET_WLANMONITOR_DEFAULT_STREAMINGMODE               true
-
 // event dispatch
 #define NET_EVENT_DISPATCH_THREAD_GROUP_ID                  22
 #define NET_EVENT_USE_REACTOR                               false // ? reactor : proactor
@@ -146,6 +118,5 @@
 #define NET_STREAM_DEFAULT_NAME                             "NetStream"
 
 #define NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING "SocketHandler"
-
 
 #endif

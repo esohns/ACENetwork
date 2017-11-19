@@ -24,11 +24,6 @@
 #include <limits>
 #include <string>
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-#include "dbus/dbus.h"
-#endif
-
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
@@ -106,33 +101,7 @@ class Net_Common_Tools
   static ULONG interfaceToIndex (REFGUID); // interface identifier
   static struct _GUID indexToInterface (ULONG); // interface index
 
-  //static std::string WLANInterfaceToString (HANDLE,   // WLAN API client handle
-  //                                          REFGUID); // interface identifier
   static std::string interfaceToString (REFGUID); // interface identifier
-
-  static std::string associatedSSID (HANDLE,   // WLAN API client handle
-                                     REFGUID); // interface identifier
-  static bool hasSSID (HANDLE,              // WLAN API client handle
-                       REFGUID,             // interface identifier
-                       const std::string&); // SSID
-
-  static bool getDeviceSettingBool (HANDLE,   // WLAN API client handle
-                                    REFGUID, // interface identifier
-                                    enum _WLAN_INTF_OPCODE); // code
-  static bool setDeviceSettingBool (HANDLE,                 // WLAN API client handle
-                                    REFGUID,                // interface identifier
-                                    enum _WLAN_INTF_OPCODE, // code
-                                    bool);                  // enable ? : disable
-
-#else
-  static std::string associatedSSID (const std::string&); // interface identifier
-  //  static std::string associatedSSID (struct DBusConnection*, // D-Bus connection handle
-//                                     const std::string&);    // interface identifier
-  static bool hasSSID (const std::string&,  // interface identifier
-                       const std::string&); // SSID
-  // *NOTE*: this merely (tries to) call the SIOCGIWNAME ioctl
-  static bool interfaceIsWLAN (const std::string&); // interface identifier
-  static void scan (const std::string&); // interface identifier
 #endif
 
   // network layer
@@ -144,8 +113,7 @@ class Net_Common_Tools
   // *NOTE*: 'gateway' really means the 'next hop' router with regard to some
   //         policy (e.g. routing table entry metric/priority/...).
   //         Consequently, this API is non-functional at this point
-  static ACE_INET_Addr getGateway (const std::string&,      // interface identifier
-                                   struct DBusConnection*); // D-Bus connection handle
+  static ACE_INET_Addr getGateway (const std::string&); // interface identifier
 #endif
 
   // *NOTE*: this returns the external (i.e. routable) IP address (for clients
@@ -160,7 +128,6 @@ class Net_Common_Tools
   static bool interfaceToIPAddress (REFGUID,                // device identifier
 #else
   static bool interfaceToIPAddress (const std::string&,     // device identifier
-                                    struct DBusConnection*, // D-Bus connection handle
 #endif
                                     ACE_INET_Addr&,         // return value: (first) IP address
                                     ACE_INET_Addr&);        // return value: (first) gateway IP address
@@ -252,48 +219,6 @@ class Net_Common_Tools
   static bool sendDatagram (const ACE_INET_Addr&, // local SAP (may be 'any')
                             const ACE_INET_Addr&, // remote SAP
                             ACE_Message_Block*);  // data
-
-  // --- D-Bus ---
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-  static bool activateConnection (struct DBusConnection*, // D-Bus connection handle
-                                  const std::string&,     // connection object path
-                                  const std::string&,     // device object path
-                                  const std::string&);    // access point object path
-  // *IMPORTANT NOTE* fire-and-forget the second argument
-  static struct DBusMessage* dBusMessageExchange (struct DBusConnection*, // D-Bus connection handle
-                                                  struct DBusMessage*&,   // D-Bus message handle
-                                                  int = DBUS_TIMEOUT_INFINITE); // timeout (ms) {default: block}
-  static bool dBusMessageValidate (struct DBusMessageIter&,  // D-Bus message iterator
-                                   int = DBUS_TYPE_INVALID); // expected type
-
-  static std::string accessPointDBusPathToSSID (struct DBusConnection*, // D-Bus connection handle
-                                                const std::string&);    // access point object path
-  static std::string activeConnectionDBusPathToDeviceDBusPath (struct DBusConnection*, // D-Bus connection handle
-                                                               const std::string&);    // active connection object path
-  static std::string activeConnectionDBusPathToIp4ConfigDBusPath (struct DBusConnection*, // D-Bus connection handle
-                                                                  const std::string&);    // connection object path
-  static std::string connectionDBusPathToSSID (struct DBusConnection*, // D-Bus connection handle
-                                               const std::string&);    // connection object path
-  static std::string deviceDBusPathToActiveAccessPointDBusPath (struct DBusConnection*, // D-Bus connection handle
-                                                                const std::string&);    // device object path
-  static std::string deviceDBusPathToIdentifier (struct DBusConnection*, // D-Bus connection handle
-                                                 const std::string&);    // device object path
-  static std::string deviceDBusPathToIp4ConfigDBusPath (struct DBusConnection*, // D-Bus connection handle
-                                                        const std::string&);    // device object path
-  static std::string deviceToDBusPath (struct DBusConnection*, // D-Bus connection handle
-                                       const std::string&);    // device identifier
-  static std::string Ip4ConfigDBusPathToGateway (struct DBusConnection*, // D-Bus connection handle
-                                                 const std::string&);    // IPv4Config object path
-  static std::string SSIDToAccessPointDBusPath (struct DBusConnection*, // D-Bus connection handle
-                                                const std::string&,     // device object path
-                                                const std::string&);    // SSID
-  static std::string SSIDToDeviceDBusPath (struct DBusConnection*, // D-Bus connection handle
-                                           const std::string&);    // SSID
-  static std::string SSIDToConnectionDBusPath (struct DBusConnection*, // D-Bus connection handle
-                                               const std::string&,     // device object path
-                                               const std::string&);    // SSID
-#endif
 
 //  // stream
 //  static std::string generateUniqueName (const std::string&); // prefix

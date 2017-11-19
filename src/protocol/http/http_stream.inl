@@ -142,7 +142,7 @@ HTTP_Stream_T<StreamStateType,
   ACE_ASSERT (!inherited::isRunning ());
 
   //  int result = -1;
-  SessionDataType* session_data_p = NULL;
+//  SessionDataType* session_data_p = NULL;
   typename inherited::MODULE_T* module_p = NULL;
   PARSER_T* parser_impl_p = NULL;
 
@@ -167,10 +167,10 @@ HTTP_Stream_T<StreamStateType,
   reset_setup_pipeline = false;
 
   // sanity check(s)
-  ACE_ASSERT (inherited::sessionData_);
+//  ACE_ASSERT (inherited::sessionData_);
 
-  session_data_p =
-    &const_cast<SessionDataType&> (inherited::sessionData_->getR ());
+//  session_data_p =
+//    &const_cast<SessionDataType&> (inherited::sessionData_->getR ());
 
   // ---------------------------------------------------------------------------
 

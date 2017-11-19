@@ -681,10 +681,6 @@ do_work (bool requestBroadcastReplies_in,
   {
     ACE_INET_Addr gateway_address;
     if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-                                                 NULL,
-#endif
                                                  configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress,
                                                  gateway_address))
     {

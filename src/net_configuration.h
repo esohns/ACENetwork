@@ -24,14 +24,6 @@
 #include <map>
 #include <string>
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <cguid.h>
-#include <guiddef.h>
-#include <wlanapi.h>
-#else
-#include "dbus/dbus.h"
-#endif
-
 #include "ace/Basic_Types.h"
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
@@ -262,39 +254,6 @@ struct Net_ListenerConfiguration
 
   int                                 addressFamily;
   struct Net_ConnectionConfiguration* connectionConfiguration;
-};
-
-//////////////////////////////////////////
-
-struct Net_WLANMonitorConfiguration
-{
-  Net_WLANMonitorConfiguration ()
-   : autoAssociate (false)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-   , enableBackgroundScans (NET_WLANMONITOR_DEFAULT_BACKGROUNDSCANS)
-   , enableStreamingMode (NET_WLANMONITOR_DEFAULT_STREAMINGMODE)
-   , interfaceIdentifier (GUID_NULL)
-   , notificationCB (NULL)
-   , notificationCBData (NULL)
-#else
-   , interfaceIdentifier ()
-#endif
-   , SSID ()
-  {};
-
-  bool                       autoAssociate;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  BOOL                       enableBackgroundScans;
-  BOOL                       enableStreamingMode;
-  struct _GUID               interfaceIdentifier;
-  WLAN_NOTIFICATION_CALLBACK notificationCB;
-  PVOID                      notificationCBData;
-#else
-  std::string                interfaceIdentifier;
-  DBusHandleMessageFunction  notificationCB;
-  void*                      notificationCBData;
-#endif
-  std::string                SSID;
 };
 
 #endif

@@ -18,8 +18,8 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#ifndef NET_WLANINETMONITOR_T_H
-#define NET_WLANINETMONITOR_T_H
+#ifndef NET_WLAN_INETMONITOR_T_H
+#define NET_WLAN_INETMONITOR_T_H
 
 #include <string>
 
@@ -33,42 +33,47 @@
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 
-#include "net_wlanmonitor.h"
+#include "net_wlan_monitor.h"
 
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           ////////////////////////////////
+          enum Net_WLAN_MonitorAPI MonitorAPI_e,
+          ////////////////////////////////
           typename UserDataType>
-class Net_WLANInetMonitor_T
- : public Net_WLANMonitor_T<ACE_SYNCH_USE,
-                            TimePolicyType,
-                            ACE_INET_Addr,
-                            ConfigurationType,
-                            UserDataType>
+class Net_WLAN_InetMonitor_T
+ : public Net_WLAN_Monitor_T<ACE_SYNCH_USE,
+                             TimePolicyType,
+                             ACE_INET_Addr,
+                             ConfigurationType,
+                             MonitorAPI_e,
+                             UserDataType>
 {
   // singleton has access to the ctor/dtors
-  friend class ACE_Singleton<Net_WLANInetMonitor_T<ACE_SYNCH_USE,
-                                                   TimePolicyType,
-                                                   ConfigurationType,
-                                                   UserDataType>,
+  friend class ACE_Singleton<Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
+                                                    TimePolicyType,
+                                                    ConfigurationType,
+                                                    MonitorAPI_e,
+                                                    UserDataType>,
                              ACE_SYNCH_MUTEX>;
 
+  typedef Net_WLAN_Monitor_T<ACE_SYNCH_USE,
+                             TimePolicyType,
+                             ACE_INET_Addr,
+                             ConfigurationType,
+                             MonitorAPI_e,
+                             UserDataType> inherited;
+
  public:
-  inline virtual ~Net_WLANInetMonitor_T () {};
+  inline virtual ~Net_WLAN_InetMonitor_T () {};
 
  private:
-  typedef Net_WLANMonitor_T<ACE_SYNCH_USE,
-                            TimePolicyType,
-                            ACE_INET_Addr,
-                            ConfigurationType,
-                            UserDataType> inherited;
+  Net_WLAN_InetMonitor_T ();
+  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_InetMonitor_T (const Net_WLAN_InetMonitor_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_InetMonitor_T& operator= (const Net_WLAN_InetMonitor_T&))
 
-  Net_WLANInetMonitor_T ();
-  ACE_UNIMPLEMENTED_FUNC (Net_WLANInetMonitor_T (const Net_WLANInetMonitor_T&))
-  ACE_UNIMPLEMENTED_FUNC (Net_WLANInetMonitor_T& operator= (const Net_WLANInetMonitor_T&))
-
-  // override (part of) Net_IWLANMonitor_T
+  // override (part of) Net_WLAN_IMonitor_T
   ////////////////////////////////////////
 
   // *IMPORTANT NOTE*: addresses() may not return significant data before this,
@@ -84,6 +89,6 @@ class Net_WLANInetMonitor_T
 };
 
 // include template definition
-#include "net_wlaninetmonitor.inl"
+#include "net_wlan_inetmonitor.inl"
 
 #endif

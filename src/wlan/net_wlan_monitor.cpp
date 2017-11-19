@@ -20,7 +20,7 @@
 #include "stdafx.h"
 
 #include "ace/Synch.h"
-#include "net_wlanmonitor.h"
+#include "net_wlan_monitor.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -390,9 +390,9 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
   if (dbus_message_get_type (message_in) != DBUS_MESSAGE_TYPE_SIGNAL)
     return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
   ACE_ASSERT (userData_in);
-  Net_IWLANMonitorBase* iwlanmonitorbase_p =
-      static_cast<Net_IWLANMonitorBase*> (userData_in);
-  ACE_ASSERT (iwlanmonitorbase_p);
+  Net_WLAN_IMonitorBase* imonitorbase_p =
+      static_cast<Net_WLAN_IMonitorBase*> (userData_in);
+  ACE_ASSERT (imonitorbase_p);
 
   bool result = false;
   struct DBusError error_s;
@@ -401,7 +401,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
   const char* object_path_p = NULL;
 
   if (dbus_message_is_signal (message_in,
-                              ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_INTERFACE),
+                              ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_INTERFACE),
                               ACE_TEXT_ALWAYS_CHAR ("DeviceAdded")))
   {
     if (!dbus_message_get_args (message_in,
@@ -422,24 +422,24 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
 
     object_path_string = object_path_p;
     device_identifier_string =
-        Net_Common_Tools::deviceDBusPathToIdentifier (connection_in,
-                                                      object_path_string);
+        Net_WLAN_Tools::deviceDBusPathToIdentifier (connection_in,
+                                                    object_path_string);
     if (device_identifier_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::deviceDBusPathToIdentifier(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusPathToIdentifier(\"%s\"), aborting\n"),
                   ACE_TEXT (object_path_string.c_str ())));
       goto continue_;
     } // end IF
 
     // add to cache
     Common_ISet2R_T<std::string>* iset_p =
-        dynamic_cast<Common_ISet2R_T<std::string>*> (iwlanmonitorbase_p);
+        dynamic_cast<Common_ISet2R_T<std::string>*> (imonitorbase_p);
     ACE_ASSERT (iset_p);
     iset_p->set2R (device_identifier_string, object_path_string);
 
     try {
-      iwlanmonitorbase_p->onHotPlug (device_identifier_string,
+      imonitorbase_p->onHotPlug (device_identifier_string,
                                      true);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
@@ -448,7 +448,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
     }
   } // end IF
   else if (dbus_message_is_signal (message_in,
-                                   ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_INTERFACE),
+                                   ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_INTERFACE),
                                    ACE_TEXT_ALWAYS_CHAR ("DeviceRemoved")))
   {
     if (!dbus_message_get_args (message_in,
@@ -470,7 +470,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
     object_path_string = object_path_p;
     // check cache first
     Common_IGet1R_T<std::string>* iget_p =
-        dynamic_cast<Common_IGet1R_T<std::string>*> (iwlanmonitorbase_p);
+        dynamic_cast<Common_IGet1R_T<std::string>*> (imonitorbase_p);
     ACE_ASSERT (iget_p);
     // *NOTE*: this fails, the device has gone away
 //    device_identifier_string =
@@ -488,7 +488,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       goto continue_;
     } // end IF
     try {
-      iwlanmonitorbase_p->onHotPlug (device_identifier_string,
+      imonitorbase_p->onHotPlug (device_identifier_string,
                                      false);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
@@ -498,7 +498,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
   } // end ELSE IF
   ////////////////////////////////////////
   else if (dbus_message_is_signal (message_in,
-                                   ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICE_INTERFACE),
+                                   ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_DEVICE_INTERFACE),
                                    ACE_TEXT_ALWAYS_CHAR ("StateChanged")))
   {
     NMDeviceState state_previous, state_current;
@@ -546,44 +546,44 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
     } // end IF
     // check cache first
     iget_p =
-        dynamic_cast<Common_IGet1R_T<std::string>*> (iwlanmonitorbase_p);
+        dynamic_cast<Common_IGet1R_T<std::string>*> (imonitorbase_p);
     ACE_ASSERT (iget_p);
     device_identifier_string = iget_p->get1R (object_path_string);
     if (device_identifier_string.empty ())
       device_identifier_string =
-          Net_Common_Tools::deviceDBusPathToIdentifier (connection_in,
-                                                        object_path_string);
+          Net_WLAN_Tools::deviceDBusPathToIdentifier (connection_in,
+                                                      object_path_string);
     if (device_identifier_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::deviceDBusPathToIdentifier(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusPathToIdentifier(\"%s\"), aborting\n"),
                   ACE_TEXT (object_path_string.c_str ())));
       goto continue_;
     } // end IF
     if (ACE_OS::strcmp (device_identifier_string.c_str (),
-                        iwlanmonitorbase_p->interfaceIdentifier ().c_str ()))
+                        imonitorbase_p->interfaceIdentifier ().c_str ()))
       goto continue_; // --> not interested
     // *NOTE*: this may fail if the device has-/is- disconnect-ed/-ing
     if ((state_current == NM_DEVICE_STATE_IP_CONFIG) ||
         (state_current == NM_DEVICE_STATE_ACTIVATED))
     {
       active_access_point_path_string =
-          Net_Common_Tools::deviceDBusPathToActiveAccessPointDBusPath (connection_in,
-                                                                       object_path_string);
+          Net_WLAN_Tools::deviceDBusPathToActiveAccessPointDBusPath (connection_in,
+                                                                     object_path_string);
       if (active_access_point_path_string.empty ())
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::deviceDBusPathToActiveAccessPointDBusPath(\"%s\"), aborting\n"),
+                    ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusPathToActiveAccessPointDBusPath(\"%s\"), aborting\n"),
                     ACE_TEXT (object_path_string.c_str ())));
         goto continue_;
       } // end IF
       SSID_string =
-          Net_Common_Tools::accessPointDBusPathToSSID (connection_in,
-                                                       active_access_point_path_string);
+          Net_WLAN_Tools::accessPointDBusPathToSSID (connection_in,
+                                                     active_access_point_path_string);
       if (SSID_string.empty ())
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::accessPointDBusPathToSSID(\"%s\"), aborting\n"),
+                    ACE_TEXT ("failed to Net_WLAN_Tools::accessPointDBusPathToSSID(\"%s\"), aborting\n"),
                     ACE_TEXT (active_access_point_path_string.c_str ())));
         goto continue_;
       } // end IF
@@ -593,12 +593,12 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       case NM_DEVICE_STATE_IP_CONFIG:
       {
         try {
-          iwlanmonitorbase_p->onAssociate (device_identifier_string,
-                                           SSID_string,
-                                           true);
+          imonitorbase_p->onAssociate (device_identifier_string,
+                                       SSID_string,
+                                       true);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in Net_IWLANCB;;onAssociate(), continuing\n")));
+                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onAssociate(), continuing\n")));
           goto continue_;
         }
         break;
@@ -606,12 +606,12 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       case NM_DEVICE_STATE_ACTIVATED:
       {
         try {
-          iwlanmonitorbase_p->onConnect (device_identifier_string,
-                                         SSID_string,
-                                         true);
+          imonitorbase_p->onConnect (device_identifier_string,
+                                     SSID_string,
+                                     true);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in Net_IWLANCB;;onConnect(), continuing\n")));
+                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onConnect(), continuing\n")));
           goto continue_;
         }
         break;
@@ -619,12 +619,12 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       case NM_DEVICE_STATE_DEACTIVATING:
       {
         try {
-          iwlanmonitorbase_p->onConnect (device_identifier_string,
-                                         SSID_string,
-                                         false);
+          imonitorbase_p->onConnect (device_identifier_string,
+                                     SSID_string,
+                                     false);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in Net_IWLANCB;;onConnect(), continuing\n")));
+                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onConnect(), continuing\n")));
           goto continue_;
         }
         break;
@@ -632,12 +632,12 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       case NM_DEVICE_STATE_DISCONNECTED:
       {
         try {
-          iwlanmonitorbase_p->onAssociate (device_identifier_string,
-                                           SSID_string,
-                                           false);
+          imonitorbase_p->onAssociate (device_identifier_string,
+                                       SSID_string,
+                                       false);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in Net_IWLANCB;;onAssociate(), continuing\n")));
+                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onAssociate(), continuing\n")));
           goto continue_;
         }
         break;
@@ -648,7 +648,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
   } // end ELSE IF
   ////////////////////////////////////////
   else if (dbus_message_is_signal (message_in,
-                                   ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_CONNECTIONACTIVE_INTERFACE),
+                                   ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_CONNECTIONACTIVE_INTERFACE),
                                    ACE_TEXT_ALWAYS_CHAR ("StateChanged")))
   {
     NMActiveConnectionState state_current;
@@ -693,42 +693,42 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       goto continue_;
     } // end IF
     device_path_string =
-        Net_Common_Tools::activeConnectionDBusPathToDeviceDBusPath (connection_in,
-                                                                    object_path_string);
+        Net_WLAN_Tools::activeConnectionDBusPathToDeviceDBusPath (connection_in,
+                                                                  object_path_string);
     if (device_path_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::activeConnectionDBusPathToDeviceDBusPath(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLANs_Tools::activeConnectionDBusPathToDeviceDBusPath(\"%s\"), aborting\n"),
                   ACE_TEXT (object_path_string.c_str ())));
       goto continue_;
     } // end IF
     device_identifier_string =
-        Net_Common_Tools::deviceDBusPathToIdentifier (connection_in,
-                                                      device_path_string);
+        Net_WLAN_Tools::deviceDBusPathToIdentifier (connection_in,
+                                                    device_path_string);
     if (device_identifier_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::deviceDBusPathToIdentifier(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusPathToIdentifier(\"%s\"), aborting\n"),
                   ACE_TEXT (device_path_string.c_str ())));
       goto continue_;
     } // end IF
     active_access_point_path_string =
-        Net_Common_Tools::deviceDBusPathToActiveAccessPointDBusPath (connection_in,
-                                                                     device_path_string);
+        Net_WLAN_Tools::deviceDBusPathToActiveAccessPointDBusPath (connection_in,
+                                                                   device_path_string);
     if (active_access_point_path_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::deviceDBusPathToActiveAccessPointDBusPath(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusPathToActiveAccessPointDBusPath(\"%s\"), aborting\n"),
                   ACE_TEXT (device_path_string.c_str ())));
       goto continue_;
     } // end IF
     SSID_string =
-        Net_Common_Tools::accessPointDBusPathToSSID (connection_in,
-                                                     active_access_point_path_string);
+        Net_WLAN_Tools::accessPointDBusPathToSSID (connection_in,
+                                                   active_access_point_path_string);
     if (SSID_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::accessPointDBusPathToSSID(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::accessPointDBusPathToSSID(\"%s\"), aborting\n"),
                   ACE_TEXT (active_access_point_path_string.c_str ())));
       goto continue_;
     } // end IF
@@ -737,7 +737,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
 //      case NM_ACTIVE_CONNECTION_STATE_ACTIVATING:
 //      {
 //        try {
-//          iwlanmonitorbase_p->onAssociate (device_identifier_string,
+//          imonitorbase_p->onAssociate (device_identifier_string,
 //                                           SSID_string,
 //                                           true);
 //        } catch (...) {
@@ -750,7 +750,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       case NM_ACTIVE_CONNECTION_STATE_ACTIVATED:
       {
         try {
-          iwlanmonitorbase_p->onConnect (device_identifier_string,
+          imonitorbase_p->onConnect (device_identifier_string,
                                          SSID_string,
                                          true);
         } catch (...) {
@@ -763,7 +763,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       case NM_ACTIVE_CONNECTION_STATE_DEACTIVATING:
       {
         try {
-          iwlanmonitorbase_p->onConnect (device_identifier_string,
+          imonitorbase_p->onConnect (device_identifier_string,
                                          SSID_string,
                                          false);
         } catch (...) {
@@ -776,7 +776,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
 //      case NM_ACTIVE_CONNECTION_STATE_DEACTIVATED:
 //      {
 //        try {
-//          iwlanmonitorbase_p->onAssociate (device_identifier_string,
+//          imonitorbase_p->onAssociate (device_identifier_string,
 //                                           SSID_string,
 //                                           false);
 //        } catch (...) {
@@ -792,7 +792,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
   } // end ELSE IF
   ////////////////////////////////////////
   else if (dbus_message_is_signal (message_in,
-                                  ACE_TEXT_ALWAYS_CHAR (NET_WLANMONITOR_DBUS_NETWORKMANAGER_DEVICEWIRELESS_INTERFACE),
+                                   ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_DEVICEWIRELESS_INTERFACE),
                                    ACE_TEXT_ALWAYS_CHAR ("AccessPointAdded")))
   {
     object_path_p = dbus_message_get_path (message_in);
@@ -805,21 +805,21 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       goto continue_;
     } // end IF
     device_identifier_string =
-        Net_Common_Tools::deviceDBusPathToIdentifier (connection_in,
-                                                      object_path_string);
+        Net_WLAN_Tools::deviceDBusPathToIdentifier (connection_in,
+                                                    object_path_string);
 
     if (device_identifier_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::deviceDBusPathToIdentifier(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusPathToIdentifier(\"%s\"), aborting\n"),
                   ACE_TEXT (object_path_string.c_str ())));
       goto continue_;
     } // end IF
     try {
-      iwlanmonitorbase_p->onScanComplete (device_identifier_string);
+      imonitorbase_p->onScanComplete (device_identifier_string);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: caught exception in Net_IWLANCB::onScanComplete(), continuing\n")));
+                  ACE_TEXT ("%s: caught exception in Net_WLAN_IMonitorCB::onScanComplete(), continuing\n")));
     }
   } // end ELSE IF
 //  else if (dbus_message_is_signal (message_in,

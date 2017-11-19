@@ -1288,10 +1288,6 @@ allocate:
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
   ACE_INET_Addr IP_address, gateway_address;
   if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-                                               NULL,
-#endif
                                                IP_address,
                                                gateway_address))
   {
@@ -1546,10 +1542,6 @@ allocate:
   } // end IF
   ACE_INET_Addr IP_address, gateway_address;
   if (!Net_Common_Tools::interfaceToIPAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-                                               NULL,
-#endif
                                                IP_address,
                                                gateway_address))
   {
@@ -1953,10 +1945,6 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     {
       ACE_INET_Addr gateway_address;
       if (!Net_Common_Tools::interfaceToIPAddress (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-                                                   NULL,
-#endif
                                                    data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress,
                                                    gateway_address))
       {

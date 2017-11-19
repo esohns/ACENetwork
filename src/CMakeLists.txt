@@ -48,8 +48,6 @@ include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
 if (UNIX)
  pkg_check_modules (PKG_SSL REQUIRED libssl)
- pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
- pkg_check_modules (PKG_NETWORKMANAGER REQUIRED NetworkManager)
 endif ()
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/.. REALPATH DIRECTORY)
@@ -89,10 +87,6 @@ add_definitions (-DHAVE_CONFIG_H)
 if (UNIX)
  include_directories (${PKG_SSL_INCLUDE_DIRS})
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE)
-
- include_directories (${PKG_DBUS_INCLUDE_DIRS})
- #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../dbus)
- include_directories (${PKG_NETWORKMANAGER_INCLUDE_DIRS})
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src)
@@ -150,7 +144,6 @@ set (${PROJECT_NAME}_LIB_SRCS
      net_ipconnection.cpp
      net_ipconnection.h
      net_itransportlayer.h
-     net_iwlanmonitor.h
      net_macros.h
      net_module_sockethandler.cpp
      net_module_sockethandler.h
@@ -217,13 +210,7 @@ set (${PROJECT_NAME}_LIB_SRCS
      net_udpconnection_base.inl
      net_udpsockethandler.cpp
      net_udpsockethandler.h
-     net_udpsockethandler.inl
-     net_wlaninetmonitor.cpp
-     net_wlaninetmonitor.h
-     net_wlaninetmonitor.inl
-     net_wlanmonitor.cpp
-     net_wlanmonitor.h
-     net_wlanmonitor.inl)
+     net_udpsockethandler.inl)
 
 if (WIN32)
  add_definitions (-DWIN32)
@@ -255,10 +242,6 @@ set_target_properties (${PROJECT_NAME} PROPERTIES DEFINE_SYMBOL NET_BUILD_DLL)
 set_target_properties (${PROJECT_NAME} PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
 if (UNIX)
- target_link_libraries (${PROJECT_NAME} ${PKG_DBUS_LIBRARIES})
- #link_directories (/usr/local/lib/dbus-1.0)
- #link_directories (${CMAKE_CURRENT_BINARY_DIR}/../../../dbus/dbus/.libs)
- #target_link_libraries (${PROJECT_NAME} libdbus-1.so.3)
 elseif (WIN32)
  target_link_libraries (${PROJECT_NAME} iphlpapi.lib)
  target_link_libraries (${PROJECT_NAME} Wlanapi.lib)
@@ -302,7 +285,6 @@ install (FILES
          net_iparser.h
          net_ipconnection.h
          net_itransportlayer.h
-         net_iwlanmonitor.h
          net_macros.h
          net_module_sockethandler.h
          net_module_sockethandler.inl
@@ -346,10 +328,6 @@ install (FILES
          net_udpconnection_base.inl
          net_udpsockethandler.h
          net_udpsockethandler.inl
-         net_wlaninetmonitor.h
-         net_wlaninetmonitor.inl
-         net_wlanmonitor.h
-         net_wlanmonitor.inl
          DESTINATION include)
 install (TARGETS ${PROJECT_NAME}
          EXPORT ${PROJECT_NAME}Targets
@@ -360,3 +338,4 @@ install (TARGETS ${PROJECT_NAME}
 
 add_subdirectory (client_server)
 add_subdirectory (protocol)
+add_subdirectory (wlan)
