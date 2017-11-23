@@ -595,6 +595,9 @@ Net_Common_Tools::LinkLayerAddressToString (const unsigned char* const addressDa
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::LinkLayerAddressToString"));
 
+  // initialize return value(s)
+  std::string return_value;
+
   switch (type_in)
   {
     case NET_LINKLAYER_802_3:
@@ -603,8 +606,8 @@ Net_Common_Tools::LinkLayerAddressToString (const unsigned char* const addressDa
       ACE_TCHAR buffer[NET_ADDRESS_LINK_ETHERNET_ADDRESS_STRING_SIZE];
       ACE_OS::memset (&buffer, 0, sizeof (buffer));
 
-      // *IMPORTANT NOTE*: ether_ntoa_r is not portable
-      // *TODO*: ether_ntoa_r is not portable...
+      // *PORTABILITY*: ether_ntoa_r is not portable
+      // *TODO*: implement an ACE wrapper function for unsupported platforms
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (ACE_USES_WCHAR)
       PWSTR result_2 =
@@ -622,7 +625,9 @@ Net_Common_Tools::LinkLayerAddressToString (const unsigned char* const addressDa
         break;
       } // end IF
 #else
-      if (unlikely (::ether_ntoa_r (reinterpret_cast<const ether_addr*> (addressDataPtr_in),
+      const struct ether_addr* const ether_addr_p =
+          reinterpret_cast<const struct ether_addr* const> (addressDataPtr_in);
+      if (unlikely (::ether_ntoa_r (ether_addr_p,
                                     buffer) != buffer))
       {
         ACE_DEBUG ((LM_ERROR,
@@ -630,7 +635,9 @@ Net_Common_Tools::LinkLayerAddressToString (const unsigned char* const addressDa
         break;
       } // end IF
 #endif
-      return ACE_TEXT_ALWAYS_CHAR (buffer);
+      return_value = ACE_TEXT_ALWAYS_CHAR (buffer);
+
+      break;
     }
     case NET_LINKLAYER_PPP:
     {
@@ -643,7 +650,7 @@ Net_Common_Tools::LinkLayerAddressToString (const unsigned char* const addressDa
     }
     case NET_LINKLAYER_ATM:
     case NET_LINKLAYER_FDDI:
-    {
+    { // *TODO*
       ACE_ASSERT (false);
       ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
 
@@ -658,7 +665,7 @@ Net_Common_Tools::LinkLayerAddressToString (const unsigned char* const addressDa
     }
   } // end SWITCH
 
-  return ACE_TEXT_ALWAYS_CHAR ("");
+  return return_value;
 }
 std::string
 Net_Common_Tools::LinkLayerTypeToString (enum Net_LinkLayerType type_in)

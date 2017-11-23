@@ -52,9 +52,12 @@ class Net_WLAN_Export Net_WLAN_Tools
                                     enum _WLAN_INTF_OPCODE, // code
                                     bool);                  // enable ? : disable
 #else
-  static std::string associatedSSID (const std::string&); // interface identifier
+  static std::string associatedSSID (const std::string&, // interface identifier
+                                     ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
   //  static std::string associatedSSID (struct DBusConnection*, // D-Bus connection handle
 //                                     const std::string&);    // interface identifier
+  static struct ether_addr associatedBSSID (const std::string&, // interface identifier
+                                            ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
 
   // *NOTE*: 'gateway' really means the 'next hop' router with regard to some
   //         policy (e.g. routing table entry metric/priority/...).
@@ -66,9 +69,14 @@ class Net_WLAN_Export Net_WLAN_Tools
                        const std::string&); // SSID
   // *TODO*: merely tests SIOCGIWNAME
   static bool interfaceIsWLAN (const std::string&); // interface identifier
-  // *NOTE*: simply invokes SIOCSIWSCAN; results can be retrieved only after the
-  //         kernel has signalled the handle
+  // *NOTE*:
+  static bool associate (const std::string&,       // interface identifier
+                         const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
+                         const std::string&,       // (E)SSID
+                         ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
+  // *NOTE*: invokes SIOCSIWSCAN; result data must be polled with SIOCGIWSCAN
   static void scan (const std::string&, // interface identifier
+                    const std::string&, // ESSID (if any)
                     ACE_HANDLE,         // (socket) handle to effectuate the ioctl (if any)
                     bool = false);      // wait for the (first bit of-) result data ? (times out after 250ms)
 #endif

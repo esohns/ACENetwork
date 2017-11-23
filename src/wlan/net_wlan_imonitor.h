@@ -27,6 +27,8 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <guiddef.h>
 #else
+#include <net/ethernet.h>
+
 #include "dbus/dbus.h"
 #endif
 
@@ -40,9 +42,9 @@ class Net_WLAN_IMonitorCB
 {
  public:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onAssociate (REFGUID,            // device identifier
+  virtual void onAssociate (REFGUID,            // interface identifier
 #else
-  virtual void onAssociate (const std::string&, // device identifier
+  virtual void onAssociate (const std::string&, // interface identifier
 #endif
                             const std::string&, // SSID
                             bool) = 0;          // success ?
@@ -51,22 +53,22 @@ class Net_WLAN_IMonitorCB
   //                   configuration (e.g. DHCP handshake, ...) most likely has
   //                   not been established
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onConnect (REFGUID,            // device identifier
+  virtual void onConnect (REFGUID,            // interface identifier
 #else
-  virtual void onConnect (const std::string&, // device identifier
+  virtual void onConnect (const std::string&, // interface identifier
 #endif
                           const std::string&, // SSID
                           bool) = 0;          // success ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onHotPlug (REFGUID,            // device identifier
+  virtual void onHotPlug (REFGUID,            // interface identifier
 #else
-  virtual void onHotPlug (const std::string&, // device identifier
+  virtual void onHotPlug (const std::string&, // interface identifier
 #endif
                           bool) = 0;          // enabled ? : disabled/removed
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onScanComplete (REFGUID) = 0;            // device identifier
+  virtual void onScanComplete (REFGUID) = 0;            // interface identifier
 #else
-  virtual void onScanComplete (const std::string&) = 0; // device identifier
+  virtual void onScanComplete (const std::string&) = 0; // interface identifier
 #endif
 };
 
@@ -82,11 +84,12 @@ class Net_WLAN_IMonitorBase
 {
  public:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual bool associate (REFGUID,                 // device identifier {GUID_NULL: any}
+  virtual bool associate (REFGUID,                  // interface identifier {GUID_NULL: any}
 #else
-  virtual bool associate (const std::string&,      // device identifier {"": any}
+  virtual bool associate (const std::string&,       // interface identifier {"": any}
+                          const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
 #endif
-                          const std::string&) = 0; // SSID
+                          const std::string&) = 0;  // (E)SSID
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual REFGUID interfaceIdentifier () const = 0;

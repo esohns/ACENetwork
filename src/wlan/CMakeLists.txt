@@ -86,6 +86,8 @@ set (${PROJECT_NAME}_WLAN_LIB_SRCS
      net_wlan_monitor.h
      net_wlan_monitor.inl
      net_wlan_monitor.cpp
+     net_wlan_monitor_statemachine.cpp
+     net_wlan_monitor_statemachine.h
      net_wlan_tools.cpp
      net_wlan_tools.h
      stdafx.cpp
@@ -127,6 +129,7 @@ install (FILES
          net_wlan_monitor.h
          net_wlan_monitor.inl
          net_wlan_monitor.cpp
+         net_wlan_monitor_statemachine.h
          net_wlan_tools.h
          stdafx.h
          DESTINATION include)

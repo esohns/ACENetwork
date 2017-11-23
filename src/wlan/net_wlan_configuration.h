@@ -32,6 +32,8 @@
 #include "dbus/dbus.h"
 #endif
 
+#include "net_defines.h"
+
 #include "net_wlan_defines.h"
 
 struct Net_WLAN_MonitorConfiguration
@@ -48,6 +50,7 @@ struct Net_WLAN_MonitorConfiguration
    , interfaceIdentifier ()
 #endif
    , SSID ()
+   , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
   bool                       autoAssociate;
@@ -63,6 +66,7 @@ struct Net_WLAN_MonitorConfiguration
   void*                      notificationCBData;
 #endif
   std::string                SSID;
+  bool                       useReactor;
 };
 
 #endif

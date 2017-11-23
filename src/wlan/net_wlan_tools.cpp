@@ -28,14 +28,19 @@
 #include <mstcpip.h>
 #include <wlanapi.h>
 #else
-#include "ifaddrs.h"
-#include "iwlib.h"
+#include <sys/capability.h>
+#include <linux/capability.h>
+#include <net/if_arp.h>
+#include <ifaddrs.h>
+#include <iwlib.h>
 #endif
 
 #include "ace/Handle_Set.h"
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
+
+#include "common_tools.h"
 
 #include "common_dbus_tools.h"
 
@@ -365,11 +370,11 @@ Net_WLAN_Tools::interfaceIsWLAN (const std::string& interfaceIdentifier_in)
 
   bool result = false;
   int socket_handle = -1;
-  struct iwreq request_s;
-  ACE_OS::memset (&request_s, 0, sizeof (struct iwreq));
+  struct iwreq iwreq_s;
+  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
   int result_2 = -1;
 
-  ACE_OS::strncpy (request_s.ifr_name,
+  ACE_OS::strncpy (iwreq_s.ifr_name,
                    interfaceIdentifier_in.c_str (),
                    IFNAMSIZ);
   socket_handle = ACE_OS::socket (AF_INET,
@@ -384,7 +389,7 @@ Net_WLAN_Tools::interfaceIsWLAN (const std::string& interfaceIdentifier_in)
   // verify the presence of Wireless Extensions
   result_2 = ACE_OS::ioctl (socket_handle,
                             SIOCGIWNAME,
-                            &request_s);
+                            &iwreq_s);
   if (!result_2)
     result = true;
 
@@ -397,8 +402,111 @@ Net_WLAN_Tools::interfaceIsWLAN (const std::string& interfaceIdentifier_in)
   return result;
 }
 
+bool
+Net_WLAN_Tools::associate (const std::string& interfaceIdentifier_in,
+                           const struct ether_addr& APMACAddress_in,
+                           const std::string& SSID_in,
+                           ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::associate"));
+
+  // sanity check(s)
+  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+  ACE_ASSERT (interfaceIdentifier_in.size () <= IFNAMSIZ);
+  ACE_ASSERT (!SSID_in.empty ());
+  ACE_ASSERT (SSID_in.size () <= IW_ESSID_MAX_SIZE);
+
+  bool result = false;
+  struct iwreq iwreq_s;
+  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  ACE_HANDLE socket_handle = handle_in;
+  bool close_handle = false;
+  int result_2 = -1;
+  int error = 0;
+
+  if (unlikely (socket_handle == ACE_INVALID_HANDLE))
+  {
+    socket_handle = ACE_OS::socket (AF_INET,
+                                    SOCK_STREAM,
+                                    0);
+    if (unlikely (socket_handle == -1))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::socket(AF_INET): \"%m\", aborting\n")));
+      return false;
+    } // end IF
+    close_handle = true;
+  } // end IF
+
+  // step1: set ESSID ?
+  if (likely (ACE_OS::strcmp (Net_WLAN_Tools::associatedSSID (interfaceIdentifier_in,
+                                                              socket_handle).c_str (),
+                              SSID_in.c_str ())))
+  {
+    ACE_OS::strncpy (iwreq_s.ifr_name,
+                     interfaceIdentifier_in.c_str (),
+                     IFNAMSIZ);
+    iwreq_s.u.essid.flags = 1;
+    iwreq_s.u.essid.length = SSID_in.size ();
+    iwreq_s.u.essid.pointer = const_cast<char*> (SSID_in.c_str ());
+    result_2 = ACE_OS::ioctl (socket_handle,
+                              SIOCSIWESSID,
+                              &iwreq_s);
+    if (unlikely (result_2 == -1))
+    {
+      error = ACE_OS::last_error ();
+      if (error != EALREADY) // 114
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWESSID): \"%m\", aborting\n"),
+                    socket_handle));
+        goto clean;
+      } // end IF
+    } // end IF
+  } // end IF
+
+  // step2: set AP BSSID
+  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  ACE_OS::strncpy (iwreq_s.ifr_name,
+                   interfaceIdentifier_in.c_str (),
+                   IFNAMSIZ);
+  iwreq_s.u.ap_addr.sa_family = ARPHRD_ETHER;
+  ACE_OS::memcpy (iwreq_s.u.ap_addr.sa_data,
+                  &APMACAddress_in,
+                  sizeof (struct ether_addr));
+  result_2 = ACE_OS::ioctl (socket_handle,
+                            SIOCSIWAP,
+                            &iwreq_s);
+  if (unlikely (result_2 == -1))
+  {
+    error = ACE_OS::last_error ();
+    if (error != EALREADY) // 114
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWAP): \"%m\", aborting\n"),
+                  socket_handle));
+      goto clean;
+    } // end IF
+  } // end IF
+
+  result = true;
+
+clean:
+  if (unlikely (close_handle))
+  {
+    result_2 = ACE_OS::close (socket_handle);
+    if (unlikely (result_2 == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::close(\"%s\"): \"%m\", continuing\n"),
+                  ACE_TEXT (interfaceIdentifier_in.c_str ())));
+  } // end IF
+
+  return result;
+}
+
 void
 Net_WLAN_Tools::scan (const std::string& interfaceIdentifier_in,
+                      const std::string& ESSID_in,
                       ACE_HANDLE handle_in,
                       bool wait_in)
 {
@@ -410,13 +518,35 @@ Net_WLAN_Tools::scan (const std::string& interfaceIdentifier_in,
 
   ACE_HANDLE socket_handle = handle_in;
   bool close_handle = false;
-  struct iwreq request_s;
-  ACE_OS::memset (&request_s, 0, sizeof (struct iwreq));
+  struct iwreq iwreq_s;
+  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  struct iw_scan_req iw_scan_req_s;
+  ACE_OS::memset (&iw_scan_req_s, 0, sizeof (struct iw_scan_req));
+  //  iwreq_s.u.data.flags = IW_SCAN_DEFAULT;
+  iwreq_s.u.data.flags = (IW_SCAN_ALL_ESSID |
+                          IW_SCAN_ALL_FREQ  |
+                          IW_SCAN_ALL_MODE  |
+                          IW_SCAN_ALL_RATE);
   int result = -1;
+#if defined (ACE_LINUX)
+  bool handle_capabilities = false;
+#endif
 
-  ACE_OS::strncpy (request_s.ifr_name,
+  ACE_OS::strncpy (iwreq_s.ifr_name,
                    interfaceIdentifier_in.c_str (),
                    IFNAMSIZ);
+  if (likely (!ESSID_in.empty ()))
+  { ACE_ASSERT (ESSID_in.size () <= IW_ESSID_MAX_SIZE);
+    iw_scan_req_s.bssid.sa_family = ARPHRD_ETHER;
+    ACE_OS::memset (iw_scan_req_s.bssid.sa_data, 0xff, ETH_ALEN);
+    iw_scan_req_s.essid_len = ESSID_in.size ();
+    ACE_OS::memcpy (iw_scan_req_s.essid,
+                    ESSID_in.c_str (),
+                    ESSID_in.size ());
+    iwreq_s.u.data.flags = IW_SCAN_THIS_ESSID;
+    iwreq_s.u.data.length = sizeof (struct iw_scan_req);
+    iwreq_s.u.data.pointer = &iw_scan_req_s;
+  } // end IF
   if (unlikely (socket_handle == ACE_INVALID_HANDLE))
   {
     socket_handle = ACE_OS::socket (AF_INET,
@@ -430,47 +560,78 @@ Net_WLAN_Tools::scan (const std::string& interfaceIdentifier_in,
     } // end IF
     close_handle = true;
   } // end IF
+
+#if defined (ACE_LINUX)
+  // (temporarily) elevate privileges to start scan
+  if (!Common_Tools::hasCapability (CAP_NET_ADMIN))
+  {
+    if (unlikely (!Common_Tools::setCapability (CAP_NET_ADMIN)))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_Tools::setCapability(%s): \"%m\", aborting\n"),
+                  ACE_TEXT (Common_Tools::capabilityToString (CAP_NET_ADMIN).c_str ())));
+      goto error;
+    } // end IF
+    handle_capabilities = true;
+  } // end IF
+#endif
+
   result = ACE_OS::ioctl (socket_handle,
                           SIOCSIWSCAN,
-                          &request_s);
-  if (unlikely (result == 1))
+                          &iwreq_s);
+  if (unlikely (result == -1))
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::ioctl(\"%s\",SIOCSIWSCAN): \"%m\", returning\n"),
-                ACE_TEXT (interfaceIdentifier_in.c_str ())));
-    goto error;
+    int error = ACE_OS::last_error ();
+//    if (error == EPERM) // 1
+    if ((error != EAGAIN) && // 11: scan not complete
+        (error != EBUSY))    // 16: another scan is in progress
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWSCAN): \"%m\", returning\n"),
+                  socket_handle));
+      goto error;
+    } // end IF
   } // end IF
 
   if (unlikely (wait_in))
   {
-    ACE_Handle_Set handle_set;
-    handle_set.set_bit (socket_handle);
-    // (maximum) 250ms between set and first get
-    ACE_Time_Value timeout (0, 250000);
-    result = ACE_OS::select (static_cast<int> (socket_handle) + 1,
-                             static_cast<fd_set*> (handle_set),    // read
-                             NULL,                                 // write
-                             NULL,                                 // exception
-                             &timeout);
-    switch (result)
-    {
-      case 0:
-        ACE_OS::last_error (ETIME);
-        // *WARNING*: control falls through here
-      case -1:
-      {
-        if (unlikely (result == -1))
-        {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_OS::select(%d): \"%m\", returning\n"),
-                      socket_handle));
-          goto error;
-        } // end IF
-        break;
-      }
-      default:
-        break;
-    } // end SWITCH
+    // *IMPORTANT NOTE*: the kernel apparently does not signal the ioctl socket
+    //                   file descriptor on the arrival of result data
+    //                   --> poll
+    // *TODO*: why ?
+    ACE_ASSERT (false);
+    ACE_NOTSUP;
+
+    ACE_NOTREACHED (return;)
+//    ACE_Handle_Set handle_set;
+//    handle_set.set_bit (socket_handle);
+//    // wait (maximum) 250ms between set and (first) result data
+//    ACE_Time_Value timeout (0, 250000);
+//    result = ACE_OS::select (static_cast<int> (socket_handle) + 1,
+//                             static_cast<fd_set*> (handle_set),    // read
+//                             NULL,                                 // write
+//                             NULL,                                 // exception
+////                             &timeout);
+//                             NULL);
+//    switch (result)
+//    {
+//      case 0:
+//        ACE_OS::last_error (ETIME);
+//        // *WARNING*: control falls through here
+//      case -1:
+//      {
+//        if (unlikely (result == -1))
+//        {
+//          ACE_DEBUG ((LM_ERROR,
+//                      ACE_TEXT ("failed to ACE_OS::select(%d): \"%m\", returning\n"),
+//                      socket_handle));
+//          goto error;
+//        } // end IF
+//        break;
+//      }
+//      default:
+//        break;
+//    } // end SWITCH
   } // end IF
 
 error:
@@ -482,6 +643,13 @@ error:
                   ACE_TEXT ("failed to ACE_OS::close(\"%s\"): \"%m\", continuing\n"),
                   ACE_TEXT (interfaceIdentifier_in.c_str ())));
   } // end IF
+
+#if defined (ACE_LINUX)
+  if (handle_capabilities)
+    if (!Common_Tools::dropCapability (CAP_NET_ADMIN))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_Tools::dropCapability(CAP_NET_ADMIN): \"%m\", continuing\n")));
+#endif
 }
 #endif
 
@@ -490,7 +658,8 @@ std::string
 Net_WLAN_Tools::associatedSSID (HANDLE clientHandle_in,
                                 REFGUID interfaceIdentifier_in)
 #else
-Net_WLAN_Tools::associatedSSID (const std::string& interfaceIdentifier_in)
+Net_WLAN_Tools::associatedSSID (const std::string& interfaceIdentifier_in,
+                                ACE_HANDLE handle_in)
 #endif
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::associatedSSID"));
@@ -559,17 +728,22 @@ Net_WLAN_Tools::associatedSSID (const std::string& interfaceIdentifier_in)
 //      Net_WLAN_Tools::accessPointDBusPathToSSID (connection_in,
 //                                                   access_point_path_string);
 
-  int socket_handle = -1;
+  ACE_HANDLE socket_handle = handle_in;
   int result_2 = -1;
   struct iwreq iwreq_s;
   char essid[IW_ESSID_MAX_SIZE + 1];
+  bool close_socket = false;
 
-  socket_handle = iw_sockets_open ();
-  if (unlikely (socket_handle == -1))
+  if (unlikely (socket_handle == ACE_INVALID_HANDLE))
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to iw_sockets_open(): \"%m\", aborting\n")));
-    goto error;
+    socket_handle = iw_sockets_open ();
+    if (socket_handle == ACE_INVALID_HANDLE)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to iw_sockets_open(): \"%m\", aborting\n")));
+      goto error;
+    } // end IF
+    close_socket = true;
   } // end IF
 
   ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
@@ -588,11 +762,12 @@ Net_WLAN_Tools::associatedSSID (const std::string& interfaceIdentifier_in)
     goto error;
   } // end IF
   // *NOTE*: the length iwreq_s.u.essid.length is wrong
+//  ACE_ASSERT (iwreq_s.u.essid.length && (iwreq_s.u.essid.length <= IW_ESSID_MAX_SIZE));
 //  result.assign (essid, iwreq_s.u.essid.length);
   result = essid;
 
 error:
-  if (likely (socket_handle != -1))
+  if (unlikely (close_socket))
     iw_sockets_close (socket_handle);
 #endif
 
@@ -602,6 +777,73 @@ error:
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
+struct ether_addr
+Net_WLAN_Tools::associatedBSSID (const std::string& interfaceIdentifier_in,
+                                 ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::associatedBSSID"));
+
+  // initialize return value(s)
+  struct ether_addr return_value;
+  ACE_OS::memset (&return_value, 0, sizeof (struct ether_addr));
+
+  // sanity check(s)
+  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+  ACE_ASSERT (interfaceIdentifier_in.size () <= IFNAMSIZ);
+
+  struct iwreq iwreq_s;
+  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  ACE_HANDLE socket_handle = handle_in;
+  bool close_handle = false;
+  int result_2 = -1;
+  int error = 0;
+
+  if (unlikely (socket_handle == ACE_INVALID_HANDLE))
+  {
+    socket_handle = ACE_OS::socket (AF_INET,
+                                    SOCK_STREAM,
+                                    0);
+    if (unlikely (socket_handle == -1))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::socket(AF_INET): \"%m\", aborting\n")));
+      return return_value;
+    } // end IF
+    close_handle = true;
+  } // end IF
+
+  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  ACE_OS::strncpy (iwreq_s.ifr_name,
+                   interfaceIdentifier_in.c_str (),
+                   IFNAMSIZ);
+  result_2 = ACE_OS::ioctl (socket_handle,
+                            SIOCGIWAP,
+                            &iwreq_s);
+  if (unlikely (result_2 == -1))
+  {
+    error = ACE_OS::last_error ();
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWAP): \"%m\", aborting\n"),
+                socket_handle));
+    goto clean;
+  } // end IF
+  ACE_OS::memcpy (&return_value,
+                  iwreq_s.u.ap_addr.sa_data,
+                  sizeof (struct ether_addr));
+
+clean:
+  if (unlikely (close_handle))
+  {
+    result_2 = ACE_OS::close (socket_handle);
+    if (unlikely (result_2 == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::close(\"%s\"): \"%m\", continuing\n"),
+                  ACE_TEXT (interfaceIdentifier_in.c_str ())));
+  } // end IF
+
+  return return_value;
+}
+
 ACE_INET_Addr
 Net_WLAN_Tools::getGateway (const std::string& interfaceIdentifier_in,
                             struct DBusConnection* connection_in)

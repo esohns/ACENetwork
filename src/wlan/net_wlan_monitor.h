@@ -31,9 +31,12 @@
 #include <guiddef.h>
 #include <wlanapi.h>
 #else
-#include <dbus/dbus.h>
-//#include <dbus/dbus-glib.h>
+#include <net/ethernet.h>
+
 #include <iwlib.h>
+
+#include "dbus/dbus.h"
+//#include <dbus/dbus-glib.h>
 
 #include "ace/Event_Handler.h"
 #endif
@@ -49,6 +52,7 @@
 
 #include "net_wlan_common.h"
 #include "net_wlan_imonitor.h"
+#include "net_wlan_monitor_statemachine.h"
 #include "net_wlan_tools.h"
 
 // forward declarations
@@ -78,12 +82,14 @@ class Net_WLAN_Monitor_T
  : public Common_TaskBase_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             Common_ILock_T<ACE_SYNCH_USE> >
+ , public Net_WLAN_MonitorStateMachine
  , public Net_WLAN_IMonitor_T<AddressType,
                               ConfigurationType>
 {
   typedef Common_TaskBase_T<ACE_SYNCH_USE,
                             TimePolicyType,
                             Common_ILock_T<ACE_SYNCH_USE> > inherited;
+  typedef Net_WLAN_MonitorStateMachine inherited2;
 
   // singleton has access to the ctor/dtors
   friend class ACE_Singleton<Net_WLAN_Monitor_T<ACE_SYNCH_USE,
@@ -125,11 +131,12 @@ class Net_WLAN_Monitor_T
 #endif
   inline virtual bool addresses (AddressType& localSAP_out, AddressType& peerSAP_out) const { localSAP_out = localSAP_; peerSAP_out = peerSAP_; return true; }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual bool associate (REFGUID,             // device identifier
+  virtual bool associate (REFGUID,                  // interface identifier
 #else
-  virtual bool associate (const std::string&,  // device identifier
+  virtual bool associate (const std::string&,       // interface identifier
+                          const struct ether_addr&, // BSSID
 #endif
-                          const std::string&); // SSID
+                          const std::string&);      // (E)SSID
   inline virtual std::string interfaceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->interfaceIdentifier; }
   virtual std::string SSID () const;
 
@@ -142,7 +149,7 @@ class Net_WLAN_Monitor_T
   typedef std::vector<std::string> INTERFACEIDENTIFIERS_T;
 #endif
   typedef INTERFACEIDENTIFIERS_T::iterator INTERFACEIDENTIFIERS_ITERATOR_T;
-  typedef std::multimap<std::string, std::string> SSIDS_TO_INTERFACEIDENTIFIER_MAP_T;
+  typedef std::multimap<std::string, std::pair<std::string, struct ether_addr> > SSIDS_TO_INTERFACEIDENTIFIER_MAP_T;
   typedef SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::const_iterator SSIDS_TO_INTERFACEIDENTIFIER_MAP_CONST_ITERATOR_T;
   typedef SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::iterator SSIDS_TO_INTERFACEIDENTIFIER_MAP_ITERATOR_T;
 
@@ -154,7 +161,7 @@ class Net_WLAN_Monitor_T
   void*                                   buffer_; // scan results
   size_t                                  bufferSize_;
   ACE_HANDLE                              handle_;
-  bool                                    isRegistered_;
+//  bool                                    isRegistered_;
   struct iw_range                         range_;
 #endif
   ConfigurationType*                      configuration_;
@@ -176,23 +183,26 @@ class Net_WLAN_Monitor_T
   typedef Stream_MessageQueue_T<ACE_SYNCH_USE,
                                 TimePolicyType,
                                 ACE_Message_Block> MESSAGEQUEUE_T;
-  typedef std::pair<std::string, std::string> SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T;
+  typedef std::pair<std::string, std::pair <std::string, struct ether_addr>> SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T;
   struct SSIDS_TO_INTERFACEIDENTIFIER_FIND_S
    : public std::binary_function<SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T,
                                  std::string,
                                  bool>
   {
-    inline bool operator() (const SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T& entry_in, std::string value_in) const { return entry_in.second == value_in; }
+    inline bool operator() (const SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T& entry_in, std::string value_in) const { return entry_in.second.first == value_in; }
   };
 
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T (const Net_WLAN_Monitor_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T& operator= (const Net_WLAN_Monitor_T&))
 
+  // implement (part of) Common_IStateMachine_T
+  virtual void onChange (enum Net_WLAN_MonitorState); // new state
+
   // implement Net_WLAN_IMonitorCB
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onAssociate (REFGUID,            // device identifier
+  virtual void onAssociate (REFGUID,            // interface identifier
 #else
-  virtual void onAssociate (const std::string&, // device identifier
+  virtual void onAssociate (const std::string&, // interface identifier
 #endif
                             const std::string&, // SSID
                             bool);              // success ?
@@ -201,22 +211,22 @@ class Net_WLAN_Monitor_T
   //                   configuration (e.g. DHCP handshake, ...) most likely has
   //                   not been established
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onConnect (REFGUID,            // device identifier
+  virtual void onConnect (REFGUID,            // interface identifier
 #else
-  virtual void onConnect (const std::string&, // device identifier
+  virtual void onConnect (const std::string&, // interface identifier
 #endif
                           const std::string&, // SSID
                           bool);              // success ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onHotPlug (REFGUID,            // device identifier
+  virtual void onHotPlug (REFGUID,            // interface identifier
 #else
-  virtual void onHotPlug (const std::string&, // device identifier
+  virtual void onHotPlug (const std::string&, // interface identifier
 #endif
                           bool);              // arrival ? : removal
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onScanComplete (REFGUID);            // device identifier
+  virtual void onScanComplete (REFGUID);            // interface identifier
 #else
-  virtual void onScanComplete (const std::string&); // device identifier
+  virtual void onScanComplete (const std::string&); // interface identifier
 #endif
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -311,9 +321,9 @@ class Net_WLAN_Monitor_T<ACE_SYNCH_USE,
 #endif
   inline virtual bool addresses (AddressType& localSAP_out, AddressType& peerSAP_out) const { localSAP_out = localSAP_; peerSAP_out = peerSAP_; return true; }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual bool associate (REFGUID,             // device identifier
+  virtual bool associate (REFGUID,             // interface identifier
 #else
-  virtual bool associate (const std::string&,  // device identifier
+  virtual bool associate (const std::string&,  // interface identifier
 #endif
                           const std::string&); // SSID
   inline virtual std::string interfaceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->interfaceIdentifier; }
@@ -372,9 +382,9 @@ class Net_WLAN_Monitor_T<ACE_SYNCH_USE,
 
   // implement Net_IWLANCB
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onAssociate (REFGUID,            // device identifier
+  virtual void onAssociate (REFGUID,            // interface identifier
 #else
-  virtual void onAssociate (const std::string&, // device identifier
+  virtual void onAssociate (const std::string&, // interface identifier
 #endif
                             const std::string&, // SSID
                             bool);              // success ?
@@ -383,22 +393,22 @@ class Net_WLAN_Monitor_T<ACE_SYNCH_USE,
   //                   configuration (e.g. DHCP handshake, ...) most likely has
   //                   not been established
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onConnect (REFGUID,            // device identifier
+  virtual void onConnect (REFGUID,            // interface identifier
 #else
-  virtual void onConnect (const std::string&, // device identifier
+  virtual void onConnect (const std::string&, // interface identifier
 #endif
                           const std::string&, // SSID
                           bool);              // success ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onHotPlug (REFGUID,            // device identifier
+  virtual void onHotPlug (REFGUID,            // interface identifier
 #else
-  virtual void onHotPlug (const std::string&, // device identifier
+  virtual void onHotPlug (const std::string&, // interface identifier
 #endif
                           bool);              // arrival ? : removal
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onScanComplete (REFGUID);            // device identifier
+  virtual void onScanComplete (REFGUID);            // interface identifier
 #else
-  virtual void onScanComplete (const std::string&); // device identifier
+  virtual void onScanComplete (const std::string&); // interface identifier
 #endif
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
