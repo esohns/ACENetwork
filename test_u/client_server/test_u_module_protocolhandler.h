@@ -24,9 +24,10 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
-#include "common_itimerhandler.h"
 #include "common_time_common.h"
-#include "common_timerhandler.h"
+
+#include "common_itimerhandler.h"
+#include "common_timer_handler.h"
 
 #include "stream_common.h"
 #include "stream_streammodule_base.h"

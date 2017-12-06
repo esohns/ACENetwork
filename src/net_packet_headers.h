@@ -18,18 +18,17 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef Net_PACKET_HEADERS_H
-#define Net_PACKET_HEADERS_H
+#ifndef NET_PACKET_HEADERS_H
+#define NET_PACKET_HEADERS_H
 
-#include "ace/OS.h"
+#include "ace/config-lite.h"
+#include "ace/Basic_Types.h"
 
 #ifdef _MSC_VER
 #pragma pack(push, 1)
 #endif
 
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include <netinet/tcp.h>
-#else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 struct tcphdr
 {
   u_short source;  // Source port
@@ -69,12 +68,11 @@ struct tcphdr
 #else
 };
 #endif
+#else
+#include <netinet/tcp.h>
 #endif
 
-// *IMPORTANT NOTE*: this header doesn't exist on the Windows platform...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include <netinet/udp.h>
-#else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 struct udphdr
 {
   u_short source; // Source port
@@ -86,12 +84,11 @@ struct udphdr
 #else
 };
 #endif
+#else
+#include <netinet/udp.h>
 #endif
 
-// *IMPORTANT NOTE*: this header doesn't exist on the Windows platform...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include <netinet/ip6.h>
-#else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <in6addr.h>
 //struct in6_addr
 //{
@@ -129,12 +126,12 @@ struct udphdr
 //#else
 //};
 //#endif
+#else
+#include <netinet/ip6.h>
 #endif
 
 // *IMPORTANT NOTE*: this header doesn't exist on the Windows platform...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include <netinet/ip.h>
-#else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 struct iphdr
 {
 #if defined (ACE_LITTLE_ENDIAN)
@@ -170,6 +167,8 @@ struct iphdr
 #else
 };
 #endif
+#else
+#include <netinet/ip.h>
 #endif
 
 // *IMPORTANT NOTE*: this header doesn't exist on the Windows platform...
@@ -190,9 +189,7 @@ struct iphdr
 #endif
 
 // *IMPORTANT NOTE*: this header doesn't exist on the Windows platform...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include <net/ethernet.h>
-#else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
  /*
   *      IEEE 802.3 Ethernet magic constants.  The frame sizes omit the preamble
   *      and FCS/CRC (frame check sequence).
@@ -202,6 +199,11 @@ struct iphdr
 #define ETH_ZLEN        60              /* Min. octets in frame sans FCS */
 #define ETH_DATA_LEN    1500            /* Max. octets in payload        */
 #define ETH_FRAME_LEN   1514            /* Max. octets in frame sans FCS */
+
+struct ether_addr
+{
+  u_char ether_addr_octet[ETH_ALEN];
+};
 
 // *INFORMATION*
 //Ethernet Frame Formats
@@ -234,14 +236,12 @@ struct iphdr
  */
 struct ether_header
 {
-  u_char   h_dest[ETH_ALEN];   /* destination eth addr */
-  u_char   h_source[ETH_ALEN]; /* source ether addr    */
-  u_short  ether_type;         /* packet type ID field */
-#ifdef __GNUC__
-} __attribute__ ((__packed__));
-#else
+  struct ether_addr h_dest[ETH_ALEN];   /* destination eth addr */
+  struct ether_addr h_source[ETH_ALEN]; /* source ether addr    */
+  u_short           ether_type;         /* packet type ID field */
 };
-#endif
+#else
+#include <net/ethernet.h>
 #endif
 
 /*
@@ -453,20 +453,14 @@ struct ether_header
 #endif
 
 // *IMPORTANT NOTE*: this header doesn't exist on the Windows platform...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include <netinet/if_fddi.h>
-#else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 // *TODO*: FDDI LLC/SNAP/...
 struct fddi_8022_1_hdr
 {
   u_char dsap; /* destination service access point */
   u_char ssap; /* source service access point */
   u_char ctrl; /* control byte #1 */
-#ifdef __GNUC__
-} __attribute__ ((__packed__));
-#else
 };
-#endif
 
 /* Define 802.2 Type 2 header */
 struct fddi_8022_2_hdr
@@ -475,26 +469,18 @@ struct fddi_8022_2_hdr
   u_char ssap;   /* source service access point */
   u_char ctrl_1; /* control byte #1 */
   u_char ctrl_2; /* control byte #2 */
-#ifdef __GNUC__
-} __attribute__ ((__packed__));
-#else
 };
-#endif
 
 /* Define 802.2 SNAP header */
 #define FDDI_K_OUI_LEN	 3
 struct fddi_snap_hdr
 {
   u_char  dsap;                /* always 0xAA */
-  u_char  ssap;					       /* always 0xAA */
-  u_char  ctrl;					       /* always 0x03 */
+  u_char  ssap;                /* always 0xAA */
+  u_char  ctrl;                /* always 0x03 */
   u_char  oui[FDDI_K_OUI_LEN]; /* organizational universal id */
-  u_short	ethertype;				   /* packet type ID field */
-#ifdef __GNUC__
-} __attribute__ ((__packed__));
-#else
+  u_short	ethertype;           /* packet type ID field */
 };
-#endif
 
 /* Define FDDI LLC frame header */
 #define FDDI_K_ALEN      6               /* Octets in one fddi addr      */
@@ -509,16 +495,15 @@ struct fddi_header
     struct fddi_8022_2_hdr llc_8022_2;
     struct fddi_snap_hdr   llc_snap;
   } hdr;
-#ifdef __GNUC__
-} __attribute__ ((__packed__));
-#else
 };
-#endif
 
 #ifdef _MSC_VER
 #pragma pack(pop)
 #endif
 
 #define FDDI_K_SNAP_HLEN 21             /* Total octets in header.       */
+#else
+#include <netinet/if_fddi.h>
 #endif
+
 #endif

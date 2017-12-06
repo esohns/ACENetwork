@@ -92,7 +92,7 @@ class Net_WLAN_IMonitorBase
                           const std::string&) = 0;  // (E)SSID
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual REFGUID interfaceIdentifier () const = 0;
+  virtual struct _GUID interfaceIdentifier () const = 0;
 #else
   virtual std::string interfaceIdentifier () const = 0;
 #endif

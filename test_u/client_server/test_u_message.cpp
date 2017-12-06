@@ -85,13 +85,13 @@ Test_U_Message::command () const
     } // end FOR
     ACE_ASSERT (!remaining);
 
-    return message_header.messageType;
+    return message_header.type;
   } // end IF
 
   Net_MessageHeader_t* message_header_p =
       reinterpret_cast<Net_MessageHeader_t*> (inherited::rd_ptr ());
 
-  return message_header_p->messageType;
+  return message_header_p->type;
 }
 
 std::string
@@ -99,14 +99,14 @@ Test_U_Message::CommandTypeToString (Net_MessageType_t messageType_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Message::CommandTypeToString"));
 
-  std::string result = ACE_TEXT ("INVALID");
+  std::string result = ACE_TEXT_ALWAYS_CHAR ("INVALID");
 
   switch (messageType_in)
   {
     case Net_Remote_Comm::NET_MESSAGE_PING:
-      result = ACE_TEXT ("PING"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("PING"); break;
     case Net_Remote_Comm::NET_MESSAGE_PONG:
-      result = ACE_TEXT ("PONG"); break;
+      result = ACE_TEXT_ALWAYS_CHAR ("PONG"); break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,

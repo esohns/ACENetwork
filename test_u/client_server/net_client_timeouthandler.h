@@ -31,7 +31,7 @@
 #include "ace/Time_Value.h"
 
 #include "common_itimerhandler.h"
-#include "common_timerhandler.h"
+#include "common_timer_handler.h"
 
 #include "test_u_stream.h"
 

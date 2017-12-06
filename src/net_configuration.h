@@ -33,6 +33,8 @@
 
 #include "net_common.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include <cguid.h>
+
 #include "net_common_tools.h"
 #endif
 #include "net_defines.h"

@@ -97,20 +97,24 @@ add_library (${PROJECT_NAME}_WLAN STATIC
              ${ACENetwork_WLAN_LIB_SRCS})
 
 add_dependencies (${PROJECT_NAME}_WLAN Common)
-add_dependencies (${PROJECT_NAME}_WLAN Common_DBus)
+if (UNIX)
+ add_dependencies (${PROJECT_NAME}_WLAN Common_DBus)
+endif ()
 
 set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES DEFINE_SYMBOL NET_WLAN_BUILD_DLL)
-set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
+#set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
+#set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
 #set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
 cotire (${PROJECT_NAME}_WLAN)
 
-if (WIN32)
+if (UNIX)
+ target_link_libraries (${PROJECT_NAME}_WLAN Common_DBus)
+elseif (WIN32)
  target_link_libraries (${PROJECT_NAME}_WLAN ${ACE_LIBRARY})
 endif ()
-target_link_libraries (${PROJECT_NAME}_WLAN Common_DBus)
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_WLAN

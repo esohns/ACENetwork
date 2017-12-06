@@ -90,7 +90,7 @@ class Net_Connection_Manager_T
   virtual void stop (bool = true,  // wait for completion ?
                      bool = true); // locked access ?
   virtual bool isRunning () const;
-  virtual void wait () const;
+  virtual void wait (bool = true) const; // wait for the message queue ? : worker thread(s) only
   virtual void dump_state () const;
   virtual void abort (enum Net_Connection_AbortStrategy); // strategy
                                                           // *IMPORTANT NOTE*: passing 'true' will hog the CPU --> use wait() instead

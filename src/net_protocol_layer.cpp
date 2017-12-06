@@ -26,89 +26,44 @@
 #include "net_macros.h"
 
 void
-Net_Protocol_Layer::ProtocolLayer2String (const ProtocolLayer& protocolType_in,
-                                          std::string& typeString_out)
+Net_Protocol_Layer::ProtocolLayerToString (const enum ProtocolLayerType& protocolType_in,
+                                           std::string& typeString_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Protocol_Layer::ProtocolLayer2String"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Protocol_Layer::ProtocolLayerToString"));
 
   // init return value(s)
-  typeString_out = ACE_TEXT ("INVALID_PROTOCOL");
+  typeString_out = ACE_TEXT_ALWAYS_CHAR ("INVALID_PROTOCOL");
 
   switch (protocolType_in)
   {
     case ETHERNET:
-    {
-      typeString_out = ACE_TEXT ("ETHERNET");
-
-      break;
-    }
+      typeString_out = ACE_TEXT_ALWAYS_CHAR ("ETHERNET"); break;
     case FDDI_LLC_SNAP:
-    {
-      typeString_out = ACE_TEXT ("FDDI_LLC_SNAP");
-
-      break;
-    }
+      typeString_out = ACE_TEXT_ALWAYS_CHAR ("FDDI_LLC_SNAP"); break;
     case IPv4:
-    {
-      typeString_out = ACE_TEXT ("IPv4");
-
-      break;
-    }
+      typeString_out = ACE_TEXT_ALWAYS_CHAR ("IPv4"); break;
     case IPv6:
-    {
-      typeString_out = ACE_TEXT ("IPv6");
-
-      break;
-    }
+      typeString_out = ACE_TEXT_ALWAYS_CHAR ("IPv6"); break;
     case ICMP:
-    {
-      typeString_out = ACE_TEXT ("ICMP");
-
-      break;
-    }
+      typeString_out = ACE_TEXT_ALWAYS_CHAR ("ICMP"); break;
     case IGMP:
-    {
-      typeString_out = ACE_TEXT ("IGMP");
-
-      break;
-    }
+      typeString_out = ACE_TEXT_ALWAYS_CHAR ("IGMP"); break;
     case UDP:
-    {
-      typeString_out = ACE_TEXT ("UDP");
-
-      break;
-    }
+      typeString_out = ACE_TEXT_ALWAYS_CHAR ("UDP"); break;
     case TCP:
-    {
-      typeString_out = ACE_TEXT ("TCP");
-
-      break;
-    }
+      typeString_out = ACE_TEXT_ALWAYS_CHAR ("TCP"); break;
     case RAW:
-    {
-      typeString_out = ACE_TEXT ("RAW");
-
-      break;
-    }
+      typeString_out = ACE_TEXT_ALWAYS_CHAR ("RAW"); break;
     case PIM:
-    {
-      typeString_out = ACE_TEXT ("PIM");
-
-      break;
-    }
+      typeString_out = ACE_TEXT_ALWAYS_CHAR ("PIM"); break;
     case IRC:
-    {
-      typeString_out = ACE_TEXT ("IRC");
-
-      break;
-    }
+      typeString_out = ACE_TEXT_ALWAYS_CHAR ("IRC"); break;
     case INVALID:
     default:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown protocol (type: \"%d\"), continuing\n"),
                   protocolType_in));
-
       break;
     }
   } // end SWITCH

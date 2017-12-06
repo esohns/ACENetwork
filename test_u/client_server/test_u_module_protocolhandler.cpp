@@ -148,7 +148,7 @@ Test_U_Module_ProtocolHandler::handleDataMessage (Test_U_Message*& message_inout
 
   // retrieve type of message and other details...
   Net_MessageHeader_t message_header = message_inout->get ();
-  switch (message_header.messageType)
+  switch (message_header.type)
   {
     case Net_Remote_Comm::NET_MESSAGE_PING:
     {
@@ -173,9 +173,9 @@ Test_U_Module_ProtocolHandler::handleDataMessage (Test_U_Message*& message_inout
         Net_Remote_Comm::PongMessage* pong_struct =
           reinterpret_cast<Net_Remote_Comm::PongMessage*> (message_p->wr_ptr ());
         ACE_OS::memset (pong_struct, 0, sizeof (Net_Remote_Comm::PongMessage));
-        pong_struct->messageHeader.messageLength =
+        pong_struct->header.length =
           sizeof (Net_Remote_Comm::PongMessage) - sizeof (unsigned int);
-        pong_struct->messageHeader.messageType =
+        pong_struct->header.type =
           Net_Remote_Comm::NET_MESSAGE_PONG;
         message_p->wr_ptr (sizeof (Net_Remote_Comm::PongMessage));
         // step2: send it upstream
@@ -217,7 +217,7 @@ Test_U_Module_ProtocolHandler::handleDataMessage (Test_U_Message*& message_inout
                   ACE_TEXT ("%s: [%u/%u]: unknown/invalid message type (was: \"%s\"), returning\n"),
                   inherited::mod_->name (),
                   message_inout->sessionId (), message_inout->id (),
-                  ACE_TEXT (Test_U_Message::CommandTypeToString (message_header.messageType).c_str ())));
+                  ACE_TEXT (Test_U_Message::CommandTypeToString (message_header.type).c_str ())));
       return;
     }
   } // end SWITCH
@@ -329,9 +329,9 @@ Test_U_Module_ProtocolHandler::handle (const void* arg_in)
   Net_Remote_Comm::PingMessage* ping_struct =
     reinterpret_cast<Net_Remote_Comm::PingMessage*> (message_p->wr_ptr ());
   ACE_OS::memset (ping_struct, 0, sizeof (Net_Remote_Comm::PingMessage));
-  ping_struct->messageHeader.messageLength =
+  ping_struct->header.length =
     (sizeof (Net_Remote_Comm::PingMessage) - sizeof (unsigned int));
-  ping_struct->messageHeader.messageType = Net_Remote_Comm::NET_MESSAGE_PING;
+  ping_struct->header.type = Net_Remote_Comm::NET_MESSAGE_PING;
   ping_struct->counter = counter_++;
   message_p->wr_ptr (sizeof (Net_Remote_Comm::PingMessage));
 

@@ -25,6 +25,7 @@
 
 #include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include <wlanapi.h>
 #else
 #include "dbus/dbus.h"
 #endif
@@ -32,14 +33,20 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
-#include "net_wlan_exports.h"
+#include "net_packet_headers.h"
 
-class Net_WLAN_Export Net_WLAN_Tools
+//#include "net_wlan_exports.h"
+
+//class Net_WLAN_Export Net_WLAN_Tools
+class Net_WLAN_Tools
 {
  public:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   static std::string associatedSSID (HANDLE,   // WLAN API client handle
                                      REFGUID); // interface identifier
+  static struct ether_addr associatedBSSID (HANDLE,   // WLAN API client handle
+                                            REFGUID); // interface identifier
+
   static bool hasSSID (HANDLE,              // WLAN API client handle
                        REFGUID,             // interface identifier
                        const std::string&); // SSID
@@ -51,6 +58,13 @@ class Net_WLAN_Export Net_WLAN_Tools
                                     REFGUID,                // interface identifier
                                     enum _WLAN_INTF_OPCODE, // code
                                     bool);                  // enable ? : disable
+
+  static bool associate (HANDLE,              // WLAN API client handle
+                         REFGUID,             // interface identifier
+                         const std::string&); // (E)SSID
+  static void scan (HANDLE,              // WLAN API client handle
+                    REFGUID,             // interface identifier
+                    const std::string&); // ESSID (if any)
 #else
   static std::string associatedSSID (const std::string&, // interface identifier
                                      ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)

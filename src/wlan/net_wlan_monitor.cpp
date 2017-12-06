@@ -40,7 +40,8 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
   ACE_ASSERT (data_in);
   ACE_ASSERT (context_in);
 
-  Net_IWLANCB* iwlan_cb_p = static_cast<Net_IWLANCB*> (context_in);
+  Net_WLAN_IMonitorCB* iwlanmonitor_cb_p =
+    static_cast<Net_WLAN_IMonitorCB*> (context_in);
 
   WLAN_REASON_CODE reason_i = 0;
   std::string notification_string;
@@ -77,10 +78,10 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
         case wlan_notification_acm_scan_complete:
         {
           try {
-            iwlan_cb_p->onScanComplete (data_in->InterfaceGuid);
+            iwlanmonitor_cb_p->onScanComplete (data_in->InterfaceGuid);
           } catch (...) {
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("%s: caught exception in Net_IWLANCB::onScanComplete(), continuing\n"),
+                        ACE_TEXT ("%s: caught exception in Net_WLAN_IMonitorCB::onScanComplete(), continuing\n"),
                         ACE_TEXT (Common_Tools::GUIDToString (data_in->InterfaceGuid).c_str ())));
           }
           notification_string =
@@ -90,10 +91,10 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
         case wlan_notification_acm_scan_fail:
         {
           try {
-            iwlan_cb_p->onScanComplete (data_in->InterfaceGuid);
+            iwlanmonitor_cb_p->onScanComplete (data_in->InterfaceGuid);
           } catch (...) {
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("%s: caught exception in Net_IWLANCB::onScanComplete(), continuing\n"),
+                        ACE_TEXT ("%s: caught exception in Net_WLAN_IMonitorCB::onScanComplete(), continuing\n"),
                         ACE_TEXT (Common_Tools::GUIDToString (data_in->InterfaceGuid).c_str ())));
           }
           notification_string =
@@ -116,12 +117,12 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
           std::string SSID_string (reinterpret_cast<char*> (wlan_connection_notification_data_p->dot11Ssid.ucSSID),
                                    wlan_connection_notification_data_p->dot11Ssid.uSSIDLength);
           try {
-            iwlan_cb_p->onAssociate (data_in->InterfaceGuid,
-                                     SSID_string,
-                                     (wlan_connection_notification_data_p->wlanReasonCode == WLAN_REASON_CODE_SUCCESS));
+            iwlanmonitor_cb_p->onAssociate (data_in->InterfaceGuid,
+                                            SSID_string,
+                                            (wlan_connection_notification_data_p->wlanReasonCode == WLAN_REASON_CODE_SUCCESS));
           } catch (...) {
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("%s: caught exception in Net_IWLANCB::onAssociate(%s), continuing\n"),
+                        ACE_TEXT ("%s: caught exception in Net_WLAN_IMonitorCB::onAssociate(%s), continuing\n"),
                         ACE_TEXT (Common_Tools::GUIDToString (data_in->InterfaceGuid).c_str ()),
                         ACE_TEXT (SSID_string.c_str ())));
           }
@@ -147,11 +148,11 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
           notification_string =
             ACE_TEXT_ALWAYS_CHAR ("wlan_notification_acm_interface_arrival");
           try {
-            iwlan_cb_p->onHotPlug (data_in->InterfaceGuid,
-                                   true);
+            iwlanmonitor_cb_p->onHotPlug (data_in->InterfaceGuid,
+                                          true);
           } catch (...) {
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("%s: caught exception in Net_IWLANCB::onHotPlug(), continuing\n"),
+                        ACE_TEXT ("%s: caught exception in Net_WLAN_IMonitorCB::onHotPlug(), continuing\n"),
                         ACE_TEXT (Common_Tools::GUIDToString (data_in->InterfaceGuid).c_str ())));
           }
           break;
@@ -161,11 +162,11 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
           notification_string =
             ACE_TEXT_ALWAYS_CHAR ("wlan_notification_acm_interface_removal");
           try {
-            iwlan_cb_p->onHotPlug (data_in->InterfaceGuid,
-                                   false);
+            iwlanmonitor_cb_p->onHotPlug (data_in->InterfaceGuid,
+                                          false);
           } catch (...) {
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("%s: caught exception in Net_IWLANCB::onHotPlug(), continuing\n"),
+                        ACE_TEXT ("%s: caught exception in Net_WLAN_IMonitorCB::onHotPlug(), continuing\n"),
                         ACE_TEXT (Common_Tools::GUIDToString (data_in->InterfaceGuid).c_str ())));
           }
           break;
@@ -443,7 +444,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
                                      true);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IWLANCB;;onHotPlug(), continuing\n")));
+                  ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB;;onHotPlug(), continuing\n")));
       goto continue_;
     }
   } // end IF
@@ -492,7 +493,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
                                      false);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_IWLANCB;;onHotPlug(), continuing\n")));
+                  ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB;;onHotPlug(), continuing\n")));
       goto continue_;
     }
   } // end ELSE IF
@@ -742,7 +743,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
 //                                           true);
 //        } catch (...) {
 //          ACE_DEBUG ((LM_ERROR,
-//                      ACE_TEXT ("caught exception in Net_IWLANCB;;onAssociate(), continuing\n")));
+//                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB;;onAssociate(), continuing\n")));
 //          goto continue_;
 //        }
 //        break;
@@ -755,7 +756,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
                                          true);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in Net_IWLANCB;;onConnect(), continuing\n")));
+                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB;;onConnect(), continuing\n")));
           goto continue_;
         }
         break;
@@ -768,7 +769,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
                                          false);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in Net_IWLANCB;;onConnect(), continuing\n")));
+                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB;;onConnect(), continuing\n")));
           goto continue_;
         }
         break;
@@ -781,7 +782,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
 //                                           false);
 //        } catch (...) {
 //          ACE_DEBUG ((LM_ERROR,
-//                      ACE_TEXT ("caught exception in Net_IWLANCB;;onAssociate(), continuing\n")));
+//                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB;;onAssociate(), continuing\n")));
 //          goto continue_;
 //        }
 //        break;
@@ -877,7 +878,7 @@ continue_:
 //  // sanity check(s)
 //  ACE_ASSERT (userData_in);
 
-//  Net_IWLANCB* iwlan_cb_p = static_cast<Net_IWLANCB*> (userData_in);
+//  Net_WLAN_IMonitorCB* iwlan_cb_p = static_cast<Net_WLAN_IMonitorCB*> (userData_in);
 //}
 #endif
 

@@ -723,9 +723,11 @@ Net_Connection_Manager_T<ACE_SYNCH_USE,
                          ConfigurationType,
                          StateType,
                          StatisticContainerType,
-                         UserDataType>::wait () const
+                         UserDataType>::wait (bool waitForMessageQueue_in) const
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Connection_Manager_T::wait"));
+
+  ACE_UNUSED_ARG (waitForMessageQueue_in);
 
   int result = -1;
 

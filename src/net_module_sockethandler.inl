@@ -481,7 +481,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
     // *PORTABILITY*: handle endianness && type issues !
     // see also net_remote_comm.h
     currentMessageLength_ =
-        message_header.messageLength + sizeof (unsigned int);
+        message_header.length + sizeof (unsigned int);
   } // end IF
 
 //   ACE_DEBUG ((LM_DEBUG,

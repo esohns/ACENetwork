@@ -40,7 +40,7 @@ endif ()
 if (NOT ACE_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
 else ()
- message (STATUS "Found ACE library \"${ACE_LIBRARY}\"")
+ #message (STATUS "Found ACE library \"${ACE_LIBRARY}\"")
 endif ()
 add_definitions (-DACE_HAS_DLL)
 
@@ -89,6 +89,8 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/timer)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src/modules/lib)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src/modules/stat)
@@ -98,7 +100,8 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../openssl/include)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/ui)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/timer)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src/modules/lib)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src/modules/stat)

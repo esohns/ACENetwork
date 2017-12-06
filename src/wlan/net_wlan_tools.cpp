@@ -33,6 +33,8 @@
 #include <net/if_arp.h>
 #include <ifaddrs.h>
 #include <iwlib.h>
+
+#include "common_dbus_tools.h"
 #endif
 
 #include "ace/Handle_Set.h"
@@ -41,8 +43,6 @@
 #include "ace/OS.h"
 
 #include "common_tools.h"
-
-#include "common_dbus_tools.h"
 
 #include "net_common_tools.h"
 #include "net_macros.h"
@@ -304,7 +304,7 @@ Net_WLAN_Tools::getDeviceSettingBool (HANDLE clientHandle_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("\"%s\": failed to ::WlanQueryInterface(0x%@,%d): \"%s\", aborting\n"),
-                ACE_TEXT (Net_WLAN_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                 clientHandle_in, parameter_in,
                 ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
     return false;
@@ -342,7 +342,7 @@ Net_WLAN_Tools::setDeviceSettingBool (HANDLE clientHandle_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("\"%s\": failed to ::WlanSetInterface(0x%@,%d): \"%s\", aborting\n"),
-                ACE_TEXT (Net_WLAN_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                 clientHandle_in, parameter_in,
                 ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
     return false;
@@ -401,22 +401,74 @@ Net_WLAN_Tools::interfaceIsWLAN (const std::string& interfaceIdentifier_in)
 
   return result;
 }
+#endif
 
 bool
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+Net_WLAN_Tools::associate (HANDLE clientHandle_in,
+                           REFGUID interfaceIdentifier_in,
+                           const std::string& SSID_in)
+#else
 Net_WLAN_Tools::associate (const std::string& interfaceIdentifier_in,
                            const struct ether_addr& APMACAddress_in,
                            const std::string& SSID_in,
                            ACE_HANDLE handle_in)
+#endif
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::associate"));
 
   // sanity check(s)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_ASSERT (clientHandle_in != ACE_INVALID_HANDLE);
+  ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
+  ACE_ASSERT (SSID_in.size () <= DOT11_SSID_MAX_LENGTH);
+#else
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
   ACE_ASSERT (interfaceIdentifier_in.size () <= IFNAMSIZ);
-  ACE_ASSERT (!SSID_in.empty ());
   ACE_ASSERT (SSID_in.size () <= IW_ESSID_MAX_SIZE);
+#endif
+  ACE_ASSERT (!SSID_in.empty ());
 
   bool result = false;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _DOT11_SSID ssid_s;
+  ACE_OS::memset (&ssid_s, 0, sizeof (struct _DOT11_SSID));
+  ssid_s.uSSIDLength = SSID_in.size ();
+  ACE_OS::memcpy (ssid_s.ucSSID,
+                  SSID_in.c_str (),
+                  SSID_in.size ());
+  struct _WLAN_CONNECTION_PARAMETERS wlan_connection_parameters_s;
+  ACE_OS::memset (&wlan_connection_parameters_s,
+                  0,
+                  sizeof (struct _WLAN_CONNECTION_PARAMETERS));
+  // *TODO*: do the research here
+  wlan_connection_parameters_s.wlanConnectionMode =
+    //wlan_connection_mode_profile; // support WinXP
+    wlan_connection_mode_discovery_unsecure;
+  //wlan_connection_parameters_s.strProfile = NULL;
+  wlan_connection_parameters_s.pDot11Ssid = &ssid_s;
+  //wlan_connection_parameters_s.pDesiredBssidList = NULL;
+  wlan_connection_parameters_s.dot11BssType =
+    dot11_BSS_type_infrastructure;
+    //wlan_connection_parameters_s.dwFlags = 0;
+  // *NOTE*: this returns immediately
+  DWORD result_2 = WlanConnect (clientHandle_in,
+                                &interfaceIdentifier_in,
+                                &wlan_connection_parameters_s,
+                                NULL);
+  if (unlikely (result_2 != ERROR_SUCCESS))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("\"%s\": failed to ::WlanConnect(0x%@,%s): \"%s\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+                clientHandle_in,
+                ACE_TEXT (SSID_in.c_str ()),
+                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+    return false;
+  } // end IF
+
+  result = true;
+#else
   struct iwreq iwreq_s;
   ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
   ACE_HANDLE socket_handle = handle_in;
@@ -438,35 +490,7 @@ Net_WLAN_Tools::associate (const std::string& interfaceIdentifier_in,
     close_handle = true;
   } // end IF
 
-  // step1: set ESSID ?
-  if (likely (ACE_OS::strcmp (Net_WLAN_Tools::associatedSSID (interfaceIdentifier_in,
-                                                              socket_handle).c_str (),
-                              SSID_in.c_str ())))
-  {
-    ACE_OS::strncpy (iwreq_s.ifr_name,
-                     interfaceIdentifier_in.c_str (),
-                     IFNAMSIZ);
-    iwreq_s.u.essid.flags = 1;
-    iwreq_s.u.essid.length = SSID_in.size ();
-    iwreq_s.u.essid.pointer = const_cast<char*> (SSID_in.c_str ());
-    result_2 = ACE_OS::ioctl (socket_handle,
-                              SIOCSIWESSID,
-                              &iwreq_s);
-    if (unlikely (result_2 == -1))
-    {
-      error = ACE_OS::last_error ();
-      if (error != EALREADY) // 114
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWESSID): \"%m\", aborting\n"),
-                    socket_handle));
-        goto clean;
-      } // end IF
-    } // end IF
-  } // end IF
-
-  // step2: set AP BSSID
-  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  // step1: set BSSID (AP MAC)
   ACE_OS::strncpy (iwreq_s.ifr_name,
                    interfaceIdentifier_in.c_str (),
                    IFNAMSIZ);
@@ -489,6 +513,29 @@ Net_WLAN_Tools::associate (const std::string& interfaceIdentifier_in,
     } // end IF
   } // end IF
 
+  // step2: set ESSID
+  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  ACE_OS::strncpy (iwreq_s.ifr_name,
+                   interfaceIdentifier_in.c_str (),
+                   IFNAMSIZ);
+  iwreq_s.u.essid.flags = 1;
+  iwreq_s.u.essid.length = SSID_in.size ();
+  iwreq_s.u.essid.pointer = const_cast<char*> (SSID_in.c_str ());
+  result_2 = ACE_OS::ioctl (socket_handle,
+                            SIOCSIWESSID,
+                            &iwreq_s);
+  if (unlikely (result_2 == -1))
+  {
+    error = ACE_OS::last_error ();
+    if (error != EALREADY) // 114
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWESSID): \"%m\", aborting\n"),
+                  socket_handle));
+      goto clean;
+    } // end IF
+  } // end IF
+
   result = true;
 
 clean:
@@ -500,22 +547,63 @@ clean:
                   ACE_TEXT ("failed to ACE_OS::close(\"%s\"): \"%m\", continuing\n"),
                   ACE_TEXT (interfaceIdentifier_in.c_str ())));
   } // end IF
+#endif
 
   return result;
 }
 
 void
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+Net_WLAN_Tools::scan (HANDLE clientHandle_in,
+                      REFGUID interfaceIdentifier_in,
+                      const std::string& ESSID_in)
+#else
 Net_WLAN_Tools::scan (const std::string& interfaceIdentifier_in,
                       const std::string& ESSID_in,
                       ACE_HANDLE handle_in,
                       bool wait_in)
+#endif
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::scan"));
 
   // sanity check(s)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_ASSERT (clientHandle_in != ACE_INVALID_HANDLE);
+  ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
+  ACE_ASSERT (ESSID_in.size () <= DOT11_SSID_MAX_LENGTH);
+#else
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
   ACE_ASSERT (interfaceIdentifier_in.size () <= IFNAMSIZ);
+  ACE_ASSERT (ESSID_in.size () <= IW_ESSID_MAX_SIZE);
+#endif
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _DOT11_SSID ssid_s;
+  ACE_OS::memset (&ssid_s, 0, sizeof (struct _DOT11_SSID));
+  ssid_s.uSSIDLength = ESSID_in.size ();
+  ACE_OS::memcpy (ssid_s.ucSSID,
+                  ESSID_in.c_str (),
+                  ESSID_in.size ());
+  //struct _WLAN_RAW_DATA raw_data_s;
+  //ACE_OS::memset (&raw_data_s, 0, sizeof (struct _WLAN_RAW_DATA));
+  // *NOTE*: this returns immediately
+  DWORD result_2 = WlanScan (clientHandle_in,
+                             &interfaceIdentifier_in,
+                             NULL, // *NOTE*: support WinXP
+                                   //&ssid_s,
+                             NULL, // *NOTE*: support WinXP
+                                   //&raw_data_s,
+                             NULL);
+  if (unlikely (result_2 != ERROR_SUCCESS))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("\"%s\": failed to ::WlanScan(0x%@): \"%s\", returning\n"),
+                clientHandle_in,
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+    return;
+  } // end IF
+#else
   ACE_HANDLE socket_handle = handle_in;
   bool close_handle = false;
   struct iwreq iwreq_s;
@@ -650,6 +738,62 @@ error:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_Tools::dropCapability(CAP_NET_ADMIN): \"%m\", continuing\n")));
 #endif
+#endif
+}
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+struct ether_addr
+Net_WLAN_Tools::associatedBSSID (HANDLE clientHandle_in,
+                                 REFGUID interfaceIdentifier_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::associatedBSSID"));
+
+  // initialize return value(s)
+  struct ether_addr return_value;
+  ACE_OS::memset (&return_value, 0, sizeof (struct ether_addr));
+
+  // sanity check(s)
+  if (unlikely ((clientHandle_in == ACE_INVALID_HANDLE) ||
+                InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid argument, aborting\n")));
+    return return_value;
+  } // end IF
+
+  DWORD data_size = 0;
+  PVOID data_p = NULL;
+  struct _WLAN_CONNECTION_ATTRIBUTES* wlan_connection_attributes_p = NULL;
+  DWORD result_2 =
+    WlanQueryInterface (clientHandle_in,
+                        &interfaceIdentifier_in,
+                        wlan_intf_opcode_current_connection,
+                        NULL,
+                        &data_size,
+                        &data_p,
+                        NULL);
+  if (unlikely ((result_2 != ERROR_SUCCESS) &&
+                (result_2 != ERROR_INVALID_STATE)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::WlanQueryInterface(\"%s\",wlan_intf_opcode_current_connection): \"%s\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+    return return_value;
+  } // end IF
+  if (result_2 == ERROR_INVALID_STATE) // <-- not connected
+    return return_value;
+  ACE_ASSERT (data_p && (data_size == sizeof (struct _WLAN_CONNECTION_ATTRIBUTES)));
+  wlan_connection_attributes_p =
+    static_cast<struct _WLAN_CONNECTION_ATTRIBUTES*> (data_p);
+  ACE_OS::memcpy (&return_value,
+                  wlan_connection_attributes_p->wlanAssociationAttributes.dot11Bssid,
+                  ETH_ALEN);
+
+  // clean up
+  WlanFreeMemory (data_p);
+
+  return return_value;
 }
 #endif
 
@@ -697,7 +841,7 @@ Net_WLAN_Tools::associatedSSID (const std::string& interfaceIdentifier_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::WlanQueryInterface(\"%s\",wlan_intf_opcode_current_connection): \"%s\", aborting\n"),
-                ACE_TEXT (Net_WLAN_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                 ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
     return result;
   } // end IF

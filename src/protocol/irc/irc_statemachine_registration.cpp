@@ -36,16 +36,6 @@ IRC_StateMachine_Registration::IRC_StateMachine_Registration ()
 
 }
 
-void
-IRC_StateMachine_Registration::initialize ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_StateMachine_Registration::initialize"));
-
-  if (!change (IRC_REGISTRATION_STATE_PASS))
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to IRC_StateMachine_Registration::change(IRC_REGISTRATION_STATE_PASS), continuing\n")));
-}
-
 bool
 IRC_StateMachine_Registration::change (enum IRC_RegistrationStateType newState_in)
 {

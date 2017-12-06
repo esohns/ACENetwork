@@ -31,12 +31,12 @@ class Net_Protocol_Layer
   // define different protocol layers
   // *IMPORTANT NOTE*: code relies on the fact that higher-level protocols are
   //                   assigned larger values
-  enum ProtocolLayer
+  enum ProtocolLayerType : int
   {
     INVALID = -1,
     // *** Link Layer Protocols
     ETHERNET,
-    FDDI_LLC_SNAP, // this actually wraps several layers...
+    FDDI_LLC_SNAP, // *TODO*: this wraps several layers
     // *** Network Layer Protocols
     IPv4,
     IPv6,
@@ -55,19 +55,21 @@ class Net_Protocol_Layer
   };
 
   // debug tools
-  static void ProtocolLayer2String(const ProtocolLayer&, // header type
-                                   std::string&);        // return value: corresp. string
+  static void ProtocolLayerToString (const enum ProtocolLayerType&, // header type
+                                     std::string&);                 // return value: corresp. string
 
  private:
   // safety measures
-  ACE_UNIMPLEMENTED_FUNC(Net_Protocol_Layer());
-  ACE_UNIMPLEMENTED_FUNC(virtual ~Net_Protocol_Layer());
-  ACE_UNIMPLEMENTED_FUNC(Net_Protocol_Layer(const Net_Protocol_Layer&));
-  ACE_UNIMPLEMENTED_FUNC(Net_Protocol_Layer& operator=(const Net_Protocol_Layer&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Protocol_Layer ());
+  ACE_UNIMPLEMENTED_FUNC (virtual ~Net_Protocol_Layer ());
+  ACE_UNIMPLEMENTED_FUNC (Net_Protocol_Layer (const Net_Protocol_Layer&));
+  ACE_UNIMPLEMENTED_FUNC (Net_Protocol_Layer& operator= (const Net_Protocol_Layer&));
 };
 
+//////////////////////////////////////////
+
 // convenience typedefs
-typedef Net_Protocol_Layer::ProtocolLayer Net_Protocol_t;
+typedef Net_Protocol_Layer::ProtocolLayerType Net_Protocol_t;
 typedef Net_Protocol_t Net_MessageHeader_t;
 
 #endif

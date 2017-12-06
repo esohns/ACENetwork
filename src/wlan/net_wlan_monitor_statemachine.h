@@ -29,7 +29,7 @@
 #include "common_istatemachine.h"
 #include "common_statemachine_base.h"
 
-enum Net_WLAN_MonitorState
+enum Net_WLAN_MonitorState : int
 {
   NET_WLAN_MONITOR_STATE_INVALID = -1,
   NET_WLAN_MONITOR_STATE_INITIAL = 0,  // initialized
@@ -48,15 +48,20 @@ enum Net_WLAN_MonitorState
 
 class Net_WLAN_MonitorStateMachine
  : public Common_StateMachine_Base_T<ACE_NULL_SYNCH,
-                                     enum Net_WLAN_MonitorState>
+                                     enum Net_WLAN_MonitorState,
+                                     Common_IStateMachine_T<enum Net_WLAN_MonitorState> >
 {
+  typedef Common_StateMachine_Base_T<ACE_NULL_SYNCH,
+                                     enum Net_WLAN_MonitorState,
+                                     Common_IStateMachine_T<enum Net_WLAN_MonitorState> > inherited;
+
  public:
   Net_WLAN_MonitorStateMachine ();
   inline virtual ~Net_WLAN_MonitorStateMachine () {}
 
   // implement (part of) Common_IStateMachine_T
-  virtual void initialize ();
-  inline virtual void reset () { initialize (); };
+  inline virtual bool initialize () { change (NET_WLAN_MONITOR_STATE_INVALID); return true; }
+  inline virtual void reset () { initialize (); }
   virtual std::string stateToString (enum Net_WLAN_MonitorState) const;
 
  protected:
@@ -67,14 +72,12 @@ class Net_WLAN_MonitorStateMachine
   virtual bool change (enum Net_WLAN_MonitorState); // new state
 
  private:
-  typedef Common_StateMachine_Base_T<ACE_NULL_SYNCH,
-                                     enum Net_WLAN_MonitorState> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_MonitorStateMachine (const Net_WLAN_MonitorStateMachine&))
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_MonitorStateMachine& operator= (const Net_WLAN_MonitorStateMachine&))
 };
 
-// convenient types
+//////////////////////////////////////////
+
 typedef Common_IStateMachine_T<enum Net_WLAN_MonitorState> Net_WLAN_Monitor_IStateMachine_t;
 
 #endif

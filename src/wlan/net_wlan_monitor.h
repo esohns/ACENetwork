@@ -137,7 +137,11 @@ class Net_WLAN_Monitor_T
                           const struct ether_addr&, // BSSID
 #endif
                           const std::string&);      // (E)SSID
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  inline virtual struct _GUID interfaceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->interfaceIdentifier; }
+#else
   inline virtual std::string interfaceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->interfaceIdentifier; }
+#endif
   virtual std::string SSID () const;
 
  protected:
@@ -145,11 +149,12 @@ class Net_WLAN_Monitor_T
   typedef typename SUBSCRIBERS_T::iterator SUBSCRIBERS_ITERATOR_T;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   typedef std::vector<struct _GUID> INTERFACEIDENTIFIERS_T;
+  typedef std::multimap<std::string, std::pair<struct _GUID, struct ether_addr> > SSIDS_TO_INTERFACEIDENTIFIER_MAP_T;
 #else
   typedef std::vector<std::string> INTERFACEIDENTIFIERS_T;
+  typedef std::multimap<std::string, std::pair<std::string, struct ether_addr> > SSIDS_TO_INTERFACEIDENTIFIER_MAP_T;
 #endif
   typedef INTERFACEIDENTIFIERS_T::iterator INTERFACEIDENTIFIERS_ITERATOR_T;
-  typedef std::multimap<std::string, std::pair<std::string, struct ether_addr> > SSIDS_TO_INTERFACEIDENTIFIER_MAP_T;
   typedef SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::const_iterator SSIDS_TO_INTERFACEIDENTIFIER_MAP_CONST_ITERATOR_T;
   typedef SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::iterator SSIDS_TO_INTERFACEIDENTIFIER_MAP_ITERATOR_T;
 
@@ -183,14 +188,21 @@ class Net_WLAN_Monitor_T
   typedef Stream_MessageQueue_T<ACE_SYNCH_USE,
                                 TimePolicyType,
                                 ACE_Message_Block> MESSAGEQUEUE_T;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  typedef std::pair<std::string, std::pair <struct _GUID, struct ether_addr>> SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T;
+  struct SSIDS_TO_INTERFACEIDENTIFIER_FIND_S
+   : public std::binary_function<SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T,
+                                 struct _GUID,
+                                 bool>
+  { inline bool operator() (const SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T& entry_in, struct _GUID value_in) const { return InlineIsEqualGUID (entry_in.second.first, value_in); } };
+#else
   typedef std::pair<std::string, std::pair <std::string, struct ether_addr>> SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T;
   struct SSIDS_TO_INTERFACEIDENTIFIER_FIND_S
    : public std::binary_function<SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T,
                                  std::string,
                                  bool>
-  {
-    inline bool operator() (const SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T& entry_in, std::string value_in) const { return entry_in.second.first == value_in; }
-  };
+  { inline bool operator() (const SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T& entry_in, std::string value_in) const { return entry_in.second.first == value_in; } };
+#endif
 
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T (const Net_WLAN_Monitor_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T& operator= (const Net_WLAN_Monitor_T&))
@@ -258,6 +270,8 @@ class Net_WLAN_Monitor_T
 
 //////////////////////////////////////////
 // partial specialization (for DBus strategy)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           ////////////////////////////////
@@ -435,6 +449,7 @@ class Net_WLAN_Monitor_T<ACE_SYNCH_USE,
 #endif
   MESSAGEQUEUE_T                          queue_;
 };
+#endif
 
 //////////////////////////////////////////
 

@@ -26,11 +26,12 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_istatemachine.h"
 #include "common_statemachine_base.h"
 
 #include "irc_exports.h"
 
-enum IRC_RegistrationStateType
+enum IRC_RegistrationStateType : int
 {
   IRC_REGISTRATION_STATE_INVALID = -1,
   IRC_REGISTRATION_STATE_PASS = 0,
@@ -43,15 +44,18 @@ enum IRC_RegistrationStateType
 
 class IRC_Export IRC_StateMachine_Registration
  : public Common_StateMachine_Base_T<ACE_NULL_SYNCH,
-                                     enum IRC_RegistrationStateType>
+                                     enum IRC_RegistrationStateType,
+                                     Common_IStateMachine_T<enum IRC_RegistrationStateType> >
 {
+  typedef Common_StateMachine_Base_T<ACE_NULL_SYNCH,
+                                     enum IRC_RegistrationStateType,
+                                     Common_IStateMachine_T<enum IRC_RegistrationStateType> > inherited;
+
  public:
   IRC_StateMachine_Registration ();
-  inline virtual ~IRC_StateMachine_Registration () {};
+  inline virtual ~IRC_StateMachine_Registration () {}
 
   // implement (part of) Common_IStateMachine_T
-  virtual void initialize ();
-  inline virtual void reset () { initialize (); };
   virtual std::string stateToString (enum IRC_RegistrationStateType) const;
 
  protected:
@@ -60,16 +64,14 @@ class IRC_Export IRC_StateMachine_Registration
   virtual bool change (enum IRC_RegistrationStateType); // new state
 
  private:
-  typedef Common_StateMachine_Base_T<ACE_NULL_SYNCH,
-                                     enum IRC_RegistrationStateType> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (IRC_StateMachine_Registration (const IRC_StateMachine_Registration&))
   ACE_UNIMPLEMENTED_FUNC (IRC_StateMachine_Registration& operator= (const IRC_StateMachine_Registration&))
 
   ACE_SYNCH_NULL_MUTEX lock_;
 };
 
-// convenient types
+//////////////////////////////////////////
+
 typedef Common_IStateMachine_T<enum IRC_RegistrationStateType> IRC_IRegistrationStateMachine_t;
 
 #endif

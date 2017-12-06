@@ -4,10 +4,13 @@
 
 if (UNIX)
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/timer)
+
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
 elseif (WIN32)
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/timer)
+
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
 endif ()
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../)
@@ -29,14 +32,15 @@ set (${PROJECT_NAME}_Client_LIB_SRCS
      net_client_defines.h
      net_client_exports.h)
 
-add_library (${PROJECT_NAME}_Client STATIC ${ACENetwork_Client_LIB_SRCS})
+add_library (${PROJECT_NAME}_Client STATIC
+             ${ACENetwork_Client_LIB_SRCS})
 
 set_target_properties (${PROJECT_NAME}_Client PROPERTIES DEFINE_SYMBOL NET_CLIENT_BUILD_DLL)
 set_target_properties (${PROJECT_NAME}_Client PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Client PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
-set_target_properties (${PROJECT_NAME}_Client PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
+#set_target_properties (${PROJECT_NAME}_Client PROPERTIES COTIRE_ENABLE_PRECOMPILED_HEADER FALSE)
 #cotire (${PROJECT_NAME}_Client)
 
 ############## next target ################
@@ -57,7 +61,8 @@ set (${PROJECT_NAME}_Server_LIB_SRCS
      net_server_ssl_listener.h
      net_server_ssl_listener.inl)
 
-add_library (${PROJECT_NAME}_Server STATIC ${ACENetwork_Server_LIB_SRCS})
+add_library (${PROJECT_NAME}_Server STATIC
+             ${ACENetwork_Server_LIB_SRCS})
 
 if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Server ${ACE_LIBRARY})

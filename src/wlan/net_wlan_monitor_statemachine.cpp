@@ -36,16 +36,6 @@ Net_WLAN_MonitorStateMachine::Net_WLAN_MonitorStateMachine ()
 
 }
 
-void
-Net_WLAN_MonitorStateMachine::initialize ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_MonitorStateMachine::initialize"));
-
-  if (!change (NET_WLAN_MONITOR_STATE_INVALID))
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_WLAN_MonitorStateMachine::change(NET_WLAN_MONITOR_STATE_INVALID), continuing\n")));
-}
-
 bool
 Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
 {
