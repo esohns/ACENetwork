@@ -961,11 +961,11 @@ IRC_Client_GUI_MessageHandler::remove (const std::string& nick_in,
   ACE_ASSERT (list_store_p);
 
   // step1: convert text
-  gchar* string_p = Common_UI_Tools::Locale2UTF8 (nick_in);
+  gchar* string_p = Common_UI_Tools::LocaleToUTF8 (nick_in);
   if (!string_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"): \"%m\", returning\n"),
+                ACE_TEXT ("failed to Common_UI_Tools::LocaleToUTF8(\"%s\"): \"%m\", returning\n"),
                 ACE_TEXT (nick_in.c_str ())));
 
     // clean up

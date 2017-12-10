@@ -225,11 +225,11 @@ connection_setup_function (void* arg_in)
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("%s\n"),
                   ACE_TEXT (converter.str ().c_str ())));
-      string_p = Common_UI_Tools::Locale2UTF8 (converter.str ());
+      string_p = Common_UI_Tools::LocaleToUTF8 (converter.str ());
       if (!string_p)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"): \"%m\", returning\n"),
+                    ACE_TEXT ("failed to Common_UI_Tools::LocaleToUTF8(\"%s\"): \"%m\", returning\n"),
                     ACE_TEXT (converter.str ().c_str ())));
         goto remove_page;
       } // end IF
@@ -278,10 +278,10 @@ connection_failed:
                 ACE_TEXT (converter.str ().c_str ())));
 
     // clean up
-    string_p = Common_UI_Tools::Locale2UTF8 (converter.str ());
+    string_p = Common_UI_Tools::LocaleToUTF8 (converter.str ());
     if (!string_p)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"): \"%m\", continuing\n"),
+                  ACE_TEXT ("failed to Common_UI_Tools::LocaleToUTF8(\"%s\"): \"%m\", continuing\n"),
                   ACE_TEXT (converter.str ().c_str ())));
     gdk_threads_enter ();
     gtk_statusbar_push (statusbar_p,
@@ -672,11 +672,11 @@ idle_add_connection_cb (gpointer userData_in)
     GTK_LABEL (gtk_builder_get_object ((*iterator_2).second.second,
                                        ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_LABEL_CONNECTION_TAB)));
   ACE_ASSERT (label_p);
-  string_p = Common_UI_Tools::Locale2UTF8 (data_p->label);
+  string_p = Common_UI_Tools::LocaleToUTF8 (data_p->label);
   if (!string_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT ("failed to Common_UI_Tools::LocaleToUTF8(\"%s\"): \"%m\", aborting\n"),
                 ACE_TEXT (data_p->label.c_str ())));
 
     // clean up
@@ -2042,13 +2042,12 @@ button_send_clicked_cb (GtkWidget* widget_in,
     }
     case IRC_CHARACTERENCODING_LOCALE:
     {
-      message_string =
-        Common_UI_Tools::UTF82Locale (string_p, // text
-                                      -1);      // number of bytes
+      message_string = Common_UI_Tools::UTF8ToLocale (string_p, -1);
       if (message_string.empty ())
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Common_UI_Tools::UTF82Locale(): \"%m\", returning\n")));
+                    ACE_TEXT ("failed to Common_UI_Tools::UTF8ToLocale(\"%s\"): \"%m\", returning\n"),
+                    string_p));
 
         // clean up
         gtk_entry_buffer_delete_text (buffer_p, // buffer
@@ -2364,12 +2363,12 @@ usersbox_changed_cb (GtkWidget* widget_in,
   // convert UTF8 to locale
 //   user_string = g_value_get_string(&active_value);
   std::string username =
-    Common_UI_Tools::UTF82Locale (string_p,
-                                  g_utf8_strlen (string_p, -1));
+    Common_UI_Tools::UTF8ToLocale (string_p,
+                                   g_utf8_strlen (string_p, -1));
   if (username.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_UI_Tools::UTF82Locale(\"%s\"), returning\n"),
+                ACE_TEXT ("failed to Common_UI_Tools::UTF8ToLocale(\"%s\"), returning\n"),
                 ACE_TEXT (string_p)));
 
     // clean up
@@ -2606,12 +2605,12 @@ channelbox_changed_cb (GtkWidget* widget_in,
   // convert UTF8 to locale
 //   channel_string = g_value_get_string(&active_value);
   std::string channel_string =
-    Common_UI_Tools::UTF82Locale (channel_value,
-                                  g_utf8_strlen (channel_value, -1));
+    Common_UI_Tools::UTF8ToLocale (channel_value,
+                                   g_utf8_strlen (channel_value, -1));
   if (channel_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to convert channel name (was: \"%s\", returning\n"),
+                ACE_TEXT ("failed to Common_UI_Tools::UTF8ToLocale(\"%s\"), returning\n"),
                 channel_value));
 
     // clean up
@@ -2920,8 +2919,8 @@ action_away_cb (GtkAction* action_in,
     //gtk_widget_hide (GTK_WIDGET (dialog_p));
 
     away_message =
-      Common_UI_Tools::UTF82Locale (gtk_entry_get_text (entry_p),
-                                        -1);
+      Common_UI_Tools::UTF8ToLocale (gtk_entry_get_text (entry_p),
+                                     -1);
     // clean up
     gtk_entry_buffer_delete_text (gtk_entry_get_buffer (entry_p),
                                   0, -1);
