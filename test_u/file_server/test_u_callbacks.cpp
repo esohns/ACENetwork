@@ -94,11 +94,11 @@ idle_update_log_display_cb (gpointer userData_in)
          iterator_2 != data_p->logStack.end ();
          ++iterator_2)
     {
-      converted_text = Common_UI_Tools::Locale2UTF8 (*iterator_2);
+      converted_text = Common_UI_Tools::LocaleToUTF8 (*iterator_2);
       if (!converted_text)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to convert message text (was: \"%s\"), aborting\n"),
+                    ACE_TEXT ("failed to Common_UI_Tools::LocaleToUTF8(\"%s\"), aborting\n"),
                     ACE_TEXT ((*iterator_2).c_str ())));
         return G_SOURCE_REMOVE;
       } // end IF
@@ -398,7 +398,7 @@ idle_initialize_ui_cb (gpointer userData_in)
     //if (!gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
     //                                              file_uri.c_str ()))
     filename_p =
-      Common_UI_Tools::Locale2UTF8 ((*iterator_2).second.second.fileName);
+      Common_UI_Tools::LocaleToUTF8 ((*iterator_2).second.second.fileName);
     if (!gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_button_p),
                                         filename_p))
     {
@@ -437,7 +437,7 @@ idle_initialize_ui_cb (gpointer userData_in)
     //ACE_ASSERT (file_p);
 
     filename_p =
-      Common_UI_Tools::Locale2UTF8 (Common_File_Tools::getTempDirectory ());
+      Common_UI_Tools::LocaleToUTF8 (Common_File_Tools::getTempDirectory ());
     if (!gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_button_p),
                                         filename_p))
     {
@@ -844,7 +844,7 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.end ());
     (*iterator_2).second.second.fileName =
-        Common_UI_Tools::UTF82Locale (filename_p, -1);
+        Common_UI_Tools::UTF8ToLocale (filename_p, -1);
     g_free (filename_p);
 
     if (!data_p->configuration->listener->initialize (data_p->configuration->listenerConfiguration))

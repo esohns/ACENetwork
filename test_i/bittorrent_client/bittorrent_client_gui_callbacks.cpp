@@ -1066,13 +1066,13 @@ button_connection_close_clicked_cb (GtkWidget* widget_in,
   // convert UTF8 to locale
 //   channel_string = g_value_get_string(&active_value);
   std::string connection_string =
-    Common_UI_Tools::UTF82Locale (connection_value,
-                                  g_utf8_strlen (connection_value, -1));
+    Common_UI_Tools::UTF8ToLocale (connection_value,
+                                   g_utf8_strlen (connection_value, -1));
   g_free (connection_value);
   if (connection_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to convert connection name (was: \"%s\", returning\n"),
+                ACE_TEXT ("failed to Common_UI_Tools::UTF8ToLocale(\"%s\"), returning\n"),
                 connection_value));
     return;
   } // end IF
@@ -1126,13 +1126,13 @@ combobox_connections_changed_cb (GtkWidget* widget_in,
   // convert UTF8 to locale
 //   channel_string = g_value_get_string(&active_value);
   std::string connection_string =
-    Common_UI_Tools::UTF82Locale (connection_value,
-                                  g_utf8_strlen (connection_value, -1));
+    Common_UI_Tools::UTF8ToLocale (connection_value,
+                                   g_utf8_strlen (connection_value, -1));
   g_free (connection_value);
   if (connection_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to convert connection name (was: \"%s\", returning\n"),
+                ACE_TEXT ("failed to Common_UI_Tools::UTF8ToLocale(\"%s\"), returning\n"),
                 connection_value));
     return;
   } // end IF

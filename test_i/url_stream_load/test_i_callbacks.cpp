@@ -233,7 +233,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
   gchar* text_p =
-    Common_UI_Tools::Locale2UTF8 ((*iterator_3).second.second.URL);
+    Common_UI_Tools::LocaleToUTF8 ((*iterator_3).second.second.URL);
   gtk_entry_set_text (entry_p,
                       text_p);
   g_free (text_p);
@@ -927,7 +927,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_URL_NAME)));
     ACE_ASSERT (entry_p);
     (*iterator_3).second.second.URL =
-      Common_UI_Tools::UTF82Locale (gtk_entry_get_text (entry_p), -1);
+      Common_UI_Tools::UTF8ToLocale (gtk_entry_get_text (entry_p), -1);
     if (!HTTP_Tools::parseURL ((*iterator_3).second.second.URL,
                                hostname_string,
                                URI_string,

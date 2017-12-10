@@ -95,11 +95,11 @@ idle_update_log_display_cb (gpointer userData_in)
          iterator_2 != data_p->logStack.end ();
          ++iterator_2)
     {
-      converted_text = Common_UI_Tools::Locale2UTF8 (*iterator_2);
+      converted_text = Common_UI_Tools::LocaleToUTF8 (*iterator_2);
       if (!converted_text)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to convert message text (was: \"%s\"), aborting\n"),
+                    ACE_TEXT ("failed to Common_UI_Tools::LocaleToUTF8(\"%s\"), aborting\n"),
                     ACE_TEXT ((*iterator_2).c_str ())));
         return G_SOURCE_REMOVE;
       } // end IF
