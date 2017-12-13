@@ -68,7 +68,7 @@ add_library (${PROJECT_NAME}_WLAN STATIC
 add_dependencies (${PROJECT_NAME}_WLAN Common)
 if (UNIX)
  if (DBUS_SUPPORT)
-  add_dependencies (${PROJECT_NAME}_WLAN Common_DBus)
+  add_dependencies (${PROJECT_NAME}_WLAN CommonDBus)
  endif ()
 endif ()
 
@@ -83,7 +83,7 @@ cotire (${PROJECT_NAME}_WLAN)
 
 if (UNIX)
  if (DBUS_SUPPORT)
-  target_link_libraries (${PROJECT_NAME}_WLAN Common_DBus)
+  target_link_libraries (${PROJECT_NAME}_WLAN CommonDBus)
  endif ()
 elseif (WIN32)
  target_link_libraries (${PROJECT_NAME}_WLAN ${ACE_LIBRARY})
