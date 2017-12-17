@@ -73,7 +73,7 @@ const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("HTTPDecoderStream");
 void
 do_printUsage (const std::string& programName_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::do_printUsage"));
+  NETWORK_TRACE (ACE_TEXT ("::do_printUsage"));
 
   // enable verbatim boolean output
   std::cout.setf (std::ios::boolalpha);
@@ -156,7 +156,7 @@ do_processArguments (int argc_in,
                      bool& printVersionAndExit_out,
                      unsigned int& numberOfDispatchThreads_out)
 {
-  STREAM_TRACE (ACE_TEXT ("::do_processArguments"));
+  NETWORK_TRACE (ACE_TEXT ("::do_processArguments"));
 
   int result = -1;
   std::string path =
@@ -387,7 +387,7 @@ do_initializeSignals (bool allowUserRuntimeConnect_in,
                       ACE_Sig_Set& signals_out,
                       ACE_Sig_Set& ignoredSignals_out)
 {
-  STREAM_TRACE (ACE_TEXT ("::do_initializeSignals"));
+  NETWORK_TRACE (ACE_TEXT ("::do_initializeSignals"));
 
   int result = -1;
 
@@ -470,10 +470,10 @@ do_work (unsigned int bufferSize_in,
          Common_SignalActions_t& previousSignalActions_inout,
          Test_U_Protocol_SignalHandler& signalHandler_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::do_work"));
+  NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   // step0a: initialize configuration and stream
-  struct Test_U_Configuration configuration;
+  struct Test_U_HTTPDecoder_Configuration configuration;
   configuration.useReactor = useReactor_in;
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
@@ -929,7 +929,7 @@ clean_up:
 void
 do_printVersion (const std::string& programName_in)
 {
-  STREAM_TRACE (ACE_TEXT ("::do_printVersion"));
+  NETWORK_TRACE (ACE_TEXT ("::do_printVersion"));
 
   std::ostringstream converter;
 
@@ -978,7 +978,7 @@ int
 ACE_TMAIN (int argc_in,
            ACE_TCHAR* argv_in[])
 {
-  STREAM_TRACE (ACE_TEXT ("::main"));
+  NETWORK_TRACE (ACE_TEXT ("::main"));
 
   int result = -1;
 

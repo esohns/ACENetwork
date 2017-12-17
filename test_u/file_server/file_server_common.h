@@ -99,6 +99,7 @@ struct FileServer_Configuration
 {
   FileServer_Configuration ()
    : Test_U_Configuration ()
+   , allocatorConfiguration ()
    , connectionConfigurations ()
    , handle (ACE_INVALID_HANDLE)
    , listener (NULL)
@@ -108,6 +109,7 @@ struct FileServer_Configuration
    , userData ()
   {};
 
+  struct Stream_AllocatorConfiguration         allocatorConfiguration;
   FileServer_ConnectionConfigurations_t        connectionConfigurations;
   ACE_HANDLE                                   handle;
   Test_U_IListener_t*                          listener;

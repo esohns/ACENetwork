@@ -40,7 +40,7 @@
 
 //#include "net_server_defines.h"
 
-//#include "test_u_common.h"
+#include "test_u_common.h"
 //#include "test_u_stream_common.h"
 
 //#include "test_u_connection_common.h"
@@ -77,14 +77,16 @@
 //};
 
 //struct Test_U_ConnectionConfiguration;
-struct Test_U_Configuration
-{
-  inline Test_U_Configuration ()
-   : allocatorConfiguration ()
-  {};
+//struct FileServer_Configuration
+// : Test_U_Configuration
+//{
+//  FileServer_Configuration ()
+//   : Test_U_Configuration ()
+//   , allocatorConfiguration ()
+//  {};
 
-  // **************************** stream data **********************************
-  struct Stream_AllocatorConfiguration allocatorConfiguration;
-};
+//  // **************************** stream data **********************************
+//  struct Stream_AllocatorConfiguration allocatorConfiguration;
+//};
 
 #endif

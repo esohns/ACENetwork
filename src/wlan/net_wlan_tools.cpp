@@ -491,6 +491,43 @@ Net_WLAN_Tools::associate (const std::string& interfaceIdentifier_in,
     close_handle = true;
   } // end IF
 
+  // step0: set mode ?
+  ACE_OS::strncpy (iwreq_s.ifr_name,
+                   interfaceIdentifier_in.c_str (),
+                   IFNAMSIZ);
+  result_2 = ACE_OS::ioctl (socket_handle,
+                            SIOCGIWMODE,
+                            &iwreq_s);
+  if (unlikely (result_2 == -1))
+  {
+    error = ACE_OS::last_error ();
+    if (error != EALREADY) // 114
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCGIWMODE): \"%m\", aborting\n"),
+                  socket_handle));
+      goto clean;
+    } // end IF
+  } // end IF
+  if (unlikely (iwreq_s.u.mode != IW_MODE_INFRA))
+  {
+    iwreq_s.u.mode = IW_MODE_INFRA;
+    result_2 = ACE_OS::ioctl (socket_handle,
+                              SIOCSIWMODE,
+                              &iwreq_s);
+    if (unlikely (result_2 == -1))
+    {
+      error = ACE_OS::last_error ();
+      if (error != EALREADY) // 114
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWMODE): \"%m\", aborting\n"),
+                    socket_handle));
+        goto clean;
+      } // end IF
+    } // end IF
+  } // end IF
+
   // step1: set BSSID (AP MAC)
   ACE_OS::strncpy (iwreq_s.ifr_name,
                    interfaceIdentifier_in.c_str (),
@@ -537,6 +574,26 @@ Net_WLAN_Tools::associate (const std::string& interfaceIdentifier_in,
     } // end IF
   } // end IF
 
+  // step3: commit pending changes
+  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  ACE_OS::strncpy (iwreq_s.ifr_name,
+                   interfaceIdentifier_in.c_str (),
+                   IFNAMSIZ);
+  result_2 = ACE_OS::ioctl (socket_handle,
+                            SIOCSIWCOMMIT,
+                            &iwreq_s);
+  if (unlikely (result_2 == -1))
+  {
+    error = ACE_OS::last_error ();
+    if (error != ENOTSUP)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWCOMMIT): \"%m\", aborting\n"),
+                  socket_handle));
+      goto clean;
+    } // end IF
+  } // end IF
+
   result = true;
 
 clean:
@@ -551,6 +608,140 @@ clean:
 #endif
 
   return result;
+}
+
+void
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+Net_WLAN_Tools::disassociate (HANDLE clientHandle_in,
+                              REFGUID interfaceIdentifier_in)
+#else
+Net_WLAN_Tools::disassociate (const std::string& interfaceIdentifier_in,
+                              ACE_HANDLE handle_in)
+#endif
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::disassociate"));
+
+  // sanity check(s)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_ASSERT (clientHandle_in != ACE_INVALID_HANDLE);
+  ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
+#else
+  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+  ACE_ASSERT (interfaceIdentifier_in.size () <= IFNAMSIZ);
+#endif
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _DOT11_SSID ssid_s;
+  ACE_OS::memset (&ssid_s, 0, sizeof (struct _DOT11_SSID));
+  ssid_s.uSSIDLength = SSID_in.size ();
+  ACE_OS::memcpy (ssid_s.ucSSID,
+                  SSID_in.c_str (),
+                  SSID_in.size ());
+  struct _WLAN_CONNECTION_PARAMETERS wlan_connection_parameters_s;
+  ACE_OS::memset (&wlan_connection_parameters_s,
+                  0,
+                  sizeof (struct _WLAN_CONNECTION_PARAMETERS));
+  // *TODO*: do the research here
+  wlan_connection_parameters_s.wlanConnectionMode =
+    //wlan_connection_mode_profile; // support WinXP
+    wlan_connection_mode_discovery_unsecure;
+  //wlan_connection_parameters_s.strProfile = NULL;
+  wlan_connection_parameters_s.pDot11Ssid = &ssid_s;
+  //wlan_connection_parameters_s.pDesiredBssidList = NULL;
+  wlan_connection_parameters_s.dot11BssType =
+    dot11_BSS_type_infrastructure;
+    //wlan_connection_parameters_s.dwFlags = 0;
+  // *NOTE*: this returns immediately
+  DWORD result_2 = WlanDisconnect (clientHandle_in,
+                                   &interfaceIdentifier_in,
+                                   &wlan_connection_parameters_s,
+                                   NULL);
+  if (unlikely (result_2 != ERROR_SUCCESS))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("\"%s\": failed to ::WlanConnect(0x%@,%s): \"%s\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+                clientHandle_in,
+                ACE_TEXT (SSID_in.c_str ()),
+                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+    return false;
+  } // end IF
+
+  result = true;
+#else
+  struct iwreq iwreq_s;
+  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  ACE_HANDLE socket_handle = handle_in;
+  bool close_handle = false;
+  int result_2 = -1;
+  int error = 0;
+
+  if (unlikely (socket_handle == ACE_INVALID_HANDLE))
+  {
+    socket_handle = ACE_OS::socket (AF_INET,
+                                    SOCK_STREAM,
+                                    0);
+    if (unlikely (socket_handle == -1))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::socket(AF_INET): \"%m\", returning\n")));
+      return;
+    } // end IF
+    close_handle = true;
+  } // end IF
+
+  // step1: reset BSSID (AP MAC)
+  ACE_OS::strncpy (iwreq_s.ifr_name,
+                   interfaceIdentifier_in.c_str (),
+                   IFNAMSIZ);
+  iwreq_s.u.ap_addr.sa_family = ARPHRD_ETHER;
+  result_2 = ACE_OS::ioctl (socket_handle,
+                            SIOCSIWAP,
+                            &iwreq_s);
+  if (unlikely (result_2 == -1))
+  {
+    error = ACE_OS::last_error ();
+    if (error != EALREADY) // 114
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWAP): \"%m\", returning\n"),
+                  socket_handle));
+      goto clean;
+    } // end IF
+  } // end IF
+
+  // step2: commit pending changes
+  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  ACE_OS::strncpy (iwreq_s.ifr_name,
+                   interfaceIdentifier_in.c_str (),
+                   IFNAMSIZ);
+  result_2 = ACE_OS::ioctl (socket_handle,
+                            SIOCSIWCOMMIT,
+                            &iwreq_s);
+  if (unlikely (result_2 == -1))
+  {
+    error = ACE_OS::last_error ();
+    if (error != ENOTSUP)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWCOMMIT): \"%m\", returning\n"),
+                  socket_handle));
+      goto clean;
+    } // end IF
+  } // end IF
+
+clean:
+  if (unlikely (close_handle))
+  {
+    result_2 = ACE_OS::close (socket_handle);
+    if (unlikely (result_2 == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::close(\"%s\"): \"%m\", continuing\n"),
+                  ACE_TEXT (interfaceIdentifier_in.c_str ())));
+  } // end IF
+#endif
+
+  return;
 }
 
 void

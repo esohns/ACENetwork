@@ -29,6 +29,8 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #include <ifaddrs.h>
+
+#include "dhcpctl/dhcpctl.h"
 #endif
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -95,6 +97,12 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   ACE_OS::memset (&range_, 0, sizeof (struct iw_range));
+
+  isc_result_t status_i = dhcpctl_initialize ();
+  if (status_i != ISC_R_SUCCESS)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::dhcpctl_initialize(): \"%s\", continuing\n"),
+                ACE_TEXT (isc_result_totext (status_i))));
 #endif
 }
 
@@ -551,13 +559,19 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
                 ACE_TEXT ("not running, aborting\n")));
     return false;
   } // end IF
+  std::string ssid_s = SSID ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
+  if (likely (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL)))
 #else
-  if (!interfaceIdentifier_in.empty ())
+  if (likely (!interfaceIdentifier_in.empty ()))
 #endif
-    if (SSID () == SSID_in)
+    if (unlikely (!ACE_OS::strcmp (ssid_s.c_str (),
+                                   SSID_in.c_str ())))
       return true; // --> nothing to do
+
+  if (!ssid_s.empty ())
+    Net_WLAN_Tools::disassociate (interfaceIdentifier (),
+                                  handle_);
 
   INTERFACEIDENTIFIERS_T interface_identifiers;
   INTERFACEIDENTIFIERS_ITERATOR_T iterator;
@@ -1107,6 +1121,107 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
 #endif
         return;
       } // end IF
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+      // obtain an IP address via DHCP
+      dhcpctl_handle connection_h = dhcpctl_null_handle;
+      dhcpctl_handle authenticator_h = dhcpctl_null_handle;
+      dhcpctl_handle interface_h = dhcpctl_null_handle;
+      dhcpctl_status wait_status = -1;
+      dhcpctl_data_string result_string;
+      dhcpctl_status status_i =
+          dhcpctl_connect (&connection_h,
+                           ACE_TEXT_ALWAYS_CHAR ("192.168.0.1"),
+                           7911,
+                           authenticator_h);
+      if (status_i != ISC_R_SUCCESS)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ::dhcpctl_connect(%s:%u): \"%s\", returning\n"),
+                    ACE_TEXT ("192.168.0.1"), 7911,
+                    ACE_TEXT (isc_result_totext (status_i))));
+        return;
+      } // end IF
+      ACE_ASSERT (connection_h != dhcpctl_null_handle);
+
+      status_i = dhcpctl_new_object (&interface_h,
+                                     connection_h,
+                                     ACE_TEXT_ALWAYS_CHAR ("interface"));
+      if (status_i != ISC_R_SUCCESS)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ::dhcpctl_new_object(0x%@,%s): \"%s\", returning\n"),
+                    connection_h,
+                    ACE_TEXT ("interface"),
+                    ACE_TEXT (isc_result_totext (status_i))));
+        return;
+      } // end IF
+      ACE_ASSERT (interface_h != dhcpctl_null_handle);
+      status_i =
+          dhcpctl_set_string_value (interface_h,
+                                    ACE_TEXT_ALWAYS_CHAR (interface_identifier_string.c_str ()),
+                                    ACE_TEXT_ALWAYS_CHAR ("name"));
+      if (status_i != ISC_R_SUCCESS)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ::dhcpctl_set_string_value(0x%@,%s,\"%s\"): \"%s\", returning\n"),
+                    interface_h,
+                    ACE_TEXT (interface_identifier_string.c_str ()),
+                    ACE_TEXT ("name"),
+                    ACE_TEXT (isc_result_totext (status_i))));
+        return;
+      } // end IF
+      status_i =
+          dhcpctl_open_object (interface_h,
+                               connection_h,
+                               DHCPCTL_CREATE | DHCPCTL_EXCL);
+      if (status_i != ISC_R_SUCCESS)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ::dhcpctl_open_object(0x%@,0x%@,%d): \"%s\", returning\n"),
+                    interface_h,
+                    connection_h,
+                    DHCPCTL_CREATE | DHCPCTL_EXCL,
+                    ACE_TEXT (isc_result_totext (status_i))));
+        return;
+      } // end IF
+
+      status_i = dhcpctl_wait_for_completion (interface_h,
+                                              &wait_status);
+      if (status_i != ISC_R_SUCCESS)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ::dhcpctl_wait_for_completion(0x%@): \"%s\", returning\n"),
+                    interface_h,
+                    ACE_TEXT (isc_result_totext (status_i))));
+        return;
+      } // end IF
+      if (wait_status != ISC_R_SUCCESS)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ::dhcpctl_open_object(0x%@,create): \"%s\", returning\n"),
+                    interface_h,
+                    ACE_TEXT (isc_result_totext (wait_status))));
+        return;
+      } // end IF
+
+      ACE_OS::memset (&result_string, 0, sizeof (dhcpctl_data_string));
+      status_i = dhcpctl_get_value (&result_string,
+                                    interface_h,
+                                    ACE_TEXT_ALWAYS_CHAR ("state"));
+      if (status_i != ISC_R_SUCCESS)
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ::dhcpctl_get_value(0x%@,state): \"%s\", returning\n"),
+                    interface_h,
+                    ACE_TEXT (isc_result_totext (wait_status))));
+        return;
+      } // end IF
+
+      dhcpctl_data_string_dereference (&result_string, MDL);
+#endif
+
       // *TODO*: implement nl80211 support, rather than polling
       do
       {
@@ -1152,7 +1267,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
         } // end IF
         message_block_p->release ();
         message_block_p = NULL;
-      } while (true);
+      } while (true); // *TODO*: add association timeout
       if (unlikely (done))
         break;
 

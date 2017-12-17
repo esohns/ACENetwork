@@ -46,19 +46,19 @@
 
 #include "test_u_HTTP_decoder_stream_common.h"
 
-struct Test_U_StreamConfiguration;
-struct Test_U_HTTPDecoder_UserData
- : Test_U_UserData
-{
-  inline Test_U_HTTPDecoder_UserData ()
-   : Test_U_UserData ()
-  {};
-};
+//struct Test_U_StreamConfiguration;
+//struct Test_U_HTTPDecoder_UserData
+// : Test_U_UserData
+//{
+//  Test_U_HTTPDecoder_UserData ()
+//   : Test_U_UserData ()
+//  {};
+//};
 
 struct Test_U_AllocatorConfiguration
  : Stream_AllocatorConfiguration
 {
-  inline Test_U_AllocatorConfiguration ()
+  Test_U_AllocatorConfiguration ()
    : Stream_AllocatorConfiguration ()
   {
     // *NOTE*: this facilitates (message block) data buffers to be scanned with
@@ -67,10 +67,10 @@ struct Test_U_AllocatorConfiguration
   };
 };
 
-struct Test_U_SignalHandlerConfiguration
+struct Test_U_HTTPDecoder_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
-  inline Test_U_SignalHandlerConfiguration ()
+  Test_U_HTTPDecoder_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    //messageAllocator (NULL)
    , statisticReportingInterval (0)
@@ -92,29 +92,28 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
-struct Test_U_Configuration
+struct Test_U_HTTPDecoder_Configuration
+ : Test_U_Configuration
 {
-  inline Test_U_Configuration ()
-   : connectionConfigurations ()
+  Test_U_HTTPDecoder_Configuration ()
+   : Test_U_Configuration ()
+   , connectionConfigurations ()
    , parserConfiguration ()
    , signalHandlerConfiguration ()
    , streamConfiguration ()
    , useReactor (NET_EVENT_USE_REACTOR)
-   , userData ()
   {};
 
   // **************************** socket data **********************************
-  Test_U_ConnectionConfigurations_t        connectionConfigurations;
+  Test_U_ConnectionConfigurations_t                    connectionConfigurations;
   // **************************** parser data **********************************
-  struct Common_ParserConfiguration        parserConfiguration;
+  struct Common_ParserConfiguration                    parserConfiguration;
   // **************************** signal data **********************************
-  struct Test_U_SignalHandlerConfiguration signalHandlerConfiguration;
+  struct Test_U_HTTPDecoder_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** stream data **********************************
-  Test_U_StreamConfiguration_t             streamConfiguration;
+  Test_U_StreamConfiguration_t                         streamConfiguration;
   // *************************** protocol data *********************************
-  bool                                     useReactor;
-
-  struct Test_U_UserData                   userData;
+  bool                                                 useReactor;
 };
 
 #endif

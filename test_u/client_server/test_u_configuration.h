@@ -124,10 +124,12 @@ struct Test_U_StreamConfiguration
 };
 
 //struct Test_U_ConnectionConfiguration;
-struct Test_U_Configuration
+struct Test_U_ClientServer_Configuration
+ : Test_U_Configuration
 {
-  Test_U_Configuration ()
-   : connectionConfigurations ()
+  Test_U_ClientServer_Configuration ()
+   : Test_U_Configuration ()
+   , connectionConfigurations ()
    , streamConfiguration ()
    , protocolConfiguration ()
    , userData ()

@@ -97,10 +97,10 @@ struct Test_U_Server_ListenerConfiguration
 };
 
 struct Test_U_Server_Configuration
- : Test_U_Configuration
+ : Test_U_ClientServer_Configuration
 {
   Test_U_Server_Configuration ()
-   : Test_U_Configuration ()
+   : Test_U_ClientServer_Configuration ()
    , allocatorConfiguration ()
    , connector (NULL)
    , listener (NULL)

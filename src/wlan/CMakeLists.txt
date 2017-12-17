@@ -3,9 +3,46 @@ if (UNIX)
          ON)
 endif ()
 
+set (JSON_LIB_FILE libjson-c.so.3)
+set (ISC_LIB_FILE libisc.a)
+set (DHCPCTL_LIB_FILE libdhcpctl.a)
+if (UNIX)
+  find_library (JSON_LIBRARY ${JSON_LIB_FILE}
+                HINTS /usr/lib
+                PATH_SUFFIXES x86_64-linux-gnu
+                DOC "searching for ${JSON_LIB_FILE} (system paths)")
+  find_library (ISC_LIBRARY ${ISC_LIB_FILE}
+                HINTS /usr/lib
+                PATH_SUFFIXES x86_64-linux-gnu
+                DOC "searching for ${ISC_LIB_FILE} (system paths)")
+  find_library (DHCPCTL_LIBRARY ${DHCPCTL_LIB_FILE}
+               HINTS /usr/lib
+#               PATH_SUFFIXES x86_64-linux-gnu
+               DOC "searching for ${DHCPCTL_LIB_FILE} (system paths)")
+endif ()
+if (UNIX)
+ if (NOT JSON_LIBRARY)
+  message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
+ else ()
+  message (STATUS "Found json library \"${JSON_LIBRARY}\"")
+ endif ()
+ if (NOT ISC_LIBRARY)
+  message (FATAL_ERROR "could not find ${ISC_LIB_FILE}, aborting")
+ else ()
+  message (STATUS "Found isc library \"${ISC_LIBRARY}\"")
+ endif ()
+ if (NOT DHCPCTL_LIBRARY)
+  message (FATAL_ERROR "could not find ${DHCPCTL_LIB_FILE}, aborting")
+ else ()
+  message (STATUS "Found dhcpctl library \"${DHCPCTL_LIBRARY}\"")
+ endif ()
+endif ()
+
 include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
 if (UNIX)
+ pkg_check_modules (PKG_LIBXML REQUIRED libxml-2.0)
+#  pkg_check_modules (PKG_DHCP REQUIRED bind-exports isc-dhcp-client)
  if (DBUS_SUPPORT)
   pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
   pkg_check_modules (PKG_NETWORKMANAGER REQUIRED NetworkManager)
@@ -29,7 +66,8 @@ if (DBUS_SUPPORT)
 endif ()
 
 if (UNIX)
- if (DBUS_SUPPORT)
+  include_directories (/usr/include/bind-export)
+  if (DBUS_SUPPORT)
   include_directories (${PKG_DBUS_INCLUDE_DIRS})
   include_directories (${PKG_NETWORKMANAGER_INCLUDE_DIRS})
 
@@ -82,11 +120,15 @@ set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES COTIRE_CXX_PREFIX_HEADER_
 cotire (${PROJECT_NAME}_WLAN)
 
 if (UNIX)
- if (DBUS_SUPPORT)
-  target_link_libraries (${PROJECT_NAME}_WLAN CommonDBus)
- endif ()
+# target_link_libraries (${PROJECT_NAME}_WLAN ${JSON_LIBRARY})
+# target_link_libraries (${PROJECT_NAME}_WLAN ${PKG_LIBXML_LIBRARIES})
+# target_link_libraries (${PROJECT_NAME}_WLAN ${ISC_LIBRARY})
+# target_link_libraries (${PROJECT_NAME}_WLAN ${DHCPCTL_LIBRARY})
+# if (DBUS_SUPPORT)
+#  target_link_libraries (${PROJECT_NAME}_WLAN CommonDBus)
+# endif ()
 elseif (WIN32)
- target_link_libraries (${PROJECT_NAME}_WLAN ${ACE_LIBRARY})
+# target_link_libraries (${PROJECT_NAME}_WLAN ${ACE_LIBRARY})
 endif ()
 
 # add all targets to the build-tree export set

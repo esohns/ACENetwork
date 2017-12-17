@@ -18,31 +18,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_PROTOCOL_SIGNALHANDLER_H
-#define TEST_U_PROTOCOL_SIGNALHANDLER_H
+#ifndef WLAN_MONITOR_DEFINES_H
+#define WLAN_MONITOR_DEFINES_H
 
-#include "ace/Global_Macros.h"
 
-#include "common_isignal.h"
-#include "common_signalhandler.h"
+#define WLAN_MONITOR_UI_FILE                              "wlan_monitor.glade"
 
-#include "test_u_HTTP_decoder_common.h"
-
-class Test_U_Protocol_SignalHandler
- : public Common_SignalHandler_T<struct Test_U_HTTPDecoder_SignalHandlerConfiguration>
-{
- public:
-  Test_U_Protocol_SignalHandler ();
-  virtual ~Test_U_Protocol_SignalHandler ();
-
-  // implement Common_ISignal
-  virtual void handle (int); // signal
-
- private:
-  typedef Common_SignalHandler_T<struct Test_U_HTTPDecoder_SignalHandlerConfiguration> inherited;
-
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Protocol_SignalHandler (const Test_U_Protocol_SignalHandler&))
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Protocol_SignalHandler& operator= (const Test_U_Protocol_SignalHandler&))
-};
+#define WLAN_MONITOR_GTK_ADJUSTMENT_SCROLLEDWINDOW_V_NAME "adjustment_scrolledwindow_v"
+#define WLAN_MONITOR_GTK_SPINBUTTON_NOTIFICATIONS_NAME    "spinbutton_notifications"
+#define WLAN_MONITOR_GTK_TEXTVIEW_LOG_NAME                "textview_log"
 
 #endif

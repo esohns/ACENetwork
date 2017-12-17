@@ -18,62 +18,34 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_GTK_COMMON_H
-#define TEST_U_GTK_COMMON_H
+#ifndef TEST_U_SIGNALHANDLER_H
+#define TEST_U_SIGNALHANDLER_H
 
-#include <deque>
+#include "ace/Global_Macros.h"
 
-#include "gtk/gtk.h"
+#include "common_signalhandler.h"
+#include "common_isignal.h"
+#include "common_istatistic.h"
 
-#include "common_ui_gtk_common.h"
+#include "net_common.h"
 
-#include "stream_common.h"
+#include "wlan_monitor_common.h"
 
-enum Test_U_GTK_Event : int
+class Test_U_SignalHandler
+ : public Common_SignalHandler_T<struct WLANMonitor_SignalHandlerConfiguration>
 {
-  TEST_U_GTKEVENT_INVALID   = -1,
-  TEST_U_GTKEVENT_CONNECT   = 0,
-  TEST_U_GTKEVENT_DATA,
-  TEST_U_GTKEVENT_DISCONNECT,
-  TEST_U_GTKEVENT_STATISTIC,
-  // -------------------------------------
-  TEST_U_GTKEVENT_MAX
-};
-typedef std::deque<enum Test_U_GTK_Event> Test_U_GTK_Events_t;
-typedef Test_U_GTK_Events_t::const_iterator Test_U_GTK_EventsIterator_t;
+ public:
+  Test_U_SignalHandler ();
+  inline virtual ~Test_U_SignalHandler () {}
 
-struct Test_U_GTK_ProgressData
-{
-  Test_U_GTK_ProgressData ()
-   : /*cursorType (GDK_LAST_CURSOR)
-   ,*/ GTKState (NULL)
-   , size (0)
-   , transferred (0)
-   , statistic ()
-  {};
+  // implement Common_ISignal
+  virtual void handle (int); // signal
 
-  //GdkCursorType       cursorType;
-  struct Common_UI_GTKState* GTKState;
-  size_t                     size; // bytes
-  size_t                     transferred; // bytes
-  struct Stream_Statistic    statistic;
-};
+ private:
+  typedef Common_SignalHandler_T<struct WLANMonitor_SignalHandlerConfiguration> inherited;
 
-struct Test_U_GTK_CBData
- : Common_UI_GTKState
-{
-  Test_U_GTK_CBData ()
-   : Common_UI_GTKState ()
-   , allowUserRuntimeStatistic (true)
-   , eventStack ()
-   , progressData ()
-   , progressEventSourceId (0)
-  {};
-
-  bool                           allowUserRuntimeStatistic;
-  Test_U_GTK_Events_t            eventStack;
-  struct Test_U_GTK_ProgressData progressData;
-  guint                          progressEventSourceId;
+  ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler (const Test_U_SignalHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler& operator= (const Test_U_SignalHandler&))
 };
 
 #endif

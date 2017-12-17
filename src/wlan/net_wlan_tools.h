@@ -83,11 +83,13 @@ class Net_WLAN_Tools
                        const std::string&); // SSID
   // *TODO*: merely tests SIOCGIWNAME
   static bool interfaceIsWLAN (const std::string&); // interface identifier
-  // *NOTE*:
+
   static bool associate (const std::string&,       // interface identifier
                          const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
                          const std::string&,       // (E)SSID
-                         ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
+                         ACE_HANDLE);              // (socket) handle to effectuate the ioctl (if any)
+  static void disassociate (const std::string&, // interface identifier
+                            ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
   // *NOTE*: invokes SIOCSIWSCAN; result data must be polled with SIOCGIWSCAN
   static void scan (const std::string&, // interface identifier
                     const std::string&, // ESSID (if any)

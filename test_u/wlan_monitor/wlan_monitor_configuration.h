@@ -18,67 +18,14 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_COMMON_H
-#define TEST_U_COMMON_H
-
-#include "ace/config-lite.h"
-
-#include "common.h"
-#include "common_istatistic.h"
-
-#include "stream_common.h"
-
-#include "stream_stat_statistic_handler.h"
+#ifndef WLAN_MONITOR_CONFIGURATION_H
+#define WLAN_MONITOR_CONFIGURATION_H
 
 #include "net_common.h"
 #include "net_configuration.h"
 
-// forward declarations
-class Stream_IAllocator;
-struct Net_Server_Configuration;
+#include "test_u_gtk_common.h"
 
-extern unsigned int random_seed;
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-extern struct random_data random_data;
-extern char random_state_buffer[];
-#endif
-
-typedef struct Stream_Statistic Test_U_Statistic_t;
-typedef Common_IStatistic_T<Test_U_Statistic_t> Test_U_StatisticReportingHandler_t;
-typedef Stream_StatisticHandler_T<Test_U_Statistic_t> Test_U_StatisticHandler_t;
-
-struct Test_U_SignalHandlerConfiguration
- : Common_SignalHandlerConfiguration
-{
-  Test_U_SignalHandlerConfiguration ()
-   : Common_SignalHandlerConfiguration ()
-  {};
-};
-
-struct Test_U_ConnectionConfiguration;
-struct Test_U_UserData
- : Net_UserData
-{
-  Test_U_UserData ()
-   : Net_UserData ()
-//   , connectionConfiguration (NULL)
-  {};
-
-//  struct Test_U_ConnectionConfiguration* connectionConfiguration;
-};
-
-//////////////////////////////////////////
-
-struct Test_U_Configuration
-{
-  Test_U_Configuration ()
-   : signalHandlerConfiguration ()
-   , userData ()
-  {};
-
-  struct Test_U_SignalHandlerConfiguration signalHandlerConfiguration;
-
-  struct Test_U_UserData                   userData;
-};
+#include "wlan_monitor_configuration.h"
 
 #endif

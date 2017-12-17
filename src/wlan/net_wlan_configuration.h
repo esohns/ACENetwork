@@ -32,9 +32,18 @@
 #include "dbus/dbus.h"
 #endif
 
+#include "ace/INET_Addr.h"
+#include "ace/Singleton.h"
+#include "ace/Synch_Traits.h"
+
+#include "common_time_common.h"
+
 #include "net_defines.h"
 
+#include "net_wlan_configuration.h"
 #include "net_wlan_defines.h"
+#include "net_wlan_imonitor.h"
+#include "net_wlan_inetmonitor.h"
 
 struct Net_WLAN_MonitorConfiguration
 {
@@ -51,6 +60,7 @@ struct Net_WLAN_MonitorConfiguration
 #endif
    , SSID ()
    , useReactor (NET_EVENT_USE_REACTOR)
+   , userData (NULL)
   {};
 
   bool                       autoAssociate;
@@ -67,6 +77,25 @@ struct Net_WLAN_MonitorConfiguration
 #endif
   std::string                SSID;
   bool                       useReactor;
+
+  struct Net_UserData*       userData;
 };
+
+//////////////////////////////////////////
+
+typedef Net_WLAN_IMonitor_T<ACE_INET_Addr,
+                            struct Net_WLAN_MonitorConfiguration> Net_WLAN_IInetMonitor_t;
+
+typedef Net_WLAN_InetMonitor_T<ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+                               struct Net_WLAN_MonitorConfiguration,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                               NET_WLAN_MONITOR_API_WLANAPI,
+#else
+                               NET_WLAN_MONITOR_API_IOCTL,
+#endif
+                               struct Net_UserData> Net_WLAN_InetMonitor_t;
+typedef ACE_Singleton<Net_WLAN_InetMonitor_t,
+                      ACE_SYNCH_MUTEX> NET_WLAN_INETMONITOR_SINGLETON;
 
 #endif

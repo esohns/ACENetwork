@@ -33,10 +33,12 @@
 #else
 #include <net/ethernet.h>
 
-#include <iwlib.h>
+#include "iwlib.h"
 
 #include "dbus/dbus.h"
-//#include <dbus/dbus-glib.h>
+//#include "dbus/dbus-glib.h"
+
+#include "dhcpctl/dhcpctl.h"
 
 #include "ace/Event_Handler.h"
 #endif

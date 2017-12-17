@@ -88,19 +88,16 @@ struct Test_U_Client_SignalHandlerConfiguration
 };
 
 struct Test_U_Client_Configuration
- : Test_U_Configuration
+ : Test_U_ClientServer_Configuration
 {
   Test_U_Client_Configuration ()
-   : Test_U_Configuration ()
+   : Test_U_ClientServer_Configuration ()
    , signalHandlerConfiguration ()
    , timeoutHandler (NULL)
-   , userData ()
   {};
 
   struct Test_U_Client_SignalHandlerConfiguration signalHandlerConfiguration;
   Test_U_Client_TimeoutHandler*                   timeoutHandler;
-
-  struct Test_U_UserData                          userData;
 };
 
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
@@ -148,7 +145,7 @@ typedef ACE_Singleton<Test_U_Client_GTK_Manager_t,
 class Net_IPing
 {
  public:
-  inline virtual ~Net_IPing () {};
+  virtual ~Net_IPing () {};
 
   virtual void ping () = 0;
 };
