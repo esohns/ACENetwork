@@ -36,6 +36,7 @@
 #include "net_packet_headers.h"
 
 //#include "net_wlan_exports.h"
+#include "net_wlan_common.h"
 
 //class Net_WLAN_Export Net_WLAN_Tools
 class Net_WLAN_Tools
@@ -44,6 +45,8 @@ class Net_WLAN_Tools
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   static std::string associatedSSID (HANDLE,   // WLAN API client handle
                                      REFGUID); // interface identifier
+  static Net_WLAN_SSIDs_t getSSIDs (HANDLE,   // WLAN API client handle
+                                    REFGUID); // interface identifier
   static struct ether_addr associatedBSSID (HANDLE,   // WLAN API client handle
                                             REFGUID); // interface identifier
 
@@ -70,6 +73,8 @@ class Net_WLAN_Tools
                                      ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
   //  static std::string associatedSSID (struct DBusConnection*, // D-Bus connection handle
 //                                     const std::string&);    // interface identifier
+  static Net_WLAN_SSIDs_t getSSIDs (const std::string&, // interface identifier
+                                    ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
   static struct ether_addr associatedBSSID (const std::string&, // interface identifier
                                             ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
 

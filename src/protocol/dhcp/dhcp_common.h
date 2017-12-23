@@ -29,12 +29,11 @@
 #include "ace/Time_Value.h"
 
 #include "common_inotify.h"
+#include "common_statistic_handler.h"
 
 #include "stream_common.h"
 #include "stream_data_base.h"
 #include "stream_isessionnotify.h"
-
-#include "stream_stat_statistic_handler.h"
 
 #include "net_common.h"
 
@@ -56,7 +55,7 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
 
 typedef struct Stream_Statistic DHCP_Statistic_t;
 typedef Common_IStatistic_T<DHCP_Statistic_t> DHCP_StatisticReportingHandler_t;
-typedef Stream_StatisticHandler_T<DHCP_Statistic_t> DHCP_StatisticHandler_t;
+typedef Common_StatisticHandler_T<DHCP_Statistic_t> DHCP_StatisticHandler_t;
 
 // convenient type definitions
 typedef DHCP_Codes::OpType DHCP_Op_t;
@@ -69,7 +68,7 @@ typedef std::map<unsigned char, std::string> DHCP_Options_t;
 typedef DHCP_Options_t::const_iterator DHCP_OptionsIterator_t;
 struct DHCP_Record
 {
-  inline DHCP_Record ()
+  DHCP_Record ()
    : op (DHCP_Codes::DHCP_OP_INVALID)
    , htype (0)
    , hlen (0)
@@ -111,10 +110,10 @@ struct DHCP_Record
 };
 struct DHCP_MessageData
 {
-  inline DHCP_MessageData ()
+  DHCP_MessageData ()
    : DHCPRecord (NULL)
   {};
-  inline ~DHCP_MessageData ()
+  ~DHCP_MessageData ()
   {
     if (DHCPRecord)
       delete DHCPRecord;
@@ -127,7 +126,7 @@ typedef Stream_DataBase_T<DHCP_MessageData> DHCP_MessageData_t;
 struct DHCP_ConnectionState
  : Net_ConnectionState
 {
-  inline DHCP_ConnectionState ()
+  DHCP_ConnectionState ()
    : Net_ConnectionState ()
    , configuration (NULL)
    , userData (NULL)

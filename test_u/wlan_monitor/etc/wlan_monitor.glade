@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.1 -->
+<!-- Generated with glade 3.20.2 -->
 <interface>
   <requires lib="gtk+" version="3.0"/>
   <object class="GtkAdjustment" id="adjustment_notifications">
@@ -18,11 +18,24 @@
     <property name="page_increment">10</property>
   </object>
   <object class="GtkFileFilter" id="filefilter_file"/>
-  <object class="GtkListStore" id="liststore_interface"/>
-  <object class="GtkListStore" id="liststore_ssid"/>
+  <object class="GtkListStore" id="liststore_interface">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name GUID -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore_ssid">
+    <columns>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkTextBuffer" id="textbuffer_log"/>
   <object class="GtkDialog" id="dialog_main">
     <property name="can_focus">False</property>
+    <property name="title" translatable="yes">WLAN monitor</property>
     <property name="type_hint">dialog</property>
     <property name="deletable">False</property>
     <child internal-child="vbox">
@@ -122,7 +135,7 @@
                         <property name="layout_style">start</property>
                         <child>
                           <object class="GtkToggleButton" id="togglebutton_monitor">
-                            <property name="label">gtk-connect</property>
+                            <property name="label">gtk-media-play</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="has_focus">True</property>
@@ -144,9 +157,29 @@
                           </packing>
                         </child>
                         <child>
+                          <object class="GtkToggleButton" id="togglebutton_connect">
+                            <property name="label">gtk-connect</property>
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">True</property>
+                            <property name="focus_on_click">False</property>
+                            <property name="can_default">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="relief">half</property>
+                            <property name="use_stock">True</property>
+                            <signal name="toggled" handler="togglebutton_connect_toggled_cb" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkButton" id="button_report">
                             <property name="label">gtk-file</property>
                             <property name="visible">True</property>
+                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="focus_on_click">False</property>
                             <property name="can_default">True</property>
@@ -200,6 +233,7 @@
                         <child>
                           <object class="GtkLabel" id="label_notifications">
                             <property name="visible">True</property>
+                            <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
                             <property name="halign">center</property>
                             <property name="label" translatable="yes">notifications</property>
@@ -213,6 +247,7 @@
                         <child>
                           <object class="GtkSpinButton" id="spinbutton_notifications">
                             <property name="visible">True</property>
+                            <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
                             <property name="editable">False</property>
                             <property name="has_frame">False</property>
@@ -285,7 +320,7 @@
                                 <child>
                                   <object class="GtkComboBox" id="combobox_interface">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
+                                    <property name="can_focus">True</property>
                                     <property name="focus_on_click">False</property>
                                     <property name="can_default">True</property>
                                     <property name="receives_default">True</property>
@@ -303,7 +338,7 @@
                                 <child>
                                   <object class="GtkComboBox" id="combobox_ssid">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
+                                    <property name="can_focus">True</property>
                                     <property name="focus_on_click">False</property>
                                     <property name="can_default">True</property>
                                     <property name="receives_default">True</property>
@@ -359,7 +394,7 @@
                                     <property name="tooltip_text" translatable="yes">auto-associate ?</property>
                                     <property name="use_stock">True</property>
                                     <property name="draw_indicator">True</property>
-                                    <signal name="toggled" handler="checkbutton_autoassociate_toggled_cb" swapped="no"/>
+                                    <signal name="toggled" handler="togglebutton_autoassociate_toggled_cb" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="left_attach">0</property>
@@ -452,6 +487,7 @@
               <object class="GtkProgressBar" id="progressbar">
                 <property name="width_request">150</property>
                 <property name="visible">True</property>
+                <property name="sensitive">False</property>
                 <property name="can_focus">False</property>
               </object>
               <packing>
@@ -464,12 +500,22 @@
               <object class="GtkStatusbar" id="statusbar">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="spacing">2</property>
               </object>
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkSpinner" id="spinner">
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>

@@ -76,9 +76,9 @@ struct Test_U_Server_SignalHandlerConfiguration
    , statisticReportingTimerId (-1)
   {};
 
-  Test_U_IListener_t*              listener;
-  Net_StatisticReportingHandler_t* statisticReportingHandler;
-  long                             statisticReportingTimerId;
+  Test_U_IListener_t*      listener;
+  Net_IStatisticHandler_t* statisticReportingHandler;
+  long                     statisticReportingTimerId;
 };
 
 struct Test_U_Server_ListenerConfiguration

@@ -3,40 +3,40 @@ if (UNIX)
          ON)
 endif ()
 
-set (JSON_LIB_FILE libjson-c.so.3)
-set (ISC_LIB_FILE libisc.a)
-set (DHCPCTL_LIB_FILE libdhcpctl.a)
-if (UNIX)
-  find_library (JSON_LIBRARY ${JSON_LIB_FILE}
-                HINTS /usr/lib
-                PATH_SUFFIXES x86_64-linux-gnu
-                DOC "searching for ${JSON_LIB_FILE} (system paths)")
-  find_library (ISC_LIBRARY ${ISC_LIB_FILE}
-                HINTS /usr/lib
-                PATH_SUFFIXES x86_64-linux-gnu
-                DOC "searching for ${ISC_LIB_FILE} (system paths)")
-  find_library (DHCPCTL_LIBRARY ${DHCPCTL_LIB_FILE}
-               HINTS /usr/lib
+#set (JSON_LIB_FILE libjson-c.so.3)
+#set (ISC_LIB_FILE libisc.a)
+#set (DHCPCTL_LIB_FILE libdhcpctl.a)
+#if (UNIX)
+#  find_library (JSON_LIBRARY ${JSON_LIB_FILE}
+#                HINTS /usr/lib
+#                PATH_SUFFIXES x86_64-linux-gnu
+#                DOC "searching for ${JSON_LIB_FILE} (system paths)")
+#  find_library (ISC_LIBRARY ${ISC_LIB_FILE}
+#                HINTS /usr/lib
+#                PATH_SUFFIXES x86_64-linux-gnu
+#                DOC "searching for ${ISC_LIB_FILE} (system paths)")
+#  find_library (DHCPCTL_LIBRARY ${DHCPCTL_LIB_FILE}
+#               HINTS /usr/lib
 #               PATH_SUFFIXES x86_64-linux-gnu
-               DOC "searching for ${DHCPCTL_LIB_FILE} (system paths)")
-endif ()
-if (UNIX)
- if (NOT JSON_LIBRARY)
-  message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
- else ()
-  message (STATUS "Found json library \"${JSON_LIBRARY}\"")
- endif ()
- if (NOT ISC_LIBRARY)
-  message (FATAL_ERROR "could not find ${ISC_LIB_FILE}, aborting")
- else ()
-  message (STATUS "Found isc library \"${ISC_LIBRARY}\"")
- endif ()
- if (NOT DHCPCTL_LIBRARY)
-  message (FATAL_ERROR "could not find ${DHCPCTL_LIB_FILE}, aborting")
- else ()
-  message (STATUS "Found dhcpctl library \"${DHCPCTL_LIBRARY}\"")
- endif ()
-endif ()
+#               DOC "searching for ${DHCPCTL_LIB_FILE} (system paths)")
+#endif ()
+#if (UNIX)
+# if (NOT JSON_LIBRARY)
+#  message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
+# else ()
+#  message (STATUS "Found json library \"${JSON_LIBRARY}\"")
+# endif ()
+# if (NOT ISC_LIBRARY)
+#  message (FATAL_ERROR "could not find ${ISC_LIB_FILE}, aborting")
+# else ()
+#  message (STATUS "Found isc library \"${ISC_LIBRARY}\"")
+# endif ()
+# if (NOT DHCPCTL_LIBRARY)
+#  message (FATAL_ERROR "could not find ${DHCPCTL_LIB_FILE}, aborting")
+# else ()
+#  message (STATUS "Found dhcpctl library \"${DHCPCTL_LIBRARY}\"")
+# endif ()
+#endif ()
 
 include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)

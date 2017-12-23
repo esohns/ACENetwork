@@ -31,9 +31,9 @@
 #include "ace/config-macros.h"
 #include "ace/OS.h"
 
-#include "stream_common.h"
+#include "common_statistic_handler.h"
 
-#include "stream_stat_statistic_handler.h"
+#include "stream_common.h"
 
 #include "bittorrent_defines.h"
 
@@ -68,11 +68,11 @@ typedef Bencoding_Dictionary_t::const_iterator Bencoding_DictionaryIterator_t;
 
 struct Bencoding_Element
 {
-  inline Bencoding_Element ()
+  Bencoding_Element ()
    : type (BENCODING_TYPE_INVALID)
   {};
 
-  enum Bencoding_ElementType
+  enum Bencoding_ElementType : int
   {
     BENCODING_TYPE_INTEGER = 0,
     BENCODING_TYPE_STRING,
@@ -95,7 +95,7 @@ struct Bencoding_Element
 
 //////////////////////////////////////////
 
-enum BitTorrent_MessageType
+enum BitTorrent_MessageType : int
 {
   BITTORRENT_MESSAGETYPE_CHOKE = 0,
   BITTORRENT_MESSAGETYPE_UNCHOKE,
@@ -113,7 +113,7 @@ enum BitTorrent_MessageType
 
 struct BitTorrent_PeerHandShake
 {
-  inline BitTorrent_PeerHandShake ()
+  BitTorrent_PeerHandShake ()
    : pstr (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_PEER_HANDSHAKE_PSTR_STRING))
    , reserved ()
    , info_hash ()
@@ -151,11 +151,11 @@ struct BitTorrent_MessagePayload_Request
 
 struct BitTorrent_PeerRecord
 {
-  inline BitTorrent_PeerRecord ()
+  BitTorrent_PeerRecord ()
    : length (0)
    , type (BITTORRENT_MESSAGETYPE_INVALID)
   {};
- inline void operator+= (struct BitTorrent_PeerRecord rhs_in)
+ void operator+= (struct BitTorrent_PeerRecord rhs_in)
  { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); };
 
   unsigned int                               length;
@@ -176,7 +176,7 @@ struct BitTorrent_PeerRecord
 
 //////////////////////////////////////////
 
-enum BitTorrent_Event
+enum BitTorrent_Event : int
 {
   BITTORRENT_EVENT_CANCELLED = 0,
   BITTORRENT_EVENT_COMPLETE,
@@ -188,6 +188,6 @@ enum BitTorrent_Event
 //////////////////////////////////////////
 
 typedef struct Stream_Statistic BitTorrent_Statistic_t;
-typedef Stream_StatisticHandler_T<BitTorrent_Statistic_t> BitTorrent_StatisticHandler_t;
+typedef Common_StatisticHandler_T<BitTorrent_Statistic_t> BitTorrent_StatisticHandler_t;
 
 #endif

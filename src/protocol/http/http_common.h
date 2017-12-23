@@ -24,11 +24,11 @@
 #include <map>
 #include <string>
 
+#include "common_statistic_handler.h"
+
 #include "stream_common.h"
 #include "stream_data_base.h"
 #include "stream_isessionnotify.h"
-
-#include "stream_stat_statistic_handler.h"
 
 #include "net_common.h"
 
@@ -49,7 +49,7 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
 
 typedef struct Stream_Statistic HTTP_Statistic_t;
 typedef Common_IStatistic_T<HTTP_Statistic_t> HTTP_StatisticReportingHandler_t;
-typedef Stream_StatisticHandler_T<HTTP_Statistic_t> HTTP_StatisticHandler_t;
+typedef Common_StatisticHandler_T<HTTP_Statistic_t> HTTP_StatisticHandler_t;
 
 typedef std::map<std::string, std::string> HTTP_Headers_t;
 typedef HTTP_Headers_t::const_iterator HTTP_HeadersConstIterator_t;
@@ -58,7 +58,7 @@ typedef std::map<std::string, std::string> HTTP_Form_t;
 typedef HTTP_Form_t::const_iterator HTTP_FormIterator_t;
 struct HTTP_Record
 {
-  inline HTTP_Record ()
+  HTTP_Record ()
    : form ()
    , headers ()
    , method (HTTP_Codes::HTTP_METHOD_INVALID)
@@ -67,7 +67,7 @@ struct HTTP_Record
    , URI ()
    , version (HTTP_Codes::HTTP_VERSION_INVALID)
   {};
-  inline void operator+= (struct HTTP_Record rhs_in)
+  void operator+= (struct HTTP_Record rhs_in)
   { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); };
 
   HTTP_Form_t             form; // request

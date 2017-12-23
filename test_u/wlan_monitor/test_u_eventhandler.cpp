@@ -93,4 +93,20 @@ Test_U_EventHandler::onScanComplete (const std::string& interfaceIdentifier_in)
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::onScanComplete"));
 
   ACE_UNUSED_ARG (interfaceIdentifier_in);
+
+  // sanity check(s)
+  if (!CBData_)
+    return;
+
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    guint event_source_id = g_idle_add (idle_update_ssids_cb,
+                                        CBData_);
+    if (event_source_id == 0)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_update_ssids_cb): \"%m\", returning\n")));
+      return;
+    } // end IF
+    CBData_->eventSourceIds.insert (event_source_id);
+  } // end lock scope
 }

@@ -71,6 +71,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
       {
         case NET_WLAN_MONITOR_STATE_INVALID:
         // good case
+        case NET_WLAN_MONITOR_STATE_INITIAL:
         case NET_WLAN_MONITOR_STATE_SCAN:
         case NET_WLAN_MONITOR_STATE_ASSOCIATE:
         case NET_WLAN_MONITOR_STATE_ASSOCIATED:
@@ -90,6 +91,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
       {
         case NET_WLAN_MONITOR_STATE_INVALID:
         // good case
+        case NET_WLAN_MONITOR_STATE_INITIAL:
         case NET_WLAN_MONITOR_STATE_ASSOCIATE:
         {
           inherited::change (newState_in);
@@ -108,6 +110,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_INVALID:
         case NET_WLAN_MONITOR_STATE_SCAN:
         // good case
+        case NET_WLAN_MONITOR_STATE_INITIAL:
         case NET_WLAN_MONITOR_STATE_ASSOCIATED:
         {
           inherited::change (newState_in);
@@ -127,6 +130,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_SCAN:
         case NET_WLAN_MONITOR_STATE_ASSOCIATED:
         // good case
+        case NET_WLAN_MONITOR_STATE_INITIAL:
         case NET_WLAN_MONITOR_STATE_CONNECTED:
         {
           inherited::change (newState_in);
@@ -146,6 +150,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_SCAN:
         case NET_WLAN_MONITOR_STATE_CONNECTED:
         // good case
+        case NET_WLAN_MONITOR_STATE_INITIAL:
         case NET_WLAN_MONITOR_STATE_ASSOCIATED:
         {
           inherited::change (newState_in);
@@ -164,6 +169,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_INVALID:
         case NET_WLAN_MONITOR_STATE_ASSOCIATED:
         // good case
+        case NET_WLAN_MONITOR_STATE_INITIAL:
         case NET_WLAN_MONITOR_STATE_SCAN:
         {
           inherited::change (newState_in);
@@ -181,6 +187,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
       {
         case NET_WLAN_MONITOR_STATE_INVALID:
         // good case
+        case NET_WLAN_MONITOR_STATE_INITIAL:
         case NET_WLAN_MONITOR_STATE_DISASSOCIATE:
         case NET_WLAN_MONITOR_STATE_CONNECT:
         {
@@ -199,6 +206,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
       {
         case NET_WLAN_MONITOR_STATE_INVALID:
         // good case
+        case NET_WLAN_MONITOR_STATE_INITIAL:
         case NET_WLAN_MONITOR_STATE_DISCONNECT:
         {
           inherited::change (newState_in);

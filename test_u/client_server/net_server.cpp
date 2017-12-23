@@ -594,7 +594,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
   struct Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
-  Net_StatisticHandler_t statistic_handler (ACTION_REPORT,
+  Net_StatisticHandler_t statistic_handler (STATISTIC_ACTION_REPORT,
                                             connection_manager_p,
                                             false);
   long timer_id = -1;

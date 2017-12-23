@@ -60,7 +60,7 @@ class Net_WLAN_MonitorStateMachine
   inline virtual ~Net_WLAN_MonitorStateMachine () {}
 
   // implement (part of) Common_IStateMachine_T
-  inline virtual bool initialize () { change (NET_WLAN_MONITOR_STATE_INVALID); return true; }
+  inline virtual bool initialize () { change (NET_WLAN_MONITOR_STATE_INITIAL); return true; }
   inline virtual void reset () { initialize (); }
   virtual std::string stateToString (enum Net_WLAN_MonitorState) const;
 

@@ -25,10 +25,9 @@
 
 #include "common.h"
 #include "common_istatistic.h"
+#include "common_statistic_handler.h"
 
 #include "stream_common.h"
-
-#include "stream_stat_statistic_handler.h"
 
 #include "net_common.h"
 #include "net_configuration.h"
@@ -37,15 +36,9 @@
 class Stream_IAllocator;
 struct Net_Server_Configuration;
 
-extern unsigned int random_seed;
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-extern struct random_data random_data;
-extern char random_state_buffer[];
-#endif
-
-typedef struct Stream_Statistic Test_U_Statistic_t;
-typedef Common_IStatistic_T<Test_U_Statistic_t> Test_U_StatisticReportingHandler_t;
-typedef Stream_StatisticHandler_T<Test_U_Statistic_t> Test_U_StatisticHandler_t;
+typedef Net_Statistic_t Test_U_Statistic_t;
+typedef Common_IStatistic_T<Test_U_Statistic_t> Test_U_IStatisticHandler_t;
+typedef Common_StatisticHandler_T<Test_U_Statistic_t> Test_U_StatisticHandler_t;
 
 struct Test_U_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration

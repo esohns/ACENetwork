@@ -1111,6 +1111,200 @@ error:
   return result;
 }
 
+Net_WLAN_SSIDs_t
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+Net_WLAN_Tools::getSSIDs (HANDLE clientHandle_in,
+                          REFGUID interfaceIdentifier_in)
+#else
+Net_WLAN_Tools::getSSIDs (const std::string& interfaceIdentifier_in,
+                          ACE_HANDLE handle_in)
+#endif
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::getSSIDs"));
+
+  Net_WLAN_SSIDs_t result;
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // sanity check(s)
+  ACE_ASSERT (clientHandle_in != ACE_INVALID_HANDLE);
+  ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
+
+  // *TODO*
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (result);
+#else
+  // sanity check(s)
+  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+  ACE_ASSERT (handle_in != ACE_INVALID_HANDLE);
+
+  int result_2 = -1;
+  struct iwreq iwreq_s;
+  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  ACE_OS::strncpy (iwreq_s.ifr_name,
+                   interfaceIdentifier_in.c_str (),
+                   IFNAMSIZ);
+  struct iw_range iw_range_s;
+  ACE_OS::memset (&iw_range_s, 0, sizeof (struct iw_range));
+  struct stream_descr stream_descr_s;
+  ACE_OS::memset (&stream_descr_s, 0, sizeof (struct stream_descr));
+  struct iw_event iw_event_s;
+  ACE_OS::memset (&iw_event_s, 0, sizeof (struct iw_event));
+  int error = 0;
+  size_t buffer_size = IW_SCAN_MAX_DATA;
+  struct ether_addr ap_mac_address;
+  ACE_OS::memset (&ap_mac_address, 0, sizeof (struct ether_addr));
+  std::string essid_string;
+
+  result_2 = iw_get_range_info (handle_in,
+                                interfaceIdentifier_in.c_str (),
+                                &iw_range_s);
+  if (unlikely (result_2 < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to iw_get_range_info(%d,\"%s\"): \"%m\", aborting\n"),
+                handle_in,
+                ACE_TEXT (interfaceIdentifier_in.c_str ())));
+    return result;
+  } // end IF
+
+  iwreq_s.u.data.pointer = ACE_OS::malloc (buffer_size);
+  if (unlikely (!iwreq_s.u.data.pointer))
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory (%u byte(s)): \"%m\", aborting\n"),
+                buffer_size));
+    return result;
+  } // end IF
+  iwreq_s.u.data.length = buffer_size;
+
+fetch_scan_result_data:
+  result_2 = ACE_OS::ioctl (handle_in,
+                            SIOCGIWSCAN,
+                            &iwreq_s);
+  if (unlikely (result_2 < 0))
+  {
+    error = ACE_OS::last_error ();
+    if ((error == E2BIG) && // 7
+        (iw_range_s.we_version_compiled > 16))
+    { // buffer too small --> retry
+      if (iwreq_s.u.data.length > buffer_size)
+        buffer_size = iwreq_s.u.data.length;
+      else
+        buffer_size *= 2; // grow dynamically
+      goto retry;
+    } // end IF
+
+    if (unlikely (error == EAGAIN)) // 11
+    { // result(s) not available yet
+      goto clean;
+    } // end IF
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCGIWSCAN): \"%m\", aborting\n"),
+                handle_in));
+    result.clear ();
+    goto clean;
+  } // end IF
+
+  // the driver may have reported the required buffer size
+  if (unlikely (iwreq_s.u.data.length > buffer_size))
+  { // --> grow the buffer and retrys
+    buffer_size = iwreq_s.u.data.length;
+retry:
+    iwreq_s.u.data.pointer = ACE_OS::realloc (iwreq_s.u.data.pointer,
+                                              buffer_size);
+    if (unlikely (!iwreq_s.u.data.pointer))
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to reallocate memory (%u byte(s)): \"%m\", aborting\n"),
+                  buffer_size));
+      result.clear ();
+      goto clean;
+    } // end IF
+    iwreq_s.u.data.length = buffer_size;
+    goto fetch_scan_result_data;
+  } // end IF
+  ACE_ASSERT (iwreq_s.u.data.length && (iwreq_s.u.data.length <= buffer_size));
+
+  // process the result data
+  iw_init_event_stream (&stream_descr_s,
+                        static_cast<char*> (iwreq_s.u.data.pointer),
+                        static_cast<int> (iwreq_s.u.data.length));
+  do
+  {
+    result_2 = iw_extract_event_stream (&stream_descr_s,
+                                        &iw_event_s,
+                                        iw_range_s.we_version_compiled);
+    if (result_2 <= 0)
+      break; // done
+
+    switch (iw_event_s.cmd)
+    {
+      case SIOCGIWAP:
+      {
+        ACE_OS::memcpy (&ap_mac_address,
+                        reinterpret_cast<void*> (iw_event_s.u.ap_addr.sa_data),
+                        sizeof (struct ether_addr));
+        break;
+      }
+      case SIOCGIWNWID:
+      case SIOCGIWFREQ:
+      case SIOCGIWMODE:
+      case SIOCGIWNAME:
+      case SIOCGIWENCODE:
+      case SIOCGIWRATE:
+      case SIOCGIWMODUL:
+      case IWEVQUAL:
+#ifndef WE_ESSENTIAL
+      case IWEVGENIE:
+#endif /* WE_ESSENTIAL */
+      case IWEVCUSTOM:
+        break;
+      case SIOCGIWESSID:
+      {
+        ACE_ASSERT (iw_event_s.u.essid.pointer);
+        ACE_ASSERT (iw_event_s.u.essid.length && (iw_event_s.u.essid.length <= IW_ESSID_MAX_SIZE));
+        essid_string.assign (reinterpret_cast<char*> (iw_event_s.u.essid.pointer),
+                             iw_event_s.u.essid.length);
+        //        if (iw_event_s.u.essid.flags)
+        //        {
+        //          /* Does it have an ESSID index ? */
+        //          if((iw_event_s.u.essid.flags & IW_ENCODE_INDEX) > 1)
+        //            printf("                    ESSID:\"%s\" [%d]\n", essid,
+        //                   (iw_event_s.u.essid.flags & IW_ENCODE_INDEX));
+        //          else
+        //            printf("                    ESSID:\"%s\"\n", essid);
+        //        } // end IF
+        //        else
+        //          printf("                    ESSID:off/any/hidden\n");
+        result.push_back (essid_string);
+#if defined (_DEBUG)
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("\"%s\": found wireless access point (MAC address: %s, ESSID: %s)...\n"),
+                    ACE_TEXT (interfaceIdentifier_in.c_str ()),
+                    ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address),
+                                                                          NET_LINKLAYER_802_11).c_str ()),
+                    ACE_TEXT (essid_string.c_str ())));
+#endif
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("invalid/unknown WE event type (was: %d), continuing\n"),
+                    iw_event_s.cmd));
+        break;
+      }
+    } // end SWITCH
+  } while (true);
+
+clean:
+  if (iwreq_s.u.data.pointer)
+    ACE_OS::free (iwreq_s.u.data.pointer);
+#endif
+
+  return result;
+}
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 struct ether_addr

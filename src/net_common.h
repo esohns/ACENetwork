@@ -30,10 +30,9 @@
 #include "ace/Time_Value.h"
 
 #include "common_istatistic.h"
+#include "common_statistic_handler.h"
 
 #include "stream_common.h"
-
-#include "stream_stat_statistic_handler.h"
 
 // forward declarations
 template <ACE_SYNCH_DECL>
@@ -46,7 +45,7 @@ struct Net_NetlinkSocketConfiguration;
 struct Net_TCPSocketConfiguration;
 struct Net_UDPSocketConfiguration;
 
-enum Net_LinkLayerType
+enum Net_LinkLayerType : int
 {
   NET_LINKLAYER_802_3  = 0x01, // i.e. CSMA/CD, aka 'Ethernet'
   NET_LINKLAYER_802_11 = 0x02, // i.e. Wireless LAN aka 'WLAN' (EU; US: 'WiFi')
@@ -58,7 +57,7 @@ enum Net_LinkLayerType
   NET_LINKLAYER_INVALID = -1,
 };
 
-enum Net_NetworkLayerType
+enum Net_NetworkLayerType : int
 {
   NET_NETWORKLAYER_IP_UNICAST   = 0x0001, // i.e. "routable" IP
   NET_NETWORKLAYER_IP_BROADCAST = 0x0002,
@@ -68,7 +67,7 @@ enum Net_NetworkLayerType
   NET_NETWORKLAYER_INVALID = -1,
 };
 
-enum Net_TransportLayerType
+enum Net_TransportLayerType : int
 {
   NET_TRANSPORTLAYER_INVALID = -1,
   NET_TRANSPORTLAYER_IP_CAST = 0, // 'pseudo' (LAN-only, no flow control)
@@ -81,7 +80,7 @@ enum Net_TransportLayerType
   NET_TRANSPORTLAYER_MAX
 };
 
-enum Net_ClientServerRole
+enum Net_ClientServerRole : int
 {
   NET_ROLE_INVALID = -1,
   NET_ROLE_CLIENT = 0,
@@ -151,9 +150,8 @@ enum Net_Connection_Status : int
 };
 
 typedef Stream_Statistic Net_Statistic_t;
-
-typedef Common_IStatistic_T<Net_Statistic_t> Net_StatisticReportingHandler_t;
-typedef Stream_StatisticHandler_T<Net_Statistic_t> Net_StatisticHandler_t;
+typedef Common_IStatistic_T<Net_Statistic_t> Net_IStatisticHandler_t;
+typedef Common_StatisticHandler_T<Net_Statistic_t> Net_StatisticHandler_t;
 
 #if defined (ACE_HAS_NETLINK)
 typedef Net_ITransportLayer_T<struct Net_NetlinkSocketConfiguration> Net_INetlinkTransportLayer_t;

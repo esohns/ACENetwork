@@ -28,8 +28,7 @@
 
 #include "common_isubscribe.h"
 #include "common_referencecounter_base.h"
-
-#include "stream_stat_statistic_handler.h"
+#include "common_statistic_handler.h"
 
 #include "net_connection_manager.h"
 #include "net_iconnection.h"
@@ -110,7 +109,7 @@ class Net_ConnectionBase_T
 
  private:
   // convenient types
-  typedef Stream_StatisticHandler_T<StatisticContainerType> STATISTIC_HANDLER_T;
+  typedef Common_StatisticHandler_T<StatisticContainerType> STATISTIC_HANDLER_T;
   typedef Net_ConnectionBase_T<AddressType,
                                ConfigurationType,
                                StateType,

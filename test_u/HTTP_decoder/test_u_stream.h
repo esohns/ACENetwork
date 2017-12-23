@@ -26,7 +26,9 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_statistic_handler.h"
 #include "common_time_common.h"
+
 #include "common_timer_manager_common.h"
 
 #include "stream_base.h"
@@ -35,8 +37,6 @@
 
 #include "stream_net_io.h"
 #include "stream_net_io_stream.h"
-
-#include "stream_stat_statistic_handler.h"
 
 #include "http_common.h"
 

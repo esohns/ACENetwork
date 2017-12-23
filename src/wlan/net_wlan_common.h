@@ -21,6 +21,9 @@
 #ifndef NET_WLAN_COMMON_H
 #define NET_WLAN_COMMON_H
 
+#include <string>
+#include <vector>
+
 #include "ace/config-lite.h"
 
 enum Net_WLAN_MonitorAPI : int
@@ -35,5 +38,8 @@ enum Net_WLAN_MonitorAPI : int
   NET_WLAN_MONITOR_API_MAX,
   NET_WLAN_MONITOR_API_INVALID
 };
+
+typedef std::vector<std::string> Net_WLAN_SSIDs_t;
+typedef Net_WLAN_SSIDs_t::const_iterator Net_WLAN_SSIDsIterator_t;
 
 #endif

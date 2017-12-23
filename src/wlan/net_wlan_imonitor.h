@@ -29,14 +29,21 @@
 #else
 #include <net/ethernet.h>
 
+#if defined (DBUS_SUPPORT)
 #include "dbus/dbus.h"
+#endif
 #endif
 
 //#include "ace/INET_Addr.h"
+#include "ace/Synch_Traits.h"
 
 #include "common_iget.h"
 #include "common_iinitialize.h"
+#include "common_ilock.h"
 #include "common_isubscribe.h"
+#include "common_itaskcontrol.h"
+
+#include "net_wlan_common.h"
 
 class Net_WLAN_IMonitorCB
 {
@@ -79,7 +86,10 @@ class Net_WLAN_IMonitorBase
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
  , public Common_IGet_T<HANDLE>
 #else
+#if defined (DBUS_SUPPORT)
  , public Common_IGetP_T<struct DBusConnection>
+#endif
+ , public Common_IGet_T<ACE_HANDLE>
 #endif
 {
  public:
@@ -90,19 +100,28 @@ class Net_WLAN_IMonitorBase
                           const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
 #endif
                           const std::string&) = 0;  // (E)SSID
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual void scan (REFGUID) = 0; // interface identifier {GUID_NULL: all}
+#else
+  virtual void scan (const std::string&) = 0; // interface identifier {"": all}
+#endif
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual struct _GUID interfaceIdentifier () const = 0;
+  virtual struct _GUID interfaceIdentifier () const = 0; // returns currently monitored interface (if any)
 #else
   virtual std::string interfaceIdentifier () const = 0;
 #endif
-  virtual std::string SSID () const = 0;
+  virtual std::string SSID () const = 0; // returns currently associated (E)SSID (if any)
+
+  virtual Net_WLAN_SSIDs_t SSIDs () const = 0; // returns (E)SSID(s) published by the AP(s) in range (if any)
 };
 
 template <typename AddressType,
           typename ConfigurationType>
 class Net_WLAN_IMonitor_T
  : public Net_WLAN_IMonitorBase
+ , virtual public Common_ITaskControl_T<ACE_MT_SYNCH,
+                                        Common_ILock_T<ACE_MT_SYNCH> >
  , public Common_IGetR_2_T<ConfigurationType>
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else

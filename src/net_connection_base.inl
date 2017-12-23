@@ -42,7 +42,7 @@ Net_ConnectionBase_T<AddressType,
  , state_ ()
  , isRegistered_ (false)
  , manager_ (interfaceHandle_in)
- , statisticHandler_ (ACTION_COLLECT,
+ , statisticHandler_ (STATISTIC_ACTION_COLLECT,
                       this,
                       true)
  , timerId_ (-1)

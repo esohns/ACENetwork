@@ -35,10 +35,15 @@
 
 #include "iwlib.h"
 
+#if defined (DBUS_SUPPORT)
 #include "dbus/dbus.h"
 //#include "dbus/dbus-glib.h"
+#endif
 
+extern "C"
+{
 #include "dhcpctl/dhcpctl.h"
+}
 
 #include "ace/Event_Handler.h"
 #endif
@@ -48,9 +53,12 @@
 #include "ace/Synch_Traits.h"
 
 #include "common_ilock.h"
+#include "common_istatistic.h"
 #include "common_task_base.h"
 
 #include "stream_messagequeue.h"
+
+#include "net_common.h"
 
 #include "net_wlan_common.h"
 #include "net_wlan_imonitor.h"
@@ -63,12 +71,14 @@ void WINAPI
 network_wlan_default_notification_cb (PWLAN_NOTIFICATION_DATA,
                                       PVOID);
 #else
+#if defined (DBUS_SUPPORT)
 void
 network_wlan_dbus_main_wakeup_cb (void*);
 DBusHandlerResult
 network_wlan_dbus_default_filter_cb (struct DBusConnection*,
                                      struct DBusMessage*,
                                      void*);
+#endif
 #endif
 
 template <ACE_SYNCH_DECL,
@@ -87,6 +97,7 @@ class Net_WLAN_Monitor_T
  , public Net_WLAN_MonitorStateMachine
  , public Net_WLAN_IMonitor_T<AddressType,
                               ConfigurationType>
+ , public Common_IStatistic_T<Net_Statistic_t>
 {
   typedef Common_TaskBase_T<ACE_SYNCH_USE,
                             TimePolicyType,
@@ -129,7 +140,10 @@ class Net_WLAN_Monitor_T
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   inline virtual const HANDLE get () const { return clientHandle_; };
 #else
+#if defined (DBUS_SUPPORT)
   inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
+#endif
+  inline virtual const ACE_HANDLE get () const { return handle_; }
 #endif
   inline virtual bool addresses (AddressType& localSAP_out, AddressType& peerSAP_out) const { localSAP_out = localSAP_; peerSAP_out = peerSAP_; return true; }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -140,11 +154,18 @@ class Net_WLAN_Monitor_T
 #endif
                           const std::string&);      // (E)SSID
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  inline virtual void scan (REFGUID interfaceIdentifier_in) { Net_WLAN_Tools::scan (clientHandle_, interfaceIdentifier_in, ACE_TEXT_ALWAYS_CHAR ("")); }
+#else
+  inline virtual void scan (const std::string& interfaceIdentifier_in) { Net_WLAN_Tools::scan (interfaceIdentifier_in, ACE_TEXT_ALWAYS_CHAR (""), handle_, false); }
+#endif
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   inline virtual struct _GUID interfaceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->interfaceIdentifier; }
 #else
   inline virtual std::string interfaceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->interfaceIdentifier; }
 #endif
   virtual std::string SSID () const;
+
+  virtual Net_WLAN_SSIDs_t SSIDs () const;
 
  protected:
   // convenient types
@@ -163,27 +184,27 @@ class Net_WLAN_Monitor_T
   Net_WLAN_Monitor_T ();
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  HANDLE                                  clientHandle_; // API-
+  HANDLE                                          clientHandle_; // API-
 #else
-  void*                                   buffer_; // scan results
-  size_t                                  bufferSize_;
-  ACE_HANDLE                              handle_;
-//  bool                                    isRegistered_;
-  struct iw_range                         range_;
+  void*                                           buffer_; // scan results
+  size_t                                          bufferSize_;
+  ACE_HANDLE                                      handle_;
+//  bool                                            isRegistered_;
+  struct iw_range                                 range_;
 #endif
-  ConfigurationType*                      configuration_;
-  INTERFACEIDENTIFIERS_T                  interfaceIdentifiers_;
-  bool                                    isActive_;
-  bool                                    isInitialized_;
-  AddressType                             localSAP_;
-  AddressType                             peerSAP_;
+  ConfigurationType*                              configuration_;
+  INTERFACEIDENTIFIERS_T                          interfaceIdentifiers_;
+  bool                                            isActive_;
+  bool                                            isInitialized_;
+  AddressType                                     localSAP_;
+  AddressType                                     peerSAP_;
 
   // *IMPORTANT NOTE*: this must be 'recursive', so that callees may unsubscribe
   //                   from within the notification callbacks
-  typename ACE_SYNCH_USE::RECURSIVE_MUTEX subscribersLock_;
-  SUBSCRIBERS_T                           subscribers_;
+  mutable typename ACE_SYNCH_USE::RECURSIVE_MUTEX subscribersLock_;
+  SUBSCRIBERS_T                                   subscribers_;
 
-  UserDataType*                           userData_;
+  UserDataType*                                   userData_;
 
  private:
   // comvenient types
@@ -191,14 +212,14 @@ class Net_WLAN_Monitor_T
                                 TimePolicyType,
                                 ACE_Message_Block> MESSAGEQUEUE_T;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  typedef std::pair<std::string, std::pair <struct _GUID, struct ether_addr>> SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T;
+  typedef std::pair<std::string, std::pair <struct _GUID, struct ether_addr> > SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T;
   struct SSIDS_TO_INTERFACEIDENTIFIER_FIND_S
    : public std::binary_function<SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T,
                                  struct _GUID,
                                  bool>
   { inline bool operator() (const SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T& entry_in, struct _GUID value_in) const { return InlineIsEqualGUID (entry_in.second.first, value_in); } };
 #else
-  typedef std::pair<std::string, std::pair <std::string, struct ether_addr>> SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T;
+  typedef std::pair<std::string, std::pair <std::string, struct ether_addr> > SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T;
   struct SSIDS_TO_INTERFACEIDENTIFIER_FIND_S
    : public std::binary_function<SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T,
                                  std::string,
@@ -263,17 +284,22 @@ class Net_WLAN_Monitor_T
   inline void wait () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 #endif
 
+  // implement Common_IStatistic_T
+  inline virtual bool collect (Net_Statistic_t& statistic_inout) { ACE_UNUSED_ARG (statistic_inout); ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+
   // helper functions
   INTERFACEIDENTIFIERS_T getDevices () const;
 
-  MESSAGEQUEUE_T                          queue_;
-  SSIDS_TO_INTERFACEIDENTIFIER_MAP_T      SSIDsToInterfaceIdentifier_;
+  MESSAGEQUEUE_T                                  queue_;
+  SSIDS_TO_INTERFACEIDENTIFIER_MAP_T              SSIDsToInterfaceIdentifier_;
 };
 
 //////////////////////////////////////////
 // partial specialization (for DBus strategy)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
+#if defined (DBUS_SUPPORT)
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           ////////////////////////////////
@@ -342,8 +368,15 @@ class Net_WLAN_Monitor_T<ACE_SYNCH_USE,
   virtual bool associate (const std::string&,  // interface identifier
 #endif
                           const std::string&); // SSID
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  inline virtual void scan (REFGUID interfaceIdentifier_in) { Net_WLAN_Tools::scan (clientHandle_, interfaceIdentifier_in, ACE_TEXT_ALWAYS_CHAR ("")); }
+#else
+  inline virtual void scan (const std::string& interfaceIdentifier_in) { Net_WLAN_Tools::scan (interfaceIdentifier_in, ACE_TEXT_ALWAYS_CHAR (""), handle_, false); }
+#endif
   inline virtual std::string interfaceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->interfaceIdentifier; }
   inline virtual std::string SSID () const { ACE_ASSERT (configuration_); return Net_WLAN_Tools::associatedSSID (configuration_->interfaceIdentifier); }
+
+  virtual Net_WLAN_SSIDs_t SSIDs () const;
 
  protected:
   // convenient types
@@ -368,24 +401,24 @@ class Net_WLAN_Monitor_T<ACE_SYNCH_USE,
   Net_WLAN_Monitor_T ();
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  HANDLE                                  clientHandle_;
+  HANDLE                                          clientHandle_;
 #else
-  struct DBusConnection*                  connection_;
-  INTERFACEIDENTIFIERS_T                  identifierToObjectPath_;
-//  struct DBusGProxy*                      proxy_;
+  struct DBusConnection*                          connection_;
+  INTERFACEIDENTIFIERS_T                          identifierToObjectPath_;
+//  struct DBusGProxy*                              proxy_;
 #endif
-  ConfigurationType*                      configuration_;
-  bool                                    isActive_;
-  bool                                    isInitialized_;
-  AddressType                             localSAP_;
-  AddressType                             peerSAP_;
+  ConfigurationType*                              configuration_;
+  bool                                            isActive_;
+  bool                                            isInitialized_;
+  AddressType                                     localSAP_;
+  AddressType                                     peerSAP_;
 
   // *IMPORTANT NOTE*: this must be 'recursive', so that callees may unsubscribe
   //                   from within the notification callbacks
-  typename ACE_SYNCH_USE::RECURSIVE_MUTEX subscribersLock_;
-  SUBSCRIBERS_T                           subscribers_;
+  mutable typename ACE_SYNCH_USE::RECURSIVE_MUTEX subscribersLock_;
+  SUBSCRIBERS_T                                   subscribers_;
 
-  UserDataType*                           userData_;
+  UserDataType*                                   userData_;
 
  private:
   // comvenient types
@@ -447,11 +480,12 @@ class Net_WLAN_Monitor_T<ACE_SYNCH_USE,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  bool                                    DBusDispatchStarted_;
+  bool                                            DBusDispatchStarted_;
 #endif
-  MESSAGEQUEUE_T                          queue_;
+  MESSAGEQUEUE_T                                  queue_;
 };
-#endif
+#endif /* DBUS_SUPPORT */
+#endif /* ACE_WIN32 || ACE_WIN64 */
 
 //////////////////////////////////////////
 

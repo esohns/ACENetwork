@@ -86,12 +86,12 @@ struct FileServer_SignalHandlerConfiguration
    : Common_SignalHandlerConfiguration ()
    , listener (NULL)
    , statisticReportingHandler (NULL)
-   , statisticReportingTimerID (-1)
+   , statisticReportingTimerId (-1)
   {};
 
-  Test_U_IListener_t*              listener;
-  Net_StatisticReportingHandler_t* statisticReportingHandler;
-  long                             statisticReportingTimerID;
+  Test_U_IListener_t*      listener;
+  Net_IStatisticHandler_t* statisticReportingHandler;
+  long                     statisticReportingTimerId;
 };
 
 struct FileServer_Configuration

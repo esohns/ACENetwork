@@ -149,24 +149,24 @@ FileServer_SignalHandler::handle (int signal_in)
     } // end IF
 
     // step3: stop timer
-    if (inherited::configuration_->statisticReportingTimerID >= 0)
+    if (inherited::configuration_->statisticReportingTimerId >= 0)
     {
       const void* act_p = NULL;
       result =
-          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (inherited::configuration_->statisticReportingTimerID,
+          COMMON_TIMERMANAGER_SINGLETON::instance ()->cancel (inherited::configuration_->statisticReportingTimerId,
                                                               &act_p);
       if (result <= 0)
       {
         ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("failed to cancel timer (ID: %d): \"%m\", returning\n"),
-                    inherited::configuration_->statisticReportingTimerID));
+                    ACE_TEXT ("failed to cancel timer (id: %d): \"%m\", returning\n"),
+                    inherited::configuration_->statisticReportingTimerId));
 
         // clean up
-        inherited::configuration_->statisticReportingTimerID = -1;
+        inherited::configuration_->statisticReportingTimerId = -1;
 
         return;
       } // end IF
-      inherited::configuration_->statisticReportingTimerID = -1;
+      inherited::configuration_->statisticReportingTimerId = -1;
     } // end IF
 
     // step4: stop accepting connections, abort open connections

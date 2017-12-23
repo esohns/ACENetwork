@@ -21,15 +21,28 @@
 #ifndef TEST_U_UI_CALLBACKS_H
 #define TEST_U_UI_CALLBACKS_H
 
+#include <string>
+
 #include "gtk/gtk.h"
+
+#include "net_wlan_common.h"
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+void load_ssids (REFGUID,
+#else
+void load_ssids (const std::string&,
+#endif
+                 Net_WLAN_SSIDs_t&,
+                 GtkListStore*);
+bool load_wlan_interfaces (GtkListStore*);
 
 //------------------------------------------------------------------------------
 
 // idle routines
 gboolean idle_finalize_ui_cb (gpointer);
 gboolean idle_initialize_ui_cb (gpointer);
-gboolean idle_session_start_cb (gpointer);
 gboolean idle_update_info_display_cb (gpointer);
+gboolean idle_update_ssids_cb (gpointer);
 gboolean idle_update_log_display_cb (gpointer);
 gboolean idle_update_progress_cb (gpointer);
 
@@ -40,10 +53,13 @@ gboolean idle_update_progress_cb (gpointer);
 extern "C"
 {
 #endif /* __cplusplus */
-G_MODULE_EXPORT void togglebutton_listen_toggled_cb (GtkToggleButton*, gpointer);
-G_MODULE_EXPORT void button_close_all_clicked_cb (GtkButton*, gpointer);
+G_MODULE_EXPORT void togglebutton_monitor_toggled_cb (GtkToggleButton*, gpointer);
+G_MODULE_EXPORT void togglebutton_connect_toggled_cb (GtkToggleButton*, gpointer);
 G_MODULE_EXPORT void button_report_clicked_cb (GtkButton*, gpointer);
-
+G_MODULE_EXPORT void combobox_interface_changed_cb (GtkComboBox*, gpointer);
+G_MODULE_EXPORT void combobox_ssid_changed_cb (GtkComboBox*, gpointer);
+G_MODULE_EXPORT void togglebutton_autoassociate_toggled_cb (GtkToggleButton*, gpointer);
+//////////////////////////////////////////
 G_MODULE_EXPORT void button_clear_clicked_cb (GtkButton*, gpointer);
 G_MODULE_EXPORT void button_about_clicked_cb (GtkButton*, gpointer);
 G_MODULE_EXPORT void button_quit_clicked_cb (GtkButton*, gpointer);

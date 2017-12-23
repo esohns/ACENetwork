@@ -29,8 +29,6 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #include <ifaddrs.h>
-
-#include "dhcpctl/dhcpctl.h"
 #endif
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -452,6 +450,8 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
     return false;
   } // end IF
   isInitialized_ = true;
+
+  inherited2::initialize ();
 
   return true;
 }
@@ -890,6 +890,8 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
                    MonitorAPI_e,
                    UserDataType>::SSID () const
 {
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::SSID"));
+
   // sanity check(s)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_ASSERT (clientHandle_ != ACE_INVALID_HANDLE);
@@ -905,6 +907,46 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
   return Net_WLAN_Tools::associatedSSID (configuration_->interfaceIdentifier,
                                          handle_);
 #endif
+}
+
+template <ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename AddressType,
+          typename ConfigurationType,
+          enum Net_WLAN_MonitorAPI MonitorAPI_e,
+          typename UserDataType>
+Net_WLAN_SSIDs_t
+Net_WLAN_Monitor_T<ACE_SYNCH_USE,
+                   TimePolicyType,
+                   AddressType,
+                   ConfigurationType,
+                   MonitorAPI_e,
+                   UserDataType>::SSIDs () const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::SSIDs"));
+
+  Net_WLAN_SSIDs_t result;
+
+  // sanity check(s)
+  ACE_ASSERT (configuration_);
+
+  { ACE_GUARD_RETURN (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, subscribersLock_, result);
+    for (SSIDS_TO_INTERFACEIDENTIFIER_MAP_CONST_ITERATOR_T iterator = SSIDsToInterfaceIdentifier_.begin ();
+         iterator != SSIDsToInterfaceIdentifier_.end ();
+         ++iterator)
+    {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if (InlineIsEqualGUID (configuration_->interfaceIdentifier,
+                             (*iterator).second.first))
+#else
+      if (!ACE_OS::strcmp (configuration_->interfaceIdentifier.c_str (),
+                           (*iterator).second.first.c_str ()))
+#endif
+        result.push_back ((*iterator).first);
+    } // end FOR
+  } // end lock scope
+
+  return result;
 }
 
 //////////////////////////////////////////
@@ -936,9 +978,11 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
     {
       // sanity check(s)
       ACE_ASSERT (configuration_);
+      if (unlikely (!isRunning ()))
+        break; // not start()ed yet, nothing to do
 
       { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, subscribersLock_);
-        if (interfaceIdentifiers_.empty ())
+        if (unlikely (interfaceIdentifiers_.empty ()))
           interfaceIdentifiers_ = getDevices ();
       } // end lock scope
 
@@ -1748,6 +1792,11 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
 //                handle_));
 //  isRegistered_ = false;
 
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("(%s): monitor (group: %d, thread id: %t) leaving...\n"),
+              ACE_TEXT (inherited::threadName_.c_str ()),
+              inherited::grp_id_));
+
   return result;
 }
 
@@ -1777,8 +1826,6 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
   ACE_OS::strncpy (iwreq_s.ifr_name,
                    configuration_->interfaceIdentifier.c_str (),
                    IFNAMSIZ);
-  iwreq_s.u.data.pointer = buffer_;
-  iwreq_s.u.data.length = bufferSize_;
   struct stream_descr stream_descr_s;
   ACE_OS::memset (&stream_descr_s, 0, sizeof (struct stream_descr));
   struct iw_event iw_event_s;
@@ -1787,6 +1834,8 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
   SSIDS_TO_INTERFACEIDENTIFIER_MAP_ITERATOR_T iterator;
   struct ether_addr ap_mac_address;
   ACE_OS::memset (&ap_mac_address, 0, sizeof (struct ether_addr));
+  std::string essid_string;
+  ACE_TCHAR buffer_a[BUFSIZ];
 
   if (!buffer_)
   { ACE_ASSERT (!bufferSize_);
@@ -1797,11 +1846,11 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate memory (%u byte(s)): \"%m\", continuing\n"),
                   bufferSize_));
-      goto clean;
+      goto continue_;
     } // end IF
-    iwreq_s.u.data.pointer = buffer_;
-    iwreq_s.u.data.length = bufferSize_;
   } // end IF
+  iwreq_s.u.data.pointer = buffer_;
+  iwreq_s.u.data.length = bufferSize_;
 
 fetch_scan_result_data:
   result = ACE_OS::ioctl (handle_in,
@@ -1822,12 +1871,12 @@ fetch_scan_result_data:
 
     if (unlikely (error == EAGAIN)) // 11
     { // result(s) not available yet
-      goto clean;
+      goto continue_;
     } // end IF
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCGIWSCAN): \"%m\", continuing\n"),
                 handle_in));
-    goto clean;
+    goto continue_;
   } // end IF
 
   // the driver may have reported the required buffer size
@@ -1841,7 +1890,7 @@ retry:
       ACE_DEBUG ((LM_CRITICAL,
                   ACE_TEXT ("failed to allocate memory (%u byte(s)): \"%m\", continuing\n"),
                   bufferSize_));
-      goto clean;
+      goto continue_;
     } // end IF
     iwreq_s.u.data.pointer = buffer_;
     iwreq_s.u.data.length = bufferSize_;
@@ -1885,11 +1934,16 @@ retry:
         break;
       }
       case SIOCGIWNWID:
-        //        if(event->u.nwid.disabled)
-        //          printf("                    NWID:off/any\n");
-        //        else
-        //          printf("                    NWID:%X\n", event->u.nwid.value);
+      {
+#if defined (_DEBUG)
+        ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
+        if (!iw_event_s.u.nwid.disabled)
+          ACE_OS::sprintf (buffer_a,
+                           ACE_TEXT_ALWAYS_CHAR ("NWID: %X"),
+                           iw_event_s.u.nwid.value);
+#endif
         break;
+      }
       case SIOCGIWFREQ:
       {
         float freq = iw_freq2float (&iw_event_s.u.freq);
@@ -1899,128 +1953,147 @@ retry:
       }
       case SIOCGIWMODE:
       {
-        const char* mode_p = iw_operation_mode[iw_event_s.u.mode];
-        ACE_UNUSED_ARG (mode_p);
+#if defined (_DEBUG)
+        ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
+        ACE_OS::sprintf (buffer_a,
+                         ACE_TEXT_ALWAYS_CHAR ("Mode: %s"),
+                         iw_operation_mode[iw_event_s.u.mode]);
+#endif
         break;
       }
       case SIOCGIWNAME:
-        //        printf("                    Protocol:%-1.16s\n", event->u.name);
+      {
+#if defined (_DEBUG)
+        ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
+        ACE_OS::sprintf (buffer_a,
+                         ACE_TEXT_ALWAYS_CHAR ("Protocol: %-1.16s"),
+                         iw_event_s.u.name);
+#endif
         break;
+      }
       case SIOCGIWESSID:
       {
         ACE_ASSERT (iw_event_s.u.essid.length && (iw_event_s.u.essid.length <= IW_ESSID_MAX_SIZE));
         ACE_ASSERT (iw_event_s.u.essid.pointer);
-        std::string essid_string (reinterpret_cast<char*> (iw_event_s.u.essid.pointer),
-                                  iw_event_s.u.essid.length);
-        //        if (iw_event_s.u.essid.flags)
-        //        {
-        //          /* Does it have an ESSID index ? */
-        //          if((iw_event_s.u.essid.flags & IW_ENCODE_INDEX) > 1)
-        //            printf("                    ESSID:\"%s\" [%d]\n", essid,
-        //                   (iw_event_s.u.essid.flags & IW_ENCODE_INDEX));
-        //          else
-        //            printf("                    ESSID:\"%s\"\n", essid);
-        //        } // end IF
-        //        else
-        //          printf("                    ESSID:off/any/hidden\n");
+        essid_string.assign (reinterpret_cast<char*> (iw_event_s.u.essid.pointer),
+                             iw_event_s.u.essid.length);
+        if (iw_event_s.u.essid.flags)
+        {
+          /* Does it have an ESSID index ? */
+          if ((iw_event_s.u.essid.flags & IW_ENCODE_INDEX) > 1);
+//            printf("                    ESSID:\"%s\" [%d]\n", essid,
+//                   (iw_event_s.u.essid.flags & IW_ENCODE_INDEX));
+//          else
+//            printf("                    ESSID:\"%s\"\n", essid);
+        } // end IF
+//        else
+//          printf("                    ESSID:off/any/hidden\n");
         { ACE_GUARD_RETURN (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, subscribersLock_, 0);
           SSIDsToInterfaceIdentifier_.insert (std::make_pair (essid_string,
                                                               std::make_pair (configuration_->interfaceIdentifier,
                                                                               ap_mac_address)));
         } // end lock scope
+#if defined (_DEBUG)
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("\"%s\": found wireless access point (MAC address: %s, ESSID: %s)...\n"),
                     ACE_TEXT (configuration_->interfaceIdentifier.c_str ()),
                     ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address),
                                                                           NET_LINKLAYER_802_11).c_str ()),
                     ACE_TEXT (essid_string.c_str ())));
+#endif
         break;
       }
       case SIOCGIWENCODE:
       {
-        //        unsigned char	key[IW_ENCODING_TOKEN_MAX];
-        //        if(event->u.data.pointer)
-        //          memcpy(key, event->u.data.pointer, event->u.data.length);
-        //        else
-        //          event->u.data.flags |= IW_ENCODE_NOKEY;
-        //        printf("                    Encryption key:");
-        //        if(event->u.data.flags & IW_ENCODE_DISABLED)
-        //          printf("off\n");
-        //        else
-        //        {
-        //          /* Display the key */
-        //          iw_print_key(buffer, sizeof(buffer), key, event->u.data.length,
-        //                       event->u.data.flags);
-        //          printf("%s", buffer);
-
-        //          /* Other info... */
-        //          if((event->u.data.flags & IW_ENCODE_INDEX) > 1)
-        //            printf(" [%d]", event->u.data.flags & IW_ENCODE_INDEX);
-        //          if(event->u.data.flags & IW_ENCODE_RESTRICTED)
-        //            printf("   Security mode:restricted");
-        //          if(event->u.data.flags & IW_ENCODE_OPEN)
-        //            printf("   Security mode:open");
-        //          printf("\n");
-        //        }
+        ACE_TCHAR buffer_2[IW_ENCODING_TOKEN_MAX];
+        ACE_OS::memset (buffer_2, 0, sizeof (ACE_TCHAR[IW_ENCODING_TOKEN_MAX]));
+        if (iw_event_s.u.data.pointer)
+        { ACE_ASSERT (iw_event_s.u.data.length <= IW_ENCODING_TOKEN_MAX);
+          ACE_OS::memcpy (buffer_2,
+                          iw_event_s.u.data.pointer,
+                          iw_event_s.u.data.length);
+//        else
+//          iw_event_s.u.data.flags |= IW_ENCODE_NOKEY;
+        } // end IF
+        if (iw_event_s.u.data.flags & IW_ENCODE_DISABLED);
+//          printf ("off\n");
+        else
+        {
+#if defined (_DEBUG)
+          iw_print_key (buffer_a,
+                        sizeof (ACE_TCHAR[BUFSIZ]),
+                        reinterpret_cast<unsigned char*> (iw_event_s.u.data.pointer),
+                        iw_event_s.u.data.length,
+                        iw_event_s.u.data.flags);
+#endif
+          /* Other info... */
+          if ((iw_event_s.u.data.flags & IW_ENCODE_INDEX) > 1);
+//            printf (" [%d]", iw_event_s.u.data.flags & IW_ENCODE_INDEX);
+          if (iw_event_s.u.data.flags & IW_ENCODE_RESTRICTED);
+//            printf ("   Security mode:restricted");
+          if (iw_event_s.u.data.flags & IW_ENCODE_OPEN);
+//            printf ("   Security mode:open");
+        } // end ELSE
         break;
       }
       case SIOCGIWRATE:
-        //        if(state->val_index == 0)
-        //          printf("                    Bit Rates:");
-        //        else
-        //          if((state->val_index % 5) == 0)
-        //            printf("\n                              ");
-        //          else
-        //            printf("; ");
-        //        iw_print_bitrate(buffer, sizeof(buffer), event->u.bitrate.value);
-        //        printf("%s", buffer);
-        //        /* Check for termination */
-        //        if(stream->value == NULL)
-        //        {
-        //          printf("\n");
-        //          state->val_index = 0;
-        //        }
-        //        else
-        //          state->val_index++;
+      {
+#if defined (_DEBUG)
+        ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
+        iw_print_bitrate (buffer_a,
+                          sizeof (ACE_TCHAR[BUFSIZ]),
+                          iw_event_s.u.bitrate.value);
+#endif
         break;
+      }
       case SIOCGIWMODUL:
       {
-        //        unsigned int	modul = event->u.param.value;
-        //        int		i;
-        //        int		n = 0;
-        //        printf("                    Modulations :");
-        //        for(i = 0; i < IW_SIZE_MODUL_LIST; i++)
-        //        {
-        //          if((modul & iw_modul_list[i].mask) == iw_modul_list[i].mask)
-        //          {
-        //            if((n++ % 8) == 7)
-        //              printf("\n                        ");
-        //            else
-        //              printf(" ; ");
-        //            printf("%s", iw_modul_list[i].cmd);
-        //          }
-        //        }
-        //        printf("\n");
+        for (int i = 0;
+             i < IW_SIZE_MODUL_LIST;
+             ++i)
+        {
+          if ((iw_event_s.u.param.value & iw_modul_list[i].mask) == iw_modul_list[i].mask);
+#if defined (_DEBUG)
+          ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
+          ACE_OS::sprintf (buffer_a,
+                           ACE_TEXT_ALWAYS_CHAR ("Modulation: %s"),
+                           iw_modul_list[i].cmd);
+#endif
+        } // end FOR
         break;
       }
       case IWEVQUAL:
-        //        iw_print_stats(buffer, sizeof(buffer),
-        //                       &event->u.qual, iw_range, has_range);
-        //        printf("                    %s\n", buffer);
+      {
+#if defined (_DEBUG)
+        ACE_OS::memset (buffer_a, 0, sizeof (ACE_TCHAR[BUFSIZ]));
+        iw_print_stats (buffer_a, sizeof (ACE_TCHAR[BUFSIZ]),
+                        &iw_event_s.u.qual,
+                        &range_, 1);
+#endif
         break;
+      }
 #ifndef WE_ESSENTIAL
       case IWEVGENIE:
-        //        /* Informations Elements are complex, let's do only some of them */
-        //        iw_print_gen_ie(event->u.data.pointer, event->u.data.length);
+      {
+#if defined (_DEBUG)
+//        iw_print_gen_ie (iw_event_s.u.data.pointer,
+//                         iw_event_s.u.data.length);
+#endif
         break;
+      }
 #endif /* WE_ESSENTIAL */
       case IWEVCUSTOM:
       {
-        //        char custom[IW_CUSTOM_MAX+1];
-        //        if((event->u.data.pointer) && (event->u.data.length))
-        //          memcpy(custom, event->u.data.pointer, event->u.data.length);
-        //        custom[event->u.data.length] = '\0';
-        //        printf("                    Extra:%s\n", custom);
+#if defined (_DEBUG)
+        ACE_TCHAR buffer_2[IW_CUSTOM_MAX + 1];
+        ACE_OS::memset (buffer_2, 0, sizeof (ACE_TCHAR[IW_CUSTOM_MAX + 1]));
+        ACE_ASSERT (iw_event_s.u.data.length <= IW_CUSTOM_MAX);
+        if (iw_event_s.u.data.pointer && iw_event_s.u.data.length)
+          ACE_OS::memcpy (buffer_2,
+                          iw_event_s.u.data.pointer,
+                          iw_event_s.u.data.length);
+//        buffer_2[iw_event_s.u.data.length] = '\0';
+#endif
         break;
       }
       default:
@@ -2033,7 +2106,14 @@ retry:
     } // end SWITCH
   } while (true);
 
-clean:
+  try {
+    onScanComplete (configuration_->interfaceIdentifier);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onScanComplete(), continuing\n")));
+  }
+
+continue_:
   // *NOTE*: do not deregister from the callback
   return 0;
 }
@@ -2166,6 +2246,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
+#if defined (DBUS_SUPPORT)
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename AddressType,
@@ -2739,7 +2820,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
                                       success_in);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Net_IWLANCB::onAssociate(), continuing\n")));
+                    ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onAssociate(), continuing\n")));
       }
     } // end FOR
   } // end lock scope
@@ -2803,7 +2884,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
                                     success_in);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Net_IWLANCB::onConnect(), continuing\n")));
+                    ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onConnect(), continuing\n")));
       }
     } // end FOR
   } // end lock scope
@@ -2861,7 +2942,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
                                     enabled_in);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Net_IWLANCB::onHotPlug(), continuing\n")));
+                    ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onHotPlug(), continuing\n")));
       }
     } // end FOR
   } // end lock scope
@@ -2901,7 +2982,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
         (*(iterator++))->onScanComplete (interfaceIdentifier_in);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Net_IWLANCB::onScanComplete(), continuing\n")));
+                    ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onScanComplete(), continuing\n")));
       }
     } // end FOR
   } // end lock scope
@@ -3122,4 +3203,5 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
 
   return result;
 }
-#endif
+#endif /* DBUS_SUPPORT */
+#endif /* ACE_WIN32 || ACE_WIN64 */

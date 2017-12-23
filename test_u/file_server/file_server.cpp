@@ -520,7 +520,7 @@ do_work (
     connection_manager_p;
   ACE_ASSERT (iconnection_manager_p);
 
-  Test_U_StatisticHandler_t statistic_handler (ACTION_REPORT,
+  Test_U_StatisticHandler_t statistic_handler (STATISTIC_ACTION_REPORT,
                                                connection_manager_p,
                                                false);
   Test_U_EventHandler ui_event_handler (&CBData_in);
@@ -687,7 +687,7 @@ do_work (
   signal_handler_configuration.listener =
     CBData_in.configuration->listener;
   signal_handler_configuration.statisticReportingHandler = connection_manager_p;
-  signal_handler_configuration.statisticReportingTimerID = timer_id;
+  signal_handler_configuration.statisticReportingTimerId = timer_id;
   signal_handler_configuration.useReactor = useReactor_in;
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {

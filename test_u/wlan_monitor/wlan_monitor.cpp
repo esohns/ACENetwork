@@ -48,6 +48,8 @@
 #include "common_logger.h"
 #include "common_tools.h"
 
+#include "common_timer_manager_common.h"
+
 #include "common_ui_defines.h"
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager_common.h"
@@ -68,13 +70,6 @@
 
 #include "wlan_monitor_common.h"
 #include "wlan_monitor_defines.h"
-
-// globals
-unsigned int random_seed;
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-struct random_data random_data;
-char random_state_buffer[BUFSIZ];
-#endif
 
 void
 do_printUsage (const std::string& programName_in)
@@ -99,33 +94,41 @@ do_printUsage (const std::string& programName_in)
             << std::endl
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("available configuration options:") << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-a           : auto-associate with the AP [")
+            << false
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-c           : console mode [")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
 #endif
-  std::string UI_file = path;
+  std::string UI_file = configuration_path;
   UI_file += ACE_DIRECTORY_SEPARATOR_STR;
-  UI_file += ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_UI_FILE);
+  UI_file += ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_UI_DEFINITION_FILE);
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-g[[STRING]] : UI definition file [\"")
             << UI_file
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
             << std::endl;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-i [GUID]    : network interface [\"")
+            << ACE_TEXT_ALWAYS_CHAR (Net_Common_Tools::interfaceToString (Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11)).c_str ())
 #else
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-i [STRING]  : network interface [\"")
-            << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET)
+            << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_WLAN)
+#endif
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
-#endif
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-l           : log to a file [")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]   : statistic reporting interval (second(s)) [")
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-r [VALUE]   : statistic reporting interval (second(s)) [")
             << STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL
             << ACE_TEXT_ALWAYS_CHAR ("] {0: off})")
+            << std::endl;
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [SSID]    : SSID")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-t           : trace information")
             << std::endl;
@@ -136,13 +139,15 @@ do_printUsage (const std::string& programName_in)
 bool
 do_processArguments (const int& argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
+                     bool& autoAssociate_out,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                      bool& showConsole_out,
 #endif
-                     std::string& UIFile_out,
-                     std::string& networkInterface_out,
+                     std::string& UIDefinitionFilePath_out,
+                     std::string& interfaceIdentifier_out,
                      bool& logToFile_out,
                      unsigned int& statisticReportingInterval_out,
+                     std::string& SSID_out,
                      bool& traceInformation_out,
                      bool& printVersionAndExit_out)
 {
@@ -156,27 +161,34 @@ do_processArguments (const int& argc_in,
 #endif // #ifdef DEBUG_DEBUGGER
 
   // initialize results
+  autoAssociate_out = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   showConsole_out = false;
 #endif
-  std::string path = configuration_path;
-  UIFile_out = path;
-  UIFile_out += ACE_DIRECTORY_SEPARATOR_STR;
-  UIFile_out += ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_UI_FILE);
-  networkInterface_out =
-    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
+  UIDefinitionFilePath_out = configuration_path;
+  UIDefinitionFilePath_out += ACE_DIRECTORY_SEPARATOR_STR;
+  UIDefinitionFilePath_out +=
+      ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_UI_DEFINITION_FILE);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  interfaceIdentifier_out =
+      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11);
+#else
+  interfaceIdentifier_out =
+    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_WLAN);
+#endif
   logToFile_out = false;
   statisticReportingInterval_out =
       STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+  SSID_out.clear ();
   traceInformation_out = false;
   printVersionAndExit_out = false;
 
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                              ACE_TEXT ("cg::i:ls:tv"));
+                              ACE_TEXT ("acg::i:lr:s:tv"));
 #else
-                              ACE_TEXT ("g::i:ls:tv"));
+                              ACE_TEXT ("ag::i:lr:s:tv"));
 #endif
   int option = 0;
   std::stringstream converter;
@@ -184,6 +196,11 @@ do_processArguments (const int& argc_in,
   {
     switch (option)
     {
+      case 'a':
+      {
+        autoAssociate_out = true;
+        break;
+      }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       case 'c':
       {
@@ -195,15 +212,19 @@ do_processArguments (const int& argc_in,
       {
         ACE_TCHAR* opt_arg = argumentParser.opt_arg ();
         if (opt_arg)
-          UIFile_out = ACE_TEXT_ALWAYS_CHAR (opt_arg);
+          UIDefinitionFilePath_out = ACE_TEXT_ALWAYS_CHAR (opt_arg);
         else
-          UIFile_out.clear ();
+          UIDefinitionFilePath_out.clear ();
         break;
       }
       case 'i':
       {
-        networkInterface_out =
-          ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
+        interfaceIdentifier_out =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+            Common_Tools::StringToGUID (ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ()));
+#else
+            ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
+#endif
         break;
       }
       case 'l':
@@ -211,12 +232,17 @@ do_processArguments (const int& argc_in,
         logToFile_out = true;
         break;
       }
-      case 's':
+      case 'r':
       {
         converter.clear ();
         converter.str (ACE_TEXT_ALWAYS_CHAR (""));
         converter << argumentParser.opt_arg ();
         converter >> statisticReportingInterval_out;
+        break;
+      }
+      case 's':
+      {
+        SSID_out = ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
         break;
       }
       case 't':
@@ -337,13 +363,18 @@ do_initializeSignals (bool useReactor_in,
 }
 
 void
-do_work (
+do_work (bool autoAssociate_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
          bool showConsole_in,
 #endif
          const std::string& UIDefinitionFile_in,
-         const std::string& networkInterface_in,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+         REFGUID interfaceIdentifier_in,
+#else
+         const std::string& interfaceIdentifier_in,
+#endif
          unsigned int statisticReportingInterval_in,
+         const std::string& SSID_in,
          struct WLANMonitor_GTK_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
@@ -353,11 +384,10 @@ do_work (
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   int result = -1;
-  struct Common_DispatchThreadData thread_data;
-  struct Common_TimerConfiguration timer_configuration;
   struct Test_U_SignalHandlerConfiguration signal_handler_configuration;
-  struct Test_U_UserData user_data;
-  FileServer_GTK_Manager_t* gtk_manager_p = NULL;
+  Common_Timer_Manager_t* timer_manager_p = NULL;
+  Net_WLAN_IInetMonitor_t* iwlanmonitor_p = NULL;
+  WLANMonitor_GTK_Manager_t* gtk_manager_p = NULL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HWND window_p = NULL;
   BOOL was_visible_b = true;
@@ -367,169 +397,51 @@ do_work (
   bool stop_event_dispatch = false;
 
   // step0a: initialize configuration
-  struct FileServer_Configuration configuration;
+  struct WLANMonitor_Configuration configuration;
   CBData_in.configuration = &configuration;
 
-  Common_Timer_Manager_t* timer_manager_p =
+  timer_manager_p =
     COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
+  iwlanmonitor_p =
+      NET_WLAN_INETMONITOR_SINGLETON::instance ();
+  ACE_ASSERT (iwlanmonitor_p);
 
-  FileServer_InetConnectionManager_t* connection_manager_p =
-    FILESERVER_CONNECTIONMANAGER_SINGLETON::instance ();
-  FileServer_IInetConnectionManager_t* iconnection_manager_p =
-    connection_manager_p;
-  ACE_ASSERT (iconnection_manager_p);
-
-  Test_U_StatisticHandler_t statistic_handler (ACTION_REPORT,
-                                               connection_manager_p,
+  Test_U_StatisticHandler_t statistic_handler (STATISTIC_ACTION_REPORT,
+                                               NET_WLAN_INETMONITOR_SINGLETON::instance (),
                                                false);
   Test_U_EventHandler ui_event_handler (&CBData_in);
-  Test_U_Module_EventHandler_Module event_handler (NULL,
-                                                   ACE_TEXT_ALWAYS_CHAR ("EventHandler"));
-  Test_U_Module_EventHandler* event_handler_p =
-    dynamic_cast<Test_U_Module_EventHandler*> (event_handler.writer ());
-  if (!event_handler_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_EventHandler> failed, returning\n")));
-    return;
-  } // end IF
 
-  Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Stream_AllocatorConfiguration> heap_allocator;
-  if (!heap_allocator.initialize (configuration.allocatorConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize message allocator, returning\n")));
-    return;
-  } // end IF
-  Test_U_StreamMessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
-                                                     &heap_allocator,         // heap allocator handle
-                                                     true);                   // block ?
+  // ********************** monitor configuration data *************************
+  configuration.signalHandlerConfiguration.hasUI =
+      !UIDefinitionFile_in.empty ();
+  configuration.signalHandlerConfiguration.statisticReportingHandler =
+      NET_WLAN_INETMONITOR_SINGLETON::instance ();
+  configuration.signalHandlerConfiguration.useReactor =
+      NET_EVENT_USE_REACTOR;
+  configuration.subscriber = &ui_event_handler;
+  configuration.WLANMonitorConfiguration.autoAssociate =
+      autoAssociate_in;
+  configuration.WLANMonitorConfiguration.interfaceIdentifier =
+      interfaceIdentifier_in;
+  configuration.WLANMonitorConfiguration.SSID =
+      SSID_in;
 
-  // ******************** protocol configuration data **************************
-  // ********************** stream configuration data **************************
-//  configuration.allocatorConfiguration.defaultBufferSize =
-//    bufferSize_in;
-  struct Stream_ModuleConfiguration module_configuration;
-  struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
-  modulehandler_configuration.allocatorConfiguration =
-    &configuration.allocatorConfiguration;
-  modulehandler_configuration.connectionConfigurations =
-    &configuration.connectionConfigurations;
-  modulehandler_configuration.connectionManager = connection_manager_p;
-  modulehandler_configuration.fileName = fileName_in;
-  if (useUDP_in)
-    modulehandler_configuration.inbound = false;
-  modulehandler_configuration.printFinalReport = true;
-  //modulehandler_configuration.program =
-  //  FILE_SERVER_DEFAULT_MPEG_TS_PROGRAM_NUMBER;
-  modulehandler_configuration.statisticReportingInterval =
-    ACE_Time_Value (statisticReportingInterval_in, 0);
-  modulehandler_configuration.streamConfiguration =
-    &configuration.streamConfiguration;
-  //modulehandler_configuration.streamType =
-  //  FILE_SERVER_DEFAULT_MPEG_TS_STREAM_TYPE;
-  if (!UIDefinitionFile_in.empty ())
-  {
-    modulehandler_configuration.subscribersLock = &CBData_in.subscribersLock;
-    modulehandler_configuration.subscriber = &ui_event_handler;
-    modulehandler_configuration.subscribers = &CBData_in.subscribers;
-  } // end IF
-
-  configuration.streamConfiguration.configuration_.cloneModule =
-    !(UIDefinitionFile_in.empty ());
-  configuration.streamConfiguration.configuration_.messageAllocator =
-    &message_allocator;
-  configuration.streamConfiguration.configuration_.module = &event_handler;
-  configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                            std::make_pair (module_configuration,
-                                                                            modulehandler_configuration)));
-
-  //configuration.streamConfiguration.protocolConfiguration =
-  //  &configuration.protocolConfiguration;
-  // *TODO*: is this correct ?
-  configuration.streamConfiguration.configuration_.serializeOutput =
-    useThreadPool_in;
-  configuration.streamConfiguration.configuration_.useReactor =
-    useReactor_in;
-  configuration.streamConfiguration.configuration_.userData =
-    &configuration.userData;
-  //configuration.userData.connectionConfiguration =
-  //    &configuration.connectionConfiguration;
-
-  // ********************** socket configuration data **************************
-  struct FileServer_ConnectionConfiguration connection_configuration;
-  FileServer_ConnectionConfigurationIterator_t iterator;
-  if (useUDP_in)
-  {
-    result =
-      configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_3.listenAddress.set (listeningPortNumber_in,
-                                                                                                                                       static_cast<ACE_UINT32> (INADDR_ANY),
-                                                                                                                                       1,
-                                                                                                                                       0);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
-      goto error;
-    } // end IF
-    configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_3.writeOnly =
-      true;
-  } // end IF
-  // ****************** connection configuration data **************************
-  connection_configuration.socketHandlerConfiguration.userData =
-    &configuration.userData;
-  connection_configuration.messageAllocator = &message_allocator;
-  connection_configuration.streamConfiguration =
-    &configuration.streamConfiguration;
-  connection_configuration.userData = &configuration.userData;
-  configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                                 connection_configuration));
-  iterator =
-    configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
-  (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
-    &((*iterator).second);
-
-  //  config.delete_module = false;
-  // *WARNING*: set at runtime, by the appropriate connection handler
-  //  config.sessionID = 0; // (== socket handle !)
-  //  config.statisticsReportingInterval = 0; // == off
-  //	config.printFinalReport = false;
-  // ************ runtime data ************
-  //	config.currentStatistics = {};
-  //	config.lastCollectionTimestamp = ACE_Time_Value::zero;
-
-  // step0b: initialize event dispatch
-  thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data.useReactor = useReactor_in;
-  if (!Common_Tools::initializeEventDispatch (thread_data.useReactor,
-                                              useThreadPool_in,
-                                              thread_data.numberOfDispatchThreads,
-                                              thread_data.proactorType,
-                                              thread_data.reactorType,
-                                              configuration.streamConfiguration.configuration_.serializeOutput))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
-    goto error;
-  } // end IF
-
-  timer_manager_p->initialize (timer_configuration);
+  // step1: initialize regular (global) statistic reporting ?
+  timer_manager_p->initialize (configuration.timerConfiguration);
   timer_manager_p->start ();
+  ACE_ASSERT (timer_manager_p->isRunning ());
 
-  // step1: initialize regular (global) statistic reporting
   if (statisticReportingInterval_in)
   {
     ACE_Time_Value interval (statisticReportingInterval_in,
                              0);
-    timer_id =
+    configuration.signalHandlerConfiguration.statisticReportingTimerId =
       timer_manager_p->schedule_timer (&statistic_handler,         // event handler handle
                                        NULL,                       // asynchronous completion token
                                        COMMON_TIME_NOW + interval, // first wakeup time
                                        interval);                  // interval
-    if (timer_id == -1)
+    if (configuration.signalHandlerConfiguration.statisticReportingTimerId == -1)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to schedule timer: \"%m\", aborting\n")));
@@ -538,18 +450,7 @@ do_work (
   } // end IF
 
   // step2: signal handling
-  if (useReactor_in)
-    CBData_in.configuration->listener =
-      FILESERVER_LISTENER_SINGLETON::instance ();
-  else
-    CBData_in.configuration->listener =
-      FILESERVER_ASYNCHLISTENER_SINGLETON::instance ();
-  signal_handler_configuration.listener =
-    CBData_in.configuration->listener;
-  signal_handler_configuration.statisticReportingHandler = connection_manager_p;
-  signal_handler_configuration.statisticReportingTimerID = timer_id;
-  signal_handler_configuration.useReactor = useReactor_in;
-  if (!signalHandler_in.initialize (signal_handler_configuration))
+  if (!signalHandler_in.initialize (configuration.signalHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize signal handler, aborting\n")));
@@ -565,48 +466,6 @@ do_work (
     goto error;
   } // end IF
 
-  // step3: initialize connection manager
-  connection_manager_p->initialize (maximumNumberOfConnections_in);
-  iconnection_manager_p->set ((*iterator).second,
-                              &user_data);
-
-  // step4: initialize listener
-  //if (networkInterface_in.empty ()); // *TODO*
-  if (useLoopBack_in)
-  {
-    result =
-      configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.set (listeningPortNumber_in,
-                                                                                                                                 INADDR_LOOPBACK,
-                                                                                                                                 1,
-                                                                                                                                 0);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
-      goto error;
-    } // end IF
-    result =
-      configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_3.listenAddress.set (listeningPortNumber_in,
-                                                                                                                                       INADDR_LOOPBACK,
-                                                                                                                                       1,
-                                                                                                                                       0);
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
-      goto error;
-    } // end IF
-  } // end IF
-  else
-  {
-    configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address.set_port_number (listeningPortNumber_in,
-                                                                                                                                           1);
-    configuration.listenerConfiguration.connectionConfiguration->socketHandlerConfiguration.socketConfiguration_3.listenAddress.set_port_number (listeningPortNumber_in,
-                                                                                                                                                 1);
-  } // end ELSE
-  configuration.listenerConfiguration.connectionManager = connection_manager_p;
-  //configuration.listenerConfiguration.useLoopBackDevice = useLoopBack_in;
-
   // step5: handle events (signals, incoming connections/data, timers, ...)
   // reactor/proactor event loop:
   // - dispatch connection attempts to acceptor
@@ -616,12 +475,20 @@ do_work (
   // [GTK events:]
   // - dispatch UI events (if any)
 
+  if (!iwlanmonitor_p->initialize (configuration.WLANMonitorConfiguration))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize WLAN monitor, aborting\n")));
+    goto error;
+  } // end IF
+
   // step5a: start GTK event loop ?
-  gtk_manager_p =
-    FILESERVER_UI_GTK_MANAGER_SINGLETON::instance ();
-  ACE_ASSERT (gtk_manager_p);
   if (!UIDefinitionFile_in.empty ())
   {
+    gtk_manager_p =
+      WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ();
+    ACE_ASSERT (gtk_manager_p);
+
     CBData_in.finalizationHook = idle_finalize_ui_cb;
     CBData_in.initializationHook = idle_initialize_ui_cb;
     CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
@@ -653,151 +520,35 @@ do_work (
 #endif
   } // end IF
 
-  // step4b: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (thread_data,
-                                         group_id))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to start event dispatch, aborting\n")));
-    goto error;
-  } // end IF
-  stop_event_dispatch = true;
+//  // step4b: initialize worker(s)
+//  if (!Common_Tools::startEventDispatch (thread_data,
+//                                         group_id))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to start event dispatch, aborting\n")));
+//    goto error;
+//  } // end IF
+//  stop_event_dispatch = true;
 
-  // step4c: start listening ?
+  // step4c: start monitoring ?
   if (UIDefinitionFile_in.empty ())
   {
-    if (!CBData_in.configuration->listener->initialize (configuration.listenerConfiguration))
+    iwlanmonitor_p->start ();
+    if (!iwlanmonitor_p->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to initialize listener, aborting\n")));
+                  ACE_TEXT ("failed to start WLAN monitor, aborting\n")));
       goto error;
     } // end IF
-
-    if (useUDP_in)
-    {
-      //Test_U_IInetConnector_t* iconnector_p = NULL;
-
-      //if (useReactor_in)
-      //  ACE_NEW_NORETURN (iconnector_p,
-      //                    Test_U_UDPConnector_t (connection_manager_p,
-      //                                           configuration.streamConfiguration.statisticReportingInterval));
-      //else
-      //  ACE_NEW_NORETURN (iconnector_p,
-      //                    Test_U_UDPAsynchConnector_t (connection_manager_p,
-      //                                                 configuration.streamConfiguration.statisticReportingInterval));
-      //bool result_2 =
-      //  iconnector_p->initialize (configuration.socketHandlerConfiguration);
-      //if (!iconnector_p)
-      //{
-      //  ACE_DEBUG ((LM_CRITICAL,
-      //              ACE_TEXT ("failed to allocate memory, returning\n")));
-      //  goto error;
-      //} // end IF
-      ////  Stream_IInetConnector_t* iconnector_p = &connector;
-      //if (!result_2)
-      //{
-      //  ACE_DEBUG ((LM_ERROR,
-      //              ACE_TEXT ("failed to initialize connector: \"%m\", returning\n")));
-      //  goto error;
-      //} // end IF
-
-      //// connect
-      //// *TODO*: support one-thread operation by scheduling a signal and manually
-      ////         running the dispatch loop for a limited time...
-      //configuration.handle =
-      //  iconnector_p->connect (configuration.socketConfiguration.address);
-      //if (!useReactor_in)
-      //{
-      //  // *TODO*: avoid tight loop here
-      //  ACE_Time_Value timeout (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT, 0);
-      //  //result = ACE_OS::sleep (timeout);
-      //  //if (result == -1)
-      //  //  ACE_DEBUG ((LM_ERROR,
-      //  //              ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
-      //  //              &timeout));
-      //  ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
-      //  Test_U_UDPAsynchConnector_t::ICONNECTION_T* connection_p = NULL;
-      //  do
-      //  {
-      //    connection_p =
-      //      connection_manager_p->get (configuration.socketConfiguration.address);
-      //    if (connection_p)
-      //    {
-      //      configuration.handle =
-      //          reinterpret_cast<ACE_HANDLE> (connection_p->id ());
-      //      connection_p->decrease ();
-      //      break;
-      //    } // end IF
-      //  } while (COMMON_TIME_NOW < deadline);
-      //} // end IF
-      //result_2 = !(configuration.handle == ACE_INVALID_HANDLE);
-      //if (!result_2)
-      //{
-      //  ACE_DEBUG ((LM_ERROR,
-      //              ACE_TEXT ("failed to connect to \"%s\", returning\n"),
-      //              ACE_TEXT (Net_Common_Tools::IPAddress2String (configuration.socketConfiguration.address).c_str ())));
-      //  goto error;
-      //} // end IF
-      //ACE_DEBUG ((LM_DEBUG,
-      //            ACE_TEXT ("listening to UDP \"%s\"...\n"),
-      //            ACE_TEXT (Net_Common_Tools::IPAddress2String (configuration.socketConfiguration.address).c_str ())));
-
-      //// clean up
-      //delete iconnector_p;
-
-      Test_U_UDPStream stream;
-      if (!stream.initialize (configuration.streamConfiguration,
-                              ACE_INVALID_HANDLE))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to initialize stream, aborting\n")));
-        goto error;
-      } // end IF
-
-      stream.start ();
-      if (!stream.isRunning ())
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to start stream, aborting\n")));
-        goto error;
-      } // end IF
-      stream.wait (true,  // wait for thread(s)
-                   false, // wait for upstream ?
-                   true); // wait for downstream ?
-    } // end IF
-    else
-    {
-      CBData_in.configuration->listener->start ();
-      if (!CBData_in.configuration->listener->isRunning ())
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to start listener (port: %u), aborting\n"),
-                    listeningPortNumber_in));
-        goto error;
-      } // end IF
-    } // end ELSE
+    iwlanmonitor_p->wait (false); // wait for message queue ?
   } // end IF
+  else
+    gtk_manager_p->wait ();
 
-  // *NOTE*: from this point on, clean up any remote connections !
-
-  if (!useUDP_in)
-    Common_Tools::dispatchEvents (useReactor_in,
-                                  group_id);
-  stop_event_dispatch = false;
-
-  // clean up
-  // *NOTE*: listener has stopped, interval timer has been cancelled,
-  // and connections have been aborted...
-
-  //// wait for connection processing to complete
-  //NET_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
-  //NET_CONNECTIONMANAGER_SINGLETON::instance ()->wait ();
-
-  result = event_handler.close (ACE_Module_Base::M_DELETE_NONE);
-  if (result == -1)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to ACE_Module::close (): \"%m\", continuing\n"),
-                event_handler.name ()));
+//  if (!useUDP_in)
+//    Common_Tools::dispatchEvents (useReactor_in,
+//                                  group_id);
+//  stop_event_dispatch = false;
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("finished working...\n")));
@@ -813,15 +564,12 @@ error:
 //				g_source_remove(*iterator);
 //		} // end lock scope
   if (!UIDefinitionFile_in.empty ())
-    gtk_manager_p->stop (true);
-  if (stop_event_dispatch)
-    Common_Tools::finalizeEventDispatch (useReactor_in,
-                                          !useReactor_in,
-                                          group_id);
-  if (CBData_in.configuration->listener &&
-      !useUDP_in)
-    CBData_in.configuration->listener->stop (true,
-                                             true);
+    gtk_manager_p->stop (true,
+                         true);
+//  if (stop_event_dispatch)
+//    Common_Tools::finalizeEventDispatch (useReactor_in,
+//                                          !useReactor_in,
+//                                          group_id);
 }
 
 void
@@ -897,37 +645,7 @@ ACE_TMAIN (int argc_in,
   // start profile timer...
   process_profile.start ();
 
-  // initialize randomness
-  // *TODO*: use STL functionality here
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("initializing random seed (RAND_MAX = %d)...\n"),
-              RAND_MAX));
-  ACE_Time_Value now = COMMON_TIME_NOW;
-  random_seed = static_cast<unsigned int> (now.sec ());
-  // *PORTABILITY*: outside glibc, this is not very portable...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_OS::srand (static_cast<u_int> (random_seed));
-#else
-  ACE_OS::memset (random_state_buffer, 0, sizeof (random_state_buffer));
-  result = ::initstate_r (random_seed,
-                          random_state_buffer, sizeof (random_state_buffer),
-                          &random_data);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initstate_r(): \"%s\", aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-  result = ::srandom_r (random_seed, &random_data);
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize random seed: \"%s\", aborting\n")));
-    return EXIT_FAILURE;
-  } // end IF
-#endif
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("initializing random seed...DONE\n")));
+//  // initialize randomness
 
   std::string configuration_path =
     Common_File_Tools::getWorkingDirectory ();
@@ -939,55 +657,44 @@ ACE_TMAIN (int argc_in,
 #endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
+  bool auto_associate = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   bool show_console = false;
 #endif
-  std::string path = configuration_path;
-  std::string source_file = Common_File_Tools::getTempDirectory ();
-  source_file += ACE_DIRECTORY_SEPARATOR_STR;
-  source_file += ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_DEFAULT_FILE);
-  std::string UI_file = path;
-  UI_file += ACE_DIRECTORY_SEPARATOR_STR;
-  UI_file += ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_UI_FILE);
-  bool use_thread_pool = NET_EVENT_USE_THREAD_POOL;
-  std::string network_interface =
-    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
-  //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
+  std::string UI_definition_file_path = configuration_path;
+  UI_definition_file_path += ACE_DIRECTORY_SEPARATOR_STR;
+  UI_definition_file_path +=
+      ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_UI_DEFINITION_FILE);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _GUID interface_identifier =
+      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11);
+#else
+  std::string interface_identifier =
+    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_WLAN);
+#endif
   bool log_to_file = false;
-  unsigned int maximum_number_of_connections =
-    NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
-  bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
-  unsigned short listening_port_number = NET_SERVER_DEFAULT_LISTENING_PORT;
-  bool use_reactor = NET_EVENT_USE_REACTOR;
+//  bool use_reactor = NET_EVENT_USE_REACTOR;
   unsigned int statistic_reporting_interval =
-    NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
+    NET_STATISTIC_DEFAULT_REPORTING_INTERVAL;
+  std::string SSID_string;
   bool trace_information = false;
-  bool use_udp = false;
   bool print_version_and_exit = false;
-  unsigned int number_of_dispatch_threads =
-    NET_SERVER_DEFAULT_NUMBER_OF_DISPATCHING_THREADS;
 
   // step1b: parse/process/validate configuration
   if (!do_processArguments (argc_in,
                             argv_in,
+                            auto_associate,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                             show_console,
 #endif
-                            source_file,
-                            UI_file,
-                            use_thread_pool,
-                            network_interface,
-                            //keep_alive_timeout,
+                            UI_definition_file_path,
+                            interface_identifier,
                             log_to_file,
-                            maximum_number_of_connections,
-                            use_loopback,
-                            listening_port_number,
-                            use_reactor,
+//                            use_reactor,
                             statistic_reporting_interval,
+                            SSID_string,
                             trace_information,
-                            use_udp,
-                            print_version_and_exit,
-                            number_of_dispatch_threads))
+                            print_version_and_exit))
   {
     do_printUsage (ACE::basename (argv_in[0]));
 
@@ -1003,25 +710,13 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   // step1c: validate arguments
-  // *NOTE*: probably requires CAP_NET_BIND_SERVICE
-  if (listening_port_number <= 1023)
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("using (privileged) port #: %d...\n"),
-                listening_port_number));
-  if (use_reactor && (number_of_dispatch_threads > 1))
-    use_thread_pool = true;
+//  if (use_reactor && (number_of_dispatch_threads > 1))
+//    use_thread_pool = true;
 
-  // *IMPORTANT NOTE*: iff the number of message buffers is limited, the
-  //                   reactor/proactor thread could (dead)lock on the
-  //                   allocator lock, as it cannot dispatch events that would
-  //                   free slots
-  if (NET_STREAM_MAX_MESSAGES)
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("limiting the number of message buffers could lead to deadlocks...\n")));
-  if ((!Common_File_Tools::isReadable (source_file))                       ||
-      (!UI_file.empty () && !Common_File_Tools::isReadable (UI_file))      ||
-      (use_thread_pool && !use_reactor)                                    ||
-      (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool))
+  if ((!UI_definition_file_path.empty () && !Common_File_Tools::isReadable (UI_definition_file_path)) ||
+      (UI_definition_file_path.empty () && (auto_associate && SSID_string.empty ())))
+//      (use_thread_pool && !use_reactor)                                    ||
+//      (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid arguments, aborting\n")));
@@ -1038,9 +733,8 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (number_of_dispatch_threads == 0) number_of_dispatch_threads = 1;
 
-  struct FileServer_GTK_CBData gtk_cb_user_data;
+  struct WLANMonitor_GTK_CBData gtk_cb_user_data;
   gtk_cb_user_data.allowUserRuntimeStatistic =
     (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
                                          // iff regular reporting
@@ -1053,15 +747,16 @@ ACE_TMAIN (int argc_in,
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
-        Net_Server_Common_Tools::getNextLogFileName (ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME),
-                                                     ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_LOG_FILENAME_PREFIX));
+        Common_File_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME),
+                                           ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
+                                                                                ACE_DIRECTORY_SEPARATOR_CHAR)));
   if (!Common_Tools::initializeLogging (ACE::basename (argv_in[0]),    // program name
                                         log_file_name,                 // log file name
                                         true,                          // log to syslog ?
                                         false,                         // trace messages ?
                                         trace_information,             // debug messages ?
-                                        (UI_file.empty () ? NULL
-                                                          : &logger))) // logger ?
+                                        (UI_definition_file_path.empty () ? NULL
+                                                                          : &logger))) // logger ?
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeLogging(), aborting\n")));
@@ -1080,7 +775,8 @@ ACE_TMAIN (int argc_in,
   // step1e: (pre-)initialize signal handling
   ACE_Sig_Set signal_set (0);
   ACE_Sig_Set ignored_signal_set (0);
-  do_initializeSignals (use_reactor,
+  do_initializeSignals (//use_reactor,
+                        NET_EVENT_USE_REACTOR,
                         gtk_cb_user_data.allowUserRuntimeStatistic, // handle SIGUSR1/SIGBREAK
                                                                     // iff regular reporting
                                                                     // is off
@@ -1106,7 +802,8 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
   if (!Common_Tools::preInitializeSignals (signal_set,
-                                           use_reactor,
+                                           //use_reactor,
+                                           NET_EVENT_USE_REACTOR,
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
@@ -1124,7 +821,8 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  FileServer_SignalHandler signal_handler;
+  Test_U_SignalHandler signal_handler ((UI_definition_file_path.empty () ? NULL
+                                                                         : &gtk_cb_user_data));
 
   // step1f: handle specific program modes
   if (print_version_and_exit)
@@ -1149,13 +847,15 @@ ACE_TMAIN (int argc_in,
   // step1g: set process resource limits
   // *NOTE*: settings will be inherited by any child processes
   // *TODO*: the reasoning here is incomplete
-  bool use_fd_based_reactor = use_reactor;
+//  bool use_fd_based_reactor = use_reactor;
+  bool use_fd_based_reactor = NET_EVENT_USE_REACTOR;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   use_fd_based_reactor =
     (use_reactor && !(COMMON_EVENT_REACTOR_TYPE == COMMON_REACTOR_WFMO));
 #endif
   bool stack_traces = true;
-  bool use_signal_based_proactor = !use_reactor;
+//  bool use_signal_based_proactor = !use_reactor;
+  bool use_signal_based_proactor = !NET_EVENT_USE_REACTOR;
   if (!Common_Tools::setResourceLimits (use_fd_based_reactor,       // file descriptors
                                         stack_traces,               // stack traces
                                         use_signal_based_proactor)) // pending signals
@@ -1181,33 +881,26 @@ ACE_TMAIN (int argc_in,
   // step1h: init GLIB / G(D|T)K[+] / GNOME ?
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
-  FileServer_GtkBuilderDefinition_t ui_definition (argc_in,
+  WLANMonitor_GtkBuilderDefinition_t ui_definition (argc_in,
                                                    argv_in);
-  if (!UI_file.empty ())
-    FILESERVER_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                                  argv_in,
-                                                                  &gtk_cb_user_data,
-                                                                  &ui_definition);
+  if (!UI_definition_file_path.empty ())
+    WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
+                                                                   argv_in,
+                                                                   &gtk_cb_user_data,
+                                                                   &ui_definition);
 
   ACE_High_Res_Timer timer;
   timer.start ();
   // step2: do actual work
-  do_work (
+  do_work (auto_associate,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
            show_console,
 #endif
-           source_file,
-           UI_file,
-           use_thread_pool,
-           network_interface,
-           //keep_alive_timeout,
-           maximum_number_of_connections,
-           use_loopback,
-           listening_port_number,
-           use_reactor,
+           UI_definition_file_path,
+           interface_identifier,
+//           use_reactor,
            statistic_reporting_interval,
-           use_udp,
-           number_of_dispatch_threads,
+           SSID_string,
            gtk_cb_user_data,
            signal_set,
            ignored_signal_set,

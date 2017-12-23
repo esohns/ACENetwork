@@ -40,18 +40,21 @@
 
 #include "net_wlan_configuration.h"
 
-Test_U_SignalHandler::Test_U_SignalHandler ()
+Test_U_SignalHandler::Test_U_SignalHandler (struct WLANMonitor_GTK_CBData* CBData_in)
  : inherited (this) // event handler handle
+ , CBData_ (CBData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_SignalHandler::Test_U_SignalHandler"));
 
-//  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
 }
 
 void
 Test_U_SignalHandler::handle (int signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_SignalHandler::handle"));
+
+  //  sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
 
   int result = -1;
   Common_ITask_T<ACE_MT_SYNCH,
@@ -121,15 +124,10 @@ Test_U_SignalHandler::handle (int signal_in)
   if (shutdown)
   {
     // stop everything, i.e.
-    // - leave event loop(s) handling signals, sockets, (maintenance) timers,
-    //   exception handlers, ...
     // - activation timers (connection attempts, ...)
+    //   exception handlers, ...
+    // - leave event loop(s) handling signals, sockets, (maintenance) timers,
     // [- UI dispatch]
-
-    // step1: stop GTK event processing
-    // *NOTE*: triggering UI shutdown from a widget callback is more consistent,
-    //         compared to doing it here
-//    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
 
     // step3: stop timer
     if (inherited::configuration_->statisticReportingTimerId >= 0)
@@ -156,9 +154,16 @@ Test_U_SignalHandler::handle (int signal_in)
     itask_p->stop (true,
                    true);
 
-    // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (inherited::configuration_->useReactor,  // stop reactor ?
-                                         !inherited::configuration_->useReactor, // stop proactor ?
-                                         -1);                                    // group ID (--> don't block)
+//    // step1: stop GTK event processing ?
+//    // *NOTE*: triggering UI shutdown from a widget callback is more consistent,
+//    //         compared to doing it here
+//    if (CBData_)
+//      WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false,
+//                                                               true);
+
+//    // step5: stop reactor (&& proactor, if applicable)
+//    Common_Tools::finalizeEventDispatch (inherited::configuration_->useReactor,  // stop reactor ?
+//                                         !inherited::configuration_->useReactor, // stop proactor ?
+//                                         -1);                                    // group id (--> don't block)
   } // end IF
 }
