@@ -41,7 +41,9 @@
 #include "net_wlan_configuration.h"
 
 Test_U_SignalHandler::Test_U_SignalHandler (struct WLANMonitor_GTK_CBData* CBData_in)
- : inherited (this) // event handler handle
+ : inherited (COMMON_SIGNAL_DISPATCH_SIGNAL,
+              NULL,
+              this) // event handler handle
  , CBData_ (CBData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_SignalHandler::Test_U_SignalHandler"));
@@ -49,7 +51,7 @@ Test_U_SignalHandler::Test_U_SignalHandler (struct WLANMonitor_GTK_CBData* CBDat
 }
 
 void
-Test_U_SignalHandler::handle (int signal_in)
+Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_SignalHandler::handle"));
 
@@ -57,14 +59,13 @@ Test_U_SignalHandler::handle (int signal_in)
   ACE_ASSERT (inherited::configuration_);
 
   int result = -1;
-  Common_ITask_T<ACE_MT_SYNCH,
-                 Common_ILock_T<ACE_MT_SYNCH> >* itask_p =
+  Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
       NET_WLAN_INETMONITOR_SINGLETON::instance ();
-  ACE_ASSERT (itask_p);
+  ACE_ASSERT (iinetwlanmonitor_p);
 
   bool shutdown = false;
   bool report = false;
-  switch (signal_in)
+  switch (signal_in.signal)
   {
 // *PORTABILITY*: on Windows SIGHUP/SIGQUIT are not defined
 // --> use SIGINT (2) and/or SIGTERM (15) instead...
@@ -75,12 +76,8 @@ Test_U_SignalHandler::handle (int signal_in)
     case SIGINT:
     case SIGTERM:
     {
-      //ACE_DEBUG((LM_DEBUG,
-      //           ACE_TEXT("shutting down...\n")));
 
-      // shutdown
       shutdown = true;
-
       break;
     }
 // *PORTABILITY*: on Windows SIGUSRx are not defined
@@ -93,7 +90,6 @@ Test_U_SignalHandler::handle (int signal_in)
     {
       // dump statistic
       report = true;
-
       break;
     }
     default:
@@ -151,8 +147,8 @@ Test_U_SignalHandler::handle (int signal_in)
     } // end IF
 
     // step4: stop accepting connections, abort open connections
-    itask_p->stop (true,
-                   true);
+    iinetwlanmonitor_p->stop (true,
+                              true);
 
 //    // step1: stop GTK event processing ?
 //    // *NOTE*: triggering UI shutdown from a widget callback is more consistent,

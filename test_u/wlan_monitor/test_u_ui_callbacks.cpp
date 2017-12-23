@@ -290,35 +290,6 @@ idle_update_log_display_cb (gpointer userData_in)
 }
 
 gboolean
-idle_session_start_cb (gpointer userData_in)
-{
-  STREAM_TRACE (ACE_TEXT ("::idle_session_start_cb"));
-
-  struct WLANMonitor_GTK_CBData* data_p =
-    static_cast<struct WLANMonitor_GTK_CBData*> (userData_in);
-
-  // sanity check(s)
-  ACE_ASSERT (data_p);
-
-  Common_UI_GTKBuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
-  // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
-
-  GtkSpinButton* spin_button_p =
-    GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                             ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINBUTTON_NOTIFICATIONS_NAME)));
-  ACE_ASSERT (spin_button_p);
-  gtk_spin_button_set_value (spin_button_p, 0.0);
-
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
-    ACE_OS::memset (&data_p->progressData.statistic, 0, sizeof (Stream_Statistic));
-  } // end lock scope
-
-  return G_SOURCE_REMOVE;
-}
-
-gboolean
 idle_update_info_display_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_info_display_cb"));
@@ -354,6 +325,16 @@ idle_update_info_display_cb (gpointer userData_in)
         }
         case WLAN_MONITOR_EVENT_CONNECT_ESSID:
         {
+          GtkSpinner* spinner_p =
+            GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
+                                                 ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINNER_NAME)));
+          ACE_ASSERT (spinner_p);
+          gtk_spinner_stop (spinner_p);
+          gtk_widget_set_sensitive (GTK_WIDGET (spinner_p),
+                                    false);
+          gtk_widget_set_visible (GTK_WIDGET (spinner_p),
+                                  false);
+
           break;
         }
         case WLAN_MONITOR_EVENT_SCAN_COMPLETE:
@@ -403,6 +384,7 @@ idle_update_ssids_cb (gpointer userData_in)
       GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_LISTSTORE_SSID_NAME)));
   ACE_ASSERT (list_store_p);
+  gtk_list_store_clear (list_store_p);
 
   GtkTreeIter iterator_2;
   Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =

@@ -22,8 +22,9 @@
 #define TEST_U_PROTOCOL_SIGNALHANDLER_H
 
 #include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
-#include "common_isignal.h"
+#include "common.h"
 #include "common_signalhandler.h"
 
 #include "test_u_HTTP_decoder_common.h"
@@ -31,16 +32,18 @@
 class Test_U_Protocol_SignalHandler
  : public Common_SignalHandler_T<struct Test_U_HTTPDecoder_SignalHandlerConfiguration>
 {
- public:
-  Test_U_Protocol_SignalHandler ();
-  virtual ~Test_U_Protocol_SignalHandler ();
-
-  // implement Common_ISignal
-  virtual void handle (int); // signal
-
- private:
   typedef Common_SignalHandler_T<struct Test_U_HTTPDecoder_SignalHandlerConfiguration> inherited;
 
+ public:
+  Test_U_Protocol_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
+                                 ACE_SYNCH_MUTEX*);              // lock handle
+  inline virtual ~Test_U_Protocol_SignalHandler () {}
+
+  // implement Common_ISignal
+  virtual void handle (const struct Common_Signal&); // signal
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Protocol_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Protocol_SignalHandler (const Test_U_Protocol_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Protocol_SignalHandler& operator= (const Test_U_Protocol_SignalHandler&))
 };

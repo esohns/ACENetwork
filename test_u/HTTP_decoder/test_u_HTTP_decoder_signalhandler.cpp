@@ -33,21 +33,18 @@
 #include "test_u_connection_manager_common.h"
 #include "test_u_session_message.h"
 
-Test_U_Protocol_SignalHandler::Test_U_Protocol_SignalHandler ()
- : inherited (this ) // event handler handle
+Test_U_Protocol_SignalHandler::Test_U_Protocol_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
+                                                              ACE_SYNCH_MUTEX* lock_in)
+ : inherited (dispatchMode_in,
+              lock_in,
+              this) // event handler handle
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Protocol_SignalHandler::Test_U_Protocol_SignalHandler"));
 
 }
 
-Test_U_Protocol_SignalHandler::~Test_U_Protocol_SignalHandler ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Protocol_SignalHandler::~Test_U_Protocol_SignalHandler"));
-
-}
-
 void
-Test_U_Protocol_SignalHandler::handle (int signal_in)
+Test_U_Protocol_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Protocol_SignalHandler::handle"));
 
@@ -55,7 +52,7 @@ Test_U_Protocol_SignalHandler::handle (int signal_in)
 
   bool statistic = false;
   bool shutdown = false;
-  switch (signal_in)
+  switch (signal_in.signal)
   {
     case SIGINT:
 // *PORTABILITY*: on Windows SIGQUIT is not defined

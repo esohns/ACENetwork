@@ -59,6 +59,7 @@ struct Net_WLAN_MonitorConfiguration
    , interfaceIdentifier ()
 #endif
    , SSID ()
+   , subscriber (NULL)
    , useReactor (NET_EVENT_USE_REACTOR)
    , userData (NULL)
   {};
@@ -76,6 +77,7 @@ struct Net_WLAN_MonitorConfiguration
   void*                      notificationCBData;
 #endif
   std::string                SSID;
+  Net_WLAN_IMonitorCB*       subscriber;
   bool                       useReactor;
 
   struct Net_UserData*       userData;

@@ -1047,7 +1047,6 @@ ACE_TMAIN (int argc_in,
                             print_version_and_exit,
                             number_of_dispatch_threads))
   {
-    // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
     // *PORTABILITY*: on Windows, finalize ACE...
@@ -1171,7 +1170,10 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  Test_U_Protocol_SignalHandler signal_handler;
+  ACE_SYNCH_MUTEX signal_lock;
+  Test_U_Protocol_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                             : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                                &signal_lock);
 
   // step1f: handle specific program modes
   if (print_version_and_exit)

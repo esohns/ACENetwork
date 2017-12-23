@@ -35,16 +35,18 @@ class Test_U_Client_SignalHandler
   typedef Common_SignalHandler_T<struct Test_U_Client_SignalHandlerConfiguration> inherited;
 
  public:
-  Test_U_Client_SignalHandler ();
-  inline virtual ~Test_U_Client_SignalHandler () {};
+  Test_U_Client_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
+                               ACE_SYNCH_MUTEX*);              // lock handle
+  inline virtual ~Test_U_Client_SignalHandler () {}
 
   // override Common_IInitialize_T
   virtual bool initialize (const struct Test_U_Client_SignalHandlerConfiguration&);
 
   // implement Common_ISignal
-  virtual void handle (int); // signal
+  virtual void handle (const struct Common_Signal&); // signal
 
  private:
+  ACE_UNIMPLEMENTED_FUNC (Test_U_Client_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_Client_SignalHandler (const Test_U_Client_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_Client_SignalHandler& operator= (const Test_U_Client_SignalHandler&))
 

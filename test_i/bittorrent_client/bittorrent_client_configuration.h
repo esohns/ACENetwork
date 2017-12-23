@@ -83,7 +83,7 @@ struct BitTorrent_Client_Configuration
    , sessionConfiguration ()
    ///////////////////////////////////////
    , cursesState (NULL)
-   , groupID (COMMON_EVENT_THREAD_GROUP_ID)
+   , groupId (COMMON_EVENT_THREAD_GROUP_ID)
    , logToFile (TEST_I_DEFAULT_SESSION_LOG)
    , useReactor (NET_EVENT_USE_REACTOR)
    , peerUserData ()
@@ -107,7 +107,7 @@ struct BitTorrent_Client_Configuration
   // ***************************************************************************
   // *TODO*: move this somewhere else
   struct BitTorrent_Client_CursesState*               cursesState;
-  int                                                 groupID;
+  int                                                 groupId;
   bool                                                logToFile;
   bool                                                useReactor;
 

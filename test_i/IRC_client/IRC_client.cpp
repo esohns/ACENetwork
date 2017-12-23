@@ -1204,7 +1204,11 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  IRC_Client_SignalHandler signal_handler (use_reactor);
+  ACE_SYNCH_MUTEX signal_lock;
+  IRC_Client_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                           &signal_lock,
+                                           use_curses_library);
 
   // step5: handle specific program modes
   if (print_version_and_exit)

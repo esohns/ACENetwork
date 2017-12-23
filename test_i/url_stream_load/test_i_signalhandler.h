@@ -22,8 +22,9 @@
 #define TEST_I_SIGNALHANDLER_H
 
 #include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
-#include "common_isignal.h"
+#include "common.h"
 #include "common_signalhandler.h"
 
 #include "test_i_url_stream_load_common.h"
@@ -31,16 +32,18 @@
 class Test_I_SignalHandler
  : public Common_SignalHandler_T<struct Test_I_SignalHandlerConfiguration>
 {
- public:
-  Test_I_SignalHandler ();
-  virtual ~Test_I_SignalHandler ();
-
-  // implement Common_ISignal
-  virtual void handle (int); // signal
-
- private:
   typedef Common_SignalHandler_T<struct Test_I_SignalHandlerConfiguration> inherited;
 
+ public:
+  Test_I_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
+                        ACE_SYNCH_MUTEX*);              // lock handle
+  inline virtual ~Test_I_SignalHandler () {}
+
+  // implement Common_ISignal
+  virtual void handle (const struct Common_Signal&); // signal
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Test_I_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_I_SignalHandler (const Test_I_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_SignalHandler& operator= (const Test_I_SignalHandler&))
 };

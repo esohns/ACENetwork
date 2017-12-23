@@ -31,21 +31,18 @@
 
 #include "test_i_connection_manager_common.h"
 
-Test_I_SignalHandler::Test_I_SignalHandler ()
- : inherited (this) // event handler handle
+Test_I_SignalHandler::Test_I_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
+                                            ACE_SYNCH_MUTEX* lock_in)
+ : inherited (dispatchMode_in,
+              lock_in,
+              this) // event handler handle
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_SignalHandler::Test_I_SignalHandler"));
 
 }
 
-Test_I_SignalHandler::~Test_I_SignalHandler ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_I_SignalHandler::~Test_I_SignalHandler"));
-
-}
-
 void
-Test_I_SignalHandler::handle (int signal_in)
+Test_I_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_SignalHandler::handle"));
 
@@ -53,7 +50,7 @@ Test_I_SignalHandler::handle (int signal_in)
 
   bool statistic = false;
   bool shutdown = false;
-  switch (signal_in)
+  switch (signal_in.signal)
   {
     case SIGINT:
 // *PORTABILITY*: on Windows SIGQUIT is not defined

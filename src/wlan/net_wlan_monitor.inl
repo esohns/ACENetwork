@@ -449,6 +449,9 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
                 ACE_TEXT ("invalid configuration, aborting\n")));
     return false;
   } // end IF
+  if (unlikely (configuration_->subscriber))
+    subscribe (configuration_->subscriber);
+
   isInitialized_ = true;
 
   inherited2::initialize ();
@@ -1052,7 +1055,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
         result = handle_input (handle_);
         ACE_UNUSED_ARG (result);
         error = ACE_OS::last_error ();
-        if (unlikely (error == EAGAIN)) // --> result data not available yet
+        if (unlikely (error == EAGAIN)) //11: result data not available yet
         {
 #endif
           result = ACE_OS::sleep (poll_interval);
@@ -1946,8 +1949,8 @@ retry:
       }
       case SIOCGIWFREQ:
       {
-        float freq = iw_freq2float (&iw_event_s.u.freq);
-        int channel =iw_freq_to_channel (freq, &range_);
+        double frequency_d = iw_freq2float (&iw_event_s.u.freq);
+        int channel =iw_freq_to_channel (frequency_d, &range_);
         ACE_UNUSED_ARG (channel);
         break;
       }

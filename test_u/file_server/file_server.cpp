@@ -1264,7 +1264,9 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  FileServer_SignalHandler signal_handler;
+  FileServer_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                           &gtk_cb_user_data.lock);
 
   // step1f: handle specific program modes
   if (print_version_and_exit)

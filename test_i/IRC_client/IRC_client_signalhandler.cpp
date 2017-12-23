@@ -37,23 +37,20 @@
 
 #include "IRC_client_gui_common.h"
 
-IRC_Client_SignalHandler::IRC_Client_SignalHandler (bool useReactor_in,
+IRC_Client_SignalHandler::IRC_Client_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
+                                                    ACE_SYNCH_MUTEX* lock_in,
                                                     bool useCursesLibrary_in)
- : inherited (this) // event handler handle
+ : inherited (dispatchMode_in,
+              lock_in,
+              this) // event handler handle
  , useCursesLibrary_ (useCursesLibrary_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::IRC_Client_SignalHandler"));
 
 }
 
-IRC_Client_SignalHandler::~IRC_Client_SignalHandler ()
-{
-  NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::~IRC_Client_SignalHandler"));
-
-}
-
 void
-IRC_Client_SignalHandler::handle (int signal_in)
+IRC_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::handleSignal"));
 
@@ -64,7 +61,7 @@ IRC_Client_SignalHandler::handle (int signal_in)
   bool abort = false;
   bool connect = false;
   bool shutdown = false;
-  switch (signal_in)
+  switch (signal_in.signal)
   {
     case SIGINT:
     case SIGTERM:

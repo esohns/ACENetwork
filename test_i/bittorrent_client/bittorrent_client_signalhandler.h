@@ -22,11 +22,10 @@
 #define BITTORRENT_CLIENT_SIGNALHANDLER_H
 
 #include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
-#include "common_isignal.h"
+#include "common.h"
 #include "common_signalhandler.h"
-
-#include "net_defines.h"
 
 #include "bittorrent_client_common.h"
 
@@ -35,17 +34,19 @@
 class BitTorrent_Client_SignalHandler
  : public Common_SignalHandler_T<struct BitTorrent_Client_SignalHandlerConfiguration>
 {
- public:
-  BitTorrent_Client_SignalHandler (bool = NET_EVENT_USE_REACTOR,      // use reactor ?
-                                   bool = TEST_I_SESSION_USE_CURSES); // use curses library ?
-  virtual ~BitTorrent_Client_SignalHandler ();
-
-  // implement Common_ISignal
-  virtual void handle (int); // signal
-
- private:
   typedef Common_SignalHandler_T<struct BitTorrent_Client_SignalHandlerConfiguration> inherited;
 
+ public:
+  BitTorrent_Client_SignalHandler (enum Common_SignalDispatchType,    // dispatch mode
+                                   ACE_SYNCH_MUTEX*,                  // lock handle
+                                   ///////
+                                   bool = TEST_I_SESSION_USE_CURSES); // use curses library ?
+  inline virtual ~BitTorrent_Client_SignalHandler () {}
+
+  // implement Common_ISignal
+  virtual void handle (const struct Common_Signal&); // signal
+
+ private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_SignalHandler (const BitTorrent_Client_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_SignalHandler& operator= (const BitTorrent_Client_SignalHandler&))

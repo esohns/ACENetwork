@@ -69,14 +69,12 @@ struct WLANMonitor_Configuration
    : Test_U_Configuration ()
    , handle (ACE_INVALID_HANDLE)
    , signalHandlerConfiguration ()
-   , subscriber (NULL)
    , timerConfiguration ()
    , WLANMonitorConfiguration ()
   {};
 
   ACE_HANDLE                                    handle;
   struct WLANMonitor_SignalHandlerConfiguration signalHandlerConfiguration;
-  Net_WLAN_IMonitorCB*                          subscriber;
   struct Common_TimerConfiguration              timerConfiguration;
   struct Net_WLAN_MonitorConfiguration          WLANMonitorConfiguration;
 };

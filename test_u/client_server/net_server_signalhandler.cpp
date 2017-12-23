@@ -40,15 +40,18 @@
 
 #include "test_u_connection_manager_common.h"
 
-Test_U_Server_SignalHandler::Test_U_Server_SignalHandler ()
- : inherited (NULL)
+Test_U_Server_SignalHandler::Test_U_Server_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
+                                                          ACE_SYNCH_MUTEX* lock_in)
+ : inherited (dispatchMode_in,
+              lock_in,
+              this) // event handler handle
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Server_SignalHandler::Test_U_Server_SignalHandler"));
 
 }
 
 void
-Test_U_Server_SignalHandler::handle (int signal_in)
+Test_U_Server_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Server_SignalHandler::handle"));
 
@@ -59,7 +62,7 @@ Test_U_Server_SignalHandler::handle (int signal_in)
 
   bool shutdown = false;
   bool report = false;
-  switch (signal_in)
+  switch (signal_in.signal)
   {
 // *PORTABILITY*: on Windows SIGHUP/SIGQUIT are not defined
 // --> use SIGINT (2) and/or SIGTERM (15) instead...

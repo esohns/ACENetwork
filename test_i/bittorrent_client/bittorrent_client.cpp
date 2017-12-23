@@ -685,7 +685,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   // step6a: initialize dispatch thread(s)
   if (!Common_Tools::startEventDispatch (dispatch_thread_data,
-                                         configuration_in.groupID))
+                                         configuration_in.groupId))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::startEventDispatch(), returning\n")));
@@ -699,7 +699,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   if (useCursesLibrary_in)
     curses_thread_data.cursesState = &curses_state;
   curses_thread_data.filename = metaInfoFileName_in;
-//  curses_thread_data.groupID = group_id_2;
+//  curses_thread_data.groupId = group_id_2;
 //  curses_thread_data.moduleHandlerConfiguration =
 //      &configuration_in.moduleHandlerConfiguration;
   curses_thread_data.useReactor = configuration_in.useReactor;
@@ -714,7 +714,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     // clean up
     Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
                                          !configuration_in.useReactor,
-                                         configuration_in.groupID);
+                                         configuration_in.groupId);
 
     goto clean;
   } // end IF
@@ -743,7 +743,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     // clean up
     Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
                                          !configuration_in.useReactor,
-                                         configuration_in.groupID);
+                                         configuration_in.groupId);
 
     goto clean;
   } // end IF
@@ -751,7 +751,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   // step6c: dispatch connection attempt, wait for the session to finish
   if (!numberOfDispatchThreads_in)
     Common_Tools::dispatchEvents (configuration_in.useReactor,
-                                  configuration_in.groupID);
+                                  configuration_in.groupId);
   else
   {
     // wait for the download to complete
@@ -768,7 +768,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
     Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
                                          !configuration_in.useReactor,
-                                         configuration_in.groupID);
+                                         configuration_in.groupId);
   } // end ELSE
 
   ACE_DEBUG ((LM_DEBUG,
@@ -1000,7 +1000,11 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  BitTorrent_Client_SignalHandler signal_handler (use_reactor);
+  ACE_SYNCH_MUTEX signal_lock;
+  BitTorrent_Client_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                                  &signal_lock,
+                                                  use_curses_library);
 
   // step5: handle specific program modes
   if (print_version_and_exit)

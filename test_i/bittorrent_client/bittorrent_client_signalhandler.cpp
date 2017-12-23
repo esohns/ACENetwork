@@ -37,23 +37,20 @@
 #include "bittorrent_client_curses.h"
 #include "bittorrent_client_network.h"
 
-BitTorrent_Client_SignalHandler::BitTorrent_Client_SignalHandler (bool useReactor_in,
+BitTorrent_Client_SignalHandler::BitTorrent_Client_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
+                                                                  ACE_SYNCH_MUTEX* lock_in,
                                                                   bool useCursesLibrary_in)
- : inherited (this) // event handler handle
+ : inherited (dispatchMode_in,
+              lock_in,
+              this) // event handler handle
  , useCursesLibrary_ (useCursesLibrary_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SignalHandler::BitTorrent_Client_SignalHandler"));
 
 }
 
-BitTorrent_Client_SignalHandler::~BitTorrent_Client_SignalHandler ()
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SignalHandler::~BitTorrent_Client_SignalHandler"));
-
-}
-
 void
-BitTorrent_Client_SignalHandler::handle (int signal_in)
+BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SignalHandler::handleSignal"));
 
@@ -62,7 +59,7 @@ BitTorrent_Client_SignalHandler::handle (int signal_in)
   bool abort = false;
 //  bool connect = false;
   bool shutdown = false;
-  switch (signal_in)
+  switch (signal_in.signal)
   {
     case SIGINT:
     case SIGTERM:
@@ -109,13 +106,13 @@ BitTorrent_Client_SignalHandler::handle (int signal_in)
     case SIGCLD:
     default:
     {
-      if (signal_in != SIGCLD)
+      if (signal_in.signal != SIGCLD)
       {
         // *PORTABILITY*: tracing in a signal handler context is not portable
         // *TODO*
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid/unknown signal: \"%S\", returning\n"),
-                    signal_in));
+                    signal_in.signal));
       } // end IF
       return;
     }
@@ -138,7 +135,6 @@ BitTorrent_Client_SignalHandler::handle (int signal_in)
     if (inherited::configuration_)
       if (inherited::configuration_->cursesState)
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);
-
         inherited::configuration_->cursesState->finished = true;
       } // end IF
 

@@ -1178,7 +1178,6 @@ ACE_TMAIN (int argc_in,
       !Common_File_Tools::isReadable (phonebook_file_name)     ||
       !Common_File_Tools::isReadable (ui_definition_file_name))
   {
-    // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
     // *PORTABILITY*: on Windows, fini ACE...
@@ -1264,7 +1263,13 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  IRC_Client_SignalHandler signal_handler (use_reactor);
+  struct IRC_Client_Configuration configuration;
+  struct IRC_Client_GTK_CBData gtk_cb_data;
+  gtk_cb_data.configuration = &configuration;
+  IRC_Client_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                           &gtk_cb_data.lock,
+                                           false);
 
   // step5: handle specific program modes
   if (print_version_and_exit)
@@ -1287,7 +1292,6 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   // step6: initialize configuration objects
-  struct IRC_Client_Configuration configuration;
 
   // initialize protocol configuration
   Stream_CachedAllocatorHeap_T<struct IRC_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
@@ -1337,12 +1341,10 @@ ACE_TMAIN (int argc_in,
   configuration.streamConfiguration.configuration_.messageAllocator =
     &message_allocator;
 
-  struct IRC_Client_GTK_CBData cb_user_data;
-  cb_user_data.configuration = &configuration;
-  cb_user_data.UIFileDirectory = UIDefinitionFile_directory;
+  gtk_cb_data.UIFileDirectory = UIDefinitionFile_directory;
 //   userData.phoneBook;
 //   userData.loginOptions.password = ;
-  cb_user_data.configuration->protocolConfiguration.loginOptions.nickname =
+  gtk_cb_data.configuration->protocolConfiguration.loginOptions.nickname =
       ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);
 //   userData.loginOptions.user.username = ;
   std::string host_name;
@@ -1388,12 +1390,12 @@ ACE_TMAIN (int argc_in,
   Common_Tools::getCurrentUserName (configuration.protocolConfiguration.loginOptions.user.userName,
                                     configuration.protocolConfiguration.loginOptions.user.realName);
 
-  cb_user_data.RCFiles.push_back (UIRC_file_name);
+  gtk_cb_data.RCFiles.push_back (UIRC_file_name);
 
   // step7: parse configuration file(s) (if any)
   if (Common_File_Tools::isReadable (phonebook_file_name))
     do_parsePhonebookFile (phonebook_file_name,
-                           cb_user_data.phoneBook);
+                           gtk_cb_data.phoneBook);
   if (!configuration_file_name.empty ())
   {
     IRC_Client_Connections_t connections;
@@ -1405,20 +1407,20 @@ ACE_TMAIN (int argc_in,
     for (IRC_Client_ConnectionsIterator_t iterator = connections.begin ();
          iterator != connections.end ();
          ++iterator)
-      cb_user_data.phoneBook.servers.insert (std::make_pair ((*iterator).hostName,
+      gtk_cb_data.phoneBook.servers.insert (std::make_pair ((*iterator).hostName,
                                                              *iterator));
   } // end IF
 
   configuration.useReactor = use_reactor;
 
-  cb_user_data.progressData.GTKState = &cb_user_data;
+  gtk_cb_data.progressData.GTKState = &gtk_cb_data;
 
   // step8: initialize GTK UI
   IRC_Client_GtkBuilderDefinition_t ui_definition (argc_in,
                                                    argv_in);
   IRC_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                                 argv_in,
-                                                                &cb_user_data,
+                                                                &gtk_cb_data,
                                                                 &ui_definition);
 
   // step9: do work
@@ -1426,7 +1428,7 @@ ACE_TMAIN (int argc_in,
   timer.start ();
   do_work (use_thread_pool,
            number_of_thread_pool_threads,
-           cb_user_data,
+           gtk_cb_data,
            ui_definition_file_name,
            ACE_Time_Value (reporting_interval, 0),
            signal_set,

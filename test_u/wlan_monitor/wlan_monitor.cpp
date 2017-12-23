@@ -419,13 +419,13 @@ do_work (bool autoAssociate_in,
       NET_WLAN_INETMONITOR_SINGLETON::instance ();
   configuration.signalHandlerConfiguration.useReactor =
       NET_EVENT_USE_REACTOR;
-  configuration.subscriber = &ui_event_handler;
   configuration.WLANMonitorConfiguration.autoAssociate =
       autoAssociate_in;
   configuration.WLANMonitorConfiguration.interfaceIdentifier =
       interfaceIdentifier_in;
   configuration.WLANMonitorConfiguration.SSID =
       SSID_in;
+  configuration.WLANMonitorConfiguration.subscriber = &ui_event_handler;
 
   // step1: initialize regular (global) statistic reporting ?
   timer_manager_p->initialize (configuration.timerConfiguration);
@@ -882,7 +882,7 @@ ACE_TMAIN (int argc_in,
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
   WLANMonitor_GtkBuilderDefinition_t ui_definition (argc_in,
-                                                   argv_in);
+                                                    argv_in);
   if (!UI_definition_file_path.empty ())
     WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                                    argv_in,

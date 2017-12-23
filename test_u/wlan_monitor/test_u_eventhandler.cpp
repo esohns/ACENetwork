@@ -51,6 +51,14 @@ Test_U_EventHandler::onAssociate (const std::string& interfaceIdentifier_in,
   ACE_UNUSED_ARG (interfaceIdentifier_in);
   ACE_UNUSED_ARG (SSID_in);
   ACE_UNUSED_ARG (success_in);
+
+  // sanity check(s)
+  if (!CBData_)
+    return;
+
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_ASSOCIATE_AP);
+  } // end lock scope
 }
 
 void
@@ -67,6 +75,14 @@ Test_U_EventHandler::onConnect (const std::string& interfaceIdentifier_in,
   ACE_UNUSED_ARG (interfaceIdentifier_in);
   ACE_UNUSED_ARG (SSID_in);
   ACE_UNUSED_ARG (success_in);
+
+  // sanity check(s)
+  if (!CBData_)
+    return;
+
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_CONNECT_ESSID);
+  } // end lock scope
 }
 
 void
@@ -81,6 +97,14 @@ Test_U_EventHandler::onHotPlug (const std::string& interfaceIdentifier_in,
 
   ACE_UNUSED_ARG (interfaceIdentifier_in);
   ACE_UNUSED_ARG (enabled_in);
+
+  // sanity check(s)
+  if (!CBData_)
+    return;
+
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_INTERFACE_HOTPLUG);
+  } // end lock scope
 }
 
 void
@@ -108,5 +132,6 @@ Test_U_EventHandler::onScanComplete (const std::string& interfaceIdentifier_in)
       return;
     } // end IF
     CBData_->eventSourceIds.insert (event_source_id);
+    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_SCAN_COMPLETE);
   } // end lock scope
 }

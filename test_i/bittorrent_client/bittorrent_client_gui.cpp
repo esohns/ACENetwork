@@ -1176,7 +1176,6 @@ ACE_TMAIN (int argc_in,
   if (!Common_File_Tools::isReadable (configuration_file_name) ||
       !Common_File_Tools::isReadable (ui_definition_file_name))
   {
-    // make 'em learn...
     do_printUsage (ACE::basename (argv_in[0]));
 
     // *PORTABILITY*: on Windows, fini ACE...
@@ -1262,7 +1261,14 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  BitTorrent_Client_SignalHandler signal_handler (use_reactor);
+  struct BitTorrent_Client_Configuration configuration;
+  struct BitTorrent_Client_GTK_CBData cb_user_data;
+  cb_user_data.configuration = &configuration;
+
+  BitTorrent_Client_SignalHandler signal_handler  ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                                   &cb_user_data.lock,
+                                                   false);
 
   // step5: handle specific program modes
   if (print_version_and_exit)
@@ -1287,14 +1293,12 @@ ACE_TMAIN (int argc_in,
   // step6: initialize configuration objects
 
   // initialize protocol configuration
-  Stream_CachedAllocatorHeap_T<Stream_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                              BITTORRENT_BUFFER_SIZE);
+  Stream_CachedAllocatorHeap_T<struct Stream_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                                     BITTORRENT_BUFFER_SIZE);
   BitTorrent_Client_PeerMessageAllocator_t peer_message_allocator (NET_STREAM_MAX_MESSAGES,
                                                                    &heap_allocator);
   BitTorrent_Client_TrackerMessageAllocator_t tracker_message_allocator (NET_STREAM_MAX_MESSAGES,
                                                                          &heap_allocator);
-
-  BitTorrent_Client_Configuration configuration;
 
   ////////////////////////// stream configuration //////////////////////////////
   configuration.parserConfiguration.debugScanner = debug;
@@ -1337,8 +1341,6 @@ ACE_TMAIN (int argc_in,
   configuration.trackerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                         tracker_connection_configuration));
 
-  struct BitTorrent_Client_GTK_CBData cb_user_data;
-  cb_user_data.configuration = &configuration;
   cb_user_data.UIFileDirectory = UIDefinitionFile_directory;
 //   userData.phoneBook;
 //   userData.loginOptions.password = ;

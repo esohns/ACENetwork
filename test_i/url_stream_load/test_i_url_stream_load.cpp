@@ -888,7 +888,8 @@ ACE_TMAIN (int argc_in,
   ACE_Sig_Set ignored_signal_set (0);
   Common_SignalActions_t previous_signal_actions;
   sigset_t previous_signal_mask;
-  Test_I_SignalHandler signal_handler;
+  Test_I_SignalHandler signal_handler (COMMON_SIGNAL_DISPATCH_SIGNAL,
+                                       &gtk_cb_user_data.lock);
   Test_I_URLStreamLoad_GtkBuilderDefinition_t ui_definition (argc_in,
                                                              argv_in);
   ACE_High_Res_Timer timer;

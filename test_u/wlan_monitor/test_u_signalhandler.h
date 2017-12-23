@@ -23,11 +23,8 @@
 
 #include "ace/Global_Macros.h"
 
+#include "common.h"
 #include "common_signalhandler.h"
-#include "common_isignal.h"
-#include "common_istatistic.h"
-
-#include "net_common.h"
 
 #include "wlan_monitor_common.h"
 
@@ -39,7 +36,7 @@ class Test_U_SignalHandler
   inline virtual ~Test_U_SignalHandler () {}
 
   // implement Common_ISignal
-  virtual void handle (int); // signal
+  virtual void handle (const struct Common_Signal&); // signal information
 
  private:
   typedef Common_SignalHandler_T<struct WLANMonitor_SignalHandlerConfiguration> inherited;

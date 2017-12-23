@@ -32,15 +32,17 @@ class Test_U_SignalHandler
  : public Common_SignalHandler_T<struct Test_U_SignalHandlerConfiguration>
 {
  public:
-  Test_U_SignalHandler ();
-  virtual ~Test_U_SignalHandler ();
+  Test_U_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
+                        ACE_SYNCH_MUTEX*);              // lock handle
+  inline virtual ~Test_U_SignalHandler () {}
 
   // implement Common_ISignal
-  virtual void handle (int); // signal
+  virtual void handle (const struct Common_Signal&); // signal
 
  private:
   typedef Common_SignalHandler_T<struct Test_U_SignalHandlerConfiguration> inherited;
 
+  ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler (const Test_U_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler& operator= (const Test_U_SignalHandler&))
 };

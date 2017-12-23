@@ -38,8 +38,11 @@
 
 #include "net_client_common.h"
 
-Test_U_Client_SignalHandler::Test_U_Client_SignalHandler ()
- : inherited (NULL)
+Test_U_Client_SignalHandler::Test_U_Client_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
+                                                          ACE_SYNCH_MUTEX* lock_in)
+ : inherited (dispatchMode_in,
+              lock_in,
+              this) // event handler handle
  , address_ ()
  , connector_ (NULL)
  , hasUI_ (false)
@@ -65,7 +68,7 @@ Test_U_Client_SignalHandler::initialize (const struct Test_U_Client_SignalHandle
 }
 
 void
-Test_U_Client_SignalHandler::handle (int signal_in)
+Test_U_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Client_SignalHandler::handleSignal"));
 
@@ -80,7 +83,7 @@ Test_U_Client_SignalHandler::handle (int signal_in)
   bool abort = false;
   bool connect = false;
   bool shutdown = false;
-  switch (signal_in)
+  switch (signal_in.signal)
   {
     case SIGINT:
 // *PORTABILITY*: on Windows SIGQUIT is not defined

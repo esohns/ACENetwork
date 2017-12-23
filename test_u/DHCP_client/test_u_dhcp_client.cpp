@@ -1457,7 +1457,7 @@ ACE_TMAIN (int argc_in,
   } // end IF
   if (number_of_dispatch_threads == 0) number_of_dispatch_threads = 1;
 
-  Test_U_DHCPClient_GTK_CBData gtk_cb_user_data;
+  struct Test_U_DHCPClient_GTK_CBData gtk_cb_user_data;
   gtk_cb_user_data.progressData.GTKState = &gtk_cb_user_data;
   // step1d: initialize logging and/or tracing
   Common_Logger_t logger (&gtk_cb_user_data.logStack,
@@ -1550,7 +1550,9 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  Test_U_SignalHandler signal_handler;
+  Test_U_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                    : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                       &gtk_cb_user_data.lock);
 
   // step1f: handle specific program modes
   if (print_version_and_exit)

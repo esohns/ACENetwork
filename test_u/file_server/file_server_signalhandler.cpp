@@ -40,22 +40,18 @@
 
 #include "test_u_connection_manager_common.h"
 
-FileServer_SignalHandler::FileServer_SignalHandler ()
- : inherited (this) // event handler handle
+FileServer_SignalHandler::FileServer_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
+                                                    ACE_SYNCH_MUTEX* lock_in)
+: inherited (dispatchMode_in,
+        lock_in,
+        this) // event handler handle
 {
   NETWORK_TRACE (ACE_TEXT ("FileServer_SignalHandler::FileServer_SignalHandler"));
-
-//  ACE_OS::memset (&configuration_, 0, sizeof (configuration_));
-}
-
-FileServer_SignalHandler::~FileServer_SignalHandler ()
-{
-  NETWORK_TRACE (ACE_TEXT ("FileServer_SignalHandler::~FileServer_SignalHandler"));
 
 }
 
 void
-FileServer_SignalHandler::handle (int signal_in)
+FileServer_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
   NETWORK_TRACE (ACE_TEXT ("FileServer_SignalHandler::handle"));
 
@@ -66,7 +62,7 @@ FileServer_SignalHandler::handle (int signal_in)
 
   bool shutdown = false;
   bool report = false;
-  switch (signal_in)
+  switch (signal_in.signal)
   {
 // *PORTABILITY*: on Windows SIGHUP/SIGQUIT are not defined
 // --> use SIGINT (2) and/or SIGTERM (15) instead...

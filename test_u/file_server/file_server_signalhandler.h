@@ -22,30 +22,28 @@
 #define FileServer_SignalHandler_H
 
 #include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
+#include "common.h"
 #include "common_signalhandler.h"
-#include "common_isignal.h"
-#include "common_istatistic.h"
-
-#include "stream_common.h"
-
-#include "net_common.h"
 
 #include "file_server_common.h"
 
 class FileServer_SignalHandler
  : public Common_SignalHandler_T<struct FileServer_SignalHandlerConfiguration>
 {
- public:
-  FileServer_SignalHandler ();
-  virtual ~FileServer_SignalHandler ();
-
-  // implement Common_ISignal
-  virtual void handle (int); // signal
-
- private:
   typedef Common_SignalHandler_T<struct FileServer_SignalHandlerConfiguration> inherited;
 
+ public:
+  FileServer_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
+                            ACE_SYNCH_MUTEX*);              // lock handle
+  inline virtual ~FileServer_SignalHandler () {}
+
+  // implement Common_ISignal
+  virtual void handle (const struct Common_Signal&); // signal
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (FileServer_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (FileServer_SignalHandler (const FileServer_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (FileServer_SignalHandler& operator= (const FileServer_SignalHandler&))
 };
