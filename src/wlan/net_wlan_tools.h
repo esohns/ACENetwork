@@ -27,8 +27,10 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <wlanapi.h>
 #else
+#if defined (DBUS_SUPPORT)
 #include "dbus/dbus.h"
-#endif
+#endif // DBUS_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
@@ -71,18 +73,12 @@ class Net_WLAN_Tools
 #else
   static std::string associatedSSID (const std::string&, // interface identifier
                                      ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
-  //  static std::string associatedSSID (struct DBusConnection*, // D-Bus connection handle
+  //  static std::string associatedSSID (struct DBusConnection*, // DBus connection handle
 //                                     const std::string&);    // interface identifier
   static Net_WLAN_SSIDs_t getSSIDs (const std::string&, // interface identifier
                                     ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
   static struct ether_addr associatedBSSID (const std::string&, // interface identifier
                                             ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
-
-  // *NOTE*: 'gateway' really means the 'next hop' router with regard to some
-  //         policy (e.g. routing table entry metric/priority/...).
-  //         Consequently, this API is non-functional at this point
-  static ACE_INET_Addr getGateway (const std::string&,      // interface identifier
-                                   struct DBusConnection*); // D-Bus connection handle
 
   static bool hasSSID (const std::string&,  // interface identifier
                        const std::string&); // SSID
@@ -102,40 +98,48 @@ class Net_WLAN_Tools
                     bool = false);      // wait for the (first bit of-) result data ? (times out after 250ms)
 #endif
 
-  // --- D-Bus ---
+  // --- DBus ---
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  static bool activateConnection (struct DBusConnection*, // D-Bus connection handle
+#if defined (DBUS_SUPPORT)
+  static bool activateConnection (struct DBusConnection*, // DBus connection handle
                                   const std::string&,     // connection object path
                                   const std::string&,     // device object path
                                   const std::string&);    // access point object path
-  static std::string accessPointDBusPathToSSID (struct DBusConnection*, // D-Bus connection handle
+  // *NOTE*: 'gateway' really means the 'next hop' router with regard to some
+  //         policy (e.g. routing table entry metric/priority/...).
+  //         Consequently, this API is non-functional at this point
+  static ACE_INET_Addr getGateway (const std::string&,      // interface identifier
+                                   struct DBusConnection*); // DBus connection handle
+
+  static std::string accessPointDBusPathToSSID (struct DBusConnection*, // DBus connection handle
                                                 const std::string&);    // access point object path
-  static std::string activeConnectionDBusPathToDeviceDBusPath (struct DBusConnection*, // D-Bus connection handle
+  static std::string activeConnectionDBusPathToDeviceDBusPath (struct DBusConnection*, // DBus connection handle
                                                                const std::string&);    // active connection object path
-  static std::string activeConnectionDBusPathToIp4ConfigDBusPath (struct DBusConnection*, // D-Bus connection handle
+  static std::string activeConnectionDBusPathToIp4ConfigDBusPath (struct DBusConnection*, // DBus connection handle
                                                                   const std::string&);    // connection object path
-  static std::string connectionDBusPathToSSID (struct DBusConnection*, // D-Bus connection handle
+  static std::string connectionDBusPathToSSID (struct DBusConnection*, // DBus connection handle
                                                const std::string&);    // connection object path
-  static std::string deviceDBusPathToActiveAccessPointDBusPath (struct DBusConnection*, // D-Bus connection handle
+  static std::string deviceDBusPathToActiveAccessPointDBusPath (struct DBusConnection*, // DBus connection handle
                                                                 const std::string&);    // device object path
-  static std::string deviceDBusPathToIdentifier (struct DBusConnection*, // D-Bus connection handle
+  static std::string deviceDBusPathToIdentifier (struct DBusConnection*, // DBus connection handle
                                                  const std::string&);    // device object path
-  static std::string deviceDBusPathToIp4ConfigDBusPath (struct DBusConnection*, // D-Bus connection handle
+  static std::string deviceDBusPathToIp4ConfigDBusPath (struct DBusConnection*, // DBus connection handle
                                                         const std::string&);    // device object path
-  static std::string deviceToDBusPath (struct DBusConnection*, // D-Bus connection handle
-                                       const std::string&);    // device identifier
-  static std::string Ip4ConfigDBusPathToGateway (struct DBusConnection*, // D-Bus connection handle
+  static std::string deviceToDBusPath (struct DBusConnection*, // DBus connection handle
+                                       const std::string&);    // interface identifier
+  static std::string Ip4ConfigDBusPathToGateway (struct DBusConnection*, // DBus connection handle
                                                  const std::string&);    // IPv4Config object path
-  static std::string SSIDToAccessPointDBusPath (struct DBusConnection*, // D-Bus connection handle
+  static std::string SSIDToAccessPointDBusPath (struct DBusConnection*, // DBus connection handle
                                                 const std::string&,     // device object path
                                                 const std::string&);    // SSID
-  static std::string SSIDToDeviceDBusPath (struct DBusConnection*, // D-Bus connection handle
+  static std::string SSIDToDeviceDBusPath (struct DBusConnection*, // DBus connection handle
                                            const std::string&);    // SSID
-  static std::string SSIDToConnectionDBusPath (struct DBusConnection*, // D-Bus connection handle
+  static std::string SSIDToConnectionDBusPath (struct DBusConnection*, // DBus connection handle
                                                const std::string&,     // device object path
                                                const std::string&);    // SSID
-#endif
+#endif // DBUS_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Tools ())

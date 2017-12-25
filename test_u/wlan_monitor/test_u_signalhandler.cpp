@@ -69,15 +69,25 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
   {
 // *PORTABILITY*: on Windows SIGHUP/SIGQUIT are not defined
 // --> use SIGINT (2) and/or SIGTERM (15) instead...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
     case SIGHUP:
     case SIGQUIT:
 #endif
     case SIGINT:
     case SIGTERM:
     {
-
       shutdown = true;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#if defined (_DEBUG)
+      // *NOTE*: gdb raises SIGINT with code SI_USER on 'interrupt'
+      //         --> do not shutdown in this case
+      shutdown = !(Common_Tools::inDebugSession () &&
+                   (signal_in.signal == SIGINT)    &&
+                   (signal_in.siginfo.si_code == SI_USER));
+#endif
+#endif
       break;
     }
 // *PORTABILITY*: on Windows SIGUSRx are not defined

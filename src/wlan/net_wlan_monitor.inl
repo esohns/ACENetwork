@@ -88,6 +88,10 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
  /////////////////////////////////////////
  , queue_ (STREAM_QUEUE_MAX_SLOTS)
  , SSIDsToInterfaceIdentifier_ ()
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+ , SSIDSeenBefore_ (false)
+#endif
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::Net_WLAN_Monitor_T"));
 
@@ -289,6 +293,12 @@ continue_:
 
   // monitor the interface in a dedicated thread
   inherited::open (NULL);
+  ACE_Time_Value timeout (0, COMMON_TIMEOUT_DEFAULT_THREAD_SPAWN * 1000);
+  result = ACE_OS::sleep (timeout);
+  if (unlikely (result == -1))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
+                &timeout));
   if (unlikely (!inherited::isRunning ()))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -416,6 +426,10 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
     unsigned int result = queue_.flush (false);
     ACE_UNUSED_ARG (result);
     SSIDsToInterfaceIdentifier_.clear ();
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+    SSIDSeenBefore_ = false;
+#endif
 
     isInitialized_ = false;
   } // end IF
@@ -981,7 +995,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
     {
       // sanity check(s)
       ACE_ASSERT (configuration_);
-      if (unlikely (!isRunning ()))
+      if (unlikely (!inherited::isRunning ()))
         break; // not start()ed yet, nothing to do
 
       { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, subscribersLock_);
@@ -1003,7 +1017,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
         // check cache whether the ESSID is known
         SSIDS_TO_INTERFACEIDENTIFIER_MAP_CONST_ITERATOR_T iterator =
             SSIDsToInterfaceIdentifier_.find (configuration_->SSID);
-        // SSID not found ? --> initiate scan
+        // SSID not found ? --> initiate scan(s)
         if (iterator == SSIDsToInterfaceIdentifier_.end ())
         {
           inherited2::change (NET_WLAN_MONITOR_STATE_SCAN);
@@ -1037,46 +1051,57 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
           iterator =
               SSIDsToInterfaceIdentifier_.find (configuration_->SSID);
           if (likely (iterator != SSIDsToInterfaceIdentifier_.end ()))
+          {
+            SSIDSeenBefore_ = true;
             break;
+          } // end IF
         } // end lock scope
 
         // scan and poll for results
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+//        ACE_DEBUG ((LM_DEBUG,
+//                    ACE_TEXT ("\"%s\": scanning...\n"),
+//                    ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ())));
         Net_WLAN_Tools::scan (clientHandle_,
                               configuration_->interfaceIdentifier,
                               configuration_->SSID);
 #else
+//        ACE_DEBUG ((LM_DEBUG,
+//                    ACE_TEXT ("\"%s\": scanning...\n"),
+//                    ACE_TEXT (configuration_->interfaceIdentifier.c_str ())));
         Net_WLAN_Tools::scan (configuration_->interfaceIdentifier,
-                              configuration_->SSID,
+                              (SSIDSeenBefore_ ? configuration_->SSID
+                                               : ACE_TEXT_ALWAYS_CHAR ("")),
                               handle_,
                               false); // don't wait
+fetch_scan_result_data:
         ACE_OS::last_error (0);
         // *TODO*: implement nl80211 support, rather than polling
         result = handle_input (handle_);
         ACE_UNUSED_ARG (result);
         error = ACE_OS::last_error ();
-        if (unlikely (error == EAGAIN)) //11: result data not available yet
+        if (unlikely (error == EAGAIN)) // 11: result data not available yet
         {
-#endif
           result = ACE_OS::sleep (poll_interval);
           if (unlikely (result == -1))
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
                         &poll_interval));
+#endif
 
           // done ?
           result = inherited::getq (message_block_p, &now);
           if (likely (result == -1))
           {
             error = ACE_OS::last_error ();
-            if (unlikely ((error != EAGAIN) &&
-                          (error != ESHUTDOWN)))
+            if (unlikely ((error != EAGAIN) &&   // 11 : timeout
+                          (error != ESHUTDOWN))) // 108: queue has been close()d
             {
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", returning\n")));
               return;
             } // end IF
-            continue;
+            goto fetch_scan_result_data;
           } // end IF
           ACE_ASSERT (message_block_p);
           if (likely (message_block_p->msg_type () == ACE_Message_Block::MB_STOP))
@@ -1087,7 +1112,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
           } // end IF
           message_block_p->release ();
           message_block_p = NULL;
-          continue;
+          goto fetch_scan_result_data;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
         } // end IF
@@ -1839,6 +1864,9 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
   ACE_OS::memset (&ap_mac_address, 0, sizeof (struct ether_addr));
   std::string essid_string;
   ACE_TCHAR buffer_a[BUFSIZ];
+#if defined (_DEBUG)
+  std::set<std::string> known_ssids, current_ssids;
+#endif
 
   if (!buffer_)
   { ACE_ASSERT (!bufferSize_);
@@ -1847,7 +1875,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
     if (unlikely (!buffer_))
     {
       ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate memory (%u byte(s)): \"%m\", continuing\n"),
+                  ACE_TEXT ("failed to allocate memory (%u byte(s)): \"%m\", returning\n"),
                   bufferSize_));
       goto continue_;
     } // end IF
@@ -1859,12 +1887,12 @@ fetch_scan_result_data:
   result = ACE_OS::ioctl (handle_in,
                           SIOCGIWSCAN,
                           &iwreq_s);
-  if (unlikely (result < 0))
+  if (result < 0)
   {
     error = ACE_OS::last_error ();
-    if ((error == E2BIG) && // 7
+    if ((error == E2BIG) && // 7: buffer too small
         (range_.we_version_compiled > 16))
-    { // buffer too small --> retry
+    {
       if (iwreq_s.u.data.length > bufferSize_)
         bufferSize_ = iwreq_s.u.data.length;
       else
@@ -1872,26 +1900,26 @@ fetch_scan_result_data:
       goto retry;
     } // end IF
 
-    if (unlikely (error == EAGAIN)) // 11
-    { // result(s) not available yet
-      goto continue_;
-    } // end IF
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCGIWSCAN): \"%m\", continuing\n"),
-                handle_in));
+    if (unlikely (error != EAGAIN)) // 11: result(s) not available yet
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCGIWSCAN): \"%m\", returning\n"),
+                  handle_in));
+//    else
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("scan results not yet available, returning\n")));
     goto continue_;
   } // end IF
 
   // the driver may have reported the required buffer size
   if (unlikely (iwreq_s.u.data.length > bufferSize_))
-  { // --> grow the buffer and retrys
+  { // --> grow the buffer and retry
     bufferSize_ = iwreq_s.u.data.length;
 retry:
     buffer_ = ACE_OS::realloc (buffer_, bufferSize_);
     if (!buffer_)
     {
       ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to allocate memory (%u byte(s)): \"%m\", continuing\n"),
+                  ACE_TEXT ("failed to reallocate memory (%u byte(s)): \"%m\", returning\n"),
                   bufferSize_));
       goto continue_;
     } // end IF
@@ -1911,6 +1939,10 @@ retry:
                                       configuration_->interfaceIdentifier));
       if (iterator == SSIDsToInterfaceIdentifier_.end ())
         break;
+
+#if defined (_DEBUG)
+      known_ssids.insert ((*iterator).first);
+#endif
       SSIDsToInterfaceIdentifier_.erase ((*iterator).first);
     } while (true);
   } // end lock scope
@@ -1997,12 +2029,13 @@ retry:
                                                                               ap_mac_address)));
         } // end lock scope
 #if defined (_DEBUG)
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("\"%s\": found wireless access point (MAC address: %s, ESSID: %s)...\n"),
-                    ACE_TEXT (configuration_->interfaceIdentifier.c_str ()),
-                    ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address),
-                                                                          NET_LINKLAYER_802_11).c_str ()),
-                    ACE_TEXT (essid_string.c_str ())));
+        if (known_ssids.find (essid_string) == known_ssids.end ())
+          ACE_DEBUG ((LM_DEBUG,
+                      ACE_TEXT ("\"%s\": detected wireless access point (MAC address: %s, ESSID: %s)...\n"),
+                      ACE_TEXT (configuration_->interfaceIdentifier.c_str ()),
+                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address),
+                                                                            NET_LINKLAYER_802_11).c_str ()),
+                      ACE_TEXT (essid_string.c_str ())));
 #endif
         break;
       }
@@ -2102,12 +2135,30 @@ retry:
       default:
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("invalid/unknown WE event (was: %d), continuing\n"),
+                    ACE_TEXT ("invalid/unknown WE event (was: %d), returning\n"),
                     iw_event_s.cmd));
-        break;
+        goto continue_;
       }
     } // end SWITCH
   } while (true);
+#if defined (_DEBUG)
+  { ACE_GUARD_RETURN (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, subscribersLock_, 0);
+    for (SSIDS_TO_INTERFACEIDENTIFIER_MAP_CONST_ITERATOR_T iterator_2 = SSIDsToInterfaceIdentifier_.begin ();
+         iterator_2 != SSIDsToInterfaceIdentifier_.end ();
+         ++iterator_2)
+      if (!ACE_OS::strcmp ((*iterator_2).second.first.c_str (),
+                           configuration_->interfaceIdentifier.c_str ()))
+        current_ssids.insert ((*iterator_2).first);
+  } // end lock scope
+  for (std::set<std::string>::const_iterator iterator_2 = known_ssids.begin ();
+       iterator_2 != known_ssids.end ();
+       ++iterator_2)
+    if (current_ssids.find (*iterator_2) == current_ssids.end ())
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("\"%s\": lost contact to ESSID (was: %s)...\n"),
+                  ACE_TEXT (configuration_->interfaceIdentifier.c_str ()),
+                  ACE_TEXT ((*iterator_2).c_str ())));
+#endif
 
   try {
     onScanComplete (configuration_->interfaceIdentifier);

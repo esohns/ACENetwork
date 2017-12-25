@@ -38,10 +38,10 @@
 #include "ace/Synch.h"
 #include "common_timer_manager.h"
 
-#include "common_ui_common.h"
-#include "common_ui_defines.h"
+#include "common_ui_gtk_common.h"
+#include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_manager_common.h"
-#include "common_ui_tools.h"
+#include "common_ui_gtk_tools.h"
 
 #include "net_macros.h"
 
@@ -115,7 +115,7 @@ load_network_interfaces (GtkListStore* listStore_in)
 
     gtk_list_store_append (listStore_in, &iterator);
     gtk_list_store_set (listStore_in, &iterator,
-                        0, Common_UI_Tools::Locale2UTF8 (ip_adapter_info_2->Description),
+                        0, Common_UI_GTK_Tools::Locale2UTF8 (ip_adapter_info_2->Description),
                         1, ip_adapter_info_2->AdapterName,
                         -1);
 
@@ -988,11 +988,11 @@ idle_update_log_display_cb (gpointer userData_in)
        iterator_2 != data_p->logStack.end ();
        iterator_2++)
   {
-    string_p = Common_UI_Tools::LocaleToUTF8 (*iterator_2);
+    string_p = Common_UI_GTK_Tools::localeToUTF8 (*iterator_2);
     if (!string_p)
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_UI_Tools::LocaleToUTF8(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"), aborting\n"),
                   ACE_TEXT ((*iterator_2).c_str ())));
       return G_SOURCE_REMOVE;
     } // end IF

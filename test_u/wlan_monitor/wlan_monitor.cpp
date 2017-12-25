@@ -392,9 +392,9 @@ do_work (bool autoAssociate_in,
   HWND window_p = NULL;
   BOOL was_visible_b = true;
 #endif
-  long timer_id = -1;
-  int group_id = -1;
-  bool stop_event_dispatch = false;
+//  long timer_id = -1;
+//  int group_id = -1;
+//  bool stop_event_dispatch = false;
 
   // step0a: initialize configuration
   struct WLANMonitor_Configuration configuration;
@@ -456,7 +456,9 @@ do_work (bool autoAssociate_in,
                 ACE_TEXT ("failed to initialize signal handler, aborting\n")));
     goto error;
   } // end IF
-  if (!Common_Tools::initializeSignals (signalSet_in,
+  if (!Common_Tools::initializeSignals ((COMMON_SIGNAL_DEFAULT_DISPATCH_MODE ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                                             : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                        signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
                                         previousSignalActions_inout))
@@ -475,13 +477,6 @@ do_work (bool autoAssociate_in,
   // [GTK events:]
   // - dispatch UI events (if any)
 
-  if (!iwlanmonitor_p->initialize (configuration.WLANMonitorConfiguration))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to initialize WLAN monitor, aborting\n")));
-    goto error;
-  } // end IF
-
   // step5a: start GTK event loop ?
   if (!UIDefinitionFile_in.empty ())
   {
@@ -496,10 +491,13 @@ do_work (bool autoAssociate_in,
     CBData_in.userData = &CBData_in;
 
     gtk_manager_p->start ();
-    result = ACE_OS::sleep (ACE_Time_Value (1, 0));
+    ACE_Time_Value timeout (0,
+                            COMMON_UI_GTK_TIMEOUT_DEFAULT_INITIALIZATION * 1000);
+    result = ACE_OS::sleep (timeout);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::sleep(): \"%m\", continuing\n")));
+                  ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
+                  &timeout));
     if (!gtk_manager_p->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -533,6 +531,13 @@ do_work (bool autoAssociate_in,
   // step4c: start monitoring ?
   if (UIDefinitionFile_in.empty ())
   {
+    if (!iwlanmonitor_p->initialize (configuration.WLANMonitorConfiguration))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to initialize WLAN monitor, aborting\n")));
+      goto error;
+    } // end IF
+
     iwlanmonitor_p->start ();
     if (!iwlanmonitor_p->isRunning ())
     {
@@ -743,7 +748,7 @@ ACE_TMAIN (int argc_in,
 
   // step1d: initialize logging and/or tracing
   Common_Logger_t logger (&gtk_cb_user_data.logStack,
-                          &gtk_cb_user_data.lock);
+                          &gtk_cb_user_data.logStackLock);
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
@@ -829,7 +834,9 @@ ACE_TMAIN (int argc_in,
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
-    Common_Tools::finalizeSignals (signal_set,
+    Common_Tools::finalizeSignals ((COMMON_SIGNAL_DEFAULT_DISPATCH_MODE ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                   signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
@@ -863,7 +870,9 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));
 
-    Common_Tools::finalizeSignals (signal_set,
+    Common_Tools::finalizeSignals ((COMMON_SIGNAL_DEFAULT_DISPATCH_MODE ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                   signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
@@ -931,7 +940,9 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
-    Common_Tools::finalizeSignals (signal_set,
+    Common_Tools::finalizeSignals ((COMMON_SIGNAL_DEFAULT_DISPATCH_MODE ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                   signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
@@ -990,7 +1001,9 @@ ACE_TMAIN (int argc_in,
               ACE_TEXT (system_time_string.c_str ())));
 #endif
 
-  Common_Tools::finalizeSignals (signal_set,
+  Common_Tools::finalizeSignals ((COMMON_SIGNAL_DEFAULT_DISPATCH_MODE ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                                      : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                 signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Tools::finalizeLogging ();

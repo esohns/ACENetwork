@@ -24,10 +24,12 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
+#if defined (DBUS_SUPPORT)
 #include "NetworkManager/NetworkManager.h"
+#endif // DBUS_SUPPORT
 
 #include "net_configuration.h"
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 void WINAPI
@@ -349,6 +351,7 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
               ACE_TEXT (notification_string.c_str ())));
 }
 #else
+#if defined (DBUS_SUPPORT)
 //void
 //network_wlan_dbus_main_wakeup_cb (void* userData_in)
 //{
@@ -880,6 +883,5 @@ continue_:
 
 //  Net_WLAN_IMonitorCB* iwlan_cb_p = static_cast<Net_WLAN_IMonitorCB*> (userData_in);
 //}
-#endif
-
-//////////////////////////////////////////
+#endif // DBUS_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64

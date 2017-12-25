@@ -48,9 +48,9 @@
 #include "common_timer_manager.h"
 #include "common_tools.h"
 
-#include "common_ui_defines.h"
-//#include "common_ui_glade_definition.h"
 #include "common_ui_gtk_builder_definition.h"
+#include "common_ui_gtk_defines.h"
+//#include "common_ui_gtk_glade_definition.h"
 #include "common_ui_gtk_manager_common.h"
 
 #include "stream_allocatorheap.h"
@@ -708,7 +708,9 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
 
     return;
   } // end IF
-  if (!Common_Tools::initializeSignals (signalSet_in,
+  if (!Common_Tools::initializeSignals ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                       : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                        signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
                                         previousSignalActions_inout))
@@ -742,10 +744,13 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
       CLIENT_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
     gtk_manager_p->start ();
-    result = ACE_OS::sleep (ACE_Time_Value (1, 0));
+    ACE_Time_Value timeout (0,
+                            COMMON_UI_GTK_TIMEOUT_DEFAULT_INITIALIZATION * 1000);
+    result = ACE_OS::sleep (timeout);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::sleep(): \"%m\", continuing\n")));
+                  ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
+                  &timeout));
     if (!gtk_manager_p->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1250,7 +1255,9 @@ ACE_TMAIN (int argc_in,
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
-    Common_Tools::finalizeSignals (signal_set,
+    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                   signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
@@ -1282,7 +1289,9 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));
 
-    Common_Tools::finalizeSignals (signal_set,
+    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                   signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
@@ -1352,7 +1361,9 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
-    Common_Tools::finalizeSignals (signal_set,
+    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                   signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
@@ -1411,7 +1422,9 @@ ACE_TMAIN (int argc_in,
               ACE_TEXT (system_time_string.c_str ())));
 #endif
 
-  Common_Tools::finalizeSignals (signal_set,
+  Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                              : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                 signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Tools::finalizeLogging ();

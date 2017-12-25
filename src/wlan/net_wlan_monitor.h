@@ -180,6 +180,7 @@ class Net_WLAN_Monitor_T
   typedef INTERFACEIDENTIFIERS_T::iterator INTERFACEIDENTIFIERS_ITERATOR_T;
   typedef SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::const_iterator SSIDS_TO_INTERFACEIDENTIFIER_MAP_CONST_ITERATOR_T;
   typedef SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::iterator SSIDS_TO_INTERFACEIDENTIFIER_MAP_ITERATOR_T;
+  typedef std::pair<SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::iterator, bool> SSIDS_TO_INTERFACEIDENTIFIER_MAP_RESULT_T;
 
   Net_WLAN_Monitor_T ();
 
@@ -293,6 +294,10 @@ class Net_WLAN_Monitor_T
 
   MESSAGEQUEUE_T                                  queue_;
   SSIDS_TO_INTERFACEIDENTIFIER_MAP_T              SSIDsToInterfaceIdentifier_;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  bool                                            SSIDSeenBefore_;
+#endif
 };
 
 //////////////////////////////////////////

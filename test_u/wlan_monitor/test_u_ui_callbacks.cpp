@@ -27,10 +27,10 @@
 #include "ace/Synch.h"
 #include "common_timer_manager.h"
 
-#include "common_ui_common.h"
-#include "common_ui_defines.h"
+#include "common_ui_gtk_common.h"
+#include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_manager_common.h"
-#include "common_ui_tools.h"
+#include "common_ui_gtk_tools.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
@@ -167,11 +167,10 @@ load_ssids (const std::string& interfaceIdentifier_in,
 
   // sanity check(s)
   ACE_ASSERT (listStore_in);
-
-  GtkTreeIter iterator;
   Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
       NET_WLAN_INETMONITOR_SINGLETON::instance ();
   ACE_ASSERT (iinetwlanmonitor_p);
+
   SSIDs_out =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       Net_WLAN_Tools::getSSIDs (iinetwlanmonitor_p->get (),
@@ -180,14 +179,23 @@ load_ssids (const std::string& interfaceIdentifier_in,
       Net_WLAN_Tools::getSSIDs (interfaceIdentifier_in,
                                 iinetwlanmonitor_p->get ());
 #endif
+
+  gchar* string_p = NULL;
+  GtkTreeIter tree_iterator;
   for (Net_WLAN_SSIDsIterator_t iterator_2 = SSIDs_out.begin ();
        iterator_2 != SSIDs_out.end ();
        ++iterator_2)
   {
-    gtk_list_store_append (listStore_in, &iterator);
-    gtk_list_store_set (listStore_in, &iterator,
-                        0, ACE_TEXT_ALWAYS_CHAR ((*iterator_2).c_str ()),
+    gtk_list_store_append (listStore_in, &tree_iterator);
+    string_p = Common_UI_GTK_Tools::localeToUTF8 (*iterator_2);
+    ACE_ASSERT (string_p);
+    gtk_list_store_set (listStore_in, &tree_iterator,
+                        0, string_p,
                         -1);
+
+    // clean up
+    g_free (string_p);
+    string_p = NULL;
   } // end FOR
 }
 
@@ -240,11 +248,11 @@ idle_update_log_display_cb (gpointer userData_in)
          iterator_2 != data_p->logStack.end ();
          ++iterator_2)
     {
-      converted_text = Common_UI_Tools::LocaleToUTF8 (*iterator_2);
+      converted_text = Common_UI_GTK_Tools::localeToUTF8 (*iterator_2);
       if (!converted_text)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Common_UI_Tools::LocaleToUTF8(\"%s\"), aborting\n"),
+                    ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"), aborting\n"),
                     ACE_TEXT ((*iterator_2).c_str ())));
         return G_SOURCE_REMOVE;
       } // end IF
@@ -380,28 +388,57 @@ idle_update_ssids_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
 
-  GtkListStore* list_store_p =
-      GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
-                                              ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_LISTSTORE_SSID_NAME)));
-  ACE_ASSERT (list_store_p);
-  gtk_list_store_clear (list_store_p);
-
-  GtkTreeIter iterator_2;
   Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
       NET_WLAN_INETMONITOR_SINGLETON::instance ();
   ACE_ASSERT (iinetwlanmonitor_p);
   Net_WLAN_SSIDs_t ssids = iinetwlanmonitor_p->SSIDs ();
-  for (Net_WLAN_SSIDsIterator_t iterator_3 = ssids.begin ();
-       iterator_3 != ssids.end ();
-       ++iterator_3)
-  {
-    gtk_list_store_append (list_store_p, &iterator_2);
-    gtk_list_store_set (list_store_p, &iterator_2,
-                        0, ACE_TEXT_ALWAYS_CHAR ((*iterator_3).c_str ()),
-                        -1);
-  } // end FOR
+  GtkTreeIter tree_iterator;
+  gchar* string_p = NULL;
+  guint num_signal_handlers = 0;
 
-  return G_SOURCE_CONTINUE;
+  GtkComboBox* combo_box_p =
+      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
+                                             ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_COMBOBOX_SSID_NAME)));
+  ACE_ASSERT (combo_box_p);
+  GtkListStore* list_store_p =
+      GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
+                                              ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_LISTSTORE_SSID_NAME)));
+  ACE_ASSERT (list_store_p);
+
+  num_signal_handlers =
+      g_signal_handlers_block_by_func (G_OBJECT (combo_box_p),
+                                       (gpointer)combobox_ssid_changed_cb,
+                                       userData_in);
+  ACE_ASSERT (num_signal_handlers == 1);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
+    gtk_list_store_clear (list_store_p);
+
+    for (Net_WLAN_SSIDsIterator_t iterator_3 = ssids.begin ();
+         iterator_3 != ssids.end ();
+         ++iterator_3)
+    {
+      gtk_list_store_append (list_store_p, &tree_iterator);
+      string_p = Common_UI_GTK_Tools::localeToUTF8 (*iterator_3);
+      ACE_ASSERT (string_p);
+      gtk_list_store_set (list_store_p, &tree_iterator,
+                          0, string_p,
+                          -1);
+
+      // clean up
+      g_free (string_p);
+      string_p = NULL;
+    } // end FOR
+  } // end lock scope
+  num_signal_handlers =
+      g_signal_handlers_unblock_by_func (G_OBJECT (combo_box_p),
+                                         (gpointer)combobox_ssid_changed_cb,
+                                         userData_in);
+  ACE_ASSERT (num_signal_handlers == 1);
+  g_signal_emit_by_name (G_OBJECT (combo_box_p),
+                         ACE_TEXT_ALWAYS_CHAR ("changed"),
+                         userData_in);
+
+  return G_SOURCE_REMOVE;
 }
 
 //////////////////////////////////////////
@@ -626,7 +663,7 @@ idle_initialize_ui_cb (gpointer userData_in)
       return G_SOURCE_REMOVE;
     } // end ELSE
     // schedule asynchronous updates of the info view
-    event_source_id = g_timeout_add (COMMON_UI_GTK_WIDGET_UPDATE_INTERVAL,
+    event_source_id = g_timeout_add (COMMON_UI_GTK_UPDATE_WIDGET_INTERVAL,
                                      idle_update_info_display_cb,
                                      data_p);
     if (event_source_id > 0)
@@ -660,7 +697,6 @@ idle_initialize_ui_cb (gpointer userData_in)
   gtk_widget_set_sensitive (GTK_WIDGET (combo_box_p), (n_rows > 0));
   if (n_rows > 0)
     gtk_combo_box_set_active (combo_box_p, 0);
-
 
   GtkCheckButton* check_button_p =
       GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -831,7 +867,7 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
           //                 &data_p->progressData,
           //                 NULL);
           g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,                   // _LOW doesn't work (on Win32)
-                              COMMON_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL, // ms (?)
+                              COMMON_UI_GTK_UPDATE_PROGRESSBAR_INTERVAL, // ms (?)
                               idle_update_progress_cb,
                               userData_in,
                               NULL);
@@ -1205,17 +1241,10 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
 
-  GtkTreeIter iterator_2;
-  if (!gtk_combo_box_get_active_iter (comboBox_in,
-                                      &iterator_2))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to gtk_combo_box_get_active_iter(), returning\n")));
-    return;
-  } // end IF
   Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
       NET_WLAN_INETMONITOR_SINGLETON::instance ();
   ACE_ASSERT (iinetwlanmonitor_p);
+  // sanity check(s)
   if (!iinetwlanmonitor_p->isRunning ())
     return; // nothing to do
 
@@ -1226,57 +1255,157 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   GValue value;
 #if GTK_CHECK_VERSION (3,0,0)
   value = G_VALUE_INIT;
-#else
-  g_value_init (&value, G_TYPE_STRING);
 #endif
-  gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
-                            &iterator_2,
-                            0, &value);
-  ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
-  data_p->configuration->WLANMonitorConfiguration.SSID =
-    ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value));
-  g_value_unset (&value);
+  g_value_init (&value, G_TYPE_STRING);
 
+  bool has_active_item = false;
+  GtkTreeIter iterator_2;
+  std::string current_essid_string = iinetwlanmonitor_p->SSID ();
+  std::string selected_essid_string;
+  gchar* string_p = NULL;
+  guint index_i = std::numeric_limits<unsigned int>::max ();
+  // retrieve the active entry
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
+    if (!gtk_combo_box_get_active_iter (comboBox_in,
+                                        &iterator_2))
+    { // most probable reason: nothing selected
+      // --> select configured entry (if any) and available
+      if (data_p->configuration->WLANMonitorConfiguration.SSID.empty ())
+      {
+        // not configured
+        // --> select current entry (if any) and available
+        if (current_essid_string.empty ())
+          return;
+
+        string_p = Common_UI_GTK_Tools::localeToUTF8 (current_essid_string);
+        ACE_ASSERT (string_p);
+        g_value_set_string (&value,
+                            string_p);
+        g_free (string_p);
+        index_i = Common_UI_GTK_Tools::entryToIndex (list_store_p,
+                                                     value,
+                                                     0);
+        g_value_reset (&value);
+        if (index_i != std::numeric_limits<unsigned int>::max ())
+          gtk_combo_box_set_active (comboBox_in, index_i);
+        return;
+      } // end IF
+
+      string_p =
+          Common_UI_GTK_Tools::localeToUTF8 (data_p->configuration->WLANMonitorConfiguration.SSID);
+      ACE_ASSERT (string_p);
+      g_value_set_string (&value,
+                          string_p);
+      g_free (string_p);
+      index_i = Common_UI_GTK_Tools::entryToIndex (list_store_p,
+                                                   value,
+                                                   0);
+      g_value_reset (&value);
+      if (index_i != std::numeric_limits<unsigned int>::max ())
+        gtk_combo_box_set_active (comboBox_in, index_i);
+      return;
+    } // end IF
+    g_value_unset (&value);
+    gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
+                              &iterator_2,
+                              0, &value);
+  } // end lock scope
+  ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
+  selected_essid_string =
+      Common_UI_GTK_Tools::UTF8ToLocale (g_value_get_string (&value),
+                                         -1);
+  g_value_reset (&value);
+  if (!ACE_OS::strcmp (selected_essid_string.c_str (),
+                       data_p->configuration->WLANMonitorConfiguration.SSID.c_str ()))
+  {
+    // the selected SSID is the configured SSID
+
+    if (data_p->configuration->WLANMonitorConfiguration.SSID.empty () ||                 // not configured
+        !ACE_OS::strcmp (current_essid_string.c_str (),
+                         data_p->configuration->WLANMonitorConfiguration.SSID.c_str ())) // already associated
+      return; //nothing to do
+
+    // the current SSID is not the configured SSID
+    // --> auto-associate ?
+    if (data_p->configuration->WLANMonitorConfiguration.autoAssociate)
+      goto associate;
+  } // end IF
+  else
+  {
+    // the selected SSID is not the configured SSID
+
+    if (data_p->configuration->WLANMonitorConfiguration.SSID.empty ())
+    {
+      // not configured
+      // --> update configuration
+      data_p->configuration->WLANMonitorConfiguration.SSID
+          = selected_essid_string;
+
+      if (!ACE_OS::strcmp (current_essid_string.c_str (),
+                           data_p->configuration->WLANMonitorConfiguration.SSID.c_str ())) // already associated
+        return; //nothing to do
+
+      // the current SSID is not the configured SSID
+      // --> auto-associate ?
+      if (data_p->configuration->WLANMonitorConfiguration.autoAssociate)
+        goto associate;
+    } // end IF
+
+    // configured
+    // --> select configured SSID if available
+    string_p =
+        Common_UI_GTK_Tools::localeToUTF8 (data_p->configuration->WLANMonitorConfiguration.SSID);
+    ACE_ASSERT (string_p);
+    g_value_set_string (&value,
+                        string_p);
+    g_free (string_p);
+    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
+      index_i = Common_UI_GTK_Tools::entryToIndex (list_store_p,
+                                                   value,
+                                                   0);
+    } // end lock scope
+    g_value_reset (&value);
+    if (index_i != std::numeric_limits<unsigned int>::max ())
+      gtk_combo_box_set_active (comboBox_in, index_i);
+    return;
+  } // end ELSE
+
+associate:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   struct ether_addr ap_mac_address;
   ACE_OS::memset (&ap_mac_address, 0, sizeof (struct ether_addr));
 #endif
-  if (ACE_OS::strcmp (iinetwlanmonitor_p->SSID ().c_str (),
-                      data_p->configuration->WLANMonitorConfiguration.SSID.c_str ()) &&
-      data_p->configuration->WLANMonitorConfiguration.autoAssociate)
-  {
-    GtkSpinner* spinner_p =
+  GtkSpinner* spinner_p =
       GTK_SPINNER (gtk_builder_get_object ((*iterator).second.second,
                                            ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SPINNER_NAME)));
-    ACE_ASSERT (spinner_p);
-    gtk_widget_set_visible (GTK_WIDGET (spinner_p),
+  ACE_ASSERT (spinner_p);
+  gtk_widget_set_visible (GTK_WIDGET (spinner_p),
+                          true);
+  gtk_widget_set_sensitive (GTK_WIDGET (spinner_p),
                             true);
-    gtk_widget_set_sensitive (GTK_WIDGET (spinner_p),
-                              true);
-    gtk_spinner_start (spinner_p);
+  gtk_spinner_start (spinner_p);
 
-    if (!iinetwlanmonitor_p->associate (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+  if (!iinetwlanmonitor_p->associate (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+                                    #if defined (ACE_WIN32) || defined (ACE_WIN64)
+                                    #else
+                                      ap_mac_address,
+                                    #endif
+                                      data_p->configuration->WLANMonitorConfiguration.SSID))
+  {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s), returning\n"),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier).c_str ()),
+                ACE_TEXT (data_p->configuration->WLANMonitorConfiguration.SSID.c_str ())));
 #else
-                                        ap_mac_address,
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s,%s), returning\n"),
+                ACE_TEXT (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier.c_str ()),
+                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address)).c_str ()),
+                ACE_TEXT (data_p->configuration->WLANMonitorConfiguration.SSID.c_str ())));
 #endif
-                                        data_p->configuration->WLANMonitorConfiguration.SSID))
-    {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s), returning\n"),
-                  ACE_TEXT (Net_Common_Tools::interfaceToString (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier).c_str ()),
-                  ACE_TEXT (data_p->configuration->WLANMonitorConfiguration.SSID.c_str ())));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s,%s), returning\n"),
-                  ACE_TEXT (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier.c_str ()),
-                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address)).c_str ()),
-                  ACE_TEXT (data_p->configuration->WLANMonitorConfiguration.SSID.c_str ())));
-#endif
-      return;
-    } // end IF
+    return;
   } // end IF
 }
 

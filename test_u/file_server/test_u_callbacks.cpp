@@ -27,10 +27,10 @@
 #include "ace/Synch.h"
 #include "common_timer_manager.h"
 
-#include "common_ui_common.h"
-#include "common_ui_defines.h"
+#include "common_ui_gtk_common.h"
+#include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_manager_common.h"
-#include "common_ui_tools.h"
+#include "common_ui_gtk_tools.h"
 
 #include "net_defines.h"
 #include "net_macros.h"
@@ -94,11 +94,11 @@ idle_update_log_display_cb (gpointer userData_in)
          iterator_2 != data_p->logStack.end ();
          ++iterator_2)
     {
-      converted_text = Common_UI_Tools::LocaleToUTF8 (*iterator_2);
+      converted_text = Common_UI_GTK_Tools::localeToUTF8 (*iterator_2);
       if (!converted_text)
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Common_UI_Tools::LocaleToUTF8(\"%s\"), aborting\n"),
+                    ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"), aborting\n"),
                     ACE_TEXT ((*iterator_2).c_str ())));
         return G_SOURCE_REMOVE;
       } // end IF
@@ -397,21 +397,14 @@ idle_initialize_ui_cb (gpointer userData_in)
     //  data_p->configuration->moduleHandlerConfiguration.targetFileName;
     //if (!gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
     //                                              file_uri.c_str ()))
-    filename_p =
-      Common_UI_Tools::LocaleToUTF8 ((*iterator_2).second.second.fileName);
     if (!gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_button_p),
-                                        filename_p))
+                                        (*iterator_2).second.second.fileName.c_str ()))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to gtk_file_chooser_set_filename(\"%s\"): \"%s\", aborting\n"),
                   ACE_TEXT ((*iterator_2).second.second.fileName.c_str ())));
-
-      // clean up
-      g_free (filename_p);
-
       return G_SOURCE_REMOVE;
     } // end IF
-    g_free (filename_p);
 
     //if (!gtk_file_chooser_select_file (GTK_FILE_CHOOSER (file_chooser_dialog_p),
     //                                   file_p,
@@ -436,36 +429,36 @@ idle_initialize_ui_cb (gpointer userData_in)
     //  g_file_new_for_path (Common_File_Tools::getTempDirectory ().c_str ());
     //ACE_ASSERT (file_p);
 
-    filename_p =
-      Common_UI_Tools::LocaleToUTF8 (Common_File_Tools::getTempDirectory ());
     if (!gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_button_p),
-                                        filename_p))
+                                        Common_File_Tools::getTempDirectory ().c_str ()))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to gtk_file_chooser_set_filename(\"%s\"): \"%s\", aborting\n"),
                   ACE_TEXT (Common_File_Tools::getTempDirectory ().c_str ())));
-
-      // clean up
-      g_free (filename_p);
-
       return G_SOURCE_REMOVE;
     } // end IF
-    g_free (filename_p);
     //g_object_unref (file_p);
   } // end ELSE
 
   std::string default_folder_uri = ACE_TEXT_ALWAYS_CHAR ("file://");
   default_folder_uri += (*iterator_2).second.second.fileName;
+  filename_p = Common_UI_GTK_Tools::localeToUTF8 (default_folder_uri);
+  ACE_ASSERT (filename_p);
   gboolean result_2 =
     gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (file_chooser_button_p),
-                                             default_folder_uri.c_str ());
+                                             filename_p);
   if (!result_2)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to gtk_file_chooser_set_current_folder_uri(\"%s\"): \"%m\", aborting\n"),
                 ACE_TEXT (default_folder_uri.c_str ())));
+
+    g_free (filename_p);
+
     return G_SOURCE_REMOVE;
   } // end IF
+  g_free (filename_p);
+  filename_p = NULL;
 
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -548,7 +541,7 @@ idle_initialize_ui_cb (gpointer userData_in)
       return G_SOURCE_REMOVE;
     } // end ELSE
       // schedule asynchronous updates of the info view
-    event_source_id = g_timeout_add (COMMON_UI_GTK_WIDGET_UPDATE_INTERVAL,
+    event_source_id = g_timeout_add (COMMON_UI_GTK_UPDATE_WIDGET_INTERVAL,
                                      idle_update_info_display_cb,
                                      userData_in);
     if (event_source_id > 0)
@@ -671,7 +664,7 @@ idle_initialize_ui_cb (gpointer userData_in)
       return G_SOURCE_REMOVE;
     } // end ELSE
     // schedule asynchronous updates of the info view
-    event_source_id = g_timeout_add (COMMON_UI_GTK_WIDGET_UPDATE_INTERVAL,
+    event_source_id = g_timeout_add (COMMON_UI_GTK_UPDATE_WIDGET_INTERVAL,
                                      idle_update_info_display_cb,
                                      data_p);
     if (event_source_id > 0)
@@ -844,7 +837,7 @@ togglebutton_listen_toggled_cb (GtkToggleButton* toggleButton_in,
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.end ());
     (*iterator_2).second.second.fileName =
-        Common_UI_Tools::UTF8ToLocale (filename_p, -1);
+        Common_UI_GTK_Tools::UTF8ToLocale (filename_p, -1);
     g_free (filename_p);
 
     if (!data_p->configuration->listener->initialize (data_p->configuration->listenerConfiguration))

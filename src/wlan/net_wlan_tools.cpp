@@ -34,8 +34,10 @@
 #include <ifaddrs.h>
 #include <iwlib.h>
 
+#if defined (DBUS_SUPPORT)
 #include "common_dbus_tools.h"
-#endif
+#endif // DBUS_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Handle_Set.h"
 #include "ace/INET_Addr.h"
@@ -826,6 +828,9 @@ Net_WLAN_Tools::scan (const std::string& interfaceIdentifier_in,
     iwreq_s.u.data.flags = IW_SCAN_THIS_ESSID;
     iwreq_s.u.data.length = sizeof (struct iw_scan_req);
     iwreq_s.u.data.pointer = &iw_scan_req_s;
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("scanning for ESSID %s...\n"),
+                ACE_TEXT (ESSID_in.c_str ())));
   } // end IF
   if (unlikely (socket_handle == ACE_INVALID_HANDLE))
   {
@@ -1373,78 +1378,6 @@ clean:
 
   return return_value;
 }
-
-ACE_INET_Addr
-Net_WLAN_Tools::getGateway (const std::string& interfaceIdentifier_in,
-                            struct DBusConnection* connection_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::getGateway"));
-
-  // sanity check(s)
-  ACE_ASSERT (!interfaceIdentifier_in.empty ());
-  ACE_ASSERT (connection_in);
-
-  ACE_INET_Addr result = Net_Common_Tools::getGateway (interfaceIdentifier_in);
-  int result_2 = -1;
-
-  // *IMPORTANT NOTE*: (as of kernel 3.16.0,x) dhclient apparently does not add
-  //                   wireless gateway information to the routing table
-  //                   reliably (i.e. Gateway is '*'). Specifically, when there
-  //                   already is a gateway configured on a different interface
-  //                   --> try DBus instead
-  if (result.is_any ())
-  {
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("\"%s\": failed to retrieve gateway from kernel, trying DBus...\n"),
-                ACE_TEXT (interfaceIdentifier_in.c_str ())));
-
-    std::string result_string =
-        Net_WLAN_Tools::deviceToDBusPath (connection_in,
-                                          interfaceIdentifier_in);
-    if (unlikely (result_string.empty ()))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceToDBusPath(\"%s\"), aborting\n"),
-                  ACE_TEXT (interfaceIdentifier_in.c_str ())));
-      return result;
-    } // end IF
-    result_string =
-        Net_WLAN_Tools::deviceDBusPathToIp4ConfigDBusPath (connection_in,
-                                                             result_string);
-    if (unlikely (result_string.empty ()))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusPathToIp4ConfigDBusPath(\"%s\",\"%s\"), aborting\n"),
-                  ACE_TEXT (interfaceIdentifier_in.c_str ()),
-                  ACE_TEXT (result_string.c_str ())));
-      return result;
-    } // end IF
-    result_string =
-        Net_WLAN_Tools::Ip4ConfigDBusPathToGateway (connection_in,
-                                                      result_string);
-    if (unlikely (result_string.empty ()))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLAN_Tools::Ip4ConfigDBusPathToGateway(\"%s\",\"%s\"), aborting\n"),
-                  ACE_TEXT (interfaceIdentifier_in.c_str ()),
-                  ACE_TEXT (result_string.c_str ())));
-      return result;
-    } // end IF
-    result_2 = result.set (0,
-                           result_string.c_str (),
-                           1,
-                           AF_INET);
-    if (unlikely (result_2 == -1))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
-                  ACE_TEXT (result_string.c_str ())));
-      return result;
-    } // end IF
-  } // end IF
-
-  return result;
-}
 #endif
 
 bool
@@ -1596,6 +1529,7 @@ error:
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
+#if defined (DBUS_SUPPORT)
 bool
 Net_WLAN_Tools::activateConnection (struct DBusConnection* connection_in,
                                       const std::string& connectionObjectPath_in,
@@ -1697,6 +1631,78 @@ error:
   return false;
 
 continue_:
+  return result;
+}
+
+ACE_INET_Addr
+Net_WLAN_Tools::getGateway (const std::string& interfaceIdentifier_in,
+                            struct DBusConnection* connection_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::getGateway"));
+
+  // sanity check(s)
+  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+  ACE_ASSERT (connection_in);
+
+  ACE_INET_Addr result = Net_Common_Tools::getGateway (interfaceIdentifier_in);
+  int result_2 = -1;
+
+  // *IMPORTANT NOTE*: (as of kernel 3.16.0,x) dhclient apparently does not add
+  //                   wireless gateway information to the routing table
+  //                   reliably (i.e. Gateway is '*'). Specifically, when there
+  //                   already is a gateway configured on a different interface
+  //                   --> try DBus instead
+  if (result.is_any ())
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("\"%s\": failed to retrieve gateway from kernel, trying DBus...\n"),
+                ACE_TEXT (interfaceIdentifier_in.c_str ())));
+
+    std::string result_string =
+        Net_WLAN_Tools::deviceToDBusPath (connection_in,
+                                          interfaceIdentifier_in);
+    if (unlikely (result_string.empty ()))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceToDBusPath(\"%s\"), aborting\n"),
+                  ACE_TEXT (interfaceIdentifier_in.c_str ())));
+      return result;
+    } // end IF
+    result_string =
+        Net_WLAN_Tools::deviceDBusPathToIp4ConfigDBusPath (connection_in,
+                                                             result_string);
+    if (unlikely (result_string.empty ()))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusPathToIp4ConfigDBusPath(\"%s\",\"%s\"), aborting\n"),
+                  ACE_TEXT (interfaceIdentifier_in.c_str ()),
+                  ACE_TEXT (result_string.c_str ())));
+      return result;
+    } // end IF
+    result_string =
+        Net_WLAN_Tools::Ip4ConfigDBusPathToGateway (connection_in,
+                                                      result_string);
+    if (unlikely (result_string.empty ()))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_WLAN_Tools::Ip4ConfigDBusPathToGateway(\"%s\",\"%s\"), aborting\n"),
+                  ACE_TEXT (interfaceIdentifier_in.c_str ()),
+                  ACE_TEXT (result_string.c_str ())));
+      return result;
+    } // end IF
+    result_2 = result.set (0,
+                           result_string.c_str (),
+                           1,
+                           AF_INET);
+    if (unlikely (result_2 == -1))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_INET_Addr::set(\"%s\"): \"%m\", aborting\n"),
+                  ACE_TEXT (result_string.c_str ())));
+      return result;
+    } // end IF
+  } // end IF
+
   return result;
 }
 
@@ -2817,4 +2823,5 @@ error:
 continue_:
   return result;
 }
-#endif
+#endif // DBUS_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64

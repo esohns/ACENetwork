@@ -33,6 +33,8 @@ template <typename AddressType>
 class Net_IConnectorBase_T
 {
  public:
+  inline virtual ~Net_IConnectorBase_T () {}
+
   virtual enum Net_TransportLayerType transportLayer () const = 0;
   virtual bool useReactor () const = 0; // ? : uses proactor (i.e. operation is asynchronous)
 

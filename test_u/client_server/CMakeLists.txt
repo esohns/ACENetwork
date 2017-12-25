@@ -64,6 +64,8 @@ find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
+add_definitions (-DCOMMON_HAS_DLL)
+add_definitions (-DCOMMON_UI_HAS_DLL)
 
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -74,6 +76,7 @@ find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
+add_definitions (-DACESTREAM_HAS_DLL)
 
 find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -84,6 +87,7 @@ find_package (ACENetwork ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 if (NOT EXISTS ${ACENetwork_DIR})
  message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
 endif ()
+add_definitions (-DACENETWORK_HAS_DLL)
 
 add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
@@ -100,6 +104,7 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/timer)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui/gtk)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/lib)
@@ -125,6 +130,7 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/timer)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui/gtk)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/lib)
@@ -187,6 +193,8 @@ endif ()
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE_SOURCE} Common)
+add_dependencies (${EXECUTABLE_SOURCE} CommonUI)
+add_dependencies (${EXECUTABLE_SOURCE} CommonUI_GTK)
 add_dependencies (${EXECUTABLE_SOURCE} ACEStream)
 add_dependencies (${EXECUTABLE_SOURCE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_Client)
@@ -221,7 +229,8 @@ if (WIN32)
  # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
-target_link_libraries (${EXECUTABLE_SOURCE} CommonUI)
+#target_link_libraries (${EXECUTABLE_SOURCE} CommonUI)
+target_link_libraries (${EXECUTABLE_SOURCE} CommonUI_GTK)
 
 target_link_libraries (${EXECUTABLE_SOURCE} ACEStream)
 target_link_libraries (${EXECUTABLE_SOURCE} ACEStream_Miscellaneous)
@@ -292,6 +301,8 @@ endif ()
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE_TARGET} Common)
+add_dependencies (${EXECUTABLE_TARGET} CommonUI)
+add_dependencies (${EXECUTABLE_TARGET} CommonUI_GTK)
 add_dependencies (${EXECUTABLE_TARGET} ACEStream)
 add_dependencies (${EXECUTABLE_TARGET} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Server)
@@ -326,7 +337,8 @@ if (WIN32)
  # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE_TARGET} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
-target_link_libraries (${EXECUTABLE_TARGET} CommonUI)
+#target_link_libraries (${EXECUTABLE_TARGET} CommonUI)
+target_link_libraries (${EXECUTABLE_TARGET} CommonUI_GTK)
 
 target_link_libraries (${EXECUTABLE_TARGET} ACEStream)
 target_link_libraries (${EXECUTABLE_TARGET} ACEStream_Miscellaneous)
