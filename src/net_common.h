@@ -22,6 +22,16 @@
 #define NET_COMMON_H
 
 #include <set>
+#include "ace/config-lite.h"
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#include <string>
+#endif
+#include <vector>
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include <guiddef.h>
+#endif
 
 #if defined (ACE_HAS_NETLINK)
 #include "ace/Netlink_Addr.h"
@@ -47,11 +57,11 @@ struct Net_UDPSocketConfiguration;
 
 enum Net_LinkLayerType : int
 {
-  NET_LINKLAYER_802_3  = 0x01, // i.e. CSMA/CD, aka 'Ethernet'
-  NET_LINKLAYER_802_11 = 0x02, // i.e. Wireless LAN aka 'WLAN' (EU; US: 'WiFi')
-  NET_LINKLAYER_ATM    = 0x04,
-  NET_LINKLAYER_FDDI   = 0x08,
-  NET_LINKLAYER_PPP    = 0x10,
+  NET_LINKLAYER_802_3   = 0x01, // i.e. CSMA/CD, aka 'Ethernet'
+  NET_LINKLAYER_802_11  = 0x02, // i.e. Wireless LAN aka 'WLAN' (EU; US: 'WiFi')
+  NET_LINKLAYER_ATM     = 0x04,
+  NET_LINKLAYER_FDDI    = 0x08,
+  NET_LINKLAYER_PPP     = 0x10,
   ////////////////////////////////////////
   NET_LINKLAYER_MAX,
   NET_LINKLAYER_INVALID = -1,
@@ -64,7 +74,7 @@ enum Net_NetworkLayerType : int
   NET_NETWORKLAYER_IP_MULTICAST = 0x0004,
   ////////////////////////////////////////
   NET_NETWORKLAYER_MAX,
-  NET_NETWORKLAYER_INVALID = -1,
+  NET_NETWORKLAYER_INVALID      = -1,
 };
 
 enum Net_TransportLayerType : int
@@ -80,10 +90,17 @@ enum Net_TransportLayerType : int
   NET_TRANSPORTLAYER_MAX
 };
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+typedef std::vector<struct _GUID> Net_InterfaceIdentifiers_t;
+#else
+typedef std::vector<std::string> Net_InterfaceIdentifiers_t;
+#endif
+typedef Net_InterfaceIdentifiers_t::iterator Net_InterfacesIdentifiersIterator_t;
+
 enum Net_ClientServerRole : int
 {
   NET_ROLE_INVALID = -1,
-  NET_ROLE_CLIENT = 0,
+  NET_ROLE_CLIENT  = 0,
   NET_ROLE_SERVER,
   ////////////////////////////////////////
   NET_ROLE_MAX
@@ -127,7 +144,7 @@ enum Net_Connection_AbortStrategy : int
 // *NOTE*: this extends ACE_Svc_Handler_Close (see Svc_Handler.h)
 enum Net_Connection_CloseReason : int
 {
-  NET_CONNECTION_CLOSE_REASON_INVALID = -1,
+  NET_CONNECTION_CLOSE_REASON_INVALID        = -1,
   ////////////////////////////////////////
   NET_CONNECTION_CLOSE_REASON_INITIALIZATION = 0x02,
   NET_CONNECTION_CLOSE_REASON_USER_ABORT,
@@ -137,9 +154,9 @@ enum Net_Connection_CloseReason : int
 
 enum Net_Connection_Status : int
 {
-  NET_CONNECTION_STATUS_INVALID = -1,
+  NET_CONNECTION_STATUS_INVALID              = -1,
   ////////////////////////////////////////
-  NET_CONNECTION_STATUS_OK = 0,
+  NET_CONNECTION_STATUS_OK                   = 0,
   ////////////////////////////////////////
   NET_CONNECTION_STATUS_INITIALIZATION_FAILED,
   ////////////////////////////////////////

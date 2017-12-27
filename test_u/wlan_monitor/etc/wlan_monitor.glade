@@ -2,7 +2,17 @@
 <!-- Generated with glade 3.20.2 -->
 <interface>
   <requires lib="gtk+" version="3.0"/>
-  <object class="GtkAdjustment" id="adjustment_notifications">
+  <object class="GtkAdjustment" id="adjustment_associations">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_hotpluggings">
+    <property name="upper">100</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjustment_scans">
     <property name="upper">100</property>
     <property name="step_increment">1</property>
     <property name="page_increment">1</property>
@@ -137,6 +147,7 @@
                           <object class="GtkToggleButton" id="togglebutton_monitor">
                             <property name="label">gtk-media-play</property>
                             <property name="visible">True</property>
+                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="has_focus">True</property>
                             <property name="is_focus">True</property>
@@ -165,6 +176,7 @@
                             <property name="focus_on_click">False</property>
                             <property name="can_default">True</property>
                             <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">associate</property>
                             <property name="relief">half</property>
                             <property name="use_stock">True</property>
                             <signal name="toggled" handler="togglebutton_connect_toggled_cb" swapped="no"/>
@@ -224,32 +236,20 @@
                     <property name="xalign">0</property>
                     <property name="yalign">0</property>
                     <child>
-                      <object class="GtkTable" id="table">
+                      <object class="GtkTable" id="table_notifications">
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <property name="halign">start</property>
                         <property name="valign">start</property>
+                        <property name="n_rows">3</property>
                         <property name="n_columns">2</property>
                         <child>
-                          <object class="GtkLabel" id="label_notifications">
+                          <object class="GtkSpinButton" id="spinbutton_scans">
                             <property name="visible">True</property>
                             <property name="sensitive">False</property>
                             <property name="can_focus">False</property>
-                            <property name="halign">center</property>
-                            <property name="label" translatable="yes">notifications</property>
-                            <property name="track_visited_links">False</property>
-                          </object>
-                          <packing>
-                            <property name="x_options"/>
-                            <property name="x_padding">3</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkSpinButton" id="spinbutton_notifications">
-                            <property name="visible">True</property>
-                            <property name="sensitive">False</property>
-                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">completed scans</property>
                             <property name="editable">False</property>
                             <property name="has_frame">False</property>
                             <property name="xalign">1</property>
@@ -259,12 +259,113 @@
                             <property name="primary_icon_sensitive">False</property>
                             <property name="secondary_icon_sensitive">False</property>
                             <property name="input_purpose">number</property>
-                            <property name="adjustment">adjustment_notifications</property>
+                            <property name="adjustment">adjustment_scans</property>
                             <property name="numeric">True</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
                             <property name="right_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label_scans">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">completed scans</property>
+                            <property name="halign">center</property>
+                            <property name="label" translatable="yes">scans</property>
+                            <property name="track_visited_links">False</property>
+                          </object>
+                          <packing>
+                            <property name="x_options"/>
+                            <property name="x_padding">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label_associations">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">associations started/ended</property>
+                            <property name="halign">center</property>
+                            <property name="label" translatable="yes">associations</property>
+                            <property name="track_visited_links">False</property>
+                          </object>
+                          <packing>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                            <property name="x_options"/>
+                            <property name="x_padding">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSpinButton" id="spinbutton_associations">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_text" translatable="yes">associations started/ended</property>
+                            <property name="editable">False</property>
+                            <property name="has_frame">False</property>
+                            <property name="text" translatable="yes">0</property>
+                            <property name="xalign">1</property>
+                            <property name="caps_lock_warning">False</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">False</property>
+                            <property name="secondary_icon_sensitive">False</property>
+                            <property name="input_purpose">number</property>
+                            <property name="adjustment">adjustment_associations</property>
+                            <property name="numeric">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkSpinButton" id="spinbutton_hotpluggings">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_text" translatable="yes">interfaces hotplugged/unplugged</property>
+                            <property name="editable">False</property>
+                            <property name="has_frame">False</property>
+                            <property name="text" translatable="yes">0</property>
+                            <property name="xalign">1</property>
+                            <property name="caps_lock_warning">False</property>
+                            <property name="primary_icon_activatable">False</property>
+                            <property name="secondary_icon_activatable">False</property>
+                            <property name="primary_icon_sensitive">False</property>
+                            <property name="secondary_icon_sensitive">False</property>
+                            <property name="input_purpose">number</property>
+                            <property name="adjustment">adjustment_hotpluggings</property>
+                            <property name="numeric">True</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label_hotpluggings">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">False</property>
+                            <property name="tooltip_text" translatable="yes">interfaces hotplugged/unplugged</property>
+                            <property name="halign">center</property>
+                            <property name="label" translatable="yes">hotpluggings</property>
+                            <property name="track_visited_links">False</property>
+                          </object>
+                          <packing>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                            <property name="x_options"/>
+                            <property name="x_padding">3</property>
                           </packing>
                         </child>
                       </object>
@@ -324,6 +425,7 @@
                                 <child>
                                   <object class="GtkComboBox" id="combobox_interface">
                                     <property name="visible">True</property>
+                                    <property name="sensitive">False</property>
                                     <property name="can_focus">True</property>
                                     <property name="focus_on_click">False</property>
                                     <property name="can_default">True</property>
@@ -342,6 +444,7 @@
                                 <child>
                                   <object class="GtkComboBox" id="combobox_ssid">
                                     <property name="visible">True</property>
+                                    <property name="sensitive">False</property>
                                     <property name="can_focus">True</property>
                                     <property name="focus_on_click">False</property>
                                     <property name="can_default">True</property>
@@ -452,14 +555,12 @@
                     <property name="vadjustment">adjustment_scrolledwindow_v</property>
                     <child>
                       <object class="GtkTextView" id="textview_log">
-                        <property name="width_request">600</property>
-                        <property name="height_request">300</property>
+                        <property name="width_request">640</property>
+                        <property name="height_request">480</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <property name="tooltip_text" translatable="yes">log</property>
-                        <property name="hexpand">True</property>
-                        <property name="vexpand">True</property>
                         <property name="editable">False</property>
                         <property name="wrap_mode">word</property>
                         <property name="cursor_visible">False</property>

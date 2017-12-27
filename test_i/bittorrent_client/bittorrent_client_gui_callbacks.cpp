@@ -26,10 +26,10 @@
 #include "ace/OS.h"
 #include "ace/Synch.h"
 
-#include "common_ui_common.h"
-#include "common_ui_defines.h"
+#include "common_ui_gtk_common.h"
+#include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_manager_common.h"
-#include "common_ui_tools.h"
+#include "common_ui_gtk_tools.h"
 
 #include "net_macros.h"
 
@@ -99,11 +99,11 @@ session_handler_cb (void* arg_in)
                                              ACE_TEXT_ALWAYS_CHAR (BITTORRENT_CLIENT_GUI_GTK_STATUSBAR)));
     ACE_ASSERT (statusbar_p);
     //string_p =
-    //  Common_UI_Tools::Locale2UTF8 ((*data_p->phonebookIterator).second.hostName);
+    //  Common_UI_GTK_Tools::Locale2UTF8 ((*data_p->phonebookIterator).second.hostName);
     //if (!string_p)
     //{
     //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"): \"%m\", returning\n"),
+    //              ACE_TEXT ("failed to Common_UI_GTK_Tools::Locale2UTF8(\"%s\"): \"%m\", returning\n"),
     //              ACE_TEXT ((*data_p->phonebookIterator).second.hostName.c_str ())));
 
     //  // clean up
@@ -1066,13 +1066,13 @@ button_connection_close_clicked_cb (GtkWidget* widget_in,
   // convert UTF8 to locale
 //   channel_string = g_value_get_string(&active_value);
   std::string connection_string =
-    Common_UI_Tools::UTF8ToLocale (connection_value,
-                                   g_utf8_strlen (connection_value, -1));
+    Common_UI_GTK_Tools::UTF8ToLocale (connection_value,
+                                       g_utf8_strlen (connection_value, -1));
   g_free (connection_value);
   if (connection_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_UI_Tools::UTF8ToLocale(\"%s\"), returning\n"),
+                ACE_TEXT ("failed to Common_UI_GTK_Tools::UTF8ToLocale(\"%s\"), returning\n"),
                 connection_value));
     return;
   } // end IF
@@ -1126,13 +1126,13 @@ combobox_connections_changed_cb (GtkWidget* widget_in,
   // convert UTF8 to locale
 //   channel_string = g_value_get_string(&active_value);
   std::string connection_string =
-    Common_UI_Tools::UTF8ToLocale (connection_value,
+    Common_UI_GTK_Tools::UTF8ToLocale (connection_value,
                                    g_utf8_strlen (connection_value, -1));
   g_free (connection_value);
   if (connection_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_UI_Tools::UTF8ToLocale(\"%s\"), returning\n"),
+                ACE_TEXT ("failed to Common_UI_GTK_Tools::UTF8ToLocale(\"%s\"), returning\n"),
                 connection_value));
     return;
   } // end IF

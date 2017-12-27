@@ -157,7 +157,7 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
     } // end IF
 
     // step4: stop accepting connections, abort open connections
-    iinetwlanmonitor_p->stop (true,
+    iinetwlanmonitor_p->stop (false, // wait ?
                               true);
 
 //    // step1: stop GTK event processing ?

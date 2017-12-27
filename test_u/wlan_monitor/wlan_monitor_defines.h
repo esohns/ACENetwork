@@ -21,6 +21,7 @@
 #ifndef WLAN_MONITOR_DEFINES_H
 #define WLAN_MONITOR_DEFINES_H
 
+// --- gtk ---
 #define WLAN_MONITOR_UI_DEFINITION_FILE                   "wlan_monitor.glade"
 
 #define WLAN_MONITOR_GTK_ABOUTDIALOG_NAME                 "aboutdialog"
@@ -34,11 +35,15 @@
 #define WLAN_MONITOR_GTK_LISTSTORE_INTERFACE_NAME         "liststore_interface"
 #define WLAN_MONITOR_GTK_LISTSTORE_SSID_NAME              "liststore_ssid"
 #define WLAN_MONITOR_GTK_PROGRESSBAR_NAME                 "progressbar"
-#define WLAN_MONITOR_GTK_SPINBUTTON_NOTIFICATIONS_NAME    "spinbutton_notifications"
+#define WLAN_MONITOR_GTK_SPINBUTTON_ASSOCIATIONS_NAME     "spinbutton_associations"
+#define WLAN_MONITOR_GTK_SPINBUTTON_HOTPLUGGINGS_NAME     "spinbutton_hotpluggings"
+#define WLAN_MONITOR_GTK_SPINBUTTON_SCANS_NAME            "spinbutton_scans"
 #define WLAN_MONITOR_GTK_SPINNER_NAME                     "spinner"
 #define WLAN_MONITOR_GTK_TEXTVIEW_LOG_NAME                "textview_log"
+#define WLAN_MONITOR_GTK_TOGGLEBUTTON_CONNECT_NAME        "togglebutton_connect"
 #define WLAN_MONITOR_GTK_TOGGLEBUTTON_MONITOR_NAME        "togglebutton_monitor"
 
+// fonts
 #define WLAN_MONITOR_GTK_PANGO_LOG_FONT_DESCRIPTION       "Monospace 8"
 #define WLAN_MONITOR_GTK_PANGO_LOG_COLOR_BASE             "#FFFFFF" // white
 #define WLAN_MONITOR_GTK_PANGO_LOG_COLOR_TEXT             "#000000" // black

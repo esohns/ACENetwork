@@ -35,6 +35,7 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
+#include "net_common.h"
 #include "net_packet_headers.h"
 
 //#include "net_wlan_exports.h"
@@ -47,11 +48,11 @@ class Net_WLAN_Tools
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   static std::string associatedSSID (HANDLE,   // WLAN API client handle
                                      REFGUID); // interface identifier
-  static Net_WLAN_SSIDs_t getSSIDs (HANDLE,   // WLAN API client handle
-                                    REFGUID); // interface identifier
   static struct ether_addr associatedBSSID (HANDLE,   // WLAN API client handle
                                             REFGUID); // interface identifier
-
+  static Net_InterfaceIdentifiers_t getInterfaces (HANDLE, // WLAN API client handle
+  static Net_WLAN_SSIDs_t getSSIDs (HANDLE,   // WLAN API client handle
+                                    REFGUID); // interface identifier
   static bool hasSSID (HANDLE,              // WLAN API client handle
                        REFGUID,             // interface identifier
                        const std::string&); // SSID
@@ -67,6 +68,8 @@ class Net_WLAN_Tools
   static bool associate (HANDLE,              // WLAN API client handle
                          REFGUID,             // interface identifier
                          const std::string&); // (E)SSID
+  static void disassociate (HANDLE,   // WLAN API client handle
+                            REFGUID); // interface identifier
   static void scan (HANDLE,              // WLAN API client handle
                     REFGUID,             // interface identifier
                     const std::string&); // ESSID (if any)
@@ -75,15 +78,16 @@ class Net_WLAN_Tools
                                      ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
   //  static std::string associatedSSID (struct DBusConnection*, // DBus connection handle
 //                                     const std::string&);    // interface identifier
-  static Net_WLAN_SSIDs_t getSSIDs (const std::string&, // interface identifier
-                                    ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
   static struct ether_addr associatedBSSID (const std::string&, // interface identifier
                                             ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
-
+  static Net_InterfaceIdentifiers_t getInterfaces (int = AF_UNSPEC, // address family {default: any; use AF_MAX for any IP}
+                                                   int = 0);        // flag(s) (e.g. IFF_UP; may be ORed)
+  static Net_WLAN_SSIDs_t getSSIDs (const std::string&, // interface identifier
+                                    ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
   static bool hasSSID (const std::string&,  // interface identifier
                        const std::string&); // SSID
-  // *TODO*: merely tests SIOCGIWNAME
-  static bool interfaceIsWLAN (const std::string&); // interface identifier
+  // *TODO*: only tests for SIOCGIWNAME ioctl
+  static bool isWireless (const std::string&); // interface identifier
 
   static bool associate (const std::string&,       // interface identifier
                          const struct ether_addr&, // AP BSSID (i.e. AP MAC address)

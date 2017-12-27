@@ -456,8 +456,7 @@ do_work (bool autoAssociate_in,
                 ACE_TEXT ("failed to initialize signal handler, aborting\n")));
     goto error;
   } // end IF
-  if (!Common_Tools::initializeSignals ((COMMON_SIGNAL_DEFAULT_DISPATCH_MODE ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                                             : COMMON_SIGNAL_DISPATCH_PROACTOR),
+  if (!Common_Tools::initializeSignals (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                         signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
@@ -545,10 +544,11 @@ do_work (bool autoAssociate_in,
                   ACE_TEXT ("failed to start WLAN monitor, aborting\n")));
       goto error;
     } // end IF
-    iwlanmonitor_p->wait (false); // wait for message queue ?
   } // end IF
   else
     gtk_manager_p->wait ();
+
+  iwlanmonitor_p->wait (false); // wait for message queue ?
 
 //  if (!useUDP_in)
 //    Common_Tools::dispatchEvents (useReactor_in,
@@ -834,8 +834,7 @@ ACE_TMAIN (int argc_in,
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
-    Common_Tools::finalizeSignals ((COMMON_SIGNAL_DEFAULT_DISPATCH_MODE ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
+    Common_Tools::finalizeSignals (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
@@ -870,8 +869,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));
 
-    Common_Tools::finalizeSignals ((COMMON_SIGNAL_DEFAULT_DISPATCH_MODE ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
+    Common_Tools::finalizeSignals (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
@@ -940,8 +938,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
-    Common_Tools::finalizeSignals ((COMMON_SIGNAL_DEFAULT_DISPATCH_MODE ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
+    Common_Tools::finalizeSignals (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
@@ -1001,8 +998,7 @@ ACE_TMAIN (int argc_in,
               ACE_TEXT (system_time_string.c_str ())));
 #endif
 
-  Common_Tools::finalizeSignals ((COMMON_SIGNAL_DEFAULT_DISPATCH_MODE ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                                      : COMMON_SIGNAL_DISPATCH_PROACTOR),
+  Common_Tools::finalizeSignals (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                  signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);

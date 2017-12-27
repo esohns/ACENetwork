@@ -45,8 +45,8 @@
 #include "common_file_tools.h"
 #include "common_tools.h"
 
-#include "common_ui_defines.h"
 #include "common_ui_gtk_builder_definition.h"
+#include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_manager_common.h"
 
 #include "stream_cachedallocatorheap.h"
@@ -524,7 +524,9 @@ do_work (bool useThreadPool_in,
 
     return;
   } // end IF
-  if (!Common_Tools::initializeSignals (signalSet_in,
+  if (!Common_Tools::initializeSignals ((CBData_in.configuration->useReactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                                             : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                        signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
                                         previousSignalActions_inout))
@@ -1276,7 +1278,9 @@ ACE_TMAIN (int argc_in,
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
-    Common_Tools::finalizeSignals (signal_set,
+    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                   signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
@@ -1353,7 +1357,9 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::getHostname(), aborting\n")));
 
-    Common_Tools::finalizeSignals (signal_set,
+    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                   signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
@@ -1459,7 +1465,9 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
-    Common_Tools::finalizeSignals (signal_set,
+    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                   signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
@@ -1518,7 +1526,9 @@ ACE_TMAIN (int argc_in,
 #endif
 
   // step10: clean up
-  Common_Tools::finalizeSignals (signal_set,
+  Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                              : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                 signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Tools::finalizeLogging ();

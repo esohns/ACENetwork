@@ -38,10 +38,10 @@
 #include "ace/Synch.h"
 #include "common_timer_manager.h"
 
-#include "common_ui_common.h"
-#include "common_ui_defines.h"
+#include "common_ui_gtk_common.h"
+#include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_manager_common.h"
-#include "common_ui_tools.h"
+#include "common_ui_gtk_tools.h"
 
 #include "net_macros.h"
 
@@ -233,7 +233,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
   gchar* text_p =
-    Common_UI_Tools::LocaleToUTF8 ((*iterator_3).second.second.URL);
+    Common_UI_GTK_Tools::localeToUTF8 ((*iterator_3).second.second.URL);
   gtk_entry_set_text (entry_p,
                       text_p);
   g_free (text_p);
@@ -260,7 +260,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   //  GTK_FILE_CHOOSER_DIALOG (file_chooser_p);
   //ACE_ASSERT (file_chooser_dialog_p);
   //GtkPlacesSidebar* places_sidebar_p = NULL;
-  //Common_UI_Tools::dump (GTK_WIDGET (file_chooser_dialog_p));
+  //Common_UI_GTK_Tools::dump (GTK_WIDGET (file_chooser_dialog_p));
   //[0].get_children ()[0].get_children ([0].get_children ()[0]
   //  vbox.get_children ()[0].hide ()
 
@@ -292,7 +292,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     //                                              file_uri.c_str ()))
     string_p = g_string_new ((*iterator_3).second.second.targetFileName.c_str ());
     filename_p = string_p->str;
-      //Common_UI_Tools::Locale2UTF8 (data_p->configuration->moduleHandlerConfiguration.targetFileName);
+      //Common_UI_GTK_Tools::Locale2UTF8 (data_p->configuration->moduleHandlerConfiguration.targetFileName);
     if (!gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_button_p),
                                         filename_p))
     {
@@ -334,7 +334,7 @@ idle_initialize_UI_cb (gpointer userData_in)
 
     string_p = g_string_new (Common_File_Tools::getTempDirectory ().c_str ());
     filename_p = string_p->str;
-      //Common_UI_Tools::Locale2UTF8 (Common_File_Tools::getTempDirectory ());
+      //Common_UI_GTK_Tools::Locale2UTF8 (Common_File_Tools::getTempDirectory ());
     if (!gtk_file_chooser_set_filename (GTK_FILE_CHOOSER (file_chooser_button_p),
                                         filename_p))
     {
@@ -422,7 +422,7 @@ idle_initialize_UI_cb (gpointer userData_in)
     //} // end ELSE
 
     // schedule asynchronous updates of the info view
-    event_source_id = g_timeout_add (COMMON_UI_GTK_WIDGET_UPDATE_INTERVAL,
+    event_source_id = g_timeout_add (COMMON_UI_GTK_UPDATE_WIDGET_INTERVAL,
                                      idle_update_info_display_cb,
                                      data_p);
     if (event_source_id > 0)
@@ -776,7 +776,7 @@ idle_update_info_display_cb (gpointer userData_in)
 //       iterator_2 != data_p->logStack.end ();
 //       iterator_2++)
 //  {
-//    string_p = Common_UI_Tools::Locale2UTF8 (*iterator_2);
+//    string_p = Common_UI_GTK_Tools::Locale2UTF8 (*iterator_2);
 //    if (!string_p)
 //    {
 //      ACE_DEBUG ((LM_ERROR,
@@ -927,7 +927,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                                          ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_ENTRY_URL_NAME)));
     ACE_ASSERT (entry_p);
     (*iterator_3).second.second.URL =
-      Common_UI_Tools::UTF8ToLocale (gtk_entry_get_text (entry_p), -1);
+      Common_UI_GTK_Tools::UTF8ToLocale (gtk_entry_get_text (entry_p), -1);
     if (!HTTP_Tools::parseURL ((*iterator_3).second.second.URL,
                                hostname_string,
                                URI_string,
@@ -1209,7 +1209,7 @@ continue_:
         //                 &data_p->progressData,
         //                 NULL);
           g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,                   // _LOW doesn't work (on Win32)
-                              COMMON_UI_GTK_PROGRESSBAR_UPDATE_INTERVAL, // ms (?)
+                              COMMON_UI_GTK_UPDATE_PROGRESSBAR_INTERVAL, // ms (?)
                               idle_update_progress_cb,
                               &data_p->progressData,
                               NULL);

@@ -38,12 +38,7 @@
 #if defined (DBUS_SUPPORT)
 #include "dbus/dbus.h"
 //#include "dbus/dbus-glib.h"
-#endif
-
-extern "C"
-{
-#include "dhcpctl/dhcpctl.h"
-}
+#endif // DBUS_SUPPORT
 
 #include "ace/Event_Handler.h"
 #endif
@@ -78,8 +73,8 @@ DBusHandlerResult
 network_wlan_dbus_default_filter_cb (struct DBusConnection*,
                                      struct DBusMessage*,
                                      void*);
-#endif
-#endif
+#endif // DBUS_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
 
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
@@ -146,6 +141,7 @@ class Net_WLAN_Monitor_T
   inline virtual const ACE_HANDLE get () const { return handle_; }
 #endif
   inline virtual bool addresses (AddressType& localSAP_out, AddressType& peerSAP_out) const { localSAP_out = localSAP_; peerSAP_out = peerSAP_; return true; }
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual bool associate (REFGUID,                  // interface identifier
 #else
@@ -154,10 +150,11 @@ class Net_WLAN_Monitor_T
 #endif
                           const std::string&);      // (E)SSID
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inline virtual void scan (REFGUID interfaceIdentifier_in) { Net_WLAN_Tools::scan (clientHandle_, interfaceIdentifier_in, ACE_TEXT_ALWAYS_CHAR ("")); }
+  virtual void scan (REFGUID); // interface identifier
 #else
-  inline virtual void scan (const std::string& interfaceIdentifier_in) { Net_WLAN_Tools::scan (interfaceIdentifier_in, ACE_TEXT_ALWAYS_CHAR (""), handle_, false); }
+  virtual void scan (const std::string&); // interface identifier
 #endif
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   inline virtual struct _GUID interfaceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->interfaceIdentifier; }
 #else
@@ -174,10 +171,8 @@ class Net_WLAN_Monitor_T
   typedef std::vector<struct _GUID> INTERFACEIDENTIFIERS_T;
   typedef std::multimap<std::string, std::pair<struct _GUID, struct ether_addr> > SSIDS_TO_INTERFACEIDENTIFIER_MAP_T;
 #else
-  typedef std::vector<std::string> INTERFACEIDENTIFIERS_T;
   typedef std::multimap<std::string, std::pair<std::string, struct ether_addr> > SSIDS_TO_INTERFACEIDENTIFIER_MAP_T;
 #endif
-  typedef INTERFACEIDENTIFIERS_T::iterator INTERFACEIDENTIFIERS_ITERATOR_T;
   typedef SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::const_iterator SSIDS_TO_INTERFACEIDENTIFIER_MAP_CONST_ITERATOR_T;
   typedef SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::iterator SSIDS_TO_INTERFACEIDENTIFIER_MAP_ITERATOR_T;
   typedef std::pair<SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::iterator, bool> SSIDS_TO_INTERFACEIDENTIFIER_MAP_RESULT_T;
@@ -194,7 +189,7 @@ class Net_WLAN_Monitor_T
   struct iw_range                                 range_;
 #endif
   ConfigurationType*                              configuration_;
-  INTERFACEIDENTIFIERS_T                          interfaceIdentifiers_;
+  Net_InterfaceIdentifiers_t                      interfaceIdentifiers_;
   bool                                            isActive_;
   bool                                            isInitialized_;
   AddressType                                     localSAP_;
@@ -287,10 +282,8 @@ class Net_WLAN_Monitor_T
 
   // implement Common_IStatistic_T
   inline virtual bool collect (Net_Statistic_t& statistic_inout) { ACE_UNUSED_ARG (statistic_inout); ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  // *TODO*: report (current) interface statistic(s)
   inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-
-  // helper functions
-  INTERFACEIDENTIFIERS_T getDevices () const;
 
   MESSAGEQUEUE_T                                  queue_;
   SSIDS_TO_INTERFACEIDENTIFIER_MAP_T              SSIDsToInterfaceIdentifier_;

@@ -29,9 +29,9 @@
 
 #include "common_file_tools.h"
 
-#include "common_ui_common.h"
-#include "common_ui_defines.h"
-#include "common_ui_tools.h"
+#include "common_ui_gtk_common.h"
+#include "common_ui_gtk_defines.h"
+#include "common_ui_gtk_tools.h"
 
 #include "net_macros.h"
 
@@ -993,11 +993,11 @@ IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
           param_iterator--;
 
           // convert text
-          gchar* string_p = Common_UI_Tools::LocaleToUTF8 (*param_iterator);
+          gchar* string_p = Common_UI_GTK_Tools::localeToUTF8 (*param_iterator);
           if (!string_p)
           {
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to Common_UI_Tools::LocaleToUTF8(\"%s\"), aborting\n"),
+                        ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"), aborting\n"),
                         ACE_TEXT ((*param_iterator).c_str ())));
 
             // clean up
@@ -1009,11 +1009,11 @@ IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
           if (record_r.parameters_.size () > 3)
           {
             param_iterator++;
-            string_2 = Common_UI_Tools::LocaleToUTF8 (*param_iterator);
+            string_2 = Common_UI_GTK_Tools::localeToUTF8 (*param_iterator);
             if (!string_2)
             {
               ACE_DEBUG ((LM_ERROR,
-                          ACE_TEXT ("failed to Common_UI_Tools::LocaleToUTF8(\"%s\"), aborting\n"),
+                          ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"), aborting\n"),
                           ACE_TEXT ((*param_iterator).c_str ())));
 
               // clean up
@@ -1022,7 +1022,7 @@ IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
 
               break;
             } // end IF
-          } // end IF
+          } // end IFs
 
           GtkTreeIter tree_iter;
           gtk_list_store_append (list_store_p,
@@ -1132,7 +1132,7 @@ IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
 
           // step1: convert text
           const gchar* string_p = nickname.c_str ();
-          //gchar* string_p = Common_UI_Tools::Locale2UTF8 (nick);
+          //gchar* string_p = Common_UI_GTK_Tools::Locale2UTF8 (nick);
           //if (!string_p)
           //{
           //  ACE_DEBUG ((LM_ERROR,
@@ -1145,7 +1145,7 @@ IRC_Client_GUI_Connection::notify (Stream_SessionId_t sessionID_in,
           //  break;
           //} // end IF
           const gchar* string_2 = real_name.c_str ();
-          //gchar* string_2 = Common_UI_Tools::Locale2UTF8 (real_name);
+          //gchar* string_2 = Common_UI_GTK_Tools::Locale2UTF8 (real_name);
           //if (!string_2)
           //{
           //  ACE_DEBUG ((LM_ERROR,

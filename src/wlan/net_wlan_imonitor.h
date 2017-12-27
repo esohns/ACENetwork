@@ -93,6 +93,16 @@ class Net_WLAN_IMonitorBase
 #endif
 {
  public:
+  // *TODO*: support monitoring multiple interfaces at the same time
+
+  // *IMPORTANT NOTE*: does not block; results are reported by callback (see:
+  //                   subscribe())
+  // *NOTE*: effectively does the following:
+  //         - disconnect from any AP and reconfigure the interface
+  //           (if any)/AP/SSID (if different)
+  //         - set the 'auto-associate' flag
+  //         - resume scanning; this will trigger association as soon as the
+  //           AP/SSID combination is detected on the given/any interface
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual bool associate (REFGUID,                  // interface identifier {GUID_NULL: any}
 #else
@@ -100,6 +110,13 @@ class Net_WLAN_IMonitorBase
                           const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
 #endif
                           const std::string&) = 0;  // (E)SSID
+  // *IMPORTANT NOTE*: does not block; results are reported by callback (see:
+  //                   subscribe())
+  // *NOTE*: effectively does the following:
+  //         - disconnect from any AP, reconfigure the interface (if any) and
+  //           reset the AP/SSID
+  //         - reset the 'auto-associate' flag
+  //         - resume scanning
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual void scan (REFGUID) = 0; // interface identifier {GUID_NULL: all}
 #else

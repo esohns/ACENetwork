@@ -69,7 +69,7 @@ struct tcphdr
 };
 #endif
 #else
-#include <netinet/tcp.h>
+#include "netinet/tcp.h"
 #endif
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -85,7 +85,7 @@ struct udphdr
 };
 #endif
 #else
-#include <netinet/udp.h>
+#include "netinet/udp.h"
 #endif
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -127,10 +127,9 @@ struct udphdr
 //};
 //#endif
 #else
-#include <netinet/ip6.h>
+#include "netinet/ip6.h"
 #endif
 
-// *IMPORTANT NOTE*: this header doesn't exist on the Windows platform...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 struct iphdr
 {
@@ -168,14 +167,11 @@ struct iphdr
 };
 #endif
 #else
-#include <netinet/ip.h>
+#include "netinet/ip.h"
 #endif
 
-// *IMPORTANT NOTE*: this header doesn't exist on the Windows platform...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-#include <netinet/in.h>
-#else
-// these protocols seem to be missing in winsock2.h...
+#if defined (ACE_WIN32)  || defined (ACE_WIN64)
+// these protocols seem to be missing in winsock2.h
 #define IPPROTO_IPIP  IPPROTO_IPV4 /* IPIP tunnels (older KA9Q tunnels use 94) */
 #define IPPROTO_EGP   8            /* Exterior Gateway Protocol                */
 #define IPPROTO_TP    29           /* SO Transport Protocol Class 4            */
@@ -186,9 +182,10 @@ struct iphdr
 #define IPPROTO_PIM   103          /* Protocol Independent Multicast           */
 #define IPPROTO_COMP  108          /* Compression Header Protocol              */
 #define IPPROTO_SCTP  132          /* Stream Control Transmission Protocol     */
+#else
+#include "netinet/in.h"
 #endif
 
-// *IMPORTANT NOTE*: this header doesn't exist on the Windows platform...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
  /*
   *      IEEE 802.3 Ethernet magic constants.  The frame sizes omit the preamble
@@ -241,7 +238,7 @@ struct ether_header
   u_short           ether_type;         /* packet type ID field */
 };
 #else
-#include <net/ethernet.h>
+#include "net/ethernet.h"
 #endif
 
 /*
@@ -452,7 +449,6 @@ struct ether_header
 #define ETH_P_ARCNET    0x001A          /* 1A for ArcNet :-)            */
 #endif
 
-// *IMPORTANT NOTE*: this header doesn't exist on the Windows platform...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 // *TODO*: FDDI LLC/SNAP/...
 struct fddi_8022_1_hdr
@@ -503,7 +499,7 @@ struct fddi_header
 
 #define FDDI_K_SNAP_HLEN 21             /* Total octets in header.       */
 #else
-#include <netinet/if_fddi.h>
+#include "netinet/if_fddi.h"
 #endif
 
 #endif

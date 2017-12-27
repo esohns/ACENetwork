@@ -46,8 +46,8 @@
 #include "common_logger.h"
 #include "common_tools.h"
 
-#include "common_ui_defines.h"
 #include "common_ui_gtk_builder_definition.h"
+#include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_manager_common.h"
 
 #include "stream_allocatorheap.h"
@@ -673,7 +673,9 @@ do_work (bool debugParser_in,
                 ACE_TEXT ("failed to initialize signal handler, returning\n")));
     goto clean;
   } // end IF
-  if (!Common_Tools::initializeSignals (signalSet_in,
+  if (!Common_Tools::initializeSignals ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                       : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                        signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
                                         previousSignalActions_inout))
@@ -694,7 +696,7 @@ do_work (bool debugParser_in,
     ACE_ASSERT (gtk_manager_p);
     gtk_manager_p->start ();
     ACE_Time_Value delay (0,
-                          COMMON_UI_GTK_INITIALIZATION_DELAY_MS * 1000);
+                          COMMON_UI_GTK_TIMEOUT_DEFAULT_INITIALIZATION * 1000);
     int result = ACE_OS::sleep (delay);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
@@ -1062,7 +1064,9 @@ ACE_TMAIN (int argc_in,
     do_print_version (std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
                                                                         ACE_DIRECTORY_SEPARATOR_CHAR))));
 
-    Common_Tools::finalizeSignals (signal_set,
+    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                   signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
@@ -1197,7 +1201,9 @@ ACE_TMAIN (int argc_in,
               ACE_TEXT (system_time_string.c_str ())));
 #endif
 
-  Common_Tools::finalizeSignals (signal_set,
+  Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                              : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                 signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Tools::finalizeLogging ();
@@ -1212,7 +1218,9 @@ ACE_TMAIN (int argc_in,
   return EXIT_SUCCESS;
 
 error:
-  Common_Tools::finalizeSignals (signal_set,
+  Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                              : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                 signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Tools::finalizeLogging ();

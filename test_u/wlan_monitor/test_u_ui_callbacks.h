@@ -34,7 +34,7 @@ void load_ssids (const std::string&,
 #endif
                  Net_WLAN_SSIDs_t&,
                  GtkListStore*);
-bool load_wlan_interfaces (GtkListStore*);
+void load_wlan_interfaces (GtkListStore*);
 
 //------------------------------------------------------------------------------
 

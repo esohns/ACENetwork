@@ -109,14 +109,14 @@ Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("\"%s\": connected to SSID %s: %s <---> %s\n"),
+              ACE_TEXT ("\"%s\": connected to access point (SSID: %s): %s <---> %s\n"),
               ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
               ACE_TEXT (SSID_in.c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("\"%s\": connected to SSID %s: %s <---> %s\n"),
+              ACE_TEXT ("\"%s\": connected to access point (SSID: %s): %s <---> %s\n"),
               ACE_TEXT (interfaceIdentifier_in.c_str ()),
               ACE_TEXT (SSID_in.c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),

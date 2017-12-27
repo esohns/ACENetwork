@@ -222,8 +222,12 @@ endif ()
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)
+add_dependencies (${EXECUTABLE} CommonTimer)
+add_dependencies (${EXECUTABLE} CommonUI)
+
 add_dependencies (${EXECUTABLE} ACEStream)
 add_dependencies (${EXECUTABLE} ACEStream_Decoder)
+
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_BitTorrent)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
@@ -278,6 +282,7 @@ if (UNIX)
   include_directories (${PKG_GTK2_INCLUDE_DIRS})
  endif ()
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui/gtk)
 elseif (WIN32)
  # *TODO*: repair pkgconfig support
 # gtk
@@ -291,6 +296,7 @@ elseif (WIN32)
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtkglarea)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui/gtk)
 endif ()
 
 ########### next target ###############
@@ -343,7 +349,10 @@ endif ()
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE_GUI} Common)
 add_dependencies (${EXECUTABLE_GUI} CommonUI)
+add_dependencies (${EXECUTABLE_GUI} CommonUI_GTK)
+
 add_dependencies (${EXECUTABLE_GUI} ACEStream)
+
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_BitTorrent)
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_HTTP)
@@ -379,9 +388,11 @@ if (WIN32)
  # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE_GUI} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
-target_link_libraries (${EXECUTABLE_GUI} CommonUI)
+#target_link_libraries (${EXECUTABLE_GUI} CommonUI)
+target_link_libraries (${EXECUTABLE_GUI} CommonUI_GTK)
 
 target_link_libraries (${EXECUTABLE_GUI} ACEStream)
+
 target_link_libraries (${EXECUTABLE_GUI} ACENetwork)
 target_link_libraries (${EXECUTABLE_GUI} ACENetwork_Protocol_BitTorrent)
 target_link_libraries (${EXECUTABLE_GUI} ACENetwork_Protocol_HTTP)

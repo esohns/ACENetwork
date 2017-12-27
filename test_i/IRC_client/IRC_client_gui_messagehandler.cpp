@@ -26,7 +26,7 @@
 
 #include "common_file_tools.h"
 
-#include "common_ui_tools.h"
+#include "common_ui_gtk_tools.h"
 
 #include "net_macros.h"
 
@@ -39,7 +39,7 @@
 #include "IRC_client_gui_connection.h"
 #include "IRC_client_gui_defines.h"
 
-IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState* GTKState_in,
+IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (struct Common_UI_GTKState* GTKState_in,
                                                               IRC_Client_GUI_Connection* connection_in,
                                                               const std::string& timeStamp_in)
  : CBData_ ()
@@ -101,7 +101,7 @@ IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState
   gdk_threads_leave ();
 }
 
-IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (Common_UI_GTKState* GTKState_in,
+IRC_Client_GUI_MessageHandler::IRC_Client_GUI_MessageHandler (struct Common_UI_GTKState* GTKState_in,
                                                               IRC_Client_GUI_Connection* connection_in,
                                                               IRC_IControl* controller_in,
                                                               const std::string& id_in,
@@ -588,11 +588,11 @@ IRC_Client_GUI_MessageHandler::update ()
 
       //// step1: convert text (GTK uses UTF-8 to represent strings)
       //string_p =
-      //  Common_UI_Tools::Locale2UTF8 (message_text);
+      //  Common_UI_GTK_Tools::Locale2UTF8 (message_text);
       //if (!string_p)
       //{
       //  ACE_DEBUG ((LM_ERROR,
-      //              ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"), returning\n"),
+      //              ACE_TEXT ("failed to Common_UI_GTK_Tools::Locale2UTF8(\"%s\"), returning\n"),
       //              ACE_TEXT (message_text.c_str ())));
       //  return;
       //} // end IF
@@ -892,11 +892,11 @@ IRC_Client_GUI_MessageHandler::add (const std::string& nickname_in,
 
   //// step1: convert text
   const gchar* string_p = nickname_in.c_str ();
-  //gchar* string_p = Common_UI_Tools::Locale2UTF8 (nickname_in);
+  //gchar* string_p = Common_UI_GTK_Tools::Locale2UTF8 (nickname_in);
   //if (!string_p)
   //{
   //  ACE_DEBUG ((LM_ERROR,
-  //              ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"): \"%m\", returning\n"),
+  //              ACE_TEXT ("failed to Common_UI_GTK_Tools::Locale2UTF8(\"%s\"): \"%m\", returning\n"),
   //              ACE_TEXT (nickname_in.c_str ())));
 
   //  // clean up
@@ -961,11 +961,11 @@ IRC_Client_GUI_MessageHandler::remove (const std::string& nick_in,
   ACE_ASSERT (list_store_p);
 
   // step1: convert text
-  gchar* string_p = Common_UI_Tools::LocaleToUTF8 (nick_in);
+  gchar* string_p = Common_UI_GTK_Tools::localeToUTF8 (nick_in);
   if (!string_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_UI_Tools::LocaleToUTF8(\"%s\"): \"%m\", returning\n"),
+                ACE_TEXT ("failed to Common_UI_GTK_Tools::localeToUTF8(\"%s\"): \"%m\", returning\n"),
                 ACE_TEXT (nick_in.c_str ())));
 
     // clean up
@@ -1083,11 +1083,11 @@ IRC_Client_GUI_MessageHandler::members (const string_list_t& list_in,
   {
     // step1: convert text
     string_p = (*iterator).c_str ();
-    //string_p = Common_UI_Tools::Locale2UTF8 (*iterator);
+    //string_p = Common_UI_GTK_Tools::Locale2UTF8 (*iterator);
     //if (!string_p)
     //{
     //  ACE_DEBUG ((LM_ERROR,
-    //              ACE_TEXT ("failed to Common_UI_Tools::Locale2UTF8(\"%s\"): \"%m\", returning\n"),
+    //              ACE_TEXT ("failed to Common_UI_GTK_Tools::Locale2UTF8(\"%s\"): \"%m\", returning\n"),
     //              ACE_TEXT ((*iterator).c_str ())));
 
     //  // clean up

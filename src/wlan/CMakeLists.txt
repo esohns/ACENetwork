@@ -1,42 +1,56 @@
+include (CMakeDependentOption)
+
 if (UNIX)
- option (DBUS_SUPPORT "enable DBus support"
+ # *NOTE*: these are mutually exclusive
+ option (DHCLIENT_SUPPORT "enable ISC dhclient support (default)"
          ON)
+# option (DBUS_SUPPORT "enable DBus support"
+#         OFF)
+ # *NOTE*: implies DHCLIENT_SUPPORT off
+ CMAKE_DEPENDENT_OPTION (DBUS_SUPPORT "enable DBus support" OFF
+                         "NOT DHCLIENT_SUPPORT" OFF)
 endif ()
 
-#set (JSON_LIB_FILE libjson-c.so.3)
-#set (ISC_LIB_FILE libisc.a)
-#set (DHCPCTL_LIB_FILE libdhcpctl.a)
-#if (UNIX)
-#  find_library (JSON_LIBRARY ${JSON_LIB_FILE}
-#                HINTS /usr/lib
-#                PATH_SUFFIXES x86_64-linux-gnu
-#                DOC "searching for ${JSON_LIB_FILE} (system paths)")
-#  find_library (ISC_LIBRARY ${ISC_LIB_FILE}
-#                HINTS /usr/lib
-#                PATH_SUFFIXES x86_64-linux-gnu
-#                DOC "searching for ${ISC_LIB_FILE} (system paths)")
-#  find_library (DHCPCTL_LIBRARY ${DHCPCTL_LIB_FILE}
-#               HINTS /usr/lib
-#               PATH_SUFFIXES x86_64-linux-gnu
-#               DOC "searching for ${DHCPCTL_LIB_FILE} (system paths)")
-#endif ()
-#if (UNIX)
-# if (NOT JSON_LIBRARY)
-#  message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
-# else ()
-#  message (STATUS "Found json library \"${JSON_LIBRARY}\"")
-# endif ()
-# if (NOT ISC_LIBRARY)
-#  message (FATAL_ERROR "could not find ${ISC_LIB_FILE}, aborting")
-# else ()
-#  message (STATUS "Found isc library \"${ISC_LIBRARY}\"")
-# endif ()
-# if (NOT DHCPCTL_LIBRARY)
-#  message (FATAL_ERROR "could not find ${DHCPCTL_LIB_FILE}, aborting")
-# else ()
-#  message (STATUS "Found dhcpctl library \"${DHCPCTL_LIBRARY}\"")
-# endif ()
-#endif ()
+if (UNIX)
+ if (DHCLIENT_SUPPORT)
+  set (JSON_LIB_FILE libjson-c.so.3)
+  find_library (JSON_LIBRARY ${JSON_LIB_FILE}
+                HINTS /usr/lib
+                PATH_SUFFIXES x86_64-linux-gnu
+                DOC "searching for ${JSON_LIB_FILE} (system paths)")
+  if (NOT JSON_LIBRARY)
+   message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
+  else ()
+   message (STATUS "Found json library \"${JSON_LIBRARY}\"")
+  endif ()
+
+  set (ISC_LIB_FILE libisc.a)
+  find_library (ISC_LIBRARY ${ISC_LIB_FILE}
+                HINTS /usr/lib
+                PATH_SUFFIXES x86_64-linux-gnu
+                DOC "searching for ${ISC_LIB_FILE} (system paths)")
+  if (NOT ISC_LIBRARY)
+   message (FATAL_ERROR "could not find ${ISC_LIB_FILE}, aborting")
+  else ()
+   message (STATUS "Found isc library \"${ISC_LIBRARY}\"")
+  endif ()
+
+  set (DHCPCTL_LIB_FILE libdhcpctl.a)
+  find_library (DHCPCTL_LIBRARY ${DHCPCTL_LIB_FILE}
+               HINTS /usr/lib
+               PATH_SUFFIXES x86_64-linux-gnu
+               DOC "searching for ${DHCPCTL_LIB_FILE} (system paths)")
+  if (NOT DHCPCTL_LIBRARY)
+   message (FATAL_ERROR "could not find ${DHCPCTL_LIB_FILE}, aborting")
+  else ()
+   message (STATUS "Found dhcpctl library \"${DHCPCTL_LIBRARY}\"")
+  endif ()
+  add_definitions (-DDHCLIENT_SUPPORT)
+ endif ()
+ if (DBUS_SUPPORT)
+  add_definitions (-DDBUS_SUPPORT)
+ endif ()
+endif ()
 
 include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
@@ -66,8 +80,10 @@ if (DBUS_SUPPORT)
 endif ()
 
 if (UNIX)
+ if (DHCLIENT_SUPPORT)
   include_directories (/usr/include/bind-export)
-  if (DBUS_SUPPORT)
+ endif ()
+ if (DBUS_SUPPORT)
   include_directories (${PKG_DBUS_INCLUDE_DIRS})
   include_directories (${PKG_NETWORKMANAGER_INCLUDE_DIRS})
 

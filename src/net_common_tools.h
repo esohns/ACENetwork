@@ -24,6 +24,8 @@
 #include <limits>
 #include <string>
 
+#include "net_packet_headers.h"
+
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
@@ -85,6 +87,13 @@ class Net_Common_Tools
   static std::string LinkLayerAddressToString (const unsigned char* const, // pointer to physical address data (i.e. START of ethernet header address field !)
                                                enum Net_LinkLayerType = NET_LINKLAYER_802_3);
   static std::string LinkLayerTypeToString (enum Net_LinkLayerType);
+
+  // *** ethernet ***
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  inline static bool isAny (const struct ether_addr& address_in) { for (int i = 0; i < ETH_ALEN; ++i) if (address_in.ether_addr_octet[i]) return false; return true; }
+  inline static bool isBroadcast (const struct ether_addr& address_in) { for (int i = 0; i < ETH_ALEN; ++i) if (address_in.ether_addr_octet[i] != 0xFF) return false; return true; }
+#endif
   static std::string EthernetProtocolTypeIdToString (unsigned short); // ethernet frame type (in network (== big-endian) byte order)
 
   // *WARNING*: ensure that the array argument can hold at least 6 bytes !

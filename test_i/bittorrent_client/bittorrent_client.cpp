@@ -658,7 +658,9 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to BitTorrent_Client_SignalHandler::initialize(), returning\n")));
     goto clean;
   } // end IF
-  if (!Common_Tools::initializeSignals (signalSet_in,
+  if (!Common_Tools::initializeSignals ((configuration_in.useReactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                                     : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                        signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
                                         previousSignalActions_inout))
@@ -1011,7 +1013,9 @@ ACE_TMAIN (int argc_in,
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
-    Common_Tools::finalizeSignals (signal_set,
+    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                   signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
@@ -1069,7 +1073,9 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
-    Common_Tools::finalizeSignals (signal_set,
+    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                   signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
     Common_Tools::finalizeLogging ();
@@ -1128,7 +1134,9 @@ ACE_TMAIN (int argc_in,
 #endif
 
   // step9: clean up
-  Common_Tools::finalizeSignals (signal_set,
+  Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                              : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                 signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
   Common_Tools::finalizeLogging ();
