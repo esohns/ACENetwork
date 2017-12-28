@@ -86,9 +86,9 @@ do
  i=$i+1
 done
 
-SUB_DIRS="wlan_monitor"
+SUB_DIRS="WLAN_monitor"
 #declare -a LIBS=("libACE.so")
-BINS="wlan_monitor"
+BINS="WLAN_monitor"
 i=0
 for DIR in $SUB_DIRS
 do

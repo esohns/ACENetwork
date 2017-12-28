@@ -291,7 +291,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ########### next target ###############
-set (wlan_monitor_SRCS
+set (WLAN_monitor_SRCS
      stdafx.cpp
      stdafx.h
      test_u_eventhandler.cpp
@@ -305,10 +305,10 @@ set (wlan_monitor_SRCS
      wlan_monitor_configuration.h
      wlan_monitor_defines.h)
 
-set (EXECUTABLE wlan_monitor)
+set (EXECUTABLE WLAN_monitor)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
-                ${wlan_monitor_SRCS}
+                ${WLAN_monitor_SRCS}
                 etc/wlan_monitor.glade)
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
 if (UNIX)
@@ -417,7 +417,7 @@ install (FILES etc/file_server.glade
 
 if (UNIX)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-f /mnt/win_d/temp/H264_720p.ts -g -l -p 5555 -t"
+                         ARGS "-a -l -t"
 #                         FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug
@@ -426,11 +426,11 @@ if (UNIX)
                                               ${PROJECT_SOURCE_DIR}/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
                                               /usr/local/lib
-                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/file_server
+                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/wlan_monitor
                          ENVIRONMENT foo=bar)
 elseif (WIN32)
  create_target_launcher (${EXECUTABLE}
-                         ARGS "-c -f D:/temp/H264_720p.ts -g -l -p 5555 -t"
+                         ARGS "-a -l -t"
 #                        FORWARD_ARGS
                          RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
                                               ${PROJECT_SOURCE_DIR}/../openssl/bin
@@ -445,6 +445,6 @@ elseif (WIN32)
                                               ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/Debug
                                               ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/modules/dec/Debug
                                               ${PROJECT_SOURCE_DIR}/cmake/src/Debug
-                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/file_server
+                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/wlan_monitor
                          ENVIRONMENT foo=bar)
 endif ()

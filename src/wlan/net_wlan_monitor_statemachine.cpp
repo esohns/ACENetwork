@@ -207,6 +207,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_INVALID:
         // good case
         case NET_WLAN_MONITOR_STATE_INITIAL:
+        case NET_WLAN_MONITOR_STATE_SCAN:
         case NET_WLAN_MONITOR_STATE_DISCONNECT:
         {
           inherited::change (newState_in);

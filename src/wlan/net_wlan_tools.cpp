@@ -449,10 +449,12 @@ Net_WLAN_Tools::getInterfaces (int addressFamily_in,
        ifaddrs_2;
        ifaddrs_2 = ifaddrs_2->ifa_next)
   {
+    if (!Net_WLAN_Tools::isWireless (ifaddrs_2->ifa_name))
+      continue;
     if (unlikely (addressFamily_in != AF_UNSPEC))
-    {
-      if (!ifaddrs_2->ifa_addr)
-        continue;
+    { ACE_ASSERT (ifaddrs_2->ifa_addr);
+//      if (!ifaddrs_2->ifa_addr)
+//        continue;
       if (addressFamily_in == AF_MAX)
       {
         if ((ifaddrs_2->ifa_addr->sa_family != AF_INET) &&
@@ -462,10 +464,13 @@ Net_WLAN_Tools::getInterfaces (int addressFamily_in,
       else if (ifaddrs_2->ifa_addr->sa_family != addressFamily_in)
         continue;
     } // end IF
+//    else
+//    { ACE_ASSERT (ifaddrs_2->ifa_addr);
+//      if (unlikely (ifaddrs_2->ifa_addr->sa_family == AF_PACKET))
+//      continue;
+//    } // end IF
     if (unlikely (flags_in &&
                   !(ifaddrs_2->ifa_flags & flags_in)))
-      continue;
-    if (!Net_WLAN_Tools::isWireless (ifaddrs_2->ifa_name))
       continue;
 
     result.push_back (ifaddrs_2->ifa_name);
@@ -473,6 +478,13 @@ Net_WLAN_Tools::getInterfaces (int addressFamily_in,
 
   // clean up
   ::freeifaddrs (ifaddrs_p);
+
+  // *NOTE*: there may be duplicate entries (e.g. one for each address family)
+  //         --> remove duplicates
+  std::sort (result.begin (), result.end ());
+  Net_InterfacesIdentifiersIterator_t iterator =
+      std::unique (result.begin (), result.end ());
+  result.erase (iterator, result.end ());
 #else
   ACE_ASSERT (false);
   ACE_NOTSUP_RETURN (false);

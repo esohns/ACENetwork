@@ -153,7 +153,7 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 #message (STATUS "CMAKE_CURRENT_BINARY_DIR: \"${CMAKE_CURRENT_BINARY_DIR}/../..\"")
 
 ############## next target ################
-set (${PROJECT_NAME}_Protocol_EXE_SRCS
+set (HTTP_decoder_SRCS
      stdafx.cpp
      stdafx.h
      test_u_common_modules.h
@@ -175,10 +175,10 @@ set (${PROJECT_NAME}_Protocol_EXE_SRCS
 #  test_u_template_instantiations.cpp
 
 #string (TOLOWER "${PROJECT_NAME}_Protocol" EXECUTABLE)
-set (EXECUTABLE httpdecoder)
+set (EXECUTABLE HTTP_decoder)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
-                ${ACENetwork_Protocol_EXE_SRCS})
+                ${HTTP_decoder_SRCS})
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
 if (WIN32 AND NOT ${BUILD_TEST_U})
  set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)

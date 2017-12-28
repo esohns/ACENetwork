@@ -541,9 +541,10 @@ idle_initialize_ui_cb (gpointer userData_in)
       return G_SOURCE_REMOVE;
     } // end ELSE
       // schedule asynchronous updates of the info view
-    event_source_id = g_timeout_add (COMMON_UI_GTK_UPDATE_WIDGET_INTERVAL,
-                                     idle_update_info_display_cb,
-                                     userData_in);
+    event_source_id =
+        g_timeout_add (COMMON_UI_GTK_INTERVAL_DEFAULT_WIDGET_REFRESH,
+                       idle_update_info_display_cb,
+                       userData_in);
     if (event_source_id > 0)
       data_p->eventSourceIds.insert (event_source_id);
     else
@@ -664,9 +665,10 @@ idle_initialize_ui_cb (gpointer userData_in)
       return G_SOURCE_REMOVE;
     } // end ELSE
     // schedule asynchronous updates of the info view
-    event_source_id = g_timeout_add (COMMON_UI_GTK_UPDATE_WIDGET_INTERVAL,
-                                     idle_update_info_display_cb,
-                                     data_p);
+    event_source_id =
+        g_timeout_add (COMMON_UI_GTK_INTERVAL_DEFAULT_WIDGET_REFRESH,
+                       idle_update_info_display_cb,
+                       data_p);
     if (event_source_id > 0)
       data_p->eventSourceIds.insert (event_source_id);
     else

@@ -476,6 +476,7 @@ continue_:
   // *IMPORTANT NOTE*: fire-and-forget API (message_data_container_p)
   //  message_p->initialize (message_data_container_p,
   message_p->initialize (DHCP_record,
+                         message_p->id (),
                          NULL);
 
   typename ConnectorType::ISTREAM_CONNECTION_T* istream_connection_p =

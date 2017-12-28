@@ -615,9 +615,10 @@ idle_initialize_ui_cb (gpointer userData_in)
       return G_SOURCE_REMOVE;
     } // end ELSE
     // schedule asynchronous updates of the info view
-    event_source_id = g_timeout_add (COMMON_UI_GTK_UPDATE_WIDGET_INTERVAL,
-                                     idle_update_info_display_cb,
-                                     data_p);
+    event_source_id =
+        g_timeout_add (COMMON_UI_GTK_INTERVAL_DEFAULT_WIDGET_REFRESH,
+                       idle_update_info_display_cb,
+                       data_p);
     if (event_source_id > 0)
       data_p->eventSourceIds.insert (event_source_id);
     else
@@ -828,8 +829,8 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
           //                 idle_update_progress_cb,
           //                 &data_p->progressData,
           //                 NULL);
-          g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,                   // _LOW doesn't work (on Win32)
-                              COMMON_UI_GTK_UPDATE_PROGRESSBAR_INTERVAL, // ms (?)
+          g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,                            // _LOW doesn't work (on Win32)
+                              COMMON_UI_GTK_INTERVAL_DEFAULT_PROGRESSBAR_REFRESH, // ms (?)
                               idle_update_progress_cb,
                               userData_in,
                               NULL);
@@ -1278,7 +1279,10 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   guint index_i = std::numeric_limits<unsigned int>::max ();
   bool select_ssid = false;
   bool can_connect = true;
-  GtkToggleButton* toggle_button_p = NULL;
+  GtkToggleButton* toggle_button_p =
+      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                  ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_TOGGLEBUTTON_CONNECT_NAME)));
+  ACE_ASSERT (toggle_button_p);
   // retrieve the active entry
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
     if (!gtk_combo_box_get_active_iter (comboBox_in,
@@ -1327,10 +1331,6 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
       Common_UI_GTK_Tools::UTF8ToLocale (g_value_get_string (&value),
                                          -1);
   g_value_reset (&value);
-  toggle_button_p =
-      GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                  ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_TOGGLEBUTTON_CONNECT_NAME)));
-  ACE_ASSERT (toggle_button_p);
   if (!ACE_OS::strcmp (selected_essid_string.c_str (),
                        data_p->configuration->WLANMonitorConfiguration.SSID.c_str ()))
   {

@@ -1129,6 +1129,7 @@ allocate:
   //         - 'vendor class identifier' (60)
   //         - 'client identifier'       (61)
   message_p->initialize (DHCP_record,
+                         message_p->id (),
                          NULL);
 
   Test_U_IConnectionManager_t* iconnection_manager_p =
@@ -1322,6 +1323,7 @@ allocate:
   //         - 'vendor class identifier' (60)
   //         - 'client identifier'       (61)
   message_p->initialize (DHCP_record,
+                         message_p->id (),
                          NULL);
 
   Test_U_IStreamConnection_t* istream_connection_p =
@@ -1437,6 +1439,7 @@ allocate:
   //         - 'vendor class identifier' (60)
   //         - 'client identifier'       (61)
   message_p->initialize (DHCP_record,
+                         message_p->id (),
                          NULL);
 
   Test_U_IStreamConnection_t* istream_connection_p =

@@ -174,6 +174,7 @@ DHCP_Module_Parser_T<ACE_SYNCH_USE,
   } // end IF
   message_inout->rd_ptr (message_inout->base ());
   message_inout->initialize (*record_p,
+                             message_inout->id (),
                              NULL);
   isDriverInitialized_ = false;
 }

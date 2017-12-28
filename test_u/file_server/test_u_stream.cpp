@@ -109,7 +109,7 @@ Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configurat
 //  bool result = false;
   bool setup_pipeline = configuration_in.configuration_.setupPipeline;
   bool reset_setup_pipeline = false;
-  struct FileServer_SessionData* session_data_p = NULL;
+//  struct FileServer_SessionData* session_data_p = NULL;
   Test_U_Module_Net_Writer_t* net_io_impl_p = NULL;
 
   // allocate a new session state, reset stream
@@ -129,8 +129,8 @@ Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configurat
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
 
-  session_data_p =
-      &const_cast<struct FileServer_SessionData&> (inherited::sessionData_->getR ());
+//  session_data_p =
+//      &const_cast<struct FileServer_SessionData&> (inherited::sessionData_->getR ());
   //session_data_p->sessionID = configuration_in.sessionID;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;
@@ -333,10 +333,10 @@ Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configu
   ACE_ASSERT (iterator != const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).end ());
   //(*iterator).second.second.stream = this;
 
-  bool result = false;
+//  bool result = false;
   bool setup_pipeline = configuration_in.configuration_.setupPipeline;
   bool reset_setup_pipeline = false;
-  struct FileServer_SessionData* session_data_p = NULL;
+//  struct FileServer_SessionData* session_data_p = NULL;
   Stream_Module_t* module_p = NULL;
   Test_U_FileReaderH* file_source_impl_p = NULL;
 
@@ -357,9 +357,9 @@ Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configu
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
 
-  session_data_p =
-      &const_cast<struct FileServer_SessionData&> (inherited::sessionData_->getR ());
-  //session_data_p->sessionID = configuration_in.sessionID;
+//  session_data_p =
+//      &const_cast<struct FileServer_SessionData&> (inherited::sessionData_->getR ());
+  //session_data_p->sessionId = configuration_in.sessionId;
 
   //  configuration_in.moduleConfiguration.streamState = &state_;
 

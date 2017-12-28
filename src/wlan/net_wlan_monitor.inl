@@ -994,8 +994,31 @@ fetch_scan_result_data:
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
                       &scan_interval));
+
+        // shut down ?
+        result = inherited::getq (message_block_p, &now);
+        if (likely (result == -1))
+        {
+          error = ACE_OS::last_error ();
+          if (unlikely ((error != EAGAIN) &&   // 11 : timeout
+                        (error != ESHUTDOWN))) // 108: queue has been close()d
+          {
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to ACE_Task::getq(): \"%m\", returning\n")));
+            return;
+          } // end IF
+          goto scan_loop;
+        } // end IF
+        ACE_ASSERT (message_block_p);
+        if (likely (message_block_p->msg_type () == ACE_Message_Block::MB_STOP))
+        {
+          message_block_p->release ();
+          break; // done
+        } // end IF
+        message_block_p->release ();
+        message_block_p = NULL;
+        goto scan_loop;
       } // end ELSE
-      goto scan_loop;
 
       ACE_NOTREACHED (break;)
     }
@@ -1450,7 +1473,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
               ACE_TEXT (SSID_in.c_str ())));
 #else
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("\"%s\": associated with access point (SSID: %s)s\n"),
+              ACE_TEXT ("\"%s\": associated with access point (SSID: %s)\n"),
               ACE_TEXT (interfaceIdentifier_in.c_str ()),
               ACE_TEXT (SSID_in.c_str ())));
 #endif
