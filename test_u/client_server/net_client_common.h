@@ -40,38 +40,46 @@
 #include "net_iconnector.h"
 
 #include "test_u_common.h"
-#include "test_u_configuration.h"
 #include "test_u_gtk_common.h"
 #include "test_u_stream_common.h"
 
+#include "test_u_configuration.h"
+#include "test_u_connection_common.h"
+
 // forward declaration(s)
 class Stream_IAllocator;
-struct Test_U_SocketHandlerConfiguration;
+struct ClientServer_SocketHandlerConfiguration;
 class Test_U_SessionMessage;
 class Test_U_Message;
-class Test_U_Client_TimeoutHandler;
+class Client_TimeoutHandler;
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         struct Test_U_ConnectionConfiguration> Test_U_IConnector_t;
+                         ClientServer_ConnectionConfiguration_t> Client_IConnector_t;
 typedef Net_IAsynchConnector_T<ACE_INET_Addr,
-                               struct Test_U_ConnectionConfiguration> Test_U_IAsynchConnector_t;
+                               ClientServer_ConnectionConfiguration_t> Client_IAsynchConnector_t;
 
-struct Test_U_Client_ConnectorConfiguration
+class Net_IPing
 {
-  Test_U_Client_ConnectorConfiguration ()
-   : connectionManager (NULL)
-   , socketHandlerConfiguration (NULL)
-   //, statisticCollectionInterval (0)
-  {};
+ public:
+  virtual ~Net_IPing () {}
 
-  Test_U_IInetConnectionManager_t*          connectionManager;
-  struct Test_U_SocketHandlerConfiguration* socketHandlerConfiguration;
-  //unsigned int                    statisticCollectionInterval; // statistic collecting interval (second(s)) [0: off]
+  virtual void ping () = 0;
 };
 
-struct Test_U_Client_SignalHandlerConfiguration
+struct Client_ConnectorConfiguration
+{
+  Client_ConnectorConfiguration ()
+   : connectionManager (NULL)
+   , socketHandlerConfiguration (NULL)
+  {};
+
+  ClientServer_IInetConnectionManager_t*          connectionManager;
+  struct ClientServer_SocketHandlerConfiguration* socketHandlerConfiguration;
+};
+
+struct Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
-  Test_U_Client_SignalHandlerConfiguration ()
+  Client_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    , actionTimerId (-1)
    , connectionConfiguration (NULL)
@@ -80,74 +88,58 @@ struct Test_U_Client_SignalHandlerConfiguration
    , statisticReportingInterval (0)
   {};
 
-  long                                   actionTimerId;
-  struct Test_U_ConnectionConfiguration* connectionConfiguration;
-  Test_U_IConnector_t*                   connector;
-  Stream_IAllocator*                     messageAllocator;
-  unsigned int                           statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
+  long                                    actionTimerId;
+  ClientServer_ConnectionConfiguration_t* connectionConfiguration;
+  Client_IConnector_t*                    connector;
+  Stream_IAllocator*                      messageAllocator;
+  unsigned int                            statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
 };
 
-struct Test_U_Client_Configuration
- : Test_U_ClientServer_Configuration
+struct Client_Configuration
+ : ClientServer_Configuration
 {
-  Test_U_Client_Configuration ()
-   : Test_U_ClientServer_Configuration ()
+  Client_Configuration ()
+   : ClientServer_Configuration ()
    , signalHandlerConfiguration ()
    , timeoutHandler (NULL)
   {};
 
-  struct Test_U_Client_SignalHandlerConfiguration signalHandlerConfiguration;
-  Test_U_Client_TimeoutHandler*                   timeoutHandler;
+  struct Client_SignalHandlerConfiguration signalHandlerConfiguration;
+  Client_TimeoutHandler*                   timeoutHandler;
 };
-
-typedef Stream_ControlMessage_T<enum Stream_ControlType,
-                                enum Stream_ControlMessageType,
-                                struct Stream_AllocatorConfiguration> Test_U_ControlMessage_t;
-
-typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                          struct Stream_AllocatorConfiguration,
-                                          Test_U_ControlMessage_t,
-                                          Test_U_Message,
-                                          Test_U_SessionMessage> Test_U_StreamMessageAllocator_t;
 
 //////////////////////////////////////////
 
-typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct Test_U_StreamSessionData,
-                                    enum Stream_SessionMessageType,
-                                    Test_U_Message,
-                                    Test_U_SessionMessage> Test_U_ISessionNotify_t;
-typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
-typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
+//typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
+//                                    struct Test_U_StreamSessionData,
+//                                    enum Stream_SessionMessageType,
+//                                    Test_U_Message,
+//                                    Test_U_SessionMessage> ClientServer_ISessionNotify_t;
+//typedef std::list<ClientServer_ISessionNotify_t*> ClientServer_Subscribers_t;
+//typedef ClientServer_Subscribers_t::const_iterator ClientServer_SubscribersIterator_t;
 
-typedef Common_ISubscribe_T<Test_U_ISessionNotify_t> Test_U_ISubscribe_t;
+//typedef Common_ISubscribe_T<ClientServer_ISessionNotify_t> ClientServer_ISubscribe_t;
 
-struct Test_U_Client_GTK_CBData
+struct Client_GTK_CBData
  : Test_U_GTK_CBData
 {
-  Test_U_Client_GTK_CBData ()
+  Client_GTK_CBData ()
    : Test_U_GTK_CBData ()
    , configuration (NULL)
    , subscribers ()
   {};
 
-  struct Test_U_Client_Configuration* configuration;
+  struct Client_Configuration* configuration;
 
-  Test_U_Subscribers_t                subscribers;
+  ClientServer_Subscribers_t   subscribers;
 };
 
-typedef Common_UI_GtkBuilderDefinition_T<struct Test_U_Client_GTK_CBData> Test_U_Client_GtkBuilderDefinition_t;
+//////////////////////////////////////////
 
-typedef Common_UI_GTK_Manager_T<struct Test_U_Client_GTK_CBData> Test_U_Client_GTK_Manager_t;
-typedef ACE_Singleton<Test_U_Client_GTK_Manager_t,
+typedef Common_UI_GtkBuilderDefinition_T<struct Client_GTK_CBData> Client_GtkBuilderDefinition_t;
+
+typedef Common_UI_GTK_Manager_T<struct Client_GTK_CBData> Client_GTK_Manager_t;
+typedef ACE_Singleton<Client_GTK_Manager_t,
                       typename ACE_MT_SYNCH::RECURSIVE_MUTEX> CLIENT_UI_GTK_MANAGER_SINGLETON;
-
-class Net_IPing
-{
- public:
-  virtual ~Net_IPing () {};
-
-  virtual void ping () = 0;
-};
 
 #endif

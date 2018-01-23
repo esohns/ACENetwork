@@ -32,66 +32,55 @@
 #include "gtk/gtk.h"
 
 #include "common_ui_common.h"
+
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_manager.h"
 
 #include "stream_common.h"
 
+#include "test_i_common.h"
+
 // forward declarations
 struct Test_I_Configuration;
 
-typedef std::deque<enum Common_UI_Event> Test_I_GTK_Events_t;
-typedef Test_I_GTK_Events_t::const_iterator Test_I_GTK_EventsIterator_t;
-
-typedef std::map<guint, ACE_Thread_ID> Test_I_PendingActions_t;
-typedef Test_I_PendingActions_t::iterator Test_I_PendingActionsIterator_t;
-typedef std::set<guint> Test_I_CompletedActions_t;
-typedef Test_I_CompletedActions_t::iterator Test_I_CompletedActionsIterator_t;
-
 struct Test_I_GTK_ProgressData
+ : Common_UI_GTK_ProgressData
 {
-  inline Test_I_GTK_ProgressData ()
-   : completedActions ()
-   //   , cursorType (GDK_LAST_CURSOR)
-   , GTKState (NULL)
-   , pendingActions ()
+  Test_I_GTK_ProgressData ()
+   : Common_UI_GTK_ProgressData ()
    , statistic ()
   {};
 
-  Test_I_CompletedActions_t  completedActions;
-  //  GdkCursorType                      cursorType;
-  struct Common_UI_GTKState* GTKState;
-  Test_I_PendingActions_t    pendingActions;
-  struct Stream_Statistic    statistic;
+  Test_I_Statistic_t statistic;
 };
 
 struct Test_I_GTK_CBData
- : Common_UI_GTKState
+ : Common_UI_GTK_State
 {
-  inline Test_I_GTK_CBData ()
-   : Common_UI_GTKState ()
+  Test_I_GTK_CBData ()
+   : Common_UI_GTK_State ()
    , configuration (NULL)
-   , eventStack ()
+//   , cursorType (GDK_LAST_CURSOR)
    , progressData ()
-   , progressEventSourceID (0)
+   , progressEventSourceId (0)
   {};
 
   struct Test_I_Configuration*   configuration;
-  Test_I_GTK_Events_t            eventStack;
+//  GdkCursorType                      cursorType;
   struct Test_I_GTK_ProgressData progressData;
-  guint                          progressEventSourceID;
+  guint                          progressEventSourceId;
 };
 
 struct Test_I_ThreadData
 {
-  inline Test_I_ThreadData ()
+  Test_I_ThreadData ()
    : CBData (NULL)
-   , eventSourceID (0)
+   , eventSourceId (0)
   {};
 
   struct Test_I_GTK_CBData* CBData;
-  guint                     eventSourceID;
+  guint                     eventSourceId;
 };
 
 typedef Common_UI_GtkBuilderDefinition_T<struct Test_I_GTK_CBData> Test_I_GtkBuilderDefinition_t;

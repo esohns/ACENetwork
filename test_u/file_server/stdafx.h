@@ -14,18 +14,32 @@
 
 // C RunTime Header Files
 //#include <iostream>
-//#include <string>
+#include <string>
 
-// System Library Header Files
-#include "ace/iosfwd.h"
-#include "ace/Log_Msg.h"
-#include "ace/OS.h"
-
-#ifdef LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
-#include <valgrind/valgrind.h>
+//#ifdef LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
+#if defined (VALGRIND_SUPPORT)
+#include "valgrind/valgrind.h"
 #endif
 
+// System Library Header Files
+#include "ace/config-lite.h"
+#include "ace/Global_Macros.h"
+#include "ace/Log_Msg.h"
+
+// Library Header Files
+#include "common.h"
+#include "common_macros.h"
+#include "common_pragmas.h"
+
+#include "stream_common.h"
+#include "stream_macros.h"
+
 // Local Header Files
+#include "net_common.h"
 #include "net_macros.h"
 
-//using namespace std;
+#if defined (_MSC_VER)
+#include "targetver.h"
+#endif
+
+// *TODO*: reference additional headers your program requires here

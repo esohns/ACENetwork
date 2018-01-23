@@ -30,25 +30,22 @@
 
 #include "dhcp_common.h"
 
-// forward declarations
-struct Test_U_ConnectionConfiguration;
-struct Test_U_ConnectionState;
-struct Test_U_UserData;
+#include "test_u_connection_common.h"
 
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 struct Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
+                                 DHCPClient_ConnectionConfiguration_t,
+                                 struct DHCPClient_ConnectionState,
                                  DHCP_Statistic_t,
-                                 struct Test_U_UserData> Test_U_IConnectionManager_t;
+                                 struct Test_U_UserData> DHCPClient_IConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 struct Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
+                                 DHCPClient_ConnectionConfiguration_t,
+                                 struct DHCPClient_ConnectionState,
                                  DHCP_Statistic_t,
-                                 struct Test_U_UserData> Test_U_ConnectionManager_t;
+                                 struct Test_U_UserData> DHCPClient_ConnectionManager_t;
 
-typedef ACE_Singleton<Test_U_ConnectionManager_t,
-                      ACE_SYNCH_MUTEX> TEST_U_CONNECTIONMANAGER_SINGLETON;
+typedef ACE_Singleton<DHCPClient_ConnectionManager_t,
+                      ACE_SYNCH_MUTEX> DHCPCLIENT_CONNECTIONMANAGER_SINGLETON;
 
 #endif

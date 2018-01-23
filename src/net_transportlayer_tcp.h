@@ -33,7 +33,7 @@ class Net_TransportLayer_TCP
 
  public:
   Net_TransportLayer_TCP ();
-  inline virtual ~Net_TransportLayer_TCP () {};
+  inline virtual ~Net_TransportLayer_TCP () {}
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_TransportLayer_TCP (const Net_TransportLayer_TCP&));

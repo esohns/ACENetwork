@@ -43,7 +43,10 @@
 #include "gtk/gtk.h"
 
 #include "common_file_tools.h"
+#include "common_signal_tools.h"
 #include "common_tools.h"
+
+#include "common_timer_tools.h"
 
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_defines.h"
@@ -66,6 +69,7 @@
 #include "IRC_client_gui_common.h"
 #include "IRC_client_gui_defines.h"
 #include "IRC_client_messageallocator.h"
+#include "IRC_client_sessionmessage.h"
 #include "IRC_client_module_IRChandler.h"
 #include "IRC_client_network.h"
 #include "IRC_client_signalhandler.h"
@@ -479,14 +483,14 @@ do_work (bool useThreadPool_in,
   //CBData_in.configuration->streamConfiguration.cloneModule = true;
 
   // step2: initialize event dispatch
-  struct Common_DispatchThreadData thread_data;
-  thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data.useReactor = CBData_in.configuration->useReactor;
+  struct Common_EventDispatchThreadData thread_data_s;
+  thread_data_s.numberOfDispatchThreads = numberOfDispatchThreads_in;
+  thread_data_s.useReactor = CBData_in.configuration->useReactor;
   if (!Common_Tools::initializeEventDispatch (CBData_in.configuration->useReactor,
-                                              (thread_data.numberOfDispatchThreads > 1),
-                                              thread_data.numberOfDispatchThreads,
-                                              thread_data.proactorType,
-                                              thread_data.reactorType,
+                                              (thread_data_s.numberOfDispatchThreads > 1),
+                                              thread_data_s.numberOfDispatchThreads,
+                                              thread_data_s.proactorType,
+                                              thread_data_s.reactorType,
                                               CBData_in.configuration->streamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -524,7 +528,7 @@ do_work (bool useThreadPool_in,
 
     return;
   } // end IF
-  if (!Common_Tools::initializeSignals ((CBData_in.configuration->useReactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+  if (!Common_Signal_Tools::initialize ((CBData_in.configuration->useReactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                                              : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                         signalSet_in,
                                         ignoredSignalSet_in,
@@ -532,7 +536,7 @@ do_work (bool useThreadPool_in,
                                         previousSignalActions_inout))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeSignals(), returning\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
 
     // clean up
     timer_manager_p->stop ();
@@ -570,7 +574,7 @@ do_work (bool useThreadPool_in,
 
   // step6: initialize worker(s)
   int group_id = -1;
-  if (!Common_Tools::startEventDispatch (thread_data,
+  if (!Common_Tools::startEventDispatch (thread_data_s,
                                          group_id))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1246,13 +1250,13 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (!Common_Tools::preInitializeSignals (signal_set,
+  if (!Common_Signal_Tools::preInitialize (signal_set,
                                            use_reactor,
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::preInitializeSignals(), aborting\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
 
     Common_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, fini ACE...
@@ -1278,7 +1282,7 @@ ACE_TMAIN (int argc_in,
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1325,14 +1329,16 @@ ACE_TMAIN (int argc_in,
   if (debug)
     configuration.parserConfiguration.debugScanner = debug;
   ////////////////////// socket handler configuration //////////////////////////
-  struct IRC_Client_ConnectionConfiguration connection_configuration;
+  IRC_Client_ConnectionConfiguration_t connection_configuration;
   connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
     ACE_Time_Value (reporting_interval, 0);
   connection_configuration.socketHandlerConfiguration.userData =
     &configuration.userData;
   connection_configuration.messageAllocator = &message_allocator;
-  connection_configuration.streamConfiguration =
-    &configuration.streamConfiguration;
+
+  connection_configuration.initialize (configuration.streamConfiguration.allocatorConfiguration_,
+                                       configuration.streamConfiguration);
+
   configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                  connection_configuration));
   IRC_Client_ConnectionConfigurationIterator_t iterator =
@@ -1357,7 +1363,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::getHostname(), aborting\n")));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1419,7 +1425,7 @@ ACE_TMAIN (int argc_in,
 
   configuration.useReactor = use_reactor;
 
-  gtk_cb_data.progressData.GTKState = &gtk_cb_data;
+  gtk_cb_data.progressData.state = &gtk_cb_data;
 
   // step8: initialize GTK UI
   IRC_Client_GtkBuilderDefinition_t ui_definition (argc_in,
@@ -1447,8 +1453,8 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Tools::periodToString (working_time,
-                                working_time_string);
+  Common_Timer_Tools::periodToString (working_time,
+                                      working_time_string);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
               ACE_TEXT (working_time_string.c_str ())));
@@ -1465,7 +1471,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1488,10 +1494,10 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Tools::periodToString (user_time,
-                               user_time_string);
-  Common_Tools::periodToString (system_time,
-                               system_time_string);
+  Common_Timer_Tools::periodToString (user_time,
+                                      user_time_string);
+  Common_Timer_Tools::periodToString (system_time,
+                                      system_time_string);
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
@@ -1526,7 +1532,7 @@ ACE_TMAIN (int argc_in,
 #endif
 
   // step10: clean up
-  Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+  Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                  signal_set,
                                  previous_signal_actions,

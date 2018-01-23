@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_CLIENT_TIMEOUTHANDLER_H
-#define TEST_U_CLIENT_TIMEOUTHANDLER_H
+#ifndef CLIENT_TIMEOUTHANDLER_H
+#define CLIENT_TIMEOUTHANDLER_H
 
 #include <functional>
 #include <random>
@@ -37,14 +37,13 @@
 
 #include "net_client_connector_common.h"
 
-class Test_U_Client_TimeoutHandler
+class Client_TimeoutHandler
  : public Common_TimerHandler
- , public Common_ITimerHandler
 {
   typedef Common_TimerHandler inherited;
 
  public:
-  enum ActionModeType
+  enum ActionModeType : int
   {
     ACTION_NORMAL = 0,
     ACTION_ALTERNATING,
@@ -56,7 +55,7 @@ class Test_U_Client_TimeoutHandler
     ACTION_INVALID = -1
   };
 
-  enum AlternatingModeStateType
+  enum AlternatingModeStateType : int
   {
     ALTERNATING_STATE_CONNECT = 0,
     ALTERNATING_STATE_ABORT,
@@ -65,10 +64,10 @@ class Test_U_Client_TimeoutHandler
     ALTERNATING_STATE_INVALID = -1
   };
 
-  Test_U_Client_TimeoutHandler (enum ActionModeType,   // mode
-                                unsigned int,          // max #connections
-                                Test_U_IConnector_t*); // connector
-  inline virtual ~Test_U_Client_TimeoutHandler () {};
+  Client_TimeoutHandler (enum ActionModeType,   // mode
+                         unsigned int,          // max #connections
+                         Client_IConnector_t*); // connector
+  inline virtual ~Client_TimeoutHandler () {}
 
   void mode (enum ActionModeType);
   enum ActionModeType mode () const;
@@ -77,12 +76,12 @@ class Test_U_Client_TimeoutHandler
   virtual void handle (const void*); // asynchronous completion token
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Client_TimeoutHandler ())
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Client_TimeoutHandler (const Test_U_Client_TimeoutHandler&))
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Client_TimeoutHandler& operator= (const Test_U_Client_TimeoutHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Client_TimeoutHandler ())
+  ACE_UNIMPLEMENTED_FUNC (Client_TimeoutHandler (const Client_TimeoutHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Client_TimeoutHandler& operator= (const Client_TimeoutHandler&))
 
   enum AlternatingModeStateType      alternatingModeState_;
-  Test_U_IConnector_t*               connector_;
+  Client_IConnector_t*               connector_;
   mutable ACE_SYNCH_MUTEX            lock_;
   unsigned int                       maximumNumberOfConnections_;
   enum ActionModeType                mode_;

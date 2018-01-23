@@ -1020,7 +1020,7 @@ IRC_Session_T<ConnectionType,
       typename inherited::ICONNECTOR_T* iconnector_p = NULL;
 
       // work around ACE code here
-      if ((inherited::dispatch () == COMMON_DISPATCH_REACTOR) &&
+      if ((inherited::dispatch () == COMMON_EVENT_DISPATCH_REACTOR) &&
           (inherited::transportLayer () == NET_TRANSPORTLAYER_TCP))
       {
         //ACE_CONNECTOR_T* connector_p =
@@ -1068,21 +1068,21 @@ IRC_Session_T<ConnectionType,
   if (!inherited::manager_)
   {
     // *TODO*: remove type inference
-    ACE_ASSERT (connection_configuration_p->streamConfiguration);
+    ACE_ASSERT (connection_configuration_p->streamConfiguration_);
 
     iterator =
-      connection_configuration_p->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator != connection_configuration_p->streamConfiguration->end ());
+      connection_configuration_p->streamConfiguration_->find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator != connection_configuration_p->streamConfiguration_->end ());
   } // end IF
   else
   {
     // *TODO*: remove type inference
     ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
-    ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration);
+    ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_);
 
     iterator =
-      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
-    ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->end ());
+      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_->find (ACE_TEXT_ALWAYS_CHAR (""));
+    ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_->end ());
   } // end ELSE
   (*iterator).second.second.subscriber = this;
   (*iterator).second.second.userData =
@@ -1138,7 +1138,7 @@ IRC_Session_T<ConnectionType,
   // sanity checK(s)
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
   // *TODO*: remove type inferences
-  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration);
+  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_);
 
   // step0: intialize configuration object
   ModuleHandlerConfigurationIteratorType iterator;
@@ -1179,8 +1179,8 @@ IRC_Session_T<ConnectionType,
 //  } // end IF
 //  else
   iterator =
-      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->end ());
+      inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_->find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != inherited::CONNECTION_BASE_T::configuration_->streamConfiguration_->end ());
   (*iterator).second.second.subscriber = this;
 //  ACE_ASSERT (module_handler_configuration_p->userData);
 //  const IRC_ConnectionState& connection_state_r = inherited::state ();

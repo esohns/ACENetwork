@@ -147,16 +147,16 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
     //} // end IF
 
     // step2: stop/abort(/wait) for connections
-    Test_U_IConnectionManager_t* iconnection_manager_p =
-        TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+    DHCPClient_IConnectionManager_t* iconnection_manager_p =
+        DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
     ACE_ASSERT (iconnection_manager_p);
     iconnection_manager_p->stop ();
     iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (inherited::configuration_->useReactor,  // stop reactor ?
-                                         !inherited::configuration_->useReactor, // stop proactor ?
-                                         -1);                                    // group ID (--> don't block)
+    Common_Tools::finalizeEventDispatch (inherited::configuration_->useReactor,    // stop reactor ?
+                                         !(inherited::configuration_->useReactor), // stop proactor ?
+                                         -1);                                      // group id (--> don't block)
 
     // *IMPORTANT NOTE*: there is no real reason to wait here
   } // end IF

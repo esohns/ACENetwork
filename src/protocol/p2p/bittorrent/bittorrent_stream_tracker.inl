@@ -39,7 +39,6 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType,
           typename ConnectionManagerType,
           typename UserDataType>
 BitTorrent_TrackerStream_T<StreamStateType,
@@ -57,7 +56,6 @@ BitTorrent_TrackerStream_T<StreamStateType,
                            ConnectionStateType,
                            HandlerConfigurationType,
                            SessionStateType,
-                           CBDataType,
                            ConnectionManagerType,
                            UserDataType>::BitTorrent_TrackerStream_T ()
  : inherited ()
@@ -81,7 +79,6 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType,
           typename ConnectionManagerType,
           typename UserDataType>
 bool
@@ -100,7 +97,6 @@ BitTorrent_TrackerStream_T<StreamStateType,
                            ConnectionStateType,
                            HandlerConfigurationType,
                            SessionStateType,
-                           CBDataType,
                            ConnectionManagerType,
                            UserDataType>::load (Stream_ModuleList_t& modules_out,
                                                 bool& deleteModules_out)
@@ -137,7 +133,6 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType,
           typename ConnectionManagerType,
           typename UserDataType>
 bool
@@ -156,7 +151,6 @@ BitTorrent_TrackerStream_T<StreamStateType,
                            ConnectionStateType,
                            HandlerConfigurationType,
                            SessionStateType,
-                           CBDataType,
                            ConnectionManagerType,
 // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -333,8 +327,7 @@ error:
 //          typename ConnectionConfigurationType,
 //          typename ConnectionStateType,
 //          typename HandlerConfigurationType,
-//          typename SessionStateType,
-//          typename CBDataType>
+//          typename SessionStateType>
 //bool
 //BitTorrent_TrackerStream_T<StreamStateType,
 //                           ConfigurationType,
@@ -348,8 +341,7 @@ error:
 //                           ConnectionConfigurationType,
 //                           ConnectionStateType,
 //                           HandlerConfigurationType,
-//                           SessionStateType,
-//                           CBDataType>::collect (StatisticContainerType& data_out)
+//                           SessionStateType>::collect (StatisticContainerType& data_out)
 //{
 //  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStream_T::collect"));
 

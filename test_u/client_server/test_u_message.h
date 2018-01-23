@@ -40,21 +40,21 @@ class ACE_Message_Block;
 class Test_U_SessionMessage;
 
 class Test_U_Message
- : public Stream_MessageBase_2<struct Stream_AllocatorConfiguration,
+ : public Stream_MessageBase_2<struct Net_AllocatorConfiguration,
                                enum Stream_MessageType,
                                Net_Remote_Comm::MessageHeader,
                                Net_MessageType_t>
 {
   // enable access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Stream_AllocatorConfiguration,
+                                                 struct Net_AllocatorConfiguration,
                                                  Test_U_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
 
  public:
   Test_U_Message (unsigned int); // size
-  inline virtual ~Test_U_Message () {};
+  inline virtual ~Test_U_Message () {}
 
   virtual Net_MessageType_t command () const; // return value: message type
   static std::string CommandTypeToString (Net_MessageType_t);
@@ -73,7 +73,7 @@ class Test_U_Message
   Test_U_Message (const Test_U_Message&);
 
  private:
-  typedef Stream_MessageBase_2<struct Stream_AllocatorConfiguration,
+  typedef Stream_MessageBase_2<struct Net_AllocatorConfiguration,
                                enum Stream_MessageType,
                                Net_Remote_Comm::MessageHeader,
                                Net_MessageType_t> inherited;

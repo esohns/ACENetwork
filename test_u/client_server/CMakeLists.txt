@@ -175,6 +175,7 @@ set (client_SRCS
      test_u_sessionmessage.h
      test_u_stream.cpp
      test_u_stream.h
+     test_u_stream_common.h
      test_u_socket_common.h
      test_u_tcpconnection.cpp
      test_u_tcpconnection.h
@@ -187,7 +188,7 @@ add_executable (${EXECUTABLE_SOURCE}
                 ${client_SRCS}
                 etc/net_client.glade)
 set_property (TARGET ${EXECUTABLE_SOURCE} PROPERTY FOLDER "test_u")
-if (WIN32 AND NOT ${BUILD_TEST_U})
+if (WIN32 AND NOT BUILD_TEST_U)
  set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
 endif ()
 
@@ -222,6 +223,8 @@ elseif (WIN32)
  target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gdk-3.0.lib)
  target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gtk-3.0.lib)
  target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/pango-1.0.lib)
+
+ target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_WLAN)
 endif ()
 target_link_libraries (${EXECUTABLE_SOURCE} Common)
 target_link_libraries (${EXECUTABLE_SOURCE} CommonTimer)
@@ -283,6 +286,7 @@ set (server_SRCS
      test_u_sessionmessage.h
      test_u_stream.cpp
      test_u_stream.h
+     test_u_stream_common.h
      test_u_socket_common.h
      test_u_tcpconnection.cpp
      test_u_tcpconnection.h
@@ -295,7 +299,7 @@ add_executable (${EXECUTABLE_TARGET}
                 ${server_SRCS}
                 etc/net_server.glade)
 set_property (TARGET ${EXECUTABLE_TARGET} PROPERTY FOLDER "test_u")
-if (WIN32 AND NOT ${BUILD_TEST_U})
+if (WIN32 AND NOT BUILD_TEST_U)
  set_target_properties (${EXECUTABLE_TARGET} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
 endif ()
 
@@ -330,6 +334,8 @@ elseif (WIN32)
  target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gdk-3.0.lib)
  target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gtk-3.0.lib)
  target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/pango-1.0.lib)
+
+ target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_WLAN)
 endif ()
 target_link_libraries (${EXECUTABLE_TARGET} Common)
 target_link_libraries (${EXECUTABLE_TARGET} CommonTimer)

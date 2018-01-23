@@ -64,7 +64,7 @@ struct Test_I_StreamState
   struct Test_I_UserData*          userData;
 };
 
-typedef Stream_INotify_T<enum Stream_SessionMessageType> Test_I_IStreamNotify_t;
+//typedef Stream_INotify_T<enum Stream_SessionMessageType> Test_I_IStreamNotify_t;
 
 //enum Test_I_SAXParserStateBase
 //{

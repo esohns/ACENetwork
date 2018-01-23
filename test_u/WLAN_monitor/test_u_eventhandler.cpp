@@ -39,6 +39,36 @@ Test_U_EventHandler::Test_U_EventHandler (struct WLANMonitor_GTK_CBData* CBData_
 
 void
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+Test_U_EventHandler::onSignalQualityChange (REFGUID interfaceIdentifier_in,
+                                            WLAN_SIGNAL_QUALITY signalQuality_in)
+#else
+Test_U_EventHandler::onSignalQualityChange (const std::string& interfaceIdentifier_in,
+                                            unsigned int signalQuality_in)
+#endif
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::onSignalQualityChange"));
+
+  ACE_UNUSED_ARG (interfaceIdentifier_in);
+  ACE_UNUSED_ARG (signalQuality_in);
+
+  // sanity check(s)
+  if (!CBData_)
+    return;
+
+  guint event_source_id = g_idle_add (idle_update_signal_quality_cb,
+                                      CBData_);
+  if (!event_source_id)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to g_idle_add(idle_update_signal_quality_cb): \"%m\", continuing\n")));
+
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    //CBData_->eventSourceIds.insert (event_source_id);
+    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_SIGNAL_QUALITY_CHANGED);
+  } // end lock scope
+}
+
+void
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 Test_U_EventHandler::onAssociate (REFGUID interfaceIdentifier_in,
 #else
 Test_U_EventHandler::onAssociate (const std::string& interfaceIdentifier_in,
@@ -56,8 +86,56 @@ Test_U_EventHandler::onAssociate (const std::string& interfaceIdentifier_in,
   if (!CBData_)
     return;
 
+  guint event_source_id = 0;
+  if (success_in)
+  {
+    event_source_id = g_idle_add (idle_update_status_cb,
+                                  CBData_);
+    if (!event_source_id)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_update_status_cb): \"%m\", continuing\n")));
+    //else
+    //  CBData_->eventSourceIds.insert (event_source_id);
+  } // end IF
+
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_ASSOCIATE_AP);
+    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_ASSOCIATE);
+  } // end lock scope
+}
+
+void
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+Test_U_EventHandler::onDisassociate (REFGUID interfaceIdentifier_in,
+#else
+Test_U_EventHandler::onDisassociate (const std::string& interfaceIdentifier_in,
+#endif
+                                     const std::string& SSID_in,
+                                     bool success_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::onDisassociate"));
+
+  ACE_UNUSED_ARG (interfaceIdentifier_in);
+  ACE_UNUSED_ARG (SSID_in);
+  ACE_UNUSED_ARG (success_in);
+
+  // sanity check(s)
+  if (!CBData_)
+    return;
+
+  guint event_source_id = 0;
+  if (success_in)
+  {
+    event_source_id = g_idle_add (idle_update_status_cb,
+                                  CBData_);
+    if (!event_source_id)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_update_status_cb): \"%m\", continuing\n")));
+    //else
+    //  CBData_->eventSourceIds.insert (event_source_id);
+  } // end IF
+
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_DISASSOCIATE);
   } // end lock scope
 }
 
@@ -80,8 +158,56 @@ Test_U_EventHandler::onConnect (const std::string& interfaceIdentifier_in,
   if (!CBData_)
     return;
 
+  guint event_source_id = 0;
+  if (success_in)
+  {
+    event_source_id = g_idle_add (idle_update_status_cb,
+                                  CBData_);
+    if (!event_source_id)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_update_status_cb): \"%m\", continuing\n")));
+    //else
+    //  CBData_->eventSourceIds.insert (event_source_id);
+  } // end IF
+
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_CONNECT_ESSID);
+    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_CONNECT);
+  } // end lock scope
+}
+
+void
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+Test_U_EventHandler::onDisconnect (REFGUID interfaceIdentifier_in,
+#else
+Test_U_EventHandler::onDisconnect (const std::string& interfaceIdentifier_in,
+#endif
+                                   const std::string& SSID_in,
+                                   bool success_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::onDisconnect"));
+
+  ACE_UNUSED_ARG (interfaceIdentifier_in);
+  ACE_UNUSED_ARG (SSID_in);
+  ACE_UNUSED_ARG (success_in);
+
+  // sanity check(s)
+  if (!CBData_)
+    return;
+
+  guint event_source_id = 0;
+  if (success_in)
+  {
+    event_source_id = g_idle_add (idle_update_status_cb,
+                                  CBData_);
+    if (!event_source_id)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to g_idle_add(idle_update_status_cb): \"%m\", continuing\n")));
+    //else
+    //  CBData_->eventSourceIds.insert (event_source_id);
+  } // end IF
+
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_DISCONNECT);
   } // end lock scope
 }
 
@@ -109,7 +235,29 @@ Test_U_EventHandler::onHotPlug (const std::string& interfaceIdentifier_in,
 
 void
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-Test_U_EventHandler::onScanComplete (REFGUID interfaceIdentifier_in,
+Test_U_EventHandler::onRemove (REFGUID interfaceIdentifier_in,
+#else
+Test_U_EventHandler::onRemove (const std::string& interfaceIdentifier_in,
+#endif
+                               bool enabled_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::onRemove"));
+
+  ACE_UNUSED_ARG (interfaceIdentifier_in);
+  ACE_UNUSED_ARG (enabled_in);
+
+  // sanity check(s)
+  if (!CBData_)
+    return;
+
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_INTERFACE_REMOVE);
+  } // end lock scope
+}
+
+void
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+Test_U_EventHandler::onScanComplete (REFGUID interfaceIdentifier_in)
 #else
 Test_U_EventHandler::onScanComplete (const std::string& interfaceIdentifier_in)
 #endif
@@ -122,16 +270,15 @@ Test_U_EventHandler::onScanComplete (const std::string& interfaceIdentifier_in)
   if (!CBData_)
     return;
 
+  guint event_source_id = g_idle_add (idle_update_ssids_cb,
+                                      CBData_);
+  if (!event_source_id)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to g_idle_add(idle_update_ssids_cb): \"%m\", continuing\n")));
+  //else
+  //  CBData_->eventSourceIds.insert (event_source_id);
+
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-    guint event_source_id = g_idle_add (idle_update_ssids_cb,
-                                        CBData_);
-    if (event_source_id == 0)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to g_idle_add(idle_update_ssids_cb): \"%m\", returning\n")));
-      return;
-    } // end IF
-    CBData_->eventSourceIds.insert (event_source_id);
     CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_SCAN_COMPLETE);
   } // end lock scope
 }

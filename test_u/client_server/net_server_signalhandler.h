@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_SERVER_SIGNALHANDLER_H
-#define TEST_U_SERVER_SIGNALHANDLER_H
+#ifndef Server_SignalHandler_H
+#define Server_SignalHandler_H
 
 #include "ace/Global_Macros.h"
 
@@ -33,23 +33,23 @@
 
 #include "net_server_common.h"
 
-class Test_U_Server_SignalHandler
- : public Common_SignalHandler_T<struct Test_U_Server_SignalHandlerConfiguration>
+class Server_SignalHandler
+ : public Common_SignalHandler_T<struct Server_SignalHandlerConfiguration>
 {
-  typedef Common_SignalHandler_T<struct Test_U_Server_SignalHandlerConfiguration> inherited;
+  typedef Common_SignalHandler_T<struct Server_SignalHandlerConfiguration> inherited;
 
  public:
-  Test_U_Server_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
-                               ACE_SYNCH_MUTEX*);              // lock handle
-  inline virtual ~Test_U_Server_SignalHandler () {}
+  Server_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
+                        ACE_SYNCH_MUTEX*);              // lock handle
+  inline virtual ~Server_SignalHandler () {}
 
   // implement Common_ISignal
   virtual void handle (const struct Common_Signal&); // signal
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Server_SignalHandler ())
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Server_SignalHandler (const Test_U_Server_SignalHandler&))
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Server_SignalHandler& operator= (const Test_U_Server_SignalHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Server_SignalHandler ())
+  ACE_UNIMPLEMENTED_FUNC (Server_SignalHandler (const Server_SignalHandler&))
+  ACE_UNIMPLEMENTED_FUNC (Server_SignalHandler& operator= (const Server_SignalHandler&))
 };
 
 #endif

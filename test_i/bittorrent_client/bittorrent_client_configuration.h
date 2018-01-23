@@ -30,46 +30,24 @@
 
 #include "test_i_defines.h"
 
-#include "bittorrent_client_session_common.h"
+#include "bittorrent_client_network.h"
 #include "bittorrent_client_stream_common.h"
 
-struct BitTorrent_Client_PeerConnectionConfiguration;
-struct BitTorrent_Client_PeerModuleHandlerConfiguration;
 struct BitTorrent_Client_PeerUserData
 {
-  inline BitTorrent_Client_PeerUserData ()
-   //: connectionConfiguration (NULL)
-   //, moduleConfiguration (NULL)
-   //, moduleHandlerConfiguration (NULL)
+  BitTorrent_Client_PeerUserData ()
   {};
-
-  //struct BitTorrent_Client_PeerConnectionConfiguration*    connectionConfiguration;
-
-  // *TODO*: remove these ASAP
-  //struct Stream_ModuleConfiguration*                       moduleConfiguration;
-  //struct BitTorrent_Client_PeerModuleHandlerConfiguration* moduleHandlerConfiguration;
 };
-struct BitTorrent_Client_TrackerConnectionConfiguration;
-struct BitTorrent_Client_TrackerModuleHandlerConfiguration;
 struct BitTorrent_Client_TrackerUserData
 {
-  inline BitTorrent_Client_TrackerUserData ()
-   //: connectionConfiguration (NULL)
-   //, moduleConfiguration (NULL)
-   //, moduleHandlerConfiguration (NULL)
+  BitTorrent_Client_TrackerUserData ()
   {};
-
-  //struct BitTorrent_Client_TrackerConnectionConfiguration*    connectionConfiguration;
-
-  // *TODO*: remove these ASAP
-  //struct Stream_ModuleConfiguration*                          moduleConfiguration;
-  //struct BitTorrent_Client_TrackerModuleHandlerConfiguration* moduleHandlerConfiguration;
 };
 
 struct BitTorrent_Client_CursesState;
 struct BitTorrent_Client_Configuration
 {
-  inline BitTorrent_Client_Configuration ()
+  BitTorrent_Client_Configuration ()
    : signalHandlerConfiguration ()
    ///////////////////////////////////////
    , peerConnectionConfigurations ()

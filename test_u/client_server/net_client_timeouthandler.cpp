@@ -37,9 +37,9 @@
 #include "test_u_message.h"
 #include "test_u_sessionmessage.h"
 
-Test_U_Client_TimeoutHandler::Test_U_Client_TimeoutHandler (enum ActionModeType mode_in,
-                                                            unsigned int maximumNumberOfConnections_in,
-                                                            Test_U_IConnector_t* connector_in)
+Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
+                                              unsigned int maximumNumberOfConnections_in,
+                                              Client_IConnector_t* connector_in)
  : inherited (this,  // dispatch interface
               false) // invoke only once ?
  , alternatingModeState_ (ALTERNATING_STATE_CONNECT)
@@ -56,7 +56,7 @@ Test_U_Client_TimeoutHandler::Test_U_Client_TimeoutHandler (enum ActionModeType 
  , randomEngine_ ()
  , randomGenerator_ ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_TimeoutHandler::Test_U_Client_TimeoutHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Client_TimeoutHandler::Client_TimeoutHandler"));
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -79,9 +79,9 @@ Test_U_Client_TimeoutHandler::Test_U_Client_TimeoutHandler (enum ActionModeType 
 }
 
 void
-Test_U_Client_TimeoutHandler::mode (enum ActionModeType mode_in)
+Client_TimeoutHandler::mode (enum ActionModeType mode_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_TimeoutHandler::mode"));
+  NETWORK_TRACE (ACE_TEXT ("Client_TimeoutHandler::mode"));
 
   ACE_ASSERT (mode_in < ACTION_MAX);
 
@@ -90,10 +90,10 @@ Test_U_Client_TimeoutHandler::mode (enum ActionModeType mode_in)
   } // end lock scope
 }
 
-enum Test_U_Client_TimeoutHandler::ActionModeType
-Test_U_Client_TimeoutHandler::mode () const
+enum Client_TimeoutHandler::ActionModeType
+Client_TimeoutHandler::mode () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_TimeoutHandler::mode"));
+  NETWORK_TRACE (ACE_TEXT ("Client_TimeoutHandler::mode"));
 
   // initialize return value(s)
   enum ActionModeType result = ACTION_INVALID;
@@ -106,29 +106,29 @@ Test_U_Client_TimeoutHandler::mode () const
 }
 
 void
-Test_U_Client_TimeoutHandler::handle (const void* arg_in)
+Client_TimeoutHandler::handle (const void* arg_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_TimeoutHandler::handle"));
+  NETWORK_TRACE (ACE_TEXT ("Client_TimeoutHandler::handle"));
 
   ACE_UNUSED_ARG (arg_in);
 
   int result = -1;
   int index = 0;
-  Test_U_InetConnectionManager_t::CONNECTION_T* abort_connection_p = NULL;
-  Test_U_InetConnectionManager_t::CONNECTION_T* ping_connection_p = NULL;
+  ClientServer_InetConnectionManager_t::CONNECTION_T* abort_connection_p = NULL;
+  ClientServer_InetConnectionManager_t::CONNECTION_T* ping_connection_p = NULL;
   bool do_abort = false;
   bool do_abort_oldest = false;
   bool do_abort_youngest = false;
   bool do_connect = false;
   bool do_ping = false;
-  Test_U_IInetConnectionManager_t* connection_manager_p =
-    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  ClientServer_IInetConnectionManager_t* connection_manager_p =
+    CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ();
 
   // sanity check(s)
   ACE_ASSERT (connector_);
   ACE_ASSERT (connection_manager_p);
 
-  const typename Test_U_IConnector_t::CONFIGURATION_T& configuration_r =
+  const typename Client_IConnector_t::CONFIGURATION_T& configuration_r =
     connector_->getR ();
   unsigned int number_of_connections = 0;
 
@@ -234,7 +234,7 @@ Test_U_Client_TimeoutHandler::handle (const void* arg_in)
         // cycle mode
         int temp = alternatingModeState_;
         alternatingModeState_ =
-          static_cast<enum Test_U_Client_TimeoutHandler::AlternatingModeStateType> (++temp);
+          static_cast<enum Client_TimeoutHandler::AlternatingModeStateType> (++temp);
         if (alternatingModeState_ == ALTERNATING_STATE_MAX)
           alternatingModeState_ = ALTERNATING_STATE_CONNECT;
 
@@ -392,7 +392,7 @@ continue_:
 
       return;
     } // end IF
-    typename Test_U_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
+    typename ClientServer_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
       NULL;
     if (connector_->useReactor ())
     {

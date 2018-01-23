@@ -20,6 +20,7 @@
 #include "stdafx.h"
 
 #include "ace/Synch.h"
+#include "IRC_client_sessionmessage.h"
 #include "IRC_client_module_IRChandler.h"
 
 //#include <iostream>
@@ -37,7 +38,8 @@
 #include "irc_tools.h"
 
 #include "IRC_client_defines.h"
-#include "IRC_client_network.h"
+#include "IRC_client_common.h"
+#include "IRC_client_stream_common.h"
 
 IRC_Client_Module_IRCHandler::IRC_Client_Module_IRCHandler (ISTREAM_T* stream_in)
  : inherited (stream_in)
@@ -1244,25 +1246,27 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::configuration_->connectionConfigurations);
+  ACE_ASSERT (inherited::configuration_->streamConfiguration);
   ACE_ASSERT (inherited::sessionData_);
   ACE_ASSERT (record_inout);
 
-  IRC_Client_ConnectionConfigurationIterator_t iterator =
-    inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != inherited::configuration_->connectionConfigurations->end ());
+  //IRC_Client_ConnectionConfigurationIterator_t iterator =
+  //  inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (""));
+  //ACE_ASSERT (iterator != inherited::configuration_->connectionConfigurations->end ());
   struct IRC_Client_SessionData& session_data_r =
       const_cast<struct IRC_Client_SessionData&> (inherited::sessionData_->getR ());
 
   // step1: allocate a message buffer
   IRC_Message* message_p =
-      inherited::allocateMessage ((*iterator).second.PDUSize);
+      //inherited::allocateMessage ((*iterator).second.PDUSize);
+    inherited::allocateMessage (inherited::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize);
   if (!message_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_TaskBase_T::allocateMessage(%u), returning\n"),
                 inherited::mod_->name (),
-                (*iterator).second.PDUSize));
+                //(*iterator).second.PDUSize));
+                inherited::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize));
 
     // clean up
     record_inout->decrease ();
@@ -1311,9 +1315,6 @@ IRC_Client_Module_IRCHandler::sendMessage (IRC_Record*& record_inout)
 
     return;
   } // end IF
-
-//   ACE_DEBUG ((LM_DEBUG,
-//               ACE_TEXT ("pushed message\n")));
 }
 
 ACE_Task<ACE_MT_SYNCH,

@@ -21,29 +21,15 @@
 #ifndef TEST_U_HTTP_DECODER_COMMON_H
 #define TEST_U_HTTP_DECODER_COMMON_H
 
-#include <map>
-#include <string>
+#include "common_configuration.h"
 
-#include "ace/Synch_Traits.h"
+#include "stream_configuration.h"
 
-#include "common.h"
-
-#include "stream_common.h"
-#include "stream_control_message.h"
-#include "stream_data_base.h"
-#include "stream_messageallocatorheap_base.h"
-
-#include "stream_dec_common.h"
-
-#include "net_connection_manager.h"
 #include "net_defines.h"
-#include "net_iconnection.h"
-
-#include "http_common.h"
-#include "http_configuration.h"
 
 #include "test_u_common.h"
 
+#include "test_u_connection_common.h"
 #include "test_u_HTTP_decoder_stream_common.h"
 
 //struct Test_U_StreamConfiguration;
@@ -55,40 +41,22 @@
 //  {};
 //};
 
-struct Test_U_AllocatorConfiguration
- : Stream_AllocatorConfiguration
-{
-  Test_U_AllocatorConfiguration ()
-   : Stream_AllocatorConfiguration ()
-  {
-    // *NOTE*: this facilitates (message block) data buffers to be scanned with
-    //         'flex's yy_scan_buffer() method
-    paddingBytes = NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
-  };
-};
-
 struct Test_U_HTTPDecoder_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
   Test_U_HTTPDecoder_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
-   //messageAllocator (NULL)
    , statisticReportingInterval (0)
   {};
 
-  //Stream_IAllocator* messageAllocator;
-  unsigned int       statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
+  unsigned int statisticReportingInterval; // statistic collecting interval (second(s)) [0: off]
 };
 
-struct Test_U_ConnectionConfiguration;
-typedef std::map<std::string,
-                 struct Test_U_ConnectionConfiguration> Test_U_ConnectionConfigurations_t;
 //extern const char stream_name_string_[];
-struct Test_U_AllocatorConfiguration;
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Test_U_AllocatorConfiguration,
+                               struct Common_FlexParserAllocatorConfiguration,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;

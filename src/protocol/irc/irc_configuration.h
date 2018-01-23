@@ -55,7 +55,7 @@ struct IRC_Stream_SessionData;
 struct IRC_AllocatorConfiguration
  : Stream_AllocatorConfiguration
 {
-  inline IRC_AllocatorConfiguration ()
+  IRC_AllocatorConfiguration ()
    : Stream_AllocatorConfiguration ()
   {
     defaultBufferSize = IRC_MAXIMUM_FRAME_SIZE;
@@ -67,7 +67,7 @@ struct IRC_AllocatorConfiguration
 
 //struct IRC_ConnectorConfiguration
 //{
-//  inline IRC_ConnectorConfiguration ()
+//  IRC_ConnectorConfiguration ()
 //   : /*configuration (NULL)
 //   ,*/ connectionManager (NULL)
 //   , socketHandlerConfiguration (NULL)
@@ -82,7 +82,7 @@ struct IRC_AllocatorConfiguration
 
 struct IRC_ProtocolConfiguration
 {
-  inline IRC_ProtocolConfiguration ()
+  IRC_ProtocolConfiguration ()
    : automaticPong (IRC_STREAM_DEFAULT_AUTOPONG)
    , loginOptions ()
    , printPingDot (IRC_CLIENT_DEFAULT_PRINT_PINGDOT)
@@ -97,9 +97,9 @@ struct IRC_StreamConfiguration;
 struct IRC_ModuleHandlerConfiguration
  : Stream_ModuleHandlerConfiguration
 {
-  inline IRC_ModuleHandlerConfiguration ()
+  IRC_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
-   , connectionConfigurations (NULL)
+   //, connectionConfigurations (NULL)
    , protocolConfiguration (NULL)
    , printProgressDot (false)
    , streamConfiguration (NULL)
@@ -115,27 +115,27 @@ struct IRC_ModuleHandlerConfiguration
     passive = false;
   };
 
-  IRC_ConnectionConfigurations_t*   connectionConfigurations;
+  //IRC_ConnectionConfigurations_t*   connectionConfigurations;
   struct IRC_ProtocolConfiguration* protocolConfiguration;
   bool                              printProgressDot; // file writer module
   struct IRC_StreamConfiguration*   streamConfiguration;
 };
-typedef std::map<std::string,
-                 struct IRC_ModuleHandlerConfiguration> IRC_ModuleHandlerConfigurations_t;
-typedef IRC_ModuleHandlerConfigurations_t::const_iterator IRC_ModuleHandlerConfigurationsConstIterator_t;
+//typedef std::map<std::string,
+//                 struct IRC_ModuleHandlerConfiguration> IRC_ModuleHandlerConfigurations_t;
+//typedef IRC_ModuleHandlerConfigurations_t::const_iterator IRC_ModuleHandlerConfigurationsConstIterator_t;
 
 struct IRC_StreamConfiguration
  : Stream_Configuration
 {
-  inline IRC_StreamConfiguration ()
+  IRC_StreamConfiguration ()
    : Stream_Configuration ()
-   , moduleConfiguration_2 ()
-   , moduleHandlerConfigurations ()
+   //, moduleConfiguration_2 ()
+   //, moduleHandlerConfigurations ()
    , protocolConfiguration (NULL)
   {};
 
-  struct Stream_ModuleConfiguration moduleConfiguration_2;       // stream module configuration
-  IRC_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration
+  //struct Stream_ModuleConfiguration moduleConfiguration_2;       // stream module configuration
+  //IRC_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration
   struct IRC_ProtocolConfiguration* protocolConfiguration;       // protocol configuration
 };
 

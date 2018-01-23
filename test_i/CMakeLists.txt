@@ -1,3 +1,5 @@
+option (BUILD_TEST_I "build test_i" OFF)
+
 if (WIN32)
  add_definitions (-DWIN32)
  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc") # C++ exception handling
@@ -27,7 +29,7 @@ add_custom_target (test_i ALL
                    SOURCES ${ACENetwork_Test_I_SRCS})
 add_dependencies (test_i bittorrent_client bittorrent_client_gui IRC_client IRC_client_gui url_stream_load)
 
-if (NOT ${BUILD_TEST_I})
+if (NOT BUILD_TEST_I)
  set_target_properties (test_i PROPERTIES EXCLUDE_FROM_ALL 1)
  if (WIN32)
   set_target_properties (test_i PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)

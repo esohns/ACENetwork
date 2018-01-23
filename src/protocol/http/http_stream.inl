@@ -30,6 +30,7 @@ template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
           typename TimerManagerType,
+          typename AllocatorConfigurationType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -42,6 +43,7 @@ HTTP_Stream_T<StreamStateType,
               ConfigurationType,
               StatisticContainerType,
               TimerManagerType,
+              AllocatorConfigurationType,
               ModuleHandlerConfigurationType,
               SessionDataType,
               SessionDataContainerType,
@@ -60,6 +62,7 @@ template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
           typename TimerManagerType,
+          typename AllocatorConfigurationType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -73,6 +76,7 @@ HTTP_Stream_T<StreamStateType,
               ConfigurationType,
               StatisticContainerType,
               TimerManagerType,
+              AllocatorConfigurationType,
               ModuleHandlerConfigurationType,
               SessionDataType,
               SessionDataContainerType,
@@ -108,6 +112,7 @@ template <typename StreamStateType,
           typename ConfigurationType,
           typename StatisticContainerType,
           typename TimerManagerType,
+          typename AllocatorConfigurationType,
           typename ModuleHandlerConfigurationType,
           typename SessionDataType,
           typename SessionDataContainerType,
@@ -121,6 +126,7 @@ HTTP_Stream_T<StreamStateType,
               ConfigurationType,
               StatisticContainerType,
               TimerManagerType,
+              AllocatorConfigurationType,
               ModuleHandlerConfigurationType,
               SessionDataType,
               SessionDataContainerType,
@@ -271,57 +277,4 @@ error:
       setup_pipeline;
 
   return false;
-}
-
-template <typename StreamStateType,
-          typename ConfigurationType,
-          typename StatisticContainerType,
-          typename TimerManagerType,
-          typename ModuleHandlerConfigurationType,
-          typename SessionDataType,
-          typename SessionDataContainerType,
-          typename ControlMessageType,
-          typename DataMessageType,
-          typename SessionMessageType,
-          typename ConnectionManagerType,
-          typename UserDataType>
-bool
-HTTP_Stream_T<StreamStateType,
-              ConfigurationType,
-              StatisticContainerType,
-              TimerManagerType,
-              ModuleHandlerConfigurationType,
-              SessionDataType,
-              SessionDataContainerType,
-              ControlMessageType,
-              DataMessageType,
-              SessionMessageType,
-              ConnectionManagerType,
-              UserDataType>::collect (StatisticContainerType& data_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("HTTP_Stream_T::collect"));
-
-  typename inherited::MODULE_T* module_p = NULL;
-  module_p =
-      const_cast<typename inherited::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: module \"%s\" not found, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ()),
-                ACE_TEXT (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
-    return false;
-  } // end IF
-  STATISTIC_WRITER_T* statisticReport_impl_p = NULL;
-  statisticReport_impl_p =
-      dynamic_cast<STATISTIC_WRITER_T*> (module_p->writer ());
-  if (!statisticReport_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<Net_Module_Statistic_WriterTask_T> failed, aborting\n"),
-                ACE_TEXT (inherited::name_.c_str ())));
-    return false;
-  } // end IF
-
-  return statisticReport_impl_p->collect (data_out);
 }

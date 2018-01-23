@@ -39,7 +39,7 @@ template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
           ////////////////////////////////
-          enum Net_WLAN_MonitorAPI MonitorAPI_e,
+          enum Net_WLAN_MonitorAPIType MonitorAPI_e,
           ////////////////////////////////
           typename UserDataType>
 class Net_WLAN_InetMonitor_T

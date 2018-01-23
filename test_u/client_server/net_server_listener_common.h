@@ -41,46 +41,46 @@
 // foward declarations
 class Test_U_Stream;
 
-typedef Net_Server_AsynchListener_T<Test_U_AsynchTCPConnection,
+typedef Net_Server_AsynchListener_T<ClientServer_AsynchTCPConnection,
                                     ACE_INET_Addr,
-                                    struct Test_U_Server_ListenerConfiguration,
-                                    struct Test_U_ConnectionState,
-                                    struct Test_U_ConnectionConfiguration,
+                                    struct Server_ListenerConfiguration,
+                                    struct ClientServer_ConnectionState,
+                                    ClientServer_ConnectionConfiguration_t,
                                     Test_U_Stream,
-                                    struct Test_U_UserData> Test_U_Server_AsynchListener_t;
-typedef Net_Server_Listener_T<Test_U_TCPConnection,
+                                    struct Test_U_UserData> Server_AsynchListener_t;
+typedef Net_Server_Listener_T<ClientServer_TCPConnection,
                               ACE_SOCK_ACCEPTOR,
                               ACE_INET_Addr,
-                              struct Test_U_Server_ListenerConfiguration,
-                              struct Test_U_ConnectionState,
-                              struct Test_U_ConnectionConfiguration,
+                              struct Server_ListenerConfiguration,
+                              struct ClientServer_ConnectionState,
+                              ClientServer_ConnectionConfiguration_t,
                               Test_U_Stream,
-                              struct Test_U_UserData> Test_U_Server_Listener_t;
+                              struct Test_U_UserData> Server_Listener_t;
 
-typedef Net_Client_AsynchConnector_T<Test_U_AsynchUDPConnection,
+typedef Net_Client_AsynchConnector_T<ClientServer_AsynchUDPConnection,
                                      ACE_INET_Addr,
-                                     struct Test_U_ConnectionConfiguration,
-                                     struct Test_U_ConnectionState,
+                                     ClientServer_ConnectionConfiguration_t,
+                                     struct ClientServer_ConnectionState,
                                      Test_U_Statistic_t,
                                      struct Net_UDPSocketConfiguration,
-                                     struct Test_U_SocketHandlerConfiguration,
+                                     struct ClientServer_SocketHandlerConfiguration,
                                      Test_U_Stream,
-                                     struct Test_U_UserData> Test_U_Server_AsynchUDPConnector_t;
+                                     struct Test_U_UserData> Server_UDP_AsynchConnector_t;
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
-                               Test_U_UDPConnection,
+                               ClientServer_UDPConnection,
                                ACE_SOCK_CONNECTOR,
                                ACE_INET_Addr,
-                               struct Test_U_ConnectionConfiguration,
-                               struct Test_U_ConnectionState,
+                               ClientServer_ConnectionConfiguration_t,
+                               struct ClientServer_ConnectionState,
                                Test_U_Statistic_t,
                                struct Net_UDPSocketConfiguration,
-                               struct Test_U_SocketHandlerConfiguration,
+                               struct ClientServer_SocketHandlerConfiguration,
                                Test_U_Stream,
-                               struct Test_U_UserData> Test_U_Server_UDPConnector_t;
+                               struct Test_U_UserData> Server_UDP_Connector_t;
 
-typedef ACE_Singleton<Test_U_Server_AsynchListener_t,
-                      ACE_SYNCH_RECURSIVE_MUTEX> TEST_U_SERVER_ASYNCHLISTENER_SINGLETON;
-typedef ACE_Singleton<Test_U_Server_Listener_t,
-                      ACE_SYNCH_RECURSIVE_MUTEX> TEST_U_SERVER_LISTENER_SINGLETON;
+typedef ACE_Singleton<Server_AsynchListener_t,
+                      ACE_SYNCH_RECURSIVE_MUTEX> SERVER_ASYNCHLISTENER_SINGLETON;
+typedef ACE_Singleton<Server_Listener_t,
+                      ACE_SYNCH_RECURSIVE_MUTEX> SERVER_LISTENER_SINGLETON;
 
 #endif

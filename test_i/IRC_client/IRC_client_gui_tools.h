@@ -25,7 +25,7 @@
 
 #include "ace/Global_Macros.h"
 
-#include "common_ui_common.h"
+#include "common_ui_gtk_common.h"
 
 #include "IRC_client_gui_common.h"
 
@@ -42,7 +42,7 @@ class IRC_Client_UI_Tools
                        std::string&,                        // return value: nickname
                        std::string&);                       // return value: channel
   // *WARNING*: this requires gdk_threads_enter()/leave() protection !
-  static IRC_Client_GUI_Connection* current (const Common_UI_GTKState&,            // GTK state
+  static IRC_Client_GUI_Connection* current (const Common_UI_GTK_State&,           // GTK state
                                              const IRC_Client_GUI_Connections_t&); // connections
 
  private:

@@ -46,9 +46,11 @@
 
 #include "common_file_tools.h"
 #include "common_logger.h"
+#include "common_signal_tools.h"
 #include "common_tools.h"
 
 #include "common_timer_manager_common.h"
+#include "common_timer_tools.h"
 
 #include "common_ui_defines.h"
 #include "common_ui_gtk_builder_definition.h"
@@ -144,7 +146,11 @@ do_processArguments (const int& argc_in,
                      bool& showConsole_out,
 #endif
                      std::string& UIDefinitionFilePath_out,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                     struct _GUID& interfaceIdentifier_out,
+#else
                      std::string& interfaceIdentifier_out,
+#endif
                      bool& logToFile_out,
                      unsigned int& statisticReportingInterval_out,
                      std::string& SSID_out,
@@ -400,14 +406,14 @@ do_work (bool autoAssociate_in,
   struct WLANMonitor_Configuration configuration;
   CBData_in.configuration = &configuration;
 
-  timer_manager_p =
-    COMMON_TIMERMANAGER_SINGLETON::instance ();
+  timer_manager_p = COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
-  iwlanmonitor_p =
-      NET_WLAN_INETMONITOR_SINGLETON::instance ();
+  configuration.WLANMonitorConfiguration.timerInterface =
+    timer_manager_p;
+  iwlanmonitor_p = NET_WLAN_INETMONITOR_SINGLETON::instance ();
   ACE_ASSERT (iwlanmonitor_p);
 
-  Test_U_StatisticHandler_t statistic_handler (STATISTIC_ACTION_REPORT,
+  Test_U_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                                NET_WLAN_INETMONITOR_SINGLETON::instance (),
                                                false);
   Test_U_EventHandler ui_event_handler (&CBData_in);
@@ -456,7 +462,7 @@ do_work (bool autoAssociate_in,
                 ACE_TEXT ("failed to initialize signal handler, aborting\n")));
     goto error;
   } // end IF
-  if (!Common_Tools::initializeSignals (//COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
+  if (!Common_Signal_Tools::initialize (//COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                         COMMON_SIGNAL_DISPATCH_REACTOR,
                                         signalSet_in,
                                         ignoredSignalSet_in,
@@ -464,7 +470,7 @@ do_work (bool autoAssociate_in,
                                         previousSignalActions_inout))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeSignals(), aborting\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::initialize(), aborting\n")));
     goto error;
   } // end IF
 
@@ -738,16 +744,16 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
 
-  struct WLANMonitor_GTK_CBData gtk_cb_user_data;
-  gtk_cb_user_data.allowUserRuntimeStatistic =
+  struct WLANMonitor_GTK_CBData gtk_cb_data;
+  gtk_cb_data.allowUserRuntimeStatistic =
     (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
                                          // iff regular reporting
                                          // is off
-  gtk_cb_user_data.progressData.GTKState = &gtk_cb_user_data;
+  gtk_cb_data.progressData.state = &gtk_cb_data;
 
   // step1d: initialize logging and/or tracing
-  Common_Logger_t logger (&gtk_cb_user_data.logStack,
-                          &gtk_cb_user_data.logStackLock);
+  Common_Logger_t logger (&gtk_cb_data.logStack,
+                          &gtk_cb_data.logStackLock);
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
@@ -781,7 +787,7 @@ ACE_TMAIN (int argc_in,
   ACE_Sig_Set ignored_signal_set (0);
   do_initializeSignals (//use_reactor,
                         NET_EVENT_USE_REACTOR,
-                        gtk_cb_user_data.allowUserRuntimeStatistic, // handle SIGUSR1/SIGBREAK
+                        gtk_cb_data.allowUserRuntimeStatistic, // handle SIGUSR1/SIGBREAK
                                                                     // iff regular reporting
                                                                     // is off
                         signal_set,
@@ -805,14 +811,14 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (!Common_Tools::preInitializeSignals (signal_set,
+  if (!Common_Signal_Tools::preInitialize (signal_set,
                                            //use_reactor,
                                            NET_EVENT_USE_REACTOR,
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::preInitializeSignals(), aborting\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
 
     Common_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE...
@@ -826,14 +832,14 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
   Test_U_SignalHandler signal_handler ((UI_definition_file_path.empty () ? NULL
-                                                                         : &gtk_cb_user_data));
+                                                                         : &gtk_cb_data));
 
   // step1f: handle specific program modes
   if (print_version_and_exit)
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
-    Common_Tools::finalizeSignals (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
+    Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
@@ -856,7 +862,7 @@ ACE_TMAIN (int argc_in,
   bool use_fd_based_reactor = NET_EVENT_USE_REACTOR;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   use_fd_based_reactor =
-    (use_reactor && !(COMMON_EVENT_REACTOR_TYPE == COMMON_REACTOR_WFMO));
+    (NET_EVENT_USE_REACTOR && !(COMMON_EVENT_REACTOR_TYPE == COMMON_REACTOR_WFMO));
 #endif
   bool stack_traces = true;
 //  bool use_signal_based_proactor = !use_reactor;
@@ -868,7 +874,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));
 
-    Common_Tools::finalizeSignals (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
+    Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
@@ -892,7 +898,7 @@ ACE_TMAIN (int argc_in,
   if (!UI_definition_file_path.empty ())
     WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                                    argv_in,
-                                                                   &gtk_cb_user_data,
+                                                                   &gtk_cb_data,
                                                                    &ui_definition);
 
   ACE_High_Res_Timer timer;
@@ -907,7 +913,7 @@ ACE_TMAIN (int argc_in,
 //           use_reactor,
            statistic_reporting_interval,
            SSID_string,
-           gtk_cb_user_data,
+           gtk_cb_data,
            signal_set,
            ignored_signal_set,
            previous_signal_actions,
@@ -918,8 +924,8 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Tools::periodToString (working_time,
-                                working_time_string);
+  Common_Timer_Tools::periodToString (working_time,
+                                      working_time_string);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
               ACE_TEXT (working_time_string.c_str ())));
@@ -937,7 +943,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
-    Common_Tools::finalizeSignals (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
+    Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
@@ -959,10 +965,10 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Tools::periodToString (user_time,
-                               user_time_string);
-  Common_Tools::periodToString (system_time,
-                               system_time_string);
+  Common_Timer_Tools::periodToString (user_time,
+                                      user_time_string);
+  Common_Timer_Tools::periodToString (system_time,
+                                      system_time_string);
 
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
@@ -997,7 +1003,7 @@ ACE_TMAIN (int argc_in,
               ACE_TEXT (system_time_string.c_str ())));
 #endif
 
-  Common_Tools::finalizeSignals (//COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
+  Common_Signal_Tools::finalize (//COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                  COMMON_SIGNAL_DISPATCH_REACTOR,
                                  signal_set,
                                  previous_signal_actions,

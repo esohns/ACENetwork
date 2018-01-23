@@ -2,13 +2,21 @@ include (CMakeDependentOption)
 
 if (UNIX)
  # *NOTE*: these are mutually exclusive
- option (DHCLIENT_SUPPORT "enable ISC dhclient support (default)"
-         ON)
-# option (DBUS_SUPPORT "enable DBus support"
-#         OFF)
+ option (DHCLIENT_SUPPORT "enable ISC dhclient support (default)" ON)
+# option (DBUS_SUPPORT "enable DBus support" OFF)
  # *NOTE*: implies DHCLIENT_SUPPORT off
  CMAKE_DEPENDENT_OPTION (DBUS_SUPPORT "enable DBus support" OFF
                          "NOT DHCLIENT_SUPPORT" OFF)
+elseif (WIN32)
+ include (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/scripts/cmake_macros.txt)
+ get_WIN32_Version (WINDOWS_VERSION_MAJOR WINDOWS_VERSION_MINOR WINDOWS_VERSION_MICRO)
+# message (STATUS "WINDOWS_VERSION: ${WINDOWS_VERSION_MAJOR}.${WINDOWS_VERSION_MINOR}.${WINDOWS_VERSION_MICRO}")
+ if (WINDOWS_VERSION_MAJOR GREATER 5)
+  option (WINXP_SUPPORT "enable WinXP support (default)" OFF)
+	if (WINXP_SUPPORT)
+    add_definitions (-DWINXP_SUPPORT)
+	endif ()
+ endif (WINDOWS_VERSION_MAJOR GREATER 5)
 endif ()
 
 if (UNIX)
@@ -78,6 +86,16 @@ add_definitions (-DCOMMON_HAS_DLL)
 if (DBUS_SUPPORT)
  add_definitions (-DCOMMON_DBUS_HAS_DLL)
 endif ()
+#find_package (CommonXML ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+#              REQUIRED
+#              CONFIG
+#              PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules ${CMAKE_CURRENT_SOURCE_DIR}/../../..
+#              PATH_SUFFIXES libCommon/${BUILD_PATH_SUFFIX}
+#              NO_DEFAULT_PATH)
+#if (NOT EXISTS ${CommonXML_DIR})
+# message (FATAL_ERROR "could not find package \"CommonXML\", aborting")
+#endif ()
+#add_definitions (-DCOMMONXML_HAS_DLL)
 
 if (UNIX)
  if (DHCLIENT_SUPPORT)
@@ -90,8 +108,11 @@ if (UNIX)
   include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/dbus)
  endif ()
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/xml)
 elseif (WIN32)
  include_directories ($ENV{ACE_ROOT})
+
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/xml)
 endif ()
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/..)
@@ -103,18 +124,24 @@ set (${PROJECT_NAME}_WLAN_LIB_SRCS
      net_wlan_defines.h
      net_wlan_exports.h
      net_wlan_imonitor.h
+     net_wlan_inetmonitor.cpp
      net_wlan_inetmonitor.h
      net_wlan_inetmonitor.inl
-     net_wlan_inetmonitor.cpp
+     net_wlan_monitor.cpp
      net_wlan_monitor.h
      net_wlan_monitor.inl
-     net_wlan_monitor.cpp
      net_wlan_monitor_statemachine.cpp
      net_wlan_monitor_statemachine.h
      net_wlan_tools.cpp
      net_wlan_tools.h
      stdafx.cpp
      stdafx.h)
+if (WIN32)
+ set (${PROJECT_NAME}_WLAN_LIB_SRCS
+      ${ACENetwork_WLAN_LIB_SRCS}
+      net_wlan_profile_xml_handler.cpp
+      net_wlan_profile_xml_handler.h)
+endif ()
 
 add_library (${PROJECT_NAME}_WLAN STATIC
              ${ACENetwork_WLAN_LIB_SRCS})
@@ -145,6 +172,7 @@ if (UNIX)
 # endif ()
 elseif (WIN32)
 # target_link_libraries (${PROJECT_NAME}_WLAN ${ACE_LIBRARY})
+# target_link_libraries (${PROJECT_NAME}_WLAN CommonXML)
 endif ()
 
 # add all targets to the build-tree export set
@@ -152,21 +180,26 @@ export (TARGETS ${PROJECT_NAME}_WLAN
         APPEND FILE "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Targets.cmake")
 
 ############### install files ################
+set (${PROJECT_NAME}_WLAN_LIB_HDRS
+     net_wlan_common.h
+     net_wlan_configuration.h
+     net_wlan_defines.h
+     net_wlan_exports.h
+     net_wlan_imonitor.h
+     net_wlan_inetmonitor.h
+     net_wlan_inetmonitor.inl
+     net_wlan_monitor.h
+     net_wlan_monitor.inl
+     net_wlan_monitor_statemachine.h
+     net_wlan_tools.h)
+if (WIN32)
+ set (${PROJECT_NAME}_WLAN_LIB_HDRS
+      ${ACENetwork_WLAN_LIB_HDRS}
+      net_wlan_profile_xml_handler.h)
+endif ()
+
 install (FILES
-         net_wlan_common.h
-         net_wlan_configuration.h
-         net_wlan_defines.h
-         net_wlan_exports.h
-         net_wlan_imonitor.h
-         net_wlan_inetmonitor.h
-         net_wlan_inetmonitor.inl
-         net_wlan_inetmonitor.cpp
-         net_wlan_monitor.h
-         net_wlan_monitor.inl
-         net_wlan_monitor.cpp
-         net_wlan_monitor_statemachine.h
-         net_wlan_tools.h
-         stdafx.h
+         ${ACENetwork_WLAN_LIB_HDRS}
          DESTINATION include)
 install (TARGETS ${PROJECT_NAME}_WLAN
          EXPORT ${PROJECT_NAME}Targets

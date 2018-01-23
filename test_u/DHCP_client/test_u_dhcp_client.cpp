@@ -44,7 +44,10 @@
 #include "common.h"
 #include "common_file_tools.h"
 #include "common_logger.h"
+#include "common_signal_tools.h"
 #include "common_tools.h"
+
+#include "common_timer_tools.h"
 
 #include "common_ui_defines.h"
 #include "common_ui_gtk_builder_definition.h"
@@ -53,6 +56,8 @@
 #include "stream_allocatorheap.h"
 
 #include "stream_file_sink.h"
+
+#include "stream_misc_defines.h"
 
 #ifdef HAVE_CONFIG_H
 #include "libACENetwork_config.h"
@@ -477,7 +482,7 @@ do_work (bool requestBroadcastReplies_in,
          bool useReactor_in,
          unsigned int statisticReportingInterval_in,
          unsigned int numberOfDispatchThreads_in,
-         struct Test_U_DHCPClient_GTK_CBData& CBData_in,
+         struct DHCPClient_GTK_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -521,7 +526,7 @@ do_work (bool requestBroadcastReplies_in,
   Common_Tools::initialize ();
 
   // step0c: initialize configuration and stream
-  struct Test_U_DHCPClient_Configuration configuration;
+  struct DHCPClient_Configuration configuration;
   //configuration.userData.connectionConfiguration =
   //    &configuration.connectionConfiguration;
   //configuration.userData.streamConfiguration =
@@ -545,20 +550,20 @@ do_work (bool requestBroadcastReplies_in,
 //  } // end IF
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Test_U_AllocatorConfiguration> heap_allocator;
+                         struct Common_FlexParserAllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize heap allocator, returning\n")));
     return;
   } // end IF
-  Test_U_MessageAllocator_t message_allocator (TEST_U_MAX_MESSAGES, // maximum #buffers
-                                               &heap_allocator,     // heap allocator handle
-                                               true);               // block ?
+  DHCPClient_MessageAllocator_t message_allocator (TEST_U_MAX_MESSAGES, // maximum #buffers
+                                                   &heap_allocator,     // heap allocator handle
+                                                   true);               // block ?
 
   Test_U_EventHandler ui_event_handler (&CBData_in);
   Test_U_Module_EventHandler_Module event_handler (NULL,
-                                                   ACE_TEXT_ALWAYS_CHAR ("EventHandler"));
+                                                   ACE_TEXT_ALWAYS_CHAR (MODULE_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   //Test_U_Stream_t stream;
   //Test_U_AsynchStream_t asynch_stream;
   //Test_U_StreamBase_t* stream_p = &stream;
@@ -573,8 +578,8 @@ do_work (bool requestBroadcastReplies_in,
   } // end IF
   event_handler_p->subscribe (&ui_event_handler);
 
-  Test_U_ConnectionManager_t* connection_manager_p =
-    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  DHCPClient_ConnectionManager_t* connection_manager_p =
+    DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
 
   // *********************** parser configuration data *************************
@@ -590,7 +595,7 @@ do_work (bool requestBroadcastReplies_in,
   //               server) is the lowest (run 'route print' and inspect the
   //               (global) broadcast route entries) to ensure that broadcast
   //               packets are (at least) sent out on the correct subnet
-  struct Test_U_ConnectionConfiguration connection_configuration;
+  DHCPClient_ConnectionConfiguration_t connection_configuration;
   result =
     connection_configuration.socketHandlerConfiguration.socketConfiguration_2.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_SERVER_PORT),
                                                                                                  static_cast<ACE_UINT32> (INADDR_BROADCAST),
@@ -616,10 +621,12 @@ do_work (bool requestBroadcastReplies_in,
 
   connection_configuration.messageAllocator = &message_allocator;
   connection_configuration.userData = &configuration.userData;
+  connection_configuration.initialize (configuration.streamConfiguration.allocatorConfiguration_,
+                                       configuration.streamConfiguration);
 
   configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                  connection_configuration));
-  Test_U_ConnectionConfigurationIterator_t iterator =
+  DHCPClient_ConnectionConfigurationIterator_t iterator =
     configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
   (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
@@ -636,7 +643,7 @@ do_work (bool requestBroadcastReplies_in,
 
   // ********************** module configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
-  struct Test_U_StreamModuleHandlerConfiguration modulehandler_configuration;
+  struct DHCPClient_ModuleHandlerConfiguration modulehandler_configuration;
   modulehandler_configuration.connectionConfigurations =
     &CBData_in.configuration->connectionConfigurations;
   modulehandler_configuration.parserConfiguration =
@@ -656,7 +663,7 @@ do_work (bool requestBroadcastReplies_in,
   configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                             std::make_pair (module_configuration,
                                                                             modulehandler_configuration)));
-  Test_U_StreamConfiguration_t::ITERATOR_T iterator_2 =
+  DHCPClient_StreamConfiguration_t::ITERATOR_T iterator_2 =
     configuration.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != configuration.streamConfiguration.end ());
 
@@ -738,14 +745,14 @@ do_work (bool requestBroadcastReplies_in,
     statisticReportingInterval_in;
 
   // step0b: initialize event dispatch
-  struct Common_DispatchThreadData thread_data;
-  thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data.useReactor = useReactor_in;
-  if (!Common_Tools::initializeEventDispatch (thread_data.useReactor,
+  struct Common_EventDispatchThreadData thread_data_s;
+  thread_data_s.numberOfDispatchThreads = numberOfDispatchThreads_in;
+  thread_data_s.useReactor = useReactor_in;
+  if (!Common_Tools::initializeEventDispatch (thread_data_s.useReactor,
                                               useThreadPool_in,
-                                              thread_data.numberOfDispatchThreads,
-                                              thread_data.proactorType,
-                                              thread_data.reactorType,
+                                              thread_data_s.numberOfDispatchThreads,
+                                              thread_data_s.proactorType,
+                                              thread_data_s.reactorType,
                                               configuration.streamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -754,15 +761,15 @@ do_work (bool requestBroadcastReplies_in,
   } // end IF
 
   ACE_Time_Value deadline = ACE_Time_Value::zero;
-  Test_U_IConnector_t* iconnector_p = NULL;
-  Test_U_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
+  DHCPClient_IConnector_t* iconnector_p = NULL;
+  DHCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
       connection_manager_p;
   ACE_ASSERT (iconnection_manager_p);
   int group_id = -1;
   ACE_Time_Value timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT, 0);
 
-  Test_U_IConnection_t* iconnection_p = NULL;
-  Test_U_IStreamConnection_t* istream_connection_p = NULL;
+  DHCPClient_IConnection_t* iconnection_p = NULL;
+  DHCPClient_IStreamConnection_t* istream_connection_p = NULL;
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   enum Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
 //  Test_U_MessageData* message_data_p = NULL;
@@ -781,7 +788,7 @@ do_work (bool requestBroadcastReplies_in,
   struct Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
-  DHCP_StatisticHandler_t statistic_handler (STATISTIC_ACTION_REPORT,
+  DHCP_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                              connection_manager_p,
                                              false);
   long timer_id = -1;
@@ -811,7 +818,7 @@ do_work (bool requestBroadcastReplies_in,
   //    TEST_U_ASYNCHLISTENER_SINGLETON::instance ();
   CBData_in.configuration->signalHandlerConfiguration.statisticReportingHandler =
     connection_manager_p;
-  CBData_in.configuration->signalHandlerConfiguration.statisticReportingTimerID =
+  CBData_in.configuration->signalHandlerConfiguration.statisticReportingTimerId =
     timer_id;
   CBData_in.configuration->signalHandlerConfiguration.useReactor =
     useReactor_in;
@@ -821,7 +828,7 @@ do_work (bool requestBroadcastReplies_in,
                 ACE_TEXT ("failed to initialize signal handler, returning\n")));
     return;
   } // end IF
-  if (!Common_Tools::initializeSignals ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
+  if (!Common_Signal_Tools::initialize ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                         signalSet_in,
                                         ignoredSignalSet_in,
@@ -829,7 +836,7 @@ do_work (bool requestBroadcastReplies_in,
                                         previousSignalActions_inout))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeSignals(), returning\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
     return;
   } // end IF
 
@@ -843,7 +850,7 @@ do_work (bool requestBroadcastReplies_in,
   // - dispatch UI events (if any)
 
   // step1a: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (thread_data,
+  if (!Common_Tools::startEventDispatch (thread_data_s,
                                          group_id))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -863,10 +870,10 @@ do_work (bool requestBroadcastReplies_in,
   //                                      configuration.socketHandlerConfiguration.statisticReportingInterval);
   //Test_U_OutboundAsynchConnector_t asynch_connector (connection_manager_p,
   //                                                   configuration.socketHandlerConfiguration.statisticReportingInterval);
-  Test_U_OutboundConnectorBcast_t connector (connection_manager_p,
-                                             (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
-  Test_U_OutboundAsynchConnectorBcast_t asynch_connector (connection_manager_p,
-                                                          (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
+  DHCPClient_OutboundConnectorBcast_t connector (connection_manager_p,
+                                                 (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
+  DHCPClient_OutboundAsynchConnectorBcast_t asynch_connector (connection_manager_p,
+                                                              (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
   if (useReactor_in)
     iconnector_p = &connector;
   else
@@ -939,7 +946,7 @@ do_work (bool requestBroadcastReplies_in,
   } // end IF
   // step1c: wait for the connection stream to finish initializing
   istream_connection_p =
-    dynamic_cast<Test_U_IStreamConnection_t*> ((*iterator_2).second.second.broadcastConnection);
+    dynamic_cast<DHCPClient_IStreamConnection_t*> ((*iterator_2).second.second.broadcastConnection);
   if (!istream_connection_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -966,10 +973,10 @@ do_work (bool requestBroadcastReplies_in,
   // step1cb: start listening ?
   if (UIDefinitionFileName_in.empty ())
   {
-    Test_U_Connector_t connector_2 (iconnection_manager_p,
-                                    (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
-    Test_U_AsynchConnector_t asynch_connector_2 (iconnection_manager_p,
-                                                 (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
+    DHCPClient_Connector_t connector_2 (iconnection_manager_p,
+                                        (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
+    DHCPClient_AsynchConnector_t asynch_connector_2 (iconnection_manager_p,
+                                                     (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
     if (useReactor_in)
       iconnector_p = &connector_2;
     else
@@ -1115,18 +1122,12 @@ allocate:
     DHCP_record.xid = DHCP_Tools::generateXID ();
     if (configuration.protocolConfiguration.requestBroadcastReplies)
       DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-    if (!Net_Common_Tools::interfaceToMACAddress ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
-                                                  DHCP_record.chaddr))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToMACAddress(), returning\n")));
-
-      // clean up
-      //    message_data_container_p->decrease ();
-      connection_manager_p->abort ();
-
-      return;
-    } // end IF
+    struct ether_addr ether_addrs_s =
+      Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier);
+    ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
+    ACE_OS::memcpy (&(DHCP_record.chaddr),
+                    &(ether_addrs_s.ether_addr_octet),
+                    ETH_ALEN);
     // *TODO*: support optional options:
     //         - 'requested IP address'    (50)
     //         - 'IP address lease time'   (51)
@@ -1145,22 +1146,22 @@ allocate:
                            message_p->id (),
                            NULL);
 
-    Test_U_IStreamConnection_t* istream_connection_p =
-      dynamic_cast<Test_U_IStreamConnection_t*> ((*iterator_2).second.second.broadcastConnection);
+    DHCPClient_IStreamConnection_t* istream_connection_p =
+      dynamic_cast<DHCPClient_IStreamConnection_t*> ((*iterator_2).second.second.broadcastConnection);
     ACE_ASSERT (istream_connection_p);
 
-    struct Test_U_ConnectionState& state_r =
-        const_cast<struct Test_U_ConnectionState&> (istream_connection_p->state ());
+    struct DHCPClient_ConnectionState& state_r =
+        const_cast<struct DHCPClient_ConnectionState&> (istream_connection_p->state ());
     state_r.timeStamp = COMMON_TIME_NOW;
     state_r.xid = DHCP_record.xid;
 
     Test_U_OutboundConnectionStream& stream_r =
         const_cast<Test_U_OutboundConnectionStream&> (istream_connection_p->stream ());
-    const Test_U_DHCPClient_SessionData_t* session_data_container_p =
+    const DHCPClient_SessionData_t* session_data_container_p =
         &stream_r.getR ();
     ACE_ASSERT (session_data_container_p);
-    struct Test_U_DHCPClient_SessionData& session_data_r =
-        const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->getR ());
+    struct DHCPClient_SessionData& session_data_r =
+        const_cast<struct DHCPClient_SessionData&> (session_data_container_p->getR ());
     session_data_r.timeStamp = state_r.timeStamp;
     session_data_r.xid = DHCP_record.xid;
 
@@ -1183,13 +1184,13 @@ allocate:
 
     //CBData_in.stream = stream_p;
 
-    TEST_U_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
+    DHCPCLIENT_GTK_MANAGER_SINGLETON::instance ()->start ();
     ACE_Time_Value one_second (1, 0);
     result = ACE_OS::sleep (one_second);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::sleep(): \"%m\", continuing\n")));
-    if (!TEST_U_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
+    if (!DHCPCLIENT_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
@@ -1212,7 +1213,7 @@ allocate:
     //ACE_UNUSED_ARG (was_visible_b);
 #endif
 
-    TEST_U_UI_GTK_MANAGER_SINGLETON::instance ()->wait ();
+    DHCPCLIENT_GTK_MANAGER_SINGLETON::instance ()->wait ();
   } // end IF
 
   Common_Tools::dispatchEvents (useReactor_in,
@@ -1240,7 +1241,7 @@ allocate:
   } // end IF
 
   if (!UIDefinitionFileName_in.empty ())
-    TEST_U_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);
+    DHCPCLIENT_GTK_MANAGER_SINGLETON::instance ()->stop (true);
   //		{ // synch access
   //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -1458,13 +1459,14 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (number_of_dispatch_threads == 0) number_of_dispatch_threads = 1;
+  if (number_of_dispatch_threads == 0)
+    number_of_dispatch_threads = 1;
 
-  struct Test_U_DHCPClient_GTK_CBData gtk_cb_user_data;
-  gtk_cb_user_data.progressData.GTKState = &gtk_cb_user_data;
+  struct DHCPClient_GTK_CBData gtk_cb_data;
+  gtk_cb_data.progressData.state = &gtk_cb_data;
   // step1d: initialize logging and/or tracing
-  Common_Logger_t logger (&gtk_cb_user_data.logStack,
-                          &gtk_cb_user_data.lock);
+  Common_Logger_t logger (&gtk_cb_data.logStack,
+                          &gtk_cb_data.lock);
   std::string log_file_name;
   if (log_to_file)
   {
@@ -1534,13 +1536,13 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (!Common_Tools::preInitializeSignals (signal_set,
+  if (!Common_Signal_Tools::preInitialize (signal_set,
                                            use_reactor,
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::preInitializeSignals(), aborting\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
 
     Common_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE...
@@ -1555,14 +1557,14 @@ ACE_TMAIN (int argc_in,
   } // end IF
   Test_U_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                     : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                       &gtk_cb_user_data.lock);
+                                       &gtk_cb_data.lock);
 
   // step1f: handle specific program modes
   if (print_version_and_exit)
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1588,7 +1590,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1607,21 +1609,21 @@ ACE_TMAIN (int argc_in,
 
   // step1h: initialize GLIB / G(D|T)K[+] / GNOME ?
   if (!gtk_rc_file.empty ())
-    gtk_cb_user_data.RCFiles.push_back (gtk_rc_file);
+    gtk_cb_data.RCFiles.push_back (gtk_rc_file);
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
-  Test_U_GtkBuilderDefinition_t ui_definition (argc_in,
-                                               argv_in);
+  DHCPClient_GtkBuilderDefinition_t ui_definition (argc_in,
+                                                   argv_in);
   if (!ui_definition_file.empty ())
-    if (!TEST_U_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                                   argv_in,
-                                                                   &gtk_cb_user_data,
-                                                                   &ui_definition))
+    if (!DHCPCLIENT_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
+                                                                    argv_in,
+                                                                    &gtk_cb_data,
+                                                                    &ui_definition))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_UI_GTK_Manager::initialize(), aborting\n")));
 
-      Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+      Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                   : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                      signal_set,
                                      previous_signal_actions,
@@ -1656,7 +1658,7 @@ ACE_TMAIN (int argc_in,
            use_reactor,
            statistic_reporting_interval,
            number_of_dispatch_threads,
-           gtk_cb_user_data,
+           gtk_cb_data,
            signal_set,
            ignored_signal_set,
            previous_signal_actions,
@@ -1667,8 +1669,8 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Tools::periodToString (working_time,
-                                working_time_string);
+  Common_Timer_Tools::periodToString (working_time,
+                                      working_time_string);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
@@ -1687,7 +1689,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1710,10 +1712,10 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Tools::periodToString (user_time,
-                               user_time_string);
-  Common_Tools::periodToString (system_time,
-                               system_time_string);
+  Common_Timer_Tools::periodToString (user_time,
+                                      user_time_string);
+  Common_Timer_Tools::periodToString (system_time,
+                                      system_time_string);
 
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
@@ -1748,7 +1750,7 @@ ACE_TMAIN (int argc_in,
               ACE_TEXT (system_time_string.c_str ())));
 #endif
 
-  Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+  Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                  signal_set,
                                  previous_signal_actions,

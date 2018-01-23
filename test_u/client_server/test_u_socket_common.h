@@ -54,34 +54,34 @@
 // forward declarations
 class Test_U_Stream;
 
-typedef Net_AsynchTCPSocketHandler_T<struct Test_U_SocketHandlerConfiguration> Test_U_AsynchTCPSocketHandler_t;
+typedef Net_AsynchTCPSocketHandler_T<struct ClientServer_SocketHandlerConfiguration> ClientServer_AsynchTCPSocketHandler_t;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-typedef Net_AsynchNetlinkSocketHandler_T<struct Test_U_SocketHandlerConfiguration> Test_U_AsynchNetlinkSocketHandler_t;
+typedef Net_AsynchNetlinkSocketHandler_T<struct ClientServer_SocketHandlerConfiguration> ClientServer_AsynchNetlinkSocketHandler_t;
 #endif
 
 typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram,
-                                     struct Test_U_SocketHandlerConfiguration> Test_U_AsynchUDPSocketHandler_t;
+                                     struct ClientServer_SocketHandlerConfiguration> ClientServer_AsynchUDPSocketHandler_t;
 typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
-                                     struct Test_U_SocketHandlerConfiguration> Test_U_AsynchIPMulticastSocketHandler_t;
+                                     struct ClientServer_SocketHandlerConfiguration> ClientServer_AsynchIPMulticastSocketHandler_t;
 typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
-                                     struct Test_U_SocketHandlerConfiguration> Test_U_AsynchIPBroadcastSocketHandler_t;
+                                     struct ClientServer_SocketHandlerConfiguration> ClientServer_AsynchIPBroadcastSocketHandler_t;
 
 typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
                                ACE_SOCK_STREAM,
-                               struct Test_U_SocketHandlerConfiguration> Test_U_TCPSocketHandler_t;
+                               struct ClientServer_SocketHandlerConfiguration> ClientServer_TCPSocketHandler_t;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-typedef Net_NetlinkSocketHandler_T<struct Test_U_SocketHandlerConfiguration> Test_U_NetlinkSocketHandler_t;
+typedef Net_NetlinkSocketHandler_T<struct ClientServer_SocketHandlerConfiguration> ClientServer_NetlinkSocketHandler_t;
 #endif
 typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
                                Net_SOCK_Dgram,
-                               struct Test_U_SocketHandlerConfiguration> Test_U_UDPSocketHandler_t;
+                               struct ClientServer_SocketHandlerConfiguration> ClientServer_UDPSocketHandler_t;
 typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
                                Net_SOCK_Dgram_Mcast,
-                               struct Test_U_SocketHandlerConfiguration> Test_U_IPMulticastSocketHandler_t;
+                               struct ClientServer_SocketHandlerConfiguration> ClientServer_IPMulticastSocketHandler_t;
 typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
                                Net_SOCK_Dgram_Bcast,
-                               struct Test_U_SocketHandlerConfiguration> Test_U_IPBroadcastSocketHandler_t;
+                               struct ClientServer_SocketHandlerConfiguration> ClientServer_IPBroadcastSocketHandler_t;
 
 #endif

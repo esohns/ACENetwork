@@ -44,117 +44,104 @@
 #include "net_iconnector.h"
 #include "net_ilistener.h"
 
-#include "test_u_connection_common.h"
-#include "test_u_configuration.h"
-#include "test_u_connection_manager_common.h"
 #include "test_u_gtk_common.h"
 
+#include "test_u_configuration.h"
+#include "test_u_connection_common.h"
+#include "test_u_connection_manager_common.h"
+#include "test_u_stream_common.h"
+
 // forward declarations
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
-                                 struct Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
-                                 Net_Statistic_t,
-                                 struct Test_U_UserData> Test_U_IInetConnectionManager_t;
 class Test_U_SessionMessage;
 class Test_U_Message;
-struct Test_U_Server_ListenerConfiguration;
-typedef Net_IListener_T<struct Test_U_Server_ListenerConfiguration,
-                        struct Test_U_ConnectionConfiguration> Test_U_IListener_t;
-typedef Net_IConnector_T<ACE_INET_Addr,
-                         struct Test_U_ConnectionConfiguration> Test_U_IConnector_t;
+struct Server_ListenerConfiguration;
 
-//////////////////////////////////////////
-
-struct Test_U_Server_SignalHandlerConfiguration
+typedef Net_IListener_T<struct Server_ListenerConfiguration,
+                        ClientServer_ConnectionConfiguration_t> Server_IListener_t;
+struct Server_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
-  Test_U_Server_SignalHandlerConfiguration ()
+  Server_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    , listener (NULL)
    , statisticReportingHandler (NULL)
    , statisticReportingTimerId (-1)
   {};
 
-  Test_U_IListener_t*      listener;
+  Server_IListener_t*      listener;
   Net_IStatisticHandler_t* statisticReportingHandler;
   long                     statisticReportingTimerId;
 };
 
-struct Test_U_Server_ListenerConfiguration
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
+                                 ClientServer_ConnectionConfiguration_t,
+                                 struct ClientServer_ConnectionState,
+                                 Net_Statistic_t,
+                                 struct Test_U_UserData> ClientServer_IInetConnectionManager_t;
+struct Server_ListenerConfiguration
  : Net_ListenerConfiguration
 {
-  Test_U_Server_ListenerConfiguration ()
+  Server_ListenerConfiguration ()
    : Net_ListenerConfiguration ()
    , connectionConfiguration (NULL)
    , connectionManager (NULL)
-//   , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {};
 
-  struct Test_U_ConnectionConfiguration* connectionConfiguration;
-  Test_U_IInetConnectionManager_t*       connectionManager;
-//  bool                                    useLoopBackDevice;
+  ClientServer_ConnectionConfiguration_t* connectionConfiguration;
+  ClientServer_IInetConnectionManager_t*  connectionManager;
 };
 
-struct Test_U_Server_Configuration
- : Test_U_ClientServer_Configuration
+typedef Net_IConnector_T<ACE_INET_Addr,
+                         ClientServer_ConnectionConfiguration_t> Client_IConnector_t;
+struct Server_Configuration
+ : ClientServer_Configuration
 {
-  Test_U_Server_Configuration ()
-   : Test_U_ClientServer_Configuration ()
-   , allocatorConfiguration ()
+  Server_Configuration ()
+   : ClientServer_Configuration ()
    , connector (NULL)
    , listener (NULL)
    , listenerConfiguration ()
    , signalHandlerConfiguration ()
   {};
 
-  struct Stream_AllocatorConfiguration            allocatorConfiguration;
+  Client_IConnector_t*                     connector;
+  Server_IListener_t*                      listener;
+  struct Server_ListenerConfiguration      listenerConfiguration;
 
-  Test_U_IConnector_t*                            connector;
-  Test_U_IListener_t*                             listener;
-  struct Test_U_Server_ListenerConfiguration      listenerConfiguration;
-
-  struct Test_U_Server_SignalHandlerConfiguration signalHandlerConfiguration;
+  struct Server_SignalHandlerConfiguration signalHandlerConfiguration;
 };
-
-typedef Stream_ControlMessage_T<enum Stream_ControlType,
-                                enum Stream_ControlMessageType,
-                                struct Stream_AllocatorConfiguration> Test_U_ControlMessage_t;
-
-typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                          struct Stream_AllocatorConfiguration,
-                                          Test_U_ControlMessage_t,
-                                          Test_U_Message,
-                                          Test_U_SessionMessage> Test_U_StreamMessageAllocator_t;
 
 //////////////////////////////////////////
 
 typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
-                                    struct Test_U_StreamSessionData,
+                                    struct ClientServer_StreamSessionData,
                                     enum Stream_SessionMessageType,
                                     Test_U_Message,
-                                    Test_U_SessionMessage> Test_U_ISessionNotify_t;
-typedef std::list<Test_U_ISessionNotify_t*> Test_U_Subscribers_t;
-typedef Test_U_Subscribers_t::const_iterator Test_U_SubscribersIterator_t;
+                                    Test_U_SessionMessage> ClientServer_ISessionNotify_t;
+typedef std::list<ClientServer_ISessionNotify_t*> ClientServer_Subscribers_t;
+typedef ClientServer_Subscribers_t::const_iterator ClientServer_SubscribersIterator_t;
 
-struct Test_U_Server_GTK_CBData
+struct Server_GTK_CBData
  : Test_U_GTK_CBData
 {
-  Test_U_Server_GTK_CBData ()
+  Server_GTK_CBData ()
    : Test_U_GTK_CBData ()
    , configuration (NULL)
    , subscribers ()
   {};
 
-  struct Test_U_Server_Configuration* configuration;
+  struct Server_Configuration* configuration;
 
-  Test_U_Subscribers_t                subscribers;
+  ClientServer_Subscribers_t   subscribers;
 };
 
-typedef Common_UI_GtkBuilderDefinition_T<struct Test_U_Server_GTK_CBData> Test_U_Server_GtkBuilderDefinition_t;
+//////////////////////////////////////////
 
-typedef Common_UI_GTK_Manager_T<struct Test_U_Server_GTK_CBData> Test_U_Server_GTK_Manager_t;
-typedef ACE_Singleton<Test_U_Server_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> SERVER_UI_GTK_MANAGER_SINGLETON;
+typedef Common_UI_GtkBuilderDefinition_T<struct Server_GTK_CBData> Server_GtkBuilderDefinition_t;
+
+typedef Common_UI_GTK_Manager_T<struct Server_GTK_CBData> Server_GTK_Manager_t;
+typedef ACE_Singleton<Server_GTK_Manager_t,
+                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> SERVER_GTK_MANAGER_SINGLETON;
 
 #endif

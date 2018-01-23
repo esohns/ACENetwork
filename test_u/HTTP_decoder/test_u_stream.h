@@ -26,6 +26,7 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
+#include "common_configuration.h"
 #include "common_statistic_handler.h"
 #include "common_time_common.h"
 
@@ -33,23 +34,51 @@
 
 #include "stream_base.h"
 #include "stream_common.h"
+#include "stream_control_message.h"
+#include "stream_session_data.h"
 #include "stream_statemachine_control.h"
 
 #include "stream_net_io.h"
 #include "stream_net_io_stream.h"
 
+#include "net_connection_manager.h"
+
 #include "http_common.h"
 
 #include "test_u_common.h"
 
-#include "test_u_connection_manager_common.h"
-#include "test_u_HTTP_decoder_common.h"
-#include "test_u_HTTP_decoder_stream_common.h"
+//#include "test_u_connection_common.h"
+//#include "test_u_HTTP_decoder_common.h"
 
 // forward declarations
-class ACE_Message_Block;
+struct Test_U_HTTPDecoder_StreamState;
+struct Test_U_StreamConfiguration;
+struct Test_U_ModuleHandlerConfiguration;
+struct Test_U_HTTPDecoder_SessionData;
+typedef Stream_SessionData_T<struct Test_U_HTTPDecoder_SessionData> Test_U_HTTPDecoder_SessionData_t;
+typedef Stream_ControlMessage_T<enum Stream_ControlType,
+                                enum Stream_ControlMessageType,
+                                struct Common_FlexParserAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
 class Test_U_Message;
 class Test_U_SessionMessage;
+struct Test_U_ConnectionConfiguration;
+struct Test_U_StreamConfiguration;
+struct Test_U_ModuleHandlerConfiguration;
+typedef Stream_Configuration_T<//stream_name_string_,
+                               struct Common_FlexParserAllocatorConfiguration,
+                               struct Test_U_StreamConfiguration,
+                               struct Stream_ModuleConfiguration,
+                               struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
+typedef Net_StreamConnectionConfiguration_T<struct Test_U_ConnectionConfiguration,
+                                            struct Common_FlexParserAllocatorConfiguration,
+                                            Test_U_StreamConfiguration_t> Test_U_ConnectionConfiguration_t;
+typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
+                                 Test_U_ConnectionConfiguration_t,
+                                 struct Test_U_ConnectionState,
+                                 HTTP_Statistic_t,
+                                 struct Test_U_UserData> Test_U_ConnectionManager_t;
+struct Test_U_UserData;
 
 extern const char stream_name_string_[];
 
@@ -65,12 +94,12 @@ class Test_U_Stream_T
                                         struct Test_U_StreamConfiguration,
                                         HTTP_Statistic_t,
                                         TimerManagerType,
-                                        struct Test_U_AllocatorConfiguration,
+                                        struct Common_FlexParserAllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
                                         struct Test_U_ModuleHandlerConfiguration,
                                         struct Test_U_HTTPDecoder_SessionData,
                                         Test_U_HTTPDecoder_SessionData_t,
-                                        Test_U_ControlMessage_t,
+                                        Test_U_HTTPDecoder_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
@@ -87,12 +116,12 @@ class Test_U_Stream_T
                                         struct Test_U_StreamConfiguration,
                                         HTTP_Statistic_t,
                                         TimerManagerType,
-                                        struct Test_U_AllocatorConfiguration,
+                                        struct Common_FlexParserAllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
                                         struct Test_U_ModuleHandlerConfiguration,
                                         struct Test_U_HTTPDecoder_SessionData,
                                         Test_U_HTTPDecoder_SessionData_t,
-                                        Test_U_ControlMessage_t,
+                                        Test_U_HTTPDecoder_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
@@ -115,14 +144,12 @@ class Test_U_Stream_T
 #endif
                            ACE_HANDLE);
 
-  // implement Common_IStatistic_T
-  // *NOTE*: these delegate to runtimeStatistic_
-  virtual bool collect (HTTP_Statistic_t&); // return value: statistic data
-  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  // override (part of) Common_IStatistic_T
+  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   typedef Stream_Module_Net_IOWriter_T<ACE_MT_SYNCH,
-                                       Test_U_ControlMessage_t,
+                                       Test_U_HTTPDecoder_ControlMessage_t,
                                        Test_U_Message,
                                        Test_U_SessionMessage,
                                        struct Test_U_ModuleHandlerConfiguration,
@@ -137,7 +164,7 @@ class Test_U_Stream_T
                                        Test_U_ConnectionManager_t,
                                        struct Test_U_UserData> WRITER_T;
   typedef Stream_Module_Net_IOReader_T<ACE_MT_SYNCH,
-                                       Test_U_ControlMessage_t,
+                                       Test_U_HTTPDecoder_ControlMessage_t,
                                        Test_U_Message,
                                        Test_U_SessionMessage,
                                        struct Test_U_ModuleHandlerConfiguration,
@@ -159,7 +186,7 @@ class Test_U_Stream_T
                                 struct Stream_ModuleConfiguration,        // module configuration type
                                 struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
                                 libacestream_default_net_io_module_name_string,
-                                Test_U_IStreamNotify_t,                   // stream notification interface type
+                                Stream_INotify_t,                         // stream notification interface type
                                 READER_T,                                 // reader type
                                 WRITER_T> IO_MODULE_T;                    // writer type
 
@@ -172,9 +199,5 @@ class Test_U_Stream_T
 
 // include template definition
 #include "test_u_stream.inl"
-
-//////////////////////////////////////////
-
-typedef Test_U_Stream_T<Common_Timer_Manager_t> Test_U_Stream_t;
 
 #endif

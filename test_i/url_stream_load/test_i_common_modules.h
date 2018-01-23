@@ -34,10 +34,11 @@
 
 #include "stream_stat_statistic_report.h"
 
-#include "net_connection_manager.h"
+//#include "net_connection_manager.h"
 
 #include "http_common.h"
 #include "http_module_parser.h"
+#include "http_module_streamer.h"
 #include "http_network.h"
 
 #include "test_i_common.h"
@@ -47,12 +48,12 @@
 // forward declarations
 class Test_I_SessionMessage;
 class Test_I_Message;
-typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
-                                 struct Test_I_URLStreamLoad_ConnectionConfiguration,
-                                 struct HTTP_ConnectionState,
-                                 HTTP_Statistic_t,
-                                 struct HTTP_Stream_UserData> Test_I_ConnectionManager_t;
+//typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
+//                                 ACE_INET_Addr,
+//                                 Test_I_URLStreamLoad_ConnectionConfiguration_t,
+//                                 struct HTTP_ConnectionState,
+//                                 HTTP_Statistic_t,
+//                                 struct HTTP_Stream_UserData> Test_I_ConnectionManager_t;
 
 // declare module(s)
 typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
@@ -102,7 +103,7 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,              
                           enum Stream_SessionMessageType,                         // session event type
                           struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
                           libacenetwork_protocol_default_http_parser_module_name_string,
-                          Test_I_IStreamNotify_t,                                 // stream notification interface type
+                          Stream_INotify_t,                                       // stream notification interface type
                           Test_I_HTTPStreamer,                                    // reader type
                           Test_I_HTTPParser,                                      // writer type
                           Test_I_HTTPMarshal);                                    // name
@@ -111,7 +112,7 @@ DATASTREAM_MODULE_DUPLEX (struct Test_I_URLStreamLoad_SessionData,              
                           enum Stream_SessionMessageType,                         // session event type
                           struct Test_I_URLStreamLoad_ModuleHandlerConfiguration, // module handler configuration type
                           libacestream_default_stat_report_module_name_string,
-                          Test_I_IStreamNotify_t,                                 // stream notification interface type
+                          Stream_INotify_t,                                       // stream notification interface type
                           Test_I_StatisticReport_ReaderTask_t,                    // reader type
                           Test_I_StatisticReport_WriterTask_t,                    // writer type
                           Test_I_StatisticReport);                                // name

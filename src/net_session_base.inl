@@ -98,7 +98,7 @@ Net_SessionBase_T<AddressType,
                   state_.connections.size ()));
 
     typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
-    for (Net_ConnectionsIterator_t iterator = state_.connections.begin ();
+    for (Net_ConnectionIdsIterator_t iterator = state_.connections.begin ();
          iterator != state_.connections.end ();
          ++iterator)
     {
@@ -375,13 +375,12 @@ Net_SessionBase_T<AddressType,
 
   int result = -1;
 
+  // sanity check(s)
+  ACE_ASSERT (connectionManager_);
+
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-
-    // sanity check(s)
-    ACE_ASSERT (connectionManager_);
-
     typename ConnectorType::ICONNECTION_T* iconnection_p = NULL;
-    for (Net_ConnectionsIterator_t iterator = state_.connections.begin ();
+    for (Net_ConnectionIdsIterator_t iterator = state_.connections.begin ();
          iterator != state_.connections.end ();
          ++iterator)
     {
@@ -447,7 +446,7 @@ Net_SessionBase_T<AddressType,
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
 
-    std::pair<Net_ConnectionsIterator_t, bool> result =
+    std::pair<Net_ConnectionIdsIterator_t, bool> result =
         state_.connections.insert (id_in);
 //    ACE_UNUSED_ARG (result);
     ACE_ASSERT (result.second);
@@ -486,9 +485,8 @@ Net_SessionBase_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::disconnect"));
 
-  Net_ConnectionsIterator_t iterator;
+  Net_ConnectionIdsIterator_t iterator;
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-
     iterator = state_.connections.find (id_in);
     if (iterator != state_.connections.end ())
       state_.connections.erase (iterator);

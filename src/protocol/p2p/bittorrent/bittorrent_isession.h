@@ -57,7 +57,7 @@ class BitTorrent_ISession_T
                          StateType>
 {
  public:
-  inline virtual ~BitTorrent_ISession_T () {};
+  inline virtual ~BitTorrent_ISession_T () {}
 
   virtual void scrape () = 0;
 

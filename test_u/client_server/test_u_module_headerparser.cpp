@@ -31,18 +31,18 @@
 #include "test_u_defines.h"
 #include "test_u_message.h"
 
-Test_U_Module_HeaderParser::Test_U_Module_HeaderParser (ISTREAM_T* stream_in)
+ClientServer_Module_HeaderParser::ClientServer_Module_HeaderParser (ISTREAM_T* stream_in)
  : inherited (stream_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::Test_U_Module_HeaderParser"));
+  NETWORK_TRACE (ACE_TEXT ("ClientServer_Module_HeaderParser::ClientServer_Module_HeaderParser"));
 
 }
 
 bool
-Test_U_Module_HeaderParser::initialize (const struct Test_U_ModuleHandlerConfiguration& configuration_in,
-                                        Stream_IAllocator* allocator_in)
+ClientServer_Module_HeaderParser::initialize (const struct ClientServer_ModuleHandlerConfiguration& configuration_in,
+                                              Stream_IAllocator* allocator_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("ClientServer_Module_HeaderParser::initialize"));
 
   // sanity check(s)
   if (inherited::isInitialized_)
@@ -54,10 +54,10 @@ Test_U_Module_HeaderParser::initialize (const struct Test_U_ModuleHandlerConfigu
 }
 
 void
-Test_U_Module_HeaderParser::handleDataMessage (Test_U_Message*& message_inout,
-                                               bool& passMessageDownstream_out)
+ClientServer_Module_HeaderParser::handleDataMessage (Test_U_Message*& message_inout,
+                                                     bool& passMessageDownstream_out)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::handleDataMessage"));
+  NETWORK_TRACE (ACE_TEXT ("ClientServer_Module_HeaderParser::handleDataMessage"));
 
   // don't care (implies yes per default, if part of a stream)
   ACE_UNUSED_ARG (passMessageDownstream_out);
@@ -73,9 +73,9 @@ Test_U_Module_HeaderParser::handleDataMessage (Test_U_Message*& message_inout,
 }
 
 void
-Test_U_Module_HeaderParser::dump_state () const
+ClientServer_Module_HeaderParser::dump_state () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_HeaderParser::dump_state"));
+  NETWORK_TRACE (ACE_TEXT ("ClientServer_Module_HeaderParser::dump_state"));
 
 //   ACE_DEBUG ((LM_DEBUG,
 //               ACE_TEXT (" ***** MODULE: \"%s\" state *****\n"),

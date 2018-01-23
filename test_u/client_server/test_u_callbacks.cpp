@@ -68,7 +68,7 @@ idle_update_log_display_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
@@ -155,97 +155,106 @@ idle_update_info_display_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
+  GtkSpinButton* spin_button_p = NULL;
+  bool is_session_message = false;
+  enum Common_UI_EventType* event_p = NULL;
+  int result = -1;
+  enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
 
-  if (data_p->eventStack.empty ())
-    return G_SOURCE_CONTINUE;
-
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
 
-  bool is_session_message = false;
-  GtkSpinButton* spin_button_p = NULL;
-  for (Test_U_GTK_EventsIterator_t iterator_2 = data_p->eventStack.begin ();
-       iterator_2 != data_p->eventStack.end ();
-       iterator_2++)
-  {
-    spin_button_p = NULL;
-    switch (*iterator_2)
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
+    for (Common_UI_Events_t::ITERATOR iterator_2 (data_p->eventStack);
+         !iterator_2.done ();
+         iterator_2.next (event_p))
+    { ACE_ASSERT (event_p);
+      switch (*event_p)
+      {
+        case COMMON_UI_EVENT_CONNECT:
+        {
+          spin_button_p =
+            GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                     ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
+          ACE_ASSERT (spin_button_p);
+          gtk_spin_button_spin (spin_button_p,
+                                GTK_SPIN_STEP_FORWARD,
+                                1.0);
+
+          spin_button_p =
+            GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                     ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMSESSIONMESSAGES_NAME)));
+          ACE_ASSERT (spin_button_p);
+
+          is_session_message = true;
+
+          break;
+        }
+        case COMMON_UI_EVENT_DATA:
+        {
+          spin_button_p =
+            GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                     ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME)));
+          ACE_ASSERT (spin_button_p);
+
+          break;
+        }
+        case COMMON_UI_EVENT_DISCONNECT:
+        {
+          spin_button_p =
+            GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                     ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
+          ACE_ASSERT (spin_button_p);
+          gtk_spin_button_spin (spin_button_p,
+                                GTK_SPIN_STEP_BACKWARD,
+                                1.0);
+
+          spin_button_p =
+            GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                     ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMSESSIONMESSAGES_NAME)));
+          ACE_ASSERT (spin_button_p);
+
+          is_session_message = true;
+
+          break;
+        }
+        case COMMON_UI_EVENT_STATISTIC:
+        {
+          spin_button_p =
+            GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                     ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMSESSIONMESSAGES_NAME)));
+          ACE_ASSERT (spin_button_p);
+
+          is_session_message = true;
+
+          break;
+        }
+        default:
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("invalid/unknown event type (was: %d), continuing\n"),
+                      *event_p));
+          break;
+        }
+      } // end SWITCH
+      ACE_UNUSED_ARG (is_session_message);
+      gtk_spin_button_spin (spin_button_p,
+                            GTK_SPIN_STEP_FORWARD,
+                            1.0);
+      event_p = NULL;
+    } // end FOR
+
+    // clean up
+    while (!data_p->eventStack.is_empty ())
     {
-      case TEST_U_GTKEVENT_CONNECT:
-      {
-        spin_button_p =
-          GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                   ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
-        ACE_ASSERT (spin_button_p);
-        gtk_spin_button_spin (spin_button_p,
-                              GTK_SPIN_STEP_FORWARD,
-                              1.0);
-
-        spin_button_p =
-          GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                   ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMSESSIONMESSAGES_NAME)));
-        ACE_ASSERT (spin_button_p);
-
-        is_session_message = true;
-
-        break;
-      }
-      case TEST_U_GTKEVENT_DATA:
-      {
-        spin_button_p =
-          GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                   ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMMESSAGES_NAME)));
-        ACE_ASSERT (spin_button_p);
-
-        break;
-      }
-      case TEST_U_GTKEVENT_DISCONNECT:
-      {
-        spin_button_p =
-          GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                   ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMCONNECTIONS_NAME)));
-        ACE_ASSERT (spin_button_p);
-        gtk_spin_button_spin (spin_button_p,
-                              GTK_SPIN_STEP_BACKWARD,
-                              1.0);
-
-        spin_button_p =
-          GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                   ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMSESSIONMESSAGES_NAME)));
-        ACE_ASSERT (spin_button_p);
-
-        is_session_message = true;
-
-        break;
-      }
-      case TEST_U_GTKEVENT_STATISTIC:
-      {
-        spin_button_p =
-          GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                   ACE_TEXT_ALWAYS_CHAR (NET_UI_GTK_SPINBUTTON_NUMSESSIONMESSAGES_NAME)));
-        ACE_ASSERT (spin_button_p);
-
-        is_session_message = true;
-
-        break;
-      }
-      default:
-      {
+      result = data_p->eventStack.pop (event_e);
+      if (result == -1)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("invalid/unknown event type (was: %d), continuing\n"),
-                    *iterator_2));
-        break;
-      }
-    } // end SWITCH
-    ACE_UNUSED_ARG (is_session_message);
-    gtk_spin_button_spin (spin_button_p,
-                          GTK_SPIN_STEP_FORWARD,
-                          1.0);
-  } // end FOR
-  data_p->eventStack.clear ();
+                    ACE_TEXT ("failed to ACE_Unbounded_Stack::pop(): \"%m\", continuing\n")));
+    } // end WHILE
+  } // end lock scope
 
   return G_SOURCE_CONTINUE;
 }
@@ -257,15 +266,15 @@ idle_initialize_client_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_client_UI_cb"));
 
-  struct Test_U_Client_GTK_CBData* data_p =
-    static_cast<struct Test_U_Client_GTK_CBData*> (userData_in);
+  struct Client_GTK_CBData* data_p =
+    static_cast<struct Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
   ACE_ASSERT (data_p->configuration->timeoutHandler);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
@@ -313,18 +322,18 @@ idle_initialize_client_UI_cb (gpointer userData_in)
                              std::numeric_limits<double>::max ());
 
   // step3: initialize options
-  enum Test_U_Client_TimeoutHandler::ActionModeType action_mode =
+  enum Client_TimeoutHandler::ActionModeType action_mode =
     data_p->configuration->timeoutHandler->mode ();
   std::string radio_button_name;
   switch (action_mode)
   {
-  case Test_U_Client_TimeoutHandler::ACTION_NORMAL:
+  case Client_TimeoutHandler::ACTION_NORMAL:
     radio_button_name = ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_NORMAL_NAME);
     break;
-  case Test_U_Client_TimeoutHandler::ACTION_ALTERNATING:
+  case Client_TimeoutHandler::ACTION_ALTERNATING:
     radio_button_name = ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_ALTERNATING_NAME);
     break;
-  case Test_U_Client_TimeoutHandler::ACTION_STRESS:
+  case Client_TimeoutHandler::ACTION_STRESS:
     radio_button_name = ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_STRESS_NAME);
     break;
   default:
@@ -638,16 +647,16 @@ idle_update_progress_client_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->GTKState);
+  ACE_ASSERT (data_p->state);
 
   // synch access
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_REMOVE);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
 
 //  int result = -1;
-  Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->GTKState->builders.end ());
+  ACE_ASSERT (iterator != data_p->state->builders.end ());
 
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -702,7 +711,7 @@ idle_end_session_client_cb (gpointer userData_in)
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
 
 //  int result = -1;
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
@@ -726,14 +735,14 @@ idle_initialize_server_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_server_UI_cb"));
 
-  struct Test_U_Server_GTK_CBData* data_p =
-    static_cast<struct Test_U_Server_GTK_CBData*> (userData_in);
+  struct Server_GTK_CBData* data_p =
+    static_cast<struct Server_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
@@ -1030,15 +1039,15 @@ idle_update_progress_server_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->GTKState);
+  ACE_ASSERT (data_p->state);
 
   // synch access
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_REMOVE);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
 
-  Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->GTKState->builders.end ());
+  ACE_ASSERT (iterator != data_p->state->builders.end ());
 
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -1160,7 +1169,7 @@ button_close_all_clicked_cb (GtkWidget* widget_in,
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (userData_in);
 
-  TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
+  CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
 
   return FALSE;
 } // button_close_all_clicked_cb
@@ -1176,7 +1185,7 @@ button_ping_clicked_cb (GtkWidget* widget_in,
 
   // sanity check
   unsigned int number_of_connections =
-    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->count ();
+    CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ()->count ();
   if (number_of_connections == 0)
     return FALSE;
 
@@ -1192,8 +1201,8 @@ button_ping_clicked_cb (GtkWidget* widget_in,
   index = ((ACE_OS::rand_r (&usecs) % number_of_connections) + 1);
 #endif
 
-  typename Test_U_InetConnectionManager_t::CONNECTION_T* connection_base_p =
-      TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->operator[] (index - 1);
+  typename ClientServer_InetConnectionManager_t::CONNECTION_T* connection_base_p =
+      CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ()->operator[] (index - 1);
   if (!connection_base_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1241,15 +1250,15 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   int result = -1;
 
   ACE_UNUSED_ARG (widget_in);
-  struct Test_U_Client_GTK_CBData* data_p =
-    static_cast<struct Test_U_Client_GTK_CBData*> (userData_in);
+  struct Client_GTK_CBData* data_p =
+    static_cast<struct Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
   ACE_ASSERT (data_p->configuration->timeoutHandler);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
@@ -1260,14 +1269,14 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
     ACE_Time_Value interval = ACE_Time_Value::max_time;
     switch (data_p->configuration->timeoutHandler->mode ())
     {
-      case Test_U_Client_TimeoutHandler::ActionModeType::ACTION_ALTERNATING:
-      case Test_U_Client_TimeoutHandler::ActionModeType::ACTION_NORMAL:
+      case Client_TimeoutHandler::ActionModeType::ACTION_ALTERNATING:
+      case Client_TimeoutHandler::ActionModeType::ACTION_NORMAL:
       {
         interval.set ((NET_CLIENT_DEF_SERVER_TEST_INTERVAL / 1000),
                       ((NET_CLIENT_DEF_SERVER_TEST_INTERVAL % 1000) * 1000));
         break;
       }
-      case Test_U_Client_TimeoutHandler::ActionModeType::ACTION_STRESS:
+      case Client_TimeoutHandler::ActionModeType::ACTION_STRESS:
       {
         interval.set ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL / 1000),
                       ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL % 1000) * 1000));
@@ -1331,8 +1340,8 @@ radiobutton_mode_toggled_cb (GtkWidget* widget_in,
 
   int result = -1;
 
-  struct Test_U_Client_GTK_CBData* data_p =
-    static_cast<struct Test_U_Client_GTK_CBData*> (userData_in);
+  struct Client_GTK_CBData* data_p =
+    static_cast<struct Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (widget_in);
@@ -1346,27 +1355,27 @@ radiobutton_mode_toggled_cb (GtkWidget* widget_in,
   if (!gtk_toggle_button_get_active (toggle_button_p))
     return FALSE;
 
-  enum Test_U_Client_TimeoutHandler::ActionModeType mode =
-    Test_U_Client_TimeoutHandler::ACTION_INVALID;
+  enum Client_TimeoutHandler::ActionModeType mode =
+    Client_TimeoutHandler::ACTION_INVALID;
   GtkButton* button_p = GTK_BUTTON (widget_in);
   ACE_ASSERT (button_p);
   const gchar* label_text_p = gtk_button_get_label (button_p);
   result = ACE_OS::strcmp (label_text_p,
                            ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_NORMAL_LABEL));
   if (result == 0)
-    mode = Test_U_Client_TimeoutHandler::ACTION_NORMAL;
+    mode = Client_TimeoutHandler::ACTION_NORMAL;
   else
   {
     result = ACE_OS::strcmp (label_text_p,
                              ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_ALTERNATING_LABEL));
     if (result == 0)
-      mode = Test_U_Client_TimeoutHandler::ACTION_ALTERNATING;
+      mode = Client_TimeoutHandler::ACTION_ALTERNATING;
     else
     {
       result = ACE_OS::strcmp (label_text_p,
                                ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_UI_GTK_RADIOBUTTON_STRESS_LABEL));
       if (result == 0)
-        mode = Test_U_Client_TimeoutHandler::ACTION_STRESS;
+        mode = Client_TimeoutHandler::ACTION_STRESS;
       else
       {
         ACE_DEBUG ((LM_ERROR,
@@ -1397,8 +1406,8 @@ togglebutton_listen_toggled_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::togglebutton_listen_toggled_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  struct Test_U_Server_GTK_CBData* data_p =
-    static_cast<struct Test_U_Server_GTK_CBData*> (userData_in);
+  struct Server_GTK_CBData* data_p =
+    static_cast<struct Server_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1460,14 +1469,14 @@ spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_connections_value_changed_client_cb"));
 
-  struct Test_U_Client_GTK_CBData* data_p =
-    static_cast<struct Test_U_Client_GTK_CBData*> (userData_in);
+  struct Client_GTK_CBData* data_p =
+    static_cast<struct Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (spinButton_in);
   ACE_ASSERT (data_p);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
@@ -1551,14 +1560,14 @@ spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_connections_value_changed_server_cb"));
 
-  struct Test_U_Server_GTK_CBData* data_p =
-    static_cast<struct Test_U_Server_GTK_CBData*> (userData_in);
+  struct Server_GTK_CBData* data_p =
+    static_cast<struct Server_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (spinButton_in);
   ACE_ASSERT (data_p);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
@@ -1630,8 +1639,8 @@ spinbutton_ping_interval_value_changed_client_cb (GtkSpinButton* spinButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_ping_interval_value_changed_client_cb"));
 
-  struct Test_U_Client_GTK_CBData* data_p =
-    static_cast<struct Test_U_Client_GTK_CBData*> (userData_in);
+  struct Client_GTK_CBData* data_p =
+    static_cast<struct Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (spinButton_in);
@@ -1647,8 +1656,8 @@ spinbutton_ping_interval_value_changed_server_cb (GtkSpinButton* spinButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::spinbutton_ping_interval_value_changed_server_cb"));
 
-  struct Test_U_Server_GTK_CBData* data_p =
-    static_cast<struct Test_U_Server_GTK_CBData*> (userData_in);
+  struct Server_GTK_CBData* data_p =
+    static_cast<struct Server_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (spinButton_in);
@@ -1672,7 +1681,7 @@ button_clear_clicked_cb (GtkWidget* widget_in,
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
@@ -1704,7 +1713,7 @@ button_about_clicked_cb (GtkWidget* widget_in,
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());

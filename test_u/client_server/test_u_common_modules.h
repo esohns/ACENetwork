@@ -48,52 +48,52 @@ typedef Net_Module_TCPSocketHandler_T<ACE_MT_SYNCH,
                                       Test_U_ControlMessage_t,
                                       Test_U_Message,
                                       Test_U_SessionMessage,
-                                      struct Test_U_ModuleHandlerConfiguration,
+                                      struct ClientServer_ModuleHandlerConfiguration,
                                       enum Stream_ControlType,
                                       enum Stream_SessionMessageType,
-                                      struct Test_U_StreamState,
-                                      struct Test_U_StreamSessionData,
-                                      Test_U_StreamSessionData_t,
+                                      struct ClientServer_StreamState,
+                                      struct ClientServer_StreamSessionData,
+                                      ClientServer_StreamSessionData_t,
                                       Net_Statistic_t,
                                       Common_Timer_Manager_t,
                                       Net_Remote_Comm::MessageHeader,
-                                      struct Test_U_UserData> Test_U_Module_TCPSocketHandler;
-DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
-                              enum Stream_SessionMessageType,           // session event type
-                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+                                      struct Test_U_UserData> ClientServer_Module_TCPSocketHandler;
+DATASTREAM_MODULE_INPUT_ONLY (struct ClientServer_StreamSessionData,          // session data type
+                              enum Stream_SessionMessageType,                 // session event type
+                              struct ClientServer_ModuleHandlerConfiguration, // module handler configuration type
                               libacenetwork_default_tcp_sockethandler_module_name_string,
-                              Test_U_IStreamNotify_t,                   // stream notification interface type
-                              Test_U_Module_TCPSocketHandler);          // writer type
+                              Stream_INotify_t,                               // stream notification interface type
+                              ClientServer_Module_TCPSocketHandler);          // writer type
 
 typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
-                                                      struct Test_U_ModuleHandlerConfiguration,
+                                                      struct ClientServer_ModuleHandlerConfiguration,
                                                       Test_U_ControlMessage_t,
                                                       Test_U_Message,
                                                       Test_U_SessionMessage,
                                                       Net_MessageType_t,
                                                       Net_Statistic_t,
                                                       Common_Timer_Manager_t,
-                                                      struct Test_U_StreamSessionData,
-                                                      Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_ReaderTask_t;
+                                                      struct ClientServer_StreamSessionData,
+                                                      ClientServer_StreamSessionData_t> ClientServer_Module_StatisticReport_ReaderTask_t;
 typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
-                                                      struct Test_U_ModuleHandlerConfiguration,
+                                                      struct ClientServer_ModuleHandlerConfiguration,
                                                       Test_U_ControlMessage_t,
                                                       Test_U_Message,
                                                       Test_U_SessionMessage,
                                                       Net_MessageType_t,
                                                       Net_Statistic_t,
                                                       Common_Timer_Manager_t,
-                                                      struct Test_U_StreamSessionData,
-                                                      Test_U_StreamSessionData_t> Test_U_Module_StatisticReport_WriterTask_t;
-DATASTREAM_MODULE_DUPLEX (struct Test_U_StreamSessionData,            // session data type
-                          enum Stream_SessionMessageType,             // session event type
-                          struct Test_U_ModuleHandlerConfiguration,   // module handler configuration type
+                                                      struct ClientServer_StreamSessionData,
+                                                      ClientServer_StreamSessionData_t> ClientServer_Module_StatisticReport_WriterTask_t;
+DATASTREAM_MODULE_DUPLEX (struct ClientServer_StreamSessionData,            // session data type
+                          enum Stream_SessionMessageType,                   // session event type
+                          struct ClientServer_ModuleHandlerConfiguration,   // module handler configuration type
                           libacestream_default_stat_report_module_name_string,
-                          Test_U_IStreamNotify_t,                     // stream notification interface type
-                          Test_U_Module_StatisticReport_ReaderTask_t, // reader type
-                          Test_U_Module_StatisticReport_WriterTask_t, // writer type
-                          Test_U_Module_StatisticReport);             // name
+                          Stream_INotify_t,                                 // stream notification interface type
+                          ClientServer_Module_StatisticReport_ReaderTask_t, // reader type
+                          ClientServer_Module_StatisticReport_WriterTask_t, // writer type
+                          ClientServer_Module_StatisticReport);             // name
 
 #endif

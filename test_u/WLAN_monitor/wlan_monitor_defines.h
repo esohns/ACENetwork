@@ -35,6 +35,7 @@
 #define WLAN_MONITOR_GTK_LISTSTORE_INTERFACE_NAME         "liststore_interface"
 #define WLAN_MONITOR_GTK_LISTSTORE_SSID_NAME              "liststore_ssid"
 #define WLAN_MONITOR_GTK_PROGRESSBAR_NAME                 "progressbar"
+#define WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME         "scale_signalquality"
 #define WLAN_MONITOR_GTK_SPINBUTTON_ASSOCIATIONS_NAME     "spinbutton_associations"
 #define WLAN_MONITOR_GTK_SPINBUTTON_HOTPLUGGINGS_NAME     "spinbutton_hotpluggings"
 #define WLAN_MONITOR_GTK_SPINBUTTON_SCANS_NAME            "spinbutton_scans"

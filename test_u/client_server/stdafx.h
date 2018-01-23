@@ -16,7 +16,8 @@
 //#include <iostream>
 #include <string>
 
-#ifdef LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
+//#ifdef LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
+#if defined (VALGRIND_SUPPORT)
 #include "valgrind/valgrind.h"
 #endif
 
@@ -28,6 +29,7 @@
 // Library Header Files
 #include "common.h"
 #include "common_macros.h"
+#include "common_pragmas.h"
 
 #include "stream_common.h"
 #include "stream_macros.h"
@@ -35,3 +37,9 @@
 // Local Header Files
 #include "net_common.h"
 #include "net_macros.h"
+
+#if defined (_MSC_VER)
+#include "targetver.h"
+#endif
+
+// *TODO*: reference additional headers your program requires here

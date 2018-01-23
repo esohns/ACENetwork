@@ -38,10 +38,6 @@
 #include <panel.h>
 
 #include "IRC_client_common.h"
-#include "IRC_client_stream_common.h"
-
-// forward declaration(s)
-struct IRC_Client_SessionState;
 
 typedef std::map<std::string, struct panel*> IRC_Client_CursesChannels_t;
 typedef IRC_Client_CursesChannels_t::iterator IRC_Client_CursesChannelsIterator_t;
@@ -49,6 +45,7 @@ typedef IRC_Client_CursesChannels_t::iterator IRC_Client_CursesChannelsIterator_
 typedef std::map<std::string, IRC_Client_MessageQueue_t> IRC_Client_CursesMessages_t;
 typedef IRC_Client_CursesMessages_t::iterator IRC_Client_CursesMessagesIterator_t;
 
+struct IRC_Client_SessionState;
 struct IRC_Client_CursesState
 {
   inline IRC_Client_CursesState ()
@@ -83,7 +80,7 @@ struct IRC_Client_CursesState
 
   // session
   IRC_Client_CursesMessages_t         backLog;
-  IRC_Client_SessionState*            sessionState;
+  struct IRC_Client_SessionState*     sessionState;
 };
 
 bool curses_join (const std::string&,              // channel

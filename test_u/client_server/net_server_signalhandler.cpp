@@ -40,24 +40,24 @@
 
 #include "test_u_connection_manager_common.h"
 
-Test_U_Server_SignalHandler::Test_U_Server_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
-                                                          ACE_SYNCH_MUTEX* lock_in)
+Server_SignalHandler::Server_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
+                                            ACE_SYNCH_MUTEX* lock_in)
  : inherited (dispatchMode_in,
               lock_in,
               this) // event handler handle
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Server_SignalHandler::Test_U_Server_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Server_SignalHandler::Server_SignalHandler"));
 
 }
 
 void
-Test_U_Server_SignalHandler::handle (const struct Common_Signal& signal_in)
+Server_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Server_SignalHandler::handle"));
+  NETWORK_TRACE (ACE_TEXT ("Server_SignalHandler::handle"));
 
   int result = -1;
-  Test_U_IInetConnectionManager_t* iconnection_manager_p =
-      TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  ClientServer_IInetConnectionManager_t* iconnection_manager_p =
+      CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
 
   bool shutdown = false;
@@ -170,8 +170,8 @@ Test_U_Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (inherited::configuration_->useReactor,  // stop reactor ?
-                                         !inherited::configuration_->useReactor, // stop proactor ?
-                                         -1);                                    // group ID (--> don't block)
+    Common_Tools::finalizeEventDispatch (inherited::configuration_->useReactor,    // stop reactor ?
+                                         !(inherited::configuration_->useReactor), // stop proactor ?
+                                         -1);                                      // group id (--> don't block)
   } // end IF
 }

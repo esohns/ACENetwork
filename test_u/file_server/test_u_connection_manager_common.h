@@ -41,13 +41,13 @@ struct FileServer_UserData;
 
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 struct FileServer_ConnectionConfiguration,
+                                 FileServer_ConnectionConfiguration_t,
                                  struct FileServer_ConnectionState,
                                  Net_Statistic_t,
                                  struct FileServer_UserData> FileServer_IInetConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 struct FileServer_ConnectionConfiguration,
+                                 FileServer_ConnectionConfiguration_t,
                                  struct FileServer_ConnectionState,
                                  Net_Statistic_t,
                                  struct FileServer_UserData> FileServer_InetConnectionManager_t;

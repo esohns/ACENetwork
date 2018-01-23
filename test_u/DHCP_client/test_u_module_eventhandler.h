@@ -37,22 +37,22 @@
 class Test_U_Module_EventHandler
  : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
-                                         struct Test_U_StreamModuleHandlerConfiguration,
-                                         ACE_Message_Block,
+                                         struct DHCPClient_ModuleHandlerConfiguration,
+                                         Test_U_ControlMessage_t,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
                                          Stream_SessionId_t,
-                                         struct Test_U_DHCPClient_SessionData,
+                                         struct DHCPClient_SessionData,
                                          struct Test_U_UserData>
 {
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
-                                         struct Test_U_StreamModuleHandlerConfiguration,
-                                         ACE_Message_Block,
+                                         struct DHCPClient_ModuleHandlerConfiguration,
+                                         Test_U_ControlMessage_t,
                                          Test_U_Message,
                                          Test_U_SessionMessage,
                                          Stream_SessionId_t,
-                                         struct Test_U_DHCPClient_SessionData,
+                                         struct DHCPClient_SessionData,
                                          struct Test_U_UserData> inherited;
 
  public:
@@ -70,11 +70,11 @@ class Test_U_Module_EventHandler
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_DHCPClient_SessionData,           // session data type
+DATASTREAM_MODULE_INPUT_ONLY (struct DHCPClient_SessionData,                  // session data type
                               enum Stream_SessionMessageType,                 // session event type
-                              struct Test_U_StreamModuleHandlerConfiguration, // module handler configuration type
+                              struct DHCPClient_ModuleHandlerConfiguration,   // module handler configuration type
                               libacestream_default_misc_messagehandler_module_name_string,
-                              Test_U_IStreamNotify_t,                         // stream notification interface type
+                              Stream_INotify_t,                               // stream notification interface type
                               Test_U_Module_EventHandler);                    // writer type
 
 #endif

@@ -31,7 +31,7 @@
 
 Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionId_t sessionId_in,
                                               Stream_SessionMessageType messageType_in,
-                                              Test_U_StreamSessionData_t*& sessionData_inout,
+                                              ClientServer_StreamSessionData_t*& sessionData_inout,
                                               Test_U_UserData* userData_in)
  : inherited (sessionId_in,
               messageType_in,

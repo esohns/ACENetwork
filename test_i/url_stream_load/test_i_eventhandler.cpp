@@ -65,7 +65,7 @@ Test_I_EventHandler::start (Stream_SessionId_t sessionID_in,
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
 //  CBData_->progressData.transferred = 0;
-  CBData_->eventStack.push_back (COMMON_UI_EVENT_STARTED);
+  CBData_->eventStack.push (COMMON_UI_EVENT_STARTED);
 
   guint event_source_id = g_idle_add (idle_start_session_cb,
                                       CBData_);
@@ -105,7 +105,7 @@ Test_I_EventHandler::end (Stream_SessionId_t sessionID_in)
 
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
-  CBData_->eventStack.push_back (COMMON_UI_EVENT_FINISHED);
+  CBData_->eventStack.push (COMMON_UI_EVENT_FINISHED);
 
   guint event_source_id = g_idle_add (idle_end_session_cb,
                                       CBData_);
@@ -134,7 +134,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionID_in,
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
   CBData_->progressData.transferred += message_in.total_length ();
-  CBData_->eventStack.push_back (COMMON_UI_EVENT_DATA);
+  CBData_->eventStack.push (COMMON_UI_EVENT_DATA);
 }
 void
 Test_I_EventHandler::notify (Stream_SessionId_t sessionID_in,
@@ -151,17 +151,17 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionID_in,
 
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
-  enum Common_UI_Event event = COMMON_UI_EVENT_INVALID;
+  enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
   switch (sessionMessage_in.type ())
   {
     case STREAM_SESSION_MESSAGE_CONNECT:
     {
-      event = COMMON_UI_EVENT_CONNECT;
+      event_e = COMMON_UI_EVENT_CONNECT;
       break;
     }
     case STREAM_SESSION_MESSAGE_DISCONNECT:
     {
-      event = COMMON_UI_EVENT_DISCONNECT;
+      event_e = COMMON_UI_EVENT_DISCONNECT;
       break;
     }
     case STREAM_SESSION_MESSAGE_STATISTIC:
@@ -184,7 +184,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionID_in,
                       ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
       } // end IF
 
-      event = COMMON_UI_EVENT_STATISTIC;
+      event_e = COMMON_UI_EVENT_STATISTIC;
       break;
     }
     default:
@@ -195,5 +195,5 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionID_in,
       return;
     }
   } // end SWITCH
-  CBData_->eventStack.push_back (event);
+  CBData_->eventStack.push (event_e);
 }

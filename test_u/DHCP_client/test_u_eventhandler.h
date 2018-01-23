@@ -33,15 +33,15 @@
 #include "test_u_session_message.h"
 
 class Test_U_EventHandler
- : public Test_U_ISessionNotify_t
+ : public DHCPClient_ISessionNotify_t
 {
  public:
-  Test_U_EventHandler (Test_U_GTK_CBData*); // GTK state
-  virtual ~Test_U_EventHandler ();
+  Test_U_EventHandler (struct DHCPClient_GTK_CBData*); // GTK state
+  inline virtual ~Test_U_EventHandler () {}
 
   // implement Stream_ISessionDataNotify_T
   virtual void start (Stream_SessionId_t,                    // session id
-                      const Test_U_DHCPClient_SessionData&); // session data
+                      const struct DHCPClient_SessionData&); // session data
   virtual void notify (Stream_SessionId_t,
                        const Stream_SessionMessageType&);
   virtual void end (Stream_SessionId_t);                // session id
@@ -55,11 +55,11 @@ class Test_U_EventHandler
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler (const Test_U_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler& operator= (const Test_U_EventHandler&))
 
-  typedef std::map<unsigned int, Test_U_DHCPClient_SessionData*> SESSION_DATA_MAP_T;
+  typedef std::map<unsigned int, struct DHCPClient_SessionData*> SESSION_DATA_MAP_T;
   typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
 
-  Test_U_GTK_CBData* CBData_;
-  SESSION_DATA_MAP_T sessionDataMap_;
+  struct DHCPClient_GTK_CBData* CBData_;
+  SESSION_DATA_MAP_T            sessionDataMap_;
 };
 
 #endif

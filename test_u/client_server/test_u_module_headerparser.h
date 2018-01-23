@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_MODULE_HEADERPARSER_H
-#define TEST_U_MODULE_HEADERPARSER_H
+#ifndef ClientServer_Module_HeaderParser_H
+#define ClientServer_Module_HeaderParser_H
 
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
@@ -41,10 +41,10 @@ extern const char libacenetwork_default_test_u_headerparser_module_name_string[]
 class Test_U_Message;
 class Test_U_SessionMessage;
 
-class Test_U_Module_HeaderParser
+class ClientServer_Module_HeaderParser
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 struct Test_U_ModuleHandlerConfiguration,
+                                 struct ClientServer_ModuleHandlerConfiguration,
                                  Test_U_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
@@ -54,11 +54,11 @@ class Test_U_Module_HeaderParser
                                  struct Test_U_UserData>
 {
  public:
-  Test_U_Module_HeaderParser (ISTREAM_T*); // stream handle
-  inline virtual ~Test_U_Module_HeaderParser () {}
+  ClientServer_Module_HeaderParser (ISTREAM_T*); // stream handle
+  inline virtual ~ClientServer_Module_HeaderParser () {}
 
   // initialization
-  virtual bool initialize (const struct Test_U_ModuleHandlerConfiguration&,
+  virtual bool initialize (const struct ClientServer_ModuleHandlerConfiguration&,
                            Stream_IAllocator* = NULL);
 
   // implement (part of) Stream_ITaskBase
@@ -71,7 +71,7 @@ class Test_U_Module_HeaderParser
  private:
   typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 struct Test_U_ModuleHandlerConfiguration,
+                                 struct ClientServer_ModuleHandlerConfiguration,
                                  Test_U_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
@@ -80,17 +80,17 @@ class Test_U_Module_HeaderParser
                                  enum Stream_SessionMessageType,
                                  struct Test_U_UserData> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_HeaderParser ());
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_HeaderParser (const Test_U_Module_HeaderParser&));
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_HeaderParser& operator= (const Test_U_Module_HeaderParser&));
+  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_HeaderParser ());
+  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_HeaderParser (const ClientServer_Module_HeaderParser&));
+  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_HeaderParser& operator= (const ClientServer_Module_HeaderParser&));
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
-                              enum Stream_SessionMessageType,           // session event type
-                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+DATASTREAM_MODULE_INPUT_ONLY (struct ClientServer_StreamSessionData,          // session data type
+                              enum Stream_SessionMessageType,                 // session event type
+                              struct ClientServer_ModuleHandlerConfiguration, // module handler configuration type
                               libacenetwork_default_test_u_headerparser_module_name_string,
-                              Test_U_IStreamNotify_t,                   // stream notification interface type
-                              Test_U_Module_HeaderParser);              // writer type
+                              Stream_INotify_t,                               // stream notification interface type
+                              ClientServer_Module_HeaderParser);              // writer type
 
 #endif

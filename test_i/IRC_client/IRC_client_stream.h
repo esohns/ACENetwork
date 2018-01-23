@@ -27,29 +27,28 @@
 
 #include "common_timer_manager_common.h"
 
+#include "stream_session_data.h"
+
 #include "irc_common.h"
 #include "irc_configuration.h"
 #include "irc_message.h"
 #include "irc_stream.h"
 #include "irc_stream_common.h"
 
-#include "IRC_client_stream_common.h"
+#include "IRC_client_network.h"
+//#include "IRC_client_stream_common.h"
 
 // forward declarations
+struct IRC_Client_StreamState;
+struct IRC_Client_StreamConfiguration;
+struct IRC_Client_ModuleHandlerConfiguration;
+struct IRC_Client_SessionData;
+typedef Stream_SessionData_T<struct IRC_Client_SessionData> IRC_Client_SessionData_t;
+typedef Stream_ControlMessage_T<enum Stream_ControlType,
+                                enum Stream_ControlMessageType,
+                                struct IRC_AllocatorConfiguration> IRC_Client_ControlMessage_t;
 class IRC_Client_SessionMessage;
-template <ACE_SYNCH_DECL,
-          typename AddressType,
-          typename ConfigurationType,
-          typename StateType,
-          typename StatisticContainerType,
-          typename UserDataType>
-class Net_Connection_Manager_T;
-typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
-                                 struct IRC_Client_ConnectionConfiguration,
-                                 struct IRC_Client_SessionState,
-                                 IRC_Statistic_t,
-                                 struct IRC_Client_UserData> IRC_Client_Connection_Manager_t;
+struct IRC_Client_UserData;
 
 template <typename TimerManagerType> // implements Common_ITimer
 class IRC_Client_Stream_T
@@ -100,9 +99,5 @@ class IRC_Client_Stream_T
 
 // include template definition
 #include "IRC_client_stream.inl"
-
-//////////////////////////////////////////
-
-typedef IRC_Client_Stream_T<Common_Timer_Manager_t> IRC_Client_Stream_t;
 
 #endif

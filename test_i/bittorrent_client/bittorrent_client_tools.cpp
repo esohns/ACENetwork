@@ -48,10 +48,10 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
   ACE_HANDLE return_value = ACE_INVALID_HANDLE;
 
 //  int result = -1;
-  struct BitTorrent_Client_PeerConnectionConfiguration* peer_configuration_p =
+  BitTorrent_Client_PeerConnectionConfiguration_t* peer_configuration_p =
       NULL;
   struct BitTorrent_Client_PeerUserData* peer_user_data_p = NULL;
-  struct BitTorrent_Client_TrackerConnectionConfiguration* tracker_configuration_p =
+  BitTorrent_Client_TrackerConnectionConfiguration_t* tracker_configuration_p =
       NULL;
   struct BitTorrent_Client_TrackerUserData* tracker_user_data_p = NULL;
 
@@ -70,9 +70,9 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
   ACE_ASSERT (tracker_user_data_p);
   // *TODO*: remove type inferences
   ACE_ASSERT (peer_configuration_p);
-  ACE_ASSERT (peer_configuration_p->streamConfiguration);
+  ACE_ASSERT (peer_configuration_p->streamConfiguration_);
   ACE_ASSERT (tracker_configuration_p);
-  ACE_ASSERT (tracker_configuration_p->streamConfiguration);
+  ACE_ASSERT (tracker_configuration_p->streamConfiguration_);
 
   // step1: set up configuration
   if (isPeer_in)
@@ -85,20 +85,20 @@ BitTorrent_Client_Tools::connect (BitTorrent_Client_IPeerConnector_t& peerConnec
   {
     if (isPeer_in)
     {
-      peer_configuration_p->streamConfiguration->configuration_.cloneModule =
+      peer_configuration_p->streamConfiguration_->configuration_.cloneModule =
         cloneModule_in;
-      peer_configuration_p->streamConfiguration->configuration_.deleteModule =
+      peer_configuration_p->streamConfiguration_->configuration_.deleteModule =
         deleteModule_in;
-      peer_configuration_p->streamConfiguration->configuration_.module =
+      peer_configuration_p->streamConfiguration_->configuration_.module =
         finalModule_inout;
     } // end IF
     else
     {
-      tracker_configuration_p->streamConfiguration->configuration_.cloneModule =
+      tracker_configuration_p->streamConfiguration_->configuration_.cloneModule =
         cloneModule_in;
-      tracker_configuration_p->streamConfiguration->configuration_.deleteModule =
+      tracker_configuration_p->streamConfiguration_->configuration_.deleteModule =
         deleteModule_in;
-      tracker_configuration_p->streamConfiguration->configuration_.module =
+      tracker_configuration_p->streamConfiguration_->configuration_.module =
         finalModule_inout;
     } // end ELSE
     if (deleteModule_in)

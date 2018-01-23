@@ -190,6 +190,67 @@ if (NOT ACE_LIBRARY)
  #message (STATUS "Found ACE library \"${ACE_LIBRARY}\"")
 endif ()
 
+set (ACE_XML_LIB_FILE libACEXML.so)
+if (UNIX)
+# message ("CMAKE_FIND_ROOT_PATH is ${CMAKE_FIND_ROOT_PATH}")
+ find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
+               HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE /usr/local
+               PATHS ENV ACE_ROOT
+               PATH_SUFFIXES lib
+               DOC "searching for ${ACE_XML_LIB_FILE}"
+               NO_DEFAULT_PATH)
+# else ()
+#  find_library (ACEXML_LIBRARY ${ACE_XML_LIB_FILE}
+#                DOC "searching for ${ACE_XML_LIB_FILE} (system paths)")
+# endif ()
+elseif (WIN32)
+ if (CMAKE_BUILD_TYPE STREQUAL Debug)
+  set (LIB_FILE_SUFFIX d)
+ endif ()
+ unset (ACE_XML_LIB_FILE)
+ set (ACE_XML_LIB_FILE ACEXML${LIB_FILE_SUFFIX}.lib)
+ find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
+               PATHS ENV ACE_ROOT
+               PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
+               DOC "searching for ${ACE_XML_LIB_FILE}")
+endif ()
+#if (NOT EXISTS ACE_XML_LIBRARY)
+if (NOT ACE_XML_LIBRARY)
+ message (FATAL_ERROR "Could not find ${ACE_XML_LIB_FILE} (was: \"${ACE_XML_LIBRARY}\"), aborting")
+else ()
+ #message (STATUS "Found ACEXML library \"${ACE_XML_LIBRARY}\"")
+endif ()
+set (ACE_XML_PARSER_LIB_FILE libACEXML_Parser.so)
+if (UNIX)
+# message ("CMAKE_FIND_ROOT_PATH is ${CMAKE_FIND_ROOT_PATH}")
+ find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
+               HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE /usr/local
+               PATHS ENV ACE_ROOT
+               PATH_SUFFIXES lib
+               DOC "searching for ${ACE_XML_PARSER_LIB_FILE}"
+               NO_DEFAULT_PATH)
+# else ()
+#  find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
+#                DOC "searching for ${ACE_XML_PARSER_LIB_FILE} (system paths)")
+# endif ()
+elseif (WIN32)
+ if (CMAKE_BUILD_TYPE STREQUAL Debug)
+  set (LIB_FILE_SUFFIX d)
+ endif ()
+ unset (ACE_XML_PARSER_LIB_FILE)
+ set (ACE_XML_PARSER_LIB_FILE ACEXML_Parser${LIB_FILE_SUFFIX}.lib)
+ find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
+               PATHS ENV ACE_ROOT
+               PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
+               DOC "searching for ${ACE_XML_PARSER_LIB_FILE}")
+endif ()
+#if (NOT EXISTS ACE_XML_PARSER_LIBRARY)
+if (NOT ACE_XML_PARSER_LIBRARY)
+ message (FATAL_ERROR "Could not find ${ACE_XML_PARSER_LIB_FILE} (was: \"${ACE_XML_PARSER_LIBRARY}\"), aborting")
+else ()
+ #message (STATUS "Found ACEXML parser library \"${ACE_XML_PARSER_LIBRARY}\"")
+endif ()
+
 include (FindPkgConfig)
 #pkg_check_modules (PKGACE REQUIRED ACE)
 if (UNIX)
@@ -222,6 +283,7 @@ if (NOT EXISTS ${Common_DIR})
 endif ()
 add_definitions (-DCOMMON_HAS_DLL)
 add_definitions (-DCOMMON_UI_HAS_DLL)
+add_definitions (-DCOMMON_XML_HAS_DLL)
 
 find_package (ACEStream ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
@@ -282,8 +344,10 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/timer)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui/gtk)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/xml)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/lib)
 endif ()
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/wlan)
@@ -315,7 +379,7 @@ if (UNIX)
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_INTERFACE_MULTIPLICITY 4)
  set_target_properties (${EXECUTABLE} PROPERTIES IMPORTED_LINK_INTERFACE_MULTIPLICITY 4)
 elseif (WIN32)
-  if (NOT ${BUILD_TEST_U})
+  if (NOT BUILD_TEST_U)
    set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
  endif ()
 endif ()
@@ -334,6 +398,9 @@ endif ()
 add_dependencies (${EXECUTABLE} CommonTimer)
 add_dependencies (${EXECUTABLE} CommonUI)
 add_dependencies (${EXECUTABLE} CommonUI_GTK)
+if (WIN32)
+ add_dependencies (${EXECUTABLE} CommonXML)
+endif ()
 
 add_dependencies (${EXECUTABLE} ACEStream)
 
@@ -359,6 +426,10 @@ if (UNIX)
  endif ()
 elseif (WIN32)
  target_link_libraries (${EXECUTABLE} ntdll.lib)
+
+ target_link_libraries (${EXECUTABLE} ${ACE_XML_LIBRARY})
+ target_link_libraries (${EXECUTABLE} ${ACE_XML_PARSER_LIBRARY})
+
 # *TODO*: repair WIN32 pkgconfig support
  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gio-2.0.lib)
  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/glib-2.0.lib)
@@ -381,6 +452,7 @@ if (WIN32)
 endif ()
 #target_link_libraries (${EXECUTABLE} CommonUI)
 target_link_libraries (${EXECUTABLE} CommonUI_GTK)
+target_link_libraries (${EXECUTABLE} CommonXML)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)

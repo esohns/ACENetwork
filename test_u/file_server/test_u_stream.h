@@ -24,6 +24,7 @@
 #include <string>
 
 #include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
@@ -31,23 +32,27 @@
 
 #include "stream_base.h"
 #include "stream_common.h"
-#include "stream_control_message.h"
+//#include "stream_control_message.h"
+#include "stream_session_data.h"
 #include "stream_statemachine_control.h"
 
 #include "stream_net_io_stream.h"
 
-#include "test_u_common.h"
+#include "test_u_stream_common.h"
+
 #include "test_u_connection_manager_common.h"
 #include "test_u_configuration.h"
-
-#include "file_server_stream_common.h"
+#include "file_server_connection_common.h"
+#include "test_u_message.h"
 
 // forward declarations
-class Test_U_Message;
+struct FileServer_StreamState;
+struct FileServer_StreamConfiguration;
+struct Test_U_ModuleHandlerConfiguration;
+struct FileServer_SessionData;
+typedef Stream_SessionData_T<struct FileServer_SessionData> FileServer_SessionData_t;
 class Test_U_SessionMessage;
-typedef Stream_ControlMessage_T<enum Stream_ControlType,
-                                enum Stream_ControlMessageType,
-                                struct Stream_AllocatorConfiguration> Test_U_ControlMessage_t;
+struct FileServer_UserData;
 
 extern const char stream_name_string_[];
 
@@ -62,7 +67,7 @@ class Test_U_Stream
                                         struct FileServer_StreamConfiguration,
                                         Net_Statistic_t,
                                         Common_Timer_Manager_t,
-                                        struct Stream_AllocatorConfiguration,
+                                        struct Net_AllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
                                         struct Test_U_ModuleHandlerConfiguration,
                                         struct FileServer_SessionData,
@@ -84,7 +89,7 @@ class Test_U_Stream
                                         struct FileServer_StreamConfiguration,
                                         Net_Statistic_t,
                                         Common_Timer_Manager_t,
-                                        struct Stream_AllocatorConfiguration,
+                                        struct Net_AllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
                                         struct Test_U_ModuleHandlerConfiguration,
                                         struct FileServer_SessionData,
@@ -134,7 +139,7 @@ class Test_U_UDPStream
                                         struct FileServer_StreamConfiguration,
                                         Net_Statistic_t,
                                         Common_Timer_Manager_t,
-                                        struct Stream_AllocatorConfiguration,
+                                        struct Net_AllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
                                         struct Test_U_ModuleHandlerConfiguration,
                                         struct FileServer_SessionData,
@@ -156,7 +161,7 @@ class Test_U_UDPStream
                                         struct FileServer_StreamConfiguration,
                                         Net_Statistic_t,
                                         Common_Timer_Manager_t,
-                                        struct Stream_AllocatorConfiguration,
+                                        struct Net_AllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
                                         struct Test_U_ModuleHandlerConfiguration,
                                         struct FileServer_SessionData,

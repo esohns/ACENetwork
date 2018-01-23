@@ -55,7 +55,7 @@ struct FileServer_ConnectionState;
 struct FileServer_UserData;
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 struct FileServer_ConnectionConfiguration,
+                                 FileServer_ConnectionConfiguration_t,
                                  struct FileServer_ConnectionState,
                                  Net_Statistic_t,
                                  struct FileServer_UserData> FileServer_IInetConnectionManager_t;
@@ -63,20 +63,16 @@ class Test_U_SessionMessage;
 class Test_U_Message;
 struct FileServer_ListenerConfiguration;
 typedef Net_IListener_T<struct FileServer_ListenerConfiguration,
-                        struct FileServer_ConnectionConfiguration> Test_U_IListener_t;
+                        FileServer_ConnectionConfiguration_t> Test_U_IListener_t;
 
 //////////////////////////////////////////
 
-struct FileServer_ConnectionConfiguration;
 struct FileServer_UserData
  : Net_UserData
 {
   FileServer_UserData ()
    : Net_UserData ()
-   //, connectionConfiguration (NULL)
   {};
-
-  //struct FileServer_ConnectionConfiguration* connectionConfiguration;
 };
 
 struct FileServer_SignalHandlerConfiguration
@@ -109,7 +105,7 @@ struct FileServer_Configuration
    , userData ()
   {};
 
-  struct Stream_AllocatorConfiguration         allocatorConfiguration;
+  struct Net_AllocatorConfiguration            allocatorConfiguration;
   FileServer_ConnectionConfigurations_t        connectionConfigurations;
   ACE_HANDLE                                   handle;
   Test_U_IListener_t*                          listener;
@@ -120,15 +116,15 @@ struct FileServer_Configuration
   struct FileServer_UserData                   userData;
 };
 
-typedef Stream_ControlMessage_T<enum Stream_ControlType,
-                                enum Stream_ControlMessageType,
-                                struct Stream_AllocatorConfiguration> Test_U_ControlMessage_t;
-
-typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                          struct Stream_AllocatorConfiguration,
-                                          Test_U_ControlMessage_t,
-                                          Test_U_Message,
-                                          Test_U_SessionMessage> Test_U_StreamMessageAllocator_t;
+//typedef Stream_ControlMessage_T<enum Stream_ControlType,
+//                                enum Stream_ControlMessageType,
+//                                struct Stream_AllocatorConfiguration> Test_U_ControlMessage_t;
+//
+//typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+//                                          struct Stream_AllocatorConfiguration,
+//                                          Test_U_ControlMessage_t,
+//                                          Test_U_Message,
+//                                          Test_U_SessionMessage> Test_U_StreamMessageAllocator_t;
 
 //////////////////////////////////////////
 

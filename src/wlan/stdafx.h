@@ -3,7 +3,7 @@
 //      are changed infrequently
 //
 #if defined _MSC_VER
-#define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
+#define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers
 
 // *NOTE*: work around quirky MSVC...
 #define NOMINMAX
@@ -17,19 +17,19 @@
 #include <string>
 
 // System Library Header Files
-
-#ifdef LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
-#include "valgrind/valgrind.h"
-#endif
-
-// System Library Header Files
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
 
+//#if defined (LIBACENETWORK_ENABLE_VALGRIND_SUPPORT)
+#if defined (VALGRIND_SUPPORT)
+#include "valgrind/valgrind.h"
+#endif
+
 // Library Header Files
 #include "common.h"
 #include "common_macros.h"
+#include "common_pragmas.h"
 
 #include "stream_common.h"
 #include "stream_macros.h"

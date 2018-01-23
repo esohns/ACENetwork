@@ -21,6 +21,8 @@
 #ifndef DHCP_CONFIGURATION_H
 #define DHCP_CONFIGURATION_H
 
+#include <deque>
+#include <map>
 #include <string>
 
 #include "ace/INET_Addr.h"

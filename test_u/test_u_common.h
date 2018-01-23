@@ -21,20 +21,11 @@
 #ifndef TEST_U_COMMON_H
 #define TEST_U_COMMON_H
 
-#include "ace/config-lite.h"
-
-#include "common.h"
+#include "common_configuration.h"
 #include "common_istatistic.h"
 #include "common_statistic_handler.h"
 
-#include "stream_common.h"
-
 #include "net_common.h"
-#include "net_configuration.h"
-
-// forward declarations
-class Stream_IAllocator;
-struct Net_Server_Configuration;
 
 typedef Net_Statistic_t Test_U_Statistic_t;
 typedef Common_IStatistic_T<Test_U_Statistic_t> Test_U_IStatisticHandler_t;
@@ -48,19 +39,15 @@ struct Test_U_SignalHandlerConfiguration
   {};
 };
 
-struct Test_U_ConnectionConfiguration;
+//////////////////////////////////////////
+
 struct Test_U_UserData
  : Net_UserData
 {
   Test_U_UserData ()
    : Net_UserData ()
-//   , connectionConfiguration (NULL)
   {};
-
-//  struct Test_U_ConnectionConfiguration* connectionConfiguration;
 };
-
-//////////////////////////////////////////
 
 struct Test_U_Configuration
 {

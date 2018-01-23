@@ -24,16 +24,23 @@
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"
 
+#include "common_configuration.h"
+
 #include "stream_common.h"
+#include "stream_control_message.h"
+#include "stream_session_data.h"
 #include "stream_session_message_base.h"
 
 #include "test_u_common.h"
-//#include "test_u_HTTP_decoder_common.h"
-#include "test_u_HTTP_decoder_stream_common.h"
 
 // forward declaration(s)
 class ACE_Allocator;
 class Test_U_Message;
+struct Test_U_HTTPDecoder_SessionData;
+typedef Stream_SessionData_T<struct Test_U_HTTPDecoder_SessionData> Test_U_HTTPDecoder_SessionData_t;
+typedef Stream_ControlMessage_T<enum Stream_ControlType,
+                                enum Stream_ControlMessageType,
+                                struct Common_FlexParserAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
 template <ACE_SYNCH_DECL,
           typename AllocatorConfigurationType,
           typename ControlMessageType,
@@ -42,17 +49,22 @@ template <ACE_SYNCH_DECL,
 class Stream_MessageAllocatorHeapBase_T;
 
 class Test_U_SessionMessage
- : public Stream_SessionMessageBase_T<struct Test_U_AllocatorConfiguration,
+ : public Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
                                       Test_U_HTTPDecoder_SessionData_t,
                                       struct Test_U_UserData>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Test_U_AllocatorConfiguration,
-                                                 Test_U_ControlMessage_t,
+                                                 struct Common_FlexParserAllocatorConfiguration,
+                                                 Test_U_HTTPDecoder_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
+
+  typedef Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
+                                      Test_U_HTTPDecoder_SessionData_t,
+                                      struct Test_U_UserData> inherited;
 
  public:
   // *NOTE*: assumes responsibility for the second argument !
@@ -61,17 +73,12 @@ class Test_U_SessionMessage
                          enum Stream_SessionMessageType,
                          Test_U_HTTPDecoder_SessionData_t*&, // session data container handle
                          struct Test_U_UserData*);
-  inline virtual ~Test_U_SessionMessage () {};
+  inline virtual ~Test_U_SessionMessage () {}
 
   // overloaded from ACE_Message_Block
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<struct Test_U_AllocatorConfiguration,
-                                      enum Stream_SessionMessageType,
-                                      Test_U_HTTPDecoder_SessionData_t,
-                                      struct Test_U_UserData> inherited;
-
   // copy ctor to be used by duplicate()
   Test_U_SessionMessage (const Test_U_SessionMessage&);
 

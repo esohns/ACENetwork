@@ -38,14 +38,15 @@
 #include "net_common.h"
 
 #include "test_u_common.h"
-#include "test_u_connection_manager_common.h"
 #include "test_u_configuration.h"
+#include "test_u_connection_manager_common.h"
+#include "test_u_message.h"
+#include "test_u_stream_common.h"
 
 // forward declarations
-typedef Stream_ControlMessage_T<enum Stream_ControlType,
-                                enum Stream_ControlMessageType,
-                                struct Stream_AllocatorConfiguration> Test_U_ControlMessage_t;
-class Test_U_Message;
+//typedef Stream_ControlMessage_T<enum Stream_ControlType,
+//                                enum Stream_ControlMessageType,
+//                                struct Net_AllocatorConfiguration> Test_U_ControlMessage_t;
 class Test_U_SessionMessage;
 
 extern const char stream_name_string_[];
@@ -57,20 +58,20 @@ class Test_U_Stream
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
-                                        struct Test_U_StreamState,
-                                        struct Test_U_StreamConfiguration,
-                                        Net_Statistic_t,
+                                        struct ClientServer_StreamState,
+                                        struct ClientServer_StreamConfiguration,
+                                        Test_U_Statistic_t,
                                         Common_Timer_Manager_t,
-                                        struct Stream_AllocatorConfiguration,
+                                        struct Net_AllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
-                                        struct Test_U_ModuleHandlerConfiguration,
-                                        struct Test_U_StreamSessionData, // session data
-                                        Test_U_StreamSessionData_t,      // session data container (reference counted)
+                                        struct ClientServer_ModuleHandlerConfiguration,
+                                        struct ClientServer_StreamSessionData, // session data
+                                        ClientServer_StreamSessionData_t,      // session data container (reference counted)
                                         Test_U_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
-                                        Test_U_InetConnectionManager_t,
+                                        ClientServer_InetConnectionManager_t,
                                         struct Test_U_UserData>
 {
   typedef Stream_Module_Net_IO_Stream_T<ACE_MT_SYNCH,
@@ -79,20 +80,20 @@ class Test_U_Stream
                                         enum Stream_ControlType,
                                         enum Stream_SessionMessageType,
                                         enum Stream_StateMachine_ControlState,
-                                        struct Test_U_StreamState,
-                                        struct Test_U_StreamConfiguration,
-                                        Net_Statistic_t,
+                                        struct ClientServer_StreamState,
+                                        struct ClientServer_StreamConfiguration,
+                                        Test_U_Statistic_t,
                                         Common_Timer_Manager_t,
-                                        struct Stream_AllocatorConfiguration,
+                                        struct Net_AllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
-                                        struct Test_U_ModuleHandlerConfiguration,
-                                        struct Test_U_StreamSessionData,
-                                        Test_U_StreamSessionData_t,
+                                        struct ClientServer_ModuleHandlerConfiguration,
+                                        struct ClientServer_StreamSessionData,
+                                        ClientServer_StreamSessionData_t,
                                         Test_U_ControlMessage_t,
                                         Test_U_Message,
                                         Test_U_SessionMessage,
                                         ACE_INET_Addr,
-                                        Test_U_InetConnectionManager_t,
+                                        ClientServer_InetConnectionManager_t,
                                         struct Test_U_UserData> inherited;
 
  public:
@@ -116,7 +117,7 @@ class Test_U_Stream
 
   // implement Common_IStatistic_T
   // *NOTE*: these delegate to runtimeStatistic_
-  virtual bool collect (Net_Statistic_t&); // return value: statistic data
+  virtual bool collect (Test_U_Statistic_t&); // return value: statistic data
   inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:

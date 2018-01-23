@@ -45,6 +45,8 @@ gboolean idle_update_info_display_cb (gpointer);
 gboolean idle_update_ssids_cb (gpointer);
 gboolean idle_update_log_display_cb (gpointer);
 gboolean idle_update_progress_cb (gpointer);
+gboolean idle_update_signal_quality_cb (gpointer);
+gboolean idle_update_status_cb (gpointer);
 
 //------------------------------------------------------------------------------
 
@@ -59,6 +61,7 @@ G_MODULE_EXPORT void button_report_clicked_cb (GtkButton*, gpointer);
 G_MODULE_EXPORT void combobox_interface_changed_cb (GtkComboBox*, gpointer);
 G_MODULE_EXPORT void combobox_ssid_changed_cb (GtkComboBox*, gpointer);
 G_MODULE_EXPORT void togglebutton_autoassociate_toggled_cb (GtkToggleButton*, gpointer);
+G_MODULE_EXPORT void togglebutton_backgroundscan_toggled_cb (GtkToggleButton*, gpointer);
 //////////////////////////////////////////
 G_MODULE_EXPORT void button_clear_clicked_cb (GtkButton*, gpointer);
 G_MODULE_EXPORT void button_about_clicked_cb (GtkButton*, gpointer);

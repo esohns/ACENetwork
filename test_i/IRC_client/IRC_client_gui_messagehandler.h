@@ -23,7 +23,7 @@
 
 #include <string>
 
-#include <gtk/gtk.h>
+#include "gtk/gtk.h"
 
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
@@ -36,7 +36,7 @@
 #include "IRC_client_gui_common.h"
 
 // forward declaration(s)
-struct Common_UI_GTKState;
+struct Common_UI_GTK_State;
 class IRC_Client_GUI_Connection;
 
 class IRC_Client_GUI_MessageHandler
@@ -44,30 +44,30 @@ class IRC_Client_GUI_MessageHandler
 {
  public:
   // ctor for default handler (== server log)
-  IRC_Client_GUI_MessageHandler (struct Common_UI_GTKState*, // GTK state handle
-                                 IRC_Client_GUI_Connection*, // connection handle
-                                 const std::string&);        // connection timestamp
-                                                             // *NOTE*: used to lookup the corresponding builder
+  IRC_Client_GUI_MessageHandler (struct Common_UI_GTK_State*, // GTK state handle
+                                 IRC_Client_GUI_Connection*,  // connection handle
+                                 const std::string&);         // connection timestamp
+                                                              // *NOTE*: used to lookup the corresponding builder
   // ctor for regular channel handler
   // *WARNING*: must be called with
   //            IRC_Client_GTK_CBData::Common_UI_GTKState::lock held !
-  IRC_Client_GUI_MessageHandler (struct Common_UI_GTKState*, // GTK state handle
-                                 IRC_Client_GUI_Connection*, // connection handle
-                                 IRC_IControl*,              // controller handle
-                                 const std::string&,         // identifier (channel/nick)
-                                 const std::string&,         // UI (glade) file directory
-                                 const std::string&,         // connection timestamp
-                                                             // *NOTE*: used to lookup the corresponding builder
-                                 bool = true);               // locked access (GDK) ?
+  IRC_Client_GUI_MessageHandler (struct Common_UI_GTK_State*, // GTK state handle
+                                 IRC_Client_GUI_Connection*,  // connection handle
+                                 IRC_IControl*,               // controller handle
+                                 const std::string&,          // identifier (channel/nick)
+                                 const std::string&,          // UI (glade) file directory
+                                 const std::string&,          // connection timestamp
+                                                              // *NOTE*: used to lookup the corresponding builder
+                                 bool = true);                // locked access (GDK) ?
   // *WARNING*: must be called with
   //            IRC_Client_GTK_CBData::Common_UI_GTKState::lock held !
   virtual ~IRC_Client_GUI_MessageHandler ();
 
   // implement Common_IGet_T
-  inline virtual const IRC_Client_GTK_HandlerCBData& getR () const { return CBData_; };
+  inline virtual const IRC_Client_GTK_HandlerCBData& getR () const { return CBData_; }
 
-  inline bool isPrivateDialog () const { return isPrivateDialog_; };
-  inline bool isServerLog () const { return CBData_.id.empty (); };
+  inline bool isPrivateDialog () const { return isPrivateDialog_; }
+  inline bool isServerLog () const { return CBData_.id.empty (); }
 
   // *WARNING*: to be called from gtk_main context ONLY (trigger with
   //            g_idle_add())

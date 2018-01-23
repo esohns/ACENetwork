@@ -124,6 +124,7 @@ if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP Common)
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACEStream)
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACENetwork)
+ target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACENetwork_WLAN)
 endif ()
 
 # add PCH

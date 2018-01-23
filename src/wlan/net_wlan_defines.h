@@ -24,19 +24,37 @@
 #include "ace/config-lite.h"
 
 // monitor
+#define NET_WLAN_MONITOR_AP_ASSOCIATION_RETRIES                           3
+// *NOTE*: 'connection' really refers to the level-3 (i.e. IP) address handshake
+//         procedure (e.g. by DHCP) taking place after successful AP association
+#define NET_WLAN_MONITOR_AP_CONNECTION_RETRIES                            3
 // *NOTE*: the monitor will continually scan until the configured SSID (if any)
 //         is detected. It will then periodically rescan at this interval iff it
 //         is not configured to 'auto-associate'
-#define NET_WLAN_MONITOR_SCAN_INTERVAL                                    500 // ms
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+// *TODO*: see timeout below
+#define NET_WLAN_MONITOR_WIN32_SCAN_INTERVAL                              5 // s
+#else
+#define NET_WLAN_MONITOR_UNIX_SCAN_INTERVAL                               500 // ms
+#endif
 #define NET_WLAN_MONITOR_SCAN_SSID_RETRIES                                3
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+// *NOTE*: this is a 'Windows-Logo' requirement
 #define NET_WLAN_MONITOR_WIN32_SCAN_SSID_TIMEOUT                          4 // seconds
 
+#define NET_WLAN_MONITOR_WIN32_DEFAULT_AUTOCONF                           true
 // *NOTE*: 'background' refers to an associated state
 #define NET_WLAN_MONITOR_WIN32_DEFAULT_BACKGROUNDSCANS                    false
-#define NET_WLAN_MONITOR_WIN32_DEFAULT_STREAMINGMODE                      true
+#define NET_WLAN_MONITOR_WIN32_DEFAULT_MEDIASTREAMINGMODE                 false
+
+// XML WLAN profile
+#define NET_WLAN_PROFILE_HEX_ELEMENT_STRING                               "hex"
+#define NET_WLAN_PROFILE_SSIDCONFIG_ELEMENT_STRING                        "SSIDConfig"
+#define NET_WLAN_PROFILE_SSID_ELEMENT_STRING                              "SSID"
 #else
+#define NET_WLAN_MONITOR_ASSOCIATION_DEFAULT_RESULT_POLL_INTERVAL         50 // ms
+#define NET_WLAN_MONITOR_ASSOCIATION_DEFAULT_TIMEOUT                      3 // s
 #define NET_WLAN_MONITOR_SCAN_DEFAULT_RESULT_POLL_INTERVAL                50 // ms
 
 #if defined (DHCLIENT_SUPPORT)

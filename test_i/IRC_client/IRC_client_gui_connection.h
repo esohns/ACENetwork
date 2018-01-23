@@ -52,7 +52,7 @@ class IRC_Client_GUI_Connection
   friend class IRC_Client_GUI_MessageHandler;
 
  public:
-  IRC_Client_GUI_Connection (struct Common_UI_GTKState*,    // GTK state handle
+  IRC_Client_GUI_Connection (struct Common_UI_GTK_State*,   // GTK state handle
                              IRC_Client_GUI_Connections_t*, // connections handle
                              guint,                         // (statusbar) context ID
                              const std::string&,            // (server tab) label

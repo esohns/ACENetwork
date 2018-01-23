@@ -35,12 +35,12 @@
 #include "stream_net_io_stream.h"
 
 #include "test_i_connection_manager_common.h"
+#include "test_i_message.h"
 #include "test_i_url_stream_load_common.h"
 #include "test_i_url_stream_load_stream_common.h"
 
 // forward declarations
 class Stream_IAllocator;
-class Test_I_Message;
 class Test_I_SessionMessage;
 
 extern const char stream_name_string_[];
@@ -56,7 +56,7 @@ class Test_I_ConnectionStream
                                         struct Test_I_URLStreamLoad_StreamConfiguration,
                                         HTTP_Statistic_t,
                                         Common_Timer_Manager_t,
-                                        struct Test_I_AllocatorConfiguration,
+                                        struct Common_FlexParserAllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
                                         struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
                                         struct Test_I_URLStreamLoad_SessionData,
@@ -78,7 +78,7 @@ class Test_I_ConnectionStream
                                         struct Test_I_URLStreamLoad_StreamConfiguration,
                                         HTTP_Statistic_t,
                                         Common_Timer_Manager_t,
-                                        struct Test_I_AllocatorConfiguration,
+                                        struct Common_FlexParserAllocatorConfiguration,
                                         struct Stream_ModuleConfiguration,
                                         struct Test_I_URLStreamLoad_ModuleHandlerConfiguration,
                                         struct Test_I_URLStreamLoad_SessionData,

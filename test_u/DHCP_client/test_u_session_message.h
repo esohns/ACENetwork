@@ -39,24 +39,29 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType> class Stream_MessageAllocatorHeapBase_T;
 
 class Test_U_SessionMessage
- : public Stream_SessionMessageBase_T<struct Test_U_AllocatorConfiguration,
+ : public Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
                                       enum Stream_SessionMessageType,
-                                      Test_U_DHCPClient_SessionData_t,
+                                      DHCPClient_SessionData_t,
                                       struct Test_U_UserData>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Test_U_AllocatorConfiguration,
-                                                 Test_U_ControlMessage_t,
+                                                 struct Common_FlexParserAllocatorConfiguration,
+                                                 DHCPClient_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
+
+  typedef Stream_SessionMessageBase_T<struct Common_FlexParserAllocatorConfiguration,
+                                      enum Stream_SessionMessageType,
+                                      DHCPClient_SessionData_t,
+                                      struct Test_U_UserData> inherited;
 
  public:
   // *NOTE*: assumes responsibility for the second argument !
   // *TODO*: (using gcc) cannot pass reference to pointer for some reason
   Test_U_SessionMessage (Stream_SessionId_t,
                          enum Stream_SessionMessageType,
-                         Test_U_DHCPClient_SessionData_t*&, // session data container handle
+                         DHCPClient_SessionData_t*&, // session data container handle
                          struct Test_U_UserData*);
   // copy ctor to be used by duplicate()
   Test_U_SessionMessage (const Test_U_SessionMessage&);
@@ -66,11 +71,6 @@ class Test_U_SessionMessage
   virtual ACE_Message_Block* duplicate (void) const;
 
  private:
-  typedef Stream_SessionMessageBase_T<struct Test_U_AllocatorConfiguration,
-                                      enum Stream_SessionMessageType,
-                                      Test_U_DHCPClient_SessionData_t,
-                                      struct Test_U_UserData> inherited;
-
   // *NOTE*: these may be used by message allocators
   // *WARNING*: these ctors are NOT threadsafe
   Test_U_SessionMessage (Stream_SessionId_t,

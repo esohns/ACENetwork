@@ -101,11 +101,13 @@ elseif (WIN32)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/timer)
+ #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/xml)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src/modules/lib)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src/modules/stat)
 endif ()
+#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/wlan)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../3rd_party/bison)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/..)
 
@@ -128,7 +130,9 @@ set (${PROJECT_NAME}_LIB_SRCS
      net_common_tools.cpp
      net_common_tools.h
      net_common.h
+     net_configuration.cpp
      net_configuration.h
+     net_configuration.inl
      net_connection_base.cpp
      net_connection_base.h
      net_connection_base.inl
@@ -275,6 +279,7 @@ install (FILES
          net_common_tools.h
          net_common.h
          net_configuration.h
+         net_configuration.inl
          net_connection_base.h
          net_connection_manager.h
          net_connection_manager.inl

@@ -39,33 +39,33 @@
 
 #include "IRC_client_common.h"
 #include "IRC_client_defines.h"
-//#include "IRC_client_network.h"
+#include "IRC_client_network.h"
 #include "IRC_client_stream_common.h"
 
 // forward declarations
-struct IRC_Client_ConnectionConfiguration;
+//struct IRC_Client_ConnectionConfiguration;
 struct IRC_Client_CursesState;
-struct IRC_Client_SessionState;
-class IRC_Record;
-struct IRC_ModuleHandlerConfiguration;
+//struct IRC_Client_SessionState;
+//class IRC_Record;
+//struct IRC_ModuleHandlerConfiguration;
 //class IRC_Client_Stream;
-struct IRC_Stream_SessionData;
+//struct IRC_Stream_SessionData;
 struct IRC_Client_UserData;
 //typedef Net_IConnection_T<ACE_INET_Addr,
-//                          struct IRC_Client_ConnectionConfiguration,
+//                          IRC_Client_ConnectionConfiguration_t,
 //                          struct IRC_Client_ConnectionState,
 //                          IRC_Statistic_t,
 //                          IRC_Client_Stream> IRC_Client_IConnection_t;
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
-                                 struct IRC_Client_ConnectionConfiguration,
-                                 struct IRC_Client_SessionState,
-                                 IRC_Statistic_t,
-                                 struct IRC_Client_UserData> IRC_Client_IConnection_Manager_t;
+//typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+//                                 ACE_INET_Addr,
+//                                 IRC_Client_ConnectionConfiguration_t,
+//                                 struct IRC_Client_SessionState,
+//                                 IRC_Statistic_t,
+//                                 struct IRC_Client_UserData> IRC_Client_IConnection_Manager_t;
 
 //struct IRC_Client_ConnectorConfiguration
 //{
-//  inline IRC_Client_ConnectorConfiguration ()
+//  IRC_Client_ConnectorConfiguration ()
 //   : /*configuration (NULL)
 //   ,*/ connectionManager (NULL)
 //   , socketHandlerConfiguration (NULL)
@@ -81,7 +81,7 @@ typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
 struct IRC_Client_ConnectionConfiguration;
 struct IRC_Client_InputHandlerConfiguration
 {
-  inline IRC_Client_InputHandlerConfiguration ()
+  IRC_Client_InputHandlerConfiguration ()
    : controller (NULL)
    , connectionConfiguration (NULL)
   {};
@@ -93,7 +93,7 @@ struct IRC_Client_InputHandlerConfiguration
 
 struct IRC_Client_Configuration
 {
-  inline IRC_Client_Configuration ()
+  IRC_Client_Configuration ()
    : parserConfiguration ()
    ///////////////////////////////////////
    , connectionConfigurations ()
@@ -104,7 +104,7 @@ struct IRC_Client_Configuration
    ///////////////////////////////////////
    , cursesState (NULL)
    , encoding (IRC_PRT_DEFAULT_ENCODING)
-   , groupID (COMMON_EVENT_THREAD_GROUP_ID)
+   , groupId (COMMON_EVENT_THREAD_GROUP_ID)
    , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
    , useReactor (NET_EVENT_USE_REACTOR)
    ///////////////////////////////////////
@@ -126,7 +126,7 @@ struct IRC_Client_Configuration
   // *TODO*: implement support for 7-bit ASCII (as it is the most compatible
   //         encoding)
   enum IRC_CharacterEncoding            encoding;
-  int                                   groupID;
+  int                                   groupId;
   bool                                  logToFile;
   bool                                  useReactor;
 

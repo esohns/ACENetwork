@@ -18,14 +18,13 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#include "ace/Assert.h"
-#include "ace/config-macros.h"
+#include "ace/Log_Msg.h"
 
 #include "net_macros.h"
 
 template <typename ConfigurationType>
 Net_InetTransportLayerBase_T<ConfigurationType>::Net_InetTransportLayerBase_T (enum Net_TransportLayerType transportLayer_in)
- : dispatch_ (COMMON_DISPATCH_INVALID)
+ : dispatch_ (COMMON_EVENT_DISPATCH_INVALID)
  , role_ (NET_ROLE_INVALID)
  , transportLayer_ (transportLayer_in)
 {
@@ -35,7 +34,7 @@ Net_InetTransportLayerBase_T<ConfigurationType>::Net_InetTransportLayerBase_T (e
 
 template <typename ConfigurationType>
 bool
-Net_InetTransportLayerBase_T<ConfigurationType>::initialize (enum Common_DispatchType dispatch_in,
+Net_InetTransportLayerBase_T<ConfigurationType>::initialize (enum Common_EventDispatchType dispatch_in,
                                                              enum Net_ClientServerRole role_in,
                                                              const ConfigurationType& configuration_in)
 {

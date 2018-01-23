@@ -33,6 +33,7 @@ endif ()
 if (NOT ACE_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
 endif ()
+
 set (ACE_SSL_LIB_FILE libACE_SSL.so)
 if (UNIX)
  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
@@ -56,6 +57,55 @@ endif ()
 #if (NOT EXISTS ACE_LIBRARY)
 if (NOT ACE_SSL_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_SSL_LIB_FILE} (was: \"${ACE_SSL_LIBRARY}\"), aborting")
+endif ()
+
+set (ACE_XML_LIB_FILE libACEXML.so)
+if (UNIX)
+ find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
+               HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE /usr/local
+               PATHS ENV ACE_ROOT
+               PATH_SUFFIXES lib
+               DOC "searching for ${ACE_XML_LIB_FILE}"
+               NO_DEFAULT_PATH)
+elseif (WIN32)
+ if (CMAKE_BUILD_TYPE STREQUAL Debug)
+  set (LIB_FILE_SUFFIX d)
+ endif ()
+ unset (ACE_XML_LIB_FILE)
+ set (ACE_XML_LIB_FILE ACEXML${LIB_FILE_SUFFIX}.lib)
+ find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
+               PATHS ENV ACE_ROOT
+               PATH_SUFFIXES lib
+               DOC "searching for ${ACE_XML_LIB_FILE}"
+               NO_DEFAULT_PATH)
+endif ()
+#if (NOT EXISTS ACE_LIBRARY)
+if (NOT ACE_XML_LIBRARY)
+ message (FATAL_ERROR "could not find ${ACE_XML_LIB_FILE} (was: \"${ACE_XML_LIBRARY}\"), aborting")
+endif ()
+set (ACE_XML_PARSER_LIB_FILE libACEXML_Parser.so)
+if (UNIX)
+ find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
+               HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE /usr/local
+               PATHS ENV ACE_ROOT
+               PATH_SUFFIXES lib
+               DOC "searching for ${ACE_XML_PARSER_LIB_FILE}"
+               NO_DEFAULT_PATH)
+elseif (WIN32)
+ if (CMAKE_BUILD_TYPE STREQUAL Debug)
+  set (LIB_FILE_SUFFIX d)
+ endif ()
+ unset (ACE_XML_PARSER_LIB_FILE)
+ set (ACE_XML_PARSER_LIB_FILE ACEXML_Parser${LIB_FILE_SUFFIX}.lib)
+ find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
+               PATHS ENV ACE_ROOT
+               PATH_SUFFIXES lib
+               DOC "searching for ${ACE_XML_PARSER_LIB_FILE}"
+               NO_DEFAULT_PATH)
+endif ()
+#if (NOT EXISTS ACE_LIBRARY)
+if (NOT ACE_XML_PARSER_LIBRARY)
+ message (FATAL_ERROR "could not find ${ACE_XML_PARSER_LIB_FILE} (was: \"${ACE_XML_PARSER_LIBRARY}\"), aborting")
 endif ()
 
 include (FindPkgConfig)
@@ -180,7 +230,7 @@ add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${HTTP_decoder_SRCS})
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
-if (WIN32 AND NOT ${BUILD_TEST_U})
+if (WIN32 AND NOT BUILD_TEST_U)
  set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
 endif ()
 
@@ -203,6 +253,11 @@ elseif (WIN32)
 # *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
  target_link_libraries (${EXECUTABLE} ntdll.lib)
+
+ target_link_libraries (${EXECUTABLE} ${ACE_XML_LIBRARY})
+ target_link_libraries (${EXECUTABLE} ${ACE_XML_PARSER_LIBRARY})
+
+ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 endif ()
 #target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/libeay32.lib)
 target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/ssleay32.lib)

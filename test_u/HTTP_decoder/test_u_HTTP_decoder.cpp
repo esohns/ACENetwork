@@ -42,7 +42,10 @@
 #include "common.h"
 #include "common_file_tools.h"
 #include "common_logger.h"
+#include "common_signal_tools.h"
 #include "common_tools.h"
+
+#include "common_timer_tools.h"
 
 #include "stream_allocatorheap.h"
 #include "stream_macros.h"
@@ -60,13 +63,13 @@
 #include "http_scanner.h"
 
 #include "test_u_common.h"
+#include "test_u_defines.h"
+
+#include "test_u_common_modules.h"
 #include "test_u_connection_common.h"
 #include "test_u_connection_manager_common.h"
-#include "test_u_defines.h"
-#include "test_u_message.h"
 #include "test_u_HTTP_decoder_common.h"
 #include "test_u_HTTP_decoder_signalhandler.h"
-#include "test_u_session_message.h"
 
 const char stream_name_string_[] = ACE_TEXT_ALWAYS_CHAR ("HTTPDecoderStream");
 
@@ -477,16 +480,16 @@ do_work (unsigned int bufferSize_in,
   configuration.useReactor = useReactor_in;
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Test_U_AllocatorConfiguration> heap_allocator;
+                         struct Common_FlexParserAllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize heap allocator, returning\n")));
     return;
   } // end IF
-  Test_U_MessageAllocator_t message_allocator (TEST_U_MAX_MESSAGES, // maximum #buffers
-                                               &heap_allocator,     // heap allocator handle
-                                               true);               // block ?
+  Test_U_HTTPDecoder_MessageAllocator_t message_allocator (TEST_U_MAX_MESSAGES, // maximum #buffers
+                                                           &heap_allocator,     // heap allocator handle
+                                                           true);               // block ?
 
   Test_U_ConnectionManager_t* connection_manager_p =
     TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
@@ -497,7 +500,7 @@ do_work (unsigned int bufferSize_in,
   if (debugParser_in)
     configuration.parserConfiguration.debugScanner = true;
   // *********************** socket configuration data *************************
-  struct Test_U_ConnectionConfiguration connection_configuration;
+  Test_U_ConnectionConfiguration_t connection_configuration;
   int result =
     connection_configuration.socketHandlerConfiguration.socketConfiguration_2.address.set (port_in,
                                                                                            hostName_in.c_str (),
@@ -521,8 +524,10 @@ do_work (unsigned int bufferSize_in,
     &configuration.userData;
   connection_configuration.messageAllocator = &message_allocator;
   connection_configuration.PDUSize = bufferSize_in;
-  connection_configuration.streamConfiguration =
-      &configuration.streamConfiguration;
+  connection_configuration.userData = &configuration.userData;
+  connection_configuration.initialize (configuration.streamConfiguration.allocatorConfiguration_,
+                                       configuration.streamConfiguration);
+
   configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                  connection_configuration));
   Test_U_ConnectionConfigurationIterator_t iterator =
@@ -571,14 +576,14 @@ do_work (unsigned int bufferSize_in,
                                                                             modulehandler_configuration)));
 
   // step0b: initialize event dispatch
-  struct Common_DispatchThreadData thread_data;
-  thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data.useReactor = useReactor_in;
-  if (!Common_Tools::initializeEventDispatch (thread_data.useReactor,
+  struct Common_EventDispatchThreadData thread_data_s;
+  thread_data_s.numberOfDispatchThreads = numberOfDispatchThreads_in;
+  thread_data_s.useReactor = useReactor_in;
+  if (!Common_Tools::initializeEventDispatch (thread_data_s.useReactor,
                                               useThreadPool_in,
-                                              thread_data.numberOfDispatchThreads,
-                                              thread_data.proactorType,
-                                              thread_data.reactorType,
+                                              thread_data_s.numberOfDispatchThreads,
+                                              thread_data_s.proactorType,
+                                              thread_data_s.reactorType,
                                               configuration.streamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -598,7 +603,7 @@ do_work (unsigned int bufferSize_in,
   Common_TimerConfiguration timer_configuration;
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
-  Test_U_StatisticHandler_t statistic_handler (STATISTIC_ACTION_REPORT,
+  Test_U_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                                connection_manager_p,
                                                false);
   long timer_id = -1;
@@ -637,7 +642,7 @@ do_work (unsigned int bufferSize_in,
 
     return;
   } // end IF
-  if (!Common_Tools::initializeSignals ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
+  if (!Common_Signal_Tools::initialize ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                         signalSet_in,
                                         ignoredSignalSet_in,
@@ -645,7 +650,7 @@ do_work (unsigned int bufferSize_in,
                                         previousSignalActions_inout))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeSignals(), returning\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
 
     // clean up
     timer_manager_p->stop ();
@@ -662,7 +667,7 @@ do_work (unsigned int bufferSize_in,
 
   // step1a: initialize worker(s)
   int group_id = -1;
-  if (!Common_Tools::startEventDispatch (thread_data,
+  if (!Common_Tools::startEventDispatch (thread_data_s,
                                          group_id))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -775,7 +780,8 @@ do_work (unsigned int bufferSize_in,
   do
   {
     status = connection_p->status ();
-    if (status == NET_CONNECTION_STATUS_OK) break;
+    if (status == NET_CONNECTION_STATUS_OK)
+      break;
   } while (COMMON_TIME_NOW < deadline);
   if (status != NET_CONNECTION_STATUS_OK)
   {
@@ -1154,13 +1160,13 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (!Common_Tools::preInitializeSignals (signal_set,
+  if (!Common_Signal_Tools::preInitialize (signal_set,
                                            use_reactor,
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::preInitializeSignals(), aborting\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
 
     Common_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE...
@@ -1183,7 +1189,7 @@ ACE_TMAIN (int argc_in,
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1209,7 +1215,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1249,8 +1255,8 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Tools::periodToString (working_time,
-                                working_time_string);
+  Common_Timer_Tools::periodToString (working_time,
+                                      working_time_string);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
@@ -1269,7 +1275,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1292,10 +1298,10 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Tools::periodToString (user_time,
-                               user_time_string);
-  Common_Tools::periodToString (system_time,
-                               system_time_string);
+  Common_Timer_Tools::periodToString (user_time,
+                                      user_time_string);
+  Common_Timer_Tools::periodToString (system_time,
+                                      system_time_string);
 
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
@@ -1330,7 +1336,7 @@ ACE_TMAIN (int argc_in,
               ACE_TEXT (system_time_string.c_str ())));
 #endif
 
-  Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+  Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                  signal_set,
                                  previous_signal_actions,

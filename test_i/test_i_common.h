@@ -21,6 +21,8 @@
 #ifndef TEST_I_COMMON_H
 #define TEST_I_COMMON_H
 
+#include "common_configuration.h"
+
 #include "stream_common.h"
 #include "stream_configuration.h"
 #include "stream_inotify.h"
@@ -33,7 +35,7 @@ struct Net_Configuration;
 struct Test_I_UserData
  : Net_UserData
 {
-  inline Test_I_UserData ()
+  Test_I_UserData ()
    : Net_UserData ()
    , configuration (NULL)
   {};
@@ -44,7 +46,7 @@ struct Test_I_UserData
 struct Test_I_ConnectionState
  : Net_ConnectionState
 {
-  inline Test_I_ConnectionState ()
+  Test_I_ConnectionState ()
    : Net_ConnectionState ()
    //, configuration (NULL)
   {};
@@ -53,17 +55,17 @@ struct Test_I_ConnectionState
   //struct Net_Configuration* configuration;
 };
 
-struct Test_I_AllocatorConfiguration
- : Stream_AllocatorConfiguration
-{
-  inline Test_I_AllocatorConfiguration ()
-   : Stream_AllocatorConfiguration ()
-  {
-    // *NOTE*: this facilitates (message block) data buffers to be scanned with
-    //         'flex's yy_scan_buffer() method
-    paddingBytes = NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
-  };
-};
+//struct Test_I_AllocatorConfiguration
+// : Stream_AllocatorConfiguration
+//{
+//  Test_I_AllocatorConfiguration ()
+//   : Stream_AllocatorConfiguration ()
+//  {
+//    // *NOTE*: this facilitates (message block) data buffers to be scanned with
+//    //         'flex's yy_scan_buffer() method
+//    paddingBytes = NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
+//  };
+//};
 
 typedef Stream_Statistic Test_I_Statistic_t;
 typedef Common_IStatistic_T<Test_I_Statistic_t> Test_I_StatisticReportingHandler_t;
@@ -71,19 +73,19 @@ typedef Common_IStatistic_T<Test_I_Statistic_t> Test_I_StatisticReportingHandler
 struct Test_I_SignalHandlerConfiguration
   : Common_SignalHandlerConfiguration
 {
-  inline Test_I_SignalHandlerConfiguration ()
+  Test_I_SignalHandlerConfiguration ()
     : Common_SignalHandlerConfiguration ()
     , statisticReportingHandler (NULL)
-    , statisticReportingTimerID (-1)
+    , statisticReportingTimerId (-1)
   {};
 
   Test_I_StatisticReportingHandler_t* statisticReportingHandler;
-  long                                statisticReportingTimerID;
+  long                                statisticReportingTimerId;
 };
 
 struct Test_I_Configuration
 {
-  inline Test_I_Configuration ()
+  Test_I_Configuration ()
    : connectionConfigurations ()
    , parserConfiguration ()
    //, streamConfiguration ()
@@ -104,7 +106,5 @@ struct Test_I_Configuration
 
   struct Test_I_UserData                   userData;
 };
-
-typedef Stream_INotify_T<enum Stream_SessionMessageType> Test_I_IStreamNotify_t;
 
 #endif

@@ -36,12 +36,12 @@ class Test_U_EventHandler
 
   // implement Net_WLAN_IMonitorCB
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onAssociate (REFGUID,            // interface identifier
+  virtual void onSignalQualityChange (REFGUID,              // interface identifier
+                                      WLAN_SIGNAL_QUALITY); // signal quality (of current association)
 #else
-  virtual void onAssociate (const std::string&, // interface identifier
+  virtual void onSignalQualityChange (const std::string&, // interface identifier
+                                      unsigned int);      // signal quality (of current association)
 #endif
-                            const std::string&, // SSID
-                            bool);              // success ?
   // *IMPORTANT NOTE*: Net_IWLANMonitor_T::addresses() may not return
   //                   significant data before this, as the link layer
   //                   configuration (e.g. DHCP handshake, ...) most likely has
@@ -54,16 +54,43 @@ class Test_U_EventHandler
                           const std::string&, // SSID
                           bool);              // success ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onHotPlug (REFGUID,            // interface identifier
+  virtual void onDisconnect (REFGUID,            // interface identifier
 #else
-  virtual void onHotPlug (const std::string&, // interface identifier
+  virtual void onDisconnect (const std::string&, // interface identifier
 #endif
-                          bool);              // enabled ? : disabled/removed
+                             const std::string&, // SSID
+                             bool);              // success ?
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual void onAssociate (REFGUID,            // interface identifier
+#else
+  virtual void onAssociate (const std::string&, // interface identifier
+#endif
+                            const std::string&, // SSID
+                            bool);              // success ?
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual void onDisassociate (REFGUID,            // interface identifier
+#else
+  virtual void onDisassociate (const std::string&, // interface identifier
+#endif
+                               const std::string&, // SSID
+                               bool);              // success ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual void onScanComplete (REFGUID);            // interface identifier
 #else
   virtual void onScanComplete (const std::string&); // interface identifier
 #endif
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual void onHotPlug (REFGUID,            // interface identifier
+#else
+  virtual void onHotPlug (const std::string&, // interface identifier
+#endif
+                          bool);              // success ?
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual void onRemove (REFGUID,            // interface identifier
+#else
+  virtual void onRemove (const std::string&, // interface identifier
+#endif
+                         bool);              // success ?
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler ())

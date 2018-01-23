@@ -24,14 +24,13 @@
 #include "ace/Global_Macros.h"
 
 #include "stream_common.h"
-//#include "stream_inotify.h"
 
 #include "http_stream.h"
 
 #include "bittorrent_common.h"
 
 // forward declarations
-//typedef Stream_INotify_T<enum Stream_SessionMessageType> BitTorrent_INotify_t;
+struct BitTorrent_AllocatorConfiguration;
 
 template <typename StreamStateType,
           ////////////////////////////////
@@ -54,7 +53,6 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType, // socket-
           typename SessionStateType,
-          typename CBDataType,
           ////////////////////////////////
           typename ConnectionManagerType,
           typename UserDataType>
@@ -63,6 +61,7 @@ class BitTorrent_TrackerStream_T
                         ConfigurationType,
                         StatisticContainerType,
                         StatisticHandlerType,
+                        struct BitTorrent_AllocatorConfiguration,
                         ModuleHandlerConfigurationType,
                         SessionDataType,
                         SessionDataContainerType,
@@ -76,6 +75,7 @@ class BitTorrent_TrackerStream_T
                         ConfigurationType,
                         StatisticContainerType,
                         StatisticHandlerType,
+                        struct BitTorrent_AllocatorConfiguration,
                         ModuleHandlerConfigurationType,
                         SessionDataType,
                         SessionDataContainerType,
@@ -87,7 +87,7 @@ class BitTorrent_TrackerStream_T
 
  public:
   BitTorrent_TrackerStream_T ();
-  inline virtual ~BitTorrent_TrackerStream_T () { inherited::shutdown (); };
+  inline virtual ~BitTorrent_TrackerStream_T () { inherited::shutdown (); }
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ModuleList_t&, // return value: module list
@@ -117,7 +117,6 @@ class BitTorrent_TrackerStream_T
                                      ConnectionStateType,
                                      HandlerConfigurationType, // socket-
                                      SessionStateType,
-                                     CBDataType,
                                      ConnectionManagerType,
                                      UserDataType> OWN_TYPE_T;
 

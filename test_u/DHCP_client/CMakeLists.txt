@@ -172,7 +172,6 @@ set (${PROJECT_NAME}_DHCPClient_EXE_SRCS
      stdafx.h
      test_u_callbacks.cpp
      test_u_callbacks.h
-     test_u_common.h
      test_u_common_modules.h
      test_u_connection_common.h
      test_u_connection_manager_common.h
@@ -207,7 +206,7 @@ add_executable (${EXECUTABLE}
                 ${ACENetwork_DHCPClient_EXE_SRCS}
                 etc/test_u.glade)
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
-if (WIN32 AND NOT ${BUILD_TEST_U})
+if (WIN32 AND NOT BUILD_TEST_U)
  set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
 endif ()
 
@@ -253,6 +252,8 @@ elseif (WIN32)
  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gdk-3.0.lib)
  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gtk-3.0.lib)
  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/pango-1.0.lib)
+
+ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 endif ()
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} CommonTimer)

@@ -30,20 +30,20 @@
 
 #include "http_common.h"
 
+#include "test_u_connection_common.h"
+
 // forward declarations
-struct Test_U_ConnectionConfiguration;
-struct Test_U_ConnectionState;
 struct Test_U_UserData;
 
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 struct Test_U_ConnectionConfiguration,
+                                 Test_U_ConnectionConfiguration_t,
                                  struct Test_U_ConnectionState,
                                  HTTP_Statistic_t,
                                  struct Test_U_UserData> Test_U_IConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 struct Test_U_ConnectionConfiguration,
+                                 Test_U_ConnectionConfiguration_t,
                                  struct Test_U_ConnectionState,
                                  HTTP_Statistic_t,
                                  struct Test_U_UserData> Test_U_ConnectionManager_t;

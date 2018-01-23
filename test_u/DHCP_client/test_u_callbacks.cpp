@@ -106,18 +106,23 @@ load_network_interfaces (GtkListStore* listStore_in)
   } // end IF
 
   struct _IP_ADAPTER_INFO* ip_adapter_info_2 = ip_adapter_info_p;
+  gchar* string_p = NULL;
   do
   {
     //ACE_DEBUG ((LM_DEBUG,
     //            ACE_TEXT ("found network interface: \"%s\": \"%s\"...\n"),
     //            ACE_TEXT (ip_adapter_info_2->Description),
     //            ACE_TEXT (Net_Common_Tools::MACAddress2String (ip_adapter_info_2->Address).c_str ())));
-
+    string_p =
+      Common_UI_GTK_Tools::localeToUTF8 (ip_adapter_info_2->Description);
+    ACE_ASSERT (string_p);
     gtk_list_store_append (listStore_in, &iterator);
     gtk_list_store_set (listStore_in, &iterator,
-                        0, Common_UI_GTK_Tools::Locale2UTF8 (ip_adapter_info_2->Description),
+                        0, string_p,
                         1, ip_adapter_info_2->AdapterName,
                         -1);
+    g_free (string_p);
+    string_p = NULL;
 
     ip_adapter_info_2 = ip_adapter_info_2->Next;
   } while (ip_adapter_info_2);
@@ -172,14 +177,14 @@ idle_initialize_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_UI_cb"));
 
-  struct Test_U_DHCPClient_GTK_CBData* data_p =
-      static_cast<struct Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  struct DHCPClient_GTK_CBData* data_p =
+      static_cast<struct DHCPClient_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
@@ -228,7 +233,7 @@ idle_initialize_UI_cb (gpointer userData_in)
       GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_PORT_NAME)));
   ACE_ASSERT (spin_button_p);
-  Test_U_ConnectionConfigurationIterator_t iterator_2 =
+  DHCPClient_ConnectionConfigurationIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   gtk_spin_button_set_value (spin_button_p,
@@ -658,13 +663,13 @@ idle_start_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_start_UI_cb"));
 
-  Test_U_DHCPClient_GTK_CBData* data_p =
-      static_cast<Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  struct DHCPClient_GTK_CBData* data_p =
+      static_cast<struct DHCPClient_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
 
   // sanity check(s)
@@ -689,13 +694,13 @@ idle_end_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_end_UI_cb"));
 
-  Test_U_DHCPClient_GTK_CBData* data_p =
-      static_cast<Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  DHCPClient_GTK_CBData* data_p =
+      static_cast<DHCPClient_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
 
   // sanity check(s)
@@ -723,13 +728,13 @@ idle_reset_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_reset_UI_cb"));
 
-  Test_U_DHCPClient_GTK_CBData* data_p =
-      static_cast<Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  struct DHCPClient_GTK_CBData* data_p =
+      static_cast<struct DHCPClient_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
 
   // sanity check(s)
@@ -771,17 +776,17 @@ idle_update_progress_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_progress_cb"));
 
-  Test_U_GTK_ProgressData* data_p =
-      static_cast<Test_U_GTK_ProgressData*> (userData_in);
+  struct DHCPClient_GTK_ProgressData* data_p =
+      static_cast<struct DHCPClient_GTK_ProgressData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->GTKState);
+  ACE_ASSERT (data_p->state);
 
-  Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->GTKState->builders.end ());
+  ACE_ASSERT (iterator != data_p->state->builders.end ());
 
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -794,7 +799,7 @@ idle_update_progress_cb (gpointer userData_in)
   float speed = 0.0F;
 
   {
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_CONTINUE);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_CONTINUE);
     speed = data_p->statistic.bytesPerSecond;
   } // end lock scope
   std::string magnitude_string = ACE_TEXT_ALWAYS_CHAR ("byte(s)/s");
@@ -844,107 +849,116 @@ idle_update_info_display_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_info_display_cb"));
 
-  Test_U_DHCPClient_GTK_CBData* data_p =
-      static_cast<Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  struct DHCPClient_GTK_CBData* data_p =
+      static_cast<struct DHCPClient_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
+  GtkSpinButton* spin_button_p = NULL;
+  bool is_session_message = false;
+  enum Common_UI_EventType* event_p = NULL;
+  int result = -1;
+  enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
 
-  GtkSpinButton* spin_button_p = NULL;
-  bool is_session_message = false;
-  if (data_p->eventStack.empty ())
-    return G_SOURCE_CONTINUE;
-
-  for (Test_U_GTK_EventsIterator_t iterator_2 = data_p->eventStack.begin ();
-       iterator_2 != data_p->eventStack.end ();
-       iterator_2++)
-  {
-    switch (*iterator_2)
-    {
-      case TEST_U_GTKEVENT_START:
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
+    for (Common_UI_Events_t::ITERATOR iterator_2 (data_p->eventStack);
+         !iterator_2.done ();
+         iterator_2.next (event_p))
+    { ACE_ASSERT (event_p);
+      switch (*event_p)
       {
-        spin_button_p =
+        case COMMON_UI_EVENT_STARTED:
+        {
+          spin_button_p =
+              GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                       ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
+          ACE_ASSERT (spin_button_p);
+          gtk_spin_button_set_value (spin_button_p, 0.0);
+          spin_button_p =
+              GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                       ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME)));
+          ACE_ASSERT (spin_button_p);
+          gtk_spin_button_set_value (spin_button_p, 0.0);
+          spin_button_p =
+              GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                       ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATA_NAME)));
+          ACE_ASSERT (spin_button_p);
+          gtk_spin_button_set_value (spin_button_p, 0.0);
+
+          spin_button_p =
             GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                      ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
-        ACE_ASSERT (spin_button_p);
-        gtk_spin_button_set_value (spin_button_p, 0.0);
-        spin_button_p =
-            GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                     ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME)));
-        ACE_ASSERT (spin_button_p);
-        gtk_spin_button_set_value (spin_button_p, 0.0);
-        spin_button_p =
+          ACE_ASSERT (spin_button_p);
+
+          is_session_message = true;
+          break;
+        }
+        case COMMON_UI_EVENT_DATA:
+        {
+          spin_button_p =
             GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                      ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATA_NAME)));
-        ACE_ASSERT (spin_button_p);
-        gtk_spin_button_set_value (spin_button_p, 0.0);
+          ACE_ASSERT (spin_button_p);
+          gtk_spin_button_set_value (spin_button_p,
+                                     static_cast<gdouble> (data_p->progressData.transferred));
 
-        spin_button_p =
-          GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                   ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
-        ACE_ASSERT (spin_button_p);
+          spin_button_p =
+              GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                       ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME)));
+          ACE_ASSERT (spin_button_p);
 
-        is_session_message = true;
-        break;
-      }
-      case TEST_U_GTKEVENT_DATA:
-      {
-        spin_button_p =
-          GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                   ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATA_NAME)));
-        ACE_ASSERT (spin_button_p);
-        gtk_spin_button_set_value (spin_button_p,
-                                   static_cast<gdouble> (data_p->progressData.transferred));
-
-        spin_button_p =
-            GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                     ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_DATAMESSAGES_NAME)));
-        ACE_ASSERT (spin_button_p);
-
-        break;
-      }
-      case TEST_U_GTKEVENT_END:
-      {
-        spin_button_p =
-          GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
-                                                   ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
-        ACE_ASSERT (spin_button_p);
-
-        is_session_message = true;
-        break;
-      }
-      case TEST_U_GTKEVENT_STATISTIC:
-      {
-        spin_button_p =
+          break;
+        }
+        case COMMON_UI_EVENT_STOPPED:
+        {
+          spin_button_p =
             GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                                      ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
-        ACE_ASSERT (spin_button_p);
+          ACE_ASSERT (spin_button_p);
 
-        is_session_message = true;
-        break;
-      }
-      default:
-      {
+          is_session_message = true;
+          break;
+        }
+        case COMMON_UI_EVENT_STATISTIC:
+        {
+          spin_button_p =
+              GTK_SPIN_BUTTON (gtk_builder_get_object ((*iterator).second.second,
+                                                       ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_SPINBUTTON_SESSIONMESSAGES_NAME)));
+          ACE_ASSERT (spin_button_p);
+
+          is_session_message = true;
+          break;
+        }
+        default:
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("invalid/unknown event type (was: %d), continuing\n"),
+                      *event_p));
+          break;
+        }
+      } // end SWITCH
+      ACE_UNUSED_ARG (is_session_message);
+      gtk_spin_button_spin (spin_button_p,
+                            GTK_SPIN_STEP_FORWARD,
+                            1.0);
+      event_p = NULL;
+    } // end FOR
+
+    // clean up
+    while (!data_p->eventStack.is_empty ())
+    {
+      result = data_p->eventStack.pop (event_e);
+      if (result == -1)
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("invalid/unknown event type (was: %d), continuing\n"),
-                    *iterator_2));
-        break;
-      }
-    } // end SWITCH
-    ACE_UNUSED_ARG (is_session_message);
-    gtk_spin_button_spin (spin_button_p,
-                          GTK_SPIN_STEP_FORWARD,
-                          1.0);
-  } // end FOR
-
-  data_p->eventStack.clear ();
+                    ACE_TEXT ("failed to ACE_Unbounded_Stack::pop(): \"%m\", continuing\n")));
+    } // end WHILE
+  } // end lock scope
 
   return G_SOURCE_CONTINUE;
 }
@@ -954,15 +968,15 @@ idle_update_log_display_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_log_display_cb"));
 
-  Test_U_DHCPClient_GTK_CBData* data_p =
-      static_cast<Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  DHCPClient_GTK_CBData* data_p =
+      static_cast<DHCPClient_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
 
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
       data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
@@ -1048,10 +1062,10 @@ action_discover_activate_cb (GtkAction* action_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::action_discover_activate_cb"));
 
-  struct Test_U_DHCPClient_GTK_CBData* data_p =
-      static_cast<struct Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  struct DHCPClient_GTK_CBData* data_p =
+      static_cast<struct DHCPClient_GTK_CBData*> (userData_in);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
 
   // sanity check(s)
@@ -1075,7 +1089,7 @@ action_discover_activate_cb (GtkAction* action_in,
   ACE_ASSERT (spin_button_p);
   unsigned short port_number =
     static_cast<unsigned short> (gtk_spin_button_get_value_as_int (spin_button_p));
-  Test_U_ConnectionConfigurationIterator_t iterator_2 =
+  DHCPClient_ConnectionConfigurationIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
   (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.peerAddress.set_port_number (port_number,
@@ -1109,13 +1123,13 @@ allocate:
   DHCP_record.xid = DHCP_Tools::generateXID ();
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-  if (!Net_Common_Tools::interfaceToMACAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
-                                                DHCP_record.chaddr))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interfaceToMACAddress(), returning\n")));
-    return;
-  } // end IF
+  struct ether_addr ether_addrs_s =
+    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier);
+  ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
+  ACE_OS::memcpy (&(DHCP_record.chaddr),
+                  &(ether_addrs_s.ether_addr_octet),
+                  ETH_ALEN);
+    
   // *TODO*: support optional options:
   //         - 'requested IP address'    (50)
   //         - 'IP address lease time'   (51)
@@ -1132,10 +1146,10 @@ allocate:
                          message_p->id (),
                          NULL);
 
-  Test_U_IConnectionManager_t* iconnection_manager_p =
-    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  DHCPClient_IConnectionManager_t* iconnection_manager_p =
+    DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
-  Test_U_IConnection_t* iconnection_p =
+  DHCPClient_IConnection_t* iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
 #else
@@ -1160,21 +1174,21 @@ allocate:
 
     return;
   } // end IF
-  Test_U_IInboundStreamConnection_t* istream_connection_2 =
-    dynamic_cast<Test_U_IInboundStreamConnection_t*> (iconnection_p);
+  DHCPClient_IInboundStreamConnection_t* istream_connection_2 =
+    dynamic_cast<DHCPClient_IInboundStreamConnection_t*> (iconnection_p);
   ACE_ASSERT (istream_connection_2);
-  struct Test_U_ConnectionState& state_r =
-      const_cast<struct Test_U_ConnectionState&> (istream_connection_2->state ());
+  struct DHCPClient_ConnectionState& state_r =
+      const_cast<struct DHCPClient_ConnectionState&> (istream_connection_2->state ());
   state_r.timeStamp = COMMON_TIME_NOW;
   state_r.xid = DHCP_record.xid;
 
   Test_U_InboundConnectionStream& stream_r =
       const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
-  const Test_U_DHCPClient_SessionData_t* session_data_container_p =
+  const DHCPClient_SessionData_t* session_data_container_p =
     &stream_r.getR ();
   ACE_ASSERT (session_data_container_p);
-  struct Test_U_DHCPClient_SessionData& session_data_r =
-      const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->getR ());
+  struct DHCPClient_SessionData& session_data_r =
+      const_cast<struct DHCPClient_SessionData&> (session_data_container_p->getR ());
   session_data_r.timeStamp = state_r.timeStamp;
   session_data_r.xid = DHCP_record.xid;
 
@@ -1185,8 +1199,8 @@ allocate:
   // sanity check(s)
   ACE_ASSERT (session_data_r.broadcastConnection);
 
-  Test_U_IStreamConnection_t* istream_connection_p =
-    dynamic_cast<Test_U_IStreamConnection_t*> (session_data_r.broadcastConnection);
+  DHCPClient_IStreamConnection_t* istream_connection_p =
+    dynamic_cast<DHCPClient_IStreamConnection_t*> (session_data_r.broadcastConnection);
   ACE_ASSERT (istream_connection_p);
 
   ACE_Message_Block* message_block_p = message_p;
@@ -1206,10 +1220,10 @@ action_inform_activate_cb (GtkAction* action_in,
 
   ACE_UNUSED_ARG (action_in);
 
-  struct Test_U_DHCPClient_GTK_CBData* data_p =
-    static_cast<struct Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  struct DHCPClient_GTK_CBData* data_p =
+    static_cast<struct DHCPClient_GTK_CBData*> (userData_in);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
 
   // sanity check(s)
@@ -1219,30 +1233,30 @@ action_inform_activate_cb (GtkAction* action_in,
   ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_.messageAllocator);
   ACE_ASSERT (iterator != data_p->builders.end ());
 
-  Test_U_IConnectionManager_t* iconnection_manager_p =
-    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  DHCPClient_IConnectionManager_t* iconnection_manager_p =
+    DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
-  Test_U_IConnection_t* iconnection_p =
+  DHCPClient_IConnection_t* iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
 #else
     iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
 #endif
   ACE_ASSERT (iconnection_p);
-  Test_U_IInboundStreamConnection_t* istream_connection_2 =
-    dynamic_cast<Test_U_IInboundStreamConnection_t*> (iconnection_p);
+  DHCPClient_IInboundStreamConnection_t* istream_connection_2 =
+    dynamic_cast<DHCPClient_IInboundStreamConnection_t*> (iconnection_p);
   ACE_ASSERT (istream_connection_2);
-  struct Test_U_ConnectionState& state_r =
-    const_cast<struct Test_U_ConnectionState&> (istream_connection_2->state ());
+  struct DHCPClient_ConnectionState& state_r =
+    const_cast<struct DHCPClient_ConnectionState&> (istream_connection_2->state ());
 
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
-  const Test_U_DHCPClient_SessionData_t* session_data_container_p =
+  const DHCPClient_SessionData_t* session_data_container_p =
       &stream_r.getR ();
   ACE_ASSERT (session_data_container_p);
-  struct Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->getR ());
-  Test_U_ConnectionConfigurationIterator_t iterator_2 =
+  struct DHCPClient_SessionData& session_data_r =
+    const_cast<struct DHCPClient_SessionData&> (session_data_container_p->getR ());
+  DHCPClient_ConnectionConfigurationIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
 
@@ -1305,13 +1319,12 @@ allocate:
     return;
   } // end IF
   DHCP_record.ciaddr = IP_address.get_ip_address ();
-  if (!Net_Common_Tools::interfaceToMACAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
-                                                DHCP_record.chaddr))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interfaceToMACAddress(), returning\n")));
-    return;
-  } // end IF
+  struct ether_addr ether_addrs_s =
+    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier);
+  ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
+  ACE_OS::memcpy (&(DHCP_record.chaddr),
+                  &(ether_addrs_s.ether_addr_octet),
+                  ETH_ALEN);
   // *TODO*: support optional options:
   //         - 'overload'                (52)
   char message_type = DHCP_Codes::DHCP_MESSAGE_INFORM;
@@ -1326,8 +1339,8 @@ allocate:
                          message_p->id (),
                          NULL);
 
-  Test_U_IStreamConnection_t* istream_connection_p =
-    dynamic_cast<Test_U_IStreamConnection_t*> (iconnection_p);
+  DHCPClient_IStreamConnection_t* istream_connection_p =
+    dynamic_cast<DHCPClient_IStreamConnection_t*> (iconnection_p);
   ACE_ASSERT (istream_connection_p);
 
   ACE_Message_Block* message_block_p = message_p;
@@ -1347,10 +1360,10 @@ action_request_activate_cb (GtkAction* action_in,
 
   ACE_UNUSED_ARG (action_in);
 
-  struct Test_U_DHCPClient_GTK_CBData* data_p =
-    static_cast<struct Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  struct DHCPClient_GTK_CBData* data_p =
+    static_cast<struct DHCPClient_GTK_CBData*> (userData_in);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
 
   // sanity check(s)
@@ -1360,30 +1373,30 @@ action_request_activate_cb (GtkAction* action_in,
   ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_.messageAllocator);
   ACE_ASSERT (iterator != data_p->builders.end ());
 
-  Test_U_IConnectionManager_t* iconnection_manager_p =
-    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  DHCPClient_IConnectionManager_t* iconnection_manager_p =
+    DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
-  Test_U_IConnection_t* iconnection_p =
+  DHCPClient_IConnection_t* iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
 #else
     iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
 #endif
   ACE_ASSERT (iconnection_p);
-  Test_U_IInboundStreamConnection_t* istream_connection_2 =
-    dynamic_cast<Test_U_IInboundStreamConnection_t*> (iconnection_p);
+  DHCPClient_IInboundStreamConnection_t* istream_connection_2 =
+    dynamic_cast<DHCPClient_IInboundStreamConnection_t*> (iconnection_p);
   ACE_ASSERT (istream_connection_2);
-  Test_U_ConnectionState& state_r =
-    const_cast<Test_U_ConnectionState&> (istream_connection_2->state ());
+  DHCPClient_ConnectionState& state_r =
+    const_cast<DHCPClient_ConnectionState&> (istream_connection_2->state ());
 
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
-  const Test_U_DHCPClient_SessionData_t* session_data_container_p =
+  const DHCPClient_SessionData_t* session_data_container_p =
       &stream_r.getR ();
   ACE_ASSERT (session_data_container_p);
-  struct Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->getR ());
-  Test_U_ConnectionConfigurationIterator_t iterator_2 =
+  struct DHCPClient_SessionData& session_data_r =
+    const_cast<struct DHCPClient_SessionData&> (session_data_container_p->getR ());
+  DHCPClient_ConnectionConfigurationIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
 
@@ -1419,13 +1432,12 @@ allocate:
   } // end IF
   if (data_p->configuration->protocolConfiguration.requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-  if (!Net_Common_Tools::interfaceToMACAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
-                                                DHCP_record.chaddr))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interfaceToMACAddress(), returning\n")));
-    return;
-  } // end IF
+  struct ether_addr ether_addrs_s =
+    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier);
+  ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
+  ACE_OS::memcpy (&(DHCP_record.chaddr),
+                  &(ether_addrs_s.ether_addr_octet),
+                  ETH_ALEN);
   // *TODO*: support optional options:
   //         - 'requested IP address'    (50)
   //         - 'IP address lease time'   (51)
@@ -1442,8 +1454,8 @@ allocate:
                          message_p->id (),
                          NULL);
 
-  Test_U_IStreamConnection_t* istream_connection_p =
-    dynamic_cast<Test_U_IStreamConnection_t*> (session_data_r.broadcastConnection);
+  DHCPClient_IStreamConnection_t* istream_connection_p =
+    dynamic_cast<DHCPClient_IStreamConnection_t*> (session_data_r.broadcastConnection);
   ACE_ASSERT (istream_connection_p);
 
   ACE_Message_Block* message_block_p = message_p;
@@ -1463,10 +1475,10 @@ action_release_activate_cb (GtkAction* action_in,
 
   ACE_UNUSED_ARG (action_in);
 
-  struct Test_U_DHCPClient_GTK_CBData* data_p =
-    static_cast<struct Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  struct DHCPClient_GTK_CBData* data_p =
+    static_cast<struct DHCPClient_GTK_CBData*> (userData_in);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
 
   // sanity check(s)
@@ -1476,30 +1488,30 @@ action_release_activate_cb (GtkAction* action_in,
   ACE_ASSERT (data_p->configuration->streamConfiguration.configuration_.messageAllocator);
   ACE_ASSERT (iterator != data_p->builders.end ());
 
-  Test_U_IConnectionManager_t* iconnection_manager_p =
-    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  DHCPClient_IConnectionManager_t* iconnection_manager_p =
+    DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
-  Test_U_IConnection_t* iconnection_p =
+  DHCPClient_IConnection_t* iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     iconnection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
 #else
     iconnection_manager_p->get (static_cast<Net_ConnectionId_t> (data_p->configuration->handle));
 #endif
   ACE_ASSERT (iconnection_p);
-  Test_U_IInboundStreamConnection_t* istream_connection_2 =
-    dynamic_cast<Test_U_IInboundStreamConnection_t*> (iconnection_p);
+  DHCPClient_IInboundStreamConnection_t* istream_connection_2 =
+    dynamic_cast<DHCPClient_IInboundStreamConnection_t*> (iconnection_p);
   ACE_ASSERT (istream_connection_2);
-  Test_U_ConnectionState& state_r =
-    const_cast<Test_U_ConnectionState&> (istream_connection_2->state ());
+  DHCPClient_ConnectionState& state_r =
+    const_cast<DHCPClient_ConnectionState&> (istream_connection_2->state ());
 
   Test_U_InboundConnectionStream& stream_r =
     const_cast<Test_U_InboundConnectionStream&> (istream_connection_2->stream ());
-  const Test_U_DHCPClient_SessionData_t* session_data_container_p =
+  const DHCPClient_SessionData_t* session_data_container_p =
     &stream_r.getR ();
   ACE_ASSERT (session_data_container_p);
-  struct Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<struct Test_U_DHCPClient_SessionData&> (session_data_container_p->getR ());
-  Test_U_ConnectionConfigurationIterator_t iterator_2 =
+  struct DHCPClient_SessionData& session_data_r =
+    const_cast<struct DHCPClient_SessionData&> (session_data_container_p->getR ());
+  DHCPClient_ConnectionConfigurationIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
 
@@ -1561,13 +1573,12 @@ allocate:
     return;
   } // end IF
   DHCP_record.ciaddr = IP_address.get_ip_address ();
-  if (!Net_Common_Tools::interfaceToMACAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier,
-                                                DHCP_record.chaddr))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interfaceToMACAddress(), returning\n")));
-    return;
-  } // end IF
+  struct ether_addr ether_addrs_s =
+    Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier);
+  ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
+  ACE_OS::memcpy (&(DHCP_record.chaddr),
+                  &(ether_addrs_s.ether_addr_octet),
+                  ETH_ALEN);
   // *TODO*: support optional options:
   //         - 'overload'                (52)
   char message_type = DHCP_Codes::DHCP_MESSAGE_RELEASE;
@@ -1588,8 +1599,8 @@ allocate:
                          1,
                          NULL);
 
-  Test_U_IStreamConnection_t* istream_connection_p =
-    dynamic_cast<Test_U_IStreamConnection_t*> (iconnection_p);
+  DHCPClient_IStreamConnection_t* istream_connection_p =
+    dynamic_cast<DHCPClient_IStreamConnection_t*> (iconnection_p);
   ACE_ASSERT (istream_connection_p);
 
   ACE_Message_Block* message_block_p = message_p;
@@ -1634,14 +1645,14 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::combobox_interface_changed_cb"));
 
-  struct Test_U_DHCPClient_GTK_CBData* data_p =
-      static_cast<struct Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  struct DHCPClient_GTK_CBData* data_p =
+      static_cast<struct DHCPClient_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
-  Test_U_ConnectionConfigurationIterator_t iterator_2 =
+  DHCPClient_ConnectionConfigurationIterator_t iterator_2 =
     data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator_2 != data_p->configuration->connectionConfigurations.end ());
 
@@ -1684,8 +1695,8 @@ checkbutton_broadcast_toggled_cb (GtkCheckButton* checkButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::checkbutton_broadcast_toggled_cb"));
 
-  struct Test_U_DHCPClient_GTK_CBData* data_p =
-      static_cast<struct Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  struct DHCPClient_GTK_CBData* data_p =
+      static_cast<struct DHCPClient_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1700,8 +1711,8 @@ checkbutton_request_toggled_cb (GtkCheckButton* checkButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::checkbutton_request_toggled_cb"));
 
-  struct Test_U_DHCPClient_GTK_CBData* data_p =
-      static_cast<struct Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  struct DHCPClient_GTK_CBData* data_p =
+      static_cast<struct DHCPClient_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
@@ -1723,14 +1734,14 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     return;
   } // end IF
 
-  struct Test_U_DHCPClient_GTK_CBData* data_p =
-      static_cast<struct Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  struct DHCPClient_GTK_CBData* data_p =
+      static_cast<struct DHCPClient_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
 
   // sanity check(s)
@@ -1756,15 +1767,15 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
                                             : GTK_STOCK_CONNECT));
 
   bool failed = true;
-  Test_U_ConnectionManager_t* connection_manager_p =
-    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  DHCPClient_ConnectionManager_t* connection_manager_p =
+    DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
   if (start_listening)
   {
     // already listening ? --> stop
     if (data_p->configuration->broadcastHandle != ACE_INVALID_HANDLE)
     {
-      Test_U_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+      DHCPClient_ConnectionManager_t::ICONNECTION_T* iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->broadcastHandle));
 #else
@@ -1779,7 +1790,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     } // end IF
     if (data_p->configuration->handle != ACE_INVALID_HANDLE)
     {
-      Test_U_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+      DHCPClient_ConnectionManager_t::ICONNECTION_T* iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
 #else
@@ -1794,22 +1805,22 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
     } // end IF
 
     // connect (broadcast)
-    Test_U_StreamConfiguration_t::ITERATOR_T iterator_2 =
+    DHCPClient_StreamConfiguration_t::ITERATOR_T iterator_2 =
       data_p->configuration->streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_2 != data_p->configuration->streamConfiguration.end ());
-    Test_U_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
+    DHCPClient_ConnectionManager_t::INTERFACE_T* iconnection_manager_p =
       connection_manager_p;
     ACE_ASSERT (iconnection_manager_p);
-    Test_U_ConnectorBcast_t connector_bcast (iconnection_manager_p,
-                                             (*iterator_2).second.second.statisticReportingInterval);
-    Test_U_AsynchConnectorBcast_t asynch_connector_bcast (iconnection_manager_p,
-                                                          (*iterator_2).second.second.statisticReportingInterval);
+    DHCPClient_ConnectorBcast_t connector_bcast (iconnection_manager_p,
+                                                 (*iterator_2).second.second.statisticReportingInterval);
+    DHCPClient_AsynchConnectorBcast_t asynch_connector_bcast (iconnection_manager_p,
+                                                              (*iterator_2).second.second.statisticReportingInterval);
     //Test_U_Connector_t connector_bcast (iconnection_manager_p,
     //                                    data_p->configuration->streamConfiguration.statisticReportingInterval);
     //Test_U_AsynchConnector_t asynch_connector_bcast (iconnection_manager_p,
     //                                                 data_p->configuration->streamConfiguration.statisticReportingInterval);
-    Test_U_IConnector_t* iconnector_p = NULL;
-    Test_U_ConnectionConfigurationIterator_t iterator_3 =
+    DHCPClient_IConnector_t* iconnector_p = NULL;
+    DHCPClient_ConnectionConfigurationIterator_t iterator_3 =
       data_p->configuration->connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
     ACE_ASSERT (iterator_3 != data_p->configuration->connectionConfigurations.end ());
 
@@ -1873,7 +1884,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       //              ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
       //              &timeout));
       ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
-      Test_U_AsynchConnector_t::ICONNECTION_T* iconnection_p = NULL;
+      DHCPClient_AsynchConnector_t::ICONNECTION_T* iconnection_p = NULL;
       do
       {
         iconnection_p =
@@ -2006,7 +2017,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       //              ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
       //              &timeout));
       ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
-      Test_U_AsynchConnector_t::ICONNECTION_T* iconnection_p = NULL;
+      DHCPClient_AsynchConnector_t::ICONNECTION_T* iconnection_p = NULL;
       do
       {
         iconnection_p =
@@ -2074,11 +2085,9 @@ continue_:
     ACE_ASSERT (progressbar_p);
     gtk_widget_set_sensitive (GTK_WIDGET (progressbar_p), TRUE);
 
-    ACE_ASSERT (!data_p->progressEventSourceID);
-    {
-      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
-
-      data_p->progressEventSourceID =
+    ACE_ASSERT (!data_p->progressEventSourceId);
+    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
+      data_p->progressEventSourceId =
         //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
         //                 idle_update_progress_cb,
         //                 &data_p->progressData,
@@ -2088,8 +2097,8 @@ continue_:
                               idle_update_progress_cb,
                               &data_p->progressData,
                               NULL);
-      if (data_p->progressEventSourceID > 0)
-        data_p->eventSourceIds.insert (data_p->progressEventSourceID);
+      if (data_p->progressEventSourceId > 0)
+        data_p->eventSourceIds.insert (data_p->progressEventSourceId);
       else
       {
         ACE_DEBUG ((LM_ERROR,
@@ -2102,7 +2111,7 @@ continue_:
   {
     if (data_p->configuration->broadcastHandle != ACE_INVALID_HANDLE)
     {
-      Test_U_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+      DHCPClient_ConnectionManager_t::ICONNECTION_T* iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->broadcastHandle));
 #else
@@ -2117,7 +2126,7 @@ continue_:
     } // end IF
     if (data_p->configuration->handle != ACE_INVALID_HANDLE)
     {
-      Test_U_ConnectionManager_t::ICONNECTION_T* iconnection_p =
+      DHCPClient_ConnectionManager_t::ICONNECTION_T* iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (data_p->configuration->handle));
 #else
@@ -2132,16 +2141,14 @@ continue_:
     } // end IF
 
     // stop progress reporting
-    ACE_ASSERT (data_p->progressEventSourceID);
-    {
-      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
-
-      if (!g_source_remove (data_p->progressEventSourceID))
+    ACE_ASSERT (data_p->progressEventSourceId);
+    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
+      if (!g_source_remove (data_p->progressEventSourceId))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
-                    data_p->progressEventSourceID));
-      data_p->eventSourceIds.erase (data_p->progressEventSourceID);
-      data_p->progressEventSourceID = 0;
+                    data_p->progressEventSourceId));
+      data_p->eventSourceIds.erase (data_p->progressEventSourceId);
+      data_p->progressEventSourceId = 0;
     } // end lock scope
     GtkProgressBar* progressbar_p =
       GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -2198,13 +2205,13 @@ button_clear_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_clear_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  Test_U_DHCPClient_GTK_CBData* data_p =
-      static_cast<Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  struct DHCPClient_GTK_CBData* data_p =
+      static_cast<struct DHCPClient_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
 
   // sanity check(s)
@@ -2232,13 +2239,13 @@ button_about_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_about_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  Test_U_DHCPClient_GTK_CBData* data_p =
-      static_cast<Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  struct DHCPClient_GTK_CBData* data_p =
+      static_cast<struct DHCPClient_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
@@ -2326,13 +2333,13 @@ textview_size_allocate_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (rectangle_in);
-  Test_U_DHCPClient_GTK_CBData* data_p =
-      static_cast<Test_U_DHCPClient_GTK_CBData*> (userData_in);
+  struct DHCPClient_GTK_CBData* data_p =
+      static_cast<struct DHCPClient_GTK_CBData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
 
   // sanity check(s)

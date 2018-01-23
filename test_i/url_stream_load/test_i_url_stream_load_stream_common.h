@@ -59,18 +59,20 @@
 #include "http_common.h"
 #include "http_defines.h"
 #include "http_network.h"
+#include "http_stream_common.h"
 
-#include "test_i_connection_common.h"
 #include "test_i_defines.h"
 #include "test_i_stream_common.h"
+
+#include "test_i_connection_common.h"
 
 // forward declarations
 class Stream_IAllocator;
 class Test_I_Message;
 class Test_I_SessionMessage;
-struct Test_I_URLStreamLoad_ConnectionConfiguration;
+//struct Test_I_URLStreamLoad_ConnectionConfiguration;
 typedef Net_IConnection_T<ACE_INET_Addr,
-                          struct Test_I_URLStreamLoad_ConnectionConfiguration,
+                          Test_I_URLStreamLoad_ConnectionConfiguration_t,
                           struct HTTP_ConnectionState,
                           HTTP_Statistic_t> Test_I_IConnection_t;
 
@@ -96,7 +98,7 @@ struct Test_I_MessageData
 };
 
 struct Test_I_URLStreamLoad_SessionData;
-enum Test_I_URLStreamLoad_SAXParserState
+enum Test_I_URLStreamLoad_SAXParserState : int
 {
   TEST_I_SAXPARSER_STATE_INVALID = -1,
   ////////////////////////////////////////
@@ -168,7 +170,7 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
   Test_I_URLStreamLoad_ModuleHandlerConfiguration ()
    : HTTP_ModuleHandlerConfiguration ()
    , connectionConfigurations (NULL)
-   //, contextID (0)
+   //, contextId (0)
    , mode (STREAM_MODULE_HTMLPARSER_MODE_SAX)
    , subscriber (NULL)
    , subscribers (NULL)
@@ -179,7 +181,7 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
   };
 
   Test_I_URLStreamLoad_ConnectionConfigurations_t* connectionConfigurations;
-  //guint                                   contextID;
+  //guint                                   contextId;
   enum Stream_Module_HTMLParser_Mode               mode; // HTML parser module
   Test_I_ISessionNotify_t*                         subscriber;
   Test_I_Subscribers_t*                            subscribers;
@@ -195,7 +197,7 @@ struct Test_I_URLStreamLoad_StreamConfiguration
 };
 //extern const char stream_name_string_[];
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Test_I_AllocatorConfiguration,
+                               struct Common_FlexParserAllocatorConfiguration,
                                struct Test_I_URLStreamLoad_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_I_URLStreamLoad_ModuleHandlerConfiguration> Test_I_URLStreamLoad_StreamConfiguration_t;
@@ -205,17 +207,13 @@ struct Test_I_URLStreamLoad_StreamState
 {
   Test_I_URLStreamLoad_StreamState ()
    : Test_I_StreamState ()
-   , currentSessionData (NULL)
+   , sessionData (NULL)
    , userData (NULL)
   {};
 
-  struct Test_I_URLStreamLoad_SessionData* currentSessionData;
+  struct Test_I_URLStreamLoad_SessionData* sessionData;
 
   struct HTTP_Stream_UserData*             userData;
 };
-
-//typedef Stream_IModuleHandler_T<Test_I_ModuleHandlerConfiguration> Test_I_IModuleHandler_t;
-
-typedef Stream_INotify_T<enum Stream_SessionMessageType> Test_I_IStreamNotify_t;
 
 #endif

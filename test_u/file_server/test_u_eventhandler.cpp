@@ -46,19 +46,19 @@ Test_U_EventHandler::~Test_U_EventHandler ()
 }
 
 void
-Test_U_EventHandler::start (Stream_SessionId_t sessionID_in,
+Test_U_EventHandler::start (Stream_SessionId_t sessionId_in,
                             const struct FileServer_SessionData& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::start"));
 
-  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionId_in);
 
   sessionData_ =
     &const_cast<struct FileServer_SessionData&> (sessionData_in);
 
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
 
-  CBData_->eventStack.push_back (TEST_U_GTKEVENT_CONNECT);
+  CBData_->eventStack.push (COMMON_UI_EVENT_CONNECT);
 
   guint event_source_id = g_idle_add (idle_session_start_cb,
                                       CBData_);
@@ -72,12 +72,12 @@ Test_U_EventHandler::start (Stream_SessionId_t sessionID_in,
 }
 
 void
-Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
+Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
                              const enum Stream_SessionMessageType& sessionEvent_in)
 {
   STREAM_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
 
-  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
 
   ACE_ASSERT (false);
@@ -87,47 +87,46 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
 }
 
 void
-Test_U_EventHandler::end (Stream_SessionId_t sessionID_in)
+Test_U_EventHandler::end (Stream_SessionId_t sessionId_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::end"));
 
-  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionId_in);
 
   sessionData_ = NULL;
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-
-  CBData_->eventStack.push_back (TEST_U_GTKEVENT_DISCONNECT);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    CBData_->eventStack.push (COMMON_UI_EVENT_DISCONNECT);
+  } // end lock scope
 }
 
 void
-Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
+Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
                              const Test_U_Message& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
 
-  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionId_in);
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-
-  //CBData_->progressData.statistic.bytes += message_in.total_length ();
-
-  CBData_->eventStack.push_back (TEST_U_GTKEVENT_DATA);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    //CBData_->progressData.statistic.bytes += message_in.total_length ();
+    CBData_->eventStack.push (COMMON_UI_EVENT_DATA);
+  } // end lock scope
 }
 void
-Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
+Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
                              const Test_U_SessionMessage& sessionMessage_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
 
-  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionId_in);
 
   int result = -1;
-  Test_U_GTK_Event event = TEST_U_GTKEVENT_INVALID;
+  enum Common_UI_EventType event_e = COMMON_UI_EVENT_SESSION;
   switch (sessionMessage_in.type ())
   {
     case STREAM_SESSION_MESSAGE_DISCONNECT:
-      event = TEST_U_GTKEVENT_DISCONNECT;
+      event_e = COMMON_UI_EVENT_DISCONNECT;
       return;
     case STREAM_SESSION_MESSAGE_STATISTIC:
     {
@@ -154,7 +153,7 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionID_in,
       } // end IF
 
 continue_:
-      event = TEST_U_GTKEVENT_STATISTIC;
+      event_e = COMMON_UI_EVENT_STATISTIC;
       break;
     }
     default:
@@ -166,7 +165,7 @@ continue_:
     }
   } // end SWITCH
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-
-  CBData_->eventStack.push_back (event);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    CBData_->eventStack.push (event_e);
+  } // end lock scope
 }

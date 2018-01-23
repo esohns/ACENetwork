@@ -51,8 +51,8 @@ class BitTorrent_Client_GUI_Session_T
 {
  public:
   BitTorrent_Client_GUI_Session_T (const struct BitTorrent_Client_Configuration&, // configuration
-                                   struct Common_UI_GTKState&,                    // GTK state
-                                   guint,                                         // (statusbar) context ID
+                                   struct Common_UI_GTK_State*,                   // GTK state
+                                   guint,                                         // (statusbar) context id
                                    const std::string&,                            // (session log tab) label
                                    const std::string&,                            // UI (glade) file directory
                                    ///////
@@ -100,7 +100,7 @@ class BitTorrent_Client_GUI_Session_T
 //              bool = true); // locked access ?
 
   ConnectionCBDataType CBData_;
-  guint                contextID_;
+  guint                contextId_;
 //  struct BitTorrent_Client_SessionState*     sessionState_;
   std::string          UIFileDirectory_;
 };

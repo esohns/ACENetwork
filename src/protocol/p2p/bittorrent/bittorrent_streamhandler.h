@@ -62,7 +62,7 @@ class BitTorrent_PeerStreamHandler_T
   BitTorrent_PeerStreamHandler_T (SessionInterfaceType*, // session handle
 
                                   CBDataType* = NULL);   // ui feedback data handle
-  virtual ~BitTorrent_PeerStreamHandler_T ();
+  inline virtual ~BitTorrent_PeerStreamHandler_T () {}
 
   // implement Stream_ISessionDataNotify_T
   virtual void start (Stream_SessionId_t,      // session id
@@ -111,7 +111,7 @@ class BitTorrent_TrackerStreamHandler_T
   BitTorrent_TrackerStreamHandler_T (SessionInterfaceType*, // session handle
 
                                      CBDataType* = NULL);   // ui feedback data handle
-  virtual ~BitTorrent_TrackerStreamHandler_T ();
+  inline virtual ~BitTorrent_TrackerStreamHandler_T () {}
 
   // implement Stream_ISessionDataNotify_T
   virtual void start (Stream_SessionId_t,      // session id

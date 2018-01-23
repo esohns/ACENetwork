@@ -44,7 +44,7 @@ class Test_U_Stream;
 class Test_U_TCPConnection
  : public Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                   Test_U_TCPSocketHandler_t,
-                                  struct FileServer_ConnectionConfiguration,
+                                  FileServer_ConnectionConfiguration_t,
                                   struct FileServer_ConnectionState,
                                   Net_Statistic_t,
                                   struct FileServer_SocketHandlerConfiguration,
@@ -55,7 +55,7 @@ class Test_U_TCPConnection
 {
   typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                   Test_U_TCPSocketHandler_t,
-                                  struct FileServer_ConnectionConfiguration,
+                                  FileServer_ConnectionConfiguration_t,
                                   struct FileServer_ConnectionState,
                                   Net_Statistic_t,
                                   struct FileServer_SocketHandlerConfiguration,
@@ -70,14 +70,14 @@ class Test_U_TCPConnection
  public:
   typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                    ACE_INET_Addr,
-                                   struct FileServer_ConnectionConfiguration,
+                                   FileServer_ConnectionConfiguration_t,
                                    struct FileServer_ConnectionState,
                                    Net_Statistic_t,
                                    struct FileServer_UserData> ICONNECTION_MANAGER_T;
 
   Test_U_TCPConnection (ICONNECTION_MANAGER_T*,                        // connection manager handle
                         const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  inline virtual ~Test_U_TCPConnection () {};
+  inline virtual ~Test_U_TCPConnection () {}
 
   // implement (part of) Net_ITransportLayer_T
   inline virtual void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
@@ -95,7 +95,7 @@ class Test_U_TCPConnection
 
 class Test_U_AsynchTCPConnection
  : public Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPSocketHandler_t,
-                                        struct FileServer_ConnectionConfiguration,
+                                        FileServer_ConnectionConfiguration_t,
                                         struct FileServer_ConnectionState,
                                         Net_Statistic_t,
                                         struct FileServer_SocketHandlerConfiguration,
@@ -105,7 +105,7 @@ class Test_U_AsynchTCPConnection
                                         struct FileServer_UserData>
 {
   typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPSocketHandler_t,
-                                        struct FileServer_ConnectionConfiguration,
+                                        FileServer_ConnectionConfiguration_t,
                                         struct FileServer_ConnectionState,
                                         Net_Statistic_t,
                                         struct FileServer_SocketHandlerConfiguration,
@@ -120,14 +120,14 @@ class Test_U_AsynchTCPConnection
  public:
   typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                    ACE_INET_Addr,
-                                   struct FileServer_ConnectionConfiguration,
+                                   FileServer_ConnectionConfiguration_t,
                                    struct FileServer_ConnectionState,
                                    Net_Statistic_t,
                                    struct FileServer_UserData> ICONNECTION_MANAGER_T;
 
   Test_U_AsynchTCPConnection (ICONNECTION_MANAGER_T*,                        // connection manager handle
                               const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  inline virtual ~Test_U_AsynchTCPConnection () {};
+  inline virtual ~Test_U_AsynchTCPConnection () {}
 
   // implement (part of) Net_ITransportLayer_T
   inline virtual void ping () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };

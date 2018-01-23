@@ -45,6 +45,7 @@ using namespace std;
 #include "irc_record.h"
 
 #include "IRC_client_network.h"
+#include "IRC_client_stream_common.h"
 
 bool
 curses_join (const std::string& channel_in,

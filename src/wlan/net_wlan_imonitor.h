@@ -26,6 +26,7 @@
 #include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <guiddef.h>
+#include <wlanapi.h>
 #else
 #include <net/ethernet.h>
 
@@ -49,12 +50,12 @@ class Net_WLAN_IMonitorCB
 {
  public:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onAssociate (REFGUID,            // interface identifier
+  virtual void onSignalQualityChange (REFGUID,                  // interface identifier
+                                      WLAN_SIGNAL_QUALITY) = 0; // signal quality (of current association)
 #else
-  virtual void onAssociate (const std::string&, // interface identifier
+  virtual void onSignalQualityChange (const std::string&, // interface identifier
+                                      unsigned int) = 0;  // signal quality (of current association)
 #endif
-                            const std::string&, // SSID
-                            bool) = 0;          // success ?
   // *IMPORTANT NOTE*: Net_IWLANMonitor_T::addresses() may not return
   //                   significant data before this, as the link layer
   //                   configuration (e.g. DHCP handshake, ...) most likely has
@@ -67,16 +68,46 @@ class Net_WLAN_IMonitorCB
                           const std::string&, // SSID
                           bool) = 0;          // success ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onHotPlug (REFGUID,            // interface identifier
+  virtual void onDisconnect (REFGUID,            // interface identifier
 #else
-  virtual void onHotPlug (const std::string&, // interface identifier
+  virtual void onDisconnect (const std::string&, // interface identifier
 #endif
-                          bool) = 0;          // enabled ? : disabled/removed
+                             const std::string&, // SSID
+                             bool) = 0;          // success ?
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual void onAssociate (REFGUID,            // interface identifier
+#else
+  virtual void onAssociate (const std::string&, // interface identifier
+#endif
+                            const std::string&, // SSID
+                            bool) = 0;          // success ?
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual void onDisassociate (REFGUID,            // interface identifier
+#else
+  virtual void onDisassociate (const std::string&, // interface identifier
+#endif
+                               const std::string&, // SSID
+                               bool) = 0;          // success ?
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual void onScanComplete (REFGUID) = 0;            // interface identifier
 #else
   virtual void onScanComplete (const std::string&) = 0; // interface identifier
 #endif
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual void onHotPlug (REFGUID,            // interface identifier
+#else
+  virtual void onHotPlug (const std::string&, // interface identifier
+#endif
+                          bool) = 0;          // success ?
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual void onRemove (REFGUID,            // interface identifier
+#else
+  virtual void onRemove (const std::string&, // interface identifier
+#endif
+                         bool) = 0;          // success ?
 };
 
 //////////////////////////////////////////
@@ -85,11 +116,13 @@ class Net_WLAN_IMonitorBase
  : public Net_WLAN_IMonitorCB
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
  , public Common_IGet_T<HANDLE>
+ , public Common_IGet_2_T<WLAN_SIGNAL_QUALITY>
 #else
 #if defined (DBUS_SUPPORT)
  , public Common_IGetP_T<struct DBusConnection>
 #endif
  , public Common_IGet_T<ACE_HANDLE>
+ , public Common_IGet_2_T<unsigned int>
 #endif
 {
  public:
@@ -109,7 +142,7 @@ class Net_WLAN_IMonitorBase
   virtual bool associate (const std::string&,       // interface identifier {"": any}
                           const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
 #endif
-                          const std::string&) = 0;  // (E)SSID
+                          const std::string&) = 0;  // (E)SSID {"": disassociate}
   // *IMPORTANT NOTE*: does not block; results are reported by callback (see:
   //                   subscribe())
   // *NOTE*: effectively does the following:

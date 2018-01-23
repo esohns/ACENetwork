@@ -21,7 +21,6 @@
 #ifndef IRC_CLIENT_MODULE_IRCHANDLER_H
 #define IRC_CLIENT_MODULE_IRCHANDLER_H
 
-#include <list>
 #include <string>
 
 #include "ace/Global_Macros.h"
@@ -30,28 +29,37 @@
 #include "common_time_common.h"
 
 #include "stream_common.h"
+#include "stream_control_message.h"
 #include "stream_streammodule_base.h"
 
 #include "stream_misc_messagehandler.h"
 
+#include "irc_icontrol.h"
+#include "irc_record.h"
 #include "irc_statemachine_registration.h"
 
-#include "IRC_client_common.h"
-#include "IRC_client_configuration.h"
-#include "IRC_client_sessionmessage.h"
-#include "IRC_client_stream_common.h"
+//#include "IRC_client_common.h"
+//#include "IRC_client_configuration.h"
+//#include "IRC_client_sessionmessage.h"
+//#include "IRC_client_stream_common.h"
 
 // forward declaration(s)
 class ACE_Time_Value;
 class Stream_IAllocator;
 class IRC_Message;
-class IRC_Record;
+struct IRC_Client_ModuleHandlerConfiguration;
+typedef Stream_ControlMessage_T<enum Stream_ControlType,
+                                enum Stream_ControlMessageType,
+                                struct IRC_AllocatorConfiguration> IRC_Client_ControlMessage_t;
+class IRC_Client_SessionMessage;
+struct IRC_Client_SessionData;
+struct IRC_Client_UserData;
 
 class IRC_Client_Module_IRCHandler
  : public Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
                                          struct IRC_Client_ModuleHandlerConfiguration,
-                                         ACE_Message_Block,
+                                         IRC_Client_ControlMessage_t,
                                          IRC_Message,
                                          IRC_Client_SessionMessage,
                                          Stream_SessionId_t,
@@ -63,7 +71,7 @@ class IRC_Client_Module_IRCHandler
   typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                          Common_TimePolicy_t,
                                          struct IRC_Client_ModuleHandlerConfiguration,
-                                         ACE_Message_Block,
+                                         IRC_Client_ControlMessage_t,
                                          IRC_Message,
                                          IRC_Client_SessionMessage,
                                          Stream_SessionId_t,
@@ -162,7 +170,7 @@ DATASTREAM_MODULE_INPUT_ONLY (struct IRC_Client_SessionData,                // s
                               enum Stream_SessionMessageType,               // session event type
                               struct IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_misc_messagehandler_module_name_string,
-                              IRC_Client_IStreamNotify_t,                   // stream notification interface type
+                              Stream_INotify_t,                             // stream notification interface type
                               IRC_Client_Module_IRCHandler);                // writer type
 
 #endif

@@ -91,7 +91,7 @@ DATASTREAM_MODULE_INPUT_ONLY (struct FileServer_SessionData,            // sessi
                               enum Stream_SessionMessageType,           // session event type
                               struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_misc_messagehandler_module_name_string,
-                              Test_U_IStreamNotify_t,                   // stream notification interface type
+                              Stream_INotify_t,                         // stream notification interface type
                               Test_U_Module_EventHandler);              // writer type
 
 #endif

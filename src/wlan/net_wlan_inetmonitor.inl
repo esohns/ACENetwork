@@ -26,7 +26,7 @@
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
-          enum Net_WLAN_MonitorAPI MonitorAPI_e,
+          enum Net_WLAN_MonitorAPIType MonitorAPI_e,
           typename UserDataType>
 Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
                        TimePolicyType,
@@ -44,7 +44,7 @@ Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ConfigurationType,
-          enum Net_WLAN_MonitorAPI MonitorAPI_e,
+          enum Net_WLAN_MonitorAPIType MonitorAPI_e,
           typename UserDataType>
 void
 Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
@@ -60,6 +60,42 @@ Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
                                                  bool success_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_InetMonitor_T::onConnect"));
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // sanity check(s)
+  ACE_ASSERT (clientHandle_ != ACE_INVALID_HANDLE);
+  ACE_ASSERT (configuration_);
+  ACE_ASSERT (!configuration_->SSID.empty ());
+
+  struct ether_addr ether_addr_s =
+    Net_WLAN_Tools::getAccessPointAddress (inherited::clientHandle_,
+                                           interfaceIdentifier_in,
+                                           SSID_in);
+
+  if (!success_in)
+  {
+    if (unlikely (retries_ == NET_WLAN_MONITOR_AP_CONNECTION_RETRIES))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("\"%s\": failed to connect to %s (SSID was: %s), giving up\n"),
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
+                  ACE_TEXT (SSID_in.c_str ())));
+      retries_ = 0;
+      inherited::change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
+    } // end IF
+    else
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("\"%s\": failed to connect to %s (SSID was: %s), retrying...\n"),
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
+                  ACE_TEXT (SSID_in.c_str ())));
+      ++retries_;
+      inherited::change (NET_WLAN_MONITOR_STATE_CONNECT);
+    } // end ELSE
+  } // end IF
+#endif // ACE_WIN32 || ACE_WIN64
 
   // synch access
   { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_);
@@ -87,6 +123,7 @@ Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
   if (!success_in)
     return;
 
+#if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
 #else
@@ -109,17 +146,28 @@ Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("\"%s\": connected to access point (SSID: %s): %s <---> %s\n"),
+              ACE_TEXT ("\"%s\": (MAC: %s) connected to %s (SSID: %s): %s <---> %s\n"),
               ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in)), NET_LINKLAYER_802_11).c_str ()),
+              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (SSID_in.c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
 #else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("\"%s\": connected to access point (SSID: %s): %s <---> %s\n"),
-              ACE_TEXT (interfaceIdentifier_in.c_str ()),
-              ACE_TEXT (SSID_in.c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
+  SSIDS_TO_INTERFACEIDENTIFIER_MAP_CONST_ITERATOR_T iterator;
+  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, subscribersLock_);
+    iterator =
+      inherited::SSIDsToInterfaceIdentifier_.find (configuration_->SSID);
+    ACE_ASSERT (iterator != inherited::SSIDsToInterfaceIdentifier_.end ());
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("\"%s\": (MAC: %s) connected to %s (SSID: %s): %s <---> %s\n"),
+                ACE_TEXT (interfaceIdentifier_in.c_str ()),
+                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in)), NET_LINKLAYER_802_11).c_str ()),
+                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&(*iterator).second.second), NET_LINKLAYER_802_3).c_str ()),
+                ACE_TEXT (SSID_in.c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
+  } // end lock scope
 #endif
+#endif // _DEBUG
 }

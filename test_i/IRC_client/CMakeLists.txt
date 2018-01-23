@@ -204,7 +204,7 @@ add_executable (${EXECUTABLE}
                 ${IRC_client_SRCS}
                 ${IRC_client_INI})
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_i")
-if (WIN32 AND NOT ${BUILD_TEST_I})
+if (WIN32 AND NOT BUILD_TEST_I)
  set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
 endif ()
 
@@ -236,6 +236,8 @@ elseif (WIN32)
  target_link_libraries (${EXECUTABLE} ntdll.lib)
  target_link_libraries (${EXECUTABLE} ${CURSES_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${PANEL_LIBRARY})
+
+ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 endif ()
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} CommonTimer)
@@ -346,7 +348,7 @@ add_executable (${EXECUTABLE_GUI}
                 etc/IRC_client_connection.glade
                 etc/IRC_client_main.glade)
 set_property (TARGET ${EXECUTABLE_GUI} PROPERTY FOLDER "test_i")
-if (WIN32 AND NOT ${BUILD_TEST_I})
+if (WIN32 AND NOT BUILD_TEST_I)
  set_target_properties (${EXECUTABLE_GUI} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
 endif ()
 
@@ -376,6 +378,7 @@ if (UNIX)
  endif ()
 elseif (WIN32)
  target_link_libraries (${EXECUTABLE_GUI} ntdll.lib)
+
 # *TODO*: repair WIN32 pkgconfig support
  if (GTK3_SUPPORT)
   target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gio-2.0.lib)
@@ -394,6 +397,8 @@ elseif (WIN32)
   target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk2/lib/libgtk-win32-2.0.dll.a)
   target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk2/lib/libpango-1.0.dll.a)
  endif ()
+
+ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 endif ()
 target_link_libraries (${EXECUTABLE_GUI} Common)
 target_link_libraries (${EXECUTABLE_GUI} CommonTimer)

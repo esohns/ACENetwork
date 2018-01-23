@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_EVENTHANDLER_H
-#define TEST_U_EVENTHANDLER_H
+#ifndef ClientServer_EventHandler_H
+#define ClientServer_EventHandler_H
 
 #include "ace/Global_Macros.h"
 
@@ -30,16 +30,16 @@
 
 #include "net_client_common.h"
 
-class Test_U_EventHandler
- : public Test_U_ISessionNotify_t
+class ClientServer_EventHandler
+ : public ClientServer_ISessionNotify_t
 {
  public:
-  Test_U_EventHandler (struct Test_U_GTK_CBData*); // GTK state
-  inline virtual ~Test_U_EventHandler () {};
+  ClientServer_EventHandler (struct Test_U_GTK_CBData*); // GTK state
+  inline virtual ~ClientServer_EventHandler () {}
 
   // implement Common_INotify_T
   virtual void start (Stream_SessionId_t,
-                      const struct Test_U_StreamSessionData&);
+                      const struct ClientServer_StreamSessionData&);
   virtual void notify (Stream_SessionId_t,
                        const enum Stream_SessionMessageType&);
   virtual void end (Stream_SessionId_t);
@@ -49,11 +49,11 @@ class Test_U_EventHandler
                        const Test_U_SessionMessage&);
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler ())
-  ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler (const Test_U_EventHandler&))
-  ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler& operator=(const Test_U_EventHandler&))
+  ACE_UNIMPLEMENTED_FUNC (ClientServer_EventHandler ())
+  ACE_UNIMPLEMENTED_FUNC (ClientServer_EventHandler (const ClientServer_EventHandler&))
+  ACE_UNIMPLEMENTED_FUNC (ClientServer_EventHandler& operator=(const ClientServer_EventHandler&))
 
-    struct Test_U_GTK_CBData* CBData_;
+  struct Test_U_GTK_CBData* CBData_;
 };
 
 #endif

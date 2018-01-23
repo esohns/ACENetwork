@@ -40,7 +40,6 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType,
           typename ConnectionManagerType,
           typename UserDataType>
 BitTorrent_PeerStream_T<StreamStateType,
@@ -57,7 +56,6 @@ BitTorrent_PeerStream_T<StreamStateType,
                         ConnectionStateType,
                         HandlerConfigurationType,
                         SessionStateType,
-                        CBDataType,
                         ConnectionManagerType,
                         UserDataType>::BitTorrent_PeerStream_T ()
  : inherited ()
@@ -80,7 +78,6 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType,
           typename ConnectionManagerType,
           typename UserDataType>
 bool
@@ -98,7 +95,6 @@ BitTorrent_PeerStream_T<StreamStateType,
                         ConnectionStateType,
                         HandlerConfigurationType,
                         SessionStateType,
-                        CBDataType,
                         ConnectionManagerType,
                         UserDataType>::load (Stream_ModuleList_t& modules_out,
                                              bool& deleteModules_out)
@@ -144,7 +140,6 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType,
           typename ConnectionManagerType,
           typename UserDataType>
 bool
@@ -162,7 +157,6 @@ BitTorrent_PeerStream_T<StreamStateType,
                         ConnectionStateType,
                         HandlerConfigurationType,
                         SessionStateType,
-                        CBDataType,
                         ConnectionManagerType,
 // *TODO*: on MSVC 2015u3 the accurate declaration does not compile
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -324,7 +318,6 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType,
           typename SessionStateType,
-          typename CBDataType,
           typename ConnectionManagerType,
           typename UserDataType>
 bool
@@ -342,7 +335,6 @@ BitTorrent_PeerStream_T<StreamStateType,
                         ConnectionStateType,
                         HandlerConfigurationType,
                         SessionStateType,
-                        CBDataType,
                         ConnectionManagerType,
                         UserDataType>::collect (StatisticContainerType& data_out)
 {

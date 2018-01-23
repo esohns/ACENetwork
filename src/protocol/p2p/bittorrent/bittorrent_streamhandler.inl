@@ -54,29 +54,16 @@ template <typename SessionDataType,
           typename UserDataType,
           typename SessionInterfaceType,
           typename CBDataType>
-BitTorrent_PeerStreamHandler_T<SessionDataType,
-                               UserDataType,
-                               SessionInterfaceType,
-                               CBDataType>::~BitTorrent_PeerStreamHandler_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStreamHandler_T::~BitTorrent_PeerStreamHandler_T"));
-
-}
-
-template <typename SessionDataType,
-          typename UserDataType,
-          typename SessionInterfaceType,
-          typename CBDataType>
 void
 BitTorrent_PeerStreamHandler_T<SessionDataType,
                                UserDataType,
                                SessionInterfaceType,
-                               CBDataType>::start (Stream_SessionId_t sessionID_in,
+                               CBDataType>::start (Stream_SessionId_t sessionId_in,
                                                    const SessionDataType& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStreamHandler_T::start"));
 
-  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionID_in);
+  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
 
   // sanity check(s)
   ACE_ASSERT (session_);
@@ -86,22 +73,20 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
   if (iterator != sessionData_.end ())
     sessionData_.erase (iterator);
 
-  sessionData_.insert (std::make_pair (sessionID_in,
+  sessionData_.insert (std::make_pair (sessionId_in,
                                        &const_cast<SessionDataType&> (sessionData_in)));
 
   try {
-    session_->connect (sessionID_in);
+    session_->connect (sessionId_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::connect(), continuing\n")));
   }
 
   if (CBData_)
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
     //  CBData_->progressData.transferred = 0;
-    CBData_->eventStack.push_back (COMMON_UI_EVENT_STARTED);
+    CBData_->eventStack.push (COMMON_UI_EVENT_STARTED);
 
 //    guint event_source_id = g_idle_add (idle_start_UI_cb,
 //                                        CBData_);
@@ -123,12 +108,12 @@ void
 BitTorrent_PeerStreamHandler_T<SessionDataType,
                                UserDataType,
                                SessionInterfaceType,
-                               CBDataType>::notify (Stream_SessionId_t sessionID_in,
+                               CBDataType>::notify (Stream_SessionId_t sessionId_in,
                                                     const enum Stream_SessionMessageType& sessionEvent_in)
 {
   STREAM_TRACE (ACE_TEXT ("BitTorrent_PeerStreamHandler_T::notify"));
 
-  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
 
   ACE_ASSERT (false);
@@ -145,11 +130,11 @@ void
 BitTorrent_PeerStreamHandler_T<SessionDataType,
                                UserDataType,
                                SessionInterfaceType,
-                               CBDataType>::end (Stream_SessionId_t sessionID_in)
+                               CBDataType>::end (Stream_SessionId_t sessionId_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStreamHandler_T::end"));
 
-  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionID_in);
+  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
 
   // sanity check(s)
   ACE_ASSERT (session_);
@@ -157,17 +142,15 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
     sessionData_.erase (iterator);
 
   try {
-    session_->disconnect (sessionID_in);
+    session_->disconnect (sessionId_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::disconnect(), continuing\n")));
   }
 
   if (CBData_)
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-
-    CBData_->eventStack.push_back (COMMON_UI_EVENT_FINISHED);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    CBData_->eventStack.push (COMMON_UI_EVENT_FINISHED);
 
 //    guint event_source_id = g_idle_add (idle_end_UI_cb,
 //                                        CBData_);
@@ -189,13 +172,13 @@ void
 BitTorrent_PeerStreamHandler_T<SessionDataType,
                                UserDataType,
                                SessionInterfaceType,
-                               CBDataType>::notify (Stream_SessionId_t sessionID_in,
+                               CBDataType>::notify (Stream_SessionId_t sessionId_in,
                                                     const BitTorrent_Message_T<Stream_SessionData_T<SessionDataType>,
                                                                                UserDataType>& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStreamHandler_T::notify"));
 
-  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionId_in);
 
   // sanity check(s)
   ACE_ASSERT (session_);
@@ -215,11 +198,9 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
   }
 
   if (CBData_)
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
     CBData_->progressData.transferred += message_in.total_length ();
-    CBData_->eventStack.push_back (COMMON_UI_EVENT_DATA);
+    CBData_->eventStack.push (COMMON_UI_EVENT_DATA);
   } // end lock scope
 }
 template <typename SessionDataType,
@@ -230,13 +211,13 @@ void
 BitTorrent_PeerStreamHandler_T<SessionDataType,
                                UserDataType,
                                SessionInterfaceType,
-                               CBDataType>::notify (Stream_SessionId_t sessionID_in,
+                               CBDataType>::notify (Stream_SessionId_t sessionId_in,
                                                     const BitTorrent_SessionMessage_T<SessionDataType,
                                                                                       UserDataType>& sessionMessage_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_PeerStreamHandler_T::notify"));
 
-  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionID_in);
+  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
   int result = -1;
 
   // sanity check(s)
@@ -247,10 +228,8 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
     return;
 
   if (CBData_)
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-
-    Common_UI_Event event = COMMON_UI_EVENT_INVALID;
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
     switch (sessionMessage_in.type ())
     {
       case STREAM_SESSION_MESSAGE_STATISTIC:
@@ -273,7 +252,7 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
                         ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
         } // end IF
 
-        event = COMMON_UI_EVENT_STATISTIC;
+        event_e = COMMON_UI_EVENT_STATISTIC;
         break;
       }
       default:
@@ -284,7 +263,7 @@ BitTorrent_PeerStreamHandler_T<SessionDataType,
         return;
       }
     } // end SWITCH
-    CBData_->eventStack.push_back (event);
+    CBData_->eventStack.push (event_e);
   } // end IF
 }
 
@@ -313,50 +292,35 @@ template <typename SessionDataType,
           typename UserDataType,
           typename SessionInterfaceType,
           typename CBDataType>
-BitTorrent_TrackerStreamHandler_T<SessionDataType,
-                                  UserDataType,
-                                  SessionInterfaceType,
-                                  CBDataType>::~BitTorrent_TrackerStreamHandler_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStreamHandler_T::~BitTorrent_TrackerStreamHandler_T"));
-
-}
-
-template <typename SessionDataType,
-          typename UserDataType,
-          typename SessionInterfaceType,
-          typename CBDataType>
 void
 BitTorrent_TrackerStreamHandler_T<SessionDataType,
                                   UserDataType,
                                   SessionInterfaceType,
-                                  CBDataType>::start (Stream_SessionId_t sessionID_in,
+                                  CBDataType>::start (Stream_SessionId_t sessionId_in,
                                                       const SessionDataType& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStreamHandler_T::start"));
 
-  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionID_in);
+  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
 
   // sanity check(s)
   ACE_ASSERT (iterator == sessionData_.end ());
   ACE_ASSERT (session_);
 
-  sessionData_.insert (std::make_pair (sessionID_in,
+  sessionData_.insert (std::make_pair (sessionId_in,
                                        &const_cast<SessionDataType&> (sessionData_in)));
 
   try {
-    session_->trackerConnect (sessionID_in);
+    session_->trackerConnect (sessionId_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::trackerConnect(), continuing\n")));
   }
 
   if (CBData_)
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
     //  CBData_->progressData.transferred = 0;
-    CBData_->eventStack.push_back (COMMON_UI_EVENT_STARTED);
+    CBData_->eventStack.push (COMMON_UI_EVENT_STARTED);
 
 //    guint event_source_id = g_idle_add (idle_start_UI_cb,
 //                                        CBData_);
@@ -378,12 +342,12 @@ void
 BitTorrent_TrackerStreamHandler_T<SessionDataType,
                                   UserDataType,
                                   SessionInterfaceType,
-                                  CBDataType>::notify (Stream_SessionId_t sessionID_in,
+                                  CBDataType>::notify (Stream_SessionId_t sessionId_in,
                                                        const enum Stream_SessionMessageType& sessionEvent_in)
 {
   STREAM_TRACE (ACE_TEXT ("BitTorrent_TrackerStreamHandler_T::notify"));
 
-  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
 
   ACE_ASSERT (false);
@@ -400,11 +364,11 @@ void
 BitTorrent_TrackerStreamHandler_T<SessionDataType,
                                   UserDataType,
                                   SessionInterfaceType,
-                                  CBDataType>::end (Stream_SessionId_t sessionID_in)
+                                  CBDataType>::end (Stream_SessionId_t sessionId_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStreamHandler_T::end"));
 
-  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionID_in);
+  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
 
   // sanity check(s)
   ACE_ASSERT (iterator != sessionData_.end ());
@@ -413,17 +377,15 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   sessionData_.erase (iterator);
 
   try {
-    session_->trackerDisconnect (sessionID_in);
+    session_->trackerDisconnect (sessionId_in);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Net_ISession_T::trackerDisconnect(), continuing\n")));
   }
 
   if (CBData_)
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-
-    CBData_->eventStack.push_back (COMMON_UI_EVENT_FINISHED);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    CBData_->eventStack.push (COMMON_UI_EVENT_FINISHED);
 
 //    guint event_source_id = g_idle_add (idle_end_UI_cb,
 //                                        CBData_);
@@ -445,13 +407,13 @@ void
 BitTorrent_TrackerStreamHandler_T<SessionDataType,
                                   UserDataType,
                                   SessionInterfaceType,
-                                  CBDataType>::notify (Stream_SessionId_t sessionID_in,
+                                  CBDataType>::notify (Stream_SessionId_t sessionId_in,
                                                        const BitTorrent_TrackerMessage_T<Stream_SessionData_T<SessionDataType>,
                                                                                          UserDataType>& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStreamHandler_T::notify"));
 
-  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionId_in);
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
@@ -502,7 +464,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
   if (CBData_)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
     CBData_->progressData.transferred += message_in.total_length ();
-    CBData_->eventStack.push_back (COMMON_UI_EVENT_DATA);
+    CBData_->eventStack.push (COMMON_UI_EVENT_DATA);
   } // end lock scope
 }
 template <typename SessionDataType,
@@ -513,23 +475,21 @@ void
 BitTorrent_TrackerStreamHandler_T<SessionDataType,
                                   UserDataType,
                                   SessionInterfaceType,
-                                  CBDataType>::notify (Stream_SessionId_t sessionID_in,
+                                  CBDataType>::notify (Stream_SessionId_t sessionId_in,
                                                        const BitTorrent_SessionMessage_T<SessionDataType,
                                                                                          UserDataType>& sessionMessage_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_TrackerStreamHandler_T::notify"));
 
-  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionID_in);
+  SESSION_DATA_ITERATOR_T iterator = sessionData_.find (sessionId_in);
   int result = -1;
 
   // sanity check(s)
   ACE_ASSERT (iterator != sessionData_.end ());
 
   if (CBData_)
-  {
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-
-    Common_UI_Event event = COMMON_UI_EVENT_INVALID;
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+    enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
     switch (sessionMessage_in.type ())
     {
       case STREAM_SESSION_MESSAGE_STATISTIC:
@@ -552,7 +512,7 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
                         ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
         } // end IF
 
-        event = COMMON_UI_EVENT_STATISTIC;
+        event_e = COMMON_UI_EVENT_STATISTIC;
         break;
       }
       default:
@@ -563,6 +523,6 @@ BitTorrent_TrackerStreamHandler_T<SessionDataType,
         return;
       }
     } // end SWITCH
-    CBData_->eventStack.push_back (event);
+    CBData_->eventStack.push (event_e);
   } // end IF
 }

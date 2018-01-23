@@ -23,10 +23,13 @@
 
 #include "ace/Synch_Traits.h"
 
+#include "common_configuration.h"
 #include "common_time_common.h"
+
 #include "common_timer_manager_common.h"
 
 #include "stream_common.h"
+#include "stream_control_message.h"
 #include "stream_session_data.h"
 #include "stream_streammodule_base.h"
 
@@ -42,35 +45,38 @@
 #include "http_module_streamer.h"
 
 #include "test_u_common.h"
+//#include "test_u_stream_common.h"
+
 #include "test_u_message.h"
 #include "test_u_session_message.h"
-#include "test_u_stream_common.h"
+#include "test_u_HTTP_decoder_stream_common.h"
 
 // forward declarations
+struct Test_U_ModuleHandlerConfiguration;
 struct Test_U_HTTPDecoder_SessionData;
 typedef Stream_SessionData_T<struct Test_U_HTTPDecoder_SessionData> Test_U_HTTPDecoder_SessionData_t;
-class ACE_Message_Block;
-//class Test_U_Message;
-//class Test_U_SessionMessage;
+typedef Stream_ControlMessage_T<enum Stream_ControlType,
+                                enum Stream_ControlMessageType,
+                                struct Common_FlexParserAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
 
 // declare module(s)
 typedef HTTP_Module_Parser_T<ACE_MT_SYNCH,
                              Common_TimePolicy_t,
                              struct Test_U_ModuleHandlerConfiguration,
-                             Test_U_ControlMessage_t,
+                             Test_U_HTTPDecoder_ControlMessage_t,
                              Test_U_Message,
                              Test_U_SessionMessage> Test_U_Module_Parser;
 typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
                                Common_TimePolicy_t,
                                struct Test_U_ModuleHandlerConfiguration,
-                               Test_U_ControlMessage_t,
+                               Test_U_HTTPDecoder_ControlMessage_t,
                                Test_U_Message,
                                Test_U_SessionMessage> Test_U_Module_Streamer;
 
 typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
                                                       struct Test_U_ModuleHandlerConfiguration,
-                                                      Test_U_ControlMessage_t,
+                                                      Test_U_HTTPDecoder_ControlMessage_t,
                                                       Test_U_Message,
                                                       Test_U_SessionMessage,
                                                       HTTP_Method_t,
@@ -81,7 +87,7 @@ typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
 typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,
                                                       struct Test_U_ModuleHandlerConfiguration,
-                                                      Test_U_ControlMessage_t,
+                                                      Test_U_HTTPDecoder_ControlMessage_t,
                                                       Test_U_Message,
                                                       Test_U_SessionMessage,
                                                       HTTP_Method_t,
@@ -93,7 +99,7 @@ typedef Stream_Statistic_StatisticReport_WriterTask_T<ACE_MT_SYNCH,
 typedef Stream_Module_FileWriter_T<ACE_MT_SYNCH,
                                    Common_TimePolicy_t,
                                    struct Test_U_ModuleHandlerConfiguration,
-                                   Test_U_ControlMessage_t,
+                                   Test_U_HTTPDecoder_ControlMessage_t,
                                    Test_U_Message,
                                    Test_U_SessionMessage,
                                    struct Test_U_HTTPDecoder_SessionData> Test_U_Module_FileWriter;
@@ -103,7 +109,7 @@ DATASTREAM_MODULE_DUPLEX (struct Test_U_HTTPDecoder_SessionData,    // session d
                           enum Stream_SessionMessageType,           // session event type
                           struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
                           libacenetwork_protocol_default_http_parser_module_name_string,
-                          Test_U_IStreamNotify_t,                   // stream notification interface type
+                          Stream_INotify_t,                         // stream notification interface type
                           Test_U_Module_Streamer,                   // reader type
                           Test_U_Module_Parser,                     // writer type
                           Test_U_Module_Marshal);                   // name
@@ -112,7 +118,7 @@ DATASTREAM_MODULE_DUPLEX (struct Test_U_HTTPDecoder_SessionData,      // session
                           enum Stream_SessionMessageType,             // session event type
                           struct Test_U_ModuleHandlerConfiguration,   // module handler configuration type
                           libacestream_default_stat_report_module_name_string,
-                          Test_U_IStreamNotify_t,                     // stream notification interface type
+                          Stream_INotify_t,                           // stream notification interface type
                           Test_U_Module_StatisticReport_ReaderTask_t, // reader type
                           Test_U_Module_StatisticReport_WriterTask_t, // writer type
                           Test_U_Module_StatisticReport);             // name
@@ -121,7 +127,7 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_HTTPDecoder_SessionData,    // sessi
                               enum Stream_SessionMessageType,           // session event type
                               struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
                               libacestream_default_file_sink_module_name_string,
-                              Test_U_IStreamNotify_t,                   // stream notification interface type
+                              Stream_INotify_t,                         // stream notification interface type
                               Test_U_Module_FileWriter);                // writer type
 
 #endif

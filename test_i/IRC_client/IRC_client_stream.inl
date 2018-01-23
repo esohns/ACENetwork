@@ -22,9 +22,6 @@
 
 #include "net_macros.h"
 
-#include "IRC_client_common_modules.h"
-#include "IRC_client_module_IRChandler.h"
-
 template <typename TimerManagerType>
 IRC_Client_Stream_T<TimerManagerType>::IRC_Client_Stream_T ()
  : inherited ()
@@ -49,19 +46,19 @@ IRC_Client_Stream_T<TimerManagerType>::load (Stream_ModuleList_t& modules_out,
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   IRC_Client_Module_StatisticReport_Module (this,
-                                                            ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
+                                                            ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   IRC_Client_Module_Parser_Module (this,
-                                                   ACE_TEXT_ALWAYS_CHAR ("Parser")),
+                                                   ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_MODULE_PARSER_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   IRC_Client_Module_Marshal_Module (this,
-                                                    ACE_TEXT_ALWAYS_CHAR ("Marshal")),
+                                                    ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_MODULE_MARSHAL_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
 
@@ -120,13 +117,13 @@ IRC_Client_Stream_T<TimerManagerType>::initialize (const IRC_Client_StreamConfig
   // ---------------------------------------------------------------------------
   // ******************* Marshal ************************
   module_p =
-    const_cast<typename inherited::ISTREAM_T::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("Marshal")));
+    const_cast<typename inherited::ISTREAM_T::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_MODULE_MARSHAL_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
                 ACE_TEXT (libacenetwork_default_irc_stream_name_string),
-                ACE_TEXT ("Marshal")));
+                ACE_TEXT (IRC_DEFAULT_MODULE_MARSHAL_NAME_STRING)));
     goto error;
   } // end IF
   bisector_impl_p =

@@ -38,6 +38,10 @@
 
 #include "common_time_common.h"
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include "common_timer_common.h"
+#endif
+
 #include "net_defines.h"
 
 #include "net_wlan_configuration.h"
@@ -50,11 +54,13 @@ struct Net_WLAN_MonitorConfiguration
   Net_WLAN_MonitorConfiguration ()
    : autoAssociate (false)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-   , enableBackgroundScans (NET_WLAN_MONITOR_DEFAULT_BACKGROUNDSCANS)
-   , enableStreamingMode (NET_WLAN_MONITOR_DEFAULT_STREAMINGMODE)
+   , enableAutoConf (NET_WLAN_MONITOR_WIN32_DEFAULT_AUTOCONF ? TRUE : FALSE)
+   , enableBackgroundScans (NET_WLAN_MONITOR_WIN32_DEFAULT_BACKGROUNDSCANS ? TRUE : FALSE)
+   , enableMediaStreamingMode (NET_WLAN_MONITOR_WIN32_DEFAULT_MEDIASTREAMINGMODE ? TRUE : FALSE)
    , interfaceIdentifier (GUID_NULL)
    , notificationCB (NULL)
    , notificationCBData (NULL)
+   , timerInterface (NULL)
 #else
    , interfaceIdentifier ()
 #endif
@@ -66,11 +72,21 @@ struct Net_WLAN_MonitorConfiguration
 
   bool                       autoAssociate;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  BOOL                       enableAutoConf;
+  // *NOTE*: "...Background scan can only be disabled when the interface is in
+  //         the connected state. Background scan is disabled if at least one
+  //         client disables it. If the interface gets disconnected, background
+  //         scan will be enabled automatically. ..."
   BOOL                       enableBackgroundScans;
-  BOOL                       enableStreamingMode;
+  // *NOTE*: "...The media streaming mode can only be set when the interface is
+  //         in the connected state. The media streaming mode is enabled if at
+  //         least one client enables it. If the interface gets disconnected,
+  //         the media streaming mode is disabled automatically..."
+  BOOL                       enableMediaStreamingMode;
   struct _GUID               interfaceIdentifier;
   WLAN_NOTIFICATION_CALLBACK notificationCB;
   PVOID                      notificationCBData;
+  Common_ITimer_t*           timerInterface;
 #else
   std::string                interfaceIdentifier;
   DBusHandleMessageFunction  notificationCB;

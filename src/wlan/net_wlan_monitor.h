@@ -51,6 +51,11 @@
 #include "common_istatistic.h"
 #include "common_task_base.h"
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include "common_timer_common.h"
+#include "common_timer_handler.h"
+#endif
+
 #include "stream_messagequeue.h"
 
 #include "net_common.h"
@@ -82,7 +87,7 @@ template <ACE_SYNCH_DECL,
           typename AddressType,
           typename ConfigurationType,
           ////////////////////////////////
-          enum Net_WLAN_MonitorAPI MonitorAPI_e,
+          enum Net_WLAN_MonitorAPIType MonitorAPI_e,
           ////////////////////////////////
           typename UserDataType>
 class Net_WLAN_Monitor_T
@@ -93,6 +98,9 @@ class Net_WLAN_Monitor_T
  , public Net_WLAN_IMonitor_T<AddressType,
                               ConfigurationType>
  , public Common_IStatistic_T<Net_Statistic_t>
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+ , public Common_ITimerHandler
+#endif
 {
   typedef Common_TaskBase_T<ACE_SYNCH_USE,
                             TimePolicyType,
@@ -133,7 +141,8 @@ class Net_WLAN_Monitor_T
   virtual void subscribe (Net_WLAN_IMonitorCB*); // new subscriber
   virtual void unsubscribe (Net_WLAN_IMonitorCB*); // existing subscriber
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inline virtual const HANDLE get () const { return clientHandle_; };
+  inline virtual const HANDLE get () const { return clientHandle_; }
+  inline virtual const WLAN_SIGNAL_QUALITY get_2 () const;
 #else
 #if defined (DBUS_SUPPORT)
   inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
@@ -167,33 +176,59 @@ class Net_WLAN_Monitor_T
  protected:
   // convenient types
   typedef typename SUBSCRIBERS_T::iterator SUBSCRIBERS_ITERATOR_T;
+  struct Association_Configuration
+  {
+    Association_Configuration ()
+     : accessPointLinkLayerAddress ()
+     , signalQuality (0)
+    {
+      ACE_OS::memset (accessPointLinkLayerAddress.ether_addr_octet,
+                      0,
+                      sizeof (u_char[ETH_ALEN]));
+    };
+
+    struct ether_addr   accessPointLinkLayerAddress;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    WLAN_SIGNAL_QUALITY signalQuality;
+#else
+    unsigned int        signalQuality;
+#endif
+  };
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   typedef std::vector<struct _GUID> INTERFACEIDENTIFIERS_T;
-  typedef std::multimap<std::string, std::pair<struct _GUID, struct ether_addr> > SSIDS_TO_INTERFACEIDENTIFIER_MAP_T;
+  typedef std::multimap<std::string, std::pair<struct _GUID, struct Association_Configuration> > SSIDS_TO_INTERFACEIDENTIFIER_MAP_T;
 #else
-  typedef std::multimap<std::string, std::pair<std::string, struct ether_addr> > SSIDS_TO_INTERFACEIDENTIFIER_MAP_T;
+  typedef std::multimap<std::string, std::pair<std::string, struct Association_Configuration> > SSIDS_TO_INTERFACEIDENTIFIER_MAP_T;
 #endif
-  typedef SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::const_iterator SSIDS_TO_INTERFACEIDENTIFIER_MAP_CONST_ITERATOR_T;
-  typedef SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::iterator SSIDS_TO_INTERFACEIDENTIFIER_MAP_ITERATOR_T;
-  typedef std::pair<SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::iterator, bool> SSIDS_TO_INTERFACEIDENTIFIER_MAP_RESULT_T;
+  typedef typename SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::const_iterator SSIDS_TO_INTERFACEIDENTIFIER_MAP_CONST_ITERATOR_T;
+  typedef typename SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::iterator SSIDS_TO_INTERFACEIDENTIFIER_MAP_ITERATOR_T;
+  typedef std::pair<typename SSIDS_TO_INTERFACEIDENTIFIER_MAP_T::iterator, bool> SSIDS_TO_INTERFACEIDENTIFIER_MAP_RESULT_T;
 
   Net_WLAN_Monitor_T ();
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HANDLE                                          clientHandle_; // API-
+  long                                            scanTimerId_;
+  Common_TimerHandler                             timerHandler_;
+  Common_ITimer_t*                                timerInterface_;
 #else
   void*                                           buffer_; // scan results
   size_t                                          bufferSize_;
   ACE_HANDLE                                      handle_;
-//  bool                                            isRegistered_;
   struct iw_range                                 range_;
 #endif
   ConfigurationType*                              configuration_;
   Net_InterfaceIdentifiers_t                      interfaceIdentifiers_;
   bool                                            isActive_;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  bool                                            isConnectionNotified_;
+  bool                                            isFirstConnect_;
+#endif
   bool                                            isInitialized_;
   AddressType                                     localSAP_;
   AddressType                                     peerSAP_;
+  unsigned int                                    retries_; // AP association-/connection-
+  SSIDS_TO_INTERFACEIDENTIFIER_MAP_T              SSIDsToInterfaceIdentifier_; // cache
 
   // *IMPORTANT NOTE*: this must be 'recursive', so that callees may unsubscribe
   //                   from within the notification callbacks
@@ -208,14 +243,14 @@ class Net_WLAN_Monitor_T
                                 TimePolicyType,
                                 ACE_Message_Block> MESSAGEQUEUE_T;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  typedef std::pair<std::string, std::pair <struct _GUID, struct ether_addr> > SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T;
+  typedef std::pair<std::string, std::pair <struct _GUID, struct Association_Configuration> > SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T;
   struct SSIDS_TO_INTERFACEIDENTIFIER_FIND_S
    : public std::binary_function<SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T,
                                  struct _GUID,
                                  bool>
   { inline bool operator() (const SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T& entry_in, struct _GUID value_in) const { return InlineIsEqualGUID (entry_in.second.first, value_in); } };
 #else
-  typedef std::pair<std::string, std::pair <std::string, struct ether_addr> > SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T;
+  typedef std::pair<std::string, std::pair <std::string, struct Association_Configuration> > SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T;
   struct SSIDS_TO_INTERFACEIDENTIFIER_FIND_S
    : public std::binary_function<SSIDS_TO_INTERFACEIDENTIFIER_PAIR_T,
                                  std::string,
@@ -231,12 +266,12 @@ class Net_WLAN_Monitor_T
 
   // implement Net_WLAN_IMonitorCB
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onAssociate (REFGUID,            // interface identifier
+  virtual void onSignalQualityChange (REFGUID,              // interface identifier
+                                      WLAN_SIGNAL_QUALITY); // signal quality (of current association)
 #else
-  virtual void onAssociate (const std::string&, // interface identifier
+  virtual void onSignalQualityChange (const std::string&, // interface identifier
+                                      unsigned int);      // signal quality (of current association)
 #endif
-                            const std::string&, // SSID
-                            bool);              // success ?
   // *IMPORTANT NOTE*: Net_IWLANMonitor_T::addresses() may not return
   //                   significant data before this, as the link layer
   //                   configuration (e.g. DHCP handshake, ...) most likely has
@@ -249,16 +284,43 @@ class Net_WLAN_Monitor_T
                           const std::string&, // SSID
                           bool);              // success ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onHotPlug (REFGUID,            // interface identifier
+  virtual void onDisconnect (REFGUID,            // interface identifier
 #else
-  virtual void onHotPlug (const std::string&, // interface identifier
+  virtual void onDisconnect (const std::string&, // interface identifier
 #endif
-                          bool);              // arrival ? : removal
+                             const std::string&, // SSID
+                             bool);              // success ?
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual void onAssociate (REFGUID,            // interface identifier
+#else
+  virtual void onAssociate (const std::string&, // interface identifier
+#endif
+                            const std::string&, // SSID
+                            bool);              // success ?
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual void onDisassociate (REFGUID,            // interface identifier
+#else
+  virtual void onDisassociate (const std::string&, // interface identifier
+#endif
+                               const std::string&, // SSID
+                               bool);              // success ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual void onScanComplete (REFGUID);            // interface identifier
 #else
   virtual void onScanComplete (const std::string&); // interface identifier
 #endif
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual void onHotPlug (REFGUID,            // interface identifier
+#else
+  virtual void onHotPlug (const std::string&, // interface identifier
+#endif
+                          bool);              // success ?
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual void onRemove (REFGUID,            // interface identifier
+#else
+  virtual void onRemove (const std::string&, // interface identifier
+#endif
+                         bool);              // success ?
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -285,12 +347,16 @@ class Net_WLAN_Monitor_T
   // *TODO*: report (current) interface statistic(s)
   inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
-  MESSAGEQUEUE_T                                  queue_;
-  SSIDS_TO_INTERFACEIDENTIFIER_MAP_T              SSIDsToInterfaceIdentifier_;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-  bool                                            SSIDSeenBefore_;
+  void startScanTimer ();
+  void cancelScanTimer ();
+
+  // implement Common_ITimerHandler
+  inline virtual void handle (const void*) { inherited2::change (NET_WLAN_MONITOR_STATE_SCAN); }
 #endif
+
+  MESSAGEQUEUE_T                                  queue_;
+  bool                                            SSIDSeenBefore_;
 };
 
 //////////////////////////////////////////

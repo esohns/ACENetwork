@@ -23,7 +23,9 @@
 
 #include "ace/Synch_Traits.h"
 
-#include "common.h"
+#include "common_configuration.h"
+
+#include "common_timer_manager_common.h"
 
 #include "stream_common.h"
 #include "stream_control_message.h"
@@ -41,22 +43,25 @@
 
 #include "test_u_stream_common.h"
 
+#include "test_u_connection_common.h"
+
 // forward declarations
 class Test_U_Message;
 class Test_U_SessionMessage;
+//template <typename TimerManagerType> // implements Common_ITimer
+//class Test_U_Stream_T;
 
 typedef Stream_DataBase_T<struct HTTP_Record> Test_U_MessageData_t;
 
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
-                                struct Test_U_AllocatorConfiguration> Test_U_ControlMessage_t;
+                                struct Common_FlexParserAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
 
-//typedef Stream_IModuleHandler_T<Test_U_ModuleHandlerConfiguration> Test_U_IModuleHandler_t;
 typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                          struct Test_U_AllocatorConfiguration,
-                                          Test_U_ControlMessage_t,
+                                          struct Common_FlexParserAllocatorConfiguration,
+                                          Test_U_HTTPDecoder_ControlMessage_t,
                                           Test_U_Message,
-                                          Test_U_SessionMessage> Test_U_MessageAllocator_t;
+                                          Test_U_SessionMessage> Test_U_HTTPDecoder_MessageAllocator_t;
 
 struct Test_U_HTTPDecoder_SessionData
  : Test_U_StreamSessionData
@@ -91,33 +96,11 @@ struct Test_U_HTTPDecoder_SessionData
 typedef Stream_SessionData_T<struct Test_U_HTTPDecoder_SessionData> Test_U_HTTPDecoder_SessionData_t;
 
 struct Test_U_Configuration;
-struct Test_U_ConnectionState;
-typedef Net_IConnection_T<ACE_INET_Addr,
-                          struct Test_U_ConnectionConfiguration,
-                          struct Test_U_ConnectionState,
-                          HTTP_Statistic_t> Test_U_IConnection_t;
-struct Test_U_ConnectionConfiguration;
-typedef std::map<std::string,
-                 struct Test_U_ConnectionConfiguration> Test_U_ConnectionConfigurations_t;
-typedef Test_U_ConnectionConfigurations_t::iterator Test_U_ConnectionConfigurationIterator_t;
-typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
-                                 struct Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
-                                 HTTP_Statistic_t,
-                                 struct Test_U_UserData> Test_U_ConnectionManager_t;
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
-                                 struct Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
-                                 HTTP_Statistic_t,
-                                 struct Test_U_UserData> Test_U_IConnectionManager_t;
 //extern const char stream_name_string_[];
-struct Test_U_AllocatorConfiguration;
 struct Test_U_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Test_U_AllocatorConfiguration,
+                               struct Common_FlexParserAllocatorConfiguration,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
@@ -168,12 +151,10 @@ struct Test_U_HTTPDecoder_StreamState
 {
   Test_U_HTTPDecoder_StreamState ()
    : Test_U_StreamState ()
-   , currentSessionData (NULL)
+   , sessionData (NULL)
   {};
 
-  struct Test_U_HTTPDecoder_SessionData* currentSessionData;
+  struct Test_U_HTTPDecoder_SessionData* sessionData;
 };
-
-typedef Stream_INotify_T<enum Stream_SessionMessageType> Test_U_IStreamNotify_t;
 
 #endif

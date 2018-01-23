@@ -25,7 +25,7 @@
 
 #include "ace/Global_Macros.h"
 
-#include "common_ui_common.h"
+#include "common_ui_gtk_common.h"
 
 #include "bittorrent_client_gui_common.h"
 
@@ -39,7 +39,7 @@ class BitTorrent_Client_UI_Tools
 //                       std::string&,                               // return value: nickname
 //                       std::string&);                              // return value: channel
   // *WARNING*: this requires gdk_threads_enter()/leave() protection !
-  static BitTorrent_Client_GUI_Session_t* current (const Common_UI_GTKState&,                // GTK state
+  static BitTorrent_Client_GUI_Session_t* current (const Common_UI_GTK_State&,               // GTK state
                                                    const BitTorrent_Client_GUI_Sessions_t&); // sessions
 
  private:

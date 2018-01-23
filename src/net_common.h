@@ -207,8 +207,8 @@ struct Net_ConnectionState
   struct Net_UserData*       userData;
 };
 
-typedef std::set<Net_ConnectionId_t> Net_Connections_t;
-typedef Net_Connections_t::iterator Net_ConnectionsIterator_t;
+typedef std::set<Net_ConnectionId_t> Net_ConnectionIds_t;
+typedef Net_ConnectionIds_t::iterator Net_ConnectionIdsIterator_t;
 
 #if defined (ACE_HAS_NETLINK)
 class Net_Netlink_Addr

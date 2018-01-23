@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef TEST_U_MODULE_PROTOCOLHANDLER_H
-#define TEST_U_MODULE_PROTOCOLHANDLER_H
+#ifndef ClientServer_Module_ProtocolHandler_H
+#define ClientServer_Module_ProtocolHandler_H
 
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
@@ -46,10 +46,10 @@ class Test_U_SessionMessage;
 //extern Net_Export const char libacenetwork_default_test_u_protocolhandler_module_name_string[];
 extern const char libacenetwork_default_test_u_protocolhandler_module_name_string[];
 
-class Test_U_Module_ProtocolHandler
+class ClientServer_Module_ProtocolHandler
  : public Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 struct Test_U_ModuleHandlerConfiguration,
+                                 struct ClientServer_ModuleHandlerConfiguration,
                                  Test_U_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
@@ -60,12 +60,12 @@ class Test_U_Module_ProtocolHandler
  , public Common_ITimerHandler
 {
  public:
-  Test_U_Module_ProtocolHandler (ISTREAM_T*); // stream handle
-  virtual ~Test_U_Module_ProtocolHandler ();
+  ClientServer_Module_ProtocolHandler (ISTREAM_T*); // stream handle
+  virtual ~ClientServer_Module_ProtocolHandler ();
 
   // initialization
-  virtual bool initialize (const struct Test_U_ModuleHandlerConfiguration&, // configuration
-                           Stream_IAllocator* = NULL);                      // allocator
+  virtual bool initialize (const struct ClientServer_ModuleHandlerConfiguration&, // configuration
+                           Stream_IAllocator* = NULL);                            // allocator
 
   // implement (part of) Stream_ITaskBase
   virtual void handleDataMessage (Test_U_Message*&, // data message handle
@@ -79,7 +79,7 @@ class Test_U_Module_ProtocolHandler
  private:
   typedef Stream_TaskBaseSynch_T<ACE_MT_SYNCH,
                                  Common_TimePolicy_t,
-                                 struct Test_U_ModuleHandlerConfiguration,
+                                 struct ClientServer_ModuleHandlerConfiguration,
                                  Test_U_ControlMessage_t,
                                  Test_U_Message,
                                  Test_U_SessionMessage,
@@ -88,9 +88,9 @@ class Test_U_Module_ProtocolHandler
                                  enum Stream_SessionMessageType,
                                  struct Test_U_UserData> inherited;
 
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler ())
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler (const Test_U_Module_ProtocolHandler&))
-  ACE_UNIMPLEMENTED_FUNC (Test_U_Module_ProtocolHandler& operator= (const Test_U_Module_ProtocolHandler&))
+  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_ProtocolHandler ())
+  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_ProtocolHandler (const ClientServer_Module_ProtocolHandler&))
+  ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_ProtocolHandler& operator= (const ClientServer_Module_ProtocolHandler&))
 
   // implement Common_ITimerHandler
   virtual void handle (const void*); // asynchronous completion token
@@ -107,11 +107,11 @@ class Test_U_Module_ProtocolHandler
 };
 
 // declare module
-DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // session data type
-                              enum Stream_SessionMessageType,           // session event type
-                              struct Test_U_ModuleHandlerConfiguration, // module handler configuration type
+DATASTREAM_MODULE_INPUT_ONLY (struct ClientServer_StreamSessionData,          // session data type
+                              enum Stream_SessionMessageType,                 // session event type
+                              struct ClientServer_ModuleHandlerConfiguration, // module handler configuration type
                               libacenetwork_default_test_u_protocolhandler_module_name_string,
-                              Test_U_IStreamNotify_t,                   // stream notification interface type
-                              Test_U_Module_ProtocolHandler);           // writer type
+                              Stream_INotify_t,                               // stream notification interface type
+                              ClientServer_Module_ProtocolHandler);           // writer type
 
 #endif

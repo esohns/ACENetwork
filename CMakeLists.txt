@@ -89,10 +89,6 @@ install (FILES "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_config.h"
          DESTINATION "${INSTALL_INCLUDE_DIR}/${PROJECT_NAME}"
          COMPONENT dev)
 
-set (BUILD_TEST_U TRUE
-     CACHE BOOL "build test_u")
-set (BUILD_TEST_I TRUE
-     CACHE BOOL "build test_i")
 set (DEBUG_DEBUGGER TRUE
      CACHE BOOL "in debugger")
 

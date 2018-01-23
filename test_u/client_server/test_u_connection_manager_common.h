@@ -36,48 +36,46 @@
 #include "test_u_connection_common.h"
 
 // forward declarations
-//struct Test_U_ConnectionConfiguration;
-//struct Test_U_ConnectionState;
 struct Test_U_UserData;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  Net_Netlink_Addr,
-                                 struct Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
+                                 ClientServer_ConnectionConfiguration_t,
+                                 struct ClientServer_ConnectionState,
                                  Net_Statistic_t,
-                                 struct Test_U_UserData> Test_U_INetlinkConnectionManager_t;
+                                 struct Test_U_UserData> ClientServer_INetlinkConnectionManager_t;
 #endif
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 struct Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
+                                 ClientServer_ConnectionConfiguration_t,
+                                 struct ClientServer_ConnectionState,
                                  Net_Statistic_t,
-                                 struct Test_U_UserData> Test_U_IInetConnectionManager_t;
+                                 struct Test_U_UserData> ClientServer_IInetConnectionManager_t;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  Net_Netlink_Addr,
-                                 struct Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
+                                 ClientServer_ConnectionConfiguration_t,
+                                 struct ClientServer_ConnectionState,
                                  Net_Statistic_t,
-                                 struct Test_U_UserData> Test_U_NetlinkConnectionManager_t;
+                                 struct Test_U_UserData> ClientServer_NetlinkConnectionManager_t;
 #endif
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 struct Test_U_ConnectionConfiguration,
-                                 struct Test_U_ConnectionState,
+                                 ClientServer_ConnectionConfiguration_t,
+                                 struct ClientServer_ConnectionState,
                                  Net_Statistic_t,
-                                 struct Test_U_UserData> Test_U_InetConnectionManager_t;
+                                 struct Test_U_UserData> ClientServer_InetConnectionManager_t;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-typedef ACE_Singleton<Test_U_NetlinkConnectionManager_t,
-                      ACE_SYNCH_MUTEX> TEST_U_NETLINKCONNECTIONMANAGER_SINGLETON;
+typedef ACE_Singleton<ClientServer_NetlinkConnectionManager_t,
+                      ACE_SYNCH_MUTEX> CLIENTSERVER_NETLINKCONNECTIONMANAGER_SINGLETON;
 #endif
-typedef ACE_Singleton<Test_U_InetConnectionManager_t,
-                      ACE_SYNCH_MUTEX> TEST_U_CONNECTIONMANAGER_SINGLETON;
+typedef ACE_Singleton<ClientServer_InetConnectionManager_t,
+                      ACE_SYNCH_MUTEX> CLIENTSERVER_CONNECTIONMANAGER_SINGLETON;
 
 #endif

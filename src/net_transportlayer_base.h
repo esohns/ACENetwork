@@ -36,25 +36,25 @@ class Net_InetTransportLayerBase_T
  : public virtual Net_ITransportLayer_T<ConfigurationType>
 {
  public:
-  inline virtual ~Net_InetTransportLayerBase_T () {};
+  inline virtual ~Net_InetTransportLayerBase_T () {}
 
   // implement (part of) Net_ITransportLayer_T
-  inline virtual enum Common_DispatchType dispatch () { return dispatch_; };
-  inline virtual enum Net_ClientServerRole role () { return role_; };
-  virtual bool initialize (enum Common_DispatchType,
+  inline virtual enum Common_EventDispatchType dispatch () { return dispatch_; }
+  inline virtual enum Net_ClientServerRole role () { return role_; }
+  virtual bool initialize (enum Common_EventDispatchType,
                            enum Net_ClientServerRole,
                            const ConfigurationType&);
-  inline virtual enum Net_TransportLayerType transportLayer () { return transportLayer_; };
+  inline virtual enum Net_TransportLayerType transportLayer () { return transportLayer_; }
 
  protected:
   Net_InetTransportLayerBase_T (enum Net_TransportLayerType);
 
   // implement (part of) Net_ITransportLayer_T
-  inline virtual void finalize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void finalize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
-  enum Common_DispatchType    dispatch_;
-  enum Net_ClientServerRole   role_;
-  enum Net_TransportLayerType transportLayer_;
+  enum Common_EventDispatchType dispatch_;
+  enum Net_ClientServerRole     role_;
+  enum Net_TransportLayerType   transportLayer_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_InetTransportLayerBase_T ())
@@ -69,25 +69,25 @@ class Net_NetlinkTransportLayer_Base
  : virtual public Net_ITransportLayer_T<struct Net_NetlinkSocketConfiguration>
 {
  public:
-  inline virtual ~Net_NetlinkTransportLayer_Base () {};
+  inline virtual ~Net_NetlinkTransportLayer_Base () {}
 
   // implement (part of) Net_ITransportLayer_T
-  inline virtual enum Common_DispatchType dispatch () { return dispatch_; };
-  inline virtual enum Net_ClientServerRole role () { return role_; };
-  virtual bool initialize (enum Common_DispatchType,
+  inline virtual enum Common_EventDispatchType dispatch () { return dispatch_; }
+  inline virtual enum Net_ClientServerRole role () { return role_; }
+  virtual bool initialize (enum Common_EventDispatchType,
                            enum Net_ClientServerRole,
                            const struct Net_NetlinkSocketConfiguration&);
-  inline virtual enum Net_TransportLayerType transportLayer () { return transportLayer_; };
+  inline virtual enum Net_TransportLayerType transportLayer () { return transportLayer_; }
 
  protected:
   Net_NetlinkTransportLayer_Base ();
 
   // implement (part of) Net_ITransportLayer_T
-  inline virtual void finalize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void finalize () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
-  enum Common_DispatchType    dispatch_;
-  enum Net_ClientServerRole   role_;
-  enum Net_TransportLayerType transportLayer_;
+  enum Common_EventDispatchType dispatch_;
+  enum Net_ClientServerRole     role_;
+  enum Net_TransportLayerType   transportLayer_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_NetlinkTransportLayer_Base (const Net_NetlinkTransportLayer_Base&))

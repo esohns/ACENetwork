@@ -31,38 +31,38 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-Test_U_TCPConnection::Test_U_TCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
-                                            const ACE_Time_Value& statisticCollectionInterval_in)
+ClientServer_TCPConnection::ClientServer_TCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
+                                                        const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_TCPConnection::Test_U_TCPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("ClientServer_TCPConnection::ClientServer_TCPConnection"));
 
 }
 
-Test_U_TCPConnection::Test_U_TCPConnection ()
+ClientServer_TCPConnection::ClientServer_TCPConnection ()
  : inherited (NULL,
               ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_TCPConnection::Test_U_TCPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("ClientServer_TCPConnection::ClientServer_TCPConnection"));
 
 }
 
 //////////////////////////////////////////
 
-Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
+ClientServer_AsynchTCPConnection::ClientServer_AsynchTCPConnection (ICONNECTION_MANAGER_T* interfaceHandle_in,
                                                         const ACE_Time_Value& statisticCollectionInterval_in)
  : inherited (interfaceHandle_in,
               statisticCollectionInterval_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("ClientServer_AsynchTCPConnection::ClientServer_AsynchTCPConnection"));
 
 }
 
-Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection ()
+ClientServer_AsynchTCPConnection::ClientServer_AsynchTCPConnection ()
  : inherited (NULL,
               ACE_Time_Value (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL, 0))
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_AsynchTCPConnection::Test_U_AsynchTCPConnection"));
+  NETWORK_TRACE (ACE_TEXT ("ClientServer_AsynchTCPConnection::ClientServer_AsynchTCPConnection"));
 
 }

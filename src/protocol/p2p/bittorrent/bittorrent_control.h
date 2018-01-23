@@ -24,8 +24,8 @@
 #include <map>
 #include <string>
 
-#include <ace/Global_Macros.h>
-#include <ace/Synch_Traits.h>
+#include "ace/Global_Macros.h"
+#include "ace/Synch_Traits.h"
 
 #include "bittorrent_common.h"
 #include "bittorrent_icontrol.h"

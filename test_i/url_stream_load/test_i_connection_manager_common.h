@@ -41,13 +41,13 @@ struct Test_I_UserData;
 
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 struct Test_I_URLStreamLoad_ConnectionConfiguration,
+                                 Test_I_URLStreamLoad_ConnectionConfiguration_t,
                                  struct HTTP_ConnectionState,
                                  HTTP_Statistic_t,
                                  struct HTTP_Stream_UserData> Test_I_IConnectionManager_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
-                                 struct Test_I_URLStreamLoad_ConnectionConfiguration,
+                                 Test_I_URLStreamLoad_ConnectionConfiguration_t,
                                  struct HTTP_ConnectionState,
                                  HTTP_Statistic_t,
                                  struct HTTP_Stream_UserData> Test_I_ConnectionManager_t;

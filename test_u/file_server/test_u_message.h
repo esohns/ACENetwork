@@ -38,20 +38,24 @@ class ACE_Message_Block;
 class Test_U_SessionMessage;
 
 class Test_U_Message
- : public Stream_MessageBase_T<struct Stream_AllocatorConfiguration,
+ : public Stream_MessageBase_T<struct Net_AllocatorConfiguration,
                                enum Stream_MessageType,
                                int>
 {
   // enable access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Stream_AllocatorConfiguration,
+                                                 struct Net_AllocatorConfiguration,
                                                  Test_U_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
 
+  typedef Stream_MessageBase_T<struct Net_AllocatorConfiguration,
+                               enum Stream_MessageType,
+                               int> inherited;
+
  public:
   Test_U_Message (unsigned int); // size
-  inline virtual ~Test_U_Message () {};
+  inline virtual ~Test_U_Message () {}
 
   inline virtual int command () const { return ACE_Message_Block::MB_DATA; };
   inline static std::string CommandTypeToString (int) { return ACE_TEXT_ALWAYS_CHAR ("DATA"); };
@@ -70,10 +74,6 @@ class Test_U_Message
   Test_U_Message (const Test_U_Message&);
 
  private:
-  typedef Stream_MessageBase_T<struct Stream_AllocatorConfiguration,
-                               enum Stream_MessageType,
-                               int> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Test_U_Message ())
   // *NOTE*: to be used by allocators
   Test_U_Message (Stream_SessionId_t,

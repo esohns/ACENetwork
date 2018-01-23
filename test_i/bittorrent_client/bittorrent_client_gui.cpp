@@ -43,7 +43,10 @@
 #include "gtk/gtk.h"
 
 #include "common_file_tools.h"
+#include "common_signal_tools.h"
 #include "common_tools.h"
+
+#include "common_timer_tools.h"
 
 #include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_builder_definition.h"
@@ -471,14 +474,14 @@ do_work (bool useThreadPool_in,
                                                                                               tracker_modulehandler_configuration)));
 
   // step2: initialize event dispatch
-  struct Common_DispatchThreadData thread_data;
-  thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data.useReactor = CBData_in.configuration->useReactor;
+  struct Common_EventDispatchThreadData thread_data_s;
+  thread_data_s.numberOfDispatchThreads = numberOfDispatchThreads_in;
+  thread_data_s.useReactor = CBData_in.configuration->useReactor;
   if (!Common_Tools::initializeEventDispatch (CBData_in.configuration->useReactor,
-                                              (thread_data.numberOfDispatchThreads > 1),
-                                              thread_data.numberOfDispatchThreads,
-                                              thread_data.proactorType,
-                                              thread_data.reactorType,
+                                              (thread_data_s.numberOfDispatchThreads > 1),
+                                              thread_data_s.numberOfDispatchThreads,
+                                              thread_data_s.proactorType,
+                                              thread_data_s.reactorType,
                                               CBData_in.configuration->peerStreamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -520,7 +523,7 @@ do_work (bool useThreadPool_in,
 
     return;
   } // end IF
-  if (!Common_Tools::initializeSignals ((CBData_in.configuration->useReactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+  if (!Common_Signal_Tools::initialize ((CBData_in.configuration->useReactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                                              : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                         signalSet_in,
                                         ignoredSignalSet_in,
@@ -528,7 +531,7 @@ do_work (bool useThreadPool_in,
                                         previousSignalActions_inout))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeSignals(), returning\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
 
     // clean up
     timer_manager_p->stop ();
@@ -568,7 +571,7 @@ do_work (bool useThreadPool_in,
 
   // step6: initialize worker(s)
   int group_id = -1;
-  if (!Common_Tools::startEventDispatch (thread_data,
+  if (!Common_Tools::startEventDispatch (thread_data_s,
                                          group_id))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1244,13 +1247,13 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (!Common_Tools::preInitializeSignals (signal_set,
+  if (!Common_Signal_Tools::preInitialize (signal_set,
                                            use_reactor,
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::preInitializeSignals(), aborting\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
 
     Common_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, fini ACE...
@@ -1264,12 +1267,12 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
   struct BitTorrent_Client_Configuration configuration;
-  struct BitTorrent_Client_GTK_CBData cb_user_data;
-  cb_user_data.configuration = &configuration;
+  struct BitTorrent_Client_GTK_CBData gtk_cb_data;
+  gtk_cb_data.configuration = &configuration;
 
   BitTorrent_Client_SignalHandler signal_handler  ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                                   &cb_user_data.lock,
+                                                   &gtk_cb_data.lock,
                                                    false);
 
   // step5: handle specific program modes
@@ -1277,7 +1280,7 @@ ACE_TMAIN (int argc_in,
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1297,8 +1300,29 @@ ACE_TMAIN (int argc_in,
   // step6: initialize configuration objects
 
   // initialize protocol configuration
-  Stream_CachedAllocatorHeap_T<struct Stream_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                                     BITTORRENT_BUFFER_SIZE);
+  Stream_CachedAllocatorHeap_T<struct BitTorrent_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
+                                                                                         BITTORRENT_BUFFER_SIZE);
+  if (!heap_allocator.initialize (configuration.peerStreamConfiguration.allocatorConfiguration_))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to initialize allocator, aborting\n")));
+
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                    : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                   signal_set,
+                                   previous_signal_actions,
+                                   previous_signal_mask);
+    Common_Tools::finalizeLogging ();
+    // *PORTABILITY*: on Windows, fini ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif
+
+    return EXIT_SUCCESS;
+  } // end IF
   BitTorrent_Client_PeerMessageAllocator_t peer_message_allocator (NET_STREAM_MAX_MESSAGES,
                                                                    &heap_allocator);
   BitTorrent_Client_TrackerMessageAllocator_t tracker_message_allocator (NET_STREAM_MAX_MESSAGES,
@@ -1319,51 +1343,55 @@ ACE_TMAIN (int argc_in,
       &configuration.parserConfiguration;
 
   ////////////////////// socket handler configuration //////////////////////////
-  struct BitTorrent_Client_PeerConnectionConfiguration peer_connection_configuration;
+  BitTorrent_Client_PeerConnectionConfiguration_t peer_connection_configuration;
   peer_connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
     ACE_Time_Value (reporting_interval, 0);
   peer_connection_configuration.socketHandlerConfiguration.userData =
     &configuration.peerUserData;
   peer_connection_configuration.messageAllocator = &peer_message_allocator;
-  peer_connection_configuration.streamConfiguration =
-    &configuration.peerStreamConfiguration;
   peer_connection_configuration.userData = &configuration.peerUserData;
+
+  peer_connection_configuration.initialize (configuration.peerStreamConfiguration.allocatorConfiguration_,
+                                            configuration.peerStreamConfiguration);
+
   configuration.peerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                      peer_connection_configuration));
 
-  struct BitTorrent_Client_TrackerConnectionConfiguration tracker_connection_configuration;
+  BitTorrent_Client_TrackerConnectionConfiguration_t tracker_connection_configuration;
   tracker_connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
     ACE_Time_Value (reporting_interval, 0);
   tracker_connection_configuration.socketHandlerConfiguration.userData =
     &configuration.trackerUserData;
   tracker_connection_configuration.messageAllocator =
     &tracker_message_allocator;
-  tracker_connection_configuration.streamConfiguration =
-    &configuration.trackerStreamConfiguration;
   tracker_connection_configuration.userData =
     &configuration.trackerUserData;
+
+  tracker_connection_configuration.initialize (configuration.trackerStreamConfiguration.allocatorConfiguration_,
+                                               configuration.trackerStreamConfiguration);
+
   configuration.trackerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                         tracker_connection_configuration));
 
-  cb_user_data.UIFileDirectory = UIDefinitionFile_directory;
+  gtk_cb_data.UIFileDirectory = UIDefinitionFile_directory;
 //   userData.phoneBook;
 //   userData.loginOptions.password = ;
-//  cb_user_data.configuration->protocolConfiguration.loginOptions.nickName =
+//  gtk_cb_data.configuration->protocolConfiguration.loginOptions.nickName =
 //      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_NICKNAME);
 //   userData.loginOptions.user.username = ;
 
-  cb_user_data.RCFiles.push_back (rc_file_name);
+  gtk_cb_data.RCFiles.push_back (rc_file_name);
 
   configuration.useReactor = use_reactor;
 
-  cb_user_data.progressData.GTKState = &cb_user_data;
+  gtk_cb_data.progressData.state = &gtk_cb_data;
 
   // step8: initialize GTK UI
   BitTorrent_Client_GtkBuilderDefinition_t ui_definition (argc_in,
                                                           argv_in);
   BITTORRENT_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                                        argv_in,
-                                                                       &cb_user_data,
+                                                                       &gtk_cb_data,
                                                                        &ui_definition);
 
   // step9: do work
@@ -1371,7 +1399,7 @@ ACE_TMAIN (int argc_in,
   timer.start ();
   do_work (use_thread_pool,
            number_of_thread_pool_threads,
-           cb_user_data,
+           gtk_cb_data,
            ui_definition_file_name,
            signal_set,
            ignored_signal_set,
@@ -1383,8 +1411,8 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Tools::periodToString (working_time,
-                                working_time_string);
+  Common_Timer_Tools::periodToString (working_time,
+                                      working_time_string);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
               ACE_TEXT (working_time_string.c_str ())));
@@ -1401,7 +1429,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1424,10 +1452,10 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Tools::periodToString (user_time,
-                               user_time_string);
-  Common_Tools::periodToString (system_time,
-                               system_time_string);
+  Common_Timer_Tools::periodToString (user_time,
+                                      user_time_string);
+  Common_Timer_Tools::periodToString (system_time,
+                                      system_time_string);
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
@@ -1462,7 +1490,7 @@ ACE_TMAIN (int argc_in,
 #endif
 
   // step10: clean up
-  Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+  Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                  signal_set,
                                  previous_signal_actions,

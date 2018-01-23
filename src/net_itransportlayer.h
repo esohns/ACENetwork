@@ -31,11 +31,11 @@ class Net_ILinkLayer_T
  public:
   // information
   // *TODO*: move this somewhere else
-  virtual enum Common_DispatchType dispatch () = 0;
+  virtual enum Common_EventDispatchType dispatch () = 0;
   virtual enum Net_ClientServerRole role () = 0;
   virtual void set (enum Net_ClientServerRole) = 0;
 
-  virtual bool initialize (enum Common_DispatchType,
+  virtual bool initialize (enum Common_EventDispatchType,
                            enum Net_ClientServerRole,
                            const ConfigurationType&) = 0;
   virtual void finalize () = 0;

@@ -31,17 +31,22 @@
 
 enum Net_WLAN_MonitorState : int
 {
-  NET_WLAN_MONITOR_STATE_INVALID = -1,
-  NET_WLAN_MONITOR_STATE_INITIAL = 0,  // initialized
+  NET_WLAN_MONITOR_STATE_INVALID     = -1,
   // -------------------------------------
-  NET_WLAN_MONITOR_STATE_SCAN,         // scanning
-  NET_WLAN_MONITOR_STATE_ASSOCIATE,    // associating to AP
-  NET_WLAN_MONITOR_STATE_CONNECT,      // request IP address (e.g. DHCP)
-  NET_WLAN_MONITOR_STATE_DISCONNECT,   // release IP address (e.g. DHCP)
-  NET_WLAN_MONITOR_STATE_DISASSOCIATE, // disassociate from AP
+  // 'transitional' states (task-/timeout-oriented, i.e. may return to previous
+  // state upon completion)
+  NET_WLAN_MONITOR_STATE_IDLE        = 0,  // idle (i.e. waiting between scans/connection attempts/...)
+  NET_WLAN_MONITOR_STATE_SCAN,             // scanning
+  NET_WLAN_MONITOR_STATE_ASSOCIATE,        // associating to AP
+  NET_WLAN_MONITOR_STATE_CONNECT,          // requesting IP address (e.g. DHCP)
+  NET_WLAN_MONITOR_STATE_DISCONNECT,       // releasing IP address (e.g. DHCP)
+  NET_WLAN_MONITOR_STATE_DISASSOCIATE,     // disassociating from AP
   ////////////////////////////////////////
-  NET_WLAN_MONITOR_STATE_ASSOCIATED,   // associated to AP
-  NET_WLAN_MONITOR_STATE_CONNECTED,    // 'online': interface is associated to AP and has a valid IP address
+  // 'static' states (discrete/persisting, i.e. long(er)-term)
+  NET_WLAN_MONITOR_STATE_INITIALIZED,      // initialized
+  NET_WLAN_MONITOR_STATE_SCANNED,          // scanning complete
+  NET_WLAN_MONITOR_STATE_ASSOCIATED,       // associated to AP
+  NET_WLAN_MONITOR_STATE_CONNECTED,        // 'online': interface is associated to AP and has a valid IP address
   ////////////////////////////////////////
   NET_WLAN_MONITOR_STATE_MAX
 };
@@ -60,12 +65,15 @@ class Net_WLAN_MonitorStateMachine
   inline virtual ~Net_WLAN_MonitorStateMachine () {}
 
   // implement (part of) Common_IStateMachine_T
-  inline virtual bool initialize () { change (NET_WLAN_MONITOR_STATE_INITIAL); return true; }
+  inline virtual bool initialize () { change (NET_WLAN_MONITOR_STATE_INITIALIZED); return true; }
   inline virtual void reset () { initialize (); }
   virtual std::string stateToString (enum Net_WLAN_MonitorState) const;
 
  protected:
-   ACE_SYNCH_NULL_MUTEX lock_;
+  // convenient types
+  typename ACE_NULL_SYNCH::MUTEX MUTEX_T;
+
+  ACE_SYNCH_NULL_MUTEX lock_;
 
   // implement (part of) Common_IStateMachine_T
   // *NOTE*: only derived classes can change state

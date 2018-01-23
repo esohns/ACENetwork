@@ -24,9 +24,12 @@
 
 #include "ace/Log_Msg.h"
 
+#include "stream_stat_defines.h"
+
 #include "net_defines.h"
 #include "net_macros.h"
 
+#include "test_u_defines.h"
 #include "test_u_message.h"
 #include "test_u_sessionmessage.h"
 #include "test_u_common_modules.h"
@@ -63,26 +66,26 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_ProtocolHandler_Module (this,
-                                                        ACE_TEXT_ALWAYS_CHAR ("ProtocolHandler")),
+                  ClientServer_Module_ProtocolHandler_Module (this,
+                                                              ACE_TEXT_ALWAYS_CHAR (TEST_U_STREAM_MODULE_PROTOCOLHANDLER_NAME)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_StatisticReport_Module (this,
-                                                        ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
+                  ClientServer_Module_StatisticReport_Module (this,
+                                                              ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_HeaderParser_Module (this,
-                                                     ACE_TEXT_ALWAYS_CHAR ("HeaderParser")),
+                  ClientServer_Module_HeaderParser_Module (this,
+                                                           ACE_TEXT_ALWAYS_CHAR (TEST_U_STREAM_MODULE_HEADERPARSER_NAME)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_TCPSocketHandler_Module (this,
-                                                         ACE_TEXT_ALWAYS_CHAR ("SocketHandler")),
+                  ClientServer_Module_TCPSocketHandler_Module (this,
+                                                               ACE_TEXT_ALWAYS_CHAR (NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
 
@@ -105,7 +108,7 @@ Test_U_Stream::initialize (const CONFIGURATION_T& configuration_in,
   bool reset_setup_pipeline = false;
 //  struct Test_U_StreamSessionData* session_data_p = NULL;
   Stream_Module_t* module_p = NULL;
-  Test_U_Module_TCPSocketHandler* socketHandler_impl_p = NULL;
+  ClientServer_Module_TCPSocketHandler* socketHandler_impl_p = NULL;
 
   // allocate a new session state, reset stream
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
@@ -134,17 +137,17 @@ Test_U_Stream::initialize (const CONFIGURATION_T& configuration_in,
 
   // ******************* Socket Handler ************************
   module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("SocketHandler")));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
                 ACE_TEXT (stream_name_string_),
-                ACE_TEXT ("SocketHandler")));
+                ACE_TEXT (NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING)));
     goto error;
   } // end IF
   socketHandler_impl_p =
-    dynamic_cast<Test_U_Module_TCPSocketHandler*> (module_p->writer ());
+    dynamic_cast<ClientServer_Module_TCPSocketHandler*> (module_p->writer ());
   if (!socketHandler_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -192,12 +195,12 @@ Test_U_Stream::ping ()
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::ping"));
 
   Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("ProtocolHandler")));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (TEST_U_STREAM_MODULE_PROTOCOLHANDLER_NAME)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to retrieve \"%s\" module handle, returning\n"),
-                ACE_TEXT ("ProtocolHandler")));
+                ACE_TEXT (TEST_U_STREAM_MODULE_PROTOCOLHANDLER_NAME)));
     return;
   } // end IF
   Common_ITimerHandler* itimer_handler_p =
@@ -215,7 +218,7 @@ Test_U_Stream::ping ()
 }
 
 bool
-Test_U_Stream::collect (Net_Statistic_t& data_out)
+Test_U_Stream::collect (Test_U_Statistic_t& data_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::collect"));
 
@@ -225,26 +228,26 @@ Test_U_Stream::collect (Net_Statistic_t& data_out)
   int result = -1;
 
   Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT ("StatisticReport")));
+                ACE_TEXT (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
     return false;
   } // end IF
-  Test_U_Module_StatisticReport_WriterTask_t* statistic_report_impl_p =
-    dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
+  ClientServer_Module_StatisticReport_WriterTask_t* statistic_report_impl_p =
+    dynamic_cast<ClientServer_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
   if (!statistic_report_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<ClientServer_Module_StatisticReport_WriterTask_t> failed, aborting\n")));
     return false;
   } // end IF
 
   // synch access
-  Test_U_StreamSessionData& session_data_r =
-      const_cast<Test_U_StreamSessionData&> (inherited::sessionData_->getR ());
+  struct ClientServer_StreamSessionData& session_data_r =
+      const_cast<struct ClientServer_StreamSessionData&> (inherited::sessionData_->getR ());
   if (session_data_r.lock)
   {
     result = session_data_r.lock->acquire ();

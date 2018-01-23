@@ -20,6 +20,7 @@
 #include "stdafx.h"
 
 #include "ace/Synch.h"
+#include "test_u_HTTP_decoder_stream_common.h"
 #include "test_u_session_message.h"
 
 #include "ace/Malloc_Base.h"

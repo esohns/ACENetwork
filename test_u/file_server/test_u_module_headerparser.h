@@ -86,7 +86,7 @@ DATASTREAM_MODULE_INPUT_ONLY (struct Test_U_StreamSessionData,          // sessi
                               enum Stream_SessionMessageType,           // session event type
                               struct Stream_ModuleHandlerConfiguration, // module handler configuration type
                               libacenetwork_default_test_u_headerparser_module_name_string,
-                              Test_U_IStreamNotify_t,                   // stream notification interface type
+                              Stream_INotify_t,                         // stream notification interface type
                               Test_U_Module_HeaderParser);              // writer type
 
 #endif

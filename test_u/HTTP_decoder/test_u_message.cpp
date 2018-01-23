@@ -20,6 +20,7 @@
 #include "stdafx.h"
 
 #include "ace/Synch.h"
+#include "test_u_HTTP_decoder_stream_common.h"
 #include "test_u_message.h"
 
 #include "ace/Log_Msg.h"
@@ -28,9 +29,6 @@
 //#include "http_tools.h"
 
 #include "net_macros.h"
-
-#include "test_u_connection_common.h"
-#include "test_u_session_message.h"
 
 Test_U_Message::Test_U_Message (unsigned int size_in)
  : inherited (size_in)
@@ -128,5 +126,5 @@ Test_U_Message::duplicate (void) const
 //  NETWORK_TRACE (ACE_TEXT ("Test_U_Message::CommandTypeToString"));
 
 //  return (method_in == HTTP_Codes::HTTP_METHOD_INVALID ? ACE_TEXT_ALWAYS_CHAR (HTTP_COMMAND_STRING_RESPONSE)
-//                                                       : HTTP_Tools::Method2String (method_in));
+//                                                       : HTTP_Tools::MethodToString (method_in));
 //}

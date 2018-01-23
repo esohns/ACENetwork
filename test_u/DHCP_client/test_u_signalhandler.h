@@ -26,11 +26,13 @@
 #include "common_isignal.h"
 #include "common_signalhandler.h"
 
-#include "test_u_common.h"
+#include "test_u_dhcp_client_common.h"
 
 class Test_U_SignalHandler
- : public Common_SignalHandler_T<struct Test_U_SignalHandlerConfiguration>
+ : public Common_SignalHandler_T<struct DHCPClient_SignalHandlerConfiguration>
 {
+  typedef Common_SignalHandler_T<struct DHCPClient_SignalHandlerConfiguration> inherited;
+
  public:
   Test_U_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
                         ACE_SYNCH_MUTEX*);              // lock handle
@@ -40,8 +42,6 @@ class Test_U_SignalHandler
   virtual void handle (const struct Common_Signal&); // signal
 
  private:
-  typedef Common_SignalHandler_T<struct Test_U_SignalHandlerConfiguration> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler (const Test_U_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler& operator= (const Test_U_SignalHandler&))

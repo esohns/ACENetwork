@@ -115,17 +115,16 @@ Net_UDPConnectionBase_T<ACE_SYNCH_USE,
 
   // sanity check
   ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_);
-  ACE_ASSERT (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration);
 
   // *TODO*: remove type inference
   message_block_p =
-    inherited::allocateMessage (inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize);
+    inherited::allocateMessage (inherited::CONNECTION_BASE_T::configuration_->PDUSize);
   if (unlikely (!message_block_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to allocateMessage(%u), aborting\n"),
                 this->id (),
-                inherited::CONNECTION_BASE_T::configuration_->streamConfiguration->allocatorConfiguration_.defaultBufferSize));
+                inherited::CONNECTION_BASE_T::configuration_->PDUSize));
     return -1; // <-- remove 'this' from dispatch
   } // end IF
 

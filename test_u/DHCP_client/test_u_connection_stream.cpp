@@ -24,7 +24,15 @@
 
 #include "ace/Log_Msg.h"
 
+#include "stream_misc_defines.h"
+
+#include "stream_net_defines.h"
+
+#include "stream_stat_defines.h"
+
 #include "net_macros.h"
+
+#include "dhcp_defines.h"
 
 #include "test_u_message.h"
 #include "test_u_session_message.h"
@@ -54,37 +62,37 @@ Test_U_InboundConnectionStream::load (Stream_ModuleList_t& modules_out,
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_Dump_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR ("Dump")),
+                  DHCPClient_Module_Dump_Module (this,
+                                                 ACE_TEXT_ALWAYS_CHAR (MODULE_MISC_DUMP_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_DHCPDiscover_Module (this,
-                                                     ACE_TEXT_ALWAYS_CHAR ("DHCPDiscover")),
+                  DHCPClient_Module_DHCPDiscover_Module (this,
+                                                         ACE_TEXT_ALWAYS_CHAR (DHCP_DEFAULT_MODULE_DISCOVER_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_StatisticReport_Module (this,
-                                                        ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
+                  DHCPClient_Module_StatisticReport_Module (this,
+                                                            ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
 //  module_p = NULL;
 //  ACE_NEW_RETURN (module_p,
-//                  Test_U_Module_Parser_Module (ACE_TEXT_ALWAYS_CHAR ("Parser")),
+//                  DHCPClient_Module_Parser_Module (ACE_TEXT_ALWAYS_CHAR (MODULE_MISC_PARSER_DEFAULT_NAME_STRING)),
 //                  false);
 //  modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_Marshal_Module (this,
-                                                ACE_TEXT_ALWAYS_CHAR ("Marshal")),
+                  DHCPClient_Module_Marshal_Module (this,
+                                                    ACE_TEXT_ALWAYS_CHAR (MODULE_NET_MARSHAL_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_Net_IO_Module (this,
-                                               ACE_TEXT_ALWAYS_CHAR ("NetIO")),
+                  DHCPClient_Module_Net_IO_Module (this,
+                                                   ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
 
@@ -105,10 +113,10 @@ Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURAT
 //  bool result = false;
   bool setup_pipeline = configuration_in.configuration_.setupPipeline;
   bool reset_setup_pipeline = false;
-  struct Test_U_DHCPClient_SessionData* session_data_p = NULL;
+  struct DHCPClient_SessionData* session_data_p = NULL;
   typename inherited::CONFIGURATION_T::ITERATOR_T iterator;
   Stream_Module_t* module_p = NULL;
-  Test_U_Module_Net_Writer_t* netIO_impl_p = NULL;
+  DHCPClient_Module_Net_Writer_t* netIO_impl_p = NULL;
 
   // allocate a new session state, reset stream
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
@@ -127,7 +135,7 @@ Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURAT
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
   session_data_p =
-    &const_cast<struct Test_U_DHCPClient_SessionData&> (inherited::sessionData_->getR ());
+    &const_cast<struct DHCPClient_SessionData&> (inherited::sessionData_->getR ());
   iterator =
     const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.end ());
@@ -140,21 +148,21 @@ Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURAT
   // ---------------------------------------------------------------------------
   // ******************* Net IO ************************
   module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("NetIO")));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
                 ACE_TEXT (stream_name_string_),
-                ACE_TEXT ("NetIO")));
+                ACE_TEXT (MODULE_NET_IO_DEFAULT_NAME_STRING)));
     goto failed;
   } // end IF
   netIO_impl_p =
-      dynamic_cast<Test_U_Module_Net_Writer_t*> (module_p->writer ());
+      dynamic_cast<DHCPClient_Module_Net_Writer_t*> (module_p->writer ());
   if (!netIO_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n"),
+                ACE_TEXT ("%s: dynamic_cast<DHCPClient_Module_Net_IOWriter_T> failed, aborting\n"),
                 ACE_TEXT (stream_name_string_)));
     goto failed;
   } // end IF
@@ -204,20 +212,20 @@ Test_U_InboundConnectionStream::collect (DHCP_Statistic_t& data_out)
   ACE_ASSERT (inherited::sessionData_);
 
   int result = -1;
-  struct Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<struct Test_U_DHCPClient_SessionData&> (inherited::sessionData_->getR ());
+  struct DHCPClient_SessionData& session_data_r =
+    const_cast<struct DHCPClient_SessionData&> (inherited::sessionData_->getR ());
 
   Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT ("StatisticReport")));
+                ACE_TEXT (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
     return false;
   } // end IF
-  Test_U_Module_StatisticReport_WriterTask_t* statistic_report_impl =
-    dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
+  DHCPClient_Module_StatisticReport_WriterTask_t* statistic_report_impl =
+    dynamic_cast<DHCPClient_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
   if (!statistic_report_impl)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -292,20 +300,20 @@ Test_U_OutboundConnectionStream::load (Stream_ModuleList_t& modules_out,
 
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_StatisticReport_Module (this,
-                                                        ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
+                  DHCPClient_Module_StatisticReport_Module (this,
+                                                            ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_Streamer_Module (this,
-                                                 ACE_TEXT_ALWAYS_CHAR ("Marshal")),
+                  DHCPClient_Module_Streamer_Module (this,
+                                                     ACE_TEXT_ALWAYS_CHAR (MODULE_NET_MARSHAL_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
-                  Test_U_Module_Net_IO_Module (this,
-                                               ACE_TEXT_ALWAYS_CHAR ("NetIO")),
+                  DHCPClient_Module_Net_IO_Module (this,
+                                                   ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
 
@@ -324,10 +332,10 @@ Test_U_OutboundConnectionStream::initialize (const typename inherited::CONFIGURA
 //  bool result = false;
   bool setup_pipeline = configuration_in.configuration_.setupPipeline;
   bool reset_setup_pipeline = false;
-  struct Test_U_DHCPClient_SessionData* session_data_p = NULL;
+  struct DHCPClient_SessionData* session_data_p = NULL;
   typename inherited::CONFIGURATION_T::ITERATOR_T iterator;
   typename inherited::ISTREAM_T::MODULE_T* module_p = NULL;
-  Test_U_Module_Net_Writer_t* netIO_impl_p = NULL;
+  DHCPClient_Module_Net_Writer_t* netIO_impl_p = NULL;
 
   // allocate a new session state, reset stream
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
@@ -346,7 +354,7 @@ Test_U_OutboundConnectionStream::initialize (const typename inherited::CONFIGURA
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
   session_data_p =
-    &const_cast<struct Test_U_DHCPClient_SessionData&> (inherited::sessionData_->getR ());
+    &const_cast<struct DHCPClient_SessionData&> (inherited::sessionData_->getR ());
   iterator =
     const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.end ());
@@ -357,17 +365,17 @@ Test_U_OutboundConnectionStream::initialize (const typename inherited::CONFIGURA
   // ---------------------------------------------------------------------------
   // ******************* Net IO ************************
   module_p =
-    const_cast<typename inherited::ISTREAM_T::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("NetIO")));
+    const_cast<typename inherited::ISTREAM_T::MODULE_T*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT ("NetIO")));
+                ACE_TEXT (MODULE_NET_IO_DEFAULT_NAME_STRING)));
     goto failed;
   } // end IF
   //netIO_.initialize (*configuration_in.moduleConfiguration);
   netIO_impl_p =
-      dynamic_cast<Test_U_Module_Net_Writer_t*> (module_p->writer ());
+      dynamic_cast<DHCPClient_Module_Net_Writer_t*> (module_p->writer ());
   if (!netIO_impl_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -420,24 +428,24 @@ Test_U_OutboundConnectionStream::collect (DHCP_Statistic_t& data_out)
   ACE_ASSERT (inherited::sessionData_);
 
   int result = -1;
-  struct Test_U_DHCPClient_SessionData& session_data_r =
-    const_cast<struct Test_U_DHCPClient_SessionData&> (inherited::sessionData_->getR ());
+  struct DHCPClient_SessionData& session_data_r =
+    const_cast<struct DHCPClient_SessionData&> (inherited::sessionData_->getR ());
 
   Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT ("StatisticReport")));
+                ACE_TEXT (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
     return false;
   } // end IF
-  Test_U_Module_StatisticReport_WriterTask_t* statistic_report_impl =
-    dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
+  DHCPClient_Module_StatisticReport_WriterTask_t* statistic_report_impl =
+    dynamic_cast<DHCPClient_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
   if (!statistic_report_impl)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t> failed, aborting\n")));
+                ACE_TEXT ("dynamic_cast<DHCPClient_Module_StatisticReport_WriterTask_t> failed, aborting\n")));
     return false;
   } // end IF
 

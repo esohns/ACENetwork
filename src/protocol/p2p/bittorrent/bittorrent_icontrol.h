@@ -33,7 +33,7 @@ class BitTorrent_IControl_T
  : public Common_IGetR_T<std::map<std::string, SessionInterfaceType*> >
 {
  public:
-  inline virtual ~BitTorrent_IControl_T () {};
+  inline virtual ~BitTorrent_IControl_T () {}
 
   // *NOTE*: sending a request to the tracker allocates a session and initiates
   //         communication with the swarm of registered peers

@@ -31,32 +31,32 @@
 #include "test_u_stream.h"
 #include "test_u_callbacks.h"
 
-Test_U_EventHandler::Test_U_EventHandler (struct Test_U_GTK_CBData* CBData_in)
+ClientServer_EventHandler::ClientServer_EventHandler (struct Test_U_GTK_CBData* CBData_in)
  : CBData_ (CBData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::Test_U_EventHandler"));
+  NETWORK_TRACE (ACE_TEXT ("ClientServer_EventHandler::ClientServer_EventHandler"));
 
 }
 
 void
-Test_U_EventHandler::start (Stream_SessionId_t sessionId_in,
-                            const struct Test_U_StreamSessionData& sessionData_in)
+ClientServer_EventHandler::start (Stream_SessionId_t sessionId_in,
+                                  const struct ClientServer_StreamSessionData& sessionData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::start"));
+  NETWORK_TRACE (ACE_TEXT ("ClientServer_EventHandler::start"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionData_in);
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-    CBData_->eventStack.push_back (TEST_U_GTKEVENT_CONNECT);
+    CBData_->eventStack.push (COMMON_UI_EVENT_CONNECT);
   } // end lock scope
 }
 
 void
-Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
-                             const enum Stream_SessionMessageType& sessionEvent_in)
+ClientServer_EventHandler::notify (Stream_SessionId_t sessionId_in,
+                                   const enum Stream_SessionMessageType& sessionEvent_in)
 {
-  STREAM_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
+  STREAM_TRACE (ACE_TEXT ("ClientServer_EventHandler::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
@@ -68,9 +68,9 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
 }
 
 void
-Test_U_EventHandler::end (Stream_SessionId_t sessionId_in)
+ClientServer_EventHandler::end (Stream_SessionId_t sessionId_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::end"));
+  NETWORK_TRACE (ACE_TEXT ("ClientServer_EventHandler::end"));
 
   ACE_UNUSED_ARG (sessionId_in);
 
@@ -89,35 +89,37 @@ Test_U_EventHandler::end (Stream_SessionId_t sessionId_in)
 }
 
 void
-Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
-                             const Test_U_Message& message_in)
+ClientServer_EventHandler::notify (Stream_SessionId_t sessionId_in,
+                                   const Test_U_Message& message_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
+  NETWORK_TRACE (ACE_TEXT ("ClientServer_EventHandler::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (message_in);
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-    CBData_->eventStack.push_back (TEST_U_GTKEVENT_DATA);
+    CBData_->eventStack.push (COMMON_UI_EVENT_DATA);
   } // end lock scope
 }
 void
-Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
-                             const Test_U_SessionMessage& sessionMessage_in)
+ClientServer_EventHandler::notify (Stream_SessionId_t sessionId_in,
+                                   const Test_U_SessionMessage& sessionMessage_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::notify"));
+  NETWORK_TRACE (ACE_TEXT ("ClientServer_EventHandler::notify"));
 
   ACE_UNUSED_ARG (sessionId_in);
 
-  enum Test_U_GTK_Event event_e = TEST_U_GTKEVENT_INVALID;
+  enum Common_UI_EventType event_e = COMMON_UI_EVENT_SESSION;
   switch (sessionMessage_in.type ())
   {
     //case STREAM_SESSION_MESSAGE_CONNECT:
     //  return;
     case STREAM_SESSION_MESSAGE_DISCONNECT:
-      event_e = TEST_U_GTKEVENT_DISCONNECT; break;
+      event_e = COMMON_UI_EVENT_DISCONNECT;
+      break;
     case STREAM_SESSION_MESSAGE_STATISTIC:
-      event_e = TEST_U_GTKEVENT_STATISTIC; break;
+      event_e = COMMON_UI_EVENT_STATISTIC;
+      break;
     default:
     {
       ACE_DEBUG ((LM_ERROR,
@@ -128,6 +130,6 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
   } // end SWITCH
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-    CBData_->eventStack.push_back (event_e);
+    CBData_->eventStack.push (event_e);
   } // end lock scope
 }

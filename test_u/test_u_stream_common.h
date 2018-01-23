@@ -21,20 +21,27 @@
 #ifndef TEST_U_STREAM_COMMON_H
 #define TEST_U_STREAM_COMMON_H
 
+#include "ace/Synch_Traits.h"
+
 #include "stream_common.h"
-#include "stream_inotify.h"
+#include "stream_control_message.h"
+//#include "stream_inotify.h"
+#include "stream_messageallocatorheap_base.h"
 #include "stream_session_data.h"
 
 #include "net_common.h"
+#include "net_configuration.h"
 
-// forward declarations
-struct Net_ConnectionState;
-struct Test_U_UserData;
+#include "test_u_common.h"
+
+ // forward declarations
+class Test_U_Message;
+class Test_U_SessionMessage;
 
 struct Test_U_StreamSessionData
  : Stream_SessionData
 {
-  inline Test_U_StreamSessionData ()
+  Test_U_StreamSessionData ()
    : Stream_SessionData ()
    , connectionState (NULL)
    , statistic ()
@@ -42,7 +49,7 @@ struct Test_U_StreamSessionData
   {};
 
   struct Net_ConnectionState* connectionState;
-  Net_Statistic_t             statistic;
+  Test_U_Statistic_t          statistic;
 
   struct Test_U_UserData*     userData;
 };
@@ -51,7 +58,7 @@ typedef Stream_SessionData_T<struct Test_U_StreamSessionData> Test_U_StreamSessi
 struct Test_U_StreamState
  : Stream_State
 {
-  inline Test_U_StreamState ()
+  Test_U_StreamState ()
    : Stream_State ()
    , sessionData (NULL)
    , userData (NULL)
@@ -62,13 +69,25 @@ struct Test_U_StreamState
   struct Test_U_UserData*          userData;
 };
 
+//////////////////////////////////////////
+
+typedef Stream_ControlMessage_T<enum Stream_ControlType,
+                                enum Stream_ControlMessageType,
+                                struct Net_AllocatorConfiguration> Test_U_ControlMessage_t;
+
+typedef Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
+                                          struct Net_AllocatorConfiguration,
+                                          Test_U_ControlMessage_t,
+                                          Test_U_Message,
+                                          Test_U_SessionMessage> Test_U_MessageAllocator_t;
+
 //typedef Stream_IModuleHandler_T<Test_U_ModuleHandlerConfiguration> Test_U_IModuleHandler_t;
 //typedef Stream_IModule_T<ACE_MT_SYNCH,
 //                         Common_TimePolicy_t,
 //                         struct Stream_ModuleConfiguration,
 //                         struct Test_U_ModuleHandlerConfiguration> Test_U_IModule_t;
 
-typedef Stream_INotify_T<enum Stream_SessionMessageType> Test_U_IStreamNotify_t;
+//typedef Stream_INotify_T<enum Stream_SessionMessageType> Test_U_IStreamNotify_t;
 
 //typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
 //                                    struct Test_U_StreamSessionData,

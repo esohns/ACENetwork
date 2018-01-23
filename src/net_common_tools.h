@@ -83,8 +83,17 @@ class Net_Common_Tools
   static std::string getDefaultInterface (int); // link layer type(s) (bitmask)
 #endif
 
-  // *NOTE*: make sure the argument points at at least 6 (!) bytes of allocated memory
-  static std::string LinkLayerAddressToString (const unsigned char* const, // pointer to physical address data (i.e. START of ethernet header address field !)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // *TODO*: this API is obviously broken (race conditions)
+  //         --> remove ASAP
+  static ULONG interfaceToIndex (REFGUID); // interface identifier
+  static struct _GUID indexToInterface (ULONG); // interface index
+#endif
+
+  // *NOTE*: the argument is assumed to be in network byte order (i.e. bytes
+  //         ordered left to right)
+  // *NOTE*: make sure the argument points to at least ETH_ALEN bytes of allocated (!) memory
+  static std::string LinkLayerAddressToString (const unsigned char* const, // pointer to address data (i.e. ethernet header address field)
                                                enum Net_LinkLayerType = NET_LINKLAYER_802_3);
   static std::string LinkLayerTypeToString (enum Net_LinkLayerType);
 
@@ -96,20 +105,15 @@ class Net_Common_Tools
 #endif
   static std::string EthernetProtocolTypeIdToString (unsigned short); // ethernet frame type (in network (== big-endian) byte order)
 
-  // *WARNING*: ensure that the array argument can hold at least 6 bytes !
+  // *NOTE*: returns the ethernet 'MAC' address
+  // *TODO*: support other link layers
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  static bool interfaceToMACAddress (REFGUID,            // interface identifier
+  static struct ether_addr interfaceToLinkLayerAddress (REFGUID);            // interface identifier
 #else
-  static bool interfaceToMACAddress (const std::string&, // interface identifier
+  static struct ether_addr interfaceToLinkLayerAddress (const std::string&); // interface identifier
 #endif
-                                     unsigned char[]);   // return value: MAC address
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  // *TODO*: this API is obviously broken (race conditions)
-  //         --> remove ASAP
-  static ULONG interfaceToIndex (REFGUID); // interface identifier
-  static struct _GUID indexToInterface (ULONG); // interface index
-
   static std::string interfaceToString (REFGUID); // interface identifier
 #endif
 

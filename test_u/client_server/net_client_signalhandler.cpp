@@ -38,8 +38,8 @@
 
 #include "net_client_common.h"
 
-Test_U_Client_SignalHandler::Test_U_Client_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
-                                                          ACE_SYNCH_MUTEX* lock_in)
+Client_SignalHandler::Client_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
+                                            ACE_SYNCH_MUTEX* lock_in)
  : inherited (dispatchMode_in,
               lock_in,
               this) // event handler handle
@@ -49,14 +49,14 @@ Test_U_Client_SignalHandler::Test_U_Client_SignalHandler (enum Common_SignalDisp
  , timerId_ (-1)
  , useReactor_ (NET_EVENT_USE_REACTOR)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_SignalHandler::Test_U_Client_SignalHandler"));
+  NETWORK_TRACE (ACE_TEXT ("Client_SignalHandler::Client_SignalHandler"));
 
 }
 
 bool
-Test_U_Client_SignalHandler::initialize (const struct Test_U_Client_SignalHandlerConfiguration& configuration_in)
+Client_SignalHandler::initialize (const struct Client_SignalHandlerConfiguration& configuration_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_SignalHandler::handleSignal"));
+  NETWORK_TRACE (ACE_TEXT ("Client_SignalHandler::handleSignal"));
 
   // *TODO*: remove type inference
   connector_ = configuration_in.connector;
@@ -68,16 +68,16 @@ Test_U_Client_SignalHandler::initialize (const struct Test_U_Client_SignalHandle
 }
 
 void
-Test_U_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
+Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Client_SignalHandler::handleSignal"));
+  NETWORK_TRACE (ACE_TEXT ("Client_SignalHandler::handleSignal"));
 
   int result = -1;
   Common_Timer_Manager_t* timer_manager_p =
     COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
-  Test_U_IInetConnectionManager_t* iconnection_manager_p =
-      TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  ClientServer_IInetConnectionManager_t* iconnection_manager_p =
+      CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (iconnection_manager_p);
 
   bool abort = false;
@@ -198,8 +198,8 @@ Test_U_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     if (connector_ &&
         !useReactor_)
     {
-      Test_U_IAsynchConnector_t* iasynch_connector_p =
-          dynamic_cast<Test_U_IAsynchConnector_t*> (connector_);
+      Client_IAsynchConnector_t* iasynch_connector_p =
+          dynamic_cast<Client_IAsynchConnector_t*> (connector_);
       ACE_ASSERT (iasynch_connector_p);
       try {
         iasynch_connector_p->abort ();

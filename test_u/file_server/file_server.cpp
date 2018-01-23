@@ -46,13 +46,18 @@
 
 #include "common_file_tools.h"
 #include "common_logger.h"
+#include "common_signal_tools.h"
 #include "common_tools.h"
+
+#include "common_timer_tools.h"
 
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_manager_common.h"
 
 #include "stream_allocatorheap.h"
+
+#include "stream_misc_defines.h"
 
 #include "net_common_tools.h"
 #include "net_macros.h"
@@ -493,7 +498,7 @@ do_work (
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   int result = -1;
-  struct Common_DispatchThreadData thread_data;
+  struct Common_EventDispatchThreadData thread_data_s;
   struct Common_TimerConfiguration timer_configuration;
   struct FileServer_SignalHandlerConfiguration signal_handler_configuration;
   struct FileServer_UserData user_data;
@@ -520,12 +525,12 @@ do_work (
     connection_manager_p;
   ACE_ASSERT (iconnection_manager_p);
 
-  Test_U_StatisticHandler_t statistic_handler (STATISTIC_ACTION_REPORT,
+  Test_U_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                                connection_manager_p,
                                                false);
   Test_U_EventHandler ui_event_handler (&CBData_in);
   Test_U_Module_EventHandler_Module event_handler (NULL,
-                                                   ACE_TEXT_ALWAYS_CHAR ("EventHandler"));
+                                                   ACE_TEXT_ALWAYS_CHAR (MODULE_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_U_Module_EventHandler* event_handler_p =
     dynamic_cast<Test_U_Module_EventHandler*> (event_handler.writer ());
   if (!event_handler_p)
@@ -536,16 +541,16 @@ do_work (
   } // end IF
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Stream_AllocatorConfiguration> heap_allocator;
+                         struct Net_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration.allocatorConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize message allocator, returning\n")));
     return;
   } // end IF
-  Test_U_StreamMessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
-                                                     &heap_allocator,         // heap allocator handle
-                                                     true);                   // block ?
+  Test_U_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
+                                               &heap_allocator,         // heap allocator handle
+                                               true);                   // block ?
 
   // ******************** protocol configuration data **************************
   // ********************** stream configuration data **************************
@@ -599,7 +604,7 @@ do_work (
   //    &configuration.connectionConfiguration;
 
   // ********************** socket configuration data **************************
-  struct FileServer_ConnectionConfiguration connection_configuration;
+  FileServer_ConnectionConfiguration_t connection_configuration;
   FileServer_ConnectionConfigurationIterator_t iterator;
   if (useUDP_in)
   {
@@ -621,9 +626,11 @@ do_work (
   connection_configuration.socketHandlerConfiguration.userData =
     &configuration.userData;
   connection_configuration.messageAllocator = &message_allocator;
-  connection_configuration.streamConfiguration =
-    &configuration.streamConfiguration;
   connection_configuration.userData = &configuration.userData;
+
+  connection_configuration.initialize (configuration.allocatorConfiguration,
+                                       configuration.streamConfiguration);
+
   configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                  connection_configuration));
   iterator =
@@ -642,13 +649,13 @@ do_work (
   //	config.lastCollectionTimestamp = ACE_Time_Value::zero;
 
   // step0b: initialize event dispatch
-  thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data.useReactor = useReactor_in;
-  if (!Common_Tools::initializeEventDispatch (thread_data.useReactor,
+  thread_data_s.numberOfDispatchThreads = numberOfDispatchThreads_in;
+  thread_data_s.useReactor = useReactor_in;
+  if (!Common_Tools::initializeEventDispatch (thread_data_s.useReactor,
                                               useThreadPool_in,
-                                              thread_data.numberOfDispatchThreads,
-                                              thread_data.proactorType,
-                                              thread_data.reactorType,
+                                              thread_data_s.numberOfDispatchThreads,
+                                              thread_data_s.proactorType,
+                                              thread_data_s.reactorType,
                                               configuration.streamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -695,7 +702,7 @@ do_work (
                 ACE_TEXT ("failed to initialize signal handler, aborting\n")));
     goto error;
   } // end IF
-  if (!Common_Tools::initializeSignals ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
+  if (!Common_Signal_Tools::initialize ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                         signalSet_in,
                                         ignoredSignalSet_in,
@@ -703,7 +710,7 @@ do_work (
                                         previousSignalActions_inout))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeSignals(), aborting\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::initialize(), aborting\n")));
     goto error;
   } // end IF
 
@@ -759,8 +766,7 @@ do_work (
   // - dispatch UI events (if any)
 
   // step5a: start GTK event loop ?
-  gtk_manager_p =
-    FILESERVER_UI_GTK_MANAGER_SINGLETON::instance ();
+  gtk_manager_p = FILESERVER_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
   if (!UIDefinitionFile_in.empty ())
   {
@@ -768,7 +774,7 @@ do_work (
     CBData_in.initializationHook = idle_initialize_ui_cb;
     CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
-    CBData_in.userData = &CBData_in;
+    //CBData_in.userData = &CBData_in;
 
     gtk_manager_p->start ();
     ACE_Time_Value timeout (0,
@@ -799,7 +805,7 @@ do_work (
   } // end IF
 
   // step4b: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (thread_data,
+  if (!Common_Tools::startEventDispatch (thread_data_s,
                                          group_id))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1185,16 +1191,16 @@ ACE_TMAIN (int argc_in,
   } // end IF
   if (number_of_dispatch_threads == 0) number_of_dispatch_threads = 1;
 
-  struct FileServer_GTK_CBData gtk_cb_user_data;
-  gtk_cb_user_data.allowUserRuntimeStatistic =
+  struct FileServer_GTK_CBData gtk_cb_data;
+  gtk_cb_data.allowUserRuntimeStatistic =
     (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
                                          // iff regular reporting
                                          // is off
-  gtk_cb_user_data.progressData.GTKState = &gtk_cb_user_data;
+  gtk_cb_data.progressData.state = &gtk_cb_data;
 
   // step1d: initialize logging and/or tracing
-  Common_Logger_t logger (&gtk_cb_user_data.logStack,
-                          &gtk_cb_user_data.lock);
+  Common_Logger_t logger (&gtk_cb_data.logStack,
+                          &gtk_cb_data.lock);
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
@@ -1226,7 +1232,7 @@ ACE_TMAIN (int argc_in,
   ACE_Sig_Set signal_set (0);
   ACE_Sig_Set ignored_signal_set (0);
   do_initializeSignals (use_reactor,
-                        gtk_cb_user_data.allowUserRuntimeStatistic, // handle SIGUSR1/SIGBREAK
+                        gtk_cb_data.allowUserRuntimeStatistic, // handle SIGUSR1/SIGBREAK
                                                                     // iff regular reporting
                                                                     // is off
                         signal_set,
@@ -1250,13 +1256,13 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (!Common_Tools::preInitializeSignals (signal_set,
+  if (!Common_Signal_Tools::preInitialize (signal_set,
                                            use_reactor,
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::preInitializeSignals(), aborting\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
 
     Common_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE...
@@ -1271,14 +1277,14 @@ ACE_TMAIN (int argc_in,
   } // end IF
   FileServer_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                         : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                           &gtk_cb_user_data.lock);
+                                           &gtk_cb_data.lock);
 
   // step1f: handle specific program modes
   if (print_version_and_exit)
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1312,7 +1318,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1337,7 +1343,7 @@ ACE_TMAIN (int argc_in,
   if (!UI_file.empty ())
     FILESERVER_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                                   argv_in,
-                                                                  &gtk_cb_user_data,
+                                                                  &gtk_cb_data,
                                                                   &ui_definition);
 
   ACE_High_Res_Timer timer;
@@ -1359,7 +1365,7 @@ ACE_TMAIN (int argc_in,
            statistic_reporting_interval,
            use_udp,
            number_of_dispatch_threads,
-           gtk_cb_user_data,
+           gtk_cb_data,
            signal_set,
            ignored_signal_set,
            previous_signal_actions,
@@ -1370,8 +1376,8 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Tools::periodToString (working_time,
-                                working_time_string);
+  Common_Timer_Tools::periodToString (working_time,
+                                      working_time_string);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
               ACE_TEXT (working_time_string.c_str ())));
@@ -1389,7 +1395,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1412,10 +1418,10 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Tools::periodToString (user_time,
-                               user_time_string);
-  Common_Tools::periodToString (system_time,
-                               system_time_string);
+  Common_Timer_Tools::periodToString (user_time,
+                                      user_time_string);
+  Common_Timer_Tools::periodToString (system_time,
+                                      system_time_string);
 
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
@@ -1450,7 +1456,7 @@ ACE_TMAIN (int argc_in,
               ACE_TEXT (system_time_string.c_str ())));
 #endif
 
-  Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+  Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                  signal_set,
                                  previous_signal_actions,

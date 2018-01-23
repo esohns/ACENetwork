@@ -58,7 +58,10 @@ using namespace std;
 #endif
 
 #include "common_file_tools.h"
+#include "common_signal_tools.h"
 #include "common_tools.h"
+
+#include "common_timer_tools.h"
 
 #include "stream_cachedallocatorheap.h"
 
@@ -73,10 +76,12 @@ using namespace std;
 
 #include "test_i_defines.h"
 
+#include "IRC_client_common_modules.h"
 #include "IRC_client_configuration.h"
 #include "IRC_client_curses.h"
 #include "IRC_client_defines.h"
 #include "IRC_client_messageallocator.h"
+#include "IRC_client_sessionmessage.h"
 #include "IRC_client_module_IRChandler.h"
 #include "IRC_client_session_common.h"
 #include "IRC_client_signalhandler.h"
@@ -436,11 +441,11 @@ connection_setup_curses_function (void* arg_in)
   return_value = arg_in;
 #endif
 
-  IRC_Client_InputThreadData* thread_data_p =
+  IRC_Client_InputThreadData* thread_data_s_p =
     static_cast<IRC_Client_InputThreadData*> (arg_in);
 
   // sanity check(s)
-  ACE_ASSERT (thread_data_p);
+  ACE_ASSERT (thread_data_s_p);
 
   int result = -1;
   ACE_Time_Value delay (IRC_CLIENT_CONNECTION_ASYNCH_TIMEOUT_INTERVAL, 0);
@@ -460,7 +465,7 @@ connection_setup_curses_function (void* arg_in)
   ACE_ASSERT (connection_manager_p);
 
   // step1: wait for connection ?
-  if (!thread_data_p->useReactor)
+  if (!thread_data_s_p->useReactor)
   {
     ACE_Time_Value deadline =
       (COMMON_TIME_NOW +
@@ -479,8 +484,8 @@ connection_setup_curses_function (void* arg_in)
     } while (COMMON_TIME_NOW < deadline);
   } // end IF
   // *NOTE*: signal main thread (resumes dispatching)
-  Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
-                                       !thread_data_p->useReactor,
+  Common_Tools::finalizeEventDispatch (thread_data_s_p->useReactor,
+                                       !thread_data_s_p->useReactor,
                                        -1);
 
   connection_p = connection_manager_p->operator[] (0);
@@ -526,7 +531,7 @@ connection_setup_curses_function (void* arg_in)
   try
   {
     result_2 =
-      icontrol_p->registerc (thread_data_p->configuration->protocolConfiguration.loginOptions);
+      icontrol_p->registerc (thread_data_s_p->configuration->protocolConfiguration.loginOptions);
   }
   catch (...)
   {
@@ -576,7 +581,7 @@ connection_setup_curses_function (void* arg_in)
 
   // step4: join a channel
   channel_string =
-    thread_data_p->configuration->protocolConfiguration.loginOptions.channel;
+    thread_data_s_p->configuration->protocolConfiguration.loginOptions.channel;
   // sanity check(s): has '#' prefix ?
   if (channel_string.find ('#', 0) != 0)
     channel_string.insert (channel_string.begin (), '#');
@@ -595,7 +600,7 @@ connection_setup_curses_function (void* arg_in)
   }
 
   // step5: run curses event dispatch ?
-  if (thread_data_p->cursesState)
+  if (thread_data_s_p->cursesState)
   {
     //IRC_Client_ISession_t* session_p =
     //  dynamic_cast<IRC_Client_ISession_t*> (connection_p);
@@ -607,8 +612,8 @@ connection_setup_curses_function (void* arg_in)
 
     //  // clean up
     //  connection_p->decrease ();
-    //  Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
-    //                                       !thread_data_p->useReactor,
+    //  Common_Tools::finalizeEventDispatch (thread_data_s_p->useReactor,
+    //                                       !thread_data_s_p->useReactor,
     //                                       -1);
 
     //  goto clean_up;
@@ -616,7 +621,7 @@ connection_setup_curses_function (void* arg_in)
     //const IRC_Client_ConnectionState& connection_state_r = session_p->state ();
     const IRC_Client_SessionState& session_state_r =
       connection_p->state ();
-    thread_data_p->cursesState->sessionState =
+    thread_data_s_p->cursesState->sessionState =
       &const_cast<IRC_Client_SessionState&> (session_state_r);
 
     // step6: clean up
@@ -626,7 +631,7 @@ connection_setup_curses_function (void* arg_in)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("running curses dispatch loop...\n")));
 
-    bool result_2 = curses_main (*thread_data_p->cursesState,
+    bool result_2 = curses_main (*thread_data_s_p->cursesState,
                                  icontrol_p);
     if (!result_2)
     {
@@ -656,8 +661,8 @@ clean_up:
   if (connection_p)
     connection_p->decrease ();
 
-  Common_Tools::finalizeEventDispatch (thread_data_p->useReactor,
-                                       !thread_data_p->useReactor,
+  Common_Tools::finalizeEventDispatch (thread_data_s_p->useReactor,
+                                       !thread_data_s_p->useReactor,
                                        -1);
 
 done:
@@ -716,14 +721,14 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   configuration_in.streamConfiguration.configuration_.module = &IRC_handler;
 
   // step2: initialize event dispatch
-  struct Common_DispatchThreadData thread_data;
-  thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data.useReactor = configuration_in.useReactor;
+  struct Common_EventDispatchThreadData thread_data_s;
+  thread_data_s.numberOfDispatchThreads = numberOfDispatchThreads_in;
+  thread_data_s.useReactor = configuration_in.useReactor;
   if (!Common_Tools::initializeEventDispatch (configuration_in.useReactor,
-                                              (thread_data.numberOfDispatchThreads > 1),
-                                              thread_data.numberOfDispatchThreads,
-                                              thread_data.proactorType,
-                                              thread_data.reactorType,
+                                              (thread_data_s.numberOfDispatchThreads > 1),
+                                              thread_data_s.numberOfDispatchThreads,
+                                              thread_data_s.proactorType,
+                                              thread_data_s.reactorType,
                                               configuration_in.streamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -732,7 +737,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   } // end IF
 
   // step3: initialize client connector
-  struct IRC_Client_ConnectionConfiguration connection_configuration;
+  IRC_Client_ConnectionConfiguration_t connection_configuration;
   connection_configuration.socketHandlerConfiguration.socketConfiguration_2.address =
     serverAddress_in;
 
@@ -747,10 +752,10 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     configuration_in.streamConfiguration.configuration_.messageAllocator;
   connection_configuration.protocolConfiguration =
     &configuration_in.protocolConfiguration;
-  connection_configuration.streamConfiguration =
-    &configuration_in.streamConfiguration;
   connection_configuration.userData =
     &configuration_in.userData;
+  connection_configuration.initialize (configuration_in.streamConfiguration.allocatorConfiguration_,
+                                       configuration_in.streamConfiguration);
 
   configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                     connection_configuration));
@@ -797,7 +802,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to IRC_Client_SignalHandler::initialize(), returning\n")));
     return;
   } // end IF
-  if (!Common_Tools::initializeSignals ((configuration_in.useReactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+  if (!Common_Signal_Tools::initialize ((configuration_in.useReactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                                      : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                         signalSet_in,
                                         ignoredSignalSet_in,
@@ -805,7 +810,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                                         previousSignalActions_inout))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeSignals(), returning\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
     return;
   } // end IF
 
@@ -820,8 +825,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   // [- signal timer expiration to perform server queries] (see above)
 
   // step5a: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (thread_data,
-                                         configuration_in.groupID))
+  if (!Common_Tools::startEventDispatch (thread_data_s,
+                                         configuration_in.groupId))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::startEventDispatch(), returning\n")));
@@ -839,7 +844,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     // clean up
     Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
                                          !configuration_in.useReactor,
-                                         configuration_in.groupID);
+                                         configuration_in.groupId);
 
     return;
   } // end IF
@@ -848,14 +853,14 @@ do_work (struct IRC_Client_Configuration& configuration_in,
 
   // step6a: wait for connection / setup
 
-  struct IRC_Client_InputThreadData input_thread_data;
-  input_thread_data.configuration = &configuration_in;
-  input_thread_data.groupID = configuration_in.groupID;
-  input_thread_data.moduleHandlerConfiguration =
+  struct IRC_Client_InputThreadData input_thread_data_s;
+  input_thread_data_s.configuration = &configuration_in;
+  input_thread_data_s.groupId = configuration_in.groupId;
+  input_thread_data_s.moduleHandlerConfiguration =
     const_cast<IRC_Client_ModuleHandlerConfiguration*> (&((*iterator).second.second));
   if (useCursesLibrary_in)
-    input_thread_data.cursesState = &curses_state;
-  input_thread_data.useReactor = configuration_in.useReactor;
+    input_thread_data_s.cursesState = &curses_state;
+  input_thread_data_s.useReactor = configuration_in.useReactor;
   ACE_thread_t thread_id = -1;
   ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
   //char thread_name[BUFSIZ];
@@ -871,7 +876,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     // clean up
     Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
                                          !configuration_in.useReactor,
-                                         configuration_in.groupID);
+                                         configuration_in.groupId);
 
     return;
   } // end IF
@@ -882,7 +887,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   ACE_ASSERT (thread_manager_p);
   result =
     thread_manager_p->spawn (::connection_setup_curses_function, // function
-                             &input_thread_data,                 // argument
+                             &input_thread_data_s,                 // argument
                              (THR_NEW_LWP      |
                               THR_JOINABLE     |
                               THR_INHERIT_SCHED),                // flags
@@ -901,12 +906,12 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     // clean up
     Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
                                          !configuration_in.useReactor,
-                                         configuration_in.groupID);
+                                         configuration_in.groupId);
 
     return;
   } // end IF
   Common_Tools::dispatchEvents (configuration_in.useReactor,
-                                configuration_in.groupID);
+                                configuration_in.groupId);
   // *NOTE*: awoken by the worker thread (see above)...
   if (connection_manager_p->count () < 1)
   {
@@ -936,8 +941,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
               ACE_TEXT ("connected...\n")));
 
   // step6b: dispatch events
-  if (!Common_Tools::startEventDispatch (thread_data,
-                                         configuration_in.groupID))
+  if (!Common_Tools::startEventDispatch (thread_data_s,
+                                         configuration_in.groupId))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::startEventDispatch(), returning\n")));
@@ -954,7 +959,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     return;
   } // end IF
   Common_Tools::dispatchEvents (configuration_in.useReactor,
-                                configuration_in.groupID);
+                                configuration_in.groupId);
 
   // step7: clean up
   result = thread_manager_p->wait_grp (group_id_2);
@@ -1187,13 +1192,13 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (!Common_Tools::preInitializeSignals (signal_set,
+  if (!Common_Signal_Tools::preInitialize (signal_set,
                                            use_reactor,
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::preInitializeSignals(), aborting\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
 
     Common_Tools::finalizeLogging ();
 //    // *PORTABILITY*: on Windows, fini ACE...
@@ -1217,7 +1222,7 @@ ACE_TMAIN (int argc_in,
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1245,7 +1250,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize heap allocator: \"%m\", aborting\n")));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1277,7 +1282,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::getHostname(), aborting\n")));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1343,7 +1348,7 @@ ACE_TMAIN (int argc_in,
                     ACE_TEXT ("failed to ACE_INET_Addr::string_to_addr(\"%s\"): \"%m\", aborting\n"),
                     ACE_TEXT (address_string.c_str ())));
 
-        Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+        Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                     : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                        signal_set,
                                        previous_signal_actions,
@@ -1382,8 +1387,8 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Tools::periodToString (working_time,
-                                working_time_string);
+  Common_Timer_Tools::periodToString (working_time,
+                                      working_time_string);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
               ACE_TEXT (working_time_string.c_str ())));
@@ -1399,7 +1404,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1422,10 +1427,10 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Tools::periodToString (user_time,
-                               user_time_string);
-  Common_Tools::periodToString (system_time,
-                               system_time_string);
+  Common_Timer_Tools::periodToString (user_time,
+                                      user_time_string);
+  Common_Timer_Tools::periodToString (system_time,
+                                      system_time_string);
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
@@ -1460,7 +1465,7 @@ ACE_TMAIN (int argc_in,
 #endif
 
   // step9: clean up
-  Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+  Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                  signal_set,
                                  previous_signal_actions,

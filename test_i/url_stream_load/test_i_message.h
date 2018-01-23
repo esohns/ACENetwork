@@ -64,21 +64,21 @@ class Test_I_MessageDataContainer
 //////////////////////////////////////////
 
 class Test_I_Message
- : public Stream_DataMessageBase_2<struct Test_I_AllocatorConfiguration,
+ : public Stream_DataMessageBase_2<struct Common_FlexParserAllocatorConfiguration,
                                    enum Stream_MessageType,
                                    Test_I_MessageDataContainer,
                                    HTTP_Method_t>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Test_I_AllocatorConfiguration,
+                                                 struct Common_FlexParserAllocatorConfiguration,
                                                  Test_I_ControlMessage_t,
                                                  Test_I_Message,
                                                  Test_I_SessionMessage>;
 
  public:
   Test_I_Message (unsigned int); // size
-  inline virtual ~Test_I_Message () {};
+  inline virtual ~Test_I_Message () {}
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
@@ -91,7 +91,7 @@ class Test_I_Message
   Test_I_Message (const Test_I_Message&);
 
  private:
-  typedef Stream_DataMessageBase_2<struct Test_I_AllocatorConfiguration,
+  typedef Stream_DataMessageBase_2<struct Common_FlexParserAllocatorConfiguration,
                                    enum Stream_MessageType,
                                    Test_I_MessageDataContainer,
                                    HTTP_Method_t> inherited;

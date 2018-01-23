@@ -21,7 +21,6 @@
 #ifndef IRC_CLIENT_COMMON_H
 #define IRC_CLIENT_COMMON_H
 
-#include <bitset>
 #include <deque>
 #include <map>
 #include <set>
@@ -33,6 +32,7 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
+#include "common_configuration.h"
 #include "common_inotify.h"
 
 #include "stream_common.h"
@@ -52,16 +52,7 @@
 #include "IOStream_alt_T.h"
 #include "IRC_client_defines.h"
 
-// forward declarations
-struct IRC_Client_ConnectionConfiguration;
-struct IRC_Client_Configuration;
-struct IRC_Client_CursesState;
-struct IRC_Client_ModuleHandlerConfiguration;
-struct IRC_Client_SessionData;
-class IRC_Client_SessionMessage;
-struct IRC_Client_SessionState;
-struct IRC_Client_SocketHandlerConfiguration;
-class IRC_Record;
+#include "IRC_client_network.h"
 
 // phonebook
 typedef std::set<std::string> IRC_Client_Networks_t;
@@ -107,19 +98,22 @@ typedef IRC_Client_MessageQueue_t::reverse_iterator IRC_Client_MessageQueueRever
 //  ACE_IOStream<ACE_FILE_Stream> output_;
 typedef ACE_IOStream_alt_T<ACE_FILE_Stream> IRC_Client_IOStream_t;
 
+struct IRC_Client_Configuration;
+struct IRC_Client_CursesState;
+struct IRC_Client_ModuleHandlerConfiguration;
 struct IRC_Client_InputThreadData
 {
   IRC_Client_InputThreadData ()
    : configuration (NULL)
    , cursesState (NULL)
-   , groupID (-1)
+   , groupId (-1)
    , moduleHandlerConfiguration (NULL)
    , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
   struct IRC_Client_Configuration*              configuration;
   struct IRC_Client_CursesState*                cursesState;
-  int                                           groupID;
+  int                                           groupId;
   struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
   bool                                          useReactor;
 };
@@ -127,18 +121,20 @@ struct IRC_Client_InputThreadData
 struct IRC_Client_UserData
 {
   IRC_Client_UserData ()
-   : connectionConfiguration (NULL)
-   , moduleConfiguration (NULL)
-   , moduleHandlerConfiguration (NULL)
+   //: connectionConfiguration (NULL)
+   //, moduleConfiguration (NULL)
+   //, moduleHandlerConfiguration (NULL)
   {};
 
-  struct IRC_Client_ConnectionConfiguration*    connectionConfiguration;
+  //struct IRC_Client_ConnectionConfiguration*    connectionConfiguration;
 
-  // *TODO*: remove these ASAP
-  struct Stream_ModuleConfiguration*            moduleConfiguration;
-  struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
+  //// *TODO*: remove these ASAP
+  //struct Stream_ModuleConfiguration*            moduleConfiguration;
+  //struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
 };
 
+struct IRC_Client_SessionState;
+struct IRC_Client_UserData;
 struct IRC_Client_SessionData
  : IRC_Stream_SessionData
 {
@@ -154,7 +150,7 @@ struct IRC_Client_SessionData
 };
 
 typedef Net_IConnector_T<ACE_INET_Addr,
-                         struct IRC_Client_ConnectionConfiguration> IRC_Client_IConnector_t;
+                         IRC_Client_ConnectionConfiguration_t> IRC_Client_IConnector_t;
 struct IRC_Client_CursesState;
 struct IRC_Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration

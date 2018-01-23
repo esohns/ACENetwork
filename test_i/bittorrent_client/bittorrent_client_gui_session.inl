@@ -47,20 +47,21 @@ template <typename SessionInterfaceType,
 BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
                                 ConnectionType,
                                 ConnectionCBDataType>::BitTorrent_Client_GUI_Session_T (const struct BitTorrent_Client_Configuration& configuration_in,
-                                                                                        struct Common_UI_GTKState& GTKState_in,
-                                                                                        guint contextID_in,
+                                                                                        struct Common_UI_GTK_State* GTKState_in,
+                                                                                        guint contextId_in,
                                                                                         const std::string& label_in,
                                                                                         const std::string& UIFileDirectory_in,
                                                                                         BitTorrent_Client_IControl_t* controller_in,
                                                                                         const std::string& metaInfoFileName_in)
  : closing_ (false)
  , CBData_ ()
- , contextID_ (contextID_in)
+ , contextId_ (contextId_in)
  , UIFileDirectory_ (UIFileDirectory_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::BitTorrent_Client_GUI_Session_T"));
 
   // sanity check(s)
+  ACE_ASSERT (GTKState_in);
   if (!Common_File_Tools::isDirectory (UIFileDirectory_in))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -74,7 +75,7 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
       &const_cast<struct BitTorrent_Client_Configuration&> (configuration_in);
   CBData_.controller = controller_in;
   CBData_.eventSourceId = 0;
-  CBData_.GTKState = &GTKState_in;
+  CBData_.state = GTKState_in;
   CBData_.handler = this;
   CBData_.label = label_in;
 
@@ -176,9 +177,9 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 //                                    FALSE);
 
   { // synch access
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
+    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
 
-    CBData_.GTKState->builders[CBData_.label] =
+    CBData_.state->builders[CBData_.label] =
         std::make_pair (ui_definition_filename, builder_p);
   } // end lock scope
 
@@ -192,8 +193,8 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
                 ACE_TEXT (metaInfoFileName_in.c_str ())));
 
     // clean up
-//      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
-    CBData_.GTKState->builders.erase (CBData_.label);
+//      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
+    CBData_.state->builders.erase (CBData_.label);
 
     goto error;
   }
@@ -207,13 +208,13 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
                 ACE_TEXT (metaInfoFileName_in.c_str ())));
 
     // clean up
-//      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
-    CBData_.GTKState->builders.erase (CBData_.label);
+//      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
+    CBData_.state->builders.erase (CBData_.label);
 
     goto error;
   } // end IF
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
     CBData_.eventSourceId =
         g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
                          idle_add_session_cb,
@@ -225,12 +226,12 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
                   ACE_TEXT ("failed to g_idle_add_full(idle_add_session_cb): \"%m\", returning\n")));
 
       // clean up
-//      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
-      CBData_.GTKState->builders.erase (CBData_.label);
+//      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
+      CBData_.state->builders.erase (CBData_.label);
 
       goto error;
     } // end IF
-    CBData_.GTKState->eventSourceIds.insert (CBData_.eventSourceId);
+    CBData_.state->eventSourceIds.insert (CBData_.eventSourceId);
   } // end lock scope
 
   return;
@@ -255,15 +256,15 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::~BitTorrent_Client_GUI_Session_T"));
 
   // sanity check(s)
-  ACE_ASSERT (CBData_.GTKState);
+  ACE_ASSERT (CBData_.state);
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
 
   // remove builder
-  Common_UI_GTKBuildersIterator_t iterator =
-    CBData_.GTKState->builders.find (CBData_.label);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    CBData_.state->builders.find (CBData_.label);
   // sanity check(s)
-  if (iterator == CBData_.GTKState->builders.end ())
+  if (iterator == CBData_.state->builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("session (was: \"%s\") builder not found, returning\n"),
@@ -271,7 +272,7 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
     return;
   } // end IF
   g_object_unref (G_OBJECT ((*iterator).second.second));
-  CBData_.GTKState->builders.erase (iterator);
+  CBData_.state->builders.erase (iterator);
 }
 
 //template <typename ConnectionType,
@@ -300,12 +301,12 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 
 //  // sanity check(s)
 //  ACE_ASSERT (CBData_);
-//  ACE_ASSERT (CBData_.GTKState);
+//  ACE_ASSERT (CBData_.state);
 
 //  int result = -1;
 //  if (lockedAccess_in)
 //  {
-//    result = CBData_.GTKState->lock.acquire ();
+//    result = CBData_.state->lock.acquire ();
 //    if (result == -1)
 //      ACE_DEBUG ((LM_ERROR,
 //                  ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
@@ -313,7 +314,7 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 
 //  // clean up connections
 ////  const ConnectionCBDataType* cb_data_p = NULL;
-////  Common_UI_GTKBuildersIterator_t iterator;
+////  Common_UI_GTK_BuildersIterator_t iterator;
 ////  GtkButton* button_p = NULL;
 ////  gdk_threads_enter ();
 //  for (BitTorrent_Client_GUI_ConnectionsConstIterator_t iterator_2 = CBData_.connections.begin ();
@@ -327,9 +328,9 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 ////      cb_data_p = &(*iterator_2).second->get ();
 ////      ACE_ASSERT (cb_data_p);
 
-////      iterator = CBData_.GTKState->builders.find (cb_data_p->builderLabel);
+////      iterator = CBData_.state->builders.find (cb_data_p->builderLabel);
 ////      // sanity check(s)
-////      if (iterator == CBData_.GTKState->builders.end ())
+////      if (iterator == CBData_.state->builders.end ())
 ////      {
 ////        ACE_DEBUG ((LM_ERROR,
 ////                    ACE_TEXT ("connection builder (was: \"%s\")  not found, continuing\n"),
@@ -346,7 +347,7 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 
 //  if (lockedAccess_in)
 //  {
-//    result = CBData_.GTKState->lock.release ();
+//    result = CBData_.state->lock.release ();
 //    if (result == -1)
 //      ACE_DEBUG ((LM_ERROR,
 //                  ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
@@ -368,14 +369,14 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 
 //  // sanity check(s)
 //  ACE_ASSERT (CBData_);
-//  ACE_ASSERT (CBData_.GTKState);
+//  ACE_ASSERT (CBData_.state);
 
-//  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
+//  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
 
-//  Common_UI_GTKBuildersIterator_t iterator =
-//    CBData_.GTKState->builders.find (CBData_.label);
+//  Common_UI_GTK_BuildersIterator_t iterator =
+//    CBData_.state->builders.find (CBData_.label);
 //  // sanity check(s)
-//  if (iterator == CBData_.GTKState->builders.end ())
+//  if (iterator == CBData_.state->builders.end ())
 //  {
 //    ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("session builder (was: \"%s\") not found, returning\n"),
@@ -426,14 +427,14 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 
 //  // sanity check(s)
 //  ACE_ASSERT (CBData_);
-//  ACE_ASSERT (CBData_.GTKState);
+//  ACE_ASSERT (CBData_.state);
 
-//  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
+//  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
 
-//  Common_UI_GTKBuildersIterator_t iterator =
-//    CBData_.GTKState->builders.find (CBData_.label);
+//  Common_UI_GTK_BuildersIterator_t iterator =
+//    CBData_.state->builders.find (CBData_.label);
 //  // sanity check(s)
-//  if (iterator == CBData_.GTKState->builders.end ())
+//  if (iterator == CBData_.state->builders.end ())
 //  {
 //    ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("session builder (was: \"%s\") not found, returning\n"),
@@ -469,14 +470,14 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 
 //  // sanity check(s)
 //  ACE_ASSERT (CBData_);
-//  ACE_ASSERT (CBData_.GTKState);
+//  ACE_ASSERT (CBData_.state);
 
-//  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
+//  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
 
-//  Common_UI_GTKBuildersIterator_t iterator =
-//    CBData_.GTKState->builders.find (CBData_.label);
+//  Common_UI_GTK_BuildersIterator_t iterator =
+//    CBData_.state->builders.find (CBData_.label);
 //  // sanity check(s)
-//  if (iterator == CBData_.GTKState->builders.end ())
+//  if (iterator == CBData_.state->builders.end ())
 //  {
 //    ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("session builder (was: \"%s\") not found, returning\n"),
@@ -837,7 +838,7 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 ////          gdk_threads_enter ();
 
 ////          // retrieve server tab users store
-////          Common_UI_GTKBuildersIterator_t iterator_3 =
+////          Common_UI_GTK_BuildersIterator_t iterator_3 =
 ////            CBData_.builders.find (CBData_.timeStamp);
 ////          // sanity check(s)
 ////          if (iterator_3 == CBData_.builders.end ())
@@ -1407,11 +1408,11 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 //  NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::getConnection"));
 
 //  // sanity check(s)
-//  ACE_ASSERT (CBData_.GTKState);
+//  ACE_ASSERT (CBData_.state);
 //  ACE_ASSERT (CBData_.session);
 
 //  // existing connection ? --> retrieve
-//  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
+//  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
 
 //  ACE_HANDLE handle = ACE_INVALID_HANDLE;
 //  ACE_INET_Addr local_address, remote_address;
@@ -1472,10 +1473,10 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::close"));
 
   // sanity check(s)
-  ACE_ASSERT (CBData_.GTKState);
+  ACE_ASSERT (CBData_.state);
   ACE_ASSERT (CBData_.session);
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
     // step1: close connections
     CBData_.session->close (false);
 
@@ -1486,7 +1487,7 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
                          CBData_,
                          NULL);
     if (event_source_id)
-      CBData_.GTKState->eventSourceIds.insert (event_source_id);
+      CBData_.state->eventSourceIds.insert (event_source_id);
     else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_idle_add_full(idle_remove_connection_cb): \"%m\", continuing\n")));
@@ -1504,13 +1505,13 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::log"));
 
   // sanity check(s)
-  ACE_ASSERT (CBData_.GTKState);
+  ACE_ASSERT (CBData_.state);
 
   gdk_threads_enter ();
-  Common_UI_GTKBuildersIterator_t iterator =
-      CBData_.GTKState->builders.find (CBData_.label);
+  Common_UI_GTK_BuildersIterator_t iterator =
+      CBData_.state->builders.find (CBData_.label);
   // sanity check(s)
-  ACE_ASSERT (iterator != CBData_.GTKState->builders.end ());
+  ACE_ASSERT (iterator != CBData_.state->builders.end ());
 
   GtkTextView* text_view_p =
       GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,
@@ -1634,7 +1635,7 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 //                  ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
 //  } // end IF
 
-//  Common_UI_GTKBuildersIterator_t iterator =
+//  Common_UI_GTK_BuildersIterator_t iterator =
 //    CBData_.builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
 //  // sanity check(s)
 //  if (iterator == CBData_.builders.end ())
@@ -1679,23 +1680,23 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 
 //  // sanity check(s)
 //  ACE_ASSERT (CBData_);
-//  ACE_ASSERT (CBData_.GTKState);
+//  ACE_ASSERT (CBData_.state);
 
 //  int result = -1;
 //  ConnectionType* connection_p = NULL;
 
 //  if (lockedAccess_in)
 //  {
-//    result = CBData_.GTKState->lock.acquire ();
+//    result = CBData_.state->lock.acquire ();
 //    if (result == -1)
 //      ACE_DEBUG ((LM_ERROR,
 //                  ACE_TEXT ("failed to ACE_Thread_Mutex::acquire(): \"%m\", continuing\n")));
 //  } // end IF
 
-//  Common_UI_GTKBuildersIterator_t iterator =
-//    CBData_.GTKState->builders.find (CBData_.label);
+//  Common_UI_GTK_BuildersIterator_t iterator =
+//    CBData_.state->builders.find (CBData_.label);
 //  // sanity check(s)
-//  if (iterator == CBData_.GTKState->builders.end ())
+//  if (iterator == CBData_.state->builders.end ())
 //  {
 //    ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("session builder (was: \"%s\") not found, returning\n"),
@@ -1732,9 +1733,9 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 //  if (CBData_.connections.size () == 1)
 //  {
 //    iterator =
-//        CBData_.GTKState->builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
+//        CBData_.state->builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
 //    // sanity check(s)
-//    ACE_ASSERT (iterator != CBData_.GTKState->builders.end ());
+//    ACE_ASSERT (iterator != CBData_.state->builders.end ());
 //    gdk_threads_enter ();
 //    GtkComboBox* combo_box_p =
 //        GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
@@ -1747,7 +1748,7 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 //clean_up:
 //  if (lockedAccess_in)
 //  {
-//    result = CBData_.GTKState->lock.release ();
+//    result = CBData_.state->lock.release ();
 //    if (result == -1)
 //      ACE_DEBUG ((LM_ERROR,
 //                  ACE_TEXT ("failed to ACE_Thread_Mutex::release(): \"%m\", continuing\n")));
@@ -1767,9 +1768,9 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 
 //  // sanity check(s)
 //  ACE_ASSERT (CBData_);
-//  ACE_ASSERT (CBData_.GTKState);
+//  ACE_ASSERT (CBData_.state);
 
-//  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.GTKState->lock);
+//  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
 
 //  ACE_HANDLE handle = ACE_INVALID_HANDLE;
 //  ACE_INET_Addr local_address, remote_address;
@@ -1817,10 +1818,10 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 //  // --> disable corresponding widgets in the main UI
 //  if (!CBData_.connections.size ())
 //  {
-//    Common_UI_GTKBuildersIterator_t iterator =
-//      CBData_.GTKState->builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
+//    Common_UI_GTK_BuildersIterator_t iterator =
+//      CBData_.state->builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
 //    // sanity check(s)
-//    ACE_ASSERT (iterator != CBData_.GTKState->builders.end ());
+//    ACE_ASSERT (iterator != CBData_.state->builders.end ());
 //    gdk_threads_enter ();
 //    GtkComboBox* combo_box_p =
 //      GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,

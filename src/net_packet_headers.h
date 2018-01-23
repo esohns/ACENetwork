@@ -24,9 +24,9 @@
 #include "ace/config-lite.h"
 #include "ace/Basic_Types.h"
 
-#ifdef _MSC_VER
-#pragma pack(push, 1)
-#endif
+#if defined (_MSC_VER)
+#pragma pack (push, 1)
+#endif // _MSC_VER
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 struct tcphdr
@@ -63,11 +63,11 @@ struct tcphdr
   u_short window;  // Window
   u_short check;   // Checksum
   u_short urg_ptr; // Urgent pointer
-#ifdef __GNUC__
-} __attribute__ ((__packed__));
-#else
+//#ifdef __GNUC__
+//} __attribute__ ((__packed__));
+//#else
 };
-#endif
+//#endif
 #else
 #include "netinet/tcp.h"
 #endif
@@ -79,11 +79,11 @@ struct udphdr
   u_short dest;   // Destination port
   u_short len;    // Datagram length
   u_short check;  // Checksum
-#ifdef __GNUC__
-} __attribute__ ((__packed__));
-#else
+//#ifdef __GNUC__
+//} __attribute__ ((__packed__));
+//#else
 };
-#endif
+//#endif
 #else
 #include "netinet/udp.h"
 #endif
@@ -161,11 +161,11 @@ struct iphdr
   u_long  daddr;          // Destination address
 // *IMPORTANT NOTE*: this field is optional (i.e. it only exists if ihl > 5 !
 //  u_int   op_pad;       // Option + Padding
-#ifdef __GNUC__
-} __attribute__ ((__packed__));
-#else
+//#ifdef __GNUC__
+//} __attribute__ ((__packed__));
+//#else
 };
-#endif
+//#endif
 #else
 #include "netinet/ip.h"
 #endif
@@ -233,9 +233,9 @@ struct ether_addr
  */
 struct ether_header
 {
-  struct ether_addr h_dest[ETH_ALEN];   /* destination eth addr */
-  struct ether_addr h_source[ETH_ALEN]; /* source ether addr    */
-  u_short           ether_type;         /* packet type ID field */
+  struct ether_addr h_dest;     /* destination eth addr */
+  struct ether_addr h_source;   /* source ether addr    */
+  u_short           ether_type; /* packet type id field */
 };
 #else
 #include "net/ethernet.h"
@@ -493,13 +493,13 @@ struct fddi_header
   } hdr;
 };
 
-#ifdef _MSC_VER
-#pragma pack(pop)
-#endif
-
 #define FDDI_K_SNAP_HLEN 21             /* Total octets in header.       */
 #else
 #include "netinet/if_fddi.h"
+#endif
+
+#if defined (_MSC_VER)
+#pragma pack (pop)
 #endif
 
 #endif

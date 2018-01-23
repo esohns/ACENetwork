@@ -29,15 +29,17 @@
 #include "stream_stat_statistic_report.h"
 
 #include "irc_common.h"
-//#include "irc_common_modules.h"
+#include "irc_message.h"
 #include "irc_module_bisector.h"
 #include "irc_stream_common.h"
 
 #include "IRC_client_configuration.h"
+#include "IRC_client_sessionmessage.h"
+#include "IRC_client_stream_common.h"
 
 // forward declarations
-class IRC_Message;
-class IRC_Client_SessionMessage;
+//class IRC_Message;
+//class IRC_Client_SessionMessage;
 
 typedef IRC_Module_Streamer_T<ACE_MT_SYNCH,
                               Common_TimePolicy_t,
@@ -95,7 +97,7 @@ DATASTREAM_MODULE_DUPLEX (struct IRC_Client_SessionData,                // sessi
                           enum Stream_SessionMessageType,               // session event type
                           struct IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
                           libacenetwork_protocol_default_irc_bisector_module_name_string,
-                          IRC_Client_IStreamNotify_t,                   // stream notification interface type
+                          Stream_INotify_t,                             // stream notification interface type
                           IRC_Client_Module_Streamer_t,                 // reader type
                           IRC_Client_Module_Bisector_t,                 // writer type
                           IRC_Client_Module_Marshal);                   // name
@@ -103,13 +105,13 @@ DATASTREAM_MODULE_INPUT_ONLY (struct IRC_Client_SessionData,                // s
                               enum Stream_SessionMessageType,               // session event type
                               struct IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
                               libacenetwork_protocol_default_irc_parser_module_name_string,
-                              IRC_Client_IStreamNotify_t,                   // stream notification interface type
+                              Stream_INotify_t,                             // stream notification interface type
                               IRC_Client_Module_Parser);                    // writer type
 DATASTREAM_MODULE_DUPLEX (struct IRC_Client_SessionData,                // session data type
                           enum Stream_SessionMessageType,               // session event type
                           struct IRC_Client_ModuleHandlerConfiguration, // module handler configuration type
                           libacestream_default_stat_report_module_name_string,
-                          IRC_Client_IStreamNotify_t,                   // stream notification interface type
+                          Stream_INotify_t,                             // stream notification interface type
                           IRC_Client_Module_Statistic_ReaderTask_t,     // reader type
                           IRC_Client_Module_Statistic_WriterTask_t,     // writer type
                           IRC_Client_Module_StatisticReport);           // name

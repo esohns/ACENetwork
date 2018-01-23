@@ -28,7 +28,7 @@
 
 Test_U_SessionMessage::Test_U_SessionMessage (Stream_SessionId_t sessionId_in,
                                               enum Stream_SessionMessageType messageType_in,
-                                              Test_U_DHCPClient_SessionData_t*& sessionData_in,
+                                              DHCPClient_SessionData_t*& sessionData_in,
                                               Test_U_UserData* userData_in)
  : inherited (sessionId_in,
               messageType_in,

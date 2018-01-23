@@ -429,26 +429,12 @@ continue_:
   DHCP_record.secs = data_r.secs;
   if (inherited::configuration_->protocolConfiguration->requestBroadcastReplies)
     DHCP_record.flags = DHCP_FLAGS_BROADCAST;
-  if (!Net_Common_Tools::interfaceToMACAddress (socket_configuration_p->interfaceIdentifier,
-                                                DHCP_record.chaddr))
-  {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Net_Common_Tools::interfaceToMACAddress(\"%s\"), returning\n"),
-                inherited::mod_->name (),
-                ACE_TEXT (Net_Common_Tools::interfaceToString (socket_configuration_p->interfaceIdentifier).c_str ())));
-#else
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Net_Common_Tools::interfaceToMACAddress(\"%s\"), returning\n"),
-                inherited::mod_->name (),
-                ACE_TEXT (socket_configuration_p->interfaceIdentifier.c_str ())));
-#endif
-
-    // clean up
-    message_p->release ();
-
-    return;
-  } // end IF
+  struct ether_addr ether_addrs_s =
+    Net_Common_Tools::interfaceToLinkLayerAddress (socket_configuration_p->interfaceIdentifier);
+  ACE_ASSERT (DHCP_CHADDR_SIZE <= ETH_ALEN);
+  ACE_OS::memcpy (&(DHCP_record.chaddr),
+                  &(ether_addrs_s.ether_addr_octet),
+                  ETH_ALEN);
   std::string buffer_2;
   buffer_2.append (reinterpret_cast<const char*> (&data_r.yiaddr), 4);
   DHCP_record.options.insert (std::make_pair (DHCP_Codes::DHCP_OPTION_DHCP_REQUESTEDIPADDRESS,

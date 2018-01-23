@@ -27,25 +27,25 @@
 
 #include "net_macros.h"
 
-Test_U_Module_EventHandler::Test_U_Module_EventHandler (ISTREAM_T* stream_in)
+ClientServer_Module_EventHandler::ClientServer_Module_EventHandler (ISTREAM_T* stream_in)
  : inherited (stream_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_EventHandler::Test_U_Module_EventHandler"));
+  NETWORK_TRACE (ACE_TEXT ("ClientServer_Module_EventHandler::ClientServer_Module_EventHandler"));
 
 }
 
 ACE_Task<ACE_MT_SYNCH,
          Common_TimePolicy_t>*
-Test_U_Module_EventHandler::clone ()
+ClientServer_Module_EventHandler::clone ()
 {
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Module_EventHandler::clone"));
+  NETWORK_TRACE (ACE_TEXT ("ClientServer_Module_EventHandler::clone"));
 
   // initialize return value(s)
   ACE_Task<ACE_MT_SYNCH,
            Common_TimePolicy_t>* task_p = NULL;
 
   ACE_NEW_NORETURN (task_p,
-                    Test_U_Module_EventHandler (NULL));
+                    ClientServer_Module_EventHandler (NULL));
   if (!task_p)
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("%s: failed to allocate memory: \"%m\", aborting\n"),

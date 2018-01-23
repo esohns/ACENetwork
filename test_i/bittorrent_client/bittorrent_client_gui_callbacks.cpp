@@ -81,7 +81,7 @@ session_handler_cb (void* arg_in)
 
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->lock, NULL);
     // step1: create new connection handler
-    Common_UI_GTKBuildersIterator_t iterator =
+    Common_UI_GTK_BuildersIterator_t iterator =
       data_p->CBData->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
     // sanity check(s)
     ACE_ASSERT (iterator != data_p->CBData->builders.end ());
@@ -128,7 +128,7 @@ session_handler_cb (void* arg_in)
 //  gdk_threads_enter ();
   ACE_NEW_NORETURN (session_p,
                     BitTorrent_Client_GUI_Session_t (*data_p->configuration,
-                                                     *data_p->CBData,
+                                                     data_p->CBData,
                                                      context_id,
                                                      label_string,
                                                      data_p->CBData->UIFileDirectory,
@@ -145,7 +145,6 @@ session_handler_cb (void* arg_in)
   //            --> goto remove_page
 
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->lock, NULL);
-
     data_p->CBData->sessions.insert (std::make_pair (label_string, session_p));
   } // end lock scope
 
@@ -204,7 +203,7 @@ idle_add_session_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->eventSourceId);
-  ACE_ASSERT (data_p->GTKState);
+  ACE_ASSERT (data_p->state);
 
   GtkWindow* window_p = NULL;
   GtkHBox* hbox_p = NULL;
@@ -213,14 +212,14 @@ idle_add_session_cb (gpointer userData_in)
   GtkVBox* vbox_p = NULL;
   GtkNotebook* notebook_p = NULL;
   gint page_number = -1;
-  ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->GTKState->lock);
+  ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->state->lock);
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_REMOVE);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
 
-  Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState->builders.find (data_p->label);
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->state->builders.find (data_p->label);
   // sanity check(s)
-  if (iterator == data_p->GTKState->builders.end ())
+  if (iterator == data_p->state->builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("session builder (was: \"%s\") not found, aborting\n"),
@@ -300,7 +299,7 @@ idle_add_session_cb (gpointer userData_in)
   } // end lock scope
 
 clean_up:
-  data_p->GTKState->eventSourceIds.erase (data_p->eventSourceId);
+  data_p->state->eventSourceIds.erase (data_p->eventSourceId);
   data_p->eventSourceId = 0;
 
   return G_SOURCE_REMOVE;
@@ -329,7 +328,7 @@ idle_finalize_UI_cb (gpointer userData_in)
 
   {
     ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
-    //ACE_ASSERT (removed_events == data_p->GTKState.eventSourceIds.size ());
+    //ACE_ASSERT (removed_events == data_p->state.eventSourceIds.size ());
     data_p->eventSourceIds.clear ();
   } // end lock scope
 
@@ -350,7 +349,7 @@ idle_initialize_UI_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (data_p);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
@@ -484,21 +483,21 @@ idle_remove_session_cb (gpointer userData_in)
   // sanity check(s)
   ACE_ASSERT (data_p);
 //  ACE_ASSERT (data_p->eventSourceId); // *NOTE*: seems to be a race condition
-  ACE_ASSERT (data_p->GTKState);
+  ACE_ASSERT (data_p->state);
   ACE_ASSERT (data_p->session);
 
   GtkNotebook* notebook_p = NULL;
   GtkVBox* vbox_p = NULL;
   gint page_number = -1;
 //  gint number_of_pages = 0;
-  Common_UI_GTKBuildersIterator_t iterator;
-  ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->GTKState->lock);
+  Common_UI_GTK_BuildersIterator_t iterator;
+  ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->state->lock);
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_REMOVE);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
 
-  iterator = data_p->GTKState->builders.find (data_p->label);
+  iterator = data_p->state->builders.find (data_p->label);
   // sanity check(s)
-  if (iterator == data_p->GTKState->builders.end ())
+  if (iterator == data_p->state->builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (timestamp was: \"%s\") builder not found, aborting\n"),
@@ -530,7 +529,7 @@ idle_remove_session_cb (gpointer userData_in)
                             page_number);
 
 clean_up:
-  data_p->GTKState->eventSourceIds.erase (data_p->eventSourceId);
+  data_p->state->eventSourceIds.erase (data_p->eventSourceId);
   delete data_p->session;
   data_p->session = NULL;
 
@@ -576,18 +575,18 @@ idle_update_progress_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_progress_cb"));
 
-  BitTorrent_Client_GTK_ProgressData* data_p =
-    static_cast<BitTorrent_Client_GTK_ProgressData*> (userData_in);
+  struct BitTorrent_Client_GTK_ProgressData* data_p =
+    static_cast<struct BitTorrent_Client_GTK_ProgressData*> (userData_in);
 
   // sanity check(s)
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->GTKState);
+  ACE_ASSERT (data_p->state);
 
   int result = -1;
-  Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->GTKState->builders.end ());
+  ACE_ASSERT (iterator != data_p->state->builders.end ());
 
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -598,10 +597,8 @@ idle_update_progress_cb (gpointer userData_in)
   ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
   ACE_ASSERT (thread_manager_p);
   // synch access
-  {
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock, G_SOURCE_REMOVE);
-
-    for (BitTorrent_Client_GUI_CompletedActionsIterator_t iterator_2 = data_p->completedActions.begin ();
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
+    for (Common_UI_GTK_CompletedActionsIterator_t iterator_2 = data_p->completedActions.begin ();
          iterator_2 != data_p->completedActions.end ();
          ++iterator_2)
     {
@@ -625,10 +622,10 @@ idle_update_progress_cb (gpointer userData_in)
 #endif
       } // end IF
 
-      BitTorrent_Client_GUI_PendingActionsIterator_t iterator_3 =
+      Common_UI_GTK_PendingActionsIterator_t iterator_3 =
           data_p->pendingActions.find (*iterator_2);
       ACE_ASSERT (iterator_3 != data_p->pendingActions.end ());
-      data_p->GTKState->eventSourceIds.erase ((*iterator_3).second);
+      data_p->state->eventSourceIds.erase ((*iterator_3).first);
       data_p->pendingActions.erase (iterator_3);
     } // end FOR
     data_p->completedActions.clear ();
@@ -680,7 +677,7 @@ button_about_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
@@ -712,7 +709,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p->configuration);
 
   int result = -1;
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
@@ -876,7 +873,6 @@ button_connect_clicked_cb (GtkWidget* widget_in,
                                    1.0 / static_cast<double> (width));
   { // synch access
     ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
-
     gtk_widget_show (GTK_WIDGET (progress_bar_p));
 
     guint event_source_id =
@@ -905,7 +901,9 @@ button_connect_clicked_cb (GtkWidget* widget_in,
 
       return;
     } // end IF
-    data_p->progressData.pendingActions[thread_id] = event_source_id;
+    data_p->progressData.pendingActions[event_source_id] =
+      ACE_Thread_ID (thread_id,
+                     thread_handle);
 //    ACE_DEBUG ((LM_DEBUG,
 //                ACE_TEXT ("idle_update_progress_cb: %d\n"),
 //                event_source_id));
@@ -927,7 +925,7 @@ button_disconnect_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
-  Common_UI_GTKBuildersIterator_t iterator =
+  Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
@@ -951,16 +949,16 @@ button_quit_clicked_cb (GtkWidget* widget_in,
 
   //// step1: remove event sources
   //{
-  //  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->GTKState.lock);
+  //  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->state.lock);
 
-  //  for (Common_UI_GTKeventSourceIdsIterator_t iterator = data_p->GTKState.eventSourceIds.begin ();
-  //       iterator != data_p->GTKState.eventSourceIds.end ();
+  //  for (Common_UI_GTKeventSourceIdsIterator_t iterator = data_p->state.eventSourceIds.begin ();
+  //       iterator != data_p->state.eventSourceIds.end ();
   //       iterator++)
   //    if (!g_source_remove (*iterator))
   //      ACE_DEBUG ((LM_ERROR,
   //                  ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
   //                  *iterator));
-  //  data_p->GTKState.eventSourceIds.clear ();
+  //  data_p->state.eventSourceIds.clear ();
   //} // end lock scope
 
   // step2: initiate shutdown sequence
@@ -992,14 +990,14 @@ switch_session_cb (GtkNotebook* notebook_in,
 
   // sanity check(s)
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->GTKState);
+  ACE_ASSERT (data_p->state);
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->GTKState->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock);
 
-  Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->GTKState->builders.end ());
+  ACE_ASSERT (iterator != data_p->state->builders.end ());
 }
 
 void
@@ -1030,13 +1028,13 @@ button_connection_close_clicked_cb (GtkWidget* widget_in,
 
   // sanity check(s)
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->GTKState);
+  ACE_ASSERT (data_p->state);
   ACE_ASSERT (data_p->session);
 
-  Common_UI_GTKBuildersIterator_t iterator =
-    data_p->GTKState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+  Common_UI_GTK_BuildersIterator_t iterator =
+    data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->GTKState->builders.end ());
+  ACE_ASSERT (iterator != data_p->state->builders.end ());
 
   // step1: retrieve active connection entry
   GtkComboBox* combo_box_p =
@@ -1095,7 +1093,7 @@ combobox_connections_changed_cb (GtkWidget* widget_in,
   // sanity check(s)
   ACE_ASSERT (widget_in);
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->GTKState);
+  ACE_ASSERT (data_p->state);
 
   // step1: retrieve active connection entry
   // retrieve session tab connections combobox handle

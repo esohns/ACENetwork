@@ -21,59 +21,53 @@
 #ifndef TEST_U_GTK_COMMON_H
 #define TEST_U_GTK_COMMON_H
 
-#include <deque>
-
 #include "gtk/gtk.h"
 
 #include "common_ui_gtk_common.h"
 
-#include "stream_common.h"
-
-enum Test_U_GTK_Event : int
-{
-  TEST_U_GTKEVENT_INVALID   = -1,
-  TEST_U_GTKEVENT_CONNECT   = 0,
-  TEST_U_GTKEVENT_DATA,
-  TEST_U_GTKEVENT_DISCONNECT,
-  TEST_U_GTKEVENT_STATISTIC,
-  // -------------------------------------
-  TEST_U_GTKEVENT_MAX
-};
-typedef std::deque<enum Test_U_GTK_Event> Test_U_GTK_Events_t;
-typedef Test_U_GTK_Events_t::const_iterator Test_U_GTK_EventsIterator_t;
+#include "test_u_common.h"
 
 struct Test_U_GTK_ProgressData
 {
   Test_U_GTK_ProgressData ()
    : /*cursorType (GDK_LAST_CURSOR)
-   ,*/ GTKState (NULL)
-   , size (0)
+   ,*/ size (0)
+   , state (NULL)
    , transferred (0)
    , statistic ()
   {};
 
-  //GdkCursorType       cursorType;
-  struct Common_UI_GTKState* GTKState;
-  size_t                     size; // bytes
-  size_t                     transferred; // bytes
-  struct Stream_Statistic    statistic;
+//GdkCursorType                 cursorType;
+  size_t                      size; // bytes
+  struct Common_UI_GTK_State* state;
+  size_t                      transferred; // bytes
+  Test_U_Statistic_t          statistic;
 };
 
 struct Test_U_GTK_CBData
- : Common_UI_GTKState
+ : Common_UI_GTK_State
 {
   Test_U_GTK_CBData ()
-   : Common_UI_GTKState ()
+   : Common_UI_GTK_State ()
    , allowUserRuntimeStatistic (true)
-   , eventStack ()
    , progressData ()
    , progressEventSourceId (0)
   {};
 
   bool                           allowUserRuntimeStatistic;
-  Test_U_GTK_Events_t            eventStack;
   struct Test_U_GTK_ProgressData progressData;
   guint                          progressEventSourceId;
+};
+
+struct Test_U_GTK_ThreadData
+{
+  Test_U_GTK_ThreadData ()
+   : CBData (NULL)
+   , eventSourceId (0)
+  {};
+
+  struct Test_U_GTK_CBData* CBData;
+  guint                     eventSourceId;
 };
 
 #endif

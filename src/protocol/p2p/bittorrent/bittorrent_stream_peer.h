@@ -73,7 +73,6 @@ template <typename StreamStateType,
           typename ConnectionStateType,
           typename HandlerConfigurationType, // socket-
           typename SessionStateType,
-          typename CBDataType,
           ////////////////////////////////
           typename ConnectionManagerType,
           typename UserDataType>
@@ -124,7 +123,7 @@ class BitTorrent_PeerStream_T
 
  public:
   BitTorrent_PeerStream_T ();
-  inline virtual ~BitTorrent_PeerStream_T () { inherited::shutdown (); };
+  inline virtual ~BitTorrent_PeerStream_T () { inherited::shutdown (); }
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ModuleList_t&, // return value: module list
@@ -160,7 +159,6 @@ class BitTorrent_PeerStream_T
                                   ConnectionStateType,
                                   HandlerConfigurationType, // socket-
                                   SessionStateType,
-                                  CBDataType,
                                   ConnectionManagerType,
                                   UserDataType> OWN_TYPE_T;
   typedef BitTorrent_Module_Streamer_T<ACE_MT_SYNCH,

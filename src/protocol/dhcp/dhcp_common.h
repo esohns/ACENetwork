@@ -86,7 +86,7 @@ struct DHCP_Record
    , cookie (0)
    , options ()
   {
-    ACE_OS::memset (chaddr, 0, 16);
+    ACE_OS::memset (chaddr, 0, DHCP_CHADDR_SIZE);
 //    ACE_OS::memset (options, 0, 312);
   };
 
@@ -141,7 +141,7 @@ struct DHCP_ConnectionState
 
   ACE_INET_Addr                serverAddress;
   ACE_Time_Value               timeStamp; // lease timeout
-  unsigned int                 xid;       // session ID
+  unsigned int                 xid;       // session id
 };
 
 #endif

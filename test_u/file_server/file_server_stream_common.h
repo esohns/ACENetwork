@@ -34,17 +34,17 @@
 
 #include "test_u_stream_common.h"
 
+#include "file_server_connection_common.h"
 #include "file_server_defines.h"
 
 // forward declarations
-struct FileServer_ConnectionState;
 class Test_U_Message;
 class Test_U_SessionMessage;
-struct FileServer_ConnectionConfiguration;
-typedef Net_IConnection_T<ACE_INET_Addr,
-                          struct FileServer_ConnectionConfiguration,
-                          struct FileServer_ConnectionState,
-                          Net_Statistic_t> FileServer_IConnection_t;
+//struct FileServer_ConnectionState;
+//typedef Net_IConnection_T<ACE_INET_Addr,
+//                          FileServer_ConnectionConfiguration_t,
+//                          struct FileServer_ConnectionState,
+//                          Net_Statistic_t> FileServer_IConnection_t;
 
 struct FileServer_SessionData
  : Test_U_StreamSessionData
@@ -83,29 +83,29 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
 typedef std::list<FileServer_ISessionNotify_t*> FileServer_Subscribers_t;
 typedef FileServer_Subscribers_t::const_iterator FileServer_SubscribersIterator_t;
 
-class Test_U_UDPStream;
-typedef Net_IStreamConnection_T<ACE_INET_Addr,
-                                struct FileServer_ConnectionConfiguration,
-                                struct FileServer_ConnectionState,
-                                Net_Statistic_t,
-                                struct Net_SocketConfiguration,
-                                struct FileServer_SocketHandlerConfiguration,
-                                Test_U_UDPStream,
-                                enum Stream_StateMachine_ControlState> FileServer_UDPIStreamConnection_t;
-typedef std::map<std::string,
-                 struct FileServer_ConnectionConfiguration> FileServer_ConnectionConfigurations_t;
-typedef FileServer_ConnectionConfigurations_t::iterator FileServer_ConnectionConfigurationIterator_t;
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
-                                 struct FileServer_ConnectionConfiguration,
-                                 struct FileServer_ConnectionState,
-                                 Net_Statistic_t,
-                                 struct FileServer_UserData> FileServer_IInetConnectionManager_t;
+//class Test_U_UDPStream;
+//typedef Net_IStreamConnection_T<ACE_INET_Addr,
+//                                FileServer_ConnectionConfiguration_t,
+//                                struct FileServer_ConnectionState,
+//                                Net_Statistic_t,
+//                                struct Net_SocketConfiguration,
+//                                struct FileServer_SocketHandlerConfiguration,
+//                                Test_U_UDPStream,
+//                                enum Stream_StateMachine_ControlState> FileServer_UDPIStreamConnection_t;
+//typedef std::map<std::string,
+//                 struct FileServer_ConnectionConfiguration> FileServer_ConnectionConfigurations_t;
+//typedef FileServer_ConnectionConfigurations_t::iterator FileServer_ConnectionConfigurationIterator_t;
+//typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+//                                 ACE_INET_Addr,
+//                                 FileServer_ConnectionConfiguration_t,
+//                                 struct FileServer_ConnectionState,
+//                                 Net_Statistic_t,
+//                                 struct FileServer_UserData> FileServer_IInetConnectionManager_t;
 //extern const char stream_name_string_[];
 struct FileServer_StreamConfiguration;
 struct Test_U_ModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
-                               struct Stream_AllocatorConfiguration,
+                               struct Net_AllocatorConfiguration,
                                struct FileServer_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> FileServer_StreamConfiguration_t;
@@ -114,6 +114,7 @@ struct Test_U_ModuleHandlerConfiguration
 {
   Test_U_ModuleHandlerConfiguration ()
    : Stream_ModuleHandlerConfiguration ()
+   , allocatorConfiguration (NULL)
    , connection (NULL)
    , connectionConfigurations (NULL)
    , connectionManager (NULL)
@@ -128,6 +129,7 @@ struct Test_U_ModuleHandlerConfiguration
     inbound = true;
   };
 
+  struct Net_AllocatorConfiguration*     allocatorConfiguration;
   FileServer_UDPIStreamConnection_t*     connection;               // net target module
   FileServer_ConnectionConfigurations_t* connectionConfigurations; // net target module
   FileServer_IInetConnectionManager_t*   connectionManager;        // net target module

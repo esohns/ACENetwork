@@ -45,8 +45,11 @@
 
 #include "common_file_tools.h"
 #include "common_logger.h"
-#include "common_timer_manager.h"
+#include "common_signal_tools.h"
 #include "common_tools.h"
+
+#include "common_timer_manager.h"
+#include "common_timer_tools.h"
 
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_defines.h"
@@ -54,6 +57,8 @@
 #include "common_ui_gtk_manager_common.h"
 
 #include "stream_allocatorheap.h"
+
+#include "stream_misc_defines.h"
 
 #include "net_iconnector.h"
 #include "net_macros.h"
@@ -440,7 +445,7 @@ do_initializeSignals (bool allowUserRuntimeConnect_in,
 }
 
 void
-do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
+do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
          unsigned int maxNumConnections_in,
          const std::string& UIDefinitionFile_in,
          bool useThreadPool_in,
@@ -452,11 +457,11 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
          const ACE_Time_Value& statisticReportingInterval_in,
          unsigned int numberOfDispatchThreads_in,
          bool useUDP_in,
-         struct Test_U_Client_GTK_CBData& CBData_in,
+         struct Client_GTK_CBData& CBData_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
-         Test_U_Client_SignalHandler& signalHandler_in)
+         Client_SignalHandler& signalHandler_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
@@ -466,41 +471,41 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
   Common_Tools::initialize ();
 
   // step0a: initialize configuration
-  struct Test_U_Client_Configuration configuration;
+  struct Client_Configuration configuration;
   CBData_in.configuration = &configuration;
 
-  Test_U_EventHandler ui_event_handler (&CBData_in);
-  Test_U_Module_EventHandler_Module event_handler (NULL,
-                                                   ACE_TEXT_ALWAYS_CHAR ("EventHandler"));
-  Test_U_Module_EventHandler* event_handler_p =
-    dynamic_cast<Test_U_Module_EventHandler*> (event_handler.writer ());
+  ClientServer_EventHandler ui_event_handler (&CBData_in);
+  ClientServer_Module_EventHandler_Module event_handler (NULL,
+                                                         ACE_TEXT_ALWAYS_CHAR (MODULE_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
+  ClientServer_Module_EventHandler* event_handler_p =
+    dynamic_cast<ClientServer_Module_EventHandler*> (event_handler.writer ());
   if (!event_handler_p)
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Net_Module_EventHandler> failed, returning\n")));
+                ACE_TEXT ("dynamic_cast<ClientServer_Module_EventHandler> failed, returning\n")));
     return;
   } // end IF
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
-                         struct Stream_AllocatorConfiguration> heap_allocator;
+                         struct Net_AllocatorConfiguration> heap_allocator;
   if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize heap allocator, returning\n")));
     return;
   } // end IF
-  Test_U_StreamMessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
-                                                     &heap_allocator,         // heap allocator handle
-                                                     true);                   // block ?
+  Test_U_MessageAllocator_t message_allocator (NET_STREAM_MAX_MESSAGES, // maximum #buffers
+                                               &heap_allocator,         // heap allocator handle
+                                               true);                   // block ?
   // ********************* protocol configuration data *************************
   configuration.protocolConfiguration.pingInterval =
-    ((actionMode_in == Test_U_Client_TimeoutHandler::ACTION_STRESS) ? ACE_Time_Value::zero
-                                                                    : pingInterval_in);
+    ((actionMode_in == Client_TimeoutHandler::ACTION_STRESS) ? ACE_Time_Value::zero
+                                                             : pingInterval_in);
   configuration.protocolConfiguration.printPongMessages =
     UIDefinitionFile_in.empty ();
   // ********************** stream configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
-  struct Test_U_ModuleHandlerConfiguration modulehandler_configuration;
+  struct ClientServer_ModuleHandlerConfiguration modulehandler_configuration;
   modulehandler_configuration.protocolConfiguration =
     &configuration.protocolConfiguration;
   modulehandler_configuration.streamConfiguration =
@@ -528,18 +533,18 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
                                                                             modulehandler_configuration)));
 
   // ********************** connection configuration data **********************
-  struct Test_U_ConnectionConfiguration connection_configuration;
+  ClientServer_ConnectionConfiguration_t connection_configuration;
   connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
-  connection_configuration.streamConfiguration =
-    &configuration.streamConfiguration;
   connection_configuration.messageAllocator = &message_allocator;
   connection_configuration.userData =
     &configuration.userData;
+  connection_configuration.initialize (configuration.streamConfiguration.allocatorConfiguration_,
+                                       configuration.streamConfiguration);
 
   configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                  connection_configuration));
-  Test_U_ConnectionConfigurationIterator_t iterator =
+  ClientServer_ConnectionConfigurationIterator_t iterator =
     configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
   (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
@@ -562,14 +567,14 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
 //	config.lastCollectionTimestamp = ACE_Time_Value::zero;
 
   // step0b: initialize event dispatch
-  struct Common_DispatchThreadData thread_data;
-  thread_data.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data.useReactor = useReactor_in;
-  if (!Common_Tools::initializeEventDispatch (thread_data.useReactor,
+  struct Common_EventDispatchThreadData thread_data_s;
+  thread_data_s.numberOfDispatchThreads = numberOfDispatchThreads_in;
+  thread_data_s.useReactor = useReactor_in;
+  if (!Common_Tools::initializeEventDispatch (thread_data_s.useReactor,
                                               useThreadPool_in,
-                                              thread_data.numberOfDispatchThreads,
-                                              thread_data.proactorType,
-                                              thread_data.reactorType,
+                                              thread_data_s.numberOfDispatchThreads,
+                                              thread_data_s.proactorType,
+                                              thread_data_s.reactorType,
                                               configuration.streamConfiguration.configuration_.serializeOutput))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -578,20 +583,20 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
   } // end IF
 
   // step0c: initialize connector
-  Test_U_InetConnectionManager_t* connection_manager_p =
-    TEST_U_CONNECTIONMANAGER_SINGLETON::instance ();
+  ClientServer_InetConnectionManager_t* connection_manager_p =
+    CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
-  Test_U_IInetConnectionManager_t* iconnection_manager_p =
+  ClientServer_IInetConnectionManager_t* iconnection_manager_p =
     connection_manager_p;
-  Test_U_Client_TCP_AsynchConnector_t asynch_connector (iconnection_manager_p,
-                                                        statisticReportingInterval_in);
-  Test_U_Client_TCP_Connector_t connector (iconnection_manager_p,
-                                           statisticReportingInterval_in);
-  Test_U_Client_UDP_AsynchConnector_t udp_asynch_connector (iconnection_manager_p,
-                                                            statisticReportingInterval_in);
-  Test_U_Client_UDP_Connector_t udp_connector (iconnection_manager_p,
-                                               statisticReportingInterval_in);
-  Test_U_IConnector_t* connector_p = NULL;
+  Client_TCP_AsynchConnector_t asynch_connector (iconnection_manager_p,
+                                                 statisticReportingInterval_in);
+  Client_TCP_Connector_t connector (iconnection_manager_p,
+                                    statisticReportingInterval_in);
+  Client_UDP_AsynchConnector_t udp_asynch_connector (iconnection_manager_p,
+                                                     statisticReportingInterval_in);
+  Client_UDP_Connector_t udp_connector (iconnection_manager_p,
+                                        statisticReportingInterval_in);
+  Client_IConnector_t* connector_p = NULL;
   if (useUDP_in)
   {
     if (useReactor_in)
@@ -653,15 +658,15 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
     return;
   } // end IF
 
-  Test_U_Client_TimeoutHandler timeout_handler (actionMode_in,
-                                                maxNumConnections_in,
-                                                connector_p);
+  Client_TimeoutHandler timeout_handler (actionMode_in,
+                                         maxNumConnections_in,
+                                         connector_p);
   configuration.timeoutHandler = &timeout_handler;
   Common_Timer_Manager_t* timer_manager_p =
       COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
   struct Common_TimerConfiguration timer_configuration;
-  if (!Common_Tools::initializeTimers (timer_configuration))
+  if (!Common_Timer_Tools::initializeTimers (timer_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeTimers(), returning\n")));
@@ -671,10 +676,10 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
       (connectionInterval_in > 0))
   {
     // schedule action interval timer
-    ACE_Time_Value interval (((actionMode_in == Test_U_Client_TimeoutHandler::ACTION_STRESS) ? (NET_CLIENT_DEF_SERVER_STRESS_INTERVAL / 1000)
-                                                                                             : connectionInterval_in),
-                             ((actionMode_in == Test_U_Client_TimeoutHandler::ACTION_STRESS) ? ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL % 1000) * 1000)
-                                                                                             : 0));
+    ACE_Time_Value interval (((actionMode_in == Client_TimeoutHandler::ACTION_STRESS) ? (NET_CLIENT_DEF_SERVER_STRESS_INTERVAL / 1000)
+                                                                                      : connectionInterval_in),
+                             ((actionMode_in == Client_TimeoutHandler::ACTION_STRESS) ? ((NET_CLIENT_DEF_SERVER_STRESS_INTERVAL % 1000) * 1000)
+                                                                                      : 0));
     configuration.signalHandlerConfiguration.actionTimerId =
         timer_manager_p->schedule_timer (&timeout_handler,           // event handler handle
                                          NULL,                       // asynchronous completion token
@@ -686,7 +691,7 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
                   ACE_TEXT ("failed to schedule action timer: \"%m\", returning\n")));
 
       // clean up
-      Common_Tools::finalizeTimers (timer_configuration);
+      Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
 
       return;
     } // end IF
@@ -704,11 +709,11 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
                 ACE_TEXT ("failed to initialize signal handler, returning\n")));
 
     // clean up
-    Common_Tools::finalizeTimers (timer_configuration);
+    Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
 
     return;
   } // end IF
-  if (!Common_Tools::initializeSignals ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
+  if (!Common_Signal_Tools::initialize ((useReactor_in ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                        : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                         signalSet_in,
                                         ignoredSignalSet_in,
@@ -716,10 +721,10 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
                                         previousSignalActions_inout))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeSignals(), returning\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::initialize(), returning\n")));
 
     // clean up
-    Common_Tools::finalizeTimers (timer_configuration);
+    Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
 
     return;
   } // end IF
@@ -729,7 +734,7 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
   // [- signal timer expiration to perform server queries] (see above)
 
   // step1a: start GTK event loop ?
-  Test_U_Client_GTK_Manager_t* gtk_manager_p = NULL;
+  Client_GTK_Manager_t* gtk_manager_p = NULL;
   if (!UIDefinitionFile_in.empty ())
   {
     CBData_in.finalizationHook = idle_finalize_UI_cb;
@@ -757,7 +762,7 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
 
       // clean up
-      Common_Tools::finalizeTimers (timer_configuration);
+      Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
 
       return;
     } // end IF
@@ -770,7 +775,7 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
                   ACE_TEXT ("failed to ::GetConsoleWindow(), returning\n")));
 
       // clean up
-      Common_Tools::finalizeTimers (timer_configuration);
+      Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
       gtk_manager_p->stop (true,
                            true);
 
@@ -782,7 +787,7 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
 
   // step1b: initialize worker(s)
   int group_id = -1;
-  if (!Common_Tools::startEventDispatch (thread_data,
+  if (!Common_Tools::startEventDispatch (thread_data_s,
                                          group_id))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -797,7 +802,7 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
 //					 iterator++)
 //				g_source_remove(*iterator);
 //		} // end lock scope
-    Common_Tools::finalizeTimers (timer_configuration);
+    Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
     if (!UIDefinitionFile_in.empty ())
       gtk_manager_p->stop (true,
                            true);
@@ -828,14 +833,14 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
       //					 iterator++)
       //				g_source_remove(*iterator);
       //		} // end lock scope
-      Common_Tools::finalizeTimers (timer_configuration);
+      Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
       if (!UIDefinitionFile_in.empty ())
         gtk_manager_p->stop (true,
                              true);
 
       return;
     } // end IF
-    typename Test_U_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
+    typename ClientServer_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
       NULL;
     if (useReactor_in)
     {
@@ -882,7 +887,7 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
       //					 iterator++)
       //				g_source_remove(*iterator);
       //		} // end lock scope
-      Common_Tools::finalizeTimers (timer_configuration);
+      Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
       if (!UIDefinitionFile_in.empty ())
         gtk_manager_p->stop (true,
                              true);
@@ -916,7 +921,7 @@ do_work (enum Test_U_Client_TimeoutHandler::ActionModeType actionMode_in,
   // *IMPORTANT NOTE*: as long as connections are inactive (i.e. events are
   // dispatched by reactor thread(s), there is no real reason to wait here)
 //  connection_manager_p->wait ();
-  TEST_U_CONNECTIONMANAGER_SINGLETON::instance ()->wait ();
+  CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ()->wait ();
 
 //  { // synch access
 //    ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
@@ -1052,8 +1057,8 @@ ACE_TMAIN (int argc_in,
 #endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
-  enum Test_U_Client_TimeoutHandler::ActionModeType action_mode =
-    Test_U_Client_TimeoutHandler::ACTION_NORMAL;
+  enum Client_TimeoutHandler::ActionModeType action_mode =
+    Client_TimeoutHandler::ACTION_NORMAL;
   bool alternating_mode = false;
   unsigned int maximum_number_of_connections =
    NET_CLIENT_DEF_MAX_NUM_OPEN_CONNECTIONS;
@@ -1165,15 +1170,15 @@ ACE_TMAIN (int argc_in,
   if (number_of_dispatch_threads == 0)
     number_of_dispatch_threads = 1;
   if (alternating_mode)
-    action_mode = Test_U_Client_TimeoutHandler::ACTION_ALTERNATING;
+    action_mode = Client_TimeoutHandler::ACTION_ALTERNATING;
   if (run_stress_test)
-    action_mode = Test_U_Client_TimeoutHandler::ACTION_STRESS;
+    action_mode = Client_TimeoutHandler::ACTION_STRESS;
 
-  struct Test_U_Client_GTK_CBData gtk_cb_user_data;
-  gtk_cb_user_data.progressData.GTKState = &gtk_cb_user_data;
+  struct Client_GTK_CBData gtk_cb_data;
+  gtk_cb_data.progressData.state = &gtk_cb_data;
   // step1d: initialize logging and/or tracing
-  Common_Logger_t logger (&gtk_cb_user_data.logStack,
-                          &gtk_cb_user_data.lock);
+  Common_Logger_t logger (&gtk_cb_data.logStack,
+                          &gtk_cb_data.lock);
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
@@ -1227,13 +1232,13 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  if (!Common_Tools::preInitializeSignals (signal_set,
+  if (!Common_Signal_Tools::preInitialize (signal_set,
                                            use_reactor,
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::preInitializeSignals(), aborting\n")));
+                ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
 
     Common_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE...
@@ -1246,16 +1251,16 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  Test_U_Client_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                           : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                              &gtk_cb_user_data.lock);
+  Client_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                    : COMMON_SIGNAL_DISPATCH_PROACTOR),
+                                       &gtk_cb_data.lock);
 
   // step1f: handle specific program modes
   if (print_version_and_exit)
   {
     do_printVersion (ACE::basename (argv_in[0]));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1289,7 +1294,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1307,12 +1312,12 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   // step1h: init GLIB / G(D|T)K[+] / GNOME ?
-  Test_U_Client_GtkBuilderDefinition_t ui_definition (argc_in,
-                                                      argv_in);
+  Client_GtkBuilderDefinition_t ui_definition (argc_in,
+                                               argv_in);
   if (!UI_file.empty ())
     CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                               argv_in,
-                                                              &gtk_cb_user_data,
+                                                              &gtk_cb_data,
                                                               &ui_definition);
 
   ACE_High_Res_Timer timer;
@@ -1330,7 +1335,7 @@ ACE_TMAIN (int argc_in,
            statistic_reporting_interval,
            number_of_dispatch_threads,
            use_UDP,
-           gtk_cb_user_data,
+           gtk_cb_data,
            signal_set,
            ignored_signal_set,
            previous_signal_actions,
@@ -1341,8 +1346,8 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Tools::periodToString (working_time,
-                                working_time_string);
+  Common_Timer_Tools::periodToString (working_time,
+                                      working_time_string);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
@@ -1361,7 +1366,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
 
-    Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                    signal_set,
                                    previous_signal_actions,
@@ -1384,10 +1389,10 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Tools::periodToString (user_time,
-                               user_time_string);
-  Common_Tools::periodToString (system_time,
-                               system_time_string);
+  Common_Timer_Tools::periodToString (user_time,
+                                      user_time_string);
+  Common_Timer_Tools::periodToString (system_time,
+                                      system_time_string);
 
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
@@ -1422,7 +1427,7 @@ ACE_TMAIN (int argc_in,
               ACE_TEXT (system_time_string.c_str ())));
 #endif
 
-  Common_Tools::finalizeSignals ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
+  Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                  signal_set,
                                  previous_signal_actions,

@@ -81,7 +81,7 @@
 //}
 
 BitTorrent_Client_GUI_Session_t*
-BitTorrent_Client_UI_Tools::current (const Common_UI_GTKState& GTKState_in,
+BitTorrent_Client_UI_Tools::current (const Common_UI_GTK_State& GTKState_in,
                                      const BitTorrent_Client_GUI_Sessions_t& sessions_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_UI_Tools::current"));
@@ -90,7 +90,7 @@ BitTorrent_Client_UI_Tools::current (const Common_UI_GTKState& GTKState_in,
   BitTorrent_Client_GUI_Session_t* result_p = NULL;
 
   // sanity check(s)
-  Common_UI_GTKBuildersConstIterator_t iterator =
+  Common_UI_GTK_BuildersConstIterator_t iterator =
     GTKState_in.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != GTKState_in.builders.end ());
@@ -115,7 +115,7 @@ BitTorrent_Client_UI_Tools::current (const Common_UI_GTKState& GTKState_in,
   {
     const struct BitTorrent_Client_GTK_SessionCBData& data_r =
       (*iterator_2).second->getR ();
-    Common_UI_GTKBuildersConstIterator_t iterator_3 =
+    Common_UI_GTK_BuildersConstIterator_t iterator_3 =
       GTKState_in.builders.find (data_r.label);
     if (iterator_3 == GTKState_in.builders.end ())
     {

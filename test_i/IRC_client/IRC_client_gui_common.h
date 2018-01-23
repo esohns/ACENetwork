@@ -37,6 +37,8 @@
 
 #include "irc_message.h"
 
+#include "test_i_gtk_common.h"
+
 #include "IRC_client_configuration.h"
 #include "IRC_client_stream_common.h"
 
@@ -49,34 +51,25 @@ typedef std::map<std::string,
 typedef IRC_Client_GUI_Connections_t::iterator IRC_Client_GUI_ConnectionsIterator_t;
 typedef IRC_Client_GUI_Connections_t::const_iterator IRC_Client_GUI_ConnectionsConstIterator_t;
 
-typedef std::map<ACE_thread_t, guint> IRC_Client_GUI_PendingActions_t;
-typedef IRC_Client_GUI_PendingActions_t::iterator IRC_Client_GUI_PendingActionsIterator_t;
-typedef std::set<ACE_thread_t> IRC_Client_GUI_CompletedActions_t;
-typedef IRC_Client_GUI_CompletedActions_t::iterator IRC_Client_GUI_CompletedActionsIterator_t;
-
 struct IRC_Client_GTK_ProgressData
+ : Test_I_GTK_ProgressData
 {
-  inline IRC_Client_GTK_ProgressData ()
-   : completedActions ()
+  IRC_Client_GTK_ProgressData ()
+   : Test_I_GTK_ProgressData ()
    , cursorType (GDK_LAST_CURSOR)
-   , GTKState (NULL)
-   , pendingActions ()
   {};
 
-  IRC_Client_GUI_CompletedActions_t completedActions;
-  GdkCursorType                     cursorType;
-  struct Common_UI_GTKState*        GTKState;
-  IRC_Client_GUI_PendingActions_t   pendingActions;
+  GdkCursorType cursorType;
 };
 
 struct IRC_Client_GTK_CBData
- : Common_UI_GTKState
+ : Test_I_GTK_CBData
 {
-  inline IRC_Client_GTK_CBData ()
-   : Common_UI_GTKState ()
+  IRC_Client_GTK_CBData ()
+   : Test_I_GTK_CBData ()
    , configuration (NULL)
    , connections ()
-   , contextID (0)
+   , contextId (0)
    , phoneBook ()
    , progressData ()
    , UIFileDirectory ()
@@ -84,7 +77,7 @@ struct IRC_Client_GTK_CBData
 
   struct IRC_Client_Configuration*   configuration;
   IRC_Client_GUI_Connections_t       connections;
-  guint                              contextID;
+  guint                              contextId;
   struct IRC_Client_PhoneBook        phoneBook;
   struct IRC_Client_GTK_ProgressData progressData;
   std::string                        UIFileDirectory;
@@ -92,7 +85,7 @@ struct IRC_Client_GTK_CBData
 
 struct IRC_Client_ConnectionThreadData
 {
-  inline IRC_Client_ConnectionThreadData ()
+  IRC_Client_ConnectionThreadData ()
    : configuration (NULL)
    , CBData (NULL)
    , loginOptions ()
@@ -107,38 +100,38 @@ struct IRC_Client_ConnectionThreadData
 
 struct IRC_Client_GTK_ConnectionCBData
 {
-  inline IRC_Client_GTK_ConnectionCBData ()
+  IRC_Client_GTK_ConnectionCBData ()
    : acknowledgements (0)
    , connections (NULL)
    , controller (NULL)
-   , eventSourceID (0)
-   , GTKState (NULL)
+   , eventSourceId (0)
    , label ()
    , pending (false)
+   , state (NULL)
    , timeStamp ()
   {};
 
   unsigned int                  acknowledgements;
   IRC_Client_GUI_Connections_t* connections;
   IRC_IControl*                 controller;
-  guint                         eventSourceID;
-  struct Common_UI_GTKState*    GTKState;
+  guint                         eventSourceId;
   // *TODO*: remove this
   std::string                   label;
   bool                          pending;
+  struct Common_UI_GTK_State*   state;
   std::string                   timeStamp;
 };
 
 struct IRC_Client_GTK_HandlerCBData
 {
-  inline IRC_Client_GTK_HandlerCBData ()
+  IRC_Client_GTK_HandlerCBData ()
    : acknowledgements (0)
    , builderLabel ()
    , channelModes ()
    , connection (NULL)
    , controller (NULL)
-   , eventSourceID (0)
-   , GTKState (NULL)
+   , eventSourceId (0)
+   , state (NULL)
    , handler (NULL)
    , id ()
    , parameters ()
@@ -151,8 +144,8 @@ struct IRC_Client_GTK_HandlerCBData
   IRC_ChannelModes_t             channelModes;
   IRC_Client_GUI_Connection*     connection;
   IRC_IControl*                  controller;
-  guint                          eventSourceID;
-  struct Common_UI_GTKState*     GTKState;
+  guint                          eventSourceId;
+  struct Common_UI_GTK_State*    state;
   IRC_Client_GUI_MessageHandler* handler;
   // *TODO*: remove this
   std::string                    id;

@@ -42,7 +42,7 @@ Net_ConnectionBase_T<AddressType,
  , state_ ()
  , isRegistered_ (false)
  , manager_ (interfaceHandle_in)
- , statisticHandler_ (STATISTIC_ACTION_COLLECT,
+ , statisticHandler_ (COMMON_STATISTIC_ACTION_COLLECT,
                       this,
                       true)
  , timerId_ (-1)
@@ -76,7 +76,7 @@ Net_ConnectionBase_T<AddressType,
                                         NULL,                                             // asynchronous completion token
                                         COMMON_TIME_NOW + statisticCollectionInterval_in, // first wakeup time
                                         statisticCollectionInterval_in);                  // interval
-    if (timerId_ == -1)
+    if (unlikely (timerId_ == -1))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_ITimer::schedule_timer(%#T): \"%m\", continuing\n"),
                   &statisticCollectionInterval_in));
@@ -106,7 +106,7 @@ Net_ConnectionBase_T<AddressType,
   int result = -1;
 
   // clean up timer, if necessary
-  if (timerId_ != -1)
+  if (unlikely (timerId_ != -1))
   {
     typename TimerManagerType::INTERFACE_T* itimer_manager_p =
         (configuration_ ? (configuration_->timerManager ? configuration_->timerManager
@@ -147,7 +147,7 @@ Net_ConnectionBase_T<AddressType,
 
   // sanity check(s)
   ACE_ASSERT (!isRegistered_);
-  if (!manager_)
+  if (unlikely (!manager_))
     return false; // nothing to do
 
   // (try to) register with the connection manager
@@ -158,7 +158,7 @@ Net_ConnectionBase_T<AddressType,
                 ACE_TEXT ("caught exception in Net_IConnectionManager_T::registerc(), continuing\n")));
     isRegistered_ = false;
   }
-  if (!isRegistered_)
+  if (unlikely (!isRegistered_))
   {
     // *NOTE*: most probable reason: maximum number of connections has been
     //         reached
@@ -177,6 +177,7 @@ Net_ConnectionBase_T<AddressType,
     return false;
   }
 
+#if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("registered connection [0x%@/0x%@]: %s %s %s (total: %d)\n"),
@@ -193,6 +194,7 @@ Net_ConnectionBase_T<AddressType,
               (remote_address.is_any () ? ACE_TEXT ("<--") : (local_address.is_any () ? ACE_TEXT ("-->") :ACE_TEXT ("<-->"))),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (remote_address).c_str ()),
               manager_->count ()));
+#endif
 #endif
 
   return true;
@@ -215,8 +217,8 @@ Net_ConnectionBase_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_ConnectionBase_T::deregister"));
 
   // sanity check(s)
-  if (!manager_ ||
-      !isRegistered_)
+  if (unlikely (!manager_ ||
+                !isRegistered_))
     return;
 
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
@@ -242,7 +244,7 @@ Net_ConnectionBase_T<AddressType,
                 ACE_TEXT ("caught exception in Net_IConnectionManager_T::deregister(), continuing\n")));
   }
 
-  // *PORTABILITY*
+#if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("deregistered connection [0x%@/0x%@] (total: %u)\n"),
@@ -253,6 +255,7 @@ Net_ConnectionBase_T<AddressType,
               ACE_TEXT ("deregistered connection [%@/%d] (total: %d)\n"),
               this, handle,
               number_of_connections));
+#endif
 #endif
 }
 
@@ -274,18 +277,17 @@ Net_ConnectionBase_T<AddressType,
 
   // sanity check(s)
   ACE_ASSERT (configuration_);
-  ACE_ASSERT (configuration_->streamConfiguration);
 
   // initialize return value(s)
   ACE_Message_Block* message_block_p = NULL;
 
 //  if (inherited::configuration_->messageAllocator)
-  if (configuration_->streamConfiguration->configuration_.messageAllocator)
+  if (likely (configuration_->messageAllocator))
   {
 allocate:
     try {
       message_block_p =
-        static_cast<ACE_Message_Block*> (configuration_->streamConfiguration->configuration_.messageAllocator->malloc (requestedSize_in));
+        static_cast<ACE_Message_Block*> (configuration_->messageAllocator->malloc (requestedSize_in));
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Stream_IAllocator::malloc(%u), aborting\n"),
@@ -294,8 +296,8 @@ allocate:
     }
 
     // keep retrying ?
-    if (!message_block_p &&
-        !configuration_->streamConfiguration->configuration_.messageAllocator->block ())
+    if (unlikely (!message_block_p &&
+                  !configuration_->messageAllocator->block ()))
       goto allocate;
   } // end IF
   else
@@ -311,11 +313,11 @@ allocate:
                                          ACE_Time_Value::max_time,
                                          NULL,
                                          NULL));
-  if (!message_block_p)
+  if (unlikely (!message_block_p))
   {
-    if (configuration_->streamConfiguration->configuration_.messageAllocator)
+    if (configuration_->messageAllocator)
     {
-      if (configuration_->streamConfiguration->configuration_.messageAllocator->block ())
+      if (configuration_->messageAllocator->block ())
         ACE_DEBUG ((LM_CRITICAL,
                     ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
     } // end IF

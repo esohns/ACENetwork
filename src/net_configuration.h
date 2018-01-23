@@ -29,7 +29,12 @@
 #include "ace/Log_Msg.h"
 #include "ace/Time_Value.h"
 
+#include "common_configuration.h"
+
 #include "common_timer_common.h"
+
+#include "stream_common.h"
+#include "stream_configuration.h"
 
 #include "net_common.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -42,14 +47,20 @@
 
 // forward declarations
 class Stream_IAllocator;
-struct Net_ConnectionConfiguration;
 struct Net_UserData;
-typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
-                                 ACE_INET_Addr,
-                                 struct Net_ConnectionConfiguration,
-                                 struct Net_ConnectionState,
-                                 Net_Statistic_t,
-                                 struct Net_UserData> Net_IInetConnectionManager_t;
+
+struct Net_AllocatorConfiguration
+ : Common_AllocatorConfiguration
+{
+  Net_AllocatorConfiguration ()
+   : Common_AllocatorConfiguration ()
+  {
+    defaultBufferSize = NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
+    // *NOTE*: this facilitates (message block) data buffers to be scanned with
+    //         'flex's yy_scan_buffer() method
+    paddingBytes = NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
+  };
+};
 
 struct Net_SocketConfigurationBase
 {
@@ -67,7 +78,7 @@ struct Net_SocketConfigurationBase
       Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
 #endif
   };
-  inline virtual ~Net_SocketConfigurationBase () {};
+  inline virtual ~Net_SocketConfigurationBase () {}
 
   int         bufferSize; // socket buffer size (I/O)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -205,6 +216,20 @@ struct Net_SocketHandlerConfiguration
 
 struct Stream_Configuration;
 class Common_ITimer;
+template <typename ConnectionConfigurationType, // derives from Net_ConnectionConfiguration
+          typename AllocatorConfigurationType,
+          typename StreamConfigurationType>
+class Net_StreamConnectionConfiguration_T;
+struct Net_ConnectionConfiguration;
+typedef Net_StreamConnectionConfiguration_T<struct Net_ConnectionConfiguration,
+                                            struct Net_AllocatorConfiguration,
+                                            struct Stream_Configuration> Net_ConnectionConfiguration_t;
+typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
+                                 ACE_INET_Addr,
+                                 Net_ConnectionConfiguration_t,
+                                 struct Net_ConnectionState,
+                                 Net_Statistic_t,
+                                 struct Net_UserData> Net_IInetConnectionManager_t;
 struct Net_ConnectionConfiguration
 {
   Net_ConnectionConfiguration ()
@@ -213,8 +238,8 @@ struct Net_ConnectionConfiguration
    , messageAllocator (NULL)
    , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , socketHandlerConfiguration ()
-   , streamConfiguration (NULL)
    , timerManager (NULL)
+   , useReactor (NET_EVENT_USE_REACTOR)
    , userData (NULL)
   {};
 
@@ -226,16 +251,38 @@ struct Net_ConnectionConfiguration
   //         stream buffers
   unsigned int                          PDUSize; // package data unit size
   struct Net_SocketHandlerConfiguration socketHandlerConfiguration;
-  struct Stream_Configuration*          streamConfiguration;
   Common_ITimer_t*                      timerManager;
+  bool                                  useReactor;
 
   struct Net_UserData*                  userData;
 };
 typedef std::map<std::string,
-                 struct Net_ConnectionConfiguration> Net_ConnectionConfigurations_t;
+                 Net_ConnectionConfiguration_t> Net_ConnectionConfigurations_t;
 typedef Net_ConnectionConfigurations_t::iterator Net_ConnectionConfigurationIterator_t;
 
-struct Common_ParserConfiguration;
+template <typename ConnectionConfigurationType, // derives from Net_ConnectionConfiguration
+          typename AllocatorConfigurationType,
+          typename StreamConfigurationType>
+class Net_StreamConnectionConfiguration_T
+ : public ConnectionConfigurationType
+{
+  typedef ConnectionConfigurationType inherited;
+
+ public:
+  Net_StreamConnectionConfiguration_T ();
+  inline virtual ~Net_StreamConnectionConfiguration_T () {}
+
+  bool initialize (const AllocatorConfigurationType&,
+                   const StreamConfigurationType&);
+
+  AllocatorConfigurationType allocatorConfiguration_;
+  StreamConfigurationType*   streamConfiguration_;
+  bool                       isInitialized_;
+};
+
+// include template definition
+#include "net_configuration.inl"
+
 struct Net_SessionConfiguration
 {
   Net_SessionConfiguration ()

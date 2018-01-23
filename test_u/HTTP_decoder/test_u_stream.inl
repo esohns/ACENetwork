@@ -17,15 +17,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-//#include "http_scanner.h"
 
 #include "ace/Log_Msg.h"
 
 #include "net_macros.h"
-
-#include "test_u_common_modules.h"
-//#include "test_u_connection_common.h"
-#include "test_u_session_message.h"
 
 template <typename TimerManagerType>
 Test_U_Stream_T<TimerManagerType>::Test_U_Stream_T ()
@@ -58,19 +53,19 @@ Test_U_Stream_T<TimerManagerType>::load (Stream_ModuleList_t& modules_out,
   Stream_Module_t* module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_FileWriter_Module (this,
-                                                   ACE_TEXT_ALWAYS_CHAR ("FileWriter")),
+                                                   ACE_TEXT_ALWAYS_CHAR (MODULE_FILE_SINK_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_StatisticReport_Module (this,
-                                                        ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
+                                                        ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_Module_Marshal_Module (this,
-                                                ACE_TEXT_ALWAYS_CHAR ("Marshal")),
+                                                ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_MARSHAL_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
@@ -82,7 +77,7 @@ Test_U_Stream_T<TimerManagerType>::load (Stream_ModuleList_t& modules_out,
   //module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   IO_MODULE_T (this,
-                               ACE_TEXT_ALWAYS_CHAR ("NetIO")),
+                               ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
 
@@ -175,13 +170,13 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
 
   // ******************* IO ************************
   module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("NetIO")));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
                 ACE_TEXT (stream_name_string_),
-                ACE_TEXT ("NetIO")));
+                ACE_TEXT (MODULE_NET_IO_DEFAULT_NAME_STRING)));
     goto error;
   } // end IF
   IOWriter_impl_p = dynamic_cast<WRITER_T*> (module_p->writer ());
@@ -242,79 +237,4 @@ error:
 //  } // end IF
 
   return result;
-}
-
-template <typename TimerManagerType>
-bool
-Test_U_Stream_T<TimerManagerType>::collect (Net_Statistic_t& data_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream_T::collect"));
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::sessionData_);
-
-  int result = -1;
-  typename inherited::MODULE_T* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (stream_name_string_),
-                ACE_TEXT ("StatisticReport")));
-    return false;
-  } // end IF
-  Test_U_Module_StatisticReport_WriterTask_t* statistic_report_impl_p =
-    dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
-  if (!statistic_report_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<Stream_Module_StatisticReport_WriterTask_T> failed, aborting\n"),
-                ACE_TEXT (stream_name_string_)));
-    return false;
-  } // end IF
-
-  // synch access
-  struct Test_U_HTTPDecoder_SessionData& session_data_r =
-      const_cast<struct Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->getR ());
-  if (session_data_r.lock)
-  {
-    result = session_data_r.lock->acquire ();
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", aborting\n"),
-                  ACE_TEXT (stream_name_string_)));
-      return false;
-    } // end IF
-  } // end IF
-
-  session_data_r.statistic.timeStamp = COMMON_TIME_NOW;
-
-  // delegate to the statistics module
-  bool result_2 = false;
-  try {
-    result_2 = statistic_report_impl_p->collect (data_out);
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: caught exception in Common_IStatistic_T::collect(), continuing\n"),
-                ACE_TEXT (stream_name_string_)));
-  }
-  if (!result)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: failed to Common_IStatistic_T::collect(), aborting\n"),
-                ACE_TEXT (stream_name_string_)));
-  else
-    session_data_r.statistic = data_out;
-
-  if (session_data_r.lock)
-  {
-    result = session_data_r.lock->release ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n"),
-                  ACE_TEXT (stream_name_string_)));
-  } // end IF
-
-  return result_2;
 }

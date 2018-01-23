@@ -22,17 +22,24 @@
 #define TEST_U_MESSAGE_H
 
 #include "ace/Global_Macros.h"
+#include "ace/Message_Block.h"
+
+#include "common_configuration.h"
+
+#include "stream_common.h"
+#include "stream_control_message.h"
 
 #include "http_message.h"
 
-#include "test_u_HTTP_decoder_common.h"
-#include "test_u_HTTP_decoder_stream_common.h"
+//#include "test_u_HTTP_decoder_common.h"
+//#include "test_u_HTTP_decoder_stream_common.h"
 
 // forward declaration(s)
 class ACE_Allocator;
-class ACE_Data_Block;
-class ACE_Message_Block;
 class Test_U_SessionMessage;
+typedef Stream_ControlMessage_T<enum Stream_ControlType,
+                                enum Stream_ControlMessageType,
+                                struct Common_FlexParserAllocatorConfiguration> Test_U_HTTPDecoder_ControlMessage_t;
 template <ACE_SYNCH_DECL,
           typename AllocatorConfigurationType,
           typename ControlMessageType,
@@ -45,24 +52,24 @@ template <ACE_SYNCH_DECL,
           typename SessionMessageType> class Stream_CachedMessageAllocator_T;
 
 class Test_U_Message
- : public HTTP_Message_T<struct Test_U_AllocatorConfiguration,
+ : public HTTP_Message_T<struct Common_FlexParserAllocatorConfiguration,
                          enum Stream_MessageType>
 {
   // grant access to specific private ctors
   friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
-                                                 struct Test_U_AllocatorConfiguration,
-                                                 Test_U_ControlMessage_t,
+                                                 struct Common_FlexParserAllocatorConfiguration,
+                                                 Test_U_HTTPDecoder_ControlMessage_t,
                                                  Test_U_Message,
                                                  Test_U_SessionMessage>;
   friend class Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
-                                               struct Test_U_AllocatorConfiguration,
-                                               Test_U_ControlMessage_t,
+                                               struct Common_FlexParserAllocatorConfiguration,
+                                               Test_U_HTTPDecoder_ControlMessage_t,
                                                Test_U_Message,
                                                Test_U_SessionMessage>;
 
  public:
   Test_U_Message (unsigned int); // size
-  inline virtual ~Test_U_Message () {};
+  inline virtual ~Test_U_Message () {}
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
@@ -79,7 +86,7 @@ class Test_U_Message
  private:
 //  typedef Stream_DataMessageBase_T<xmlDoc,
 //                                   Stream_CommandType_t> inherited;
-  typedef HTTP_Message_T<struct Test_U_AllocatorConfiguration,
+  typedef HTTP_Message_T<struct Common_FlexParserAllocatorConfiguration,
                          enum Stream_MessageType> inherited;
 
   ACE_UNIMPLEMENTED_FUNC (Test_U_Message ())

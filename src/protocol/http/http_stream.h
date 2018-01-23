@@ -21,15 +21,13 @@
 #ifndef HTTP_STREAM_H
 #define HTTP_STREAM_H
 
-#include <string>
-
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
 #include "common_time_common.h"
 
 #include "stream_common.h"
-#include "stream_inotify.h"
+//#include "stream_inotify.h"
 #include "stream_statemachine_control.h"
 #include "stream_streammodule_base.h"
 
@@ -46,8 +44,6 @@
 #include "http_stream_common.h"
 
 // forward declarations
-typedef Stream_INotify_T<enum Stream_SessionMessageType> HTTP_Stream_INotify_t;
-
 extern HTTP_Export const char libacenetwork_default_http_marshal_module_name_string[];
 extern HTTP_Export const char libacenetwork_default_http_stream_name_string[];
 
@@ -58,6 +54,7 @@ template <typename StreamStateType,
           typename StatisticContainerType,
           typename TimerManagerType, // implements Common_ITimer
           ////////////////////////////////
+          typename AllocatorConfigurationType,
           typename ModuleHandlerConfigurationType,
           ////////////////////////////////
           typename SessionDataType,
@@ -80,7 +77,7 @@ class HTTP_Stream_T
                                         ConfigurationType,
                                         StatisticContainerType,
                                         TimerManagerType,
-                                        struct HTTP_AllocatorConfiguration,
+                                        AllocatorConfigurationType,
                                         struct Stream_ModuleConfiguration,
                                         ModuleHandlerConfigurationType,
                                         SessionDataType,
@@ -102,7 +99,7 @@ class HTTP_Stream_T
                                         ConfigurationType,
                                         StatisticContainerType,
                                         TimerManagerType,
-                                        struct HTTP_AllocatorConfiguration,
+                                        AllocatorConfigurationType,
                                         struct Stream_ModuleConfiguration,
                                         ModuleHandlerConfigurationType,
                                         SessionDataType,
@@ -116,7 +113,7 @@ class HTTP_Stream_T
 
  public:
   HTTP_Stream_T ();
-  inline virtual ~HTTP_Stream_T () { inherited::shutdown (); };
+  inline virtual ~HTTP_Stream_T () { inherited::shutdown (); }
 
   // implement (part of) Stream_IStreamControlBase
   virtual bool load (Stream_ModuleList_t&, // return value: module list
@@ -130,11 +127,8 @@ class HTTP_Stream_T
 #endif
                            ACE_HANDLE);
 
-  // implement Common_IStatistic_T
-  // *NOTE*: delegate this to rntimeStatistic_
-  virtual bool collect (StatisticContainerType&); // return value: statistic data
-  // just a dummy (set statisticReportingInterval instead)
-  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  // override (part of) Common_IStatistic_T
+  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   typedef HTTP_Module_Streamer_T<ACE_MT_SYNCH,
@@ -165,7 +159,7 @@ class HTTP_Stream_T
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
                                 libacenetwork_default_http_marshal_module_name_string,
-                                HTTP_Stream_INotify_t,
+                                Stream_INotify_t,
                                 STREAMER_T,
                                 PARSER_T> MODULE_MARSHAL_T;
 
@@ -199,7 +193,7 @@ class HTTP_Stream_T
                                 struct Stream_ModuleConfiguration,
                                 ModuleHandlerConfigurationType,
                                 libacestream_default_stat_report_module_name_string,
-                                HTTP_Stream_INotify_t,
+                                Stream_INotify_t,
                                 STATISTIC_READER_T,
                                 STATISTIC_WRITER_T> MODULE_STATISTIC_T;
 

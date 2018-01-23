@@ -19,6 +19,8 @@
  ***************************************************************************/
 #include "stdafx.h"
 
+#include <sstream>
+
 #include "ace/Synch.h"
 #include "IRC_client_tools.h"
 
@@ -31,8 +33,9 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
-#include "IRC_client_configuration.h"
+#include "IRC_client_common.h"
 #include "IRC_client_defines.h"
+#include "IRC_client_stream_common.h"
 
 void
 IRC_Client_Tools::parseConfigurationFile (const std::string& fileName_in,
@@ -234,7 +237,7 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   ACE_HANDLE return_value = ACE_INVALID_HANDLE;
 
 //  int result = -1;
-  struct IRC_Client_ConnectionConfiguration* configuration_p = NULL;
+  IRC_Client_ConnectionConfiguration_t* configuration_p = NULL;
   struct IRC_Client_UserData* user_data_p = NULL;
 
   // step0: retrive default configuration
@@ -247,7 +250,7 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
   // *TODO*: remove type inferences
   ACE_ASSERT (configuration_p);
   ACE_ASSERT (configuration_p->protocolConfiguration);
-  ACE_ASSERT (configuration_p->streamConfiguration);
+  ACE_ASSERT (configuration_p->streamConfiguration_);
 
   // step1: set up configuration
   configuration_p->protocolConfiguration->loginOptions =
@@ -256,11 +259,11 @@ IRC_Client_Tools::connect (IRC_Client_IConnector_t& connector_in,
       peerAddress_in;
   if (finalModule_inout)
   {
-    configuration_p->streamConfiguration->configuration_.cloneModule =
+    configuration_p->streamConfiguration_->configuration_.cloneModule =
       cloneModule_in;
-    configuration_p->streamConfiguration->configuration_.deleteModule =
+    configuration_p->streamConfiguration_->configuration_.deleteModule =
       deleteModule_in;
-    configuration_p->streamConfiguration->configuration_.module =
+    configuration_p->streamConfiguration_->configuration_.module =
       finalModule_inout;
     if (deleteModule_in)
       finalModule_inout = NULL;
