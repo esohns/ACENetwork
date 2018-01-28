@@ -20,6 +20,8 @@
 
 #include "ace/Log_Msg.h"
 
+#include "common_macros.h"
+
 #include "net_common_tools.h"
 #include "net_macros.h"
 
@@ -127,10 +129,10 @@ Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
 #else
-  if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
+  if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
 #endif
-                                               inherited::localSAP_,
-                                               inherited::peerSAP_))
+                                                         inherited::localSAP_,
+                                                         inherited::peerSAP_)))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
@@ -158,7 +160,8 @@ Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
   { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_);
     iterator =
       inherited::SSIDsToInterfaceIdentifier_.find (inherited::configuration_->SSID);
-    ACE_ASSERT (iterator != inherited::SSIDsToInterfaceIdentifier_.end ());
+    if (unlikely (iterator == inherited::SSIDsToInterfaceIdentifier_.end ()))
+      goto continue_; // *NOTE*: nost probable reason: not scanned yet (connected on start ?)
     struct ether_addr ether_addr_s =
         Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in);
     ACE_DEBUG ((LM_DEBUG,
@@ -171,5 +174,7 @@ Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
   } // end lock scope
 #endif
+continue_:
+  ;
 #endif // _DEBUG
 }

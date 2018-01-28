@@ -92,8 +92,8 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
  , isActive_ (false)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
  , isConnectionNotified_ (false)
- , isFirstConnect_ (true)
 #endif
+ , isFirstConnect_ (true)
  , isInitialized_ (false)
  , localSAP_ ()
  , peerSAP_ ()
@@ -292,13 +292,21 @@ continue_:
   } // end IF
 
   // monitor the interface in a dedicated thread
-  inherited::open (NULL);
-  ACE_Time_Value timeout (0, COMMON_TIMEOUT_DEFAULT_THREAD_SPAWN * 1000);
-  result = ACE_OS::sleep (timeout);
+  ACE_Time_Value deadline =
+      (COMMON_TIME_NOW +
+       ACE_Time_Value (0, COMMON_TIMEOUT_DEFAULT_THREAD_SPAWN * 1000));
+  result = inherited::open (NULL);
   if (unlikely (result == -1))
+  {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
-                &timeout));
+                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", returning\n")));
+    return;
+  } // end IF
+  do
+  { // *NOTE*: the livelock here
+    if (COMMON_TIME_NOW > deadline)
+      break;
+  } while (!inherited::isRunning ());
   if (unlikely (!inherited::isRunning ()))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -426,8 +434,8 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
     ACE_ASSERT (!isActive_);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     isConnectionNotified_ = false;
-    isFirstConnect_ = true;
 #endif
+    isFirstConnect_ = true;
     localSAP_.reset ();
     peerSAP_.reset ();
 
@@ -949,10 +957,9 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
       std::string SSID_string = SSID ();
       if (!SSID_string.empty ()) // connected
       {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
         if (!isFirstConnect_)
           goto continue_;
-
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
         // sanity check(s)
         ACE_ASSERT (configuration_);
 
@@ -966,9 +973,12 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
                       ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ()),
                       ACE_TEXT (SSID_string.c_str ())));
         }
-continue_:
 #else
         inherited2::change (NET_WLAN_MONITOR_STATE_CONNECTED);
+        break;
+
+continue_:
+        inherited2::change (NET_WLAN_MONITOR_STATE_SCAN);
 #endif // ACE_WIN32 || ACE_WIN64
         break;
       } // end IF
@@ -1296,13 +1306,13 @@ scanned:
       //ACE_ASSERT (!ACE_OS::strcmp (configuration_->SSID.c_str (),
       //                             SSID_string.c_str ()));
 #else
-      bool result = false;
+//      bool result = false;
       ACE_Time_Value result_poll_interval (0,
                                            NET_WLAN_MONITOR_ASSOCIATION_DEFAULT_RESULT_POLL_INTERVAL * 1000);
       ACE_Time_Value result_timeout (NET_WLAN_MONITOR_ASSOCIATION_DEFAULT_TIMEOUT,
                                      0);
       ACE_Time_Value deadline;
-      bool shutdown = false;
+//      bool shutdown = false;
 #if defined (DHCLIENT_SUPPORT)
       // sanity check(s)
       ACE_ASSERT (Common_Tools::getProcessId (ACE_TEXT_ALWAYS_CHAR ("dhclient")));
@@ -1622,10 +1632,14 @@ connected:
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 continue_2:
-      if (scanTimerId_ == -1)
-        startScanTimer ();
+#endif
       if (unlikely (isFirstConnect_))
         isFirstConnect_ = false;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if (unlikely (scanTimerId_ == -1))
+        startScanTimer ();
+#else
+      inherited2::change (NET_WLAN_MONITOR_STATE_IDLE);
 #endif
       break;
     }

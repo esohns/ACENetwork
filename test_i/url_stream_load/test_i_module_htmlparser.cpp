@@ -517,11 +517,11 @@ endElement (void* userData_in,
   ACE_ASSERT (data_p->URL.empty ());
 
   bool done = true;
-  std::string regex_string;
-  std::regex::flag_type flags = std::regex_constants::ECMAScript;
-  std::regex regex;
-  std::smatch match_results;
-  std::istringstream converter;
+//  std::string regex_string;
+//  std::regex::flag_type flags = std::regex_constants::ECMAScript;
+//  std::regex regex;
+//  std::smatch match_results;
+//  std::istringstream converter;
 
   switch (data_p->state)
   {
@@ -778,28 +778,23 @@ endElement (void* userData_in,
   data_p->accumulate = false;
   data_p->characters.clear ();
 
-  if (done) return;
+  if (done)
+    return;
 
   if (xmlStrEqual (name_in,
                    BAD_CAST (ACE_TEXT_ALWAYS_CHAR ("html"))))
-  {
-    // sanity check(s)
+  { // sanity check(s)
     ACE_ASSERT (data_p->state == TEST_I_SAXPARSER_STATE_IN_HTML);
-
     data_p->state = TEST_I_SAXPARSER_STATE_INVALID;
-
     return;
   } // end IF
 
   // ------------------------------- head --------------------------------------
   if (xmlStrEqual (name_in,
                    BAD_CAST (ACE_TEXT_ALWAYS_CHAR ("head"))))
-  {
-    // sanity check(s)
+  { // sanity check(s)
     ACE_ASSERT (data_p->state == TEST_I_SAXPARSER_STATE_IN_HEAD);
-
     data_p->state = TEST_I_SAXPARSER_STATE_IN_HTML;
-
     return;
   } // end IF
 
@@ -808,7 +803,6 @@ endElement (void* userData_in,
                    BAD_CAST (ACE_TEXT_ALWAYS_CHAR ("body"))))
   {
     data_p->state = TEST_I_SAXPARSER_STATE_IN_HTML;
-
     return;
   } // end IF
 }

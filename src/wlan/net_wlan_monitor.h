@@ -223,8 +223,8 @@ class Net_WLAN_Monitor_T
   bool                                            isActive_;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   bool                                            isConnectionNotified_;
-  bool                                            isFirstConnect_;
 #endif
+  bool                                            isFirstConnect_;
   bool                                            isInitialized_;
   AddressType                                     localSAP_;
   AddressType                                     peerSAP_;
