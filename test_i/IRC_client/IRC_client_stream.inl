@@ -20,7 +20,14 @@
 
 #include "ace/Log_Msg.h"
 
+#include "stream_stat_defines.h"
+
 #include "net_macros.h"
+
+#include "irc_defines.h"
+
+#include "IRC_client_common_modules.h"
+#include "IRC_client_module_IRChandler.h"
 
 template <typename TimerManagerType>
 IRC_Client_Stream_T<TimerManagerType>::IRC_Client_Stream_T ()

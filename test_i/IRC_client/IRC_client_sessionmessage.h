@@ -23,15 +23,21 @@
 
 #include "ace/Global_Macros.h"
 
+#include "stream_common.h"
+#include "stream_session_data.h"
+
 #include "irc_sessionmessage.h"
 
-#include "IRC_client_common.h"
-#include "IRC_client_stream_common.h"
+//#include "IRC_client_common.h"
+//#include "IRC_client_stream_common.h"
 
 // forward declarations
 class ACE_Allocator;
 class ACE_Data_Block;
 class ACE_Message_Block;
+struct IRC_Client_SessionData;
+typedef Stream_SessionData_T<struct IRC_Client_SessionData> IRC_Client_SessionData_t;
+struct IRC_Client_UserData;
 
 class IRC_Client_SessionMessage
  : public IRC_SessionMessage_T<IRC_Client_SessionData_t,
@@ -53,7 +59,7 @@ class IRC_Client_SessionMessage
   IRC_Client_SessionMessage (Stream_SessionId_t,
                              ACE_Data_Block*, // data block to use
                              ACE_Allocator*); // message allocator
-  inline virtual ~IRC_Client_SessionMessage () {};
+  inline virtual ~IRC_Client_SessionMessage () {}
 
   // override from ACE_Message_Block
   // *WARNING*: any children need to override this as well

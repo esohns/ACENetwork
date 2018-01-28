@@ -527,7 +527,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
         const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
       // step2: set up a (UDP) connection ?
-      int result = -1;
+//      int result = -1;
       ConnectionManagerType* connection_manager_p =
         ConnectionManagerType::SINGLETON_T::instance ();
       ACE_ASSERT (connection_manager_p);

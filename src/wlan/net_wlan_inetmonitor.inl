@@ -154,16 +154,18 @@ Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
 #else
-  SSIDS_TO_INTERFACEIDENTIFIER_MAP_CONST_ITERATOR_T iterator;
-  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, subscribersLock_);
+  typename inherited::SSIDS_TO_INTERFACEIDENTIFIER_MAP_CONST_ITERATOR_T iterator;
+  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_);
     iterator =
-      inherited::SSIDsToInterfaceIdentifier_.find (configuration_->SSID);
+      inherited::SSIDsToInterfaceIdentifier_.find (inherited::configuration_->SSID);
     ACE_ASSERT (iterator != inherited::SSIDsToInterfaceIdentifier_.end ());
+    struct ether_addr ether_addr_s =
+        Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("\"%s\": (MAC: %s) connected to %s (SSID: %s): %s <---> %s\n"),
                 ACE_TEXT (interfaceIdentifier_in.c_str ()),
-                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in)), NET_LINKLAYER_802_11).c_str ()),
-                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&(*iterator).second.second), NET_LINKLAYER_802_3).c_str ()),
+                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s), NET_LINKLAYER_802_11).c_str ()),
+                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&(*iterator).second.second), NET_LINKLAYER_802_11).c_str ()),
                 ACE_TEXT (SSID_in.c_str ()),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));

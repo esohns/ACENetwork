@@ -26,15 +26,20 @@
 #include "common_time_common.h"
 #include "common_timer_manager_common.h"
 
+#include "stream_common.h"
 #include "stream_stat_statistic_report.h"
 
 #include "irc_common.h"
 #include "irc_message.h"
 #include "irc_module_bisector.h"
-#include "irc_stream_common.h"
+#include "irc_module_parser.h"
+#include "irc_module_streamer.h"
+#include "irc_record.h"
+//#include "irc_stream_common.h"
 
-#include "IRC_client_configuration.h"
-#include "IRC_client_sessionmessage.h"
+//#include "IRC_client_configuration.h"
+//#include "IRC_client_sessionmessage.h"
+//#include "IRC_client_stream.h"
 #include "IRC_client_stream_common.h"
 
 // forward declarations

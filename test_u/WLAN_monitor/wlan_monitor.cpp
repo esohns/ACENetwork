@@ -408,8 +408,10 @@ do_work (bool autoAssociate_in,
 
   timer_manager_p = COMMON_TIMERMANAGER_SINGLETON::instance ();
   ACE_ASSERT (timer_manager_p);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   configuration.WLANMonitorConfiguration.timerInterface =
     timer_manager_p;
+#endif
   iwlanmonitor_p = NET_WLAN_INETMONITOR_SINGLETON::instance ();
   ACE_ASSERT (iwlanmonitor_p);
 

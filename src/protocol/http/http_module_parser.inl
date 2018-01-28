@@ -366,6 +366,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   ACE_ASSERT (!record_inout);
   data_container_2 = data_container_p;
   headFragment_->initialize (data_container_2,
+                             headFragment_->id (),
                              NULL);
 
   // make sure the whole fragment chain references the same data record

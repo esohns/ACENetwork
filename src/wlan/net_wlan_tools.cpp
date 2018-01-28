@@ -1063,8 +1063,8 @@ Net_WLAN_Tools::associate (const std::string& interfaceIdentifier_in,
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::associate"));
 
   // sanity check(s)
-  bool release_handle = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  bool release_handle = false;
   HANDLE client_handle = clientHandle_in;
   if (unlikely (client_handle == ACE_INVALID_HANDLE))
   {
@@ -1921,7 +1921,7 @@ Net_WLAN_Tools::getSSIDs (const std::string& interfaceIdentifier_in,
   if (unlikely (InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL)))
     interface_identifiers_a = Net_WLAN_Tools::getInterfaces (clientHandle_in);
 #else
-  if (unlikely (interfaceIdentifier_in.empty ())))
+  if (unlikely (interfaceIdentifier_in.empty ()))
     interface_identifiers_a = Net_WLAN_Tools::getInterfaces ();
 #endif
   else

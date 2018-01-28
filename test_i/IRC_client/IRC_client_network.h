@@ -33,15 +33,21 @@
 
 #include "stream_configuration.h"
 
+#include "net_asynch_tcpsockethandler.h"
+#include "net_configuration.h"
+#include "net_connection_manager.h"
+#include "net_tcpconnection_base.h"
+#include "net_tcpsockethandler.h"
+
+#include "net_client_asynchconnector.h"
+#include "net_client_connector.h"
+
 #include "irc_common.h"
 #include "irc_network.h"
 
-//#include "IRC_client_common.h"
-//#include "IRC_client_configuration.h"
 #include "IRC_client_defines.h"
-//#include "IRC_client_curses.h"
-//#include "IRC_client_stream.h"
-//#include "IRC_client_stream_common.h"
+#include "IRC_client_stream.h"
+#include "IRC_client_stream_common.h"
 
 //////////////////////////////////////////
 
@@ -139,12 +145,6 @@ typedef IRC_Client_ConnectionConfigurations_t::iterator IRC_Client_ConnectionCon
 
 //////////////////////////////////////////
 
-template <typename TimerManagerType> // implements Common_ITimer
-class IRC_Client_Stream_T;
-typedef IRC_Client_Stream_T<Common_Timer_Manager_t> IRC_Client_Stream_t;
-
-//////////////////////////////////////////
-
 typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
                                ACE_SOCK_STREAM,
                                struct IRC_Client_SocketHandlerConfiguration> IRC_Client_TCPSocketHandler_t;
@@ -225,7 +225,6 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  struct IRC_Client_SessionState,
                                  IRC_Statistic_t,
                                  struct IRC_Client_UserData> IRC_Client_Connection_Manager_t;
-
 typedef ACE_Singleton<IRC_Client_Connection_Manager_t,
                       ACE_SYNCH_MUTEX> IRC_CLIENT_CONNECTIONMANAGER_SINGLETON;
 

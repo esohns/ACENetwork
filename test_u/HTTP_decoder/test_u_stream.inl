@@ -20,7 +20,17 @@
 
 #include "ace/Log_Msg.h"
 
+#include "stream_file_defines.h"
+
+#include "stream_net_defines.h"
+
+#include "stream_stat_defines.h"
+
 #include "net_macros.h"
+
+#include "http_defines.h"
+
+#include "test_u_common_modules.h"
 
 template <typename TimerManagerType>
 Test_U_Stream_T<TimerManagerType>::Test_U_Stream_T ()

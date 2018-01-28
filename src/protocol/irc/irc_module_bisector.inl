@@ -501,7 +501,7 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
       ACE_ASSERT (inherited::streamState_->sessionData);
       ACE_ASSERT (inherited::streamState_->sessionData->lock);
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *(inherited::streamState_->sessionData->lock));
-        inherited::streamState_->currentSessionData->sessionId =
+        inherited::streamState_->sessionData->sessionId =
           session_data_r.sessionId;
       } // end lock scope
 

@@ -1,3 +1,5 @@
+option (SSL_SUPPORT "enable SSL support" OFF)
+
 if (UNIX)
  include (CheckLibraryExists)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
@@ -34,29 +36,31 @@ if (NOT ACE_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
 endif ()
 
-set (ACE_SSL_LIB_FILE libACE_SSL.so)
-if (UNIX)
- find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
-               HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib
-               DOC "searching for ${ACE_SSL_LIB_FILE}"
-               NO_DEFAULT_PATH)
-elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
+if (SSL_SUPPORT)
+ set (ACE_SSL_LIB_FILE libACE_SSL.so)
+ if (UNIX)
+  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
+                HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE
+                PATHS ENV ACE_ROOT
+                PATH_SUFFIXES lib
+                DOC "searching for ${ACE_SSL_LIB_FILE}"
+                NO_DEFAULT_PATH)
+ elseif (WIN32)
+  if (CMAKE_BUILD_TYPE STREQUAL Debug)
+   set (LIB_FILE_SUFFIX d)
+  endif ()
+  unset (ACE_SSL_LIB_FILE)
+  set (ACE_SSL_LIB_FILE ACE_SSL${LIB_FILE_SUFFIX}.lib)
+  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
+                PATHS ENV ACE_ROOT
+                PATH_SUFFIXES lib
+                DOC "searching for ${ACE_SSL_LIB_FILE}"
+                NO_DEFAULT_PATH)
  endif ()
- unset (ACE_SSL_LIB_FILE)
- set (ACE_SSL_LIB_FILE ACE_SSL${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib
-               DOC "searching for ${ACE_SSL_LIB_FILE}"
-               NO_DEFAULT_PATH)
-endif ()
-#if (NOT EXISTS ACE_LIBRARY)
-if (NOT ACE_SSL_LIBRARY)
- message (FATAL_ERROR "could not find ${ACE_SSL_LIB_FILE} (was: \"${ACE_SSL_LIBRARY}\"), aborting")
+ #if (NOT EXISTS ACE_LIBRARY)
+ if (NOT ACE_SSL_LIBRARY)
+  message (FATAL_ERROR "could not find ${ACE_SSL_LIB_FILE} (was: \"${ACE_SSL_LIBRARY}\"), aborting")
+ endif ()
 endif ()
 
 set (ACE_XML_LIB_FILE libACEXML.so)
@@ -113,8 +117,13 @@ if (UNIX)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
 # *NOTE*: libCommon requires libcap
  pkg_check_modules (PKG_CAP REQUIRED libcap)
- pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
- pkg_check_modules (PKG_OPENSSL REQUIRED openssl)
+ if (SSL_SUPPORT)
+  pkg_check_modules (PKG_OPENSSL REQUIRED openssl)
+ endif ()
+ if (DBUS_SUPPORT)
+  pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
+ endif ()
+ pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libswscale libavutil)
 endif ()
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
@@ -154,13 +163,19 @@ endif ()
 add_definitions (-DNET_HAS_DLL)
 add_definitions (-DHTTP_HAS_DLL)
 
+if (SSL_SUPPORT)
+ add_definitions (-DSSL_SUPPORT)
+endif ()
 add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
 if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
- include_directories (${PKG_DBUS_INCLUDE_DIRS})
+ if (DBUS_SUPPORT)
+  include_directories (${PKG_DBUS_INCLUDE_DIRS})
+ endif ()
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/timer)
 
@@ -173,7 +188,9 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/net)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/stat)
 elseif (WIN32)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
+ if (SSL_SUPPORT)
+  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
+ endif ()
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
@@ -248,22 +265,29 @@ if (UNIX)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
  #target_link_libraries (${EXECUTABLE} ${PKG_DBUS_LIBRARIES})
  target_link_libraries (${EXECUTABLE} iw)
- target_link_libraries (${EXECUTABLE} ${PKG_OPENSSL_LIBRARIES})
+ if (SSL_SUPPORT)
+  target_link_libraries (${EXECUTABLE} ${PKG_OPENSSL_LIBRARIES})
+ endif ()
+ target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})
 elseif (WIN32)
 # *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
  target_link_libraries (${EXECUTABLE} ntdll.lib)
+
+ if (SSL_SUPPORT)
+  #target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/libeay32.lib)
+  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/ssleay32.lib)
+ endif ()
 
  target_link_libraries (${EXECUTABLE} ${ACE_XML_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${ACE_XML_PARSER_LIBRARY})
 
  target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 endif ()
-#target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/libeay32.lib)
-target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/ssleay32.lib)
-
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
-target_link_libraries (${EXECUTABLE} ${ACE_SSL_LIBRARY})
+if (SSL_SUPPORT)
+ target_link_libraries (${EXECUTABLE} ${ACE_SSL_LIBRARY})
+endif ()
 
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} CommonTimer)

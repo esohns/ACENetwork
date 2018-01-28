@@ -39,6 +39,8 @@ if (UNIX)
  endif ()
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE)
 
+ include_directories (${PKG_GTK_INCLUDE_DIRS})
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/timer)
  if (GTK_SUPPORT)

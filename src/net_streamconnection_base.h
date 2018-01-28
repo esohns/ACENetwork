@@ -118,7 +118,7 @@ class Net_StreamConnectionBase_T
   //inline virtual unsigned int increase () { return CONNECTION_BASE_T::REFERENCECOUNTER_T::increase (); };
   //inline virtual unsigned int decrease () { return CONNECTION_BASE_T::REFERENCECOUNTER_T::decrease (); };
   inline virtual bool collect (StatisticContainerType& statistic_out) { return stream_.collect (statistic_out); }
-  inline virtual void report () const { return stream_.report (); }
+  inline virtual void report () const { stream_.report (); }
   //using CONNECTION_BASE_T::getR;
   virtual void dump_state () const;
   virtual void info (ACE_HANDLE&,

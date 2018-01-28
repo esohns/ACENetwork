@@ -53,7 +53,7 @@ class Test_I_Stream_T
                         enum Stream_StateMachine_ControlState,
                         struct Test_I_StreamState,
                         struct Test_I_StreamConfiguration,
-                        Test_I_RuntimeStatistic_t,
+                        Test_I_Statistic_t,
                         struct Test_I_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_I_StreamModuleHandlerConfiguration,
@@ -71,7 +71,7 @@ class Test_I_Stream_T
                         enum Stream_StateMachine_ControlState,
                         struct Test_I_StreamState,
                         struct Test_I_StreamConfiguration,
-                        Test_I_RuntimeStatistic_t,
+                        Test_I_Statistic_t,
                         struct Test_I_AllocatorConfiguration,
                         struct Stream_ModuleConfiguration,
                         struct Test_I_StreamModuleHandlerConfiguration,
@@ -90,11 +90,6 @@ class Test_I_Stream_T
 
   // *TODO*: re-consider this API
   void ping ();
-
-  // implement Common_IStatistic_T
-  // *NOTE*: these delegate to runtimeStatistic_
-  virtual bool collect (Test_U_RuntimeStatistic_t&); // return value: statistic data
-  virtual void report () const;
 
  private:
   typedef Stream_Module_Net_Target_T<ACE_MT_SYNCH,

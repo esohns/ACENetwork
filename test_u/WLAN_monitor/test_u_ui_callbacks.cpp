@@ -1597,8 +1597,13 @@ togglebutton_backgroundscan_toggled_cb (GtkToggleButton* toggleButton_in,
 
   // update configuration
   data_p->configuration->WLANMonitorConfiguration.enableBackgroundScans =
-    gtk_toggle_button_get_active (toggleButton_in);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    (gtk_toggle_button_get_active (toggleButton_in) ? TRUE : FALSE);
+#else
+      gtk_toggle_button_get_active (toggleButton_in);
+#endif
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
     NET_WLAN_INETMONITOR_SINGLETON::instance ();
   // sanity check(s)
@@ -1610,6 +1615,7 @@ togglebutton_backgroundscan_toggled_cb (GtkToggleButton* toggleButton_in,
                                         data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
                                         wlan_intf_opcode_background_scan_enabled,
                                         data_p->configuration->WLANMonitorConfiguration.enableBackgroundScans);
+#endif
 }
 
 void

@@ -1,5 +1,5 @@
-option (GTK3_SUPPORT "enable Gtk3 support"
-        ON)
+option (SSL_SUPPORT "enable SSL support" OFF)
+option (GTK3_SUPPORT "enable Gtk3 support" ON)
 
 if (UNIX)
  include (CheckLibraryExists)
@@ -33,29 +33,32 @@ endif ()
 if (NOT ACE_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
 endif ()
-set (ACE_SSL_LIB_FILE libACE_SSL.so)
-if (UNIX)
- find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
-               HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib
-               DOC "searching for ${ACE_SSL_LIB_FILE}"
-               NO_DEFAULT_PATH)
-elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
+
+if (SSL_SUPPORT)
+ set (ACE_SSL_LIB_FILE libACE_SSL.so)
+ if (UNIX)
+  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
+                HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE
+                PATHS ENV ACE_ROOT
+                PATH_SUFFIXES lib
+                DOC "searching for ${ACE_SSL_LIB_FILE}"
+                NO_DEFAULT_PATH)
+ elseif (WIN32)
+  if (CMAKE_BUILD_TYPE STREQUAL Debug)
+   set (LIB_FILE_SUFFIX d)
+  endif ()
+  unset (ACE_SSL_LIB_FILE)
+  set (ACE_SSL_LIB_FILE ACE_SSL${LIB_FILE_SUFFIX}.lib)
+  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
+                PATHS ENV ACE_ROOT
+                PATH_SUFFIXES lib
+                DOC "searching for ${ACE_SSL_LIB_FILE}"
+                NO_DEFAULT_PATH)
  endif ()
- unset (ACE_SSL_LIB_FILE)
- set (ACE_SSL_LIB_FILE ACE_SSL${LIB_FILE_SUFFIX}.lib)
- find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib
-               DOC "searching for ${ACE_SSL_LIB_FILE}"
-               NO_DEFAULT_PATH)
-endif ()
-#if (NOT EXISTS ACE_LIBRARY)
-if (NOT ACE_SSL_LIBRARY)
- message (FATAL_ERROR "could not find ${ACE_SSL_LIB_FILE} (was: \"${ACE_SSL_LIBRARY}\"), aborting")
+ #if (NOT EXISTS ACE_LIBRARY)
+ if (NOT ACE_SSL_LIBRARY)
+  message (FATAL_ERROR "could not find ${ACE_SSL_LIB_FILE} (was: \"${ACE_SSL_LIBRARY}\"), aborting")
+ endif ()
 endif ()
 
 include (FindPkgConfig)
@@ -63,10 +66,13 @@ include (FindPkgConfig)
 if (UNIX)
 # *NOTE*: libCommon requires libcap
  pkg_check_modules (PKG_CAP REQUIRED libcap)
+ if (SSL_SUPPORT)
+  pkg_check_modules (PKG_OPENSSL REQUIRED openssl)
+ endif ()
  #pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
- pkg_check_modules (PKG_OPENSSL REQUIRED openssl)
  pkg_check_modules (PKG_LIBXML2 REQUIRED libxml-2.0)
 # pkg_check_modules (PKG_CURSES REQUIRED ncurses panel)
+ pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libavformat libswscale)
  if (GTK3_SUPPORT)
   pkg_check_modules (PKG_GTK3 REQUIRED gtk+-3.0)
  else ()
@@ -169,11 +175,13 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/net)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/stat)
 elseif (WIN32)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
+ if (SSL_SUPPORT)
+  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
+ endif ()
  include_directories ("$ENV{PROGRAMFILES}/Microsoft SDKs/Windows/v7.0/Samples/multimedia/directshow/baseclasses")
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libiconv-1.9.2-1/include)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libxml2-2.9.4/include)
 
@@ -223,6 +231,10 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/client_server)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../src/protocol/http)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
+
+if (SSL_SUPPORT)
+ add_definitions (-DSSL_SUPPORT)
+endif ()
 
 ############## next target ################
 set (${PROJECT_NAME}_URLStreamLoad_EXE_SRCS
@@ -287,7 +299,9 @@ if (WIN32)
  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/ssleay32.lib)
 endif ()
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
-target_link_libraries (${EXECUTABLE} ${ACE_SSL_LIBRARY})
+if (SSL_SUPPORT)
+ target_link_libraries (${EXECUTABLE} ${ACE_SSL_LIBRARY})
+endif ()
 if (UNIX)
  target_link_libraries (${EXECUTABLE} rt)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
@@ -297,6 +311,9 @@ if (UNIX)
  target_link_libraries (${EXECUTABLE} ${PKG_LIBXML2_LIBRARIES})
  target_link_libraries (${EXECUTABLE} X11)
 # target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
+
+ target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})
+
  if (GTK3_SUPPORT)
   target_link_libraries (${EXECUTABLE} ${PKG_GTK3_LIBRARIES})
  else ()

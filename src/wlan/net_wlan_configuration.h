@@ -49,20 +49,25 @@
 #include "net_wlan_imonitor.h"
 #include "net_wlan_inetmonitor.h"
 
-struct Net_WLAN_MonitorConfiguration
+struct  Net_WLAN_MonitorConfiguration
 {
   Net_WLAN_MonitorConfiguration ()
    : autoAssociate (false)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-   , enableAutoConf (NET_WLAN_MONITOR_WIN32_DEFAULT_AUTOCONF ? TRUE : FALSE)
    , enableBackgroundScans (NET_WLAN_MONITOR_WIN32_DEFAULT_BACKGROUNDSCANS ? TRUE : FALSE)
+   , enableAutoConf (NET_WLAN_MONITOR_WIN32_DEFAULT_AUTOCONF ? TRUE : FALSE)
    , enableMediaStreamingMode (NET_WLAN_MONITOR_WIN32_DEFAULT_MEDIASTREAMINGMODE ? TRUE : FALSE)
    , interfaceIdentifier (GUID_NULL)
    , notificationCB (NULL)
    , notificationCBData (NULL)
    , timerInterface (NULL)
 #else
+   , enableBackgroundScans (NET_WLAN_MONITOR_UNIX_DEFAULT_BACKGROUNDSCANS)
    , interfaceIdentifier ()
+#if defined (DBUS_SUPPORT)
+   , notificationCB (NULL)
+   , notificationCBData (NULL)
+#endif
 #endif
    , SSID ()
    , subscriber (NULL)
@@ -88,9 +93,12 @@ struct Net_WLAN_MonitorConfiguration
   PVOID                      notificationCBData;
   Common_ITimer_t*           timerInterface;
 #else
+  bool                       enableBackgroundScans;
   std::string                interfaceIdentifier;
+#if defined (DBUS_SUPPORT)
   DBusHandleMessageFunction  notificationCB;
   void*                      notificationCBData;
+#endif // DBUS_SUPPORT
 #endif
   std::string                SSID;
   Net_WLAN_IMonitorCB*       subscriber;

@@ -23,6 +23,8 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
+#include "net/ethernet.h"
+
 #if defined (DHCLIENT_SUPPORT)
 extern "C"
 {
@@ -32,14 +34,11 @@ extern "C"
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Log_Msg.h"
-//#include "ace/POSIX_Proactor.h"
-//#include "ace/Proactor.h"
-//#include "ace/Reactor.h"
+#include "ace/OS.h"
 #include "ace/Time_Value.h"
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "common_tools.h"
-
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "common_timer_manager_common.h"
 #endif
 
@@ -562,6 +561,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
   } // end lock scope
 }
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename AddressType,
@@ -594,6 +594,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
 
   return 0;
 }
+#endif
 
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
@@ -626,13 +627,18 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
 
   // sanity check(s)
   bool restart = isActive_;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _GUID interface_identifier = interfaceIdentifier_in;
+#else
+  std::string interface_identifier = interfaceIdentifier_in;
+#endif // ACE_WIN32 || ACE_WIN64
   std::string current_ssid_s = SSID ();
   if (likely (!SSID_in.empty ()))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_ASSERT (SSID_in.size () <= DOT11_SSID_MAX_LENGTH);
 #else
-    ACE_ASSERT (SSID_in.size () <= DOT11_SSID_MAX_LENGTH);
+    ACE_ASSERT (SSID_in.size () <= IW_ESSID_MAX_SIZE);
 #endif // ACE_WIN32 || ACE_WIN64
 
     if (unlikely (!ACE_OS::strcmp (SSID_in.c_str (),
@@ -645,11 +651,6 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
       goto configure;
   } // end ELSE
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  struct _GUID interface_identifier = interfaceIdentifier_in;
-#else
-  std::string interface_identifier = interfaceIdentifier_in;
-#endif // ACE_WIN32 || ACE_WIN64
   // check cache ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
@@ -701,20 +702,26 @@ configure:
     configuration_->autoAssociate = !SSID_in.empty ();
     configuration_->interfaceIdentifier = interface_identifier;
     configuration_->SSID = SSID_in;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
     isConnectionNotified_ = false;
+#endif
   } // end IF
 
   if (unlikely (!restart))
   { // *NOTE*: not active
+    struct ether_addr ether_addr_s;
+    ACE_OS::memset (&ether_addr_s, 0, sizeof (struct ether_addr));
     if (likely (!SSID_in.empty ()))
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       result = Net_WLAN_Tools::associate (clientHandle_,
                                           interface_identifier,
+                                          SSID_in);
 #else
       result = Net_WLAN_Tools::associate (interface_identifier,
-                                          handle_,
+                                          ether_addr_s,
+                                          SSID_in,
+                                          handle_);
 #endif // ACE_WIN32 || ACE_WIN64
-                                          SSID_in);
     else
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       result = Net_WLAN_Tools::disassociate (clientHandle_,
@@ -1101,7 +1108,7 @@ fetch_scan_result_data:
         interface_identifier = (*iterator).second.first;
 #else
         interface_identifier_string = (*iterator).second.first;
-        ap_mac_address = (*iterator).second.second;
+        ap_mac_address = (*iterator).second.second.accessPointLinkLayerAddress;
 #endif // ACE_WIN32 || ACE_WIN64
       } // end lock scope
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1291,8 +1298,8 @@ scanned:
 #else
       bool result = false;
       ACE_Time_Value result_poll_interval (0,
-                                           NET_WLAN_MONITOR_CONNECTION_DEFAULT_RESULT_POLL_INTERVAL * 1000);
-      ACE_Time_Value result_timeout (NET_WLAN_MONITOR_CONNECTION_DEFAULT_TIMEOUT,
+                                           NET_WLAN_MONITOR_ASSOCIATION_DEFAULT_RESULT_POLL_INTERVAL * 1000);
+      ACE_Time_Value result_timeout (NET_WLAN_MONITOR_ASSOCIATION_DEFAULT_TIMEOUT,
                                      0);
       ACE_Time_Value deadline;
       bool shutdown = false;
@@ -1817,10 +1824,12 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
     iterator =
       SSIDsToInterfaceIdentifier_.find (configuration_->SSID);
     ACE_ASSERT (iterator != SSIDsToInterfaceIdentifier_.end ());
+    struct ether_addr ether_addr_s =
+        Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("\"%s\": (MAC: %s) associated with %s (SSID: %s)\n"),
                 ACE_TEXT (interfaceIdentifier_in.c_str ()),
-                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in)), NET_LINKLAYER_802_11).c_str ()),
+                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s), NET_LINKLAYER_802_11).c_str ()),
                 ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&(*iterator).second.second), NET_LINKLAYER_802_11).c_str ()),
                 ACE_TEXT (SSID_in.c_str ())));
   } // end lock scope
@@ -2462,7 +2471,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
               ACE_TEXT (inherited::threadName_.c_str ()),
               inherited::grp_id_));
 
-  change (NET_WLAN_MONITOR_STATE_INITIAL);
+  change (NET_WLAN_MONITOR_STATE_IDLE);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("(%s): monitor (group: %d, thread id: %t) leaving...\n"),
@@ -2669,10 +2678,13 @@ retry:
         } // end IF
 //        else
 //          printf("                    ESSID:off/any/hidden\n");
+        struct Association_Configuration association_configuration_s;
+        association_configuration_s.accessPointLinkLayerAddress =
+            ap_mac_address;
         { ACE_GUARD_RETURN (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, subscribersLock_, 0);
           SSIDsToInterfaceIdentifier_.insert (std::make_pair (essid_string,
                                                               std::make_pair (configuration_->interfaceIdentifier,
-                                                                              ap_mac_address)));
+                                                                              association_configuration_s)));
         } // end lock scope
 #if defined (_DEBUG)
         if (known_ssids.find (essid_string) == known_ssids.end ())

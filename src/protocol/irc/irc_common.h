@@ -153,7 +153,7 @@ struct IRC_LoginOptions
        , string (NULL)
       {};
 
-      enum
+      enum : int
       {
         INVALID = -1,
         MODE    = 0,

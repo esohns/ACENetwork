@@ -703,18 +703,23 @@ do_work (unsigned int bufferSize_in,
   ACE_Message_Block* message_block_p = NULL;
   if (useReactor_in)
   {
+#if defined (SSL_SUPPORT)
     if (port_in == HTTPS_DEFAULT_SERVER_PORT)
       ACE_NEW_NORETURN (iconnector_p,
                         Test_U_SSLTCPConnector_t (connection_manager_p,
                                                   (*iterator).second.socketHandlerConfiguration.statisticReportingInterval));
     else
+#endif
       ACE_NEW_NORETURN (iconnector_p,
                         Test_U_TCPConnector_t (connection_manager_p,
                                                (*iterator).second.socketHandlerConfiguration.statisticReportingInterval));
   } // end IF
   else
-  { // *TODO*: add SSL support to the proactor framework
+  {
+#if defined (SSL_SUPPORT)
+    // *TODO*: add SSL support to the proactor framework
     ACE_ASSERT (port_in != HTTPS_DEFAULT_SERVER_PORT);
+#endif
     ACE_NEW_NORETURN (iconnector_p,
                       Test_U_TCPAsynchConnector_t (connection_manager_p,
                                                    (*iterator).second.socketHandlerConfiguration.statisticReportingInterval));

@@ -49,7 +49,7 @@ class Test_I_MessageDataContainer
   // *IMPORTANT NOTE*: fire-and-forget API
   Test_I_MessageDataContainer (struct Test_I_MessageData*&, // data handle
                                bool = true);                // delete in dtor ?
-  inline virtual ~Test_I_MessageDataContainer () {};
+  inline virtual ~Test_I_MessageDataContainer () {}
 
   // implement Common_ISetPP_T
   virtual void setPR (struct HTTP_Record*&);

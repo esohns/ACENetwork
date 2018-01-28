@@ -20,6 +20,7 @@
 #include "stdafx.h"
 
 #include "ace/Synch.h"
+#include "IRC_client_stream_common.h"
 #include "IRC_client_sessionmessage.h"
 
 #include "ace/Log_Msg.h"

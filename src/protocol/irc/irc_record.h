@@ -54,7 +54,7 @@ class IRC_Export IRC_Record
    public Common_IDumpState
 {
  public:
-  enum CommandType
+  enum CommandType : int
   {
     // *NOTE*: in an effort to avoid clashes and still handle IRC commands and
     //         replies/errors uniformly, start this beyond the range of

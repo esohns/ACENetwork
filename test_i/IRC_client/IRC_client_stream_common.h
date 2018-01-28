@@ -39,14 +39,15 @@
 #include "stream_isessionnotify.h"
 #include "stream_session_data.h"
 
+#include "net_configuration.h"
+
 #include "irc_icontrol.h"
 #include "irc_common.h"
+#include "irc_configuration.h"
 #include "irc_record.h"
 #include "irc_stream_common.h"
 
-//#include "IRC_client_common.h"
-#include "IRC_client_network.h"
-#include "IRC_client_stream.h"
+//#include "IRC_client_stream.h"
 
 // forward declaration(s)
 struct IRC_Client_SessionData;
@@ -60,16 +61,32 @@ class IRC_Message;
 //                         struct Stream_ModuleConfiguration,
 //                         struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_IModule_t;
 
+struct IRC_Client_SessionState;
+struct IRC_Client_SessionData
+ : IRC_Stream_SessionData
+{
+  IRC_Client_SessionData ()
+   : IRC_Stream_SessionData ()
+   , connectionState (NULL)
+   , userData (NULL)
+  {};
+
+  struct IRC_Client_SessionState* connectionState;
+
+  struct IRC_Client_UserData*     userData;
+};
+typedef Stream_SessionData_T<struct IRC_Client_SessionData> IRC_Client_SessionData_t;
+
 struct IRC_Client_StreamState
  : IRC_StreamState
 {
   IRC_Client_StreamState ()
    : IRC_StreamState ()
-   , currentSessionData (NULL)
+   , sessionData (NULL)
    , userData (NULL)
   {};
 
-  struct IRC_Client_SessionData* currentSessionData;
+  struct IRC_Client_SessionData* sessionData;
 
   struct IRC_Client_UserData*    userData;
 };
@@ -94,12 +111,18 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct IRC_Client_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_StreamConfiguration_t;
+struct IRC_Client_ConnectionConfiguration;
+typedef Net_StreamConnectionConfiguration_T<struct IRC_Client_ConnectionConfiguration,
+                                            struct IRC_AllocatorConfiguration,
+                                            IRC_Client_StreamConfiguration_t> IRC_Client_ConnectionConfiguration_t;
+typedef std::map<std::string,
+                 IRC_Client_ConnectionConfiguration_t> IRC_Client_ConnectionConfigurations_t;
 struct IRC_Client_ModuleHandlerConfiguration
  : IRC_ModuleHandlerConfiguration
 {
   IRC_Client_ModuleHandlerConfiguration ()
    : IRC_ModuleHandlerConfiguration ()
-   ///////////////////////////////////////
+  ////////////////////////////////////////
    , connectionConfigurations (NULL)
    , streamConfiguration (NULL)
    , subscriber (NULL)
@@ -125,14 +148,6 @@ struct IRC_Client_StreamConfiguration
 
   struct IRC_Client_UserData* userData;
 };
-//extern const char stream_name_string_[];
-typedef Stream_Configuration_T<//stream_name_string_,
-                               struct IRC_AllocatorConfiguration,
-                               struct IRC_Client_StreamConfiguration,
-                               struct Stream_ModuleConfiguration,
-                               struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_StreamConfiguration_t;
-
-typedef Stream_SessionData_T<struct IRC_Client_SessionData> IRC_Client_SessionData_t;
 
 typedef Stream_ControlMessage_T<enum Stream_ControlType,
                                 enum Stream_ControlMessageType,
@@ -143,9 +158,5 @@ typedef Stream_CachedMessageAllocator_T<ACE_MT_SYNCH,
                                         IRC_Client_ControlMessage_t,
                                         IRC_Message,
                                         IRC_Client_SessionMessage> IRC_Client_MessageAllocator_t;
-
-//////////////////////////////////////////
-
-typedef IRC_Client_Stream_T<Common_Timer_Manager_t> IRC_Client_Stream_t;
 
 #endif

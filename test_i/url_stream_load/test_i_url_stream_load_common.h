@@ -123,7 +123,7 @@ struct Test_I_URLStreamLoad_GTK_CBData
 
 //struct Test_I_URLStreamLoad_ThreadData
 //{
-//  inline Test_I_URLStreamLoad_ThreadData ()
+//  Test_I_URLStreamLoad_ThreadData ()
 //   : CBData (NULL)
 //   , eventSourceID (0)
 //  {};

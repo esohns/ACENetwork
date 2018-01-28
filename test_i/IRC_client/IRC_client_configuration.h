@@ -40,7 +40,7 @@
 #include "IRC_client_common.h"
 #include "IRC_client_defines.h"
 #include "IRC_client_network.h"
-#include "IRC_client_stream_common.h"
+//#include "IRC_client_stream_common.h"
 
 // forward declarations
 //struct IRC_Client_ConnectionConfiguration;

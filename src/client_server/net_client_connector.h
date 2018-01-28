@@ -310,7 +310,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
                             StatisticContainerType> ICONNECTION_T;
   typedef Net_IStreamConnection_T<Net_Netlink_Addr,
                                   ConfigurationType,
-                                  StateType,
+  StateType,
                                   StatisticContainerType,
                                   struct Net_NetlinkSocketConfiguration,
                                   HandlerConfigurationType,

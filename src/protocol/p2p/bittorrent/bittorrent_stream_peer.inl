@@ -203,6 +203,7 @@ BitTorrent_PeerStream_T<StreamStateType,
 
   session_data_p =
     &const_cast<SessionDataType&> (inherited::sessionData_->getR ());
+  ACE_ASSERT (session_data_p);
 
   // ---------------------------------------------------------------------------
 

@@ -29,8 +29,10 @@
 #include "ace/SOCK_Connector.h"
 #include "ace/Synch_Traits.h"
 
+#if defined (SSL_SUPPORT)
 #include "ace/SSL/SSL_SOCK_Connector.h"
 #include "ace/SSL/SSL_SOCK_Stream.h"
+#endif
 
 #include "common_timer_manager_common.h"
 
@@ -51,7 +53,9 @@
 
 #include "net_client_asynchconnector.h"
 #include "net_client_connector.h"
+#if defined (SSL_SUPPORT)
 #include "net_client_ssl_connector.h"
+#endif
 
 #include "http_common.h"
 #include "http_network.h"
@@ -133,9 +137,11 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
 typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
                                ACE_SOCK_STREAM,
                                struct HTTP_SocketHandlerConfiguration> Test_I_TCPSocketHandler_t;
+#if defined (SSL_SUPPORT)
 typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
                                ACE_SSL_SOCK_Stream,
                                struct HTTP_SocketHandlerConfiguration> Test_I_SSLTCPSocketHandler_t;
+#endif
 typedef Net_AsynchTCPSocketHandler_T<struct HTTP_SocketHandlerConfiguration> Test_I_AsynchTCPSocketHandler_t;
 
 typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
@@ -148,6 +154,7 @@ typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Test_I_ConnectionStream,
                                 Common_Timer_Manager_t,
                                 struct HTTP_Stream_UserData> Test_I_TCPConnection_t;
+#if defined (SSL_SUPPORT)
 typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Test_I_SSLTCPSocketHandler_t,
                                 Test_I_URLStreamLoad_ConnectionConfiguration_t,
@@ -158,6 +165,7 @@ typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Test_I_ConnectionStream,
                                 Common_Timer_Manager_t,
                                 struct HTTP_Stream_UserData> Test_I_SSLTCPConnection_t;
+#endif
 typedef Net_AsynchTCPConnectionBase_T<Test_I_AsynchTCPSocketHandler_t,
                                       Test_I_URLStreamLoad_ConnectionConfiguration_t,
                                       struct HTTP_ConnectionState,
@@ -184,6 +192,7 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                struct HTTP_SocketHandlerConfiguration,
                                Test_I_ConnectionStream,
                                struct HTTP_Stream_UserData> Test_I_TCPConnector_t;
+#if defined (SSL_SUPPORT)
 typedef Net_Client_SSL_Connector_T<Test_I_SSLTCPConnection_t,
                                    ACE_SSL_SOCK_Connector,
                                    ACE_INET_Addr,
@@ -193,6 +202,7 @@ typedef Net_Client_SSL_Connector_T<Test_I_SSLTCPConnection_t,
                                    struct HTTP_SocketHandlerConfiguration,
                                    Test_I_ConnectionStream,
                                    struct HTTP_Stream_UserData> Test_I_SSLTCPConnector_t;
+#endif
 typedef Net_Client_AsynchConnector_T<Test_I_AsynchTCPConnection_t,
                                      ACE_INET_Addr,
                                      Test_I_URLStreamLoad_ConnectionConfiguration_t,

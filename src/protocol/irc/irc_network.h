@@ -22,34 +22,35 @@
 #define IRC_NETWORK_H
 
 //#include <map>
-//#include <string>
+#include <string>
 
-#include "ace/Global_Macros.h"
-#include "ace/INET_Addr.h"
-#include "ace/Singleton.h"
-#include "ace/Synch_Traits.h"
-#include "ace/Time_Value.h"
+//#include "ace/Global_Macros.h"
+//#include "ace/INET_Addr.h"
+//#include "ace/Singleton.h"
+//#include "ace/Synch_Traits.h"
+//#include "ace/Time_Value.h"
 
-#include "common_timer_manager_common.h"
+//#include "common_timer_manager_common.h"
 
-#include "stream_common.h"
+//#include "stream_common.h"
 
-#include "net_asynch_tcpsockethandler.h"
-#include "net_connection_manager.h"
-#include "net_iconnectionmanager.h"
-#include "net_iconnector.h"
-#include "net_stream_asynch_tcpsocket_base.h"
-#include "net_stream_tcpsocket_base.h"
-#include "net_tcpsockethandler.h"
-#include "net_tcpconnection_base.h"
+//#include "net_asynch_tcpsockethandler.h"
+#include "net_configuration.h"
+//#include "net_connection_manager.h"
+//#include "net_iconnectionmanager.h"
+//#include "net_iconnector.h"
+//#include "net_stream_asynch_tcpsocket_base.h"
+//#include "net_stream_tcpsocket_base.h"
+//#include "net_tcpsockethandler.h"
+//#include "net_tcpconnection_base.h"
 
-#include "net_client_asynchconnector.h"
-#include "net_client_connector.h"
+//#include "net_client_asynchconnector.h"
+//#include "net_client_connector.h"
 
 #include "irc_common.h"
 //#include "irc_control.h"
 #include "irc_defines.h"
-#include "irc_stream_common.h"
+//#include "irc_stream_common.h"
 
 // forward declarations
 class IRC_IControl;

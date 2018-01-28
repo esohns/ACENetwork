@@ -133,22 +133,6 @@ struct IRC_Client_UserData
   //struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
 };
 
-struct IRC_Client_SessionState;
-struct IRC_Client_UserData;
-struct IRC_Client_SessionData
- : IRC_Stream_SessionData
-{
-  IRC_Client_SessionData ()
-   : IRC_Stream_SessionData ()
-   , connectionState (NULL)
-   , userData (NULL)
-  {};
-
-  struct IRC_Client_SessionState* connectionState;
-
-  struct IRC_Client_UserData*     userData;
-};
-
 typedef Net_IConnector_T<ACE_INET_Addr,
                          IRC_Client_ConnectionConfiguration_t> IRC_Client_IConnector_t;
 struct IRC_Client_CursesState;

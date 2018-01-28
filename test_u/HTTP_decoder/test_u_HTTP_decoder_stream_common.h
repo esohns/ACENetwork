@@ -74,7 +74,7 @@ struct Test_U_HTTPDecoder_SessionData
    , userData (NULL)
   {};
   
-  Test_U_HTTPDecoder_SessionData& operator= (Test_U_HTTPDecoder_SessionData& rhs_in)
+  struct Test_U_HTTPDecoder_SessionData& operator= (struct Test_U_HTTPDecoder_SessionData& rhs_in)
   {
     Test_U_StreamSessionData::operator= (rhs_in);
 
@@ -86,7 +86,7 @@ struct Test_U_HTTPDecoder_SessionData
     userData = (userData ? userData : rhs_in.userData);
 
     return *this;
-  }
+  };
 
   struct HTTP_ConnectionState*              connectionState;
   enum Stream_Decoder_CompressionFormatType format; // decompressor module

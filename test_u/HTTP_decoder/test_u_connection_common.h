@@ -27,7 +27,10 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
+
+#if defined (SSL_SUPPORT)
 #include "ace/SSL/SSL_SOCK_Connector.h"
+#endif
 
 #include "common_configuration.h"
 
@@ -53,7 +56,9 @@
 
 #include "net_client_asynchconnector.h"
 #include "net_client_connector.h"
+#if defined (SSL_SUPPORT)
 #include "net_client_ssl_connector.h"
+#endif
 
 #include "http_common.h"
 #include "http_network.h"
@@ -183,9 +188,11 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
 typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
                                ACE_SOCK_STREAM,
                                struct Test_U_SocketHandlerConfiguration> Test_U_TCPSocketHandler_t;
+#if defined (SSL_SUPPORT)
 typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
                                ACE_SSL_SOCK_Stream,
                                struct Test_U_SocketHandlerConfiguration> Test_U_SSLTCPSocketHandler_t;
+#endif
 typedef Net_AsynchTCPSocketHandler_T<struct Test_U_SocketHandlerConfiguration> Test_U_AsynchTCPSocketHandler_t;
 
 typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
@@ -198,6 +205,7 @@ typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Test_U_Stream_t,
                                 Common_Timer_Manager_t,
                                 struct Test_U_UserData> Test_U_TCPConnection_t;
+#if defined (SSL_SUPPORT)
 typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Test_U_SSLTCPSocketHandler_t,
                                 Test_U_ConnectionConfiguration_t,
@@ -208,6 +216,7 @@ typedef Net_TCPConnectionBase_T<ACE_MT_SYNCH,
                                 Test_U_Stream_t,
                                 Common_Timer_Manager_t,
                                 struct Test_U_UserData> Test_U_SSLTCPConnection_t;
+#endif
 typedef Net_AsynchTCPConnectionBase_T<Test_U_AsynchTCPSocketHandler_t,
                                       Test_U_ConnectionConfiguration_t,
                                       struct Test_U_ConnectionState,
@@ -236,6 +245,7 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                struct Test_U_SocketHandlerConfiguration,
                                Test_U_Stream_t,
                                struct Test_U_UserData> Test_U_TCPConnector_t;
+#if defined (SSL_SUPPORT)
 typedef Net_Client_SSL_Connector_T<Test_U_SSLTCPConnection_t,
                                    ACE_SSL_SOCK_Connector,
                                    ACE_INET_Addr,
@@ -245,6 +255,7 @@ typedef Net_Client_SSL_Connector_T<Test_U_SSLTCPConnection_t,
                                    struct Test_U_SocketHandlerConfiguration,
                                    Test_U_Stream_t,
                                    struct Test_U_UserData> Test_U_SSLTCPConnector_t;
+#endif
 typedef Net_Client_AsynchConnector_T<Test_U_AsynchTCPConnection_t,
                                      ACE_INET_Addr,
                                      Test_U_ConnectionConfiguration_t,

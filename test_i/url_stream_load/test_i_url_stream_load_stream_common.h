@@ -135,6 +135,7 @@ struct Test_I_URLStreamLoad_SessionData
    , targetFileName ()
    , userData (NULL)
   {};
+
   struct Test_I_URLStreamLoad_SessionData& operator= (struct Test_I_URLStreamLoad_SessionData& rhs_in)
   {
     Test_I_StreamSessionData::operator= (rhs_in);
@@ -144,7 +145,7 @@ struct Test_I_URLStreamLoad_SessionData
                                               : targetFileName);
 
     return *this;
-  }
+  };
 
   ACE_INET_Addr                                address;
   Test_I_IConnection_t*                        connection;

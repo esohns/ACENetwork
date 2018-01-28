@@ -188,12 +188,12 @@ IRC_Session_T<ConnectionType,
               ConnectionManagerType,
               InputHandlerType,
               InputHandlerConfigurationType,
-              LogOutputType>::start (Stream_SessionId_t sessionID_in,
+              LogOutputType>::start (Stream_SessionId_t sessionId_in,
                                      const SessionDataType& sessionData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::start"));
 
-  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionData_in);
 
   int result = -1;
@@ -359,12 +359,12 @@ IRC_Session_T<ConnectionType,
               ConnectionManagerType,
               InputHandlerType,
               InputHandlerConfigurationType,
-              LogOutputType>::notify (Stream_SessionId_t sessionID_in,
+              LogOutputType>::notify (Stream_SessionId_t sessionId_in,
                                       const enum Stream_SessionMessageType& sessionEvent_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::notify"));
 
-  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionEvent_in);
 
   ACE_ASSERT (false);
@@ -401,11 +401,11 @@ IRC_Session_T<ConnectionType,
               ConnectionManagerType,
               InputHandlerType,
               InputHandlerConfigurationType,
-              LogOutputType>::end (Stream_SessionId_t sessionID_in)
+              LogOutputType>::end (Stream_SessionId_t sessionId_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::end"));
 
-  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionId_in);
 
   int result = -1;
 
@@ -452,12 +452,12 @@ IRC_Session_T<ConnectionType,
               ConnectionManagerType,
               InputHandlerType,
               InputHandlerConfigurationType,
-              LogOutputType>::notify (Stream_SessionId_t sessionID_in,
+              LogOutputType>::notify (Stream_SessionId_t sessionId_in,
                                       const MessageType& message_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::notify"));
 
-  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionId_in);
 
   // *TODO*: remove type inference
   const IRC_Record& record_r = message_in.getR ();
@@ -968,12 +968,12 @@ IRC_Session_T<ConnectionType,
               ConnectionManagerType,
               InputHandlerType,
               InputHandlerConfigurationType,
-              LogOutputType>::notify (Stream_SessionId_t sessionID_in,
+              LogOutputType>::notify (Stream_SessionId_t sessionId_in,
                                       const SessionMessageType& sessionrecord_r)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Session_T::notify"));
 
-  ACE_UNUSED_ARG (sessionID_in);
+  ACE_UNUSED_ARG (sessionId_in);
   ACE_UNUSED_ARG (sessionrecord_r);
 }
 

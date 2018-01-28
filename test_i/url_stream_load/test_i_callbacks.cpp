@@ -908,8 +908,10 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     ACE_ASSERT (iterator_3 != data_p->configuration->streamConfiguration.end ());
     Test_I_TCPConnector_t connector (iconnection_manager_p,
                                      (*iterator_3).second.second.statisticReportingInterval);
+#if defined (SSL_SUPPORT)
     Test_I_SSLTCPConnector_t ssl_connector (iconnection_manager_p,
                                             (*iterator_3).second.second.statisticReportingInterval);
+#endif
     Test_I_AsynchTCPConnector_t asynch_connector (iconnection_manager_p,
                                                   (*iterator_3).second.second.statisticReportingInterval);
     Test_I_IConnector_t* iconnector_p = NULL;
@@ -1027,15 +1029,19 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     // step3: connect to peer
     if (data_p->configuration->useReactor)
     {
+#if defined (SSL_SUPPORT)
       if (use_SSL)
         iconnector_p = &ssl_connector;
       else
+#endif
         iconnector_p = &connector;
     } // end IF
     else
-    { // *TODO*: add SSL support to the proactor framework
+    {
+#if defined (SSL_SUPPORT)
+      // *TODO*: add SSL support to the proactor framework
       ACE_ASSERT (!use_SSL);
-
+#endif
       iconnector_p = &asynch_connector;
     } // end ELSE
     if (!iconnector_p->initialize ((*iterator_2).second))
