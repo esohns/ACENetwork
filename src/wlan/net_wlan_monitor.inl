@@ -90,9 +90,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
  , configuration_ (NULL)
  , interfaceIdentifiers_ ()
  , isActive_ (false)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
  , isConnectionNotified_ (false)
-#endif
  , isFirstConnect_ (true)
  , isInitialized_ (false)
  , localSAP_ ()
@@ -352,8 +350,9 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
   Net_WLAN_Tools::finalize (clientHandle_);
   clientHandle_ = ACE_INVALID_HANDLE;
 #else
-  inherited::stop (waitForCompletion_in,
-                   lockedAccess_in);
+  isActive_ = false;
+  if (waitForCompletion_in)
+    inherited::wait (true);
 
   int result = -1;
 //  if (likely (isRegistered_))
@@ -387,11 +386,11 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
   bufferSize_ = 0;
 #endif // ACE_WIN32 || ACE_WIN64
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   isActive_ = false;
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
   inherited2::change (NET_WLAN_MONITOR_STATE_INITIALIZED);
-#endif // ACE_WIN32 || ACE_WIN64
+#endif
 }
 
 template <ACE_SYNCH_DECL,
@@ -432,9 +431,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
 
     configuration_ = NULL;
     ACE_ASSERT (!isActive_);
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
     isConnectionNotified_ = false;
-#endif
     isFirstConnect_ = true;
     localSAP_.reset ();
     peerSAP_.reset ();
@@ -710,9 +707,7 @@ configure:
     configuration_->autoAssociate = !SSID_in.empty ();
     configuration_->interfaceIdentifier = interface_identifier;
     configuration_->SSID = SSID_in;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
     isConnectionNotified_ = false;
-#endif
   } // end IF
 
   if (unlikely (!restart))
@@ -1138,8 +1133,28 @@ fetch_scan_result_data:
                     ACE_TEXT (interface_identifier_string.c_str ()),
                     ACE_TEXT (configuration_->interfaceIdentifier.c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
+
       std::string SSID_string = SSID ();
-      ACE_ASSERT (SSID_string.empty ());
+      if (!SSID_string.empty () &&
+          ACE_OS::strcmp (SSID_string.c_str (),
+                          configuration_->SSID.c_str ()))
+      {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        if (unlikely (!Net_WLAN_Tools::disassociate (clientHandle_,
+                                                     interface_identifier)))
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to Net_WLAN_Tools::disassociate(0x%@,\"%s\"), continuing\n"),
+                      clientHandle_,
+                      ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
+#else
+        if (unlikely (!Net_WLAN_Tools::disassociate (interface_identifier_string,
+                                                     handle_)))
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to Net_WLAN_Tools::disassociate(\"%s\",%d), continuing\n"),
+                      ACE_TEXT (interface_identifier_string.c_str ()),
+                      handle_));
+#endif // ACE_WIN32 || ACE_WIN64
+      } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       if (unlikely (!Net_WLAN_Tools::associate (clientHandle_,
@@ -1180,9 +1195,9 @@ associate:
         ether_addr_s =
           Net_WLAN_Tools::associatedBSSID (configuration_->interfaceIdentifier,
                                            handle_);
-        if (likely (!ACE_OS::memcmp (&ether_addr_s.ether_addr_octet,
-                                     &ap_mac_address.ether_addr_octet,
-                                     ETH_ALEN)))
+        if (!ACE_OS::memcmp (&ether_addr_s.ether_addr_octet,
+                             &ap_mac_address.ether_addr_octet,
+                             ETH_ALEN))
         {
           result = true;
           break;
@@ -1493,15 +1508,20 @@ connected:
         inherited2::state_ = NET_WLAN_MONITOR_STATE_SCANNED;
       } // end lock scope
 
-      std::string SSID_string = SSID ();
-      if (!SSID_string.empty ())
-      {
-        inherited2::change (NET_WLAN_MONITOR_STATE_CONNECTED);
-        break;
-      } // end IF
-
       // sanity check(s)
       ACE_ASSERT (configuration_);
+
+      std::string SSID_string = SSID ();
+      if ((configuration_->SSID.empty () && // not configured
+           !SSID_string.empty ()) ||        // associated
+          (!configuration_->SSID.empty () &&        // configured
+           !SSID_string.empty ()          &&        // associated
+           !ACE_OS::strcmp (configuration_->SSID.c_str (),
+                            SSID_string.c_str ()))) // already associated to configured ESSID
+      {
+        inherited2::change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
+        break;
+      } // end IF
 
       bool essid_is_cached = false;
       { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, subscribersLock_);
@@ -1514,11 +1534,14 @@ connected:
       if (!configuration_->SSID.empty () && // configured
           essid_is_cached                && // configured SSID known (i.e. cached)
           configuration_->autoAssociate)    // auto-associate enabled
+      {
         inherited2::change (NET_WLAN_MONITOR_STATE_ASSOCIATE);
+        break;
+      } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-      // switch to 'idle', but wait in-between scans
+      // switch back to 'idle', but wait in-between scans
       ACE_Time_Value scan_interval (0,
                                     NET_WLAN_MONITOR_UNIX_SCAN_INTERVAL * 1000);
       int result = ACE_OS::sleep (scan_interval);
@@ -1527,6 +1550,7 @@ connected:
                     ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
                     &scan_interval));
 #endif // ACE_WIN32 || ACE_WIN64
+
       inherited2::change (NET_WLAN_MONITOR_STATE_IDLE);
 
       break;
@@ -1607,11 +1631,9 @@ connected:
         inherited2::state_ = NET_WLAN_MONITOR_STATE_CONNECTED;
       } // end lock scope
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
       if (likely (isConnectionNotified_))
         goto continue_2;
       isConnectionNotified_ = true;
-#endif
       try {
         onConnect (configuration_->interfaceIdentifier,
                    SSID (),
@@ -1630,9 +1652,7 @@ connected:
 #endif
       }
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
 continue_2:
-#endif
       if (unlikely (isFirstConnect_))
         isFirstConnect_ = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

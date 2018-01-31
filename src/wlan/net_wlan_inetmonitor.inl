@@ -127,7 +127,7 @@ Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
 
 #if defined (_DEBUG)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
+  if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
 #else
   if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
 #endif

@@ -221,9 +221,7 @@ class Net_WLAN_Monitor_T
   ConfigurationType*                              configuration_;
   Net_InterfaceIdentifiers_t                      interfaceIdentifiers_;
   bool                                            isActive_;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
   bool                                            isConnectionNotified_;
-#endif
   bool                                            isFirstConnect_;
   bool                                            isInitialized_;
   AddressType                                     localSAP_;

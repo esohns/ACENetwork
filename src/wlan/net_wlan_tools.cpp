@@ -1288,7 +1288,7 @@ continue_:
   if (unlikely (result_2 == -1))
   {
     error = ACE_OS::last_error ();
-    if (error != ENOTSUP)
+    if (error != ENOTSUP) // 95
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWCOMMIT): \"%m\", aborting\n"),
@@ -1438,7 +1438,7 @@ Net_WLAN_Tools::disassociate (const std::string& interfaceIdentifier_in,
     if (unlikely (result_2 == -1))
     {
       error = ACE_OS::last_error ();
-      if (error != ENOTSUP)
+      if (error != ENOTSUP) // 95
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWCOMMIT): \"%m\", aborting\n"),
