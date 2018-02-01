@@ -1542,8 +1542,7 @@ connected:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
       // switch back to 'idle', but wait in-between scans
-      ACE_Time_Value scan_interval (0,
-                                    NET_WLAN_MONITOR_UNIX_SCAN_INTERVAL * 1000);
+      ACE_Time_Value scan_interval (NET_WLAN_MONITOR_UNIX_SCAN_INTERVAL, 0);
       int result = ACE_OS::sleep (scan_interval);
       if (unlikely (result == -1))
         ACE_DEBUG ((LM_ERROR,

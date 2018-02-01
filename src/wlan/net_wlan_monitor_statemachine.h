@@ -27,7 +27,13 @@
 #include "ace/Synch_Traits.h"
 
 #include "common_istatemachine.h"
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "common_statemachine_base.h"
+#else
+#include "common_ilock.h"
+#include "common_statemachine.h"
+#include "common_time_common.h"
+#endif
 
 enum Net_WLAN_MonitorState : int
 {
@@ -52,13 +58,27 @@ enum Net_WLAN_MonitorState : int
 };
 
 class Net_WLAN_MonitorStateMachine
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
  : public Common_StateMachine_Base_T<ACE_NULL_SYNCH,
                                      enum Net_WLAN_MonitorState,
                                      Common_IStateMachine_T<enum Net_WLAN_MonitorState> >
+#else
+ : public Common_StateMachineAsynch_T<ACE_MT_SYNCH,
+                                      Common_TimePolicy_t,
+                                      Common_ILock_T<ACE_MT_SYNCH>,
+                                      enum Net_WLAN_MonitorState>
+#endif
 {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   typedef Common_StateMachine_Base_T<ACE_NULL_SYNCH,
                                      enum Net_WLAN_MonitorState,
                                      Common_IStateMachine_T<enum Net_WLAN_MonitorState> > inherited;
+#else
+  typedef Common_StateMachineAsynch_T<ACE_MT_SYNCH,
+                                      Common_TimePolicy_t,
+                                      Common_ILock_T<ACE_MT_SYNCH>,
+                                      enum Net_WLAN_MonitorState> inherited;
+#endif
 
  public:
   Net_WLAN_MonitorStateMachine ();
@@ -71,9 +91,15 @@ class Net_WLAN_MonitorStateMachine
 
  protected:
   // convenient types
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   typename ACE_NULL_SYNCH::MUTEX MUTEX_T;
 
   ACE_SYNCH_NULL_MUTEX lock_;
+#else
+  typename ACE_MT_SYNCH::MUTEX MUTEX_T;
+
+  ACE_SYNCH_MUTEX      lock_;
+#endif
 
   // implement (part of) Common_IStateMachine_T
   // *NOTE*: only derived classes can change state
@@ -86,6 +112,10 @@ class Net_WLAN_MonitorStateMachine
 
 //////////////////////////////////////////
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 typedef Common_IStateMachine_T<enum Net_WLAN_MonitorState> Net_WLAN_Monitor_IStateMachine_t;
+#else
+typedef Common_IStateMachine_2<enum Net_WLAN_MonitorState> Net_WLAN_Monitor_IStateMachine_t;
+#endif
 
 #endif

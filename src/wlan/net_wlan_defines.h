@@ -35,7 +35,7 @@
 // *TODO*: see timeout below
 #define NET_WLAN_MONITOR_WIN32_SCAN_INTERVAL                              5 // s
 #else
-#define NET_WLAN_MONITOR_UNIX_SCAN_INTERVAL                               500 // ms
+#define NET_WLAN_MONITOR_UNIX_SCAN_INTERVAL                               3 // s
 #endif
 #define NET_WLAN_MONITOR_SCAN_SSID_RETRIES                                3
 
