@@ -59,9 +59,9 @@ enum Net_WLAN_MonitorState : int
 
 class Net_WLAN_MonitorStateMachine
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
- : public Common_StateMachine_Base_T<ACE_NULL_SYNCH,
-                                     enum Net_WLAN_MonitorState,
-                                     Common_IStateMachine_T<enum Net_WLAN_MonitorState> >
+ : public Common_StateMachine_T<ACE_NULL_SYNCH,
+                                enum Net_WLAN_MonitorState,
+                                Common_IStateMachine_T<enum Net_WLAN_MonitorState> >
 #else
  : public Common_StateMachineAsynch_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
@@ -70,9 +70,9 @@ class Net_WLAN_MonitorStateMachine
 #endif
 {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  typedef Common_StateMachine_Base_T<ACE_NULL_SYNCH,
-                                     enum Net_WLAN_MonitorState,
-                                     Common_IStateMachine_T<enum Net_WLAN_MonitorState> > inherited;
+  typedef Common_StateMachine_T<ACE_NULL_SYNCH,
+                                enum Net_WLAN_MonitorState,
+                                Common_IStateMachine_T<enum Net_WLAN_MonitorState> > inherited;
 #else
   typedef Common_StateMachineAsynch_T<ACE_MT_SYNCH,
                                       Common_TimePolicy_t,

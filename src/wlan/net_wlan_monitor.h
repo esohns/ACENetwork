@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
 *   Copyright (C) 2010 by Erik Sohns   *
 *   erik.sohns@web.de   *
 *                                                                         *
@@ -32,7 +32,6 @@
 #include <wlanapi.h>
 #else
 #include <net/ethernet.h>
-
 #include "iwlib.h"
 
 #if defined (DBUS_SUPPORT)
@@ -91,10 +90,7 @@ template <ACE_SYNCH_DECL,
           ////////////////////////////////
           typename UserDataType>
 class Net_WLAN_Monitor_T
- : public Common_TaskBase_T<ACE_SYNCH_USE,
-                            TimePolicyType,
-                            Common_ILock_T<ACE_SYNCH_USE> >
- , public Net_WLAN_MonitorStateMachine
+ : public Net_WLAN_MonitorStateMachine
  , public Net_WLAN_IMonitor_T<AddressType,
                               ConfigurationType>
  , public Common_IStatistic_T<Net_Statistic_t>
@@ -102,10 +98,7 @@ class Net_WLAN_Monitor_T
  , public Common_ITimerHandler
 #endif
 {
-  typedef Common_TaskBase_T<ACE_SYNCH_USE,
-                            TimePolicyType,
-                            Common_ILock_T<ACE_SYNCH_USE> > inherited;
-  typedef Net_WLAN_MonitorStateMachine inherited2;
+  typedef Net_WLAN_MonitorStateMachine inherited;
 
   // singleton has access to the ctor/dtors
   friend class ACE_Singleton<Net_WLAN_Monitor_T<ACE_SYNCH_USE,
@@ -323,9 +316,6 @@ class Net_WLAN_Monitor_T
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  // override some ACE_Task_Base methods
-  virtual int svc (void);
-
   // override some ACE_Event_Handler methods
   inline virtual ACE_HANDLE get_handle (void) const { return handle_; }
   inline virtual void set_handle (ACE_HANDLE handle_in) { ACE_ASSERT (handle_ == ACE_INVALID_HANDLE); ACE_ASSERT (handle_in != ACE_INVALID_HANDLE); handle_ = handle_in; }

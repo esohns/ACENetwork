@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -31,8 +31,8 @@
 #include <sys/capability.h>
 #include <linux/capability.h>
 #include <net/if_arp.h>
-#include <ifaddrs.h>
-#include <iwlib.h>
+#include "ifaddrs.h"
+#include "iwlib.h"
 
 #if defined (DBUS_SUPPORT)
 #include "common_dbus_tools.h"

@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2010 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -62,18 +62,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
                    ConfigurationType,
                    MonitorAPI_e,
                    UserDataType>::Net_WLAN_Monitor_T ()
- : inherited (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_THREAD_NAME), // thread name
-              NET_WLAN_MONITOR_THREAD_GROUP_ID,                    // group id
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-              0,                                                   // # thread(s)
-#else
-              1,                                                   // # thread(s)
-#endif
-              false,                                               // auto-start ?
-              ////////////////////////////
-              //NULL)                                             // queue handle
-              // *TODO*: this looks dodgy, but seems to work nonetheless...
-              &queue_)                                            // queue handle
+ : inherited ()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
  , clientHandle_ (ACE_INVALID_HANDLE)
  , scanTimerId_ (-1)
@@ -315,9 +304,7 @@ continue_:
 
   isActive_ = true;
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inherited2::change (NET_WLAN_MONITOR_STATE_IDLE);
-#endif // ACE_WIN32 || ACE_WIN64
+  inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
 }
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
@@ -352,7 +339,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
 #else
   isActive_ = false;
   if (waitForCompletion_in)
-    inherited::wait (true);
+    inherited::TASK_T::wait (true);
 
   int result = -1;
 //  if (likely (isRegistered_))
@@ -389,7 +376,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   isActive_ = false;
 
-  inherited2::change (NET_WLAN_MONITOR_STATE_INITIALIZED);
+  inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_INITIALIZED);
 #endif
 }
 
@@ -498,7 +485,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
 
   isInitialized_ = true;
 
-  inherited2::initialize ();
+  inherited::initialize ();
 
   return true;
 }
@@ -939,14 +926,18 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
     {
       // *NOTE*: actually 'set' intermediate states to support atomic state
       //         transition notifications
-      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited2::stateLock_));
-        inherited2::state_ = NET_WLAN_MONITOR_STATE_IDLE;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#else
+      { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#endif
+        inherited::state_ = NET_WLAN_MONITOR_STATE_IDLE;
       } // end lock scope
 
       if (!isActive_ ||              // stop()ped
           inherited::hasShutDown ())
       {
-        inherited2::change (NET_WLAN_MONITOR_STATE_INITIALIZED);
+        inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_INITIALIZED);
         break;
       } // end IF
       std::string SSID_string = SSID ();
@@ -969,11 +960,11 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
                       ACE_TEXT (SSID_string.c_str ())));
         }
 #else
-        inherited2::change (NET_WLAN_MONITOR_STATE_CONNECTED);
+        inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_CONNECTED);
         break;
 
 continue_:
-        inherited2::change (NET_WLAN_MONITOR_STATE_SCAN);
+        inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_SCAN);
 #endif // ACE_WIN32 || ACE_WIN64
         break;
       } // end IF
@@ -1003,17 +994,21 @@ continue_:
           !essid_is_cached              || // configured SSID unknown (i.e. not cached yet)
           !configuration_->autoAssociate)  // auto-associate disabled
       {
-        inherited2::change (NET_WLAN_MONITOR_STATE_SCAN);
+        inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_SCAN);
         goto reset_state;
       } // end IF
 
       ACE_ASSERT (SSID_string.empty () && !configuration_->SSID.empty () && essid_is_cached && configuration_->autoAssociate);
 
-      inherited2::change (NET_WLAN_MONITOR_STATE_ASSOCIATE);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_ASSOCIATE);
 
 reset_state:
-      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited2::stateLock_));
-        inherited2::state_ = NET_WLAN_MONITOR_STATE_IDLE;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#else
+      { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#endif
+        inherited::state_ = NET_WLAN_MONITOR_STATE_IDLE;
       } // end lock scope
 
       break;
@@ -1022,8 +1017,12 @@ reset_state:
     {
       // *NOTE*: actually 'set' intermediate states to support atomic state
       //         transition notifications
-      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited2::stateLock_));
-        inherited2::state_ = NET_WLAN_MONITOR_STATE_SCAN;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#else
+      { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#endif
+        inherited::state_ = NET_WLAN_MONITOR_STATE_SCAN;
       } // end lock scope
 
       // sanity check(s)
@@ -1074,7 +1073,7 @@ fetch_scan_result_data:
         goto fetch_scan_result_data;
       } // end IF
 
-      inherited2::change (NET_WLAN_MONITOR_STATE_SCANNED);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_SCANNED);
 #endif // ACE_WIN32 || ACE_WIN64
 
       break;
@@ -1083,8 +1082,12 @@ fetch_scan_result_data:
     {
       // *NOTE*: actually 'set' intermediate states to support atomic state
       //         transition notifications
-      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited2::stateLock_));
-        inherited2::state_ = NET_WLAN_MONITOR_STATE_ASSOCIATE;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#else
+      { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#endif
+        inherited::state_ = NET_WLAN_MONITOR_STATE_ASSOCIATE;
       } // end lock scope
 
       // sanity check(s)
@@ -1223,7 +1226,7 @@ associate:
                       ACE_TEXT (configuration_->SSID.c_str ()),
                       &result_poll_interval));
           retries_ = 0;
-          inherited2::change (NET_WLAN_MONITOR_STATE_IDLE);
+          inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
           break;
         } // end IF
         else
@@ -1239,7 +1242,7 @@ associate:
         } // end ELSE
       } // end IF
 
-      inherited2::change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
       break;
 #endif // ACE_WIN32 || ACE_WIN64
     }
@@ -1247,8 +1250,12 @@ associate:
     {
       // *NOTE*: actually 'set' intermediate states to support atomic state
       //         transition notifications
-      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited2::stateLock_));
-        inherited2::state_ = NET_WLAN_MONITOR_STATE_DISASSOCIATE;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#else
+      { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#endif
+        inherited::state_ = NET_WLAN_MONITOR_STATE_DISASSOCIATE;
       } // end lock scope
 
       std::string SSID_string = SSID ();
@@ -1277,30 +1284,38 @@ associate:
       if (configuration_->SSID.empty () || // not configured
           !essid_is_cached)                // configured SSID unknown (i.e. not cached)
       {
-        inherited2::change (NET_WLAN_MONITOR_STATE_IDLE);
+        inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
         goto reset_state_2;
       } // end IF
       else
         goto scanned;
 
 reset_state_2:
-      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited2::stateLock_));
-        inherited2::state_ = NET_WLAN_MONITOR_STATE_DISASSOCIATE;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#else
+      { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#endif
+        inherited::state_ = NET_WLAN_MONITOR_STATE_DISASSOCIATE;
       } // end lock scope
 
       break;
 
       // configured && configured SSID known (i.e. cached)
 scanned:
-      inherited2::change (NET_WLAN_MONITOR_STATE_SCANNED);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_SCANNED);
       break;
     }
     case NET_WLAN_MONITOR_STATE_CONNECT:
     {
       // *NOTE*: actually 'set' intermediate states to support atomic state
       //         transition notifications
-      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited2::stateLock_));
-        inherited2::state_ = NET_WLAN_MONITOR_STATE_CONNECT;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#else
+      { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#endif
+        inherited::state_ = NET_WLAN_MONITOR_STATE_CONNECT;
       } // end lock scope
 
       // sanity check(s)
@@ -1431,15 +1446,19 @@ dhcpctl:
       ACE_ASSERT (false); // *TODO*
 #endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
-      inherited2::change (NET_WLAN_MONITOR_STATE_CONNECTED);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_CONNECTED);
       break;
     }
     case NET_WLAN_MONITOR_STATE_DISCONNECT:
     {
       // *NOTE*: actually 'set' intermediate states to support atomic state
       //         transition notifications
-      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited2::stateLock_));
-        inherited2::state_ = NET_WLAN_MONITOR_STATE_DISCONNECT;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#else
+      { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#endif
+        inherited::state_ = NET_WLAN_MONITOR_STATE_DISCONNECT;
       } // end lock scope
 
       // sanity check(s)
@@ -1465,47 +1484,22 @@ dhcpctl:
 #endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
-      inherited2::change (NET_WLAN_MONITOR_STATE_DISASSOCIATE);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_DISASSOCIATE);
       break;
     }
     //////////////////////////////////////
     case NET_WLAN_MONITOR_STATE_INITIALIZED:
-    {
-      // *NOTE*: set state early to support atomic state transition
-      //         notifications
-      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited2::stateLock_));
-        inherited2::state_ = NET_WLAN_MONITOR_STATE_INITIALIZED;
-      } // end lock scope
-
-      if (!isActive_)
-        break; // nothing to do
-
-      std::string SSID_string = SSID ();
-      if (SSID_string.empty ())
-      {
-        inherited2::change (NET_WLAN_MONITOR_STATE_SCAN);
-        goto reset_state_3;
-      } // end IF
-      else
-        goto connected;
-
-reset_state_3:
-      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited2::stateLock_));
-        inherited2::state_ = NET_WLAN_MONITOR_STATE_DISASSOCIATE;
-      } // end lock scope
-
       break;
-
-connected:
-      inherited2::change (NET_WLAN_MONITOR_STATE_CONNECTED);
-      break;
-    }
     case NET_WLAN_MONITOR_STATE_SCANNED:
     {
       // *NOTE*: set state early to support atomic state transition
       //         notifications
-      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited2::stateLock_));
-        inherited2::state_ = NET_WLAN_MONITOR_STATE_SCANNED;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#else
+      { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#endif
+        inherited::state_ = NET_WLAN_MONITOR_STATE_SCANNED;
       } // end lock scope
 
       // sanity check(s)
@@ -1519,7 +1513,7 @@ connected:
            !ACE_OS::strcmp (configuration_->SSID.c_str (),
                             SSID_string.c_str ()))) // already associated to configured ESSID
       {
-        inherited2::change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
+        inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
         break;
       } // end IF
 
@@ -1535,7 +1529,7 @@ connected:
           essid_is_cached                && // configured SSID known (i.e. cached)
           configuration_->autoAssociate)    // auto-associate enabled
       {
-        inherited2::change (NET_WLAN_MONITOR_STATE_ASSOCIATE);
+        inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_ASSOCIATE);
         break;
       } // end IF
 
@@ -1550,7 +1544,7 @@ connected:
                     &scan_interval));
 #endif // ACE_WIN32 || ACE_WIN64
 
-      inherited2::change (NET_WLAN_MONITOR_STATE_IDLE);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
 
       break;
     }
@@ -1558,8 +1552,12 @@ connected:
     {
       // *NOTE*: set state early to support atomic state transition
       //         notifications
-      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited2::stateLock_));
-        inherited2::state_ = NET_WLAN_MONITOR_STATE_ASSOCIATED;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#else
+      { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#endif
+        inherited::state_ = NET_WLAN_MONITOR_STATE_ASSOCIATED;
       } // end lock scope
 
       // sanity check(s)
@@ -1612,12 +1610,16 @@ connected:
       }
 #endif // ACE_WIN32 || ACE_WIN64
 
-      inherited2::change (NET_WLAN_MONITOR_STATE_CONNECT);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_CONNECT);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 //reset_state:
-      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited2::stateLock_));
-        inherited2::state_ = NET_WLAN_MONITOR_STATE_ASSOCIATED;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#else
+      { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#endif
+        inherited::state_ = NET_WLAN_MONITOR_STATE_ASSOCIATED;
       } // end lock scope
 #endif
       break;
@@ -1626,8 +1628,12 @@ connected:
     {
       // *NOTE*: set state early to support atomic state transition
       //         notifications
-      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited2::stateLock_));
-        inherited2::state_ = NET_WLAN_MONITOR_STATE_CONNECTED;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#else
+      { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
+#endif
+        inherited::state_ = NET_WLAN_MONITOR_STATE_CONNECTED;
       } // end lock scope
 
       if (likely (isConnectionNotified_))
@@ -1658,7 +1664,7 @@ continue_2:
       if (unlikely (scanTimerId_ == -1))
         startScanTimer ();
 #else
-      inherited2::change (NET_WLAN_MONITOR_STATE_IDLE);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
 #endif
       break;
     }
@@ -1666,7 +1672,7 @@ continue_2:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("unknown/invalid state switch: \"%s\" --> \"%s\" --> check implementation !, returning\n"),
-                  ACE_TEXT (stateToString (inherited2::state_).c_str ()),
+                  ACE_TEXT (stateToString (inherited::state_).c_str ()),
                   ACE_TEXT (stateToString (newState_in).c_str ())));
       break;
     }
@@ -1778,7 +1784,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
     if (!ACE_OS::memcmp (&ether_addr_s.ether_addr_octet,
                          &ether_addr_2.ether_addr_octet,
                          ETH_ALEN))
-      inherited2::change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
   } // end IF
   else
   {
@@ -1790,7 +1796,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                   ACE_TEXT (SSID_in.c_str ())));
       retries_ = 0;
-      inherited2::change (NET_WLAN_MONITOR_STATE_IDLE);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
     } // end IF
     else
     {
@@ -1800,7 +1806,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                   ACE_TEXT (SSID_in.c_str ())));
       ++retries_;
-      inherited2::change (NET_WLAN_MONITOR_STATE_ASSOCIATE);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_ASSOCIATE);
     } // end ELSE
   } // end ELSE
 #endif // ACE_WIN32 || ACE_WIN64
@@ -1912,7 +1918,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
     if (!ACE_OS::memcmp (&ether_addr_s.ether_addr_octet,
                          &association_configuration.accessPointLinkLayerAddress.ether_addr_octet,
                          ETH_ALEN))
-      inherited2::change (NET_WLAN_MONITOR_STATE_IDLE);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
   } // end IF
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -2015,7 +2021,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
     if (!ACE_OS::strcmp (SSID_in.c_str (),
                          configuration_->SSID.c_str ()) &&
         !isFirstConnect_)
-      inherited2::change (NET_WLAN_MONITOR_STATE_CONNECTED);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_CONNECTED);
   } // end IF
   else
   {
@@ -2027,7 +2033,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                   ACE_TEXT (SSID_in.c_str ())));
       retries_ = 0;
-      inherited2::change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
     } // end IF
     else
     {
@@ -2037,7 +2043,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                   ACE_TEXT (SSID_in.c_str ())));
       ++retries_;
-      inherited2::change (NET_WLAN_MONITOR_STATE_CONNECT);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_CONNECT);
     } // end ELSE
   } // end ELSE
 #endif // ACE_WIN32 || ACE_WIN64
@@ -2131,7 +2137,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
   {
     if (!ACE_OS::strcmp (SSID_in.c_str (),
                          configuration_->SSID.c_str ()))
-      inherited2::change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
+      inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
   } // end IF
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -2373,7 +2379,7 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
                   ACE_TEXT ((*iterator_2).c_str ())));
 #endif // _DEBUG
 
-  inherited2::change (NET_WLAN_MONITOR_STATE_SCANNED);
+  inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_SCANNED);
 #endif // ACE_WIN32 || ACE_WIN64
 
   // synch access
@@ -2483,37 +2489,6 @@ Net_WLAN_Monitor_T<ACE_SYNCH_USE,
   ACE_UNUSED_ARG (act_p);
 }
 #else
-template <ACE_SYNCH_DECL,
-          typename TimePolicyType,
-          typename AddressType,
-          typename ConfigurationType,
-          enum Net_WLAN_MonitorAPIType MonitorAPI_e,
-          typename UserDataType>
-int
-Net_WLAN_Monitor_T<ACE_SYNCH_USE,
-                   TimePolicyType,
-                   AddressType,
-                   ConfigurationType,
-                   MonitorAPI_e,
-                   UserDataType>::svc (void)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::svc"));
-
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("(%s): monitor (group: %d, thread id: %t) starting...\n"),
-              ACE_TEXT (inherited::threadName_.c_str ()),
-              inherited::grp_id_));
-
-  change (NET_WLAN_MONITOR_STATE_IDLE);
-
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("(%s): monitor (group: %d, thread id: %t) leaving...\n"),
-              ACE_TEXT (inherited::threadName_.c_str ()),
-              inherited::grp_id_));
-
-  return 0;
-}
-
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename AddressType,

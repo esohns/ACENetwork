@@ -27,10 +27,19 @@
 
 #include "net_macros.h"
 
+#include "net_wlan_defines.h"
+
 Net_WLAN_MonitorStateMachine::Net_WLAN_MonitorStateMachine ()
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
  : inherited (&lock_,                         // lock handle
               NET_WLAN_MONITOR_STATE_INVALID) // (initial) state
- , lock_ ()
+#else
+ : inherited (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_THREAD_NAME), // thread name
+              NET_WLAN_MONITOR_THREAD_GROUP_ID,                    // group id
+              &lock_,                                              // lock handle
+              NET_WLAN_MONITOR_STATE_INVALID)                      // (initial) state
+#endif
+  , lock_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_MonitorStateMachine::Net_WLAN_MonitorStateMachine"));
 

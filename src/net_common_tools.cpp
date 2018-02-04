@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -30,7 +30,6 @@
 #include <guiddef.h>
 #include <iphlpapi.h>
 #include <mstcpip.h>
-#include <wlanapi.h>
 #else
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
@@ -38,7 +37,6 @@
 #include <linux/rtnetlink.h>
 #include <netinet/ether.h>
 #include "ifaddrs.h"
-#include "iwlib.h"
 #endif
 
 #include "ace/Dirent_Selector.h"
@@ -2082,7 +2080,7 @@ Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
                       ip_adapter_addresses_2->IfIndex));
           goto error;
         } // end IF
-        
+
         connected_interfaces.insert (std::make_pair (ip_adapter_addresses_2->Ipv4Metric,
                                                      interface_identifier));
 
@@ -3113,7 +3111,7 @@ Net_Common_Tools::sendDatagram (const ACE_INET_Addr& localSAP_in,
   ssize_t result_3 = -1;
   ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
   size_t bytes_to_send = messageBlock_in->length ();
-    
+
   handle_h = ACE_OS::socket (AF_INET,    // family
                              SOCK_DGRAM, // type
                              0);         // protocol

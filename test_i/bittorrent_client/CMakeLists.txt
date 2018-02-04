@@ -1,12 +1,10 @@
-option (GTK3_SUPPORT "enable Gtk3 support"
-        ON)
+﻿option (GTK3_SUPPORT "enable Gtk3 support" ON)
 
 if (UNIX)
  include (CheckLibraryExists)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
  set (CMAKE_THREAD_PREFER_PTHREAD ON)
  find_package (Threads)
- check_library_exists (iwlib iw_sockets_open "" HAVE_LIB_IW)
 endif ()
 
 set (ACE_LIB_FILE libACE.so)
@@ -36,7 +34,7 @@ endif ()
 set (FLEX_LIB_FILE libfl.so)
 if (UNIX)
  find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
-               HINTS /usr/lib
+               HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES x86_64-linux-gnu
                DOC "searching for ${FLEX_LIB_FILE} (system paths)")
 elseif (WIN32)
@@ -50,15 +48,11 @@ if (NOT FLEX_LIBRARY)
 # message (FATAL_ERROR "could not find ${FLEX_LIB_FILE} (was: \"${FLEX_LIBRARY}\"), aborting")
 endif ()
 
-#include (FindPkgConfig)
-#pkg_check_modules (PKGACE REQUIRED ACE)
-
 include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
 if (UNIX)
 # *NOTE*: libCommon requires libcap
  pkg_check_modules (PKG_CAP REQUIRED libcap)
- #pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
  pkg_check_modules (PKG_CURSES REQUIRED ncurses panel)
  pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libavformat libswscale)
  if (GTK3_SUPPORT)
@@ -66,9 +60,6 @@ if (UNIX)
  else ()
 # pkg_check_modules (PKG_GTK_GLADE REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0 libglade-2.0)
   pkg_check_modules (PKG_GTK2 REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0)
- endif ()
- if ((!PKG_CURSES) OR (!PKG_GTK))
-  message (FATAL_ERROR "required packages not found, aborting")
  endif ()
 # *TODO*: repair WIN32 pkgconfig support
 elseif (WIN32)
@@ -130,9 +121,13 @@ add_definitions (-DIRC_HAS_DLL)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
 if (UNIX)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
+ include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
+# *WORKAROUND*
+ add_definitions (-DNCURSES_INTERNALS)
  include_directories (${PKG_CURSES_INCLUDE_DIRS})
+
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/timer)
@@ -146,11 +141,12 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src/modules/stat)
 elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses)
+
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/timer)
@@ -239,10 +235,10 @@ if (UNIX)
  target_link_libraries (${EXECUTABLE} rt)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
  #target_link_libraries (${EXECUTABLE} ${PKG_DBUS_LIBRARIES})
- target_link_libraries (${EXECUTABLE} iw)
- target_link_libraries (${EXECUTABLE} ${FLEX_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
+# target_link_libraries (${EXECUTABLE} iw)
+# target_link_libraries (${EXECUTABLE} ${FLEX_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})
+ target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
 elseif (WIN32)
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 
@@ -285,6 +281,7 @@ if (UNIX)
  else ()
   include_directories (${PKG_GTK2_INCLUDE_DIRS})
  endif ()
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui/gtk)
 elseif (WIN32)
@@ -367,8 +364,8 @@ if (UNIX)
  target_link_libraries (${EXECUTABLE_GUI} rt)
  target_link_libraries (${EXECUTABLE_GUI} ${PKG_CAP_LIBRARIES})
  #target_link_libraries (${EXECUTABLE_GUI} ${PKG_DBUS_LIBRARIES})
- target_link_libraries (${EXECUTABLE_GUI} iw)
- target_link_libraries (${EXECUTABLE_GUI} ${FLEX_LIBRARY})
+# target_link_libraries (${EXECUTABLE_GUI} iw)
+# target_link_libraries (${EXECUTABLE_GUI} ${FLEX_LIBRARY})
  target_link_libraries (${EXECUTABLE_GUI} X11)
  target_link_libraries (${EXECUTABLE_GUI} ${PKG_FFMPEG_LIBRARIES})
  if (GTK3_SUPPORT)

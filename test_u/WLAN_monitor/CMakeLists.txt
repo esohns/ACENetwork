@@ -1,4 +1,4 @@
-if (UNIX)
+﻿if (UNIX)
  option (DBUS_SUPPORT "enable DBus support"
          OFF)
 endif ()
@@ -26,9 +26,8 @@ if (UNIX)
  set (ISC_LIB_FILE libisc.a)
  find_library (ISC_LIBRARY ${ISC_LIB_FILE}
 #               HINTS ../../../dhcpctl/dhcp-4.3.6/bind /usr/lib
-               HINTS /usr/lib
-#               PATH_SUFFIXES lib x86_64-linux-gnu
-               PATH_SUFFIXES x86_64-linux-gnu
+               HINTS /usr/lib64 /usr/lib
+               PATH_SUFFIXES dhcp x86_64-linux-gnu
                DOC "searching for ${ISC_LIB_FILE} (system paths)")
  if (NOT ISC_LIBRARY)
   message (FATAL_ERROR "could not find ${ISC_LIB_FILE}, aborting")
@@ -39,9 +38,8 @@ if (UNIX)
  set (ISC_CFG_LIB_FILE libisccfg.a)
  find_library (ISC_CFG_LIBRARY ${ISC_CFG_LIB_FILE}
 #               HINTS ../../../dhcpctl/dhcp-4.3.6/bind /usr/lib
-               HINTS /usr/lib
-#               PATH_SUFFIXES lib x86_64-linux-gnu
-               PATH_SUFFIXES x86_64-linux-gnu
+               HINTS /usr/lib64 /usr/lib
+               PATH_SUFFIXES dhcp x86_64-linux-gnu
                DOC "searching for ${ISC_CFG_LIB_FILE} (system paths)")
  if (NOT ISC_CFG_LIBRARY)
   message (FATAL_ERROR "could not find ${ISC_CFG_LIB_FILE}, aborting")
@@ -71,9 +69,10 @@ if (UNIX)
   message (STATUS "Found MIT kerberos library \"${GSS_KRB5_LIBRARY}\"")
  endif ()
 
- set (GSS_LIB_FILE libgss.so.3)
+# set (GSS_LIB_FILE libgss.so.3)
+ set (GSS_LIB_FILE libgssglue.so)
  find_library (GSS_LIBRARY ${GSS_LIB_FILE}
-               HINTS /usr/lib
+               HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES x86_64-linux-gnu
                DOC "searching for ${GSS_LIB_FILE} (system paths)")
  if (NOT GSS_LIBRARY)
@@ -85,9 +84,8 @@ if (UNIX)
  set (IRS_LIB_FILE libirs.a)
  find_library (IRS_LIBRARY ${IRS_LIB_FILE}
 #               HINTS ../../../dhcpctl/dhcp-4.3.6/bind /usr/lib
-               HINTS /usr/lib
-#               PATH_SUFFIXES lib x86_64-linux-gnu
-               PATH_SUFFIXES x86_64-linux-gnu
+               HINTS /usr/lib64 /usr/lib
+               PATH_SUFFIXES dhcp x86_64-linux-gnu
                DOC "searching for ${IRS_LIB_FILE} (system paths)")
  if (NOT IRS_LIBRARY)
   message (FATAL_ERROR "could not find ${IRS_LIB_FILE}, aborting")
@@ -109,9 +107,8 @@ if (UNIX)
  set (DNS_LIB_FILE libdns.a)
  find_library (DNS_LIBRARY ${DNS_LIB_FILE}
 #               HINTS ../../../dhcpctl/dhcp-4.3.6/bind /usr/lib
-               HINTS /usr/lib
-#               PATH_SUFFIXES lib x86_64-linux-gnu
-               PATH_SUFFIXES x86_64-linux-gnu
+               HINTS /usr/lib64 /usr/lib
+               PATH_SUFFIXES dhcp x86_64-linux-gnu
                DOC "searching for ${DNS_LIB_FILE} (system paths)")
  if (NOT DNS_LIBRARY)
   message (FATAL_ERROR "could not find ${DNS_LIB_FILE}, aborting")
@@ -122,9 +119,8 @@ if (UNIX)
  set (OMAPI_LIB_FILE libomapi.a)
  find_library (OMAPI_LIBRARY ${OMAPI_LIB_FILE}
 #               HINTS ../../../dhcpctl/dhcp-4.3.6 /usr/lib
-               HINTS /usr/lib
-#               PATH_SUFFIXES omapip x86_64-linux-gnu
-               PATH_SUFFIXES x86_64-linux-gnu
+               HINTS /usr/lib64 /usr/lib
+               PATH_SUFFIXES dhcp x86_64-linux-gnu
                DOC "searching for ${OMAPI_LIB_FILE} (system paths)")
  if (NOT OMAPI_LIBRARY)
   message (FATAL_ERROR "could not find ${OMAPI_LIB_FILE}, aborting")

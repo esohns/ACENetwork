@@ -1,4 +1,4 @@
-include (CMakeDependentOption)
+﻿include (CMakeDependentOption)
 
 if (UNIX)
  # *NOTE*: these are mutually exclusive
@@ -13,9 +13,9 @@ elseif (WIN32)
 # message (STATUS "WINDOWS_VERSION: ${WINDOWS_VERSION_MAJOR}.${WINDOWS_VERSION_MINOR}.${WINDOWS_VERSION_MICRO}")
  if (WINDOWS_VERSION_MAJOR GREATER 5)
   option (WINXP_SUPPORT "enable WinXP support (default)" OFF)
-	if (WINXP_SUPPORT)
+  if (WINXP_SUPPORT)
     add_definitions (-DWINXP_SUPPORT)
-	endif ()
+  endif ()
  endif (WINDOWS_VERSION_MAJOR GREATER 5)
 endif ()
 
@@ -33,9 +33,10 @@ if (UNIX)
   endif ()
 
   set (ISC_LIB_FILE libisc.a)
+  #set (ISC_LIB_FILE libisc.so.166)
   find_library (ISC_LIBRARY ${ISC_LIB_FILE}
-                HINTS /usr/lib
-                PATH_SUFFIXES x86_64-linux-gnu
+                HINTS /usr/lib64 /usr/lib
+                PATH_SUFFIXES dhcp x86_64-linux-gnu
                 DOC "searching for ${ISC_LIB_FILE} (system paths)")
   if (NOT ISC_LIBRARY)
    message (FATAL_ERROR "could not find ${ISC_LIB_FILE}, aborting")
@@ -45,8 +46,8 @@ if (UNIX)
 
   set (DHCPCTL_LIB_FILE libdhcpctl.a)
   find_library (DHCPCTL_LIBRARY ${DHCPCTL_LIB_FILE}
-               HINTS /usr/lib
-               PATH_SUFFIXES x86_64-linux-gnu
+               HINTS /usr/lib64 /usr/lib
+               PATH_SUFFIXES dhcp x86_64-linux-gnu
                DOC "searching for ${DHCPCTL_LIB_FILE} (system paths)")
   if (NOT DHCPCTL_LIBRARY)
    message (FATAL_ERROR "could not find ${DHCPCTL_LIB_FILE}, aborting")
@@ -100,6 +101,7 @@ endif ()
 if (UNIX)
  if (DHCLIENT_SUPPORT)
   include_directories (/usr/include/bind-export)
+  include_directories (/usr/include/dhcp)
  endif ()
  if (DBUS_SUPPORT)
   include_directories (${PKG_DBUS_INCLUDE_DIRS})

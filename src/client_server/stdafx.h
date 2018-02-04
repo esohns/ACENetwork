@@ -1,4 +1,4 @@
-// stdafx.h : include file for standard system include files,
+﻿// stdafx.h : include file for standard system include files,
 //  or project specific include files that are used frequently, but
 //      are changed infrequently
 //
@@ -19,7 +19,7 @@
 // System Library Header Files
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
-#include "ace/Log_Msg.h"
+//#include "ace/Log_Msg.h"
 
 //#if defined (LIBACENETWORK_ENABLE_VALGRIND_SUPPORT)
 #if defined (VALGRIND_SUPPORT)
@@ -27,7 +27,7 @@
 #endif
 
 // Library Header Files
-#include "common.h"
+//#include "common.h"
 #include "common_macros.h"
 #include "common_pragmas.h"
 

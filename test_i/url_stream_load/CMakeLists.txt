@@ -1,4 +1,4 @@
-option (SSL_SUPPORT "enable SSL support" OFF)
+﻿option (SSL_SUPPORT "enable SSL support" OFF)
 option (GTK3_SUPPORT "enable Gtk3 support" ON)
 
 if (UNIX)
@@ -150,16 +150,18 @@ add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
 if (UNIX)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
-
  include_directories (${PKG_CAP_INCLUDE_DIRS})
  include_directories (${PKG_LIBXML2_INCLUDE_DIRS})
+ include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
 # include_directories (${PKG_CURSES_INCLUDE_DIRS})
  if (GTK3_SUPPORT)
   include_directories (${PKG_GTK3_INCLUDE_DIRS})
  else ()
   include_directories (${PKG_GTK2_INCLUDE_DIRS})
  endif ()
+
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/timer)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui)

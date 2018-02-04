@@ -1,4 +1,4 @@
-option (SSL_SUPPORT "enable SSL support" OFF)
+﻿option (SSL_SUPPORT "enable SSL support" OFF)
 
 if (UNIX)
  include (CheckLibraryExists)
@@ -123,7 +123,7 @@ if (UNIX)
  if (DBUS_SUPPORT)
   pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
  endif ()
- pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libswscale libavutil)
+ pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libswscale)
 endif ()
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
@@ -170,11 +170,13 @@ add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
 if (UNIX)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
  if (DBUS_SUPPORT)
   include_directories (${PKG_DBUS_INCLUDE_DIRS})
  endif ()
+ include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
+
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/timer)
