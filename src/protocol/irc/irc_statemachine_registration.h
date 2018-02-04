@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -42,12 +42,16 @@ enum IRC_RegistrationStateType : int
   IRC_REGISTRATION_STATE_MAX
 };
 
+extern const char network_irc_statemachine_registration_name_string_[];
+
 class IRC_Export IRC_StateMachine_Registration
- : public Common_StateMachine_Base_T<ACE_NULL_SYNCH,
+ : public Common_StateMachine_Base_T<network_irc_statemachine_registration_name_string_,
+                                     ACE_NULL_SYNCH,
                                      enum IRC_RegistrationStateType,
                                      Common_IStateMachine_T<enum IRC_RegistrationStateType> >
 {
-  typedef Common_StateMachine_Base_T<ACE_NULL_SYNCH,
+  typedef Common_StateMachine_Base_T<network_irc_statemachine_registration_name_string_,
+                                     ACE_NULL_SYNCH,
                                      enum IRC_RegistrationStateType,
                                      Common_IStateMachine_T<enum IRC_RegistrationStateType> > inherited;
 

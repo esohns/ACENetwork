@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -37,7 +37,8 @@
 #define NET_INTERFACE_DEFAULT_ETHERNET                      "eth0"
 #define NET_INTERFACE_DEFAULT_LOOPBACK                      "lo"
 #define NET_INTERFACE_DEFAULT_PPP                           "ppp0"
-#define NET_INTERFACE_DEFAULT_WLAN                          "wlan0"
+//#define NET_INTERFACE_DEFAULT_WLAN                          "wlan0" // Debian-style
+#define NET_INTERFACE_DEFAULT_WLAN                          "wlp3s0" // openSUSE-style
 #endif
 #define NET_INTERFACE_DEFAULT_USE_LOOPBACK                  false
 

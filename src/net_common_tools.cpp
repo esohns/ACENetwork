@@ -37,6 +37,7 @@
 #include <linux/rtnetlink.h>
 #include <netinet/ether.h>
 #include "ifaddrs.h"
+#include "iwlib.h"
 #endif
 
 #include "ace/Dirent_Selector.h"
@@ -2140,51 +2141,27 @@ error:
       //         - temporary files
       //         - system(3) call
       //         --> extremely inefficient; remove ASAP
-      std::string filename_string =
-          Common_File_Tools::getTempFilename (ACE_TEXT_ALWAYS_CHAR (""));
-      std::string command_line_string = ACE_TEXT_ALWAYS_CHAR ("ip route >> ");
-      command_line_string += filename_string;
-
-      int result_2 = ACE_OS::system (ACE_TEXT (command_line_string.c_str ()));
-    //  result = execl ("/bin/sh", "sh", "-c", command, (char *) 0);
-      if (unlikely ((result_2 == -1)      ||
-                    !WIFEXITED (result_2) ||
-                    WEXITSTATUS (result_2)))
+      std::string command_line_string = ACE_TEXT_ALWAYS_CHAR ("ip route");
+      std::string ip_route_records_string;
+      if (unlikely (!Common_Tools::command (command_line_string,
+                                            ip_route_records_string)))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::system(\"%s\"): \"%m\" (result was: %d), aborting\n"),
-                    ACE_TEXT (command_line_string.c_str ()),
-                    WEXITSTATUS (result_2)));
+                    ACE_TEXT ("failed to Common_Tools::command(\"%s\"), aborting\n"),
+                    ACE_TEXT (ip_route_records_string.c_str ())));
         return ACE_TEXT_ALWAYS_CHAR ("");
       } // end IF
-      unsigned char* data_p = NULL;
-      if (unlikely (!Common_File_Tools::load (filename_string,
-                                              data_p)))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Common_File_Tools::load(\"%s\"): \"%m\", aborting\n"),
-                    ACE_TEXT (filename_string.c_str ())));
-        return ACE_TEXT_ALWAYS_CHAR ("");
-      } // end IF
-      if (unlikely (!Common_File_Tools::deleteFile (filename_string)))
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Common_File_Tools::deleteFile(\"%s\"), continuing\n"),
-                    ACE_TEXT (filename_string.c_str ())));
-
-      std::string route_record_string = reinterpret_cast<char*> (data_p);
-      delete [] data_p;
     //  ACE_DEBUG ((LM_DEBUG,
     //              ACE_TEXT ("ip data: \"%s\"\n"),
-    //              ACE_TEXT (route_record_string.c_str ())));
+    //              ACE_TEXT (ip_route_records_string.c_str ())));
 
-      std::string result;
       std::istringstream converter;
       char buffer [BUFSIZ];
       std::string regex_string =
           ACE_TEXT_ALWAYS_CHAR ("^default via ([[:digit:].]+) dev ([[:alnum:]]+)(?:.*)$");
       std::regex regex (regex_string);
       std::cmatch match_results;
-      converter.str (route_record_string);
+      converter.str (ip_route_records_string);
       do
       {
         converter.getline (buffer, sizeof (buffer));
@@ -2204,7 +2181,7 @@ error:
       if (unlikely (result.empty ()))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to retrieve default interface from route data (was: \"%s\"), aborting\n"),
-                    ACE_TEXT (route_record_string.c_str ())));
+                    ACE_TEXT (ip_route_records_string.c_str ())));
 #if defined (_DEBUG)
       else
         ACE_DEBUG ((LM_DEBUG,
@@ -2275,7 +2252,62 @@ error_2:
                     ACE_TEXT ("failed to ::WlanCloseHandle(): \"%s\", continuing\n"),
                     ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
 #else
-      ACE_ASSERT (false); // *TODO*
+#if defined (ACE_HAS_GETIFADDRS)
+      int socket_handle = -1;
+      struct iwreq iwreq_s;
+      ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+      int result_2 = -1;
+
+      socket_handle = ACE_OS::socket (AF_INET,
+                                      SOCK_STREAM,
+                                      0);
+      if (unlikely (socket_handle == -1))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::socket(AF_INET): \"%m\", aborting\n")));
+        return result;
+      } // end IF
+
+      struct ifaddrs* ifaddrs_p = NULL;
+      result_2 = ::getifaddrs (&ifaddrs_p);
+      if (unlikely (result_2 == -1))
+      {
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("failed to ::getifaddrs(): \"%m\", aborting\n")));
+        goto clean;
+      } // end IF
+      ACE_ASSERT (ifaddrs_p);
+
+      // verify the presence of Wireless Extensions
+      for (struct ifaddrs* ifaddrs_2 = ifaddrs_p;
+           ifaddrs_2;
+           ifaddrs_2 = ifaddrs_2->ifa_next)
+      {
+        // *TODO*: only tests for SIOCGIWNAME ioctl
+        ACE_OS::strncpy (iwreq_s.ifr_name,
+                         ifaddrs_2->ifa_name,
+                         IFNAMSIZ);
+        result_2 = ACE_OS::ioctl (socket_handle,
+                                  SIOCGIWNAME,
+                                  &iwreq_s);
+        if (!result_2)
+          interface_identifiers_a.push_back (ifaddrs_2->ifa_name);
+      } // end FOR
+
+clean:
+      result_2 = ACE_OS::close (socket_handle);
+      if (unlikely (result_2 == -1))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
+                    socket_handle));
+      if (likely (ifaddrs_p))
+        ::freeifaddrs (ifaddrs_p);
+#else
+    ACE_ASSERT (false);
+    ACE_NOTSUP_RETURN (false);
+
+    ACE_NOTREACHED (return false;)
+#endif /* ACE_HAS_GETIFADDRS */
 #endif
       if (likely (!interface_identifiers_a.empty ()))
         return interface_identifiers_a.front ();
@@ -2699,9 +2731,11 @@ Net_Common_Tools::setSocketBuffer (ACE_HANDLE handle_in,
 
   if (unlikely (optval != size_in))
   {
-    // *NOTE*: for some reason, Linux will actually set TWICE the size value
-    if (Common_Tools::isLinux () && (optval == (size_in * 2)))
+    // *NOTE*: (for some reason,) Linux will actually set twice the given size
+#if defined (ACE_LINUX)
+    if (likely (optval == (size_in * 2)))
       return true;
+#endif
 
     // *PORTABILITY*
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

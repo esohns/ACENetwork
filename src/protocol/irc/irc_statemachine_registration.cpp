@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -26,6 +26,11 @@
 #include "ace/Log_Msg.h"
 
 #include "net_macros.h"
+
+#include "irc_defines.h"
+
+const char network_irc_statemachine_registration_name_string_[] =
+    ACE_TEXT_ALWAYS_CHAR (IRC_STATEMACHINE_REGISTRATION_NAME);
 
 IRC_StateMachine_Registration::IRC_StateMachine_Registration ()
  : inherited (&lock_,                      // lock handle

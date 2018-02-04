@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -23,6 +23,7 @@
 #include "net_defines.h"
 #include "net_macros.h"
 
+#include "irc_defines.h"
 #include "irc_record.h"
 
 template <ACE_SYNCH_DECL,
@@ -43,10 +44,10 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
 #endif
  : inherited (stream_in)
  , crunchMessages_ (IRC_DEFAULT_CRUNCH_MESSAGES) // "crunch" messages ?
- , debugScanner_ (IRC_DEFAULT_LEX_TRACE) // trace scanning ?
- , debugParser_ (IRC_DEFAULT_YACC_TRACE) // trace parsing ?
- , driver_ (IRC_DEFAULT_LEX_TRACE,  // trace scanning ?
-            IRC_DEFAULT_YACC_TRACE) // trace parsing ?
+ , debugScanner_ (NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE) // trace scanning ?
+ , debugParser_ (NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
+ , driver_ (NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
+            NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Parser_T::IRC_Module_Parser_T"));
 
@@ -89,8 +90,8 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
   // sanity check(s)
   if (inherited::isInitialized_)
   {
-    debugScanner_ = IRC_DEFAULT_LEX_TRACE;
-    debugParser_ = IRC_DEFAULT_YACC_TRACE;
+    debugScanner_ = NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE;
+    debugParser_ = NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE;
     crunchMessages_ = IRC_DEFAULT_CRUNCH_MESSAGES;
   } // end IF
 

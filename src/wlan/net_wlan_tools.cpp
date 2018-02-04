@@ -1039,7 +1039,7 @@ Net_WLAN_Tools::isWireless (const std::string& interfaceIdentifier_in)
     result = true;
 
   result_2 = ACE_OS::close (socket_handle);
-  if (unlikely (socket_handle == -1))
+  if (unlikely (result_2 == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::close(\"%s\"): \"%m\", continuing\n"),
                 ACE_TEXT (interfaceIdentifier_in.c_str ())));
@@ -1590,9 +1590,11 @@ Net_WLAN_Tools::scan (const std::string& interfaceIdentifier_in,
 
 #if defined (ACE_LINUX)
   // (temporarily) elevate privileges to start scan
-  if (!Common_Tools::hasCapability (CAP_NET_ADMIN))
+  if (!Common_Tools::hasCapability (CAP_NET_ADMIN,
+                                    CAP_EFFECTIVE))
   {
-    if (unlikely (!Common_Tools::setCapability (CAP_NET_ADMIN)))
+    if (unlikely (!Common_Tools::setCapability (CAP_NET_ADMIN,
+                                                CAP_EFFECTIVE)))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_Tools::setCapability(%s): \"%m\", aborting\n"),

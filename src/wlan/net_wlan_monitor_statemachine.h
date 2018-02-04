@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -57,24 +57,30 @@ enum Net_WLAN_MonitorState : int
   NET_WLAN_MONITOR_STATE_MAX
 };
 
+extern const char network_wlan_statemachine_monitor_name_string_[];
+
 class Net_WLAN_MonitorStateMachine
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
- : public Common_StateMachine_T<ACE_NULL_SYNCH,
+ : public Common_StateMachine_T<network_wlan_statemachine_monitor_name_string_,
+                                ACE_NULL_SYNCH,
                                 enum Net_WLAN_MonitorState,
                                 Common_IStateMachine_T<enum Net_WLAN_MonitorState> >
 #else
- : public Common_StateMachineAsynch_T<ACE_MT_SYNCH,
+ : public Common_StateMachineAsynch_T<network_wlan_statemachine_monitor_name_string_,
+                                      ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       Common_ILock_T<ACE_MT_SYNCH>,
                                       enum Net_WLAN_MonitorState>
 #endif
 {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  typedef Common_StateMachine_T<ACE_NULL_SYNCH,
+  typedef Common_StateMachine_T<network_wlan_statemachine_monitor_name_string_,
+                                ACE_NULL_SYNCH,
                                 enum Net_WLAN_MonitorState,
                                 Common_IStateMachine_T<enum Net_WLAN_MonitorState> > inherited;
 #else
-  typedef Common_StateMachineAsynch_T<ACE_MT_SYNCH,
+  typedef Common_StateMachineAsynch_T<network_wlan_statemachine_monitor_name_string_,
+                                      ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
                                       Common_ILock_T<ACE_MT_SYNCH>,
                                       enum Net_WLAN_MonitorState> inherited;

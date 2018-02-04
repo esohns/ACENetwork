@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -44,6 +44,9 @@
 #define IRC_DEFAULT_MODULE_PARSER_NAME_STRING   "IRCParser"
 #define IRC_DEFAULT_STREAM_NAME_STRING          "IRCStream"
 
+// state-machine
+#define IRC_STATEMACHINE_REGISTRATION_NAME      "IRCStateMachineRegistration"
+
 // "crunch" messages for easier parsing ?
 // *NOTE*: this comes at the cost of alloc/free, memcopy and locking per
 //         (fragmented) message, i.e. should probably be avoided ...
@@ -59,9 +62,9 @@
 //         application to see which option proves to be more efficient...
 #define IRC_DEFAULT_CRUNCH_MESSAGES             true
 
-// output more debugging information
-#define IRC_DEFAULT_LEX_TRACE                   false
-#define IRC_DEFAULT_YACC_TRACE                  false
+//// output more debugging information
+//#define IRC_DEFAULT_LEX_TRACE                   false
+//#define IRC_DEFAULT_YACC_TRACE                  false
 
 //#define IRC_STREAM_DEF_TRACE_ENABLED       false
 #define IRC_STREAM_DEFAULT_AUTOPONG             true

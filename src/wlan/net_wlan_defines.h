@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -83,7 +83,11 @@
 #define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_WIRELESS_OBJECT_PATH         "/org/freedesktop/NetworkManager/Device/Wireless"
 #endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
+
 #define NET_WLAN_MONITOR_THREAD_NAME                                      "WLAN monitor"
 #define NET_WLAN_MONITOR_THREAD_GROUP_ID                                  21
+
+// state-machine
+#define NET_WLAN_STATEMACHINE_MONITOR_NAME                                "WLANStateMachineMonitor"
 
 #endif

@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -27,6 +27,7 @@
 #include "stream_defines.h"
 #include "stream_iallocator.h"
 
+#include "net_defines.h"
 #include "net_macros.h"
 
 #include "irc_bisector.h"
@@ -78,7 +79,7 @@ IRC_Module_Bisector_T<ACE_SYNCH_USE,
                 ACE_TEXT ("failed to yylex_init(): \"%m\", continuing\n")));
 
   // trace ?
-  IRC_Bisector_set_debug ((IRC_DEFAULT_LEX_TRACE ? 1 : 0),
+  IRC_Bisector_set_debug ((NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE ? 1 : 0),
                           context_);
 }
 

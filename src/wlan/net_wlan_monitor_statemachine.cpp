@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -28,6 +28,9 @@
 #include "net_macros.h"
 
 #include "net_wlan_defines.h"
+
+const char network_wlan_statemachine_monitor_name_string_[] =
+    ACE_TEXT_ALWAYS_CHAR (NET_WLAN_STATEMACHINE_MONITOR_NAME);
 
 Net_WLAN_MonitorStateMachine::Net_WLAN_MonitorStateMachine ()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
