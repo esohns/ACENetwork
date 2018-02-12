@@ -95,9 +95,8 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_INITIALIZED:  // monitor stopped
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         case NET_WLAN_MONITOR_STATE_SCANNED:      // (background) scan has completed
-        case NET_WLAN_MONITOR_STATE_ASSOCIATED:   // already connected (initially)
 #endif
-        case NET_WLAN_MONITOR_STATE_CONNECTED:    // already connected (monitor/ing link activity)
+        case NET_WLAN_MONITOR_STATE_ASSOCIATED:   // already connected (initially)
         {
           inherited::change (newState_in);
           return true;

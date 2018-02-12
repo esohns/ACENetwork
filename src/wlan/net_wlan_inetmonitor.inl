@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2010 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -148,7 +148,7 @@ Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("\"%s\": (MAC: %s) connected to %s (SSID: %s): %s <---> %s\n"),
+              ACE_TEXT ("\"%s\": (MAC: %s) connected to access point (MAC: %s; SSID: %s): %s <---> %s\n"),
               ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
               ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in)), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
@@ -165,7 +165,7 @@ Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
     struct ether_addr ether_addr_s =
         Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in);
     ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("\"%s\": (MAC: %s) connected to %s (SSID: %s): %s <---> %s\n"),
+                ACE_TEXT ("\"%s\": (MAC: %s) connected to access point (MAC: %s; SSID: %s): %s <---> %s\n"),
                 ACE_TEXT (interfaceIdentifier_in.c_str ()),
                 ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s), NET_LINKLAYER_802_11).c_str ()),
                 ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&(*iterator).second.second), NET_LINKLAYER_802_11).c_str ()),
@@ -173,7 +173,7 @@ Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
   } // end lock scope
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 continue_:
   ;
 #endif // _DEBUG

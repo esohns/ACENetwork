@@ -30,6 +30,7 @@
 #else
 #include <sys/capability.h>
 #include <linux/capability.h>
+//#include <linux/ieee80211.h>
 #include <net/if_arp.h>
 #include "ifaddrs.h"
 #include "iwlib.h"
@@ -1170,6 +1171,8 @@ clean:
 #else
   struct iwreq iwreq_s;
   ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  struct iw_mlme iw_mlme_s;
+  ACE_OS::memset (&iw_mlme_s, 0, sizeof (struct iw_mlme));
   ACE_HANDLE socket_handle = handle_in;
   bool close_handle = false;
   int result_2 = -1;
@@ -1227,17 +1230,15 @@ clean:
   } // end IF
 
   ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
-  ACE_OS::strncpy (iwreq_s.ifr_name,
+  ACE_OS::strncpy (iwreq_s.ifr_ifrn.ifrn_name,
                    interfaceIdentifier_in.c_str (),
                    IFNAMSIZ);
 
-  // step1: set BSSID (AP MAC) ?
+  // step1: set BSSID (AP MAC)
   iwreq_s.u.ap_addr.sa_family = ARPHRD_ETHER;
-  if (Net_Common_Tools::isAny (APMACAddress_in))
-    goto continue_;
   ACE_OS::memcpy (iwreq_s.u.ap_addr.sa_data,
-                  &APMACAddress_in,
-                  sizeof (struct ether_addr));
+                  &APMACAddress_in.ether_addr_octet,
+                  ETH_ALEN);
   result_2 = ACE_OS::ioctl (socket_handle,
                             SIOCSIWAP,
                             &iwreq_s);
@@ -1253,14 +1254,25 @@ clean:
     } // end IF
   } // end IF
 
-continue_:
   // step2: set ESSID
   ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
-  ACE_OS::strncpy (iwreq_s.ifr_name,
+  ACE_OS::strncpy (iwreq_s.ifr_ifrn.ifrn_name,
                    interfaceIdentifier_in.c_str (),
                    IFNAMSIZ);
   iwreq_s.u.essid.flags = 1;
   iwreq_s.u.essid.length = SSID_in.size ();
+//  if (drv->we_version_compiled < 21) {
+//		/* For historic reasons, set SSID length to include one extra
+//		 * character, C string nul termination, even though SSID is
+//		 * really an octet string that should not be presented as a C
+//		 * string. Some Linux drivers decrement the length by one and
+//		 * can thus end up missing the last octet of the SSID if the
+//		 * length is not incremented here. WE-21 changes this to
+//		 * explicitly require the length _not_ to include nul
+//		 * termination. */
+//		if (ssid_len)
+//			ssid_len++;
+//}
   iwreq_s.u.essid.pointer = const_cast<char*> (SSID_in.c_str ());
   result_2 = ACE_OS::ioctl (socket_handle,
                             SIOCSIWESSID,
@@ -1277,9 +1289,40 @@ continue_:
     } // end IF
   } // end IF
 
-  // step3: commit pending changes
+  // step3: MLME associate
   ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
-  ACE_OS::strncpy (iwreq_s.ifr_name,
+  ACE_OS::strncpy (iwreq_s.ifr_ifrn.ifrn_name,
+                   interfaceIdentifier_in.c_str (),
+                   IFNAMSIZ);
+//  ACE_OS::memset (&iw_mlme_s, 0, sizeof (struct iw_mlme));
+  iw_mlme_s.addr.sa_family = ARPHRD_ETHER;
+  ACE_OS::memcpy (iw_mlme_s.addr.sa_data,
+                  &APMACAddress_in.ether_addr_octet,
+                  ETH_ALEN);
+  iw_mlme_s.cmd = IW_MLME_ASSOC;
+//    iwreq_s.u.data.flags = 0;Stream_IStream_t
+//  iw_mlme_s.reason_code = 0; // *TODO*: include <linux/ieee80211.h, see above>
+  iwreq_s.u.data.length = sizeof (struct iw_mlme);
+  iwreq_s.u.data.pointer = &iw_mlme_s;
+  result_2 = ACE_OS::ioctl (socket_handle,
+                            SIOCSIWMLME,
+                            &iwreq_s);
+  if (unlikely (result_2 == -1))
+  {
+    error = ACE_OS::last_error ();
+    if ((error != ENOTSUP) && // 95 *TODO*
+        (error != EALREADY))  // 114
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWMLME): \"%m\", aborting\n"),
+                  socket_handle));
+      goto clean;
+    } // end IF
+  } // end IF
+
+  // step4: commit pending changes
+  ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+  ACE_OS::strncpy (iwreq_s.ifr_ifrn.ifrn_name,
                    interfaceIdentifier_in.c_str (),
                    IFNAMSIZ);
   result_2 = ACE_OS::ioctl (socket_handle,
@@ -1345,6 +1388,9 @@ Net_WLAN_Tools::disassociate (const std::string& interfaceIdentifier_in,
   DWORD result_2 = 0;
 #else
   struct iwreq iwreq_s;
+  std::string essid_string;
+  struct iw_mlme iw_mlme_s;
+  struct ether_addr interface_mac_address_s;
   ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
   ACE_HANDLE socket_handle = handle_in;
   int result_2 = -1;
@@ -1406,12 +1452,36 @@ Net_WLAN_Tools::disassociate (const std::string& interfaceIdentifier_in,
       goto clean;
     } // end IF
 #else
-    // step1: reset BSSID (AP MAC)
     ACE_ASSERT ((*iterator).size () <= IFNAMSIZ);
-    ACE_OS::strncpy (iwreq_s.ifr_name,
+    ACE_OS::strncpy (iwreq_s.ifr_ifrn.ifrn_name,
+                     (*iterator).c_str (),
+                     IFNAMSIZ);
+
+    // step1: reset ESSID
+//    iwreq_s.u.essid.flags = 0; // --> promiscuous
+    iwreq_s.u.essid.pointer = const_cast<char*> (essid_string.c_str ());
+    result_2 = ACE_OS::ioctl (socket_handle,
+                              SIOCSIWESSID,
+                              &iwreq_s);
+    if (unlikely (result_2 == -1))
+    {
+      error = ACE_OS::last_error ();
+      if (error != EALREADY) // 114
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWESSID): \"%m\", aborting\n"),
+                    socket_handle));
+        goto clean;
+      } // end IF
+    } // end IF
+
+    // step2: reset BSSID (AP MAC)
+    ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+    ACE_OS::strncpy (iwreq_s.ifr_ifrn.ifrn_name,
                      (*iterator).c_str (),
                      IFNAMSIZ);
     iwreq_s.u.ap_addr.sa_family = ARPHRD_ETHER;
+//    ACE_OS::memset (iwreq_s.u.ap_addr.sa_data, 0, ETH_ALEN);
     result_2 = ACE_OS::ioctl (socket_handle,
                               SIOCSIWAP,
                               &iwreq_s);
@@ -1427,9 +1497,73 @@ Net_WLAN_Tools::disassociate (const std::string& interfaceIdentifier_in,
       } // end IF
     } // end IF
 
-    // step2: commit pending changes
+    // step3: MLME deauthenticate
     ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
-    ACE_OS::strncpy (iwreq_s.ifr_name,
+    ACE_OS::strncpy (iwreq_s.ifr_ifrn.ifrn_name,
+                     (*iterator).c_str (),
+                     IFNAMSIZ);
+    ACE_OS::memset (&iw_mlme_s, 0, sizeof (struct iw_mlme));
+    interface_mac_address_s =
+        Net_Common_Tools::interfaceToLinkLayerAddress (*iterator);
+    iw_mlme_s.addr.sa_family = ARPHRD_ETHER;
+    ACE_OS::memcpy (iw_mlme_s.addr.sa_data,
+                    &interface_mac_address_s.ether_addr_octet,
+                    sizeof (struct ether_addr));
+    iw_mlme_s.cmd = IW_MLME_DEAUTH;
+//    iwreq_s.u.data.flags = 0;
+    iw_mlme_s.reason_code = 3; // *TODO*: include <linux/ieee80211.h, see above>
+    iwreq_s.u.data.length = sizeof (struct iw_mlme);
+    iwreq_s.u.data.pointer = &iw_mlme_s;
+    result_2 = ACE_OS::ioctl (socket_handle,
+                              SIOCSIWMLME,
+                              &iwreq_s);
+    if (unlikely (result_2 == -1))
+    {
+      error = ACE_OS::last_error ();
+      if (error != EALREADY) // 114
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWMLME): \"%m\", aborting\n"),
+                    socket_handle));
+        goto clean;
+      } // end IF
+    } // end IF
+
+    // step4: MLME disassociate
+    ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+    ACE_OS::strncpy (iwreq_s.ifr_ifrn.ifrn_name,
+                     (*iterator).c_str (),
+                     IFNAMSIZ);
+    ACE_OS::memset (&iw_mlme_s, 0, sizeof (struct iw_mlme));
+//    interface_mac_address_s =
+//        Net_Common_Tools::interfaceToLinkLayerAddress (*iterator);
+    iw_mlme_s.addr.sa_family = ARPHRD_ETHER;
+    ACE_OS::memcpy (iw_mlme_s.addr.sa_data,
+                    &interface_mac_address_s.ether_addr_octet,
+                    sizeof (struct ether_addr));
+    iw_mlme_s.cmd = IW_MLME_DISASSOC;
+//    iwreq_s.u.data.flags = 0;
+    iw_mlme_s.reason_code = 3; // *TODO*: include <linux/ieee80211.h, see above>
+    iwreq_s.u.data.length = sizeof (struct iw_mlme);
+    iwreq_s.u.data.pointer = &iw_mlme_s;
+    result_2 = ACE_OS::ioctl (socket_handle,
+                              SIOCSIWMLME,
+                              &iwreq_s);
+    if (unlikely (result_2 == -1))
+    {
+      error = ACE_OS::last_error ();
+      if (error != EALREADY) // 114
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWMLME): \"%m\", aborting\n"),
+                    socket_handle));
+        goto clean;
+      } // end IF
+    } // end IF
+
+    // step5: commit pending changes
+    ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
+    ACE_OS::strncpy (iwreq_s.ifr_ifrn.ifrn_name,
                      (*iterator).c_str (),
                      IFNAMSIZ);
     result_2 = ACE_OS::ioctl (socket_handle,

@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -170,6 +170,13 @@ class Net_Common_Tools
   // transport layer
   static std::string TransportLayerTypeToString (enum Net_TransportLayerType);
 
+  // *** UDP ***
+
+  // *NOTE*: uses sendto(); does not send message block continuations ATM
+  static bool sendDatagram (const ACE_INET_Addr&, // local SAP (may be 'any')
+                            const ACE_INET_Addr&, // remote SAP
+                            ACE_Message_Block*);  // data
+
   // session layer (and above)
   static bool getHostname (std::string&); // return value: hostname
 
@@ -226,15 +233,15 @@ class Net_Common_Tools
   static ACE_INET_Addr getBoundAddress (ACE_HANDLE);
   static int getProtocol (ACE_HANDLE); // socket handle
 
-  // --- UDP ---
-
-  // *NOTE*: uses sendto(); does not send message block continuations ATM
-  static bool sendDatagram (const ACE_INET_Addr&, // local SAP (may be 'any')
-                            const ACE_INET_Addr&, // remote SAP
-                            ACE_Message_Block*);  // data
-
 //  // stream
 //  static std::string generateUniqueName (const std::string&); // prefix
+
+  // --- OS services ---
+#if defined (ACE_LINUX)
+  // *NOTE*: these use 'systemctl'
+  static bool isNetworkManagerRunning ();
+  static void toggleNetworkManager (bool); // status
+#endif
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools ())

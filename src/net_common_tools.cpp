@@ -3370,3 +3370,76 @@ Net_Common_Tools::URLToHostName (const std::string& URL_in,
 
 //  return result;
 //}
+
+#if defined (ACE_LINUX)
+bool
+Net_Common_Tools::isNetworkManagerRunning ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::isNetworkManagerRunning"));
+
+  std::string commandline_string =
+      ACE_TEXT_ALWAYS_CHAR ("systemctl status NetworkManager");
+  std::string output_string;
+  if (unlikely (!Common_Tools::command (commandline_string,
+                                        output_string)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_Tools::command(\"%s\"), aborting\n"),
+                ACE_TEXT (commandline_string.c_str ())));
+    return false; // *TODO*: avoid false negative
+  } // end IF
+
+  std::istringstream converter;
+  char buffer [BUFSIZ];
+  std::string regex_string =
+      ACE_TEXT_ALWAYS_CHAR ("^   Active: (.+) \\((.+)\\) since (.+); (.+) ago$");
+  std::regex regex (regex_string);
+  std::cmatch match_results;
+  converter.str (output_string);
+  std::string status_string;
+  do
+  {
+    converter.getline (buffer, sizeof (buffer));
+    if (likely (!std::regex_match (buffer,
+                                   match_results,
+                                   regex,
+                                   std::regex_constants::match_default)))
+      continue;
+    ACE_ASSERT (match_results.ready () && !match_results.empty ());
+    ACE_ASSERT (match_results[1].matched);
+    ACE_ASSERT (match_results[2].matched);
+    ACE_ASSERT (match_results[3].matched);
+    ACE_ASSERT (match_results[4].matched);
+
+    status_string = match_results[1];
+    if (ACE_OS::strcmp (status_string.c_str (),
+                        ACE_TEXT_ALWAYS_CHAR ("active")))
+      break;
+    status_string = match_results[2];
+    if (ACE_OS::strcmp (status_string.c_str (),
+                        ACE_TEXT_ALWAYS_CHAR ("running")))
+      break;
+    return true;
+  } while (!converter.fail ());
+
+  return false;
+}
+
+void
+Net_Common_Tools::toggleNetworkManager (bool toggle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::isNetworkManagerRunning"));
+
+  std::string commandline_string =
+      ACE_TEXT_ALWAYS_CHAR ("systemctl ");
+  commandline_string += (toggle_in ? ACE_TEXT_ALWAYS_CHAR ("start")
+                                   : ACE_TEXT_ALWAYS_CHAR ("stop"));
+  commandline_string += ACE_TEXT_ALWAYS_CHAR (" NetworkManager");
+  std::string output_string;
+  if (unlikely (!Common_Tools::command (commandline_string,
+                                        output_string)))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_Tools::command(\"%s\"), returning\n"),
+                ACE_TEXT (commandline_string.c_str ())));
+}
+#endif
