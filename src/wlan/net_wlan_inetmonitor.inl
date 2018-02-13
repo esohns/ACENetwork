@@ -25,14 +25,20 @@
 #include "net_common_tools.h"
 #include "net_macros.h"
 
-template <ACE_SYNCH_DECL,
+template <typename ConfigurationType,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
-          typename ConfigurationType,
+#endif
           enum Net_WLAN_MonitorAPIType MonitorAPI_e,
           typename UserDataType>
-Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
+Net_WLAN_InetMonitor_T<ConfigurationType,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                       ACE_SYNCH_USE,
                        TimePolicyType,
-                       ConfigurationType,
+#endif
                        MonitorAPI_e,
                        UserDataType>::Net_WLAN_InetMonitor_T ()
  : inherited ()
@@ -43,15 +49,21 @@ Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
 
 //////////////////////////////////////////
 
-template <ACE_SYNCH_DECL,
+template <typename ConfigurationType,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
-          typename ConfigurationType,
+#endif
           enum Net_WLAN_MonitorAPIType MonitorAPI_e,
           typename UserDataType>
 void
-Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
+Net_WLAN_InetMonitor_T<ConfigurationType,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                       ACE_SYNCH_USE,
                        TimePolicyType,
-                       ConfigurationType,
+#endif
                        MonitorAPI_e,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                        UserDataType>::onConnect (REFGUID interfaceIdentifier_in,
@@ -156,11 +168,11 @@ Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
 #else
-  typename inherited::SSIDS_TO_INTERFACEIDENTIFIER_MAP_CONST_ITERATOR_T iterator;
+  Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator;
   { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_);
     iterator =
-      inherited::SSIDsToInterfaceIdentifier_.find (inherited::configuration_->SSID);
-    if (unlikely (iterator == inherited::SSIDsToInterfaceIdentifier_.end ()))
+      inherited::SSIDCache_.find (inherited::configuration_->SSID);
+    if (unlikely (iterator == inherited::SSIDCache_.end ()))
       goto continue_; // *NOTE*: nost probable reason: not scanned yet (connected on start ?)
     struct ether_addr ether_addr_s =
         Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in);

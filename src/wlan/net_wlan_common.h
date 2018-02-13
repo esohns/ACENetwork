@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -64,6 +64,56 @@ struct Net_WLAN_IEEE802_11_InformationElement
 #endif
 #if defined (_MSC_VER)
 #pragma pack (pop)
+#endif
+
+struct Net_WLAN_AssociationConfiguration
+{
+  Net_WLAN_AssociationConfiguration ()
+   : accessPointLinkLayerAddress ()
+   , signalQuality (0)
+  {
+    ACE_OS::memset (&accessPointLinkLayerAddress,
+                    0,
+                    sizeof (struct ether_addr));
+  };
+
+  struct ether_addr   accessPointLinkLayerAddress;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  WLAN_SIGNAL_QUALITY signalQuality;
+#else
+  unsigned int        signalQuality;
+#endif
+};
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+typedef std::multimap<std::string,
+                      std::pair<struct _GUID, struct Net_WLAN_AssociationConfiguration> > Net_WLAN_SSIDToInterfaceIdentifier_t;
+#else
+typedef std::multimap<std::string,
+                      std::pair<std::string, struct Net_WLAN_AssociationConfiguration> > Net_WLAN_SSIDToInterfaceIdentifier_t;
+#endif
+typedef Net_WLAN_SSIDToInterfaceIdentifier_t::const_iterator Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t;
+typedef Net_WLAN_SSIDToInterfaceIdentifier_t::iterator Net_WLAN_SSIDToInterfaceIdentifierIterator_t;
+typedef std::pair<Net_WLAN_SSIDToInterfaceIdentifier_t::iterator, bool> Net_WLAN_SSIDToInterfaceIdentifierResult_t;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+typedef std::pair<std::string,
+                  std::pair <struct _GUID, struct Net_WLAN_AssociationConfiguration> > Net_WLAN_SSIDToInterfaceIdentifierEntry_t;
+struct Net_WLAN_SSIDToInterfaceIdentifierFindPredicate
+ : public std::binary_function<Net_WLAN_SSIDToInterfaceIdentifierEntry_t,
+                               struct _GUID,
+                               bool>
+{
+  inline bool operator() (const Net_WLAN_SSIDToInterfaceIdentifierEntry_t& entry_in, struct _GUID value_in) const { return InlineIsEqualGUID (entry_in.second.first, value_in); }
+};
+#else
+typedef std::pair<std::string,
+                  std::pair <std::string, struct Net_WLAN_AssociationConfiguration> > Net_WLAN_SSIDToInterfaceIdentifierEntry_t;
+struct Net_WLAN_SSIDToInterfaceIdentifierFindPredicate
+ : public std::binary_function<Net_WLAN_SSIDToInterfaceIdentifierEntry_t,
+                               std::string,
+                               bool>
+{
+  inline bool operator() (const Net_WLAN_SSIDToInterfaceIdentifierEntry_t& entry_in, std::string value_in) const { return entry_in.second.first == value_in; }
+};
 #endif
 
 typedef std::vector<std::string> Net_WLAN_SSIDs_t;

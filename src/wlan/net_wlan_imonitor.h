@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -131,11 +131,11 @@ class Net_WLAN_IMonitorBase
   // *IMPORTANT NOTE*: does not block; results are reported by callback (see:
   //                   subscribe())
   // *NOTE*: effectively does the following:
-  //         - disconnect from any AP and reconfigure the interface
-  //           (if any)/AP/SSID (if different)
+  //         - disconnect from any AP (if associated and SSID is ""/different)
+  //         - reconfigure the interface and SSID (if any/different)
   //         - set the 'auto-associate' flag
-  //         - resume scanning; this will trigger association as soon as the
-  //           AP/SSID combination is detected on the given/any interface
+  //         - resume scanning
+  //         --> associate as soon as the given AP/SSID combination is detected
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual bool associate (REFGUID,                  // interface identifier {GUID_NULL: any}
 #else
@@ -146,8 +146,8 @@ class Net_WLAN_IMonitorBase
   // *IMPORTANT NOTE*: does not block; results are reported by callback (see:
   //                   subscribe())
   // *NOTE*: effectively does the following:
-  //         - disconnect from any AP, reconfigure the interface (if any) and
-  //           reset the AP/SSID
+  //         - disconnect from any AP (if associated)
+  //         - reconfigure the interface and reset the SSID
   //         - reset the 'auto-associate' flag
   //         - resume scanning
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -159,11 +159,11 @@ class Net_WLAN_IMonitorBase
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual struct _GUID interfaceIdentifier () const = 0; // returns currently monitored interface (if any)
 #else
-  virtual std::string interfaceIdentifier () const = 0;
+  virtual std::string interfaceIdentifier () const = 0; // returns currently monitored interface (if any)
 #endif
   virtual std::string SSID () const = 0; // returns currently associated (E)SSID (if any)
 
-  virtual Net_WLAN_SSIDs_t SSIDs () const = 0; // returns (E)SSID(s) published by the AP(s) in range (if any)
+  virtual Net_WLAN_SSIDs_t SSIDs () const = 0; // returns (E)SSID(s) published by the AP(s) within range
 };
 
 template <typename AddressType,

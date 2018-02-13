@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
 *   Copyright (C) 2010 by Erik Sohns   *
 *   erik.sohns@web.de   *
 *                                                                         *
@@ -35,38 +35,51 @@
 
 #include "net_wlan_monitor.h"
 
-template <ACE_SYNCH_DECL,
+template <typename ConfigurationType,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+          ////////////////////////////////
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
-          typename ConfigurationType,
+#endif
           ////////////////////////////////
           enum Net_WLAN_MonitorAPIType MonitorAPI_e,
           ////////////////////////////////
           typename UserDataType>
 class Net_WLAN_InetMonitor_T
- : public Net_WLAN_Monitor_T<ACE_SYNCH_USE,
-                             TimePolicyType,
-                             ACE_INET_Addr,
+ : public Net_WLAN_Monitor_T<ACE_INET_Addr,
                              ConfigurationType,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                             ACE_SYNCH_USE,
+                             TimePolicyType,
+#endif
                              MonitorAPI_e,
                              UserDataType>
 {
   // singleton has access to the ctor/dtors
-  friend class ACE_Singleton<Net_WLAN_InetMonitor_T<ACE_SYNCH_USE,
+  friend class ACE_Singleton<Net_WLAN_InetMonitor_T<ConfigurationType,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                                                    ACE_SYNCH_USE,
                                                     TimePolicyType,
-                                                    ConfigurationType,
+#endif
                                                     MonitorAPI_e,
                                                     UserDataType>,
                              ACE_SYNCH_MUTEX>;
 
-  typedef Net_WLAN_Monitor_T<ACE_SYNCH_USE,
-                             TimePolicyType,
-                             ACE_INET_Addr,
+  typedef Net_WLAN_Monitor_T<ACE_INET_Addr,
                              ConfigurationType,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                             ACE_SYNCH_USE,
+                             TimePolicyType,
+#endif
                              MonitorAPI_e,
                              UserDataType> inherited;
 
  public:
-  inline virtual ~Net_WLAN_InetMonitor_T () {};
+  inline virtual ~Net_WLAN_InetMonitor_T () {}
 
  private:
   Net_WLAN_InetMonitor_T ();

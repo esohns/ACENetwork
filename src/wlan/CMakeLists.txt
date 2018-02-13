@@ -1,18 +1,18 @@
-﻿include (CMakeDependentOption)
+﻿#include (CMakeDependentOption)
 
 if (UNIX)
- # *NOTE*: these are mutually exclusive
- option (DHCLIENT_SUPPORT "enable ISC dhclient support (default)" ON)
+ option (DBUS_SUPPORT "enable DBus support" ON)
+ option (DHCLIENT_SUPPORT "enable ISC dhclient support" ON)
 # option (DBUS_SUPPORT "enable DBus support" OFF)
  # *NOTE*: implies DHCLIENT_SUPPORT off
- CMAKE_DEPENDENT_OPTION (DBUS_SUPPORT "enable DBus support" OFF
-                         "NOT DHCLIENT_SUPPORT" OFF)
+# CMAKE_DEPENDENT_OPTION (DBUS_SUPPORT "enable DBus support" OFF
+#                         "NOT DHCLIENT_SUPPORT" OFF)
 elseif (WIN32)
  include (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/scripts/cmake_macros.txt)
  get_WIN32_Version (WINDOWS_VERSION_MAJOR WINDOWS_VERSION_MINOR WINDOWS_VERSION_MICRO)
 # message (STATUS "WINDOWS_VERSION: ${WINDOWS_VERSION_MAJOR}.${WINDOWS_VERSION_MINOR}.${WINDOWS_VERSION_MICRO}")
  if (WINDOWS_VERSION_MAJOR GREATER 5)
-  option (WINXP_SUPPORT "enable WinXP support (default)" OFF)
+  option (WINXP_SUPPORT "enable WinXP support" OFF)
   if (WINXP_SUPPORT)
     add_definitions (-DWINXP_SUPPORT)
   endif ()
@@ -20,6 +20,9 @@ elseif (WIN32)
 endif ()
 
 if (UNIX)
+ if (DBUS_SUPPORT)
+  add_definitions (-DDBUS_SUPPORT)
+ endif (DBUS_SUPPORT)
  if (DHCLIENT_SUPPORT)
   set (JSON_LIB_FILE libjson-c.so.3)
   find_library (JSON_LIBRARY ${JSON_LIB_FILE}
@@ -55,11 +58,8 @@ if (UNIX)
    message (STATUS "Found dhcpctl library \"${DHCPCTL_LIBRARY}\"")
   endif ()
   add_definitions (-DDHCLIENT_SUPPORT)
- endif ()
- if (DBUS_SUPPORT)
-  add_definitions (-DDBUS_SUPPORT)
- endif ()
-endif ()
+ endif (DHCLIENT_SUPPORT)
+endif (UNIX)
 
 include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
@@ -84,8 +84,10 @@ if (NOT EXISTS ${Common_DIR})
  message (FATAL_ERROR "could not find package \"Common\", aborting")
 endif ()
 add_definitions (-DCOMMON_HAS_DLL)
-if (DBUS_SUPPORT)
- add_definitions (-DCOMMON_DBUS_HAS_DLL)
+if (UNIX)
+ if (DBUS_SUPPORT)
+  add_definitions (-DCOMMON_DBUS_HAS_DLL)
+ endif ()
 endif ()
 #find_package (CommonXML ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
 #              REQUIRED
@@ -99,15 +101,15 @@ endif ()
 #add_definitions (-DCOMMONXML_HAS_DLL)
 
 if (UNIX)
- if (DHCLIENT_SUPPORT)
-  include_directories (/usr/include/bind-export)
-  include_directories (/usr/include/dhcp)
- endif ()
  if (DBUS_SUPPORT)
   include_directories (${PKG_DBUS_INCLUDE_DIRS})
   include_directories (${PKG_NETWORKMANAGER_INCLUDE_DIRS})
 
   include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/dbus)
+ endif ()
+ if (DHCLIENT_SUPPORT)
+  include_directories (/usr/include/bind-export)
+  include_directories (/usr/include/dhcp)
  endif ()
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/xml)
@@ -132,6 +134,9 @@ set (${PROJECT_NAME}_WLAN_LIB_SRCS
      net_wlan_monitor.cpp
      net_wlan_monitor.h
      net_wlan_monitor.inl
+     net_wlan_monitor_base.cpp
+     net_wlan_monitor_base.h
+     net_wlan_monitor_base.inl
      net_wlan_monitor_statemachine.cpp
      net_wlan_monitor_statemachine.h
      net_wlan_tools.cpp
@@ -192,6 +197,8 @@ set (${PROJECT_NAME}_WLAN_LIB_HDRS
      net_wlan_inetmonitor.inl
      net_wlan_monitor.h
      net_wlan_monitor.inl
+     net_wlan_monitor_base.h
+     net_wlan_monitor_base.inl
      net_wlan_monitor_statemachine.h
      net_wlan_tools.h)
 if (WIN32)
