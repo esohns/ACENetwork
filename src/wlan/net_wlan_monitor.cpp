@@ -566,4 +566,309 @@ continue_:
 //  Net_WLAN_IMonitorCB* iwlan_cb_p = static_cast<Net_WLAN_IMonitorCB*> (userData_in);
 //}
 #endif // DBUS_SUPPORT
+
+int
+network_wlan_nl80211_error_cb (struct sockaddr_nl* address_in,
+                               struct nlmsgerr* message_in,
+                               void* argument_in)
+{
+  //  NETWORK_TRACE (ACE_TEXT ("network_wlan_nl80211_error_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (address_in);
+  ACE_ASSERT (message_in);
+  ACE_ASSERT (argument_in);
+
+  Net_Netlink_Addr netlink_address;
+  netlink_address.set_addr (address_in,
+                            sizeof (struct sockaddr_nl));
+  ACE_TCHAR buffer_a[BUFSIZ];
+  int result = netlink_address.addr_to_string (buffer_a,
+                                               sizeof (buffer_a),
+                                               1);
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", continuing\n")));
+    ACE_OS::memset (buffer_a, 0, sizeof (buffer_a));
+  } // end IF
+  struct genlmsghdr* genlmsghdr_p =
+      static_cast<struct genlmsghdr*> (nlmsg_data (&message_in->msg));
+  ACE_ASSERT (genlmsghdr_p);
+  int* result_p = static_cast<int*> (argument_in);
+  struct nlattr* nlattr_a[NLMSGERR_ATTR_MAX + 1];
+  nla_parse (nlattr_a,
+             NLMSGERR_ATTR_MAX,
+             genlmsg_attrdata (genlmsghdr_p, 0),
+             genlmsg_attrlen (genlmsghdr_p, 0),
+             NULL);
+  ACE_ASSERT (nlattr_a[NLMSGERR_ATTR_MSG]);
+
+  // *NOTE*: kernel returns negative errno
+  ACE_DEBUG ((LM_ERROR,
+              ACE_TEXT ("\"%s\": nl80211 error: \"%s\" (errno: \"%s\" (%d)), stopping\n"),
+              buffer_a,
+              ACE_TEXT (nla_get_string (nlattr_a[NLMSGERR_ATTR_MSG])),
+              ACE_TEXT (ACE_OS::strerror ( -message_in->error)),
+              message_in->error));
+
+  *result_p = message_in->error;
+
+  return NL_STOP;
+}
+
+int
+network_wlan_nl80211_finish_cb (struct nl_msg* message_in,
+                                void* argument_in)
+{
+  //  NETWORK_TRACE (ACE_TEXT ("network_wlan_nl80211_finish_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (message_in);
+  ACE_ASSERT (argument_in);
+
+  ACE_UNUSED_ARG (message_in);
+
+  int* result_p = static_cast<int*> (argument_in);
+  *result_p = 0;
+
+  return NL_SKIP;
+}
+
+int
+network_wlan_nl80211_ack_cb (struct nl_msg* message_in,
+                             void* argument_in)
+{
+  //  NETWORK_TRACE (ACE_TEXT ("network_wlan_nl80211_ack_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (message_in);
+  ACE_ASSERT (argument_in);
+
+  ACE_UNUSED_ARG (message_in);
+
+  int* result_p = static_cast<int*> (argument_in);
+  *result_p = 0;
+
+  return NL_STOP;
+}
+
+int
+network_wlan_nl80211_no_seq_check_cb (struct nl_msg* message_in,
+                                      void* argument_in)
+{
+  //  NETWORK_TRACE (ACE_TEXT ("network_wlan_nl80211_no_seq_check_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (message_in);
+  ACE_ASSERT (argument_in);
+
+  ACE_UNUSED_ARG (message_in);
+  ACE_UNUSED_ARG (argument_in);
+
+  return NL_OK;
+}
+
+int
+network_wlan_nl80211_family_cb (struct nl_msg* message_in,
+                                void* argument_in)
+{
+  //  NETWORK_TRACE (ACE_TEXT ("network_wlan_nl80211_family_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (message_in);
+  ACE_ASSERT (argument_in);
+
+  // Callback for NL_CB_VALID within nl_get_multicast_id(). From http://sourcecodebrowser.com/iw/0.9.14/genl_8c.html.
+  struct nlattr* nlattr_a[CTRL_ATTR_MAX + 1];
+  struct genlmsghdr* genlmsghdr_p =
+      static_cast<struct genlmsghdr*> (nlmsg_data (nlmsg_hdr (message_in)));
+  ACE_ASSERT (genlmsghdr_p);
+  nla_parse (nlattr_a,
+             CTRL_ATTR_MAX,
+             genlmsg_attrdata (genlmsghdr_p, 0),
+             genlmsg_attrlen (genlmsghdr_p, 0),
+             NULL);
+  if (!nlattr_a[CTRL_ATTR_MCAST_GROUPS])
+    return NL_SKIP;
+
+  struct nlattr* nlattr_p = NULL;
+  int rem_mcgrp = 0;
+  struct Net_WLAN_nl80211_MulticastHandlerArguments* arguments_p =
+      static_cast<struct Net_WLAN_nl80211_MulticastHandlerArguments*> (argument_in);
+  ACE_ASSERT (!arguments_p->group.empty ());
+  nla_for_each_nested (nlattr_p, nlattr_a[CTRL_ATTR_MCAST_GROUPS], rem_mcgrp)
+  { ACE_ASSERT (nlattr_p);
+    struct nlattr* nlattr_2[CTRL_ATTR_MCAST_GRP_MAX + 1];
+    nla_parse (nlattr_2,
+               CTRL_ATTR_MCAST_GRP_MAX,
+               static_cast<struct nlattr*> (nla_data (nlattr_p)),
+               nla_len (nlattr_p),
+               NULL);
+    if (!nlattr_2[CTRL_ATTR_MCAST_GRP_NAME] ||
+        !nlattr_2[CTRL_ATTR_MCAST_GRP_ID])
+      continue;
+    if (ACE_OS::strncmp (reinterpret_cast<char*> (nla_data (nlattr_2[CTRL_ATTR_MCAST_GRP_NAME])),
+                         ACE_TEXT_ALWAYS_CHAR (arguments_p->group.c_str ()),
+                         static_cast<size_t> (nla_len (nlattr_2[CTRL_ATTR_MCAST_GRP_NAME]))))
+      continue;
+
+    arguments_p->id = nla_get_u32 (nlattr_2[CTRL_ATTR_MCAST_GRP_ID]);
+    break;
+  } // end FOREACH
+
+  return NL_SKIP;
+}
+
+int
+network_wlan_nl80211_scan_result_cb (struct nl_msg* message_in,
+                                     void* argument_in)
+{
+  //  NETWORK_TRACE (ACE_TEXT ("network_wlan_nl80211_scan_result_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (message_in);
+  ACE_ASSERT (argument_in);
+
+  // Called by the kernel when the scan is done or has been aborted.
+#if defined (_DEBUG)
+  nl_msg_dump (message_in, stdout);
+#endif // _DEBUG
+
+  struct genlmsghdr* genlmsghdr_p =
+      static_cast<struct genlmsghdr*> (nlmsg_data (nlmsg_hdr (message_in)));
+  ACE_ASSERT (genlmsghdr_p);
+  struct Net_WLAN_nl80211_ScanResult* result_p =
+      static_cast<struct Net_WLAN_nl80211_ScanResult*> (argument_in);
+
+  switch (genlmsghdr_p->cmd)
+  {
+    case NL80211_CMD_SCAN_ABORTED:
+    {
+      result_p->aborted = true;
+      result_p->done = true;
+      break;
+    }
+    case NL80211_CMD_NEW_SCAN_RESULTS:
+    {
+//      results->aborted = false;
+      result_p->done = true;
+      break;
+    }  // else probably an uninteresting multicast message.
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown nl80211 command (was: %d), continuing\n"),
+                  genlmsghdr_p->cmd));
+      break;
+    }
+  } // end SWITCH
+
+  return NL_SKIP;
+}
+int
+network_wlan_nl80211_scan_data_cb (struct nl_msg* message_in,
+                                   void* argument_in)
+{
+  //  NETWORK_TRACE (ACE_TEXT ("network_wlan_nl80211_scan_data_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (message_in);
+  ACE_ASSERT (argument_in);
+
+  // Called by the kernel with a dump of the successful scan's data. Called for each SSID.
+
+  struct genlmsghdr* genlmsghdr_p =
+      static_cast<struct genlmsghdr*> (nlmsg_data (nlmsg_hdr (message_in)));
+  ACE_ASSERT (genlmsghdr_p);
+  struct nlattr* nlattr_a[NL80211_ATTR_MAX + 1];
+  struct nlattr* nlattr_2[NL80211_BSS_MAX + 1];
+  // *TODO*: this is bound to change; #include from somewhere else
+  static struct nla_policy nla_policy_bss_a[NL80211_BSS_MAX + 1] =
+  {
+    {NLA_U8, 6, 6},     // NL80211_BSS_BSSID
+    {NLA_U32, 0, 0},    // NL80211_BSS_FREQUENCY
+    {NLA_U64, 0, 0},    // NL80211_BSS_TSF
+    {NLA_U16, 0, 0},    // NL80211_BSS_BEACON_INTERVAL
+    {NLA_U16, 0, 0},    // NL80211_BSS_CAPABILITY
+    {NLA_BINARY, 0, 0}, // NL80211_BSS_INFORMATION_ELEMENTS
+    {NLA_S32, 0, 0},    // NL80211_BSS_SIGNAL_MBM
+    {NLA_U8, 0, 0},     // NL80211_BSS_SIGNAL_UNSPEC
+    {NLA_U32, 0, 0},    // NL80211_BSS_STATUS
+    {NLA_U32, 0, 0},    // NL80211_BSS_SEEN_MS_AGO
+    {NLA_BINARY, 0, 0}, // NL80211_BSS_BEACON_IES
+    {NLA_U32, 0, 0},    // NL80211_BSS_CHAN_WIDTH
+    {NLA_U64, 0, 0},    // NL80211_BSS_BEACON_TSF
+    {NLA_FLAG, 0, 0},   // NL80211_BSS_PRESP_DATA
+    {NLA_U64, 0, 0},    // NL80211_BSS_LAST_SEEN_BOOTTIME
+    {NLA_U64, 0, 0},    // NL80211_BSS_PAD
+    {NLA_U64, 0, 0},    // NL80211_BSS_PARENT_TSF
+    {NLA_U8, 6, 6},     // NL80211_BSS_PARENT_BSSID
+  };
+  nla_parse (nlattr_a,
+             NL80211_ATTR_MAX,
+             genlmsg_attrdata (genlmsghdr_p, 0),
+             genlmsg_attrlen (genlmsghdr_p, 0),
+             NULL);
+  // sanity check(s)
+  if (!nlattr_a[NL80211_ATTR_BSS])
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to parse nl80211 scan result data: bss info missing, returning\n")));
+    return NL_SKIP;
+  } // end IF
+  if (nla_parse_nested (nlattr_2,
+                        NL80211_BSS_MAX,
+                        nlattr_a[NL80211_ATTR_BSS],
+                        nla_policy_bss_a))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to parse nl80211 scan result data bss info, returning\n")));
+    return NL_SKIP;
+  } // end IF
+  if (!nlattr_2[NL80211_BSS_BSSID] ||
+      !nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS])
+    return NL_SKIP;
+
+  struct ether_addr ap_mac_address_s;
+  ACE_OS::memcpy (&ap_mac_address_s.ether_addr_octet,
+                  nla_data (nlattr_2[NL80211_BSS_BSSID]),
+                  ETH_ALEN);
+  unsigned int frequency_mhz =
+      nla_get_u32 (nlattr_2[NL80211_BSS_FREQUENCY]);
+
+//  char buffer_a[IW_ESSID_MAX_SIZE];
+  uint8_t len_i;
+  uint8_t* data_p;
+  int i;
+  uint8_t ie_len_i =
+      static_cast<uint8_t> (nla_len (nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]));
+  uint8_t* ie_data_p =
+      reinterpret_cast<uint8_t*> (nla_data (nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]));
+  while (ie_len_i >= 2 && ie_len_i >= ie_data_p[1])
+  {
+    if (ie_data_p[0] == 0 &&
+        ie_data_p[1] >= 0 && ie_data_p[1] <= 32)
+    {
+      len_i = ie_data_p[1];
+      data_p = ie_data_p + 2;
+      for (i = 0; i < len_i; i++)
+      {
+        if (isprint (data_p[i]) &&
+            data_p[i] != ' ' &&
+            data_p[i] != '\\')
+          printf ("%c", data_p[i]);
+        else if (data_p[i] == ' ' && (i != 0 && i != len_i -1))
+          printf (" ");
+        else
+          printf ("\\x%.2x", data_p[i]);
+      } // end FOR
+      break;
+    } // end IF
+    ie_len_i -= ie_data_p[1] + 2;
+    ie_data_p += ie_data_p[1] + 2;
+  } // end WHILE
+
+  return NL_SKIP;
+}
 #endif // ACE_WIN32 || ACE_WIN64

@@ -1177,6 +1177,7 @@ clean:
   bool close_handle = false;
   int result_2 = -1;
   int error = 0;
+  unsigned int retries_i = 0;
 
   if (unlikely (socket_handle == ACE_INVALID_HANDLE))
   {
@@ -1274,12 +1275,28 @@ clean:
 //			ssid_len++;
 //}
   iwreq_s.u.essid.pointer = const_cast<char*> (SSID_in.c_str ());
+  retries_i = 0;
+set_essid:
   result_2 = ACE_OS::ioctl (socket_handle,
                             SIOCSIWESSID,
                             &iwreq_s);
   if (unlikely (result_2 == -1))
   {
     error = ACE_OS::last_error ();
+    if (error == EBUSY) // 16: driver is busy (scan, setting bssid, ...)
+    {
+      if (retries_i < NET_WLAN_MONITOR_AP_ASSOCIATION_RETRIES)
+      {
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWESSID): \"%m\", retrying...\n"),
+                    socket_handle));
+        ++retries_i;
+        goto set_essid;
+      } // end IF
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIWESSID): \"%m\", giving up\n"),
+                  socket_handle));
+    } // end IF
     if (error != EALREADY) // 114
     {
       ACE_DEBUG ((LM_ERROR,

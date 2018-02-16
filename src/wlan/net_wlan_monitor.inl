@@ -21,9 +21,19 @@
 #include <algorithm>
 #include <functional>
 
+#include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #include "net/ethernet.h"
+
+#if defined (NL80211_SUPPORT)
+#include <linux/netlink.h>
+#include <linux/nl80211.h>
+
+#include "netlink/errno.h"
+#include "netlink/netlink.h"
+#include "netlink/genl/genl.h"
+#endif // NL80211_SUPPORT
 
 #if defined (DHCLIENT_SUPPORT)
 extern "C"
@@ -37,22 +47,28 @@ extern "C"
 #else
 #if defined (_DEBUG)
 #include "ace/High_Res_Timer.h"
-
-#include "common_timer_tools.h"
 #endif // _DEBUG
 #endif // ACE_WIN32 || ACE_WIN64
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
+#include "ace/Proactor.h"
+#include "ace/Reactor.h"
 #include "ace/Time_Value.h"
 
 #include "common_tools.h"
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "common_timer_manager_common.h"
-#endif
+#else
+#if defined (_DEBUG)
+#include "common_timer_tools.h"
+#endif // _DEBUG
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "stream_defines.h"
 
 #include "net_common_tools.h"
+#include "net_defines.h"
 #include "net_macros.h"
 #include "net_packet_headers.h"
 
@@ -77,324 +93,44 @@ Net_WLAN_Monitor_T<AddressType,
                    MonitorAPI_e,
                    UserDataType>::Net_WLAN_Monitor_T ()
  : inherited ()
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
- , range_ ()
-#endif // ACE_WIN32 || ACE_WIN64
  , userData_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::Net_WLAN_Monitor_T"));
 
-//  inherited::reactor (ACE_Reactor::instance ());
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-  ACE_OS::memset (&range_, 0, sizeof (struct iw_range));
-
-//#if defined (DHCLIENT_SUPPORT)
-//  isc_result_t status_i = dhcpctl_initialize ();
-//  if (status_i != ISC_R_SUCCESS)
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ::dhcpctl_initialize(): \"%s\", continuing\n"),
-//                ACE_TEXT (isc_result_totext (status_i))));
-//#endif // DHCLIENT_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
 }
 
-template <typename AddressType,
-          typename ConfigurationType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-          ACE_SYNCH_DECL,
-          typename TimePolicyType,
-#endif
-          enum Net_WLAN_MonitorAPIType MonitorAPI_e,
-          typename UserDataType>
-Net_WLAN_Monitor_T<AddressType,
-                   ConfigurationType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-                   ACE_SYNCH_USE,
-                   TimePolicyType,
-#endif
-                   MonitorAPI_e,
-                   UserDataType>::~Net_WLAN_Monitor_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::~Net_WLAN_Monitor_T"));
+//template <typename AddressType,
+//          typename ConfigurationType,
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//#else
+//          ACE_SYNCH_DECL,
+//          typename TimePolicyType,
+//#endif
+//          enum Net_WLAN_MonitorAPIType MonitorAPI_e,
+//          typename UserDataType>
+//bool
+//Net_WLAN_Monitor_T<AddressType,
+//                   ConfigurationType,
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//#else
+//                   ACE_SYNCH_USE,
+//                   TimePolicyType,
+//#endif
+//                   MonitorAPI_e,
+//                   UserDataType>::initialize (const ConfigurationType& configuration_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::initialize"));
 
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-          ACE_SYNCH_DECL,
-          typename TimePolicyType,
-#endif
-          enum Net_WLAN_MonitorAPIType MonitorAPI_e,
-          typename UserDataType>
-void
-Net_WLAN_Monitor_T<AddressType,
-                   ConfigurationType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-                   ACE_SYNCH_USE,
-                   TimePolicyType,
-#endif
-                   MonitorAPI_e,
-                   UserDataType>::start ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::start"));
-
-  // sanity check(s)
-  if (unlikely (!inherited::isInitialized_))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("not initialized, returning\n")));
-    return;
-  } // end IF
-  if (unlikely (inherited::isActive_))
-  {
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("already started, returning\n")));
-    return;
-  } // end IF
-  ACE_ASSERT (inherited::configuration_);
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  // sanity check(s)
-  ACE_ASSERT (inherited::clientHandle_ == ACE_INVALID_HANDLE);
-
-  if (unlikely (!Net_WLAN_Tools::initialize (inherited::clientHandle_)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_WLAN_Tools::initialize(), returning\n")));
-    return;
-  } // end IF
-  ACE_ASSERT (inherited::clientHandle_ != ACE_INVALID_HANDLE);
-#endif // ACE_WIN32 || ACE_WIN64
-
-  Net_InterfaceIdentifiers_t interface_identifiers_a =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      Net_WLAN_Tools::getInterfaces (inherited::clientHandle_);
-#else
-      Net_WLAN_Tools::getInterfaces ();
-#endif // ACE_WIN32 || ACE_WIN64
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  struct _WLAN_INTERFACE_INFO_LIST* interface_list_p = NULL;
-  DWORD notification_mask = WLAN_NOTIFICATION_SOURCE_ALL;
-  DWORD previous_notification_mask = 0;
-  DWORD result = WlanRegisterNotification (inherited::clientHandle_,
-                                           notification_mask,
-                                           FALSE,
-                                           inherited::configuration_->notificationCB,
-                                           inherited::configuration_->notificationCBData,
-                                           NULL,
-                                           &previous_notification_mask);
-  if (unlikely (result != ERROR_SUCCESS))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::WlanRegisterNotification(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
-    goto error;
-  } // end IF
-
-  goto continue_;
-
-error:
-  if (inherited::clientHandle_ != ACE_INVALID_HANDLE)
-    Net_WLAN_Tools::initialize (inherited::clientHandle_);
-  inherited::clientHandle_ = ACE_INVALID_HANDLE;
-
-  return;
-
-continue_:
-#else
-  // sanity check(s)
-#if defined (ACE_LINUX)
-  if (Net_Common_Tools::isNetworkManagerRunning ())
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("systemd NetworkManager service is running; this may interfere with the monitoring activities, continuing\n")));
-#endif
-    ACE_ASSERT (inherited::handle_ == ACE_INVALID_HANDLE);
-
-  inherited::handle_ = ACE_OS::socket (AF_INET,
-                                       SOCK_DGRAM,
-                                       0);
-  if (unlikely (inherited::handle_ == ACE_INVALID_HANDLE))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::socket(AF_INET,SOCK_DGRAM,0): \"%m\", returning\n")));
-    return;
-  } // end IF
-//  inherited::set_handle (inherited::handle_);
-
-  int result = iw_get_range_info (inherited::handle_,
-                                  inherited::configuration_->interfaceIdentifier.c_str (),
-                                  &range_);
-  if (unlikely (result < 0))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to iw_get_range_info(%d,\"%s\"): \"%m\", returning\n"),
-                inherited::handle_,
-                ACE_TEXT (inherited::configuration_->interfaceIdentifier.c_str ())));
-    return;
-  } // end IFs
-  // verify that the interface supports scanning
-  if (range_.we_version_compiled < 14)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("interface (was: \"%s\") does not support scanning, returning\n"),
-                ACE_TEXT (inherited::configuration_->interfaceIdentifier.c_str ())));
-    return;
-  } // end IF
-
-  // monitor the interface in a dedicated thread
-  ACE_Time_Value deadline =
-      (COMMON_TIME_NOW +
-       ACE_Time_Value (0, COMMON_TIMEOUT_DEFAULT_THREAD_SPAWN * 1000));
-  result = inherited::open (NULL);
-  if (unlikely (result == -1))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", returning\n")));
-    return;
-  } // end IF
-  do
-  { // *NOTE*: the livelock here
-    if (COMMON_TIME_NOW > deadline)
-      break;
-  } while (!inherited::isRunning ());
-  if (unlikely (!inherited::isRunning ()))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", returning\n")));
-    return;
-  } // end IF
-#endif // ACE_WIN32 || ACE_WIN64
-
-  inherited::isActive_ = true;
-
-  inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-          ACE_SYNCH_DECL,
-          typename TimePolicyType,
-#endif
-          enum Net_WLAN_MonitorAPIType MonitorAPI_e,
-          typename UserDataType>
-void
-Net_WLAN_Monitor_T<AddressType,
-                   ConfigurationType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-                   ACE_SYNCH_USE,
-                   TimePolicyType,
-#endif
-                   MonitorAPI_e,
-                   UserDataType>::stop (bool waitForCompletion_in,
-                                        bool lockedAccess_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::stop"));
-
-  ACE_UNUSED_ARG (waitForCompletion_in);
-  ACE_UNUSED_ARG (lockedAccess_in);
-
-  // sanity check(s)
-  if (!inherited::isActive_)
-    return;
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  ACE_ASSERT (inherited::clientHandle_ != ACE_INVALID_HANDLE);
-  if (inherited::scanTimerId_ != -1)
-    cancelScanTimer ();
-  Net_WLAN_Tools::finalize (inherited::clientHandle_);
-  inherited::clientHandle_ = ACE_INVALID_HANDLE;
-#else
-  inherited::isActive_ = false;
-  inherited::stop (waitForCompletion_in,
-                   lockedAccess_in);
-
-  int result = -1;
-//  if (likely (inherited::isRegistered_))
+//  if (unlikely (inherited::isInitialized_))
 //  {
-//    ACE_Reactor* reactor_p = inherited::reactor ();
-//    ACE_ASSERT (reactor_p);
-//    result = reactor_p->remove_handler (this,
-//                                        ACE_Event_Handler::READ_MASK);
-//    if (unlikely (result == -1))
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@,ACE_Event_Handler::READ_MASK): \"%m\", continuing\n"),
-//                  this));
-//    inherited::isRegistered_ = false;
+//    userData_ = NULL;
 //  } // end IF
 
-  if (likely (inherited::handle_ != ACE_INVALID_HANDLE))
-  {
-    result = ACE_OS::close (inherited::handle_);
-    if (unlikely (result == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
-                  inherited::handle_));
-    inherited::handle_ = ACE_INVALID_HANDLE;
-  } // end IF
+//  // *TODO*: remove type inference
+//  userData_ = configuration_in.userData;
 
-  if (likely (inherited::buffer_))
-  {
-    ACE_OS::free (inherited::buffer_);
-    inherited::buffer_ = NULL;
-  } // end IF
-  inherited::bufferSize_ = 0;
-#endif // ACE_WIN32 || ACE_WIN64
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inherited::isActive_ = false;
-
-  inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_INITIALIZED);
-#endif
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-          ACE_SYNCH_DECL,
-          typename TimePolicyType,
-#endif
-          enum Net_WLAN_MonitorAPIType MonitorAPI_e,
-          typename UserDataType>
-bool
-Net_WLAN_Monitor_T<AddressType,
-                   ConfigurationType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-                   ACE_SYNCH_USE,
-                   TimePolicyType,
-#endif
-                   MonitorAPI_e,
-                   UserDataType>::initialize (const ConfigurationType& configuration_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::initialize"));
-
-  if (unlikely (inherited::isInitialized_))
-  {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-    ACE_OS::memset (&range_, 0, sizeof (struct iw_range));
-#endif // ACE_WIN32 || ACE_WIN64
-
-    userData_ = NULL;
-  } // end IF
-
-  // *TODO*: remove type inference
-  userData_ = configuration_in.userData;
-
-  return inherited::initialize (configuration_in);
-}
+//  return inherited::initialize (configuration_in);
+//}
 
 //template <ACE_SYNCH_DECL,
 //          typename TimePolicyType,
@@ -1192,26 +928,385 @@ Net_WLAN_Monitor_T<AddressType,
 //  } // end SWITCH
 //}
 
+//////////////////////////////////////////
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
 template <typename AddressType,
           typename ConfigurationType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
+          typename UserDataType>
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   NET_WLAN_MONITOR_API_WLANAPI,
+                   UserDataType>::Net_WLAN_Monitor_T ()
+ : inherited ()
+ , userData_ (NULL)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::Net_WLAN_Monitor_T"));
+
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename UserDataType>
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   NET_WLAN_MONITOR_API_WLANAPI,
+                   UserDataType>::~Net_WLAN_Monitor_T ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::~Net_WLAN_Monitor_T"));
+
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename UserDataType>
+void
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   NET_WLAN_MONITOR_API_WLANAPI,
+                   UserDataType>::start ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::start"));
+
+  // sanity check(s)
+  if (unlikely (!inherited::isInitialized_))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("not initialized, returning\n")));
+    return;
+  } // end IF
+  if (unlikely (inherited::isActive_))
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("already started, returning\n")));
+    return;
+  } // end IF
+  ACE_ASSERT (inherited::configuration_);
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::clientHandle_ == ACE_INVALID_HANDLE);
+
+  if (unlikely (!Net_WLAN_Tools::initialize (inherited::clientHandle_)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_WLAN_Tools::initialize(), returning\n")));
+    return;
+  } // end IF
+  ACE_ASSERT (inherited::clientHandle_ != ACE_INVALID_HANDLE);
+
+  Net_InterfaceIdentifiers_t interface_identifiers_a =
+      Net_WLAN_Tools::getInterfaces (inherited::clientHandle_);
+
+  struct _WLAN_INTERFACE_INFO_LIST* interface_list_p = NULL;
+  DWORD notification_mask = WLAN_NOTIFICATION_SOURCE_ALL;
+  DWORD previous_notification_mask = 0;
+  DWORD result =
+      WlanRegisterNotification (inherited::clientHandle_,
+                                notification_mask,
+                                FALSE,
+                                inherited::configuration_->notificationCB,
+                                inherited::configuration_->notificationCBData,
+                                NULL,
+                                &previous_notification_mask);
+  if (unlikely (result != ERROR_SUCCESS))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::WlanRegisterNotification(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
+    goto error;
+  } // end IF
+
+  goto continue_;
+
+error:
+  if (inherited::clientHandle_ != ACE_INVALID_HANDLE)
+    Net_WLAN_Tools::initialize (inherited::clientHandle_);
+  inherited::clientHandle_ = ACE_INVALID_HANDLE;
+
+  return;
+
+continue_:
+  inherited::isActive_ = true;
+
+  inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename UserDataType>
+void
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   NET_WLAN_MONITOR_API_WLANAPI,
+                   UserDataType>::stop (bool waitForCompletion_in,
+                                        bool lockedAccess_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::stop"));
+
+  ACE_UNUSED_ARG (waitForCompletion_in);
+  ACE_UNUSED_ARG (lockedAccess_in);
+
+  // sanity check(s)
+  if (unlikely (!inherited::isActive_))
+    return;
+  ACE_ASSERT (inherited::clientHandle_ != ACE_INVALID_HANDLE);
+
+  if (likely (inherited::scanTimerId_ != -1))
+    cancelScanTimer ();
+  Net_WLAN_Tools::finalize (inherited::clientHandle_);
+  inherited::clientHandle_ = ACE_INVALID_HANDLE;
+
+  inherited::isActive_ = false;
+
+  inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_INITIALIZED);
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          typename UserDataType>
+bool
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   NET_WLAN_MONITOR_API_WLANAPI,
+                   UserDataType>::initialize (const ConfigurationType& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::initialize"));
+
+  if (unlikely (inherited::isInitialized_))
+  {
+    userData_ = NULL;
+  } // end IF
+
+  // *TODO*: remove type inference
+  userData_ = configuration_in.userData;
+
+  return inherited::initialize (configuration_in);
+}
 #else
+#if defined (WEXT_SUPPORT)
+template <typename AddressType,
+          typename ConfigurationType,
           ACE_SYNCH_DECL,
           typename TimePolicyType,
+          typename UserDataType>
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_IOCTL,
+                   UserDataType>::Net_WLAN_Monitor_T ()
+ : inherited ()
+ , range_ ()
+ , userData_ (NULL)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::Net_WLAN_Monitor_T"));
+
+  //  inherited::reactor (ACE_Reactor::instance ());
+  ACE_OS::memset (&range_, 0, sizeof (struct iw_range));
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename UserDataType>
+void
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_IOCTL,
+                   UserDataType>::start ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::start"));
+
+  // sanity check(s)
+  if (unlikely (!inherited::isInitialized_))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("not initialized, returning\n")));
+    return;
+  } // end IF
+  if (unlikely (inherited::isActive_))
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("already started, returning\n")));
+    return;
+  } // end IF
+  ACE_ASSERT (inherited::configuration_);
+
+  Net_InterfaceIdentifiers_t interface_identifiers_a =
+      Net_WLAN_Tools::getInterfaces ();
+
+  // sanity check(s)
+#if defined (ACE_LINUX)
+  if (Net_Common_Tools::isNetworkManagerRunning ())
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("systemd NetworkManager service is running; this may interfere with the monitoring activities, continuing\n")));
 #endif
-          enum Net_WLAN_MonitorAPIType MonitorAPI_e,
+    ACE_ASSERT (inherited::handle_ == ACE_INVALID_HANDLE);
+
+  inherited::handle_ = ACE_OS::socket (AF_INET,
+                                       SOCK_DGRAM,
+                                       0);
+  if (unlikely (inherited::handle_ == ACE_INVALID_HANDLE))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::socket(AF_INET,SOCK_DGRAM,0): \"%m\", returning\n")));
+    return;
+  } // end IF
+//  inherited::set_handle (inherited::handle_);
+
+  int result =
+      iw_get_range_info (inherited::handle_,
+                         inherited::configuration_->interfaceIdentifier.c_str (),
+                         &range_);
+  if (unlikely (result < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to iw_get_range_info(%d,\"%s\"): \"%m\", returning\n"),
+                inherited::handle_,
+                ACE_TEXT (inherited::configuration_->interfaceIdentifier.c_str ())));
+    return;
+  } // end IFs
+  // verify that the interface supports scanning
+  if (range_.we_version_compiled < 14)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("interface (was: \"%s\") does not support scanning, returning\n"),
+                ACE_TEXT (inherited::configuration_->interfaceIdentifier.c_str ())));
+    return;
+  } // end IF
+
+  // monitor the interface in a dedicated thread
+  ACE_Time_Value deadline =
+      (COMMON_TIME_NOW +
+       ACE_Time_Value (0, COMMON_TIMEOUT_DEFAULT_THREAD_SPAWN * 1000));
+  result = inherited::open (NULL);
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", returning\n")));
+    return;
+  } // end IF
+  do
+  { // *NOTE*: the livelock here
+    if (COMMON_TIME_NOW > deadline)
+    {
+      ACE_OS::last_error (ETIMEDOUT);
+      break;
+    } // end IF
+  } while (!inherited::TASK_T::isRunning ());
+  if (unlikely (!inherited::TASK_T::isRunning ()))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_TaskBase_T::open(): \"%m\", returning\n")));
+    return;
+  } // end IF
+
+  inherited::isActive_ = true;
+
+  inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename UserDataType>
+void
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_IOCTL,
+                   UserDataType>::stop (bool waitForCompletion_in,
+                                        bool lockedAccess_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::stop"));
+
+  ACE_UNUSED_ARG (waitForCompletion_in);
+  ACE_UNUSED_ARG (lockedAccess_in);
+
+  // sanity check(s)
+  if (!inherited::isActive_)
+    return;
+
+  inherited::isActive_ = false;
+  inherited::stop (waitForCompletion_in,
+                   lockedAccess_in);
+
+  int result = -1;
+//  if (likely (inherited::isRegistered_))
+//  {
+//    ACE_Reactor* reactor_p = inherited::reactor ();
+//    ACE_ASSERT (reactor_p);
+//    result = reactor_p->remove_handler (this,
+//                                        ACE_Event_Handler::READ_MASK);
+//    if (unlikely (result == -1))
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@,ACE_Event_Handler::READ_MASK): \"%m\", continuing\n"),
+//                  this));
+//    inherited::isRegistered_ = false;
+//  } // end IF
+
+  if (likely (inherited::handle_ != ACE_INVALID_HANDLE))
+  {
+    result = ACE_OS::close (inherited::handle_);
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
+                  inherited::handle_));
+    inherited::handle_ = ACE_INVALID_HANDLE;
+  } // end IF
+
+  if (likely (inherited::buffer_))
+  {
+    ACE_OS::free (inherited::buffer_);
+    inherited::buffer_ = NULL;
+  } // end IF
+  inherited::bufferSize_ = 0;
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename UserDataType>
+bool
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_IOCTL,
+                   UserDataType>::initialize (const ConfigurationType& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::initialize"));
+
+  if (unlikely (inherited::isInitialized_))
+  {
+    ACE_OS::memset (&range_, 0, sizeof (struct iw_range));
+
+    userData_ = NULL;
+  } // end IF
+
+  // *TODO*: remove type inference
+  userData_ = configuration_in.userData;
+
+  return inherited::initialize (configuration_in);
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
           typename UserDataType>
 int
 Net_WLAN_Monitor_T<AddressType,
                    ConfigurationType,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
                    ACE_SYNCH_USE,
                    TimePolicyType,
-#endif
-                   MonitorAPI_e,
+                   NET_WLAN_MONITOR_API_IOCTL,
                    UserDataType>::handle_input (ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::handle_input"));
@@ -1549,12 +1644,445 @@ continue_:
   // *NOTE*: do not deregister from the callback
   return 0;
 }
-#endif
+#endif // WEXT_SUPPORT
 
 //////////////////////////////////////////
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (NL80211_SUPPORT)
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename UserDataType>
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_NL80211,
+                   UserDataType>::Net_WLAN_Monitor_T ()
+ : inherited ()
+ , inherited2 ()
+ , userData_ (NULL)
+ /////////////////////////////////////////
+ , inputStream_ ()
+ , isRegistered_ (false)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::Net_WLAN_Monitor_T"));
+
+//  inherited2::proactor (ACE_Proactor::instance ());
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename UserDataType>
+void
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_NL80211,
+                   UserDataType>::start ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::start"));
+
+  // sanity check(s)
+  if (unlikely (!inherited::isInitialized_))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("not initialized, returning\n")));
+    return;
+  } // end IF
+  if (unlikely (inherited::isActive_))
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("already started, returning\n")));
+    return;
+  } // end IF
+  ACE_ASSERT (inherited::configuration_);
+
+  // sanity check(s)
+  ACE_ASSERT (!isRegistered_);
+#if defined (ACE_LINUX)
+  if (Net_Common_Tools::isNetworkManagerRunning ())
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("systemd NetworkManager service is running; this may interfere with the monitoring activities, continuing\n")));
+#endif
+
+  ACE_HANDLE handle_h = ACE_OS::socket (AF_INET,
+                                        SOCK_DGRAM,
+                                        0);
+  if (unlikely (handle_h == ACE_INVALID_HANDLE))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::socket(AF_INET,SOCK_DGRAM,0): \"%m\", returning\n")));
+    return;
+  } // end IF
+
+  int result = -1;
+  ACE_Reactor* reactor_p = NULL;
+  ACE_Proactor* proactor_p = NULL;
+  Net_InterfaceIdentifiers_t interface_identifiers_a;
+  if (inherited::configuration_->useReactor)
+  {
+//    inherited2::set_handle (handle_h);
+    inherited::TASK_T::set_handle (handle_h);
+
+//    reactor_p = inherited2::reactor ();
+    reactor_p = inherited::reactor ();
+    ACE_ASSERT (reactor_p);
+    result = reactor_p->register_handler (this,
+                                          ACE_Event_Handler::READ_MASK);
+    if (unlikely (result == -1))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@,ACE_Event_Handler::READ_MASK): \"%m\", returning\n"),
+                  this));
+      goto error;
+    } // end IF
+  } // end IF
+  else
+  {
+    inherited2::handle (handle_h);
+
+    proactor_p = inherited2::proactor ();
+    ACE_ASSERT (proactor_p);
+
+    result = inputStream_.open (*this,
+                                handle_h,
+                                NULL,
+                                proactor_p);
+    if (unlikely (result == -1))
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Asynch_Read_Stream::open(%d): \"%m\", returning\n"),
+                  handle_h));
+      goto error;
+    } // end IF
+
+    if (unlikely (!initiate_read_stream (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)))
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_WLAN_Monitor_T::initiate_read_stream(%u), returning\n"),
+                  NET_STREAM_MESSAGE_DATA_BUFFER_SIZE));
+      goto error;
+    } // end IF
+  } // end ELSE
+  isRegistered_ = true;
+
+  interface_identifiers_a = Net_WLAN_Tools::getInterfaces ();
+
+  inherited::isActive_ = true;
+
+  inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
+
+  return;
+
+error:
+  if (inherited::configuration_->useReactor)
+  {
+    if (isRegistered_)
+    { ACE_ASSERT (reactor_p);
+      result = reactor_p->remove_handler (this,
+                                          ACE_Event_Handler::READ_MASK);
+      if (unlikely (result == -1))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@,ACE_Event_Handler::READ_MASK): \"%m\", continuing\n"),
+                    this));
+    } // end IF
+//  inherited2::set_handle (ACE_INVALID_HANDLE);
+    inherited::TASK_T::set_handle (ACE_INVALID_HANDLE);
+  } // end IF
+  else
+  {
+    if (isRegistered_)
+    {
+      result = inputStream_.cancel ();
+      if (unlikely (result == -1))
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Asynch_Read_Stream::cancel(): \"%m\", continuing\n")));
+    } // end IF
+    inherited2::handle (ACE_INVALID_HANDLE);
+  } // end ELSE
+  isRegistered_ = false;
+  if (handle_h != ACE_INVALID_HANDLE)
+  {
+    result = ACE_OS::close (handle_h);
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::close(0x%@): \"%m\", continuing\n"),
+                  handle_h));
+  } // end IF
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename UserDataType>
+void
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_NL80211,
+                   UserDataType>::stop (bool waitForCompletion_in,
+                                        bool lockedAccess_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::stop"));
+
+  ACE_UNUSED_ARG (waitForCompletion_in);
+  ACE_UNUSED_ARG (lockedAccess_in);
+
+  // sanity check(s)
+  if (!inherited::isActive_)
+    return;
+  ACE_ASSERT (inherited::configuration_);
+
+  int result = -1;
+  ACE_HANDLE handle_h = ACE_INVALID_HANDLE;
+  if (inherited::configuration_->useReactor)
+  {
+//    handle_h = inherited2::get_handle ();
+    handle_h = inherited::TASK_T::get_handle ();
+
+    if (likely (isRegistered_))
+    {
+//      ACE_Reactor* reactor_p = inherited2::reactor ();
+      ACE_Reactor* reactor_p = inherited::reactor ();
+      ACE_ASSERT (reactor_p);
+      result = reactor_p->remove_handler (this,
+                                          ACE_Event_Handler::READ_MASK);
+      if (unlikely (result == -1))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@,ACE_Event_Handler::READ_MASK): \"%m\", continuing\n"),
+                    this));
+    } // end IF
+//    inherited2::set_handle (ACE_INVALID_HANDLE);
+    inherited::TASK_T::set_handle (ACE_INVALID_HANDLE);
+  } // end IF
+  else
+  {
+    handle_h = inherited2::handle ();
+
+    if (likely (isRegistered_))
+    {
+      result = inputStream_.cancel ();
+      if (unlikely (result == -1))
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Asynch_Read_Stream::cancel(): \"%m\", continuing\n")));
+    } // end IF
+    inherited2::handle (ACE_INVALID_HANDLE);
+  } // end ELSE
+  isRegistered_ = false;
+
+  if (handle_h != ACE_INVALID_HANDLE)
+  {
+    result = ACE_OS::close (handle_h);
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::close(0x%@): \"%m\", continuing\n"),
+                  handle_h));
+  } // end IF
+
+  if (likely (handle_h != ACE_INVALID_HANDLE))
+  {
+    result = ACE_OS::close (handle_h);
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
+                  handle_h));
+  } // end IF
+
+  inherited::isActive_ = false;
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename UserDataType>
+bool
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_NL80211,
+                   UserDataType>::initialize (const ConfigurationType& configuration_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::initialize"));
+
+  if (unlikely (inherited::isInitialized_))
+  {
+    userData_ = NULL;
+
+    ACE_ASSERT (!isRegistered_);
+  } // end IF
+
+  // *TODO*: remove type inference
+  userData_ = configuration_in.userData;
+
+  return inherited::initialize (configuration_in);
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename UserDataType>
+int
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_NL80211,
+                   UserDataType>::handle_input (ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::handle_input"));
+
+  ACE_UNUSED_ARG (handle_in);
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+
+  int result = -1;
+  int error = 0;
+  Net_WLAN_SSIDToInterfaceIdentifierIterator_t iterator;
+  struct ether_addr ap_mac_address;
+  ACE_OS::memset (&ap_mac_address, 0, sizeof (struct ether_addr));
+  std::string essid_string;
+  ACE_TCHAR buffer_a[BUFSIZ];
+#if defined (_DEBUG)
+  std::set<std::string> known_ssids, current_ssids;
+#endif
+
+  // received scan results
+
+  { ACE_GUARD_RETURN (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_, 0);
+    // clear cache
+    do
+    {
+      iterator =
+          std::find_if (inherited::SSIDCache_.begin (), inherited::SSIDCache_.end (),
+                        std::bind2nd (Net_WLAN_SSIDToInterfaceIdentifierFindPredicate (),
+                                      inherited::configuration_->interfaceIdentifier));
+      if (iterator == inherited::SSIDCache_.end ())
+        break;
+
+#if defined (_DEBUG)
+      known_ssids.insert ((*iterator).first);
+#endif
+      inherited::SSIDCache_.erase ((*iterator).first);
+    } while (true);
+  } // end lock scope
+
+  // process the result data
+  do
+  {
+  } while (true);
+#if defined (_DEBUG)
+  { ACE_GUARD_RETURN (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_, 0);
+    for (Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator_2 = inherited::SSIDCache_.begin ();
+         iterator_2 != inherited::SSIDCache_.end ();
+         ++iterator_2)
+      if (!ACE_OS::strcmp ((*iterator_2).second.first.c_str (),
+                           inherited::configuration_->interfaceIdentifier.c_str ()))
+        current_ssids.insert ((*iterator_2).first);
+  } // end lock scope
+  for (std::set<std::string>::const_iterator iterator_2 = known_ssids.begin ();
+       iterator_2 != known_ssids.end ();
+       ++iterator_2)
+    if (current_ssids.find (*iterator_2) == current_ssids.end ())
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("\"%s\": lost contact to ESSID (was: %s)...\n"),
+                  ACE_TEXT (inherited::configuration_->interfaceIdentifier.c_str ()),
+                  ACE_TEXT ((*iterator_2).c_str ())));
+#endif
+
+  try {
+    inherited::onScanComplete (inherited::configuration_->interfaceIdentifier);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onScanComplete(), continuing\n")));
+  }
+
+continue_:
+  // *NOTE*: do not deregister from the callback
+  return 0;
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename UserDataType>
+bool
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_NL80211,
+                   UserDataType>::initiate_read_stream (unsigned int bufferSize_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::initiate_read_stream"));
+
+  // step1: allocate a data buffer
+  ACE_Message_Block* message_block_p = NULL;
+  ACE_NEW_NORETURN (message_block_p,
+                    ACE_Message_Block (bufferSize_in,                      // size
+                                       ACE_Message_Block::MB_DATA,         // type
+                                       NULL,                               // cont
+                                       NULL,                               // data
+                                       NULL,                               // allocator_strategy
+                                       NULL,                               // locking_strategy
+                                       ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY, // priority
+                                       ACE_Time_Value::zero,               // execution_time
+                                       ACE_Time_Value::max_time,           // deadline_time
+                                       NULL,                               // data_block_allocator
+                                       NULL));                             // message_block_allocator
+  if (unlikely (!message_block_p))
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory (was: %u byte(s)): \"%m\", aborting\n"),
+                bufferSize_in));
+    return false;
+  } // end IF
+
+  // step2: start (asynchronous) read
+//  size_t bytes_to_read = message_block_p->size ();
+  int result =
+      inputStream_.read (*message_block_p,                     // buffer
+                         message_block_p->size (),             // buffer size
+                         NULL,                                 // ACT
+                         0,                                    // priority
+                         COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
+//      inputStream_.recv (message_block_p,                      // buffer
+//                         message_block_p->size (),             // buffer size
+//                         0,                                    // flags
+//                         ACE_PROTOCOL_FAMILY_NETLINK,          // protocol family
+//                         NULL,                                 // ACT
+//                         0,                                    // priority
+//                         COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Read_Stream::read(%u): \"%m\", aborting\n"),
+//                ACE_TEXT ("failed to ACE_Asynch_Read_Stream::recv(%u): \"%m\", aborting\n"),
+                bufferSize_in));
+
+    // clean up
+    message_block_p->release ();
+
+    return false;
+  } // end IF
+
+  return true;
+}
+#endif // NL80211_SUPPORT
+
+//////////////////////////////////////////
+
 #if defined (DBUS_SUPPORT)
 template <typename AddressType,
           typename ConfigurationType,
@@ -1572,7 +2100,6 @@ Net_WLAN_Monitor_T<AddressType,
  // , proxy_ (NULL)
  , objectPathCache_ ()
  , userData_ (NULL)
- /////////////////////////////////////////
  , DBusDispatchStarted_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::Net_WLAN_Monitor_T"));

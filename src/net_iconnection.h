@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -22,8 +22,8 @@
 #define NET_ICONNECTION_T_H
 
 #include "ace/config-macros.h"
+#include "ace/Event_Handler.h"
 #include "ace/INET_Addr.h"
-#include "ace/Message_Block.h"
 
 #include "common_idumpstate.h"
 #include "common_iget.h"
@@ -37,8 +37,10 @@
 #include "net_itransportlayer.h"
 
 // forward declarations
+class ACE_Message_Block;
 class ACE_Notification_Strategy;
-enum Net_Connection_Status;
+class ACE_Time_Value;
+enum Net_Connection_Status : int;
 
 //////////////////////////////////////////
 
@@ -86,7 +88,7 @@ class Net_IConnection_T
 
   virtual ACE_Notification_Strategy* notification () = 0;
   virtual const StateType& state () const = 0;
-  virtual Net_Connection_Status status () const = 0;
+  virtual enum Net_Connection_Status status () const = 0;
 
   // *NOTE*: see ACE_Svc_Handler/ACE_Task_Base
   //         (and net_common.h / ACE_Svc_Handler.h for reason codes)

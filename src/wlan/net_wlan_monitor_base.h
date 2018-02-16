@@ -139,6 +139,7 @@ class Net_WLAN_Monitor_Base_T
 
   Net_WLAN_Monitor_Base_T ();
 
+  // *TODO*: remove any implementation-specific members
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HANDLE                                clientHandle_; // API-
   long                                  scanTimerId_;

@@ -58,11 +58,6 @@
 #define NET_WLAN_MONITOR_UNIX_DEFAULT_BACKGROUNDSCANS                     false
 #define NET_WLAN_MONITOR_SCAN_DEFAULT_RESULT_POLL_INTERVAL                50 // ms
 
-#if defined (DHCLIENT_SUPPORT)
-#define NET_WLAN_MONITOR_DHCLIENT_LOCALHOST_IP_STRING                     "127.0.0.1"
-#define NET_WLAN_MONITOR_DHCLIENT_OMAPI_PORT                              7911
-#endif // DHCLIENT_SUPPORT
-
 #if defined (DBUS_SUPPORT)
 #define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SERVICE                      "org.freedesktop.NetworkManager"
 
@@ -82,6 +77,17 @@
 #define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SETTINGS_OBJECT_PATH         "/org/freedesktop/NetworkManager/Settings"
 #define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_WIRELESS_OBJECT_PATH         "/org/freedesktop/NetworkManager/Device/Wireless"
 #endif // DBUS_SUPPORT
+
+#if defined (DHCLIENT_SUPPORT)
+#define NET_WLAN_MONITOR_DHCLIENT_EXECUTABLE_STRING                       "dhclient"
+#define NET_WLAN_MONITOR_DHCLIENT_LOCALHOST_IP_STRING                     "127.0.0.1"
+#define NET_WLAN_MONITOR_DHCLIENT_OMAPI_PORT                              7911
+
+#define NET_WLAN_MONITOR_DHCLIENT_OBJECT_INTERFACE_STRING                 "interface"
+#define NET_WLAN_MONITOR_DHCLIENT_OBJECT_VALUE_NAME_STRING                "name"
+#define NET_WLAN_MONITOR_DHCLIENT_OBJECT_VALUE_STATE_STRING               "state"
+
+#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 #define NET_WLAN_MONITOR_THREAD_NAME                                      "WLAN monitor"

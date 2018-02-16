@@ -32,7 +32,11 @@
 #include "common_xml_parser.h"
 
 #include "net_wlan_profile_xml_handler.h"
-#endif
+#else
+#if defined (NL80211_SUPPORT)
+#include "ace/Basic_Types.h"
+#endif // NL80211_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
 
 enum Net_WLAN_MonitorAPIType : int
 {
@@ -40,8 +44,9 @@ enum Net_WLAN_MonitorAPIType : int
   // *TODO*: available since WinXP
   NET_WLAN_MONITOR_API_WLANAPI = 0,
 #else
-  NET_WLAN_MONITOR_API_IOCTL = 0,
-  NET_WLAN_MONITOR_API_DBUS,
+  NET_WLAN_MONITOR_API_IOCTL = 0, // aka 'wext' (mostly deprecated)
+  NET_WLAN_MONITOR_API_NL80211,
+  NET_WLAN_MONITOR_API_DBUS, // 'talks' to the 'NetworkManager' service
 #endif
   ////////////////////////////////////////
   NET_WLAN_MONITOR_API_MAX,
@@ -130,6 +135,31 @@ typedef Common_XML_Parser_T<ACE_MT_SYNCH,
                             struct Common_XML_ParserConfiguration,
                             struct Net_WLAN_Profile_ParserContext,
                             Net_WLAN_Profile_XML_Handler> Net_WLAN_Profile_Parser_t;
-#endif
+#else
+#if defined (NL80211_SUPPORT)
+struct Net_WLAN_nl80211_ScanResult
+{
+  Net_WLAN_nl80211_ScanResult ()
+   : aborted (false)
+   , done (false)
+  {}
+
+  bool aborted;
+  bool done;
+};
+
+// For family_handler() and nl_get_multicast_id().
+struct Net_WLAN_nl80211_MulticastHandlerArguments
+{
+  Net_WLAN_nl80211_MulticastHandlerArguments ()
+   : id (0)
+   , group ()
+  {}
+
+  ACE_UINT32  id;
+  std::string group;
+};
+#endif // NL80211_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
 
 #endif

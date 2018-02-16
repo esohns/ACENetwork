@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2010 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -22,6 +22,7 @@
 #define NET_ASYNCH_NETLINK_SOCKETHANDLER_T_H
 
 #include "ace/Asynch_IO.h"
+#include "ace/config-macros.h"
 #include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/Message_Block.h"

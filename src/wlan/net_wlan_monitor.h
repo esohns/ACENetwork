@@ -21,25 +21,34 @@
 #ifndef NET_WLAN_MONITOR_H
 #define NET_WLAN_MONITOR_H
 
+#include <string>
+
 #include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
+#if defined (WEXT_SUPPORT)
 #include "iwlib.h"
+#endif // WEXT_SUPPORT
 
 #if defined (DBUS_SUPPORT)
 #include <map>
-#include <string>
+
+#if defined (NL80211_SUPPORT)
+#include "ace/Asynch_IO.h"
+#endif // NL80211_SUPPORT
 
 #include "dbus/dbus.h"
 //#include "dbus/dbus-glib.h"
 #endif // DBUS_SUPPORT
 
 //#include "ace/Event_Handler.h"
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Global_Macros.h"
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
+
+//#include "common_event_handler.h"
 
 //#include "net_common.h"
 
@@ -49,6 +58,37 @@
 // forward declarations
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
+#if defined (NL80211_SUPPORT)
+struct sockaddr_nl;
+struct nlmsgerr;
+struct nl_msg;
+
+static int
+network_wlan_nl80211_error_cb (struct sockaddr_nl*,
+                               struct nlmsgerr*,
+                               void*);
+
+static int
+network_wlan_nl80211_finish_cb (struct nl_msg*,
+                                void*);
+static int
+network_wlan_nl80211_ack_cb (struct nl_msg*,
+                             void*);
+static int
+network_wlan_nl80211_no_seq_check_cb (struct nl_msg*,
+                                      void*);
+static int
+network_wlan_nl80211_family_cb (struct nl_msg*,
+                                void*);
+
+static int
+network_wlan_nl80211_scan_result_cb (struct nl_msg*,
+                                     void*);
+static int
+network_wlan_nl80211_scan_data_cb (struct nl_msg*,
+                                   void*);
+#endif // NL80211_SUPPORT
+
 #if defined (DBUS_SUPPORT)
 void
 network_wlan_dbus_main_wakeup_cb (void*);
@@ -60,11 +100,12 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection*,
 #endif // ACE_WIN32 || ACE_WIN64
 
 template <typename AddressType,
-          typename ConfigurationType,
+          typename ConfigurationType
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+          >
 #else
           ////////////////////////////////
-          ACE_SYNCH_DECL,
+          ,ACE_SYNCH_DECL,
           typename TimePolicyType,
 #endif
           ////////////////////////////////
@@ -84,12 +125,11 @@ class Net_WLAN_Monitor_T
   typedef Net_WLAN_Monitor_Base_T<AddressType,
                                   ConfigurationType
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                  >
+                                  > inherited;
 #else
                                   ,ACE_SYNCH_USE,
-                                  TimePolicyType>
+                                  TimePolicyType> inherited;
 #endif
-  inherited;
 
   // singleton has access to the ctor/dtors
   friend class ACE_Singleton<Net_WLAN_Monitor_T<AddressType,
@@ -100,6 +140,53 @@ class Net_WLAN_Monitor_T
                                                 TimePolicyType,
 #endif
                                                 MonitorAPI_e,
+                                                UserDataType>,
+                             ACE_SYNCH_MUTEX>;
+
+ public:
+  inline virtual ~Net_WLAN_Monitor_T () {}
+
+//  // override (part of) Net_IWLANMonitor_T
+//  // *TODO*: remove ASAP
+//#if defined (DBUS_SUPPORT)
+//  inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
+//#endif
+
+ protected:
+  Net_WLAN_Monitor_T ();
+
+  UserDataType* userData_;
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T (const Net_WLAN_Monitor_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T& operator= (const Net_WLAN_Monitor_T&))
+
+  // implement (part of) Common_IStateMachine_T
+//  virtual void onChange (enum Net_WLAN_MonitorState); // new state
+};
+
+//////////////////////////////////////////
+// (partial) specializations
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+template <typename AddressType,
+          typename ConfigurationType,
+          ////////////////////////////////
+          typename UserDataType>
+class Net_WLAN_Monitor_T<AddressType,
+                         ConfigurationType,
+                         NET_WLAN_MONITOR_API_WLANAPI,
+                         UserDataType>
+ : public Net_WLAN_Monitor_Base_T<AddressType,
+                                  ConfigurationType>
+{
+  typedef Net_WLAN_Monitor_Base_T<AddressType,
+                                  ConfigurationType> inherited;
+
+  // singleton has access to the ctor/dtors
+  friend class ACE_Singleton<Net_WLAN_Monitor_T<AddressType,
+                                                ConfigurationType,
+                                                NET_WLAN_MONITOR_API_WLANAPI,
                                                 UserDataType>,
                              ACE_SYNCH_MUTEX>;
 
@@ -122,18 +209,75 @@ class Net_WLAN_Monitor_T
  protected:
   Net_WLAN_Monitor_T ();
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inline virtual bool do_associate (REFGUID interfaceIdentifier_in, const struct ether_addr&, const std::string& SSID_in) { return Net_WLAN_Tools::associate (clientHandle_, interfaceIdentifier_in, SSID_in); }
-  inline virtual void do_scan (REFGUID interfaceIdentifier_in) { ACE_ASSERT (configuration_); Net_WLAN_Tools::scan (clientHandle_, interfaceIdentifier_in, configuration_->SSID); }
+  inline virtual bool do_associate (REFGUID interfaceIdentifier_in, const struct ether_addr&, const std::string& SSID_in) { return Net_WLAN_Tools::associate (inherited::clientHandle_, interfaceIdentifier_in, SSID_in); }
+  inline virtual void do_scan (REFGUID interfaceIdentifier_in) { ACE_ASSERT (inherited::configuration_); Net_WLAN_Tools::scan (inherited::clientHandle_, interfaceIdentifier_in, inherited::configuration_->SSID); }
+
+  UserDataType* userData_;
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T (const Net_WLAN_Monitor_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T& operator= (const Net_WLAN_Monitor_T&))
+
+  // implement (part of) Common_IStateMachine_T
+//  virtual void onChange (enum Net_WLAN_MonitorState); // new state
+};
 #else
-  inline virtual bool do_associate (const std::string& interfaceIdentifier_in, const struct ether_addr& APMACAddress_in, const std::string& SSID_in) { return Net_WLAN_Tools::associate (interfaceIdentifier_in, APMACAddress_in, SSID_in, inherited::handle_); }
-  inline virtual void do_scan (const std::string& interfaceIdentifier_in) { ACE_ASSERT (inherited::configuration_); Net_WLAN_Tools::scan (interfaceIdentifier_in, inherited::configuration_->SSID, inherited::handle_, false); }
+#if defined (WEXT_SUPPORT)
+template <typename AddressType,
+          typename ConfigurationType,
+          ////////////////////////////////
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          ////////////////////////////////
+          typename UserDataType>
+class Net_WLAN_Monitor_T<AddressType,
+                         ConfigurationType,
+                         ACE_SYNCH_USE,
+                         TimePolicyType,
+                         NET_WLAN_MONITOR_API_IOCTL,
+                         UserDataType>
+ : public Net_WLAN_Monitor_Base_T<AddressType,
+                                  ConfigurationType,
+                                  ACE_SYNCH_USE,
+                                  TimePolicyType>
+{
+  typedef Net_WLAN_Monitor_Base_T<AddressType,
+                                  ConfigurationType,
+                                  ACE_SYNCH_USE,
+                                  TimePolicyType> inherited;
+
+  // singleton has access to the ctor/dtors
+  friend class ACE_Singleton<Net_WLAN_Monitor_T<AddressType,
+                                                ConfigurationType,
+                                                ACE_SYNCH_USE,
+                                                TimePolicyType,
+                                                NET_WLAN_MONITOR_API_IOCTL,
+                                                UserDataType>,
+                             ACE_SYNCH_MUTEX>;
+
+ public:
+  inline virtual ~Net_WLAN_Monitor_T () {}
+
+  // override (part of) Common_ITaskControl_T
+  virtual void start ();
+  virtual void stop (bool = true,  // wait for completion ?
+                     bool = true); // locked access ?
+//  inline bool isRunning () const { return isActive_; }
+
+  // override (part of) Net_IWLANMonitor_T
+  virtual bool initialize (const ConfigurationType&); // configuration handle
+  // *TODO*: remove ASAP
+#if defined (DBUS_SUPPORT)
+  inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
 #endif
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+ protected:
+  Net_WLAN_Monitor_T ();
+
+  inline virtual bool do_associate (const std::string& interfaceIdentifier_in, const struct ether_addr& APMACAddress_in, const std::string& SSID_in) { return Net_WLAN_Tools::associate (interfaceIdentifier_in, APMACAddress_in, SSID_in, inherited::handle_); }
+  inline virtual void do_scan (const std::string& interfaceIdentifier_in) { ACE_ASSERT (inherited::configuration_); Net_WLAN_Tools::scan (interfaceIdentifier_in, inherited::configuration_->SSID, inherited::handle_, false); }
+
   struct iw_range range_;
-#endif
 
   UserDataType*   userData_;
 
@@ -146,20 +290,98 @@ class Net_WLAN_Monitor_T
 
   ////////////////////////////////////////
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
   // override some ACE_Event_Handler methods
   virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
-#endif
 };
+#endif // WEXT_SUPPORT
 
 //////////////////////////////////////////
-// (partial) specializations
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (NL80211_SUPPORT)
+template <typename AddressType,
+          typename ConfigurationType,
+          ////////////////////////////////
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          ////////////////////////////////
+          typename UserDataType>
+class Net_WLAN_Monitor_T<AddressType,
+                         ConfigurationType,
+                         ACE_SYNCH_USE,
+                         TimePolicyType,
+                         NET_WLAN_MONITOR_API_NL80211,
+                         UserDataType>
+ : public Net_WLAN_Monitor_Base_T<AddressType,
+                                  ConfigurationType,
+                                  ACE_SYNCH_USE,
+                                  TimePolicyType>
+// , public Common_EventHandlerBase
+ , public ACE_Handler
+{
+  typedef Net_WLAN_Monitor_Base_T<AddressType,
+                                  ConfigurationType,
+                                  ACE_SYNCH_USE,
+                                  TimePolicyType> inherited;
+//  typedef Common_EventHandlerBase inherited2;
+  typedef ACE_Handler inherited2;
+
+  // singleton has access to the ctor/dtors
+  friend class ACE_Singleton<Net_WLAN_Monitor_T<AddressType,
+                                                ConfigurationType,
+                                                ACE_SYNCH_USE,
+                                                TimePolicyType,
+                                                NET_WLAN_MONITOR_API_NL80211,
+                                                UserDataType>,
+                             ACE_SYNCH_MUTEX>;
+
+ public:
+  virtual ~Net_WLAN_Monitor_T ();
+
+  // override (part of) Common_ITaskControl_T
+  virtual void start ();
+  virtual void stop (bool = true,  // wait for completion ?
+                     bool = true); // locked access ?
+//  inline bool isRunning () const { return isActive_; }
+
+  // override (part of) Net_IWLANMonitor_T
+  virtual bool initialize (const ConfigurationType&); // configuration handle
+  // *TODO*: remove ASAP
 #if defined (DBUS_SUPPORT)
-// (partial) specialization for DBus strategy
+  inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
+#endif
+
+ protected:
+  Net_WLAN_Monitor_T ();
+
+  virtual bool do_associate (const std::string&,
+                             const struct ether_addr&,
+                             const std::string&);
+  virtual void do_scan (const std::string&);
+
+  UserDataType*          userData_;
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T (const Net_WLAN_Monitor_T&))
+  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T& operator= (const Net_WLAN_Monitor_T&))
+
+  // implement (part of) Common_IStateMachine_T
+//  virtual void onChange (enum Net_WLAN_MonitorState); // new state
+
+  ////////////////////////////////////////
+
+  // override some ACE_Event_Handler methods
+  virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
+
+  bool initiate_read_stream (unsigned int); // buffer size
+
+  ACE_Asynch_Read_Stream inputStream_;
+  bool                   isRegistered_;
+};
+#endif // NL80211_SUPPORT
+
+//////////////////////////////////////////
+
+#if defined (DBUS_SUPPORT)
 template <typename AddressType,
           typename ConfigurationType,
           ////////////////////////////////
@@ -204,7 +426,6 @@ class Net_WLAN_Monitor_T<AddressType,
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
   virtual const std::string& get1R (const std::string&) const;
-
   inline virtual const struct DBusConnection* const getP () const { return connection_; }
 
  protected:
@@ -224,13 +445,10 @@ class Net_WLAN_Monitor_T<AddressType,
 
   Net_WLAN_Monitor_T ();
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
   virtual bool do_associate (const std::string&,       // interface identifier
                              const struct ether_addr&, // BSSID
                              const std::string&);      // (E)SSID
   virtual void do_scan (const std::string&); // interface identifier
-#endif
 
   struct DBusConnection*              connection_;
 //  struct DBusGProxy*                              proxy_;
