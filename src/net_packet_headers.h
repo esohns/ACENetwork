@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -59,7 +59,7 @@ struct tcphdr
           fin:1;
 #else
 #error "ACE_BYTE_ORDER not defined"
-#endif
+#endif // ACE_LITTLE_ENDIAN
   u_short window;  // Window
   u_short check;   // Checksum
   u_short urg_ptr; // Urgent pointer
@@ -69,8 +69,8 @@ struct tcphdr
 };
 //#endif
 #else
-#include "netinet/tcp.h"
-#endif
+#include <netinet/tcp.h>
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 struct udphdr
@@ -85,8 +85,8 @@ struct udphdr
 };
 //#endif
 #else
-#include "netinet/udp.h"
-#endif
+#include <netinet/udp.h>
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <in6addr.h>
@@ -127,8 +127,8 @@ struct udphdr
 //};
 //#endif
 #else
-#include "netinet/ip6.h"
-#endif
+#include <netinet/ip6.h>
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 struct iphdr
@@ -167,8 +167,8 @@ struct iphdr
 };
 //#endif
 #else
-#include "netinet/ip.h"
-#endif
+#include <netinet/ip.h>
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32)  || defined (ACE_WIN64)
 // these protocols seem to be missing in winsock2.h
@@ -183,8 +183,8 @@ struct iphdr
 #define IPPROTO_COMP  108          /* Compression Header Protocol              */
 #define IPPROTO_SCTP  132          /* Stream Control Transmission Protocol     */
 #else
-#include "netinet/in.h"
-#endif
+#include <netinet/in.h>
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
  /*
@@ -238,8 +238,8 @@ struct ether_header
   u_short           ether_type; /* packet type id field */
 };
 #else
-#include "net/ethernet.h"
-#endif
+#include <net/ethernet.h>
+#endif // ACE_WIN32 || ACE_WIN64
 
 /*
  *      These are the defined Ethernet Protocol ID's.
@@ -495,11 +495,11 @@ struct fddi_header
 
 #define FDDI_K_SNAP_HLEN 21             /* Total octets in header.       */
 #else
-#include "netinet/if_fddi.h"
-#endif
+#include <netinet/if_fddi.h>
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (_MSC_VER)
 #pragma pack (pop)
-#endif
+#endif // _MSC_VER
 
 #endif

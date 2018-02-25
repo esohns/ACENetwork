@@ -1,3 +1,5 @@
+﻿add_library (${PROJECT_NAME}_Protocol_IRC STATIC "")
+
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
@@ -20,13 +22,23 @@ if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
 
-add_definitions (-DHAVE_CONFIG_H)
+#add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 if (UNIX)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libCommon/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/net)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/stat)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACE>)
+
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libCommon/src>)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libCommon/src/timer>)
+
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src>)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/net>)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/stat>)
 elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libCommon/src/ui)
@@ -36,14 +48,15 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party)
 endif ()
 #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../..)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../client_server)
-#include_directories (${CMAKE_CURRENT_BINARY_DIR}/..)
+target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>)
+target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../client_server>)
+target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../../..>)
 
 ########### next target ###############
-set (${PROJECT_NAME}_Protocol_IRC_SRCS
-     stdafx.cpp
-     stdafx.h
+set (source_files
      irc_bisector.cpp
      irc_bisector.h
      irc_codes.h
@@ -90,10 +103,33 @@ set (${PROJECT_NAME}_Protocol_IRC_SRCS
      location.hh
      position.hh
      stack.hh)
-set (${PROJECT_NAME}_Protocol_IRC_SCRIPTS
+set (script_files
      scripts/bisector.l
      scripts/scanner.l
      scripts/parser.y)
+
+#set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+
+unset (absolute_source_files)
+foreach (source_file ${source_files})
+  get_filename_component (abs_source_file ${source_file} ABSOLUTE)
+  list (APPEND absolute_source_files
+    ${abs_source_file})
+  #       $<INSTALL_INTERFACE:${INCLUDE_DIR}/${source_file}>)
+endforeach ()
+unset (absolute_script_files)
+foreach (script_file ${script_files})
+  get_filename_component (abs_script_file ${script_file} ABSOLUTE)
+  list (APPEND absolute_script_files
+    ${absolute_script_file})
+endforeach ()
+target_sources (${PROJECT_NAME}_Protocol_IRC
+  PRIVATE stdafx.cpp
+  PRIVATE stdafx.h
+  PRIVATE
+  ${absolute_source_files}
+  INTERFACE
+  ${absolute_script_files})
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/libACENetwork/protocol/irc")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS -DIRC_BUILD_DLL)
@@ -109,9 +145,6 @@ if (WIN32)
  source_group (exports FILES etc/exports.def)
 endif ()
 
-add_library (${PROJECT_NAME}_Protocol_IRC SHARED
-             ${ACENetwork_Protocol_IRC_SRCS}
-             ${ACENetwork_Protocol_IRC_SCRIPTS})
 set_property (TARGET ${PROJECT_NAME}_Protocol_IRC PROPERTY FOLDER "protocols")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)

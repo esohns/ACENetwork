@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -28,7 +28,7 @@
 #include "net_common.h"
 
 typedef Net_Statistic_t Test_U_Statistic_t;
-typedef Common_IStatistic_T<Test_U_Statistic_t> Test_U_IStatisticHandler_t;
+typedef Common_IStatistic_T<Test_U_Statistic_t> Test_U_IStatistic_t;
 typedef Common_StatisticHandler_T<Test_U_Statistic_t> Test_U_StatisticHandler_t;
 
 struct Test_U_SignalHandlerConfiguration

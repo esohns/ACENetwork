@@ -1,8 +1,10 @@
-cmake_minimum_required (VERSION 2.8)
+﻿cmake_minimum_required (VERSION 2.8)
 
-# options
+# global options
 #set (CMAKE_VERBOSE_MAKEFILE ON)
+set_property (GLOBAL PROPERTY USE_FOLDERS ON)
 
+# version
 set (VERSION_MAJOR 0)
 set (VERSION_MINOR 0)
 set (VERSION_MICRO 1)
@@ -13,8 +15,7 @@ if (VERSION_DEVEL)
  set (VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}-${VERSION_DEVEL})
 endif ()
 
-set_property (GLOBAL PROPERTY USE_FOLDERS ON)
-
+# build type
 # *NOTE*: if the user specifies -DCMAKE_BUILD_TYPE on the command line, take
 #         their definition and dump it in the cache along with proper
 #         documentation, otherwise set CMAKE_BUILD_TYPE to Debug prior to
@@ -26,11 +27,13 @@ else ()
  set (CMAKE_BUILD_TYPE Debug CACHE STRING ${BUILD_TYPE_CACHE_STRING})
 endif ()
 
+# project
 cmake_policy (SET CMP0048 NEW) # allow project VERSION
 project (ACENetwork
          VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
          LANGUAGES CXX C)
 
+# directories
 # override the installation directories ?
 set (INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
 set (INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
@@ -50,45 +53,7 @@ foreach (path LIB BIN INCLUDE CMAKE)
  endif ()
 endforeach ()
 
-# Export the package for use from the build-tree
-# (this registers the build-tree with a global CMake-registry)
-export (PACKAGE lib${PROJECT_NAME})
-
-# Create the ACENetworkConfig.cmake and ACENetworkConfigVersion.cmake files
-file (RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
-# ... for the build tree
-set (CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
-configure_file (${PROJECT_NAME}Config.cmake.in
-                "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" @ONLY)
-# ... for the install tree
-set (CONF_INCLUDE_DIRS "\${LIBACENETWORK_CMAKE_DIR}/${REL_INCLUDE_DIR}")
-configure_file (${PROJECT_NAME}Config.cmake.in
-                "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake" @ONLY)
-# ... for both
-configure_file (${PROJECT_NAME}ConfigVersion.cmake.in
-                "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake" @ONLY)
-
-# Install the libACENetworkConfig.cmake and libACENetworkConfigVersion.cmake
-install (FILES
-         "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake"
-         "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
-         DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
-# Install the export set for use with the install-tree
-install (EXPORT ${PROJECT_NAME}Targets
-         DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
-
-set (PACKAGE ${PROJECT_NAME})
-configure_file (${CMAKE_CURRENT_SOURCE_DIR}/config.h.in.cmake
-                ${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_config.h
-                @ONLY)
-#add_custom_target (${PROJECT_NAME}_config)
-#set_target_properties (${PROJECT_NAME}_config PROPERTIES
-#                       PUBLIC_HEADER "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_config.h")
-
-install (FILES "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_config.h"
-         DESTINATION "${INSTALL_INCLUDE_DIR}/${PROJECT_NAME}"
-         COMPONENT dev)
-
+# project options
 set (DEBUG_DEBUGGER TRUE
      CACHE BOOL "in debugger")
 
@@ -118,8 +83,7 @@ elseif (CMAKE_BUILD_TYPE STREQUAL Release)
  endif ()
 endif ()
 
-option (TRACING
-        "enable tracing" OFF)
+option (TRACING "enable tracing" OFF)
 if (TRACING)
  add_definitions (-DACENETWORK_NTRACE=0)
 #  set_property (SOURCE PROPERTY COMPILE_DEFINITIONS ACENETWORK_NTRACE=0)
@@ -128,8 +92,7 @@ else ()
 #  set_property (SOURCE PROPERTY COMPILE_DEFINITIONS ACENETWORK_NTRACE=1)
 endif ()
 
-option (VALGRIND_SUPPORT
-        "enable valgrind support" OFF)
+option (VALGRIND_SUPPORT "enable valgrind support" OFF)
 include (CheckIncludeFiles)
 include (FindPkgConfig)
 if (VALGRIND_SUPPORT)
@@ -141,8 +104,7 @@ if (VALGRIND_SUPPORT)
 #  set_property (SOURCE PROPERTY COMPILE_DEFINITIONS LIBACENETWORK_ENABLE_VALGRIND_SUPPORT)
 endif ()
 
-option (BUILD_MODULES
-        "build (git) sub-modules" OFF)
+option (BUILD_MODULES "build (git) sub-modules" OFF)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
  add_compile_options (-ansi)
@@ -152,7 +114,7 @@ if (CMAKE_COMPILER_IS_GNUCXX)
  add_definitions (-D_GNU_SOURCE)
 #  set_property (SOURCE PROPERTY COMPILE_DEFINITIONS _GNU_SOURCE)
 endif ()
-if (MSVC)  
+if (MSVC)
  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
 
  set (MSVC_INCREMENTAL_YES_FLAG "/INCREMENTAL:NO")
@@ -165,21 +127,64 @@ if (MSVC)
   mark_as_advanced (CMAKE_${FLAG_TYPE}_LINKER_FLAGS_DEBUG)
  endforeach ()
 endif (MSVC)
-	
+
+################################################################################
+
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../cotire/CMake")
 #list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/scripts")
 include (cotire)
 set_directory_properties (PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)
 
-# build a CPack driven installer package
-include (InstallRequiredSystemLibraries)
-set (CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
-set (CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
-set (CPACK_PACKAGE_VERSION_PATCH ${VERSION_MICRO})
-set (CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE)
-set (CPACK_RESOURCE_FILE_README ${CMAKE_CURRENT_SOURCE_DIR}/README)
+################################################################################
 
-include (CPack)
+add_subdirectory (src)
+
+################################################################################
+
+# configuration files
+# Export the package for use from the build-tree
+# (this registers the build-tree with a global CMake-registry)
+export (PACKAGE ${PROJECT_NAME})
+
+# Create the ACENetworkConfig.cmake and ACENetworkConfigVersion.cmake files
+# *NOTE*: see: https://cmake.org/Wiki/CMake/Tutorials/How_to_create_a_ProjectConfig.cmake_file
+file (RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}" "${INSTALL_INCLUDE_DIR}")
+# ... for the build tree
+set (CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
+configure_file (${PROJECT_NAME}Config.cmake.in
+                "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake" @ONLY)
+# ... for the install tree
+set (CONF_INCLUDE_DIRS "\${ACENetwork_CMAKE_DIR}/${REL_INCLUDE_DIR}")
+configure_file (${PROJECT_NAME}Config.cmake.in
+                "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake" @ONLY)
+# ... for both
+configure_file (${PROJECT_NAME}ConfigVersion.cmake.in
+                "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake" @ONLY)
+
+set (PACKAGE ${PROJECT_NAME})
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake.in
+                ${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_config.h
+                @ONLY)
+#add_custom_target (${PROJECT_NAME}_config)
+#set_target_properties (${PROJECT_NAME}_config PROPERTIES
+#                       PUBLIC_HEADER "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_config.h")
+add_definitions (-DHAVE_CONFIG_H)
+#set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
+
+################################################################################
+
+# Install the libACENetworkConfig.cmake and libACENetworkConfigVersion.cmake
+install (FILES
+         "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${PROJECT_NAME}Config.cmake"
+         "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+         DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+# Install the export set for use with the install-tree
+install (EXPORT ${PROJECT_NAME}Targets
+         DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
+
+install (FILES "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_config.h"
+         DESTINATION "${INSTALL_INCLUDE_DIR}/${PROJECT_NAME}"
+         COMPONENT dev)
 
 ################################################################################
 
@@ -193,8 +198,17 @@ include (CreateLaunchers)
 #include (CTest)
 enable_testing ()
 
-################################################################################
-
-add_subdirectory (src)
 add_subdirectory (test_u)
 add_subdirectory (test_i)
+
+################################################################################
+
+# build a CPack driven installer package
+include (InstallRequiredSystemLibraries)
+set (CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
+set (CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
+set (CPACK_PACKAGE_VERSION_PATCH ${VERSION_MICRO})
+set (CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE)
+set (CPACK_RESOURCE_FILE_README ${CMAKE_CURRENT_SOURCE_DIR}/README)
+
+include (CPack)

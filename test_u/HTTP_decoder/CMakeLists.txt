@@ -13,8 +13,9 @@ if (UNIX)
  if (DEFINED ENV{ACE_ROOT})
   find_library (ACE_LIBRARY ${ACE_LIB_FILE}
                 PATHS ENV ACE_ROOT
-                PATH_SUFFIXES ace build/linux/ace
-                DOC "searching for ${ACE_LIB_FILE}")
+                PATH_SUFFIXES lib
+                DOC "searching for ${ACE_LIB_FILE}"
+                NO_DEFAULT_PATH)
  else ()
   find_library (ACE_LIBRARY ${ACE_LIB_FILE}
                 DOC "searching for ${ACE_LIB_FILE} (system paths)")
@@ -39,12 +40,17 @@ endif ()
 if (SSL_SUPPORT)
  set (ACE_SSL_LIB_FILE libACE_SSL.so)
  if (UNIX)
-  find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
-                HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE
-                PATHS ENV ACE_ROOT
-                PATH_SUFFIXES lib
-                DOC "searching for ${ACE_SSL_LIB_FILE}"
-                NO_DEFAULT_PATH)
+  if (DEFINED ENV{ACE_ROOT})
+   find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
+#                HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE
+                 PATHS ENV ACE_ROOT
+                 PATH_SUFFIXES lib
+                 DOC "searching for ${ACE_SSL_LIB_FILE}"
+                 NO_DEFAULT_PATH)
+  else ()
+   find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
+                 DOC "searching for ${ACE_SSL_LIB_FILE} (system paths)")
+  endif ()
  elseif (WIN32)
   if (CMAKE_BUILD_TYPE STREQUAL Debug)
    set (LIB_FILE_SUFFIX d)
@@ -53,7 +59,7 @@ if (SSL_SUPPORT)
   set (ACE_SSL_LIB_FILE ACE_SSL${LIB_FILE_SUFFIX}.lib)
   find_library (ACE_SSL_LIBRARY ${ACE_SSL_LIB_FILE}
                 PATHS ENV ACE_ROOT
-                PATH_SUFFIXES lib
+                PATH_SUFFIXES lib\\${CMAKE_BUILD_TYPE}\\Win32
                 DOC "searching for ${ACE_SSL_LIB_FILE}"
                 NO_DEFAULT_PATH)
  endif ()
@@ -166,7 +172,7 @@ add_definitions (-DHTTP_HAS_DLL)
 if (SSL_SUPPORT)
  add_definitions (-DSSL_SUPPORT)
 endif ()
-add_definitions (-DHAVE_CONFIG_H)
+#add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
 if (UNIX)

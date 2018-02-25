@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2010 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -21,57 +21,3 @@
 
 #include "ace/Synch.h"
 #include "net_netlinksockethandler.h"
-
-#if defined (ACE_HAS_NETLINK)
-#include <cmath>
-
-#include "ace/OS.h"
-
-Net_Netlink_Addr&
-Net_Netlink_Addr::operator= (const ACE_Addr& rhs)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Netlink_Addr::operator="));
-
-  *this = rhs;
-
-  return *this;
-}
-
-int
-Net_Netlink_Addr::addr_to_string (ACE_TCHAR buffer_out[],
-                                  size_t size_in,
-                                  int IPAddressFormat_in) const
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Netlink_Addr::addr_to_string"));
-
-  ACE_UNUSED_ARG (IPAddressFormat_in);
-
-  // initialize return value(s)
-  ACE_OS::memset (buffer_out, 0, size_in);
-
-  // sanity check(s)
-  int pid = inherited::get_pid ();
-  int gid = inherited::get_gid ();
-  size_t total_length =
-      (static_cast<size_t> (::floorf (::log10f (static_cast<float> (pid)))) + 1) +
-      1 + // sizeof (':')
-      (static_cast<size_t> (::floorf (::log10f (static_cast<float> (gid))) + 1)) +
-      1; // sizeof ('\0'), terminating NUL
-  if (size_in < total_length)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("buffer too small (was: %u, need: %u), aborting\n")));
-    return -1;
-  } // end IF
-
-  ACE_TCHAR const *format = ACE_TEXT ("%u:%u");
-  int result = ACE_OS::sprintf (buffer_out, format,
-                                pid, gid);
-  if (result < 0)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::sprintf(): \"%m\", aborting\n")));
-
-  return (static_cast<unsigned int> (result) == (total_length -1) ? 0 : -1);
-}
-
-#endif

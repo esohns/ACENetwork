@@ -57,13 +57,11 @@
 #define NET_ADDRESS_DEFAULT_PORT                            10001
 
 // protocols
-#if defined (ACE_HAS_NETLINK)
 // --- Netlink ---
 
 // *IMPORTANT NOTE*: must match with the kernel module implementation !
 #define NET_PROTOCOL_DEFAULT_NETLINK                        NETLINK_GENERIC
 #define NET_PROTOCOL_DEFAULT_NETLINK_GROUP                  1
-#endif
 
 // --- UDP ---
 

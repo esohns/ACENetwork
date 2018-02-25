@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -27,6 +27,7 @@
 #include "ace/Basic_Types.h"
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
+#include "ace/Netlink_Addr.h"
 #include "ace/Time_Value.h"
 
 #include "common_configuration.h"
@@ -41,13 +42,35 @@
 #include <cguid.h>
 
 #include "net_common_tools.h"
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 #include "net_defines.h"
 #include "net_iconnectionmanager.h"
 
 // forward declarations
 class Stream_IAllocator;
 struct Net_UserData;
+
+#if defined (ACE_HAS_NETLINK)
+class Net_Netlink_Addr
+ : public ACE_Netlink_Addr
+{
+  typedef ACE_Netlink_Addr inherited;
+
+ public:
+//  Net_Netlink_Addr (void);
+//  Net_Netlink_Addr (const sockaddr_nl*, int);
+  inline virtual ~Net_Netlink_Addr (void) {}
+
+  inline Net_Netlink_Addr& operator= (const ACE_Addr& rhs) { *this = rhs; return *this; }
+
+  virtual int addr_to_string (ACE_TCHAR[],    // buffer
+                              size_t,         // size
+                              int = 1) const; // ipaddr_format
+  inline bool is_any (void) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+
+  inline void reset (void) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+};
+#endif /* ACE_HAS_NETLINK */
 
 struct Net_AllocatorConfiguration
  : Common_AllocatorConfiguration
@@ -70,13 +93,13 @@ struct Net_SocketConfigurationBase
    , interfaceIdentifier (GUID_NULL)
 #else
    , interfaceIdentifier (ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET))
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     interfaceIdentifier =
       Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   };
   inline virtual ~Net_SocketConfigurationBase () {}
 
@@ -85,11 +108,10 @@ struct Net_SocketConfigurationBase
   struct _GUID interfaceIdentifier; // NIC-
 #else
   std::string  interfaceIdentifier; // NIC-
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   bool         useLoopBackDevice;   // (if any)
 };
 
-#if defined (ACE_HAS_NETLINK)
 struct Net_NetlinkSocketConfiguration
  : Net_SocketConfigurationBase
 {
@@ -102,7 +124,6 @@ struct Net_NetlinkSocketConfiguration
   Net_Netlink_Addr address;
   int              protocol;
 };
-#endif
 
 struct Net_TCPSocketConfiguration
  : Net_SocketConfigurationBase
@@ -142,7 +163,7 @@ struct Net_UDPSocketConfiguration
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
    , linger (NET_SOCKET_DEFAULT_LINGER)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
    , listenAddress (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
                     static_cast<ACE_UINT32> (INADDR_ANY))
    , peerAddress (static_cast<u_short> (NET_ADDRESS_DEFAULT_PORT),
@@ -183,7 +204,7 @@ struct Net_UDPSocketConfiguration
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
   bool          linger;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   ACE_INET_Addr listenAddress;
   ACE_INET_Addr peerAddress;
   ACE_UINT16    sourcePort; // specify a specific source port (outbound)

@@ -34,7 +34,9 @@
 #include <map>
 
 #if defined (NL80211_SUPPORT)
-#include "ace/Asynch_IO.h"
+#include "libnl3/netlink/handlers.h"
+
+//#include "ace/Asynch_IO.h"
 #endif // NL80211_SUPPORT
 
 #include "dbus/dbus.h"
@@ -63,30 +65,33 @@ struct sockaddr_nl;
 struct nlmsgerr;
 struct nl_msg;
 
-static int
-network_wlan_nl80211_error_cb (struct sockaddr_nl*,
-                               struct nlmsgerr*,
-                               void*);
+//// error handling
+//int
+//network_wlan_nl80211_error_cb (struct sockaddr_nl*,
+//                               struct nlmsgerr*,
+//                               void*);
 
-static int
-network_wlan_nl80211_finish_cb (struct nl_msg*,
-                                void*);
-static int
-network_wlan_nl80211_ack_cb (struct nl_msg*,
-                             void*);
-static int
+// protocol handling
+int
 network_wlan_nl80211_no_seq_check_cb (struct nl_msg*,
                                       void*);
-static int
-network_wlan_nl80211_family_cb (struct nl_msg*,
+int
+network_wlan_nl80211_ack_cb (struct nl_msg*,
+                             void*);
+int
+network_wlan_nl80211_finish_cb (struct nl_msg*,
                                 void*);
+int
+network_wlan_nl80211_multicast_groups_cb (struct nl_msg*,
+                                          void*);
 
-static int
-network_wlan_nl80211_scan_result_cb (struct nl_msg*,
-                                     void*);
-static int
-network_wlan_nl80211_scan_data_cb (struct nl_msg*,
-                                   void*);
+// data handling
+int
+network_wlan_nl80211_default_handler_cb (struct nl_msg*,
+                                         void*);
+//int
+//network_wlan_nl80211_scan_data_cb (struct nl_msg*,
+//                                   void*);
 #endif // NL80211_SUPPORT
 
 #if defined (DBUS_SUPPORT)
@@ -202,15 +207,17 @@ class Net_WLAN_Monitor_T<AddressType,
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
   // *TODO*: remove ASAP
-#if defined (DBUS_SUPPORT)
-  inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
-#endif
+//#if defined (DBUS_SUPPORT)
+//  inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
+//#endif
+  inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID (clientHandle_, (configuration_ ? configuration_->interfaceIdentifier : GUID_NULL); }
 
  protected:
   Net_WLAN_Monitor_T ();
 
+  // implement Net_WLAN_IManager
   inline virtual bool do_associate (REFGUID interfaceIdentifier_in, const struct ether_addr&, const std::string& SSID_in) { return Net_WLAN_Tools::associate (inherited::clientHandle_, interfaceIdentifier_in, SSID_in); }
-  inline virtual void do_scan (REFGUID interfaceIdentifier_in) { ACE_ASSERT (inherited::configuration_); Net_WLAN_Tools::scan (inherited::clientHandle_, interfaceIdentifier_in, inherited::configuration_->SSID); }
+  inline virtual void do_scan (REFGUID interfaceIdentifier_in, const struct ether_addr& APMACAddress_in, const std::string& SSID_in) { ACE_UNUSED_ARG (APMACAddress_in); Net_WLAN_Tools::scan (inherited::clientHandle_, interfaceIdentifier_in, SSID_in); }
 
   UserDataType* userData_;
 
@@ -267,15 +274,17 @@ class Net_WLAN_Monitor_T<AddressType,
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
   // *TODO*: remove ASAP
-#if defined (DBUS_SUPPORT)
-  inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
-#endif
+//#if defined (DBUS_SUPPORT)
+//  inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
+//#endif
+  inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID ((inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR ("")), inherited::handle_); }
 
  protected:
   Net_WLAN_Monitor_T ();
 
+  // implement Net_WLAN_IManager
   inline virtual bool do_associate (const std::string& interfaceIdentifier_in, const struct ether_addr& APMACAddress_in, const std::string& SSID_in) { return Net_WLAN_Tools::associate (interfaceIdentifier_in, APMACAddress_in, SSID_in, inherited::handle_); }
-  inline virtual void do_scan (const std::string& interfaceIdentifier_in) { ACE_ASSERT (inherited::configuration_); Net_WLAN_Tools::scan (interfaceIdentifier_in, inherited::configuration_->SSID, inherited::handle_, false); }
+  inline virtual void do_scan (const std::string& interfaceIdentifier_in, const struct ether_addr& APMACAddress_in, const std::string& SSID_in) { ACE_UNUSED_ARG (APMACAddress_in); Net_WLAN_Tools::scan (interfaceIdentifier_in, SSID_in, inherited::handle_, false); }
 
   struct iw_range range_;
 
@@ -345,18 +354,22 @@ class Net_WLAN_Monitor_T<AddressType,
 
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
-  // *TODO*: remove ASAP
-#if defined (DBUS_SUPPORT)
-  inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
-#endif
+  inline virtual const int get () const { ACE_ASSERT (familyId_ > 0); return familyId_; }
+//#if defined (DBUS_SUPPORT)
+//  inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
+//#endif
+  inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID ((inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR ("")), NULL, familyId_); }
 
  protected:
   Net_WLAN_Monitor_T ();
 
-  virtual bool do_associate (const std::string&,
-                             const struct ether_addr&,
-                             const std::string&);
-  virtual void do_scan (const std::string&);
+  // implement Net_WLAN_IManager
+  virtual bool do_associate (const std::string&,       // interface identifier {"": any}
+                             const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
+                             const std::string&);      // (E)SSID {"": disassociate}
+  virtual void do_scan (const std::string&,       // interface identifier {"": all}
+                        const struct ether_addr&, // AP BSSID (i.e. AP MAC address) {0: all}
+                        const std::string&);      // (E)SSID {"": all}
 
   UserDataType*          userData_;
 
@@ -369,13 +382,21 @@ class Net_WLAN_Monitor_T<AddressType,
 
   ////////////////////////////////////////
 
-  // override some ACE_Event_Handler methods
-  virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
+//  // override some ACE_Event_Handler methods
+//  virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
 
-  bool initiate_read_stream (unsigned int); // buffer size
+  // override some ACE_Task_Base methods
+  virtual int svc (void);
 
-  ACE_Asynch_Read_Stream inputStream_;
-  bool                   isRegistered_;
+//  bool initiate_read_stream (unsigned int); // buffer size
+
+  struct nl_cb*          callbacks_;
+  int                    controlId_;
+  int                    error_;
+  int                    familyId_;
+  struct nl_sock*        handle_;
+//  ACE_Asynch_Read_Stream inputStream_;
+//  bool                   isRegistered_;
 };
 #endif // NL80211_SUPPORT
 
@@ -427,6 +448,7 @@ class Net_WLAN_Monitor_T<AddressType,
   virtual bool initialize (const ConfigurationType&); // configuration handle
   virtual const std::string& get1R (const std::string&) const;
   inline virtual const struct DBusConnection* const getP () const { return connection_; }
+  inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID (connection_, (inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR ("")); }
 
  protected:
   // convenient types
@@ -445,10 +467,13 @@ class Net_WLAN_Monitor_T<AddressType,
 
   Net_WLAN_Monitor_T ();
 
-  virtual bool do_associate (const std::string&,       // interface identifier
-                             const struct ether_addr&, // BSSID
-                             const std::string&);      // (E)SSID
-  virtual void do_scan (const std::string&); // interface identifier
+  // implement Net_WLAN_IManager
+  virtual bool do_associate (const std::string&,       // interface identifier {"": any}
+                             const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
+                             const std::string&);      // (E)SSID {"": disassociate}
+  virtual void do_scan (const std::string&,       // interface identifier {"": all}
+                        const struct ether_addr&, // AP BSSID (i.e. AP MAC address) {0: all}
+                        const std::string&);      // (E)SSID {"": all}
 
   struct DBusConnection*              connection_;
 //  struct DBusGProxy*                              proxy_;
@@ -462,8 +487,6 @@ class Net_WLAN_Monitor_T<AddressType,
 
   // override some ACE_Task_Base methods
   virtual int svc (void);
-
-  bool                                DBusDispatchStarted_;
 };
 #endif /* DBUS_SUPPORT */
 #endif /* ACE_WIN32 || ACE_WIN64 */

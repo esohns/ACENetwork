@@ -66,6 +66,10 @@ class Net_WLAN_MonitorStateMachine
                                 enum Net_WLAN_MonitorState,
                                 Common_IStateMachine_T<enum Net_WLAN_MonitorState> >
 #else
+ // *TODO*: only the NET_WLAN_MONITOR_API_IOCTL specialization really warrants
+ //         an asynchronous state machine; the other implementations just
+ //         require dispatching threads, or should use the reactor/proactor
+ //         instead
  : public Common_StateMachineAsynch_T<network_wlan_statemachine_monitor_name_string_,
                                       ACE_MT_SYNCH,
                                       Common_TimePolicy_t,
@@ -104,8 +108,9 @@ class Net_WLAN_MonitorStateMachine
 #else
   typename ACE_MT_SYNCH::MUTEX MUTEX_T;
 
+  bool                 dispatchStarted_;
   ACE_SYNCH_MUTEX      lock_;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // implement (part of) Common_IStateMachine_T
   // *NOTE*: only derived classes can change state

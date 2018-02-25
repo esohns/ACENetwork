@@ -1,0 +1,44 @@
+﻿/* config.h.cmake */
+
+/* Name of package */
+#cmakedefine PACKAGE "@PACKAGE@"
+
+/* Define to the address where bug reports for this package should be sent. */
+#cmakedefine PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#define ACENETWORK_PACKAGE_NAME "@PACKAGE@"
+
+/* Define to the full name and version of this package. */
+#define ACENETWORK_PACKAGE_STRING "@PACKAGE@ @VERSION@"
+
+/* Define to the one symbol short name of this package. */
+#cmakedefine PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#cmakedefine PACKAGE_URL
+
+/* Define to the version of this package. */
+#define ACENETWORK_PACKAGE_VERSION "@VERSION@"
+
+/* Version number of package */
+#define ACENETWORK_VERSION_MAJOR @VERSION_MAJOR@
+#define ACENETWORK_VERSION_MINOR @VERSION_MINOR@
+#define ACENETWORK_VERSION_MICRO @VERSION_MICRO@
+#define ACENETWORK_VERSION_DEVEL "@VERSION_DEVEL@"
+#cmakedefine VERSION "@VERSION@"
+
+// options
+#cmakedefine01 DEBUG_DEBUGGER
+#cmakedefine TRACING
+#cmakedefine VALGRIND_SUPPORT
+// sub-options - src
+#cmakedefine SSL_SUPPORT
+#cmakedefine NETLINK_SUPPORT
+// sub-options - wlan
+#cmakedefine WEXT_SUPPORT
+#cmakedefine NL80211_SUPPORT
+#cmakedefine DBUS_SUPPORT
+#cmakedefine DHCLIENT_SUPPORT
+#cmakedefine WLANAPI_SUPPORT
+#cmakedefine WINXP_SUPPORT

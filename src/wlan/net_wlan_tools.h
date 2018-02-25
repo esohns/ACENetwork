@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -27,6 +27,10 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <wlanapi.h>
 #else
+#if defined (NL80211_SUPPORT)
+#include <linux/nl80211.h>
+#endif // NL80211_SUPPORT
+
 #if defined (DBUS_SUPPORT)
 #include "dbus/dbus.h"
 #endif // DBUS_SUPPORT
@@ -40,6 +44,36 @@
 
 //#include "net_wlan_exports.h"
 #include "net_wlan_common.h"
+
+// forward declarations
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#if defined (NL80211_SUPPORT)
+struct sockaddr_nl;
+struct nlmsgerr;
+//struct nl_msg;
+
+// error handling
+int
+network_wlan_nl80211_error_cb (struct sockaddr_nl*,
+                               struct nlmsgerr*,
+                               void*);
+
+// protocol handling
+int
+network_wlan_nl80211_bssid_cb (struct nl_msg*,
+                               void*);
+int
+network_wlan_nl80211_ssid_cb (struct nl_msg*,
+                              void*);
+int
+network_wlan_nl80211_ssids_cb (struct nl_msg*,
+                               void*);
+int
+network_wlan_nl80211_feature_cb (struct nl_msg*,
+                                 void*);
+#endif // NL80211_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
 
 //class Net_WLAN_Export Net_WLAN_Tools
 class Net_WLAN_Tools
@@ -85,20 +119,21 @@ class Net_WLAN_Tools
                     REFGUID,             // interface identifier
                     const std::string&); // (E)SSID ("": scan all)
 #else
-  static std::string associatedSSID (const std::string&, // interface identifier
-                                     ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
-  //  static std::string associatedSSID (struct DBusConnection*, // DBus connection handle
-//                                     const std::string&);    // interface identifier
-  static struct ether_addr associatedBSSID (const std::string&, // interface identifier
-                                            ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
   static Net_InterfaceIdentifiers_t getInterfaces (int = AF_UNSPEC, // address family {default: any; use AF_MAX for any IP}
                                                    int = 0);        // flag(s) (e.g. IFF_UP; may be ORed)
-  static Net_WLAN_SSIDs_t getSSIDs (const std::string&, // interface identifier (empty: all)
-                                    ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
+
   static bool hasSSID (const std::string&,  // interface identifier
                        const std::string&); // (E)SSID
-  // *TODO*: only tests for SIOCGIWNAME ioctl
-  static bool isWireless (const std::string&); // interface identifier
+  // *NOTE*: the WEXT_SUPPORT implementation merely tests SIOCGIWNAME ioctl
+  static bool isInterface (const std::string&); // interface identifier
+
+#if defined (WEXT_SUPPORT)
+  static struct ether_addr associatedBSSID (const std::string&, // interface identifier
+                                            ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
+  static std::string associatedSSID (const std::string&, // interface identifier
+                                     ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
+  static Net_WLAN_SSIDs_t getSSIDs (const std::string&, // interface identifier (empty: all)
+                                    ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
 
   static bool associate (const std::string&,       // interface identifier
                          const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
@@ -108,15 +143,56 @@ class Net_WLAN_Tools
                             ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
   // *NOTE*: invokes SIOCSIWSCAN; result data must be polled with SIOCGIWSCAN
   static void scan (const std::string&, // interface identifier
-                    const std::string&, // (E)SSID (if any)
+                    const std::string&, // (E)SSID {"": all}
                     ACE_HANDLE,         // (socket) handle to effectuate the ioctl (if any)
                     bool = false);      // wait for the (first bit of-) result data ? (times out after 250ms)
-#endif
+#endif // WEXT_SUPPORT
 
-  // --- DBus ---
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (NL80211_SUPPORT)
+  // *IMPORTANT NOTE*: passing a valid socket handle introduces race conditions,
+  //                   as the callback handlers cannot be exchanged at runtime
+
+  static struct ether_addr associatedBSSID (const std::string&, // interface identifier
+                                            struct nl_sock*,    // nl80211 (socket) handle (if any)
+                                            int);               // "nl80211" driver family identifier
+  static std::string associatedSSID (const std::string&, // interface identifier
+                                     struct nl_sock*,    // nl80211 (socket) handle (if any)
+                                     int);               // "nl80211" driver family identifier
+  static Net_WLAN_SSIDs_t getSSIDs (const std::string&, // interface identifier (empty: all)
+                                    struct nl_sock*,    // nl80211 (socket) handle (if any)
+                                    int);               // "nl80211" driver family identifier
+
+  static bool hasFeature (const std::string&,             // interface identifier
+                          enum nl80211_feature_flags,
+                          enum nl80211_ext_feature_index,
+                          struct nl_sock*,                // nl80211 (socket) handle (if any)
+                          int);                           // "nl80211" driver family identifier
+
+  // *NOTE*: sends NL80211_CMD_CONNECT (and dispatches the result(s)); data
+  //         is forwarded to the appropriate callback(s)
+  static bool associate (const std::string&,       // interface identifier
+                         const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
+                         const std::string&,       // (E)SSID
+                         struct nl_sock*,          // nl80211 (socket) handle (if any)
+                         int);                     // "nl80211" driver family identifier
+  // *NOTE*: sends NL80211_CMD_DISCONNECT (and dispatches the result(s)); data
+  //         is forwarded to the appropriate callback(s)
+  static bool disassociate (const std::string&, // interface identifier ("": all)
+                            struct nl_sock*,    // nl80211 (socket) handle (if any)
+                            int);               // "nl80211" driver family identifier
+  // *NOTE*: sends NL80211_CMD_TRIGGER_SCAN (and dispatches the result(s)); data
+  //         is forwarded to the appropriate callback(s)
+  static void scan (const std::string&, // interface identifier
+                    const std::string&, // (E)SSID {"": all}
+                    struct nl_sock*,    // nl80211 (socket) handle (if any)
+                    int,                // "nl80211" driver family identifier
+                    bool = false);      // wait for-/dispatch result data ?
+#endif // NL80211_SUPPORT
+
 #if defined (DBUS_SUPPORT)
+//  static std::string associatedSSID (struct DBusConnection*, // DBus connection handle
+//                                     const std::string&);    // interface identifier
+
   static bool activateConnection (struct DBusConnection*, // DBus connection handle
                                   const std::string&,     // connection object path
                                   const std::string&,     // device object path

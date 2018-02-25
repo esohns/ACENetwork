@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -57,12 +57,9 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
 
   //  sanity check(s)
   ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::configuration_->monitor);
 
   int result = -1;
-  Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
-      NET_WLAN_INETMONITOR_SINGLETON::instance ();
-  ACE_ASSERT (iinetwlanmonitor_p);
-
   bool shutdown = false;
   bool report = false;
   switch (signal_in.signal)
@@ -156,9 +153,9 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
       inherited::configuration_->statisticReportingTimerId = -1;
     } // end IF
 
-    // step4: stop accepting connections, abort open connections
-    iinetwlanmonitor_p->stop (false, // wait ?
-                              true);
+    // step4: stop monitor
+    inherited::configuration_->monitor->stop (false, // wait ?
+                                              true);
 
 //    // step1: stop GTK event processing ?
 //    // *NOTE*: triggering UI shutdown from a widget callback is more consistent,

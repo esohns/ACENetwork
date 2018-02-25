@@ -41,6 +41,7 @@ Net_WLAN_MonitorStateMachine::Net_WLAN_MonitorStateMachine ()
               NET_WLAN_MONITOR_THREAD_GROUP_ID,                    // group id
               &lock_,                                              // lock handle
               NET_WLAN_MONITOR_STATE_INVALID)                      // (initial) state
+ , dispatchStarted_ (false)
 #endif
   , lock_ ()
 {

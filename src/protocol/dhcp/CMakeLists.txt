@@ -1,3 +1,5 @@
+﻿add_library (${PROJECT_NAME}_Protocol_DHCP STATIC "")
+
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
@@ -20,29 +22,40 @@ if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
 
-add_definitions (-DHAVE_CONFIG_H)
+#add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 add_definitions (-DNET_HAS_DLL)
 
 if (UNIX)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libCommon/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/stat)
+ target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACE>)
+
+ target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libCommon/src>)
+ target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libCommon/src/timer>)
+
+ target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src>)
+ target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/stat>)
 elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src/modules/stat)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party)
 endif ()
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../..)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../client_server)
+target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison>)
+
+target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>)
+target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../client_server>)
 #include_directories (${CMAKE_CURRENT_BINARY_DIR}/..)
 
 ########### next target ###############
-set (${PROJECT_NAME}_Protocol_DHCP_SRCS
-     stdafx.cpp
-     stdafx.h
+set (source_files
 #     dhcp_bisector.cpp
 #     dhcp_bisector.h
      dhcp_common.h
@@ -84,9 +97,32 @@ set (${PROJECT_NAME}_Protocol_DHCP_SRCS
      dhcp_stream_common.h
      dhcp_tools.cpp
      dhcp_tools.h)
-set (${PROJECT_NAME}_Protocol_DCHP_SCRIPTS
+set (script_files
      scripts/scanner.l
      scripts/parser.y)
+
+#set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+
+unset (absolute_source_files)
+foreach (source_file ${source_files})
+  get_filename_component (abs_source_file ${source_file} ABSOLUTE)
+  list (APPEND absolute_source_files
+        ${abs_source_file})
+  #       $<INSTALL_INTERFACE:${INCLUDE_DIR}/${source_file}>)
+endforeach ()
+unset (absolute_script_files)
+foreach (script_file ${script_files})
+  get_filename_component (abs_script_file ${script_file} ABSOLUTE)
+  list (APPEND absolute_script_files
+        ${absolute_script_file})
+endforeach ()
+target_sources (${PROJECT_NAME}_Protocol_DHCP
+  PRIVATE stdafx.cpp
+  PRIVATE stdafx.h
+  PRIVATE
+  ${absolute_source_files}
+  INTERFACE
+  ${absolute_script_files})
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_dhcp_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_dhcp_SRCS PROPERTIES COMPILE_DEFINITIONS -DDHCP_BUILD_DLL)
@@ -105,9 +141,6 @@ if (WIN32)
  source_group (scripts FILES ${PROJECT_NAME}_Protocol_DCHP_SCRIPTS)
 endif ()
 
-add_library (${PROJECT_NAME}_Protocol_DHCP SHARED
-             ${ACENetwork_Protocol_DHCP_SRCS}
-             ${ACENetwork_Protocol_DCHP_SCRIPTS})
 set_property (TARGET ${PROJECT_NAME}_Protocol_DHCP PROPERTY FOLDER "protocols")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)

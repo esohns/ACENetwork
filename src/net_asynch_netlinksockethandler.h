@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_ASYNCH_NETLINK_SOCKETHANDLER_T_H
-#define NET_ASYNCH_NETLINK_SOCKETHANDLER_T_H
+#ifndef NET_ASYNCH_NETLINK_SOCKETHANDLER_H
+#define NET_ASYNCH_NETLINK_SOCKETHANDLER_H
 
 #include "ace/Asynch_IO.h"
 #include "ace/config-macros.h"
@@ -33,8 +33,6 @@
 //#include "net_netlinksockethandler.h"
 #include "net_sockethandler_base.h"
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
 template <typename ConfigurationType>
 class Net_AsynchNetlinkSocketHandler_T
  : public Net_SocketHandlerBase_T<ConfigurationType>
@@ -86,6 +84,5 @@ class Net_AsynchNetlinkSocketHandler_T
 
 // include template definition
 #include "net_asynch_netlinksockethandler.inl"
-#endif
 
 #endif

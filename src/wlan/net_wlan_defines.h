@@ -32,11 +32,13 @@
 //         is detected. It will then periodically rescan at this interval iff it
 //         is not configured to 'auto-associate'
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#define NET_WLAN_MONITOR_DEFAULT_API                                      NET_WLAN_MONITOR_API_WLANAPI
 // *TODO*: see timeout below
 #define NET_WLAN_MONITOR_WIN32_SCAN_INTERVAL                              5 // s
 #else
+#define NET_WLAN_MONITOR_DEFAULT_API                                      NET_WLAN_MONITOR_API_NL80211
 #define NET_WLAN_MONITOR_UNIX_SCAN_INTERVAL                               3 // s
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 #define NET_WLAN_MONITOR_SCAN_SSID_RETRIES                                3
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -55,8 +57,21 @@
 #else
 #define NET_WLAN_MONITOR_ASSOCIATION_DEFAULT_RESULT_POLL_INTERVAL         50 // ms
 #define NET_WLAN_MONITOR_ASSOCIATION_DEFAULT_TIMEOUT                      3 // s
+// *TODO*: try to unify this setting (see above)
 #define NET_WLAN_MONITOR_UNIX_DEFAULT_BACKGROUNDSCANS                     false
 #define NET_WLAN_MONITOR_SCAN_DEFAULT_RESULT_POLL_INTERVAL                50 // ms
+
+#if defined (NL80211_SUPPORT)
+// *TODO*: use official definitions from the standard as soon as they are
+//         available programatically (see also: Std 802.11-2007 7.3.1.7)
+#define NET_WLAN_MONITOR_NL80211_REASON_CODE_LEAVING                      3
+
+#define NET_WLAN_MONITOR_NL80211_CONTROL_NAME_STRING                      "nlctrl"
+
+#define NET_WLAN_MONITOR_NL80211_DEFAULT_FLUSHCACHEBEFORESCANS            false
+#define NET_WLAN_MONITOR_NL80211_DEFAULT_LOWPRIORITYSCANS                 true
+#define NET_WLAN_MONITOR_NL80211_DEFAULT_RANDOMIZEMACADDRESSFORSCANS      false
+#endif // NL80211_SUPPORT
 
 #if defined (DBUS_SUPPORT)
 #define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SERVICE                      "org.freedesktop.NetworkManager"

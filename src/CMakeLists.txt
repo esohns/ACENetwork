@@ -1,11 +1,15 @@
-# target system introspection (see configure.ac)
+﻿# target system introspection (see configure.ac)
 #include (CheckFunctionExists)
 #include (InstallRequiredSystemLibraries)
 #check_function_exists (memset HAVE_FUNC_MEMSET)
 #check_function_exists (socket HAVE_FUNC_SOCKET)
 #check_function_exists (strerror HAVE_FUNC_STRERROR)
 
+option (SSL_SUPPORT "enable SSL support" OFF)
+
 if (UNIX)
+ option (NETLINK_SUPPORT "enable netlink support" ON)
+
 # include (CheckLibraryExists)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
  include (FindThreads)
@@ -47,7 +51,12 @@ add_definitions (-DACE_HAS_DLL)
 include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
 if (UNIX)
- pkg_check_modules (PKG_SSL REQUIRED libssl)
+ if (NETLINK_SUPPORT)
+  pkg_check_modules (PKG_LIBNL REQUIRED libnl-3.0)
+ endif (NETLINK_SUPPORT)
+ if (SSL_SUPPORT)
+  pkg_check_modules (PKG_SSL REQUIRED libssl)
+ endif (SSL_SUPPORT)
 endif ()
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/.. REALPATH DIRECTORY)
@@ -84,37 +93,56 @@ get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
 add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
+# ........................................
+
+add_library (${PROJECT_NAME} STATIC "")
+
 if (UNIX)
- include_directories (${PKG_SSL_INCLUDE_DIRS})
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE)
+ if (NETLINK_SUPPORT)
+  target_include_directories (${PROJECT_NAME} PUBLIC ${PKG_LIBNL_INCLUDE_DIRS})
+#  add_definitions (-DNETLINK_SUPPORT)
+ endif (NETLINK_SUPPORT)
+ if (SSL_SUPPORT)
+  target_include_directories (${PROJECT_NAME} PUBLIC ${PKG_SSL_INCLUDE_DIRS})
+ endif ()
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE>)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/timer)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src>)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/math>)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/timer>)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src/modules/lib)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src/modules/stat)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src>)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src/modules/lib>)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src/modules/stat>)
 elseif (WIN32)
- include_directories ($ENV{ACE_ROOT})
+ target_include_directories (${PROJECT_NAME} PUBLIC $ENV{ACE_ROOT})
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../openssl/include)
+ target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../openssl/include)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/timer)
- #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/xml)
+ target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src)
+ target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/math)
+ target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/timer)
+ #target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/xml)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src/modules/lib)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src/modules/stat)
+ target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src)
+ target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src/modules/lib)
+ target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src/modules/stat)
 endif ()
 #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/wlan)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../3rd_party/bison)
-include_directories (${CMAKE_CURRENT_BINARY_DIR}/..)
+target_include_directories (${PROJECT_NAME} PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../3rd_party/bison>)
+target_include_directories (${PROJECT_NAME} PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..>)
 
 ############## next target ################
-set (${PROJECT_NAME}_LIB_SRCS
-     stdafx.cpp
-     stdafx.h
+set (source_files
      net_asynch_netlinksockethandler.cpp
      net_asynch_netlinksockethandler.h
      net_asynch_netlinksockethandler.inl
@@ -219,6 +247,23 @@ set (${PROJECT_NAME}_LIB_SRCS
      net_udpsockethandler.h
      net_udpsockethandler.inl)
 
+# Include dir for installed targets
+set (INCLUDE_DIR include/${PROJECT_NAME}-${upstream_version})
+
+#set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+
+foreach (source_file ${source_files})
+ get_filename_component (abs_source_file ${source_file} ABSOLUTE)
+ list (APPEND absolute_source_files
+       PRIVATE ${abs_source_file}
+       )
+#       $<INSTALL_INTERFACE:${INCLUDE_DIR}/${source_file}>)
+endforeach ()
+target_sources (${PROJECT_NAME}
+                PRIVATE stdafx.cpp
+                PRIVATE stdafx.h
+                ${absolute_source_files})
+
 if (WIN32)
  add_definitions (-DWIN32)
  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc") # C++ exception handling
@@ -238,7 +283,7 @@ if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
  add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
 endif ()
 
-add_library (${PROJECT_NAME} STATIC ${ACENetwork_LIB_SRCS})
+#add_library (${PROJECT_NAME} STATIC ${ACENetwork_LIB_SRCS})
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${PROJECT_NAME} Common)

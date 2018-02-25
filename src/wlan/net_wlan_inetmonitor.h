@@ -35,6 +35,9 @@
 
 #include "net_wlan_monitor.h"
 
+//////////////////////////////////////////
+// (partial) specializations
+
 template <typename ConfigurationType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -53,7 +56,7 @@ class Net_WLAN_InetMonitor_T
 #else
                              ACE_SYNCH_USE,
                              TimePolicyType,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                              MonitorAPI_e,
                              UserDataType>
 {
@@ -63,7 +66,7 @@ class Net_WLAN_InetMonitor_T
 #else
                                                     ACE_SYNCH_USE,
                                                     TimePolicyType,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                                                     MonitorAPI_e,
                                                     UserDataType>,
                              ACE_SYNCH_MUTEX>;
@@ -74,7 +77,7 @@ class Net_WLAN_InetMonitor_T
 #else
                              ACE_SYNCH_USE,
                              TimePolicyType,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                              MonitorAPI_e,
                              UserDataType> inherited;
 
@@ -96,7 +99,7 @@ class Net_WLAN_InetMonitor_T
   virtual void onConnect (REFGUID,            // device identifier
 #else
   virtual void onConnect (const std::string&, // device identifier
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                           const std::string&, // SSID
                           bool);              // success ?
 };

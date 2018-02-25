@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -300,9 +300,9 @@ BitTorrent_Control_T<SessionAsynchType,
                                          session_state_p->trackerId));
 
 #ifdef HAVE_CONFIG_H
-  user_agent  = ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME);
+  user_agent  = ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_NAME);
   user_agent += ACE_TEXT_ALWAYS_CHAR ("/");
-  user_agent += ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_VERSION);
+  user_agent += ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_VERSION);
 #endif
   if (!user_agent.empty ())
     record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING),

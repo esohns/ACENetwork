@@ -24,13 +24,18 @@
 #include <limits>
 #include <string>
 
-#include "net_packet_headers.h"
-
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
 #include "net_common.h"
+#include "net_configuration.h"
+#include "net_packet_headers.h"
+
+// forward declarations
+#if defined (NETLINK_SUPPORT)
+struct nl_msg;
+#endif // NETLINK_SUPPORT
 
 //////////////////////////////////////////
 
@@ -153,9 +158,11 @@ class Net_Common_Tools
 
   inline static std::string IPAddressToString (const ACE_INET_Addr& address_in,
                                                bool addressOnly_in = false) { return Net_Common_Tools::IPAddressToString ((addressOnly_in ? 0 : ACE_HTONS (address_in.get_port_number ())), ACE_HTONL (address_in.get_ip_address ())); };
-#if defined (ACE_HAS_NETLINK)
+#if defined (NETLINK_SUPPORT)
   static std::string NetlinkAddressToString (const Net_Netlink_Addr&);
-#endif
+
+  static std::string dump (struct nl_msg*);
+#endif // NETLINK_SUPPORT
   // *NOTE*: if (the first argument is '0'), the trailing ":0" will be cropped
   //         from the return value
   static std::string IPAddressToString (unsigned short, // port (network byte order !)

@@ -110,8 +110,8 @@ if (NOT EXISTS ${ACENetwork_DIR})
  message (FATAL_ERROR "could not find package \"ACENetwork\", aborting")
 endif ()
 
-add_definitions (-DHAVE_CONFIG_H)
-add_definitions (-DIRC_HAS_DLL)
+#add_definitions (-DHAVE_CONFIG_H)
+#add_definitions (-DIRC_HAS_DLL)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
 if (UNIX)

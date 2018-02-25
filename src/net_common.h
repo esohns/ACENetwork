@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -26,16 +26,13 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #include <string>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 #include <vector>
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <guiddef.h>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
-#if defined (ACE_HAS_NETLINK)
-#include "ace/Netlink_Addr.h"
-#endif
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
@@ -49,9 +46,7 @@ template <ACE_SYNCH_DECL>
 class Net_IConnectionManagerBase_T;
 template <typename ConfigurationType>
 class Net_ITransportLayer_T;
-#if defined (ACE_HAS_NETLINK)
 struct Net_NetlinkSocketConfiguration;
-#endif
 struct Net_TCPSocketConfiguration;
 struct Net_UDPSocketConfiguration;
 
@@ -81,9 +76,7 @@ enum Net_TransportLayerType : int
 {
   NET_TRANSPORTLAYER_INVALID = -1,
   NET_TRANSPORTLAYER_IP_CAST = 0, // 'pseudo' (LAN-only, no flow control)
-#if defined (ACE_HAS_NETLINK)
   NET_TRANSPORTLAYER_NETLINK, // 'pseudo' ((Linux-)host only, no flow control) kernel<->user space protocol
-#endif
   NET_TRANSPORTLAYER_TCP,
   NET_TRANSPORTLAYER_UDP,
   ////////////////////////////////////////
@@ -94,7 +87,7 @@ enum Net_TransportLayerType : int
 typedef std::vector<struct _GUID> Net_InterfaceIdentifiers_t;
 #else
 typedef std::vector<std::string> Net_InterfaceIdentifiers_t;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 typedef Net_InterfaceIdentifiers_t::iterator Net_InterfacesIdentifiersIterator_t;
 
 enum Net_ClientServerRole : int
@@ -170,9 +163,7 @@ typedef Stream_Statistic Net_Statistic_t;
 typedef Common_IStatistic_T<Net_Statistic_t> Net_IStatisticHandler_t;
 typedef Common_StatisticHandler_T<Net_Statistic_t> Net_StatisticHandler_t;
 
-#if defined (ACE_HAS_NETLINK)
 typedef Net_ITransportLayer_T<struct Net_NetlinkSocketConfiguration> Net_INetlinkTransportLayer_t;
-#endif
 typedef Net_ITransportLayer_T<struct Net_TCPSocketConfiguration> Net_ITCPTransportLayer_t;
 typedef Net_ITransportLayer_T<struct Net_UDPSocketConfiguration> Net_IUDPTransportLayer_t;
 
@@ -209,24 +200,6 @@ struct Net_ConnectionState
 
 typedef std::set<Net_ConnectionId_t> Net_ConnectionIds_t;
 typedef Net_ConnectionIds_t::iterator Net_ConnectionIdsIterator_t;
-
-#if defined (ACE_HAS_NETLINK)
-class Net_Netlink_Addr
- : public ACE_Netlink_Addr
-{
-  typedef ACE_Netlink_Addr inherited;
-
- public:
-  Net_Netlink_Addr& operator= (const ACE_Addr&);
-
-  virtual int addr_to_string (ACE_TCHAR[],
-                              size_t,
-                              int = 1) const;
-  inline bool is_any (void) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
-
-  inline void reset (void) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-};
-#endif /* ACE_HAS_NETLINK */
 
 typedef Net_IConnectionManagerBase_T<ACE_MT_SYNCH> Net_IConnectionManagerBase_t;
 

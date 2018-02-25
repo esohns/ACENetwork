@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -54,10 +54,12 @@ struct WLANMonitor_SignalHandlerConfiguration
 {
   WLANMonitor_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
+   , monitor (NULL)
    , statisticReportingHandler (NULL)
    , statisticReportingTimerId (-1)
   {};
 
+  Net_WLAN_IInetMonitor_t* monitor;
   Net_IStatisticHandler_t* statisticReportingHandler;
   long                     statisticReportingTimerId;
 };
@@ -106,11 +108,13 @@ struct WLANMonitor_GTK_CBData
    , configuration (NULL)
    , eventSourceId (0)
    , eventStack ()
+   , monitor (NULL)
   {};
 
   struct WLANMonitor_Configuration* configuration;
   guint                             eventSourceId; // progress bar
   WLANMMMonitor_Events_t            eventStack;
+  Net_WLAN_IInetMonitor_t*          monitor;
 };
 
 typedef Common_UI_GtkBuilderDefinition_T<struct WLANMonitor_GTK_CBData> WLANMonitor_GtkBuilderDefinition_t;

@@ -1,4 +1,4 @@
-// A Bison parser, made by GNU Bison 3.0.2.
+﻿// A Bison parser, made by GNU Bison 3.0.2.
 
 // Skeleton interface for Bison LALR(1) parsers in C++
 
@@ -204,7 +204,7 @@ namespace yy {
         END = 0,
         METHOD = 258,
         URI = 259,
-        VERSION = 260,
+        _VERSION = 260,
         HEADER = 261,
         DELIMITER = 262,
         STATUS = 263,

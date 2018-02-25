@@ -1,4 +1,6 @@
-﻿include (FindPkgConfig)
+﻿add_library (${PROJECT_NAME}_Protocol_HTTP STATIC "")
+
+include (FindPkgConfig)
 if (UNIX)
  pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libavformat libswscale)
 endif (UNIX)
@@ -25,18 +27,26 @@ if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
 
-add_definitions (-DHAVE_CONFIG_H)
-#set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
-
 if (UNIX)
- include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libCommon/src)
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACE>)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/dec)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/net)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/stat)
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libCommon/src>)
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libCommon/src/timer>)
+
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src>)
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/dec>)
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/net>)
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/stat>)
 elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../ffmpeg)
 
@@ -51,16 +61,19 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/flex)
 endif ()
-#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../..)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../client_server)
-#message (STATUS "CMAKE_CURRENT_BINARY_DIR: \"${CMAKE_CURRENT_BINARY_DIR}\"")
-include_directories (${CMAKE_CURRENT_BINARY_DIR}/../../..)
+target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison>)
+
+target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>)
+target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../client_server>)
+message (STATUS "CMAKE_CURRENT_BINARY_DIR: \"${CMAKE_CURRENT_BINARY_DIR}\"")
+target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../../..>)
 
 ########### next target ###############
-set (${PROJECT_NAME}_Protocol_HTTP_SRCS
-     stdafx.cpp
-     stdafx.h
+set (source_files
      http_bisector.cpp
      http_bisector.h
      http_codes.h
@@ -99,12 +112,35 @@ set (${PROJECT_NAME}_Protocol_HTTP_SRCS
      http_stream_common.h
      http_tools.cpp
      http_tools.h)
-set (${PROJECT_NAME}_Protocol_HTTP_SCRIPTS
+set (script_files
      scripts/bisector.l
      scripts/scanner.l
      scripts/parser.y)
-set (${PROJECT_NAME}_Protocol_HTTP_TABLES
+set (table_files
      etc/http_scanner.tab)
+
+#set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+
+unset (absolute_source_files)
+foreach (source_file ${source_files})
+ get_filename_component (abs_source_file ${source_file} ABSOLUTE)
+ list (APPEND absolute_source_files
+   ${abs_source_file})
+ #       $<INSTALL_INTERFACE:${INCLUDE_DIR}/${source_file}>)
+endforeach ()
+unset (absolute_script_files)
+foreach (script_file ${script_files})
+ get_filename_component (abs_script_file ${script_file} ABSOLUTE)
+ list (APPEND absolute_script_files
+   ${absolute_script_file})
+endforeach ()
+target_sources (${PROJECT_NAME}_Protocol_HTTP
+  PRIVATE stdafx.cpp
+  PRIVATE stdafx.h
+  PRIVATE
+  ${absolute_source_files}
+  INTERFACE
+  ${absolute_script_files})
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_HTTP_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_HTTP_SRCS PROPERTIES COMPILE_DEFINITIONS -DHTTP_BUILD_DLL)
@@ -128,9 +164,6 @@ endif ()
 # *TODO*: this holds for GNU Bison > 2.4.2
 #add_definitions (-DYYDEBUG)
 
-add_library (${PROJECT_NAME}_Protocol_HTTP SHARED
-             ${ACENetwork_Protocol_HTTP_SRCS}
-             ${ACENetwork_Protocol_HTTP_SCRIPTS})
 set_property (TARGET ${PROJECT_NAME}_Protocol_HTTP PROPERTY FOLDER "protocols")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)

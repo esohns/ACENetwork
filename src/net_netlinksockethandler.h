@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2010 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -27,7 +27,7 @@
 #include "ace/Svc_Handler.h"
 #include "ace/Synch_Traits.h"
 
-#include "net_common.h"
+#include "net_configuration.h"
 #include "net_sockethandler_base.h"
 
 #if defined (ACE_HAS_NETLINK)

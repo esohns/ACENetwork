@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -64,11 +64,19 @@ struct  Net_WLAN_MonitorConfiguration
 #else
    , enableBackgroundScans (NET_WLAN_MONITOR_UNIX_DEFAULT_BACKGROUNDSCANS)
    , interfaceIdentifier ()
+#if defined (NL80211_SUPPORT)
+#if defined (_DEBUG)
+   , debug (false)
+#endif // _DEBUG
+   , flushCacheBeforeScans (NET_WLAN_MONITOR_NL80211_DEFAULT_FLUSHCACHEBEFORESCANS)
+   , lowPriorityScans (NET_WLAN_MONITOR_NL80211_DEFAULT_LOWPRIORITYSCANS)
+   , randomizeMACAddressForScans (NET_WLAN_MONITOR_NL80211_DEFAULT_RANDOMIZEMACADDRESSFORSCANS)
+#endif // NL80211_SUPPORT
 #if defined (DBUS_SUPPORT)
    , notificationCB (NULL)
    , notificationCBData (NULL)
-#endif
-#endif
+#endif // DBUS_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
    , SSID ()
    , subscriber (NULL)
    , useReactor (NET_EVENT_USE_REACTOR)
@@ -95,11 +103,19 @@ struct  Net_WLAN_MonitorConfiguration
 #else
   bool                       enableBackgroundScans;
   std::string                interfaceIdentifier;
+#if defined (NL80211_SUPPORT)
+#if defined (_DEBUG)
+  bool                       debug;
+#endif // _DEBUG
+  bool                       flushCacheBeforeScans;
+  bool                       lowPriorityScans;
+  bool                       randomizeMACAddressForScans;
+#endif // NL80211_SUPPORT
 #if defined (DBUS_SUPPORT)
   DBusHandleMessageFunction  notificationCB;
   void*                      notificationCBData;
 #endif // DBUS_SUPPORT
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   std::string                SSID;
   Net_WLAN_IMonitorCB*       subscriber;
   bool                       useReactor;
@@ -112,16 +128,49 @@ struct  Net_WLAN_MonitorConfiguration
 typedef Net_WLAN_IMonitor_T<ACE_INET_Addr,
                             struct Net_WLAN_MonitorConfiguration> Net_WLAN_IInetMonitor_t;
 
-typedef Net_WLAN_InetMonitor_T<ACE_MT_SYNCH,
-                               Common_TimePolicy_t,
-                               struct Net_WLAN_MonitorConfiguration,
+typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                               NET_WLAN_MONITOR_API_WLANAPI,
 #else
-                               NET_WLAN_MONITOR_API_IOCTL,
-#endif
+                               ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+#endif // ACE_WIN32 || ACE_WIN64
+                               NET_WLAN_MONITOR_DEFAULT_API,
                                struct Net_UserData> Net_WLAN_InetMonitor_t;
+
 typedef ACE_Singleton<Net_WLAN_InetMonitor_t,
                       ACE_SYNCH_MUTEX> NET_WLAN_INETMONITOR_SINGLETON;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                               ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+#endif // ACE_WIN32 || ACE_WIN64
+                               NET_WLAN_MONITOR_API_IOCTL,
+                               struct Net_UserData> Net_WLAN_InetIoctlMonitor_t;
+typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                               ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+#endif // ACE_WIN32 || ACE_WIN64
+                               NET_WLAN_MONITOR_API_NL80211,
+                               struct Net_UserData> Net_WLAN_InetNl80211Monitor_t;
+typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+                               ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+#endif // ACE_WIN32 || ACE_WIN64
+                               NET_WLAN_MONITOR_API_DBUS,
+                               struct Net_UserData> Net_WLAN_InetDBusMonitor_t;
 
+typedef ACE_Singleton<Net_WLAN_InetIoctlMonitor_t,
+                      ACE_SYNCH_MUTEX> NET_WLAN_INETIOCTLMONITOR_SINGLETON;
+typedef ACE_Singleton<Net_WLAN_InetNl80211Monitor_t,
+                      ACE_SYNCH_MUTEX> NET_WLAN_INETNL80211MONITOR_SINGLETON;
+typedef ACE_Singleton<Net_WLAN_InetDBusMonitor_t,
+                      ACE_SYNCH_MUTEX> NET_WLAN_INETDBUSMONITOR_SINGLETON;
+#endif // ACE_WIN32 || ACE_WIN64
 #endif

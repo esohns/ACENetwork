@@ -1,4 +1,4 @@
-find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
+﻿find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
               REQUIRED
               CONFIG
               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../modules ${CMAKE_CURRENT_SOURCE_DIR}/../..
@@ -18,7 +18,7 @@ if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
 
-add_definitions (-DHAVE_CONFIG_H)
+#add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
 if (UNIX)

@@ -1,4 +1,4 @@
-%top{
+﻿%top{
 #include "ace/Synch.h"
 #include "http_common.h"
 #include "http_exports.h"
@@ -397,7 +397,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 2);
 //                             return yytokentype::VERSION;
-                             return yy::HTTP_Parser::token::VERSION; }
+                             return yy::HTTP_Parser::token::_VERSION; }
 } // end <version>
 <request_headers>{
 {GENERAL_HEADER}{CRLF}     { message_block_p->rd_ptr (yyleng);
@@ -448,7 +448,7 @@ CHUNK_TRAILER          ({ENTITY_HEADER}{CRLF})*
                              ACE_ASSERT (yylval->sval);
                              yylval->sval->append (yytext, yyleng - 1);
 //                             return yytokentype::VERSION;
-                             return yy::HTTP_Parser::token::VERSION; }
+                             return yy::HTTP_Parser::token::_VERSION; }
 } // end <response>
 <status>{
 [[:digit:]]{3}{SP}         { message_block_p->rd_ptr (yyleng);

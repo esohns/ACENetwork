@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef NET_WLAN_IMONITOR_T_H
-#define NET_WLAN_IMONITOR_T_H
+#ifndef NET_WLAN_IMONITOR_H
+#define NET_WLAN_IMONITOR_H
 
 #include <string>
 
@@ -55,7 +55,7 @@ class Net_WLAN_IMonitorCB
 #else
   virtual void onSignalQualityChange (const std::string&, // interface identifier
                                       unsigned int) = 0;  // signal quality (of current association)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   // *IMPORTANT NOTE*: Net_IWLANMonitor_T::addresses() may not return
   //                   significant data before this, as the link layer
   //                   configuration (e.g. DHCP handshake, ...) most likely has
@@ -64,14 +64,14 @@ class Net_WLAN_IMonitorCB
   virtual void onConnect (REFGUID,            // interface identifier
 #else
   virtual void onConnect (const std::string&, // interface identifier
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                           const std::string&, // SSID
                           bool) = 0;          // success ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual void onDisconnect (REFGUID,            // interface identifier
 #else
   virtual void onDisconnect (const std::string&, // interface identifier
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                              const std::string&, // SSID
                              bool) = 0;          // success ?
 
@@ -79,14 +79,14 @@ class Net_WLAN_IMonitorCB
   virtual void onAssociate (REFGUID,            // interface identifier
 #else
   virtual void onAssociate (const std::string&, // interface identifier
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                             const std::string&, // SSID
                             bool) = 0;          // success ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual void onDisassociate (REFGUID,            // interface identifier
 #else
   virtual void onDisassociate (const std::string&, // interface identifier
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                                const std::string&, // SSID
                                bool) = 0;          // success ?
 
@@ -94,19 +94,19 @@ class Net_WLAN_IMonitorCB
   virtual void onScanComplete (REFGUID) = 0;            // interface identifier
 #else
   virtual void onScanComplete (const std::string&) = 0; // interface identifier
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual void onHotPlug (REFGUID,            // interface identifier
 #else
   virtual void onHotPlug (const std::string&, // interface identifier
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                           bool) = 0;          // success ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual void onRemove (REFGUID,            // interface identifier
 #else
   virtual void onRemove (const std::string&, // interface identifier
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                          bool) = 0;          // success ?
 };
 
@@ -115,15 +115,20 @@ class Net_WLAN_IMonitorCB
 class Net_WLAN_IMonitorBase
  : public Net_WLAN_IMonitorCB
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_SUPPORT)
  , public Common_IGet_T<HANDLE>
+#endif // WLANAPI_SUPPORT
  , public Common_IGet_2_T<WLAN_SIGNAL_QUALITY>
 #else
-#if defined (DBUS_SUPPORT)
- , public Common_IGetP_T<struct DBusConnection>
-#endif
+#if defined (WEXT_SUPPORT)
  , public Common_IGet_T<ACE_HANDLE>
+#elif defined (NL80211_SUPPORT)
+ , public Common_IGet_T<int>
+#elif defined (DBUS_SUPPORT)
+ , public Common_IGetP_T<struct DBusConnection>
+#endif // WEXT_SUPPORT
  , public Common_IGet_2_T<unsigned int>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 {
  public:
   // *TODO*: support monitoring multiple interfaces at the same time
@@ -141,7 +146,7 @@ class Net_WLAN_IMonitorBase
 #else
   virtual bool associate (const std::string&,       // interface identifier {"": any}
                           const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                           const std::string&) = 0;  // (E)SSID {"": disassociate}
   // *IMPORTANT NOTE*: does not block; results are reported by callback (see:
   //                   subscribe())
@@ -154,13 +159,13 @@ class Net_WLAN_IMonitorBase
   virtual void scan (REFGUID) = 0; // interface identifier {GUID_NULL: all}
 #else
   virtual void scan (const std::string&) = 0; // interface identifier {"": all}
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual struct _GUID interfaceIdentifier () const = 0; // returns currently monitored interface (if any)
 #else
   virtual std::string interfaceIdentifier () const = 0; // returns currently monitored interface (if any)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   virtual std::string SSID () const = 0; // returns currently associated (E)SSID (if any)
 
   virtual Net_WLAN_SSIDs_t SSIDs () const = 0; // returns (E)SSID(s) published by the AP(s) within range
@@ -177,7 +182,7 @@ class Net_WLAN_IMonitor_T
 #else
  , public Common_IGet1R_T<std::string> // cache access
  , public Common_ISet2R_T<std::string> // cache access
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
  , public Common_IInitialize_T<ConfigurationType>
  , public Common_ISubscribe_T<Net_WLAN_IMonitorCB>
 {

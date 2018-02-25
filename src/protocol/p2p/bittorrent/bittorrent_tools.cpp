@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -330,7 +330,7 @@ BitTorrent_Tools::generatePeerId ()
 #ifdef HAVE_CONFIG_H
   // parse library version
   library_version =
-      ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_VERSION);
+      ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_VERSION);
   std::string regex_string =
     ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]+).([[:digit:]]+).([[:digit:]]+)(.+)?$");
   std::regex regex (regex_string);

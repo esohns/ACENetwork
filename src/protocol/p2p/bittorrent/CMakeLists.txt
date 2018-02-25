@@ -1,5 +1,7 @@
 ﻿#option (GTK3_SUPPORT "compile Gtk3 support" ON)
 
+add_library (${PROJECT_NAME}_Protocol_BitTorrent STATIC "")
+
 include (FindPkgConfig)
 if (UNIX)
  #pkg_check_modules (PKG_ACE REQUIRED ACE)
@@ -66,7 +68,7 @@ if (NOT EXISTS ${ACEStream_DIR})
  message (FATAL_ERROR "could not find package \"ACEStream\", aborting")
 endif ()
 
-add_definitions (-DHAVE_CONFIG_H)
+#add_definitions (-DHAVE_CONFIG_H)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
 if (UNIX)
@@ -75,18 +77,28 @@ if (UNIX)
 # else ()
 #  include_directories (${PKG_GTK2_INCLUDE_DIRS})
 # endif ()
- include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/ACE>)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libCommon/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libCommon/src/ui)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libCommon/src>)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libCommon/src/timer>)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libCommon/src/ui>)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libACEStream/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libACEStream/src/modules/dec)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libACEStream/src>)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libACEStream/src/modules/dec>)
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libACEStream/src/modules/dev)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libACEStream/src/modules/net)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libACEStream/src/modules/stat)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libACEStream/src/modules/net>)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libACEStream/src/modules/stat>)
 elseif (WIN32)
 # *TODO*: repair pkgconfig support
 # include_directories (${PKG_GTK_GLADE_INCLUDE_DIRS})
@@ -113,16 +125,21 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party/flex)
 endif ()
-#include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party/bison)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../..)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../client_server)
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../http)
-#include_directories (${CMAKE_CURRENT_BINARY_DIR}/..)
+target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party/bison>)
+
+target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../..>)
+target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../client_server>)
+
+target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../http>)
+target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../../../..>)
 
 ########### next target ###############
-set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
-     stdafx.cpp
-     stdafx.h
+set (source_files
      bittorrent_bencoding_parser.cpp
      bittorrent_bencoding_parser.h
      bittorrent_bencoding_parser_driver.cpp
@@ -172,11 +189,34 @@ set (${PROJECT_NAME}_Protocol_BitTorrent_SRCS
      bittorrent_streamhandler.inl
      bittorrent_tools.cpp
      bittorrent_tools.h)
-set (${PROJECT_NAME}_Protocol_BitTorrent_SCRIPTS
+set (script_files
      scripts/bencoding_scanner.ll
      scripts/bencoding_parser.yy
      scripts/scanner.l
      scripts/parser.yy)
+
+#set_target_properties (${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)
+
+unset (absolute_source_files)
+foreach (source_file ${source_files})
+  get_filename_component (abs_source_file ${source_file} ABSOLUTE)
+  list (APPEND absolute_source_files
+    ${abs_source_file})
+  #       $<INSTALL_INTERFACE:${INCLUDE_DIR}/${source_file}>)
+endforeach ()
+unset (absolute_script_files)
+foreach (script_file ${script_files})
+  get_filename_component (abs_script_file ${script_file} ABSOLUTE)
+  list (APPEND absolute_script_files
+    ${absolute_script_file})
+endforeach ()
+target_sources (${PROJECT_NAME}_Protocol_BitTorrent
+                PRIVATE stdafx.cpp
+                PRIVATE stdafx.h
+                PRIVATE
+                ${absolute_source_files}
+                INTERFACE
+                ${absolute_script_files})
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_BitTorrent_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_BitTorrent_SRCS PROPERTIES COMPILE_DEFINITIONS -Dbittorrent_BUILD_DLL)
@@ -199,9 +239,6 @@ endif ()
 # *TODO*: this holds for GNU Bison > 2.4.2
 #add_definitions (-DYYDEBUG)
 
-add_library (${PROJECT_NAME}_Protocol_BitTorrent SHARED
-             ${ACENetwork_Protocol_BitTorrent_SRCS}
-             ${ACENetwork_Protocol_BitTorrent_SCRIPTS})
 set_property (TARGET ${PROJECT_NAME}_Protocol_BitTorrent PROPERTY FOLDER "protocols")
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)

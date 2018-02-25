@@ -33,12 +33,18 @@
 #else
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
-#include <linux/netlink.h>
-#include <linux/rtnetlink.h>
 #include <netinet/ether.h>
+#if defined (NETLINK_SUPPORT)
+#include <linux/genetlink.h>
+#include <linux/netlink.h>
+#include <linux/nl80211.h>
+
+#include "netlink/genl/genl.h"
+#include "netlink/msg.h"
+#endif // NETLINK_SUPPORT
 #include "ifaddrs.h"
 #include "iwlib.h"
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Dirent_Selector.h"
 #include "ace/INET_Addr.h"
@@ -77,6 +83,77 @@ operator++ (enum Net_LinkLayerType& lhs_in, int) // postfix-
 }
 
 //////////////////////////////////////////
+
+#if defined (NETLINK_SUPPORT)
+std::string
+Net_Common_Tools::NetlinkAddressToString (const Net_Netlink_Addr& address_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::NetlinkAddressToString"));
+
+  // initialize return value(s)
+  std::string return_value;
+
+  int result = -1;
+  ACE_TCHAR buffer_a[BUFSIZ]; // "%u:%u\0"
+  ACE_OS::memset (&buffer_a, 0, sizeof (buffer_a));
+  result = address_in.addr_to_string (buffer_a,
+                                      sizeof (buffer_a),
+                                      1); // N/A
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Netlink_Addr::addr_to_string(): \"%m\", aborting\n")));
+    return return_value;
+  } // end IF
+
+  // copy string from buffer
+  return_value = ACE_TEXT_ALWAYS_CHAR (buffer_a);
+
+  return return_value;
+}
+
+std::string
+Net_Common_Tools::dump (struct nl_msg* message_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::dump"));
+
+  std::string result;
+
+  struct genlmsghdr* genlmsghdr_p =
+      static_cast<struct genlmsghdr*> (nlmsg_data (nlmsg_hdr (message_in)));
+  ACE_ASSERT (genlmsghdr_p);
+  struct nlattr* nlattr_a[NL80211_ATTR_MAX + 1];
+  nla_parse (nlattr_a,
+             NL80211_ATTR_MAX,
+             genlmsg_attrdata (genlmsghdr_p, 0),
+             genlmsg_attrlen (genlmsghdr_p, 0),
+             NULL);
+  const struct nlattr* nlattr_p = NULL;
+  int rem, i = 0;
+  std::ostringstream converter;
+  nla_for_each_attr (nlattr_p, genlmsg_attrdata (genlmsghdr_p, 0), genlmsg_attrlen (genlmsghdr_p, 0), rem)
+  { ACE_ASSERT (nlattr_p);
+    result = ACE_TEXT_ALWAYS_CHAR ("#");
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.clear ();
+    converter << ++i;
+    result += converter.str ();
+    result += ACE_TEXT_ALWAYS_CHAR (": ");
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.clear ();
+    converter << nla_type (nlattr_p);
+    result += converter.str ();
+    result += ACE_TEXT_ALWAYS_CHAR ("; ");
+    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+    converter.clear ();
+    converter << nla_len (nlattr_p);
+    result += converter.str ();
+    result += ACE_TEXT_ALWAYS_CHAR (" byte(s)\n");
+  } // end FOR
+
+  return result;
+}
+#endif // NETLINK_SUPPORT
 
 std::string
 Net_Common_Tools::IPAddressToString (unsigned short port_in,

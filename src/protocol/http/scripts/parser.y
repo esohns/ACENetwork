@@ -1,4 +1,4 @@
-%defines                          "http_parser.h"
+﻿%defines                          "http_parser.h"
 /* %file-prefix                      "" */
 /* %language                         "c++" */
 %language                         "c++"
@@ -173,7 +173,7 @@ using namespace std;
 //%token <std::string> METHOD      "method"
 %token <sval> METHOD          "method"
 %token <sval> URI             "uri"
-%token <sval> VERSION         "version"
+%token <sval> _VERSION        "version"
 %token <sval> HEADER          "header"
 %token <ival> DELIMITER       "delimiter"
 %token <sval> STATUS          "status"

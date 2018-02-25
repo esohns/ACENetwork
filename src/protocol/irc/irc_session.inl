@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -256,7 +256,7 @@ IRC_Session_T<ConnectionType,
   if (logToFile_)
   {
     std::string file_name =
-        Common_File_Tools::getLogDirectory (ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME));
+        Common_File_Tools::getLogDirectory (ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_NAME));
     file_name += ACE_DIRECTORY_SEPARATOR_CHAR_A;
     file_name += ACE_TEXT_ALWAYS_CHAR (IRC_SESSION_LOG_FILENAME_PREFIX);
     file_name += COMMON_LOG_FILENAME_SUFFIX;

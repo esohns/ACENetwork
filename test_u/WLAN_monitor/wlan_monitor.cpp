@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -105,7 +105,14 @@ do_printUsage (const std::string& programName_in)
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
-#endif
+#else
+#if defined (DBUS_SUPPORT)
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-d           : use DBus/NetworkManager implementation [")
+            << (NET_WLAN_MONITOR_DEFAULT_API == NET_WLAN_MONITOR_API_DBUS)
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
+#endif // DBUS_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
   std::string UI_file = configuration_path;
   UI_file += ACE_DIRECTORY_SEPARATOR_STR;
   UI_file += ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_UI_DEFINITION_FILE);
@@ -114,17 +121,32 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
             << std::endl;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-i [GUID]    : network interface [\"")
-            << ACE_TEXT_ALWAYS_CHAR (Net_Common_Tools::interfaceToString (Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11)).c_str ())
 #else
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-i [STRING]  : network interface [\"")
-            << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_WLAN)
-#endif
-            << ACE_TEXT_ALWAYS_CHAR ("\"]")
+#if defined (WEXT_SUPPORT)
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-i           : use ioctl implementation [")
+            << (NET_WLAN_MONITOR_DEFAULT_API == NET_WLAN_MONITOR_API_IOCTL)
+            << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
+#endif // WEXT_SUPPORT
+#if defined (NL80211_SUPPORT)
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-k           : use nl80211 implementation [")
+            << (NET_WLAN_MONITOR_DEFAULT_API == NET_WLAN_MONITOR_API_NL80211)
+            << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
+#endif // NL80211_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-l           : log to a file [")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
+            << std::endl;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [GUID]    : network interface [\"")
+            << ACE_TEXT_ALWAYS_CHAR (Net_Common_Tools::interfaceToString (Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11)).c_str ())
+#else
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [STRING]  : network interface [\"")
+            << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_WLAN)
+#endif // ACE_WIN32 || ACE_WIN64
+            << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r [VALUE]   : statistic reporting interval (second(s)) [")
             << STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL
@@ -142,16 +164,17 @@ bool
 do_processArguments (const int& argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
                      bool& autoAssociate_out,
+                     enum Net_WLAN_MonitorAPIType& API_out,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                      bool& showConsole_out,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                      std::string& UIDefinitionFilePath_out,
+                     bool& logToFile_out,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                      struct _GUID& interfaceIdentifier_out,
 #else
                      std::string& interfaceIdentifier_out,
-#endif
-                     bool& logToFile_out,
+#endif // ACE_WIN32 || ACE_WIN64
                      unsigned int& statisticReportingInterval_out,
                      std::string& SSID_out,
                      bool& traceInformation_out,
@@ -164,13 +187,14 @@ do_processArguments (const int& argc_in,
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
     ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_CONFIGURATION_DIRECTORY);
-#endif // #ifdef DEBUG_DEBUGGER
+#endif // DEBUG_DEBUGGER
 
   // initialize results
   autoAssociate_out = false;
+  API_out = NET_WLAN_MONITOR_DEFAULT_API;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   showConsole_out = false;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   UIDefinitionFilePath_out = configuration_path;
   UIDefinitionFilePath_out += ACE_DIRECTORY_SEPARATOR_STR;
   UIDefinitionFilePath_out +=
@@ -181,7 +205,7 @@ do_processArguments (const int& argc_in,
 #else
   interfaceIdentifier_out =
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_WLAN);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   logToFile_out = false;
   statisticReportingInterval_out =
       STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
@@ -192,10 +216,10 @@ do_processArguments (const int& argc_in,
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                              ACE_TEXT ("acg::i:lr:s:tv"));
+                              ACE_TEXT ("acg::ln:r:s:tv"));
 #else
-                              ACE_TEXT ("ag::i:lr:s:tv"));
-#endif
+                              ACE_TEXT ("adg::ikln:r:s:tv"));
+#endif // ACE_WIN32 || ACE_WIN64
   int option = 0;
   std::stringstream converter;
   while ((option = argumentParser ()) != EOF)
@@ -213,7 +237,15 @@ do_processArguments (const int& argc_in,
         showConsole_out = true;
         break;
       }
-#endif
+#else
+#if defined (DBUS_SUPPORT)
+      case 'd':
+      {
+        API_out = NET_WLAN_MONITOR_API_DBUS;
+        break;
+      }
+#endif // DBUS_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
       case 'g':
       {
         ACE_TCHAR* opt_arg = argumentParser.opt_arg ();
@@ -223,7 +255,29 @@ do_processArguments (const int& argc_in,
           UIDefinitionFilePath_out.clear ();
         break;
       }
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#if defined (WEXT_SUPPORT)
       case 'i':
+      {
+        API_out = NET_WLAN_MONITOR_API_IOCTL;
+        break;
+      }
+#endif // WEXT_SUPPORT
+#if defined (NL80211_SUPPORT)
+      case 'k':
+      {
+        API_out = NET_WLAN_MONITOR_API_NL80211;
+        break;
+      }
+#endif // NL80211_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
+      case 'l':
+      {
+        logToFile_out = true;
+        break;
+      }
+      case 'n':
       {
         interfaceIdentifier_out =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -231,11 +285,6 @@ do_processArguments (const int& argc_in,
 #else
             ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
 #endif
-        break;
-      }
-      case 'l':
-      {
-        logToFile_out = true;
         break;
       }
       case 'r':
@@ -370,6 +419,7 @@ do_initializeSignals (bool useReactor_in,
 
 void
 do_work (bool autoAssociate_in,
+         enum Net_WLAN_MonitorAPIType API_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
          bool showConsole_in,
 #endif
@@ -412,11 +462,33 @@ do_work (bool autoAssociate_in,
   configuration.WLANMonitorConfiguration.timerInterface =
     timer_manager_p;
 #endif
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   iwlanmonitor_p = NET_WLAN_INETMONITOR_SINGLETON::instance ();
+#else
+  switch (API_in)
+  {
+    case NET_WLAN_MONITOR_API_IOCTL:
+      iwlanmonitor_p = NET_WLAN_INETIOCTLMONITOR_SINGLETON::instance ();
+      break;
+    case NET_WLAN_MONITOR_API_NL80211:
+      iwlanmonitor_p = NET_WLAN_INETNL80211MONITOR_SINGLETON::instance ();
+      break;
+    case NET_WLAN_MONITOR_API_DBUS:
+      iwlanmonitor_p = NET_WLAN_INETDBUSMONITOR_SINGLETON::instance ();
+      break;
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unknown WLAN monitor API (was: %d), aborting\n"),
+                  API_in));
+      return;
+    }
+  } // end SWITCH
+#endif
   ACE_ASSERT (iwlanmonitor_p);
 
   Test_U_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
-                                               NET_WLAN_INETMONITOR_SINGLETON::instance (),
+                                               dynamic_cast<Test_U_IStatistic_t*> (iwlanmonitor_p),
                                                false);
   Test_U_EventHandler ui_event_handler (&CBData_in);
 
@@ -670,6 +742,7 @@ ACE_TMAIN (int argc_in,
 
   // step1a set defaults
   bool auto_associate = false;
+  enum Net_WLAN_MonitorAPIType API_e = NET_WLAN_MONITOR_DEFAULT_API;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   bool show_console = false;
 #endif
@@ -696,12 +769,13 @@ ACE_TMAIN (int argc_in,
   if (!do_processArguments (argc_in,
                             argv_in,
                             auto_associate,
+                            API_e,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                             show_console,
 #endif
                             UI_definition_file_path,
-                            interface_identifier,
                             log_to_file,
+                            interface_identifier,
 //                            use_reactor,
                             statistic_reporting_interval,
                             SSID_string,
@@ -907,6 +981,7 @@ ACE_TMAIN (int argc_in,
   timer.start ();
   // step2: do actual work
   do_work (auto_associate,
+           API_e,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
            show_console,
 #endif

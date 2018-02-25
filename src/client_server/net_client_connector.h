@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2010 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -271,7 +271,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
 
 //////////////////////////////////////////
 
-#if defined (ACE_HAS_NETLINK)
+#if defined (NETLINK_SUPPORT)
 // specialization (for Netlink)
 template <ACE_SYNCH_DECL, // 'send' lock strategy
           typename HandlerType, // implements Net_ConnectionBase_T
@@ -364,7 +364,7 @@ class Net_Client_Connector_T<ACE_SYNCH_USE,
   ICONNECTION_MANAGER_T* connectionManager_;
   ACE_Time_Value         statisticCollectionInterval_;
 };
-#endif
+#endif // NETLINK_SUPPORT
 
 // include template definition
 #include "net_client_connector.inl"

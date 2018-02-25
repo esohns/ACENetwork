@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2010 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -561,7 +561,7 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
 /////////////////////////////////////////
 
-#if defined (ACE_HAS_NETLINK)
+#if defined (NETLINK_SUPPORT)
 template <ACE_SYNCH_DECL,
           typename HandlerType,
           typename ConnectorType,
@@ -680,4 +680,4 @@ Net_Client_Connector_T<ACE_SYNCH_USE,
 
   return (handler_out ? 0 : -1);
 }
-#endif
+#endif // NETLINK_SUPPORT

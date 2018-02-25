@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -82,9 +82,11 @@ load_wlan_interfaces (GtkListStore* listStore_in)
 
 void
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-load_ssids (REFGUID interfaceIdentifier_in,
+load_ssids (HANDLE clientHandle_in,
+            REFGUID interfaceIdentifier_in,
 #else
 load_ssids (const std::string& interfaceIdentifier_in,
+            ACE_HANDLE handle_in,
 #endif
             Net_WLAN_SSIDs_t& SSIDs_out,
             GtkListStore* listStore_in)
@@ -97,17 +99,14 @@ load_ssids (const std::string& interfaceIdentifier_in,
 
   // sanity check(s)
   ACE_ASSERT (listStore_in);
-  Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
-      NET_WLAN_INETMONITOR_SINGLETON::instance ();
-  ACE_ASSERT (iinetwlanmonitor_p);
 
   SSIDs_out =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      Net_WLAN_Tools::getSSIDs (iinetwlanmonitor_p->get (),
+      Net_WLAN_Tools::getSSIDs (clientHandle_in,
                                 interfaceIdentifier_in);
 #else
       Net_WLAN_Tools::getSSIDs (interfaceIdentifier_in,
-                                iinetwlanmonitor_p->get ());
+                                handle_in);
 #endif
 
   gchar* string_p = NULL;
@@ -358,16 +357,14 @@ idle_update_ssids_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->monitor);
 
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
 
-  Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
-      NET_WLAN_INETMONITOR_SINGLETON::instance ();
-  ACE_ASSERT (iinetwlanmonitor_p);
-  Net_WLAN_SSIDs_t ssids = iinetwlanmonitor_p->SSIDs ();
+  Net_WLAN_SSIDs_t ssids = data_p->monitor->SSIDs ();
   GtkTreeIter tree_iterator;
   gchar* string_p = NULL;
   guint num_signal_handlers = 0;
@@ -426,22 +423,19 @@ idle_update_signal_quality_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->monitor);
 
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
 
-  Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
-    NET_WLAN_INETMONITOR_SINGLETON::instance ();
-  ACE_ASSERT (iinetwlanmonitor_p);
-
   GtkScale* scale_p =
     GTK_SCALE (gtk_builder_get_object ((*iterator).second.second,
                                        ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
   ACE_ASSERT (scale_p);
   gtk_range_set_value (GTK_RANGE (scale_p),
-                       static_cast<gdouble> (iinetwlanmonitor_p->get_2 ()));
+                       static_cast<gdouble> (data_p->monitor->get_2 ()));
 
   return G_SOURCE_REMOVE;
 }
@@ -456,16 +450,14 @@ idle_update_status_cb (gpointer userData_in)
 
   // sanity check(s)
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->monitor);
 
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
 
-  Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
-    NET_WLAN_INETMONITOR_SINGLETON::instance ();
-  ACE_ASSERT (iinetwlanmonitor_p);
-  bool is_connected_b = !(iinetwlanmonitor_p->SSID ().empty ());
+  bool is_connected_b = !(data_p->monitor->SSID ().empty ());
 
   GtkToggleButton* toggle_button_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -812,6 +804,7 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
   // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->monitor);
 
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -819,9 +812,6 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
   ACE_ASSERT (iterator != data_p->builders.end ());
 
   bool is_active = gtk_toggle_button_get_active (toggleButton_in);
-  Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
-      NET_WLAN_INETMONITOR_SINGLETON::instance ();
-  ACE_ASSERT (iinetwlanmonitor_p);
 //  GtkFrame* frame_p =
 //      GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
 //                                         ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_FRAME_CONFIGURATION_NAME)));
@@ -919,7 +909,7 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
     data_p->configuration->WLANMonitorConfiguration.autoAssociate =
         gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (check_button_p));
 
-    if (!iinetwlanmonitor_p->initialize (data_p->configuration->WLANMonitorConfiguration))
+    if (!data_p->monitor->initialize (data_p->configuration->WLANMonitorConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_IInitialize_T::initialize(), aborting\n")));
@@ -927,7 +917,7 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
     } // end IF
 
     try {
-      iinetwlanmonitor_p->start ();
+      data_p->monitor->start ();
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Common_ITask_T::start(): \"%m\", aborting\n")));
@@ -960,8 +950,8 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
                           GTK_STOCK_MEDIA_PLAY);
 
     try {
-      iinetwlanmonitor_p->stop (true,
-                                true);
+      data_p->monitor->stop (true,
+                             true);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Common_ITask_T::stop(): \"%m\", aborting\n")));
@@ -1005,6 +995,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
   // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->monitor);
 
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
@@ -1012,9 +1003,6 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
   ACE_ASSERT (iterator != data_p->builders.end ());
 
   bool is_active = gtk_toggle_button_get_active (toggleButton_in);
-  Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
-      NET_WLAN_INETMONITOR_SINGLETON::instance ();
-  ACE_ASSERT (iinetwlanmonitor_p);
 //  GtkFrame* frame_p =
 //      GTK_FRAME (gtk_builder_get_object ((*iterator).second.second,
 //                                         ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_FRAME_CONFIGURATION_NAME)));
@@ -1043,7 +1031,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 
     // *NOTE*: when monitoring, the signal quality display is handled in the
     //         callbacks
-    if (!iinetwlanmonitor_p->isRunning ())
+    if (!data_p->monitor->isRunning ())
     {
       gtk_widget_set_visible (GTK_WIDGET (scale_p),
                               TRUE);
@@ -1061,12 +1049,12 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
     struct ether_addr ap_mac_address;
     ACE_OS::memset (&ap_mac_address, 0, sizeof (struct ether_addr));
 #endif
-    if (!iinetwlanmonitor_p->associate (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+    if (!data_p->monitor->associate (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-                                        ap_mac_address,
+                                     ap_mac_address,
 #endif
-                                        data_p->configuration->WLANMonitorConfiguration.SSID))
+                                     data_p->configuration->WLANMonitorConfiguration.SSID))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -1100,14 +1088,14 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 #else
     struct ether_addr ap_mac_address;
     ACE_OS::memset (&ap_mac_address, 0, sizeof (struct ether_addr));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if (!iinetwlanmonitor_p->associate (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+    if (!data_p->monitor->associate (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
 #else
-    if (!iinetwlanmonitor_p->associate (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
-                                        ap_mac_address,
-#endif
-                                        ACE_TEXT_ALWAYS_CHAR ("")))
+    if (!data_p->monitor->associate (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+                                     ap_mac_address,
+#endif // ACE_WIN32 || ACE_WIN64
+                                     ACE_TEXT_ALWAYS_CHAR ("")))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -1120,13 +1108,13 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
                   ACE_TEXT (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier.c_str ()),
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address)).c_str ()),
                   ACE_TEXT ("")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       goto error;
     } // end IF
 
     // *NOTE*: when monitoring, the signal quality display is handled in the
     //         callbacks
-    if (!iinetwlanmonitor_p->isRunning ())
+    if (!data_p->monitor->isRunning ())
     {
       gtk_widget_set_visible (GTK_WIDGET (scale_p),
                               FALSE);
@@ -1194,16 +1182,12 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
   // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->monitor);
 
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
-
-  Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
-      NET_WLAN_INETMONITOR_SINGLETON::instance ();
-  // sanity check(s)
-  ACE_ASSERT (iinetwlanmonitor_p);
 
   GtkTreeIter iterator_2;
   if (!gtk_combo_box_get_active_iter (comboBox_in,
@@ -1229,7 +1213,7 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
                             1, &value);
 #else
                             0, &value);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
@@ -1237,7 +1221,7 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
 #else
   data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
     ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   g_value_reset (&value);
   gint n_rows = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (list_store_p),
                                                 NULL);
@@ -1256,7 +1240,13 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
                                        (gpointer)combobox_ssid_changed_cb,
                                        userData_in);
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    load_ssids (data_p->monitor->get (),
+                data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+#else
     load_ssids (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+                data_p->monitor->get (),
+#endif // ACE_WIN32 || ACE_WIN64
                 ssids,
                 list_store_p);
   } // end lock scope
@@ -1271,12 +1261,12 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
   guint index_i = std::numeric_limits<unsigned int>::max ();
   std::string current_essid_string =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      Net_WLAN_Tools::associatedSSID (iinetwlanmonitor_p->get (),
+      Net_WLAN_Tools::associatedSSID (data_p->monitor->get (),
                                       data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier);
 #else
       Net_WLAN_Tools::associatedSSID (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
-                                      iinetwlanmonitor_p->get ());
-#endif
+                                      data_p->monitor->get ());
+#endif // ACE_WIN32 || ACE_WIN64
   bool select_ssid = false;
   if (!data_p->configuration->WLANMonitorConfiguration.SSID.empty () || // configured
       (data_p->configuration->WLANMonitorConfiguration.SSID.empty () &&
@@ -1331,16 +1321,12 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
+  ACE_ASSERT (data_p->monitor);
 
   Common_UI_GTK_BuildersIterator_t iterator =
     data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != data_p->builders.end ());
-
-  Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
-      NET_WLAN_INETMONITOR_SINGLETON::instance ();
-  // sanity check(s)
-  ACE_ASSERT (iinetwlanmonitor_p);
 
   GtkListStore* list_store_p =
       GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
@@ -1357,11 +1343,11 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   GtkTreeIter iterator_2;
   std::string current_essid_string =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      Net_WLAN_Tools::associatedSSID (iinetwlanmonitor_p->get (),
+      Net_WLAN_Tools::associatedSSID (data_p->monitor->get (),
                                       data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier);
 #else
       Net_WLAN_Tools::associatedSSID (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
-                                      iinetwlanmonitor_p->get ());
+                                      data_p->monitor->get ());
 #endif
   std::string selected_essid_string;
   gchar* string_p = NULL;
@@ -1447,7 +1433,7 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   {
     // the selected SSID is not the configured SSID
 
-    if (!iinetwlanmonitor_p->isRunning () ||
+    if (!data_p->monitor->isRunning () ||
         data_p->configuration->WLANMonitorConfiguration.SSID.empty ())
     { // not active or configured
       // --> update configuration

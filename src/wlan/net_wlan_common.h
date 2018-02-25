@@ -21,10 +21,15 @@
 #ifndef NET_WLAN_COMMON_H
 #define NET_WLAN_COMMON_H
 
+#include "ace/config-lite.h"
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#include <net/ethernet.h>
+#endif // ACE_WIN32 || ACE_WIN64
+
 #include <string>
 #include <vector>
 
-#include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Synch_Traits.h"
 
@@ -32,10 +37,6 @@
 #include "common_xml_parser.h"
 
 #include "net_wlan_profile_xml_handler.h"
-#else
-#if defined (NL80211_SUPPORT)
-#include "ace/Basic_Types.h"
-#endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 enum Net_WLAN_MonitorAPIType : int
@@ -46,8 +47,8 @@ enum Net_WLAN_MonitorAPIType : int
 #else
   NET_WLAN_MONITOR_API_IOCTL = 0, // aka 'wext' (mostly deprecated)
   NET_WLAN_MONITOR_API_NL80211,
-  NET_WLAN_MONITOR_API_DBUS, // 'talks' to the 'NetworkManager' service
-#endif
+  NET_WLAN_MONITOR_API_DBUS, // talk to the 'NetworkManager' service
+#endif // ACE_WIN32 || ACE_WIN64
   ////////////////////////////////////////
   NET_WLAN_MONITOR_API_MAX,
   NET_WLAN_MONITOR_API_INVALID
@@ -62,19 +63,24 @@ struct Net_WLAN_IEEE802_11_InformationElement
   uint8_t  id;
   uint8_t  length;
   uint8_t* data;
-#ifdef __GNUC__
+#if defined (__GNUC__)
 } __attribute__ ((__packed__));
 #else
 };
-#endif
+#endif // __GNUC__
 #if defined (_MSC_VER)
 #pragma pack (pop)
-#endif
+#endif // _MSC_VER
 
 struct Net_WLAN_AssociationConfiguration
 {
   Net_WLAN_AssociationConfiguration ()
    : accessPointLinkLayerAddress ()
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+   , authenticationType (0)
+   , frequency (0)
+#endif // ACE_WIN32 || ACE_WIN64
    , signalQuality (0)
   {
     ACE_OS::memset (&accessPointLinkLayerAddress,
@@ -86,8 +92,10 @@ struct Net_WLAN_AssociationConfiguration
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   WLAN_SIGNAL_QUALITY signalQuality;
 #else
+  unsigned int        authenticationType;
+  unsigned int        frequency;
   unsigned int        signalQuality;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 };
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 typedef std::multimap<std::string,
@@ -95,7 +103,7 @@ typedef std::multimap<std::string,
 #else
 typedef std::multimap<std::string,
                       std::pair<std::string, struct Net_WLAN_AssociationConfiguration> > Net_WLAN_SSIDToInterfaceIdentifier_t;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 typedef Net_WLAN_SSIDToInterfaceIdentifier_t::const_iterator Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t;
 typedef Net_WLAN_SSIDToInterfaceIdentifier_t::iterator Net_WLAN_SSIDToInterfaceIdentifierIterator_t;
 typedef std::pair<Net_WLAN_SSIDToInterfaceIdentifier_t::iterator, bool> Net_WLAN_SSIDToInterfaceIdentifierResult_t;
@@ -119,7 +127,7 @@ struct Net_WLAN_SSIDToInterfaceIdentifierFindPredicate
 {
   inline bool operator() (const Net_WLAN_SSIDToInterfaceIdentifierEntry_t& entry_in, std::string value_in) const { return entry_in.second.first == value_in; }
 };
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 typedef std::vector<std::string> Net_WLAN_SSIDs_t;
 typedef Net_WLAN_SSIDs_t::iterator Net_WLAN_SSIDsIterator_t;
@@ -137,6 +145,41 @@ typedef Common_XML_Parser_T<ACE_MT_SYNCH,
                             Net_WLAN_Profile_XML_Handler> Net_WLAN_Profile_Parser_t;
 #else
 #if defined (NL80211_SUPPORT)
+struct Net_WLAN_nl80211_InformationElement
+{
+  uint8_t elementId;
+  uint8_t length;
+  void*   information;
+#if defined (__GNUC__)
+} __attribute__ ((__packed__));
+#else
+};
+#endif // __GNUC__
+
+typedef std::map<std::string, int> Net_WLAN_nl80211_MulticastGroupIds_t;
+typedef Net_WLAN_nl80211_MulticastGroupIds_t::iterator Net_WLAN_nl80211_MulticastGroupIdsIterator_t;
+struct Net_WLAN_nl80211_MulticastGroupIdQueryCBData
+{
+  Net_WLAN_nl80211_MulticastGroupIdQueryCBData ()
+   : map (NULL)
+  {}
+
+  Net_WLAN_nl80211_MulticastGroupIds_t* map;
+};
+
+typedef std::vector<uint8_t> Net_WLAN_nl80211_ExtendedFeatures_t;
+typedef Net_WLAN_nl80211_ExtendedFeatures_t::iterator Net_WLAN_nl80211_ExtendedFeaturesIterator_t;
+struct Net_WLAN_nl80211_FeatureSetCBData
+{
+  Net_WLAN_nl80211_FeatureSetCBData ()
+   : features (0)
+   , extendedFeatures ()
+  {}
+
+  ACE_UINT32                          features;
+  Net_WLAN_nl80211_ExtendedFeatures_t extendedFeatures;
+};
+
 struct Net_WLAN_nl80211_ScanResult
 {
   Net_WLAN_nl80211_ScanResult ()
@@ -146,18 +189,6 @@ struct Net_WLAN_nl80211_ScanResult
 
   bool aborted;
   bool done;
-};
-
-// For family_handler() and nl_get_multicast_id().
-struct Net_WLAN_nl80211_MulticastHandlerArguments
-{
-  Net_WLAN_nl80211_MulticastHandlerArguments ()
-   : id (0)
-   , group ()
-  {}
-
-  ACE_UINT32  id;
-  std::string group;
 };
 #endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64

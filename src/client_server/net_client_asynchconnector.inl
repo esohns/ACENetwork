@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2010 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -854,7 +854,7 @@ Net_Client_AsynchConnector_T<HandlerType,
 
 /////////////////////////////////////////
 
-#if defined (ACE_HAS_NETLINK)
+#if defined (NETLINK_SUPPORT)
 template <typename HandlerType,
           typename ConfigurationType,
           typename StateType,
@@ -944,7 +944,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                 ACE::sock_error (error)));
 #else
                 ACE_TEXT (ACE_OS::strerror (error))));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 
   return ((result == 0) ? -1 : 0);
@@ -1033,5 +1033,4 @@ Net_Client_AsynchConnector_T<HandlerType,
 
   return handler_p;
 }
-
-#endif
+#endif // NETLINK_SUPPORT
