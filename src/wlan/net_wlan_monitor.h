@@ -354,10 +354,8 @@ class Net_WLAN_Monitor_T<AddressType,
 
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
+  inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (handle_); return handle_; }
   inline virtual const int get () const { ACE_ASSERT (familyId_ > 0); return familyId_; }
-//#if defined (DBUS_SUPPORT)
-//  inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
-//#endif
   inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID ((inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR ("")), NULL, familyId_); }
 
  protected:

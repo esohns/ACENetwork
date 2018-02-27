@@ -1,6 +1,8 @@
 ﻿option (GTK3_SUPPORT "enable Gtk3 support" ON)
 
 if (UNIX)
+# option (NETLINK_SUPPORT "enable netlink support" ON)
+
  include (CheckLibraryExists)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
  set (CMAKE_THREAD_PREFER_PTHREAD ON)

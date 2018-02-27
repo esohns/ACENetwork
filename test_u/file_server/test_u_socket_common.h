@@ -32,20 +32,18 @@
 
 #include "stream_common.h"
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (NETLINK_SUPPORT)
 #include "net_asynch_netlinksockethandler.h"
-#endif
+#endif // NETLINK_SUPPORT
 #include "net_asynch_tcpsockethandler.h"
 #include "net_asynch_udpsockethandler.h"
 #include "net_stream_asynch_tcpsocket_base.h"
 #include "net_stream_asynch_udpsocket_base.h"
 #include "net_stream_tcpsocket_base.h"
 #include "net_stream_udpsocket_base.h"
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (NETLINK_SUPPORT)
 #include "net_netlinksockethandler.h"
-#endif
+#endif // NETLINK_SUPPORT
 #include "net_tcpsockethandler.h"
 #include "net_udpsockethandler.h"
 
@@ -57,10 +55,9 @@
 class Test_U_Stream;
 
 typedef Net_AsynchTCPSocketHandler_T<struct FileServer_SocketHandlerConfiguration> Test_U_AsynchTCPSocketHandler_t;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (NETLINK_SUPPORT)
 typedef Net_AsynchNetlinkSocketHandler_T<struct FileServer_SocketHandlerConfiguration> Test_U_AsynchNetlinkSocketHandler_t;
-#endif
+#endif // NETLINK_SUPPORT
 typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram,
                                      struct FileServer_SocketHandlerConfiguration> Test_U_AsynchUDPSocketHandler_t;
 typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Mcast,
@@ -71,10 +68,9 @@ typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
 typedef Net_TCPSocketHandler_T<ACE_MT_SYNCH,
                                ACE_SOCK_STREAM,
                                struct FileServer_SocketHandlerConfiguration> Test_U_TCPSocketHandler_t;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (NETLINK_SUPPORT)
 typedef Net_NetlinkSocketHandler_T<struct FileServer_SocketHandlerConfiguration> Test_U_NetlinkSocketHandler_t;
-#endif
+#endif // NETLINK_SUPPORT
 //typedef Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_SOCK_DGRAM,
 typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
                                Net_SOCK_Dgram,

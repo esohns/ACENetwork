@@ -25,6 +25,7 @@
 #include <string>
 
 #include "ace/Basic_Types.h"
+#include "ace/config-lite.h"
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
 #include "ace/Netlink_Addr.h"
@@ -50,16 +51,17 @@
 class Stream_IAllocator;
 struct Net_UserData;
 
-#if defined (ACE_HAS_NETLINK)
+#if defined (NETLINK_SUPPORT)
 class Net_Netlink_Addr
  : public ACE_Netlink_Addr
 {
   typedef ACE_Netlink_Addr inherited;
 
  public:
-//  Net_Netlink_Addr (void);
-//  Net_Netlink_Addr (const sockaddr_nl*, int);
-  inline virtual ~Net_Netlink_Addr (void) {}
+  Net_Netlink_Addr ();
+  Net_Netlink_Addr (const sockaddr_nl*, // address
+                    int);               // length
+  inline virtual ~Net_Netlink_Addr () {}
 
   inline Net_Netlink_Addr& operator= (const ACE_Addr& rhs) { *this = rhs; return *this; }
 
@@ -70,7 +72,7 @@ class Net_Netlink_Addr
 
   inline void reset (void) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 };
-#endif /* ACE_HAS_NETLINK */
+#endif // NETLINK_SUPPORT
 
 struct Net_AllocatorConfiguration
  : Common_AllocatorConfiguration
@@ -82,7 +84,7 @@ struct Net_AllocatorConfiguration
     // *NOTE*: this facilitates (message block) data buffers to be scanned with
     //         'flex's yy_scan_buffer() method
     paddingBytes = NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
-  };
+  }
 };
 
 struct Net_SocketConfigurationBase
@@ -100,7 +102,7 @@ struct Net_SocketConfigurationBase
     interfaceIdentifier =
       Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
 #endif // ACE_WIN32 || ACE_WIN64
-  };
+  }
   inline virtual ~Net_SocketConfigurationBase () {}
 
   int         bufferSize; // socket buffer size (I/O)
@@ -112,6 +114,7 @@ struct Net_SocketConfigurationBase
   bool         useLoopBackDevice;   // (if any)
 };
 
+#if defined (NETLINK_SUPPORT)
 struct Net_NetlinkSocketConfiguration
  : Net_SocketConfigurationBase
 {
@@ -124,6 +127,7 @@ struct Net_NetlinkSocketConfiguration
   Net_Netlink_Addr address;
   int              protocol;
 };
+#endif // NETLINK_SUPPORT
 
 struct Net_TCPSocketConfiguration
  : Net_SocketConfigurationBase
@@ -146,7 +150,7 @@ struct Net_TCPSocketConfiguration
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
     } // end IF
-  };
+  }
 
   ACE_INET_Addr address;
   bool          linger;
@@ -195,7 +199,7 @@ struct Net_UDPSocketConfiguration
 
     if (unlikely (writeOnly))
       listenAddress.reset ();
-  };
+  }
 
   // *IMPORTANT NOTE*: set this for asynchronous event dispatch; the socket
   //                   needs to be associated with the peer address, as the data
@@ -225,7 +229,7 @@ struct Net_SocketHandlerConfiguration
    , useThreadPerConnection (false)
    ///////////////////////////////////////
    , userData (NULL)
-  {};
+  {}
 
   struct Net_ConnectionConfiguration* connectionConfiguration;
   struct Net_SocketConfigurationBase* socketConfiguration;
@@ -262,7 +266,7 @@ struct Net_ConnectionConfiguration
    , timerManager (NULL)
    , useReactor (NET_EVENT_USE_REACTOR)
    , userData (NULL)
-  {};
+  {}
 
   Net_IInetConnectionManager_t*         connectionManager;
   bool                                  generateUniqueIOModuleNames; // stream
@@ -309,7 +313,7 @@ struct Net_SessionConfiguration
   Net_SessionConfiguration ()
    : parserConfiguration (NULL)
    , useReactor (NET_EVENT_USE_REACTOR)
-  {};
+  {}
 
   struct Common_ParserConfiguration* parserConfiguration;
   bool                               useReactor;
@@ -320,7 +324,7 @@ struct Net_ListenerConfiguration
   Net_ListenerConfiguration ()
    : addressFamily (ACE_ADDRESS_FAMILY_INET)
    , connectionConfiguration (NULL)
-  {};
+  {}
 
   int                                 addressFamily;
   struct Net_ConnectionConfiguration* connectionConfiguration;

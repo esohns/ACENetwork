@@ -123,6 +123,7 @@ class Net_WLAN_IMonitorBase
 #if defined (WEXT_SUPPORT)
  , public Common_IGet_T<ACE_HANDLE>
 #elif defined (NL80211_SUPPORT)
+ , public Common_IGetP_T<struct nl_sock>
  , public Common_IGet_T<int>
 #elif defined (DBUS_SUPPORT)
  , public Common_IGetP_T<struct DBusConnection>

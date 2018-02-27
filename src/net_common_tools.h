@@ -161,7 +161,7 @@ class Net_Common_Tools
 #if defined (NETLINK_SUPPORT)
   static std::string NetlinkAddressToString (const Net_Netlink_Addr&);
 
-  static std::string dump (struct nl_msg*);
+//  static std::string dump (struct nl_msg*);
 #endif // NETLINK_SUPPORT
   // *NOTE*: if (the first argument is '0'), the trailing ":0" will be cropped
   //         from the return value

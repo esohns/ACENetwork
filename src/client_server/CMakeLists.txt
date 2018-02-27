@@ -6,7 +6,7 @@ add_library (${PROJECT_NAME}_Client STATIC "")
 add_library (${PROJECT_NAME}_Server STATIC "")
 
 if (UNIX)
-# option (NETLINK_SUPPORT "enable netlink support" ON)
+ option (NETLINK_SUPPORT "enable netlink support" ON)
 
  if (NETLINK_SUPPORT)
 #  include_directories (${PKG_LIBNL_INCLUDE_DIRS})

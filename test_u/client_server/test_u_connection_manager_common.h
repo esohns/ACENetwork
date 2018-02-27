@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -26,27 +26,25 @@
 #include "ace/Synch_Traits.h"
 
 #include "net_common.h"
+#if defined (NETLINK_SUPPORT)
+#include "net_configuration.h"
+#endif // NETLINK_SUPPORT
 #include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-#include "net_netlinksockethandler.h"
-#endif
 
 #include "test_u_connection_common.h"
 
 // forward declarations
 struct Test_U_UserData;
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (NETLINK_SUPPORT)
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  Net_Netlink_Addr,
                                  ClientServer_ConnectionConfiguration_t,
                                  struct ClientServer_ConnectionState,
                                  Net_Statistic_t,
                                  struct Test_U_UserData> ClientServer_INetlinkConnectionManager_t;
-#endif
+#endif // NETLINK_SUPPORT
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  ClientServer_ConnectionConfiguration_t,
@@ -54,15 +52,14 @@ typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  Net_Statistic_t,
                                  struct Test_U_UserData> ClientServer_IInetConnectionManager_t;
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (NETLINK_SUPPORT)
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  Net_Netlink_Addr,
                                  ClientServer_ConnectionConfiguration_t,
                                  struct ClientServer_ConnectionState,
                                  Net_Statistic_t,
                                  struct Test_U_UserData> ClientServer_NetlinkConnectionManager_t;
-#endif
+#endif // NETLINK_SUPPORT
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  ClientServer_ConnectionConfiguration_t,
@@ -70,11 +67,10 @@ typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  Net_Statistic_t,
                                  struct Test_U_UserData> ClientServer_InetConnectionManager_t;
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (NETLINK_SUPPORT)
 typedef ACE_Singleton<ClientServer_NetlinkConnectionManager_t,
                       ACE_SYNCH_MUTEX> CLIENTSERVER_NETLINKCONNECTIONMANAGER_SINGLETON;
-#endif
+#endif // NETLINK_SUPPORT
 typedef ACE_Singleton<ClientServer_InetConnectionManager_t,
                       ACE_SYNCH_MUTEX> CLIENTSERVER_CONNECTIONMANAGER_SINGLETON;
 

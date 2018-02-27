@@ -86,8 +86,15 @@ load_ssids (HANDLE clientHandle_in,
             REFGUID interfaceIdentifier_in,
 #else
 load_ssids (const std::string& interfaceIdentifier_in,
+#if defined (WEXT_USE)
             ACE_HANDLE handle_in,
+#elif defined (NL80211_USE)
+            struct nl_sock* socketHandle_in,
+            int driverFamilyId_in,
+#elif defined (DBUS_USE)
+            struct DBusConnection*,
 #endif
+#endif // ACE_WIN32 || ACE_WIN64
             Net_WLAN_SSIDs_t& SSIDs_out,
             GtkListStore* listStore_in)
 {
@@ -102,12 +109,31 @@ load_ssids (const std::string& interfaceIdentifier_in,
 
   SSIDs_out =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_SUPPORT)
       Net_WLAN_Tools::getSSIDs (clientHandle_in,
                                 interfaceIdentifier_in);
 #else
+      Net_WLAN_SSIDs_t ();
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+  ACE_NOTREACHED (return;)
+#endif // WLANAPI_SUPPORT
+#else
       Net_WLAN_Tools::getSSIDs (interfaceIdentifier_in,
+#if defined (WEXT_USE)
                                 handle_in);
+#elif defined (NL80211_USE)
+                                socketHandle_in,
+                                driverFamilyId_in);
+#elif defined (DBUS_USE)
+                                connection_in);
+#else
+                                NULL);
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+  ACE_NOTREACHED (return;)
 #endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   gchar* string_p = NULL;
   GtkTreeIter tree_iterator;
@@ -1241,11 +1267,20 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
                                        userData_in);
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_USE)
     load_ssids (data_p->monitor->get (),
                 data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+#endif // WLANAPI_USE
 #else
     load_ssids (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+#if defined (WEXT_USE)
                 data_p->monitor->get (),
+#elif defined (NL80211_USE)
+                const_cast<struct nl_sock*> (data_p->monitor->getP ()),
+                data_p->monitor->get (),
+#elif defined (DBUS_USE)
+                data_p->monitor->getP (),
+#endif
 #endif // ACE_WIN32 || ACE_WIN64
                 ssids,
                 list_store_p);
@@ -1261,11 +1296,30 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
   guint index_i = std::numeric_limits<unsigned int>::max ();
   std::string current_essid_string =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_USE)
       Net_WLAN_Tools::associatedSSID (data_p->monitor->get (),
                                       data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier);
 #else
+      ACE_TEXT_ALWAYS_CHAR ("");
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+  ACE_NOTREACHED (return;)
+#endif // WLANAPI_USE
+#else
       Net_WLAN_Tools::associatedSSID (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+#if defined (WEXT_USE)
                                       data_p->monitor->get ());
+#elif defined (NL80211_USE)
+                                      const_cast<struct nl_sock*> (data_p->monitor->getP ()),
+                                      data_p->monitor->get ());
+#elif defined (DBUS_USE)
+                                      data_p->monitor->getP ());
+#else
+                                      NULL);
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+  ACE_NOTREACHED (return;)
+#endif
 #endif // ACE_WIN32 || ACE_WIN64
   bool select_ssid = false;
   if (!data_p->configuration->WLANMonitorConfiguration.SSID.empty () || // configured
@@ -1342,13 +1396,32 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
 
   GtkTreeIter iterator_2;
   std::string current_essid_string =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      Net_WLAN_Tools::associatedSSID (data_p->monitor->get (),
-                                      data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier);
-#else
-      Net_WLAN_Tools::associatedSSID (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
-                                      data_p->monitor->get ());
-#endif
+    #if defined (ACE_WIN32) || defined (ACE_WIN64)
+    #if defined (WLANAPI_USE)
+          Net_WLAN_Tools::associatedSSID (data_p->monitor->get (),
+                                          data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier);
+    #else
+          ACE_TEXT_ALWAYS_CHAR ("");
+      ACE_ASSERT (false);
+      ACE_NOTSUP;
+      ACE_NOTREACHED (return;)
+    #endif // WLANAPI_USE
+    #else
+          Net_WLAN_Tools::associatedSSID (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+    #if defined (WEXT_USE)
+                                          data_p->monitor->get ());
+    #elif defined (NL80211_USE)
+                                          const_cast<struct nl_sock*> (data_p->monitor->getP ()),
+                                          data_p->monitor->get ());
+    #elif defined (DBUS_USE)
+                                          data_p->monitor->getP ());
+    #else
+                                          NULL);
+      ACE_ASSERT (false);
+      ACE_NOTSUP;
+      ACE_NOTREACHED (return;)
+    #endif
+    #endif // ACE_WIN32 || ACE_WIN64
   std::string selected_essid_string;
   gchar* string_p = NULL;
   guint index_i = std::numeric_limits<unsigned int>::max ();

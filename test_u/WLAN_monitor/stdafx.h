@@ -1,4 +1,4 @@
-// stdafx.h : include file for standard system include files,
+﻿// stdafx.h : include file for standard system include files,
 //  or project specific include files that are used frequently, but
 //      are changed infrequently
 //
@@ -38,8 +38,12 @@
 #include "net_common.h"
 #include "net_macros.h"
 
-//#if defined (_MSC_VER)
-//#include "targetver.h"
-//#endif
+#if defined (HAVE_CONFIG_H)
+#include "libACENetwork_config.h"
+#endif
+
+#if defined (_MSC_VER)
+#include "targetver.h"
+#endif
 
 // *TODO*: reference additional headers your program requires here

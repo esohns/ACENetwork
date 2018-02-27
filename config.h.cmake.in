@@ -1,7 +1,7 @@
 ﻿/* config.h.cmake */
 
 /* Name of package */
-#cmakedefine PACKAGE "@PACKAGE@"
+//#cmakedefine PACKAGE "@PACKAGE@"
 
 /* Define to the address where bug reports for this package should be sent. */
 #cmakedefine PACKAGE_BUGREPORT
@@ -26,7 +26,7 @@
 #define ACENETWORK_VERSION_MINOR @VERSION_MINOR@
 #define ACENETWORK_VERSION_MICRO @VERSION_MICRO@
 #define ACENETWORK_VERSION_DEVEL "@VERSION_DEVEL@"
-#cmakedefine VERSION "@VERSION@"
+//#cmakedefine VERSION "@VERSION@"
 
 // options
 #cmakedefine01 DEBUG_DEBUGGER

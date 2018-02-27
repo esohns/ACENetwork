@@ -39,7 +39,7 @@
 #include "libnl3/netlink/socket.h"
 
 #include "ace/Handle_Set.h"
-#include "ace/INET_Addr.h"
+#include "ace/Netlink_Addr.h"
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 #include "ace/Synch.h"
@@ -47,6 +47,7 @@
 #include "common_tools.h"
 
 #include "net_common_tools.h"
+#include "net_configuration.h"
 #include "net_macros.h"
 
 #include "net_wlan_defines.h"
@@ -510,7 +511,7 @@ Net_WLAN_Tools::scan (const std::string& interfaceIdentifier_in,
   ACE_ASSERT (ESSID_in.size () <= IW_ESSID_MAX_SIZE);
   ACE_ASSERT (driverFamilyId_in > 0);
 
-  int result = -1;
+//  int result = -1;
 #if defined (ACE_LINUX)
   bool handle_capabilities = false;
 #endif // ACE_LINUX

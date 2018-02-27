@@ -443,6 +443,7 @@ do_work (bool autoAssociate_in,
   struct Test_U_SignalHandlerConfiguration signal_handler_configuration;
   Common_Timer_Manager_t* timer_manager_p = NULL;
   Net_WLAN_IInetMonitor_t* iwlanmonitor_p = NULL;
+  Net_IStatisticHandler_t* istatistic_handler_p = NULL;
   WLANMonitor_GTK_Manager_t* gtk_manager_p = NULL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HWND window_p = NULL;
@@ -463,18 +464,46 @@ do_work (bool autoAssociate_in,
     timer_manager_p;
 #endif
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  iwlanmonitor_p = NET_WLAN_INETMONITOR_SINGLETON::instance ();
+#if defined (WLANAPI_SUPPORT)
+  iwlanmonitor_p = NET_WLAN_INETWLANAPIMONITOR_SINGLETON::instance ();
+  istatistic_handler_p = NET_WLAN_INETWLANAPIMONITOR_SINGLETON::instance ();
+#else
+      ACE_ASSERT (false);
+      ACE_NOTSUP;
+      ACE_NOTREACHED (break;)
+#endif // WLANAPI_SUPPORT
 #else
   switch (API_in)
   {
     case NET_WLAN_MONITOR_API_IOCTL:
+#if defined (WEXT_SUPPORT)
       iwlanmonitor_p = NET_WLAN_INETIOCTLMONITOR_SINGLETON::instance ();
+      istatistic_handler_p = NET_WLAN_INETIOCTLMONITOR_SINGLETON::instance ();
+#else
+      ACE_ASSERT (false);
+      ACE_NOTSUP;
+      ACE_NOTREACHED (break;)
+#endif // WEXT_SUPPORT
       break;
     case NET_WLAN_MONITOR_API_NL80211:
+#if defined (NL80211_SUPPORT)
       iwlanmonitor_p = NET_WLAN_INETNL80211MONITOR_SINGLETON::instance ();
+      istatistic_handler_p = NET_WLAN_INETNL80211MONITOR_SINGLETON::instance ();
+#else
+      ACE_ASSERT (false);
+      ACE_NOTSUP;
+      ACE_NOTREACHED (break;)
+#endif // NL80211_SUPPORT
       break;
     case NET_WLAN_MONITOR_API_DBUS:
+#if defined (DBUS_SUPPORT)
       iwlanmonitor_p = NET_WLAN_INETDBUSMONITOR_SINGLETON::instance ();
+      istatistic_handler_p = NET_WLAN_INETDBUSMONITOR_SINGLETON::instance ();
+#else
+      ACE_ASSERT (false);
+      ACE_NOTSUP;
+      ACE_NOTREACHED (break;)
+#endif // DBUS_SUPPORT
       break;
     default:
     {
@@ -495,8 +524,9 @@ do_work (bool autoAssociate_in,
   // ********************** monitor configuration data *************************
   configuration.signalHandlerConfiguration.hasUI =
       !UIDefinitionFile_in.empty ();
+  configuration.signalHandlerConfiguration.monitor = iwlanmonitor_p;
   configuration.signalHandlerConfiguration.statisticReportingHandler =
-      NET_WLAN_INETMONITOR_SINGLETON::instance ();
+      istatistic_handler_p;
   configuration.signalHandlerConfiguration.useReactor =
       NET_EVENT_USE_REACTOR;
   configuration.WLANMonitorConfiguration.autoAssociate =
@@ -682,9 +712,9 @@ do_printVersion (const std::string& programName_in)
   std::cout << ACE_TEXT ("libraries: ")
             << std::endl
 #ifdef HAVE_CONFIG_H
-            << ACE_TEXT (LIBACENETWORK_PACKAGE)
+            << ACE_TEXT (ACENETWORK_PACKAGE_NAME)
             << ACE_TEXT (": ")
-            << ACE_TEXT (LIBACENETWORK_PACKAGE_VERSION)
+            << ACE_TEXT (ACENETWORK_PACKAGE_VERSION)
             << std::endl
 #endif
   ;
@@ -833,7 +863,7 @@ ACE_TMAIN (int argc_in,
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
-        Common_File_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME),
+        Common_File_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_NAME),
                                            ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
                                                                                 ACE_DIRECTORY_SEPARATOR_CHAR)));
   if (!Common_Tools::initializeLogging (ACE::basename (argv_in[0]),    // program name

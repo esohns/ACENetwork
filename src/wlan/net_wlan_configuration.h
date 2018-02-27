@@ -128,49 +128,52 @@ struct  Net_WLAN_MonitorConfiguration
 typedef Net_WLAN_IMonitor_T<ACE_INET_Addr,
                             struct Net_WLAN_MonitorConfiguration> Net_WLAN_IInetMonitor_t;
 
-typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-                               ACE_MT_SYNCH,
-                               Common_TimePolicy_t,
-#endif // ACE_WIN32 || ACE_WIN64
-                               NET_WLAN_MONITOR_DEFAULT_API,
-                               struct Net_UserData> Net_WLAN_InetMonitor_t;
+//typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//#else
+//                               ACE_MT_SYNCH,
+//                               Common_TimePolicy_t,
+//#endif // ACE_WIN32 || ACE_WIN64
+//                               NET_WLAN_MONITOR_DEFAULT_API,
+//                               struct Net_UserData> Net_WLAN_InetMonitor_t;
+//typedef ACE_Singleton<Net_WLAN_InetMonitor_t,
+//                      ACE_SYNCH_MUTEX> NET_WLAN_INETMONITOR_SINGLETON;
 
-typedef ACE_Singleton<Net_WLAN_InetMonitor_t,
-                      ACE_SYNCH_MUTEX> NET_WLAN_INETMONITOR_SINGLETON;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (WLANAPI_SUPPORT)
 typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                               NET_WLAN_MONITOR_API_WLANAPI,
+                               struct Net_UserData> Net_WLAN_InetWlanAPIMonitor_t;
+typedef ACE_Singleton<Net_WLAN_InetWlanAPIMonitor_t,
+                      ACE_SYNCH_MUTEX> NET_WLAN_INETWLANAPIMONITOR_SINGLETON;
+#endif // WLANAPI_SUPPORT
 #else
+#if defined (WEXT_SUPPORT)
+typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
                                ACE_MT_SYNCH,
                                Common_TimePolicy_t,
-#endif // ACE_WIN32 || ACE_WIN64
                                NET_WLAN_MONITOR_API_IOCTL,
                                struct Net_UserData> Net_WLAN_InetIoctlMonitor_t;
-typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-                               ACE_MT_SYNCH,
-                               Common_TimePolicy_t,
-#endif // ACE_WIN32 || ACE_WIN64
-                               NET_WLAN_MONITOR_API_NL80211,
-                               struct Net_UserData> Net_WLAN_InetNl80211Monitor_t;
-typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-                               ACE_MT_SYNCH,
-                               Common_TimePolicy_t,
-#endif // ACE_WIN32 || ACE_WIN64
-                               NET_WLAN_MONITOR_API_DBUS,
-                               struct Net_UserData> Net_WLAN_InetDBusMonitor_t;
-
 typedef ACE_Singleton<Net_WLAN_InetIoctlMonitor_t,
                       ACE_SYNCH_MUTEX> NET_WLAN_INETIOCTLMONITOR_SINGLETON;
+#endif // WEXT_SUPPORT
+#if defined (NL80211_SUPPORT)
+typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
+                               ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+                               NET_WLAN_MONITOR_API_NL80211,
+                               struct Net_UserData> Net_WLAN_InetNl80211Monitor_t;
 typedef ACE_Singleton<Net_WLAN_InetNl80211Monitor_t,
                       ACE_SYNCH_MUTEX> NET_WLAN_INETNL80211MONITOR_SINGLETON;
+#endif // NL80211_SUPPORT
+#if defined (DBUS_SUPPORT)
+typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
+                               ACE_MT_SYNCH,
+                               Common_TimePolicy_t,
+                               NET_WLAN_MONITOR_API_DBUS,
+                               struct Net_UserData> Net_WLAN_InetDBusMonitor_t;
 typedef ACE_Singleton<Net_WLAN_InetDBusMonitor_t,
                       ACE_SYNCH_MUTEX> NET_WLAN_INETDBUSMONITOR_SINGLETON;
+#endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 #endif

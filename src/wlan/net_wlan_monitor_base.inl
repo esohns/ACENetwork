@@ -155,8 +155,8 @@ Net_WLAN_Monitor_Base_T<AddressType,
     inherited::stop (true,
                      true);
 
-  int result = -1;
 #if defined (WEXT_SUPPORT)
+//  int result = -1;
 //  if (unlikely (isRegistered_))
 //  {
 //    ACE_Reactor* reactor_p = inherited::reactor ();
@@ -1102,13 +1102,13 @@ associate:
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("caught exception in Net_WLAN_IManager::do_associate(\"%s\",%s,%s), continuing\n"),
                     ACE_TEXT (Net_Common_Tools::interfaceIdentifierToString (configuration_->interfaceIdentifier).c_str ()),
-                    ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address_s.ether_addr_octet, NET_LINKLAYER_802_11)).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
                     ACE_TEXT ("")));
 #else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("caught exception in Net_WLAN_IManager::do_associate(\"%s\",%s,%s), continuing\n"),
                     ACE_TEXT (configuration_->interfaceIdentifier.c_str ()),
-                    ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address_s.ether_addr_octet, NET_LINKLAYER_802_11)).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
                     ACE_TEXT ("")));
 #endif // ACE_WIN32 || ACE_WIN64
       }

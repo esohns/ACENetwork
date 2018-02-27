@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
 *   Copyright (C) 2009 by Erik Sohns   *
 *   erik.sohns@web.de   *
 *                                                                         *
@@ -817,7 +817,7 @@ do_print_version (const std::string& programName_in)
 
   std::ostringstream converter;
 
-  // compiler version string...
+  // compiler version string
   converter << ACE::compiler_major_version ();
   converter << ACE_TEXT (".");
   converter << ACE::compiler_minor_version ();
@@ -834,15 +834,15 @@ do_print_version (const std::string& programName_in)
   std::cout << ACE_TEXT ("libraries: ")
             << std::endl
 #ifdef HAVE_CONFIG_H
-            << ACE_TEXT (LIBACENETWORK_PACKAGE)
+            << ACE_TEXT (ACENETWORK_PACKAGE_NAME)
             << ACE_TEXT (": ")
-            << ACE_TEXT (LIBACENETWORK_PACKAGE_VERSION)
+            << ACE_TEXT (ACENETWORK_PACKAGE_VERSION)
             << std::endl
 #endif
             ;
 
   converter.str ("");
-  // ACE version string...
+  // ACE version string
   converter << ACE::major_version ();
   converter << ACE_TEXT (".");
   converter << ACE::minor_version ();
@@ -1017,7 +1017,7 @@ ACE_TMAIN (int argc_in,
   if (log_to_file)
   {
     log_file_name =
-      Common_File_Tools::getLogFilename (std::string (ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME)),
+      Common_File_Tools::getLogFilename (std::string (ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_NAME)),
                                          std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
                                                                                            ACE_DIRECTORY_SEPARATOR_CHAR))));
     if (log_file_name.empty ())

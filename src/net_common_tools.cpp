@@ -112,47 +112,47 @@ Net_Common_Tools::NetlinkAddressToString (const Net_Netlink_Addr& address_in)
   return return_value;
 }
 
-std::string
-Net_Common_Tools::dump (struct nl_msg* message_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::dump"));
+//std::string
+//Net_Common_Tools::dump (struct nl_msg* message_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::dump"));
 
-  std::string result;
+//  std::string result;
 
-  struct genlmsghdr* genlmsghdr_p =
-      static_cast<struct genlmsghdr*> (nlmsg_data (nlmsg_hdr (message_in)));
-  ACE_ASSERT (genlmsghdr_p);
-  struct nlattr* nlattr_a[NL80211_ATTR_MAX + 1];
-  nla_parse (nlattr_a,
-             NL80211_ATTR_MAX,
-             genlmsg_attrdata (genlmsghdr_p, 0),
-             genlmsg_attrlen (genlmsghdr_p, 0),
-             NULL);
-  const struct nlattr* nlattr_p = NULL;
-  int rem, i = 0;
-  std::ostringstream converter;
-  nla_for_each_attr (nlattr_p, genlmsg_attrdata (genlmsghdr_p, 0), genlmsg_attrlen (genlmsghdr_p, 0), rem)
-  { ACE_ASSERT (nlattr_p);
-    result = ACE_TEXT_ALWAYS_CHAR ("#");
-    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-    converter.clear ();
-    converter << ++i;
-    result += converter.str ();
-    result += ACE_TEXT_ALWAYS_CHAR (": ");
-    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-    converter.clear ();
-    converter << nla_type (nlattr_p);
-    result += converter.str ();
-    result += ACE_TEXT_ALWAYS_CHAR ("; ");
-    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
-    converter.clear ();
-    converter << nla_len (nlattr_p);
-    result += converter.str ();
-    result += ACE_TEXT_ALWAYS_CHAR (" byte(s)\n");
-  } // end FOR
+//  struct genlmsghdr* genlmsghdr_p =
+//      static_cast<struct genlmsghdr*> (nlmsg_data (nlmsg_hdr (message_in)));
+//  ACE_ASSERT (genlmsghdr_p);
+//  struct nlattr* nlattr_a[NL80211_ATTR_MAX + 1];
+//  nla_parse (nlattr_a,
+//             NL80211_ATTR_MAX,
+//             genlmsg_attrdata (genlmsghdr_p, 0),
+//             genlmsg_attrlen (genlmsghdr_p, 0),
+//             NULL);
+//  const struct nlattr* nlattr_p = NULL;
+//  int rem, i = 0;
+//  std::ostringstream converter;
+//  nla_for_each_attr (nlattr_p, genlmsg_attrdata (genlmsghdr_p, 0), genlmsg_attrlen (genlmsghdr_p, 0), rem)
+//  { ACE_ASSERT (nlattr_p);
+//    result = ACE_TEXT_ALWAYS_CHAR ("#");
+//    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+//    converter.clear ();
+//    converter << ++i;
+//    result += converter.str ();
+//    result += ACE_TEXT_ALWAYS_CHAR (": ");
+//    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+//    converter.clear ();
+//    converter << nla_type (nlattr_p);
+//    result += converter.str ();
+//    result += ACE_TEXT_ALWAYS_CHAR ("; ");
+//    converter.str (ACE_TEXT_ALWAYS_CHAR (""));
+//    converter.clear ();
+//    converter << nla_len (nlattr_p);
+//    result += converter.str ();
+//    result += ACE_TEXT_ALWAYS_CHAR (" byte(s)\n");
+//  } // end FOR
 
-  return result;
-}
+//  return result;
+//}
 #endif // NETLINK_SUPPORT
 
 std::string

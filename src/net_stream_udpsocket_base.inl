@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2010 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -2336,7 +2336,7 @@ Net_StreamUDPSocketBase_T<Net_UDPSocketHandler_T<ACE_NULL_SYNCH,
 
 /////////////////////////////////////////
 
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (NETLINK_SUPPORT)
 template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -3249,5 +3249,4 @@ Net_StreamUDPSocketBase_T<Net_NetlinkSocketHandler_T<HandlerConfigurationType>,
               ACE_TEXT (local_address_string.c_str ()),
               buffer));
 }
-
-#endif
+#endif // NETLINK_SUPPORT

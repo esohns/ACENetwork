@@ -1,8 +1,21 @@
 ﻿cmake_minimum_required (VERSION 2.8)
 
+#include (CheckIPOSupported)
+#check_ipo_supported (RESULT IPO_SUPPORTED)
+
 # global options
+cmake_policy (SET CMP0069 NEW) # add IPO flags unconditionally (i.e. always)
+#if (IPO_SUPPORTED)
+set (CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+#endif (IPO_SUPPORTED)
 #set (CMAKE_VERBOSE_MAKEFILE ON)
 set_property (GLOBAL PROPERTY USE_FOLDERS ON)
+if (UNIX)
+ find_program (CCACHE_PROGRAM ccache)
+ if (CCACHE_PROGRAM)
+  set_property (GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
+ endif (CCACHE_PROGRAM)
+endif (UNIX)
 
 # version
 set (VERSION_MAJOR 0)
@@ -16,7 +29,8 @@ if (VERSION_DEVEL)
 endif ()
 
 # build type
-# *NOTE*: if the user specifies -DCMAKE_BUILD_TYPE on the command line, take
+#variable_watch (CMAKE_BUILD_TYPE)
+# *NOTE*: iff the user specifies -DCMAKE_BUILD_TYPE on the command line, take
 #         their definition and dump it in the cache along with proper
 #         documentation, otherwise set CMAKE_BUILD_TYPE to Debug prior to
 #         calling PROJECT()
@@ -29,6 +43,8 @@ endif ()
 
 # project
 cmake_policy (SET CMP0048 NEW) # allow project VERSION
+#cmake_policy (SET CMP0056 OLD) # honor per-config flags in try_compile()
+#cmake_policy (SET CMP0066 OLD) # honor per-config flags in try_compile()
 project (ACENetwork
          VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
          LANGUAGES CXX C)
@@ -113,9 +129,10 @@ if (CMAKE_COMPILER_IS_GNUCXX)
  set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS} -g")
  add_definitions (-D_GNU_SOURCE)
 #  set_property (SOURCE PROPERTY COMPILE_DEFINITIONS _GNU_SOURCE)
-endif ()
-if (MSVC)
- set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+elseif (MSVC)
+ add_compile_options (/MP)
+# add_definitions (-D_CRT_SECURE_NO_WARNINGS)
+# add_definitions (-D_WINSOCK_DEPRECATED_NO_WARNINGS)
 
  set (MSVC_INCREMENTAL_YES_FLAG "/INCREMENTAL:NO")
  foreach (FLAG_TYPE EXE MODULE SHARED STATIC)
@@ -126,7 +143,7 @@ if (MSVC)
        CACHE STRING "Overriding default debug ${FLAG_TYPE} linker flags." FORCE)
   mark_as_advanced (CMAKE_${FLAG_TYPE}_LINKER_FLAGS_DEBUG)
  endforeach ()
-endif (MSVC)
+endif ()
 
 ################################################################################
 
@@ -198,17 +215,44 @@ include (CreateLaunchers)
 #include (CTest)
 enable_testing ()
 
+################################################################################
+
 add_subdirectory (test_u)
 add_subdirectory (test_i)
 
 ################################################################################
 
+if (UNIX)
+# include (CheckLibraryExists)
+# check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
+ include (GNUInstallDirs)
+
+ set (CMAKE_THREAD_PREFER_PTHREAD ON)
+elseif (WIN32)
+ if (MSVC)
+#  message (STATUS "CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION: ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+#  set (CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION "10.0.16299.0") # set Windows SDK version
+  message (STATUS "CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION: ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+#  add_definitions (-CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION})
+ endif ()
+ include (InstallRequiredSystemLibraries)
+endif ()
+
+#set (NSIS_PROJECT_FILE "lib${PROJECT_NAME}.nsi")
+#add_custom_command (TARGET ${PROJECT_NAME}
+#                    POST_BUILD
+#                    COMMAND make_installer.bat ${NSIS_PROJECT_FILE}
+#                    WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/scripts"
+#                    COMMENT "making installer..."
+#                    VERBATIM)
+
 # build a CPack driven installer package
-include (InstallRequiredSystemLibraries)
+#include (InstallRequiredSystemLibraries)
 set (CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
 set (CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
 set (CPACK_PACKAGE_VERSION_PATCH ${VERSION_MICRO})
 set (CPACK_RESOURCE_FILE_LICENSE ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE)
 set (CPACK_RESOURCE_FILE_README ${CMAKE_CURRENT_SOURCE_DIR}/README)
 
+# build a CPack driven installer package
 include (CPack)

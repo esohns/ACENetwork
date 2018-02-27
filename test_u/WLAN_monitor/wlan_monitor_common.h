@@ -57,7 +57,7 @@ struct WLANMonitor_SignalHandlerConfiguration
    , monitor (NULL)
    , statisticReportingHandler (NULL)
    , statisticReportingTimerId (-1)
-  {};
+  {}
 
   Net_WLAN_IInetMonitor_t* monitor;
   Net_IStatisticHandler_t* statisticReportingHandler;
@@ -73,7 +73,7 @@ struct WLANMonitor_Configuration
    , signalHandlerConfiguration ()
    , timerConfiguration ()
    , WLANMonitorConfiguration ()
-  {};
+  {}
 
   ACE_HANDLE                                    handle;
   struct WLANMonitor_SignalHandlerConfiguration signalHandlerConfiguration;
@@ -109,7 +109,7 @@ struct WLANMonitor_GTK_CBData
    , eventSourceId (0)
    , eventStack ()
    , monitor (NULL)
-  {};
+  {}
 
   struct WLANMonitor_Configuration* configuration;
   guint                             eventSourceId; // progress bar

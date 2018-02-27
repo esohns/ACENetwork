@@ -22,12 +22,27 @@
 #include "ace/Synch.h"
 #include "net_configuration.h"
 
-#if defined (ACE_HAS_NETLINK)
 #include <cmath>
 
 #include "ace/OS.h"
 
 #include "common_math_defines.h"
+
+#if defined (NETLINK_SUPPORT)
+Net_Netlink_Addr::Net_Netlink_Addr (void)
+ : inherited ()
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Netlink_Addr::Net_Netlink_Addr"));
+
+}
+
+Net_Netlink_Addr::Net_Netlink_Addr (const sockaddr_nl* addres_in,
+                                    int length_in)
+ : inherited (addres_in, length_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Netlink_Addr::Net_Netlink_Addr"));
+
+}
 
 int
 Net_Netlink_Addr::addr_to_string (ACE_TCHAR buffer_out[],
@@ -67,4 +82,4 @@ Net_Netlink_Addr::addr_to_string (ACE_TCHAR buffer_out[],
 
   return (static_cast<size_t> (result) == (total_length - 1) ? 0 : -1);
 }
-#endif // ACE_HAS_NETLINK
+#endif // NETLINK_SUPPORT

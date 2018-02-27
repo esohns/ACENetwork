@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2010 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -27,6 +27,7 @@
 
 #include "stream_common.h"
 
+#include "net_common_tools.h"
 #include "net_configuration.h"
 #include "net_defines.h"
 #include "net_macros.h"
@@ -907,8 +908,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 
 //////////////////////////////////////////
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#if defined (NETLINK_SUPPORT)
 template <typename ConfigurationType,
           typename StateType,
           typename StatisticContainerType,
@@ -1555,5 +1555,4 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
                 result_in.handle (),
                 ACE_Event_Handler::ALL_EVENTS_MASK));
 }
-
-#endif
+#endif // NETLINK_SUPPORT

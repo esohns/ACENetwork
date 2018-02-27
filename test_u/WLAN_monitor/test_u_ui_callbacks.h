@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2010 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -31,7 +31,15 @@
 void load_ssids (REFGUID,
 #else
 void load_ssids (const std::string&,
+#if defined (WEXT_USE)
+                 ACE_HANDLE handle_in,
+#elif defined (NL80211_USE)
+                 struct nl_sock* socketHandle_in,
+                 int driverFamilyId_in,
+#elif defined (DBUS_USE)
+                 struct DBusConnection*,
 #endif
+#endif // ACE_WIN32 || ACE_WIN64
                  Net_WLAN_SSIDs_t&,
                  GtkListStore*);
 void load_wlan_interfaces (GtkListStore*);
