@@ -4,8 +4,8 @@
  option (DBUS_SUPPORT "enable DBus support" ON)
  option (DHCLIENT_SUPPORT "enable dhclient support" ON)
 endif (UNIX)
+include (${CMAKE_CURRENT_SOURCE_DIR}/SetMonitorImplementation.cmake)
 option (GTK3_SUPPORT "enable Gtk3 support" ON)
-include (${CMAKE_CURRENT_SOURCE_DIR}/etc/SetMonitorImplementation.cmake)
 
 if (UNIX)
  include (CheckLibraryExists)

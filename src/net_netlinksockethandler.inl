@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2010 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -325,8 +325,8 @@ Net_NetlinkSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle_i
 
 //void
 //Net_NetlinkSocketHandler_T::info (ACE_HANDLE& handle_out,
-//                            ACE_INET_Addr& localSAP_out,
-//                            ACE_INET_Addr& remoteSAP_out) const
+//                            Net_Netlink_Addr& localSAP_out,
+//                            Net_Netlink_Addr& remoteSAP_out) const
 //{
 //  NETWORK_TRACE (ACE_TEXT ("Net_NetlinkSocketHandler_T::info"));
 

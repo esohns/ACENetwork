@@ -20,6 +20,8 @@
 
 #include "ace/Log_Msg.h"
 
+#include "common_defines.h"
+
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -44,10 +46,10 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
 #endif
  : inherited (stream_in)
  , crunchMessages_ (IRC_DEFAULT_CRUNCH_MESSAGES) // "crunch" messages ?
- , debugScanner_ (NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE) // trace scanning ?
- , debugParser_ (NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
- , driver_ (NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
-            NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
+ , debugScanner_ (COMMON_PARSER_DEFAULT_LEX_TRACE) // trace scanning ?
+ , debugParser_ (COMMON_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
+ , driver_ (COMMON_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
+            COMMON_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Module_Parser_T::IRC_Module_Parser_T"));
 
@@ -90,8 +92,8 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
   // sanity check(s)
   if (inherited::isInitialized_)
   {
-    debugScanner_ = NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE;
-    debugParser_ = NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE;
+    debugScanner_ = COMMON_PARSER_DEFAULT_LEX_TRACE;
+    debugParser_ = COMMON_PARSER_DEFAULT_YACC_TRACE;
     crunchMessages_ = IRC_DEFAULT_CRUNCH_MESSAGES;
   } // end IF
 
@@ -177,7 +179,7 @@ IRC_Module_Parser_T<ACE_SYNCH_USE,
     } // end FOR
 
     // step3: append the "\0\0"-sequence, as required by flex
-    ACE_ASSERT (message_p->space () >= NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+    ACE_ASSERT (message_p->space () >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
     //ACE_ASSERT (IRC_FLEX_BUFFER_BOUNDARY_SIZE == 2);
     *(message_p->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
     *(message_p->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;

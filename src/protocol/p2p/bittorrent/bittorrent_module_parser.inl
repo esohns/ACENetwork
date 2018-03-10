@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -47,8 +47,8 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
                            UserDataType>::BitTorrent_Module_Parser_T (typename inherited::ISTREAM_T* stream_in)
 #endif
  : inherited (stream_in)
- , inherited2 (NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
-               NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
+ , inherited2 (COMMON_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
+               COMMON_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
  , headFragment_ (NULL)
  , crunch_ (true) // strip protocol data ?
 {
@@ -160,7 +160,7 @@ BitTorrent_Module_Parser_T<ACE_SYNCH_USE,
   passMessageDownstream_out = false;
 
   // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT (message_inout->space () >= NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  ACE_ASSERT (message_inout->space () >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
@@ -461,8 +461,8 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
               false,
               STREAM_HEADMODULECONCURRENCY_CONCURRENT,
               true)
- , inherited2 (NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
-               NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
+ , inherited2 (COMMON_PARSER_DEFAULT_LEX_TRACE,  // trace scanning ?
+               COMMON_PARSER_DEFAULT_YACC_TRACE) // trace parsing ?
  , headFragment_ (NULL)
  , crunch_ (true) // strip protocol data ?
 {
@@ -612,7 +612,7 @@ BitTorrent_Module_ParserH_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::mod_);
 
   // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT (message_inout->space () >= NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  ACE_ASSERT (message_inout->space () >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was

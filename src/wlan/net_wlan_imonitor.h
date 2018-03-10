@@ -130,6 +130,11 @@ class Net_WLAN_IMonitorBase
 #endif // WEXT_SUPPORT
  , public Common_IGet_2_T<unsigned int>
 #endif // ACE_WIN32 || ACE_WIN64
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+ , public Common_IGet1R_T<std::string> // cache access
+ , public Common_ISet2R_T<std::string> // cache access
+#endif // ACE_WIN32 || ACE_WIN64
 {
  public:
   // *TODO*: support monitoring multiple interfaces at the same time
@@ -179,11 +184,6 @@ class Net_WLAN_IMonitor_T
  , virtual public Common_ITaskControl_T<ACE_MT_SYNCH,
                                         Common_ILock_T<ACE_MT_SYNCH> >
  , public Common_IGetR_2_T<ConfigurationType>
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
- , public Common_IGet1R_T<std::string> // cache access
- , public Common_ISet2R_T<std::string> // cache access
-#endif // ACE_WIN32 || ACE_WIN64
  , public Common_IInitialize_T<ConfigurationType>
  , public Common_ISubscribe_T<Net_WLAN_IMonitorCB>
 {

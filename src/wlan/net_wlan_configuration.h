@@ -68,6 +68,7 @@ struct  Net_WLAN_MonitorConfiguration
 #if defined (_DEBUG)
    , debug (false)
 #endif // _DEBUG
+   , defaultBufferSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , flushCacheBeforeScans (NET_WLAN_MONITOR_NL80211_DEFAULT_FLUSHCACHEBEFORESCANS)
    , lowPriorityScans (NET_WLAN_MONITOR_NL80211_DEFAULT_LOWPRIORITYSCANS)
    , randomizeMACAddressForScans (NET_WLAN_MONITOR_NL80211_DEFAULT_RANDOMIZEMACADDRESSFORSCANS)
@@ -77,50 +78,51 @@ struct  Net_WLAN_MonitorConfiguration
    , notificationCBData (NULL)
 #endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
+   , dispatch (NET_EVENT_DEFAULT_DISPATCH)
    , SSID ()
    , subscriber (NULL)
-   , useReactor (NET_EVENT_USE_REACTOR)
    , userData (NULL)
   {};
 
-  bool                       autoAssociate;
+  bool                          autoAssociate;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  BOOL                       enableAutoConf;
+  BOOL                          enableAutoConf;
   // *NOTE*: "...Background scan can only be disabled when the interface is in
   //         the connected state. Background scan is disabled if at least one
   //         client disables it. If the interface gets disconnected, background
   //         scan will be enabled automatically. ..."
-  BOOL                       enableBackgroundScans;
+  BOOL                          enableBackgroundScans;
   // *NOTE*: "...The media streaming mode can only be set when the interface is
   //         in the connected state. The media streaming mode is enabled if at
   //         least one client enables it. If the interface gets disconnected,
   //         the media streaming mode is disabled automatically..."
-  BOOL                       enableMediaStreamingMode;
-  struct _GUID               interfaceIdentifier;
-  WLAN_NOTIFICATION_CALLBACK notificationCB;
-  PVOID                      notificationCBData;
-  Common_ITimer_t*           timerInterface;
+  BOOL                          enableMediaStreamingMode;
+  struct _GUID                  interfaceIdentifier;
+  WLAN_NOTIFICATION_CALLBACK    notificationCB;
+  PVOID                         notificationCBData;
+  Common_ITimer_t*              timerInterface;
 #else
-  bool                       enableBackgroundScans;
-  std::string                interfaceIdentifier;
+  bool                          enableBackgroundScans;
+  std::string                   interfaceIdentifier;
 #if defined (NL80211_SUPPORT)
 #if defined (_DEBUG)
-  bool                       debug;
+  bool                          debug;
 #endif // _DEBUG
-  bool                       flushCacheBeforeScans;
-  bool                       lowPriorityScans;
-  bool                       randomizeMACAddressForScans;
+  unsigned int                  defaultBufferSize;
+  bool                          flushCacheBeforeScans;
+  bool                          lowPriorityScans;
+  bool                          randomizeMACAddressForScans;
 #endif // NL80211_SUPPORT
 #if defined (DBUS_SUPPORT)
-  DBusHandleMessageFunction  notificationCB;
-  void*                      notificationCBData;
+  DBusHandleMessageFunction     notificationCB;
+  void*                         notificationCBData;
 #endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
-  std::string                SSID;
-  Net_WLAN_IMonitorCB*       subscriber;
-  bool                       useReactor;
+  enum Common_EventDispatchType dispatch;
+  std::string                   SSID;
+  Net_WLAN_IMonitorCB*          subscriber;
 
-  struct Net_UserData*       userData;
+  struct Net_UserData*          userData;
 };
 
 //////////////////////////////////////////

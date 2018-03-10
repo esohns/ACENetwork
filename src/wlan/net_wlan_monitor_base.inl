@@ -23,7 +23,17 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-#include "net/ethernet.h"
+#include <net/ethernet.h>
+
+#if defined (NL80211_SUPPORT)
+#include <linux/netlink.h>
+#include <linux/nl80211.h>
+
+#include "netlink/handlers.h"
+#include "netlink/netlink.h"
+#include "netlink/genl/ctrl.h"
+#include "netlink/genl/genl.h"
+#endif // NL80211_SUPPORT
 
 #if defined (DHCLIENT_SUPPORT)
 extern "C"
@@ -89,6 +99,9 @@ Net_WLAN_Monitor_Base_T<AddressType,
  , bufferSize_ (0)
  , handle_ (ACE_INVALID_HANDLE)
 // , isRegistered_ (false)
+#elif defined (NL80211_SUPPORT)
+ , familyId_ (0)
+ , handle_ (NULL)
 #endif // WEXT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
  , configuration_ (NULL)
@@ -180,8 +193,80 @@ Net_WLAN_Monitor_Base_T<AddressType,
 
   if (unlikely (buffer_))
     ACE_OS::free (buffer_);
+#elif defined (NL80211_SUPPORT)
+  if (unlikely (handle_))
+    nl_socket_free (handle_);
+#elif defined (DBUS_SUPPORT)
 #endif // WEXT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
+}
+
+template <typename AddressType,
+          typename ConfigurationType
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+          >
+#else
+          ,ACE_SYNCH_DECL,
+          typename TimePolicyType>
+#endif
+const std::string&
+Net_WLAN_Monitor_Base_T<AddressType,
+                        ConfigurationType
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                        >::~Net_WLAN_Monitor_Base_T ()
+#else
+                        ,ACE_SYNCH_USE,
+                        TimePolicyType>::get1R (const std::string& SSID_in) const
+#endif
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::get1R"));
+
+  std::string return_value;
+
+  Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator;
+  { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_, return_value);
+    iterator = SSIDCache_.find (SSID_in);
+    if (iterator != SSIDCache_.end ())
+      return_value = (*iterator).second.first;
+  } // end lock scope
+
+  return return_value;
+}
+
+template <typename AddressType,
+          typename ConfigurationType
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+          >
+#else
+          ,ACE_SYNCH_DECL,
+          typename TimePolicyType>
+#endif
+void
+Net_WLAN_Monitor_Base_T<AddressType,
+                        ConfigurationType
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                        >::~Net_WLAN_Monitor_Base_T ()
+#else
+                        ,ACE_SYNCH_USE,
+                        TimePolicyType>::set2R (const std::string& SSID_in,
+                                                const std::string& interfaceIdentifier_in)
+#endif
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::set2R"));
+
+  struct Net_WLAN_AssociationConfiguration association_configuration_s;
+  Net_WLAN_SSIDToInterfaceIdentifierIterator_t iterator;
+  { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
+    iterator = SSIDCache_.find (SSID_in);
+    if (unlikely (iterator != SSIDCache_.end ()))
+    {
+      (*iterator).second.first = interfaceIdentifier_in;
+      return;
+    } // end IF
+    SSIDCache_.insert (std::make_pair (SSID_in,
+                                       std::make_pair (interfaceIdentifier_in,
+                                                       association_configuration_s)));
+  } // end lock scope
 }
 
 template <typename AddressType,
@@ -225,6 +310,15 @@ Net_WLAN_Monitor_Base_T<AddressType,
     } // end IF
     bufferSize_ = 0;
     ACE_ASSERT (handle_ == ACE_INVALID_HANDLE);
+#elif defined (NL80211_SUPPORT)
+    ACE_ASSERT (familyId_ == 0);
+
+    if (handle_)
+    {
+      nl_socket_free (handle_);
+      handle_ = NULL;
+    } // end  IF
+#elif defined (DBUS_SUPPORT)
 #endif // WEXT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -260,7 +354,51 @@ Net_WLAN_Monitor_Base_T<AddressType,
   //              ACE_TEXT ("timer manager interface handle not specified, using default implementation\n")));
   //  timerInterface_ = COMMON_TIMERMANAGER_SINGLETON::instance ();
   //} // end ELSE
-#endif
+#else
+#if defined (WEXT_SUPPORT)
+#elif defined (NL80211_SUPPORT)
+  ACE_ASSERT (!handle_);
+
+  handle_ = nl_socket_alloc ();
+  if (unlikely (!handle_))
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to nl_socket_alloc(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+//  nl_socket_set_nonblocking (handle_);
+// nl_socket_disable_msg_peek (handle_);
+//  nl_socket_set_buffer_size (handle_, int rx, int tx);
+//  nl_socket_disable_auto_ack (handle_);
+
+  int result = nl_connect (handle_, NETLINK_GENERIC);
+  if (unlikely (result < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to nl_connect(0x%@): \"%s\", aborting\n"),
+                handle_,
+                ACE_TEXT (nl_geterror (result))));
+    return false;
+  } // end IF
+
+  familyId_ =
+      genl_ctrl_resolve (handle_,
+                         ACE_TEXT_ALWAYS_CHAR (NL80211_GENL_NAME));
+  if (unlikely (familyId_ < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to genl_ctrl_resolve(%@,%s): \"%s\", aborting\n"),
+                handle_,
+                ACE_TEXT (NL80211_GENL_NAME),
+                ACE_TEXT (nl_geterror (familyId_))));
+    return false;
+  } // end IF
+
+  // *TODO*: disable sequence checks selectively for multicast messages
+  nl_socket_disable_seq_check (handle_);
+#elif defined (DBUS_SUPPORT)
+#endif // WEXT_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
   configuration_ = &const_cast<ConfigurationType&> (configuration_in);
 
   // sanity check(s)
@@ -277,7 +415,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
   else
   {
     ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("WLAN API notification callback specified; disabled default event subscription, subscribing 'this'\n")));
+                ACE_TEXT ("WLAN API notification callback specified; disabled default event subscription, subscribing 'this' instead\n")));
     subscribe_this = true;
   } // end ELSE
 #endif // ACE_WIN32 || ACE_WIN64
@@ -309,7 +447,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 void
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -318,7 +456,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #else
                         ,ACE_SYNCH_USE,
                         TimePolicyType>::subscribe (Net_WLAN_IMonitorCB* interfaceHandle_in)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::subscribe"));
 
@@ -343,7 +481,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 void
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -352,7 +490,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #else
                         ,ACE_SYNCH_USE,
                         TimePolicyType>::unsubscribe (Net_WLAN_IMonitorCB* interfaceHandle_in)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::unsubscribe"));
 
@@ -398,7 +536,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 
   return 0;
 }
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 template <typename AddressType,
           typename ConfigurationType
@@ -407,7 +545,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 bool
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -417,8 +555,8 @@ Net_WLAN_Monitor_Base_T<AddressType,
                         ,ACE_SYNCH_USE,
                         TimePolicyType>::associate (const std::string& interfaceIdentifier_in,
                                                     const struct ether_addr& accessPointLinkLayerAddress_in,
-#endif
-                                      const std::string& SSID_in)
+#endif // ACE_WIN32 || ACE_WIN64
+                                                    const std::string& SSID_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::associate"));
 
@@ -449,10 +587,10 @@ Net_WLAN_Monitor_Base_T<AddressType,
 
     if (unlikely (!ACE_OS::strcmp (SSID_in.c_str (),
                                    current_ssid_s.c_str ())))
-      goto configure;
+      return true; // nothing to do
   } // end IF
-  else // --> reset configuration
-    goto configure;
+  else // --> (disassociate and-) reset configuration
+    goto continue_;
 
   // check cache ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -494,15 +632,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
   ACE_ASSERT (!interface_identifier.empty ());
 #endif // ACE_WIN32 || ACE_WIN64
 
-configure:
-  if (likely (isActive_))
-  {
-    restart_b = true;
-    stop (true,  // wait ?
-          true); // N/A
-  } // end IF
-  ACE_ASSERT (!isActive_);
-
+continue_:
   if (unlikely (!current_ssid_s.empty () &&
                 ACE_OS::strcmp (SSID_in.c_str (),
                                 current_ssid_s.c_str ())))
@@ -527,9 +657,17 @@ configure:
                   ACE_TEXT (interfaceIdentifier_in.c_str ()),
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&const_cast<struct ether_addr&> (accessPointLinkLayerAddress_in).ether_addr_octet)).c_str ()),
                   ACE_TEXT (SSID_in.c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     }
   } // end IF
+
+  if (likely (isActive_))
+  {
+    restart_b = true;
+    stop (true,  // wait ?
+          true); // N/A
+  } // end IF
+  ACE_ASSERT (!isActive_);
 
   // reconfigure ?
   if (likely (configuration_))
@@ -553,7 +691,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 void
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -569,10 +707,20 @@ Net_WLAN_Monitor_Base_T<AddressType,
   Net_InterfaceIdentifiers_t interface_identifiers_a;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   if (InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
+#if defined (WLANAPI_USE)
     interface_identifiers_a = Net_WLAN_Tools::getInterfaces (clientHandle_);
+#endif // WLANAPI_USE
 #else
   if (interfaceIdentifier_in.empty ())
-    interface_identifiers_a = Net_WLAN_Tools::getInterfaces ();
+    interface_identifiers_a = Net_WLAN_Tools::getInterfaces (
+#if defined (WEXT_USE)
+#elif defined (NL80211_USE)
+                                                             handle_,
+                                                             familyId_,
+#elif defined (DBUS_USE)
+#endif // DBUS_USE
+                                                             AF_UNSPEC,
+                                                             0);
 #endif // ACE_WIN32 || ACE_WIN64
   else
     interface_identifiers_a.push_back (interfaceIdentifier_in);
@@ -842,6 +990,7 @@ reset_state:
 #endif // ACE_WIN32 || ACE_WIN64
 
       struct ether_addr ap_mac_address_s;
+      ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
       try {
         do_scan (configuration_->interfaceIdentifier,
                  ap_mac_address_s,
@@ -1089,6 +1238,7 @@ associate:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
       struct ether_addr ap_mac_address_s;
+      ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
 #endif // ACE_WIN32 || ACE_WIN64
       try {
         do_associate (configuration_->interfaceIdentifier,

@@ -58,6 +58,12 @@
 void WINAPI
 network_wlan_default_notification_cb (PWLAN_NOTIFICATION_DATA,
                                       PVOID);
+#else
+#if defined (WEXT_SUPPORT)
+#elif defined (NL80211_SUPPORT)
+struct nl_sock;
+#elif defined (DBUS_SUPPORT)
+#endif // WEXT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 template <typename AddressType,
@@ -96,8 +102,8 @@ class Net_WLAN_Monitor_Base_T
   inline virtual const ConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); return *configuration_; }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  inline virtual const std::string& get1R (const std::string&) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (std::string ()); ACE_NOTREACHED (return std::string ();) }
-  inline virtual void set2R (const std::string&, const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  virtual const std::string& get1R (const std::string&) const;
+  virtual void set2R (const std::string&, const std::string&);
 #endif // ACE_WIN32 || ACE_WIN64
   virtual bool initialize (const ConfigurationType&); // configuration handle
   virtual void subscribe (Net_WLAN_IMonitorCB*); // new subscriber
@@ -155,6 +161,10 @@ class Net_WLAN_Monitor_Base_T
   void*                                 buffer_; // scan results
   size_t                                bufferSize_;
   ACE_HANDLE                            handle_;
+#elif defined (NL80211_SUPPORT)
+  int                                   familyId_;
+  struct nl_sock*                       handle_;
+#elif defined (DBUS_SUPPORT)
 #endif // WEXT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
   ConfigurationType*                    configuration_;

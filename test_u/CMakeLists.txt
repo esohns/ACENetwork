@@ -1,4 +1,4 @@
-option (BUILD_TEST_U "build test_u" OFF)
+﻿option (BUILD_TEST_U "build test_u" OFF)
 option (GTK_SUPPORT "enable GTK support" ON)
 # option (GTK3_SUPPORT "enable Gtk3 support" ON)
  # *NOTE*: implies DHCLIENT_SUPPORT off
@@ -8,26 +8,7 @@ CMAKE_DEPENDENT_OPTION (GTK3_SUPPORT "enable GTK 3 support" ON
 CMAKE_DEPENDENT_OPTION (GTK2_SUPPORT "enable GTK 2 support" ON
                         "GTK_SUPPORT; NOT GTK3_SUPPORT" OFF)
 
-set (${PROJECT_NAME}_Test_U_SRCS
-     test_u_common.h
-     test_u_connection_common.h
-     test_u_defines.h
-     test_u_socket_common.h
-		 test_u_stream_common.h)
-#install (FILES
-#         ${PROJECT_NAME}_Test_U_SRCS
-#         DESTINATION include)
-
-if (GTK_SUPPORT)
- set (${PROJECT_NAME}_Test_U_GTK_SRCS
-      test_u_gtk_common.h
-      test_u_gtk_eventhandler.cpp
-      test_u_gtk_eventhandler.h
-      test_u_gtk_eventhandler.inl)
-endif ()
-#install (FILES
-#         ${PROJECT_NAME}_Test_U_GTK_SRCS
-#         DESTINATION include)
+add_library (${PROJECT_NAME}_Test_U STATIC "")
 
 if (UNIX)
  if (GTK_SUPPORT)
@@ -37,17 +18,24 @@ if (UNIX)
    pkg_check_modules (PKG_GTK REQUIRED gtk+-3.0)
   endif ()
  endif ()
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE)
+ target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                             $<BUILD_INTERFACE:${PKG_GTK_INCLUDE_DIRS}>)
 
- include_directories (${PKG_GTK_INCLUDE_DIRS})
+ target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE>)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/timer)
+ target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src>)
+ target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/timer>)
  if (GTK_SUPPORT)
-  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/ui)
-  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/ui/gtk)
+  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/ui>)
+  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/ui/gtk>)
  endif ()
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src)
+ target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src>)
 elseif (WIN32)
 # gtk
  if (GTK_SUPPORT)
@@ -81,7 +69,41 @@ elseif (WIN32)
  endif ()
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src)
 endif ()
-include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../src)
+target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../src>)
+target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..>)
+
+set (source_files
+     test_u_common.h
+     test_u_connection_common.h
+     test_u_defines.h
+     test_u_socket_common.h
+     test_u_stream_common.h)
+if (GTK_SUPPORT)
+ set (source_files
+      ${source_files}
+      test_u_gtk_common.h
+      test_u_gtk_eventhandler.cpp
+      test_u_gtk_eventhandler.h
+      test_u_gtk_eventhandler.inl)
+endif ()
+#install (FILES
+#         ${PROJECT_NAME}_Test_U_GTK_SRCS
+#         DESTINATION include)
+
+unset (absolute_source_files)
+foreach (source_file ${source_files})
+ get_filename_component (abs_source_file ${source_file} ABSOLUTE)
+ list (APPEND absolute_source_files
+       PRIVATE ${abs_source_file}
+       )
+ #       $<INSTALL_INTERFACE:${INCLUDE_DIR}/${source_file}>)
+endforeach ()
+target_sources (${PROJECT_NAME}_Test_U
+                PRIVATE stdafx.cpp
+                PRIVATE stdafx.h
+                ${absolute_source_files})
 
 if (WIN32)
  add_definitions (-DWIN32)
@@ -91,15 +113,6 @@ if (WIN32)
 # else ()
 #  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MD")  # multithreaded dll
 # endif ()
-endif ()
-
-if (GTK_SUPPORT)
- add_library (${PROJECT_NAME}_Test_U STATIC
-              ${ACENetwork_Test_U_SRCS}
-              ${ACENetwork_Test_U_GTK_SRCS})
-else ()
- add_library (${PROJECT_NAME}_Test_U STATIC
-              ${ACENetwork_Test_U_SRCS})
 endif ()
 
 # ----------------------------------------

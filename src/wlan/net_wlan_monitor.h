@@ -34,7 +34,7 @@
 #include <map>
 
 #if defined (NL80211_SUPPORT)
-#include "libnl3/netlink/handlers.h"
+#include "netlink/handlers.h"
 
 //#include "ace/Asynch_IO.h"
 #endif // NL80211_SUPPORT
@@ -307,6 +307,63 @@ class Net_WLAN_Monitor_T<AddressType,
 //////////////////////////////////////////
 
 #if defined (NL80211_SUPPORT)
+// *NOTE*: ripped from nelink-private/types.h
+#define NL_NO_AUTO_ACK		(1<<4)
+
+struct nl_cb
+{
+  nl_recvmsg_msg_cb_t	cb_set[NL_CB_TYPE_MAX+1];
+  void *			cb_args[NL_CB_TYPE_MAX+1];
+
+  nl_recvmsg_err_cb_t	cb_err;
+  void *			cb_err_arg;
+
+  /** May be used to replace nl_recvmsgs with your own implementation
+   * in all internal calls to nl_recvmsgs. */
+  int			(*cb_recvmsgs_ow)(struct nl_sock *,
+              struct nl_cb *);
+
+  /** Overwrite internal calls to nl_recv, must return the number of
+   * octets read and allocate a buffer for the received data. */
+  int			(*cb_recv_ow)(struct nl_sock *,
+                struct sockaddr_nl *,
+                unsigned char **,
+                struct ucred **);
+
+  /** Overwrites internal calls to nl_send, must send the netlink
+   * message. */
+  int			(*cb_send_ow)(struct nl_sock *,
+                struct nl_msg *);
+
+  int			cb_refcnt;
+  /** indicates the callback that is currently active */
+  enum nl_cb_type		cb_active;
+};
+
+struct nl_sock
+{
+  struct sockaddr_nl	s_local;
+  struct sockaddr_nl	s_peer;
+  int			s_fd;
+  int			s_proto;
+  unsigned int		s_seq_next;
+  unsigned int		s_seq_expect;
+  int			s_flags;
+  struct nl_cb *		s_cb;
+  size_t			s_bufsize;
+};
+
+// *NOTE*: ripped from nelink-private/netlink.h
+static inline int nl_cb_call (struct nl_cb* cb, enum nl_cb_type type, struct nl_msg* msg)
+{
+  int ret;
+
+  cb->cb_active = type;
+  ret = cb->cb_set[type](msg, cb->cb_args[type]);
+  cb->cb_active = __NL_CB_TYPE_MAX;
+  return ret;
+}
+
 template <typename AddressType,
           typename ConfigurationType,
           ////////////////////////////////
@@ -354,9 +411,9 @@ class Net_WLAN_Monitor_T<AddressType,
 
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
-  inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (handle_); return handle_; }
-  inline virtual const int get () const { ACE_ASSERT (familyId_ > 0); return familyId_; }
-  inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID ((inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR ("")), NULL, familyId_); }
+  inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (inherited::handle_); return inherited::handle_; }
+  inline virtual const int get () const { ACE_ASSERT (inherited::familyId_ > 0); return inherited::familyId_; }
+  inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID ((inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR ("")), NULL, inherited::familyId_); }
 
  protected:
   Net_WLAN_Monitor_T ();
@@ -369,7 +426,7 @@ class Net_WLAN_Monitor_T<AddressType,
                         const struct ether_addr&, // AP BSSID (i.e. AP MAC address) {0: all}
                         const std::string&);      // (E)SSID {"": all}
 
-  UserDataType*          userData_;
+  UserDataType*                       userData_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T (const Net_WLAN_Monitor_T&))
@@ -380,21 +437,33 @@ class Net_WLAN_Monitor_T<AddressType,
 
   ////////////////////////////////////////
 
-//  // override some ACE_Event_Handler methods
-//  virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
+  // override some ACE_Event_Handler/ACE_Handler methods
+  virtual int handle_input (ACE_HANDLE = ACE_INVALID_HANDLE);
+  virtual void handle_read_stream (const ACE_Asynch_Read_Stream::Result&);
 
   // override some ACE_Task_Base methods
   virtual int svc (void);
 
-//  bool initiate_read_stream (unsigned int); // buffer size
+  ACE_Message_Block* allocateMessage (unsigned int); // buffer size
+  // *NOTE*: fire-and-forget API (second argument)
+  void processMessage (const struct sockaddr_nl&, // source address
+                       ACE_Message_Block*&);      // i/o: message buffer
+  bool initiate_read_stream (unsigned int); // buffer size
 
-  struct nl_cb*          callbacks_;
-  int                    controlId_;
-  int                    error_;
-  int                    familyId_;
-  struct nl_sock*        handle_;
-//  ACE_Asynch_Read_Stream inputStream_;
-//  bool                   isRegistered_;
+  bool hasFeature (enum nl80211_feature_flags,
+                   enum nl80211_ext_feature_index) const;
+
+  ACE_Message_Block*                  buffer_;
+  struct nl_cb*                       callbacks_;
+  int                                 controlId_;
+  int                                 error_;
+  Net_WLAN_nl80211_ExtendedFeatures_t extendedFeatures_;
+  ACE_UINT32                          features_;
+  bool                                headerReceived_;
+  ACE_Asynch_Read_Stream              inputStream_;
+  bool                                isRegistered_;
+  bool                                isSubscribedToMulticastGroups_;
+  struct nl_msg*                      message_;
 };
 #endif // NL80211_SUPPORT
 

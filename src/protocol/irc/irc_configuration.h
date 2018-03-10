@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -61,8 +61,8 @@ struct IRC_AllocatorConfiguration
     defaultBufferSize = IRC_MAXIMUM_FRAME_SIZE;
     // *NOTE*: this facilitates (message block) data buffers to be scanned with
     //         'flex's yy_scan_buffer() method
-    paddingBytes = NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
-  };
+    paddingBytes = COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
+  }
 };
 
 //struct IRC_ConnectorConfiguration
@@ -86,7 +86,7 @@ struct IRC_ProtocolConfiguration
    : automaticPong (IRC_STREAM_DEFAULT_AUTOPONG)
    , loginOptions ()
    , printPingDot (IRC_CLIENT_DEFAULT_PRINT_PINGDOT)
-  {};
+  {}
 
   bool                    automaticPong; // automatically answer "ping" messages
   struct IRC_LoginOptions loginOptions;
@@ -113,7 +113,7 @@ struct IRC_ModuleHandlerConfiguration
     crunchMessages = IRC_DEFAULT_CRUNCH_MESSAGES;
     inbound = true;
     passive = false;
-  };
+  }
 
   //IRC_ConnectionConfigurations_t*   connectionConfigurations;
   struct IRC_ProtocolConfiguration* protocolConfiguration;
@@ -132,7 +132,7 @@ struct IRC_StreamConfiguration
    //, moduleConfiguration_2 ()
    //, moduleHandlerConfigurations ()
    , protocolConfiguration (NULL)
-  {};
+  {}
 
   //struct Stream_ModuleConfiguration moduleConfiguration_2;       // stream module configuration
   //IRC_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration

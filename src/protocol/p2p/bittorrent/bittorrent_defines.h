@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -39,7 +39,7 @@
 //             prepared for usage by flex: buffers need two trailing '\0's
 //             BEYOND their datas' tail byte (i.e. at positions length() + 1 and
 //             length() + 2)
-#define BITTORRENT_DEFAULT_USE_YY_SCAN_BUFFER             true
+//#define BITTORRENT_DEFAULT_USE_YY_SCAN_BUFFER             true
 
 #define BITTORRENT_DEFAULT_STATISTIC_REPORTING_INTERVAL   0 // seconds: 0 --> OFF
 
@@ -87,11 +87,12 @@
 
 
 // session
+#define BITTORRENT_SESSION_HANDLER_THREAD_NAME            "bittorrent_session"
+#define BITTORRENT_SESSION_HANDLER_THREAD_GROUP_ID        NET_CONNECTION_HANDLER_THREAD_GROUP_ID + 1 // *TODO*
 #define BITTORRENT_SESSION_LOG_FILENAME_PREFIX            "bittorrent_session"
-#define BITTORRENT_SESSION_THREAD_NAME                    "bittorrent_session"
 #define BITTORRENT_DEFAULT_SESSION_LOG                    false // log to file ? : stdout
 
 // client
-#define BITTORRENT_DEFAULT_HANDLER_MODULE_NAME            "Handler"
+#define BITTORRENT_DEFAULT_HANDLER_MODULE_NAME            "BitTorrentHandler"
 
 #endif

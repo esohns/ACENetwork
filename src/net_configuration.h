@@ -83,7 +83,7 @@ struct Net_AllocatorConfiguration
     defaultBufferSize = NET_STREAM_MESSAGE_DATA_BUFFER_SIZE;
     // *NOTE*: this facilitates (message block) data buffers to be scanned with
     //         'flex's yy_scan_buffer() method
-    paddingBytes = NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
+    paddingBytes = COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
   }
 };
 
@@ -259,16 +259,17 @@ struct Net_ConnectionConfiguration
 {
   Net_ConnectionConfiguration ()
    : connectionManager (NULL)
+   , dispatch (NET_EVENT_DEFAULT_DISPATCH)
    , generateUniqueIOModuleNames (false)
    , messageAllocator (NULL)
    , PDUSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , socketHandlerConfiguration ()
    , timerManager (NULL)
-   , useReactor (NET_EVENT_USE_REACTOR)
    , userData (NULL)
   {}
 
   Net_IInetConnectionManager_t*         connectionManager;
+  enum Common_EventDispatchType         dispatch;
   bool                                  generateUniqueIOModuleNames; // stream
   Stream_IAllocator*                    messageAllocator;
   // *NOTE*: applies to the corresponding protocol, if it has fixed size
@@ -277,7 +278,6 @@ struct Net_ConnectionConfiguration
   unsigned int                          PDUSize; // package data unit size
   struct Net_SocketHandlerConfiguration socketHandlerConfiguration;
   Common_ITimer_t*                      timerManager;
-  bool                                  useReactor;
 
   struct Net_UserData*                  userData;
 };
@@ -311,12 +311,12 @@ class Net_StreamConnectionConfiguration_T
 struct Net_SessionConfiguration
 {
   Net_SessionConfiguration ()
-   : parserConfiguration (NULL)
-   , useReactor (NET_EVENT_USE_REACTOR)
+   : dispatch (NET_EVENT_DEFAULT_DISPATCH)
+   , parserConfiguration (NULL)
   {}
 
+  enum Common_EventDispatchType      dispatch;
   struct Common_ParserConfiguration* parserConfiguration;
-  bool                               useReactor;
 };
 
 struct Net_ListenerConfiguration

@@ -24,6 +24,8 @@
 
 #include <cmath>
 
+#include "netlink/addr.h"
+
 #include "ace/OS.h"
 
 #include "common_math_defines.h"
@@ -56,30 +58,43 @@ Net_Netlink_Addr::addr_to_string (ACE_TCHAR buffer_out[],
   // initialize return value(s)
   ACE_OS::memset (buffer_out, 0, size_in);
 
-  // sanity check(s)
-  int pid = inherited::get_pid ();
-  int gid = inherited::get_gid ();
-  size_t total_length =
-      static_cast<size_t> (COMMON_MATH_NUMDIGITS_INT (pid)) +
-      1 + // sizeof (':')
-      static_cast<size_t> (COMMON_MATH_NUMDIGITS_INT (gid)) +
-      1; // sizeof ('\0'), terminating NUL
-  if (size_in < total_length)
+  int address_size_i = inherited::get_addr_size ();
+
+  struct nl_addr* nl_addr_p =
+      nl_addr_alloc (static_cast<size_t> (address_size_i));
+  if (unlikely (!nl_addr_p))
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to nl_addr_alloc(%d): \"%m\", aborting\n"),
+                address_size_i));
+    return -1;
+  } // end IF
+  int result =
+      nl_addr_set_binary_addr (nl_addr_p,
+                               inherited::get_addr (),
+                               static_cast<size_t> (address_size_i));
+  if (unlikely (result < 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("buffer too small (was: %u, need: %u), aborting\n"),
-                size_in, total_length));
+                ACE_TEXT ("failed to nl_addr_set_binary_addr(): \"%s\", aborting\n"),
+                ACE_TEXT (nl_geterror (result))));
+    nl_addr_put (nl_addr_p);
     return -1;
   } // end IF
 
-  int result = ACE_OS::sprintf (buffer_out,
-                                ACE_TEXT ("%u:%u"),
-                                static_cast<unsigned int> (pid),
-                                static_cast<unsigned int> (gid));
-  if (result < 0)
+  if (unlikely (!nl_addr2str (nl_addr_p,
+                              buffer_out,
+                              size_in)))
+  {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::sprintf(): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to nl_addr2str(): \"%s\", aborting\n"),
+                ACE_TEXT (nl_geterror (result))));
+    nl_addr_put (nl_addr_p);
+    return -1;
+  } // end IF
 
-  return (static_cast<size_t> (result) == (total_length - 1) ? 0 : -1);
+  nl_addr_put (nl_addr_p);
+
+  return 0;
 }
 #endif // NETLINK_SUPPORT

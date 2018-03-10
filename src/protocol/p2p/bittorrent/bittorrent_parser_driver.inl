@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -156,7 +156,7 @@ BitTorrent_ParserDriver_T<MessageType,
   if (inherited::useYYScanBuffer_)
     result_p =
       BitTorrent_Scanner__scan_buffer (buffer_in,
-                                       size_in + NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
+                                       size_in + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
                                        state_in);
   else
     result_p = BitTorrent_Scanner__scan_bytes (buffer_in,

@@ -61,6 +61,9 @@ network_wlan_nl80211_error_cb (struct sockaddr_nl*,
 
 // protocol handling
 int
+network_wlan_nl80211_interface_cb (struct nl_msg*,
+                                   void*);
+int
 network_wlan_nl80211_bssid_cb (struct nl_msg*,
                                void*);
 int
@@ -80,6 +83,7 @@ class Net_WLAN_Tools
 {
  public:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_SUPPORT)
   static bool initialize (HANDLE&); // return value: WLAN API client handle
   static void finalize (HANDLE); // WLAN API client handle
 
@@ -118,22 +122,23 @@ class Net_WLAN_Tools
   static void scan (HANDLE,              // WLAN API client handle
                     REFGUID,             // interface identifier
                     const std::string&); // (E)SSID ("": scan all)
+#endif // WLANAPI_SUPPORT
 #else
+  static bool hasSSID (const std::string&,  // interface identifier
+                       const std::string&); // (E)SSID
+
+#if defined (WEXT_SUPPORT)
   static Net_InterfaceIdentifiers_t getInterfaces (int = AF_UNSPEC, // address family {default: any; use AF_MAX for any IP}
                                                    int = 0);        // flag(s) (e.g. IFF_UP; may be ORed)
 
-  static bool hasSSID (const std::string&,  // interface identifier
-                       const std::string&); // (E)SSID
-  // *NOTE*: the WEXT_SUPPORT implementation merely tests SIOCGIWNAME ioctl
-  static bool isInterface (const std::string&); // interface identifier
-
-#if defined (WEXT_SUPPORT)
   static struct ether_addr associatedBSSID (const std::string&, // interface identifier
                                             ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
   static std::string associatedSSID (const std::string&, // interface identifier
                                      ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
   static Net_WLAN_SSIDs_t getSSIDs (const std::string&, // interface identifier (empty: all)
                                     ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
+  // *NOTE*: the WEXT_SUPPORT implementation merely tests SIOCGIWNAME ioctl
+  static bool isInterface (const std::string&); // interface identifier
 
   static bool associate (const std::string&,       // interface identifier
                          const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
@@ -152,6 +157,11 @@ class Net_WLAN_Tools
   // *IMPORTANT NOTE*: passing a valid socket handle introduces race conditions,
   //                   as the callback handlers cannot be exchanged at runtime
 
+  static Net_InterfaceIdentifiers_t getInterfaces (struct nl_sock*, // nl80211 (socket) handle (if any)
+                                                   int,             // "nl80211" driver family identifier
+                                                   int = AF_UNSPEC, // address family {default: any; pass AF_MAX for any IP}
+                                                   int = 0);        // flag(s) (e.g. IFF_UP; may be ORed)
+
   static struct ether_addr associatedBSSID (const std::string&, // interface identifier
                                             struct nl_sock*,    // nl80211 (socket) handle (if any)
                                             int);               // "nl80211" driver family identifier
@@ -162,11 +172,14 @@ class Net_WLAN_Tools
                                     struct nl_sock*,    // nl80211 (socket) handle (if any)
                                     int);               // "nl80211" driver family identifier
 
-  static bool hasFeature (const std::string&,             // interface identifier
-                          enum nl80211_feature_flags,
-                          enum nl80211_ext_feature_index,
-                          struct nl_sock*,                // nl80211 (socket) handle (if any)
-                          int);                           // "nl80211" driver family identifier
+  static bool getFeatures (const std::string&,                    // interface identifier
+                           struct nl_sock*,                       // nl80211 (socket) handle (if any)
+                           int,                                   // "nl80211" driver family identifier
+                           ACE_UINT32&,                           // return value: feature set
+                           Net_WLAN_nl80211_ExtendedFeatures_t&); // return value: extended feature set
+  static bool isInterface (const std::string&, // interface identifier
+                           struct nl_sock*,    // nl80211 (socket) handle (if any)
+                           int);               // "nl80211" driver family identifier
 
   // *NOTE*: sends NL80211_CMD_CONNECT (and dispatches the result(s)); data
   //         is forwarded to the appropriate callback(s)

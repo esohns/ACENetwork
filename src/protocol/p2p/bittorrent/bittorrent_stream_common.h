@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -54,7 +54,7 @@ struct BitTorrent_AllocatorConfiguration
   {
     // *NOTE*: this facilitates (message block) data buffers to be scanned with
     //         'flex's yy_scan_buffer() method
-    paddingBytes = NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
+    paddingBytes = COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
   };
 };
 
@@ -258,7 +258,7 @@ struct BitTorrent_PeerSessionData
    , filename ()
    , handShake (NULL)
   {};
-  
+
   struct BitTorrent_PeerSessionData& operator+= (const struct BitTorrent_PeerSessionData& rhs_in)
   {
     // *NOTE*: the idea is to 'merge' the data

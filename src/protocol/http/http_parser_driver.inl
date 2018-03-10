@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -54,7 +54,7 @@ HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (const std::string&
  , scannerTables_ (scannerTables_in)
  , bufferState_ (NULL)
  , messageQueue_ (NULL)
- , useYYScanBuffer_ (NET_PROTOCOL_PARSER_FLEX_USE_YY_SCAN_BUFFER)
+ , useYYScanBuffer_ (COMMON_PARSER_DEFAULT_FLEX_USE_YY_SCAN_BUFFER)
  , isInitialized_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("HTTP_ParserDriver_T::HTTP_ParserDriver_T"));
@@ -188,7 +188,7 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_ParserC
 
     blockInParse_ = false;
     isFirst_ = true;
-    trace_ = NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE;
+    trace_ = COMMON_PARSER_DEFAULT_YACC_TRACE;
 
     //if (!scannerTables_.empty ())
     //{
@@ -215,7 +215,7 @@ HTTP_ParserDriver_T<SessionMessageType>::initialize (const struct Common_ParserC
     //} // end IF
 
     messageQueue_ = NULL;
-    useYYScanBuffer_ = NET_PROTOCOL_PARSER_FLEX_USE_YY_SCAN_BUFFER;
+    useYYScanBuffer_ = COMMON_PARSER_DEFAULT_FLEX_USE_YY_SCAN_BUFFER;
 
     isInitialized_ = false;
   } // end IF
@@ -420,7 +420,7 @@ HTTP_ParserDriver_T<SessionMessageType>::switchBuffer (bool unlink_in)
   // initialize next buffer
 
   // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT ((fragment_->capacity () - fragment_->length ()) >= NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  ACE_ASSERT ((fragment_->capacity () - fragment_->length ()) >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   *(fragment_->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
   *(fragment_->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
@@ -550,7 +550,7 @@ HTTP_ParserDriver_T<SessionMessageType>::begin (const char* buffer_in,
   {
     bufferState_ =
       HTTP_Scanner__scan_buffer (fragment_->rd_ptr (),
-                                 fragment_->length () + NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
+                                 fragment_->length () + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
                                  scannerState_);
   } // end IF
   else

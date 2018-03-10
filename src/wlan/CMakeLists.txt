@@ -148,6 +148,10 @@ if (UNIX)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src>)
+ if (NL80211_SUPPORT)
+  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/math>)
+ endif (NL80211_SUPPORT)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/timer>)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC

@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -94,7 +94,7 @@ IRC_ParserDriver::initialize (IRC_Record& record_in,
   IRC_Scanner_set_debug ((traceScanning_in ? 1 : 0),
                          scannerState_);
 #if YYDEBUG
-  parser_.set_debug_level (traceParsing_in ? 1 
+  parser_.set_debug_level (traceParsing_in ? 1
                                            : 0); // binary (see bison manual)
 #endif
 
@@ -278,7 +278,7 @@ IRC_ParserDriver::scan_begin (bool useYYScanBuffer_in)
   {
     bufferState_ =
       IRC_Scanner__scan_buffer (fragment_->rd_ptr (),
-                                fragment_->length () + NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
+                                fragment_->length () + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE,
                                 scannerState_);
   } // end IF
   else

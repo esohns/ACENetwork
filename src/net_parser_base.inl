@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -115,7 +115,7 @@ Net_CppParserBase_T<ConfigurationType,
     configuration_ = NULL;
     fragment_ = NULL;
     offset_ = 0;
-    trace_ = NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE;
+    trace_ = COMMON_PARSER_DEFAULT_YACC_TRACE;
 
     blockInParse_ = false;
     isFirst_ = true;
@@ -386,7 +386,7 @@ Net_CppParserBase_T<ConfigurationType,
   // initialize next buffer
 
   // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT (fragment_->capacity () - fragment_->length () >= NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  ACE_ASSERT (fragment_->capacity () - fragment_->length () >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   *(fragment_->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
   *(fragment_->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
@@ -530,7 +530,7 @@ Net_CppParserBase_T<ConfigurationType,
 
   // create/initialize a new buffer state
   streamBuffer_.set (fragment_->rd_ptr (),
-                     fragment_->length () + NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+                     fragment_->length () + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
 //  stream_.rdbuf (&streamBuffer_);
   scanner_.switch_streams (&stream_, NULL);
 
@@ -589,7 +589,7 @@ Net_ParserBase_T<ConfigurationType,
             NULL)                                      // scanner
 // , argument_ ()
  , state_ (NULL)
- , useYYScanBuffer_ (NET_PROTOCOL_PARSER_FLEX_USE_YY_SCAN_BUFFER)
+ , useYYScanBuffer_ (COMMON_PARSER_DEFAULT_FLEX_USE_YY_SCAN_BUFFER)
  , blockInParse_ (false)
  , isFirst_ (true)
  , buffer_ (NULL)
@@ -663,7 +663,7 @@ Net_ParserBase_T<ConfigurationType,
     configuration_ = NULL;
     fragment_ = NULL;
     offset_ = 0;
-    trace_ = NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE;
+    trace_ = COMMON_PARSER_DEFAULT_YACC_TRACE;
 
     blockInParse_ = false;
     isFirst_ = true;
@@ -692,7 +692,7 @@ Net_ParserBase_T<ConfigurationType,
     } // end IF
 
     messageQueue_ = NULL;
-    useYYScanBuffer_ = NET_PROTOCOL_PARSER_FLEX_USE_YY_SCAN_BUFFER;
+    useYYScanBuffer_ = COMMON_PARSER_DEFAULT_FLEX_USE_YY_SCAN_BUFFER;
 
     isInitialized_ = false;
   } // end IF
@@ -916,7 +916,7 @@ Net_ParserBase_T<ConfigurationType,
   // initialize next buffer
 
   // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT ((fragment_->capacity () - fragment_->length ()) >= NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  ACE_ASSERT ((fragment_->capacity () - fragment_->length ()) >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   *(fragment_->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
   *(fragment_->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was

@@ -61,6 +61,9 @@ extern "C"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "common_timer_manager_common.h"
 #else
+#if defined (NL80211_SUPPORT)
+#include "common_math_tools.h"
+#endif // NL80211_SUPPORT
 #if defined (_DEBUG)
 #include "common_timer_tools.h"
 #endif // _DEBUG
@@ -270,7 +273,7 @@ Net_WLAN_Monitor_T<AddressType,
 //                  ACE_TEXT ("\"%s\": [%T] scanning...\n"),
 //                  ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ())));
 //#endif // _DEBUG
-//      Net_WLAN_Tools::scan (clientHandle_,
+//      Net_WLAN_Tools::scan (clientinherited::handle_,
 //                            configuration_->interfaceIdentifier,
 //                            (SSIDSeenBefore_ ? configuration_->SSID
 //                                             : ACE_TEXT_ALWAYS_CHAR ("")));
@@ -287,7 +290,7 @@ Net_WLAN_Monitor_T<AddressType,
 //      Net_WLAN_Tools::scan (configuration_->interfaceIdentifier,
 //                            (SSIDSeenBefore_ ? configuration_->SSID
 //                                             : ACE_TEXT_ALWAYS_CHAR ("")),
-//                            handle_,
+//                            inherited::handle_,
 //                            false); // don't wait
 
 //      int result = -1;
@@ -297,7 +300,7 @@ Net_WLAN_Monitor_T<AddressType,
 //fetch_scan_result_data:
 //      ACE_OS::last_error (0);
 //      // *TODO*: implement nl80211 support, rather than polling
-//      result = handle_input (handle_);
+//      result = inherited::handle_input (inherited::handle_);
 //      ACE_UNUSED_ARG (result);
 //      error = ACE_OS::last_error ();
 //      if (error == EAGAIN) // 11: result data not available yet
@@ -392,24 +395,24 @@ Net_WLAN_Monitor_T<AddressType,
 //                          configuration_->SSID.c_str ()))
 //      {
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//        if (unlikely (!Net_WLAN_Tools::disassociate (clientHandle_,
+//        if (unlikely (!Net_WLAN_Tools::disassociate (clientinherited::handle_,
 //                                                     interface_identifier)))
 //          ACE_DEBUG ((LM_ERROR,
 //                      ACE_TEXT ("failed to Net_WLAN_Tools::disassociate(0x%@,\"%s\"), continuing\n"),
-//                      clientHandle_,
+//                      clientinherited::handle_,
 //                      ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
 //#else
 //        if (unlikely (!Net_WLAN_Tools::disassociate (interface_identifier_string,
-//                                                     handle_)))
+//                                                     inherited::handle_)))
 //          ACE_DEBUG ((LM_ERROR,
 //                      ACE_TEXT ("failed to Net_WLAN_Tools::disassociate(\"%s\",%d), continuing\n"),
 //                      ACE_TEXT (interface_identifier_string.c_str ()),
-//                      handle_));
+//                      inherited::handle_));
 //#endif // ACE_WIN32 || ACE_WIN64
 //      } // end IF
 
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//      if (unlikely (!Net_WLAN_Tools::associate (clientHandle_,
+//      if (unlikely (!Net_WLAN_Tools::associate (clientinherited::handle_,
 //                                                interface_identifier,
 //                                                configuration_->SSID)))
 //#else
@@ -417,13 +420,13 @@ Net_WLAN_Monitor_T<AddressType,
 //      if (unlikely (!Net_WLAN_Tools::associate (interface_identifier_string,
 //                                                ap_mac_address,
 //                                                configuration_->SSID,
-//                                                handle_)))
+//                                                inherited::handle_)))
 //#endif // ACE_WIN32 || ACE_WIN64
 //      {
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //        ACE_DEBUG ((LM_ERROR,
 //                    ACE_TEXT ("failed to Net_WLAN_Tools::associate(0x%@,\"%s\",%s), returning\n"),
-//                    clientHandle_,
+//                    clientinherited::handle_,
 //                    ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ()),
 //                    ACE_TEXT (configuration_->SSID.c_str ())));
 //#else
@@ -432,7 +435,7 @@ Net_WLAN_Monitor_T<AddressType,
 //                    ACE_TEXT (interface_identifier_string.c_str ()),
 //                    ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address)).c_str ()),
 //                    ACE_TEXT (configuration_->SSID.c_str ()),
-//                    handle_));
+//                    inherited::handle_));
 //#endif // ACE_WIN32 || ACE_WIN64
 //        break;
 //      } // end IF
@@ -446,7 +449,7 @@ Net_WLAN_Monitor_T<AddressType,
 //      {
 //        ether_addr_s =
 //          Net_WLAN_Tools::associatedBSSID (configuration_->interfaceIdentifier,
-//                                           handle_);
+//                                           inherited::handle_);
 //        if (!ACE_OS::memcmp (&ether_addr_s.ether_addr_octet,
 //                             &ap_mac_address.ether_addr_octet,
 //                             ETH_ALEN))
@@ -512,13 +515,13 @@ Net_WLAN_Monitor_T<AddressType,
 ////      ACE_ASSERT (!SSID_string.empty ()); // associated
 //      ACE_ASSERT (configuration_);
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//      ACE_ASSERT (clientHandle_ != ACE_INVALID_HANDLE);
-//      Net_WLAN_Tools::disassociate (clientHandle_,
+//      ACE_ASSERT (clientinherited::handle_ != ACE_INVALID_HANDLE);
+//      Net_WLAN_Tools::disassociate (clientinherited::handle_,
 //                                    configuration_->interfaceIdentifier);
 //#else
-//      ACE_ASSERT (handle_ != ACE_INVALID_HANDLE);
+//      ACE_ASSERT (inherited::handle_ != ACE_INVALID_HANDLE);
 //      Net_WLAN_Tools::disassociate (configuration_->interfaceIdentifier,
-//                                    handle_);
+//                                    inherited::handle_);
 //#endif
 
 //      bool essid_is_cached = false;
@@ -809,34 +812,34 @@ Net_WLAN_Monitor_T<AddressType,
 //      } // end IF
 
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//      if (unlikely (!Net_WLAN_Tools::setDeviceSettingBool (clientHandle_,
+//      if (unlikely (!Net_WLAN_Tools::setDeviceSettingBool (clientinherited::handle_,
 //                                                           configuration_->interfaceIdentifier,
 //                                                           wlan_intf_opcode_autoconf_enabled,
 //                                                           configuration_->enableAutoConf)))
 //        ACE_DEBUG ((LM_ERROR,
 //                    ACE_TEXT ("\"%s\": failed to Net_WLAN_Tools::setDeviceSettingBool(0x%@,%d,%s), continuing\n"),
 //                    ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ()),
-//                    clientHandle_,
+//                    clientinherited::handle_,
 //                    wlan_intf_opcode_autoconf_enabled,
 //                    (configuration_->enableAutoConf ? ACE_TEXT ("true") : ACE_TEXT ("false"))));
-//      if (unlikely (!Net_WLAN_Tools::setDeviceSettingBool (clientHandle_,
+//      if (unlikely (!Net_WLAN_Tools::setDeviceSettingBool (clientinherited::handle_,
 //                                                           configuration_->interfaceIdentifier,
 //                                                           wlan_intf_opcode_background_scan_enabled,
 //                                                           configuration_->enableBackgroundScans)))
 //        ACE_DEBUG ((LM_ERROR,
 //                    ACE_TEXT ("\"%s\": failed to Net_WLAN_Tools::setDeviceSettingBool(0x%@,%d,%s), continuing\n"),
 //                    ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ()),
-//                    clientHandle_,
+//                    clientinherited::handle_,
 //                    wlan_intf_opcode_background_scan_enabled,
 //                    (configuration_->enableBackgroundScans ? ACE_TEXT ("true") : ACE_TEXT ("false"))));
-//      if (unlikely (!Net_WLAN_Tools::setDeviceSettingBool (clientHandle_,
+//      if (unlikely (!Net_WLAN_Tools::setDeviceSettingBool (clientinherited::handle_,
 //                                                           configuration_->interfaceIdentifier,
 //                                                           wlan_intf_opcode_media_streaming_mode,
 //                                                           configuration_->enableMediaStreamingMode)))
 //        ACE_DEBUG ((LM_ERROR,NET_WLAN_MONITOR_STATE_DISASSOCIATE
 //                    ACE_TEXT ("\"%s\": failed to Net_WLAN_Tools::setDeviceSettingBool(0x%@,%d,%s), continuing\n"),
 //                    ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ()),
-//                    clientHandle_,
+//                    clientinherited::handle_,
 //                    wlan_intf_opcode_media_streaming_mode,
 //                    (configuration_->enableMediaStreamingMode ? ACE_TEXT ("true") : ACE_TEXT ("false"))));
 //#else
@@ -985,24 +988,24 @@ Net_WLAN_Monitor_T<AddressType,
   ACE_ASSERT (inherited::configuration_);
 
   // sanity check(s)
-  ACE_ASSERT (inherited::clientHandle_ == ACE_INVALID_HANDLE);
+  ACE_ASSERT (inherited::clientinherited::handle_ == ACE_INVALID_HANDLE);
 
-  if (unlikely (!Net_WLAN_Tools::initialize (inherited::clientHandle_)))
+  if (unlikely (!Net_WLAN_Tools::initialize (inherited::clientinherited::handle_)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_WLAN_Tools::initialize(), returning\n")));
     return;
   } // end IF
-  ACE_ASSERT (inherited::clientHandle_ != ACE_INVALID_HANDLE);
+  ACE_ASSERT (inherited::clientinherited::handle_ != ACE_INVALID_HANDLE);
 
   Net_InterfaceIdentifiers_t interface_identifiers_a =
-      Net_WLAN_Tools::getInterfaces (inherited::clientHandle_);
+      Net_WLAN_Tools::getInterfaces (inherited::clientinherited::handle_);
 
   struct _WLAN_INTERFACE_INFO_LIST* interface_list_p = NULL;
   DWORD notification_mask = WLAN_NOTIFICATION_SOURCE_ALL;
   DWORD previous_notification_mask = 0;
   DWORD result =
-      WlanRegisterNotification (inherited::clientHandle_,
+      WlanRegisterNotification (inherited::clientinherited::handle_,
                                 notification_mask,
                                 FALSE,
                                 inherited::configuration_->notificationCB,
@@ -1020,9 +1023,9 @@ Net_WLAN_Monitor_T<AddressType,
   goto continue_;
 
 error:
-  if (inherited::clientHandle_ != ACE_INVALID_HANDLE)
-    Net_WLAN_Tools::initialize (inherited::clientHandle_);
-  inherited::clientHandle_ = ACE_INVALID_HANDLE;
+  if (inherited::clientinherited::handle_ != ACE_INVALID_HANDLE)
+    Net_WLAN_Tools::initialize (inherited::clientinherited::handle_);
+  inherited::clientinherited::handle_ = ACE_INVALID_HANDLE;
 
   return;
 
@@ -1050,12 +1053,12 @@ Net_WLAN_Monitor_T<AddressType,
   // sanity check(s)
   if (unlikely (!inherited::isActive_))
     return;
-  ACE_ASSERT (inherited::clientHandle_ != ACE_INVALID_HANDLE);
+  ACE_ASSERT (inherited::clientinherited::handle_ != ACE_INVALID_HANDLE);
 
   if (likely (inherited::scanTimerId_ != -1))
     cancelScanTimer ();
-  Net_WLAN_Tools::finalize (inherited::clientHandle_);
-  inherited::clientHandle_ = ACE_INVALID_HANDLE;
+  Net_WLAN_Tools::finalize (inherited::clientinherited::handle_);
+  inherited::clientinherited::handle_ = ACE_INVALID_HANDLE;
 
   inherited::isActive_ = false;
 
@@ -1305,13 +1308,13 @@ Net_WLAN_Monitor_T<AddressType,
                    ACE_SYNCH_USE,
                    TimePolicyType,
                    NET_WLAN_MONITOR_API_IOCTL,
-                   UserDataType>::handle_input (ACE_HANDLE handle_in)
+                   UserDataType>::inherited::handle_input (ACE_HANDLE inherited::handle_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::handle_input"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::inherited::handle_input"));
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (handle_in == inherited::handle_);
+  ACE_ASSERT (inherited::handle_in == inherited::handle_);
 
   int result = -1;
   struct iwreq iwreq_s;
@@ -1349,7 +1352,7 @@ Net_WLAN_Monitor_T<AddressType,
   iwreq_s.u.data.length = inherited::bufferSize_;
 
 fetch_scan_result_data:
-  result = ACE_OS::ioctl (handle_in,
+  result = ACE_OS::ioctl (inherited::handle_in,
                           SIOCGIWSCAN,
                           &iwreq_s);
   if (result < 0)
@@ -1368,7 +1371,7 @@ fetch_scan_result_data:
     if (unlikely (error != EAGAIN)) // 11: result(s) not available yet
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCGIWSCAN): \"%m\", returning\n"),
-                  handle_in));
+                  inherited::handle_in));
 //    else
 //      ACE_DEBUG ((LM_DEBUG,
 //                  ACE_TEXT ("scan results not yet available, returning\n")));
@@ -1662,17 +1665,21 @@ Net_WLAN_Monitor_T<AddressType,
  , inherited2 ()
  , userData_ (NULL)
  /////////////////////////////////////////
+ , buffer_ (NULL)
  , callbacks_ (NULL)
  , controlId_ (0)
  , error_ (0)
- , familyId_ (0)
- , handle_ (NULL)
-// , inputStream_ ()
-// , isRegistered_ (false)
+ , headerReceived_ (false)
+ , inputStream_ ()
+ , isRegistered_ (false)
+ , isSubscribedToMulticastGroups_ (false)
+ , message_ (NULL)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::Net_WLAN_Monitor_T"));
 
-  inherited::TASK_T::threadCount_ = 2;
+  inherited::TASK_T::threadCount_ = 1;
+
+//  inherited::TASK_T::reactor (ACE_Reactor::instance ());
 //  inherited2::proactor (ACE_Proactor::instance ());
 }
 
@@ -1690,10 +1697,50 @@ Net_WLAN_Monitor_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::~Net_WLAN_Monitor_T"));
 
+  int result = -1;
+
+  if (buffer_)
+    buffer_->release ();
+
+  if (isRegistered_)
+  { ACE_ASSERT (inherited::configuration_);
+    switch (inherited::configuration_->dispatch)
+    {
+      case COMMON_EVENT_DISPATCH_PROACTOR:
+      {
+        result = inputStream_.cancel ();
+        if (unlikely (result == -1))
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Asynch_Read_Stream::cancel(): \"%m\", continuing\n")));
+        break;
+      }
+      case COMMON_EVENT_DISPATCH_REACTOR:
+      {
+        ACE_Reactor* reactor_p = inherited::TASK_T::reactor ();
+        ACE_ASSERT (reactor_p);
+        result = reactor_p->remove_handler (this,
+                                            ACE_Event_Handler::ALL_EVENTS_MASK);
+        if (unlikely (result == -1))
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@): \"%m\", continuing\n"),
+                      this));
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unkown dispatch type (was: %d), continuing\n"),
+                    inherited::configuration_->dispatch));
+        break;
+      }
+    } // end SWITCH
+  } // end IF
+
   if (callbacks_)
     nl_cb_put (callbacks_);
-  if (handle_)
-    nl_socket_free (handle_);
+
+  if (message_)
+    nlmsg_free (message_);
 }
 
 template <typename AddressType,
@@ -1728,15 +1775,14 @@ Net_WLAN_Monitor_T<AddressType,
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (callbacks_);
-  ACE_ASSERT (!controlId_);
+//  ACE_ASSERT (!controlId_);
   ACE_ASSERT (!error_);
-  ACE_ASSERT (!familyId_);
-  ACE_ASSERT (handle_);
+  ACE_ASSERT (inherited::handle_);
 //  ACE_ASSERT (!isRegistered_);
 #if defined (ACE_LINUX)
   if (Net_Common_Tools::isNetworkManagerRunning ())
     ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("systemd NetworkManager service is running; this may interfere with the monitoring activities, continuing\n")));
+                ACE_TEXT ("the (systemd) NetworkManager service is running; this may interfere with the monitoring activities, continuing\n")));
 #endif // ACE_LINUX
 
   int result = -1;
@@ -1745,45 +1791,29 @@ Net_WLAN_Monitor_T<AddressType,
   struct Net_WLAN_nl80211_MulticastGroupIdQueryCBData cb_data_s;
   cb_data_s.map = &multicast_group_ids_m;
   Net_WLAN_IMonitorBase* imonitor_base_p = this;
+  int socket_handle_i = nl_socket_get_fd (inherited::handle_);
   ACE_Time_Value deadline;
 
-//  nl_socket_recv_pktinfo(handle_, int state);
-  result = nl_connect (handle_, NETLINK_GENERIC);
-  if (unlikely (result < 0))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_connect(0x%@): \"%s\", returning\n"),
-                handle_,
-                ACE_TEXT (nl_geterror (result))));
-    goto error;
-  } // end IF
+  if (controlId_)
+    goto continue_;
 
   controlId_ =
-      genl_ctrl_resolve (handle_,
+      genl_ctrl_resolve (inherited::handle_,
                          ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_NL80211_CONTROL_NAME_STRING));
   if (unlikely (controlId_ < 0))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to genl_ctrl_resolve(0x%@,\"%s\"): \"%s\", returning\n"),
-                handle_,
+                inherited::handle_,
                 ACE_TEXT (NET_WLAN_MONITOR_NL80211_CONTROL_NAME_STRING),
                 ACE_TEXT (nl_geterror (controlId_))));
     goto error;
   } // end IF
-  familyId_ =
-      genl_ctrl_resolve (handle_,
-                         ACE_TEXT_ALWAYS_CHAR (NL80211_GENL_NAME));
-  if (unlikely (familyId_ < 0))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to genl_ctrl_resolve(0x%@,\"%s\"): \"%s\", returning\n"),
-                handle_,
-                ACE_TEXT (NL80211_GENL_NAME),
-                ACE_TEXT (nl_geterror (familyId_))));
-    goto error;
-  } // end IF
 
+continue_:
   // subscribe to all defined nl80211 multicast groups (i.e. WLAN events)
+  if (isSubscribedToMulticastGroups_)
+    goto continue_2;
 
   // step1: resolve multicast group ids
   multicast_group_ids_m.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (NL80211_MULTICAST_GROUP_CONFIG),
@@ -1824,12 +1854,12 @@ Net_WLAN_Monitor_T<AddressType,
   NLA_PUT_STRING (message_p,
                   CTRL_ATTR_FAMILY_NAME,
                   ACE_TEXT_ALWAYS_CHAR (NL80211_GENL_NAME));
-  result = nl_send_auto_complete (handle_, message_p);
+  result = nl_send_auto_complete (inherited::handle_, message_p);
   if (unlikely (result < 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_send_auto_complete(0x%@): \"%s\", returning\n"),
-                handle_,
+                ACE_TEXT ("failed to nl_send_auto_complete(%@): \"%s\", returning\n"),
+                inherited::handle_,
                 ACE_TEXT (nl_geterror (result))));
     nlmsg_free (message_p);
     goto error;
@@ -1863,12 +1893,12 @@ Net_WLAN_Monitor_T<AddressType,
   error_ = 1;
   while (//(result > 0) &&
          error_ > 0)
-    result = nl_recvmsgs (handle_, callbacks_);
+    result = nl_recvmsgs (inherited::handle_, callbacks_);
   if (unlikely (result < 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_recvmsgs(0x%@): \"%s\", returning\n"),
-                handle_,
+                ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\", returning\n"),
+                inherited::handle_,
                 ACE_TEXT (nl_geterror ((result < 0) ? result : error_))));
     goto error;
   } // end IF
@@ -1885,14 +1915,14 @@ Net_WLAN_Monitor_T<AddressType,
                   ACE_TEXT ((*iterator).first.c_str ())));
       continue;
     } // end IF
-    result = nl_socket_add_memberships (handle_,
+    result = nl_socket_add_memberships (inherited::handle_,
                                         (*iterator).second,
                                         NFNLGRP_NONE);
     if (unlikely (result < 0))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to nl_socket_add_memberships(0x%@,%d): \"%s\", returning\n"),
-                  handle_,
+                  ACE_TEXT ("failed to nl_socket_add_memberships(%@,%d): \"%s\", returning\n"),
+                  inherited::handle_,
                   (*iterator).second,
                   ACE_TEXT (nl_geterror (result))));
       goto error;
@@ -1919,55 +1949,95 @@ Net_WLAN_Monitor_T<AddressType,
                       imonitor_base_p);
   ACE_ASSERT (result >= 0);
 
-//  ACE_Reactor* reactor_p = NULL;
-//  ACE_Proactor* proactor_p = NULL;
-//  Net_InterfaceIdentifiers_t interface_identifiers_a;
-//  if (inherited::configuration_->useReactor)
-//  {
-////    inherited2::set_handle (nl_socket_get_fd (handle_););
-//    inherited::TASK_T::set_handle (nl_socket_get_fd (handle_));
+  if (!Net_WLAN_Tools::getFeatures (inherited::configuration_->interfaceIdentifier,
+                                    inherited::handle_,
+                                    inherited::familyId_,
+                                    features_,
+                                    extendedFeatures_))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_WLAN_Tools::getFeatures(\"%s\",%@,%d), returning\n"),
+                ACE_TEXT (inherited::configuration_->interfaceIdentifier.c_str ()),
+                inherited::handle_,
+                inherited::familyId_));
+    goto error;
+  } // end IF
 
-////    reactor_p = inherited2::reactor ();
-//    reactor_p = inherited::reactor ();
-//    ACE_ASSERT (reactor_p);
-//    result = reactor_p->register_handler (this,
-//                                          ACE_Event_Handler::READ_MASK);
-//    if (unlikely (result == -1))
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@,ACE_Event_Handler::READ_MASK): \"%m\", returning\n"),
-//                  this));
-//      goto error;
-//    } // end IF
-//  } // end IF
-//  else
-//  {
-//    inherited2::handle (nl_socket_get_fd (handle_));
+  isSubscribedToMulticastGroups_ = true;
 
-//    proactor_p = inherited2::proactor ();
-//    ACE_ASSERT (proactor_p);
+continue_2:
+  ACE_ASSERT (socket_handle_i);
+  switch (inherited::configuration_->dispatch)
+  {
+    case COMMON_EVENT_DISPATCH_PROACTOR:
+    { ACE_ASSERT (inherited::configuration_);
+      inherited2::handle (socket_handle_i);
 
-//    result = inputStream_.open (*this,
-//                                handle_h,
-//                                NULL,
-//                                proactor_p);
-//    if (unlikely (result == -1))
-//    {
-//      ACE_ERROR ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_Asynch_Read_Stream::open(%d): \"%m\", returning\n"),
-//                  handle_h));
-//      goto error;
-//    } // end IF
+      ACE_Proactor* proactor_p =
+//          inherited2::proactor ();
+          ACE_Proactor::instance ();
+      ACE_ASSERT (proactor_p);
 
-//    if (unlikely (!initiate_read_stream (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)))
-//    {
-//      ACE_ERROR ((LM_ERROR,
-//                  ACE_TEXT ("failed to Net_WLAN_Monitor_T::initiate_read_stream(%u), returning\n"),
-//                  NET_STREAM_MESSAGE_DATA_BUFFER_SIZE));
-//      goto error;
-//    } // end IF
-//  } // end ELSE
-//  isRegistered_ = true;
+      inherited2::proactor (proactor_p);
+
+      result = inputStream_.open (*this,
+                                  socket_handle_i,
+                                  NULL,
+                                  proactor_p);
+      if (unlikely (result == -1))
+      {
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Asynch_Read_Stream::open(%d): \"%m\", returning\n"),
+                    socket_handle_i));
+        goto error;
+      } // end IF
+
+      if (unlikely (!initiate_read_stream (inherited::configuration_->defaultBufferSize)))
+      {
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT ("failed to Net_WLAN_Monitor_T::initiate_read_stream(%u), returning\n"),
+                    inherited::configuration_->defaultBufferSize));
+        goto error;
+      } // end IF
+
+      break;
+    }
+    case COMMON_EVENT_DISPATCH_REACTOR:
+    {
+      ACE_HANDLE handle_h = nl_socket_get_fd (inherited::handle_);
+      ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
+//      inherited2::set_handle ();
+      inherited::TASK_T::set_handle (handle_h);
+
+      ACE_Reactor* reactor_p =
+//          inherited::TASK_T::reactor ();
+          ACE_Reactor::instance ();
+      ACE_ASSERT (reactor_p);
+
+      inherited::TASK_T::reactor (reactor_p);
+
+      result = reactor_p->register_handler (handle_h,
+                                            this,
+                                            ACE_Event_Handler::READ_MASK);
+      if (unlikely (result == -1))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_Reactor::register_handler(%d,0x%@,ACE_Event_Handler::READ_MASK): \"%m\", returning\n"),
+                    handle_h,
+                    this));
+        goto error;
+      } // end IF
+      break;
+    }
+    default:
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid/unkown dispatch type (was: %d), returning\n"),
+                  inherited::configuration_->dispatch));
+      goto error;
+    }
+  } // end SWITCH
+  isRegistered_ = true;
 
   // monitor the interface in a dedicated thread
   deadline =
@@ -2003,32 +2073,40 @@ Net_WLAN_Monitor_T<AddressType,
 
 error:
 nla_put_failure:
-//  if (inherited::configuration_->useReactor)
-//  {
-//    if (isRegistered_)
-//    { ACE_ASSERT (reactor_p);
-//      result = reactor_p->remove_handler (this,
-//                                          ACE_Event_Handler::READ_MASK);
-//      if (unlikely (result == -1))
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@,ACE_Event_Handler::READ_MASK): \"%m\", continuing\n"),
-//                    this));
-//    } // end IF
-////  inherited2::set_handle (ACE_INVALID_HANDLE);
-//    inherited::TASK_T::set_handle (ACE_INVALID_HANDLE);
-//  } // end IF
-//  else
-//  {
-//    if (isRegistered_)
-//    {
-//      result = inputStream_.cancel ();
-//      if (unlikely (result == -1))
-//        ACE_ERROR ((LM_ERROR,
-//                    ACE_TEXT ("failed to ACE_Asynch_Read_Stream::cancel(): \"%m\", continuing\n")));
-//    } // end IF
-//    inherited2::handle (ACE_INVALID_HANDLE);
-//  } // end ELSE
-//  isRegistered_ = false;
+  if (isRegistered_)
+  {
+    switch (inherited::configuration_->dispatch)
+    {
+      case COMMON_EVENT_DISPATCH_PROACTOR:
+      {
+        result = inputStream_.cancel ();
+        if (unlikely (result == -1))
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Asynch_Read_Stream::cancel(): \"%m\", continuing\n")));
+        break;
+      }
+      case COMMON_EVENT_DISPATCH_REACTOR:
+      {
+        ACE_Reactor* reactor_p = inherited::TASK_T::reactor ();
+        ACE_ASSERT (reactor_p);
+        result = reactor_p->remove_handler (this,
+                                            ACE_Event_Handler::ALL_EVENTS_MASK);
+        if (unlikely (result == -1))
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@): \"%m\", continuing\n"),
+                      this));
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unkown dispatch type (was: %d), continuing\n"),
+                    inherited::configuration_->dispatch));
+        break;
+      }
+    } // end SWITCH
+    isRegistered_ = false;
+  } // end IF
   if (message_p)
     nlmsg_free (message_p);
 }
@@ -2053,40 +2131,47 @@ Net_WLAN_Monitor_T<AddressType,
   ACE_UNUSED_ARG (lockedAccess_in);
 
   // sanity check(s)
-  if (!inherited::isActive_)
+  ACE_ASSERT (inherited::configuration_);
+  if (unlikely (!inherited::isActive_))
     return;
-//  ACE_ASSERT (inherited::configuration_);
 
-//  int result = -1;
-//  if (inherited::configuration_->useReactor)
-//  {
-//    if (likely (isRegistered_))
-//    {
-////      ACE_Reactor* reactor_p = inherited2::reactor ();
-//      ACE_Reactor* reactor_p = inherited::reactor ();
-//      ACE_ASSERT (reactor_p);
-//      result = reactor_p->remove_handler (this,
-//                                          ACE_Event_Handler::READ_MASK);
-//      if (unlikely (result == -1))
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("failed to ACE_Reactor::remove_handler(0x%@,ACE_Event_Handler::READ_MASK): \"%m\", continuing\n"),
-//                    this));
-//    } // end IF
-////    inherited2::set_handle (ACE_INVALID_HANDLE);
-//    inherited::TASK_T::set_handle (ACE_INVALID_HANDLE);
-//  } // end IF
-//  else
-//  {
-//    if (likely (isRegistered_))
-//    {
-//      result = inputStream_.cancel ();
-//      if (unlikely (result == -1))
-//        ACE_ERROR ((LM_ERROR,
-//                    ACE_TEXT ("failed to ACE_Asynch_Read_Stream::cancel(): \"%m\", continuing\n")));
-//    } // end IF
-//    inherited2::handle (ACE_INVALID_HANDLE);
-//  } // end ELSE
-//  isRegistered_ = false;
+  int result = -1;
+
+  if (likely (isRegistered_))
+  {
+    switch (inherited::configuration_->dispatch)
+    {
+      case COMMON_EVENT_DISPATCH_PROACTOR:
+      {
+        result = inputStream_.cancel ();
+        if (unlikely (result == -1))
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Asynch_Read_Stream::cancel(): \"%m\", continuing\n")));
+        break;
+      }
+      case COMMON_EVENT_DISPATCH_REACTOR:
+      {
+        ACE_Reactor* reactor_p = inherited::TASK_T::reactor ();
+        ACE_ASSERT (reactor_p);
+        result = reactor_p->remove_handler (this,
+                                            ACE_Event_Handler::ALL_EVENTS_MASK);
+        if (unlikely (result == -1))
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@): \"%m\", continuing\n"),
+                      this));
+        break;
+      }
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unkown dispatch type (was: %d), continuing\n"),
+                    inherited::configuration_->dispatch));
+        break;
+      }
+    } // end SWITCH
+    isRegistered_ = false;
+  } // end IF
+
   inherited::isActive_ = false;
   inherited::stop (waitForCompletion_in,
                    lockedAccess_in);
@@ -2109,7 +2194,11 @@ Net_WLAN_Monitor_T<AddressType,
 
   if (unlikely (inherited::isInitialized_))
   {
-    userData_ = NULL;
+    if (buffer_)
+    {
+      buffer_->release ();
+      buffer_ = NULL;
+    } // end IF
 
     if (callbacks_)
     {
@@ -2117,54 +2206,95 @@ Net_WLAN_Monitor_T<AddressType,
       callbacks_ = NULL;
     } // end IF
 
+    controlId_ = 0;
     error_ = 0;
-    if (handle_)
-    {
-      nl_socket_free (handle_);
-      handle_ = NULL;
-    } // end  IF
 
-//    ACE_ASSERT (!isRegistered_);
+    extendedFeatures_.clear ();
+    features_ = 0;
+
+    headerReceived_ = false;
+
+    int result = -1;
+    if (isRegistered_)
+    { ACE_ASSERT (inherited::configuration_);
+      switch (inherited::configuration_->dispatch)
+      {
+        case COMMON_EVENT_DISPATCH_PROACTOR:
+        {
+          result = inputStream_.cancel ();
+          if (unlikely (result == -1))
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to ACE_Asynch_Read_Stream::cancel(): \"%m\", continuing\n")));
+          break;
+        }
+        case COMMON_EVENT_DISPATCH_REACTOR:
+        {
+          ACE_Reactor* reactor_p = inherited::TASK_T::reactor ();
+          ACE_ASSERT (reactor_p);
+          result = reactor_p->remove_handler (this,
+                                              ACE_Event_Handler::ALL_EVENTS_MASK);
+          if (unlikely (result == -1))
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@): \"%m\", continuing\n"),
+                        this));
+          break;
+        }
+        default:
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("invalid/unkown dispatch type (was: %d), continuing\n"),
+                      inherited::configuration_->dispatch));
+          break;
+        }
+      } // end SWITCH
+    } // end IF
+    isRegistered_ = false;
+
+    isSubscribedToMulticastGroups_ = false;
+
+    if (message_)
+    {
+      nlmsg_free (message_);
+      message_ = NULL;
+    } // end IF
+
+    userData_ = NULL;
   } // end IF
 
   // *TODO*: remove type inference
   userData_ = configuration_in.userData;
 
+  if (unlikely (!inherited::initialize (configuration_in)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_WLAN_Monitor_Base_T::initialize(), aborting\n")));
+    return false;
+  } // end IF
   // sanity check(s)
+  ACE_ASSERT (inherited::handle_);
   ACE_ASSERT (!callbacks_);
-  ACE_ASSERT (!handle_);
 
-#if defined (_DEBUG)
   callbacks_ =
+#if defined (_DEBUG)
       nl_cb_alloc (configuration_in.debug ? NL_CB_DEBUG : NL_CB_DEFAULT);
 #else
-  callbacks_ = nl_cb_alloc (NL_CB_DEFAULT);
+      nl_cb_alloc (NL_CB_DEFAULT);
 #endif // _DEBUG
   if (unlikely (!callbacks_))
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to nl_cb_alloc (%d): \"%m\", aborting\n"),
 #if defined (_DEBUG)
-                NL_CB_DEBUG));
+                (configuration_in.debug ? NL_CB_DEBUG : NL_CB_DEFAULT)));
 #else
                 NL_CB_DEFAULT));
 #endif // _DEBUG
     return false;
   } // end IF
 
-  handle_ = nl_socket_alloc ();
-  if (unlikely (!handle_))
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to nl_socket_alloc(): \"%m\", aborting\n")));
-    return false;
-  } // end IF
-//  nl_socket_set_buffer_size (handle_, int rx, int tx);
-//  nl_socket_disable_auto_ack (handle_);
-  // *NOTE*: disable sequence checks selectively for multicast messages
-//  nl_socket_disable_seq_check (handle_);
+  nl_socket_set_cb (inherited::handle_, callbacks_);
 
-  return inherited::initialize (configuration_in);
+  return true;
 }
 
 template <typename AddressType,
@@ -2185,7 +2315,8 @@ Net_WLAN_Monitor_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::do_associate"));
 
   // sanity check(s)
-  ACE_ASSERT (familyId_);
+  ACE_ASSERT (inherited::handle_);
+  ACE_ASSERT (inherited::familyId_);
   if (!SSID_in.empty ())
   {
     ACE_ASSERT (!Net_Common_Tools::isAny (APMACAddress_in));
@@ -2193,13 +2324,20 @@ Net_WLAN_Monitor_T<AddressType,
 
   Net_InterfaceIdentifiers_t interface_identifiers_a;
   if (interfaceIdentifier_in.empty ())
-    interface_identifiers_a = Net_WLAN_Tools::getInterfaces ();
+    interface_identifiers_a =
+        Net_WLAN_Tools::getInterfaces (inherited::handle_,
+                                       inherited::familyId_,
+                                       AF_UNSPEC,
+                                       0);
   else
     interface_identifiers_a.push_back (interfaceIdentifier_in);
 
   struct nl_msg* message_p = NULL;
-  int command_i = (SSID_in.empty () ? NL80211_CMD_DISASSOCIATE
-                                    : NL80211_CMD_ASSOCIATE);
+  // *TODO*: implement propert disassociate/deauthenticate procedure
+//  int command_i = (SSID_in.empty () ? NL80211_CMD_DISASSOCIATE
+//                                    : NL80211_CMD_ASSOCIATE);
+  int command_i = (SSID_in.empty () ? NL80211_CMD_DISCONNECT
+                                    : NL80211_CMD_CONNECT);
   int result = -1;
   unsigned int if_index_i = 0;
   struct ether_addr ap_mac_address_s = APMACAddress_in;
@@ -2219,7 +2357,7 @@ Net_WLAN_Monitor_T<AddressType,
     if (unlikely (!genlmsg_put (message_p,
                                 NL_AUTO_PORT,              // port #
                                 NL_AUTO_SEQ,               // sequence #
-                                familyId_,                 // family id
+                                inherited::familyId_,      // family id
                                 0,                         // (user-) hdrlen
 //                                NLM_F_REQUEST | NLM_F_ACK, // flags
                                 0,
@@ -2241,26 +2379,30 @@ Net_WLAN_Monitor_T<AddressType,
     NLA_PUT_U32 (message_p,
                  NL80211_ATTR_IFINDEX,
                  static_cast<ACE_UINT32> (if_index_i));
-    if (command_i == NL80211_CMD_DISASSOCIATE)
+//    if (command_i == NL80211_CMD_DISASSOCIATE)
+    if (command_i == NL80211_CMD_DISCONNECT)
     {
-      if (Net_Common_Tools::isAny (APMACAddress_in))
+      if (Net_Common_Tools::isAny (ap_mac_address_s))
         ap_mac_address_s = Net_WLAN_Tools::associatedBSSID (*iterator,
                                                             NULL,
-                                                            familyId_);
+                                                            inherited::familyId_);
 //      ssid_string = Net_WLAN_Tools::associatedSSID (*iterator,
 //                                                    NULL,
-//                                                    familyId_);
+//                                                    inherited::familyId_);
+      // *TODO*: callers specify the most appropriate reason code
       NLA_PUT_U16 (message_p,
                    NL80211_ATTR_REASON_CODE,
                    NET_WLAN_MONITOR_NL80211_REASON_CODE_LEAVING);
 //      nla_put_flag (message_p,
 //                    NL80211_ATTR_LOCAL_STATE_CHANGE);
     } // end IF
+    ACE_ASSERT (!Net_Common_Tools::isAny (ap_mac_address_s));
     NLA_PUT (message_p,
              NL80211_ATTR_MAC,
              ETH_ALEN,
              ap_mac_address_s.ether_addr_octet);
-    if (command_i == NL80211_CMD_ASSOCIATE)
+//    if (command_i == NL80211_CMD_ASSOCIATE)
+    if (command_i == NL80211_CMD_CONNECT)
     {
       NLA_PUT (message_p,
                NL80211_ATTR_SSID,
@@ -2276,15 +2418,25 @@ Net_WLAN_Monitor_T<AddressType,
         } // end IF
       } // end lock scope
       NLA_PUT_U32 (message_p,
-                   NL80211_ATTR_WIPHY_FREQ,
-                   frequency_i);
-      NLA_PUT_U32 (message_p,
                    NL80211_ATTR_AUTH_TYPE,
                    authentication_type_i);
-      //  NLA_PUT (message_p,
-      //           NL80211_ATTR_PREV_BSSID,
-      //           ETH_ALEN,
-      //           APMACAddress_in.ether_addr_octet);
+      // NL80211_ATTR_USE_MFP
+      // *NOTE*: the next two attributes, if included, "...are restrictions on
+      //         BSS selection, i.e., they effectively prevent roaming within
+      //         the ESS. ..."
+//      NLA_PUT (message_p,
+//               NL80211_ATTR_MAC,
+//               ETH_ALEN,
+//               APMACAddress_in.ether_addr_octet);
+//      NLA_PUT_U32 (message_p,
+//                   NL80211_ATTR_WIPHY_FREQ,
+//                   frequency_i);
+      // NL80211_ATTR_CONTROL_PORT
+      // NL80211_ATTR_CONTROL_PORT_ETHERTYPE
+      // NL80211_ATTR_CONTROL_PORT_NO_ENCRYPT
+      // NL80211_ATTR_MAC_HINT
+      // NL80211_ATTR_WIPHY_FREQ_HINT
+      // NL80211_ATTR_PREV_BSSID
     } // end IF
     NLA_PUT (message_p,
              NL80211_ATTR_IE, // "...VendorSpecificInfo, but also including RSN IE
@@ -2292,12 +2444,12 @@ Net_WLAN_Monitor_T<AddressType,
              0,
              NULL);
 
-    result = nl_send_auto (handle_, message_p);
+    result = nl_send_auto (inherited::handle_, message_p);
     if (unlikely (result < 0))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to nl_send_auto(0x%@): \"%s\", returning\n"),
-                  handle_,
+                  inherited::handle_,
                   ACE_TEXT (nl_geterror (result))));
       goto error;
     } // end IF
@@ -2335,7 +2487,8 @@ Net_WLAN_Monitor_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::do_scan"));
 
   // sanity check(s)
-  ACE_ASSERT (familyId_);
+  ACE_ASSERT (inherited::familyId_);
+  ACE_ASSERT (inherited::handle_);
 
   int result = -1;
   unsigned int if_index_i = 0;
@@ -2351,7 +2504,7 @@ Net_WLAN_Monitor_T<AddressType,
   if (unlikely (!genlmsg_put (message_p,
                               NL_AUTO_PORT,              // port #
                               NL_AUTO_SEQ,               // sequence #
-                              familyId_,                 // family id
+                              inherited::familyId_,      // family id
                               0,                         // (user-) hdrlen
 //                              NLM_F_REQUEST | NLM_F_ACK, // flags
                               0,
@@ -2373,6 +2526,8 @@ Net_WLAN_Monitor_T<AddressType,
   NLA_PUT_U32 (message_p,
                NL80211_ATTR_IFINDEX,
                static_cast<ACE_UINT32> (if_index_i));
+  // *NOTE*: "...NL80211_ATTR_BSSID can be used to specify a BSSID to scan for;
+  //         if not included, the wildcard BSSID will be used. ..."
   if (unlikely (!Net_Common_Tools::isAny (APMACAddress_in)))
     NLA_PUT (message_p,
              NL80211_ATTR_BSSID,
@@ -2400,40 +2555,61 @@ Net_WLAN_Monitor_T<AddressType,
 //           NL80211_ATTR_SSID,
 //           SSID_in.size (),
 //           SSID_in.c_str ());
-  if (inherited::configuration_->lowPriorityScans)
+  if (inherited::configuration_->lowPriorityScans &&
+      hasFeature (NL80211_FEATURE_LOW_PRIORITY_SCAN,
+                  MAX_NL80211_EXT_FEATURES))
     scan_flags_i |= NL80211_SCAN_FLAG_LOW_PRIORITY;
-  if (inherited::configuration_->flushCacheBeforeScans)
+  if (inherited::configuration_->flushCacheBeforeScans &&
+      hasFeature (NL80211_FEATURE_SCAN_FLUSH,
+                  MAX_NL80211_EXT_FEATURES))
     scan_flags_i |= NL80211_SCAN_FLAG_FLUSH;
 //  NL80211_SCAN_FLAG_AP
 //  // *NOTE*: check features first; set NL80211_ATTR_MAC[, NL80211_ATTR_MAC_MASK]
-//  if (inherited::configuration_->randomizeMACAddressForScans &&
-//      Net_WLAN_Tools::hasFeature (interfaceIdentifier_in,
-//                                  NL80211_FEATURE_SCAN_RANDOM_MAC_ADDR,
-//                                  MAX_NL80211_EXT_FEATURES,
-//                                  NULL,
-//                                  familyId_))
-//    scan_flags_i |= NL80211_SCAN_FLAG_RANDOM_ADDR;
+  if (inherited::configuration_->randomizeMACAddressForScans &&
+      (hasFeature (NL80211_FEATURE_SCAN_RANDOM_MAC_ADDR,
+                   MAX_NL80211_EXT_FEATURES) ||
+       hasFeature (NL80211_FEATURE_ND_RANDOM_MAC_ADDR,
+                   MAX_NL80211_EXT_FEATURES)))
+    scan_flags_i |= NL80211_SCAN_FLAG_RANDOM_ADDR;
   // *TODO*: find out what these are
 // NL80211_SCAN_FLAG_FILS_MAX_CHANNEL_TIME
 // NL80211_SCAN_FLAG_ACCEPT_BCAST_PROBE_RESP;
 // NL80211_SCAN_FLAG_OCE_PROBE_REQ_HIGH_TX_RATE;
 // NL80211_SCAN_FLAG_OCE_PROBE_REQ_DEFERRAL_SUPPRESSION;
-
   NLA_PUT_U32 (message_p,
                NL80211_ATTR_SCAN_FLAGS,
                scan_flags_i);
+  if (scan_flags_i & NL80211_SCAN_FLAG_RANDOM_ADDR)
+  {
+    // *NOTE*: "...the NL80211_ATTR_MAC and NL80211_ATTR_MAC_MASK attributes may
+    //         also be given in which case only the masked bits will be
+    //         preserved from the MAC address and the remainder randomised. If
+    //         the attributes are not given full randomisation (46 bits, locally
+    //         administered 1, multicast 0) is assumed. ..."
+//    struct ether_addr interface_mac_address_s;
+//    ACE_OS::memset (&interface_mac_address_s, 0, sizeof (struct ether_addr));
+//    NLA_PUT (message_p,
+//             NL80211_ATTR_MAC,
+//             ETH_ALEN,
+//             interface_mac_address_s.ether_addr_octet);
+//    NLA_PUT (message_p,
+//             NL80211_ATTR_MAC_MASK,
+//             ETH_ALEN,
+//             interface_mac_address_s.ether_addr_octet);
+  } // end IF
   // *NOTE*: "...if passed, define which channels should be scanned; if not
   //          passed, all channels allowed for the current regulatory domain are
   //          used. ..."
 //  NLA_PUT_U32 (message_p,
 //               NL80211_ATTR_SCAN_FREQUENCIES,
 //               authentication_type_i);
-  // *NOTE*: do not send probe requests at 'Complementary Code Keying' rate
-  nla_put_flag (message_p,
-                NL80211_ATTR_TX_NO_CCK_RATE);
+//  // *NOTE*: do not send probe requests at 'Complementary Code Keying' rate
+//  nla_put_flag (message_p,
+//                NL80211_ATTR_TX_NO_CCK_RATE);
 //  NLA_PUT_U32 (message_p,
 //               NL80211_ATTR_MEASUREMENT_DURATION,
 //               0);
+// NL80211_ATTR_MEASUREMENT_DURATION_MANDATORY
 //  NLA_PUT_FLAG (message_p,
 //                NL80211_ATTR_SCHED_SCAN_MULTI);
   NLA_PUT (message_p,
@@ -2442,12 +2618,12 @@ Net_WLAN_Monitor_T<AddressType,
            0,
            NULL);
 
-  result = nl_send_auto (handle_, message_p);
+  result = nl_send_auto (inherited::handle_, message_p);
   if (unlikely (result < 0))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to nl_send_auto(0x%@): \"%s\", returning\n"),
-                handle_,
+                inherited::handle_,
                 ACE_TEXT (nl_geterror (result))));
     goto error;
   } // end IF
@@ -2477,16 +2653,181 @@ Net_WLAN_Monitor_T<AddressType,
                    ACE_SYNCH_USE,
                    TimePolicyType,
                    NET_WLAN_MONITOR_API_NL80211,
+                   UserDataType>::handle_input (ACE_HANDLE handle_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::handle_input"));
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::handle_);
+  ACE_ASSERT (handle_in == nl_socket_get_fd (inherited::handle_));
+
+  int result = -1;
+  ssize_t bytes_received = -1;
+  ACE_Message_Block* message_block_p =
+      allocateMessage (inherited::configuration_->defaultBufferSize);
+  if (unlikely (!message_block_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to allocateMessage(%u), aborting\n"),
+                inherited::configuration_->defaultBufferSize));
+    return -1; // <-- remove 'this' from dispatch
+  } // end IF
+  struct sockaddr_nl address_s;
+  ACE_OS::memset (&address_s, 0, sizeof (struct sockaddr_nl));
+  int address_length_i = sizeof (struct sockaddr_nl);
+
+  // read some data from the socket
+retry:
+  bytes_received =
+    ACE_OS::recvfrom (handle_in,                                       // socket handle
+                      message_block_p->wr_ptr (),                      // buffer
+                      message_block_p->capacity (),                    // #bytes to read
+                      0,                                               // flags
+                      reinterpret_cast<struct sockaddr*> (&address_s), // address
+                      &address_length_i);                              // address size
+  switch (bytes_received)
+  {
+    case -1:
+    {
+      // *IMPORTANT NOTE*: a number of issues can occur here:
+      // - connection reset by peer
+      // - connection abort()ed locally
+      int error = ACE_OS::last_error ();
+      if (error == EWOULDBLOCK)      // 11: SSL_read() failed (buffer is empty)
+        goto retry;
+      if ((error != EPIPE)        && // 32: connection reset by peer (write)
+          // -------------------------------------------------------------------
+          (error != EBADF)        && // 9
+          (error != ENOTSOCK)     && // 88
+          (error != ECONNABORTED) && // 103: connection abort()ed locally
+          (error != ECONNRESET))     // 104: connection reset by peer (read)
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::recvfrom(%d): \"%m\", aborting\n"),
+                    handle_in));
+
+      // clean up
+      message_block_p->release ();
+
+      return -1; // <-- remove 'this' from dispatch
+    }
+    // *** GOOD CASES ***
+    case 0:
+    {
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("%d: socket was closed by the peer\n"),
+                  handle_in));
+
+      // clean up
+      message_block_p->release ();
+
+      return -1; // <-- remove 'this' from dispatch
+    }
+    default:
+    {
+//      ACE_DEBUG ((LM_DEBUG,
+//                  ACE_TEXT ("[%d]: received %d bytes\n"),
+//                  handle_in,
+//                  bytes_received));
+
+      // adjust write pointer
+      message_block_p->wr_ptr (static_cast<size_t> (bytes_received));
+
+      break;
+    }
+  } // end SWITCH
+
+  // *NOTE*: fire-and-forget message_block_p
+  processMessage (address_s,
+                  message_block_p);
+
+  // *NOTE*: do not deregister from the reactor
+  return 0;
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename UserDataType>
+void
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_NL80211,
+                   UserDataType>::handle_read_stream (const ACE_Asynch_Read_Stream::Result& result_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::handle_read_stream"));
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+
+  ACE_Message_Block* message_block_p = NULL;
+  struct sockaddr_nl address_s;
+  ACE_OS::memset (&address_s, 0, sizeof (struct sockaddr_nl));
+
+  // *IMPORTANT NOTE*: there is currently no way to retrieve the source address
+  //                   when using the proactor implementation based on aio(7)
+  // *TODO*: implement ACE_Asynch_Read_Dgram/Result specializations that support
+  //         recvfrom(2) semantics
+
+  if (unlikely (!result_in.success ()))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Read_Stream::read(%d,%u): \"%s\", returning\n"),
+                result_in.handle (),
+                result_in.bytes_to_read (),
+                ACE_TEXT (ACE_OS::strerror (result_in.error ()))));
+    return;
+  } // end IF
+
+  // make a shallow copy of the message buffer
+  message_block_p = result_in.message_block ().duplicate ();
+  if (unlikely (!message_block_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Message_Block::duplicate(): \"%m\", returning\n")));
+    return;
+  } // end IF
+
+  // *NOTE*: fire-and-forget message_block_p
+  processMessage (address_s,
+                  message_block_p);
+
+  if (unlikely (!initiate_read_stream (inherited::configuration_->defaultBufferSize)))
+  {
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT ("failed to Net_WLAN_Monitor_T::initiate_read_stream(%u), returning\n"),
+                inherited::configuration_->defaultBufferSize));
+    return;
+  } // end IF
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename UserDataType>
+int
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_NL80211,
                    UserDataType>::svc (void)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::svc"));
 
   int result = -1;
+  int error = 0;
 
   { ACE_GUARD_RETURN (typename inherited::ITASKCONTROL_T::MUTEX_T, aGuard, inherited::lock_, -1);
-    if (inherited::dispatchStarted_)
+    if (!inherited::dispatchStarted_)
+    {
+      inherited::dispatchStarted_ = true;
       goto state_machine;
-    inherited::dispatchStarted_ = true;
+    } // end IF
   } // end lock scope
 
 //netlink_dispatch:
@@ -2497,18 +2838,41 @@ Net_WLAN_Monitor_T<AddressType,
 
   // sanity check(s)
   ACE_ASSERT (callbacks_);
-  ACE_ASSERT (handle_);
+  ACE_ASSERT (inherited::handle_);
 
   do
-  {
-    result = nl_recvmsgs (handle_, callbacks_);
+  { // *IMPORTANT NOTE*: there is no known way to cleanly unblock from a socket
+    //                   read. Possible solutions:
+    //                   - close()/shutdown() do not work
+    //                   - SIGINT might work, ugly
+    //                   - flag-setting and sending a 'dummy request', ugly
+    //                   --> use ACE event dispatch and circumvent nl_revmsgs()
+    result = nl_recvmsgs (inherited::handle_, callbacks_);
     if (unlikely (result < 0))
     {
+      if (-result == NLE_BAD_SOCK)  // 3: shutdown (see below))
+        break;
+      else if (-result != NLE_BUSY) // 25
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\" (%d), returning\n"),
+                    inherited::handle_,
+                    ACE_TEXT (nl_geterror (result)), result));
+        break;
+      } // end IF
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\", continuing\n"),
+                  inherited::handle_,
+                  ACE_TEXT (nl_geterror (result))));
+    } // end IF
+    error = ACE_OS::last_error ();
+    if (unlikely (error &&
+                  (error != EAGAIN))) // 11: socket is non-blocking, no data
+    {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to nl_recvmsgs(0x%@): \"%s\" (%d), returning\n"),
-                  handle_,
-                  ACE_TEXT (nl_geterror (result)), result));
-      break; // done
+                  ACE_TEXT ("failed to nl_recvmsgs(%@): \"%m\", returning\n"),
+                  inherited::handle_));
+      break;
     } // end IF
   } while (true);
 
@@ -2519,76 +2883,507 @@ Net_WLAN_Monitor_T<AddressType,
   return result;
 
 state_machine:
-  return inherited::svc ();
+  result = inherited::svc ();
+
+  // *NOTE*: the base class is not aware of the fact that not all task threads
+  //         are dispatching the message queue
+  //         --> shutdown manually:
+  //         - reset the socket
+  //         - flush the MB_STOP message
+  // *NOTE*: nl_close calls close(), which, on Linux systems, does not (!)
+  //         signal the thread blocked in recvmsg() (see above)
+  // *NOTE*: apparently, shutdown(2) does not work on netlink sockets; it
+  //         returns ENOTSUP
+  //         --> reconnect using a fresh socket
+//  int result_2 = ACE_OS::shutdown (nl_socket_get_fd (inherited::handle_),
+//                                   SHUT_RDWR);
+//  if (unlikely (result_2 == -1))
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_OS::shutdown(%d,%d): \"%m\", continuing\n"),
+//                nl_socket_get_fd (inherited::handle_), SHUT_RDWR));
+//  nl_close (inherited::handle_);
+// nl_socket_disable_msg_peek (inherited::handle_);
+//  nl_socket_set_buffer_size (inherited::handle_, int rx, int tx);
+//  nl_socket_disable_auto_ack (inherited::handle_);
+
+//  int result_2 = nl_connect (inherited::handle_, NETLINK_GENERIC);
+//  if (unlikely (result_2 < 0))
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to nl_connect(%@): \"%s\", continuing\n"),
+//                inherited::handle_,
+//                ACE_TEXT (nl_geterror (result_2))));
+
+  int result_2 = inherited::flush (ACE_Task_Flags::ACE_FLUSHALL);
+//  if (unlikely (result_2 != 1))
+  if (unlikely (result_2 != 0))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Task_T::flush(): \"%m\", continuing\n")));
+  result_2 = inherited::msg_queue_->activate ();
+  if (unlikely (result_2 == -1))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_MessageQueue_T::activate(): \"%m\", continuing\n")));
+  inherited::dispatchStarted_ = false;
+
+  return result;
 }
 
-//template <typename AddressType,
-//          typename ConfigurationType,
-//          ACE_SYNCH_DECL,
-//          typename TimePolicyType,
-//          typename UserDataType>
-//bool
-//Net_WLAN_Monitor_T<AddressType,
-//                   ConfigurationType,
-//                   ACE_SYNCH_USE,
-//                   TimePolicyType,
-//                   NET_WLAN_MONITOR_API_NL80211,
-//                   UserDataType>::initiate_read_stream (unsigned int bufferSize_in)
-//{
-//  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::initiate_read_stream"));
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename UserDataType>
+ACE_Message_Block*
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_NL80211,
+                   UserDataType>::allocateMessage (unsigned int bufferSize_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::allocateMessage"));
 
-//  // step1: allocate a data buffer
-//  ACE_Message_Block* message_block_p = NULL;
-//  ACE_NEW_NORETURN (message_block_p,
-//                    ACE_Message_Block (bufferSize_in,                      // size
-//                                       ACE_Message_Block::MB_DATA,         // type
-//                                       NULL,                               // cont
-//                                       NULL,                               // data
-//                                       NULL,                               // allocator_strategy
-//                                       NULL,                               // locking_strategy
-//                                       ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY, // priority
-//                                       ACE_Time_Value::zero,               // execution_time
-//                                       ACE_Time_Value::max_time,           // deadline_time
-//                                       NULL,                               // data_block_allocator
-//                                       NULL));                             // message_block_allocator
-//  if (unlikely (!message_block_p))
-//  {
-//    ACE_DEBUG ((LM_CRITICAL,
-//                ACE_TEXT ("failed to allocate memory (was: %u byte(s)): \"%m\", aborting\n"),
-//                bufferSize_in));
-//    return false;
-//  } // end IF
+  // initialize return value(s)
+  ACE_Message_Block* return_value = NULL;
 
-//  // step2: start (asynchronous) read
-////  size_t bytes_to_read = message_block_p->size ();
-//  int result =
-//      inputStream_.read (*message_block_p,                     // buffer
+  ACE_NEW_NORETURN (return_value,
+                    ACE_Message_Block (bufferSize_in,                      // size
+                                       ACE_Message_Block::MB_DATA,         // type
+                                       NULL,                               // cont
+                                       NULL,                               // data
+                                       NULL,                               // allocator_strategy
+                                       NULL,                               // locking_strategy
+                                       ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY, // priority
+                                       ACE_Time_Value::zero,               // execution_time
+                                       ACE_Time_Value::max_time,           // deadline_time
+                                       NULL,                               // data_block_allocator
+                                       NULL));                             // message_block_allocator
+  if (unlikely (!return_value))
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory (was: %u byte(s)): \"%m\", aborting\n"),
+                bufferSize_in));
+    return NULL;
+  } // end IF
+
+  return return_value;
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename UserDataType>
+void
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_NL80211,
+                   UserDataType>::processMessage (const struct sockaddr_nl& sourceAddress_in,
+                                                  ACE_Message_Block*& messageBlock_inout)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::processMessage"));
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (messageBlock_inout);
+
+  int result = -1;
+  ACE_Message_Block* message_block_p, *message_block_2;
+  int buffer_size;
+  int err = 0, multipart = 0, interrupted = 0, nrecv = 0;
+  struct nlmsghdr* nlmsghdr_p = NULL;
+  //  struct ucred* ucred_p = NULL;
+  unsigned int missing_bytes, bytes_to_copy, offset;
+
+  // form a chain of buffers
+  message_block_2 = buffer_;
+  if (message_block_2)
+  {
+    while (message_block_2->cont ())
+      message_block_2 = message_block_2->cont ();
+    message_block_2->cont (messageBlock_inout);
+  } // end IF
+  else
+    buffer_ = messageBlock_inout;
+  ACE_ASSERT (buffer_);
+  messageBlock_inout = NULL;
+
+  // dissect nl80211 messages
+next:
+  // sanity check(s)
+  buffer_size = buffer_->total_length ();
+  if (buffer_size < NLMSG_HDRLEN)
+    return; // need more data
+
+  if (!message_)
+  {
+    message_ = nlmsg_alloc ();
+    if (unlikely (!message_))
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT ("failed to nlmsg_alloc(): \"%m\", returning\n")));
+      goto error;
+    } // end IF
+  } // end IF
+  ACE_ASSERT (message_);
+  nlmsghdr_p =  nlmsg_hdr (message_);
+  ACE_ASSERT (nlmsghdr_p);
+
+  // step1: assemble the message header ?
+  if (headerReceived_)
+    goto continue_;
+
+  message_block_p = buffer_;
+  missing_bytes = NLMSG_HDRLEN;
+  bytes_to_copy = 0;
+  offset = 0;
+  do
+  {
+    bytes_to_copy = message_block_p->length ();
+    if (likely (bytes_to_copy > missing_bytes))
+      bytes_to_copy = missing_bytes;
+
+    ACE_OS::memcpy (nlmsghdr_p + offset,
+                    message_block_p->rd_ptr (),
+                    bytes_to_copy);
+    offset += bytes_to_copy;
+
+    message_block_p->rd_ptr (bytes_to_copy);
+    if (!message_block_p->length ())
+      message_block_p = message_block_p->cont ();
+    ACE_ASSERT (message_block_p);
+
+    missing_bytes -= bytes_to_copy;
+  } while (missing_bytes);
+  buffer_size -= NLMSG_HDRLEN;
+
+  headerReceived_ = true;
+
+  // step2: assemble the message body
+continue_:
+  // sanity check(s)
+  ACE_ASSERT (nlmsghdr_p);
+  missing_bytes = nlmsg_datalen (nlmsghdr_p);
+  if (missing_bytes > buffer_size)
+    return; // need more data
+
+  message_block_p = buffer_;
+  while (!message_block_p->length ())
+    message_block_p = message_block_p->cont ();
+  bytes_to_copy = 0;
+  offset = 0;
+  do
+  {
+    bytes_to_copy = message_block_p->length ();
+    if (likely (bytes_to_copy > missing_bytes))
+      bytes_to_copy = missing_bytes;
+
+    ACE_OS::memcpy (nlmsg_data (nlmsghdr_p) + offset,
+                    message_block_p->rd_ptr (),
+                    bytes_to_copy);
+    offset += bytes_to_copy;
+
+    message_block_p->rd_ptr (bytes_to_copy);
+    if (!message_block_p->length ())
+      message_block_p = message_block_p->cont ();
+
+    missing_bytes -= bytes_to_copy;
+  } while (missing_bytes);
+  buffer_size -= nlmsg_datalen (nlmsghdr_p);
+
+  // unlink fully processed head message buffer(s)
+  if (message_block_p &&
+      (message_block_p != buffer_))
+  { // --> there is trailing data
+    ACE_ASSERT (buffer_size);
+    message_block_2 = buffer_;
+    while (message_block_2->cont () != message_block_p)
+      message_block_2 = message_block_2->cont ();
+    ACE_ASSERT (message_block_2->cont ());
+    message_block_2->cont (NULL);
+
+    buffer_->release ();
+    buffer_ = message_block_p;
+  } // end IF
+  else if (!message_block_p)
+  { // --> there is no more data
+    ACE_ASSERT (!buffer_size);
+    buffer_->release ();
+    buffer_ = NULL;
+  } // end ELSE IF
+
+  headerReceived_ = false;
+
+  // step3: dispatch message
+  // *NOTE*: this code is adapted from libnl nl.c
+#define NL_CB_CALL(cb,type,msg) \
+do { \
+  err = nl_cb_call (cb, type, msg); \
+  switch (err) { \
+    case NL_OK: \
+    case NL_STOP: \
+        break; \
+    case NL_SKIP: \
+        goto continue_2; \
+    default: \
+        goto error; \
+  } \
+} while (0)
+
+  nlmsg_set_proto (message_,
+                   inherited::handle_->s_proto);
+  nlmsg_set_src (message_,
+                 &const_cast<struct sockaddr_nl&> (sourceAddress_in));
+//    if (ucred_p)
+//      nlmsg_set_creds (message_, ucred_p);
+
+#if defined (_DEBUG)
+  if (inherited::configuration_->debug)
+    nl_msg_dump (message_, stderr);
+#endif // _DEBUG
+
+  nrecv++;
+
+  /* Raw callback is the first, it gives the most control
+     * to the user and he can do his very own parsing. */
+  if (callbacks_->cb_set[NL_CB_MSG_IN])
+    NL_CB_CALL (callbacks_, NL_CB_MSG_IN, message_);
+
+  /* Sequence number checking. The check may be done by
+     * the user, otherwise a very simple check is applied
+     * enforcing strict ordering */
+  if (callbacks_->cb_set[NL_CB_SEQ_CHECK]) {
+    NL_CB_CALL (callbacks_, NL_CB_SEQ_CHECK, message_);
+
+    /* Only do sequence checking if auto-ack mode is enabled */
+  } else if (!(inherited::handle_->s_flags & NL_NO_AUTO_ACK)) {
+    if (nlmsghdr_p->nlmsg_seq != inherited::handle_->s_seq_expect) {
+      if (callbacks_->cb_set[NL_CB_INVALID])
+        NL_CB_CALL (callbacks_, NL_CB_INVALID, message_);
+      else {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid message sequence # (was: %d, expected: %d), returning\n"),
+                    nlmsghdr_p->nlmsg_seq,
+                    inherited::handle_->s_seq_expect));
+        err = -NLE_SEQ_MISMATCH;
+        goto error;
+      } // end ELSE
+    } // end IF
+  }
+
+  if (nlmsghdr_p->nlmsg_type == NLMSG_DONE     ||
+      nlmsghdr_p->nlmsg_type == NLMSG_ERROR    ||
+      nlmsghdr_p->nlmsg_type == NLMSG_NOOP     ||
+      nlmsghdr_p->nlmsg_type == NLMSG_OVERRUN) {
+    /* We can't check for !NLM_F_MULTI since some netlink
+       * users in the kernel are broken. */
+    inherited::handle_->s_seq_expect++;
+  } // end IF
+
+  if (nlmsghdr_p->nlmsg_flags & NLM_F_MULTI)
+    multipart = 1;
+
+  if (nlmsghdr_p->nlmsg_flags & NLM_F_DUMP_INTR) {
+    if (callbacks_->cb_set[NL_CB_DUMP_INTR])
+      NL_CB_CALL (callbacks_, NL_CB_DUMP_INTR, message_);
+    else {
+      /*
+         * We have to continue reading to clear
+         * all messages until a NLMSG_DONE is
+         * received and report the inconsistency.
+         */
+      interrupted = 1;
+    } // end ELSE
+  } // end IF
+
+  /* Other side wishes to see an ack for this message */
+  if (nlmsghdr_p->nlmsg_flags & NLM_F_ACK) {
+    if (callbacks_->cb_set[NL_CB_SEND_ACK])
+      NL_CB_CALL (callbacks_, NL_CB_SEND_ACK, message_);
+    else {
+      /* FIXME: implement */
+    }
+  } // end IF
+
+  /* messages terminates a multipart message, this is
+     * usually the end of a message and therefore we slip
+     * out of the loop by default. the user may overrule
+     * this action by skipping this packet. */
+  if (nlmsghdr_p->nlmsg_type == NLMSG_DONE) {
+    multipart = 0;
+    if (callbacks_->cb_set[NL_CB_FINISH])
+      NL_CB_CALL (callbacks_, NL_CB_FINISH, message_);
+  } // end IF
+
+  /* Message to be ignored, the default action is to
+     * skip this message if no callback is specified. The
+     * user may overrule this action by returning
+     * NL_PROCEED. */
+  else if (nlmsghdr_p->nlmsg_type == NLMSG_NOOP) {
+    if (callbacks_->cb_set[NL_CB_SKIPPED])
+      NL_CB_CALL (callbacks_, NL_CB_SKIPPED, message_);
+    else
+      goto continue_2;
+  }
+
+  /* Data got lost, report back to user. The default action is to
+     * quit parsing. The user may overrule this action by retuning
+     * NL_SKIP or NL_PROCEED (dangerous) */
+  else if (nlmsghdr_p->nlmsg_type == NLMSG_OVERRUN) {
+    if (callbacks_->cb_set[NL_CB_OVERRUN])
+      NL_CB_CALL (callbacks_, NL_CB_OVERRUN, message_);
+    else {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("buffer overrun, returning\n")));
+      err = -NLE_MSG_OVERFLOW;
+      goto error;
+    } // end ELSE
+  }
+
+  /* Message carries a nlmsgerr */
+  else if (nlmsghdr_p->nlmsg_type == NLMSG_ERROR) {
+    struct nlmsgerr* e =
+        reinterpret_cast<struct nlmsgerr*> (nlmsg_data (nlmsghdr_p));
+
+    if (nlmsghdr_p->nlmsg_len < nlmsg_size (sizeof (*e))) {
+      /* Truncated error message, the default action
+         * is to stop parsing. The user may overrule
+         * this action by returning NL_SKIP or
+         * NL_PROCEED (dangerous) */
+      if (callbacks_->cb_set[NL_CB_INVALID])
+        NL_CB_CALL (callbacks_, NL_CB_INVALID, message_);
+      else {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("truncated message, returning\n")));
+        err = -NLE_MSG_TRUNC;
+        goto error;
+      } // end ELSE
+    } else if (e->error) {
+      /* Error message reported back from kernel. */
+      if (callbacks_->cb_err) {
+        err =
+            callbacks_->cb_err (&const_cast<struct sockaddr_nl&> (sourceAddress_in),
+                                e,
+                                callbacks_->cb_err_arg);
+        if (err < 0)
+          goto error;
+        else if (err == NL_SKIP)
+          goto continue_2;
+        else if (err == NL_STOP) {
+          err = -nl_syserr2nlerr (e->error);
+          goto error;
+        }
+      } else {
+        err = -nl_syserr2nlerr (e->error);
+        goto error;
+      } // end ELSE
+    } else if (callbacks_->cb_set[NL_CB_ACK])
+      NL_CB_CALL (callbacks_, NL_CB_ACK, message_);
+  } else {
+    /* Valid message (not checking for MULTIPART bit to
+       * get along with broken kernels. NL_SKIP has no
+       * effect on this.  */
+    if (callbacks_->cb_set[NL_CB_VALID])
+      NL_CB_CALL (callbacks_, NL_CB_VALID, message_);
+  } // end ELSE
+
+continue_2:
+  err = 0;
+  nlmsg_free (message_);
+  message_ = NULL;
+
+  if (buffer_)
+    goto next;
+
+  return;
+
+error:
+  if (message_)
+    nlmsg_free (message_);
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename UserDataType>
+bool
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_NL80211,
+                   UserDataType>::initiate_read_stream (unsigned int bufferSize_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::initiate_read_stream"));
+
+  // step1: allocate a message buffer
+  ACE_Message_Block* message_block_p = allocateMessage (bufferSize_in);
+  if (unlikely (!message_block_p))
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate message (was: %u byte(s)): \"%m\", aborting\n"),
+                bufferSize_in));
+    return false;
+  } // end IF
+
+  // step2: start (asynchronous) read
+//  size_t bytes_to_read = message_block_p->size ();
+  int result =
+      inputStream_.read (*message_block_p,                     // buffer
+                         message_block_p->size (),             // buffer size
+                         NULL,                                 // ACT
+                         0,                                    // priority
+                         COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
+//      inputStream_.recv (message_block_p,                      // buffer
 //                         message_block_p->size (),             // buffer size
+//                         0,                                    // flags
+//                         ACE_PROTOCOL_FAMILY_NETLINK,          // protocol family
 //                         NULL,                                 // ACT
 //                         0,                                    // priority
 //                         COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
-////      inputStream_.recv (message_block_p,                      // buffer
-////                         message_block_p->size (),             // buffer size
-////                         0,                                    // flags
-////                         ACE_PROTOCOL_FAMILY_NETLINK,          // protocol family
-////                         NULL,                                 // ACT
-////                         0,                                    // priority
-////                         COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL); // signal
-//  if (unlikely (result == -1))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to ACE_Asynch_Read_Stream::read(%u): \"%m\", aborting\n"),
-////                ACE_TEXT ("failed to ACE_Asynch_Read_Stream::recv(%u): \"%m\", aborting\n"),
-//                bufferSize_in));
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Asynch_Read_Stream::read(%u): \"%m\", aborting\n"),
+//                ACE_TEXT ("failed to ACE_Asynch_Read_Stream::recv(%u): \"%m\", aborting\n"),
+                bufferSize_in));
 
-//    // clean up
-//    message_block_p->release ();
+    // clean up
+    message_block_p->release ();
 
-//    return false;
-//  } // end IF
+    return false;
+  } // end IF
 
-//  return true;
-//}
+  return true;
+}
+
+template <typename AddressType,
+          typename ConfigurationType,
+          ACE_SYNCH_DECL,
+          typename TimePolicyType,
+          typename UserDataType>
+bool
+Net_WLAN_Monitor_T<AddressType,
+                   ConfigurationType,
+                   ACE_SYNCH_USE,
+                   TimePolicyType,
+                   NET_WLAN_MONITOR_API_NL80211,
+                   UserDataType>::hasFeature (enum nl80211_feature_flags feature_in,
+                                              enum nl80211_ext_feature_index extendedFeature_in) const
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::hasFeature"));
+
+  // sanity check(s)
+  ACE_ASSERT (inherited::isInitialized_);
+  ACE_ASSERT (feature_in || (extendedFeature_in < MAX_NL80211_EXT_FEATURES));
+
+  if (likely (feature_in))
+    return (features_ & static_cast<ACE_UINT32> (feature_in));
+
+  return (extendedFeatures_.find (extendedFeature_in) != extendedFeatures_.end ());
+}
 #endif // NL80211_SUPPORT
 
 //////////////////////////////////////////

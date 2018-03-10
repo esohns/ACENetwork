@@ -599,7 +599,7 @@ network_wlan_nl80211_finish_cb (struct nl_msg* message_in,
   int* result_p = static_cast<int*> (argument_in);
   *result_p = 0;
 
-  return NL_STOP;
+  return NL_SKIP;
 }
 
 int
@@ -641,26 +641,40 @@ network_wlan_nl80211_multicast_groups_cb (struct nl_msg* message_in,
   int rem_mcgrp = 0;
   Net_WLAN_nl80211_MulticastGroupIdsIterator_t iterator;
 
-  nla_parse (nlattr_a,
-             CTRL_ATTR_MAX,
-             genlmsg_attrdata (genlmsghdr_p, 0),
-             genlmsg_attrlen (genlmsghdr_p, 0),
-             NULL);
+  int result = nla_parse (nlattr_a,
+                          CTRL_ATTR_MAX,
+                          genlmsg_attrdata (genlmsghdr_p, 0),
+                          genlmsg_attrlen (genlmsghdr_p, 0),
+                          NULL);
+  if (unlikely (result < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to nla_parse(): \"%s\", aborting\n"),
+                ACE_TEXT (nl_geterror (result))));
+    return NL_STOP;
+  } // end IF
   if (!nlattr_a[CTRL_ATTR_MCAST_GROUPS])
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("missing 'multicast groups' attribute, continuing\n")));
-    return NL_SKIP;
+                ACE_TEXT ("missing 'multicast groups' attribute, aborting\n")));
+    return NL_STOP;
   } // end IF
 
   nla_for_each_nested (nlattr_p, nlattr_a[CTRL_ATTR_MCAST_GROUPS], rem_mcgrp)
   { ACE_ASSERT (nlattr_p);
     struct nlattr* nlattr_2[CTRL_ATTR_MCAST_GRP_MAX + 1];
-    nla_parse (nlattr_2,
-               CTRL_ATTR_MCAST_GRP_MAX,
-               static_cast<struct nlattr*> (nla_data (nlattr_p)),
-               nla_len (nlattr_p),
-               NULL);
+    result = nla_parse (nlattr_2,
+                        CTRL_ATTR_MCAST_GRP_MAX,
+                        static_cast<struct nlattr*> (nla_data (nlattr_p)),
+                        nla_len (nlattr_p),
+                        NULL);
+    if (unlikely (result < 0))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to nla_parse(): \"%s\", aborting\n"),
+                  ACE_TEXT (nl_geterror (result))));
+      return NL_STOP;
+    } // end IF
     if (unlikely (!nlattr_2[CTRL_ATTR_MCAST_GRP_NAME] ||
                   !nlattr_2[CTRL_ATTR_MCAST_GRP_ID]))
     {
@@ -708,15 +722,28 @@ network_wlan_nl80211_default_handler_cb (struct nl_msg* message_in,
   Net_WLAN_IMonitorBase* imonitor_p =
       static_cast<Net_WLAN_IMonitorBase*> (argument_in);
 
+  // step1: parse message attributes
   struct nlattr* nlattr_a[NL80211_ATTR_MAX + 1];
-  nla_parse (nlattr_a,
-             NL80211_ATTR_MAX,
-             genlmsg_attrdata (genlmsghdr_p, 0),
-             genlmsg_attrlen (genlmsghdr_p, 0),
-             NULL);
+  int result = nla_parse (nlattr_a,
+                          NL80211_ATTR_MAX,
+                          genlmsg_attrdata (genlmsghdr_p, 0),
+                          genlmsg_attrlen (genlmsghdr_p, 0),
+                          NULL);
+  if (unlikely (result < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to nla_parse(): \"%s\", aborting\n"),
+                ACE_TEXT (nl_geterror (result))));
+    return NL_STOP;
+  } // end IF
+
   switch (genlmsghdr_p->cmd)
   {
     case NL80211_CMD_GET_WIPHY:
+    {
+      break;
+    }
+    case NL80211_CMD_NEW_WIPHY:
     {
       break;
     }
@@ -734,10 +761,232 @@ network_wlan_nl80211_default_handler_cb (struct nl_msg* message_in,
     }
     case NL80211_CMD_NEW_SCAN_RESULTS:
     {
+      // sanity check(s)
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_IFINDEX]);
+
+      unsigned int if_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_IFINDEX]);
+      ACE_ASSERT (if_index_i);
+      char buffer_a[IF_NAMESIZE + 1];
+      if (unlikely (!::if_indextoname (if_index_i,
+                                       buffer_a)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to if_indextoname(%u): \"%m\", aborting\n"),
+                    if_index_i));
+        return NL_STOP;
+      } // end IF
+      std::string interface_identifier_string = buffer_a;
+      std::string interface_identifier_string_2 =
+          imonitor_p->interfaceIdentifier ();
+
+      if (ACE_OS::strcmp (interface_identifier_string.c_str (),
+                          interface_identifier_string_2.c_str ()))
+        return NL_SKIP;
+
+      // *NOTE*: (somewhat confusingly,) control flow reaches here in two cases:
+      //         - when the scan operation has completed (i.e. comand
+      //           NL80211_CMD_TRIGGER_SCAN) has been processed)
+      //           --> send NL80211_CMD_GET_SCAN to retrieve the result(s)
+      //         - when scan results are being notified (i.e. command
+      //           NL80211_CMD_GET_SCAN is being processed)
+      //           --> update cache entries
+      //         The cases may be distinguished by the fact that case 1 is a
+      //         broadcast event sent to the "scan" multicast group, whereas
+      //         case 2 are a unicast message(s) forwarded to the sender of the
+      //         NL80211_CMD_GET_SCAN command
+      struct sockaddr_nl* source_address_p = nlmsg_get_src (message_in);
+      ACE_ASSERT (source_address_p);
+      if (source_address_p->nl_groups)
+      {
+        // scan complete --> fetch result(s)
+        int result = -1;
+        int driver_family_id_i = imonitor_p->get ();
+        ACE_ASSERT (driver_family_id_i);
+        const struct nl_sock* socket_handle_p = imonitor_p->getP ();
+        ACE_ASSERT (socket_handle_p);
+        struct nl_msg* message_p = nlmsg_alloc ();
+        if (unlikely (!message_p))
+        {
+          ACE_DEBUG ((LM_CRITICAL,
+                      ACE_TEXT ("failed to nlmsg_alloc (): \"%m\", aborting\n")));
+          return NL_STOP;
+        } // end IF
+        if (unlikely (!genlmsg_put (message_p,
+                                    NL_AUTO_PORT,         // port #
+                                    NL_AUTO_SEQ,          // sequence #
+                                    driver_family_id_i,   // family id
+                                    0,                    // (user-) hdrlen
+                                    NLM_F_DUMP,           // flags
+                                    NL80211_CMD_GET_SCAN, // command id
+                                    0)))                  // interface version
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to genlmsg_put (): \"%m\", aborting\n")));
+          nlmsg_free (message_p);
+          return NL_STOP;
+        } // end IF
+        NLA_PUT_U32 (message_p,
+                     NL80211_ATTR_IFINDEX,
+                     if_index_i);
+        result =
+            nl_send_auto_complete (const_cast<struct nl_sock*> (socket_handle_p),
+                                   message_p);
+        if (unlikely (result < 0))
+        {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("failed to nl_send_auto_complete(%@): \"%s\", aborting\n"),
+                      socket_handle_p,
+                      ACE_TEXT (nl_geterror (result))));
+          nlmsg_free (message_p);
+          return NL_STOP;
+        } // end IF
+nla_put_failure:
+        nlmsg_free (message_p);
+
+#if defined (_DEBUG)
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("scan complete, fetching results...\n")));
+#endif // _DEBUG
+        break;
+      } // end IF
+
+      // scan result(s)
+      struct nlmsghdr* nlmsghdr_p = nlmsg_hdr (message_in);
+      ACE_ASSERT (nlmsghdr_p);
+      if (unlikely (nlmsghdr_p->nlmsg_type == NLMSG_DONE)) // <-- final result
+      {
+        try {
+          imonitor_p->onScanComplete (interface_identifier_string);
+        } catch (...) {
+          ACE_DEBUG ((LM_ERROR,
+                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onScanComplete(\"%s\"), aborting\n"),
+                      ACE_TEXT (interface_identifier_string.c_str ())));
+          return NL_STOP;
+        }
+        break; // done
+      } // end IF
+
+      struct nlattr* nlattr_2[NL80211_BSS_MAX + 1];
+      struct ether_addr ap_mac_address_s;
+      std::string ssid_string;
+      uint8_t len_i;
+      uint8_t* data_p = NULL;
+      int i;
+      uint8_t ie_len_i =0;
+      uint8_t* ie_data_p = NULL;
+      if (//!nlattr_a[NL80211_ATTR_SCAN_FREQUENCIES] ||
+          //!nlattr_a[NL80211_ATTR_SCAN_SSIDS] ||
+          !nlattr_a[NL80211_ATTR_BSS])
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to parse nl80211 scan data: 'bss' attribute missing, aborting\n")));
+        return NL_STOP;
+      } // end IF
+      result = nla_parse_nested (nlattr_2,
+                                 NL80211_BSS_MAX,
+                                 nlattr_a[NL80211_ATTR_BSS],
+                                 NULL);
+      if (unlikely (result < 0))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to nla_parse_nested(NL80211_ATTR_BSS): \"%s\", aborting\n"),
+                    ACE_TEXT (nl_geterror (result))));
+        return NL_STOP;
+      } // end IF
+      if (!nlattr_2[NL80211_BSS_FREQUENCY]            ||
+          !nlattr_2[NL80211_BSS_SIGNAL_MBM]           ||
+          !nlattr_2[NL80211_BSS_BSSID]                ||
+          !nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS] ||
+          !nlattr_2[NL80211_BSS_SEEN_MS_AGO])
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to parse nl80211 scan data: 'bss freq/signal/bssid/ies/age' attribute(s) missing, aborting\n")));
+        return NL_STOP;
+      } // end IF
+
+      ACE_OS::memcpy (&ap_mac_address_s.ether_addr_octet,
+                      nla_data (nlattr_2[NL80211_BSS_BSSID]),
+                      ETH_ALEN);
+      ie_len_i =
+          static_cast<uint8_t> (nla_len (nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]));
+      ie_data_p =
+          reinterpret_cast<uint8_t*> (nla_data (nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]));
+      while (ie_len_i >= 2 && ie_len_i >= ie_data_p[1])
+      {
+        if (ie_data_p[0] == 0 &&
+            ie_data_p[1] >= 0 && ie_data_p[1] <= 32)
+        {
+          len_i = ie_data_p[1];
+          data_p = ie_data_p + 2;
+          for (i = 0; i < len_i; i++)
+          {
+            if (::isprint (data_p[i]) && data_p[i] != ' ' && data_p[i] != '\\')
+              ssid_string += static_cast<char> (data_p[i]);
+            else if (data_p[i] == ' ' && (i != 0 && i != len_i -1))
+              ssid_string += ' ';
+            else
+            {
+//              ssid_string += ("\\x%.2x", data_p[i]);
+              ssid_string += ACE_TEXT_ALWAYS_CHAR ("\\x");
+              // *TODO*: this is incomplete (see above)
+              ACE_ASSERT (false);
+              ssid_string += static_cast<char> (data_p[i]);
+            } // end ELSE
+          } // end FOR
+          break;
+        } // end IF
+        ie_len_i -= ie_data_p[1] + 2;
+        ie_data_p += ie_data_p[1] + 2;
+      } // end WHILE
+      imonitor_p->set2R (ssid_string,
+                         interface_identifier_string);
+#if defined (_DEBUG)
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("detected access point (frequency (MHz): %u, signal strength (dBM): %u, MAC: %s, SSID: %s, age (ms): %u)...\n"),
+                  nla_get_u32 (nlattr_2[NL80211_BSS_FREQUENCY]),
+                  nla_get_u32 (nlattr_2[NL80211_BSS_SIGNAL_MBM]) / 100,
+                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (ap_mac_address_s.ether_addr_octet, NET_LINKLAYER_802_11).c_str ()),
+                  ACE_TEXT (ssid_string.c_str ()),
+                  nla_get_u32 (nlattr_2[NL80211_BSS_SEEN_MS_AGO])));
+#endif // _DEBUG
+
       break;
     }
     case NL80211_CMD_SCAN_ABORTED:
     {
+      // sanity check(s)
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_IFINDEX]);
+
+      unsigned int if_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_IFINDEX]);
+      ACE_ASSERT (if_index_i);
+      char buffer_a[IF_NAMESIZE + 1];
+      if (unlikely (!::if_indextoname (if_index_i,
+                                       buffer_a)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to if_indextoname(%u): \"%m\", aborting\n"),
+                    if_index_i));
+        return NL_STOP;
+      } // end IF
+      std::string interface_identifier_string = buffer_a;
+      std::string interface_identifier_string_2 =
+          imonitor_p->interfaceIdentifier ();
+
+      if (ACE_OS::strcmp (interface_identifier_string.c_str (),
+                          interface_identifier_string_2.c_str ()))
+        return NL_SKIP;
+
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("scan failed (interface was: \"%s\"), continuing\n"),
+                  ACE_TEXT (interface_identifier_string.c_str ())));
+//      try {
+//        imonitor_p->onScanComplete (interface_identifier_string);
+//      } catch (...) {
+//        ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onScanComplete(\"%s\"), continuing\n"),
+//                    ACE_TEXT (interface_identifier_string.c_str ())));
+//      }
+
       break;
     }
     case NL80211_CMD_REG_CHANGE:
@@ -759,9 +1008,9 @@ network_wlan_nl80211_default_handler_cb (struct nl_msg* message_in,
     case NL80211_CMD_DISASSOCIATE:
     {
       // sanity check(s)
-      ACE_ASSERT (nlattr_a[NL80211_ATTR_WIPHY]);
-      ACE_ASSERT (nlattr_a[NL80211_ATTR_IFINDEX]);
       ACE_ASSERT (nlattr_a[NL80211_ATTR_FRAME]);
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_IFINDEX]);
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_WIPHY]);
 
       unsigned int if_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_IFINDEX]);
       ACE_ASSERT (if_index_i);
@@ -772,7 +1021,7 @@ network_wlan_nl80211_default_handler_cb (struct nl_msg* message_in,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to if_indextoname(%u): \"%m\", aborting\n"),
                     if_index_i));
-        return NL_SKIP;
+        return NL_STOP;
       } // end IF
       std::string interface_identifier_string = buffer_a;
       std::string interface_identifier_string_2 =
@@ -819,7 +1068,7 @@ network_wlan_nl80211_default_handler_cb (struct nl_msg* message_in,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to if_indextoname(%u): \"%m\", aborting\n"),
                     if_index_i));
-        return NL_SKIP;
+        return NL_STOP;
       } // end IF
       std::string interface_identifier_string = buffer_a;
       std::string interface_identifier_string_2 =
@@ -870,112 +1119,5 @@ network_wlan_nl80211_default_handler_cb (struct nl_msg* message_in,
 
   return NL_OK;
 }
-
-//int
-//network_wlan_nl80211_scan_data_cb (struct nl_msg* message_in,
-//                                   void* argument_in)
-//{
-//  //  NETWORK_TRACE (ACE_TEXT ("network_wlan_nl80211_scan_data_cb"));
-
-//  // sanity check(s)
-//  ACE_ASSERT (message_in);
-//  ACE_ASSERT (argument_in);
-
-//  // Called by the kernel with a dump of the successful scan's data. Called for each SSID.
-
-//  struct genlmsghdr* genlmsghdr_p =
-//      static_cast<struct genlmsghdr*> (nlmsg_data (nlmsg_hdr (message_in)));
-//  ACE_ASSERT (genlmsghdr_p);
-//  struct nlattr* nlattr_a[NL80211_ATTR_MAX + 1];
-//  struct nlattr* nlattr_2[NL80211_BSS_MAX + 1];
-//  // *TODO*: this is bound to change; #include from somewhere else
-////  static struct nla_policy nla_policy_bss_a[NL80211_BSS_MAX + 1] =
-////  {
-////    {NLA_U8, 6, 6},     // NL80211_BSS_BSSID
-////    {NLA_U32, 0, 0},    // NL80211_BSS_FREQUENCY
-////    {NLA_U64, 0, 0},    // NL80211_BSS_TSF
-////    {NLA_U16, 0, 0},    // NL80211_BSS_BEACON_INTERVAL
-////    {NLA_U16, 0, 0},    // NL80211_BSS_CAPABILITY
-////    {NLA_BINARY, 0, 0}, // NL80211_BSS_INFORMATION_ELEMENTS
-////    {NLA_S32, 0, 0},    // NL80211_BSS_SIGNAL_MBM
-////    {NLA_U8, 0, 0},     // NL80211_BSS_SIGNAL_UNSPEC
-////    {NLA_U32, 0, 0},    // NL80211_BSS_STATUS
-////    {NLA_U32, 0, 0},    // NL80211_BSS_SEEN_MS_AGO
-////    {NLA_BINARY, 0, 0}, // NL80211_BSS_BEACON_IES
-////    {NLA_U32, 0, 0},    // NL80211_BSS_CHAN_WIDTH
-////    {NLA_U64, 0, 0},    // NL80211_BSS_BEACON_TSF
-////    {NLA_FLAG, 0, 0},   // NL80211_BSS_PRESP_DATA
-////    {NLA_U64, 0, 0},    // NL80211_BSS_LAST_SEEN_BOOTTIME
-////    {NLA_U64, 0, 0},    // NL80211_BSS_PAD
-////    {NLA_U64, 0, 0},    // NL80211_BSS_PARENT_TSF
-////    {NLA_U8, 6, 6},     // NL80211_BSS_PARENT_BSSID
-////  };
-//  nla_parse (nlattr_a,
-//             NL80211_ATTR_MAX,
-//             genlmsg_attrdata (genlmsghdr_p, 0),
-//             genlmsg_attrlen (genlmsghdr_p, 0),
-//             NULL);
-//  // sanity check(s)
-//  if (!nlattr_a[NL80211_ATTR_BSS])
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to parse nl80211 scan data: 'bss' attribute missing, returning\n")));
-//    return NL_SKIP;
-//  } // end IF
-//  if (nla_parse_nested (nlattr_2,
-//                        NL80211_BSS_MAX,
-//                        nlattr_a[NL80211_ATTR_BSS],
-//                        NULL))
-////                        nla_policy_bss_a))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to parse nl80211 scan data 'bss' attribute, returning\n")));
-//    return NL_SKIP;
-//  } // end IF
-//  if (!nlattr_2[NL80211_BSS_BSSID] ||
-//      !nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS])
-//    return NL_SKIP;
-
-//  struct ether_addr ap_mac_address_s;
-//  ACE_OS::memcpy (&ap_mac_address_s.ether_addr_octet,
-//                  nla_data (nlattr_2[NL80211_BSS_BSSID]),
-//                  ETH_ALEN);
-//  unsigned int frequency_mhz =
-//      nla_get_u32 (nlattr_2[NL80211_BSS_FREQUENCY]);
-
-////  char buffer_a[IW_ESSID_MAX_SIZE];
-//  uint8_t len_i;
-//  uint8_t* data_p;
-//  int i;
-//  uint8_t ie_len_i =
-//      static_cast<uint8_t> (nla_len (nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]));
-//  uint8_t* ie_data_p =
-//      reinterpret_cast<uint8_t*> (nla_data (nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]));
-//  while (ie_len_i >= 2 && ie_len_i >= ie_data_p[1])
-//  {
-//    if (ie_data_p[0] == 0 &&
-//        ie_data_p[1] >= 0 && ie_data_p[1] <= 32)
-//    {
-//      len_i = ie_data_p[1];
-//      data_p = ie_data_p + 2;
-//      for (i = 0; i < len_i; i++)
-//      {
-//        if (isprint (data_p[i]) &&
-//            data_p[i] != ' ' &&
-//            data_p[i] != '\\')
-//          printf ("%c", data_p[i]);
-//        else if (data_p[i] == ' ' && (i != 0 && i != len_i -1))
-//          printf (" ");
-//        else
-//          printf ("\\x%.2x", data_p[i]);
-//      } // end FOR
-//      break;
-//    } // end IF
-//    ie_len_i -= ie_data_p[1] + 2;
-//    ie_data_p += ie_data_p[1] + 2;
-//  } // end WHILE
-
-//  return NL_OK;
-//}
 #endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64

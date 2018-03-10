@@ -25,10 +25,14 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #include <net/ethernet.h>
+
+#if defined (NL80211_SUPPORT)
+#include <linux/nl80211.h>
+#endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
+#include <set>
 #include <string>
-#include <vector>
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Synch_Traits.h"
@@ -54,7 +58,7 @@ enum Net_WLAN_MonitorAPIType : int
   NET_WLAN_MONITOR_API_INVALID
 };
 
-// *NOTE*: see: 802.11 RFC
+// *NOTE*: see: 802.11 ieee standard reference specification
 #if defined (_MSC_VER)
 #pragma pack (push, 1)
 #endif // _MSC_VER
@@ -108,7 +112,7 @@ typedef Net_WLAN_SSIDToInterfaceIdentifier_t::const_iterator Net_WLAN_SSIDToInte
 typedef Net_WLAN_SSIDToInterfaceIdentifier_t::iterator Net_WLAN_SSIDToInterfaceIdentifierIterator_t;
 typedef std::pair<Net_WLAN_SSIDToInterfaceIdentifier_t::iterator, bool> Net_WLAN_SSIDToInterfaceIdentifierResult_t;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-typedef std::pair<std::string,
+typedef std::pair<std::network_wlan_nl80211_interface_cbstring,
                   std::pair <struct _GUID, struct Net_WLAN_AssociationConfiguration> > Net_WLAN_SSIDToInterfaceIdentifierEntry_t;
 struct Net_WLAN_SSIDToInterfaceIdentifierFindPredicate
  : public std::binary_function<Net_WLAN_SSIDToInterfaceIdentifierEntry_t,
@@ -145,17 +149,6 @@ typedef Common_XML_Parser_T<ACE_MT_SYNCH,
                             Net_WLAN_Profile_XML_Handler> Net_WLAN_Profile_Parser_t;
 #else
 #if defined (NL80211_SUPPORT)
-struct Net_WLAN_nl80211_InformationElement
-{
-  uint8_t elementId;
-  uint8_t length;
-  void*   information;
-#if defined (__GNUC__)
-} __attribute__ ((__packed__));
-#else
-};
-#endif // __GNUC__
-
 typedef std::map<std::string, int> Net_WLAN_nl80211_MulticastGroupIds_t;
 typedef Net_WLAN_nl80211_MulticastGroupIds_t::iterator Net_WLAN_nl80211_MulticastGroupIdsIterator_t;
 struct Net_WLAN_nl80211_MulticastGroupIdQueryCBData
@@ -167,7 +160,7 @@ struct Net_WLAN_nl80211_MulticastGroupIdQueryCBData
   Net_WLAN_nl80211_MulticastGroupIds_t* map;
 };
 
-typedef std::vector<uint8_t> Net_WLAN_nl80211_ExtendedFeatures_t;
+typedef std::set<enum nl80211_ext_feature_index> Net_WLAN_nl80211_ExtendedFeatures_t;
 typedef Net_WLAN_nl80211_ExtendedFeatures_t::iterator Net_WLAN_nl80211_ExtendedFeaturesIterator_t;
 struct Net_WLAN_nl80211_FeatureSetCBData
 {
@@ -178,6 +171,17 @@ struct Net_WLAN_nl80211_FeatureSetCBData
 
   ACE_UINT32                          features;
   Net_WLAN_nl80211_ExtendedFeatures_t extendedFeatures;
+};
+
+struct Net_WLAN_nl80211_InterfaceConfigurationCBData
+{
+  Net_WLAN_nl80211_InterfaceConfigurationCBData ()
+   : index (0)
+   , type (NL80211_IFTYPE_UNSPECIFIED)
+  {}
+
+  unsigned int        index;
+  enum nl80211_iftype type;
 };
 
 struct Net_WLAN_nl80211_ScanResult

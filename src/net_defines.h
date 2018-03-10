@@ -69,19 +69,19 @@
 #define NET_PROTOCOL_DEFAULT_UDP_BUFFER_SIZE                65507
 
 // protocol parsers
-#define YY_END_OF_BUFFER_CHAR                               0 // "\0\0"
-#define NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE       2 // byte(s)
+//#define YY_END_OF_BUFFER_CHAR                               0 // "\0\0"
+//#define NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE       2 // byte(s)
 // *IMPORTANT NOTE*: scans buffers in-place (avoids a copy,
 //         see: http://flex.sourceforge.net/manual/Multiple-Input-Buffers.html)
 //         --> in order to use yy_scan_buffer(), the buffer needs to have been
 //             prepared for usage by flex: buffers need two trailing '\0's
 //             BEYOND their datas' tail byte (i.e. at positions length() + 1 and
 //             length() + 2)
-#define NET_PROTOCOL_PARSER_FLEX_USE_YY_SCAN_BUFFER         true
+//#define NET_PROTOCOL_PARSER_FLEX_USE_YY_SCAN_BUFFER         true
 
 // output more debugging information ?
-#define NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE               false
-#define NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE              false
+//#define NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE               false
+//#define NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE              false
 
 // socket
 #if defined (ACE_LINUX)
@@ -105,9 +105,9 @@
 #define NET_CONNECTION_ASYNCH_DEFAULT_TIMEOUT_INTERVAL      1  // second(s)
 
 // event dispatch
-#define NET_EVENT_DISPATCH_THREAD_GROUP_ID                  22
-#define NET_EVENT_USE_REACTOR                               false // ? reactor : proactor
-#define NET_EVENT_USE_THREAD_POOL                           false // multi-threaded event dispatch ? (reactor only)
+//#define NET_EVENT_DISPATCH_THREAD_GROUP_ID                  22
+//#define NET_EVENT_USE_THREAD_POOL                           false // multi-threaded event dispatch ? (reactor only)
+#define NET_EVENT_DEFAULT_DISPATCH                          COMMON_EVENT_DISPATCH_PROACTOR
 
 // stream
 #define NET_STREAM_MAX_MESSAGES                             0  // 0 --> no limits

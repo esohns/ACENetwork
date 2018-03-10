@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -80,7 +80,7 @@ HTTP_Module_Bisector_T<ACE_SYNCH_USE,
                 ACE_TEXT ("failed to yylex_init(): \"%m\", continuing\n")));
 
   // trace ?
-  HTTP_Bisector_set_debug ((NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE ? 1 : 0),
+  HTTP_Bisector_set_debug ((COMMON_PARSER_DEFAULT_LEX_TRACE ? 1 : 0),
                            context_);
 }
 

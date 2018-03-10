@@ -78,7 +78,7 @@ class Net_Common_Tools
   static struct _GUID getDefaultInterface (enum Net_LinkLayerType = NET_LINKLAYER_802_3);
 #else
   static std::string getDefaultInterface (enum Net_LinkLayerType = NET_LINKLAYER_802_3);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   // *NOTE*: queries the system for installed network interfaces, returning the
   //         'default' one (bitmask-version of the above)
   // *TODO*: only Ethernet (IEEE 802.3) and PPP is currently supported
@@ -86,14 +86,14 @@ class Net_Common_Tools
   static struct _GUID getDefaultInterface (int); // link layer type(s) (bitmask)
 #else
   static std::string getDefaultInterface (int); // link layer type(s) (bitmask)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   // *TODO*: this API is obviously broken (race conditions)
   //         --> remove ASAP
   static ULONG interfaceToIndex (REFGUID); // interface identifier
   static struct _GUID indexToInterface (ULONG); // interface index
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // *NOTE*: the argument is assumed to be in network byte order (i.e. bytes
   //         ordered left to right)
@@ -107,7 +107,7 @@ class Net_Common_Tools
 #else
   inline static bool isAny (const struct ether_addr& address_in) { for (int i = 0; i < ETH_ALEN; ++i) if (address_in.ether_addr_octet[i]) return false; return true; }
   inline static bool isBroadcast (const struct ether_addr& address_in) { for (int i = 0; i < ETH_ALEN; ++i) if (address_in.ether_addr_octet[i] != 0xFF) return false; return true; }
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   static std::string EthernetProtocolTypeIdToString (unsigned short); // ethernet frame type (in network (== big-endian) byte order)
 
   // *NOTE*: returns the ethernet 'MAC' address
@@ -116,11 +116,11 @@ class Net_Common_Tools
   static struct ether_addr interfaceToLinkLayerAddress (REFGUID);            // interface identifier
 #else
   static struct ether_addr interfaceToLinkLayerAddress (const std::string&); // interface identifier
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   static std::string interfaceToString (REFGUID); // interface identifier
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // network layer
   static bool getAddress (std::string&,  // host name
@@ -132,7 +132,7 @@ class Net_Common_Tools
   //         policy (e.g. routing table entry metric/priority/...).
   //         Consequently, this API is non-functional at this point
   static ACE_INET_Addr getGateway (const std::string&); // interface identifier
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // *NOTE*: this returns the external (i.e. routable) IP address (for clients
   //         behind a (NATted-) gateway)
@@ -140,13 +140,13 @@ class Net_Common_Tools
   static bool interfaceToExternalIPAddress (REFGUID,            // interface identifier
 #else
   static bool interfaceToExternalIPAddress (const std::string&, // interface identifier
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                                             ACE_INET_Addr&);    // return value: external IP address
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   static bool interfaceToIPAddress (REFGUID,                // device identifier
 #else
   static bool interfaceToIPAddress (const std::string&,     // device identifier
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                                     ACE_INET_Addr&,         // return value: (first) IP address
                                     ACE_INET_Addr&);        // return value: (first) gateway IP address
   static bool IPAddressToInterface (const ACE_INET_Addr&, // IP address
@@ -154,7 +154,7 @@ class Net_Common_Tools
                                     struct _GUID&);       // return value: interface identifier
 #else
                                     std::string&);        // return value: interface identifier
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   inline static std::string IPAddressToString (const ACE_INET_Addr& address_in,
                                                bool addressOnly_in = false) { return Net_Common_Tools::IPAddressToString ((addressOnly_in ? 0 : ACE_HTONS (address_in.get_port_number ())), ACE_HTONL (address_in.get_ip_address ())); };
@@ -196,7 +196,7 @@ class Net_Common_Tools
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   // *NOTE*: applies to TCP sockets (see also: SO_MAX_MSG_SIZE)
   static bool setLoopBackFastPath (ACE_HANDLE); // socket handle
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // MTU
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -207,7 +207,7 @@ class Net_Common_Tools
                                    int);       // option
   static bool getPathMTU (const ACE_INET_Addr&, // destination address
                           unsigned int&);       // return value: (initial) path MTU
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   // *NOTE*: applies to (connect()ed) UDP sockets (see also: SO_MAX_MSG_SIZE)
   static unsigned int getMTU (ACE_HANDLE); // socket handle
 
@@ -232,11 +232,11 @@ class Net_Common_Tools
                               );
 #else
                                , bool = false); // (try to) set SO_REUSEPORT as well ?
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_LINUX)
   static bool enableErrorQueue (ACE_HANDLE); // socket handle
-#endif
+#endif // ACE_LINUX
   static ACE_INET_Addr getBoundAddress (ACE_HANDLE);
   static int getProtocol (ACE_HANDLE); // socket handle
 
@@ -248,7 +248,7 @@ class Net_Common_Tools
   // *NOTE*: these use 'systemctl'
   static bool isNetworkManagerRunning ();
   static void toggleNetworkManager (bool); // status
-#endif
+#endif // ACE_LINUX
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools ())

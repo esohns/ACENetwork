@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -50,8 +50,8 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 #endif
  : inherited (stream_in)
  , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME), // scanner tables file (if any)
-               NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE,                     // trace scanning ?
-               NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE)                    // trace parsing ?
+               COMMON_PARSER_DEFAULT_LEX_TRACE,                           // trace scanning ?
+               COMMON_PARSER_DEFAULT_YACC_TRACE)                          // trace parsing ?
  , headFragment_ (NULL)
  , crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
  //, lock_ ()
@@ -164,7 +164,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::mod_);
 
   // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT (message_inout->space () >= NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  ACE_ASSERT (message_inout->space () >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was
@@ -421,8 +421,8 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
               STREAM_HEADMODULECONCURRENCY_CONCURRENT, // concurrency mode
               true)                                    // generate sesssion messages ?
  , inherited2 (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_LEXER_DFA_TABLES_FILENAME), // scanner tables file (if any)
-               NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE,                     // trace scanning ?
-               NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE)                    // trace parsing ?
+               COMMON_PARSER_DEFAULT_LEX_TRACE,                           // trace scanning ?
+               COMMON_PARSER_DEFAULT_YACC_TRACE)                          // trace parsing ?
  , headFragment_ (NULL)
  , crunch_ (HTTP_DEFAULT_CRUNCH_MESSAGES) // strip protocol data ?
 {
@@ -572,7 +572,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::mod_);
 
   // append the "\0\0"-sequence, as required by flex
-  ACE_ASSERT (message_inout->space () >= NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+  ACE_ASSERT (message_inout->space () >= COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   *(message_inout->wr_ptr ()) = YY_END_OF_BUFFER_CHAR;
   *(message_inout->wr_ptr () + 1) = YY_END_OF_BUFFER_CHAR;
   // *NOTE*: DO NOT adjust the write pointer --> length() must stay as it was

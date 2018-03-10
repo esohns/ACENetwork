@@ -1235,7 +1235,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     if (*(*iterator).first == key) break;
   if (iterator != record_in.end ())
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-
     if (inherited::state_.trackerScrapeResponse)
       BitTorrent_Tools::free (inherited::state_.trackerScrapeResponse);
     inherited::state_.trackerScrapeResponse =
@@ -1247,7 +1246,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   // response is regular --> (try to) connect to all peers
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::lock_);
-
     if (inherited::state_.trackerRequestResponse)
       BitTorrent_Tools::free (inherited::state_.trackerRequestResponse);
     inherited::state_.trackerRequestResponse =
@@ -1271,6 +1269,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   {
     ACE_ASSERT (false);
     ACE_NOTSUP;
+
     ACE_NOTREACHED (return;)
   } // end IF
   else
@@ -1321,7 +1320,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   ACE_THR_FUNC function_p =
       static_cast<ACE_THR_FUNC> (::session_setup_function);
   void* arg_p = &thread_data;
-  int group_id = (COMMON_EVENT_THREAD_GROUP_ID + 1); // *TODO*
+  int group_id_i = -1;
   ACE_thread_t* thread_ids_p = NULL;
   ACE_hthread_t* thread_handles_p = NULL;
   // *TODO*: use ACE_NEW_MALLOC_ARRAY (as soon as the NORETURN variant becomes
@@ -1376,7 +1375,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     converter.clear ();
     converter.str (ACE_TEXT_ALWAYS_CHAR (""));
     converter << (i + 1);
-    buffer = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_SESSION_THREAD_NAME);
+    buffer = ACE_TEXT_ALWAYS_CHAR (BITTORRENT_SESSION_HANDLER_THREAD_NAME);
     buffer += ACE_TEXT_ALWAYS_CHAR (" #");
     buffer += converter.str ();
     ACE_OS::strcpy (thread_name_p, buffer.c_str ());
@@ -1384,7 +1383,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   } // end FOR
   thread_manager_p = ACE_Thread_Manager::instance ();
   ACE_ASSERT (thread_manager_p);
-  group_id =
+  group_id_i =
     thread_manager_p->spawn_n (thread_ids_p,                   // id(s)
                                thread_data.addresses->size (), // # threads
                                function_p,                     // function
@@ -1393,13 +1392,13 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                                 THR_JOINABLE     |
                                 THR_INHERIT_SCHED),            // flags
                                ACE_DEFAULT_THREAD_PRIORITY,    // priority
-                               group_id,                       // group id
+                               BITTORRENT_SESSION_HANDLER_THREAD_GROUP_ID, // group id
                                NULL,                           // stack(s)
                                NULL,                           // stack size(s)
                                thread_handles_p,               // handle(s)
                                NULL,                           // task
                                thread_names_p);                // name(s)
-  if (group_id == -1)
+  if (group_id_i == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Thread_Manager::spawn_n(%u): \"%m\", aborting\n"),
@@ -1415,12 +1414,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
     delete [] thread_names_p[i];
   delete [] thread_names_p;
 
-  result = thread_manager_p->wait_grp (group_id); // name(s)
+  result = thread_manager_p->wait_grp (group_id_i); // name(s)
   if (result == -1)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Thread_Manager::wait_grp(%d): \"%m\", aborting\n"),
-                thread_data.addresses->size ()));
+                group_id_i));
     goto error;
   } // end IF
 

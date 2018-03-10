@@ -1,4 +1,4 @@
-/***************************************************************************
+﻿/***************************************************************************
  *   Copyright (C) 2009 by Erik Sohns   *
  *   erik.sohns@web.de   *
  *                                                                         *
@@ -51,7 +51,7 @@ Net_SessionBase_T<AddressType,
  : configuration_ (NULL)
  , connectionConfiguration_ (NULL)
  , connectionManager_ (NULL)
- , isAsynch_ (!NET_EVENT_USE_REACTOR)
+ , isAsynch_ (NET_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_PROACTOR)
  , lock_ ()
  , condition_ (lock_)
  , state_ ()
