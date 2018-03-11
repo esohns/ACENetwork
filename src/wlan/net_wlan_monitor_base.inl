@@ -209,28 +209,28 @@ template <typename AddressType,
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
 #endif
-const std::string&
+const Net_WLAN_AccessPointCacheValue_t&
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                         >::~Net_WLAN_Monitor_Base_T ()
 #else
                         ,ACE_SYNCH_USE,
-                        TimePolicyType>::get1R (const std::string& SSID_in) const
+                        TimePolicyType>::get1RR (const std::string& SSID_in) const
 #endif
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::get1R"));
 
-  std::string return_value;
+  Net_WLAN_AccessPointCacheValue_t return_value_s;
 
-  Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator;
-  { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_, return_value);
+  Net_WLAN_AccessPointCacheConstIterator_t iterator;
+  { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_, return_value_s);
     iterator = SSIDCache_.find (SSID_in);
     if (iterator != SSIDCache_.end ())
-      return_value = (*iterator).second.first;
+      return_value_s = (*iterator).second;
   } // end lock scope
 
-  return return_value;
+  return return_value_s;
 }
 
 template <typename AddressType,
@@ -245,27 +245,38 @@ void
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                        >::~Net_WLAN_Monitor_Base_T ()
+                        >::set3R (const std::string& SSID_in,
+                                  REFGUID interfaceIdentifier_in,
+                                  const struct Net_WLAN_AccessPointState& state_in)
 #else
                         ,ACE_SYNCH_USE,
-                        TimePolicyType>::set2R (const std::string& SSID_in,
-                                                const std::string& interfaceIdentifier_in)
-#endif
+                        TimePolicyType>::set3R (const std::string& SSID_in,
+                                                const std::string& interfaceIdentifier_in,
+                                                const struct Net_WLAN_AccessPointState& state_in)
+#endif // ACE_WIN32 || ACE_WIN64
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::set2R"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::set3R"));
 
-  struct Net_WLAN_AssociationConfiguration association_configuration_s;
-  Net_WLAN_SSIDToInterfaceIdentifierIterator_t iterator;
+  // sanity check(s)
+  ACE_ASSERT (!SSID_in.empty ());
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
+#else
+  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+#endif // ACE_WIN32 || ACE_WIN64
+
+  Net_WLAN_AccessPointCacheValue_t cache_value;
+  cache_value.first = interfaceIdentifier_in;
+  cache_value.second = state_in;
+  Net_WLAN_AccessPointCacheIterator_t iterator;
   { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     iterator = SSIDCache_.find (SSID_in);
     if (unlikely (iterator != SSIDCache_.end ()))
     {
-      (*iterator).second.first = interfaceIdentifier_in;
+      (*iterator).second = cache_value;
       return;
     } // end IF
-    SSIDCache_.insert (std::make_pair (SSID_in,
-                                       std::make_pair (interfaceIdentifier_in,
-                                                       association_configuration_s)));
+    SSIDCache_.insert (std::make_pair (SSID_in, cache_value));
   } // end lock scope
 }
 
@@ -527,7 +538,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
   if (unlikely (SSID_string.empty ()))
     return 0;
 
-  Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator;
+  Net_WLAN_AccessPointCacheConstIterator_t iterator;
   { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_, false);
     iterator = SSIDCache_.find (SSID_string);
     if (likely (iterator != SSIDCache_.end ()))
@@ -600,7 +611,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #endif // ACE_WIN32 || ACE_WIN64
   {
     // check cache
-    Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator_2;
+    Net_WLAN_AccessPointCacheConstIterator_t iterator_2;
     { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_, false);
       iterator_2 = SSIDCache_.find (SSID_in);
       if (iterator_2 != SSIDCache_.end ())
@@ -807,7 +818,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
   ACE_ASSERT (configuration_);
 
   { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_, result);
-    for (Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator = SSIDCache_.begin ();
+    for (Net_WLAN_AccessPointCacheConstIterator_t iterator = SSIDCache_.begin ();
          iterator != SSIDCache_.end ();
          ++iterator)
     {
@@ -908,7 +919,7 @@ continue_:
       bool essid_is_cached = false;
       { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
         // check cache whether the configured ESSID (if any) is known
-        Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator =
+        Net_WLAN_AccessPointCacheConstIterator_t iterator =
             SSIDCache_.find (configuration_->SSID);
         essid_is_cached = (iterator != SSIDCache_.end ());
         if (unlikely (!SSIDSeenBefore_ && essid_is_cached))
@@ -1074,14 +1085,13 @@ fetch_scan_result_data:
 #endif // ACE_WIN32 || ACE_WIN64
       { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
         // check cache whether the configured ESSID (if any) is known
-        Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator =
+        Net_WLAN_AccessPointCacheConstIterator_t iterator =
           SSIDCache_.find (configuration_->SSID);
         ACE_ASSERT (iterator != SSIDCache_.end ());
         interface_identifier = (*iterator).second.first;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-        ap_mac_address_s =
-            (*iterator).second.second.accessPointLinkLayerAddress;
+        ap_mac_address_s = (*iterator).second.second.linkLayerAddress;
 #endif // ACE_WIN32 || ACE_WIN64
       } // end lock scope
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1266,7 +1276,7 @@ associate:
       bool essid_is_cached = false;
       { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
         // check cache whether the configured ESSID (if any) is known
-        Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator =
+        Net_WLAN_AccessPointCacheConstIterator_t iterator =
             SSIDCache_.find (configuration_->SSID);
         essid_is_cached = (iterator != SSIDCache_.end ());
       } // end lock scope
@@ -1299,7 +1309,7 @@ associate:
       ACE_ASSERT (!configuration_->SSID.empty ());
       //{ ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
       //  // check cache whether the configured ESSID (if any) is known
-      //  Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator =
+      //  Net_WLAN_AccessPointCacheConstIterator_t iterator =
       //    SSIDCache_.find (configuration_->SSID);
       //  ACE_ASSERT (iterator != SSIDCache_.end ());
       //} // end lock scope
@@ -1475,7 +1485,7 @@ clean:
       ACE_ASSERT (!configuration_->SSID.empty ());
       { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
         // check cache whether the configured ESSID (if any) is known
-        Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator =
+        Net_WLAN_AccessPointCacheConstIterator_t iterator =
           SSIDCache_.find (configuration_->SSID);
         ACE_ASSERT (iterator != SSIDCache_.end ());
       } // end lock scope
@@ -1530,7 +1540,7 @@ clean:
       bool essid_is_cached = false;
       { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
         // check cache whether the configured ESSID (if any) is known
-        Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator =
+        Net_WLAN_AccessPointCacheConstIterator_t iterator =
             SSIDCache_.find (configuration_->SSID);
         essid_is_cached = (iterator != SSIDCache_.end ());
       } // end lock scope
@@ -1813,7 +1823,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 
   std::string SSID_string = this->SSID ();
   ACE_ASSERT (!SSID_string.empty ());
-  Net_WLAN_SSIDToInterfaceIdentifierIterator_t iterator;
+  Net_WLAN_AccessPointCacheIterator_t iterator;
   { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     // update cache
     iterator = SSIDCache_.find (SSID_string);
@@ -1954,7 +1964,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
                 ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_2.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
                 ACE_TEXT (SSID_in.c_str ())));
 #else
-  Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator;
+  Net_WLAN_AccessPointCacheConstIterator_t iterator;
   { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     iterator =
       SSIDCache_.find (configuration_->SSID);
@@ -2007,7 +2017,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
   struct Association_Configuration association_configuration;
   { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     // check cache whether the configured ESSID (if any) is known
-    Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator =
+    Net_WLAN_AccessPointCacheConstIterator_t iterator =
       SSIDCache_.find (SSID_in);
     ACE_ASSERT (iterator != SSIDCache_.end ());
     association_configuration = (*iterator).second.second;
@@ -2109,7 +2119,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
   struct Association_Configuration association_configuration;
   { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     // check cache whether the configured ESSID (if any) is known
-    Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator =
+    Net_WLAN_AccessPointCacheConstIterator_t iterator =
       SSIDCache_.find (SSID_in);
     ACE_ASSERT (iterator != SSIDCache_.end ());
     association_configuration = (*iterator).second.second;
@@ -2226,7 +2236,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
   struct Association_Configuration association_configuration;
   { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     // check cache whether the configured ESSID (if any) is known
-    Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator =
+    Net_WLAN_AccessPointCacheConstIterator_t iterator =
       SSIDCache_.find (SSID_in);
     ACE_ASSERT (iterator != SSIDCache_.end ());
     association_configuration = (*iterator).second.second;
@@ -2428,7 +2438,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   // step1: update the cache
-  Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator;
+  Net_WLAN_AccessPointCacheConstIterator_t iterator;
 #if defined (_DEBUG)
   std::set<std::string> known_ssids, current_ssids;
 #endif // _DEBUG
@@ -2480,6 +2490,10 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #endif // _DEBUG
 
   inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_SCANNED);
+#else
+#if defined (NL80211_SUPPORT)
+  inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_SCANNED);
+#endif  // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
   // synch access

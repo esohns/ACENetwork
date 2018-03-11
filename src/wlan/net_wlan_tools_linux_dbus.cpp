@@ -366,7 +366,7 @@ Net_WLAN_Tools::activeConnectionDBusPathToIp4ConfigDBusPath (struct DBusConnecti
   struct DBusMessage* message_p =
       dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SERVICE),
                                     activeConnectionObjectPath_in.c_str (),
-                                    ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
+                                    ACE_TEXT_ALWAYS_CHAR (COMMON_DBUS_INTERFACE_PROPERTIES_STRING),
                                     ACE_TEXT_ALWAYS_CHAR ("Get"));
   if (unlikely (!message_p))
   {
@@ -449,7 +449,7 @@ Net_WLAN_Tools::activeConnectionDBusPathToDeviceDBusPath (struct DBusConnection*
   struct DBusMessage* message_p =
       dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SERVICE),
                                     activeConnectionObjectPath_in.c_str (),
-                                    ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
+                                    ACE_TEXT_ALWAYS_CHAR (COMMON_DBUS_INTERFACE_PROPERTIES_STRING),
                                     ACE_TEXT_ALWAYS_CHAR ("Get"));
   if (unlikely (!message_p))
   {
@@ -613,7 +613,7 @@ Net_WLAN_Tools::Ip4ConfigDBusPathToGateway (struct DBusConnection* connection_in
   struct DBusMessage* message_p =
   dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SERVICE),
                                 Ip4ConfigObjectPath_in.c_str (),
-                                ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
+                                ACE_TEXT_ALWAYS_CHAR (COMMON_DBUS_INTERFACE_PROPERTIES_STRING),
                                 ACE_TEXT_ALWAYS_CHAR ("Get"));
   if (unlikely (!message_p))
   {
@@ -701,7 +701,7 @@ Net_WLAN_Tools::deviceDBusPathToActiveAccessPointDBusPath (struct DBusConnection
   struct DBusMessage* message_p =
       dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SERVICE),
                                     deviceObjectPath_in.c_str (),
-                                    ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
+                                    ACE_TEXT_ALWAYS_CHAR (COMMON_DBUS_INTERFACE_PROPERTIES_STRING),
                                     ACE_TEXT_ALWAYS_CHAR ("Get"));
   if (unlikely (!message_p))
   {
@@ -791,7 +791,7 @@ Net_WLAN_Tools::deviceDBusPathToIp4ConfigDBusPath (struct DBusConnection* connec
   struct DBusMessage* message_p =
       dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SERVICE),
                                     deviceObjectPath_in.c_str (),
-                                    ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
+                                    ACE_TEXT_ALWAYS_CHAR (COMMON_DBUS_INTERFACE_PROPERTIES_STRING),
                                     ACE_TEXT_ALWAYS_CHAR ("Get"));
   if (unlikely (!message_p))
   {
@@ -880,7 +880,7 @@ Net_WLAN_Tools::deviceDBusPathToIdentifier (struct DBusConnection* connection_in
   struct DBusMessage* message_p =
       dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SERVICE),
                                     deviceObjectPath_in.c_str (),
-                                    ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
+                                    ACE_TEXT_ALWAYS_CHAR (COMMON_DBUS_INTERFACE_PROPERTIES_STRING),
                                     ACE_TEXT_ALWAYS_CHAR ("Get"));
   if (unlikely (!message_p))
   {
@@ -966,7 +966,7 @@ Net_WLAN_Tools::accessPointDBusPathToSSID (struct DBusConnection* connection_in,
   struct DBusMessage* message_p =
       dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SERVICE),
                                     accessPointObjectPath_in.c_str (),
-                                    ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
+                                    ACE_TEXT_ALWAYS_CHAR (COMMON_DBUS_INTERFACE_PROPERTIES_STRING),
                                     ACE_TEXT_ALWAYS_CHAR ("Get"));
   if (unlikely (!message_p))
   {
@@ -1342,7 +1342,7 @@ Net_WLAN_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in,
       dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SERVICE),
 //                                    device_object_path_string.c_str (),
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SETTINGS_OBJECT_PATH),
-//                                    ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_PROPERTIES_INTERFACE),
+//                                    ACE_TEXT_ALWAYS_CHAR (COMMON_DBUS_INTERFACE_PROPERTIES_STRING),
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SETTINGS_INTERFACE),
 //                                    ACE_TEXT_ALWAYS_CHAR ("Get"));
                                     ACE_TEXT_ALWAYS_CHAR ("ListConnections"));

@@ -130,10 +130,16 @@ class Net_WLAN_IMonitorBase
 #endif // WEXT_SUPPORT
  , public Common_IGet_2_T<unsigned int>
 #endif // ACE_WIN32 || ACE_WIN64
+ , public Common_IGet1RR_T<std::string,
+                           Net_WLAN_AccessPointCacheValue_t> // cache access
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+ , public Common_ISet3R_T<std::string,
+                          struct _GUID,
+                          struct Net_WLAN_AccessPointState> // cache access
 #else
- , public Common_IGet1R_T<std::string> // cache access
- , public Common_ISet2R_T<std::string> // cache access
+ , public Common_ISet3R_T<std::string,
+                          std::string,
+                          struct Net_WLAN_AccessPointState> // cache access
 #endif // ACE_WIN32 || ACE_WIN64
 {
  public:

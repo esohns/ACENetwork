@@ -100,11 +100,14 @@ class Net_WLAN_Monitor_Base_T
 
   // implement Net_IWLANMonitor_T
   inline virtual const ConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); return *configuration_; }
+  virtual const Net_WLAN_AccessPointCacheValue_t& get1RR (const std::string&) const;
+  virtual void set3R (const std::string&,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+                      REFGUID,
 #else
-  virtual const std::string& get1R (const std::string&) const;
-  virtual void set2R (const std::string&, const std::string&);
+                      const std::string&,
 #endif // ACE_WIN32 || ACE_WIN64
+                      const struct Net_WLAN_AccessPointState&);
   virtual bool initialize (const ConfigurationType&); // configuration handle
   virtual void subscribe (Net_WLAN_IMonitorCB*); // new subscriber
   virtual void unsubscribe (Net_WLAN_IMonitorCB*); // existing subscriber
@@ -175,7 +178,7 @@ class Net_WLAN_Monitor_Base_T
   AddressType                           localSAP_;
   AddressType                           peerSAP_;
   unsigned int                          retries_; // AP association-/connection-
-  Net_WLAN_SSIDToInterfaceIdentifier_t  SSIDCache_;
+  Net_WLAN_AccessPointCache_t           SSIDCache_;
 
   // *IMPORTANT NOTE*: this must be 'recursive', so that callees may unsubscribe
   //                   from within the notification callbacks

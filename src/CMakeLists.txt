@@ -283,6 +283,13 @@ if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
  add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
 endif ()
 
+if (UNIX)
+ if(CMAKE_COMPILER_IS_GNUCXX)
+  set (CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed")
+#  set (CMAKE_STATIC_LINKER_FLAGS "-Wl,--as-needed")
+ endif (CMAKE_COMPILER_IS_GNUCXX)
+endif (UNIX)
+
 #add_library (${PROJECT_NAME} STATIC ${ACENetwork_LIB_SRCS})
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
@@ -392,3 +399,4 @@ install (TARGETS ${PROJECT_NAME}
 add_subdirectory (client_server)
 add_subdirectory (protocol)
 add_subdirectory (wlan)
+

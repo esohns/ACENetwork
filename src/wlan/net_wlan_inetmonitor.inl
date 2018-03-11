@@ -168,7 +168,7 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
 #else
-  Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator;
+  Net_WLAN_AccessPointCacheConstIterator_t iterator;
   { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_);
     iterator =
       inherited::SSIDCache_.find (inherited::configuration_->SSID);

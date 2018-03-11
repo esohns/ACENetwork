@@ -76,11 +76,18 @@ network_wlan_nl80211_error_cb (struct sockaddr_nl* address_in,
   int* result_p = static_cast<int*> (argument_in);
 
   struct nlattr* nlattr_a[NLMSGERR_ATTR_MAX + 1];
-  nla_parse (nlattr_a,
-             NLMSGERR_ATTR_MAX,
-             genlmsg_attrdata (genlmsghdr_p, 0),
-             genlmsg_attrlen (genlmsghdr_p, 0),
-             NULL);
+  int result = nla_parse (nlattr_a,
+                          NLMSGERR_ATTR_MAX,
+                          genlmsg_attrdata (genlmsghdr_p, 0),
+                          genlmsg_attrlen (genlmsghdr_p, 0),
+                          NULL);
+  if (unlikely (result < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to nla_parse(): \"%s\", aborting\n"),
+                ACE_TEXT (nl_geterror (result))));
+    return NL_STOP;
+  } // end IF
   const char* string_p = NULL;
   if (likely (nlattr_a[NLMSGERR_ATTR_MSG]))
     string_p = nla_get_string (nlattr_a[NLMSGERR_ATTR_MSG]);
@@ -141,17 +148,24 @@ network_wlan_nl80211_interface_cb (struct nl_msg* message_in,
   ACE_ASSERT (genlmsghdr_p);
   ACE_ASSERT (genlmsghdr_p->cmd == NL80211_CMD_NEW_INTERFACE);
   struct nlattr* nlattr_a[NL80211_ATTR_MAX + 1];
-  nla_parse (nlattr_a, NL80211_ATTR_MAX,
-             genlmsg_attrdata (genlmsghdr_p, 0),
-             genlmsg_attrlen (genlmsghdr_p, 0),
-             NULL);
+  int result = nla_parse (nlattr_a, NL80211_ATTR_MAX,
+                          genlmsg_attrdata (genlmsghdr_p, 0),
+                          genlmsg_attrlen (genlmsghdr_p, 0),
+                          NULL);
+  if (unlikely (result < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to nla_parse(): \"%s\", aborting\n"),
+                ACE_TEXT (nl_geterror (result))));
+    return NL_STOP;
+  } // end IF
   if (unlikely (!nlattr_a[NL80211_ATTR_IFINDEX] ||
                 !nlattr_a[NL80211_ATTR_WIPHY]   ||
                 !nlattr_a[NL80211_ATTR_IFTYPE]))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("missing attribute(s), continuing\n")));
-    return NL_SKIP;
+    return NL_STOP;
   } // end IF
   struct Net_WLAN_nl80211_InterfaceConfigurationCBData* cb_data_p =
       static_cast<struct Net_WLAN_nl80211_InterfaceConfigurationCBData*> (argument_in);
@@ -161,7 +175,7 @@ network_wlan_nl80211_interface_cb (struct nl_msg* message_in,
   cb_data_p->type =
       static_cast<enum nl80211_iftype> (nla_get_u32 (nlattr_a[NL80211_ATTR_IFTYPE]));
 
-  return NL_OK;
+  return NL_STOP;
 }
 
 int
@@ -181,25 +195,39 @@ network_wlan_nl80211_bssid_cb (struct nl_msg* message_in,
   struct nlattr* nlattr_a[NL80211_ATTR_MAX + 1];
   struct nlattr* nlattr_2[NL80211_BSS_MAX + 1];
   enum nl80211_bss_status status_e;
-  nla_parse (nlattr_a, NL80211_ATTR_MAX,
-             genlmsg_attrdata (genlmsghdr_p, 0),
-             genlmsg_attrlen (genlmsghdr_p, 0),
-             NULL);
+  int result = nla_parse (nlattr_a, NL80211_ATTR_MAX,
+                          genlmsg_attrdata (genlmsghdr_p, 0),
+                          genlmsg_attrlen (genlmsghdr_p, 0),
+                          NULL);
+  if (unlikely (result < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to nla_parse(): \"%s\", aborting\n"),
+                ACE_TEXT (nl_geterror (result))));
+    return NL_STOP;
+  } // end IF
   if (unlikely (!nlattr_a[NL80211_ATTR_BSS]))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("missing 'bss' attribute, continuing\n")));
-    return NL_SKIP;
+    return NL_STOP;
   } // end IF
-  nla_parse_nested (nlattr_2,
-                    NL80211_BSS_MAX,
-                    nlattr_a[NL80211_ATTR_BSS],
-                    NULL);
+  result = nla_parse_nested (nlattr_2,
+                             NL80211_BSS_MAX,
+                             nlattr_a[NL80211_ATTR_BSS],
+                             NULL);
+  if (unlikely (result < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to nla_parse_nested(NL80211_ATTR_BSS): \"%s\", aborting\n"),
+                ACE_TEXT (nl_geterror (result))));
+    return NL_STOP;
+  } // end IF
   if (unlikely (!nlattr_2[NL80211_BSS_STATUS] ||
                 !nlattr_2[NL80211_BSS_BSSID]))
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("missing 'bss status/bssid' attribute, continuing\n")));
+//    ACE_DEBUG ((LM_DEBUG,
+//                ACE_TEXT ("missing 'bss status/bssid' attribute(s), continuing\n")));
     return NL_SKIP;
   } // end IF
   status_e =
@@ -220,9 +248,9 @@ network_wlan_nl80211_bssid_cb (struct nl_msg* message_in,
   } // end SWITCH
   struct ether_addr* ap_mac_address_p =
       static_cast<struct ether_addr*> (argument_in);
-  int result = nla_memcpy (ap_mac_address_p->ether_addr_octet,
-                           nlattr_2[NL80211_BSS_BSSID],
-                           ETH_ALEN);
+  result = nla_memcpy (ap_mac_address_p->ether_addr_octet,
+                       nlattr_2[NL80211_BSS_BSSID],
+                       ETH_ALEN);
   if (unlikely (result < 0))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -251,25 +279,40 @@ network_wlan_nl80211_ssid_cb (struct nl_msg* message_in,
   struct nlattr* nlattr_a[NL80211_ATTR_MAX + 1];
   struct nlattr* nlattr_2[NL80211_BSS_MAX + 1];
   enum nl80211_bss_status status_e;
-  nla_parse (nlattr_a,
-             NL80211_ATTR_MAX,
-             genlmsg_attrdata (genlmsghdr_p, 0),
-             genlmsg_attrlen (genlmsghdr_p, 0),
-             NULL);
+  int result = nla_parse (nlattr_a,
+                          NL80211_ATTR_MAX,
+                          genlmsg_attrdata (genlmsghdr_p, 0),
+                          genlmsg_attrlen (genlmsghdr_p, 0),
+                          NULL);
+  if (unlikely (result < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to nla_parse(): \"%s\", aborting\n"),
+                ACE_TEXT (nl_geterror (result))));
+    return NL_STOP;
+  } // end IF
   if (unlikely (!nlattr_a[NL80211_ATTR_BSS]))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("missing 'bss' attribute, continuing\n")));
     return NL_SKIP;
   } // end IF
-  nla_parse_nested (nlattr_2,
-                    NL80211_BSS_MAX,
-                    nlattr_a[NL80211_ATTR_BSS],
-                    NULL);
-  if (unlikely (!nlattr_2[NL80211_BSS_STATUS]))
+  result = nla_parse_nested (nlattr_2,
+                             NL80211_BSS_MAX,
+                             nlattr_a[NL80211_ATTR_BSS],
+                             NULL);
+  if (unlikely (result < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to nla_parse_nested(NL80211_ATTR_BSS): \"%s\", aborting\n"),
+                ACE_TEXT (nl_geterror (result))));
+    return NL_STOP;
+  } // end IF
+  if (unlikely (!nlattr_2[NL80211_BSS_STATUS] ||
+                !nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]))
   {
 //    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("missing 'bss status' attribute, continuing\n")));
+//                ACE_TEXT ("missing 'bss status/information elements' attribute(s), continuing\n")));
     return NL_SKIP;
   } // end IF
   status_e =
@@ -283,17 +326,11 @@ network_wlan_nl80211_ssid_cb (struct nl_msg* message_in,
     default:
     {
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("invalid/unknown status (was: %d), returning\n"),
+                  ACE_TEXT ("invalid/unknown bss status (was: %d), returning\n"),
                   static_cast<enum nl80211_bss_status> (nla_get_u32 (nlattr_2[NL80211_BSS_STATUS]))));
       return NL_SKIP;
     }
   } // end SWITCH
-  if (unlikely (!nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("missing 'bss information elements' attribute, continuing\n")));
-    return NL_SKIP;
-  } // end IF
   // *NOTE*: information elements are encoded like so: id[1]len[1]/data[len]
   //         (see also: http://standards.ieee.org/findstds/standard/802.11-2016.html)
   void* information_elements_p = nla_data (nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]);
@@ -341,21 +378,35 @@ network_wlan_nl80211_ssids_cb (struct nl_msg* message_in,
   struct nlattr* nlattr_a[NL80211_ATTR_MAX + 1];
   struct nlattr* nlattr_2[NL80211_BSS_MAX + 1];
   std::string ssid_string;
-  nla_parse (nlattr_a,
-             NL80211_ATTR_MAX,
-             genlmsg_attrdata (genlmsghdr_p, 0),
-             genlmsg_attrlen (genlmsghdr_p, 0),
-             NULL);
+  int result = nla_parse (nlattr_a,
+                          NL80211_ATTR_MAX,
+                          genlmsg_attrdata (genlmsghdr_p, 0),
+                          genlmsg_attrlen (genlmsghdr_p, 0),
+                          NULL);
+  if (unlikely (result < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to nla_parse(): \"%s\", aborting\n"),
+                ACE_TEXT (nl_geterror (result))));
+    return NL_STOP;
+  } // end IF
   if (unlikely (!nlattr_a[NL80211_ATTR_BSS]))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("missing 'bss' attribute, continuing\n")));
     return NL_SKIP;
   } // end IF
-  nla_parse_nested (nlattr_2,
-                    NL80211_BSS_MAX,
-                    nlattr_a[NL80211_ATTR_BSS],
-                    NULL);
+  result = nla_parse_nested (nlattr_2,
+                             NL80211_BSS_MAX,
+                             nlattr_a[NL80211_ATTR_BSS],
+                             NULL);
+  if (unlikely (result < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to nla_parse_nested(NL80211_ATTR_BSS): \"%s\", aborting\n"),
+                ACE_TEXT (nl_geterror (result))));
+    return NL_STOP;
+  } // end IF
   if (unlikely (!nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -385,11 +436,18 @@ network_wlan_nl80211_feature_cb (struct nl_msg* message_in,
   ACE_ASSERT (genlmsghdr_p);
   ACE_ASSERT (genlmsghdr_p->cmd == NL80211_CMD_NEW_WIPHY);
   struct nlattr* nlattr_a[NL80211_ATTR_MAX + 1];
-  nla_parse (nlattr_a,
-             NL80211_ATTR_MAX,
-             genlmsg_attrdata (genlmsghdr_p, 0),
-             genlmsg_attrlen (genlmsghdr_p, 0),
-             NULL);
+  int result = nla_parse (nlattr_a,
+                          NL80211_ATTR_MAX,
+                          genlmsg_attrdata (genlmsghdr_p, 0),
+                          genlmsg_attrlen (genlmsghdr_p, 0),
+                          NULL);
+  if (unlikely (result < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to nla_parse(): \"%s\", aborting\n"),
+                ACE_TEXT (nl_geterror (result))));
+    return NL_STOP;
+  } // end IF
   ACE_ASSERT (nlattr_a[NL80211_ATTR_WIPHY] && nlattr_a[NL80211_ATTR_WIPHY_NAME]);
   if (unlikely (!nlattr_a[NL80211_ATTR_FEATURE_FLAGS] ||
                 !nlattr_a[NL80211_ATTR_EXT_FEATURES]))
@@ -397,8 +455,8 @@ network_wlan_nl80211_feature_cb (struct nl_msg* message_in,
                 ACE_TEXT ("%s [%u]: missing 'features'/'ext. features' attribute(s), continuing\n"),
                 ACE_TEXT (nla_get_string (nlattr_a[NL80211_ATTR_WIPHY_NAME])),
                 nla_get_u32 (nlattr_a[NL80211_ATTR_WIPHY])));
-  struct Net_WLAN_nl80211_FeatureSetCBData* features_p =
-      static_cast<struct Net_WLAN_nl80211_FeatureSetCBData*> (argument_in);
+  struct Net_WLAN_nl80211_InterfaceFeaturesCBData* features_p =
+      static_cast<struct Net_WLAN_nl80211_InterfaceFeaturesCBData*> (argument_in);
   if (likely (nlattr_a[NL80211_ATTR_FEATURE_FLAGS]))
     features_p->features = nla_get_u32 (nlattr_a[NL80211_ATTR_FEATURE_FLAGS]);
   if (likely (nlattr_a[NL80211_ATTR_EXT_FEATURES]))
@@ -416,7 +474,7 @@ network_wlan_nl80211_feature_cb (struct nl_msg* message_in,
           features_p->extendedFeatures.insert (static_cast<enum nl80211_ext_feature_index> ((i * 8) + j));
   } // end IF
 
-  return NL_STOP;
+  return NL_OK;
 }
 
 //////////////////////////////////////////
@@ -1225,7 +1283,7 @@ Net_WLAN_Tools::getFeatures (const std::string& interfaceIdentifier_in,
   bool result = false;
 
   int result_2 = -1;
-  struct Net_WLAN_nl80211_FeatureSetCBData features_s;
+  struct Net_WLAN_nl80211_InterfaceFeaturesCBData features_s;
   struct nl_msg* message_p = NULL;
   unsigned int if_index_i = 0;
 

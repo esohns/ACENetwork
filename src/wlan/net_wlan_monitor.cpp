@@ -596,8 +596,28 @@ network_wlan_nl80211_finish_cb (struct nl_msg* message_in,
   // sanity check(s)
   ACE_ASSERT (argument_in);
 
-  int* result_p = static_cast<int*> (argument_in);
-  *result_p = 0;
+//  struct nlmsghdr* nlmsghdr_p = nlmsg_hdr (message_in);
+//  ACE_ASSERT (nlmsghdr_p);
+  struct Net_WLAN_nl80211_MultipartDoneCBData* cb_data_p =
+      static_cast<struct Net_WLAN_nl80211_MultipartDoneCBData*> (argument_in);
+
+  if (cb_data_p->scanning)
+  { // received the final scan result
+    cb_data_p->scanning = false;
+
+    ACE_ASSERT (cb_data_p->monitor);
+    try {
+      cb_data_p->monitor->onScanComplete (cb_data_p->monitor->interfaceIdentifier ());
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onScanComplete(\"%s\"), aborting\n"),
+                  ACE_TEXT (cb_data_p->monitor->interfaceIdentifier ().c_str ())));
+      return NL_STOP;
+    }
+  } // end IF
+
+  ACE_ASSERT (cb_data_p->error);
+  *(cb_data_p->error) = 0;
 
   return NL_SKIP;
 }
@@ -843,37 +863,22 @@ network_wlan_nl80211_default_handler_cb (struct nl_msg* message_in,
 nla_put_failure:
         nlmsg_free (message_p);
 
-#if defined (_DEBUG)
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("scan complete, fetching results...\n")));
-#endif // _DEBUG
+//#if defined (_DEBUG)
+//        ACE_DEBUG ((LM_DEBUG,
+//                    ACE_TEXT ("scan complete, fetching results...\n")));
+//#endif // _DEBUG
         break;
       } // end IF
 
       // scan result(s)
-      struct nlmsghdr* nlmsghdr_p = nlmsg_hdr (message_in);
-      ACE_ASSERT (nlmsghdr_p);
-      if (unlikely (nlmsghdr_p->nlmsg_type == NLMSG_DONE)) // <-- final result
-      {
-        try {
-          imonitor_p->onScanComplete (interface_identifier_string);
-        } catch (...) {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onScanComplete(\"%s\"), aborting\n"),
-                      ACE_TEXT (interface_identifier_string.c_str ())));
-          return NL_STOP;
-        }
-        break; // done
-      } // end IF
-
       struct nlattr* nlattr_2[NL80211_BSS_MAX + 1];
-      struct ether_addr ap_mac_address_s;
       std::string ssid_string;
       uint8_t len_i;
       uint8_t* data_p = NULL;
       int i;
       uint8_t ie_len_i =0;
       uint8_t* ie_data_p = NULL;
+      struct Net_WLAN_AccessPointState state_s;
       if (//!nlattr_a[NL80211_ATTR_SCAN_FREQUENCIES] ||
           //!nlattr_a[NL80211_ATTR_SCAN_SSIDS] ||
           !nlattr_a[NL80211_ATTR_BSS])
@@ -904,9 +909,12 @@ nla_put_failure:
         return NL_STOP;
       } // end IF
 
-      ACE_OS::memcpy (&ap_mac_address_s.ether_addr_octet,
+      state_s.frequency = nla_get_u32 (nlattr_2[NL80211_BSS_FREQUENCY]);
+      state_s.lastSeen = nla_get_u32 (nlattr_2[NL80211_BSS_SEEN_MS_AGO]);
+      ACE_OS::memcpy (&state_s.linkLayerAddress.ether_addr_octet,
                       nla_data (nlattr_2[NL80211_BSS_BSSID]),
                       ETH_ALEN);
+      state_s.signalQuality = nla_get_u32 (nlattr_2[NL80211_BSS_SIGNAL_MBM]);
       ie_len_i =
           static_cast<uint8_t> (nla_len (nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]));
       ie_data_p =
@@ -938,16 +946,17 @@ nla_put_failure:
         ie_len_i -= ie_data_p[1] + 2;
         ie_data_p += ie_data_p[1] + 2;
       } // end WHILE
-      imonitor_p->set2R (ssid_string,
-                         interface_identifier_string);
+      imonitor_p->set3R (ssid_string,
+                         interface_identifier_string,
+                         state_s);
 #if defined (_DEBUG)
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("detected access point (frequency (MHz): %u, signal strength (dBM): %u, MAC: %s, SSID: %s, age (ms): %u)...\n"),
-                  nla_get_u32 (nlattr_2[NL80211_BSS_FREQUENCY]),
-                  nla_get_u32 (nlattr_2[NL80211_BSS_SIGNAL_MBM]) / 100,
-                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (ap_mac_address_s.ether_addr_octet, NET_LINKLAYER_802_11).c_str ()),
+                  ACE_TEXT ("detected access point (frequency (MHz): %u, signal strength (dBm): %u.%.2u, MAC: %s, SSID: %s, age (ms): %u)...\n"),
+                  state_s.frequency,
+                  state_s.signalQuality / 100, state_s.signalQuality % 100,
+                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (state_s.linkLayerAddress.ether_addr_octet, NET_LINKLAYER_802_11).c_str ()),
                   ACE_TEXT (ssid_string.c_str ()),
-                  nla_get_u32 (nlattr_2[NL80211_BSS_SEEN_MS_AGO])));
+                  state_s.lastSeen));
 #endif // _DEBUG
 
       break;

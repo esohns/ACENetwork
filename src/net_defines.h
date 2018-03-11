@@ -39,7 +39,7 @@
 #define NET_INTERFACE_DEFAULT_PPP                           "ppp0"
 //#define NET_INTERFACE_DEFAULT_WLAN                          "wlan0" // Debian-style
 #define NET_INTERFACE_DEFAULT_WLAN                          "wlp3s0" // openSUSE-style
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 #define NET_INTERFACE_DEFAULT_USE_LOOPBACK                  false
 
 // addresses
@@ -49,7 +49,7 @@
 #if defined (ACE_LINUX)
 // *NOTE*: binding to these ports requires the CAP_NET_BIND_SERVICE capability
 #define NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT                 1023
-#endif
+#endif // ACE_LINUX
 //#define NET_ADDRESS_IP_BROADCAST                        "255.255.255.255"
 #define NET_ADDRESS_NSLOOKUP_RESULT_ADDRESS_KEY_STRING      "Address"
 
@@ -86,7 +86,7 @@
 // socket
 #if defined (ACE_LINUX)
 #define NET_SOCKET_DEFAULT_ERRORQUEUE                       true  // IP_RECVERR
-#endif
+#endif // ACE_LINUX
 #define NET_SOCKET_DEFAULT_LINGER                           true  // SO_LINGER
 #define NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE              ACE_DEFAULT_MAX_SOCKET_BUFSIZ
 #define NET_SOCKET_DEFAULT_TCP_NODELAY                      true  // SO_NODELAY
@@ -121,5 +121,11 @@
 // statistic
 #define NET_STATISTIC_DEFAULT_COLLECTION_INTERVAL           500 // ms [0: off]
 #define NET_STATISTIC_DEFAULT_REPORTING_INTERVAL            0 // second(s) [0: off]
+
+// system services
+#if defined (ACE_LINUX)
+#define NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT            "NetworkManager.service"
+#define NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT            "wpa_supplicant.service"
+#endif // ACE_LINUX
 
 #endif

@@ -453,17 +453,18 @@ class Net_WLAN_Monitor_T<AddressType,
   bool hasFeature (enum nl80211_feature_flags,
                    enum nl80211_ext_feature_index) const;
 
-  ACE_Message_Block*                  buffer_;
-  struct nl_cb*                       callbacks_;
-  int                                 controlId_;
-  int                                 error_;
-  Net_WLAN_nl80211_ExtendedFeatures_t extendedFeatures_;
-  ACE_UINT32                          features_;
-  bool                                headerReceived_;
-  ACE_Asynch_Read_Stream              inputStream_;
-  bool                                isRegistered_;
-  bool                                isSubscribedToMulticastGroups_;
-  struct nl_msg*                      message_;
+  ACE_Message_Block*                          buffer_;
+  struct nl_cb*                               callbacks_;
+  int                                         controlId_;
+  int                                         error_;
+  Net_WLAN_nl80211_ExtendedFeatures_t         extendedFeatures_;
+  ACE_UINT32                                  features_;
+  bool                                        headerReceived_;
+  ACE_Asynch_Read_Stream                      inputStream_;
+  bool                                        isRegistered_;
+  bool                                        isSubscribedToMulticastGroups_;
+  struct nl_msg*                              message_;
+  struct Net_WLAN_nl80211_MultipartDoneCBData multipartDoneCBData_;
 };
 #endif // NL80211_SUPPORT
 

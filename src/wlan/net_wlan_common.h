@@ -21,6 +21,17 @@
 #ifndef NET_WLAN_COMMON_H
 #define NET_WLAN_COMMON_H
 
+#include <map>
+#include <string>
+#include <vector>
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#if defined (NL80211_SUPPORT)
+#include <set>
+#endif // NL80211_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
+
 #include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -31,12 +42,9 @@
 #endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
-#include <set>
-#include <string>
+#include "ace/OS.h"
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include "ace/Synch_Traits.h"
-
 #include "common_xml_common.h"
 #include "common_xml_parser.h"
 
@@ -76,62 +84,56 @@ struct Net_WLAN_IEEE802_11_InformationElement
 #pragma pack (pop)
 #endif // _MSC_VER
 
-struct Net_WLAN_AssociationConfiguration
+struct Net_WLAN_AccessPointState
 {
-  Net_WLAN_AssociationConfiguration ()
-   : accessPointLinkLayerAddress ()
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-   , authenticationType (0)
+  Net_WLAN_AccessPointState ()
+   : authenticationType (0)
    , frequency (0)
-#endif // ACE_WIN32 || ACE_WIN64
+   , lastSeen (0)
+   , linkLayerAddress ()
    , signalQuality (0)
   {
-    ACE_OS::memset (&accessPointLinkLayerAddress,
-                    0,
-                    sizeof (struct ether_addr));
-  };
+    ACE_OS::memset (&linkLayerAddress, 0, sizeof (struct ether_addr));
+  }
 
-  struct ether_addr   accessPointLinkLayerAddress;
+  unsigned int        authenticationType;
+  unsigned int        frequency;
+  unsigned int        lastSeen; // ms
+  struct ether_addr   linkLayerAddress;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   WLAN_SIGNAL_QUALITY signalQuality;
 #else
-  unsigned int        authenticationType;
-  unsigned int        frequency;
-  unsigned int        signalQuality;
+  unsigned int        signalQuality; // mBm
 #endif // ACE_WIN32 || ACE_WIN64
 };
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-typedef std::multimap<std::string,
-                      std::pair<struct _GUID, struct Net_WLAN_AssociationConfiguration> > Net_WLAN_SSIDToInterfaceIdentifier_t;
+typedef std::pair <struct _GUID,
 #else
-typedef std::multimap<std::string,
-                      std::pair<std::string, struct Net_WLAN_AssociationConfiguration> > Net_WLAN_SSIDToInterfaceIdentifier_t;
+typedef std::pair <std::string,
 #endif // ACE_WIN32 || ACE_WIN64
-typedef Net_WLAN_SSIDToInterfaceIdentifier_t::const_iterator Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t;
-typedef Net_WLAN_SSIDToInterfaceIdentifier_t::iterator Net_WLAN_SSIDToInterfaceIdentifierIterator_t;
-typedef std::pair<Net_WLAN_SSIDToInterfaceIdentifier_t::iterator, bool> Net_WLAN_SSIDToInterfaceIdentifierResult_t;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-typedef std::pair<std::network_wlan_nl80211_interface_cbstring,
-                  std::pair <struct _GUID, struct Net_WLAN_AssociationConfiguration> > Net_WLAN_SSIDToInterfaceIdentifierEntry_t;
-struct Net_WLAN_SSIDToInterfaceIdentifierFindPredicate
- : public std::binary_function<Net_WLAN_SSIDToInterfaceIdentifierEntry_t,
-                               struct _GUID,
-                               bool>
-{
-  inline bool operator() (const Net_WLAN_SSIDToInterfaceIdentifierEntry_t& entry_in, struct _GUID value_in) const { return InlineIsEqualGUID (entry_in.second.first, value_in); }
-};
-#else
+                   struct Net_WLAN_AccessPointState> Net_WLAN_AccessPointCacheValue_t;
+typedef std::multimap<std::string,
+                      Net_WLAN_AccessPointCacheValue_t> Net_WLAN_AccessPointCache_t;
+typedef Net_WLAN_AccessPointCache_t::const_iterator Net_WLAN_AccessPointCacheConstIterator_t;
+typedef Net_WLAN_AccessPointCache_t::iterator Net_WLAN_AccessPointCacheIterator_t;
+typedef std::pair<Net_WLAN_AccessPointCacheIterator_t, bool> Net_WLAN_AccessPointCacheFindResult_t;
 typedef std::pair<std::string,
-                  std::pair <std::string, struct Net_WLAN_AssociationConfiguration> > Net_WLAN_SSIDToInterfaceIdentifierEntry_t;
-struct Net_WLAN_SSIDToInterfaceIdentifierFindPredicate
- : public std::binary_function<Net_WLAN_SSIDToInterfaceIdentifierEntry_t,
+                  Net_WLAN_AccessPointCacheValue_t> Net_WLAN_AccessPointCacheEntry_t;
+struct Net_WLAN_AccessPointCacheFindPredicate
+ : public std::binary_function<Net_WLAN_AccessPointCacheEntry_t,
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                               struct _GUID,
+#else
                                std::string,
+#endif // ACE_WIN32 || ACE_WIN64
                                bool>
 {
-  inline bool operator() (const Net_WLAN_SSIDToInterfaceIdentifierEntry_t& entry_in, std::string value_in) const { return entry_in.second.first == value_in; }
-};
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  inline bool operator() (const Net_WLAN_AccessPointCacheEntry_t& entry_in, struct _GUID value_in) const { return InlineIsEqualGUID (entry_in.second.first, value_in); }
+#else
+  inline bool operator() (const Net_WLAN_AccessPointCacheEntry_t& entry_in, std::string value_in) const { return entry_in.second.first == value_in; }
 #endif // ACE_WIN32 || ACE_WIN64
+};
 
 typedef std::vector<std::string> Net_WLAN_SSIDs_t;
 typedef Net_WLAN_SSIDs_t::iterator Net_WLAN_SSIDsIterator_t;
@@ -160,19 +162,6 @@ struct Net_WLAN_nl80211_MulticastGroupIdQueryCBData
   Net_WLAN_nl80211_MulticastGroupIds_t* map;
 };
 
-typedef std::set<enum nl80211_ext_feature_index> Net_WLAN_nl80211_ExtendedFeatures_t;
-typedef Net_WLAN_nl80211_ExtendedFeatures_t::iterator Net_WLAN_nl80211_ExtendedFeaturesIterator_t;
-struct Net_WLAN_nl80211_FeatureSetCBData
-{
-  Net_WLAN_nl80211_FeatureSetCBData ()
-   : features (0)
-   , extendedFeatures ()
-  {}
-
-  ACE_UINT32                          features;
-  Net_WLAN_nl80211_ExtendedFeatures_t extendedFeatures;
-};
-
 struct Net_WLAN_nl80211_InterfaceConfigurationCBData
 {
   Net_WLAN_nl80211_InterfaceConfigurationCBData ()
@@ -184,17 +173,48 @@ struct Net_WLAN_nl80211_InterfaceConfigurationCBData
   enum nl80211_iftype type;
 };
 
-struct Net_WLAN_nl80211_ScanResult
+typedef std::set<enum nl80211_ext_feature_index> Net_WLAN_nl80211_ExtendedFeatures_t;
+typedef Net_WLAN_nl80211_ExtendedFeatures_t::iterator Net_WLAN_nl80211_ExtendedFeaturesIterator_t;
+struct Net_WLAN_nl80211_InterfaceFeaturesCBData
 {
-  Net_WLAN_nl80211_ScanResult ()
-   : aborted (false)
-   , done (false)
+  Net_WLAN_nl80211_InterfaceFeaturesCBData ()
+   : features (0)
+   , extendedFeatures ()
   {}
 
-  bool aborted;
-  bool done;
+  ACE_UINT32                          features;
+  Net_WLAN_nl80211_ExtendedFeatures_t extendedFeatures;
+};
+
+class Net_WLAN_IMonitorBase;
+struct Net_WLAN_nl80211_MultipartDoneCBData
+{
+  Net_WLAN_nl80211_MultipartDoneCBData ()
+   : error (NULL)
+   , scanning (false)
+   , monitor (NULL)
+  {}
+
+  int*                   error;
+  bool                   scanning;
+  Net_WLAN_IMonitorBase* monitor;
 };
 #endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
+
+struct Net_WLAN_AssociationConfiguration
+{
+  Net_WLAN_AssociationConfiguration ()
+   : accessPointLinkLayerAddress ()
+   , authenticationType (0)
+  {
+    ACE_OS::memset (&accessPointLinkLayerAddress,
+                    0,
+                    sizeof (struct ether_addr));
+  }
+
+  struct ether_addr accessPointLinkLayerAddress;
+  unsigned int      authenticationType;
+};
 
 #endif

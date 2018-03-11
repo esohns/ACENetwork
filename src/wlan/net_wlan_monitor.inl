@@ -62,6 +62,8 @@ extern "C"
 #include "common_timer_manager_common.h"
 #else
 #if defined (NL80211_SUPPORT)
+#include "common_dbus_tools.h"
+
 #include "common_math_tools.h"
 #endif // NL80211_SUPPORT
 #if defined (_DEBUG)
@@ -1141,9 +1143,18 @@ Net_WLAN_Monitor_T<AddressType,
 
   // sanity check(s)
 #if defined (ACE_LINUX)
-  if (Net_Common_Tools::isNetworkManagerRunning ())
+  if (Common_DBus_Tools::isUnitRunning (NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT))
+  {
     ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("systemd NetworkManager service is running; this may interfere with the monitoring activities, continuing\n")));
+                ACE_TEXT ("systemd unit \"%s\" is running; this may interfere with the monitoring activities, continuing\n"),
+                ACE_TEXT (NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT)));
+  } // end IF
+  elseif (Common_DBus_Tools::isUnitRunning (NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT))
+  {
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("systemd unit \"%s\" is running; this may interfere with the monitoring activities, continuing\n"),
+                ACE_TEXT (NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT)));
+  } // end ELSE IF
 #endif
     ACE_ASSERT (inherited::handle_ == ACE_INVALID_HANDLE);
 
@@ -1674,6 +1685,7 @@ Net_WLAN_Monitor_T<AddressType,
  , isRegistered_ (false)
  , isSubscribedToMulticastGroups_ (false)
  , message_ (NULL)
+ , multipartDoneCBData_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::Net_WLAN_Monitor_T"));
 
@@ -1681,6 +1693,9 @@ Net_WLAN_Monitor_T<AddressType,
 
 //  inherited::TASK_T::reactor (ACE_Reactor::instance ());
 //  inherited2::proactor (ACE_Proactor::instance ());
+
+  multipartDoneCBData_.error = &error_;
+  multipartDoneCBData_.monitor = this;
 }
 
 template <typename AddressType,
@@ -1776,13 +1791,32 @@ Net_WLAN_Monitor_T<AddressType,
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (callbacks_);
 //  ACE_ASSERT (!controlId_);
-  ACE_ASSERT (!error_);
+//  ACE_ASSERT (!error_);
   ACE_ASSERT (inherited::handle_);
 //  ACE_ASSERT (!isRegistered_);
 #if defined (ACE_LINUX)
-  if (Net_Common_Tools::isNetworkManagerRunning ())
+  if (Common_DBus_Tools::isUnitRunning (NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT))
+  {
     ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("the (systemd) NetworkManager service is running; this may interfere with the monitoring activities, continuing\n")));
+                ACE_TEXT ("stopping systemd unit \"%s\"; it may interfere with the monitoring activities\n"),
+                ACE_TEXT (NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT)));
+    if (!Common_DBus_Tools::toggleUnit (NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT,
+                                        true))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_DBus_Tools::toggleUnit(\"%s\"), continuing\n"),
+                  ACE_TEXT (NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT)));
+  } // end IF
+  if (Common_DBus_Tools::isUnitRunning (NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT))
+  {
+    ACE_DEBUG ((LM_WARNING,
+                ACE_TEXT ("systemd unit \"%s\" is running; this may interfere with the monitoring activities, continuing\n"),
+                ACE_TEXT (NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT)));
+    if (!Common_DBus_Tools::toggleUnit (NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT,
+                                        true))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_DBus_Tools::toggleUnit(\"%s\"), continuing\n"),
+                  ACE_TEXT (NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT)));
+  } // end ELSE IF
 #endif // ACE_LINUX
 
   int result = -1;
@@ -1882,7 +1916,7 @@ continue_:
                       NL_CB_FINISH,
                       NL_CB_CUSTOM,
                       network_wlan_nl80211_finish_cb,
-                      &error_);
+                      &multipartDoneCBData_);
   ACE_ASSERT (result >= 0);
   result = nl_cb_set (callbacks_,
                       NL_CB_VALID,
@@ -2087,14 +2121,22 @@ nla_put_failure:
       }
       case COMMON_EVENT_DISPATCH_REACTOR:
       {
-        ACE_Reactor* reactor_p = inherited::TASK_T::reactor ();
+        ACE_HANDLE handle_h = nl_socket_get_fd (inherited::handle_);
+        ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
+  //      inherited2::set_handle ();
+        inherited::TASK_T::set_handle (handle_h);
+
+        ACE_Reactor* reactor_p =
+  //          inherited::TASK_T::reactor ();
+            ACE_Reactor::instance ();
         ACE_ASSERT (reactor_p);
-        result = reactor_p->remove_handler (this,
+
+        result = reactor_p->remove_handler (handle_h,
                                             ACE_Event_Handler::ALL_EVENTS_MASK);
         if (unlikely (result == -1))
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@): \"%m\", continuing\n"),
-                      this));
+                      ACE_TEXT ("failed to ACE_Reactor::remove_handler(%d): \"%m\", continuing\n"),
+                      handle_h));
         break;
       }
       default:
@@ -2151,14 +2193,22 @@ Net_WLAN_Monitor_T<AddressType,
       }
       case COMMON_EVENT_DISPATCH_REACTOR:
       {
-        ACE_Reactor* reactor_p = inherited::TASK_T::reactor ();
+        ACE_HANDLE handle_h = nl_socket_get_fd (inherited::handle_);
+        ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
+  //      inherited2::set_handle ();
+        inherited::TASK_T::set_handle (handle_h);
+
+        ACE_Reactor* reactor_p =
+  //          inherited::TASK_T::reactor ();
+            ACE_Reactor::instance ();
         ACE_ASSERT (reactor_p);
-        result = reactor_p->remove_handler (this,
+
+        result = reactor_p->remove_handler (handle_h,
                                             ACE_Event_Handler::ALL_EVENTS_MASK);
         if (unlikely (result == -1))
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@): \"%m\", continuing\n"),
-                      this));
+                      ACE_TEXT ("failed to ACE_Reactor::remove_handler(%d): \"%m\", continuing\n"),
+                      handle_h));
         break;
       }
       default:
@@ -2383,9 +2433,10 @@ Net_WLAN_Monitor_T<AddressType,
     if (command_i == NL80211_CMD_DISCONNECT)
     {
       if (Net_Common_Tools::isAny (ap_mac_address_s))
-        ap_mac_address_s = Net_WLAN_Tools::associatedBSSID (*iterator,
-                                                            NULL,
-                                                            inherited::familyId_);
+        ap_mac_address_s =
+            Net_WLAN_Tools::associatedBSSID (*iterator,
+                                             NULL,
+                                             inherited::familyId_);
 //      ssid_string = Net_WLAN_Tools::associatedSSID (*iterator,
 //                                                    NULL,
 //                                                    inherited::familyId_);
@@ -2409,7 +2460,7 @@ Net_WLAN_Monitor_T<AddressType,
                ssid_string.size (),
                ssid_string.c_str ());
       { ACE_GUARD_RETURN (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_, 0);
-        Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator =
+        Net_WLAN_AccessPointCacheConstIterator_t iterator =
             inherited::SSIDCache_.begin ();
         if (likely (iterator != inherited::SSIDCache_.end ()))
         {
@@ -2617,6 +2668,8 @@ Net_WLAN_Monitor_T<AddressType,
                             //  and FT IEs..."
            0,
            NULL);
+
+  multipartDoneCBData_.scanning = true;
 
   result = nl_send_auto (inherited::handle_, message_p);
   if (unlikely (result < 0))
@@ -2988,10 +3041,10 @@ Net_WLAN_Monitor_T<AddressType,
   ACE_ASSERT (inherited::configuration_);
   ACE_ASSERT (messageBlock_inout);
 
-  int result = -1;
   ACE_Message_Block* message_block_p, *message_block_2;
-  int buffer_size;
-  int err = 0, multipart = 0, interrupted = 0, nrecv = 0;
+  unsigned int buffer_size;
+  int err = 0;
+//  int multipart = 0, interrupted = 0, nrecv = 0;
   struct nlmsghdr* nlmsghdr_p = NULL;
   //  struct ucred* ucred_p = NULL;
   unsigned int missing_bytes, bytes_to_copy, offset;
@@ -3143,7 +3196,7 @@ do { \
     nl_msg_dump (message_, stderr);
 #endif // _DEBUG
 
-  nrecv++;
+//  nrecv++;
 
   /* Raw callback is the first, it gives the most control
      * to the user and he can do his very own parsing. */
@@ -3181,8 +3234,8 @@ do { \
     inherited::handle_->s_seq_expect++;
   } // end IF
 
-  if (nlmsghdr_p->nlmsg_flags & NLM_F_MULTI)
-    multipart = 1;
+//  if (nlmsghdr_p->nlmsg_flags & NLM_F_MULTI)
+//    multipart = 1;
 
   if (nlmsghdr_p->nlmsg_flags & NLM_F_DUMP_INTR) {
     if (callbacks_->cb_set[NL_CB_DUMP_INTR])
@@ -3193,7 +3246,7 @@ do { \
          * all messages until a NLMSG_DONE is
          * received and report the inconsistency.
          */
-      interrupted = 1;
+//      interrupted = 1;
     } // end ELSE
   } // end IF
 
@@ -3211,7 +3264,7 @@ do { \
      * out of the loop by default. the user may overrule
      * this action by skipping this packet. */
   if (nlmsghdr_p->nlmsg_type == NLMSG_DONE) {
-    multipart = 0;
+//    multipart = 0;
     if (callbacks_->cb_set[NL_CB_FINISH])
       NL_CB_CALL (callbacks_, NL_CB_FINISH, message_);
   } // end IF
@@ -3246,7 +3299,7 @@ do { \
     struct nlmsgerr* e =
         reinterpret_cast<struct nlmsgerr*> (nlmsg_data (nlmsghdr_p));
 
-    if (nlmsghdr_p->nlmsg_len < nlmsg_size (sizeof (*e))) {
+    if (nlmsghdr_p->nlmsg_len < static_cast<__u32> (nlmsg_size (sizeof (*e)))) {
       /* Truncated error message, the default action
          * is to stop parsing. The user may overrule
          * this action by returning NL_SKIP or
@@ -3300,7 +3353,10 @@ continue_2:
 
 error:
   if (message_)
+  {
     nlmsg_free (message_);
+    message_ = NULL;
+  } // end IF
 }
 
 template <typename AddressType,
