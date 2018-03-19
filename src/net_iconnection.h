@@ -40,7 +40,8 @@
 class ACE_Message_Block;
 class ACE_Notification_Strategy;
 class ACE_Time_Value;
-enum Net_Connection_Status : int;
+//enum Net_Connection_Status : int;
+enum Net_Connection_Status;
 
 //////////////////////////////////////////
 

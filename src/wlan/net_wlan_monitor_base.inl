@@ -75,7 +75,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -83,7 +83,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #else
                         ,ACE_SYNCH_USE,
                         TimePolicyType>::Net_WLAN_Monitor_Base_T ()
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
  : inherited ()
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
@@ -99,10 +99,11 @@ Net_WLAN_Monitor_Base_T<AddressType,
  , bufferSize_ (0)
  , handle_ (ACE_INVALID_HANDLE)
 // , isRegistered_ (false)
-#elif defined (NL80211_SUPPORT)
- , familyId_ (0)
- , handle_ (NULL)
 #endif // WEXT_SUPPORT
+#if defined (NL80211_SUPPORT)
+ , familyId_ (0)
+ , socketHandle_ (NULL)
+#endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
  , configuration_ (NULL)
  , isActive_ (false)
@@ -119,7 +120,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //#else
 // , queue_ (STREAM_QUEUE_MAX_SLOTS)
-//#endif
+//#endif // ACE_WIN32 || ACE_WIN64
  , SSIDSeenBefore_ (false)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::Net_WLAN_Monitor_Base_T"));
@@ -144,7 +145,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -152,7 +153,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #else
                         ,ACE_SYNCH_USE,
                         TimePolicyType>::~Net_WLAN_Monitor_Base_T ()
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::~Net_WLAN_Monitor_Base_T"));
 
@@ -169,7 +170,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
                      true);
 
 #if defined (WEXT_SUPPORT)
-//  int result = -1;
+  int result = -1;
 //  if (unlikely (isRegistered_))
 //  {
 //    ACE_Reactor* reactor_p = inherited::reactor ();
@@ -208,7 +209,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 const Net_WLAN_AccessPointCacheValue_t&
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -217,7 +218,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #else
                         ,ACE_SYNCH_USE,
                         TimePolicyType>::get1RR (const std::string& SSID_in) const
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::get1R"));
 
@@ -240,7 +241,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 void
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -287,7 +288,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 bool
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -296,7 +297,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #else
                         ,ACE_SYNCH_USE,
                         TimePolicyType>::initialize (const ConfigurationType& configuration_in)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::initialize"));
 
@@ -321,16 +322,18 @@ Net_WLAN_Monitor_Base_T<AddressType,
     } // end IF
     bufferSize_ = 0;
     ACE_ASSERT (handle_ == ACE_INVALID_HANDLE);
-#elif defined (NL80211_SUPPORT)
-    ACE_ASSERT (familyId_ == 0);
-
-    if (handle_)
-    {
-      nl_socket_free (handle_);
-      handle_ = NULL;
-    } // end  IF
-#elif defined (DBUS_SUPPORT)
 #endif // WEXT_SUPPORT
+#if defined (NL80211_SUPPORT)
+    familyId_ = 0;
+
+    if (socketHandle_)
+    {
+      nl_socket_free (socketHandle_);
+      socketHandle_ = NULL;
+    } // end  IF
+#endif // NL80211_SUPPORT
+#if defined (DBUS_SUPPORT)
+#endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
     configuration_ = NULL;
@@ -366,12 +369,13 @@ Net_WLAN_Monitor_Base_T<AddressType,
   //  timerInterface_ = COMMON_TIMERMANAGER_SINGLETON::instance ();
   //} // end ELSE
 #else
-#if defined (WEXT_SUPPORT)
-#elif defined (NL80211_SUPPORT)
-  ACE_ASSERT (!handle_);
+//#if defined (WEXT_SUPPORT)
+//#endif // WEXT_SUPPORT
+#if defined (NL80211_SUPPORT)
+  ACE_ASSERT (!socketHandle_);
 
-  handle_ = nl_socket_alloc ();
-  if (unlikely (!handle_))
+  socketHandle_ = nl_socket_alloc ();
+  if (unlikely (!socketHandle_))
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to nl_socket_alloc(): \"%m\", aborting\n")));
@@ -382,33 +386,34 @@ Net_WLAN_Monitor_Base_T<AddressType,
 //  nl_socket_set_buffer_size (handle_, int rx, int tx);
 //  nl_socket_disable_auto_ack (handle_);
 
-  int result = nl_connect (handle_, NETLINK_GENERIC);
+  int result = nl_connect (socketHandle_, NETLINK_GENERIC);
   if (unlikely (result < 0))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to nl_connect(0x%@): \"%s\", aborting\n"),
-                handle_,
+                socketHandle_,
                 ACE_TEXT (nl_geterror (result))));
     return false;
   } // end IF
 
   familyId_ =
-      genl_ctrl_resolve (handle_,
+      genl_ctrl_resolve (socketHandle_,
                          ACE_TEXT_ALWAYS_CHAR (NL80211_GENL_NAME));
   if (unlikely (familyId_ < 0))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to genl_ctrl_resolve(%@,%s): \"%s\", aborting\n"),
-                handle_,
+                socketHandle_,
                 ACE_TEXT (NL80211_GENL_NAME),
                 ACE_TEXT (nl_geterror (familyId_))));
     return false;
   } // end IF
 
   // *TODO*: disable sequence checks selectively for multicast messages
-  nl_socket_disable_seq_check (handle_);
-#elif defined (DBUS_SUPPORT)
-#endif // WEXT_SUPPORT
+  nl_socket_disable_seq_check (socketHandle_);
+#endif // NL80211_SUPPORT
+//#if defined (DBUS_SUPPORT)
+//#endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
   configuration_ = &const_cast<ConfigurationType&> (configuration_in);
 
@@ -724,9 +729,10 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #else
   if (interfaceIdentifier_in.empty ())
     interface_identifiers_a = Net_WLAN_Tools::getInterfaces (
+// *TODO*: this compiles only one implementation; move out of the base class
 #if defined (WEXT_USE)
 #elif defined (NL80211_USE)
-                                                             handle_,
+                                                             socketHandle_,
                                                              familyId_,
 #elif defined (DBUS_USE)
 #endif // DBUS_USE
@@ -799,7 +805,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 Net_WLAN_SSIDs_t
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -843,7 +849,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 void
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -872,7 +878,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
       { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
 #else
       { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         inherited::state_ = NET_WLAN_MONITOR_STATE_IDLE;
       } // end lock scope
 
@@ -949,7 +955,7 @@ reset_state:
       { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
 #else
       { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         inherited::state_ = NET_WLAN_MONITOR_STATE_IDLE;
       } // end lock scope
 
@@ -963,7 +969,7 @@ reset_state:
       { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
 #else
       { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         inherited::state_ = NET_WLAN_MONITOR_STATE_SCAN;
       } // end lock scope
 
@@ -1059,7 +1065,7 @@ fetch_scan_result_data:
       { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
 #else
       { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         inherited::state_ = NET_WLAN_MONITOR_STATE_ASSOCIATE;
       } // end lock scope
 
@@ -1145,7 +1151,7 @@ fetch_scan_result_data:
 #else
 #if defined (WEXT_SUPPORT)
 associate:
-#endif // WEXT_SUPPORT
+#endif // WEXT_SUPPORT && defined (WEXT_USE)
 #endif // ACE_WIN32 || ACE_WIN64
       try {
         do_associate (interface_identifier,
@@ -1180,7 +1186,7 @@ associate:
           Net_WLAN_Tools::associatedBSSID (configuration_->interfaceIdentifier,
                                            handle_);
         if (!ACE_OS::memcmp (&ether_addr_s.ether_addr_octet,
-                             &ap_mac_address.ether_addr_octet,
+                             &ap_mac_address_s.ether_addr_octet,
                              ETH_ALEN))
         {
           result = true;
@@ -1202,8 +1208,8 @@ associate:
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("\"%s\": failed to associate with access point (MAC was: %s; SSID was: %s): timed out (was: %#T), giving up\n"),
-                      ACE_TEXT (interface_identifier_string.c_str ()),
-                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address_s.ether_addr_octet, NET_LINKLAYER_802_11)).c_str ()),
+                      ACE_TEXT (interface_identifier.c_str ()),
+                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet), NET_LINKLAYER_802_11)).c_str ()),
                       ACE_TEXT (configuration_->SSID.c_str ()),
                       &result_poll_interval));
           retries_ = 0;
@@ -1214,8 +1220,8 @@ associate:
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("\"%s\": failed to associate with access point (MAC was: %s; SSID was: %s): timed out (was: %#T), retrying...\n"),
-                      ACE_TEXT (interface_identifier_string.c_str ()),
-                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address_s.ether_addr_octet, NET_LINKLAYER_802_11)).c_str ()),
+                      ACE_TEXT (interface_identifier.c_str ()),
+                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet), NET_LINKLAYER_802_11)).c_str ()),
                       ACE_TEXT (configuration_->SSID.c_str ()),
                       &result_poll_interval));
           ++retries_;
@@ -1300,7 +1306,7 @@ associate:
       { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
 #else
       { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         inherited::state_ = NET_WLAN_MONITOR_STATE_CONNECT;
       } // end lock scope
 
@@ -1476,7 +1482,7 @@ clean:
       { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
 #else
       { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         inherited::state_ = NET_WLAN_MONITOR_STATE_DISCONNECT;
       } // end lock scope
 
@@ -1517,7 +1523,7 @@ clean:
       { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
 #else
       { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         inherited::state_ = NET_WLAN_MONITOR_STATE_SCANNED;
       } // end lock scope
 
@@ -1577,7 +1583,7 @@ clean:
       { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
 #else
       { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         inherited::state_ = NET_WLAN_MONITOR_STATE_ASSOCIATED;
       } // end lock scope
 
@@ -1649,14 +1655,10 @@ continue_2:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 //reset_state:
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
-#else
       { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
-#endif
         inherited::state_ = NET_WLAN_MONITOR_STATE_ASSOCIATED;
       } // end lock scope
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       break;
     }
     case NET_WLAN_MONITOR_STATE_CONNECTED:
@@ -1667,7 +1669,7 @@ continue_2:
       { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
 #else
       { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         inherited::state_ = NET_WLAN_MONITOR_STATE_CONNECTED;
       } // end lock scope
 
@@ -1689,7 +1691,7 @@ continue_2:
                     ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onConnect(\"%s\",%s,true), continuing\n"),
                     ACE_TEXT (configuration_->interfaceIdentifier.c_str ()),
                     ACE_TEXT (this->SSID ().c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       }
 
 continue_3:
@@ -1700,7 +1702,7 @@ continue_3:
         startScanTimer ();
 #else
       inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       break;
     }
     default:
@@ -1750,7 +1752,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
                 ACE_TEXT ("started WLAN scan interval timer (id: %d, %#T)\n"),
                 scanTimerId_,
                 &scan_interval));
-#endif
+#endif // _DEBUG
 }
 template <typename AddressType,
           typename ConfigurationType>
@@ -1781,7 +1783,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
   scanTimerId_ = -1;
   ACE_UNUSED_ARG (act_p);
 }
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 //////////////////////////////////////////
 
@@ -1792,7 +1794,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 void
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -1819,7 +1821,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
               ACE_TEXT (interfaceIdentifier_in.c_str ()),
               ACE_TEXT (this->SSID ().c_str ()),
               signalQuality_in));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   std::string SSID_string = this->SSID ();
   ACE_ASSERT (!SSID_string.empty ());
@@ -1857,7 +1859,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 void
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -1991,7 +1993,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 void
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -2095,7 +2097,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 void
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -2203,7 +2205,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 //              ACE_TEXT (SSID_in.c_str ()),
 //              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_).c_str ()),
 //              ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_).c_str ())));
-//#endif
+//#endif // ACE_WIN32 || ACE_WIN64
 }
 template <typename AddressType,
           typename ConfigurationType
@@ -2212,7 +2214,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 void
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -2314,7 +2316,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 void
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -2368,7 +2370,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 void
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
@@ -2423,7 +2425,7 @@ template <typename AddressType,
 #else
           ,ACE_SYNCH_DECL,
           typename TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 void
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType

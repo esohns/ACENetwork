@@ -42,7 +42,7 @@ class IRC_Client_InputHandler
 {
  public:
   IRC_Client_InputHandler (struct IRC_Client_SessionState*, // state handle
-                           bool = NET_EVENT_USE_REACTOR);   // use reactor ?
+                           bool = (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR));   // use reactor ?
   virtual ~IRC_Client_InputHandler ();
 
   // implement Common_IInitialize_T

@@ -25,6 +25,8 @@
 
 #include "ace/Log_Msg.h"
 
+#include "stream_file_defines.h"
+
 #include "net_defines.h"
 #include "net_macros.h"
 
@@ -283,33 +285,33 @@ Test_U_UDPStream::load (Stream_ModuleList_t& modules_out,
   NETWORK_TRACE (ACE_TEXT ("Test_U_UDPStream::load"));
 
   Stream_Module_t* module_p = NULL;
-  if (inherited::configuration_->configuration_.useReactor)
+  if (inherited::configuration_->configuration_.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     ACE_NEW_RETURN (module_p,
                     Test_U_Module_Net_UDPTarget_Module (this,
-                                                        ACE_TEXT_ALWAYS_CHAR ("NetworkTarget")),
+                                                        ACE_TEXT_ALWAYS_CHAR (MODULE_NET_TARGET_DEFAULT_NAME_STRING)),
                     false);
   else
     ACE_NEW_RETURN (module_p,
                   Test_U_Module_Net_AsynchUDPTarget_Module (this,
-                                                            ACE_TEXT_ALWAYS_CHAR ("NetworkTarget")),
+                                                            ACE_TEXT_ALWAYS_CHAR (MODULE_NET_TARGET_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_MPEG_TS_Decoder_Module (this,
-                                                 ACE_TEXT_ALWAYS_CHAR ("MPEGTSDecoder")),
+                                                 ACE_TEXT_ALWAYS_CHAR (MODULE_DEC_DECODER_MPEG_TS_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_StatisticReport_Module (this,
-                                                 ACE_TEXT_ALWAYS_CHAR ("StatisticReport")),
+                                                 ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_FileReaderH_Module (this,
-                                             ACE_TEXT_ALWAYS_CHAR ("FileSource")),
+                                             ACE_TEXT_ALWAYS_CHAR (MODULE_FILE_SOURCE_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
 
@@ -367,13 +369,13 @@ Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configu
 
   // ******************* File Reader ************************
   module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("FileSource")));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_FILE_SOURCE_DEFAULT_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
                 ACE_TEXT (stream_name_string_),
-                ACE_TEXT ("FileSource")));
+                ACE_TEXT (MODULE_FILE_SOURCE_DEFAULT_NAME_STRING)));
     goto error;
   } // end IF
   file_source_impl_p =
@@ -429,12 +431,12 @@ Test_U_UDPStream::collect (Net_Statistic_t& data_out)
   int result = -1;
 
   Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT ("StatisticReport")));
+                ACE_TEXT (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
     return false;
   } // end IF
   Test_U_Module_StatisticReport_WriterTask_t* statistic_report_impl_p =

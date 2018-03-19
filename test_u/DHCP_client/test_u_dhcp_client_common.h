@@ -267,8 +267,8 @@ struct DHCPClient_Configuration
    , streamConfiguration ()
    , listenerConfiguration ()
    , broadcastHandle (ACE_INVALID_HANDLE)
+   , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , handle (ACE_INVALID_HANDLE)
-   , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
   // **************************** signal data **********************************
@@ -285,8 +285,8 @@ struct DHCPClient_Configuration
   struct DHCPClient_ListenerConfiguration      listenerConfiguration;
 
   ACE_HANDLE                                   broadcastHandle; // listen handle (broadcast)
+  enum Common_EventDispatchType                dispatch;
   ACE_HANDLE                                   handle;          // listen handle (unicast)
-  bool                                         useReactor;
 };
 
 //typedef Common_ISubscribe_T<DHCPClient_ISessionNotify_t> DHCPClient_ISubscribe_t;

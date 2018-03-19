@@ -47,7 +47,7 @@ Client_SignalHandler::Client_SignalHandler (enum Common_SignalDispatchType dispa
  , connector_ (NULL)
  , hasUI_ (false)
  , timerId_ (-1)
- , useReactor_ (NET_EVENT_USE_REACTOR)
+ , useReactor_ (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
 {
   NETWORK_TRACE (ACE_TEXT ("Client_SignalHandler::Client_SignalHandler"));
 
@@ -62,7 +62,7 @@ Client_SignalHandler::initialize (const struct Client_SignalHandlerConfiguration
   connector_ = configuration_in.connector;
   hasUI_ = configuration_in.hasUI;
   timerId_ = configuration_in.actionTimerId;
-  useReactor_ = configuration_in.useReactor;
+  useReactor_ = (configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR);
 
   return inherited::initialize (configuration_in);
 }

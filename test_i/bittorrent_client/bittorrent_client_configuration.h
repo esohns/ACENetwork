@@ -36,12 +36,12 @@
 struct BitTorrent_Client_PeerUserData
 {
   BitTorrent_Client_PeerUserData ()
-  {};
+  {}
 };
 struct BitTorrent_Client_TrackerUserData
 {
   BitTorrent_Client_TrackerUserData ()
-  {};
+  {}
 };
 
 struct BitTorrent_Client_CursesState;
@@ -61,12 +61,12 @@ struct BitTorrent_Client_Configuration
    , sessionConfiguration ()
    ///////////////////////////////////////
    , cursesState (NULL)
-   , groupId (COMMON_EVENT_THREAD_GROUP_ID)
+   , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
+   , groupId (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1)
    , logToFile (TEST_I_DEFAULT_SESSION_LOG)
-   , useReactor (NET_EVENT_USE_REACTOR)
    , peerUserData ()
    , trackerUserData ()
-  {};
+  {}
 
   // ****************************** signal *************************************
   struct BitTorrent_Client_SignalHandlerConfiguration signalHandlerConfiguration;
@@ -85,9 +85,9 @@ struct BitTorrent_Client_Configuration
   // ***************************************************************************
   // *TODO*: move this somewhere else
   struct BitTorrent_Client_CursesState*               cursesState;
+  enum Common_EventDispatchType                       dispatch;
   int                                                 groupId;
   bool                                                logToFile;
-  bool                                                useReactor;
 
   struct BitTorrent_Client_PeerUserData               peerUserData;
   struct BitTorrent_Client_TrackerUserData            trackerUserData;

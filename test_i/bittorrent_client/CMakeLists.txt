@@ -203,6 +203,19 @@ set (bittorrent_client_SRCS
 
 #set_source_files_properties(${bittorrent_client_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
+if (UNIX)
+ add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
+endif ()
+
+set (LLVM_COMPILER_ID_STRING "Clang")
+string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
+string (TOLOWER "${CMAKE_CXX_COMPILER_ID}" CXX_COMPILER_ID_STRING_LOWER)
+if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
+ add_compile_options (-std=c++11)
+#add_compile_options (-fPIC)
+ add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
+endif ()
+
 set (EXECUTABLE bittorrent_client)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
@@ -234,8 +247,7 @@ target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (UNIX)
  target_link_libraries (${EXECUTABLE} rt)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
- #target_link_libraries (${EXECUTABLE} ${PKG_DBUS_LIBRARIES})
-# target_link_libraries (${EXECUTABLE} iw)
+ target_link_libraries (${EXECUTABLE} iw)
 # target_link_libraries (${EXECUTABLE} ${FLEX_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})
  target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
@@ -258,6 +270,7 @@ target_link_libraries (${EXECUTABLE} ACEStream_Network)
 target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_BitTorrent)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
@@ -363,8 +376,7 @@ target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
 if (UNIX)
  target_link_libraries (${EXECUTABLE_GUI} rt)
  target_link_libraries (${EXECUTABLE_GUI} ${PKG_CAP_LIBRARIES})
- #target_link_libraries (${EXECUTABLE_GUI} ${PKG_DBUS_LIBRARIES})
-# target_link_libraries (${EXECUTABLE_GUI} iw)
+ target_link_libraries (${EXECUTABLE_GUI} iw)
 # target_link_libraries (${EXECUTABLE_GUI} ${FLEX_LIBRARY})
  target_link_libraries (${EXECUTABLE_GUI} X11)
  target_link_libraries (${EXECUTABLE_GUI} ${PKG_FFMPEG_LIBRARIES})
@@ -398,6 +410,7 @@ target_link_libraries (${EXECUTABLE_GUI} CommonUI_GTK)
 target_link_libraries (${EXECUTABLE_GUI} ACEStream)
 
 target_link_libraries (${EXECUTABLE_GUI} ACENetwork)
+target_link_libraries (${EXECUTABLE_GUI} ACENetwork_WLAN)
 target_link_libraries (${EXECUTABLE_GUI} ACENetwork_Protocol_BitTorrent)
 target_link_libraries (${EXECUTABLE_GUI} ACENetwork_Protocol_HTTP)
 

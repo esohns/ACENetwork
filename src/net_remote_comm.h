@@ -27,7 +27,7 @@ class Net_Remote_Comm
 {
  public:
   // define different types of messages
-  enum MessageType : int
+  enum MessageType
   {
     NET_MESSAGE_INVALID = -1,
     NET_MESSAGE_PING,

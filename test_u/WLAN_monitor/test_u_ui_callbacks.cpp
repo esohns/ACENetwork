@@ -914,11 +914,7 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
           GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
                                                   ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_LISTSTORE_SSID_NAME)));
       ACE_ASSERT (list_store_p);
-#if GTK_CHECK_VERSION (3,0,0)
-      value = G_VALUE_INIT;
-#else
       g_value_init (&value, G_TYPE_STRING);
-#endif
       gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
                                 &iterator_2,
                                 0, &value);
@@ -1228,11 +1224,7 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
                                               ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_LISTSTORE_INTERFACE_NAME)));
   ACE_ASSERT (list_store_p);
   GValue value;
-#if GTK_CHECK_VERSION (3,0,0)
-  value = G_VALUE_INIT;
-#else
   g_value_init (&value, G_TYPE_STRING);
-#endif
   gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
                             &iterator_2,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1389,9 +1381,6 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   gint n_rows = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (list_store_p),
                                                 NULL);
   GValue value;
-#if GTK_CHECK_VERSION (3,0,0)
-  value = G_VALUE_INIT;
-#endif
   g_value_init (&value, G_TYPE_STRING);
 
   GtkTreeIter iterator_2;

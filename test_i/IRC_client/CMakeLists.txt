@@ -201,6 +201,19 @@ set (IRC_client_INI
 
 #set_source_files_properties(${IRC_client_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
+if (UNIX)
+ add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
+endif ()
+
+set (LLVM_COMPILER_ID_STRING "Clang")
+string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
+string (TOLOWER "${CMAKE_CXX_COMPILER_ID}" CXX_COMPILER_ID_STRING_LOWER)
+if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
+ add_compile_options (-std=c++11)
+#add_compile_options (-fPIC)
+ add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
+endif ()
+
 set (EXECUTABLE IRC_client)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
@@ -219,6 +232,7 @@ add_dependencies (${EXECUTABLE} CommonUI_GTK)
 add_dependencies (${EXECUTABLE} ACEStream)
 
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
+add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_IRC)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
@@ -226,7 +240,6 @@ target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (UNIX)
  target_link_libraries (${EXECUTABLE} rt)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
- #target_link_libraries (${EXECUTABLE} ${PKG_DBUS_LIBRARIES})
  target_link_libraries (${EXECUTABLE} iw)
  target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
  target_link_libraries (${EXECUTABLE} X11)
@@ -253,7 +266,7 @@ target_link_libraries (${EXECUTABLE} ACEStream_Network)
 target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
-#target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Client)
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_IRC)
 
 # add PCH
@@ -364,6 +377,7 @@ add_dependencies (${EXECUTABLE_GUI} CommonUI_GTK)
 add_dependencies (${EXECUTABLE_GUI} ACEStream)
 
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME})
+add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_WLAN)
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_IRC)
 
 target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_THREAD_LIBS_INIT})
@@ -371,7 +385,6 @@ target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
 if (UNIX)
  target_link_libraries (${EXECUTABLE_GUI} rt)
  target_link_libraries (${EXECUTABLE_GUI} ${PKG_CAP_LIBRARIES})
- #target_link_libraries (${EXECUTABLE_GUI} ${PKG_DBUS_LIBRARIES})
  target_link_libraries (${EXECUTABLE_GUI} iw)
  target_link_libraries (${EXECUTABLE_GUI} X11)
  if (GTK3_SUPPORT)
@@ -418,7 +431,7 @@ target_link_libraries (${EXECUTABLE_GUI} ACEStream_Network)
 target_link_libraries (${EXECUTABLE_GUI} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME})
-#target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Client)
+target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_IRC)
 
 # add PCH

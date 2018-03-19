@@ -50,7 +50,8 @@ struct Net_NetlinkSocketConfiguration;
 struct Net_TCPSocketConfiguration;
 struct Net_UDPSocketConfiguration;
 
-enum Net_LinkLayerType : int
+//enum Net_LinkLayerType : int
+enum Net_LinkLayerType
 {
   NET_LINKLAYER_802_3   = 0x01, // i.e. CSMA/CD, aka 'Ethernet'
   NET_LINKLAYER_802_11  = 0x02, // i.e. Wireless LAN aka 'WLAN' (EU; US: 'WiFi')
@@ -62,7 +63,8 @@ enum Net_LinkLayerType : int
   NET_LINKLAYER_INVALID = -1,
 };
 
-enum Net_NetworkLayerType : int
+//enum Net_NetworkLayerType : int
+enum Net_NetworkLayerType
 {
   NET_NETWORKLAYER_IP_UNICAST   = 0x0001, // i.e. "routable" IP
   NET_NETWORKLAYER_IP_BROADCAST = 0x0002,
@@ -72,7 +74,8 @@ enum Net_NetworkLayerType : int
   NET_NETWORKLAYER_INVALID      = -1,
 };
 
-enum Net_TransportLayerType : int
+//enum Net_TransportLayerType : int
+enum Net_TransportLayerType
 {
   NET_TRANSPORTLAYER_INVALID = -1,
   NET_TRANSPORTLAYER_IP_CAST = 0, // 'pseudo' (LAN-only, no flow control)
@@ -90,7 +93,8 @@ typedef std::vector<std::string> Net_InterfaceIdentifiers_t;
 #endif // ACE_WIN32 || ACE_WIN64
 typedef Net_InterfaceIdentifiers_t::iterator Net_InterfacesIdentifiersIterator_t;
 
-enum Net_ClientServerRole : int
+//enum Net_ClientServerRole : int
+enum Net_ClientServerRole
 {
   NET_ROLE_INVALID = -1,
   NET_ROLE_CLIENT  = 0,
@@ -125,7 +129,8 @@ enum Net_ClientServerRole : int
 //  NET_STREAM_CONTROL_INVALID
 //};
 
-enum Net_Connection_AbortStrategy : int
+//enum Net_Connection_AbortStrategy : int
+enum Net_Connection_AbortStrategy
 {
   NET_CONNECTION_ABORT_STRATEGY_RECENT_LEAST = 0,
   NET_CONNECTION_ABORT_STRATEGY_RECENT_MOST,
@@ -135,7 +140,8 @@ enum Net_Connection_AbortStrategy : int
 };
 
 // *NOTE*: this extends ACE_Svc_Handler_Close (see Svc_Handler.h)
-enum Net_Connection_CloseReason : int
+//enum Net_Connection_CloseReason : int
+enum Net_Connection_CloseReason
 {
   NET_CONNECTION_CLOSE_REASON_INVALID        = -1,
   ////////////////////////////////////////
@@ -145,7 +151,8 @@ enum Net_Connection_CloseReason : int
   NET_CONNECTION_CLOSE_REASON_MAX
 };
 
-enum Net_Connection_Status : int
+//enum Net_Connection_Status : int
+enum Net_Connection_Status
 {
   NET_CONNECTION_STATUS_INVALID              = -1,
   ////////////////////////////////////////

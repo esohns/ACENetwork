@@ -133,7 +133,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r        : use reactor {")
-            << NET_EVENT_USE_REACTOR
+            << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
             << ACE_TEXT_ALWAYS_CHAR ("}")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]: reporting interval (seconds: 0 --> OFF) {")
@@ -200,7 +200,8 @@ do_processArguments (int argc_in,
   debugParser_out                = false;
   logToFile_out                  = IRC_CLIENT_SESSION_DEFAULT_LOG;
   useCursesLibrary_out           = IRC_CLIENT_SESSION_USE_CURSES;
-  useReactor_out                 = NET_EVENT_USE_REACTOR;
+  useReactor_out                 =
+      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out =
     NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out           = false;
@@ -465,7 +466,7 @@ connection_setup_curses_function (void* arg_in)
   ACE_ASSERT (connection_manager_p);
 
   // step1: wait for connection ?
-  if (!thread_data_s_p->useReactor)
+  if (!thread_data_s_p->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
   {
     ACE_Time_Value deadline =
       (COMMON_TIME_NOW +
@@ -484,8 +485,8 @@ connection_setup_curses_function (void* arg_in)
     } while (COMMON_TIME_NOW < deadline);
   } // end IF
   // *NOTE*: signal main thread (resumes dispatching)
-  Common_Tools::finalizeEventDispatch (thread_data_s_p->useReactor,
-                                       !thread_data_s_p->useReactor,
+  Common_Tools::finalizeEventDispatch ((thread_data_s_p->dispatch == COMMON_EVENT_DISPATCH_REACTOR),
+                                       !(thread_data_s_p->dispatch == COMMON_EVENT_DISPATCH_REACTOR),
                                        -1);
 
   connection_p = connection_manager_p->operator[] (0);
@@ -661,8 +662,8 @@ clean_up:
   if (connection_p)
     connection_p->decrease ();
 
-  Common_Tools::finalizeEventDispatch (thread_data_s_p->useReactor,
-                                       !thread_data_s_p->useReactor,
+  Common_Tools::finalizeEventDispatch ((thread_data_s_p->dispatch == COMMON_EVENT_DISPATCH_REACTOR),
+                                       !(thread_data_s_p->dispatch == COMMON_EVENT_DISPATCH_REACTOR),
                                        -1);
 
 done:
@@ -721,20 +722,22 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   configuration_in.streamConfiguration.configuration_.module = &IRC_handler;
 
   // step2: initialize event dispatch
-  struct Common_EventDispatchThreadData thread_data_s;
-  thread_data_s.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data_s.useReactor = configuration_in.useReactor;
-  if (!Common_Tools::initializeEventDispatch (configuration_in.useReactor,
-                                              (thread_data_s.numberOfDispatchThreads > 1),
-                                              thread_data_s.numberOfDispatchThreads,
-                                              thread_data_s.proactorType,
-                                              thread_data_s.reactorType,
-                                              configuration_in.streamConfiguration.configuration_.serializeOutput))
+  struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
+  event_dispatch_configuration_s.numberOfReactorThreads =
+      ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? numberOfDispatchThreads_in
+                                                                    : 0);
+  event_dispatch_configuration_s.numberOfProactorThreads =
+      ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? numberOfDispatchThreads_in
+                                                                     : 0);
+  if (!Common_Tools::initializeEventDispatch (event_dispatch_configuration_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
     return;
   } // end IF
+  struct Common_EventDispatchState event_dispatch_state_s;
+  event_dispatch_state_s.configuration =
+      &event_dispatch_configuration_s;
 
   // step3: initialize client connector
   IRC_Client_ConnectionConfiguration_t connection_configuration;
@@ -779,7 +782,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   IRC_Client_AsynchSessionConnector_t asynch_connector (connection_manager_p,
                                                         statisticReportingInterval_in);
   IRC_Client_IConnector_t* connector_p = NULL;
-  if (configuration_in.useReactor)
+  if (configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     connector_p = &connector;
   else
     connector_p = &asynch_connector;
@@ -802,8 +805,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to IRC_Client_SignalHandler::initialize(), returning\n")));
     return;
   } // end IF
-  if (!Common_Signal_Tools::initialize ((configuration_in.useReactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                                     : COMMON_SIGNAL_DISPATCH_PROACTOR),
+  if (!Common_Signal_Tools::initialize (((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                                                                      : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                         signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
@@ -825,8 +828,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
   // [- signal timer expiration to perform server queries] (see above)
 
   // step5a: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (thread_data_s,
-                                         configuration_in.groupId))
+  if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::startEventDispatch(), returning\n")));
@@ -842,8 +844,8 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (serverAddress_in).c_str ())));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
-                                         !configuration_in.useReactor,
+    Common_Tools::finalizeEventDispatch ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
+                                         !(configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
                                          configuration_in.groupId);
 
     return;
@@ -860,7 +862,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
     const_cast<IRC_Client_ModuleHandlerConfiguration*> (&((*iterator).second.second));
   if (useCursesLibrary_in)
     input_thread_data_s.cursesState = &curses_state;
-  input_thread_data_s.useReactor = configuration_in.useReactor;
+  input_thread_data_s.dispatch = configuration_in.dispatch;
   ACE_thread_t thread_id = -1;
   ACE_hthread_t thread_handle = ACE_INVALID_HANDLE;
   //char thread_name[BUFSIZ];
@@ -874,15 +876,15 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
-                                         !configuration_in.useReactor,
+    Common_Tools::finalizeEventDispatch ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
+                                         !(configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
                                          configuration_in.groupId);
 
     return;
   } // end IF
   ACE_OS::memset (thread_name_p, 0, sizeof (thread_name_p));
   const char* thread_name_2 = thread_name_p;
-  int group_id_2 = (COMMON_EVENT_THREAD_GROUP_ID + 1); // *TODO*
+  int group_id_2 = (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1); // *TODO*
   ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
   ACE_ASSERT (thread_manager_p);
   result =
@@ -904,13 +906,13 @@ do_work (struct IRC_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to ACE_Thread_Manager::spawn(): \"%m\", returning\n")));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
-                                         !configuration_in.useReactor,
+    Common_Tools::finalizeEventDispatch ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
+                                         !(configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
                                          configuration_in.groupId);
 
     return;
   } // end IF
-  Common_Tools::dispatchEvents (configuration_in.useReactor,
+  Common_Tools::dispatchEvents ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
                                 configuration_in.groupId);
   // *NOTE*: awoken by the worker thread (see above)...
   if (connection_manager_p->count () < 1)
@@ -941,8 +943,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
               ACE_TEXT ("connected...\n")));
 
   // step6b: dispatch events
-  if (!Common_Tools::startEventDispatch (thread_data_s,
-                                         configuration_in.groupId))
+  if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::startEventDispatch(), returning\n")));
@@ -958,7 +959,7 @@ do_work (struct IRC_Client_Configuration& configuration_in,
 
     return;
   } // end IF
-  Common_Tools::dispatchEvents (configuration_in.useReactor,
+  Common_Tools::dispatchEvents ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
                                 configuration_in.groupId);
 
   // step7: clean up
@@ -1092,7 +1093,8 @@ ACE_TMAIN (int argc_in,
   bool debug_parser                          = false;
   bool log_to_file                           = IRC_CLIENT_SESSION_DEFAULT_LOG;
   bool use_curses_library                    = IRC_CLIENT_SESSION_USE_CURSES;
-  bool use_reactor                           = NET_EVENT_USE_REACTOR;
+  bool use_reactor                           =
+      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval  =
     NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information                     = false;
@@ -1244,7 +1246,7 @@ ACE_TMAIN (int argc_in,
 
   // initialize protocol configuration
   Stream_CachedAllocatorHeap_T<struct IRC_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                                  IRC_MAXIMUM_FRAME_SIZE + NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+                                                                                  IRC_MAXIMUM_FRAME_SIZE + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1367,7 +1369,9 @@ ACE_TMAIN (int argc_in,
     } // end IF
   } // end IF
   ///////////////////////////////////////
-  configuration.useReactor = use_reactor;
+  configuration.dispatch =
+      (use_reactor ? COMMON_EVENT_DISPATCH_REACTOR
+                   : COMMON_EVENT_DISPATCH_PROACTOR);
 
   // step8: do work
   ACE_High_Res_Timer timer;

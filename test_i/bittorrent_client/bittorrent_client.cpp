@@ -139,7 +139,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-r        : use reactor [")
-            << NET_EVENT_USE_REACTOR
+            << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
             << ACE_TEXT ("]")
             << std::endl;
   std::cout << ACE_TEXT ("-s [VALUE]: reporting interval (seconds: 0 --> OFF)")
@@ -196,7 +196,8 @@ do_processArguments (int argc_in,
 
   logToFile_out                  = TEST_I_DEFAULT_SESSION_LOG;
   useCursesLibrary_out           = BITTORRENT_CLIENT_DEFAULT_USE_CURSES;
-  useReactor_out                 = NET_EVENT_USE_REACTOR;
+  useReactor_out                 =
+      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out =
       TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out           = false;
@@ -479,9 +480,9 @@ session_setup_curses_function (void* arg_in)
 
 error:
   // *NOTE*: signal main thread (resumes dispatching)
-  Common_Tools::finalizeEventDispatch (data_p->useReactor,
-                                       !data_p->useReactor,
-                                       -1);
+  Common_Tools::finalizeEventDispatch ((data_p->dispatch == COMMON_EVENT_DISPATCH_REACTOR),  // stop reactor ?
+                                       (data_p->dispatch == COMMON_EVENT_DISPATCH_PROACTOR), // stop proactor ?
+                                       -1);                                                  // group id (--> don't block)
 
   return return_value;
 }
@@ -510,7 +511,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   //ACE_OS::memset (thread_name, 0, sizeof (thread_name));
   char* thread_name_p = NULL;
   const char* thread_name_2 = NULL;
-  int group_id_2 = (COMMON_EVENT_THREAD_GROUP_ID + 1); // *TODO*
+  int group_id_2 = (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1); // *TODO*
   ACE_Thread_Manager* thread_manager_p = NULL;
   BitTorrent_Client_Control_t bittorrent_control (&configuration_in.sessionConfiguration);
   BitTorrent_Client_PeerConnection_Manager_t* peer_connection_manager_p =
@@ -576,20 +577,22 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   BitTorrent_Client_TrackerConnectionConfigurationIterator_t iterator_2;
 
   // step2: initialize event dispatch
-  struct Common_EventDispatchThreadData thread_data_s;
-  thread_data_s.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data_s.useReactor = configuration_in.useReactor;
-  if (!Common_Tools::initializeEventDispatch (configuration_in.useReactor,
-                                              (thread_data_s.numberOfDispatchThreads > 1),
-                                              thread_data_s.numberOfDispatchThreads,
-                                              thread_data_s.proactorType,
-                                              thread_data_s.reactorType,
-                                              configuration_in.peerStreamConfiguration.configuration_.serializeOutput))
+  struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
+  event_dispatch_configuration_s.numberOfReactorThreads =
+      ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? numberOfDispatchThreads_in
+                                                                    : 0);
+  event_dispatch_configuration_s.numberOfProactorThreads =
+      ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? numberOfDispatchThreads_in
+                                                                     : 0);
+  struct Common_EventDispatchState event_dispatch_state_s;
+  if (!Common_Tools::initializeEventDispatch (event_dispatch_configuration_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
     goto clean;
   } // end IF
+  event_dispatch_state_s.configuration =
+      &event_dispatch_configuration_s;
 
   // step3: initialize configuration (part 2)
   //peer_connection_configuration.socketHandlerConfiguration.bufferSize =
@@ -648,8 +651,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     &((*iterator_2).second);
   configuration_in.sessionConfiguration.parserConfiguration =
       &configuration_in.parserConfiguration;
-  configuration_in.sessionConfiguration.useReactor =
-      configuration_in.useReactor;
+  configuration_in.sessionConfiguration.dispatch =
+      configuration_in.dispatch;
 
   if (useCursesLibrary_in)
     configuration_in.signalHandlerConfiguration.cursesState = &curses_state;
@@ -661,8 +664,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to BitTorrent_Client_SignalHandler::initialize(), returning\n")));
     goto clean;
   } // end IF
-  if (!Common_Signal_Tools::initialize ((configuration_in.useReactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                                     : COMMON_SIGNAL_DISPATCH_PROACTOR),
+  if (!Common_Signal_Tools::initialize (((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                                                                      : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                         signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
@@ -689,8 +692,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
   // [- signal timer expiration to perform server queries] (see above)
 
   // step6a: initialize dispatch thread(s)
-  if (!Common_Tools::startEventDispatch (thread_data_s,
-                                         configuration_in.groupId))
+  if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::startEventDispatch(), returning\n")));
@@ -707,7 +709,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 //  curses_thread_data.groupId = group_id_2;
 //  curses_thread_data.moduleHandlerConfiguration =
 //      &configuration_in.moduleHandlerConfiguration;
-  curses_thread_data.useReactor = configuration_in.useReactor;
+  curses_thread_data.dispatch = configuration_in.dispatch;
 
   ACE_NEW_NORETURN (thread_name_p,
                     char[BUFSIZ]);
@@ -717,8 +719,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
-                                         !configuration_in.useReactor,
+    Common_Tools::finalizeEventDispatch ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
+                                         (!configuration_in.dispatch == COMMON_EVENT_DISPATCH_PROACTOR),
                                          configuration_in.groupId);
 
     goto clean;
@@ -746,8 +748,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
                 ACE_TEXT ("failed to ACE_Thread_Manager::spawn(): \"%m\", returning\n")));
 
     // clean up
-    Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
-                                         !configuration_in.useReactor,
+    Common_Tools::finalizeEventDispatch ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
+                                         (!configuration_in.dispatch == COMMON_EVENT_DISPATCH_PROACTOR),
                                          configuration_in.groupId);
 
     goto clean;
@@ -755,7 +757,7 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
 
   // step6c: dispatch connection attempt, wait for the session to finish
   if (!numberOfDispatchThreads_in)
-    Common_Tools::dispatchEvents (configuration_in.useReactor,
+    Common_Tools::dispatchEvents ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
                                   configuration_in.groupId);
   else
   {
@@ -771,8 +773,8 @@ do_work (struct BitTorrent_Client_Configuration& configuration_in,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("session complete...\n")));
 
-    Common_Tools::finalizeEventDispatch (configuration_in.useReactor,
-                                         !configuration_in.useReactor,
+    Common_Tools::finalizeEventDispatch ((configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR),
+                                         (!configuration_in.dispatch == COMMON_EVENT_DISPATCH_PROACTOR),
                                          configuration_in.groupId);
   } // end ELSE
 
@@ -887,7 +889,8 @@ ACE_TMAIN (int argc_in,
   bool log_to_file                           = TEST_I_DEFAULT_SESSION_LOG;
   bool use_curses_library                    =
       BITTORRENT_CLIENT_DEFAULT_USE_CURSES;
-  bool use_reactor                           = NET_EVENT_USE_REACTOR;
+  bool use_reactor                           =
+      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval  =
       TEST_I_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information                     = false;
@@ -1038,7 +1041,8 @@ ACE_TMAIN (int argc_in,
   // initialize protocol configuration
   struct BitTorrent_Client_Configuration configuration;
   ////////////////////////////////////////
-  configuration.useReactor = use_reactor;
+  configuration.dispatch = (use_reactor ? COMMON_EVENT_DISPATCH_REACTOR
+                                        : COMMON_EVENT_DISPATCH_PROACTOR);
 
   // step8: do work
   ACE_High_Res_Timer timer;

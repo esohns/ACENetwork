@@ -21,9 +21,9 @@
 #ifndef Net_PROTOCOL_LAYER_H
 #define Net_PROTOCOL_LAYER_H
 
-#include "ace/Global_Macros.h"
-
 #include <string>
+
+#include "ace/Global_Macros.h"
 
 class Net_Protocol_Layer
 {
@@ -31,7 +31,8 @@ class Net_Protocol_Layer
   // define different protocol layers
   // *IMPORTANT NOTE*: code relies on the fact that higher-level protocols are
   //                   assigned larger values
-  enum ProtocolLayerType : int
+  //enum ProtocolLayerType : int
+  enum ProtocolLayerType
   {
     INVALID = -1,
     // *** Link Layer Protocols

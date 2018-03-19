@@ -124,7 +124,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-h           : use thread-pool [")
-            << NET_EVENT_USE_THREAD_POOL
+            << COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-i [VALUE]   : client ping interval (ms) [")
@@ -160,7 +160,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r           : use reactor [")
-            << NET_EVENT_USE_REACTOR
+            << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]   : statistic reporting interval (second(s)) [")
@@ -214,7 +214,7 @@ do_processArguments (const int& argc_in,
   UIFile_out = path;
   UIFile_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIFile_out += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
-  useThreadPool_out = NET_EVENT_USE_THREAD_POOL;
+  useThreadPool_out = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   pingInterval_out.set (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL / 1000,
                         (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL % 1000) * 1000);
 //  keepAliveTimeout_out = NET_SERVER_DEF_CLIENT_KEEPALIVE;
@@ -224,7 +224,8 @@ do_processArguments (const int& argc_in,
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
   useLoopBack_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   listeningPortNumber_out = NET_SERVER_DEFAULT_LISTENING_PORT;
-  useReactor_out = NET_EVENT_USE_REACTOR;
+  useReactor_out =
+      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out =
       NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out = false;
@@ -579,20 +580,20 @@ do_work (unsigned int maximumNumberOfConnections_in,
   //	config.lastCollectionTimestamp = ACE_Time_Value::zero;
 
   // step0b: initialize event dispatch
-  struct Common_EventDispatchThreadData thread_data_s;
-  thread_data_s.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data_s.useReactor = useReactor_in;
-  if (!Common_Tools::initializeEventDispatch (thread_data_s.useReactor,
-                                              useThreadPool_in,
-                                              thread_data_s.numberOfDispatchThreads,
-                                              thread_data_s.proactorType,
-                                              thread_data_s.reactorType,
-                                              configuration.streamConfiguration.configuration_.serializeOutput))
+  struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
+  event_dispatch_configuration_s.numberOfReactorThreads =
+      (useReactor_in ? numberOfDispatchThreads_in : 0);
+  event_dispatch_configuration_s.numberOfProactorThreads =
+      (!useReactor_in ? numberOfDispatchThreads_in : 0);
+  if (!Common_Tools::initializeEventDispatch (event_dispatch_configuration_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
     return;
   } // end IF
+  struct Common_EventDispatchState event_dispatch_state_s;
+  event_dispatch_state_s.configuration =
+      &event_dispatch_configuration_s;
 
   // step1: initialize regular (global) statistics reporting
   Common_Timer_Manager_t* timer_manager_p =
@@ -642,7 +643,9 @@ do_work (unsigned int maximumNumberOfConnections_in,
   signal_handler_configuration.statisticReportingHandler =
     connection_manager_p;
   signal_handler_configuration.statisticReportingTimerId = timer_id;
-  signal_handler_configuration.useReactor = useReactor_in;
+  signal_handler_configuration.dispatch =
+      (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
+                     : COMMON_EVENT_DISPATCH_PROACTOR);
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -736,8 +739,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
   // step4b: initialize worker(s)
   int group_id = -1;
-  if (!Common_Tools::startEventDispatch (thread_data_s,
-                                         group_id))
+  if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, returning\n")));
@@ -1114,7 +1116,7 @@ ACE_TMAIN (int argc_in,
   std::string UI_file = path;
   UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file += ACE_TEXT_ALWAYS_CHAR (NET_SERVER_UI_FILE);
-  bool use_thread_pool = NET_EVENT_USE_THREAD_POOL;
+  bool use_thread_pool = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   ACE_Time_Value ping_interval (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL / 1000,
                                 (NET_SERVER_DEFAULT_CLIENT_PING_INTERVAL % 1000) * 1000);
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
@@ -1123,7 +1125,8 @@ ACE_TMAIN (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
   bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   unsigned short listening_port_number = NET_SERVER_DEFAULT_LISTENING_PORT;
-  bool use_reactor = NET_EVENT_USE_REACTOR;
+  bool use_reactor =
+      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval =
     NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information = false;

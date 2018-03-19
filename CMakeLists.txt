@@ -1,13 +1,14 @@
 ﻿cmake_minimum_required (VERSION 2.8)
 
-#include (CheckIPOSupported)
-#check_ipo_supported (RESULT IPO_SUPPORTED)
+cmake_policy (SET CMP0069 NEW) # IPO is enforced when enabled
+include (CheckIPOSupported)
+check_ipo_supported (RESULT IPO_SUPPORTED
+                     OUTPUT IPO_REASON)
 
 # global options
-cmake_policy (SET CMP0069 NEW) # add IPO flags unconditionally (i.e. always)
-#if (IPO_SUPPORTED)
-set (CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-#endif (IPO_SUPPORTED)
+if (IPO_SUPPORTED)
+ set (CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+endif (IPO_SUPPORTED)
 #set (CMAKE_VERBOSE_MAKEFILE ON)
 set_property (GLOBAL PROPERTY USE_FOLDERS ON)
 if (UNIX)

@@ -36,7 +36,7 @@ struct BitTorrent_Client_SignalHandlerConfiguration
   BitTorrent_Client_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
    , cursesState (NULL)
-  {};
+  {}
 
   struct BitTorrent_Client_CursesState* cursesState;
 };
@@ -48,17 +48,17 @@ struct BitTorrent_Client_ThreadData
    : configuration (NULL)
    , controller (NULL)
    , cursesState (NULL)
+   , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , filename ()
 //   , groupId (-1)
-   , useReactor (NET_EVENT_USE_REACTOR)
-  {};
+  {}
 
   struct BitTorrent_Client_Configuration* configuration;
   BitTorrent_Client_IControl_t*           controller;
   struct BitTorrent_Client_CursesState*   cursesState;
+  enum Common_EventDispatchType           dispatch;
   std::string                             filename; // metainfo (aka '.torrent') file URI
 //  int                                     groupId;
-  bool                                    useReactor;
 };
 
 #endif

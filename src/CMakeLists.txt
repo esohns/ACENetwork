@@ -21,12 +21,15 @@ set (ACE_LIB_FILE libACE.so)
 if (UNIX)
  if (DEFINED ENV{ACE_ROOT})
   find_library (ACE_LIBRARY ${ACE_LIB_FILE}
-                HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE
+                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE
                 PATHS ENV ACE_ROOT
                 PATH_SUFFIXES lib
                 DOC "searching for ${ACE_LIB_FILE}")
  else ()
   find_library (ACE_LIBRARY ${ACE_LIB_FILE}
+                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE
+#                PATHS ENV ACE_ROOT
+                PATH_SUFFIXES lib
                 DOC "searching for ${ACE_LIB_FILE} (system paths)")
  endif ()
 elseif (WIN32)
@@ -95,6 +98,34 @@ add_definitions (-DHAVE_CONFIG_H)
 
 # ........................................
 
+if (WIN32)
+ add_definitions (-DWIN32)
+ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc") # C++ exception handling
+ if (CMAKE_BUILD_TYPE STREQUAL Debug)
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MDd") # multithreaded debug dll
+ else ()
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MD")  # multithreaded dll
+ endif ()
+endif ()
+
+#message (STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+set (LLVM_COMPILER_ID_STRING "Clang")
+string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
+string (TOLOWER "${CMAKE_CXX_COMPILER_ID}" CXX_COMPILER_ID_STRING_LOWER)
+if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
+# message (STATUS "using ${CMAKE_CXX_COMPILER_ID} options")
+ add_compile_options (-std=c++11)
+# add_compile_options (-fPIC)
+ add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
+endif ()
+
+if (UNIX)
+ if(CMAKE_COMPILER_IS_GNUCXX)
+  set (CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed")
+#  set (CMAKE_STATIC_LINKER_FLAGS "-Wl,--as-needed")
+ endif (CMAKE_COMPILER_IS_GNUCXX)
+endif (UNIX)
+
 add_library (${PROJECT_NAME} STATIC "")
 
 if (UNIX)
@@ -121,19 +152,32 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src/modules/lib>)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src/modules/stat>)
+
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/wlan>)
 elseif (WIN32)
- target_include_directories (${PROJECT_NAME} PUBLIC $ENV{ACE_ROOT})
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
 
- target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../openssl/include)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../openssl/include>)
 
- target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src)
- target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/math)
- target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/timer)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src>)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/math>)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/timer>)
  #target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/xml)
 
- target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src)
- target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src/modules/lib)
- target_include_directories (${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src/modules/stat)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src>)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src/modules/lib>)
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src/modules/stat>)
 endif ()
 #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/wlan)
 target_include_directories (${PROJECT_NAME} PUBLIC
@@ -263,32 +307,6 @@ target_sources (${PROJECT_NAME}
                 PRIVATE stdafx.cpp
                 PRIVATE stdafx.h
                 ${absolute_source_files})
-
-if (WIN32)
- add_definitions (-DWIN32)
- set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc") # C++ exception handling
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MDd") # multithreaded debug dll
- else ()
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MD")  # multithreaded dll
- endif ()
-endif ()
-
-#message (STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
-set (LLVM_COMPILER_ID_STRING "Clang")
-string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
-string (TOLOWER "${CMAKE_CXX_COMPILER_ID}" CXX_COMPILER_ID_STRING_LOWER)
-if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
- add_compile_options (-std=c++11 -fPIC)
- add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
-endif ()
-
-if (UNIX)
- if(CMAKE_COMPILER_IS_GNUCXX)
-  set (CMAKE_SHARED_LINKER_FLAGS "-Wl,--as-needed")
-#  set (CMAKE_STATIC_LINKER_FLAGS "-Wl,--as-needed")
- endif (CMAKE_COMPILER_IS_GNUCXX)
-endif (UNIX)
 
 #add_library (${PROJECT_NAME} STATIC ${ACENetwork_LIB_SRCS})
 

@@ -1,22 +1,25 @@
-﻿#include (CMakeDependentOption)
+﻿include (CMakeDependentOption)
 include (FeatureSummary)
 
 add_library (${PROJECT_NAME}_WLAN STATIC "")
 
 if (UNIX)
- option (WEXT_SUPPORT "compile wireless extensions support" OFF)
- option (NL80211_SUPPORT "compile nl80211 support" ON)
+ # API
+ option (WEXT_SUPPORT "compile wireless extensions support" ON)
+ CMAKE_DEPENDENT_OPTION (NL80211_SUPPORT "compile nl80211 support" ON
+                         "NETLINK_SUPPORT" OFF)
  # *WARNING*; DBus support is out of order ATM (see: "debug" statement below)
  # *TODO*: currently (!) implies DHCLIENT_SUPPORT off
  option (DBUS_SUPPORT "compile DBus/NetworkManager support" OFF)
-
- option (DHCLIENT_SUPPORT "enable ISC dhclient support" ON)
-
  add_feature_info (Wext WEXT_SUPPORT "support wireless extensions")
  add_feature_info (nl80211 NL80211_SUPPORT "support nl80211")
  add_feature_info (DBus/NetworkManager DBUS_SUPPORT "support DBus/NetworkManager")
 
+ # DHCP client
+ option (DHCLIENT_SUPPORT "enable ISC dhclient support" ON)
+ option (DHCPD_SUPPORT "enable dhcpd support" OFF)
  add_feature_info (ISC dhclient DHCLIENT_SUPPORT "support ISC dhclient")
+ add_feature_info (dhcpd DHCPD_SUPPORT "support dhcpd")
 elseif (WIN32)
  option (WLANAPI_SUPPORT "compile wlanapi support" ON)
  add_feature_info (wlanapi WLANAPI_SUPPORT "support wlanapi")
@@ -37,19 +40,27 @@ endif ()
 include (FindPkgConfig)
 #pkg_check_modules (PKG_ACE REQUIRED ACE)
 if (UNIX)
+ # API
  if (WEXT_SUPPORT)
-  check_library_exists (iwlib iw_sockets_open "" HAVE_LIB_IW)
-#   pkg_check_modules (PKG_WEXT REQUIRED iwlib)
+  check_library_exists (iw iw_sockets_open /usr/lib/x86_64-linux-gnu HAVE_LIBIW)
+  if (NOT HAVE_LIBIW)
+   message (FATAL_ERROR "libiw not found, aborting")
+  endif ()
+  add_definitions (-DWEXT_SUPPORT)
  endif (WEXT_SUPPORT)
  if (NL80211_SUPPORT)
   pkg_check_modules (PKG_NL80211 REQUIRED libnl-3.0 libnl-genl-3.0)
   pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
   add_definitions (-DSD_BUS_SUPPORT)
+  add_definitions (-DNL80211_SUPPORT)
  endif (NL80211_SUPPORT)
  if (DBUS_SUPPORT)
   pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
   pkg_check_modules (PKG_NETWORKMANAGER REQUIRED NetworkManager)
+  add_definitions (-DDBUS_SUPPORT)
  endif (DBUS_SUPPORT)
+
+ # DHCP client
  if (DHCLIENT_SUPPORT)
 #  pkg_check_modules (PKG_DHCP REQUIRED bind-exports isc-dhcp-client)
   set (JSON_LIB_FILE libjson-c.so.3)
@@ -85,10 +96,11 @@ if (UNIX)
   else ()
    message (STATUS "Found dhcpctl library \"${DHCPCTL_LIBRARY}\"")
   endif ()
-# pkg_check_modules (PKG_LIBXML REQUIRED libxml-2.0)
-#  add_definitions (-DDHCLIENT_SUPPORT)
+ pkg_check_modules (PKG_LIBXML REQUIRED libxml-2.0)
+ add_definitions (-DDHCLIENT_SUPPORT)
  endif (DHCLIENT_SUPPORT)
 elseif (WIN32)
+ # API
  if (WLANAPI_SUPPORT)
   add_definitions (-DWLANAPI_SUPPORT)
  endif (WLANAPI_SUPPORT)
@@ -144,8 +156,8 @@ if (UNIX)
  if (DHCLIENT_SUPPORT)
 #  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
 #                              $<BUILD_INTERFACE:/usr/include/bind-export>)
-  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              $<BUILD_INTERFACE:/usr/include/dhcp>)
+#  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+#                              $<BUILD_INTERFACE:/usr/include/dhcp>)
  endif (DHCLIENT_SUPPORT)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE>)

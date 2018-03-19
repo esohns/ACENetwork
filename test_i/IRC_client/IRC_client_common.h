@@ -106,16 +106,16 @@ struct IRC_Client_InputThreadData
   IRC_Client_InputThreadData ()
    : configuration (NULL)
    , cursesState (NULL)
+   , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , groupId (-1)
    , moduleHandlerConfiguration (NULL)
-   , useReactor (NET_EVENT_USE_REACTOR)
   {};
 
   struct IRC_Client_Configuration*              configuration;
   struct IRC_Client_CursesState*                cursesState;
+  enum Common_EventDispatchType                 dispatch;
   int                                           groupId;
   struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
-  bool                                          useReactor;
 };
 
 struct IRC_Client_UserData

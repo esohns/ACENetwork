@@ -820,7 +820,7 @@ network_wlan_nl80211_default_handler_cb (struct nl_msg* message_in,
       {
         // scan complete --> fetch result(s)
         int result = -1;
-        int driver_family_id_i = imonitor_p->get ();
+        int driver_family_id_i = imonitor_p->get_3 ();
         ACE_ASSERT (driver_family_id_i);
         const struct nl_sock* socket_handle_p = imonitor_p->getP ();
         ACE_ASSERT (socket_handle_p);

@@ -137,7 +137,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-h           : use thread-pool [")
-            << NET_EVENT_USE_THREAD_POOL
+            << COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-i [STRING]  : network interface [\"")
@@ -166,7 +166,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r           : use reactor [")
-            << NET_EVENT_USE_REACTOR
+            << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]   : statistic reporting interval (second(s)) [")
@@ -231,7 +231,7 @@ do_processArguments (const int& argc_in,
   UIFile_out = path;
   UIFile_out += ACE_DIRECTORY_SEPARATOR_STR;
   UIFile_out += ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_UI_FILE);
-  useThreadPool_out = NET_EVENT_USE_THREAD_POOL;
+  useThreadPool_out = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   networkInterface_out =
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
 //  keepAliveTimeout_out = NET_SERVER_DEF_CLIENT_KEEPALIVE;
@@ -240,7 +240,8 @@ do_processArguments (const int& argc_in,
     NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
   useLoopBack_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   listeningPortNumber_out = NET_SERVER_DEFAULT_LISTENING_PORT;
-  useReactor_out = NET_EVENT_USE_REACTOR;
+  useReactor_out =
+    (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out =
       NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out = false;
@@ -498,7 +499,8 @@ do_work (
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   int result = -1;
-  struct Common_EventDispatchThreadData thread_data_s;
+  struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
+  struct Common_EventDispatchState event_dispatch_state_s;
   struct Common_TimerConfiguration timer_configuration;
   struct FileServer_SignalHandlerConfiguration signal_handler_configuration;
   struct FileServer_UserData user_data;
@@ -594,10 +596,11 @@ do_work (
   //configuration.streamConfiguration.protocolConfiguration =
   //  &configuration.protocolConfiguration;
   // *TODO*: is this correct ?
+  configuration.streamConfiguration.configuration_.dispatch =
+    (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
+                   : COMMON_EVENT_DISPATCH_PROACTOR);
   configuration.streamConfiguration.configuration_.serializeOutput =
     useThreadPool_in;
-  configuration.streamConfiguration.configuration_.useReactor =
-    useReactor_in;
   configuration.streamConfiguration.configuration_.userData =
     &configuration.userData;
   //configuration.userData.connectionConfiguration =
@@ -649,19 +652,18 @@ do_work (
   //	config.lastCollectionTimestamp = ACE_Time_Value::zero;
 
   // step0b: initialize event dispatch
-  thread_data_s.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data_s.useReactor = useReactor_in;
-  if (!Common_Tools::initializeEventDispatch (thread_data_s.useReactor,
-                                              useThreadPool_in,
-                                              thread_data_s.numberOfDispatchThreads,
-                                              thread_data_s.proactorType,
-                                              thread_data_s.reactorType,
-                                              configuration.streamConfiguration.configuration_.serializeOutput))
+  event_dispatch_configuration_s.numberOfReactorThreads =
+      (useReactor_in ? numberOfDispatchThreads_in : 0);
+  event_dispatch_configuration_s.numberOfProactorThreads =
+      (!useReactor_in ? numberOfDispatchThreads_in : 0);
+  if (!Common_Tools::initializeEventDispatch (event_dispatch_configuration_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
     goto error;
   } // end IF
+  event_dispatch_state_s.configuration =
+      &event_dispatch_configuration_s;
 
   timer_manager_p->initialize (timer_configuration);
   timer_manager_p->start ();
@@ -695,7 +697,9 @@ do_work (
     CBData_in.configuration->listener;
   signal_handler_configuration.statisticReportingHandler = connection_manager_p;
   signal_handler_configuration.statisticReportingTimerId = timer_id;
-  signal_handler_configuration.useReactor = useReactor_in;
+  signal_handler_configuration.dispatch =
+      (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
+                     : COMMON_EVENT_DISPATCH_PROACTOR);
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -805,8 +809,7 @@ do_work (
   } // end IF
 
   // step4b: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (thread_data_s,
-                                         group_id))
+  if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, aborting\n")));
@@ -1100,7 +1103,7 @@ ACE_TMAIN (int argc_in,
   std::string UI_file = path;
   UI_file += ACE_DIRECTORY_SEPARATOR_STR;
   UI_file += ACE_TEXT_ALWAYS_CHAR (FILE_SERVER_UI_FILE);
-  bool use_thread_pool = NET_EVENT_USE_THREAD_POOL;
+  bool use_thread_pool = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   std::string network_interface =
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
   //  unsigned int keep_alive_timeout = NET_SERVER_DEFAULT_TCP_KEEPALIVE;
@@ -1109,7 +1112,8 @@ ACE_TMAIN (int argc_in,
     NET_SERVER_MAXIMUM_NUMBER_OF_OPEN_CONNECTIONS;
   bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   unsigned short listening_port_number = NET_SERVER_DEFAULT_LISTENING_PORT;
-  bool use_reactor = NET_EVENT_USE_REACTOR;
+  bool use_reactor =
+          (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval =
     NET_SERVER_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information = false;

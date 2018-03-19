@@ -62,6 +62,7 @@ extern "C"
 #include "common_timer_manager_common.h"
 #else
 #if defined (NL80211_SUPPORT)
+#include "common_dbus_defines.h"
 #include "common_dbus_tools.h"
 
 #include "common_math_tools.h"
@@ -351,7 +352,7 @@ Net_WLAN_Monitor_T<AddressType,
 //      struct _GUID interface_identifier = GUID_NULL;
 //#else
 //      std::string interface_identifier_string;
-//      struct ether_addr ap_mac_address, ether_addr_s;
+//      struct ether_addr ap_mac_address_s, ether_addr_s;
 //      bool result = false;
 //      int result_2 = -1;
 //      ACE_Time_Value result_poll_interval (0,
@@ -370,7 +371,7 @@ Net_WLAN_Monitor_T<AddressType,
 //        interface_identifier = (*iterator).second.first;
 //#else
 //        interface_identifier_string = (*iterator).second.first;
-//        ap_mac_address = (*iterator).second.second.accessPointLinkLayerAddress;
+//        ap_mac_address_s = (*iterator).second.second.accessPointLinkLayerAddress;
 //#endif // ACE_WIN32 || ACE_WIN64
 //      } // end lock scope
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -420,7 +421,7 @@ Net_WLAN_Monitor_T<AddressType,
 //#else
 //associate:
 //      if (unlikely (!Net_WLAN_Tools::associate (interface_identifier_string,
-//                                                ap_mac_address,
+//                                                ap_mac_address_s,
 //                                                configuration_->SSID,
 //                                                inherited::handle_)))
 //#endif // ACE_WIN32 || ACE_WIN64
@@ -435,7 +436,7 @@ Net_WLAN_Monitor_T<AddressType,
 //        ACE_DEBUG ((LM_ERROR,
 //                    ACE_TEXT ("failed to Net_WLAN_Tools::associate(\"%s\",%s,%s,%d), returning\n"),
 //                    ACE_TEXT (interface_identifier_string.c_str ()),
-//                    ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address)).c_str ()),
+//                    ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address_s)).c_str ()),
 //                    ACE_TEXT (configuration_->SSID.c_str ()),
 //                    inherited::handle_));
 //#endif // ACE_WIN32 || ACE_WIN64
@@ -453,7 +454,7 @@ Net_WLAN_Monitor_T<AddressType,
 //          Net_WLAN_Tools::associatedBSSID (configuration_->interfaceIdentifier,
 //                                           inherited::handle_);
 //        if (!ACE_OS::memcmp (&ether_addr_s.ether_addr_octet,
-//                             &ap_mac_address.ether_addr_octet,
+//                             &ap_mac_address_s.ether_addr_octet,
 //                             ETH_ALEN))
 //        {
 //          result = true;
@@ -476,7 +477,7 @@ Net_WLAN_Monitor_T<AddressType,
 //          ACE_DEBUG ((LM_ERROR,
 //                      ACE_TEXT ("\"%s\": failed to associate with access point (MAC was: %s; SSID was: %s): timed out (was: %#T), giving up\n"),
 //                      ACE_TEXT (interface_identifier_string.c_str ()),
-//                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address)).c_str ()),
+//                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address_s)).c_str ()),
 //                      ACE_TEXT (configuration_->SSID.c_str ()),
 //                      &result_poll_interval));
 //          retries_ = 0;
@@ -488,7 +489,7 @@ Net_WLAN_Monitor_T<AddressType,
 //          ACE_DEBUG ((LM_ERROR,
 //                      ACE_TEXT ("\"%s\": failed to associate with access point (MAC was: %s; SSID was: %s): timed out (was: %#T), retrying...\n"),
 //                      ACE_TEXT (interface_identifier_string.c_str ()),
-//                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address)).c_str ()),
+//                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address_s)).c_str ()),
 //                      ACE_TEXT (configuration_->SSID.c_str ()),
 //                      &result_poll_interval));
 //          ++retries_;
@@ -1143,19 +1144,21 @@ Net_WLAN_Monitor_T<AddressType,
 
   // sanity check(s)
 #if defined (ACE_LINUX)
-  if (Common_DBus_Tools::isUnitRunning (NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT))
+  if (Common_DBus_Tools::isUnitRunning (NULL,
+                                        NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT))
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("systemd unit \"%s\" is running; this may interfere with the monitoring activities, continuing\n"),
                 ACE_TEXT (NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT)));
   } // end IF
-  elseif (Common_DBus_Tools::isUnitRunning (NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT))
+  else if (Common_DBus_Tools::isUnitRunning (NULL,
+                                             NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT))
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("systemd unit \"%s\" is running; this may interfere with the monitoring activities, continuing\n"),
                 ACE_TEXT (NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT)));
   } // end ELSE IF
-#endif
+#endif // ACE_LINUX
     ACE_ASSERT (inherited::handle_ == ACE_INVALID_HANDLE);
 
   inherited::handle_ = ACE_OS::socket (AF_INET,
@@ -1319,13 +1322,13 @@ Net_WLAN_Monitor_T<AddressType,
                    ACE_SYNCH_USE,
                    TimePolicyType,
                    NET_WLAN_MONITOR_API_IOCTL,
-                   UserDataType>::inherited::handle_input (ACE_HANDLE inherited::handle_in)
+                   UserDataType>::handle_input (ACE_HANDLE handle_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::inherited::handle_input"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::handle_input"));
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::handle_in == inherited::handle_);
+  ACE_ASSERT (handle_in == inherited::handle_);
 
   int result = -1;
   struct iwreq iwreq_s;
@@ -1338,14 +1341,14 @@ Net_WLAN_Monitor_T<AddressType,
   struct iw_event iw_event_s;
   ACE_OS::memset (&iw_event_s, 0, sizeof (struct iw_event));
   int error = 0;
-  Net_WLAN_SSIDToInterfaceIdentifierIterator_t iterator;
-  struct ether_addr ap_mac_address;
-  ACE_OS::memset (&ap_mac_address, 0, sizeof (struct ether_addr));
+  Net_WLAN_AccessPointCacheIterator_t iterator;
+  struct ether_addr ap_mac_address_s;
+  ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
   std::string essid_string;
   ACE_TCHAR buffer_a[BUFSIZ];
 #if defined (_DEBUG)
   std::set<std::string> known_ssids, current_ssids;
-#endif
+#endif // _DEBUG
 
   if (!inherited::buffer_)
   { ACE_ASSERT (!inherited::bufferSize_);
@@ -1363,7 +1366,7 @@ Net_WLAN_Monitor_T<AddressType,
   iwreq_s.u.data.length = inherited::bufferSize_;
 
 fetch_scan_result_data:
-  result = ACE_OS::ioctl (inherited::handle_in,
+  result = ACE_OS::ioctl (handle_in,
                           SIOCGIWSCAN,
                           &iwreq_s);
   if (result < 0)
@@ -1382,7 +1385,7 @@ fetch_scan_result_data:
     if (unlikely (error != EAGAIN)) // 11: result(s) not available yet
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCGIWSCAN): \"%m\", returning\n"),
-                  inherited::handle_in));
+                  handle_in));
 //    else
 //      ACE_DEBUG ((LM_DEBUG,
 //                  ACE_TEXT ("scan results not yet available, returning\n")));
@@ -1417,14 +1420,14 @@ retry:
     {
       iterator =
           std::find_if (inherited::SSIDCache_.begin (), inherited::SSIDCache_.end (),
-                        std::bind2nd (Net_WLAN_SSIDToInterfaceIdentifierFindPredicate (),
+                        std::bind2nd (Net_WLAN_AccessPointCacheFindPredicate (),
                                       inherited::configuration_->interfaceIdentifier));
       if (iterator == inherited::SSIDCache_.end ())
         break;
 
 #if defined (_DEBUG)
       known_ssids.insert ((*iterator).first);
-#endif
+#endif // _DEBUG
       inherited::SSIDCache_.erase ((*iterator).first);
     } while (true);
   } // end lock scope
@@ -1445,7 +1448,7 @@ retry:
     {
       case SIOCGIWAP:
       {
-        ACE_OS::memcpy (&ap_mac_address,
+        ACE_OS::memcpy (&ap_mac_address_s,
                         reinterpret_cast<void*> (iw_event_s.u.ap_addr.sa_data),
                         sizeof (struct ether_addr));
         break;
@@ -1458,7 +1461,7 @@ retry:
           ACE_OS::sprintf (buffer_a,
                            ACE_TEXT_ALWAYS_CHAR ("NWID: %X"),
                            iw_event_s.u.nwid.value);
-#endif
+#endif // _DEBUG
         break;
       }
       case SIOCGIWFREQ:
@@ -1475,7 +1478,7 @@ retry:
         ACE_OS::sprintf (buffer_a,
                          ACE_TEXT_ALWAYS_CHAR ("Mode: %s"),
                          iw_operation_mode[iw_event_s.u.mode]);
-#endif
+#endif // _DEBUG
         break;
       }
       case SIOCGIWNAME:
@@ -1485,7 +1488,7 @@ retry:
         ACE_OS::sprintf (buffer_a,
                          ACE_TEXT_ALWAYS_CHAR ("Protocol: %-1.16s"),
                          iw_event_s.u.name);
-#endif
+#endif // _DEBUG
         break;
       }
       case SIOCGIWESSID:
@@ -1505,23 +1508,22 @@ retry:
         } // end IF
 //        else
 //          printf("                    ESSID:off/any/hidden\n");
-        struct Net_WLAN_AssociationConfiguration association_configuration_s;
-        association_configuration_s.accessPointLinkLayerAddress =
-            ap_mac_address;
+        struct Net_WLAN_AccessPointState access_point_state_s;
+        access_point_state_s.linkLayerAddress = ap_mac_address_s;
         { ACE_GUARD_RETURN (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_, 0);
           inherited::SSIDCache_.insert (std::make_pair (essid_string,
                                                         std::make_pair (inherited::configuration_->interfaceIdentifier,
-                                                                        association_configuration_s)));
+                                                                        access_point_state_s)));
         } // end lock scope
 #if defined (_DEBUG)
         if (known_ssids.find (essid_string) == known_ssids.end ())
           ACE_DEBUG ((LM_DEBUG,
                       ACE_TEXT ("\"%s\": detected wireless access point (MAC address: %s, ESSID: %s)...\n"),
                       ACE_TEXT (inherited::configuration_->interfaceIdentifier.c_str ()),
-                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address),
+                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ap_mac_address_s),
                                                                             NET_LINKLAYER_802_11).c_str ()),
                       ACE_TEXT (essid_string.c_str ())));
-#endif
+#endif // _DEBUG
         break;
       }
       case SIOCGIWENCODE:
@@ -1546,7 +1548,7 @@ retry:
                         reinterpret_cast<unsigned char*> (iw_event_s.u.data.pointer),
                         iw_event_s.u.data.length,
                         iw_event_s.u.data.flags);
-#endif
+#endif // _DEBUG
           /* Other info... */
           if ((iw_event_s.u.data.flags & IW_ENCODE_INDEX) > 1);
 //            printf (" [%d]", iw_event_s.u.data.flags & IW_ENCODE_INDEX);
@@ -1564,7 +1566,7 @@ retry:
         iw_print_bitrate (buffer_a,
                           sizeof (ACE_TCHAR[BUFSIZ]),
                           iw_event_s.u.bitrate.value);
-#endif
+#endif // _DEBUG
         break;
       }
       case SIOCGIWMODUL:
@@ -1579,7 +1581,7 @@ retry:
           ACE_OS::sprintf (buffer_a,
                            ACE_TEXT_ALWAYS_CHAR ("Modulation: %s"),
                            iw_modul_list[i].cmd);
-#endif
+#endif // _DEBUG
         } // end FOR
         break;
       }
@@ -1599,7 +1601,7 @@ retry:
 #if defined (_DEBUG)
 //        iw_print_gen_ie (iw_event_s.u.data.pointer,
 //                         iw_event_s.u.data.length);
-#endif
+#endif // _DEBUG
         break;
       }
 #endif /* WE_ESSENTIAL */
@@ -1614,7 +1616,7 @@ retry:
                           iw_event_s.u.data.pointer,
                           iw_event_s.u.data.length);
 //        buffer_2[iw_event_s.u.data.length] = '\0';
-#endif
+#endif // _DEBUG
         break;
       }
       default:
@@ -1628,7 +1630,7 @@ retry:
   } while (true);
 #if defined (_DEBUG)
   { ACE_GUARD_RETURN (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_, 0);
-    for (Net_WLAN_SSIDToInterfaceIdentifierConstIterator_t iterator_2 = inherited::SSIDCache_.begin ();
+    for (Net_WLAN_AccessPointCacheConstIterator_t iterator_2 = inherited::SSIDCache_.begin ();
          iterator_2 != inherited::SSIDCache_.end ();
          ++iterator_2)
       if (!ACE_OS::strcmp ((*iterator_2).second.first.c_str (),
@@ -1643,7 +1645,7 @@ retry:
                   ACE_TEXT ("\"%s\": lost contact to ESSID (was: %s)...\n"),
                   ACE_TEXT (inherited::configuration_->interfaceIdentifier.c_str ()),
                   ACE_TEXT ((*iterator_2).c_str ())));
-#endif
+#endif // _DEBUG
 
   try {
     inherited::onScanComplete (inherited::configuration_->interfaceIdentifier);
@@ -1789,34 +1791,82 @@ Net_WLAN_Monitor_T<AddressType,
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::socketHandle_);
   ACE_ASSERT (callbacks_);
 //  ACE_ASSERT (!controlId_);
 //  ACE_ASSERT (!error_);
-  ACE_ASSERT (inherited::handle_);
 //  ACE_ASSERT (!isRegistered_);
 #if defined (ACE_LINUX)
-  if (Common_DBus_Tools::isUnitRunning (NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT))
+  Common_DBus_PolicyKit_Details_t action_details_a;
+  if (Common_DBus_Tools::isUnitRunning (NULL,
+                                        NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT))
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("stopping systemd unit \"%s\"; it may interfere with the monitoring activities\n"),
                 ACE_TEXT (NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT)));
-    if (!Common_DBus_Tools::toggleUnit (NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT,
+
+    action_details_a.push_back (std::make_pair (ACE_TEXT_ALWAYS_CHAR (COMMON_SD_BUS_ACTIONID_MANAGEUNITS_DETAILS_UNIT_STRING),
+                                                ACE_TEXT_ALWAYS_CHAR (NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT)));
+    action_details_a.push_back (std::make_pair (ACE_TEXT_ALWAYS_CHAR (COMMON_SD_BUS_ACTIONID_MANAGEUNITS_DETAILS_VERB_STRING),
+                                                ACE_TEXT_ALWAYS_CHAR (COMMON_SD_BUS_ACTIONID_MANAGEUNITS_DETAIL_VERB_STOP_STRING)));
+    action_details_a.push_back (std::make_pair (ACE_TEXT_ALWAYS_CHAR (COMMON_DBUS_METHOD_PROPERTIES_POLICYKIT_DETAIL_KEY_MESSAGE_STRING),
+                                                ACE_TEXT_ALWAYS_CHAR (COMMON_SD_BUS_ACTIONID_MANAGEUNITS_DETAIL_VERB_STOP_MESSAGE_STRING)));
+    action_details_a.push_back (std::make_pair (ACE_TEXT_ALWAYS_CHAR (COMMON_DBUS_METHOD_PROPERTIES_POLICYKIT_DETAIL_KEY_GETTEXTDOMAIN_STRING),
+                                                ACE_TEXT_ALWAYS_CHAR (COMMON_SD_BUS_ACTIONID_MANAGEUNITS_DETAILS_GETTEXTDOMAIN_STRING)));
+    if (!Common_DBus_Tools::policyKitAuthorize (NULL,
+                                                COMMON_SD_BUS_ACTIONID_MANAGEUNITS_STRING,
+                                                action_details_a,
+                                                COMMON_DBUS_POLICYKIT_SUBJECT_SYSTEM_BUS,
+                                                true))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_DBus_Tools::policyKitAuthorize(\"%s\"), continuing\n"),
+                  ACE_TEXT (COMMON_SD_BUS_ACTIONID_MANAGEUNITS_STRING)));
+      goto continue_;
+    } // end IF
+    if (!Common_DBus_Tools::toggleUnit (NULL,
+                                        NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT,
                                         true))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_DBus_Tools::toggleUnit(\"%s\"), continuing\n"),
                   ACE_TEXT (NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT)));
   } // end IF
-  if (Common_DBus_Tools::isUnitRunning (NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT))
+continue_:
+  if (Common_DBus_Tools::isUnitRunning (NULL,
+                                        NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT))
   {
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("systemd unit \"%s\" is running; this may interfere with the monitoring activities, continuing\n"),
                 ACE_TEXT (NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT)));
-    if (!Common_DBus_Tools::toggleUnit (NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT,
+
+    action_details_a.clear ();
+    action_details_a.push_back (std::make_pair (ACE_TEXT_ALWAYS_CHAR (COMMON_SD_BUS_ACTIONID_MANAGEUNITS_DETAILS_UNIT_STRING),
+                                                ACE_TEXT_ALWAYS_CHAR (NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT)));
+    action_details_a.push_back (std::make_pair (ACE_TEXT_ALWAYS_CHAR (COMMON_SD_BUS_ACTIONID_MANAGEUNITS_DETAILS_VERB_STRING),
+                                                ACE_TEXT_ALWAYS_CHAR (COMMON_SD_BUS_ACTIONID_MANAGEUNITS_DETAIL_VERB_STOP_STRING)));
+    action_details_a.push_back (std::make_pair (ACE_TEXT_ALWAYS_CHAR (COMMON_DBUS_METHOD_PROPERTIES_POLICYKIT_DETAIL_KEY_MESSAGE_STRING),
+                                                ACE_TEXT_ALWAYS_CHAR (COMMON_SD_BUS_ACTIONID_MANAGEUNITS_DETAIL_VERB_STOP_MESSAGE_STRING)));
+    action_details_a.push_back (std::make_pair (ACE_TEXT_ALWAYS_CHAR (COMMON_DBUS_METHOD_PROPERTIES_POLICYKIT_DETAIL_KEY_GETTEXTDOMAIN_STRING),
+                                                ACE_TEXT_ALWAYS_CHAR (COMMON_SD_BUS_ACTIONID_MANAGEUNITS_DETAILS_GETTEXTDOMAIN_STRING)));
+    if (!Common_DBus_Tools::policyKitAuthorize (NULL,
+                                                COMMON_SD_BUS_ACTIONID_MANAGEUNITS_STRING,
+                                                action_details_a,
+                                                COMMON_DBUS_POLICYKIT_SUBJECT_SYSTEM_BUS,
+                                                true))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_DBus_Tools::policyKitAuthorize(\"%s\"), continuing\n"),
+                  ACE_TEXT (COMMON_SD_BUS_ACTIONID_MANAGEUNITS_STRING)));
+      goto continue_;
+    } // end IF
+    if (!Common_DBus_Tools::toggleUnit (NULL,
+                                        NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT,
                                         true))
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_DBus_Tools::toggleUnit(\"%s\"), continuing\n"),
                   ACE_TEXT (NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT)));
   } // end ELSE IF
+continue_2:
 #endif // ACE_LINUX
 
   int result = -1;
@@ -1825,29 +1875,29 @@ Net_WLAN_Monitor_T<AddressType,
   struct Net_WLAN_nl80211_MulticastGroupIdQueryCBData cb_data_s;
   cb_data_s.map = &multicast_group_ids_m;
   Net_WLAN_IMonitorBase* imonitor_base_p = this;
-  int socket_handle_i = nl_socket_get_fd (inherited::handle_);
+  int socket_handle_i = nl_socket_get_fd (inherited::socketHandle_);
   ACE_Time_Value deadline;
 
   if (controlId_)
-    goto continue_;
+    goto continue_3;
 
   controlId_ =
-      genl_ctrl_resolve (inherited::handle_,
+      genl_ctrl_resolve (inherited::socketHandle_,
                          ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_NL80211_CONTROL_NAME_STRING));
   if (unlikely (controlId_ < 0))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to genl_ctrl_resolve(0x%@,\"%s\"): \"%s\", returning\n"),
-                inherited::handle_,
+                ACE_TEXT ("failed to genl_ctrl_resolve(%@,\"%s\"): \"%s\", returning\n"),
+                inherited::socketHandle_,
                 ACE_TEXT (NET_WLAN_MONITOR_NL80211_CONTROL_NAME_STRING),
                 ACE_TEXT (nl_geterror (controlId_))));
     goto error;
   } // end IF
 
-continue_:
+continue_3:
   // subscribe to all defined nl80211 multicast groups (i.e. WLAN events)
   if (isSubscribedToMulticastGroups_)
-    goto continue_2;
+    goto continue_4;
 
   // step1: resolve multicast group ids
   multicast_group_ids_m.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (NL80211_MULTICAST_GROUP_CONFIG),
@@ -1888,12 +1938,12 @@ continue_:
   NLA_PUT_STRING (message_p,
                   CTRL_ATTR_FAMILY_NAME,
                   ACE_TEXT_ALWAYS_CHAR (NL80211_GENL_NAME));
-  result = nl_send_auto_complete (inherited::handle_, message_p);
+  result = nl_send_auto_complete (inherited::socketHandle_, message_p);
   if (unlikely (result < 0))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to nl_send_auto_complete(%@): \"%s\", returning\n"),
-                inherited::handle_,
+                inherited::socketHandle_,
                 ACE_TEXT (nl_geterror (result))));
     nlmsg_free (message_p);
     goto error;
@@ -1927,12 +1977,12 @@ continue_:
   error_ = 1;
   while (//(result > 0) &&
          error_ > 0)
-    result = nl_recvmsgs (inherited::handle_, callbacks_);
+    result = nl_recvmsgs (inherited::socketHandle_, callbacks_);
   if (unlikely (result < 0))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\", returning\n"),
-                inherited::handle_,
+                inherited::socketHandle_,
                 ACE_TEXT (nl_geterror ((result < 0) ? result : error_))));
     goto error;
   } // end IF
@@ -1949,14 +1999,14 @@ continue_:
                   ACE_TEXT ((*iterator).first.c_str ())));
       continue;
     } // end IF
-    result = nl_socket_add_memberships (inherited::handle_,
+    result = nl_socket_add_memberships (inherited::socketHandle_,
                                         (*iterator).second,
                                         NFNLGRP_NONE);
     if (unlikely (result < 0))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to nl_socket_add_memberships(%@,%d): \"%s\", returning\n"),
-                  inherited::handle_,
+                  inherited::socketHandle_,
                   (*iterator).second,
                   ACE_TEXT (nl_geterror (result))));
       goto error;
@@ -1984,7 +2034,7 @@ continue_:
   ACE_ASSERT (result >= 0);
 
   if (!Net_WLAN_Tools::getFeatures (inherited::configuration_->interfaceIdentifier,
-                                    inherited::handle_,
+                                    inherited::socketHandle_,
                                     inherited::familyId_,
                                     features_,
                                     extendedFeatures_))
@@ -1992,14 +2042,14 @@ continue_:
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_WLAN_Tools::getFeatures(\"%s\",%@,%d), returning\n"),
                 ACE_TEXT (inherited::configuration_->interfaceIdentifier.c_str ()),
-                inherited::handle_,
+                inherited::socketHandle_,
                 inherited::familyId_));
     goto error;
   } // end IF
 
   isSubscribedToMulticastGroups_ = true;
 
-continue_2:
+continue_4:
   ACE_ASSERT (socket_handle_i);
   switch (inherited::configuration_->dispatch)
   {
@@ -2038,7 +2088,7 @@ continue_2:
     }
     case COMMON_EVENT_DISPATCH_REACTOR:
     {
-      ACE_HANDLE handle_h = nl_socket_get_fd (inherited::handle_);
+      ACE_HANDLE handle_h = nl_socket_get_fd (inherited::socketHandle_);
       ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
 //      inherited2::set_handle ();
       inherited::TASK_T::set_handle (handle_h);
@@ -2121,7 +2171,7 @@ nla_put_failure:
       }
       case COMMON_EVENT_DISPATCH_REACTOR:
       {
-        ACE_HANDLE handle_h = nl_socket_get_fd (inherited::handle_);
+        ACE_HANDLE handle_h = nl_socket_get_fd (inherited::socketHandle_);
         ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
   //      inherited2::set_handle ();
         inherited::TASK_T::set_handle (handle_h);
@@ -2193,7 +2243,7 @@ Net_WLAN_Monitor_T<AddressType,
       }
       case COMMON_EVENT_DISPATCH_REACTOR:
       {
-        ACE_HANDLE handle_h = nl_socket_get_fd (inherited::handle_);
+        ACE_HANDLE handle_h = nl_socket_get_fd (inherited::socketHandle_);
         ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
   //      inherited2::set_handle ();
         inherited::TASK_T::set_handle (handle_h);
@@ -2279,14 +2329,17 @@ Net_WLAN_Monitor_T<AddressType,
         }
         case COMMON_EVENT_DISPATCH_REACTOR:
         {
+          ACE_HANDLE handle_h = nl_socket_get_fd (inherited::socketHandle_);
+          ACE_ASSERT (handle_h != ACE_INVALID_HANDLE);
+
           ACE_Reactor* reactor_p = inherited::TASK_T::reactor ();
           ACE_ASSERT (reactor_p);
-          result = reactor_p->remove_handler (this,
+          result = reactor_p->remove_handler (handle_h,
                                               ACE_Event_Handler::ALL_EVENTS_MASK);
           if (unlikely (result == -1))
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to ACE_Reactor::remove_handler(%@): \"%m\", continuing\n"),
-                        this));
+                        ACE_TEXT ("failed to ACE_Reactor::remove_handler(%d): \"%m\", continuing\n"),
+                        handle_h));
           break;
         }
         default:
@@ -2321,7 +2374,7 @@ Net_WLAN_Monitor_T<AddressType,
     return false;
   } // end IF
   // sanity check(s)
-  ACE_ASSERT (inherited::handle_);
+  ACE_ASSERT (inherited::socketHandle_);
   ACE_ASSERT (!callbacks_);
 
   callbacks_ =
@@ -2341,8 +2394,7 @@ Net_WLAN_Monitor_T<AddressType,
 #endif // _DEBUG
     return false;
   } // end IF
-
-  nl_socket_set_cb (inherited::handle_, callbacks_);
+  nl_socket_set_cb (inherited::socketHandle_, callbacks_);
 
   return true;
 }
@@ -2365,8 +2417,8 @@ Net_WLAN_Monitor_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::do_associate"));
 
   // sanity check(s)
-  ACE_ASSERT (inherited::handle_);
   ACE_ASSERT (inherited::familyId_);
+  ACE_ASSERT (inherited::socketHandle_);
   if (!SSID_in.empty ())
   {
     ACE_ASSERT (!Net_Common_Tools::isAny (APMACAddress_in));
@@ -2375,7 +2427,7 @@ Net_WLAN_Monitor_T<AddressType,
   Net_InterfaceIdentifiers_t interface_identifiers_a;
   if (interfaceIdentifier_in.empty ())
     interface_identifiers_a =
-        Net_WLAN_Tools::getInterfaces (inherited::handle_,
+        Net_WLAN_Tools::getInterfaces (inherited::socketHandle_,
                                        inherited::familyId_,
                                        AF_UNSPEC,
                                        0);
@@ -2390,7 +2442,7 @@ Net_WLAN_Monitor_T<AddressType,
                                     : NL80211_CMD_CONNECT);
   int result = -1;
   unsigned int if_index_i = 0;
-  struct ether_addr ap_mac_address_s = APMACAddress_in;
+  struct ether_addr ap_mac_address_s_s = APMACAddress_in;
   std::string ssid_string = SSID_in;
   ACE_UINT32 frequency_i = 0, authentication_type_i = 0;
   for (Net_InterfacesIdentifiersIterator_t iterator = interface_identifiers_a.begin ();
@@ -2432,8 +2484,8 @@ Net_WLAN_Monitor_T<AddressType,
 //    if (command_i == NL80211_CMD_DISASSOCIATE)
     if (command_i == NL80211_CMD_DISCONNECT)
     {
-      if (Net_Common_Tools::isAny (ap_mac_address_s))
-        ap_mac_address_s =
+      if (Net_Common_Tools::isAny (ap_mac_address_s_s))
+        ap_mac_address_s_s =
             Net_WLAN_Tools::associatedBSSID (*iterator,
                                              NULL,
                                              inherited::familyId_);
@@ -2447,11 +2499,11 @@ Net_WLAN_Monitor_T<AddressType,
 //      nla_put_flag (message_p,
 //                    NL80211_ATTR_LOCAL_STATE_CHANGE);
     } // end IF
-    ACE_ASSERT (!Net_Common_Tools::isAny (ap_mac_address_s));
+    ACE_ASSERT (!Net_Common_Tools::isAny (ap_mac_address_s_s));
     NLA_PUT (message_p,
              NL80211_ATTR_MAC,
              ETH_ALEN,
-             ap_mac_address_s.ether_addr_octet);
+             ap_mac_address_s_s.ether_addr_octet);
 //    if (command_i == NL80211_CMD_ASSOCIATE)
     if (command_i == NL80211_CMD_CONNECT)
     {
@@ -2495,12 +2547,12 @@ Net_WLAN_Monitor_T<AddressType,
              0,
              NULL);
 
-    result = nl_send_auto (inherited::handle_, message_p);
+    result = nl_send_auto (inherited::socketHandle_, message_p);
     if (unlikely (result < 0))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to nl_send_auto(0x%@): \"%s\", returning\n"),
-                  inherited::handle_,
+                  inherited::socketHandle_,
                   ACE_TEXT (nl_geterror (result))));
       goto error;
     } // end IF
@@ -2539,7 +2591,7 @@ Net_WLAN_Monitor_T<AddressType,
 
   // sanity check(s)
   ACE_ASSERT (inherited::familyId_);
-  ACE_ASSERT (inherited::handle_);
+  ACE_ASSERT (inherited::socketHandle_);
 
   int result = -1;
   unsigned int if_index_i = 0;
@@ -2671,12 +2723,12 @@ Net_WLAN_Monitor_T<AddressType,
 
   multipartDoneCBData_.scanning = true;
 
-  result = nl_send_auto (inherited::handle_, message_p);
+  result = nl_send_auto (inherited::socketHandle_, message_p);
   if (unlikely (result < 0))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to nl_send_auto(0x%@): \"%s\", returning\n"),
-                inherited::handle_,
+                inherited::socketHandle_,
                 ACE_TEXT (nl_geterror (result))));
     goto error;
   } // end IF
@@ -2712,8 +2764,8 @@ Net_WLAN_Monitor_T<AddressType,
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
-  ACE_ASSERT (inherited::handle_);
-  ACE_ASSERT (handle_in == nl_socket_get_fd (inherited::handle_));
+  ACE_ASSERT (inherited::socketHandle_);
+  ACE_ASSERT (handle_in == nl_socket_get_fd (inherited::socketHandle_));
 
   int result = -1;
   ssize_t bytes_received = -1;
@@ -2890,8 +2942,8 @@ Net_WLAN_Monitor_T<AddressType,
               inherited::grp_id_));
 
   // sanity check(s)
+  ACE_ASSERT (inherited::socketHandle_);
   ACE_ASSERT (callbacks_);
-  ACE_ASSERT (inherited::handle_);
 
   do
   { // *IMPORTANT NOTE*: there is no known way to cleanly unblock from a socket
@@ -2900,7 +2952,7 @@ Net_WLAN_Monitor_T<AddressType,
     //                   - SIGINT might work, ugly
     //                   - flag-setting and sending a 'dummy request', ugly
     //                   --> use ACE event dispatch and circumvent nl_revmsgs()
-    result = nl_recvmsgs (inherited::handle_, callbacks_);
+    result = nl_recvmsgs (inherited::socketHandle_, callbacks_);
     if (unlikely (result < 0))
     {
       if (-result == NLE_BAD_SOCK)  // 3: shutdown (see below))
@@ -2909,13 +2961,13 @@ Net_WLAN_Monitor_T<AddressType,
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\" (%d), returning\n"),
-                    inherited::handle_,
+                    inherited::socketHandle_,
                     ACE_TEXT (nl_geterror (result)), result));
         break;
       } // end IF
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\", continuing\n"),
-                  inherited::handle_,
+                  inherited::socketHandle_,
                   ACE_TEXT (nl_geterror (result))));
     } // end IF
     error = ACE_OS::last_error ();
@@ -2924,7 +2976,7 @@ Net_WLAN_Monitor_T<AddressType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to nl_recvmsgs(%@): \"%m\", returning\n"),
-                  inherited::handle_));
+                  inherited::socketHandle_));
       break;
     } // end IF
   } while (true);
@@ -3039,6 +3091,7 @@ Net_WLAN_Monitor_T<AddressType,
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
+  ACE_ASSERT (inherited::socketHandle_);
   ACE_ASSERT (messageBlock_inout);
 
   ACE_Message_Block* message_block_p, *message_block_2;
@@ -3132,7 +3185,7 @@ continue_:
     if (likely (bytes_to_copy > missing_bytes))
       bytes_to_copy = missing_bytes;
 
-    ACE_OS::memcpy (nlmsg_data (nlmsghdr_p) + offset,
+    ACE_OS::memcpy (static_cast<char*> (nlmsg_data (nlmsghdr_p)) + offset,
                     message_block_p->rd_ptr (),
                     bytes_to_copy);
     offset += bytes_to_copy;
@@ -3185,7 +3238,7 @@ do { \
 } while (0)
 
   nlmsg_set_proto (message_,
-                   inherited::handle_->s_proto);
+                   inherited::socketHandle_->s_proto);
   nlmsg_set_src (message_,
                  &const_cast<struct sockaddr_nl&> (sourceAddress_in));
 //    if (ucred_p)
@@ -3210,15 +3263,15 @@ do { \
     NL_CB_CALL (callbacks_, NL_CB_SEQ_CHECK, message_);
 
     /* Only do sequence checking if auto-ack mode is enabled */
-  } else if (!(inherited::handle_->s_flags & NL_NO_AUTO_ACK)) {
-    if (nlmsghdr_p->nlmsg_seq != inherited::handle_->s_seq_expect) {
+  } else if (!(inherited::socketHandle_->s_flags & NL_NO_AUTO_ACK)) {
+    if (nlmsghdr_p->nlmsg_seq != inherited::socketHandle_->s_seq_expect) {
       if (callbacks_->cb_set[NL_CB_INVALID])
         NL_CB_CALL (callbacks_, NL_CB_INVALID, message_);
       else {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("invalid message sequence # (was: %d, expected: %d), returning\n"),
                     nlmsghdr_p->nlmsg_seq,
-                    inherited::handle_->s_seq_expect));
+                    inherited::socketHandle_->s_seq_expect));
         err = -NLE_SEQ_MISMATCH;
         goto error;
       } // end ELSE
@@ -3231,7 +3284,7 @@ do { \
       nlmsghdr_p->nlmsg_type == NLMSG_OVERRUN) {
     /* We can't check for !NLM_F_MULTI since some netlink
        * users in the kernel are broken. */
-    inherited::handle_->s_seq_expect++;
+    inherited::socketHandle_->s_seq_expect++;
   } // end IF
 
 //  if (nlmsghdr_p->nlmsg_flags & NLM_F_MULTI)
@@ -4021,9 +4074,9 @@ monitor_thread:
         goto sleep;
       } // end IF
 
-      struct ether_addr ap_mac_address_s;
+      struct ether_addr ap_mac_address_s_s;
       if (unlikely (!inherited::associate (inherited::configuration_->interfaceIdentifier,
-                                           ap_mac_address_s,
+                                           ap_mac_address_s_s,
                                            inherited::configuration_->SSID)))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_IWLANMonitor_T::associate(\"%s\",%s), retrying in %#T...\n"),

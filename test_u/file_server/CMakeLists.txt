@@ -192,6 +192,19 @@ set (file_server_SRCS
      stdafx.cpp
      stdafx.h)
 
+if (UNIX)
+ add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
+endif ()
+
+set (LLVM_COMPILER_ID_STRING "Clang")
+string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
+string (TOLOWER "${CMAKE_CXX_COMPILER_ID}" CXX_COMPILER_ID_STRING_LOWER)
+if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
+ add_compile_options (-std=c++11)
+#add_compile_options (-fPIC)
+ add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
+endif ()
+
 set (EXECUTABLE file_server)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
@@ -223,6 +236,7 @@ target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (UNIX)
  target_link_libraries (${EXECUTABLE} rt)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
+ target_link_libraries (${EXECUTABLE} iw)
  target_link_libraries (${EXECUTABLE} X11)
 
  target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})
@@ -262,6 +276,7 @@ target_link_libraries (${EXECUTABLE} ACEStream_Network)
 target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Server)
 
 # add PCH

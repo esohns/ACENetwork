@@ -196,6 +196,14 @@ set (client_SRCS
      test_u_udpconnection.cpp
      test_u_udpconnection.h)
 
+set (LLVM_COMPILER_ID_STRING "Clang")
+string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
+string (TOLOWER "${CMAKE_CXX_COMPILER_ID}" CXX_COMPILER_ID_STRING_LOWER)
+if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
+ add_compile_options (-std=c++11)
+ add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
+endif ()
+
 set (EXECUTABLE_SOURCE client)
 add_executable (${EXECUTABLE_SOURCE}
                 EXCLUDE_FROM_ALL
@@ -219,7 +227,6 @@ target_link_libraries (${EXECUTABLE_SOURCE} ${ACE_LIBRARY})
 if (UNIX)
  target_link_libraries (${EXECUTABLE_SOURCE} rt)
  target_link_libraries (${EXECUTABLE_SOURCE} ${PKG_CAP_LIBRARIES})
- #target_link_libraries (${EXECUTABLE_SOURCE} ${PKG_DBUS_LIBRARIES})
  target_link_libraries (${EXECUTABLE_SOURCE} iw)
  target_link_libraries (${EXECUTABLE_SOURCE} X11)
  if (GTK3_SUPPORT)
@@ -255,6 +262,9 @@ target_link_libraries (${EXECUTABLE_SOURCE} ACEStream_Network)
 target_link_libraries (${EXECUTABLE_SOURCE} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_WLAN)
+
+target_link_libraries (${EXECUTABLE_SOURCE} Common)
 
 # add PCH
 set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
@@ -330,7 +340,6 @@ target_link_libraries (${EXECUTABLE_TARGET} ${ACE_LIBRARY})
 if (UNIX)
  target_link_libraries (${EXECUTABLE_TARGET} rt)
  target_link_libraries (${EXECUTABLE_TARGET} ${PKG_CAP_LIBRARIES})
- #target_link_libraries (${EXECUTABLE_TARGET} ${PKG_DBUS_LIBRARIES})
  target_link_libraries (${EXECUTABLE_TARGET} iw)
  target_link_libraries (${EXECUTABLE_TARGET} X11)
  if (GTK3_SUPPORT)
@@ -366,6 +375,7 @@ target_link_libraries (${EXECUTABLE_TARGET} ACEStream_Network)
 target_link_libraries (${EXECUTABLE_TARGET} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Server)
 
 # add PCH

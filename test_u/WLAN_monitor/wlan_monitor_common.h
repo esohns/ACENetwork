@@ -83,7 +83,7 @@ struct WLANMonitor_Configuration
 
 //////////////////////////////////////////
 
-enum WLANMMMonitor_EventType : int
+enum WLANMMMonitor_EventType
 {
   WLAN_MONITOR_EVENT_INTERFACE_HOTPLUG = 0,
   WLAN_MONITOR_EVENT_INTERFACE_REMOVE,

@@ -98,7 +98,7 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("received invalid/unknown signal: \"%S\", returning\n"),
-                  signal_in));
+                  signal_in.signal));
       return;
     }
   } // end SWITCH
@@ -170,8 +170,8 @@ Server_SignalHandler::handle (const struct Common_Signal& signal_in)
     iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (inherited::configuration_->useReactor,    // stop reactor ?
-                                         !(inherited::configuration_->useReactor), // stop proactor ?
-                                         -1);                                      // group id (--> don't block)
+    Common_Tools::finalizeEventDispatch ((inherited::configuration_->dispatch == COMMON_EVENT_DISPATCH_REACTOR),  // stop reactor ?
+                                         (inherited::configuration_->dispatch == COMMON_EVENT_DISPATCH_PROACTOR), // stop proactor ?
+                                         -1);                                    // group id (--> don't block)
   } // end IF
 }

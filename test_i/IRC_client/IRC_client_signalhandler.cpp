@@ -111,7 +111,7 @@ IRC_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       // *TODO*
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid/unknown signal: \"%S\", returning\n"),
-                  signal_in));
+                  signal_in.signal));
       return;
     }
   } // end SWITCH
@@ -177,8 +177,8 @@ done_connect:
     } // end IF
 
     // step2: stop event dispatch
-    Common_Tools::finalizeEventDispatch (inherited::configuration_->useReactor,  // stop reactor ?
-                                         !inherited::configuration_->useReactor, // stop proactor ?
-                                         -1);                                    // group ID (--> don't block !)
+    Common_Tools::finalizeEventDispatch ((inherited::configuration_->dispatch == COMMON_EVENT_DISPATCH_REACTOR),   // stop reactor ?
+                                         (!inherited::configuration_->dispatch == COMMON_EVENT_DISPATCH_PROACTOR), // stop proactor ?
+                                         -1);                                                                      // group Id (--> don't block !)
   } // end IF
 }

@@ -90,7 +90,7 @@ struct Test_I_Configuration
    , parserConfiguration ()
    //, streamConfiguration ()
    , signalHandlerConfiguration ()
-   , useReactor (NET_EVENT_USE_REACTOR)
+   , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , userData ()
   {};
 
@@ -102,7 +102,8 @@ struct Test_I_Configuration
   //struct Test_I_StreamConfiguration        streamConfiguration;
   // **************************** signal data **********************************
   struct Test_I_SignalHandlerConfiguration signalHandlerConfiguration;
-  bool                                     useReactor;
+
+  enum Common_EventDispatchType            dispatch;
 
   struct Test_I_UserData                   userData;
 };

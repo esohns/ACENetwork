@@ -31,7 +31,7 @@
 
 #include "irc_exports.h"
 
-enum IRC_RegistrationStateType : int
+enum IRC_RegistrationStateType
 {
   IRC_REGISTRATION_STATE_INVALID = -1,
   IRC_REGISTRATION_STATE_PASS = 0,

@@ -110,7 +110,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-d          : debug parser [")
-            << NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE
+            << COMMON_PARSER_DEFAULT_YACC_TRACE
             << ACE_TEXT_ALWAYS_CHAR ("])")
             << std::endl;
   std::string configuration_path = path;
@@ -155,7 +155,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-p          : use thread pool [")
-            << NET_EVENT_USE_THREAD_POOL
+            << COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-q          : send request on offer [")
@@ -163,7 +163,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r          : use reactor [")
-            << NET_EVENT_USE_REACTOR
+            << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]  : statistic reporting interval (second(s)) [")
@@ -214,7 +214,7 @@ do_processArguments (int argc_in,
 
   // initialize results
   requestBroadcastReplies_out = DHCP_DEFAULT_FLAGS_BROADCAST;
-  debugParser_out = NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE;
+  debugParser_out = COMMON_PARSER_DEFAULT_YACC_TRACE;
   std::string configuration_path = path;
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
@@ -237,9 +237,10 @@ do_processArguments (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET);
 #endif
   useLoopback_out = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
-  useThreadPool_out = NET_EVENT_USE_THREAD_POOL;
+  useThreadPool_out = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   sendRequestOnOffer_out = TEST_U_DEFAULT_DHCP_SEND_REQUEST_ON_OFFER;
-  useReactor_out = NET_EVENT_USE_REACTOR;
+  useReactor_out =
+      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   statisticReportingInterval_out = STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   traceInformation_out = false;
   printVersionAndExit_out = false;
@@ -531,7 +532,9 @@ do_work (bool requestBroadcastReplies_in,
   //    &configuration.connectionConfiguration;
   //configuration.userData.streamConfiguration =
   //    &configuration.streamConfiguration;
-  configuration.useReactor = useReactor_in;
+  configuration.dispatch =
+      (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
+                     : COMMON_EVENT_DISPATCH_PROACTOR);
 
 //  Stream_Module_t* module_p = NULL;
 //  Test_U_Module_FileWriter_Module file_writer (ACE_TEXT_ALWAYS_CHAR ("FileWriter"),
@@ -745,20 +748,20 @@ do_work (bool requestBroadcastReplies_in,
     statisticReportingInterval_in;
 
   // step0b: initialize event dispatch
-  struct Common_EventDispatchThreadData thread_data_s;
-  thread_data_s.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data_s.useReactor = useReactor_in;
-  if (!Common_Tools::initializeEventDispatch (thread_data_s.useReactor,
-                                              useThreadPool_in,
-                                              thread_data_s.numberOfDispatchThreads,
-                                              thread_data_s.proactorType,
-                                              thread_data_s.reactorType,
-                                              configuration.streamConfiguration.configuration_.serializeOutput))
+  struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
+  event_dispatch_configuration_s.numberOfReactorThreads =
+      (useReactor_in ? numberOfDispatchThreads_in : 0);
+  event_dispatch_configuration_s.numberOfProactorThreads =
+      (!useReactor_in ? numberOfDispatchThreads_in : 0);
+  if (!Common_Tools::initializeEventDispatch (event_dispatch_configuration_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
     return;
   } // end IF
+  struct Common_EventDispatchState event_dispatch_state_s;
+  event_dispatch_state_s.configuration =
+      &event_dispatch_configuration_s;
 
   ACE_Time_Value deadline = ACE_Time_Value::zero;
   DHCPClient_IConnector_t* iconnector_p = NULL;
@@ -820,8 +823,9 @@ do_work (bool requestBroadcastReplies_in,
     connection_manager_p;
   CBData_in.configuration->signalHandlerConfiguration.statisticReportingTimerId =
     timer_id;
-  CBData_in.configuration->signalHandlerConfiguration.useReactor =
-    useReactor_in;
+  CBData_in.configuration->signalHandlerConfiguration.dispatch =
+    (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
+                   : COMMON_EVENT_DISPATCH_PROACTOR);
   if (!signalHandler_in.initialize (configuration.signalHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -850,8 +854,7 @@ do_work (bool requestBroadcastReplies_in,
   // - dispatch UI events (if any)
 
   // step1a: initialize worker(s)
-  if (!Common_Tools::startEventDispatch (thread_data_s,
-                                         group_id))
+  if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start event dispatch, returning\n")));
@@ -1347,7 +1350,7 @@ ACE_TMAIN (int argc_in,
 
   // step1a set defaults
   bool request_broadcast_replies = DHCP_DEFAULT_FLAGS_BROADCAST;
-  bool debug_parser = NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE;
+  bool debug_parser = COMMON_PARSER_DEFAULT_YACC_TRACE;
   std::string configuration_path = path;
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
@@ -1368,10 +1371,11 @@ ACE_TMAIN (int argc_in,
   std::string interface_identifier_string;
 #endif
   bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
-  bool use_thread_pool = NET_EVENT_USE_THREAD_POOL;
+  bool use_thread_pool = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   bool send_request_on_offer =
       TEST_U_DEFAULT_DHCP_SEND_REQUEST_ON_OFFER;
-  bool use_reactor = NET_EVENT_USE_REACTOR;
+  bool use_reactor =
+      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
   unsigned int statistic_reporting_interval =
     STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
   bool trace_information = false;

@@ -181,7 +181,7 @@ connection_setup_function (void* arg_in)
   IRC_Client_AsynchConnector_t asynch_connector (connection_manager_p,
                                                  (*iterator_2).second.second.statisticReportingInterval);
   IRC_Client_IConnector_t* connector_p = &connector;
-  if (!data_p->configuration->useReactor)
+  if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
     connector_p = &asynch_connector;
   //IRC_Client_SocketHandlerConfiguration* socket_handler_configuration_p = NULL;
   //IRC_Client_ConnectorConfiguration connector_configuration;
@@ -294,7 +294,7 @@ connection_failed:
 
     goto remove_page;
   } // end IF
-  if (!data_p->configuration->useReactor)
+  if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
   {
     ACE_Time_Value deadline =
       (COMMON_TIME_NOW +
@@ -1112,7 +1112,7 @@ idle_remove_connection_cb (gpointer userData_in)
 
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
 
-  IRC_Client_GUI_ConnectionsConstIterator_t iterator_3 =
+  IRC_Client_GUI_ConnectionsIterator_t iterator_3 =
       data_p->connections->end ();
 
   iterator =
@@ -1172,9 +1172,8 @@ clean_up:
   iterator_3 = data_p->connections->find (data_p->timeStamp);
   if (iterator_3 != data_p->connections->end ())
   {
-    IRC_Client_GUI_Connections_t* connections_p = data_p->connections;
     delete (*iterator_3).second;
-    connections_p->erase (iterator_3);
+    data_p->connections->erase (iterator_3);
   } // end IF
 
   return G_SOURCE_REMOVE;
@@ -1818,7 +1817,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
                              &thread_id,                       // thread id
                              &thread_handle,                   // thread handle
                              ACE_DEFAULT_THREAD_PRIORITY,      // priority
-                             COMMON_EVENT_THREAD_GROUP_ID + 2, // *TODO*: group id
+                             COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1, // *TODO*: group id
                              NULL,                             // stack
                              0,                                // stack size
                              &thread_name_2);                  // name

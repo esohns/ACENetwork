@@ -156,7 +156,7 @@ Net_SessionBase_T<AddressType,
   connectionConfiguration_ =
       const_cast<ConfigurationType&> (configuration_in).connectionConfiguration;
   connectionManager_ = configuration_in.connectionManager;
-  isAsynch_ = !configuration_in.useReactor;
+  isAsynch_ = (configuration_in.dispatch == COMMON_EVENT_DISPATCH_PROACTOR);
 
   return true;
 }

@@ -69,7 +69,7 @@ struct Test_U_HTTPDecoder_Configuration
    , parserConfiguration ()
    , signalHandlerConfiguration ()
    , streamConfiguration ()
-   , useReactor (NET_EVENT_USE_REACTOR)
+   , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
   {};
 
   // **************************** socket data **********************************
@@ -81,7 +81,8 @@ struct Test_U_HTTPDecoder_Configuration
   // **************************** stream data **********************************
   Test_U_StreamConfiguration_t                         streamConfiguration;
   // *************************** protocol data *********************************
-  bool                                                 useReactor;
+
+  enum Common_EventDispatchType                        dispatch;
 };
 
 #endif

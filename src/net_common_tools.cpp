@@ -43,7 +43,7 @@
 #include "netlink/msg.h"
 #endif // NETLINK_SUPPORT
 #include "ifaddrs.h"
-#include "iwlib.h"
+//#include "iwlib.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Dirent_Selector.h"
@@ -59,6 +59,8 @@
 #include "net_defines.h"
 #include "net_macros.h"
 #include "net_packet_headers.h"
+
+#include "net_wlan_tools.h"
 
 //////////////////////////////////////////
 
@@ -2273,6 +2275,7 @@ error:
     {
       Net_InterfaceIdentifiers_t interface_identifiers_a;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_SUPPORT)
       DWORD maximum_client_version =
 #if (_WIN32_WINNT >= _WIN32_WINNT_VISTA) // see wlanapi.h:55
 #if defined (WINXP_SUPPORT)
@@ -2329,24 +2332,15 @@ error_2:
                     ACE_TEXT ("failed to ::WlanCloseHandle(): \"%s\", continuing\n"),
                     ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
 #else
+      ACE_ASSERT (false);
+      ACE_NOTSUP_RETURN (false);
+
+      ACE_NOTREACHED (return false;)
+#endif // WLANAPI_SUPPORT
+#else
 #if defined (ACE_HAS_GETIFADDRS)
-      int socket_handle = -1;
-      struct iwreq iwreq_s;
-      ACE_OS::memset (&iwreq_s, 0, sizeof (struct iwreq));
-      int result_2 = -1;
-
-      socket_handle = ACE_OS::socket (AF_INET,
-                                      SOCK_STREAM,
-                                      0);
-      if (unlikely (socket_handle == -1))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::socket(AF_INET): \"%m\", aborting\n")));
-        return result;
-      } // end IF
-
       struct ifaddrs* ifaddrs_p = NULL;
-      result_2 = ::getifaddrs (&ifaddrs_p);
+      int result_2 = ::getifaddrs (&ifaddrs_p);
       if (unlikely (result_2 == -1))
       {
         ACE_DEBUG ((LM_DEBUG,
@@ -2355,37 +2349,38 @@ error_2:
       } // end IF
       ACE_ASSERT (ifaddrs_p);
 
-      // verify the presence of Wireless Extensions
       for (struct ifaddrs* ifaddrs_2 = ifaddrs_p;
            ifaddrs_2;
            ifaddrs_2 = ifaddrs_2->ifa_next)
       {
-        // *TODO*: only tests for SIOCGIWNAME ioctl
-        ACE_OS::strncpy (iwreq_s.ifr_name,
-                         ifaddrs_2->ifa_name,
-                         IFNAMSIZ);
-        result_2 = ACE_OS::ioctl (socket_handle,
-                                  SIOCGIWNAME,
-                                  &iwreq_s);
-        if (!result_2)
+#if defined (WEXT_SUPPORT)
+        if (Net_WLAN_Tools::isInterface (ifaddrs_2->ifa_name))
+#elif defined (NL80211_SUPPORT)
+        if (Net_WLAN_Tools::isInterface (ifaddrs_2->ifa_name,
+                                         NULL,
+                                         -1))
+#elif defined (DBUS_SUPPORT)
+        if (Net_WLAN_Tools::isInterface (ifaddrs_2->ifa_name,
+                                         NULL))
+#else
+    ACE_ASSERT (false);
+    ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
+
+    ACE_NOTREACHED (return ACE_TEXT_ALWAYS_CHAR ("");)
+#endif // WEXT_SUPPORT
           interface_identifiers_a.push_back (ifaddrs_2->ifa_name);
       } // end FOR
 
 clean:
-      result_2 = ACE_OS::close (socket_handle);
-      if (unlikely (result_2 == -1))
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
-                    socket_handle));
       if (likely (ifaddrs_p))
         ::freeifaddrs (ifaddrs_p);
 #else
     ACE_ASSERT (false);
-    ACE_NOTSUP_RETURN (false);
+    ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
 
-    ACE_NOTREACHED (return false;)
+    ACE_NOTREACHED (return ACE_TEXT_ALWAYS_CHAR ("");)
 #endif /* ACE_HAS_GETIFADDRS */
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       if (likely (!interface_identifiers_a.empty ()))
         return interface_identifiers_a.front ();
       break;
@@ -2398,7 +2393,7 @@ clean:
       ACE_NOTSUP_RETURN (GUID_NULL);
 #else
       ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       ACE_NOTREACHED (break;)
     }
     default:
@@ -2414,7 +2409,7 @@ clean:
   return GUID_NULL;
 #else
   return ACE_TEXT_ALWAYS_CHAR ("");
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 struct _GUID

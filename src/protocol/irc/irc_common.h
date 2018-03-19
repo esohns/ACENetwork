@@ -36,7 +36,7 @@ struct IRC_Configuration;
 
 //typedef IRC_IControl_T<IRC_IStreamNotify_t> IRC_IControl_t;
 
-enum IRC_CharacterEncoding : int
+enum IRC_CharacterEncoding
 {
   IRC_CHARACTERENCODING_INVALID = -1,
   IRC_CHARACTERENCODING_ASCII   = 0,
@@ -72,7 +72,7 @@ enum IRC_CharacterEncoding : int
 //            s - secret channel flag
 //            t - topic settable by channel operator only flag
 // *NOTE*: see also: https://www.alien.net.au/irc/chanmodes.html
-enum IRC_ChannelMode : int
+enum IRC_ChannelMode
 {
   CHANNELMODE_ANONYMOUS = 0,    // 'a'
   CHANNELMODE_BAN,              // 'b'
@@ -109,7 +109,7 @@ typedef std::bitset<14> IRC_ChannelModes_t;
 //            O - local operator flag
 //            s - marks a user for receipt of server notices
 // *NOTE*: see also: https://www.alien.net.au/irc/usermodes.html
-enum IRC_UserMode : int
+enum IRC_UserMode
 {
   USERMODE_AWAY = 0,       // 'a'
   USERMODE_INVISIBLE,      // 'i'
@@ -153,7 +153,7 @@ struct IRC_LoginOptions
        , string (NULL)
       {};
 
-      enum : int
+      enum
       {
         INVALID = -1,
         MODE    = 0,

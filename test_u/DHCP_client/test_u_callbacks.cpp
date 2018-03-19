@@ -292,7 +292,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_CHECKBUTTON_ASYNCH_NAME)));
   ACE_ASSERT (check_button_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
-                                !data_p->configuration->useReactor);
+                                (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_PROACTOR));
   check_button_p =
     GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_U_UI_GTK_CHECKBUTTON_LOOPBACK_NAME)));
@@ -1847,7 +1847,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
       goto continue_;
     } // end IF
 
-    if (data_p->configuration->useReactor)
+    if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
       iconnector_p = &connector_bcast;
     else
       iconnector_p = &asynch_connector_bcast;
@@ -1872,7 +1872,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
         iconnector_p->connect (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress);
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
-    if (!data_p->configuration->useReactor)
+    if (data_p->configuration->dispatch != COMMON_EVENT_DISPATCH_REACTOR)
     {
       data_p->configuration->broadcastHandle = ACE_INVALID_HANDLE;
 
@@ -2005,7 +2005,7 @@ toggleaction_listen_toggled_cb (GtkToggleAction* toggleAction_in,
         iconnector_p->connect (data_p->configuration->listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.peerAddress);
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
-    if (!data_p->configuration->useReactor)
+    if (data_p->configuration->dispatch != COMMON_EVENT_DISPATCH_REACTOR)
     {
       data_p->configuration->handle = ACE_INVALID_HANDLE;
 

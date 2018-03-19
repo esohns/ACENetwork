@@ -70,9 +70,9 @@ struct Bencoding_Element
 {
   Bencoding_Element ()
    : type (BENCODING_TYPE_INVALID)
-  {};
+  {}
 
-  enum Bencoding_ElementType : int
+  enum Bencoding_ElementType
   {
     BENCODING_TYPE_INTEGER = 0,
     BENCODING_TYPE_STRING,
@@ -95,7 +95,7 @@ struct Bencoding_Element
 
 //////////////////////////////////////////
 
-enum BitTorrent_MessageType : int
+enum BitTorrent_MessageType
 {
   BITTORRENT_MESSAGETYPE_CHOKE = 0,
   BITTORRENT_MESSAGETYPE_UNCHOKE,
@@ -120,7 +120,7 @@ struct BitTorrent_PeerHandShake
    , peer_id ()
   {
     ACE_OS::memset (reserved, 0, sizeof (reserved));
-  };
+  }
 
   std::string pstr;
   ACE_UINT8   reserved[BITTORRENT_PEER_HANDSHAKE_RESERVED_SIZE];
@@ -154,7 +154,7 @@ struct BitTorrent_PeerRecord
   BitTorrent_PeerRecord ()
    : length (0)
    , type (BITTORRENT_MESSAGETYPE_INVALID)
-  {};
+  {}
  void operator+= (struct BitTorrent_PeerRecord rhs_in)
  { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); };
 
@@ -176,7 +176,7 @@ struct BitTorrent_PeerRecord
 
 //////////////////////////////////////////
 
-enum BitTorrent_Event : int
+enum BitTorrent_Event
 {
   BITTORRENT_EVENT_CANCELLED = 0,
   BITTORRENT_EVENT_COMPLETE,

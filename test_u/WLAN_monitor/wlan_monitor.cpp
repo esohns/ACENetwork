@@ -522,13 +522,13 @@ do_work (bool autoAssociate_in,
   Test_U_EventHandler ui_event_handler (&CBData_in);
 
   // ********************** monitor configuration data *************************
+  configuration.signalHandlerConfiguration.dispatch =
+      COMMON_EVENT_DEFAULT_DISPATCH;
   configuration.signalHandlerConfiguration.hasUI =
       !UIDefinitionFile_in.empty ();
   configuration.signalHandlerConfiguration.monitor = iwlanmonitor_p;
   configuration.signalHandlerConfiguration.statisticReportingHandler =
       istatistic_handler_p;
-  configuration.signalHandlerConfiguration.useReactor =
-      NET_EVENT_USE_REACTOR;
   configuration.WLANMonitorConfiguration.autoAssociate =
       autoAssociate_in;
   configuration.WLANMonitorConfiguration.interfaceIdentifier =
@@ -892,7 +892,7 @@ ACE_TMAIN (int argc_in,
   ACE_Sig_Set signal_set (0);
   ACE_Sig_Set ignored_signal_set (0);
   do_initializeSignals (//use_reactor,
-                        NET_EVENT_USE_REACTOR,
+                        (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR),
                         gtk_cb_data.allowUserRuntimeStatistic, // handle SIGUSR1/SIGBREAK
                                                                     // iff regular reporting
                                                                     // is off
@@ -919,7 +919,7 @@ ACE_TMAIN (int argc_in,
   } // end IF
   if (!Common_Signal_Tools::preInitialize (signal_set,
                                            //use_reactor,
-                                           NET_EVENT_USE_REACTOR,
+                                           (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR),
                                            previous_signal_actions,
                                            previous_signal_mask))
   {
@@ -965,14 +965,17 @@ ACE_TMAIN (int argc_in,
   // *NOTE*: settings will be inherited by any child processes
   // *TODO*: the reasoning here is incomplete
 //  bool use_fd_based_reactor = use_reactor;
-  bool use_fd_based_reactor = NET_EVENT_USE_REACTOR;
+  bool use_fd_based_reactor =
+      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   use_fd_based_reactor =
-    (NET_EVENT_USE_REACTOR && !(COMMON_EVENT_REACTOR_TYPE == COMMON_REACTOR_WFMO));
+    ((COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR) &&
+     !(COMMON_EVENT_REACTOR_TYPE == COMMON_REACTOR_WFMO));
 #endif
   bool stack_traces = true;
 //  bool use_signal_based_proactor = !use_reactor;
-  bool use_signal_based_proactor = !NET_EVENT_USE_REACTOR;
+  bool use_signal_based_proactor =
+      (COMMON_EVENT_DEFAULT_DISPATCH != COMMON_EVENT_DISPATCH_REACTOR);
   if (!Common_Tools::setResourceLimits (use_fd_based_reactor,       // file descriptors
                                         stack_traces,               // stack traces
                                         use_signal_based_proactor)) // pending signals

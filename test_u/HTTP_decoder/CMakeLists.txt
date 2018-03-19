@@ -71,12 +71,20 @@ endif ()
 
 set (ACE_XML_LIB_FILE libACEXML.so)
 if (UNIX)
- find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
-               HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE /usr/local
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib
-               DOC "searching for ${ACE_XML_LIB_FILE}"
-               NO_DEFAULT_PATH)
+ if (DEFINED ENV{ACE_ROOT})
+  find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
+#                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
+                PATHS ENV ACE_ROOT
+                PATH_SUFFIXES lib
+                DOC "searching for ${ACE_XML_LIB_FILE}"
+                NO_DEFAULT_PATH)
+ else ()
+  find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
+                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
+#                PATHS ENV ACE_ROOT
+                PATH_SUFFIXES lib
+                DOC "searching for ${ACE_XML_LIB_FILE} (system paths)")
+ endif ()
 elseif (WIN32)
  if (CMAKE_BUILD_TYPE STREQUAL Debug)
   set (LIB_FILE_SUFFIX d)
@@ -95,12 +103,20 @@ if (NOT ACE_XML_LIBRARY)
 endif ()
 set (ACE_XML_PARSER_LIB_FILE libACEXML_Parser.so)
 if (UNIX)
- find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
-               HINTS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE /usr/local
-               PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib
-               DOC "searching for ${ACE_XML_PARSER_LIB_FILE}"
-               NO_DEFAULT_PATH)
+ if (DEFINED ENV{ACE_ROOT})
+  find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
+                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
+                PATHS ENV ACE_ROOT
+                PATH_SUFFIXES lib
+                DOC "searching for ${ACE_XML_PARSER_LIB_FILE}"
+                NO_DEFAULT_PATH)
+ else ()
+  find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
+                HINTS ${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE /usr/local
+#                PATHS ENV ACE_ROOT
+                PATH_SUFFIXES lib
+                DOC "searching for ${ACE_XML_PARSER_LIB_FILE} (system paths)")
+ endif ()
 elseif (WIN32)
  if (CMAKE_BUILD_TYPE STREQUAL Debug)
   set (LIB_FILE_SUFFIX d)
@@ -249,6 +265,19 @@ set (HTTP_decoder_SRCS
      test_u_HTTP_decoder_stream_common.h)
 #  test_u_template_instantiations.cpp
 
+if (UNIX)
+ add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
+endif ()
+
+set (LLVM_COMPILER_ID_STRING "Clang")
+string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
+string (TOLOWER "${CMAKE_CXX_COMPILER_ID}" CXX_COMPILER_ID_STRING_LOWER)
+if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
+ add_compile_options (-std=c++11)
+# add_compile_options (-fPIC)
+ add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
+endif ()
+
 #string (TOLOWER "${PROJECT_NAME}_Protocol" EXECUTABLE)
 set (EXECUTABLE HTTP_decoder)
 add_executable (${EXECUTABLE}
@@ -271,7 +300,6 @@ target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
  target_link_libraries (${EXECUTABLE} rt)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
- #target_link_libraries (${EXECUTABLE} ${PKG_DBUS_LIBRARIES})
  target_link_libraries (${EXECUTABLE} iw)
  if (SSL_SUPPORT)
   target_link_libraries (${EXECUTABLE} ${PKG_OPENSSL_LIBRARIES})
@@ -307,6 +335,7 @@ target_link_libraries (${EXECUTABLE} ACEStream_Network)
 target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
 # add PCH

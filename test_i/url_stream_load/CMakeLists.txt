@@ -158,7 +158,7 @@ if (UNIX)
   include_directories (${PKG_GTK3_INCLUDE_DIRS})
  else ()
   include_directories (${PKG_GTK2_INCLUDE_DIRS})
- endif ()
+ endif (GTK3_SUPPORT)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
 
@@ -179,7 +179,7 @@ if (UNIX)
 elseif (WIN32)
  if (SSL_SUPPORT)
   include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
- endif ()
+ endif (SSL_SUPPORT)
  include_directories ("$ENV{PROGRAMFILES}/Microsoft SDKs/Windows/v7.0/Samples/multimedia/directshow/baseclasses")
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
@@ -206,7 +206,7 @@ elseif (WIN32)
   include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk2/include/glib-2.0)
   include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk2/lib/gtk-2.0/include)
   include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk2/include/gtk-2.0)
- endif ()
+ endif (GTK3_SUPPORT)
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtkglarea)
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtkglext)
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtkglext/gdk)
@@ -236,7 +236,7 @@ include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 if (SSL_SUPPORT)
  add_definitions (-DSSL_SUPPORT)
-endif ()
+endif (SSL_SUPPORT)
 
 ############## next target ################
 set (${PROJECT_NAME}_URLStreamLoad_EXE_SRCS
@@ -270,6 +270,19 @@ set (${PROJECT_NAME}_URLStreamLoad_EXE_CFG
      etc/test_i.glade
      etc/resources.rc)
 
+if (UNIX)
+ add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
+endif (UNIX)
+
+set (LLVM_COMPILER_ID_STRING "Clang")
+string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
+string (TOLOWER "${CMAKE_CXX_COMPILER_ID}" CXX_COMPILER_ID_STRING_LOWER)
+if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
+ add_compile_options (-std=c++11)
+#add_compile_options (-fPIC)
+ add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
+endif ()
+
 #string (TOLOWER "${PROJECT_NAME}_URLStreamLoad" EXECUTABLE)
 set (EXECUTABLE url_stream_load)
 add_executable (${EXECUTABLE}
@@ -299,15 +312,14 @@ if (WIN32)
 
 # target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/libeay32.lib)
  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/ssleay32.lib)
-endif ()
+endif (WIN32)
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (SSL_SUPPORT)
  target_link_libraries (${EXECUTABLE} ${ACE_SSL_LIBRARY})
-endif ()
+endif (SSL_SUPPORT)
 if (UNIX)
  target_link_libraries (${EXECUTABLE} rt)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
- #target_link_libraries (${EXECUTABLE} ${PKG_DBUS_LIBRARIES})
  target_link_libraries (${EXECUTABLE} iw)
  target_link_libraries (${EXECUTABLE} ${PKG_OPENSSL_LIBRARIES})
  target_link_libraries (${EXECUTABLE} ${PKG_LIBXML2_LIBRARIES})
@@ -320,7 +332,7 @@ if (UNIX)
   target_link_libraries (${EXECUTABLE} ${PKG_GTK3_LIBRARIES})
  else ()
   target_link_libraries (${EXECUTABLE} ${PKG_GTK2_LIBRARIES})
- endif ()
+ endif (GTK3_SUPPORT)
 elseif (WIN32)
  target_link_libraries (${EXECUTABLE} ntdll.lib)
 
@@ -350,6 +362,7 @@ target_link_libraries (${EXECUTABLE} ACEStream_Network)
 target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
 # add PCH

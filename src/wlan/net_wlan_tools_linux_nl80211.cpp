@@ -25,13 +25,11 @@
 #include <linux/capability.h>
 //#include <linux/ieee80211.h>
 // *TODO*: contains IW_ESSID_MAX_SIZE; should not include this
-//#include <linux/wireless.h>
+#include <linux/wireless.h>
 #include <net/if.h> /* for IFNAMSIZ and co... */
 //#include <net/if_arp.h>
 // *TODO*: remove ASAP
 #include "ifaddrs.h"
-// *TODO*: contains IW_ESSID_MAX_SIZE; should not include this
-#include "wireless.h"
 
 #include "netlink/attr.h"
 #include "netlink/genl/ctrl.h"

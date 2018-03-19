@@ -98,7 +98,7 @@ struct Test_I_MessageData
 };
 
 struct Test_I_URLStreamLoad_SessionData;
-enum Test_I_URLStreamLoad_SAXParserState : int
+enum Test_I_URLStreamLoad_SAXParserState
 {
   TEST_I_SAXPARSER_STATE_INVALID = -1,
   ////////////////////////////////////////
@@ -134,7 +134,7 @@ struct Test_I_URLStreamLoad_SessionData
    , parserContext ()
    , targetFileName ()
    , userData (NULL)
-  {};
+  {}
 
   struct Test_I_URLStreamLoad_SessionData& operator= (struct Test_I_URLStreamLoad_SessionData& rhs_in)
   {
@@ -145,7 +145,7 @@ struct Test_I_URLStreamLoad_SessionData
                                               : targetFileName);
 
     return *this;
-  };
+  }
 
   ACE_INET_Addr                                address;
   Test_I_IConnection_t*                        connection;
@@ -179,7 +179,7 @@ struct Test_I_URLStreamLoad_ModuleHandlerConfiguration
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_ACTIVE;
     inbound = true;
-  };
+  }
 
   Test_I_URLStreamLoad_ConnectionConfigurations_t* connectionConfigurations;
   //guint                                   contextId;
@@ -194,7 +194,7 @@ struct Test_I_URLStreamLoad_StreamConfiguration
 {
   Test_I_URLStreamLoad_StreamConfiguration ()
    : HTTP_StreamConfiguration ()
-  {};
+  {}
 };
 //extern const char stream_name_string_[];
 typedef Stream_Configuration_T<//stream_name_string_,
@@ -210,7 +210,7 @@ struct Test_I_URLStreamLoad_StreamState
    : Test_I_StreamState ()
    , sessionData (NULL)
    , userData (NULL)
-  {};
+  {}
 
   struct Test_I_URLStreamLoad_SessionData* sessionData;
 

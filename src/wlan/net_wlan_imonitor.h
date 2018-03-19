@@ -122,13 +122,15 @@ class Net_WLAN_IMonitorBase
 #else
 #if defined (WEXT_SUPPORT)
  , public Common_IGet_T<ACE_HANDLE>
-#elif defined (NL80211_SUPPORT)
- , public Common_IGetP_T<struct nl_sock>
- , public Common_IGet_T<int>
-#elif defined (DBUS_SUPPORT)
- , public Common_IGetP_T<struct DBusConnection>
 #endif // WEXT_SUPPORT
- , public Common_IGet_2_T<unsigned int>
+#if defined (NL80211_SUPPORT)
+ , public Common_IGetP_T<struct nl_sock>
+ , public Common_IGet_3_T<int> // family id
+#endif // WEXT_SUPPORT
+#if defined (DBUS_SUPPORT)
+ , public Common_IGetP_2_T<struct DBusConnection>
+#endif // DBUS_SUPPORT
+ , public Common_IGet_2_T<unsigned int> // signal quality
 #endif // ACE_WIN32 || ACE_WIN64
  , public Common_IGet1RR_T<std::string,
                            Net_WLAN_AccessPointCacheValue_t> // cache access

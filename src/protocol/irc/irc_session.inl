@@ -302,7 +302,7 @@ IRC_Session_T<ConnectionType,
   {
     ACE_NEW_NORETURN (inputHandler_,
                       InputHandlerType (&(inherited::state_),
-                                        configuration_p->useReactor));
+                                        (configuration_p->dispatch == COMMON_EVENT_DISPATCH_REACTOR)));
     if (!inputHandler_)
     {
       ACE_DEBUG ((LM_CRITICAL,

@@ -112,7 +112,7 @@ template <typename AddressType,
           ////////////////////////////////
           ,ACE_SYNCH_DECL,
           typename TimePolicyType,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
           ////////////////////////////////
           enum Net_WLAN_MonitorAPIType MonitorAPI_e,
           ////////////////////////////////
@@ -125,7 +125,7 @@ class Net_WLAN_Monitor_T
 #else
                                   ,ACE_SYNCH_USE,
                                   TimePolicyType>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 {
   typedef Net_WLAN_Monitor_Base_T<AddressType,
                                   ConfigurationType
@@ -134,7 +134,7 @@ class Net_WLAN_Monitor_T
 #else
                                   ,ACE_SYNCH_USE,
                                   TimePolicyType> inherited;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // singleton has access to the ctor/dtors
   friend class ACE_Singleton<Net_WLAN_Monitor_T<AddressType,
@@ -143,7 +143,7 @@ class Net_WLAN_Monitor_T
 #else
                                                 ACE_SYNCH_USE,
                                                 TimePolicyType,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                                                 MonitorAPI_e,
                                                 UserDataType>,
                              ACE_SYNCH_MUTEX>;
@@ -206,11 +206,9 @@ class Net_WLAN_Monitor_T<AddressType,
 
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
-  // *TODO*: remove ASAP
-//#if defined (DBUS_SUPPORT)
-//  inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
-//#endif
-  inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID (clientHandle_, (configuration_ ? configuration_->interfaceIdentifier : GUID_NULL); }
+  inline virtual const HANDLE get () const { return inherited::clientHandle_; }
+  inline virtual const WLAN_SIGNAL_QUALITY get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
+  inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID (inherited::clientHandle_, (inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : GUID_NULL); }
 
  protected:
   Net_WLAN_Monitor_T ();
@@ -273,10 +271,8 @@ class Net_WLAN_Monitor_T<AddressType,
 
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
-  // *TODO*: remove ASAP
-//#if defined (DBUS_SUPPORT)
-//  inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
-//#endif
+  inline virtual const ACE_HANDLE get () const { return inherited::handle_; }
+  inline virtual const unsigned int get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
   inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID ((inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR ("")), inherited::handle_); }
 
  protected:
@@ -296,6 +292,10 @@ class Net_WLAN_Monitor_T<AddressType,
 
   // implement (part of) Common_IStateMachine_T
 //  virtual void onChange (enum Net_WLAN_MonitorState); // new state
+
+  // *TODO*: remove ASAP
+  inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL); }
+  inline virtual const int get_3 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
 
   ////////////////////////////////////////
 
@@ -411,8 +411,9 @@ class Net_WLAN_Monitor_T<AddressType,
 
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
-  inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (inherited::handle_); return inherited::handle_; }
-  inline virtual const int get () const { ACE_ASSERT (inherited::familyId_ > 0); return inherited::familyId_; }
+  inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (inherited::socketHandle_); return inherited::socketHandle_; }
+  inline virtual const int get_3 () const { ACE_ASSERT (inherited::familyId_ > 0); return inherited::familyId_; }
+  inline virtual const unsigned int get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
   inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID ((inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR ("")), NULL, inherited::familyId_); }
 
  protected:
@@ -434,6 +435,9 @@ class Net_WLAN_Monitor_T<AddressType,
 
   // implement (part of) Common_IStateMachine_T
 //  virtual void onChange (enum Net_WLAN_MonitorState); // new state
+
+  // *TODO*: remove ASAP
+  inline virtual const ACE_HANDLE get () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_INVALID_HANDLE); ACE_NOTREACHED (return ACE_INVALID_HANDLE;) }
 
   ////////////////////////////////////////
 

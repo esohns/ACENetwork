@@ -70,7 +70,7 @@ struct IRC_Client_UserData;
 //   ,*/ connectionManager (NULL)
 //   , socketHandlerConfiguration (NULL)
 //   //, statisticCollectionInterval (0)
-//  {};
+//  {}
 //
 //  //struct IRC_Client_Configuration*            configuration;
 //  IRC_Client_IConnection_Manager_t*             connectionManager;
@@ -84,7 +84,7 @@ struct IRC_Client_InputHandlerConfiguration
   IRC_Client_InputHandlerConfiguration ()
    : controller (NULL)
    , connectionConfiguration (NULL)
-  {};
+  {}
 
   IRC_IControl*                              controller;
 
@@ -103,13 +103,13 @@ struct IRC_Client_Configuration
    , protocolConfiguration ()
    ///////////////////////////////////////
    , cursesState (NULL)
+   , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , encoding (IRC_PRT_DEFAULT_ENCODING)
-   , groupId (COMMON_EVENT_THREAD_GROUP_ID)
+   , groupId (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1)
    , logToFile (IRC_CLIENT_SESSION_DEFAULT_LOG)
-   , useReactor (NET_EVENT_USE_REACTOR)
    ///////////////////////////////////////
    , userData ()
-  {};
+  {}
 
   // ****************************** parser *************************************
   struct Common_ParserConfiguration     parserConfiguration;
@@ -122,13 +122,13 @@ struct IRC_Client_Configuration
   // ***************************************************************************
   // *TODO*: move this somewhere else
   struct IRC_Client_CursesState*        cursesState;
+  enum Common_EventDispatchType         dispatch;
   // *NOTE*: see also https://en.wikipedia.org/wiki/Internet_Relay_Chat#Character_encoding
   // *TODO*: implement support for 7-bit ASCII (as it is the most compatible
   //         encoding)
   enum IRC_CharacterEncoding            encoding;
   int                                   groupId;
   bool                                  logToFile;
-  bool                                  useReactor;
 
   struct IRC_Client_UserData            userData;
 };

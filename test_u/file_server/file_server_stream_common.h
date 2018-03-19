@@ -147,13 +147,13 @@ struct FileServer_StreamConfiguration
 {
   FileServer_StreamConfiguration ()
    : Stream_Configuration ()
-   , useReactor (NET_EVENT_USE_REACTOR)
+   , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , userData (NULL)
   {};
 
-  bool                        useReactor;
+  enum Common_EventDispatchType dispatch;
 
-  struct FileServer_UserData* userData;   // user data
+  struct FileServer_UserData*   userData;   // user data
 };
 
 #endif

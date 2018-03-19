@@ -51,7 +51,7 @@
 #include "net_wlan_profile_xml_handler.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
-enum Net_WLAN_MonitorAPIType : int
+enum Net_WLAN_MonitorAPIType
 {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   // *TODO*: available since WinXP

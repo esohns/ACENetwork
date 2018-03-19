@@ -1,5 +1,4 @@
-﻿option (GTK3_SUPPORT "enable Gtk3 support"
-        ON)
+﻿option (GTK3_SUPPORT "enable Gtk3 support" ON)
 
 if (UNIX)
  include (CheckLibraryExists)
@@ -199,6 +198,19 @@ set (${PROJECT_NAME}_DHCPClient_EXE_CFG
      etc/test_u.glade
      etc/resources.rc)
 
+if (UNIX)
+ add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
+endif ()
+
+set (LLVM_COMPILER_ID_STRING "Clang")
+string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
+string (TOLOWER "${CMAKE_CXX_COMPILER_ID}" CXX_COMPILER_ID_STRING_LOWER)
+if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
+ add_compile_options (-std=c++11)
+#add_compile_options (-fPIC)
+ add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
+endif ()
+
 #string (TOLOWER "${PROJECT_NAME}_DHCPClient" EXECUTABLE)
 set (EXECUTABLE DHCP_client)
 add_executable (${EXECUTABLE}
@@ -233,7 +245,7 @@ target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (UNIX)
  target_link_libraries (${EXECUTABLE} rt)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
-# target_link_libraries (${EXECUTABLE} iw)
+ target_link_libraries (${EXECUTABLE} iw)
  target_link_libraries (${EXECUTABLE} X11)
 # target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
  if (GTK3_SUPPORT)
@@ -266,6 +278,7 @@ target_link_libraries (${EXECUTABLE} ACEStream_Network)
 target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
 
 # add PCH

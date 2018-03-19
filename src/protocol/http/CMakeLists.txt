@@ -1,4 +1,15 @@
-﻿add_library (${PROJECT_NAME}_Protocol_HTTP STATIC "")
+﻿#message (STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+set (LLVM_COMPILER_ID_STRING "Clang")
+string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
+string (TOLOWER "${CMAKE_CXX_COMPILER_ID}" CXX_COMPILER_ID_STRING_LOWER)
+if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
+# message (STATUS "using ${CMAKE_CXX_COMPILER_ID} options")
+ add_compile_options (-std=c++11)
+# add_compile_options (-fPIC)
+ add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
+endif ()
+
+add_library (${PROJECT_NAME}_Protocol_HTTP STATIC "")
 
 include (FindPkgConfig)
 if (UNIX)

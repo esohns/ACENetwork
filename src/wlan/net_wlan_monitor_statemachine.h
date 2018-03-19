@@ -35,7 +35,7 @@
 #include "common_time_common.h"
 #endif
 
-enum Net_WLAN_MonitorState : int
+enum Net_WLAN_MonitorState
 {
   NET_WLAN_MONITOR_STATE_INVALID     = -1,
   // -------------------------------------

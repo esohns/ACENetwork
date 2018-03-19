@@ -111,17 +111,6 @@ class Net_WLAN_Monitor_Base_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
   virtual void subscribe (Net_WLAN_IMonitorCB*); // new subscriber
   virtual void unsubscribe (Net_WLAN_IMonitorCB*); // existing subscriber
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if defined (WLANAPI_SUPPORT)
-  inline virtual const HANDLE get () const { return clientHandle_; }
-#endif // WLANAPI_SUPPORT
-  inline virtual const WLAN_SIGNAL_QUALITY get_2 () const;
-#else
-#if defined (WEXT_SUPPORT)
-  inline virtual const ACE_HANDLE get () const { return handle_; }
-#endif // WEXT_SUPPORT
-  inline virtual const unsigned int get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
-#endif // ACE_WIN32 || ACE_WIN64
   inline virtual bool addresses (AddressType& localSAP_out, AddressType& peerSAP_out) const { localSAP_out = localSAP_; peerSAP_out = peerSAP_; return true; }
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -164,11 +153,13 @@ class Net_WLAN_Monitor_Base_T
   void*                                 buffer_; // scan results
   size_t                                bufferSize_;
   ACE_HANDLE                            handle_;
-#elif defined (NL80211_SUPPORT)
-  int                                   familyId_;
-  struct nl_sock*                       handle_;
-#elif defined (DBUS_SUPPORT)
 #endif // WEXT_SUPPORT
+#if defined (NL80211_SUPPORT)
+  int                                   familyId_;
+  struct nl_sock*                       socketHandle_;
+#endif // NL80211_SUPPORT
+#if defined (DBUS_SUPPORT)
+#endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
   ConfigurationType*                    configuration_;
   bool                                  isActive_;

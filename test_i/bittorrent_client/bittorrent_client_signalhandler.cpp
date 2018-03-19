@@ -139,8 +139,8 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       } // end IF
 
     // step2: stop event dispatch
-    Common_Tools::finalizeEventDispatch (inherited::configuration_->useReactor,  // stop reactor ?
-                                         !inherited::configuration_->useReactor, // stop proactor ?
-                                         -1);                                    // group ID (--> don't block !)
+    Common_Tools::finalizeEventDispatch ((inherited::configuration_->dispatch == COMMON_EVENT_DISPATCH_REACTOR),   // stop reactor ?
+                                         (!inherited::configuration_->dispatch == COMMON_EVENT_DISPATCH_PROACTOR), // stop proactor ?
+                                         -1);                                                                      // group Id (--> don't block !)
   } // end IF
 }

@@ -43,7 +43,7 @@ class Client_TimeoutHandler
   typedef Common_TimerHandler inherited;
 
  public:
-  enum ActionModeType : int
+  enum ActionModeType
   {
     ACTION_NORMAL = 0,
     ACTION_ALTERNATING,
@@ -55,7 +55,7 @@ class Client_TimeoutHandler
     ACTION_INVALID = -1
   };
 
-  enum AlternatingModeStateType : int
+  enum AlternatingModeStateType
   {
     ALTERNATING_STATE_CONNECT = 0,
     ALTERNATING_STATE_ABORT,

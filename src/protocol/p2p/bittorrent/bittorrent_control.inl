@@ -174,7 +174,7 @@ BitTorrent_Control_T<SessionAsynchType,
 #endif
 
   // step2: create/initialize session
-  if (configuration_->useReactor)
+  if (configuration_->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
     ACE_NEW_NORETURN (isession_p,
                       SessionType ());
   else

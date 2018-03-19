@@ -104,8 +104,8 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-d              : debug [")
-            << (NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE ||
-                NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE)
+            << (COMMON_PARSER_DEFAULT_LEX_TRACE ||
+                COMMON_PARSER_DEFAULT_YACC_TRACE)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   path = configuration_path;
@@ -118,7 +118,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-h              : use thread-pool [")
-            << NET_EVENT_USE_THREAD_POOL
+            << COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-l              : log to a file [")
@@ -135,7 +135,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-r              : use reactor [")
-            << NET_EVENT_USE_REACTOR
+            << (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-s [VALUE]      : reporting interval (seconds) [0: off] [")
@@ -193,8 +193,8 @@ do_processArguments (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
 
   debug_out                      =
-    (NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE ||
-     NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE);
+    (COMMON_PARSER_DEFAULT_LEX_TRACE ||
+     COMMON_PARSER_DEFAULT_YACC_TRACE);
 
   UIRCFile_out                   = configuration_path;
   UIRCFile_out                  += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -204,7 +204,7 @@ do_processArguments (int argc_in,
   UIRCFile_out                  +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
 
-  useThreadpool_out              = NET_EVENT_USE_THREAD_POOL;
+  useThreadpool_out              = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
 
   logToFile_out                  = false;
 
@@ -216,7 +216,8 @@ do_processArguments (int argc_in,
   phonebookFile_out             +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
 
-  useReactor_out                 = NET_EVENT_USE_REACTOR;
+  useReactor_out                 =
+      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
 
   statisticReportingInterval_out =
     NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
@@ -485,20 +486,22 @@ do_work (bool useThreadPool_in,
   //CBData_in.configuration->streamConfiguration.cloneModule = true;
 
   // step2: initialize event dispatch
-  struct Common_EventDispatchThreadData thread_data_s;
-  thread_data_s.numberOfDispatchThreads = numberOfDispatchThreads_in;
-  thread_data_s.useReactor = CBData_in.configuration->useReactor;
-  if (!Common_Tools::initializeEventDispatch (CBData_in.configuration->useReactor,
-                                              (thread_data_s.numberOfDispatchThreads > 1),
-                                              thread_data_s.numberOfDispatchThreads,
-                                              thread_data_s.proactorType,
-                                              thread_data_s.reactorType,
-                                              CBData_in.configuration->streamConfiguration.configuration_.serializeOutput))
+  struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
+  event_dispatch_configuration_s.numberOfReactorThreads =
+      ((CBData_in.configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? numberOfDispatchThreads_in
+                                                                            : 0);
+  event_dispatch_configuration_s.numberOfProactorThreads =
+      ((CBData_in.configuration->dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? numberOfDispatchThreads_in
+                                                                             : 0);
+  if (!Common_Tools::initializeEventDispatch (event_dispatch_configuration_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize event dispatch, returning\n")));
     return;
   } // end IF
+  struct Common_EventDispatchState event_dispatch_state_s;
+  event_dispatch_state_s.configuration =
+      &event_dispatch_configuration_s;
 
   // step3a: initialize connection manager
   IRC_Client_Connection_Manager_t* connection_manager_p =
@@ -518,8 +521,8 @@ do_work (bool useThreadPool_in,
 
   // step4: initialize signal handling
   struct IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
+  signal_handler_configuration.dispatch = CBData_in.configuration->dispatch;
   signal_handler_configuration.hasUI = !UIDefinitionFile_in.empty ();
-  signal_handler_configuration.useReactor = CBData_in.configuration->useReactor;
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -530,8 +533,8 @@ do_work (bool useThreadPool_in,
 
     return;
   } // end IF
-  if (!Common_Signal_Tools::initialize ((CBData_in.configuration->useReactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                                             : COMMON_SIGNAL_DISPATCH_PROACTOR),
+  if (!Common_Signal_Tools::initialize (((CBData_in.configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? COMMON_SIGNAL_DISPATCH_REACTOR
+                                                                                                              : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                         signalSet_in,
                                         ignoredSignalSet_in,
                                         &signalHandler_in,
@@ -576,8 +579,7 @@ do_work (bool useThreadPool_in,
 
   // step6: initialize worker(s)
   int group_id = -1;
-  if (!Common_Tools::startEventDispatch (thread_data_s,
-                                         group_id))
+  if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::startEventDispatch(), returning\n")));
@@ -592,7 +594,7 @@ do_work (bool useThreadPool_in,
   // *NOTE*: from this point on, clean up any remote connections !
 
   // step7: dispatch events
-  Common_Tools::dispatchEvents (CBData_in.configuration->useReactor,
+  Common_Tools::dispatchEvents ((CBData_in.configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR),
                                 group_id);
 
   // step8: clean up
@@ -1111,8 +1113,8 @@ ACE_TMAIN (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_CNF_DEFAULT_INI_FILE);
 
   bool debug                                 =
-    (NET_PROTOCOL_PARSER_DEFAULT_LEX_TRACE ||
-     NET_PROTOCOL_PARSER_DEFAULT_YACC_TRACE);
+    (COMMON_PARSER_DEFAULT_LEX_TRACE ||
+     COMMON_PARSER_DEFAULT_YACC_TRACE);
 
   std::string UIRC_file_name                 = configuration_path;
   UIRC_file_name                            += ACE_DIRECTORY_SEPARATOR_CHAR_A;
@@ -1122,7 +1124,8 @@ ACE_TMAIN (int argc_in,
   UIRC_file_name                            +=
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
 
-  bool use_thread_pool                       = NET_EVENT_USE_THREAD_POOL;
+  bool use_thread_pool                       =
+      COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   bool log_to_file                           = false;
 
   std::string phonebook_file_name            = configuration_path;
@@ -1133,7 +1136,8 @@ ACE_TMAIN (int argc_in,
   phonebook_file_name                       +=
       ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
 
-  bool use_reactor                           = NET_EVENT_USE_REACTOR;
+  bool use_reactor                           =
+      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
 
   unsigned int reporting_interval            =
     NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
@@ -1306,7 +1310,7 @@ ACE_TMAIN (int argc_in,
 
   // initialize protocol configuration
   Stream_CachedAllocatorHeap_T<struct IRC_AllocatorConfiguration> heap_allocator (NET_STREAM_MAX_MESSAGES,
-                                                                                  IRC_MAXIMUM_FRAME_SIZE + NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
+                                                                                  IRC_MAXIMUM_FRAME_SIZE + COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE);
   if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1426,7 +1430,9 @@ ACE_TMAIN (int argc_in,
                                                              *iterator));
   } // end IF
 
-  configuration.useReactor = use_reactor;
+  configuration.dispatch =
+      (use_reactor ? COMMON_EVENT_DISPATCH_REACTOR
+                   : COMMON_EVENT_DISPATCH_PROACTOR);
 
   gtk_cb_data.progressData.state = &gtk_cb_data;
 
