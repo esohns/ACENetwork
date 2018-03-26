@@ -1,0 +1,15 @@
+#/etc/polkit-1/localauthority/50-local.d/10-wlan_management.pkla
+[wpa_supplicant service]
+Action=org.freedesktop.systemd1.manage-units
+Identity=unix-group:wheel
+ResultAny=yes
+ResultInactive=yes
+ResultActive=yes
+
+[NetworkManager service]
+Action=org.freedesktop.systemd1.manage-units
+Identity=unix-group:wheel
+ResultAny=yes
+ResultInactive=yes
+ResultActive=yes
+

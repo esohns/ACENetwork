@@ -43,9 +43,10 @@
 #include "netlink/msg.h"
 #endif // NETLINK_SUPPORT
 #include "ifaddrs.h"
-//#include "iwlib.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
+#include "ace/Configuration.h"
+#include "ace/Configuration_Import_Export.h"
 #include "ace/Dirent_Selector.h"
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
@@ -745,6 +746,30 @@ Net_Common_Tools::LinkLayerAddressToString (const unsigned char* const addressDa
 
   return return_value;
 }
+struct ether_addr
+Net_Common_Tools::stringToLinkLayerAddress (const std::string& address_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::LinkLayerTypeToString"));
+
+  // initialize return value(s)
+  struct ether_addr return_value;
+  ACE_OS::memset (&return_value, 0, sizeof (struct ether_addr));
+
+  // sanity check(s)
+  ACE_ASSERT (!address_in.empty ());
+
+  if (unlikely (!::ether_aton_r (address_in.c_str (),
+                                 &return_value)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ether_aton_r(\"%s\"): \"%m\"), aborting\n"),
+                ACE_TEXT (address_in.c_str ())));
+    return return_value;
+  } // end IF
+
+  return return_value;
+}
+
 std::string
 Net_Common_Tools::LinkLayerTypeToString (enum Net_LinkLayerType type_in)
 {
@@ -1194,7 +1219,7 @@ continue_:
 #else
     // *TODO*: this may work on BSD and APPLE systems
     if (ifaddrs_2->ifa_addr->sa_family != AF_LINK)
-#endif
+#endif // ACE_LINUX
       continue;
 
     sockaddr_ll_p =
@@ -1212,9 +1237,190 @@ continue_:
 
   ACE_NOTREACHED (return false;)
 #endif /* ACE_HAS_GETIFADDRS */
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   return result;
+}
+
+std::string
+Net_Common_Tools::linkLayerAddressToInterfaceIdentifier (const struct ether_addr& address_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::linkLayerAddressToInterfaceIdentifier"));
+
+  // initialize return value(s)
+  std::string return_value;
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//  // sanity check(s)
+//  ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
+//  //ACE_ASSERT (sizeof (MACAddress_out) >= MAX_ADAPTER_ADDRESS_LENGTH);
+
+//  NET_IFINDEX interface_index = 0;
+//  struct _IP_ADAPTER_INFO* ip_interfaceIdentifier_info_p = NULL;
+//  struct _IP_ADAPTER_INFO* ip_interfaceIdentifier_info_2 = NULL;
+//  ULONG buffer_length = 0;
+//  ULONG result_2 = 0;
+
+//  interface_index =
+//    Net_Common_Tools::interfaceToIndex (interfaceIdentifier_in);
+//  if (unlikely (!interface_index))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIndex(%s), aborting\n"),
+//                ACE_TEXT (Common_Tools::GUIDToString (interfaceIdentifier_in).c_str ())));
+//    return result;
+//  } // end IF
+
+//  result_2 = GetAdaptersInfo (ip_interfaceIdentifier_info_p,
+//                              &buffer_length);
+//  if (unlikely (result_2 != ERROR_BUFFER_OVERFLOW))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
+//                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+//    return result;
+//  } // end IF
+//  ACE_ASSERT (buffer_length);
+//  ip_interfaceIdentifier_info_p =
+//    static_cast<struct _IP_ADAPTER_INFO*> (ACE_MALLOC_FUNC (buffer_length));
+//  if (unlikely (!ip_interfaceIdentifier_info_p))
+//  {
+//    ACE_DEBUG ((LM_CRITICAL,
+//                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+//    return result;
+//  } // end IF
+//  result_2 = GetAdaptersInfo (ip_interfaceIdentifier_info_p,
+//                              &buffer_length);
+//  if (unlikely (result_2 != NO_ERROR))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
+//                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+
+//    // clean up
+//    ACE_FREE_FUNC (ip_interfaceIdentifier_info_p);
+
+//    return result;
+//  } // end IF
+
+//  ip_interfaceIdentifier_info_2 = ip_interfaceIdentifier_info_p;
+//  do
+//  {
+//    if (static_cast<DWORD> (interface_index) != ip_interfaceIdentifier_info_2->Index)
+//      goto continue_;
+
+//    ACE_OS::memcpy (&result, ip_interfaceIdentifier_info_2->Address,
+//                    ETH_ALEN);
+//    break;
+
+//continue_:
+//    ip_interfaceIdentifier_info_2 = ip_interfaceIdentifier_info_2->Next;
+//  } while (ip_interfaceIdentifier_info_2);
+
+//  // clean up
+//  ACE_FREE_FUNC (ip_interfaceIdentifier_info_p);
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (false);
+
+  ACE_NOTREACHED (return false;)
+#else
+#if defined (ACE_HAS_GETIFADDRS)
+  int socket_handle_h = ACE_OS::socket (AF_INET, SOCK_DGRAM, IPPROTO_IP);
+  if (unlikely (socket_handle_h == ACE_INVALID_HANDLE))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::socket(AF_INET): \"%m\", aborting\n")));
+    return return_value;
+  } // end IF
+
+  int result = -1;
+  struct ifaddrs* ifaddrs_p = NULL;
+  result = ::getifaddrs (&ifaddrs_p);
+  if (unlikely (result == -1))
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to ::getifaddrs(): \"%m\", aborting\n")));
+    return return_value;
+  } // end IF
+  ACE_ASSERT (ifaddrs_p);
+
+  struct sockaddr_ll* sockaddr_ll_p = NULL;
+  struct ifreq ifreq_s;
+  ACE_OS::memset (&ifreq_s, 0, sizeof (struct ifreq));
+  for (struct ifaddrs* ifaddrs_2 = ifaddrs_p;
+       ifaddrs_2;
+       ifaddrs_2 = ifaddrs_2->ifa_next)
+  {
+#if defined (ACE_LINUX)
+    if (ifaddrs_2->ifa_addr->sa_family != AF_PACKET)
+#else
+    // *TODO*: this may work on BSD and APPLE systems
+    if (ifaddrs_2->ifa_addr->sa_family != AF_LINK)
+#endif // ACE_LINUX
+      continue;
+
+    sockaddr_ll_p =
+        reinterpret_cast<struct sockaddr_ll*> (ifaddrs_2->ifa_addr);
+    if (!ACE_OS::memcmp (address_in.ether_addr_octet,
+                         sockaddr_ll_p->sll_addr,
+                         ETH_ALEN))
+    {
+      return_value = ifaddrs_2->ifa_name;
+      break;
+    } // end IF
+  } // end FOR
+
+  // clean up
+  ::freeifaddrs (ifaddrs_p);
+  if (socket_handle_h != ACE_INVALID_HANDLE)
+  {
+    result = ACE_OS::close (socket_handle_h);
+    if (unlikely (result == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
+                  socket_handle_h));
+  } // end IF
+#else
+//  struct ifreq ifr;
+//  struct ifconf ifc;
+//  char buf[1024];
+//  int success = 0;
+
+//  int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+//  if (sock == -1) { /* handle error*/ };
+
+//  ifc.ifc_len = sizeof(buf);
+//  ifc.ifc_buf = buf;
+//  if (ioctl(sock, SIOCGIFCONF, &ifc) == -1) { /* handle error */ }
+
+//  struct ifreq* it = ifc.ifc_req;
+//  const struct ifreq* const end = it + (ifc.ifc_len / sizeof(struct ifreq));
+
+//  for (; it != end; ++it) {
+//    strcpy(ifr.ifr_name, it->ifr_name);
+//    if (ioctl(sock, SIOCGIFFLAGS, &ifr) == 0) {
+//      if (! (ifr.ifr_flags & IFF_LOOPBACK)) { // don't count loopback
+//        if (ioctl(sock, SIOCGIFHWADDR, &ifr) == 0) {
+//          success = 1;
+//          break;
+//        }
+//      }
+//    }
+//    else { /* handle error */ }
+//  }
+
+//  unsigned char mac_address[6];
+
+//  if (success) memcpy(mac_address, ifr.ifr_hwaddr.sa_data, 6);
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (false);
+
+  ACE_NOTREACHED (return false;)
+#endif /* ACE_HAS_GETIFADDRS */
+#endif // ACE_WIN32 || ACE_WIN64
+
+  return return_value;
 }
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -3445,73 +3651,448 @@ Net_Common_Tools::URLToHostName (const std::string& URL_in,
 
 #if defined (ACE_LINUX)
 bool
-Net_Common_Tools::isNetworkManagerRunning ()
+Net_Common_Tools::isNetworkManagerManagingInterface (const std::string& interfaceIdentifier_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::isNetworkManagerRunning"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::isNetworkManagerManagingInterface"));
 
-  std::string commandline_string =
-      ACE_TEXT_ALWAYS_CHAR ("systemctl status NetworkManager");
-  std::string output_string;
-  if (unlikely (!Common_Tools::command (commandline_string,
-                                        output_string)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::command(\"%s\"), aborting\n"),
-                ACE_TEXT (commandline_string.c_str ())));
-    return false; // *TODO*: avoid false negative
-  } // end IF
+  // sanity check(s)
+  ACE_ASSERT (!interfaceIdentifier_in.empty ());
 
-  std::istringstream converter;
-  char buffer [BUFSIZ];
-  std::string regex_string =
-      ACE_TEXT_ALWAYS_CHAR ("^   Active: (.+) \\((.+)\\) since (.+); (.+) ago$");
-  std::regex regex (regex_string);
-  std::cmatch match_results;
-  converter.str (output_string);
-  std::string status_string;
-  do
-  {
-    converter.getline (buffer, sizeof (buffer));
-    if (likely (!std::regex_match (buffer,
-                                   match_results,
-                                   regex,
-                                   std::regex_constants::match_default)))
-      continue;
-    ACE_ASSERT (match_results.ready () && !match_results.empty ());
-    ACE_ASSERT (match_results[1].matched);
-    ACE_ASSERT (match_results[2].matched);
-    ACE_ASSERT (match_results[3].matched);
-    ACE_ASSERT (match_results[4].matched);
+#if defined (DBUS_SUPPORT)
+  struct DBusConnection* connection_p = NULL;
+  Net_InterfaceIdentifiers_t interface_identifiers_a =
+      Net_WLAN_Tools::getInterfaces (connection_p,
+                                     AF_UNSPEC,
+                                     0);
+  for (Net_InterfacesIdentifiersIterator_t iterator = interface_identifiers_a.begin ();
+       iterator != interface_identifiers_a.end ();
+       ++iterator)
+    if (!ACE_OS::strcmp ((*iterator).c_str (),
+                         interfaceIdentifier_in.c_str ()))
+      return true;
+#else
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (false);
 
-    status_string = match_results[1];
-    if (ACE_OS::strcmp (status_string.c_str (),
-                        ACE_TEXT_ALWAYS_CHAR ("active")))
-      break;
-    status_string = match_results[2];
-    if (ACE_OS::strcmp (status_string.c_str (),
-                        ACE_TEXT_ALWAYS_CHAR ("running")))
-      break;
-    return true;
-  } while (!converter.fail ());
+  ACE_NOTREACHED (return false;)
+#endif // DBUS_SUPPORT
 
   return false;
 }
 
-void
-Net_Common_Tools::toggleNetworkManager (bool toggle_in)
+bool
+Net_Common_Tools::networkManagerHandleInterface (const std::string& interfaceIdentifier_in,
+                                                 bool toggle_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::isNetworkManagerRunning"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::networkManagerHandleInterface"));
 
-  std::string commandline_string =
-      ACE_TEXT_ALWAYS_CHAR ("systemctl ");
-  commandline_string += (toggle_in ? ACE_TEXT_ALWAYS_CHAR ("start")
-                                   : ACE_TEXT_ALWAYS_CHAR ("stop"));
-  commandline_string += ACE_TEXT_ALWAYS_CHAR (" NetworkManager");
-  std::string output_string;
-  if (unlikely (!Common_Tools::command (commandline_string,
-                                        output_string)))
+  // sanity check(s)
+  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+  std::string configuration_file_path =
+      ACE_TEXT_ALWAYS_CHAR ("/etc/NetworkManager/NetworkManager.conf");
+  if (unlikely (!Common_File_Tools::isReadable (configuration_file_path)))
+  {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::command(\"%s\"), returning\n"),
-                ACE_TEXT (commandline_string.c_str ())));
+                ACE_TEXT ("invalid NetworkManagaer configuration file (was: \"%s\"), aborting\n"),
+                ACE_TEXT (configuration_file_path.c_str ())));
+    return false;
+  } // end IF
+
+  ACE_Configuration_Heap configuration;
+  int result_2 = configuration.open (ACE_DEFAULT_CONFIG_SECTION_SIZE);
+  if (unlikely (result_2 == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Configuration_Heap::open(%d): \"%m\", aborting\n"),
+                ACE_DEFAULT_CONFIG_SECTION_SIZE));
+    return false;
+  } // end IF
+  ACE_Ini_ImpExp ini_importer (configuration);
+  result_2 =
+      ini_importer.import_config (ACE_TEXT (configuration_file_path.c_str ()));
+  if (unlikely (result_2 == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Ini_ImpExp::import_config(\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (configuration_file_path.c_str ())));
+    return false;
+  } // end IF
+  ACE_TString sub_section_string, value_name_string, value_string;
+  int index = 0, index_2 = 0;
+  const ACE_Configuration_Section_Key& root_section =
+      configuration.root_section ();
+  ACE_Configuration_Section_Key sub_section_key;
+  enum ACE_Configuration::VALUETYPE value_type_e;
+  std::string regex_string = ACE_TEXT_ALWAYS_CHAR ("^(?:(.+),)*(.*)$");
+  std::string regex_string_2 =
+      ACE_TEXT_ALWAYS_CHAR ("^(?:(?:mac:((?:[01234567890abcdef]{2}:){5}[01234567890abcdef]{2})|interface-name:(.+));)*(?:mac:((?:[01234567890abcdef]{2}:){5}[01234567890abcdef]{2})|interface-name:(.+))?$");
+  std::regex regex;
+  std::smatch smatch;
+  std::string value_string_2, value_string_3;
+  std::string::size_type position = std::string::npos;
+  std::smatch::iterator iterator;
+  bool section_found_b = false, value_found_b = false, modified_b = false;
+
+  // step1: make sure the 'keyfile' plugin is loaded
+  try {
+    regex.assign (regex_string,
+                  std::regex::ECMAScript);
+  } catch (std::regex_error& error) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to std::regex::assign(\"%s\"): \"%s\", aborting\n"),
+                ACE_TEXT (regex_string.c_str ()),
+                ACE_TEXT (error.what ())));
+    return false;
+  }
+  do
+  {
+    result_2 = configuration.enumerate_sections (root_section,
+                                                 index,
+                                                 sub_section_string);
+    if (result_2)
+      break;
+    if (ACE_OS::strcmp (ACE_TEXT_ALWAYS_CHAR (sub_section_string.c_str ()),
+                        ACE_TEXT_ALWAYS_CHAR ("main")))
+      goto next;
+
+    section_found_b = true;
+    result_2 = configuration.open_section (root_section,
+                                           sub_section_string.c_str (),
+                                           0,
+                                           sub_section_key);
+    ACE_ASSERT (result_2 == 0);
+    do
+    {
+      result_2 = configuration.enumerate_values (sub_section_key,
+                                                 index_2,
+                                                 value_name_string,
+                                                 value_type_e);
+      if (result_2)
+        break;
+      if (ACE_OS::strcmp (ACE_TEXT_ALWAYS_CHAR (value_name_string.c_str ()),
+                          ACE_TEXT_ALWAYS_CHAR ("plugins")))
+        goto next_2;
+
+      value_found_b = true;
+      result_2 = configuration.get_string_value (sub_section_key,
+                                                 value_name_string.c_str (),
+                                                 value_string);
+      ACE_ASSERT (result_2 == 0);
+      value_string_2 = value_string.c_str ();
+      if (!std::regex_match (value_string_2,
+                             smatch,
+                             regex,
+                             std::regex_constants::match_default))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to std::regex_match(\"%s\"), aborting\n"),
+                    ACE_TEXT (configuration_file_path.c_str ())));
+        return false;
+      } // end IF
+      for (iterator = ++smatch.begin ();
+           iterator != smatch.end ();
+           ++iterator)
+      { ACE_ASSERT ((*iterator).matched);
+        value_string_2 = (*iterator).str ();
+        if (!ACE_OS::strcmp (ACE_TEXT_ALWAYS_CHAR ("keyfile"),
+                             value_string_2.c_str ()))
+          break;
+      } // end FOR
+      if ((iterator == smatch.end ()) &&
+          toggle_in)
+      {
+        if (!value_string.empty ())
+          value_string += ACE_TEXT_ALWAYS_CHAR (",");
+        value_string += ACE_TEXT_ALWAYS_CHAR ("keyfile");
+        result_2 = configuration.set_string_value (sub_section_key,
+                                                   value_name_string.c_str (),
+                                                   value_string);
+        ACE_ASSERT (result_2 == 0);
+        modified_b = true;
+      } // end IF
+
+next_2:
+      ++index_2;
+    } while (true);
+    if (unlikely (result_2 == -1))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Configuration::enumerate_values(\"%s\"): \"%m\", aborting\n"),
+                  sub_section_string.c_str ()));
+      return false;
+    } // end IF
+
+    break;
+
+next:
+    ++index;
+  } while (true);
+  if (unlikely (result_2 == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Configuration::enumerate_sections(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+  if (unlikely (!section_found_b))
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%s: section \"%s\" not found, creating\n"),
+                ACE::basename (ACE_TEXT (configuration_file_path.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
+                ACE_TEXT ("main")));
+    result_2 = configuration.open_section (root_section,
+                                           ACE_TEXT_ALWAYS_CHAR ("main"),
+                                           1,
+                                           sub_section_key);
+    ACE_ASSERT (result_2 == 0);
+    result_2 =
+        configuration.set_string_value (sub_section_key,
+                                        ACE_TEXT_ALWAYS_CHAR ("plugins"),
+                                        ACE_TEXT_ALWAYS_CHAR ("keyfile"));
+    ACE_ASSERT (result_2 == 0);
+    modified_b = true;
+  } // end IF
+  else if (unlikely (!value_found_b))
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%s[%s]: value \"%s\" not found, creating\n"),
+                ACE::basename (ACE_TEXT (configuration_file_path.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
+                ACE_TEXT ("main"),
+                ACE_TEXT ("plugins")));
+    result_2 = configuration.open_section (root_section,
+                                           ACE_TEXT_ALWAYS_CHAR ("main"),
+                                           0,
+                                           sub_section_key);
+    ACE_ASSERT (result_2 == 0);
+    result_2 =
+        configuration.set_string_value (sub_section_key,
+                                        ACE_TEXT_ALWAYS_CHAR ("plugins"),
+                                        ACE_TEXT_ALWAYS_CHAR ("keyfile"));
+    ACE_ASSERT (result_2 == 0);
+    modified_b = true;
+  } // end ELSE IF
+
+  // step2: add/remove 'unmanaged-devices' entry to/from the 'keyfile' section
+  index = 0, index_2 = 0;
+  section_found_b = false, value_found_b = false;
+  try {
+    regex.assign (regex_string_2,
+                  std::regex::ECMAScript);
+  } catch (std::regex_error& error) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to std::regex::assign(\"%s\"): \"%s\", aborting\n"),
+                ACE_TEXT (regex_string_2.c_str ()),
+                ACE_TEXT (error.what ())));
+    return false;
+  }
+  do
+  {
+    result_2 = configuration.enumerate_sections (root_section,
+                                                 index,
+                                                 sub_section_string);
+    if (result_2)
+      break;
+    if (ACE_OS::strcmp (ACE_TEXT_ALWAYS_CHAR (sub_section_string.c_str ()),
+                        ACE_TEXT_ALWAYS_CHAR ("keyfile")))
+      goto next_3;
+
+    section_found_b = true;
+    result_2 = configuration.open_section (root_section,
+                                           sub_section_string.c_str (),
+                                           0,
+                                           sub_section_key);
+    ACE_ASSERT (result_2 == 0);
+    do
+    {
+      result_2 = configuration.enumerate_values (sub_section_key,
+                                                 index_2,
+                                                 value_name_string,
+                                                 value_type_e);
+      if (result_2)
+        break;
+      if (ACE_OS::strcmp (ACE_TEXT_ALWAYS_CHAR (value_name_string.c_str ()),
+                          ACE_TEXT_ALWAYS_CHAR ("unmanaged-devices")))
+        goto next_4;
+
+      value_found_b = true;
+      result_2 = configuration.get_string_value (sub_section_key,
+                                                 value_name_string.c_str (),
+                                                 value_string);
+      ACE_ASSERT (result_2 == 0);
+      value_string_2 = value_string.c_str ();
+      if (!std::regex_match (value_string_2,
+                             smatch,
+                             regex,
+                             std::regex_constants::match_default))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to std::regex_match(\"%s\"), aborting\n"),
+                    ACE_TEXT (configuration_file_path.c_str ())));
+        return false;
+      } // end IF
+      for (iterator = ++smatch.begin ();
+           iterator != smatch.end ();
+           ++iterator)
+      { ACE_ASSERT ((*iterator).matched);
+        value_string_2 = (*iterator).str ();
+        position = value_string_2.find (':', 0);
+        if (position == 2)
+        {
+          struct ether_addr ether_addr_s =
+              Net_Common_Tools::stringToLinkLayerAddress (value_string_2);
+          value_string_2 =
+              Net_Common_Tools::linkLayerAddressToInterfaceIdentifier (ether_addr_s);
+          ACE_ASSERT (!value_string_2.empty ());
+        } // end IF
+        if (!ACE_OS::strcmp (interfaceIdentifier_in.c_str (),
+                             value_string_2.c_str ()))
+          break;
+      } // end FOR
+      if (toggle_in)
+      {
+        if (iterator != smatch.end ())
+        {
+          value_string.clear ();
+          for (std::smatch::iterator iterator_2  = ++smatch.begin ();
+               iterator_2 != smatch.end ();
+               ++iterator_2)
+          {
+            if (iterator_2 == iterator)
+              continue;
+            if (iterator != ++smatch.begin ())
+              value_string += ACE_TEXT_ALWAYS_CHAR (";");
+            value_string_3 = (*iterator_2).str ();
+            position = value_string_3.find (':', 0);
+            if (position == 2)
+              value_string += ACE_TEXT_ALWAYS_CHAR ("mac:");
+            else
+              value_string += ACE_TEXT_ALWAYS_CHAR ("interface-name:");
+            value_string += value_string_3.c_str ();
+          } // end FOR
+
+          result_2 =
+              configuration.set_string_value (sub_section_key,
+                                              ACE_TEXT ("unmanaged-devices"),
+                                              value_string);
+          ACE_ASSERT (result_2 == 0);
+          modified_b = true;
+        } // end IF
+      } // end IF
+      else
+      {
+        if (iterator == smatch.end ())
+        {
+          if (!value_string.empty ())
+            value_string += ACE_TEXT_ALWAYS_CHAR (";");
+          value_string += ACE_TEXT_ALWAYS_CHAR ("interface-name:");
+          value_string += interfaceIdentifier_in.c_str ();
+          result_2 =
+              configuration.set_string_value (sub_section_key,
+                                              ACE_TEXT ("unmanaged-devices"),
+                                              value_string);
+          ACE_ASSERT (result_2 == 0);
+          modified_b = true;
+        } // end IF
+      } // end ELSE
+
+next_4:
+      ++index_2;
+    } while (true);
+    if (unlikely (result_2 == -1))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Configuration::enumerate_values(\"%s\"): \"%m\", aborting\n"),
+                  sub_section_string.c_str ()));
+      return false;
+    } // end IF
+
+next_3:
+    ++index;
+  } while (true);
+  if (unlikely (result_2 == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Configuration::enumerate_sections(): \"%m\", aborting\n")));
+    return false;
+  } // end IF
+  if (unlikely (!section_found_b))
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%s: section \"%s\" not found, creating\n"),
+                ACE::basename (ACE_TEXT (configuration_file_path.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
+                ACE_TEXT ("keyfile")));
+    result_2 = configuration.open_section (root_section,
+                                           ACE_TEXT_ALWAYS_CHAR ("keyfile"),
+                                           1,
+                                           sub_section_key);
+    ACE_ASSERT (result_2 == 0);
+    if (toggle_in)
+      value_string.clear ();
+    else
+    {
+      value_string = ACE_TEXT_ALWAYS_CHAR ("interface-name:");
+      value_string += interfaceIdentifier_in.c_str ();
+    } // end ELSE
+    result_2 =
+        configuration.set_string_value (sub_section_key,
+                                        ACE_TEXT_ALWAYS_CHAR ("unmanaged-devices"),
+                                        value_string);
+    ACE_ASSERT (result_2 == 0);
+    modified_b = true;
+  } // end IF
+  else if (unlikely (!value_found_b))
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%s[%s]: value \"%s\" not found, creating\n"),
+                ACE::basename (ACE_TEXT (configuration_file_path.c_str ()), ACE_DIRECTORY_SEPARATOR_CHAR),
+                ACE_TEXT ("keyfile"),
+                ACE_TEXT ("unmanaged-devices")));
+    result_2 = configuration.open_section (root_section,
+                                           ACE_TEXT_ALWAYS_CHAR ("keyfile"),
+                                           0,
+                                           sub_section_key);
+    ACE_ASSERT (result_2 == 0);
+    if (toggle_in)
+      value_string.clear ();
+    else
+    {
+      value_string = ACE_TEXT_ALWAYS_CHAR ("interface-name:");
+      value_string += interfaceIdentifier_in.c_str ();
+    } // end ELSE
+    result_2 =
+        configuration.set_string_value (sub_section_key,
+                                        ACE_TEXT_ALWAYS_CHAR ("unmanaged-devices"),
+                                        value_string);
+    ACE_ASSERT (result_2 == 0);
+    modified_b = true;
+  } // end ELSE IF
+
+  if (modified_b)
+  {
+    bool drop_privileges = false;
+    if (!Common_File_Tools::canWrite (configuration_file_path, static_cast<uid_t> (-1)))
+      drop_privileges = Common_Tools::switchUser (0);
+
+    if (unlikely (!Common_File_Tools::backup (configuration_file_path)))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_File_Tools::backup(\"\"), continuing\n"),
+                  ACE_TEXT (configuration_file_path.c_str ())));
+
+    result_2 =
+        ini_importer.export_config (ACE_TEXT (configuration_file_path.c_str ()));
+    if (unlikely (result_2 == -1))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Ini_ImpExp::export_config(): \"%m\", aborting\n")));
+
+      if (drop_privileges)
+        Common_Tools::switchUser (static_cast<uid_t> (-1));
+
+      return false;
+    } // end IF
+    if (drop_privileges)
+      Common_Tools::switchUser (static_cast<uid_t> (-1));
+  } // end IF
+
+  return true;
 }
-#endif
+#endif // ACE_LINUX

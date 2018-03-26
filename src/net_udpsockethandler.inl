@@ -174,10 +174,10 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   if (unlikely (!socket_configuration_p->writeOnly &&
                 (port_number <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT)))
   {
-    if (!Common_Tools::setRootPrivileges ())
+    if (!Common_Tools::switchUser (0))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Tools::setRootPrivileges(): \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to Common_Tools::switchUser(0): \"%m\", aborting\n")));
       goto error;
     } // end IF
     handle_privileges = true;
@@ -201,7 +201,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   } // end IF
 #if defined (ACE_LINUX)
   if (handle_privileges)
-    Common_Tools::dropRootPrivileges ();
+    Common_Tools::switchUser (static_cast<uid_t> (-1));
 #endif
   handle = inherited2::peer_.get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
@@ -440,7 +440,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 error:
 #if defined (ACE_LINUX)
   if (handle_privileges)
-    Common_Tools::dropRootPrivileges ();
+    Common_Tools::switchUser (static_cast<uid_t> (-1));
 #endif
   if (handle_sockets)
   {
@@ -730,10 +730,10 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   if (unlikely (!socket_configuration_p->writeOnly &&
                 (socket_configuration_p->listenAddress.get_port_number () <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT)))
   {
-    if (!Common_Tools::setRootPrivileges ())
+    if (!Common_Tools::switchUser (0))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Tools::setRootPrivileges(): \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to Common_Tools::switchUser(0): \"%m\", aborting\n")));
       goto error;
     } // end IF
     handle_privileges = true;
@@ -759,7 +759,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   } // end IF
 #if defined (ACE_LINUX)
   if (handle_privileges)
-    Common_Tools::dropRootPrivileges ();
+    Common_Tools::switchUser (static_cast<uid_t> (-1));
 #endif
   handle = inherited2::peer_.get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
@@ -965,7 +965,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 error:
 #if defined (ACE_LINUX)
   if (handle_privileges)
-    Common_Tools::dropRootPrivileges ();
+    Common_Tools::switchUser (static_cast<uid_t> (-1));
 #endif
   if (handle_sockets)
   {

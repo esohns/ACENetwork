@@ -1209,7 +1209,7 @@ associate:
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("\"%s\": failed to associate with access point (MAC was: %s; SSID was: %s): timed out (was: %#T), giving up\n"),
                       ACE_TEXT (interface_identifier.c_str ()),
-                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet), NET_LINKLAYER_802_11)).c_str ()),
+                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
                       ACE_TEXT (configuration_->SSID.c_str ()),
                       &result_poll_interval));
           retries_ = 0;
@@ -1221,7 +1221,7 @@ associate:
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("\"%s\": failed to associate with access point (MAC was: %s; SSID was: %s): timed out (was: %#T), retrying...\n"),
                       ACE_TEXT (interface_identifier.c_str ()),
-                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet), NET_LINKLAYER_802_11)).c_str ()),
+                      ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
                       ACE_TEXT (configuration_->SSID.c_str ()),
                       &result_poll_interval));
           ++retries_;
@@ -1364,7 +1364,8 @@ associate:
                            authenticator_h);
       if (unlikely (status_i != ISC_R_SUCCESS))
       {
-        if (status_i == ISC_R_NOMORE); // 29: client not listening on OMAPI port
+        if (status_i == ISC_R_NOMORE)
+          ; // 29: client not listening on OMAPI port
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ::dhcpctl_connect(%s:%u): \"%s\", returning\n"),
                     ACE_TEXT (NET_WLAN_MONITOR_DHCLIENT_LOCALHOST_IP_STRING),

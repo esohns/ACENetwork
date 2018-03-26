@@ -246,7 +246,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 error:
 #if defined (ACE_LINUX)
   if (handle_privileges)
-    Common_Tools::dropRootPrivileges ();
+    Common_Tools::switchUser (static_cast<uid_t> (-1));
 #endif
 
   if (handle_socket)

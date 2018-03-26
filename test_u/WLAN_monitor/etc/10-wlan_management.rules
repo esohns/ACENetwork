@@ -1,0 +1,34 @@
+#/etc/polkit-1/rules.d/10-wifimanagement.rules
+polkit.addAdminRule(function(action, subject) {
+    polkit.log("received authentication request (subject was: " + subject + "; action was: " + action + ") from program " + action.lookup("program"));
+    if (action.id == "org.freedesktop.systemd1.manage-units") {
+        if ((action.lookup("unit") == "wpa_supplicant.service") ||
+            (action.lookup("unit") == "NetworkManager.service")) {
+            var verb = action.lookup("verb");
+            if ((verb == "start") ||
+                (verb == "stop")  ||
+                (verb == "restart") {
+                polkit.log("authorizing group wheel for action (was: " + action + ")");
+		return ["unix-group:wheel"];
+            }
+        }
+    }
+});
+
+polkit.addRule(function(action, subject) {
+    polkit.log("received action authentication request (subject was: " + subject + "; action was: " + action + ") from program " + action.lookup("program"));
+    if (action.id == "org.freedesktop.systemd1.manage-units") {
+        if ((action.lookup("unit") == "wpa_supplicant.service") ||
+            (action.lookup("unit") == "NetworkManager.service")) {
+            var verb = action.lookup("verb");
+            if ((verb == "start") ||
+                (verb == "stop")  ||
+                (verb == "restart") {
+                polkit.log("authorizing action (was: " + action + ")");
+#                return polkit.Result.YES;
+		return polkit.Result.AUTH_SELF_KEEP;
+            }
+        }
+    }
+});
+

@@ -174,6 +174,7 @@ class Net_WLAN_Monitor_T
 // (partial) specializations
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_SUPPORT)
 template <typename AddressType,
           typename ConfigurationType,
           ////////////////////////////////
@@ -226,7 +227,8 @@ class Net_WLAN_Monitor_T<AddressType,
   // implement (part of) Common_IStateMachine_T
 //  virtual void onChange (enum Net_WLAN_MonitorState); // new state
 };
-#else
+#endif // WLANAPI_SUPPORT
+#elif defined (ACE_LINUX)
 #if defined (WEXT_SUPPORT)
 template <typename AddressType,
           typename ConfigurationType,
@@ -413,6 +415,11 @@ class Net_WLAN_Monitor_T<AddressType,
   virtual bool initialize (const ConfigurationType&); // configuration handle
   inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (inherited::socketHandle_); return inherited::socketHandle_; }
   inline virtual const int get_3 () const { ACE_ASSERT (inherited::familyId_ > 0); return inherited::familyId_; }
+  // *TODO*: remove these ASAP
+  inline virtual const struct DBusConnection* const getP_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
+  inline virtual const std::string& get1RR_2 (const std::string&) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR ("")); ACE_NOTREACHED (return ACE_TEXT_ALWAYS_CHAR ("");) }
+  inline virtual void set2R (const std::string&, const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+
   inline virtual const unsigned int get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
   inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID ((inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR ("")), NULL, inherited::familyId_); }
 
@@ -518,9 +525,11 @@ class Net_WLAN_Monitor_T<AddressType,
 
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
-  virtual const std::string& get1R (const std::string&) const;
-  inline virtual const struct DBusConnection* const getP () const { return connection_; }
-  inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID (connection_, (inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR ("")); }
+  inline virtual const struct DBusConnection* const getP_2 () const { return connection_; }
+  virtual const std::string& get1RR_2 (const std::string&) const;
+  virtual void set2R (const std::string&,
+                      const std::string&);
+  inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID (connection_, (inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR (""))); }
 
  protected:
   // convenient types
@@ -561,11 +570,26 @@ class Net_WLAN_Monitor_T<AddressType,
   virtual int svc (void);
 };
 #endif /* DBUS_SUPPORT */
-#endif /* ACE_WIN32 || ACE_WIN64 */
+#endif /* ACE_WIN32 || ACE_WIN64 || ACE_LINUX */
 
 //////////////////////////////////////////
 
-// include template definition
+// include template definition(s)
 #include "net_wlan_monitor.inl"
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_SUPPORT)
+#include "net_wlan_monitor_win32_wlanapi.inl"
+#endif /* WLANAPI_SUPPORT */
+#elif defined (ACE_LINUX)
+#if defined (WEXT_SUPPORT)
+#include "net_wlan_monitor_wext.inl"
+#endif /* WEXT_SUPPORT */
+#if defined (NL80211_SUPPORT)
+#include "net_wlan_monitor_nl80211.inl"
+#endif /* NL80211_SUPPORT */
+#if defined (DBUS_SUPPORT)
+#include "net_wlan_monitor_dbus.inl"
+#endif /* DBUS_SUPPORT */
+#endif /* ACE_WIN32 || ACE_WIN64 || ACE_LINUX */
 
 #endif

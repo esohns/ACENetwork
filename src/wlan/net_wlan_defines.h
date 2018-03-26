@@ -74,22 +74,31 @@
 #endif // NL80211_SUPPORT
 
 #if defined (DBUS_SUPPORT)
-#define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SERVICE                      "org.freedesktop.NetworkManager"
+// NetworkManager
+#define NET_WLAN_DBUS_NETWORKMANAGER_SERVICE                      "org.freedesktop.NetworkManager"
 
-#define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_INTERFACE                    "org.freedesktop.NetworkManager"
-#define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_ACCESSPOINT_INTERFACE        "org.freedesktop.NetworkManager.AccessPoint"
-#define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_CONNECTIONACTIVE_INTERFACE   "org.freedesktop.NetworkManager.Connection.Active"
-#define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_DEVICE_INTERFACE             "org.freedesktop.NetworkManager.Device"
-#define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_DEVICEWIRELESS_INTERFACE     "org.freedesktop.NetworkManager.Device.Wireless"
-#define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_IP4CONFIG_INTERFACE          "org.freedesktop.NetworkManager.IP4Config"
-#define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SETTINGS_INTERFACE           "org.freedesktop.NetworkManager.Settings"
-#define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SETTINGSCONNECTION_INTERFACE "org.freedesktop.NetworkManager.Settings.Connection"
+#define NET_WLAN_DBUS_NETWORKMANAGER_INTERFACE                    "org.freedesktop.NetworkManager"
+#define NET_WLAN_DBUS_NETWORKMANAGER_ACCESSPOINT_INTERFACE        "org.freedesktop.NetworkManager.AccessPoint"
+#define NET_WLAN_DBUS_NETWORKMANAGER_CONNECTIONACTIVE_INTERFACE   "org.freedesktop.NetworkManager.Connection.Active"
+#define NET_WLAN_DBUS_NETWORKMANAGER_DEVICE_INTERFACE             "org.freedesktop.NetworkManager.Device"
+#define NET_WLAN_DBUS_NETWORKMANAGER_DEVICEWIRELESS_INTERFACE     "org.freedesktop.NetworkManager.Device.Wireless"
+#define NET_WLAN_DBUS_NETWORKMANAGER_IP4CONFIG_INTERFACE          "org.freedesktop.NetworkManager.IP4Config"
+#define NET_WLAN_DBUS_NETWORKMANAGER_SETTINGS_INTERFACE           "org.freedesktop.NetworkManager.Settings"
+#define NET_WLAN_DBUS_NETWORKMANAGER_SETTINGSCONNECTION_INTERFACE "org.freedesktop.NetworkManager.Settings.Connection"
 
-#define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_OBJECT_PATH                  "/org/freedesktop/NetworkManager"
-#define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_ACCESSPOINT_OBJECT_PATH      "/org/freedesktop/NetworkManager/AccessPoint"
-#define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_DEVICE_OBJECT_PATH           "/org/freedesktop/NetworkManager/Device"
-#define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_SETTINGS_OBJECT_PATH         "/org/freedesktop/NetworkManager/Settings"
-#define NET_WLAN_MONITOR_DBUS_NETWORKMANAGER_WIRELESS_OBJECT_PATH         "/org/freedesktop/NetworkManager/Device/Wireless"
+#define NET_WLAN_DBUS_NETWORKMANAGER_OBJECT_PATH                  "/org/freedesktop/NetworkManager"
+#define NET_WLAN_DBUS_NETWORKMANAGER_ACCESSPOINT_OBJECT_PATH      "/org/freedesktop/NetworkManager/AccessPoint"
+#define NET_WLAN_DBUS_NETWORKMANAGER_DEVICE_OBJECT_PATH           "/org/freedesktop/NetworkManager/Device"
+#define NET_WLAN_DBUS_NETWORKMANAGER_SETTINGS_OBJECT_PATH         "/org/freedesktop/NetworkManager/Settings"
+#define NET_WLAN_DBUS_NETWORKMANAGER_WIRELESS_OBJECT_PATH         "/org/freedesktop/NetworkManager/Device/Wireless"
+
+// wpa_supplicant
+#define NET_WLAN_DBUS_WPASUPPLICANT_SERVICE                       "fi.w1.wpa_supplicant1"
+
+#define NET_WLAN_DBUS_WPASUPPLICANT_INTERFACE                     "fi.w1.wpa_supplicant1"
+#define NET_WLAN_DBUS_WPASUPPLICANT_INTERFACE_INTERFACE           "fi.w1.wpa_supplicant1.Interface"
+
+#define NET_WLAN_DBUS_WPASUPPLICANT_OBJECT_PATH                  "/fi/w1/wpa_supplicant1"
 #endif // DBUS_SUPPORT
 
 #if defined (DHCLIENT_SUPPORT)
@@ -100,7 +109,6 @@
 #define NET_WLAN_MONITOR_DHCLIENT_OBJECT_INTERFACE_STRING                 "interface"
 #define NET_WLAN_MONITOR_DHCLIENT_OBJECT_VALUE_NAME_STRING                "name"
 #define NET_WLAN_MONITOR_DHCLIENT_OBJECT_VALUE_STATE_STRING               "state"
-
 #endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 

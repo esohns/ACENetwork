@@ -100,6 +100,7 @@ class Net_Common_Tools
   // *NOTE*: make sure the argument points to at least ETH_ALEN bytes of allocated (!) memory
   static std::string LinkLayerAddressToString (const unsigned char* const, // pointer to address data (i.e. ethernet header address field)
                                                enum Net_LinkLayerType = NET_LINKLAYER_802_3);
+  static struct ether_addr stringToLinkLayerAddress (const std::string&);
   static std::string LinkLayerTypeToString (enum Net_LinkLayerType);
 
   // *** ethernet ***
@@ -116,6 +117,7 @@ class Net_Common_Tools
   static struct ether_addr interfaceToLinkLayerAddress (REFGUID);            // interface identifier
 #else
   static struct ether_addr interfaceToLinkLayerAddress (const std::string&); // interface identifier
+  static std::string linkLayerAddressToInterfaceIdentifier (const struct ether_addr&);
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -245,9 +247,9 @@ class Net_Common_Tools
 
   // --- OS services ---
 #if defined (ACE_LINUX)
-  // *NOTE*: these use 'systemctl'
-  static bool isNetworkManagerRunning ();
-  static void toggleNetworkManager (bool); // status
+  static bool isNetworkManagerManagingInterface (const std::string&);
+  static bool networkManagerHandleInterface (const std::string&,
+                                             bool); // toggle
 #endif // ACE_LINUX
 
  private:

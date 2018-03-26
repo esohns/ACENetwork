@@ -56,7 +56,8 @@ if (UNIX)
  endif (NL80211_SUPPORT)
  if (DBUS_SUPPORT)
   pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
-  pkg_check_modules (PKG_NETWORKMANAGER REQUIRED NetworkManager)
+#  pkg_check_modules (PKG_NETWORKMANAGER REQUIRED NetworkManager)
+  pkg_check_modules (PKG_NETWORKMANAGER REQUIRED libnm)
   add_definitions (-DDBUS_SUPPORT)
  endif (DBUS_SUPPORT)
 
@@ -146,9 +147,9 @@ if (UNIX)
  endif (NL80211_SUPPORT)
  if (DBUS_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              $<BUILD_INTERFACE:${PKG_DBUS_INCLUDE_DIRS}>)
+                              "$<BUILD_INTERFACE:${PKG_DBUS_INCLUDE_DIRS}>")
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              $<BUILD_INTERFACE:${PKG_NETWORKMANAGER_INCLUDE_DIRS}>)
+                              "$<BUILD_INTERFACE:${PKG_NETWORKMANAGER_INCLUDE_DIRS}>")
 
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/dbus>)
@@ -211,16 +212,19 @@ if (UNIX)
  if (WEXT_SUPPORT)
   set (source_files
        ${source_files}
+       net_wlan_monitor_wext.inl
        net_wlan_tools_linux_wext.cpp)
  endif (WEXT_SUPPORT)
  if (NL80211_SUPPORT)
   set (source_files
        ${source_files}
+       net_wlan_monitor_nl80211.inl
        net_wlan_tools_linux_nl80211.cpp)
  endif (NL80211_SUPPORT)
  if (DBUS_SUPPORT)
   set (source_files
        ${source_files}
+       net_wlan_monitor_dbus.inl
        net_wlan_tools_linux_dbus.cpp)
  endif (DBUS_SUPPORT)
 elseif (WIN32)
@@ -231,6 +235,7 @@ elseif (WIN32)
  if (WLANAPI_SUPPORT)
   set (source_files
        ${source_files}
+       net_wlan_monitor_win32_wlanapi.inl
        net_wlan_tools_win32_wlanapi.cpp)
  endif (WLANAPI_SUPPORT)
 endif ()

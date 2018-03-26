@@ -121,11 +121,4 @@
 // statistic
 #define NET_STATISTIC_DEFAULT_COLLECTION_INTERVAL           500 // ms [0: off]
 #define NET_STATISTIC_DEFAULT_REPORTING_INTERVAL            0 // second(s) [0: off]
-
-// system services
-#if defined (ACE_LINUX)
-#define NET_SERVICES_SYSTEMD_NETWORKMANAGER_UNIT            "NetworkManager.service"
-#define NET_SERVICES_SYSTEMD_WPA_SUPPLICANT_UNIT            "wpa_supplicant.service"
-#endif // ACE_LINUX
-
 #endif

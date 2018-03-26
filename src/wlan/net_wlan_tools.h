@@ -123,10 +123,7 @@ class Net_WLAN_Tools
                     REFGUID,             // interface identifier
                     const std::string&); // (E)SSID ("": scan all)
 #endif // WLANAPI_SUPPORT
-#else
-  static bool hasSSID (const std::string&,  // interface identifier
-                       const std::string&); // (E)SSID
-
+#elif defined (ACE_LINUX)
 #if defined (WEXT_SUPPORT)
   static Net_InterfaceIdentifiers_t getInterfaces (int = AF_UNSPEC, // address family {default: any; use AF_MAX for any IP}
                                                    int = 0);        // flag(s) (e.g. IFF_UP; may be ORed)
@@ -137,6 +134,9 @@ class Net_WLAN_Tools
                                      ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
   static Net_WLAN_SSIDs_t getSSIDs (const std::string&, // interface identifier (empty: all)
                                     ACE_HANDLE);        // (socket) handle to effectuate the ioctl (if any)
+  // *NOTE*: this uses iwlib
+  static bool hasSSID (const std::string&,  // interface identifier
+                       const std::string&); // (E)SSID
   // *NOTE*: the WEXT_SUPPORT implementation merely tests SIOCGIWNAME ioctl
   static bool isInterface (const std::string&); // interface identifier
 
@@ -203,8 +203,13 @@ class Net_WLAN_Tools
 #endif // NL80211_SUPPORT
 
 #if defined (DBUS_SUPPORT)
-//  static std::string associatedSSID (struct DBusConnection*, // DBus connection handle
-//                                     const std::string&);    // interface identifier
+  // NetworkManager
+  static Net_InterfaceIdentifiers_t getInterfaces (struct DBusConnection*, // DBus connection handle
+                                                   int = AF_UNSPEC, // address family {default: any; pass AF_MAX for any IP}
+                                                   int = 0);        // flag(s) (e.g. IFF_UP; may be ORed)
+
+  static std::string associatedSSID (struct DBusConnection*, // DBus connection handle
+                                     const std::string&);    // interface identifier
 
   static bool activateConnection (struct DBusConnection*, // DBus connection handle
                                   const std::string&,     // connection object path
@@ -242,14 +247,31 @@ class Net_WLAN_Tools
   static std::string SSIDToConnectionDBusPath (struct DBusConnection*, // DBus connection handle
                                                const std::string&,     // device object path
                                                const std::string&);    // SSID
+
+  // wpa_supplicant
+  static bool isWPASupplicantManagingInterface (struct DBusConnection*,
+                                                const std::string&);
+  static bool WPASupplicantHandleInterface (struct DBusConnection*,
+                                            const std::string&,
+                                            bool); // toggle
 #endif // DBUS_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
+#endif // ACE_WIN32 || ACE_WIN64 || ACE_LINUX
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Tools ())
   ACE_UNIMPLEMENTED_FUNC (virtual ~Net_WLAN_Tools ())
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Tools (const Net_WLAN_Tools&))
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Tools& operator= (const Net_WLAN_Tools&))
+
+  // helper methods
+#if defined (ACE_LINUX)
+#if defined (DBUS_SUPPORT)
+  static std::string dBusObjectPathToIdentifier (struct DBusConnection*,
+                                                 const std::string&);
+  static std::string identifierToDBusObjectPath (struct DBusConnection*,
+                                                 const std::string&);
+#endif // DBUS_SUPPORT
+#endif // ACE_LINUX
 };
 
 #endif

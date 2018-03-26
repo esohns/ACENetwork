@@ -129,6 +129,10 @@ class Net_WLAN_IMonitorBase
 #endif // WEXT_SUPPORT
 #if defined (DBUS_SUPPORT)
  , public Common_IGetP_2_T<struct DBusConnection>
+ , public Common_IGet1RR_2_T<std::string,
+                             std::string> // cache access
+ , public Common_ISet2R_T<std::string,
+                          std::string>  // cache access
 #endif // DBUS_SUPPORT
  , public Common_IGet_2_T<unsigned int> // signal quality
 #endif // ACE_WIN32 || ACE_WIN64

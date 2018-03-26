@@ -25,7 +25,7 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #if defined (DBUS_SUPPORT)
-#include "NetworkManager/NetworkManager.h"
+#include "NetworkManager.h"
 #endif // DBUS_SUPPORT
 
 #include "net_configuration.h"
