@@ -34,13 +34,6 @@
 #include "netlink/genl/ctrl.h"
 #include "netlink/genl/genl.h"
 #endif // NL80211_SUPPORT
-
-#if defined (DHCLIENT_SUPPORT)
-extern "C"
-{
-#include "dhcpctl/dhcpctl.h"
-}
-#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -63,6 +56,7 @@ extern "C"
 #include "stream_defines.h"
 
 #include "net_common_tools.h"
+#include "net_defines.h"
 #include "net_macros.h"
 #include "net_packet_headers.h"
 
@@ -93,7 +87,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
  , timerHandler_ (this,
                   false)
  , timerInterface_ (NULL)
-#else
+#elif defined (ACE_LINUX)
 #if defined (WEXT_SUPPORT)
  , buffer_ (NULL)
  , bufferSize_ (0)
@@ -104,6 +98,10 @@ Net_WLAN_Monitor_Base_T<AddressType,
  , familyId_ (0)
  , socketHandle_ (NULL)
 #endif // NL80211_SUPPORT
+#if defined (DHCLIENT_SUPPORT)
+ , connection_ (dhcpctl_null_handle)
+ , interface_ (dhcpctl_null_handle)
+#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
  , configuration_ (NULL)
  , isActive_ (false)
@@ -130,7 +128,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #else
 #if defined (DHCLIENT_SUPPORT)
   isc_result_t status_i = dhcpctl_initialize ();
-  if (status_i != ISC_R_SUCCESS)
+  if (unlikely (status_i != ISC_R_SUCCESS))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::dhcpctl_initialize(): \"%s\", continuing\n"),
                 ACE_TEXT (isc_result_totext (status_i))));
@@ -194,11 +192,29 @@ Net_WLAN_Monitor_Base_T<AddressType,
 
   if (unlikely (buffer_))
     ACE_OS::free (buffer_);
-#elif defined (NL80211_SUPPORT)
-  if (unlikely (handle_))
-    nl_socket_free (handle_);
-#elif defined (DBUS_SUPPORT)
 #endif // WEXT_SUPPORT
+#if defined (NL80211_SUPPORT)
+  if (unlikely (socketHandle_))
+    nl_socket_free (socketHandle_);
+#endif // NL80211_SUPPORT
+
+#if defined (DHCLIENT_SUPPORT)
+  isc_result_t status_i;
+  if (unlikely (interface_ != dhcpctl_null_handle))
+  {
+    status_i = omapi_object_dereference (&interface_, MDL);
+    ACE_ASSERT (status_i == ISC_R_SUCCESS);
+  } // end IF
+  if (unlikely (connection_ != dhcpctl_null_handle))
+  {
+    status_i = omapi_disconnect (connection_, 0);
+    if (unlikely (status_i != ISC_R_SUCCESS))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ::omapi_disconnect(%@,%d): \"%s\", continuing\n"),
+                  connection_, 0,
+                  ACE_TEXT (isc_result_totext (status_i))));
+  } // end IF
+#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 }
 
@@ -214,7 +230,7 @@ const Net_WLAN_AccessPointCacheValue_t&
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                        >::~Net_WLAN_Monitor_Base_T ()
+                        >::get1RR (const std::string& SSID_in) const
 #else
                         ,ACE_SYNCH_USE,
                         TimePolicyType>::get1RR (const std::string& SSID_in) const
@@ -259,7 +275,8 @@ Net_WLAN_Monitor_Base_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::set3R"));
 
   // sanity check(s)
-  ACE_ASSERT (!SSID_in.empty ());
+  if (SSID_in.empty ())
+    ACE_ASSERT (!SSID_in.empty ());
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
 #else
@@ -313,7 +330,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #endif // WLANAPI_SUPPORT
     ACE_ASSERT (scanTimerId_ == -1);
     timerInterface_ = NULL;
-#else
+#elif defined (ACE_LINUX)
 #if defined (WEXT_SUPPORT)
     if (buffer_)
     {
@@ -332,8 +349,27 @@ Net_WLAN_Monitor_Base_T<AddressType,
       socketHandle_ = NULL;
     } // end  IF
 #endif // NL80211_SUPPORT
-#if defined (DBUS_SUPPORT)
-#endif // DBUS_SUPPORT
+
+#if defined (DHCLIENT_SUPPORT)
+    isc_result_t status_i;
+    if (unlikely (interface_ != dhcpctl_null_handle))
+    {
+      status_i = omapi_object_dereference (&interface_, MDL);
+      ACE_ASSERT (status_i == ISC_R_SUCCESS);
+      interface_ = dhcpctl_null_handle;
+    } // end IF
+
+    if (unlikely (connection_ != dhcpctl_null_handle))
+    {
+      status_i = omapi_disconnect (connection_, 0);
+      if (unlikely (status_i != ISC_R_SUCCESS))
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ::omapi_disconnect(%@,%d): \"%s\", continuing\n"),
+                    connection_, 0,
+                    ACE_TEXT (isc_result_totext (status_i))));
+      connection_ = dhcpctl_null_handle;
+    } // end IF
+#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
     configuration_ = NULL;
@@ -414,6 +450,67 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #endif // NL80211_SUPPORT
 //#if defined (DBUS_SUPPORT)
 //#endif // DBUS_SUPPORT
+
+#if defined (DHCLIENT_SUPPORT)
+  // *IMPORTANT NOTE*: the following preconditions must be met:
+  //                   - a local ISC 'dhclient' process must be running
+  //                   - it must have been configured to listen for OMAPI
+  //                     (see also: man omapi(3), dhclient.conf(5)) traffic
+  // *NOTE*: the final precondition implies an entry 'omapi port [port]' in
+  //         /etc/dhclient.conf; this feature is not documented in recent
+  //         versions, however
+  // sanity check(s)
+  ACE_ASSERT (connection_ == dhcpctl_null_handle);
+  if (unlikely (!Common_Tools::getProcessId (ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_STRING))))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Common_Tools::getProcessId(\"%s\"), aborting\n"),
+                ACE_TEXT (NET_EXE_DHCLIENT_STRING)));
+    return false;
+  } // end IF
+
+  dhcpctl_handle authenticator_h = dhcpctl_null_handle;
+retry:
+  isc_result_t status_i =
+      dhcpctl_connect (&connection_,
+                       ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_LOCALHOST_IP_STRING),
+                       NET_EXE_DHCLIENT_OMAPI_PORT,
+                       authenticator_h);
+  if (unlikely (status_i != ISC_R_SUCCESS))
+  {
+    if (status_i == ISC_R_NOMORE) // 29: happens intermittently for reasons yet unknown
+    {
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("failed to ::dhcpctl_connect(%s:%u): \"%s\", retrying...\n"),
+                  ACE_TEXT (NET_EXE_DHCLIENT_LOCALHOST_IP_STRING),
+                  NET_EXE_DHCLIENT_OMAPI_PORT,
+                  ACE_TEXT (isc_result_totext (status_i))));
+
+      result = ACE_OS::sleep (ACE_Time_Value (1, 0));
+      ACE_ASSERT (result != -1);
+
+      goto retry;
+    } // end IF
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::dhcpctl_connect(%s:%u): \"%s\", aborting\n"),
+                ACE_TEXT (NET_EXE_DHCLIENT_LOCALHOST_IP_STRING),
+                NET_EXE_DHCLIENT_OMAPI_PORT,
+                ACE_TEXT (isc_result_totext (status_i))));
+    return false;
+  } // end IF
+  ACE_ASSERT (connection_ != dhcpctl_null_handle);
+  status_i = dhcpctl_set_callback (connection_,
+                                   NULL,
+                                   net_wlan_dhclient_cb);
+  if (unlikely (status_i != ISC_R_SUCCESS))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::dhcpctl_set_callback(%@,NULL): \"%s\", aborting\n"),
+                connection_,
+                ACE_TEXT (isc_result_totext (status_i))));
+    return false;
+  } // end IF
+#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
   configuration_ = &const_cast<ConfigurationType&> (configuration_in);
 
@@ -1018,7 +1115,7 @@ reset_state:
                     ACE_TEXT ("caught exception in Net_WLAN_IManager::do_scan(), continuing\n")));
       }
 
-#if defined (WEXT_SUPPORT)
+#if defined (WEXT_USE)
       int result = -1;
       int error = 0;
       ACE_Time_Value result_poll_interval (0,
@@ -1052,7 +1149,7 @@ fetch_scan_result_data:
 #endif // _DEBUG
 
       inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_SCANNED);
-#endif // WEXT_SUPPORT
+#endif // WEXT_USE
 #endif // ACE_WIN32 || ACE_WIN64
 
       break;
@@ -1077,7 +1174,7 @@ fetch_scan_result_data:
 #else
       std::string interface_identifier;
       struct ether_addr ap_mac_address_s;
-#if defined (WEXT_SUPPORT)
+#if defined (WEXT_USE)
       struct ether_addr ether_addr_s;
       bool result = false;
       int result_2 = -1;
@@ -1087,7 +1184,7 @@ fetch_scan_result_data:
                                      0);
       ACE_Time_Value deadline;
       bool shutdown = false;
-#endif // WEXT_SUPPORT
+#endif // WEXT_USE
 #endif // ACE_WIN32 || ACE_WIN64
       { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
         // check cache whether the configured ESSID (if any) is known
@@ -1149,9 +1246,9 @@ fetch_scan_result_data:
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-#if defined (WEXT_SUPPORT)
+#if defined (WEXT_USE)
 associate:
-#endif // WEXT_SUPPORT && defined (WEXT_USE)
+#endif // WEXT_USE
 #endif // ACE_WIN32 || ACE_WIN64
       try {
         do_associate (interface_identifier,
@@ -1177,8 +1274,8 @@ associate:
       }
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-#if defined (WEXT_SUPPORT)
+#elif defined (ACE_LINUX)
+#if defined (WEXT_USE)
       deadline = COMMON_TIME_NOW + result_timeout;
       do
       {
@@ -1230,7 +1327,7 @@ associate:
       } // end IF
 
       inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
-#endif // WEXT_SUPPORT
+#endif // WEXT_USE
 #endif // ACE_WIN32 || ACE_WIN64
       break;
     }
@@ -1279,6 +1376,9 @@ associate:
 #endif // ACE_WIN32 || ACE_WIN64
       }
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#elif defined (ACE_LINUX)
+#if defined (WEXT_USE)
       bool essid_is_cached = false;
       { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
         // check cache whether the configured ESSID (if any) is known
@@ -1293,9 +1393,11 @@ associate:
         inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
         break;
       } // end IF
-
       // --> configured && configured SSID known (i.e. cached)
       inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_SCANNED);
+#endif // WEXT_USE
+#endif // ACE_WIN32 || ACE_WIN64
+
       break;
     }
     case NET_WLAN_MONITOR_STATE_CONNECT:
@@ -1327,7 +1429,7 @@ associate:
       //         programmatically
       //ACE_ASSERT (!ACE_OS::strcmp (configuration_->SSID.c_str (),
       //                             SSID_string.c_str ()));
-#else
+#elif defined (ACE_LINUX)
       // *NOTE*: query the interface-local DHCP server on the current IP address
       //         lease (if any), and/or request an address for the configured
       //         interface
@@ -1338,141 +1440,129 @@ associate:
                                      0);
       ACE_Time_Value deadline;
 //      bool shutdown = false;
-#if defined (DHCLIENT_SUPPORT)
-      // *IMPORTANT NOTE*: for this to work:
-      //                   - a local ISC 'dhclient' process must be running
-      //                   - it must have been configured to listen for OMAPI
-      //                     (see also: man omapi(3), dhclient.conf(5)) traffic
-      // *NOTE*: the last precondition requires an entry 'omapi port [port]' in
-      //         /etc/dhclient.conf; this feature is not documented in current
-      //         versions, however
-      // sanity check(s)
-      if (unlikely (!Common_Tools::getProcessId (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DHCLIENT_EXECUTABLE_STRING))))
-        ACE_DEBUG ((LM_WARNING,
-                    ACE_TEXT ("DHCP client (executable was: \"%s\") process not found, continuing\n"),
-                    ACE_TEXT (NET_WLAN_MONITOR_DHCLIENT_EXECUTABLE_STRING)));
 
-      dhcpctl_handle connection_h = dhcpctl_null_handle;
-      dhcpctl_handle authenticator_h = dhcpctl_null_handle;
-      dhcpctl_handle interface_h = dhcpctl_null_handle;
-      dhcpctl_status wait_status = -1;
+#if defined (DHCLIENT_USE)
+      // sanity check(s)
+      ACE_ASSERT (connection_ != dhcpctl_null_handle);
+      ACE_ASSERT (interface_ == dhcpctl_null_handle);
+
+      dhcpctl_status client_status = -1;
       dhcpctl_data_string result_string = NULL;
-      dhcpctl_status status_i =
-          dhcpctl_connect (&connection_h,
-                           ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DHCLIENT_LOCALHOST_IP_STRING),
-                           NET_WLAN_MONITOR_DHCLIENT_OMAPI_PORT,
-                           authenticator_h);
+      std::string state_string;
+      isc_result_t status_i =
+          dhcpctl_new_object (&interface_,
+                              connection_,
+                              ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_INTERFACE_STRING));
       if (unlikely (status_i != ISC_R_SUCCESS))
       {
-        if (status_i == ISC_R_NOMORE)
-          ; // 29: client not listening on OMAPI port
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ::dhcpctl_connect(%s:%u): \"%s\", returning\n"),
-                    ACE_TEXT (NET_WLAN_MONITOR_DHCLIENT_LOCALHOST_IP_STRING),
-                    NET_WLAN_MONITOR_DHCLIENT_OMAPI_PORT,
+                    ACE_TEXT ("failed to ::dhcpctl_new_object(%@,%s): \"%s\", returning\n"),
+                    connection_,
+                    ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_INTERFACE_STRING),
                     ACE_TEXT (isc_result_totext (status_i))));
         break;
       } // end IF
-      ACE_ASSERT (connection_h != dhcpctl_null_handle);
+      ACE_ASSERT (interface_ != dhcpctl_null_handle);
       status_i =
-          dhcpctl_new_object (&interface_h,
-                              connection_h,
-                              ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DHCLIENT_OBJECT_INTERFACE_STRING));
-      if (unlikely (status_i != ISC_R_SUCCESS))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ::dhcpctl_new_object(0x%@,%s): \"%s\", returning\n"),
-                    connection_h,
-                    ACE_TEXT (NET_WLAN_MONITOR_DHCLIENT_OBJECT_INTERFACE_STRING),
-                    ACE_TEXT (isc_result_totext (status_i))));
-        goto clean;
-      } // end IF
-      ACE_ASSERT (interface_h != dhcpctl_null_handle);
-      status_i =
-          dhcpctl_set_string_value (interface_h,
+          dhcpctl_set_string_value (interface_,
                                     ACE_TEXT_ALWAYS_CHAR (configuration_->interfaceIdentifier.c_str ()),
-                                    ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DHCLIENT_OBJECT_VALUE_NAME_STRING));
+                                    ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_VALUE_NAME_STRING));
       if (unlikely (status_i != ISC_R_SUCCESS))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ::dhcpctl_set_string_value(0x%@,%s,\"%s\"): \"%s\", returning\n"),
-                    interface_h,
+                    ACE_TEXT ("failed to ::dhcpctl_set_string_value(%@,%s,\"%s\"): \"%s\", returning\n"),
+                    interface_,
                     ACE_TEXT (configuration_->interfaceIdentifier.c_str ()),
-                    ACE_TEXT (NET_WLAN_MONITOR_DHCLIENT_OBJECT_VALUE_NAME_STRING),
+                    ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_VALUE_NAME_STRING),
                     ACE_TEXT (isc_result_totext (status_i))));
-        goto clean;
+        break;
       } // end IF
-      status_i =
-          dhcpctl_open_object (interface_h,
-                               connection_h,
-                               DHCPCTL_CREATE | DHCPCTL_EXCL);
+      status_i = dhcpctl_open_object (interface_,
+                                      connection_,
+                                      DHCPCTL_CREATE);
       if (unlikely (status_i != ISC_R_SUCCESS))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ::dhcpctl_open_object(0x%@,0x%@,%d): \"%s\", returning\n"),
-                    interface_h,
-                    connection_h,
-                    DHCPCTL_CREATE | DHCPCTL_EXCL,
+                    ACE_TEXT ("failed to ::dhcpctl_open_object(%@,%@,%d): \"%s\", returning\n"),
+                    interface_,
+                    connection_,
+                    DHCPCTL_CREATE,
                     ACE_TEXT (isc_result_totext (status_i))));
-        goto clean;
+        break;
       } // end IF
-      // *TODO*: add a timeout here
-      status_i = dhcpctl_wait_for_completion (interface_h,
-                                              &wait_status);
+      // *TODO*: add a timeout here, or use asynchronous operations
+      status_i = dhcpctl_wait_for_completion (interface_,
+                                              &client_status);
       if (unlikely (status_i != ISC_R_SUCCESS))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ::dhcpctl_wait_for_completion(0x%@): \"%s\", returning\n"),
-                    interface_h,
+                    ACE_TEXT ("failed to ::dhcpctl_wait_for_completion(%@): \"%s\", returning\n"),
+                    interface_,
                     ACE_TEXT (isc_result_totext (status_i))));
-        goto clean;
+        break;
       } // end IF
-      if (unlikely (wait_status != ISC_R_SUCCESS))
+      if (unlikely (client_status != ISC_R_SUCCESS))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ::dhcpctl_open_object(0x%@,create|excl): \"%s\", returning\n"),
-                    interface_h,
-                    ACE_TEXT (isc_result_totext (wait_status))));
-        goto clean;
+                    ACE_TEXT ("failed to ::dhcpctl_open_object(%@,%d): \"%s\", returning\n"),
+                    interface_,
+                    DHCPCTL_CREATE,
+                    ACE_TEXT (isc_result_totext (client_status))));
+        break;
       } // end IF
+
+      // step1: verify interface state
       status_i =
           dhcpctl_get_value (&result_string,
-                             interface_h,
-                             ACE_TEXT_ALWAYS_CHAR (NET_WLAN_MONITOR_DHCLIENT_OBJECT_VALUE_STATE_STRING));
+                             interface_,
+                             ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_VALUE_STATE_STRING));
       if (unlikely (status_i != ISC_R_SUCCESS))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to ::dhcpctl_get_value(0x%@,\"%s\"): \"%s\", returning\n"),
-                    interface_h,
-                    ACE_TEXT (NET_WLAN_MONITOR_DHCLIENT_OBJECT_VALUE_STATE_STRING),
-                    ACE_TEXT (isc_result_totext (wait_status))));
-        goto clean;
+                    ACE_TEXT ("failed to ::dhcpctl_get_value(%@,\"%s\"): \"%s\", returning\n"),
+                    interface_,
+                    ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_VALUE_STATE_STRING),
+                    ACE_TEXT (isc_result_totext (status_i))));
+        break;
       } // end IF
       ACE_ASSERT (result_string);
-      dhcpctl_data_string_dereference (&result_string, MDL);
+      if (omapi_ds_strcmp (result_string,
+                           ACE_TEXT_ALWAYS_CHAR ("up")))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("\"%s\": invalid interface state (was: \"%s; expected: \"%s\"), returning\n"),
+                    ACE_TEXT (configuration_->interfaceIdentifier.c_str ()),
+                    ACE_TEXT (std::string (reinterpret_cast<char*> (result_string->value), result_string->len).c_str ()),
+                    ACE_TEXT ("up")));
 
-clean:
-      if (likely (interface_h != dhcpctl_null_handle))
-      {
-        status_i = omapi_object_dereference (&interface_h, MDL);
-        if (unlikely (status_i != ISC_R_SUCCESS))
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ::omapi_object_dereference(0x%@): \"%s\", continuing\n"),
-                      interface_h,
-                      ACE_TEXT (isc_result_totext (wait_status))));
+        dhcpctl_data_string_dereference (&result_string, MDL);
+
+        break;
       } // end IF
-      if (likely (connection_h != dhcpctl_null_handle))
+      status_i =
+          dhcpctl_data_string_dereference (&result_string, MDL);
+      ACE_ASSERT (status_i == ISC_R_SUCCESS);
+
+      // step2: verify interface has a valid lease
+      if (unlikely (!Net_Common_Tools::hasActiveLease (connection_,
+                                                       configuration_->interfaceIdentifier)))
       {
-        status_i = omapi_disconnect (connection_h, 0);
-        if (unlikely (status_i != ISC_R_SUCCESS))
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to ::omapi_disconnect(0x%@,%d): \"%s\", continuing\n"),
-                      connection_h, 0,
-                      ACE_TEXT (isc_result_totext (wait_status))));
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("\"%s\": failed to Net_Common_Tools::hasActiveLease(%@), continuing\n"),
+                    ACE_TEXT (configuration_->interfaceIdentifier.c_str ()),
+                    connection_));
+//        break;
       } // end IF
 #endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#elif defined (ACE_LINUX)
+#if defined (WEXT_USE)
       inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_CONNECTED);
+#endif // WEXT_USE
+#endif // ACE_WIN32 || ACE_WIN64
+
       break;
     }
     case NET_WLAN_MONITOR_STATE_DISCONNECT:
@@ -1501,7 +1591,7 @@ clean:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       // *NOTE*: apparently, the Win32 API currently does not let developers
       //         interfere with the DHCP addressing process programmatically
-#else
+#elif defined (ACE_LINUX)
 #if defined (DHCLIENT_SUPPORT)
       // sanity check(s)
       ACE_ASSERT (Common_Tools::getProcessId (ACE_TEXT_ALWAYS_CHAR ("dhclient")));
@@ -1530,6 +1620,14 @@ clean:
 
       // sanity check(s)
       ACE_ASSERT (configuration_);
+
+      try {
+        onScanComplete (configuration_->interfaceIdentifier);
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onScanComplete(\"%s\"), continuing\n"),
+                    ACE_TEXT (configuration_->interfaceIdentifier.c_str ())));
+      }
 
       std::string SSID_string = this->SSID ();
       if (unlikely (!isConnectionNotified_ &&
@@ -1601,6 +1699,7 @@ clean:
       } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_USE)
       if (unlikely (!Net_WLAN_Tools::setDeviceSettingBool (clientHandle_,
                                                            configuration_->interfaceIdentifier,
                                                            wlan_intf_opcode_autoconf_enabled,
@@ -1625,13 +1724,14 @@ clean:
                                                            configuration_->interfaceIdentifier,
                                                            wlan_intf_opcode_media_streaming_mode,
                                                            configuration_->enableMediaStreamingMode)))
-        ACE_DEBUG ((LM_ERROR,NET_WLAN_MONITOR_STATE_DISASSOCIATE
+        ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("\"%s\": failed to Net_WLAN_Tools::setDeviceSettingBool(0x%@,%d,%s), continuing\n"),
                     ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ()),
                     clientHandle_,
                     wlan_intf_opcode_media_streaming_mode,
                     (configuration_->enableMediaStreamingMode ? ACE_TEXT ("true") : ACE_TEXT ("false"))));
-#else
+#endif // WLANAPI_USE
+#elif defined (ACE_LINUX)
       // *TODO*: optimize tx-power
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -1875,12 +1975,13 @@ Net_WLAN_Monitor_Base_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::onAssociate"));
 
+  struct ether_addr ether_addr_s, ether_addr_2;
+  ACE_OS::memset (&ether_addr_2, 0, sizeof (struct ether_addr));
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   // sanity check(s)
   ACE_ASSERT (clientHandle_ != ACE_INVALID_HANDLE);
   ACE_ASSERT (configuration_);
 
-  struct ether_addr ether_addr_s, ether_addr_2;
   ether_addr_s =
     Net_WLAN_Tools::associatedBSSID (clientHandle_,
                                      interfaceIdentifier_in);
@@ -1967,21 +2068,20 @@ Net_WLAN_Monitor_Base_T<AddressType,
                 ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_2.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
                 ACE_TEXT (SSID_in.c_str ())));
 #else
-  Net_WLAN_AccessPointCacheConstIterator_t iterator;
   { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
-    iterator =
-      SSIDCache_.find (configuration_->SSID);
-    if (unlikely (iterator == SSIDCache_.end ()))
-      goto continue_; // *NOTE*: nost probable reason: not scanned yet (associated on start ?)
-    struct ether_addr ether_addr_s =
-        Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in);
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("\"%s\": (MAC: %s) associated with access point (MAC: %s; SSID: %s)\n"),
-                ACE_TEXT (interfaceIdentifier_in.c_str ()),
-                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s), NET_LINKLAYER_802_11).c_str ()),
-                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&(*iterator).second.second), NET_LINKLAYER_802_11).c_str ()),
-                ACE_TEXT (SSID_in.c_str ())));
+    Net_WLAN_AccessPointCacheConstIterator_t iterator =
+        SSIDCache_.find (configuration_->SSID);
+    if (likely (iterator != SSIDCache_.end ())) // *NOTE*: might not have scan results yet
+      ether_addr_2 = (*iterator).second.second.linkLayerAddress;
   } // end lock scope
+  ether_addr_s =
+      Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in);
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("\"%s\": (MAC: %s) associated with access point (MAC: %s; SSID: %s)\n"),
+              ACE_TEXT (interfaceIdentifier_in.c_str ()),
+              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
+              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_2.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
+              ACE_TEXT (SSID_in.c_str ())));
 #endif // ACE_WIN32 || ACE_WIN64
 continue_:
   ;

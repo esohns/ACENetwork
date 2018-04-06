@@ -100,16 +100,6 @@
 
 #define NET_WLAN_DBUS_WPASUPPLICANT_OBJECT_PATH                  "/fi/w1/wpa_supplicant1"
 #endif // DBUS_SUPPORT
-
-#if defined (DHCLIENT_SUPPORT)
-#define NET_WLAN_MONITOR_DHCLIENT_EXECUTABLE_STRING                       "dhclient"
-#define NET_WLAN_MONITOR_DHCLIENT_LOCALHOST_IP_STRING                     "127.0.0.1"
-#define NET_WLAN_MONITOR_DHCLIENT_OMAPI_PORT                              7911
-
-#define NET_WLAN_MONITOR_DHCLIENT_OBJECT_INTERFACE_STRING                 "interface"
-#define NET_WLAN_MONITOR_DHCLIENT_OBJECT_VALUE_NAME_STRING                "name"
-#define NET_WLAN_MONITOR_DHCLIENT_OBJECT_VALUE_STATE_STRING               "state"
-#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 #define NET_WLAN_MONITOR_THREAD_NAME                                      "WLAN monitor"

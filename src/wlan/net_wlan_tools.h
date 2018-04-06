@@ -25,10 +25,14 @@
 
 #include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_SUPPORT)
 #include <wlanapi.h>
-#else
+#endif // WLANAPI_SUPPORT
+#elif defined (ACE_LINUX)
 #if defined (NL80211_SUPPORT)
 #include <linux/nl80211.h>
+
+#include <netlink/handlers.h>
 #endif // NL80211_SUPPORT
 
 #if defined (DBUS_SUPPORT)
@@ -47,11 +51,11 @@
 
 // forward declarations
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#elif defined (ACE_LINUX)
 #if defined (NL80211_SUPPORT)
 struct sockaddr_nl;
 struct nlmsgerr;
-//struct nl_msg;
+struct nl_msg;
 
 // error handling
 int
@@ -205,8 +209,8 @@ class Net_WLAN_Tools
 #if defined (DBUS_SUPPORT)
   // NetworkManager
   static Net_InterfaceIdentifiers_t getInterfaces (struct DBusConnection*, // DBus connection handle
-                                                   int = AF_UNSPEC, // address family {default: any; pass AF_MAX for any IP}
-                                                   int = 0);        // flag(s) (e.g. IFF_UP; may be ORed)
+                                                   int = AF_UNSPEC,        // address family {default: any; pass AF_MAX for any IP}
+                                                   int = 0);               // flag(s) (e.g. IFF_UP; may be ORed)
 
   static std::string associatedSSID (struct DBusConnection*, // DBus connection handle
                                      const std::string&);    // interface identifier
@@ -221,37 +225,35 @@ class Net_WLAN_Tools
   static ACE_INET_Addr getGateway (const std::string&,      // interface identifier
                                    struct DBusConnection*); // DBus connection handle
 
-  static std::string accessPointDBusPathToSSID (struct DBusConnection*, // DBus connection handle
-                                                const std::string&);    // access point object path
-  static std::string activeConnectionDBusPathToDeviceDBusPath (struct DBusConnection*, // DBus connection handle
-                                                               const std::string&);    // active connection object path
-  static std::string activeConnectionDBusPathToIp4ConfigDBusPath (struct DBusConnection*, // DBus connection handle
-                                                                  const std::string&);    // connection object path
-  static std::string connectionDBusPathToSSID (struct DBusConnection*, // DBus connection handle
-                                               const std::string&);    // connection object path
-  static std::string deviceDBusPathToActiveAccessPointDBusPath (struct DBusConnection*, // DBus connection handle
-                                                                const std::string&);    // device object path
-  static std::string deviceDBusPathToIdentifier (struct DBusConnection*, // DBus connection handle
-                                                 const std::string&);    // device object path
-  static std::string deviceDBusPathToIp4ConfigDBusPath (struct DBusConnection*, // DBus connection handle
-                                                        const std::string&);    // device object path
-  static std::string deviceToDBusPath (struct DBusConnection*, // DBus connection handle
-                                       const std::string&);    // interface identifier
-  static std::string Ip4ConfigDBusPathToGateway (struct DBusConnection*, // DBus connection handle
-                                                 const std::string&);    // IPv4Config object path
-  static std::string SSIDToAccessPointDBusPath (struct DBusConnection*, // DBus connection handle
-                                                const std::string&,     // device object path
-                                                const std::string&);    // SSID
-  static std::string SSIDToDeviceDBusPath (struct DBusConnection*, // DBus connection handle
-                                           const std::string&);    // SSID
-  static std::string SSIDToConnectionDBusPath (struct DBusConnection*, // DBus connection handle
-                                               const std::string&,     // device object path
-                                               const std::string&);    // SSID
+  static std::string accessPointDBusObjectPathToSSID (struct DBusConnection*, // DBus connection handle
+                                                      const std::string&);    // access point object path
+  static std::string activeConnectionDBusObjectPathToDeviceDBusObjectPath (struct DBusConnection*, // DBus connection handle
+                                                                           const std::string&);    // active connection object path
+  static std::string activeConnectionDBusObjectPathToIp4ConfigDBusObjectPath (struct DBusConnection*, // DBus connection handle
+                                                                              const std::string&);    // connection object path
+  static std::string connectionDBusObjectPathToSSID (struct DBusConnection*, // DBus connection handle
+                                                     const std::string&);    // connection object path
+  static std::string deviceDBusObjectPathToActiveAccessPointDBusObjectPath (struct DBusConnection*, // DBus connection handle
+                                                                            const std::string&);    // device object path
+  static std::string deviceDBusObjectPathToIdentifier (struct DBusConnection*, // DBus connection handle
+                                                       const std::string&);    // device object path
+  static std::string deviceDBusObjectPathToIp4ConfigDBusObjectPath (struct DBusConnection*, // DBus connection handle
+                                                                    const std::string&);    // device object path
+  static std::string deviceToDBusObjectPath (struct DBusConnection*, // DBus connection handle
+                                             const std::string&);    // interface identifier
+  static std::string Ip4ConfigDBusObjectPathToGateway (struct DBusConnection*, // DBus connection handle
+                                                       const std::string&);    // IPv4Config object path
+  static std::string SSIDToAccessPointDBusObjectPath (struct DBusConnection*, // DBus connection handle
+                                                      const std::string&,     // device object path
+                                                      const std::string&);    // SSID
+  static std::string SSIDToDeviceDBusObjectPath (struct DBusConnection*, // DBus connection handle
+                                                 const std::string&);    // SSID
+  static std::string SSIDToConnectionDBusObjectPath (struct DBusConnection*, // DBus connection handle
+                                                     const std::string&,     // device object path
+                                                     const std::string&);    // SSID
 
   // wpa_supplicant
-  static bool isWPASupplicantManagingInterface (struct DBusConnection*,
-                                                const std::string&);
-  static bool WPASupplicantHandleInterface (struct DBusConnection*,
+  static bool WPASupplicantManageInterface (struct DBusConnection*,
                                             const std::string&,
                                             bool); // toggle
 #endif // DBUS_SUPPORT
@@ -265,7 +267,18 @@ class Net_WLAN_Tools
 
   // helper methods
 #if defined (ACE_LINUX)
+#if defined (NL80211_SUPPORT)
+  // *NOTE*: fire-and-forget API for the last argument
+  static bool nL80211Command (struct nl_sock*,     // socket handle
+                              nl_recvmsg_msg_cb_t, // message handler callback
+                              void*,               // message handler callback user data
+                              const std::string&,  // interface identifier (sets NL80211_ATTR_IFINDEX, if any)
+                              struct nl_msg*&);    // message handle
+#endif // NL80211_SUPPORT
 #if defined (DBUS_SUPPORT)
+  static bool isWPASupplicantManagingInterface (struct DBusConnection*,
+                                                const std::string&);
+
   static std::string dBusObjectPathToIdentifier (struct DBusConnection*,
                                                  const std::string&);
   static std::string identifierToDBusObjectPath (struct DBusConnection*,

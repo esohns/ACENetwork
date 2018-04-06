@@ -41,6 +41,7 @@
 #include "common_iget.h"
 #include "common_iinitialize.h"
 #include "common_ilock.h"
+#include "common_istatemachine.h"
 #include "common_isubscribe.h"
 #include "common_itaskcontrol.h"
 
@@ -114,6 +115,7 @@ class Net_WLAN_IMonitorCB
 
 class Net_WLAN_IMonitorBase
  : public Net_WLAN_IMonitorCB
+// , virtual public Common_IStateMachine_T<enum Net_WLAN_MonitorState>
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
  , public Common_IGet_T<HANDLE>

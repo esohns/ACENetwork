@@ -28,6 +28,13 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <guiddef.h>
 #include <wlanapi.h>
+#elif defined (ACE_LINUX)
+#if defined (DHCLIENT_SUPPORT)
+extern "C"
+{
+#include "dhcpctl/dhcpctl.h"
+}
+#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Global_Macros.h"
@@ -55,15 +62,21 @@
 
 // forward declarations
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_SUPPORT)
 void WINAPI
 network_wlan_default_notification_cb (PWLAN_NOTIFICATION_DATA,
                                       PVOID);
-#else
-#if defined (WEXT_SUPPORT)
-#elif defined (NL80211_SUPPORT)
+#endif // WLANAPI_SUPPORT
+#elif defined (ACE_LINUX)
+#if defined (NL80211_SUPPORT)
 struct nl_sock;
-#elif defined (DBUS_SUPPORT)
-#endif // WEXT_SUPPORT
+#endif // NL80211_SUPPORT
+
+#if defined (DHCLIENT_SUPPORT)
+void net_wlan_dhclient_cb (dhcpctl_handle, // omapi object handle
+                           dhcpctl_status, // result status
+                           void*);         // user data
+#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 template <typename AddressType,
@@ -89,6 +102,7 @@ class Net_WLAN_Monitor_Base_T
 
  public:
   // convenient types
+  typedef Net_WLAN_MonitorStateMachine STATEMACHINE_T;
   typedef Net_WLAN_IMonitor_T<AddressType,
                               ConfigurationType> INTERFACE_T;
   typedef std::list<Net_WLAN_IMonitorCB*> SUBSCRIBERS_T;
@@ -148,7 +162,7 @@ class Net_WLAN_Monitor_Base_T
   long                                  scanTimerId_;
   Common_TimerHandler                   timerHandler_;
   Common_ITimer_t*                      timerInterface_;
-#else
+#elif defined (ACE_LINUX)
 #if defined (WEXT_SUPPORT)
   void*                                 buffer_; // scan results
   size_t                                bufferSize_;
@@ -160,6 +174,11 @@ class Net_WLAN_Monitor_Base_T
 #endif // NL80211_SUPPORT
 #if defined (DBUS_SUPPORT)
 #endif // DBUS_SUPPORT
+
+#if defined (DHCLIENT_SUPPORT)
+  dhcpctl_handle                        connection_;
+  dhcpctl_handle                        interface_;
+#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
   ConfigurationType*                    configuration_;
   bool                                  isActive_;
@@ -254,7 +273,7 @@ class Net_WLAN_Monitor_Base_T
   virtual void onChange (enum Net_WLAN_MonitorState); // new state
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#elif defined (ACE_LINUX)
   // override some ACE_Event_Handler methods
 #if defined (WEXT_SUPPORT)
   inline virtual ACE_HANDLE get_handle (void) const { return handle_; }

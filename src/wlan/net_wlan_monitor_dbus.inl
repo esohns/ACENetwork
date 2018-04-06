@@ -173,11 +173,11 @@ Net_WLAN_Monitor_T<AddressType,
        ++iterator)
   {
     device_object_path =
-        Net_WLAN_Tools::deviceToDBusPath (connection_,
-                                          *iterator);
+        Net_WLAN_Tools::deviceToDBusObjectPath (connection_,
+                                                *iterator);
     if (unlikely (device_object_path.empty ()))
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceToDBusPath(\"%s\"), continuing\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceToDBusObjectPath(\"%s\"), continuing\n"),
                   ACE_TEXT ((*iterator).c_str ())));
     else
       ACE_DEBUG ((LM_DEBUG,
@@ -294,7 +294,7 @@ Net_WLAN_Monitor_T<AddressType,
 
   inherited::stop (waitForCompletion_in,
                    lockedAccess_in);
-//  deviceDBusPath_.resize (0);
+//  deviceDBusObjectPath_.resize (0);
 
   inherited::isActive_ = false;
 }
@@ -445,12 +445,12 @@ Net_WLAN_Monitor_T<AddressType,
     else
     {
       device_object_path_string =
-          Net_WLAN_Tools::deviceToDBusPath (connection_,
+          Net_WLAN_Tools::deviceToDBusObjectPath (connection_,
                                             (*iterator).second.first);
       if (unlikely (device_object_path_string.empty ()))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_WLAN_Tools::deviceToDBusPath(0x%@,\"%s\"), aborting\n"),
+                    ACE_TEXT ("failed to Net_WLAN_Tools::deviceToDBusObjectPath(0x%@,\"%s\"), aborting\n"),
                     connection_,
                     ACE_TEXT ((*iterator).second.first.c_str ())));
         return false;
@@ -460,12 +460,12 @@ Net_WLAN_Monitor_T<AddressType,
   else
   {
     device_object_path_string =
-        Net_WLAN_Tools::SSIDToDeviceDBusPath (connection_,
+        Net_WLAN_Tools::SSIDToDeviceDBusObjectPath (connection_,
                                               SSID_in);
     if (unlikely (device_object_path_string.empty ()))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLAN_Tools::SSIDToDeviceDBusPath(0x%@,%s), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::SSIDToDeviceDBusObjectPath(0x%@,%s), aborting\n"),
                   connection_,
                   ACE_TEXT (SSID_in.c_str ())));
       return false;
@@ -475,13 +475,13 @@ Net_WLAN_Monitor_T<AddressType,
 
   // step2: retrieve corresponding access point object path
   std::string access_point_object_path_string =
-      Net_WLAN_Tools::SSIDToAccessPointDBusPath (connection_,
+      Net_WLAN_Tools::SSIDToAccessPointDBusObjectPath (connection_,
                                                  device_object_path_string,
                                                  SSID_in);
   if (unlikely (access_point_object_path_string.empty ()))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_WLAN_Tools::SSIDToAccessPointDBusPath(0x%@,\"%s\",%s), aborting\n"),
+                ACE_TEXT ("failed to Net_WLAN_Tools::SSIDToAccessPointDBusObjectPath(0x%@,\"%s\",%s), aborting\n"),
                 connection_,
                 ACE_TEXT (device_object_path_string.c_str ()),
                 ACE_TEXT (SSID_in.c_str ())));
@@ -490,13 +490,13 @@ Net_WLAN_Monitor_T<AddressType,
 
   // step3: retrieve available and matching connection profile(s)
   std::string connection_object_path_string =
-      Net_WLAN_Tools::SSIDToConnectionDBusPath (connection_,
+      Net_WLAN_Tools::SSIDToConnectionDBusObjectPath (connection_,
                                                 device_object_path_string,
                                                 SSID_in);
   if (unlikely (connection_object_path_string.empty ()))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_WLAN_Tools::SSIDToConnectionDBusPath(0x%@,\"%s\",%s), aborting\n"),
+                ACE_TEXT ("failed to Net_WLAN_Tools::SSIDToConnectionDBusObjectPath(0x%@,\"%s\",%s), aborting\n"),
                 connection_,
                 ACE_TEXT (device_object_path_string.c_str ()),
                 ACE_TEXT (SSID_in.c_str ())));

@@ -29,8 +29,10 @@
 #include <guiddef.h>
 #include <wlanapi.h>
 #else
+#if defined (DBUS_SUPPORT)
 #include "dbus/dbus.h"
-#endif
+#endif // DBUS_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/INET_Addr.h"
 #include "ace/Singleton.h"
@@ -40,7 +42,7 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "common_timer_common.h"
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "net_defines.h"
 
@@ -54,6 +56,7 @@ struct  Net_WLAN_MonitorConfiguration
   Net_WLAN_MonitorConfiguration ()
    : autoAssociate (false)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_SUPPORT)
    , enableBackgroundScans (NET_WLAN_MONITOR_WIN32_DEFAULT_BACKGROUNDSCANS ? TRUE : FALSE)
    , enableAutoConf (NET_WLAN_MONITOR_WIN32_DEFAULT_AUTOCONF ? TRUE : FALSE)
    , enableMediaStreamingMode (NET_WLAN_MONITOR_WIN32_DEFAULT_MEDIASTREAMINGMODE ? TRUE : FALSE)
@@ -61,7 +64,8 @@ struct  Net_WLAN_MonitorConfiguration
    , notificationCB (NULL)
    , notificationCBData (NULL)
    , timerInterface (NULL)
-#else
+#endif // WLANAPI_SUPPORT
+#elif defined (ACE_LINUX)
    , enableBackgroundScans (NET_WLAN_MONITOR_UNIX_DEFAULT_BACKGROUNDSCANS)
    , interfaceIdentifier ()
 #if defined (NL80211_SUPPORT)
@@ -86,6 +90,7 @@ struct  Net_WLAN_MonitorConfiguration
 
   bool                          autoAssociate;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_SUPPORT)
   BOOL                          enableAutoConf;
   // *NOTE*: "...Background scan can only be disabled when the interface is in
   //         the connected state. Background scan is disabled if at least one
@@ -101,7 +106,8 @@ struct  Net_WLAN_MonitorConfiguration
   WLAN_NOTIFICATION_CALLBACK    notificationCB;
   PVOID                         notificationCBData;
   Common_ITimer_t*              timerInterface;
-#else
+#endif // WLANAPI_SUPPORT
+#elif defined (ACE_LINUX)
   bool                          enableBackgroundScans;
   std::string                   interfaceIdentifier;
 #if defined (NL80211_SUPPORT)
@@ -149,7 +155,7 @@ typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
 typedef ACE_Singleton<Net_WLAN_InetWlanAPIMonitor_t,
                       ACE_SYNCH_MUTEX> NET_WLAN_INETWLANAPIMONITOR_SINGLETON;
 #endif // WLANAPI_SUPPORT
-#else
+#elif defined (ACE_LINUX)
 #if defined (WEXT_SUPPORT)
 typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
                                ACE_MT_SYNCH,
@@ -178,4 +184,5 @@ typedef ACE_Singleton<Net_WLAN_InetDBusMonitor_t,
                       ACE_SYNCH_MUTEX> NET_WLAN_INETDBUSMONITOR_SINGLETON;
 #endif // DBUS_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
+
 #endif

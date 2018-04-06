@@ -25,6 +25,16 @@
 #include <string>
 
 #include "ace/config-lite.h"
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#elif defined (ACE_LINUX)
+#if defined (DHCLIENT_SUPPORT)
+extern "C"
+{
+#include "dhcpctl/dhcpctl.h"
+}
+#endif // DHCLIENT_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
+
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
@@ -48,6 +58,12 @@ class Net_Common_Tools
 {
  public:
   // physical layer
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  static bool toggleInterface (REFGUID);
+#else
+    static bool isInterfaceEnabled (const std::string&);
+    static bool toggleInterface (const std::string&);
+#endif // ACE_WIN32 || ACE_WIN64
 
   // link layer
   // *NOTE*: today, such general-purpose link-layer APIs really do not make much
@@ -247,9 +263,18 @@ class Net_Common_Tools
 
   // --- OS services ---
 #if defined (ACE_LINUX)
-  static bool isNetworkManagerManagingInterface (const std::string&);
-  static bool networkManagerHandleInterface (const std::string&,
+//  static bool ifUpDownManageInterface (const std::string&,
+//                                       bool); // toggle
+
+  static bool networkManagerManageInterface (const std::string&,
                                              bool); // toggle
+
+#if defined (DHCLIENT_SUPPORT)
+  static bool DHClientOmapiSupport (bool); // toggle
+
+  static bool hasActiveLease (dhcpctl_handle,      // connection handle
+                              const std::string&); // interface identifier
+#endif // DHCLIENT_SUPPORT
 #endif // ACE_LINUX
 
  private:
@@ -257,6 +282,17 @@ class Net_Common_Tools
   ACE_UNIMPLEMENTED_FUNC (virtual ~Net_Common_Tools ())
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools (const Net_Common_Tools&))
   ACE_UNIMPLEMENTED_FUNC (Net_Common_Tools& operator= (const Net_Common_Tools&))
+
+  // helper methods
+#if defined (ACE_LINUX)
+  static bool isIfUpDownManagingInterface (const std::string&);
+
+  static bool isNetworkManagerManagingInterface (const std::string&);
+
+#if defined (DHCLIENT_SUPPORT)
+  static bool hasDHClientOmapiSupport ();
+#endif // DHCLIENT_SUPPORT
+#endif // ACE_LINUX
 };
 
 #endif

@@ -22,16 +22,17 @@
 #include "ace/Synch.h"
 #include "net_wlan_monitor.h"
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-#if defined (DBUS_SUPPORT)
-#include "NetworkManager.h"
-#endif // DBUS_SUPPORT
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//#elif defined (ACE_LINUX)
+//#if defined (DBUS_SUPPORT)
+//#include "NetworkManager.h"
+//#endif // DBUS_SUPPORT
 
-#include "net_configuration.h"
-#endif // ACE_WIN32 || ACE_WIN64
+//#include "net_configuration.h"
+//#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_SUPPORT)
 void WINAPI
 network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
                                       PVOID context_in)
@@ -425,6 +426,38 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
               ACE_TEXT (notification_string.c_str ()),
               ((reason_i != WLAN_REASON_CODE_SUCCESS) ? ACE_TEXT (": ")   : ACE_TEXT ("")),
               ((reason_i != WLAN_REASON_CODE_SUCCESS) ? ACE_TEXT_WCHAR_TO_TCHAR (buffer) : ACE_TEXT (""))));
-#endif
+#endif // _DEBUG
+#endif // WLANAPI_SUPPORT
+#elif defined (ACE_LINUX)
+#if defined (DHCLIENT_SUPPORT)
+void
+net_wlan_dhclient_cb (dhcpctl_handle handle_in,
+                      dhcpctl_status status_in,
+                      void* userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::net_wlan_dhclient_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (handle_in != dhcpctl_null_handle);
+  ACE_ASSERT (userData_in);
+
+//  Net_WLAN_IMonitorCB* iwlanmonitor_cb_p =
+//    static_cast<Net_WLAN_IMonitorCB*> (userData_in);
+
+  if (unlikely (status_in != ISC_R_SUCCESS))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("dhclient result: \"%s\" (handle was: %@)\n"),
+                ACE_TEXT (isc_result_totext (status_in)),
+                handle_in));
+  else
+  {
+#if defined (_DEBUG)
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("dhclient result: \"%s\" (handle was: %@)\n"),
+                ACE_TEXT (isc_result_totext (status_in)),
+                handle_in));
+#endif // _DEBUG
+  } // end ELSE
 }
+#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64

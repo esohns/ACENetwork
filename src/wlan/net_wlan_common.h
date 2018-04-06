@@ -51,6 +51,28 @@
 #include "net_wlan_profile_xml_handler.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
+enum Net_WLAN_MonitorState
+{
+  NET_WLAN_MONITOR_STATE_INVALID     = -1,
+  // -------------------------------------
+  // 'transitional' states (task-/timeout-oriented, i.e. may return to previous
+  // state upon completion)
+  NET_WLAN_MONITOR_STATE_IDLE        = 0,  // idle (i.e. waiting between scans/connection attempts/...)
+  NET_WLAN_MONITOR_STATE_SCAN,             // scanning
+  NET_WLAN_MONITOR_STATE_ASSOCIATE,        // associating to AP
+  NET_WLAN_MONITOR_STATE_CONNECT,          // requesting IP address (e.g. DHCP)
+  NET_WLAN_MONITOR_STATE_DISCONNECT,       // releasing IP address (e.g. DHCP)
+  NET_WLAN_MONITOR_STATE_DISASSOCIATE,     // disassociating from AP
+  ////////////////////////////////////////
+  // 'static' states (discrete/persisting, i.e. long(er)-term)
+  NET_WLAN_MONITOR_STATE_INITIALIZED,      // initialized
+  NET_WLAN_MONITOR_STATE_SCANNED,          // scanning complete
+  NET_WLAN_MONITOR_STATE_ASSOCIATED,       // associated to AP
+  NET_WLAN_MONITOR_STATE_CONNECTED,        // 'online': interface is associated to AP and has a valid IP address
+  ////////////////////////////////////////
+  NET_WLAN_MONITOR_STATE_MAX
+};
+
 enum Net_WLAN_MonitorAPIType
 {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -74,7 +96,7 @@ struct Net_WLAN_IEEE802_11_InformationElement
 {
   uint8_t  id;
   uint8_t  length;
-  uint8_t* data;
+  uint8_t  data[];
 #if defined (__GNUC__)
 } __attribute__ ((__packed__));
 #else
@@ -149,7 +171,7 @@ typedef Common_XML_Parser_T<ACE_MT_SYNCH,
                             struct Common_XML_ParserConfiguration,
                             struct Net_WLAN_Profile_ParserContext,
                             Net_WLAN_Profile_XML_Handler> Net_WLAN_Profile_Parser_t;
-#else
+#elif defined (ACE_LINUX)
 #if defined (NL80211_SUPPORT)
 typedef std::map<std::string, int> Net_WLAN_nl80211_MulticastGroupIds_t;
 typedef Net_WLAN_nl80211_MulticastGroupIds_t::iterator Net_WLAN_nl80211_MulticastGroupIdsIterator_t;

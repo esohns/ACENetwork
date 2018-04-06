@@ -35,27 +35,7 @@
 #include "common_time_common.h"
 #endif
 
-enum Net_WLAN_MonitorState
-{
-  NET_WLAN_MONITOR_STATE_INVALID     = -1,
-  // -------------------------------------
-  // 'transitional' states (task-/timeout-oriented, i.e. may return to previous
-  // state upon completion)
-  NET_WLAN_MONITOR_STATE_IDLE        = 0,  // idle (i.e. waiting between scans/connection attempts/...)
-  NET_WLAN_MONITOR_STATE_SCAN,             // scanning
-  NET_WLAN_MONITOR_STATE_ASSOCIATE,        // associating to AP
-  NET_WLAN_MONITOR_STATE_CONNECT,          // requesting IP address (e.g. DHCP)
-  NET_WLAN_MONITOR_STATE_DISCONNECT,       // releasing IP address (e.g. DHCP)
-  NET_WLAN_MONITOR_STATE_DISASSOCIATE,     // disassociating from AP
-  ////////////////////////////////////////
-  // 'static' states (discrete/persisting, i.e. long(er)-term)
-  NET_WLAN_MONITOR_STATE_INITIALIZED,      // initialized
-  NET_WLAN_MONITOR_STATE_SCANNED,          // scanning complete
-  NET_WLAN_MONITOR_STATE_ASSOCIATED,       // associated to AP
-  NET_WLAN_MONITOR_STATE_CONNECTED,        // 'online': interface is associated to AP and has a valid IP address
-  ////////////////////////////////////////
-  NET_WLAN_MONITOR_STATE_MAX
-};
+#include "net_wlan_common.h"
 
 extern const char network_wlan_statemachine_monitor_name_string_[];
 
@@ -75,7 +55,7 @@ class Net_WLAN_MonitorStateMachine
                                       Common_TimePolicy_t,
                                       Common_ILock_T<ACE_MT_SYNCH>,
                                       enum Net_WLAN_MonitorState>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   typedef Common_StateMachine_T<network_wlan_statemachine_monitor_name_string_,
@@ -88,7 +68,7 @@ class Net_WLAN_MonitorStateMachine
                                       Common_TimePolicy_t,
                                       Common_ILock_T<ACE_MT_SYNCH>,
                                       enum Net_WLAN_MonitorState> inherited;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
  public:
   Net_WLAN_MonitorStateMachine ();
@@ -97,6 +77,7 @@ class Net_WLAN_MonitorStateMachine
   // implement (part of) Common_IStateMachine_T
   inline virtual bool initialize () { change (NET_WLAN_MONITOR_STATE_INITIALIZED); return true; }
   inline virtual void reset () { initialize (); }
+  virtual bool change (enum Net_WLAN_MonitorState); // new state
   virtual std::string stateToString (enum Net_WLAN_MonitorState) const;
 
  protected:
@@ -114,7 +95,6 @@ class Net_WLAN_MonitorStateMachine
 
   // implement (part of) Common_IStateMachine_T
   // *NOTE*: only derived classes can change state
-  virtual bool change (enum Net_WLAN_MonitorState); // new state
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_MonitorStateMachine (const Net_WLAN_MonitorStateMachine&))
@@ -127,6 +107,6 @@ class Net_WLAN_MonitorStateMachine
 typedef Common_IStateMachine_T<enum Net_WLAN_MonitorState> Net_WLAN_Monitor_IStateMachine_t;
 #else
 typedef Common_IStateMachine_2<enum Net_WLAN_MonitorState> Net_WLAN_Monitor_IStateMachine_t;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #endif

@@ -80,9 +80,11 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
   if (dbus_message_get_type (message_in) != DBUS_MESSAGE_TYPE_SIGNAL)
     return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
   ACE_ASSERT (userData_in);
-  Net_WLAN_IMonitorBase* imonitorbase_p =
+  Net_WLAN_IMonitorBase* imonitor_p =
       static_cast<Net_WLAN_IMonitorBase*> (userData_in);
-  ACE_ASSERT (imonitorbase_p);
+  Net_WLAN_Monitor_IStateMachine_t* istate_machine_p =
+      dynamic_cast<Net_WLAN_Monitor_IStateMachine_t*> (imonitor_p);
+  ACE_ASSERT (istate_machine_p);
 
   bool result = false;
   struct DBusError error_s;
@@ -112,12 +114,12 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
 
     object_path_string = object_path_p;
     interface_identifier_string =
-        Net_WLAN_Tools::deviceDBusPathToIdentifier (connection_in,
-                                                    object_path_string);
+        Net_WLAN_Tools::deviceDBusObjectPathToIdentifier (connection_in,
+                                                          object_path_string);
     if (interface_identifier_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusPathToIdentifier(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusObjectPathToIdentifier(\"%s\"), aborting\n"),
                   ACE_TEXT (object_path_string.c_str ())));
       goto continue_;
     } // end IF
@@ -126,14 +128,14 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
     Common_ISet2R_T<std::string,
                     std::string>* iset_p =
         dynamic_cast<Common_ISet2R_T<std::string,
-                                     std::string>*> (imonitorbase_p);
+                                     std::string>*> (imonitor_p);
     ACE_ASSERT (iset_p);
     iset_p->set2R (interface_identifier_string,
                    object_path_string);
 
     try {
-      imonitorbase_p->onHotPlug (interface_identifier_string,
-                                     true);
+      imonitor_p->onHotPlug (interface_identifier_string,
+                             true);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB;;onHotPlug(), continuing\n")));
@@ -165,17 +167,17 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
     Common_IGet1RR_2_T<std::string,
                        std::string>* iget_p =
         dynamic_cast<Common_IGet1RR_2_T<std::string,
-                                        std::string>*> (imonitorbase_p);
+                                        std::string>*> (imonitor_p);
     ACE_ASSERT (iget_p);
     // *NOTE*: this fails, the device has gone away
 //    interface_identifier_string =
-//        Net_Common_Tools::deviceDBusPathToIdentifier (connection_in,
+//        Net_Common_Tools::deviceDBusObjectPathToIdentifier (connection_in,
 //                                                      object_path_string);
     interface_identifier_string = iget_p->get1RR_2 (object_path_string);
     if (interface_identifier_string.empty ())
     {
 //      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("failed to Net_Common_Tools::deviceDBusPathToIdentifier(\"%s\"), aborting\n"),
+//                  ACE_TEXT ("failed to Net_Common_Tools::deviceDBusObjectPathToIdentifier(\"%s\"), aborting\n"),
 //                  ACE_TEXT (object_path_string.c_str ())));
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("failed to retrieve device identifier (DBus object path was: \"%s\"), aborting\n"),
@@ -183,8 +185,8 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       goto continue_;
     } // end IF
     try {
-      imonitorbase_p->onHotPlug (interface_identifier_string,
-                                     false);
+      imonitor_p->onHotPlug (interface_identifier_string,
+                             false);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB;;onHotPlug(), continuing\n")));
@@ -243,44 +245,44 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
     // check cache first
     iget_p =
         dynamic_cast<Common_IGet1RR_2_T<std::string,
-                                        std::string>*> (imonitorbase_p);
+                                        std::string>*> (imonitor_p);
     ACE_ASSERT (iget_p);
     interface_identifier_string = iget_p->get1RR_2 (object_path_string);
     if (interface_identifier_string.empty ())
       interface_identifier_string =
-          Net_WLAN_Tools::deviceDBusPathToIdentifier (connection_in,
+          Net_WLAN_Tools::deviceDBusObjectPathToIdentifier (connection_in,
                                                       object_path_string);
     if (interface_identifier_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusPathToIdentifier(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusObjectPathToIdentifier(\"%s\"), aborting\n"),
                   ACE_TEXT (object_path_string.c_str ())));
       goto continue_;
     } // end IF
     if (ACE_OS::strcmp (interface_identifier_string.c_str (),
-                        imonitorbase_p->interfaceIdentifier ().c_str ()))
+                        imonitor_p->interfaceIdentifier ().c_str ()))
       goto continue_; // --> not interested
     // *NOTE*: this may fail if the device has-/is- disconnect-ed/-ing
     if ((state_current == NM_DEVICE_STATE_IP_CONFIG) ||
         (state_current == NM_DEVICE_STATE_ACTIVATED))
     {
       active_access_point_path_string =
-          Net_WLAN_Tools::deviceDBusPathToActiveAccessPointDBusPath (connection_in,
+          Net_WLAN_Tools::deviceDBusObjectPathToActiveAccessPointDBusObjectPath (connection_in,
                                                                      object_path_string);
       if (active_access_point_path_string.empty ())
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusPathToActiveAccessPointDBusPath(\"%s\"), aborting\n"),
+                    ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusObjectPathToActiveAccessPointDBusObjectPath(\"%s\"), aborting\n"),
                     ACE_TEXT (object_path_string.c_str ())));
         goto continue_;
       } // end IF
       SSID_string =
-          Net_WLAN_Tools::accessPointDBusPathToSSID (connection_in,
-                                                     active_access_point_path_string);
+          Net_WLAN_Tools::accessPointDBusObjectPathToSSID (connection_in,
+                                                           active_access_point_path_string);
       if (SSID_string.empty ())
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_WLAN_Tools::accessPointDBusPathToSSID(\"%s\"), aborting\n"),
+                    ACE_TEXT ("failed to Net_WLAN_Tools::accessPointDBusObjectPathToSSID(\"%s\"), aborting\n"),
                     ACE_TEXT (active_access_point_path_string.c_str ())));
         goto continue_;
       } // end IF
@@ -288,53 +290,45 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
     switch (state_current)
     {
       case NM_DEVICE_STATE_IP_CONFIG:
-      {
+      { ACE_ASSERT (istate_machine_p);
         try {
-          imonitorbase_p->onAssociate (interface_identifier_string,
-                                       SSID_string,
-                                       true);
+          istate_machine_p->change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onAssociate(), continuing\n")));
+                      ACE_TEXT ("caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_ASSOCIATED), continuing\n")));
           goto continue_;
         }
         break;
       }
       case NM_DEVICE_STATE_ACTIVATED:
-      {
+      { ACE_ASSERT (istate_machine_p);
         try {
-          imonitorbase_p->onConnect (interface_identifier_string,
-                                     SSID_string,
-                                     true);
+          istate_machine_p->change (NET_WLAN_MONITOR_STATE_CONNECTED);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onConnect(), continuing\n")));
+                      ACE_TEXT ("caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_CONNECTED), continuing\n")));
           goto continue_;
         }
         break;
       }
       case NM_DEVICE_STATE_DEACTIVATING:
-      {
+      { ACE_ASSERT (istate_machine_p);
         try {
-          imonitorbase_p->onConnect (interface_identifier_string,
-                                     SSID_string,
-                                     false);
+          istate_machine_p->change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onConnect(), continuing\n")));
+                      ACE_TEXT ("caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_DISCONNECTED), continuing\n")));
           goto continue_;
         }
         break;
       }
       case NM_DEVICE_STATE_DISCONNECTED:
-      {
+      { ACE_ASSERT (istate_machine_p);
         try {
-          imonitorbase_p->onAssociate (interface_identifier_string,
-                                       SSID_string,
-                                       false);
+          istate_machine_p->change (NET_WLAN_MONITOR_STATE_SCANNED);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onAssociate(), continuing\n")));
+                      ACE_TEXT ("caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_SCANNED), continuing\n")));
           goto continue_;
         }
         break;
@@ -390,42 +384,42 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       goto continue_;
     } // end IF
     device_path_string =
-        Net_WLAN_Tools::activeConnectionDBusPathToDeviceDBusPath (connection_in,
+        Net_WLAN_Tools::activeConnectionDBusObjectPathToDeviceDBusObjectPath (connection_in,
                                                                   object_path_string);
     if (device_path_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLANs_Tools::activeConnectionDBusPathToDeviceDBusPath(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLANs_Tools::activeConnectionDBusObjectPathToDeviceDBusObjectPath(\"%s\"), aborting\n"),
                   ACE_TEXT (object_path_string.c_str ())));
       goto continue_;
     } // end IF
     interface_identifier_string =
-        Net_WLAN_Tools::deviceDBusPathToIdentifier (connection_in,
+        Net_WLAN_Tools::deviceDBusObjectPathToIdentifier (connection_in,
                                                     device_path_string);
     if (interface_identifier_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusPathToIdentifier(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusObjectPathToIdentifier(\"%s\"), aborting\n"),
                   ACE_TEXT (device_path_string.c_str ())));
       goto continue_;
     } // end IF
     active_access_point_path_string =
-        Net_WLAN_Tools::deviceDBusPathToActiveAccessPointDBusPath (connection_in,
+        Net_WLAN_Tools::deviceDBusObjectPathToActiveAccessPointDBusObjectPath (connection_in,
                                                                    device_path_string);
     if (active_access_point_path_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusPathToActiveAccessPointDBusPath(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusObjectPathToActiveAccessPointDBusObjectPath(\"%s\"), aborting\n"),
                   ACE_TEXT (device_path_string.c_str ())));
       goto continue_;
     } // end IF
     SSID_string =
-        Net_WLAN_Tools::accessPointDBusPathToSSID (connection_in,
+        Net_WLAN_Tools::accessPointDBusObjectPathToSSID (connection_in,
                                                    active_access_point_path_string);
     if (SSID_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLAN_Tools::accessPointDBusPathToSSID(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::accessPointDBusObjectPathToSSID(\"%s\"), aborting\n"),
                   ACE_TEXT (active_access_point_path_string.c_str ())));
       goto continue_;
     } // end IF
@@ -445,27 +439,23 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
 //        break;
 //      }
       case NM_ACTIVE_CONNECTION_STATE_ACTIVATED:
-      {
+      { ACE_ASSERT (istate_machine_p);
         try {
-          imonitorbase_p->onConnect (interface_identifier_string,
-                                         SSID_string,
-                                         true);
+          istate_machine_p->change (NET_WLAN_MONITOR_STATE_CONNECTED);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB;;onConnect(), continuing\n")));
+                      ACE_TEXT ("caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_CONNECTED), continuing\n")));
           goto continue_;
         }
         break;
       }
       case NM_ACTIVE_CONNECTION_STATE_DEACTIVATING:
-      {
+      { ACE_ASSERT (istate_machine_p);
         try {
-          imonitorbase_p->onConnect (interface_identifier_string,
-                                         SSID_string,
-                                         false);
+          istate_machine_p->change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
         } catch (...) {
           ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB;;onConnect(), continuing\n")));
+                      ACE_TEXT ("caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_ASSOCIATED), continuing\n")));
           goto continue_;
         }
         break;
@@ -502,21 +492,22 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       goto continue_;
     } // end IF
     interface_identifier_string =
-        Net_WLAN_Tools::deviceDBusPathToIdentifier (connection_in,
+        Net_WLAN_Tools::deviceDBusObjectPathToIdentifier (connection_in,
                                                     object_path_string);
 
     if (interface_identifier_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusPathToIdentifier(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusObjectPathToIdentifier(\"%s\"), aborting\n"),
                   ACE_TEXT (object_path_string.c_str ())));
       goto continue_;
     } // end IF
+    ACE_ASSERT (istate_machine_p);
     try {
-      imonitorbase_p->onScanComplete (interface_identifier_string);
+      istate_machine_p->change (NET_WLAN_MONITOR_STATE_SCANNED);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%s: caught exception in Net_WLAN_IMonitorCB::onScanComplete(), continuing\n")));
+                  ACE_TEXT ("caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_SCANNED), continuing\n")));
     }
   } // end ELSE IF
 //  else if (dbus_message_is_signal (message_in,
@@ -538,7 +529,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
 //      goto continue_;
 //    } // end IF
 //    ACE_ASSERT (object_path_p);
-//    SSID_string = Net_Common_Tools::accessPointDBusPathToSSID (connection_in,
+//    SSID_string = Net_Common_Tools::accessPointDBusObjectPathToSSID (connection_in,
 //                                                               object_path_p);
 //    ACE_DEBUG ((LM_DEBUG,
 //                ACE_TEXT ("lost access point (SSID was: %s)...\n"),
@@ -607,18 +598,20 @@ network_wlan_nl80211_finish_cb (struct nl_msg* message_in,
 //  ACE_ASSERT (nlmsghdr_p);
   struct Net_WLAN_nl80211_MultipartDoneCBData* cb_data_p =
       static_cast<struct Net_WLAN_nl80211_MultipartDoneCBData*> (argument_in);
+  ACE_ASSERT (cb_data_p->monitor);
+  Net_WLAN_Monitor_IStateMachine_t* istate_machine_p =
+      dynamic_cast<Net_WLAN_Monitor_IStateMachine_t*> (cb_data_p->monitor);
+  ACE_ASSERT (istate_machine_p);
 
   if (cb_data_p->scanning)
   { // received the final scan result
     cb_data_p->scanning = false;
 
-    ACE_ASSERT (cb_data_p->monitor);
     try {
-      cb_data_p->monitor->onScanComplete (cb_data_p->monitor->interfaceIdentifier ());
+      istate_machine_p->change (NET_WLAN_MONITOR_STATE_SCANNED);
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onScanComplete(\"%s\"), aborting\n"),
-                  ACE_TEXT (cb_data_p->monitor->interfaceIdentifier ().c_str ())));
+                  ACE_TEXT ("caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_SCANNED), aborting\n")));
       return NL_STOP;
     }
   } // end IF
@@ -748,6 +741,9 @@ network_wlan_nl80211_default_handler_cb (struct nl_msg* message_in,
   ACE_ASSERT (genlmsghdr_p);
   Net_WLAN_IMonitorBase* imonitor_p =
       static_cast<Net_WLAN_IMonitorBase*> (argument_in);
+  Net_WLAN_Monitor_IStateMachine_t* istate_machine_p =
+      dynamic_cast<Net_WLAN_Monitor_IStateMachine_t*> (imonitor_p);
+  ACE_ASSERT (istate_machine_p);
 
   // step1: parse message attributes
   struct nlattr* nlattr_a[NL80211_ATTR_MAX + 1];
@@ -880,12 +876,13 @@ nla_put_failure:
       // scan result(s)
       struct nlattr* nlattr_2[NL80211_BSS_MAX + 1];
       std::string ssid_string;
-      uint8_t len_i;
+      uint8_t length_i = 0;
       uint8_t* data_p = NULL;
-      int i;
-      uint8_t ie_len_i =0;
-      uint8_t* ie_data_p = NULL;
+      int offset_i = 0;
+      struct Net_WLAN_IEEE802_11_InformationElement* information_element_p =
+          NULL;
       struct Net_WLAN_AccessPointState state_s;
+      char buffer_2[4 + 1]; // '\\xyz\0'
       if (//!nlattr_a[NL80211_ATTR_SCAN_FREQUENCIES] ||
           //!nlattr_a[NL80211_ATTR_SCAN_SSIDS] ||
           !nlattr_a[NL80211_ATTR_BSS])
@@ -922,43 +919,62 @@ nla_put_failure:
                       nla_data (nlattr_2[NL80211_BSS_BSSID]),
                       ETH_ALEN);
       state_s.signalQuality = nla_get_u32 (nlattr_2[NL80211_BSS_SIGNAL_MBM]);
-      ie_len_i =
+      length_i =
           static_cast<uint8_t> (nla_len (nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]));
-      ie_data_p =
+      data_p =
           reinterpret_cast<uint8_t*> (nla_data (nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]));
-      while (ie_len_i >= 2 && ie_len_i >= ie_data_p[1])
+      // extract SSID (IE id 0)
+      // *NOTE*: information elements are encoded like so: id[1]len[1]/data[len]
+      //         (see also: http://standards.ieee.org/findstds/standard/802.11-2016.html)
+      do
       {
-        if (ie_data_p[0] == 0 &&
-            ie_data_p[1] >= 0 && ie_data_p[1] <= 32)
-        {
-          len_i = ie_data_p[1];
-          data_p = ie_data_p + 2;
-          for (i = 0; i < len_i; i++)
-          {
-            if (::isprint (data_p[i]) && data_p[i] != ' ' && data_p[i] != '\\')
-              ssid_string += static_cast<char> (data_p[i]);
-            else if (data_p[i] == ' ' && (i != 0 && i != len_i -1))
-              ssid_string += ' ';
-            else
-            {
-//              ssid_string += ("\\x%.2x", data_p[i]);
-              ssid_string += ACE_TEXT_ALWAYS_CHAR ("\\x");
-              // *TODO*: this is incomplete (see above)
-              ACE_ASSERT (false);
-              ssid_string += static_cast<char> (data_p[i]);
-            } // end ELSE
-          } // end FOR
+        if (offset_i >= length_i)
+          break; // no more 'IE's
+        information_element_p =
+              reinterpret_cast<struct Net_WLAN_IEEE802_11_InformationElement*> (data_p + offset_i);
+        // *NOTE*: see aforementioned document "Table 7-26—Element IDs"
+        if (information_element_p->id == 0)
           break;
-        } // end IF
-        ie_len_i -= ie_data_p[1] + 2;
-        ie_data_p += ie_data_p[1] + 2;
-      } // end WHILE
+        offset_i += (1 + 1 + information_element_p->length);
+        information_element_p = NULL;
+      } while (true);
+      if (unlikely (!information_element_p))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("missing 'SSID' information element, continuing\n")));
+        return NL_SKIP;
+      } // end IF
+      ACE_ASSERT (information_element_p->length <= IW_ESSID_MAX_SIZE);
+      for (int i = 0;
+           i < information_element_p->length;
+           ++i)
+      {
+        if (::isprint (information_element_p->data[i]) &&
+            information_element_p->data[i] != ' '      &&
+            information_element_p->data[i] != '\\')
+          ssid_string += static_cast<char> (information_element_p->data[i]);
+        else if (information_element_p->data[i] == ' ')
+          ssid_string += ' ';
+        else
+        { ACE_ASSERT (information_element_p->data[i] == '\\');
+          ACE_OS::memset (buffer_2, 0, sizeof (char[4 + 1]));
+          result =
+              ACE_OS::sprintf (buffer_2,
+                               ACE_TEXT_ALWAYS_CHAR ("\\x%.2x"),
+                               information_element_p->data[i + 1]);
+          ACE_ASSERT (result >= 0);
+          ssid_string += buffer_2;
+        } // end ELSE
+      } // end FOR
+      if (ssid_string.empty ())
+        ACE_ASSERT (!ssid_string.empty ());
       imonitor_p->set3R (ssid_string,
                          interface_identifier_string,
                          state_s);
 #if defined (_DEBUG)
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("detected access point (frequency (MHz): %u, signal strength (dBm): %u.%.2u, MAC: %s, SSID: %s, age (ms): %u)...\n"),
+                  ACE_TEXT ("\"%s\": detected access point (frequency (MHz): %u, signal strength (dBm): %u.%.2u, MAC: %s, SSID: %s, age (ms): %u)...\n"),
+                  ACE_TEXT (interface_identifier_string.c_str ()),
                   state_s.frequency,
                   state_s.signalQuality / 100, state_s.signalQuality % 100,
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (state_s.linkLayerAddress.ether_addr_octet, NET_LINKLAYER_802_11).c_str ()),
@@ -993,15 +1009,17 @@ nla_put_failure:
         return NL_SKIP;
 
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("scan failed (interface was: \"%s\"), continuing\n"),
+                  ACE_TEXT ("\"%s\": scan failed, continuing\n"),
                   ACE_TEXT (interface_identifier_string.c_str ())));
-//      try {
-//        imonitor_p->onScanComplete (interface_identifier_string);
-//      } catch (...) {
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onScanComplete(\"%s\"), continuing\n"),
-//                    ACE_TEXT (interface_identifier_string.c_str ())));
-//      }
+
+      ACE_ASSERT (istate_machine_p);
+      try {
+        istate_machine_p->change (NET_WLAN_MONITOR_STATE_SCANNED);
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_SCANNED), aborting\n")));
+        return NL_STOP;
+      }
 
       break;
     }
@@ -1011,14 +1029,109 @@ nla_put_failure:
     }
     case NL80211_CMD_AUTHENTICATE:
     {
+      // sanity check(s)
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_IFINDEX]);
+
+      unsigned int if_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_IFINDEX]);
+      ACE_ASSERT (if_index_i);
+      char buffer_a[IF_NAMESIZE + 1];
+      if (unlikely (!::if_indextoname (if_index_i,
+                                       buffer_a)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to if_indextoname(%u): \"%m\", aborting\n"),
+                    if_index_i));
+        return NL_STOP;
+      } // end IF
+      std::string interface_identifier_string = buffer_a;
+      std::string interface_identifier_string_2 =
+          imonitor_p->interfaceIdentifier ();
+      if (ACE_OS::strcmp (interface_identifier_string.c_str (),
+                          interface_identifier_string_2.c_str ()))
+        return NL_SKIP;
+
+#if defined (_DEBUG)
+      struct ether_addr ap_mac_address_s;
+      std::string ssid_string = imonitor_p->SSID ();
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("\"%s\": authenticated with access point (was: MAC: %s; SSID: %s)\n"),
+                  ACE_TEXT (interface_identifier_string.c_str ()),
+                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (ap_mac_address_s.ether_addr_octet, NET_LINKLAYER_802_11).c_str ()),
+                  ACE_TEXT (ssid_string.c_str ())));
+#endif // _DEBUG
+
       break;
     }
     case NL80211_CMD_ASSOCIATE:
     {
+      // sanity check(s)
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_IFINDEX]);
+
+      unsigned int if_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_IFINDEX]);
+      ACE_ASSERT (if_index_i);
+      char buffer_a[IF_NAMESIZE + 1];
+      if (unlikely (!::if_indextoname (if_index_i,
+                                       buffer_a)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to if_indextoname(%u): \"%m\", aborting\n"),
+                    if_index_i));
+        return NL_STOP;
+      } // end IF
+      std::string interface_identifier_string = buffer_a;
+      std::string interface_identifier_string_2 =
+          imonitor_p->interfaceIdentifier ();
+      if (ACE_OS::strcmp (interface_identifier_string.c_str (),
+                          interface_identifier_string_2.c_str ()))
+        return NL_SKIP;
+
+#if defined (_DEBUG)
+      struct ether_addr ap_mac_address_s;
+      std::string ssid_string = imonitor_p->SSID ();
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("\"%s\": associated with access point (was: MAC: %s; SSID: %s)\n"),
+                  ACE_TEXT (interface_identifier_string.c_str ()),
+                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (ap_mac_address_s.ether_addr_octet, NET_LINKLAYER_802_11).c_str ()),
+                  ACE_TEXT (ssid_string.c_str ())));
+#endif // _DEBUG
+
+      istate_machine_p->change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
+
       break;
     }
     case NL80211_CMD_DEAUTHENTICATE:
     {
+      // sanity check(s)
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_IFINDEX]);
+
+      unsigned int if_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_IFINDEX]);
+      ACE_ASSERT (if_index_i);
+      char buffer_a[IF_NAMESIZE + 1];
+      if (unlikely (!::if_indextoname (if_index_i,
+                                       buffer_a)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to if_indextoname(%u): \"%m\", aborting\n"),
+                    if_index_i));
+        return NL_STOP;
+      } // end IF
+      std::string interface_identifier_string = buffer_a;
+      std::string interface_identifier_string_2 =
+          imonitor_p->interfaceIdentifier ();
+      if (ACE_OS::strcmp (interface_identifier_string.c_str (),
+                          interface_identifier_string_2.c_str ()))
+        return NL_SKIP;
+
+#if defined (_DEBUG)
+      struct ether_addr ap_mac_address_s;
+      std::string ssid_string = imonitor_p->SSID ();
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("\"%s\": deauthenticated with access point (was: MAC: %s; SSID: %s)\n"),
+                  ACE_TEXT (interface_identifier_string.c_str ()),
+                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (ap_mac_address_s.ether_addr_octet, NET_LINKLAYER_802_11).c_str ()),
+                  ACE_TEXT (ssid_string.c_str ())));
+#endif // _DEBUG
+
       break;
     }
     case NL80211_CMD_DISASSOCIATE:
@@ -1042,38 +1155,40 @@ nla_put_failure:
       std::string interface_identifier_string = buffer_a;
       std::string interface_identifier_string_2 =
           imonitor_p->interfaceIdentifier ();
-      std::string ssid_string;
+      if (ACE_OS::strcmp (interface_identifier_string.c_str (),
+                          interface_identifier_string_2.c_str ()))
+        return NL_SKIP;
 
-      if (!ACE_OS::strcmp (interface_identifier_string.c_str (),
-                           interface_identifier_string_2.c_str ()))
-      {
-//        ssid_string = imonitor_p->SSID ();
-        try {
-          imonitor_p->onDisassociate (interface_identifier_string,
-                                      ssid_string,
-                                      true);
-        } catch (...) {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onDisassociate(\"%s\",%s,true), continuing\n"),
-                      ACE_TEXT (interface_identifier_string.c_str ()),
-                      ACE_TEXT (ssid_string.c_str ())));
-        }
-      } // end IF
+      std::string ssid_string = imonitor_p->SSID ();
+      try {
+        imonitor_p->onDisassociate (interface_identifier_string,
+                                    ssid_string,
+                                    true);
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onDisassociate(\"%s\",%s,true), continuing\n"),
+                    ACE_TEXT (interface_identifier_string.c_str ()),
+                    ACE_TEXT (ssid_string.c_str ())));
+      }
 
-//      struct ether_addr ap_mac_address_s;
-//      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("\"%s\": disassociated with access point (was: MAC: %s; SSID: %s)\n"),
-//                  ACE_TEXT (interface_identifier_string.c_str ()),
-//                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (ap_mac_address_s.ether_addr_octet, NET_LINKLAYER_802_11).c_str ()),
-//                  ACE_TEXT (ssid_string.c_str ())));
+#if defined (_DEBUG)
+      struct ether_addr ap_mac_address_s;
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("\"%s\": disassociated with access point (was: MAC: %s; SSID: %s)\n"),
+                  ACE_TEXT (interface_identifier_string.c_str ()),
+                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (ap_mac_address_s.ether_addr_octet, NET_LINKLAYER_802_11).c_str ()),
+                  ACE_TEXT (ssid_string.c_str ())));
+#endif // _DEBUG
+
+      istate_machine_p->change (NET_WLAN_MONITOR_STATE_SCANNED);
 
       break;
     }
     case NL80211_CMD_DISCONNECT:
     {
       // sanity check(s)
-      ACE_ASSERT (nlattr_a[NL80211_ATTR_WIPHY]);
       ACE_ASSERT (nlattr_a[NL80211_ATTR_IFINDEX]);
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_WIPHY]);
 
       unsigned int if_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_IFINDEX]);
       ACE_ASSERT (if_index_i);
@@ -1089,35 +1204,71 @@ nla_put_failure:
       std::string interface_identifier_string = buffer_a;
       std::string interface_identifier_string_2 =
           imonitor_p->interfaceIdentifier ();
-      std::string ssid_string;
+      if (ACE_OS::strcmp (interface_identifier_string.c_str (),
+                          interface_identifier_string_2.c_str ()))
+        return NL_SKIP;
 
-      if (!ACE_OS::strcmp (interface_identifier_string.c_str (),
-                           interface_identifier_string_2.c_str ()))
-      {
-//        ssid_string = imonitor_p->SSID ();
-        try {
-          imonitor_p->onDisconnect (interface_identifier_string,
-                                    ssid_string,
-                                    true);
-        } catch (...) {
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onDisconnect(\"%s\",%s,true), continuing\n"),
-                      ACE_TEXT (interface_identifier_string.c_str ()),
-                      ACE_TEXT (ssid_string.c_str ())));
-        }
-      } // end IF
+      std::string ssid_string = imonitor_p->SSID ();
+      try {
+        imonitor_p->onDisconnect (interface_identifier_string,
+                                  ssid_string,
+                                  true);
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onDisconnect(\"%s\",%s,true), continuing\n"),
+                    ACE_TEXT (interface_identifier_string.c_str ()),
+                    ACE_TEXT (ssid_string.c_str ())));
+      }
 
-//      struct ether_addr ap_mac_address_s;
-//      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("\"%s\": disconnected from access point (was: MAC: %s; SSID: %s)\n"),
-//                  ACE_TEXT (interface_identifier_string.c_str ()),
-//                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (ap_mac_address_s.ether_addr_octet, NET_LINKLAYER_802_11).c_str ()),
-//                  ACE_TEXT (ssid_string.c_str ())));
+#if defined (_DEBUG)
+      struct ether_addr ap_mac_address_s;
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("\"%s\": disconnected from access point (was: MAC: %s; SSID: %s)\n"),
+                  ACE_TEXT (interface_identifier_string.c_str ()),
+                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (ap_mac_address_s.ether_addr_octet, NET_LINKLAYER_802_11).c_str ()),
+                  ACE_TEXT (ssid_string.c_str ())));
+#endif // _DEBUG
+
+      istate_machine_p->change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
 
       break;
     }
     case NL80211_CMD_CONNECT:
     {
+      // sanity check(s)
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_IFINDEX]);
+//      ACE_ASSERT (nlattr_a[NL80211_ATTR_WIPHY]);
+
+      unsigned int if_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_IFINDEX]);
+      ACE_ASSERT (if_index_i);
+      char buffer_a[IF_NAMESIZE + 1];
+      if (unlikely (!::if_indextoname (if_index_i,
+                                       buffer_a)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to if_indextoname(%u): \"%m\", aborting\n"),
+                    if_index_i));
+        return NL_STOP;
+      } // end IF
+      std::string interface_identifier_string = buffer_a;
+      std::string interface_identifier_string_2 =
+          imonitor_p->interfaceIdentifier ();
+      if (ACE_OS::strcmp (interface_identifier_string.c_str (),
+                          interface_identifier_string_2.c_str ()))
+        return NL_SKIP;
+
+#if defined (_DEBUG)
+      struct ether_addr ap_mac_address_s;
+      std::string ssid_string = imonitor_p->SSID ();
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("\"%s\": connected to access point (is: MAC: %s; SSID: %s)\n"),
+                  ACE_TEXT (interface_identifier_string.c_str ()),
+                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (ap_mac_address_s.ether_addr_octet, NET_LINKLAYER_802_11).c_str ()),
+                  ACE_TEXT (ssid_string.c_str ())));
+#endif // _DEBUG
+
+      istate_machine_p->change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
+
       break;
     }
     case NL80211_CMD_NOTIFY_CQM:

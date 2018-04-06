@@ -42,7 +42,7 @@ Net_WLAN_MonitorStateMachine::Net_WLAN_MonitorStateMachine ()
               &lock_,                                              // lock handle
               NET_WLAN_MONITOR_STATE_INVALID)                      // (initial) state
  , dispatchStarted_ (false)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   , lock_ ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_MonitorStateMachine::Net_WLAN_MonitorStateMachine"));
@@ -61,8 +61,11 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_GUARD_RETURN (ACE_SYNCH_NULL_MUTEX, aGuard, *inherited::stateLock_, false);
 #else
+  // *NOTE*: the state machine is asynchronous; idle first
+  inherited::idle ();
+
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, *inherited::stateLock_, false);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   switch (inherited::state_)
   {
@@ -96,7 +99,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_INITIALIZED:  // monitor stopped
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         case NET_WLAN_MONITOR_STATE_SCANNED:      // (background) scan has completed
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         case NET_WLAN_MONITOR_STATE_ASSOCIATED:   // already connected (initially)
         {
           inherited::change (newState_in);
@@ -121,7 +124,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         //         multiple threads
         case NET_WLAN_MONITOR_STATE_SCAN:
         case NET_WLAN_MONITOR_STATE_ASSOCIATE:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         case NET_WLAN_MONITOR_STATE_SCANNED:      // scan completed
         {
           inherited::change (newState_in);
@@ -142,7 +145,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_IDLE:         // association failed (gave up)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         case NET_WLAN_MONITOR_STATE_ASSOCIATE:    // association failed (retrying)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         //////////////////////////////////
         case NET_WLAN_MONITOR_STATE_ASSOCIATED:   // association succeeded
         {
@@ -182,7 +185,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         // good case
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         case NET_WLAN_MONITOR_STATE_CONNECT:      // connection failed (e.g. failed to obtain DHCP lease) (retrying)
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         //////////////////////////////////
         case NET_WLAN_MONITOR_STATE_ASSOCIATED:   // connection failed (e.g. failed to obtain DHCP lease) (gave up)
         case NET_WLAN_MONITOR_STATE_CONNECTED:    // connection succeeded (e.g. DHCP lease obtained)
@@ -248,7 +251,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         //////////////////////////////////
         case NET_WLAN_MONITOR_STATE_INITIALIZED:  // monitor stopped
         case NET_WLAN_MONITOR_STATE_SCANNED:      // (background) scan has completed
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         case NET_WLAN_MONITOR_STATE_ASSOCIATED:   // association completed ||
                                                   // already connected (monitoring link quality)
         {
@@ -292,7 +295,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_SCANNED:
 #else
         case NET_WLAN_MONITOR_STATE_IDLE:
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         {
           inherited::change (newState_in);
           return true;

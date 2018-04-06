@@ -236,11 +236,13 @@ BitTorrent_Tools::parseMetaInfoFile (const struct Common_ParserConfiguration& co
   bool result = false;
 
   // sanity check(s)
-  ACE_ASSERT (Common_File_Tools::isReadable (metaInfoFileName_in));
+  ACE_ASSERT (Common_File_Tools::canRead (metaInfoFileName_in));
 
   unsigned char* data_p = NULL;
-  if (!Common_File_Tools::load (metaInfoFileName_in,
-                                data_p))
+  unsigned int file_size_i = 0;
+  if (unlikely (!Common_File_Tools::load (metaInfoFileName_in,
+                                          data_p,
+                                          file_size_i)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_File_Tools::load(\"%s\"), aborting\n"),

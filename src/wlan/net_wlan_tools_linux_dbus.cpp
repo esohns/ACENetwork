@@ -89,7 +89,7 @@ Net_WLAN_Tools::getInterfaces (struct DBusConnection* connection_in,
 
   struct DBusMessageIter iterator, iterator_2;
   char* object_path_p = NULL;
-  std::vector<std::string> device_object_paths_a;
+  Common_DBus_ObjectPaths_t interface_object_paths_a;
   struct DBusMessage* message_p =
       dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_DBUS_NETWORKMANAGER_SERVICE),
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLAN_DBUS_NETWORKMANAGER_OBJECT_PATH),
@@ -119,22 +119,24 @@ Net_WLAN_Tools::getInterfaces (struct DBusConnection* connection_in,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_ARRAY);
+  if (unlikely (!Common_DBus_Tools::validateType (iterator,
+                                                  DBUS_TYPE_ARRAY)))
+    goto error;
   dbus_message_iter_recurse (&iterator, &iterator_2);
   do {
     ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_OBJECT_PATH);
     object_path_p = NULL;
     dbus_message_iter_get_basic (&iterator_2, &object_path_p);
     ACE_ASSERT (object_path_p);
-    device_object_paths_a.push_back (object_path_p);
+    interface_object_paths_a.push_back (object_path_p);
   } while (dbus_message_iter_next (&iterator_2));
   dbus_message_unref (reply_p); reply_p = NULL;
 
-  for (std::vector<std::string>::const_iterator iterator_3 = device_object_paths_a.begin ();
-       iterator_3 != device_object_paths_a.end ();
+  for (Common_DBus_ObjectPathsIterator_t iterator_3 = interface_object_paths_a.begin ();
+       iterator_3 != interface_object_paths_a.end ();
        ++iterator_3)
-    return_value.push_back (Net_WLAN_Tools::deviceDBusPathToIdentifier (connection_p,
-                                                                        *iterator_3));
+    return_value.push_back (Net_WLAN_Tools::deviceDBusObjectPathToIdentifier (connection_p,
+                                                                              *iterator_3));
 
 error:
   if (message_p)
@@ -178,17 +180,17 @@ Net_WLAN_Tools::associatedSSID (struct DBusConnection* connection_in,
   } // end IF
 
   std::string device_path_string =
-      Net_WLAN_Tools::deviceToDBusPath (connection_in,
+      Net_WLAN_Tools::deviceToDBusObjectPath (connection_in,
                                         interfaceIdentifier_in);
   ACE_ASSERT (!device_path_string.empty ());
   std::string access_point_path_string =
-      Net_WLAN_Tools::deviceDBusPathToActiveAccessPointDBusPath (connection_in,
+      Net_WLAN_Tools::deviceDBusObjectPathToActiveAccessPointDBusObjectPath (connection_in,
                                                                  device_path_string);
   if (access_point_path_string.empty ())
     return result;
 
   result =
-      Net_WLAN_Tools::accessPointDBusPathToSSID (connection_in,
+      Net_WLAN_Tools::accessPointDBusObjectPathToSSID (connection_in,
                                                  access_point_path_string);
 
   return result;
@@ -278,7 +280,7 @@ Net_WLAN_Tools::activateConnection (struct DBusConnection* connection_in,
   dbus_message_unref (reply_p); reply_p = NULL;
 //  ACE_DEBUG ((LM_DEBUG,
 //              ACE_TEXT ("%s: activated connection profile \"%s\" (active connection is: \"%s\")\n"),
-//              ACE_TEXT (Net_WLAN_Tools::deviceDBusPathToIdentifier (connection_in, deviceObjectPath_in).c_str ()),
+//              ACE_TEXT (Net_WLAN_Tools::deviceDBusObjectPathToIdentifier (connection_in, deviceObjectPath_in).c_str ()),
 //              ACE_TEXT (connectionObjectPath_in.c_str ()),
 //              ACE_TEXT (object_path_p)));
 
@@ -323,33 +325,33 @@ Net_WLAN_Tools::getGateway (const std::string& interfaceIdentifier_in,
                 ACE_TEXT (interfaceIdentifier_in.c_str ())));
 
     std::string result_string =
-        Net_WLAN_Tools::deviceToDBusPath (connection_in,
+        Net_WLAN_Tools::deviceToDBusObjectPath (connection_in,
                                           interfaceIdentifier_in);
     if (unlikely (result_string.empty ()))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceToDBusPath(\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceToDBusObjectPath(\"%s\"), aborting\n"),
                   ACE_TEXT (interfaceIdentifier_in.c_str ())));
       return result;
     } // end IF
     result_string =
-        Net_WLAN_Tools::deviceDBusPathToIp4ConfigDBusPath (connection_in,
+        Net_WLAN_Tools::deviceDBusObjectPathToIp4ConfigDBusObjectPath (connection_in,
                                                              result_string);
     if (unlikely (result_string.empty ()))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusPathToIp4ConfigDBusPath(\"%s\",\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::deviceDBusObjectPathToIp4ConfigDBusObjectPath(\"%s\",\"%s\"), aborting\n"),
                   ACE_TEXT (interfaceIdentifier_in.c_str ()),
                   ACE_TEXT (result_string.c_str ())));
       return result;
     } // end IF
     result_string =
-        Net_WLAN_Tools::Ip4ConfigDBusPathToGateway (connection_in,
+        Net_WLAN_Tools::Ip4ConfigDBusObjectPathToGateway (connection_in,
                                                       result_string);
     if (unlikely (result_string.empty ()))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLAN_Tools::Ip4ConfigDBusPathToGateway(\"%s\",\"%s\"), aborting\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::Ip4ConfigDBusObjectPathToGateway(\"%s\",\"%s\"), aborting\n"),
                   ACE_TEXT (interfaceIdentifier_in.c_str ()),
                   ACE_TEXT (result_string.c_str ())));
       return result;
@@ -371,10 +373,10 @@ Net_WLAN_Tools::getGateway (const std::string& interfaceIdentifier_in,
 }
 
 std::string
-Net_WLAN_Tools::activeConnectionDBusPathToIp4ConfigDBusPath (struct DBusConnection* connection_in,
+Net_WLAN_Tools::activeConnectionDBusObjectPathToIp4ConfigDBusObjectPath (struct DBusConnection* connection_in,
                                                                const std::string& activeConnectionObjectPath_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::activeConnectionDBusPathToIp4ConfigDBusPath"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::activeConnectionDBusObjectPathToIp4ConfigDBusObjectPath"));
 
   // initialize return value(s)
   std::string result;
@@ -454,10 +456,10 @@ continue_:
 }
 
 std::string
-Net_WLAN_Tools::activeConnectionDBusPathToDeviceDBusPath (struct DBusConnection* connection_in,
-                                                            const std::string& activeConnectionObjectPath_in)
+Net_WLAN_Tools::activeConnectionDBusObjectPathToDeviceDBusObjectPath (struct DBusConnection* connection_in,
+                                                                      const std::string& activeConnectionObjectPath_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::activeConnectionDBusPathToDeviceDBusPath"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::activeConnectionDBusObjectPathToDeviceDBusObjectPath"));
 
   // initialize return value(s)
   std::string result;
@@ -547,10 +549,10 @@ continue_:
 }
 
 std::string
-Net_WLAN_Tools::deviceToDBusPath (struct DBusConnection* connection_in,
-                                    const std::string& interfaceIdentifier_in)
+Net_WLAN_Tools::deviceToDBusObjectPath (struct DBusConnection* connection_in,
+                                        const std::string& interfaceIdentifier_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::deviceToDBusPath"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::deviceToDBusObjectPath"));
 
   // initialize return value(s)
   std::string result;
@@ -599,7 +601,9 @@ Net_WLAN_Tools::deviceToDBusPath (struct DBusConnection* connection_in,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_OBJECT_PATH);
+  if (unlikely (!Common_DBus_Tools::validateType (iterator,
+                                                  DBUS_TYPE_OBJECT_PATH)))
+    goto error;
   dbus_message_iter_get_basic (&iterator, &object_path_p);
   ACE_ASSERT (object_path_p);
   result = object_path_p;
@@ -618,10 +622,10 @@ continue_:
 }
 
 std::string
-Net_WLAN_Tools::Ip4ConfigDBusPathToGateway (struct DBusConnection* connection_in,
-                                              const std::string& Ip4ConfigObjectPath_in)
+Net_WLAN_Tools::Ip4ConfigDBusObjectPathToGateway (struct DBusConnection* connection_in,
+                                                  const std::string& Ip4ConfigObjectPath_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::Ip4ConfigDBusPathToGateway"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::Ip4ConfigDBusObjectPathToGateway"));
 
   // initialize return value(s)
   std::string result;
@@ -705,10 +709,10 @@ continue_:
 }
 
 std::string
-Net_WLAN_Tools::deviceDBusPathToActiveAccessPointDBusPath (struct DBusConnection* connection_in,
-                                                             const std::string& deviceObjectPath_in)
+Net_WLAN_Tools::deviceDBusObjectPathToActiveAccessPointDBusObjectPath (struct DBusConnection* connection_in,
+                                                                       const std::string& deviceObjectPath_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::deviceDBusPathToActiveAccessPointDBusPath"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::deviceDBusObjectPathToActiveAccessPointDBusObjectPath"));
 
   // initialize return value(s)
   std::string result;
@@ -753,8 +757,8 @@ Net_WLAN_Tools::deviceDBusPathToActiveAccessPointDBusPath (struct DBusConnection
     goto error;
   } // end IF
   reply_p = Common_DBus_Tools::exchange (connection_in,
-                                                   message_p,
-                                                   -1); // timeout (ms)
+                                         message_p,
+                                         -1); // timeout (ms)
   ACE_ASSERT (!message_p);
   if (unlikely (!reply_p))
   {
@@ -795,10 +799,10 @@ continue_:
 }
 
 std::string
-Net_WLAN_Tools::deviceDBusPathToIp4ConfigDBusPath (struct DBusConnection* connection_in,
+Net_WLAN_Tools::deviceDBusObjectPathToIp4ConfigDBusObjectPath (struct DBusConnection* connection_in,
                                                       const std::string& deviceObjectPath_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::deviceDBusPathToIp4ConfigDBusPath"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::deviceDBusObjectPathToIp4ConfigDBusObjectPath"));
 
   // initialize return value(s)
   std::string result;
@@ -884,10 +888,10 @@ continue_:
 }
 
 std::string
-Net_WLAN_Tools::deviceDBusPathToIdentifier (struct DBusConnection* connection_in,
-                                              const std::string& deviceObjectPath_in)
+Net_WLAN_Tools::deviceDBusObjectPathToIdentifier (struct DBusConnection* connection_in,
+                                                  const std::string& deviceObjectPath_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::deviceDBusPathToIdentifier"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::deviceDBusObjectPathToIdentifier"));
 
   // initialize return value(s)
   std::string result;
@@ -970,10 +974,10 @@ continue_:
 }
 
 std::string
-Net_WLAN_Tools::accessPointDBusPathToSSID (struct DBusConnection* connection_in,
-                                             const std::string& accessPointObjectPath_in)
+Net_WLAN_Tools::accessPointDBusObjectPathToSSID (struct DBusConnection* connection_in,
+                                                 const std::string& accessPointObjectPath_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::accessPointDBusPathToSSID"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::accessPointDBusObjectPathToSSID"));
 
   // initialize return value(s)
   std::string result;
@@ -1060,10 +1064,10 @@ continue_:
 }
 
 std::string
-Net_WLAN_Tools::connectionDBusPathToSSID (struct DBusConnection* connection_in,
-                                            const std::string& connectionObjectPath_in)
+Net_WLAN_Tools::connectionDBusObjectPathToSSID (struct DBusConnection* connection_in,
+                                                const std::string& connectionObjectPath_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::connectionDBusPathToSSID"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::connectionDBusObjectPathToSSID"));
 
   // initialize return value(s)
   std::string result;
@@ -1089,8 +1093,8 @@ Net_WLAN_Tools::connectionDBusPathToSSID (struct DBusConnection* connection_in,
   const char* key_string_p, *key_string_2 = NULL;
   DBusBasicValue value_u;
   reply_p = Common_DBus_Tools::exchange (connection_in,
-                                                   message_p,
-                                                   -1); // timeout (ms)
+                                         message_p,
+                                         -1); // timeout (ms)
   ACE_ASSERT (!message_p);
   if (unlikely (!reply_p))
   {
@@ -1106,7 +1110,7 @@ Net_WLAN_Tools::connectionDBusPathToSSID (struct DBusConnection* connection_in,
     goto error;
   } // end IF
   if (unlikely (!Common_DBus_Tools::validateType (iterator,
-                                                        DBUS_TYPE_ARRAY)))
+                                                  DBUS_TYPE_ARRAY)))
     goto error;
   dbus_message_iter_recurse (&iterator, &iterator_2);
   do {
@@ -1195,11 +1199,11 @@ continue_:
 }
 
 std::string
-Net_WLAN_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_in,
-                                             const std::string& deviceObjectPath_in,
-                                             const std::string& SSID_in)
+Net_WLAN_Tools::SSIDToAccessPointDBusObjectPath (struct DBusConnection* connection_in,
+                                                 const std::string& deviceObjectPath_in,
+                                                 const std::string& SSID_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::SSIDToAccessPointDBusPath"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::SSIDToAccessPointDBusObjectPath"));
 
   // initialize return value(s)
   std::string result;
@@ -1209,13 +1213,13 @@ Net_WLAN_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_in,
   ACE_ASSERT (!SSID_in.empty ());
 
   std::string device_object_path_string =
-      (deviceObjectPath_in.empty () ? Net_WLAN_Tools::SSIDToDeviceDBusPath (connection_in,
+      (deviceObjectPath_in.empty () ? Net_WLAN_Tools::SSIDToDeviceDBusObjectPath (connection_in,
                                                                               SSID_in)
                                     : deviceObjectPath_in);
   if (unlikely (device_object_path_string.empty ()))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_WLAN_Tools::SSIDToDeviceDBusPath(0x%@,%s), aborting\n"),
+                ACE_TEXT ("failed to Net_WLAN_Tools::SSIDToDeviceDBusObjectPath(0x%@,%s), aborting\n"),
                 connection_in,
                 ACE_TEXT (SSID_in.c_str ())));
     return result;
@@ -1237,8 +1241,8 @@ Net_WLAN_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_in,
   char* object_path_p = NULL;
   std::string SSID_string;
   reply_p = Common_DBus_Tools::exchange (connection_in,
-                                                   message_p,
-                                                   -1); // timeout (ms)
+                                         message_p,
+                                         -1); // timeout (ms)
   ACE_ASSERT (!message_p);
   if (unlikely (!reply_p))
   {
@@ -1262,12 +1266,12 @@ Net_WLAN_Tools::SSIDToAccessPointDBusPath (struct DBusConnection* connection_in,
     ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_OBJECT_PATH);
     dbus_message_iter_get_basic (&iterator_2, &object_path_p);
     ACE_ASSERT (object_path_p);
-    SSID_string = Net_WLAN_Tools::accessPointDBusPathToSSID (connection_in,
+    SSID_string = Net_WLAN_Tools::accessPointDBusObjectPathToSSID (connection_in,
                                                                object_path_p);
     if (unlikely (SSID_string.empty ()))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Net_WLAN_Tools::accessPointDBusPathToSSID(\"%s\"), continuing\n"),
+                  ACE_TEXT ("failed to Net_WLAN_Tools::accessPointDBusObjectPathToSSID(\"%s\"), continuing\n"),
                   ACE_TEXT (object_path_p)));
       continue;
     } // end IF
@@ -1293,8 +1297,8 @@ continue_:
 }
 
 std::string
-Net_WLAN_Tools::SSIDToDeviceDBusPath (struct DBusConnection* connection_in,
-                                      const std::string& SSID_in)
+Net_WLAN_Tools::SSIDToDeviceDBusObjectPath (struct DBusConnection* connection_in,
+                                            const std::string& SSID_in)
 {
   // initialize return value(s)
   std::string result;
@@ -1312,7 +1316,7 @@ Net_WLAN_Tools::SSIDToDeviceDBusPath (struct DBusConnection* connection_in,
        iterator != wireless_device_identifiers_a.end ();
        ++iterator)
     if (!Net_WLAN_Tools::hasSSID (*iterator,
-                                    SSID_in))
+                                  SSID_in))
       wireless_device_identifiers_a.erase (iterator);
   if (wireless_device_identifiers_a.empty ())
     return result;
@@ -1322,16 +1326,16 @@ Net_WLAN_Tools::SSIDToDeviceDBusPath (struct DBusConnection* connection_in,
                 ACE_TEXT ("found several devices that can see SSID %s, choosing the first one\n"),
                 ACE_TEXT (SSID_in.c_str ())));
 
-  return Net_WLAN_Tools::deviceToDBusPath (connection_in,
+  return Net_WLAN_Tools::deviceToDBusObjectPath (connection_in,
                                            wireless_device_identifiers_a.front ());
 }
 
 std::string
-Net_WLAN_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in,
-                                            const std::string& deviceObjectPath_in,
-                                            const std::string& SSID_in)
+Net_WLAN_Tools::SSIDToConnectionDBusObjectPath (struct DBusConnection* connection_in,
+                                                const std::string& deviceObjectPath_in,
+                                                const std::string& SSID_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::SSIDToConnectionDBusPath"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::SSIDToConnectionDBusObjectPath"));
 
   // initialize return value(s)
   std::string result;
@@ -1341,13 +1345,13 @@ Net_WLAN_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in,
   ACE_ASSERT (!SSID_in.empty ());
 
   std::string device_object_path_string =
-      (deviceObjectPath_in.empty () ? Net_WLAN_Tools::SSIDToDeviceDBusPath (connection_in,
-                                                                              SSID_in)
+      (deviceObjectPath_in.empty () ? Net_WLAN_Tools::SSIDToDeviceDBusObjectPath (connection_in,
+                                                                                  SSID_in)
                                     : deviceObjectPath_in);
   if (unlikely (device_object_path_string.empty ()))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_WLAN_Tools::SSIDToDeviceDBusPath(0x%@,%s), aborting\n"),
+                ACE_TEXT ("failed to Net_WLAN_Tools::SSIDToDeviceDBusObjectPath(0x%@,%s), aborting\n"),
                 connection_in,
                 ACE_TEXT (SSID_in.c_str ())));
     return result;
@@ -1400,8 +1404,8 @@ Net_WLAN_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in,
 //    goto error;
 //  } // end IF
   reply_p = Common_DBus_Tools::exchange (connection_in,
-                                                   message_p,
-                                                   -1); // timeout (ms)
+                                         message_p,
+                                         -1); // timeout (ms)
   ACE_ASSERT (!message_p);
   if (unlikely (!reply_p))
   {
@@ -1433,8 +1437,8 @@ Net_WLAN_Tools::SSIDToConnectionDBusPath (struct DBusConnection* connection_in,
        iterator_4 != connection_paths_a.end ();
        ++iterator_4)
   {
-    SSID_string = Net_WLAN_Tools::connectionDBusPathToSSID (connection_in,
-                                                              *iterator_4);
+    SSID_string = Net_WLAN_Tools::connectionDBusObjectPathToSSID (connection_in,
+                                                                  *iterator_4);
     if (SSID_string == SSID_in)
       break;
   } // end FOR
@@ -1495,11 +1499,11 @@ Net_WLAN_Tools::isWPASupplicantManagingInterface (struct DBusConnection* connect
     release_connection_b = true;
   } // end IF
 
-  std::vector<std::string> interface_object_paths_a;
+  Common_DBus_ObjectPaths_t interface_object_paths_a;
   struct DBusMessage* reply_p = NULL;
-  struct DBusMessageIter iterator, iterator_2;
+  struct DBusMessageIter iterator, iterator_2, iterator_3;
   char* string_p = NULL;
-//  char character_c = 0;
+  char character_c = 0;
   const char* argument_string_p = NULL;
   struct DBusMessage* message_p =
       dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_DBUS_WPASUPPLICANT_SERVICE),
@@ -1543,6 +1547,9 @@ Net_WLAN_Tools::isWPASupplicantManagingInterface (struct DBusConnection* connect
                 ACE_TEXT ("failed to Common_DBus_Tools::exchange(-1): \"%m\", aborting\n")));
     goto error;
   } // end IF
+//#if defined (_DEBUG)
+//  Common_DBus_Tools::dump (*reply_p);
+//#endif // _DEBUG
 
   if (unlikely (!dbus_message_iter_init (reply_p, &iterator)))
   {
@@ -1550,18 +1557,27 @@ Net_WLAN_Tools::isWPASupplicantManagingInterface (struct DBusConnection* connect
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_ARRAY);
+  if (unlikely (!Common_DBus_Tools::validateType (iterator,
+                                                  DBUS_TYPE_VARIANT)))
+    goto error;
   dbus_message_iter_recurse (&iterator, &iterator_2);
-  do {
-    ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_OBJECT_PATH);
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_ARRAY);
+  if (!dbus_message_iter_get_element_count (&iterator_2))
+    goto continue_;
+  dbus_message_iter_recurse (&iterator_2, &iterator_3);
+  do
+  {
+    // *NOTE*: apparently, empty arrays have an 'INVALID' object type entry
+    ACE_ASSERT ((dbus_message_iter_get_arg_type (&iterator_3) == DBUS_TYPE_INVALID) || (dbus_message_iter_get_arg_type (&iterator_3) == DBUS_TYPE_OBJECT_PATH));
     string_p = NULL;
-    dbus_message_iter_get_basic (&iterator_2, &string_p);
+    dbus_message_iter_get_basic (&iterator_3, &string_p);
     ACE_ASSERT (string_p);
     interface_object_paths_a.push_back (string_p);
-  } while (dbus_message_iter_next (&iterator_2));
+  } while (dbus_message_iter_next (&iterator_3));
+continue_:
   dbus_message_unref (reply_p); reply_p = NULL;
 
-  for (std::vector<std::string>::const_iterator iterator_3 = interface_object_paths_a.begin ();
+  for (Common_DBus_ObjectPathsIterator_t iterator_3 = interface_object_paths_a.begin ();
        iterator_3 != interface_object_paths_a.end ();
        ++iterator_3)
     interface_identifiers_a.push_back (Net_WLAN_Tools::dBusObjectPathToIdentifier (connection_p,
@@ -1589,16 +1605,22 @@ error:
 }
 
 bool
-Net_WLAN_Tools::WPASupplicantHandleInterface (struct DBusConnection* connection_in,
+Net_WLAN_Tools::WPASupplicantManageInterface (struct DBusConnection* connection_in,
                                               const std::string& interfaceIdentifier_in,
                                               bool toggle_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::WPASupplicantHandleInterface"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::WPASupplicantManageInterface"));
 
   bool result = false;
 
   // sanity check(s)
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
+  bool is_managing_interface_b =
+      Net_WLAN_Tools::isWPASupplicantManagingInterface (connection_in,
+                                                        interfaceIdentifier_in);
+  if ((toggle_in && is_managing_interface_b)  ||
+      (!toggle_in && !is_managing_interface_b))
+    return true; // nothing to do
 
   struct DBusConnection* connection_p = connection_in;
   bool release_connection_b = false;
@@ -1784,7 +1806,9 @@ Net_WLAN_Tools::dBusObjectPathToIdentifier (struct DBusConnection* connection_in
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
     goto error;
   } // end IF
-  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_STRING);
+  if (unlikely (!Common_DBus_Tools::validateType (iterator,
+                                                  DBUS_TYPE_STRING)))
+    goto error;
   dbus_message_iter_get_basic (&iterator, &string_p);
   ACE_ASSERT (string_p);
   return_value = string_p;

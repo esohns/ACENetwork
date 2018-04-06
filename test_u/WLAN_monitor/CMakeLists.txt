@@ -53,7 +53,7 @@ if (UNIX)
  elseif (NL80211_USE)
   add_definitions (-DSD_BUS_SUPPORT)
  elseif (DBUS_USE)
- endif (DBUS_USE)
+ endif ()
 
  if (DHCLIENT_USE)
   set (JSON_LIB_FILE libjson-c.so.3)

@@ -483,7 +483,7 @@ continue_4:
 
   inherited::isActive_ = true;
 
-  inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
+  inherited::change (NET_WLAN_MONITOR_STATE_IDLE);
 
   return;
 
@@ -555,14 +555,13 @@ Net_WLAN_Monitor_T<AddressType,
   ACE_UNUSED_ARG (lockedAccess_in);
 
   // sanity check(s)
-  ACE_ASSERT (inherited::configuration_);
   if (unlikely (!inherited::isActive_))
     return;
 
   int result = -1;
 
   if (likely (isRegistered_))
-  {
+  { ACE_ASSERT (inherited::configuration_);
     switch (inherited::configuration_->dispatch)
     {
       case COMMON_EVENT_DISPATCH_PROACTOR:
@@ -730,27 +729,33 @@ Net_WLAN_Monitor_T<AddressType,
 
   // sanity check(s)
 #if defined (ACE_LINUX)
-  Common_DBus_PolicyKit_Details_t action_details_a;
   if (Common_DBus_Tools::isUnitRunning (NULL,
-                                        COMMON_SYSTEMD_UNIT_NETWORKMANAGER)                     &&
-      Net_Common_Tools::isNetworkManagerManagingInterface (configuration_in.interfaceIdentifier))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("systemd unit \"%s\" is running and managing interface %s; this may interfere with the monitoring activity: please reinstall, aborting\n"),
-                ACE_TEXT (COMMON_SYSTEMD_UNIT_NETWORKMANAGER),
-                ACE_TEXT (configuration_in.interfaceIdentifier.c_str ())));
-    return false;
-  } // end IF
+                                        COMMON_SYSTEMD_UNIT_NETWORKMANAGER))
+    if (!Net_Common_Tools::networkManagerManageInterface (configuration_in.interfaceIdentifier,
+                                                          false))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::networkManagerManageInterface(\"%s\",false), aborting\n"),
+                  ACE_TEXT (configuration_in.interfaceIdentifier.c_str ())));
+      return false;
+    } // end IF
   if (Common_DBus_Tools::isUnitRunning (NULL,
-                                        COMMON_SYSTEMD_UNIT_WPASUPPLICANT)                     &&
-      Net_WLAN_Tools::isWPASupplicantManagingInterface (NULL,
-                                                        configuration_in.interfaceIdentifier))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("systemd unit \"%s\" is running and managing interface %s; this may interfere with the monitoring activity: please reinstall, aborting\n"),
-                ACE_TEXT (COMMON_SYSTEMD_UNIT_WPASUPPLICANT)));
-    return false;
-  } // end IF
+                                        COMMON_SYSTEMD_UNIT_WPASUPPLICANT))
+    if (!Net_WLAN_Tools::WPASupplicantManageInterface (NULL,
+                                                       configuration_in.interfaceIdentifier,
+                                                       false))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_WLAN_Tools::WPASupplicantManageInterface(\"%s\",false), aborting\n"),
+                  ACE_TEXT (configuration_in.interfaceIdentifier.c_str ())));
+      return false;
+    } // end IF
+//  if (Common_DBus_Tools::isUnitRunning (NULL,
+//                                        COMMON_SYSTEMD_UNIT_IFUPDOWN)                     &&
+//  Net_Common_Tools::isIfUpDownManagingInterface (configuration_in.interfaceIdentifier))
+//    ACE_DEBUG ((LM_WARNING,
+//                ACE_TEXT ("systemd unit \"%s\" is running and managing interface \"%s\"; this may interfere with the WLAN monitoring activity: please reinstall, continuing\n"),
+//                ACE_TEXT (COMMON_SYSTEMD_UNIT_IFUPDOWN)));
 #endif // ACE_LINUX
 
   return true;
@@ -860,7 +865,7 @@ Net_WLAN_Monitor_T<AddressType,
     NLA_PUT (message_p,
              NL80211_ATTR_MAC,
              ETH_ALEN,
-             ap_mac_address_s_s.ether_addr_octet);
+             &ap_mac_address_s_s.ether_addr_octet);
 //    if (command_i == NL80211_CMD_ASSOCIATE)
     if (command_i == NL80211_CMD_CONNECT)
     {
@@ -884,13 +889,10 @@ Net_WLAN_Monitor_T<AddressType,
       // *NOTE*: the next two attributes, if included, "...are restrictions on
       //         BSS selection, i.e., they effectively prevent roaming within
       //         the ESS. ..."
-//      NLA_PUT (message_p,
 //               NL80211_ATTR_MAC,
-//               ETH_ALEN,
-//               APMACAddress_in.ether_addr_octet);
-//      NLA_PUT_U32 (message_p,
-//                   NL80211_ATTR_WIPHY_FREQ,
-//                   frequency_i);
+      NLA_PUT_U32 (message_p,
+                   NL80211_ATTR_WIPHY_FREQ,
+                   frequency_i);
       // NL80211_ATTR_CONTROL_PORT
       // NL80211_ATTR_CONTROL_PORT_ETHERTYPE
       // NL80211_ATTR_CONTROL_PORT_NO_ENCRYPT

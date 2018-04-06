@@ -147,6 +147,9 @@ if (UNIX)
  endif (NETLINK_SUPPORT)
  if (DBUS_SUPPORT)
   target_include_directories (${PROJECT_NAME} PUBLIC ${PKG_DBUS_INCLUDE_DIRS})
+
+  target_include_directories (${PROJECT_NAME} PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/dbus>)
  endif (DBUS_SUPPORT)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE>)

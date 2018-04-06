@@ -26,7 +26,7 @@
 #include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <guiddef.h>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
@@ -44,7 +44,7 @@ template <typename ConfigurationType,
           ////////////////////////////////
           ACE_SYNCH_DECL,
           typename TimePolicyType,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
           ////////////////////////////////
           enum Net_WLAN_MonitorAPIType MonitorAPI_e,
           ////////////////////////////////
@@ -83,6 +83,14 @@ class Net_WLAN_InetMonitor_T
 
  public:
   inline virtual ~Net_WLAN_InetMonitor_T () {}
+
+  // implement (part of) Common_IStateMachine_T
+//  using Net_WLAN_MonitorStateMachine::initialize;
+//  using Net_WLAN_MonitorStateMachine::reset;
+//  using Net_WLAN_MonitorStateMachine::change;
+//  using Net_WLAN_MonitorStateMachine::current;
+//  using Net_WLAN_MonitorStateMachine::wait;
+//  using Net_WLAN_MonitorStateMachine::stateToString;
 
  private:
   Net_WLAN_InetMonitor_T ();

@@ -344,6 +344,7 @@ network_wlan_nl80211_ssid_cb (struct nl_msg* message_in,
     if (information_element_p->id == 0)
       break;
     offset += (1 + 1 + information_element_p->length);
+    information_element_p = NULL;
   } while (true);
   if (unlikely (!information_element_p))
   {
@@ -478,7 +479,7 @@ network_wlan_nl80211_feature_cb (struct nl_msg* message_in,
 //////////////////////////////////////////
 
 Net_InterfaceIdentifiers_t
-Net_WLAN_Tools::getInterfaces (struct nl_sock* handle_in,
+Net_WLAN_Tools::getInterfaces (struct nl_sock* socketHandle_in,
                                int driverFamilyId_in,
                                int addressFamily_in,
                                int flags_in)
@@ -504,7 +505,7 @@ Net_WLAN_Tools::getInterfaces (struct nl_sock* handle_in,
        ifaddrs_2 = ifaddrs_2->ifa_next)
   {
     if (!Net_WLAN_Tools::isInterface (ifaddrs_2->ifa_name,
-                                      handle_in,
+                                      socketHandle_in,
                                       driverFamilyId_in))
       continue;
     if (unlikely (addressFamily_in != AF_UNSPEC))
@@ -526,7 +527,7 @@ Net_WLAN_Tools::getInterfaces (struct nl_sock* handle_in,
 //      continue;
 //    } // end IF
     if (unlikely (flags_in &&
-                  !(ifaddrs_2->ifa_flags & flags_in)))
+                  !(ifaddrs_2->ifa_flags & static_cast<unsigned int> (flags_in))))
       continue;
 
     result.push_back (ifaddrs_2->ifa_name);
@@ -553,161 +554,61 @@ Net_WLAN_Tools::getInterfaces (struct nl_sock* handle_in,
 
 bool
 Net_WLAN_Tools::isInterface (const std::string& interfaceIdentifier_in,
-                             struct nl_sock* handle_in,
+                             struct nl_sock* socketHandle_in,
                              int driverFamilyId_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::isInterface"));
 
-  // sanity check(s)
-  ACE_ASSERT (!interfaceIdentifier_in.empty ());
-  ACE_ASSERT (interfaceIdentifier_in.size () <= IFNAMSIZ);
-
-  bool result = false;
-  struct nl_sock* socket_handle_p = handle_in;
-  bool release_handle = false;
-  int driver_family_id_i = driverFamilyId_in;
-  int result_2 = -1;
   struct Net_WLAN_nl80211_InterfaceConfigurationCBData cb_data_s;
-  struct nl_cb* callback_p = NULL;
-  struct nl_cb* callback_2 = NULL;
   struct nl_msg* message_p = NULL;
-  if (!socket_handle_p)
+
+  // sanity check(s)
+  if (unlikely (interfaceIdentifier_in.empty ()             ||
+                (interfaceIdentifier_in.size () > IFNAMSIZ) ||
+                !driverFamilyId_in))
   {
-    socket_handle_p = nl_socket_alloc ();
-    if (unlikely (!socket_handle_p))
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to nl_socket_alloc (): \"%m\", aborting\n")));
-      return result; // *TODO*: avoid false negatives
-    } // end IF
-    release_handle = true;
-
-    result_2 = nl_connect (socket_handle_p, NETLINK_GENERIC);
-    if (unlikely (result_2 < 0))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to nl_connect(0x%@): \"%s\", returning\n"),
-                  socket_handle_p,
-                  ACE_TEXT (nl_geterror (result_2))));
-      goto clean;
-    } // end IF
-
-    if (unlikely (driver_family_id_i <= 0))
-    {
-      driver_family_id_i =
-          genl_ctrl_resolve (socket_handle_p,
-                             ACE_TEXT_ALWAYS_CHAR (NL80211_GENL_NAME));
-      if (driver_family_id_i <= 0)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to genl_ctrl_resolve(0x%@,\"%s\"): \"%s\", returning\n"),
-                    socket_handle_p,
-                    ACE_TEXT (NL80211_GENL_NAME),
-                    ACE_TEXT (nl_geterror (driver_family_id_i))));
-        goto clean;
-      } // end IF
-    } // end IF
-
-    callback_p = nl_cb_alloc (NL_CB_DEFAULT);
-    if (unlikely (!callback_p))
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to nl_cb_alloc (): \"%m\", aborting\n")));
-      goto clean;
-    } // end IF
-    result_2 = nl_cb_err (callback_p,
-                          NL_CB_CUSTOM,
-                          network_wlan_nl80211_error_cb,
-                          &result_2);
-    ACE_ASSERT (result_2 >= 0);
-    nl_socket_set_cb (socket_handle_p, callback_p);
-    nl_cb_put (callback_p);
-    callback_p = NULL;
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid argument, aborting\n")));
+    return false;
   } // end IF
-  ACE_ASSERT (socket_handle_p);
-  ACE_ASSERT (driver_family_id_i > 0);
-
-  // retain callbacks
-  callback_p = nl_socket_get_cb (socket_handle_p);
-  ACE_ASSERT (callback_p);
-  callback_2 = nl_cb_clone (callback_p);
-  ACE_ASSERT (callback_2);
-  result_2 = nl_cb_set (callback_2,
-                        NL_CB_VALID,
-                        NL_CB_CUSTOM,
-                        network_wlan_nl80211_interface_cb,
-                        &cb_data_s);
-  ACE_ASSERT (!result_2);
-//  nl_socket_set_cb (handle_in, callback_2);
 
   message_p = nlmsg_alloc ();
   if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to nlmsg_alloc (): \"%m\", returning\n")));
+                ACE_TEXT ("failed to nlmsg_alloc(): \"%m\", returning\n")));
     goto clean;
   } // end IF
-  // *NOTE*: "...When getting scan results without triggering scan first, you'll
-  //         always get the information about currently associated BSS..."
   if (unlikely (!genlmsg_put (message_p,
                               NL_AUTO_PORT,              // port #
                               NL_AUTO_SEQ,               // sequence #
-                              driver_family_id_i,        // family id
+                              driverFamilyId_in,         // family id
                               0,                         // (user-) hdrlen
                               NLM_F_DUMP,                // flags
                               NL80211_CMD_GET_INTERFACE, // command id
                               0)))                       // interface version
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to genlmsg_put (): \"%m\", returning\n")));
+                ACE_TEXT ("failed to genlmsg_put(): \"%m\", returning\n")));
     goto clean;
   } // end IF
-  cb_data_s.index = ::if_nametoindex (interfaceIdentifier_in.c_str ());
-  if (unlikely (!cb_data_s.index))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to if_nametoindex(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (interfaceIdentifier_in.c_str ())));
-    goto clean;
-  } // end IF
-  NLA_PUT_U32 (message_p,
-               NL80211_ATTR_IFINDEX,
-               static_cast<ACE_UINT32> (cb_data_s.index));
 
-  result_2 = nl_send_auto (socket_handle_p, message_p);
-  if (unlikely (result_2 < 0))
+  if (unlikely (!Net_WLAN_Tools::nL80211Command (socketHandle_in,
+                                                 network_wlan_nl80211_interface_cb,
+                                                 &cb_data_s,
+                                                 interfaceIdentifier_in,
+                                                 message_p)))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_send_auto(0x%@): \"%s\", returning\n"),
-                socket_handle_p,
-                ACE_TEXT (nl_geterror (result_2))));
+                ACE_TEXT ("failed to Net_WLAN_Tools::nL80211Command(%d), aborting\n"),
+                NL80211_CMD_GET_INTERFACE));
     goto clean;
   } // end IF
-  nlmsg_free (message_p);
-  message_p = NULL;
-
-  while (result_2 > 0)
-    result_2 = nl_recvmsgs (socket_handle_p, callback_2);
-  if (unlikely (result_2 < 0))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\", returning\n"),
-                socket_handle_p,
-                ACE_TEXT (nl_geterror (result_2))));
-    goto clean;
-  } // end IF
+  ACE_ASSERT (!message_p);
 
 clean:
-nla_put_failure:
   if (message_p)
     nlmsg_free (message_p);
-  if (callback_2)
-    nl_cb_put (callback_2);
-  if (release_handle)
-  {
-    nl_close (socket_handle_p);
-    nl_socket_free (socket_handle_p);
-  } // end IF
 
   return ((cb_data_s.type == NL80211_IFTYPE_ADHOC) ||
           (cb_data_s.type == NL80211_IFTYPE_STATION));
@@ -715,9 +616,9 @@ nla_put_failure:
 
 bool
 Net_WLAN_Tools::associate (const std::string& interfaceIdentifier_in,
-                           const struct ether_addr& APMACAddress_in,
+                           const struct ether_addr& accessPointMACAddress_in,
                            const std::string& SSID_in,
-                           struct nl_sock* handle_in,
+                           struct nl_sock* socketHandle_in,
                            int driverFamilyId_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::associate"));
@@ -776,7 +677,7 @@ Net_WLAN_Tools::disassociate (const std::string& interfaceIdentifier_in,
 void
 Net_WLAN_Tools::scan (const std::string& interfaceIdentifier_in,
                       const std::string& ESSID_in,
-                      struct nl_sock* handle_in,
+                      struct nl_sock* socketHandle_in,
                       int driverFamilyId_in,
                       bool dispatchResults_in)
 {
@@ -821,7 +722,7 @@ error:
 
 struct ether_addr
 Net_WLAN_Tools::associatedBSSID (const std::string& interfaceIdentifier_in,
-                                 struct nl_sock* handle_in,
+                                 struct nl_sock* socketHandle_in,
                                  int driverFamilyId_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::associatedBSSID"));
@@ -830,74 +731,23 @@ Net_WLAN_Tools::associatedBSSID (const std::string& interfaceIdentifier_in,
   struct ether_addr return_value;
   ACE_OS::memset (&return_value, 0, sizeof (struct ether_addr));
 
-  // sanity check(s)
-  ACE_ASSERT (!interfaceIdentifier_in.empty ());
-  ACE_ASSERT (interfaceIdentifier_in.size () <= IFNAMSIZ);
-  struct nl_sock* socket_handle_p = handle_in;
-  bool release_handle = false;
-  int result_2 = -1;
-  unsigned int if_index_i = 0;
-  struct nl_cb* callback_p = NULL;
-  struct nl_cb* callback_2 = NULL;
   struct nl_msg* message_p = NULL;
-  if (!socket_handle_p)
+
+  // sanity check(s)
+  if (unlikely (interfaceIdentifier_in.empty ()             ||
+                (interfaceIdentifier_in.size () > IFNAMSIZ) ||
+                !driverFamilyId_in))
   {
-    socket_handle_p = nl_socket_alloc ();
-    if (unlikely (!socket_handle_p))
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to nl_socket_alloc (): \"%m\", aborting\n")));
-      return return_value;
-    } // end IF
-    release_handle = true;
-
-    result_2 = nl_connect (socket_handle_p, NETLINK_GENERIC);
-    if (unlikely (result_2 < 0))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to nl_connect(0x%@): \"%s\", returning\n"),
-                  socket_handle_p,
-                  ACE_TEXT (nl_geterror (result_2))));
-      goto clean;
-    } // end IF
-
-    callback_p = nl_cb_alloc (NL_CB_DEFAULT);
-    if (unlikely (!callback_p))
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to nl_cb_alloc (): \"%m\", aborting\n")));
-      goto clean;
-    } // end IF
-    result_2 = nl_cb_err (callback_p,
-                          NL_CB_CUSTOM,
-                          network_wlan_nl80211_error_cb,
-                          &result_2);
-    ACE_ASSERT (result_2 >= 0);
-    nl_socket_set_cb (socket_handle_p, callback_p);
-    nl_cb_put (callback_p);
-    callback_p = NULL;
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid argument, aborting\n")));
+    return return_value;
   } // end IF
-  ACE_ASSERT (socket_handle_p);
-  ACE_ASSERT (driverFamilyId_in);
-
-  // retain callbacks
-  callback_p = nl_socket_get_cb (socket_handle_p);
-  ACE_ASSERT (callback_p);
-  callback_2 = nl_cb_clone (callback_p);
-  ACE_ASSERT (callback_2);
-  result_2 = nl_cb_set (callback_2,
-                        NL_CB_VALID,
-                        NL_CB_CUSTOM,
-                        network_wlan_nl80211_bssid_cb,
-                        &return_value);
-  ACE_ASSERT (!result_2);
-//  nl_socket_set_cb (handle_in, callback_2);
 
   message_p = nlmsg_alloc ();
   if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to nlmsg_alloc (): \"%m\", returning\n")));
+                ACE_TEXT ("failed to nlmsg_alloc(): \"%m\", returning\n")));
     goto clean;
   } // end IF
   // *NOTE*: "...When getting scan results without triggering scan first, you'll
@@ -912,69 +762,39 @@ Net_WLAN_Tools::associatedBSSID (const std::string& interfaceIdentifier_in,
                               0)))                  // interface version
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to genlmsg_put (): \"%m\", returning\n")));
+                ACE_TEXT ("failed to genlmsg_put(): \"%m\", returning\n")));
     goto clean;
   } // end IF
-  if_index_i = ::if_nametoindex (interfaceIdentifier_in.c_str ());
-  if (unlikely (!if_index_i))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to if_nametoindex(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (interfaceIdentifier_in.c_str ())));
-    goto clean;
-  } // end IF
-  NLA_PUT_U32 (message_p,
-               NL80211_ATTR_IFINDEX,
-               static_cast<ACE_UINT32> (if_index_i));
 //  NLA_PUT (message_p,
 //           NL80211_ATTR_MAC,
 //           ETH_ALEN,
 //           ap_mac_address_s.ether_addr_octet);
 
-  result_2 = nl_send_auto (socket_handle_p, message_p);
-  if (unlikely (result_2 < 0))
+  if (unlikely (!Net_WLAN_Tools::nL80211Command (socketHandle_in,
+                                                 network_wlan_nl80211_bssid_cb,
+                                                 &return_value,
+                                                 interfaceIdentifier_in,
+                                                 message_p)))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_send_auto(0x%@): \"%s\", returning\n"),
-                socket_handle_p,
-                ACE_TEXT (nl_geterror (result_2))));
+                ACE_TEXT ("failed to Net_WLAN_Tools::nL80211Command(%d), aborting\n"),
+                NL80211_CMD_GET_SCAN));
     goto clean;
   } // end IF
-  nlmsg_free (message_p);
-  message_p = NULL;
-
-  while (result_2 > 0)
-    result_2 = nl_recvmsgs (socket_handle_p, callback_2);
-  if (unlikely (result_2 < 0))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\", returning\n"),
-                socket_handle_p,
-                ACE_TEXT (nl_geterror (result_2))));
-    goto clean;
-  } // end IF
+  ACE_ASSERT (!message_p);
   ACE_ASSERT (!Net_Common_Tools::isAny (return_value));
 
 clean:
-nla_put_failure:
+//nla_put_failure:
   if (message_p)
     nlmsg_free (message_p);
-  if (callback_2)
-    nl_cb_put (callback_2);
-//  if (callback_p)
-//    nl_socket_set_cb (handle_in, callback_p);
-  if (release_handle)
-  {
-    nl_close (socket_handle_p);
-    nl_socket_free (socket_handle_p);
-  } // end IF
 
   return return_value;
 }
 
 std::string
 Net_WLAN_Tools::associatedSSID (const std::string& interfaceIdentifier_in,
-                                struct nl_sock* handle_in,
+                                struct nl_sock* socketHandle_in,
                                 int driverFamilyId_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::associatedSSID"));
@@ -982,308 +802,7 @@ Net_WLAN_Tools::associatedSSID (const std::string& interfaceIdentifier_in,
   // initialize return value(s)
   std::string return_value;
 
-  // sanity check(s)
-  ACE_ASSERT (!interfaceIdentifier_in.empty ());
-  ACE_ASSERT (interfaceIdentifier_in.size () <= IFNAMSIZ);
-  struct nl_sock* socket_handle_p = handle_in;
-  bool release_handle = false;
-  int result_2 = -1;
-  unsigned int if_index_i = 0;
-  struct nl_cb* callback_p = NULL;
-  struct nl_cb* callback_2 = NULL;
   struct nl_msg* message_p = NULL;
-  if (!socket_handle_p)
-  {
-    socket_handle_p = nl_socket_alloc ();
-    if (unlikely (!socket_handle_p))
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to nl_socket_alloc (): \"%m\", aborting\n")));
-      return return_value;
-    } // end IF
-    release_handle = true;
-
-    result_2 = nl_connect (socket_handle_p, NETLINK_GENERIC);
-    if (unlikely (result_2 < 0))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to nl_connect(0x%@): \"%s\", returning\n"),
-                  socket_handle_p,
-                  ACE_TEXT (nl_geterror (result_2))));
-      goto clean;
-    } // end IF
-
-    callback_p = nl_cb_alloc (NL_CB_DEFAULT);
-    if (unlikely (!callback_p))
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to nl_cb_alloc (): \"%m\", aborting\n")));
-      goto clean;
-    } // end IF
-    result_2 = nl_cb_err (callback_p,
-                          NL_CB_CUSTOM,
-                          network_wlan_nl80211_error_cb,
-                          &result_2);
-    ACE_ASSERT (result_2 >= 0);
-    nl_socket_set_cb (socket_handle_p, callback_p);
-    nl_cb_put (callback_p);
-    callback_p = NULL;
-  } // end IF
-  ACE_ASSERT (socket_handle_p);
-  ACE_ASSERT (driverFamilyId_in);
-
-  // retain callbacks
-  callback_p = nl_socket_get_cb (socket_handle_p);
-  ACE_ASSERT (callback_p);
-  callback_2 = nl_cb_clone (callback_p);
-  ACE_ASSERT (callback_2);
-  result_2 = nl_cb_set (callback_2,
-                        NL_CB_VALID,
-                        NL_CB_CUSTOM,
-                        network_wlan_nl80211_ssid_cb,
-                        &return_value);
-  ACE_ASSERT (!result_2);
-//  nl_socket_set_cb (handle_in, callback_2);
-
-  message_p = nlmsg_alloc ();
-  if (unlikely (!message_p))
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to nlmsg_alloc (): \"%m\", returning\n")));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-  if (unlikely (!genlmsg_put (message_p,
-                              NL_AUTO_PORT,         // port #
-                              NL_AUTO_SEQ,          // sequence #
-                              driverFamilyId_in,    // family id
-                              0,                    // (user-) hdrlen
-                              NLM_F_DUMP,           // flags
-                              NL80211_CMD_GET_SCAN, // command id
-                              0)))                  // interface version
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to genlmsg_put (): \"%m\", returning\n")));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-  if_index_i = ::if_nametoindex (interfaceIdentifier_in.c_str ());
-  if (unlikely (!if_index_i))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to if_nametoindex(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (interfaceIdentifier_in.c_str ())));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-  NLA_PUT_U32 (message_p,
-               NL80211_ATTR_IFINDEX,
-               static_cast<ACE_UINT32> (if_index_i));
-//  NLA_PUT (message_p,
-//           NL80211_ATTR_MAC,
-//           ETH_ALEN,
-//           ap_mac_address_s.ether_addr_octet);
-
-  result_2 = nl_send_auto (socket_handle_p, message_p);
-  if (unlikely (result_2 < 0))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_send_auto(0x%@): \"%s\", returning\n"),
-                socket_handle_p,
-                ACE_TEXT (nl_geterror (result_2))));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-  nlmsg_free (message_p);
-  message_p = NULL;
-
-  while (result_2 > 0)
-    result_2 = nl_recvmsgs (socket_handle_p, callback_2);
-  if (unlikely (result_2 < 0))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\", returning\n"),
-                socket_handle_p,
-                ACE_TEXT (nl_geterror (result_2))));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-
-clean:
-nla_put_failure:
-  if (message_p)
-    nlmsg_free (message_p);
-  if (callback_2)
-    nl_cb_put (callback_2);
-//  if (callback_p)
-//    nl_socket_set_cb (handle_in, callback_p);
-  if (release_handle)
-  {
-    nl_close (socket_handle_p);
-    nl_socket_free (socket_handle_p);
-  } // end IF
-
-  return return_value;
-}
-
-Net_WLAN_SSIDs_t
-Net_WLAN_Tools::getSSIDs (const std::string& interfaceIdentifier_in,
-                          struct nl_sock* handle_in,
-                          int driverFamilyId_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::getSSIDs"));
-
-  // initialize return value(s)
-  Net_WLAN_SSIDs_t return_value;
-
-  // sanity check(s)
-  ACE_ASSERT (!interfaceIdentifier_in.empty ());
-  ACE_ASSERT (interfaceIdentifier_in.size () <= IFNAMSIZ);
-  struct nl_sock* socket_handle_p = handle_in;
-  bool release_handle = false;
-  int result_2 = -1;
-  unsigned int if_index_i = 0;
-  struct nl_cb* callback_p = NULL;
-  struct nl_cb* callback_2 = NULL;
-  struct nl_msg* message_p = NULL;
-  if (!socket_handle_p)
-  {
-    socket_handle_p = nl_socket_alloc ();
-    if (unlikely (!socket_handle_p))
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to nl_socket_alloc (): \"%m\", aborting\n")));
-      return return_value;
-    } // end IF
-    release_handle = true;
-
-    result_2 = nl_connect (socket_handle_p, NETLINK_GENERIC);
-    if (unlikely (result_2 < 0))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to nl_connect(0x%@): \"%s\", returning\n"),
-                  socket_handle_p,
-                  ACE_TEXT (nl_geterror (result_2))));
-      goto clean;
-    } // end IF
-
-    callback_p = nl_cb_alloc (NL_CB_DEFAULT);
-    if (unlikely (!callback_p))
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to nl_cb_alloc (): \"%m\", aborting\n")));
-      goto clean;
-    } // end IF
-    result_2 = nl_cb_err (callback_p,
-                          NL_CB_CUSTOM,
-                          network_wlan_nl80211_error_cb,
-                          &result_2);
-    ACE_ASSERT (result_2 >= 0);
-    nl_socket_set_cb (socket_handle_p, callback_p);
-    nl_cb_put (callback_p);
-    callback_p = NULL;
-  } // end IF
-  ACE_ASSERT (socket_handle_p);
-  ACE_ASSERT (driverFamilyId_in);
-
-  // retain callbacks
-  callback_p = nl_socket_get_cb (socket_handle_p);
-  ACE_ASSERT (callback_p);
-  callback_2 = nl_cb_clone (callback_p);
-  ACE_ASSERT (callback_2);
-  result_2 = nl_cb_set (callback_2,
-                        NL_CB_VALID,
-                        NL_CB_CUSTOM,
-                        network_wlan_nl80211_ssids_cb,
-                        &return_value);
-  ACE_ASSERT (!result_2);
-//  nl_socket_set_cb (handle_in, callback_2);
-
-  message_p = nlmsg_alloc ();
-  if (unlikely (!message_p))
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to nlmsg_alloc (): \"%m\", returning\n")));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-  if (unlikely (!genlmsg_put (message_p,
-                              NL_AUTO_PORT,         // port #
-                              NL_AUTO_SEQ,          // sequence #
-                              driverFamilyId_in,    // family id
-                              0,                    // (user-) hdrlen
-                              NLM_F_DUMP,           // flags
-                              NL80211_CMD_GET_SCAN, // command id
-                              0)))                  // interface version
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to genlmsg_put (): \"%m\", returning\n")));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-  if_index_i = ::if_nametoindex (interfaceIdentifier_in.c_str ());
-  if (unlikely (!if_index_i))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to if_nametoindex(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (interfaceIdentifier_in.c_str ())));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-  NLA_PUT_U32 (message_p,
-               NL80211_ATTR_IFINDEX,
-               static_cast<ACE_UINT32> (if_index_i));
-
-  result_2 = nl_send_auto (socket_handle_p, message_p);
-  if (unlikely (result_2 < 0))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_send_auto(0x%@): \"%s\", returning\n"),
-                socket_handle_p,
-                ACE_TEXT (nl_geterror (result_2))));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-  nlmsg_free (message_p);
-  message_p = NULL;
-
-  while (result_2 > 0)
-    result_2 = nl_recvmsgs (socket_handle_p, callback_2);
-  if (unlikely (result_2 < 0))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\", returning\n"),
-                socket_handle_p,
-                ACE_TEXT (nl_geterror (result_2))));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-
-clean:
-nla_put_failure:
-  if (message_p)
-    nlmsg_free (message_p);
-  if (callback_2)
-    nl_cb_put (callback_2);
-//  if (callback_p)
-//    nl_socket_set_cb (handle_in, callback_p);
-  if (release_handle)
-  {
-    nl_close (socket_handle_p);
-    nl_socket_free (socket_handle_p);
-  } // end IF
-
-  return return_value;
-}
-
-bool
-Net_WLAN_Tools::getFeatures (const std::string& interfaceIdentifier_in,
-                             struct nl_sock* handle_in,
-                             int driverFamilyId_in,
-                             ACE_UINT32& features_out,
-                             Net_WLAN_nl80211_ExtendedFeatures_t& extendedFeatures_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::getFeatures"));
-
-  // initialize return values
-  features_out = 0;
-  extendedFeatures_out.clear ();
-  bool result = false;
-
-  int result_2 = -1;
-  struct Net_WLAN_nl80211_InterfaceFeaturesCBData features_s;
-  struct nl_msg* message_p = NULL;
-  unsigned int if_index_i = 0;
 
   // sanity check(s)
   if (unlikely (interfaceIdentifier_in.empty ()             ||
@@ -1292,79 +811,153 @@ Net_WLAN_Tools::getFeatures (const std::string& interfaceIdentifier_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid argument, aborting\n")));
-    return result; // *TODO*: avoid false negatives
+    return return_value;
   } // end IF
-
-  // sanity check(s)
-  struct nl_sock* socket_handle_p = handle_in;
-  bool release_handle = false;
-  struct nl_cb* callback_p = NULL;
-  struct nl_cb* callback_2 = NULL;
-  if (!socket_handle_p)
-  {
-    socket_handle_p = nl_socket_alloc ();
-    if (unlikely (!socket_handle_p))
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to nl_socket_alloc (): \"%m\", aborting\n")));
-      return result;
-    } // end IF
-    release_handle = true;
-
-    result_2 = nl_connect (socket_handle_p, NETLINK_GENERIC);
-    if (unlikely (result_2 < 0))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to nl_connect(0x%@): \"%s\", returning\n"),
-                  socket_handle_p,
-                  ACE_TEXT (nl_geterror (result_2))));
-      goto clean;
-    } // end IF
-
-    callback_p = nl_cb_alloc (NL_CB_DEFAULT);
-    if (unlikely (!callback_p))
-    {
-      ACE_DEBUG ((LM_CRITICAL,
-                  ACE_TEXT ("failed to nl_cb_alloc (): \"%m\", aborting\n")));
-      goto clean;
-    } // end IF
-    result_2 = nl_cb_err (callback_p,
-                          NL_CB_CUSTOM,
-                          network_wlan_nl80211_error_cb,
-                          &result_2);
-    ACE_ASSERT (result_2 >= 0);
-    nl_socket_set_cb (socket_handle_p, callback_p);
-    nl_cb_put (callback_p);
-    callback_p = NULL;
-  } // end IF
-  ACE_ASSERT (socket_handle_p);
-  ACE_ASSERT (driverFamilyId_in);
-
-  // retain callbacks
-  callback_p = nl_socket_get_cb (socket_handle_p);
-  ACE_ASSERT (callback_p);
-  callback_2 = nl_cb_clone (callback_p);
-  ACE_ASSERT (callback_2);
-  result_2 = nl_cb_set (callback_2,
-                        NL_CB_VALID,
-                        NL_CB_CUSTOM,
-                        network_wlan_nl80211_feature_cb,
-                        &features_s);
-  if (unlikely (result_2 < 0))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_cb_set(0x%@), aborting\n"),
-                callback_2));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-//  nl_socket_set_cb (handle_in, callback_2);
 
   message_p = nlmsg_alloc ();
   if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to nlmsg_alloc (): \"%m\", returning\n")));
-    goto clean; // *TODO*: avoid false negatives
+                ACE_TEXT ("failed to nlmsg_alloc(): \"%m\", returning\n")));
+    goto clean;
+  } // end IF
+  // *NOTE*: "...When getting scan results without triggering scan first, you'll
+  //         always get the information about currently associated BSS..."
+  if (unlikely (!genlmsg_put (message_p,
+                              NL_AUTO_PORT,         // port #
+                              NL_AUTO_SEQ,          // sequence #
+                              driverFamilyId_in,    // family id
+                              0,                    // (user-) hdrlen
+                              NLM_F_DUMP,           // flags
+                              NL80211_CMD_GET_SCAN, // command id
+                              0)))                  // interface version
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to genlmsg_put(): \"%m\", returning\n")));
+    goto clean;
+  } // end IF
+//  NLA_PUT (message_p,
+//           NL80211_ATTR_MAC,
+//           ETH_ALEN,
+//           ap_mac_address_s.ether_addr_octet);
+
+  if (unlikely (!Net_WLAN_Tools::nL80211Command (socketHandle_in,
+                                                 network_wlan_nl80211_ssid_cb,
+                                                 &return_value,
+                                                 interfaceIdentifier_in,
+                                                 message_p)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_WLAN_Tools::nL80211Command(%d), aborting\n"),
+                NL80211_CMD_GET_SCAN));
+    goto clean;
+  } // end IF
+  ACE_ASSERT (!message_p);
+
+clean:
+//nla_put_failure:
+  if (message_p)
+    nlmsg_free (message_p);
+
+  return return_value;
+}
+
+Net_WLAN_SSIDs_t
+Net_WLAN_Tools::getSSIDs (const std::string& interfaceIdentifier_in,
+                          struct nl_sock* socketHandle_in,
+                          int driverFamilyId_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::getSSIDs"));
+
+  // initialize return value(s)
+  Net_WLAN_SSIDs_t return_value;
+
+  struct nl_msg* message_p = NULL;
+
+  // sanity check(s)
+  if (unlikely (interfaceIdentifier_in.empty ()             ||
+                (interfaceIdentifier_in.size () > IFNAMSIZ) ||
+                !driverFamilyId_in))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid argument, aborting\n")));
+    return return_value;
+  } // end IF
+
+  message_p = nlmsg_alloc ();
+  if (unlikely (!message_p))
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to nlmsg_alloc(): \"%m\", aborting\n")));
+    goto clean;
+  } // end IF
+  if (unlikely (!genlmsg_put (message_p,
+                              NL_AUTO_PORT,         // port #
+                              NL_AUTO_SEQ,          // sequence #
+                              driverFamilyId_in,    // family id
+                              0,                    // (user-) hdrlen
+                              NLM_F_DUMP,           // flags
+                              NL80211_CMD_GET_SCAN, // command id
+                              0)))                  // interface version
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to genlmsg_put(): \"%m\", aborting\n")));
+    goto clean;
+  } // end IF
+
+  if (unlikely (!Net_WLAN_Tools::nL80211Command (socketHandle_in,
+                                                 network_wlan_nl80211_ssids_cb,
+                                                 &return_value,
+                                                 interfaceIdentifier_in,
+                                                 message_p)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_WLAN_Tools::nL80211Command(%d), aborting\n"),
+                NL80211_CMD_GET_SCAN));
+    goto clean;
+  } // end IF
+  ACE_ASSERT (!message_p);
+
+clean:
+  if (message_p)
+    nlmsg_free (message_p);
+
+  return return_value;
+}
+
+bool
+Net_WLAN_Tools::getFeatures (const std::string& interfaceIdentifier_in,
+                             struct nl_sock* socketHandle_in,
+                             int driverFamilyId_in,
+                             ACE_UINT32& features_out,
+                             Net_WLAN_nl80211_ExtendedFeatures_t& extendedFeatures_out)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::getFeatures"));
+
+  // initialize return values
+  bool result = false;
+  features_out = 0;
+  extendedFeatures_out.clear ();
+
+  struct Net_WLAN_nl80211_InterfaceFeaturesCBData features_s;
+  struct nl_msg* message_p = NULL;
+
+  // sanity check(s)
+  if (unlikely (interfaceIdentifier_in.empty ()             ||
+                (interfaceIdentifier_in.size () > IFNAMSIZ) ||
+                !driverFamilyId_in))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("invalid argument, aborting\n")));
+    return false;
+  } // end IF
+
+  message_p = nlmsg_alloc ();
+  if (unlikely (!message_p))
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to nlmsg_alloc(): \"%m\", aborting\n")));
+    goto clean;
   } // end IF
   if (unlikely (!genlmsg_put (message_p,
                               NL_AUTO_PORT,          // port #
@@ -1376,43 +969,22 @@ Net_WLAN_Tools::getFeatures (const std::string& interfaceIdentifier_in,
                               0)))                   // interface version
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to genlmsg_put (): \"%m\", returning\n")));
-    goto clean; // *TODO*: avoid false negatives
+                ACE_TEXT ("failed to genlmsg_put(): \"%m\", aborting\n")));
+    goto clean;
   } // end IF
-  if_index_i = ::if_nametoindex (interfaceIdentifier_in.c_str ());
-  if (unlikely (!if_index_i))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to if_nametoindex(\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (interfaceIdentifier_in.c_str ())));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-  NLA_PUT_U32 (message_p,
-               NL80211_ATTR_IFINDEX,
-               static_cast<ACE_UINT32> (if_index_i));
 
-  result_2 = nl_send_auto (socket_handle_p, message_p);
-  if (unlikely (result_2 < 0))
+  if (unlikely (!Net_WLAN_Tools::nL80211Command (socketHandle_in,
+                                                 network_wlan_nl80211_feature_cb,
+                                                 &features_s,
+                                                 interfaceIdentifier_in,
+                                                 message_p)))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_send_auto(0x%@): \"%s\", returning\n"),
-                socket_handle_p,
-                ACE_TEXT (nl_geterror (result_2))));
-    goto clean; // *TODO*: avoid false negatives
+                ACE_TEXT ("failed to Net_WLAN_Tools::nL80211Command(%d), aborting\n"),
+                NL80211_CMD_GET_WIPHY));
+    goto clean;
   } // end IF
-  nlmsg_free (message_p);
-  message_p = NULL;
-
-  while (result_2 > 0)
-    result_2 = nl_recvmsgs (socket_handle_p, callback_2);
-  if (unlikely (result_2 < 0))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\", returning\n"),
-                socket_handle_p,
-                ACE_TEXT (nl_geterror (result_2))));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
+  ACE_ASSERT (!message_p);
 
   features_out = features_s.features;
   extendedFeatures_out = features_s.extendedFeatures;
@@ -1420,14 +992,163 @@ Net_WLAN_Tools::getFeatures (const std::string& interfaceIdentifier_in,
   result = true;
 
 clean:
-nla_put_failure:
   if (message_p)
     nlmsg_free (message_p);
+
+  return result;
+}
+
+bool
+Net_WLAN_Tools::nL80211Command (struct nl_sock* socketHandle_in,
+                                nl_recvmsg_msg_cb_t messageCB_in,
+                                void* userData_in,
+                                const std::string& interfaceIdentifier_in,
+                                struct nl_msg*& message_inout)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::nL80211Command"));
+
+  bool result = false;
+  int result_2 = -1;
+  bool release_handle_b = false;
+  struct nl_cb* callback_p = NULL;
+  struct nl_cb* callback_2 = NULL;
+  struct nl_sock* socket_handle_p = NULL;
+
+  // sanity check(s)
+  socket_handle_p = socketHandle_in;
+  if (!socket_handle_p)
+  {
+    socket_handle_p = nl_socket_alloc ();
+    if (unlikely (!socket_handle_p))
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to nl_socket_alloc(): \"%m\", aborting\n")));
+      return false;
+    } // end IF
+    release_handle_b = true;
+
+    result_2 = nl_connect (socket_handle_p, NETLINK_GENERIC);
+    if (unlikely (result_2 < 0))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to nl_connect(0x%@): \"%s\", aborting\n"),
+                  socket_handle_p,
+                  ACE_TEXT (nl_geterror (result_2))));
+      goto clean;
+    } // end IF
+
+    callback_p = nl_cb_alloc (NL_CB_DEFAULT);
+    if (unlikely (!callback_p))
+    {
+      ACE_DEBUG ((LM_CRITICAL,
+                  ACE_TEXT ("failed to nl_cb_alloc(): \"%m\", aborting\n")));
+      goto clean;
+    } // end IF
+    result_2 = nl_cb_err (callback_p,
+                          NL_CB_CUSTOM,
+                          network_wlan_nl80211_error_cb,
+                          &result_2);
+    ACE_ASSERT (result_2 >= 0);
+    nl_socket_set_cb (socket_handle_p, callback_p);
+    nl_cb_put (callback_p);
+    callback_p = NULL;
+  } // end IF
+  ACE_ASSERT (socket_handle_p);
+
+  // retain callbacks
+  callback_p = nl_socket_get_cb (socket_handle_p);
+  ACE_ASSERT (callback_p);
+  callback_2 = nl_cb_clone (callback_p);
+  if (unlikely (!callback_2))
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to nl_cb_clone(): \"%m\", aborting\n")));
+    goto clean;
+  } // end IF
+  result_2 = nl_cb_set (callback_2,
+                        NL_CB_VALID,
+                        NL_CB_CUSTOM,
+                        messageCB_in,
+                        userData_in);
+  if (unlikely (result_2 < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to nl_cb_set(%@): \"%s\", aborting\n"),
+                callback_2,
+                ACE_TEXT (nl_geterror (result_2))));
+    goto clean;
+  } // end IF
+//  nl_socket_set_cb (handle_in, callback_2);
+
+  ACE_ASSERT (message_inout);
+  if (likely (!interfaceIdentifier_in.empty ()))
+  {
+    // sanity check(s)
+    ACE_ASSERT (interfaceIdentifier_in.size () <= IFNAMSIZ);
+
+    unsigned int if_index_i =
+        ::if_nametoindex (interfaceIdentifier_in.c_str ());
+    if (unlikely (!if_index_i))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ::if_nametoindex(\"%s\"): \"%m\", aborting\n"),
+                  ACE_TEXT (interfaceIdentifier_in.c_str ())));
+      goto clean;
+    } // end IF
+    NLA_PUT_U32 (message_inout,
+                 NL80211_ATTR_IFINDEX,
+                 static_cast<ACE_UINT32> (if_index_i));
+  } // end IF
+
+  result_2 = nl_send_auto (socket_handle_p, message_inout);
+  if (unlikely (result_2 < 0))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to nl_send_auto(%@): \"%s\", aborting\n"),
+                socket_handle_p,
+                ACE_TEXT (nl_geterror (result_2))));
+    goto clean;
+  } // end IF
+  nlmsg_free (message_inout);
+  message_inout = NULL;
+
+continue_:
+  result_2 = 1;
+  while (result_2 > 0)
+    result_2 = nl_recvmsgs (socket_handle_p, callback_2);
+  if (unlikely (result_2 < 0))
+  {
+    if (result_2 == -NLE_DUMP_INTR) // -33: state has changed, dump (NLM_F_DUMP flag) is inconsistent
+                                    //      most probable reason: received new scan results
+    {
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\", continuing\n"),
+                  socket_handle_p,
+                  ACE_TEXT (nl_geterror (result_2))));
+      goto continue_;
+    } // end IF
+    else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to nl_recvmsgs(%@): \"%s\", aborting\n"),
+                  socket_handle_p,
+                  ACE_TEXT (nl_geterror (result_2))));
+    goto clean;
+  } // end IF
+
+  result = true;
+
+clean:
+nla_put_failure:
+  if (message_inout)
+  {
+    nlmsg_free (message_inout);
+    message_inout = NULL;
+  } // end IF
   if (callback_2)
     nl_cb_put (callback_2);
 //  if (callback_p)
 //    nl_socket_set_cb (handle_in, callback_p);
-  if (release_handle)
+  if (release_handle_b)
   {
     nl_close (socket_handle_p);
     nl_socket_free (socket_handle_p);
