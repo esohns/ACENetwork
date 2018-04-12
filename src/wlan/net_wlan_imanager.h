@@ -39,18 +39,26 @@ class Net_WLAN_IManager
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual bool do_associate (REFGUID,                  // interface identifier {GUID_NULL: any}
-#else
+#elif defined (ACE_LINUX)
   virtual bool do_associate (const std::string&,       // interface identifier {"": any}
-                             const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
+                             const struct ether_addr&, // AP BSSID (i.e. access point MAC address)
 #endif // ACE_WIN32 || ACE_WIN64
                              const std::string&) = 0;  // (E)SSID {"": disassociate}
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void do_scan (REFGUID,                       // interface identifier {GUID_NULL: all}
-#else
+#elif defined (ACE_LINUX)
+  // *TODO*: conceive of an ADT for authentication credentials
+  virtual bool do_authenticate (const std::string&,       // interface identifier {"": any}
+                                const struct ether_addr&, // access point BSSID (i.e. access point MAC address)
+                                const std::string&) = 0;  // (E)SSID {"": deauthenticate}
+#endif // ACE_WIN32 || ACE_WIN64
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  virtual void do_scan (REFGUID,                  // interface identifier {GUID_NULL: all}
+#elif defined (ACE_LINUX)
   virtual void do_scan (const std::string&,       // interface identifier {"": all}
 #endif // ACE_WIN32 || ACE_WIN64
-                        const struct ether_addr&, // AP BSSID (i.e. AP MAC address) {0: all}
+                        const struct ether_addr&, // access point BSSID (i.e. access point MAC address) {0: all}
                         const std::string&) = 0;  // (E)SSID {"": all}
 };
 

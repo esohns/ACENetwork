@@ -169,6 +169,7 @@ class Net_WLAN_Monitor_Base_T
   ACE_HANDLE                            handle_;
 #endif // WEXT_SUPPORT
 #if defined (NL80211_SUPPORT)
+  struct Net_WLAN_nl80211_CBData        CBData_;
   int                                   familyId_;
   struct nl_sock*                       socketHandle_;
 #endif // NL80211_SUPPORT

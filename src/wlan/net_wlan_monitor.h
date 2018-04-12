@@ -59,39 +59,11 @@
 
 // forward declarations
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
+#elif defined (ACE_LINUX)
 #if defined (NL80211_SUPPORT)
 struct sockaddr_nl;
 struct nlmsgerr;
 struct nl_msg;
-
-//// error handling
-//int
-//network_wlan_nl80211_error_cb (struct sockaddr_nl*,
-//                               struct nlmsgerr*,
-//                               void*);
-
-// protocol handling
-int
-network_wlan_nl80211_no_seq_check_cb (struct nl_msg*,
-                                      void*);
-int
-network_wlan_nl80211_ack_cb (struct nl_msg*,
-                             void*);
-int
-network_wlan_nl80211_finish_cb (struct nl_msg*,
-                                void*);
-int
-network_wlan_nl80211_multicast_groups_cb (struct nl_msg*,
-                                          void*);
-
-// data handling
-int
-network_wlan_nl80211_default_handler_cb (struct nl_msg*,
-                                         void*);
-//int
-//network_wlan_nl80211_scan_data_cb (struct nl_msg*,
-//                                   void*);
 #endif // NL80211_SUPPORT
 
 #if defined (DBUS_SUPPORT)
@@ -430,11 +402,14 @@ class Net_WLAN_Monitor_T<AddressType,
   virtual bool do_associate (const std::string&,       // interface identifier {"": any}
                              const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
                              const std::string&);      // (E)SSID {"": disassociate}
+  virtual bool do_authenticate (const std::string&,       // interface identifier {"": any}
+                                const struct ether_addr&, // AP BSSID (i.e. AP MAC address)
+                                const std::string&);      // (E)SSID {"": deauthenticate}
   virtual void do_scan (const std::string&,       // interface identifier {"": all}
                         const struct ether_addr&, // AP BSSID (i.e. AP MAC address) {0: all}
                         const std::string&);      // (E)SSID {"": all}
 
-  UserDataType*                       userData_;
+  UserDataType*             userData_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T (const Net_WLAN_Monitor_T&))
@@ -461,21 +436,17 @@ class Net_WLAN_Monitor_T<AddressType,
                        ACE_Message_Block*&);      // i/o: message buffer
   bool initiate_read_stream (unsigned int); // buffer size
 
-  bool hasFeature (enum nl80211_feature_flags,
-                   enum nl80211_ext_feature_index) const;
-
-  ACE_Message_Block*                          buffer_;
-  struct nl_cb*                               callbacks_;
-  int                                         controlId_;
-  int                                         error_;
-  Net_WLAN_nl80211_ExtendedFeatures_t         extendedFeatures_;
-  ACE_UINT32                                  features_;
-  bool                                        headerReceived_;
-  ACE_Asynch_Read_Stream                      inputStream_;
-  bool                                        isRegistered_;
-  bool                                        isSubscribedToMulticastGroups_;
-  struct nl_msg*                              message_;
-  struct Net_WLAN_nl80211_MultipartDoneCBData multipartDoneCBData_;
+  ACE_Message_Block*        buffer_;
+  struct nl_cb*             callbacks_;
+  int                       controlId_;
+  int                       error_;
+  Net_WLAN_nl80211_Features features_;
+  bool                      headerReceived_;
+  ACE_Asynch_Read_Stream    inputStream_;
+  bool                      isRegistered_;
+  bool                      isSubscribedToMulticastGroups_;
+  struct nl_msg*            message_;
+  ACE_UINT32                protocolFeatures_;
 };
 #endif // NL80211_SUPPORT
 

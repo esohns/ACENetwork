@@ -57,17 +57,36 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
   // sanity check(s)
   ACE_ASSERT (inherited::stateLock_);
 
+  enum Net_WLAN_MonitorState state_e = NET_WLAN_MONITOR_STATE_INVALID;
+
   // synchronize access to state machine
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_GUARD_RETURN (ACE_SYNCH_NULL_MUTEX, aGuard, *inherited::stateLock_, false);
+  state_e = inherited::state_;
 #else
-  // *NOTE*: the state machine is asynchronous; idle first
-  inherited::idle ();
-
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, *inherited::stateLock_, false);
+  // *NOTE*: the state machine is asynchronous; the 'current' state may (!) be
+  //         at the tail end of the transition stack
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::msg_queue_->lock (), false);
+    inherited::MESSAGE_QUEUE_ITERATOR_T iterator (*inherited::msg_queue_);
+    if (iterator.done ())
+      state_e = inherited::state_;
+    else
+    {
+      ACE_Message_Block* message_block_p = NULL;
+      for (;
+           iterator.next (message_block_p);
+           iterator.advance ())
+        if (!message_block_p->next ())
+          break;
+      ACE_ASSERT (message_block_p);
+      state_e =
+          static_cast<enum Net_WLAN_MonitorState> (message_block_p->msg_type ());
+    } // end ELSE
+  } // end lock scope
 #endif // ACE_WIN32 || ACE_WIN64
 
-  switch (inherited::state_)
+  switch (state_e)
   {
     case NET_WLAN_MONITOR_STATE_INVALID:
     {
@@ -92,7 +111,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
       {
         case NET_WLAN_MONITOR_STATE_INVALID:      // reset
         // good case
-        case NET_WLAN_MONITOR_STATE_IDLE:
+        case NET_WLAN_MONITOR_STATE_IDLE:         // *TODO*: restarted ?
         case NET_WLAN_MONITOR_STATE_SCAN:         // not configured || configured SSID unknown (i.e. not cached yet || auto-associate disabled)
         case NET_WLAN_MONITOR_STATE_ASSOCIATE:    // not connected && (configured && configured SSID known (i.e. cached) && auto-associate enabled)
         //////////////////////////////////
@@ -118,13 +137,18 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_INVALID:      // reset
         // good case
         //////////////////////////////////
+        case NET_WLAN_MONITOR_STATE_IDLE:         // scan aborted
+        case NET_WLAN_MONITOR_STATE_SCAN:         // *TODO*: restarted ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_USE)
         // *NOTE*: these transitions is necessary due to the usage of a timer
-        //         and the fact that the Wlan API dispatches events from
+        //         and the fact that the WLAN API dispatches events from
         //         multiple threads
         case NET_WLAN_MONITOR_STATE_SCAN:
         case NET_WLAN_MONITOR_STATE_ASSOCIATE:
+#endif // WLANAPI_USE
 #endif // ACE_WIN32 || ACE_WIN64
+        case NET_WLAN_MONITOR_STATE_INITIALIZED:  // monitor stopped
         case NET_WLAN_MONITOR_STATE_SCANNED:      // scan completed
         {
           inherited::change (newState_in);
@@ -143,10 +167,12 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_INVALID:      // reset
         // good case
         case NET_WLAN_MONITOR_STATE_IDLE:         // association failed (gave up)
+        case NET_WLAN_MONITOR_STATE_ASSOCIATE:    // *TODO*: restarted ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         case NET_WLAN_MONITOR_STATE_ASSOCIATE:    // association failed (retrying)
 #endif // ACE_WIN32 || ACE_WIN64
         //////////////////////////////////
+        case NET_WLAN_MONITOR_STATE_INITIALIZED:  // monitor stopped
         case NET_WLAN_MONITOR_STATE_ASSOCIATED:   // association succeeded
         {
           inherited::change (newState_in);
@@ -166,6 +192,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         // good case
         case NET_WLAN_MONITOR_STATE_IDLE:         // not configured || configured SSID unknown (i.e. not cached)
         //////////////////////////////////
+        case NET_WLAN_MONITOR_STATE_INITIALIZED:  // monitor stopped
         case NET_WLAN_MONITOR_STATE_SCANNED:      // configured && configured SSID known (i.e. cached)
         {
           inherited::change (newState_in);
@@ -187,6 +214,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_CONNECT:      // connection failed (e.g. failed to obtain DHCP lease) (retrying)
 #endif // ACE_WIN32 || ACE_WIN64
         //////////////////////////////////
+        case NET_WLAN_MONITOR_STATE_INITIALIZED:  // monitor stopped
         case NET_WLAN_MONITOR_STATE_ASSOCIATED:   // connection failed (e.g. failed to obtain DHCP lease) (gave up)
         case NET_WLAN_MONITOR_STATE_CONNECTED:    // connection succeeded (e.g. DHCP lease obtained)
         {
@@ -205,6 +233,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
       {
         case NET_WLAN_MONITOR_STATE_INVALID:      // reset
         // good case
+        case NET_WLAN_MONITOR_STATE_INITIALIZED:  // monitor stopped
         case NET_WLAN_MONITOR_STATE_DISASSOCIATE: // disconnect completed (e.g. DHCP lease relinquished)
         {
           inherited::change (newState_in);
@@ -249,11 +278,12 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         case NET_WLAN_MONITOR_STATE_SCAN:         // monitor link quality
         //////////////////////////////////
-        case NET_WLAN_MONITOR_STATE_INITIALIZED:  // monitor stopped
         case NET_WLAN_MONITOR_STATE_SCANNED:      // (background) scan has completed
 #endif // ACE_WIN32 || ACE_WIN64
+        case NET_WLAN_MONITOR_STATE_INITIALIZED:  // monitor stopped
         case NET_WLAN_MONITOR_STATE_ASSOCIATED:   // association completed ||
                                                   // already connected (monitoring link quality)
+        case NET_WLAN_MONITOR_STATE_SCANNED:      // *TODO*: restarted ?
         {
           inherited::change (newState_in);
           return true;
@@ -270,6 +300,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
       {
         case NET_WLAN_MONITOR_STATE_INVALID:      // reset
         // good case
+        case NET_WLAN_MONITOR_STATE_INITIALIZED:  // monitor stopped
         case NET_WLAN_MONITOR_STATE_CONNECT:      // association succeeded
         case NET_WLAN_MONITOR_STATE_DISASSOCIATE: // disassociate after disconnect completed
         {
@@ -288,12 +319,13 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
       {
         case NET_WLAN_MONITOR_STATE_INVALID:      // reset
         // good case
+        case NET_WLAN_MONITOR_STATE_INITIALIZED:  // monitor stopped
         case NET_WLAN_MONITOR_STATE_SCAN:         // monitor link quality
         case NET_WLAN_MONITOR_STATE_DISCONNECT:   // (event/user intervention || (configured && not connected to configured SSID))
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         //////////////////////////////////
         case NET_WLAN_MONITOR_STATE_SCANNED:
-#else
+#elif defined (ACE_LINUX)
         case NET_WLAN_MONITOR_STATE_IDLE:
 #endif // ACE_WIN32 || ACE_WIN64
         {
@@ -311,7 +343,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
   } // end SWITCH
   ACE_DEBUG ((LM_ERROR,
               ACE_TEXT ("unknown/invalid state switch: \"%s\" --> \"%s\" --> check implementation !, aborting\n"),
-              ACE_TEXT (stateToString (inherited::state_).c_str ()),
+              ACE_TEXT (stateToString (state_e).c_str ()),
               ACE_TEXT (stateToString (newState_in).c_str ())));
 
   return false;

@@ -68,9 +68,13 @@
 
 #define NET_WLAN_MONITOR_NL80211_CONTROL_NAME_STRING                      "nlctrl"
 
+// features (device)
 #define NET_WLAN_MONITOR_NL80211_DEFAULT_FLUSHCACHEBEFORESCANS            false
 #define NET_WLAN_MONITOR_NL80211_DEFAULT_LOWPRIORITYSCANS                 true
 #define NET_WLAN_MONITOR_NL80211_DEFAULT_RANDOMIZEMACADDRESSFORSCANS      false
+
+// features (protocol)
+#define NET_WLAN_MONITOR_NL80211_DEFAULT_SPLITWIPHYDUMPS                  true
 #endif // NL80211_SUPPORT
 
 #if defined (DBUS_SUPPORT)

@@ -53,22 +53,25 @@
 
 enum Net_WLAN_MonitorState
 {
-  NET_WLAN_MONITOR_STATE_INVALID     = -1,
+  NET_WLAN_MONITOR_STATE_INVALID = -1,
   // -------------------------------------
   // 'transitional' states (task-/timeout-oriented, i.e. may return to previous
   // state upon completion)
-  NET_WLAN_MONITOR_STATE_IDLE        = 0,  // idle (i.e. waiting between scans/connection attempts/...)
+  NET_WLAN_MONITOR_STATE_IDLE = 0,         // idle (i.e. waiting between scans/connection attempts/...)
   NET_WLAN_MONITOR_STATE_SCAN,             // scanning
-  NET_WLAN_MONITOR_STATE_ASSOCIATE,        // associating to AP
+  NET_WLAN_MONITOR_STATE_AUTHENTICATE,     // authenticating to access point
+  NET_WLAN_MONITOR_STATE_ASSOCIATE,        // associating to access point
   NET_WLAN_MONITOR_STATE_CONNECT,          // requesting IP address (e.g. DHCP)
   NET_WLAN_MONITOR_STATE_DISCONNECT,       // releasing IP address (e.g. DHCP)
-  NET_WLAN_MONITOR_STATE_DISASSOCIATE,     // disassociating from AP
+  NET_WLAN_MONITOR_STATE_DISASSOCIATE,     // disassociating from access point
+  NET_WLAN_MONITOR_STATE_DEAUTHENTICATE,   // deauthenticating from access point
   ////////////////////////////////////////
   // 'static' states (discrete/persisting, i.e. long(er)-term)
   NET_WLAN_MONITOR_STATE_INITIALIZED,      // initialized
   NET_WLAN_MONITOR_STATE_SCANNED,          // scanning complete
-  NET_WLAN_MONITOR_STATE_ASSOCIATED,       // associated to AP
-  NET_WLAN_MONITOR_STATE_CONNECTED,        // 'online': interface is associated to AP and has a valid IP address
+  NET_WLAN_MONITOR_STATE_AUTHENTICATED,    // authenticated to access point
+  NET_WLAN_MONITOR_STATE_ASSOCIATED,       // associated to access point
+  NET_WLAN_MONITOR_STATE_CONNECTED,        // 'online': interface is associated to access point and has a valid IP address
   ////////////////////////////////////////
   NET_WLAN_MONITOR_STATE_MAX
 };
@@ -172,55 +175,104 @@ typedef Common_XML_Parser_T<ACE_MT_SYNCH,
                             struct Net_WLAN_Profile_ParserContext,
                             Net_WLAN_Profile_XML_Handler> Net_WLAN_Profile_Parser_t;
 #elif defined (ACE_LINUX)
+typedef std::map<std::string, unsigned int> Net_WLAN_WiPhyIdentifiers_t;
+typedef Net_WLAN_WiPhyIdentifiers_t::iterator Net_WLAN_WiPhyIdentifiersIterator_t;
+typedef std::pair<std::string, unsigned int> Net_WLAN_WiPhyIdentifiersEntry_t;
+struct Net_WLAN_WiPhyIdentifiersFindPredicate
+ : public std::binary_function<Net_WLAN_WiPhyIdentifiersEntry_t,
+                               unsigned int,
+                               bool>
+{
+  inline bool operator() (const Net_WLAN_WiPhyIdentifiersEntry_t& entry_in, unsigned int value_in) const { return entry_in.second == value_in; }
+};
+
 #if defined (NL80211_SUPPORT)
 typedef std::map<std::string, int> Net_WLAN_nl80211_MulticastGroupIds_t;
 typedef Net_WLAN_nl80211_MulticastGroupIds_t::iterator Net_WLAN_nl80211_MulticastGroupIdsIterator_t;
-struct Net_WLAN_nl80211_MulticastGroupIdQueryCBData
-{
-  Net_WLAN_nl80211_MulticastGroupIdQueryCBData ()
-   : map (NULL)
-  {}
-
-  Net_WLAN_nl80211_MulticastGroupIds_t* map;
-};
-
-struct Net_WLAN_nl80211_InterfaceConfigurationCBData
-{
-  Net_WLAN_nl80211_InterfaceConfigurationCBData ()
-   : index (0)
-   , type (NL80211_IFTYPE_UNSPECIFIED)
-  {}
-
-  unsigned int        index;
-  enum nl80211_iftype type;
-};
 
 typedef std::set<enum nl80211_ext_feature_index> Net_WLAN_nl80211_ExtendedFeatures_t;
 typedef Net_WLAN_nl80211_ExtendedFeatures_t::iterator Net_WLAN_nl80211_ExtendedFeaturesIterator_t;
-struct Net_WLAN_nl80211_InterfaceFeaturesCBData
+struct Net_WLAN_nl80211_Features
 {
-  Net_WLAN_nl80211_InterfaceFeaturesCBData ()
-   : features (0)
-   , extendedFeatures ()
+  Net_WLAN_nl80211_Features ()
+   : extendedFeatures ()
+   , features (0)
   {}
 
-  ACE_UINT32                          features;
   Net_WLAN_nl80211_ExtendedFeatures_t extendedFeatures;
+  ACE_UINT32                          features;
 };
 
 class Net_WLAN_IMonitorBase;
-struct Net_WLAN_nl80211_MultipartDoneCBData
+struct Net_WLAN_nl80211_CBData
 {
-  Net_WLAN_nl80211_MultipartDoneCBData ()
-   : error (NULL)
+  Net_WLAN_nl80211_CBData ()
+   : address ()
+   , done (NULL)
+   , dumping (false)
+   , error (NULL)
+   , features (NULL)
+   , index (0)
+   , interfaces (NULL)
+   , name ()
+   , protocolFeatures (NULL)
    , scanning (false)
+   , SSIDs ()
+#if defined (_DEBUG)
+   , timestamp (ACE_Time_Value::zero)
+#endif // _DEBUG
+   , type (NL80211_IFTYPE_UNSPECIFIED)
+   , map (NULL)
    , monitor (NULL)
-  {}
+   , wiPhys (NULL)
+  {
+    ACE_OS::memset (&address, 0, sizeof (struct ether_addr));
+  }
 
-  int*                   error;
-  bool                   scanning;
-  Net_WLAN_IMonitorBase* monitor;
+  struct ether_addr                     address;
+  int*                                  done;
+  bool                                  dumping;
+  int*                                  error;
+  struct Net_WLAN_nl80211_Features*     features;
+  unsigned int                          index; // interface-/wiphy-
+  Net_InterfaceIdentifiers_t*           interfaces;
+  std::string                           name; // wiphy-
+  ACE_UINT32*                           protocolFeatures;
+  bool                                  scanning;
+  Net_WLAN_SSIDs_t*                     SSIDs;
+#if defined (_DEBUG)
+  ACE_Time_Value                        timestamp;
+#endif // _DEBUG
+  enum nl80211_iftype                   type;
+  Net_WLAN_nl80211_MulticastGroupIds_t* map;
+  Net_WLAN_IMonitorBase*                monitor;
+  Net_WLAN_WiPhyIdentifiers_t*          wiPhys;
 };
+
+// error handling
+int
+network_wlan_nl80211_error_cb (struct sockaddr_nl*,
+                               struct nlmsgerr*,
+                               void*);
+
+// protocol handling
+int
+network_wlan_nl80211_no_seq_check_cb (struct nl_msg*,
+                                      void*);
+int
+network_wlan_nl80211_ack_cb (struct nl_msg*,
+                             void*);
+int
+network_wlan_nl80211_finish_cb (struct nl_msg*,
+                                void*);
+int
+network_wlan_nl80211_multicast_groups_cb (struct nl_msg*,
+                                          void*);
+
+// data handling
+int
+network_wlan_nl80211_default_handler_cb (struct nl_msg*,
+                                         void*);
 #endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 

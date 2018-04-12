@@ -228,11 +228,6 @@ class Net_WLAN_Tools
                        struct nl_sock*,          // nl80211 (socket) handle (if any)
                        int);                     // "nl80211" driver family identifier
 
-  // *NOTE*: sends NL80211_CMD_DEAUTHENTICATE (and dispatches the result(s)); data
-  //         is forwarded to the appropriate callback(s)
-  static bool deauthenticate (const std::string&, // interface identifier ("": all)
-                              struct nl_sock*,    // nl80211 (socket) handle (if any)
-                              int);               // "nl80211" driver family identifier
   // *NOTE*: sends NL80211_CMD_DISASSOCIATE (and dispatches the result(s)); data
   //         is forwarded to the appropriate callback(s)
   static bool disassociate (const std::string&, // interface identifier ("": all)

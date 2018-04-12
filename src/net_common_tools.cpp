@@ -184,7 +184,8 @@ Net_Common_Tools::toggleInterface (const std::string& interfaceIdentifier_in)
   if (unlikely (result_2 == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCGIFFLAGS): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCGIFFLAGS): \"%m\", aborting\n"),
+                socket_handle_h));
     goto error;
   } // end IF
 
@@ -199,7 +200,8 @@ Net_Common_Tools::toggleInterface (const std::string& interfaceIdentifier_in)
   if (unlikely (result_2 == -1))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIFFLAGS): \"%m\", aborting\n")));
+                ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCSIFFLAGS): \"%m\", aborting\n"),
+                socket_handle_h));
     goto error;
   } // end IF
 
@@ -2581,7 +2583,9 @@ error:
       //         --> extremely inefficient; remove ASAP
       std::string command_line_string = ACE_TEXT_ALWAYS_CHAR ("ip route");
       std::string ip_route_records_string;
+      int exit_status_i = 0;
       if (unlikely (!Common_Tools::command (command_line_string,
+                                            exit_status_i,
                                             ip_route_records_string)))
       {
         ACE_DEBUG ((LM_ERROR,
@@ -3813,9 +3817,14 @@ Net_Common_Tools::isNetworkManagerManagingInterface (const std::string& interfac
   // sanity check(s)
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
   if (!Common_Tools::getProcessId (ACE_TEXT_ALWAYS_CHAR (NET_EXE_NETWORKMANAGER_STRING)))
-    return false;
+    return false; // *TODO*: avoid false negatives
 
 #if defined (DBUS_SUPPORT)
+//  // sanity check(s)
+//  if (!Common_DBus_Tools::isUnitRunning (NULL,
+//                                         COMMON_SYSTEMD_UNIT_NETWORKMANAGER))
+//    return false; // *TODO*: avoid false negatives
+
   struct DBusError error_s;
   dbus_error_init (&error_s);
   struct DBusConnection* connection_p = NULL;
@@ -3849,7 +3858,7 @@ Net_Common_Tools::isNetworkManagerManagingInterface (const std::string& interfac
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_WLAN_Tools::deviceToDBusObjectPath(\"%s\"), aborting\n"),
                 ACE_TEXT (interfaceIdentifier_in.c_str ())));
-    goto clean;
+    goto clean; // *TODO* avoid false negatives
   } // end IF
 
   message_p =
@@ -3861,7 +3870,7 @@ Net_Common_Tools::isNetworkManagerManagingInterface (const std::string& interfac
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_new_method_call(Get): \"%m\", aborting\n")));
-    goto clean;
+    goto clean; // *TODO* avoid false negatives
   } // end IF
   argument_string_p =
       ACE_TEXT_ALWAYS_CHAR (NET_WLAN_DBUS_NETWORKMANAGER_DEVICE_INTERFACE);
@@ -3872,7 +3881,7 @@ Net_Common_Tools::isNetworkManagerManagingInterface (const std::string& interfac
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
-    goto clean;
+    goto clean; // *TODO* avoid false negatives
   } // end IF
   argument_string_p = ACE_TEXT_ALWAYS_CHAR ("Managed");
   dbus_message_iter_init_append (message_p, &iterator);
@@ -3882,7 +3891,7 @@ Net_Common_Tools::isNetworkManagerManagingInterface (const std::string& interfac
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_append_basic(): \"%m\", aborting\n")));
-    goto clean;
+    goto clean; // *TODO* avoid false negatives
   } // end IF
   reply_p = Common_DBus_Tools::exchange (connection_p,
                                          message_p,
@@ -3892,17 +3901,17 @@ Net_Common_Tools::isNetworkManagerManagingInterface (const std::string& interfac
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_DBus_Tools::exchange(-1): \"%m\", aborting\n")));
-    goto clean;
+    goto clean; // *TODO* avoid false negatives
   } // end IF
   if (unlikely (!dbus_message_iter_init (reply_p, &iterator)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
-    goto clean;
+    goto clean; // *TODO* avoid false negatives
   } // end IF
   if (unlikely (!Common_DBus_Tools::validateType (iterator,
                                                   DBUS_TYPE_VARIANT)))
-    goto clean;
+    goto clean; // *TODO* avoid false negatives
   dbus_message_iter_recurse (&iterator, &iterator_2);
   ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_BOOLEAN);
   dbus_message_iter_get_basic (&iterator_2, &value_b);
@@ -3945,7 +3954,7 @@ Net_Common_Tools::networkManagerManageInterface (const std::string& interfaceIde
   enum ACE_Configuration::VALUETYPE value_type_e;
   std::string regex_string = ACE_TEXT_ALWAYS_CHAR ("^(?:(.+),)*(.*)$");
   std::string regex_string_2 =
-      ACE_TEXT_ALWAYS_CHAR ("^(?:(?:mac:((?:[01234567890abcdef]{2}:){5}[01234567890abcdef]{2})|interface-name:(.+));)*(?:mac:((?:[01234567890abcdef]{2}:){5}[01234567890abcdef]{2})|interface-name:(.+))?$");
+      ACE_TEXT_ALWAYS_CHAR ("^(mac:(?:([01234567890abcdef]{2}):){5}[01234567890abcdef]{2}|interface-name:[^;]+;)*(mac:(?:([01234567890abcdef]{2}):){5}[01234567890abcdef]{2}|interface-name:.+)?$");
   std::regex regex;
   std::smatch smatch;
   std::string value_string_2, value_string_3;
@@ -3957,8 +3966,8 @@ Net_Common_Tools::networkManagerManageInterface (const std::string& interfaceIde
 
   // sanity check(s)
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
-  if ((toggle_in && is_managing_interface_b) ||
-      (!toggle_in && !is_managing_interface_b))
+  if ((toggle_in && is_managing_interface_b))// ||
+//      (!toggle_in && !is_managing_interface_b))
     return true; // nothing to do
   if (unlikely (!Common_File_Tools::canRead (configuration_file_path)))
   {
@@ -4190,7 +4199,8 @@ next:
           continue;
         value_string_2 = (*iterator).str ();
         position = value_string_2.find (':', 0);
-        if (position == 2)
+        ACE_ASSERT (position != std::string::npos);
+        if (position == 3) // mac:
         {
           struct ether_addr ether_addr_s =
               Net_Common_Tools::stringToLinkLayerAddress (value_string_2);
@@ -4198,6 +4208,10 @@ next:
               Net_Common_Tools::linkLayerAddressToInterfaceIdentifier (ether_addr_s);
           ACE_ASSERT (!value_string_2.empty ());
         } // end IF
+        else
+        { ACE_ASSERT (position == 14); // interface-name:
+          value_string_2.erase (0, position + 1);
+        } // end ELSE
         if (!ACE_OS::strcmp (interfaceIdentifier_in.c_str (),
                              value_string_2.c_str ()))
           break;
@@ -4211,16 +4225,12 @@ next:
                iterator_2 != smatch.end ();
                ++iterator_2)
           {
-            if (iterator_2 == iterator)
+            if (!(*iterator_2).matched ||
+                (iterator_2 == iterator))
               continue;
             if (iterator != ++smatch.begin ())
               value_string += ACE_TEXT_ALWAYS_CHAR (";");
             value_string_3 = (*iterator_2).str ();
-            position = value_string_3.find (':', 0);
-            if (position == 2)
-              value_string += ACE_TEXT_ALWAYS_CHAR ("mac:");
-            else
-              value_string += ACE_TEXT_ALWAYS_CHAR ("interface-name:");
             value_string += value_string_3.c_str ();
           } // end FOR
 
@@ -4338,7 +4348,8 @@ next_3:
     if (unlikely (result_2 == -1))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_Ini_ImpExp::export_config(): \"%m\", aborting\n")));
+                  ACE_TEXT ("failed to ACE_Ini_ImpExp::export_config(\"%s\"): \"%m\", aborting\n"),
+                  ACE_TEXT (configuration_file_path.c_str ())));
 
       if (drop_privileges)
         Common_Tools::switchUser (static_cast<uid_t> (-1));

@@ -72,11 +72,14 @@ struct  Net_WLAN_MonitorConfiguration
 #if defined (_DEBUG)
    , debug (false)
 #endif // _DEBUG
+   , authenticationType (NL80211_AUTHTYPE_AUTOMATIC)
    , defaultBufferSize (NET_STREAM_MESSAGE_DATA_BUFFER_SIZE)
    , flushCacheBeforeScans (NET_WLAN_MONITOR_NL80211_DEFAULT_FLUSHCACHEBEFORESCANS)
+   , frequency (0)
    , lowPriorityScans (NET_WLAN_MONITOR_NL80211_DEFAULT_LOWPRIORITYSCANS)
    , randomizeMACAddressForScans (NET_WLAN_MONITOR_NL80211_DEFAULT_RANDOMIZEMACADDRESSFORSCANS)
-#endif // NL80211_SUPPORT
+   , wiPhyIdentifier ()
+ #endif // NL80211_SUPPORT
 #if defined (DBUS_SUPPORT)
    , notificationCB (NULL)
    , notificationCBData (NULL)
@@ -114,10 +117,14 @@ struct  Net_WLAN_MonitorConfiguration
 #if defined (_DEBUG)
   bool                          debug;
 #endif // _DEBUG
+  // *TODO*: conceive of an ADT for authentication credentials
+  enum nl80211_auth_type        authenticationType;
   unsigned int                  defaultBufferSize;
   bool                          flushCacheBeforeScans;
+  ACE_UINT32                    frequency;
   bool                          lowPriorityScans;
   bool                          randomizeMACAddressForScans;
+  std::string                   wiPhyIdentifier;
 #endif // NL80211_SUPPORT
 #if defined (DBUS_SUPPORT)
   DBusHandleMessageFunction     notificationCB;
