@@ -32,7 +32,7 @@ class ACE_Message_Block;
 
 template <typename ConfigurationType>
 class Net_SocketHandlerBase_T
- : virtual public Net_ISocketHandler
+ : virtual protected Net_ISocketHandler
  , virtual public Common_IInitialize_T<ConfigurationType>
 {
  public:

@@ -45,9 +45,9 @@ class Net_WLAN_IManager
 #endif // ACE_WIN32 || ACE_WIN64
                              const std::string&) = 0;  // (E)SSID {"": disassociate}
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#elif defined (ACE_LINUX)
   // *TODO*: conceive of an ADT for authentication credentials
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
   virtual bool do_authenticate (const std::string&,       // interface identifier {"": any}
                                 const struct ether_addr&, // access point BSSID (i.e. access point MAC address)
                                 const std::string&) = 0;  // (E)SSID {"": deauthenticate}

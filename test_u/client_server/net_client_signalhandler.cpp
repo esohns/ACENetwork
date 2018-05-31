@@ -39,7 +39,7 @@
 #include "net_client_common.h"
 
 Client_SignalHandler::Client_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
-                                            ACE_SYNCH_MUTEX* lock_in)
+                                            ACE_SYNCH_RECURSIVE_MUTEX* lock_in)
  : inherited (dispatchMode_in,
               lock_in,
               this) // event handler handle
@@ -58,11 +58,17 @@ Client_SignalHandler::initialize (const struct Client_SignalHandlerConfiguration
 {
   NETWORK_TRACE (ACE_TEXT ("Client_SignalHandler::handleSignal"));
 
+  // sanity check(s)
+  ACE_ASSERT (configuration_in.dispatchState);
+  ACE_ASSERT (configuration_in.dispatchState->configuration);
+
   // *TODO*: remove type inference
+  address_ = configuration_in.address;
   connector_ = configuration_in.connector;
   hasUI_ = configuration_in.hasUI;
   timerId_ = configuration_in.actionTimerId;
-  useReactor_ = (configuration_in.dispatch == COMMON_EVENT_DISPATCH_REACTOR);
+  useReactor_ =
+    (configuration_in.dispatchState->configuration->numberOfReactorThreads > 0);
 
   return inherited::initialize (configuration_in);
 }
@@ -217,9 +223,9 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     iconnection_manager_p->abort ();
 
     // step5: stop reactor (&& proactor, if applicable)
-    Common_Tools::finalizeEventDispatch (true,         // stop reactor ?
-                                         !useReactor_, // stop proactor ?
-                                         -1);          // group ID (--> don't block !)
+    Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
+                                         inherited::configuration_->dispatchState->reactorGroupId,
+                                         false);                                                    // don't block
 
     // step6: stop UI ?
     if (hasUI_)

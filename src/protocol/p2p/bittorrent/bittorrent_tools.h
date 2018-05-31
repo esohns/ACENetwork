@@ -28,9 +28,9 @@
 #include "common.h"
 
 #include "bittorrent_common.h"
-#include "bittorrent_exports.h"
+//#include "bittorrent_exports.h"
 
-class BitTorrent_Export BitTorrent_Tools
+class BitTorrent_Tools
 {
  public:
   inline virtual ~BitTorrent_Tools () {};

@@ -26,13 +26,15 @@
 #include "stream_headmoduletask_base.h"
 #include "stream_streammodule_base.h"
 
-#include "irc_exports.h"
+//#include "irc_exports.h"
 
-extern IRC_Export const char libacenetwork_protocol_default_irc_bisector_module_name_string[];
+//extern IRC_Export const char libacenetwork_protocol_default_irc_bisector_module_name_string[];
+extern const char libacenetwork_protocol_default_irc_bisector_module_name_string[];
 
 //// define/declare the lexer's prototype (see irc_bisector.h)
 typedef void* yyscan_t;
-IRC_Export int IRC_Bisector_lex (yyscan_t);
+//IRC_Export int IRC_Bisector_lex (yyscan_t);
+int IRC_Bisector_lex (yyscan_t);
 //// *TODO*: this should be part of irc_bisector.h
 //#define YY_DECL extern int IRC_Bisector_lex (yyscan_t)
 //YY_DECL;

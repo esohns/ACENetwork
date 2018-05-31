@@ -37,7 +37,7 @@ class IRC_Client_SignalHandler
 
  public:
   IRC_Client_SignalHandler (enum Common_SignalDispatchType,    // dispatch mode
-                            ACE_SYNCH_MUTEX*,                  // lock handle
+                            ACE_SYNCH_RECURSIVE_MUTEX*,        // lock handle
                             //////////////
                             bool = IRC_CLIENT_SESSION_USE_CURSES); // use curses library ?
   inline virtual ~IRC_Client_SignalHandler () {}

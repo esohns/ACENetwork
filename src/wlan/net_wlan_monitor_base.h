@@ -27,7 +27,9 @@
 #include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include <guiddef.h>
+#if defined (WLANAPI_SUPPORT)
 #include <wlanapi.h>
+#endif // WLANAPI_SUPPORT
 #elif defined (ACE_LINUX)
 #if defined (DHCLIENT_SUPPORT)
 extern "C"
@@ -63,8 +65,9 @@ extern "C"
 // forward declarations
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
+struct _L2_NOTIFICATION_DATA;
 void WINAPI
-network_wlan_default_notification_cb (PWLAN_NOTIFICATION_DATA,
+network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA*,
                                       PVOID);
 #endif // WLANAPI_SUPPORT
 #elif defined (ACE_LINUX)
@@ -142,8 +145,10 @@ class Net_WLAN_Monitor_Base_T
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   inline virtual struct _GUID interfaceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->interfaceIdentifier; }
+  inline virtual const WLAN_SIGNAL_QUALITY get_2 () const;
 #else
   inline virtual std::string interfaceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->interfaceIdentifier; }
+  inline virtual const unsigned int get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
 #endif // ACE_WIN32 || ACE_WIN64
 
   virtual Net_WLAN_SSIDs_t SSIDs () const;
@@ -153,6 +158,14 @@ class Net_WLAN_Monitor_Base_T
   typedef typename SUBSCRIBERS_T::iterator SUBSCRIBERS_ITERATOR_T;
 
   Net_WLAN_Monitor_Base_T ();
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  void startScanTimer ();
+  void cancelScanTimer ();
+
+  // implement Common_ITimerHandler
+  inline virtual void handle (const void*) { inherited::change (NET_WLAN_MONITOR_STATE_SCAN); }
+#endif // ACE_WIN32 || ACE_WIN64
 
   // *TODO*: remove any implementation-specific members
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -225,19 +238,14 @@ class Net_WLAN_Monitor_Base_T
                              const std::string&, // SSID
                              bool);              // success ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onAssociate (REFGUID,            // interface identifier
 #else
   virtual void onAssociate (const std::string&, // interface identifier
-#endif // ACE_WIN32 || ACE_WIN64
                             const std::string&, // SSID
                             bool);              // success ?
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onDisassociate (REFGUID,            // interface identifier
-#else
   virtual void onDisassociate (const std::string&, // interface identifier
-#endif // ACE_WIN32 || ACE_WIN64
                                const std::string&, // SSID
                                bool);              // success ?
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual void onScanComplete (REFGUID);            // interface identifier
 #else
@@ -274,6 +282,12 @@ class Net_WLAN_Monitor_Base_T
   virtual void onChange (enum Net_WLAN_MonitorState); // new state
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  inline virtual bool lock (bool = true) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+  inline virtual int unlock (bool = false) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
+  inline virtual const ACE_MT_SYNCH::MUTEX& getR () const { ACE_MT_SYNCH::MUTEX lock; return lock; }
+  inline virtual void idle () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void wait (bool = true) const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 #elif defined (ACE_LINUX)
   // override some ACE_Event_Handler methods
 #if defined (WEXT_SUPPORT)
@@ -283,30 +297,23 @@ class Net_WLAN_Monitor_Base_T
 #endif // ACE_WIN32 || ACE_WIN64
 
   // hide/override (part of) Common_(Asynch)TaskBase_T
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#elif defined (ACE_LINUX)
   using inherited::lock;
   using inherited::unlock;
   using inherited::getR;
-  inline void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inline void wait () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual void finished () { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 #endif // ACE_WIN32 || ACE_WIN64
+  inline virtual void wait () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
   // implement Common_IStatistic_T
   inline virtual bool collect (Net_Statistic_t& statistic_inout) { ACE_UNUSED_ARG (statistic_inout); ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   // *TODO*: report (current) interface statistic(s)
   inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  void startScanTimer ();
-  void cancelScanTimer ();
-
-  // implement Common_ITimerHandler
-  inline virtual void handle (const void*) { inherited2::change (NET_WLAN_MONITOR_STATE_SCAN); }
-#endif // ACE_WIN32 || ACE_WIN64
-
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //#else
-//  MESSAGEQUEUE_T                                  queue_;
+//  MESSAGEQUEUE_T                        queue_;
 //#endif // ACE_WIN32 || ACE_WIN64
   bool                                  SSIDSeenBefore_;
 };

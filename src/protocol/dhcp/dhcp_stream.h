@@ -38,13 +38,15 @@
 
 #include "dhcp_common.h"
 //#include "dhcp_module_bisector.h"
-#include "dhcp_exports.h"
+//#include "dhcp_exports.h"
 #include "dhcp_module_parser.h"
 #include "dhcp_module_streamer.h"
 #include "dhcp_stream_common.h"
 
-extern NET_PROTOCOL_DHCP_Export const char libacenetwork_default_dhcp_marshal_module_name_string[];
-extern NET_PROTOCOL_DHCP_Export const char libacenetwork_default_dhcp_stream_name_string[];
+//extern NET_PROTOCOL_DHCP_Export const char libacenetwork_default_dhcp_marshal_module_name_string[];
+extern const char libacenetwork_default_dhcp_marshal_module_name_string[];
+//extern NET_PROTOCOL_DHCP_Export const char libacenetwork_default_dhcp_stream_name_string[];
+extern const char libacenetwork_default_dhcp_stream_name_string[];
 
 template <typename StreamStateType,
           ////////////////////////////////

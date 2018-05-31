@@ -28,7 +28,7 @@
 
 #include "location.hh"
 
-#include "irc_exports.h"
+//#include "irc_exports.h"
 #include "irc_parser.h"
 
 // forward declaration(s)
@@ -37,7 +37,7 @@ typedef void* yyscan_t;
 int IRC_Scanner_get_debug (yyscan_t);
 class IRC_Record;
 
-class IRC_Export IRC_ParserDriver
+class IRC_ParserDriver
 {
   // allow access to internals (i.e. the current message)
   friend class yy::IRC_Parser;

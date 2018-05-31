@@ -40,7 +40,7 @@
 #include "stream_stat_statistic_report.h"
 
 #include "bittorrent_common.h"
-#include "bittorrent_exports.h"
+//#include "bittorrent_exports.h"
 //#include "bittorrent_module_bisector.h"
 //#include "bittorrent_module_handler.h"
 #include "bittorrent_module_parser.h"
@@ -49,9 +49,9 @@
 // forward declarations
 typedef Stream_INotify_T<enum Stream_SessionMessageType> BitTorrent_INotify_t;
 
-extern BitTorrent_Export const char libacenetwork_default_bittorrent_marshal_module_name_string[];
-extern BitTorrent_Export const char libacenetwork_default_bittorrent_handler_module_name_string[];
-extern BitTorrent_Export const char libacenetwork_default_bittorrent_stream_name_string[];
+extern const char libacenetwork_default_bittorrent_marshal_module_name_string[];
+extern const char libacenetwork_default_bittorrent_handler_module_name_string[];
+extern const char libacenetwork_default_bittorrent_stream_name_string[];
 
 template <typename StreamStateType,
           ////////////////////////////////

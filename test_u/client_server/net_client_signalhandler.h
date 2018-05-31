@@ -36,7 +36,7 @@ class Client_SignalHandler
 
  public:
   Client_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
-                        ACE_SYNCH_MUTEX*);              // lock handle
+                        ACE_SYNCH_RECURSIVE_MUTEX*);    // lock handle
   inline virtual ~Client_SignalHandler () {}
 
   // override Common_IInitialize_T

@@ -77,19 +77,14 @@ class Net_WLAN_IMonitorCB
                              bool) = 0;          // success ?
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onAssociate (REFGUID,            // interface identifier
 #else
   virtual void onAssociate (const std::string&, // interface identifier
-#endif // ACE_WIN32 || ACE_WIN64
                             const std::string&, // SSID
                             bool) = 0;          // success ?
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onDisassociate (REFGUID,            // interface identifier
-#else
   virtual void onDisassociate (const std::string&, // interface identifier
-#endif // ACE_WIN32 || ACE_WIN64
                                const std::string&, // SSID
                                bool) = 0;          // success ?
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual void onScanComplete (REFGUID) = 0;            // interface identifier

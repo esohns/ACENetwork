@@ -143,17 +143,6 @@ struct  Net_WLAN_MonitorConfiguration
 typedef Net_WLAN_IMonitor_T<ACE_INET_Addr,
                             struct Net_WLAN_MonitorConfiguration> Net_WLAN_IInetMonitor_t;
 
-//typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//#else
-//                               ACE_MT_SYNCH,
-//                               Common_TimePolicy_t,
-//#endif // ACE_WIN32 || ACE_WIN64
-//                               NET_WLAN_MONITOR_DEFAULT_API,
-//                               struct Net_UserData> Net_WLAN_InetMonitor_t;
-//typedef ACE_Singleton<Net_WLAN_InetMonitor_t,
-//                      ACE_SYNCH_MUTEX> NET_WLAN_INETMONITOR_SINGLETON;
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
 typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,

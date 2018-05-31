@@ -943,7 +943,6 @@ Net_WLAN_Tools::associate (HANDLE clientHandle_in,
 
   ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
   ACE_ASSERT (SSID_in.size () <= DOT11_SSID_MAX_LENGTH);
-  ACE_ASSERT (!SSID_in.empty ());
 
   bool result = false;
   struct _DOT11_SSID ssid_s;
@@ -1001,15 +1000,20 @@ Net_WLAN_Tools::associate (HANDLE clientHandle_in,
     dot11_BSS_type_infrastructure;
     //wlan_connection_parameters_s.dwFlags = 0;
   // *NOTE*: this returns immediately
-  DWORD result_2 = WlanConnect (client_handle,
-                                &interfaceIdentifier_in,
-                                &wlan_connection_parameters_s,
-                                NULL);
+  DWORD result_2 =
+    (SSID_in.empty () ? WlanDisconnect (client_handle,
+                                        &interfaceIdentifier_in,
+                                        NULL)
+                      : WlanConnect (client_handle,
+                                     &interfaceIdentifier_in,
+                                     &wlan_connection_parameters_s,
+                                     NULL));
   if (unlikely (result_2 != ERROR_SUCCESS))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("\"%s\": failed to ::WlanConnect(0x%@,%s): \"%s\", aborting\n"),
+                ACE_TEXT ("\"%s\": failed to ::%s(0x%@,%s): \"%s\", aborting\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+                (SSID_in.empty () ? ACE_TEXT ("WlanDisconnect") : ACE_TEXT ("WlanConnect")),
                 client_handle,
                 ACE_TEXT (SSID_in.c_str ()),
                 ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));

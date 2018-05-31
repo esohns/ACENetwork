@@ -28,10 +28,11 @@
 #include "stream_task_base_synch.h"
 
 #include "irc_defines.h"
-#include "irc_exports.h"
+//#include "irc_exports.h"
 #include "irc_parser_driver.h"
 
-extern IRC_Export const char libacenetwork_protocol_default_irc_parser_module_name_string[];
+//extern IRC_Export const char libacenetwork_protocol_default_irc_parser_module_name_string[];
+extern const char libacenetwork_protocol_default_irc_parser_module_name_string[];
 
  // tell flex of the lexer's prototype ...
 extern yy::IRC_Parser::token_type
@@ -93,7 +94,7 @@ class IRC_Module_Parser_T
   IRC_Module_Parser_T (ISTREAM_T*);                     // stream handle
 #else
   IRC_Module_Parser_T (typename inherited::ISTREAM_T*); // stream handle
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   virtual ~IRC_Module_Parser_T ();
 
   // configuration / initialization

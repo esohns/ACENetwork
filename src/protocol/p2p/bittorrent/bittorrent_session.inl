@@ -1318,7 +1318,7 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
   std::string buffer;
   std::ostringstream converter;
   ACE_THR_FUNC function_p =
-      static_cast<ACE_THR_FUNC> (::session_setup_function);
+      static_cast<ACE_THR_FUNC> (::net_bittorrent_session_setup_function);
   void* arg_p = &thread_data;
   int group_id_i = -1;
   ACE_thread_t* thread_ids_p = NULL;

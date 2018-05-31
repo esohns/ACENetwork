@@ -34,6 +34,9 @@
 
 #include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_SUPPORT)
+#include <wlanapi.h>
+#endif // WLANAPI_SUPPORT
 #else
 #include <net/ethernet.h>
 
@@ -48,6 +51,8 @@
 #include "common_xml_common.h"
 #include "common_xml_parser.h"
 
+#include "net_packet_headers.h"
+
 #include "net_wlan_profile_xml_handler.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -57,21 +62,30 @@ enum Net_WLAN_MonitorState
   // -------------------------------------
   // 'transitional' states (task-/timeout-oriented, i.e. may return to previous
   // state upon completion)
-  NET_WLAN_MONITOR_STATE_IDLE = 0,         // idle (i.e. waiting between scans/connection attempts/...)
-  NET_WLAN_MONITOR_STATE_SCAN,             // scanning
-  NET_WLAN_MONITOR_STATE_AUTHENTICATE,     // authenticating to access point
-  NET_WLAN_MONITOR_STATE_ASSOCIATE,        // associating to access point
-  NET_WLAN_MONITOR_STATE_CONNECT,          // requesting IP address (e.g. DHCP)
-  NET_WLAN_MONITOR_STATE_DISCONNECT,       // releasing IP address (e.g. DHCP)
-  NET_WLAN_MONITOR_STATE_DISASSOCIATE,     // disassociating from access point
-  NET_WLAN_MONITOR_STATE_DEAUTHENTICATE,   // deauthenticating from access point
+  NET_WLAN_MONITOR_STATE_IDLE = 0,       // idle (i.e. waiting between scans/connection attempts/...)
+  NET_WLAN_MONITOR_STATE_SCAN,           // scanning
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  NET_WLAN_MONITOR_STATE_AUTHENTICATE,   // authenticating to access point
+  NET_WLAN_MONITOR_STATE_ASSOCIATE,      // associating to access point
+#endif // ACE_WIN32 || ACE_WIN64
+  NET_WLAN_MONITOR_STATE_CONNECT,        // requesting IP address (e.g. DHCP)
+  NET_WLAN_MONITOR_STATE_DISCONNECT,     // releasing IP address (e.g. DHCP)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  NET_WLAN_MONITOR_STATE_DISASSOCIATE,   // disassociating from access point
+  NET_WLAN_MONITOR_STATE_DEAUTHENTICATE, // deauthenticating from access point
+#endif // ACE_WIN32 || ACE_WIN64
   ////////////////////////////////////////
   // 'static' states (discrete/persisting, i.e. long(er)-term)
-  NET_WLAN_MONITOR_STATE_INITIALIZED,      // initialized
-  NET_WLAN_MONITOR_STATE_SCANNED,          // scanning complete
-  NET_WLAN_MONITOR_STATE_AUTHENTICATED,    // authenticated to access point
-  NET_WLAN_MONITOR_STATE_ASSOCIATED,       // associated to access point
-  NET_WLAN_MONITOR_STATE_CONNECTED,        // 'online': interface is associated to access point and has a valid IP address
+  NET_WLAN_MONITOR_STATE_INITIALIZED,    // initialized
+  NET_WLAN_MONITOR_STATE_SCANNED,        // scanning complete
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+  NET_WLAN_MONITOR_STATE_AUTHENTICATED,  // authenticated to access point
+  NET_WLAN_MONITOR_STATE_ASSOCIATED,     // associated to access point
+#endif // ACE_WIN32 || ACE_WIN64
+  NET_WLAN_MONITOR_STATE_CONNECTED,      // 'online': interface is associated to access point and has a valid IP address
   ////////////////////////////////////////
   NET_WLAN_MONITOR_STATE_MAX
 };
@@ -112,8 +126,14 @@ struct Net_WLAN_IEEE802_11_InformationElement
 struct Net_WLAN_AccessPointState
 {
   Net_WLAN_AccessPointState ()
-   : authenticationType (0)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+   : frequency (0)
+#elif defined (ACE_LINUX)
+#if defined (NL80211_SUPPORT)
+   : authenticationType (NL80211_AUTHTYPE_AUTOMATIC)
+#endif // NL80211_SUPPORT
    , frequency (0)
+#endif // ACE_WIN32 || ACE_WIN64
    , lastSeen (0)
    , linkLayerAddress ()
    , signalQuality (0)
@@ -121,14 +141,21 @@ struct Net_WLAN_AccessPointState
     ACE_OS::memset (&linkLayerAddress, 0, sizeof (struct ether_addr));
   }
 
-  unsigned int        authenticationType;
-  unsigned int        frequency;
-  unsigned int        lastSeen; // ms
-  struct ether_addr   linkLayerAddress;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  WLAN_SIGNAL_QUALITY signalQuality;
-#else
-  unsigned int        signalQuality; // mBm
+#elif defined (ACE_LINUX)
+#if defined (NL80211_SUPPORT)
+  enum nl80211_auth_type authenticationType;
+#endif // NL80211_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
+  ACE_UINT32             frequency;
+  unsigned int           lastSeen; // ms
+  struct ether_addr      linkLayerAddress;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_SUPPORT)
+  WLAN_SIGNAL_QUALITY    signalQuality;
+#endif // WLANAPI_SUPPORT
+#elif defined (ACE_LINUX)
+  unsigned int           signalQuality; // mBm
 #endif // ACE_WIN32 || ACE_WIN64
 };
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

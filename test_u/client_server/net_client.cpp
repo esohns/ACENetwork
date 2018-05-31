@@ -143,7 +143,7 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [STRING]  : server hostname [\"")
-            << NET_CLIENT_DEF_SERVER_HOSTNAME
+            << ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_DEF_SERVER_HOSTNAME)
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-p [VALUE]   : server port [")
@@ -216,7 +216,7 @@ do_processArguments (int argc_in,
   useThreadPool_out = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   connectionInterval_out = NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL;
   logToFile_out = false;
-  serverHostname_out = NET_CLIENT_DEF_SERVER_HOSTNAME;
+  serverHostname_out = ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_DEF_SERVER_HOSTNAME);
   serverPortNumber_out = NET_SERVER_DEFAULT_LISTENING_PORT;
   useReactor_out =
           (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
@@ -529,9 +529,10 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     useThreadPool_in;
   configuration.streamConfiguration.configuration_.userData =
     &configuration.userData;
-  configuration.streamConfiguration.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
-                                                            std::make_pair (module_configuration,
-                                                                            modulehandler_configuration)));
+  configuration.streamConfiguration.initialize (module_configuration,
+                                                modulehandler_configuration,
+                                                configuration.streamConfiguration.allocatorConfiguration_,
+                                                configuration.streamConfiguration.configuration_);
 
   // ********************** connection configuration data **********************
   ClientServer_ConnectionConfiguration_t connection_configuration;
@@ -568,20 +569,21 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 //	config.lastCollectionTimestamp = ACE_Time_Value::zero;
 
   // step0b: initialize event dispatch
-  struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
-  event_dispatch_configuration_s.numberOfReactorThreads =
-      (useReactor_in ? numberOfDispatchThreads_in : 0);
-  event_dispatch_configuration_s.numberOfProactorThreads =
-      (!useReactor_in ? numberOfDispatchThreads_in : 0);
-  if (!Common_Tools::initializeEventDispatch (event_dispatch_configuration_s))
+  struct Common_EventDispatchState event_dispatch_state_s;
+  event_dispatch_state_s.configuration =
+    &configuration.dispatchConfiguration;
+  if (useReactor_in)
+    configuration.dispatchConfiguration.numberOfReactorThreads =
+      numberOfDispatchThreads_in;
+  else
+    configuration.dispatchConfiguration.numberOfProactorThreads =
+      numberOfDispatchThreads_in;
+  if (!Common_Tools::initializeEventDispatch (configuration.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize event dispatch, returing\n")));
     return;
   } // end IF
-  struct Common_EventDispatchState event_dispatch_state_s;
-  event_dispatch_state_s.configuration =
-      &event_dispatch_configuration_s;
 
   // step0c: initialize connector
   ClientServer_InetConnectionManager_t* connection_manager_p =
@@ -625,39 +627,22 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
                              &configuration.userData);
 
   // step0e: initialize action timer
+  ACE_INET_Addr peer_address (serverPortNumber_in,
+                              serverHostname_in.c_str (),
+                              ACE_ADDRESS_FAMILY_INET);
+  configuration.signalHandlerConfiguration.address = peer_address;
   configuration.signalHandlerConfiguration.connectionConfiguration =
     &((*iterator).second);
   configuration.signalHandlerConfiguration.connector = connector_p;
   configuration.signalHandlerConfiguration.hasUI =
     !UIDefinitionFile_in.empty ();
 
-  ACE_INET_Addr peer_address;
   if (useUDP_in)
-  {
-    result =
-      (*iterator).second.socketHandlerConfiguration.socketConfiguration_3.peerAddress.set (serverPortNumber_in,
-                                                                                           serverHostname_in.c_str (),
-                                                                                           1,
-                                                                                           ACE_ADDRESS_FAMILY_INET);
-    peer_address =
-      (*iterator).second.socketHandlerConfiguration.socketConfiguration_3.peerAddress;
-  } // end IF
+      (*iterator).second.socketHandlerConfiguration.socketConfiguration_3.peerAddress =
+        peer_address;
   else
-  {
-    result =
-      (*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address.set (serverPortNumber_in,
-                                                                                       serverHostname_in.c_str (),
-                                                                                       1,
-                                                                                       ACE_ADDRESS_FAMILY_INET);
-    peer_address =
-      (*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address;
-  } // end ELSE
-  if (result == -1)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", returning\n")));
-    return;
-  } // end IF
+      (*iterator).second.socketHandlerConfiguration.socketConfiguration_2.address =
+        peer_address;
 
   Client_TimeoutHandler timeout_handler (actionMode_in,
                                          maxNumConnections_in,
@@ -699,13 +684,12 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   } // end IF
 
   // step0e: initialize signal handling
+  configuration.signalHandlerConfiguration.dispatchState =
+    &event_dispatch_state_s;
   configuration.signalHandlerConfiguration.messageAllocator =
     &message_allocator;
   configuration.signalHandlerConfiguration.connectionConfiguration =
     &((*iterator).second);
-  configuration.signalHandlerConfiguration.dispatch =
-      (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
-                     : COMMON_EVENT_DISPATCH_PROACTOR);
   if (!signalHandler_in.initialize (configuration.signalHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -740,8 +724,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   Client_GTK_Manager_t* gtk_manager_p = NULL;
   if (!UIDefinitionFile_in.empty ())
   {
-    CBData_in.finalizationHook = idle_finalize_UI_cb;
-    CBData_in.initializationHook = idle_initialize_client_UI_cb;
+    CBData_in.eventHooks.finiHook = idle_finalize_UI_cb;
+    CBData_in.eventHooks.initHook = idle_initialize_client_UI_cb;
     //CBData_in.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
     //  std::make_pair (UIDefinitionFile_in, static_cast<GladeXML*> (NULL));
     CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
@@ -784,12 +768,11 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
       return;
     } // end IF
-    BOOL was_visible_b = ShowWindow (window_p, SW_HIDE);
+    BOOL was_visible_b = ::ShowWindow (window_p, SW_HIDE);
 #endif
   } // end IF
 
   // step1b: initialize worker(s)
-  int group_id = -1;
   if (!Common_Tools::startEventDispatch (event_dispatch_state_s))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -813,7 +796,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   } // end IF
 
   // step1c: connect immediately ?
-  if (UIDefinitionFile_in.empty () && (connectionInterval_in == 0))
+  if (UIDefinitionFile_in.empty () && !connectionInterval_in)
   {
     ACE_HANDLE handle_h = connector_p->connect (peer_address);
     if (handle_h == ACE_INVALID_HANDLE)
@@ -824,9 +807,9 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
       // clean up
       if (numberOfDispatchThreads_in >= 1)
-        Common_Tools::finalizeEventDispatch (useReactor_in,
-                                             !useReactor_in,
-                                             group_id);
+        Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
+                                             event_dispatch_state_s.reactorGroupId,
+                                             false);                                // don't block
       //		{ // synch access
       //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -878,9 +861,9 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
       // clean up
       if (numberOfDispatchThreads_in >= 1)
-        Common_Tools::finalizeEventDispatch (useReactor_in,
-                                             !useReactor_in,
-                                             group_id);
+        Common_Tools::finalizeEventDispatch (event_dispatch_state_s.proactorGroupId,
+                                             event_dispatch_state_s.reactorGroupId,
+                                             false);                                // don't block
       //		{ // synch access
       //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -903,7 +886,8 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
   // step2: dispatch events
   Common_Tools::dispatchEvents (useReactor_in,
-                                group_id);
+                                (useReactor_in ? event_dispatch_state_s.reactorGroupId
+                                               : event_dispatch_state_s.proactorGroupId));
 
   // step3: clean up
   if (!UIDefinitionFile_in.empty ())
@@ -1075,7 +1059,7 @@ ACE_TMAIN (int argc_in,
    NET_CLIENT_DEF_SERVER_CONNECT_INTERVAL;
   bool log_to_file = false;
   std::string server_hostname =
-    NET_CLIENT_DEF_SERVER_HOSTNAME;
+    ACE_TEXT_ALWAYS_CHAR (NET_CLIENT_DEF_SERVER_HOSTNAME);
   unsigned short server_port_number =
    NET_SERVER_DEFAULT_LISTENING_PORT;
   bool use_reactor =
@@ -1256,7 +1240,7 @@ ACE_TMAIN (int argc_in,
   } // end IF
   Client_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                     : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                       &gtk_cb_data.lock);
+                                       &gtk_cb_data.subscribersLock);
 
   // step1f: handle specific program modes
   if (print_version_and_exit)
@@ -1349,8 +1333,7 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Timer_Tools::periodToString (working_time,
-                                      working_time_string);
+  working_time_string = Common_Timer_Tools::periodToString (working_time);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
@@ -1392,10 +1375,8 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Timer_Tools::periodToString (user_time,
-                                      user_time_string);
-  Common_Timer_Tools::periodToString (system_time,
-                                      system_time_string);
+  user_time_string = Common_Timer_Tools::periodToString (user_time);
+  system_time_string = Common_Timer_Tools::periodToString (system_time);
 
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)

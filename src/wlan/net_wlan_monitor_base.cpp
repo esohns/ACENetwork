@@ -22,14 +22,15 @@
 #include "ace/Synch.h"
 #include "net_wlan_monitor.h"
 
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//#elif defined (ACE_LINUX)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include <l2cmn.h>
+#elif defined (ACE_LINUX)
 //#if defined (DBUS_SUPPORT)
 //#include "NetworkManager.h"
 //#endif // DBUS_SUPPORT
 
 //#include "net_configuration.h"
-//#endif // ACE_WIN32 || ACE_WIN64
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
@@ -124,10 +125,10 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
           std::string SSID_string (reinterpret_cast<char*> (wlan_connection_notification_data_p->dot11Ssid.ucSSID),
                                    wlan_connection_notification_data_p->dot11Ssid.uSSIDLength);
           try {
-            istate_machine_p->change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
+            istate_machine_p->change (NET_WLAN_MONITOR_STATE_CONNECTED);
           } catch (...) {
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("\"%s\": caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_ASSOCIATED), continuing\n"),
+                        ACE_TEXT ("\"%s\": caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_CONNECTED), continuing\n"),
                         ACE_TEXT (Net_Common_Tools::interfaceToString (data_in->InterfaceGuid).c_str ())));
           }
           notification_string =
@@ -228,10 +229,10 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
           std::string SSID_string (reinterpret_cast<char*> (wlan_connection_notification_data_p->dot11Ssid.ucSSID),
                                    wlan_connection_notification_data_p->dot11Ssid.uSSIDLength);
           try {
-            istate_machine_p->change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
+            istate_machine_p->change (NET_WLAN_MONITOR_STATE_SCANNED);
           } catch (...) {
             ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("\"%s\": caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_ASSOCIATED), continuing\n"),
+                        ACE_TEXT ("\"%s\": caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_SCANNED), continuing\n"),
                         ACE_TEXT (Net_Common_Tools::interfaceToString (data_in->InterfaceGuid).c_str ())));
           }
           notification_string =
@@ -421,6 +422,7 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
               ((reason_i != WLAN_REASON_CODE_SUCCESS) ? ACE_TEXT (": ")   : ACE_TEXT ("")),
               ((reason_i != WLAN_REASON_CODE_SUCCESS) ? ACE_TEXT_WCHAR_TO_TCHAR (buffer) : ACE_TEXT (""))));
 #endif // _DEBUG
+}
 #endif // WLANAPI_SUPPORT
 #elif defined (ACE_LINUX)
 #if defined (DHCLIENT_SUPPORT)

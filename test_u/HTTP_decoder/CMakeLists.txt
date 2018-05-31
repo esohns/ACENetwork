@@ -308,8 +308,12 @@ if (UNIX)
 elseif (WIN32)
 # *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
- target_link_libraries (${EXECUTABLE} ntdll.lib)
 
+ target_link_libraries (${EXECUTABLE} ntdll.lib)
+ target_link_libraries (${EXECUTABLE} dxguid.lib)
+ target_link_libraries (${EXECUTABLE} mf.lib)
+ target_link_libraries (${EXECUTABLE} mfplat.lib)
+# *TODO*: repair WIN32 pkgconfig support
  if (SSL_SUPPORT)
   #target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/libeay32.lib)
   target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/ssleay32.lib)
@@ -330,7 +334,11 @@ target_link_libraries (${EXECUTABLE} CommonTimer)
 
 target_link_libraries (${EXECUTABLE} ACEStream)
 target_link_libraries (${EXECUTABLE} ACEStream_Decoder)
+target_link_libraries (${EXECUTABLE} ACEStream_Device)
 target_link_libraries (${EXECUTABLE} ACEStream_File)
+if (WIN32)
+ target_link_libraries (${EXECUTABLE} ACEStream_MediaFramework)
+endif (WIN32)
 target_link_libraries (${EXECUTABLE} ACEStream_Network)
 target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
 

@@ -578,12 +578,13 @@ do_work (unsigned int bufferSize_in,
                                                                             modulehandler_configuration)));
 
   // step0b: initialize event dispatch
-  struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
-  event_dispatch_configuration_s.numberOfReactorThreads =
-      (useReactor_in ? numberOfDispatchThreads_in : 0);
-  event_dispatch_configuration_s.numberOfProactorThreads =
-      (!useReactor_in ? numberOfDispatchThreads_in : 0);
-  if (!Common_Tools::initializeEventDispatch (event_dispatch_configuration_s))
+  if (useReactor_in)
+    configuration.dispatchConfiguration.numberOfReactorThreads =
+      numberOfDispatchThreads_in;
+  else
+    configuration.dispatchConfiguration.numberOfProactorThreads =
+      numberOfDispatchThreads_in;
+  if (!Common_Tools::initializeEventDispatch (configuration.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
@@ -591,7 +592,7 @@ do_work (unsigned int bufferSize_in,
   } // end IF
   struct Common_EventDispatchState event_dispatch_state_s;
   event_dispatch_state_s.configuration =
-      &event_dispatch_configuration_s;
+      &configuration.dispatchConfiguration;
 
   // step0c: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
@@ -630,12 +631,11 @@ do_work (unsigned int bufferSize_in,
   } // end IF
 
   // step0c: initialize signal handling
+  configuration.signalHandlerConfiguration.dispatchState =
+    &event_dispatch_state_s;
   //configuration.signalHandlerConfiguration.statisticReportingHandler =
   //  connection_manager_p;
-  //configuration.signalHandlerConfiguration.statisticReportingTimerID = timer_id;
-  configuration.signalHandlerConfiguration.dispatch =
-      (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
-                     : COMMON_EVENT_DISPATCH_PROACTOR);
+  //configuration.signalHandlerConfiguration.statisticReportingTimerId = timer_id;
   if (!signalHandler_in.initialize (configuration.signalHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1188,7 +1188,7 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
-  ACE_SYNCH_MUTEX signal_lock;
+  ACE_SYNCH_RECURSIVE_MUTEX signal_lock;
   Test_U_Protocol_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                              : COMMON_SIGNAL_DISPATCH_PROACTOR),
                                                 &signal_lock);
@@ -1264,8 +1264,7 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Timer_Tools::periodToString (working_time,
-                                      working_time_string);
+  working_time_string = Common_Timer_Tools::periodToString (working_time);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
@@ -1307,10 +1306,8 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Timer_Tools::periodToString (user_time,
-                                      user_time_string);
-  Common_Timer_Tools::periodToString (system_time,
-                                      system_time_string);
+  user_time_string = Common_Timer_Tools::periodToString (user_time);
+  system_time_string = Common_Timer_Tools::periodToString (system_time);
 
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)

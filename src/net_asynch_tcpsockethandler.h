@@ -51,9 +51,7 @@ class Net_AsynchTCPSocketHandler_T
   inline virtual void addresses (const ACE_INET_Addr& peerAddress_in, const ACE_INET_Addr& localAddress_in) { peerSAP_ = peerAddress_in; localSAP_ = localAddress_in; };
 
   // implement (part of) Net_IAsynchSocketHandler
-  // *NOTE*: this cancels all outstanding asynchronous operations
-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
-                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
+  virtual void cancel ();
 
  protected:
   // convenient types

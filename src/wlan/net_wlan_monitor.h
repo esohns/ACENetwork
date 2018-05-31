@@ -79,7 +79,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection*,
 template <typename AddressType,
           typename ConfigurationType
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-          >
+          ,
 #else
           ////////////////////////////////
           ,ACE_SYNCH_DECL,
@@ -180,15 +180,16 @@ class Net_WLAN_Monitor_T<AddressType,
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
   inline virtual const HANDLE get () const { return inherited::clientHandle_; }
-  inline virtual const WLAN_SIGNAL_QUALITY get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
-  inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID (inherited::clientHandle_, (inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : GUID_NULL); }
+  //inline virtual const WLAN_SIGNAL_QUALITY get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
+  inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID (inherited::clientHandle_, (inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : GUID_NULL)); }
 
  protected:
   Net_WLAN_Monitor_T ();
 
   // implement Net_WLAN_IManager
-  inline virtual bool do_associate (REFGUID interfaceIdentifier_in, const struct ether_addr&, const std::string& SSID_in) { return Net_WLAN_Tools::associate (inherited::clientHandle_, interfaceIdentifier_in, SSID_in); }
-  inline virtual void do_scan (REFGUID interfaceIdentifier_in, const struct ether_addr& APMACAddress_in, const std::string& SSID_in) { ACE_UNUSED_ARG (APMACAddress_in); Net_WLAN_Tools::scan (inherited::clientHandle_, interfaceIdentifier_in, SSID_in); }
+  inline virtual bool do_associate (REFGUID interfaceIdentifier_in, const std::string& SSID_in) { return Net_WLAN_Tools::associate (inherited::clientHandle_, interfaceIdentifier_in, SSID_in); }
+  inline virtual bool do_authenticate (REFGUID interfaceIdentifier_in, const struct ether_addr& accessPointMACAddress_in, const std::string& SSID_in) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false); }
+  inline virtual void do_scan (REFGUID interfaceIdentifier_in, const struct ether_addr& accessPointMACAddress_in, const std::string& SSID_in) { ACE_UNUSED_ARG (accessPointMACAddress_in); Net_WLAN_Tools::scan (inherited::clientHandle_, interfaceIdentifier_in, SSID_in); }
 
   UserDataType* userData_;
 
@@ -246,7 +247,7 @@ class Net_WLAN_Monitor_T<AddressType,
   // override (part of) Net_IWLANMonitor_T
   virtual bool initialize (const ConfigurationType&); // configuration handle
   inline virtual const ACE_HANDLE get () const { return inherited::handle_; }
-  inline virtual const unsigned int get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
+
   inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID ((inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR ("")), inherited::handle_); }
 
  protected:
@@ -392,7 +393,6 @@ class Net_WLAN_Monitor_T<AddressType,
   inline virtual const std::string& get1RR_2 (const std::string&) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR ("")); ACE_NOTREACHED (return ACE_TEXT_ALWAYS_CHAR ("");) }
   inline virtual void set2R (const std::string&, const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
-  inline virtual const unsigned int get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
   inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID ((inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR ("")), NULL, inherited::familyId_); }
 
  protected:
@@ -500,6 +500,7 @@ class Net_WLAN_Monitor_T<AddressType,
   virtual const std::string& get1RR_2 (const std::string&) const;
   virtual void set2R (const std::string&,
                       const std::string&);
+
   inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID (connection_, (inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR (""))); }
 
  protected:

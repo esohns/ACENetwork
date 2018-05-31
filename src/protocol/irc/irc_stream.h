@@ -18,8 +18,8 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#ifndef IRC_Stream_T_H
-#define IRC_Stream_T_H
+#ifndef IRC_STREAM_H
+#define IRC_STREAM_H
 
 #include <string>
 
@@ -39,16 +39,19 @@
 #include "stream_stat_statistic_report.h"
 
 #include "irc_common.h"
-#include "irc_exports.h"
+//#include "irc_exports.h"
 #include "irc_module_bisector.h"
 #include "irc_module_parser.h"
 #include "irc_module_streamer.h"
 #include "irc_record.h"
 #include "irc_stream_common.h"
 
-extern IRC_Export const char libacenetwork_default_irc_marshal_module_name_string[];
-extern IRC_Export const char libacenetwork_default_irc_parser_module_name_string[];
-extern IRC_Export const char libacenetwork_default_irc_stream_name_string[];
+//extern IRC_Export const char libacenetwork_default_irc_marshal_module_name_string[];
+extern const char libacenetwork_default_irc_marshal_module_name_string[];
+//extern IRC_Export const char libacenetwork_default_irc_parser_module_name_string[];
+extern const char libacenetwork_default_irc_parser_module_name_string[];
+//extern IRC_Export const char libacenetwork_default_irc_stream_name_string[];
+extern const char libacenetwork_default_irc_stream_name_string[];
 
 template <typename StreamStateType,
           ////////////////////////////////

@@ -88,7 +88,7 @@ typedef void* yyscan_t;
 //         header manually, as there is no way to add the export symbol to
 //         the declaration
 #define YYDEBUG 1
-extern int HTTP_Export yydebug;
+extern int yydebug;
 #define YYERROR_VERBOSE 1
 
 
@@ -169,7 +169,8 @@ namespace yy {
 
 
   /// A Bison parser.
-  class HTTP_Export HTTP_Parser
+  //class HTTP_Export HTTP_Parser
+  class HTTP_Parser
   {
   public:
 #ifndef YYSTYPE

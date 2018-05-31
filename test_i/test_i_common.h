@@ -38,7 +38,7 @@ struct Test_I_UserData
   Test_I_UserData ()
    : Net_UserData ()
    , configuration (NULL)
-  {};
+  {}
 
   struct Net_Configuration* configuration;
 };
@@ -49,7 +49,7 @@ struct Test_I_ConnectionState
   Test_I_ConnectionState ()
    : Net_ConnectionState ()
    //, configuration (NULL)
-  {};
+  {}
 
   // *TODO*: remove ASAP
   //struct Net_Configuration* configuration;
@@ -64,7 +64,7 @@ struct Test_I_ConnectionState
 //    // *NOTE*: this facilitates (message block) data buffers to be scanned with
 //    //         'flex's yy_scan_buffer() method
 //    paddingBytes = NET_PROTOCOL_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
-//  };
+//  }
 //};
 
 typedef Stream_Statistic Test_I_Statistic_t;
@@ -77,7 +77,7 @@ struct Test_I_SignalHandlerConfiguration
    : Common_SignalHandlerConfiguration ()
    , statisticReportingHandler (NULL)
    , statisticReportingTimerId (-1)
-  {};
+  {}
 
   Test_I_StatisticReportingHandler_t* statisticReportingHandler;
   long                                statisticReportingTimerId;
@@ -86,14 +86,15 @@ struct Test_I_SignalHandlerConfiguration
 struct Test_I_Configuration
 {
   Test_I_Configuration ()
-   : connectionConfigurations ()
+   : dispatchConfiguration ()
+   , connectionConfigurations ()
    , parserConfiguration ()
    //, streamConfiguration ()
    , signalHandlerConfiguration ()
-   , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , userData ()
-  {};
+  {}
 
+  struct Common_EventDispatchConfiguration dispatchConfiguration;
   // **************************** socket data **********************************
   Net_ConnectionConfigurations_t           connectionConfigurations;
   // **************************** parser data **********************************
@@ -102,8 +103,6 @@ struct Test_I_Configuration
   //struct Test_I_StreamConfiguration        streamConfiguration;
   // **************************** signal data **********************************
   struct Test_I_SignalHandlerConfiguration signalHandlerConfiguration;
-
-  enum Common_EventDispatchType            dispatch;
 
   struct Test_I_UserData                   userData;
 };

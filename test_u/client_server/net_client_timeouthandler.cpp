@@ -51,7 +51,7 @@ Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
 #else
  , randomStateInitializationBuffer_ ()
  , randomState_ ()
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
  , randomDistribution_ (1, 100)
  , randomEngine_ ()
  , randomGenerator_ ()
@@ -74,7 +74,7 @@ Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::srandom_r(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   randomGenerator_ = std::bind (randomDistribution_, randomEngine_);
 }
 
@@ -113,9 +113,9 @@ Client_TimeoutHandler::handle (const void* arg_in)
   ACE_UNUSED_ARG (arg_in);
 
   int result = -1;
-  int index = 0;
-  ClientServer_InetConnectionManager_t::CONNECTION_T* abort_connection_p = NULL;
-  ClientServer_InetConnectionManager_t::CONNECTION_T* ping_connection_p = NULL;
+  int index_i = 0;
+  ClientServer_InetConnectionManager_t::CONNECTION_T* connection_p = NULL;
+  ClientServer_InetConnectionManager_t::CONNECTION_T* connection_2 = NULL;
   bool do_abort = false;
   bool do_abort_oldest = false;
   bool do_abort_youngest = false;
@@ -130,40 +130,41 @@ Client_TimeoutHandler::handle (const void* arg_in)
 
   const typename Client_IConnector_t::CONFIGURATION_T& configuration_r =
     connector_->getR ();
-  unsigned int number_of_connections = 0;
+  unsigned int number_of_connections_i = 0;
 
   connection_manager_p->lock ();
-  number_of_connections = connection_manager_p->count ();
+  number_of_connections_i = connection_manager_p->count ();
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
     switch (mode_)
     {
       case ACTION_NORMAL:
       {
-        if (number_of_connections == 0)
+        if (!number_of_connections_i)
           goto continue_;
 
         // grab a (random) connection handler
-        // *PORTABILITY*: outside glibc, this is not very portable...
-        // *TODO*: use STL funcionality instead
+        // *PORTABILITY*: outside glibc, this is not very portable
+        // *TODO*: use STL random funcionality instead
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        index =
-          (ACE_OS::rand_r (&Common_Tools::randomSeed_) % number_of_connections);
+        index_i =
+          (ACE_OS::rand_r (&Common_Tools::randomSeed_) %
+           number_of_connections_i);
 #else
-        result = ::random_r (&randomState_, &index);
+        result = ::random_r (&randomState_, &index_i);
         if (result == -1)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ::random_r(): \"%s\", returning\n")));
           goto continue_;
         } // end IF
-        index = (index % number_of_connections);
-#endif
-        ping_connection_p = connection_manager_p->operator[] (index);
-        if (!ping_connection_p)
+        index_i = (index_i % number_of_connections_i);
+#endif // ACE_WIN32 || ACE_WIN64
+        connection_2 = connection_manager_p->operator[] (index_i);
+        if (!connection_2)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to retrieve connection #%d/%d, returning\n"),
-                      index, number_of_connections));
+                      index_i, number_of_connections_i));
           goto continue_;
         } // end IF
 
@@ -180,7 +181,7 @@ Client_TimeoutHandler::handle (const void* arg_in)
             // sanity check: max num connections already reached ?
             // --> abort the oldest one first
             if (maximumNumberOfConnections_ &&
-                (number_of_connections >= maximumNumberOfConnections_))
+                (number_of_connections_i >= maximumNumberOfConnections_))
               do_abort_oldest = true;
 
             do_connect = true;
@@ -190,31 +191,31 @@ Client_TimeoutHandler::handle (const void* arg_in)
           case ALTERNATING_STATE_ABORT:
           {
             // sanity check
-            if (number_of_connections == 0)
+            if (number_of_connections_i == 0)
               break; // nothing to do...
 
             // grab a (random) connection handler
-            // *PORTABILITY*: outside glibc, this is not very portable...
+            // *PORTABILITY*: outside glibc, this is not very portable
             // *TODO*: use STL funcionality instead
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-            index =
-              (ACE_OS::rand_r (&Common_Tools::randomSeed_) % number_of_connections);
+            index_i =
+              (ACE_OS::rand_r (&Common_Tools::randomSeed_) % number_of_connections_i);
 #else
-            result = ::random_r (&randomState_, &index);
+            result = ::random_r (&randomState_, &index_i);
             if (result == -1)
             {
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("failed to ::random_r(): \"%s\", returning\n")));
               goto continue_;
             } // end IF
-            index = (index % number_of_connections);
-#endif
-            abort_connection_p = connection_manager_p->operator[] (index);
-            if (!abort_connection_p)
+            index_i = (index_i % number_of_connections_i);
+#endif // ACE_WIN32 || ACE_WIN64
+            connection_p = connection_manager_p->operator[] (index_i);
+            if (!connection_p)
             {
               ACE_DEBUG ((LM_ERROR,
                           ACE_TEXT ("failed to retrieve connection #%d/%d, returning\n"),
-                          index, number_of_connections));
+                          index_i, number_of_connections_i));
               goto continue_;
             } // end IF
 
@@ -232,9 +233,8 @@ Client_TimeoutHandler::handle (const void* arg_in)
         } // end SWITCH
 
         // cycle mode
-        int temp = alternatingModeState_;
         alternatingModeState_ =
-          static_cast<enum Client_TimeoutHandler::AlternatingModeStateType> (++temp);
+          static_cast<enum Client_TimeoutHandler::AlternatingModeStateType> (alternatingModeState_ + 1);
         if (alternatingModeState_ == ALTERNATING_STATE_MAX)
           alternatingModeState_ = ALTERNATING_STATE_CONNECT;
 
@@ -242,49 +242,49 @@ Client_TimeoutHandler::handle (const void* arg_in)
       }
       case ACTION_STRESS:
       {
-        // allow some probability for closing connections in between
-        float probability = static_cast<float> (randomGenerator_ ()) / 100.0F;
+        // allow some probability_f for closing connections in between
+        float probability_f = static_cast<float> (randomGenerator_ ()) / 100.0F;
 
-        if ((number_of_connections > 0) &&
-            (probability <= NET_CLIENT_U_TEST_ABORT_PROBABILITY))
+        if ((number_of_connections_i > 0) &&
+            (probability_f <= NET_CLIENT_U_TEST_ABORT_PROBABILITY))
           do_abort_youngest = true;
 
-        // allow some probability for opening connections in between
-        probability = static_cast<float> (randomGenerator_ ()) / 100.0F;
-        if (probability <= NET_CLIENT_U_TEST_CONNECT_PROBABILITY)
+        // allow some probability_f for opening connections in between
+        probability_f = static_cast<float> (randomGenerator_ ()) / 100.0F;
+        if (probability_f <= NET_CLIENT_U_TEST_CONNECT_PROBABILITY)
           do_connect = true;
 
         // ping the server
 
         // sanity check
-        if ((number_of_connections == 0) ||
-            ((number_of_connections == 1) && do_abort_youngest))
+        if (!number_of_connections_i ||
+            ((number_of_connections_i == 1) && do_abort_youngest))
           break;
 
         // grab a (random) connection handler
         // *PORTABILITY*: outside glibc, this is not very portable...
         // *TODO*: use STL funcionality instead
-        //        std::uniform_int_distribution<int> distribution (0, number_of_connections - 1);
-        //        index = distribution (randomGenerator_);
+        //        std::uniform_int_distribution<int> distribution (0, number_of_connections_i - 1);
+        //        index_i = distribution (randomGenerator_);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        index =
-          (ACE_OS::rand_r (&Common_Tools::randomSeed_) % number_of_connections);
+        index_i =
+          (ACE_OS::rand_r (&Common_Tools::randomSeed_) % number_of_connections_i);
 #else
-        result = ::random_r (&randomState_, &index);
+        result = ::random_r (&randomState_, &index_i);
         if (result == -1)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to ::random_r(): \"%s\", returning\n")));
           goto continue_;
         } // end IF
-        index = (index % number_of_connections);
-#endif
-        ping_connection_p = connection_manager_p->operator[] (index);
-        if (!ping_connection_p)
+        index_i = (index_i % number_of_connections_i);
+#endif // ACE_WIN32 || ACE_WIN64
+        connection_2 = connection_manager_p->operator[] (index_i);
+        if (!connection_2)
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to retrieve connection #%d/%d, returning\n"),
-                      index, number_of_connections));
+                      index_i, number_of_connections_i));
           goto continue_;
         } // end IF
 
@@ -308,24 +308,24 @@ continue_:
   // -------------------------------------
 
   if (do_abort)
-  {
-    ACE_ASSERT (abort_connection_p);
+  { ACE_ASSERT (connection_p);
     try {
-      abort_connection_p->close ();
+      connection_p->close ();
     } catch (...) {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("caught exception in Net_IConnection_T::close(), returning\n")));
 
       // clean up
-      abort_connection_p->decrease ();
-      if (ping_connection_p)
-        ping_connection_p->decrease ();
+      connection_p->decrease ();
+      if (connection_2)
+        connection_2->decrease ();
 
       return;
     }
 
     // clean up
-    abort_connection_p->decrease ();
+    connection_p->decrease ();
+    connection_p = NULL;
   } // end IF
 
   if (do_abort_oldest)
@@ -340,17 +340,13 @@ continue_:
     switch (connector_->transportLayer ())
     {
       case NET_TRANSPORTLAYER_TCP:
-      {
         peer_address =
           configuration_r.socketHandlerConfiguration.socketConfiguration_2.address;
         break;
-      }
       case NET_TRANSPORTLAYER_UDP:
-      {
         peer_address =
           configuration_r.socketHandlerConfiguration.socketConfiguration_3.peerAddress;
         break;
-      }
       default:
       {
         ACE_DEBUG ((LM_ERROR,
@@ -358,8 +354,8 @@ continue_:
                     connector_->transportLayer ()));
 
         // clean up
-        if (ping_connection_p)
-          ping_connection_p->decrease ();
+        if (connection_2)
+          connection_2->decrease ();
 
         return;
       }
@@ -375,8 +371,8 @@ continue_:
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
 
       // clean up
-      if (ping_connection_p)
-        ping_connection_p->decrease ();
+      if (connection_2)
+        connection_2->decrease ();
 
       return;
     }
@@ -387,8 +383,8 @@ continue_:
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
 
       // clean up
-      if (ping_connection_p)
-        ping_connection_p->decrease ();
+      if (connection_2)
+        connection_2->decrease ();
 
       return;
     } // end IF
@@ -402,14 +398,15 @@ continue_:
 #else
       iconnection_p =
         connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     } // end IF
     else
     {
       // step1: wait for the connection to register with the manager
       // *TODO*: avoid these tight loops
-      ACE_Time_Value timeout (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT, 0);
-      ACE_Time_Value deadline = COMMON_TIME_NOW + timeout;
+      ACE_Time_Value deadline =
+        (COMMON_TIME_NOW +
+         ACE_Time_Value (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT, 0));
       // *TODO*: this may not be accurate/applicable for/to all protocols
       do
       {
@@ -427,26 +424,26 @@ continue_:
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ())));
 
       // clean up
-      if (ping_connection_p)
-        ping_connection_p->decrease ();
+      if (connection_2)
+        connection_2->decrease ();
 
       return;
     } // end IF
     iconnection_p->decrease ();
+    iconnection_p = NULL;
   } // end IF
 
   if (do_ping)
-  {
-    ACE_ASSERT (ping_connection_p);
-    Net_IPing* iping_p = dynamic_cast<Net_IPing*> (ping_connection_p);
+  { ACE_ASSERT (connection_2);
+    Net_IPing* iping_p = dynamic_cast<Net_IPing*> (connection_2);
     if (!iping_p)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to dynamic_cast<Net_IPing>(0x%@), returning\n"),
-                  ping_connection_p));
+                  connection_2));
 
       // clean up
-      ping_connection_p->decrease ();
+      connection_2->decrease ();
 
       return;
     } // end IF
@@ -458,12 +455,13 @@ continue_:
                   ACE_TEXT ("caught exception in Net_IPing::ping(), returning\n")));
 
       // clean up
-      ping_connection_p->decrease ();
+      connection_2->decrease ();
 
       return;
     }
 
     // clean up
-    ping_connection_p->decrease ();
+    connection_2->decrease ();
+    connection_2 = NULL;
   } // end IF
 }

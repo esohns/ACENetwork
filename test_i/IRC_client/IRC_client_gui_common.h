@@ -57,11 +57,12 @@ struct IRC_Client_GTK_ProgressData
   IRC_Client_GTK_ProgressData ()
    : Test_I_GTK_ProgressData ()
    , cursorType (GDK_LAST_CURSOR)
-  {};
+  {}
 
   GdkCursorType cursorType;
 };
 
+struct IRC_Client_Configuration;
 struct IRC_Client_GTK_CBData
  : Test_I_GTK_CBData
 {
@@ -73,7 +74,7 @@ struct IRC_Client_GTK_CBData
    , phoneBook ()
    , progressData ()
    , UIFileDirectory ()
-  {};
+  {}
 
   struct IRC_Client_Configuration*   configuration;
   IRC_Client_GUI_Connections_t       connections;
@@ -90,7 +91,7 @@ struct IRC_Client_ConnectionThreadData
    , CBData (NULL)
    , loginOptions ()
    , phonebookEntry ()
-  {};
+  {}
 
   struct IRC_Client_Configuration*  configuration;
   struct IRC_Client_GTK_CBData*     CBData;
@@ -109,7 +110,7 @@ struct IRC_Client_GTK_ConnectionCBData
    , pending (false)
    , state (NULL)
    , timeStamp ()
-  {};
+  {}
 
   unsigned int                  acknowledgements;
   IRC_Client_GUI_Connections_t* connections;
@@ -137,7 +138,7 @@ struct IRC_Client_GTK_HandlerCBData
    , parameters ()
    , pending (false)
    , timeStamp ()
-  {};
+  {}
 
   unsigned int                   acknowledgements;
   std::string                    builderLabel;
@@ -156,8 +157,9 @@ struct IRC_Client_GTK_HandlerCBData
 
 typedef Common_UI_GtkBuilderDefinition_T<struct IRC_Client_GTK_CBData> IRC_Client_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<struct IRC_Client_GTK_CBData> IRC_Client_GTK_Manager_t;
+typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+                                struct IRC_Client_GTK_CBData> IRC_Client_GTK_Manager_t;
 typedef ACE_Singleton<IRC_Client_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> IRC_CLIENT_UI_GTK_MANAGER_SINGLETON;
+                      typename ACE_MT_SYNCH::MUTEX> IRC_CLIENT_UI_GTK_MANAGER_SINGLETON;
 
 #endif

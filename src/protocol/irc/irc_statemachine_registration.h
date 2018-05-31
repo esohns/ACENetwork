@@ -29,7 +29,7 @@
 #include "common_istatemachine.h"
 #include "common_statemachine_base.h"
 
-#include "irc_exports.h"
+//#include "irc_exports.h"
 
 enum IRC_RegistrationStateType
 {
@@ -44,7 +44,7 @@ enum IRC_RegistrationStateType
 
 extern const char network_irc_statemachine_registration_name_string_[];
 
-class IRC_Export IRC_StateMachine_Registration
+class IRC_StateMachine_Registration
  : public Common_StateMachine_Base_T<network_irc_statemachine_registration_name_string_,
                                      ACE_NULL_SYNCH,
                                      enum IRC_RegistrationStateType,

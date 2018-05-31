@@ -31,7 +31,7 @@
 
 #include "stream_stat_statistic_report.h"
 
-#include "net_module_sockethandler.h"
+//#include "net_module_sockethandler.h"
 #include "net_remote_comm.h"
 
 #include "test_u_common.h"
@@ -44,26 +44,26 @@ class Test_U_Message;
 class Test_U_SessionMessage;
 
 // declare module(s)
-typedef Net_Module_TCPSocketHandler_T<ACE_MT_SYNCH,
-                                      Test_U_ControlMessage_t,
-                                      Test_U_Message,
-                                      Test_U_SessionMessage,
-                                      struct ClientServer_ModuleHandlerConfiguration,
-                                      enum Stream_ControlType,
-                                      enum Stream_SessionMessageType,
-                                      struct ClientServer_StreamState,
-                                      struct ClientServer_StreamSessionData,
-                                      ClientServer_StreamSessionData_t,
-                                      Net_Statistic_t,
-                                      Common_Timer_Manager_t,
-                                      Net_Remote_Comm::MessageHeader,
-                                      struct Test_U_UserData> ClientServer_Module_TCPSocketHandler;
-DATASTREAM_MODULE_INPUT_ONLY (struct ClientServer_StreamSessionData,          // session data type
-                              enum Stream_SessionMessageType,                 // session event type
-                              struct ClientServer_ModuleHandlerConfiguration, // module handler configuration type
-                              libacenetwork_default_tcp_sockethandler_module_name_string,
-                              Stream_INotify_t,                               // stream notification interface type
-                              ClientServer_Module_TCPSocketHandler);          // writer type
+//typedef Net_Module_SocketHandler_T<ACE_MT_SYNCH,
+//                                      Test_U_ControlMessage_t,
+//                                      Test_U_Message,
+//                                      Test_U_SessionMessage,
+//                                      struct ClientServer_ModuleHandlerConfiguration,
+//                                      enum Stream_ControlType,
+//                                      enum Stream_SessionMessageType,
+//                                      struct ClientServer_StreamState,
+//                                      struct ClientServer_StreamSessionData,
+//                                      ClientServer_StreamSessionData_t,
+//                                      Net_Statistic_t,
+//                                      Common_Timer_Manager_t,
+//                                      Net_Remote_Comm::MessageHeader,
+//                                      struct Test_U_UserData> ClientServer_Module_SocketHandler;
+//DATASTREAM_MODULE_INPUT_ONLY (struct ClientServer_StreamSessionData,          // session data type
+//                              enum Stream_SessionMessageType,                 // session event type
+//                              struct ClientServer_ModuleHandlerConfiguration, // module handler configuration type
+//                              libacenetwork_default_tcp_sockethandler_module_name_string,
+//                              Stream_INotify_t,                               // stream notification interface type
+//                              ClientServer_Module_SocketHandler);             // writer type
 
 typedef Stream_Statistic_StatisticReport_ReaderTask_T<ACE_MT_SYNCH,
                                                       Common_TimePolicy_t,

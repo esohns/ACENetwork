@@ -338,8 +338,9 @@ struct DHCPClient_ThreadData
 
 typedef Common_UI_GtkBuilderDefinition_T<struct DHCPClient_GTK_CBData> DHCPClient_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<struct DHCPClient_GTK_CBData> DHCPClient_GTK_Manager_t;
+typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+                                struct DHCPClient_GTK_CBData> DHCPClient_GTK_Manager_t;
 typedef ACE_Singleton<DHCPClient_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> DHCPCLIENT_GTK_MANAGER_SINGLETON;
+                      typename ACE_MT_SYNCH::MUTEX> DHCPCLIENT_GTK_MANAGER_SINGLETON;
 
 #endif

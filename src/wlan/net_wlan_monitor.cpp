@@ -387,7 +387,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
     } // end IF
     device_path_string =
         Net_WLAN_Tools::activeConnectionDBusObjectPathToDeviceDBusObjectPath (connection_in,
-                                                                  object_path_string);
+                                                                              object_path_string);
     if (device_path_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -397,7 +397,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
     } // end IF
     interface_identifier_string =
         Net_WLAN_Tools::deviceDBusObjectPathToIdentifier (connection_in,
-                                                    device_path_string);
+                                                          device_path_string);
     if (interface_identifier_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -407,7 +407,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
     } // end IF
     active_access_point_path_string =
         Net_WLAN_Tools::deviceDBusObjectPathToActiveAccessPointDBusObjectPath (connection_in,
-                                                                   device_path_string);
+                                                                               device_path_string);
     if (active_access_point_path_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -417,7 +417,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
     } // end IF
     SSID_string =
         Net_WLAN_Tools::accessPointDBusObjectPathToSSID (connection_in,
-                                                   active_access_point_path_string);
+                                                         active_access_point_path_string);
     if (SSID_string.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -495,7 +495,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
     } // end IF
     interface_identifier_string =
         Net_WLAN_Tools::deviceDBusObjectPathToIdentifier (connection_in,
-                                                    object_path_string);
+                                                          object_path_string);
 
     if (interface_identifier_string.empty ())
     {
@@ -1108,9 +1108,6 @@ nla_put_failure:
         return NL_SKIP;
 
       char buffer_a[IF_NAMESIZE + 1];
-      struct ether_addr ap_mac_address_s;
-      ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
-
       if (unlikely (!::if_indextoname (if_index_i,
                                        buffer_a)))
       {
@@ -1120,9 +1117,11 @@ nla_put_failure:
         return NL_STOP;
       } // end IF
 
+      struct ether_addr ap_mac_address_s;
+      ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
       if (nlattr_a[NL80211_ATTR_TIMED_OUT])
       { ACE_ASSERT (nlattr_a[NL80211_ATTR_MAC]);
-        ACE_OS::memcpy (&ap_mac_address_s.ether_addr_octet,
+        ACE_OS::memcpy (&(ap_mac_address_s.ether_addr_octet),
                         nla_data (nlattr_a[NL80211_ATTR_MAC]),
                         ETH_ALEN);
         ACE_DEBUG ((LM_ERROR,
@@ -1158,6 +1157,7 @@ nla_put_failure:
     case NL80211_CMD_ASSOCIATE:
     {
       // sanity check(s)
+//      ACE_ASSERT (nlattr_a[NL80211_ATTR_FRAME]);
       ACE_ASSERT (nlattr_a[NL80211_ATTR_IFINDEX]);
 
       unsigned int if_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_IFINDEX]);

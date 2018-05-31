@@ -49,8 +49,8 @@ struct nl_msg;
 
 //////////////////////////////////////////
 
-enum Net_LinkLayerType& operator++ (enum Net_LinkLayerType& lhs);
-enum Net_LinkLayerType  operator++ (enum Net_LinkLayerType& lhs, int);
+enum Net_LinkLayerType& operator++ (enum Net_LinkLayerType&);
+enum Net_LinkLayerType  operator++ (enum Net_LinkLayerType&, int);
 
 //////////////////////////////////////////
 
@@ -61,8 +61,8 @@ class Net_Common_Tools
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   static bool toggleInterface (REFGUID);
 #else
-    static bool isInterfaceEnabled (const std::string&);
-    static bool toggleInterface (const std::string&);
+  static bool isInterfaceEnabled (const std::string&);
+  static bool toggleInterface (const std::string&);
 #endif // ACE_WIN32 || ACE_WIN64
 
   // link layer
@@ -131,6 +131,7 @@ class Net_Common_Tools
   // *TODO*: support other link layers
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   static struct ether_addr interfaceToLinkLayerAddress (REFGUID);            // interface identifier
+  static struct _GUID linkLayerAddressToInterfaceIdentifier (const struct ether_addr&);
 #else
   static struct ether_addr interfaceToLinkLayerAddress (const std::string&); // interface identifier
   static std::string linkLayerAddressToInterfaceIdentifier (const struct ether_addr&);

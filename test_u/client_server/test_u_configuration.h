@@ -57,7 +57,7 @@ struct ClientServer_ProtocolConfiguration
    , pingInterval (ACE_Time_Value::zero)
    , pingAutoAnswer (true)
    , printPongMessages (true)
-  {};
+  {}
 
   unsigned int   PDUSize; // pdu size (if fixed)
   ACE_Time_Value pingInterval; // {0: off}
@@ -94,7 +94,7 @@ struct ClientServer_ModuleHandlerConfiguration
    , subscribers (NULL)
   {
     concurrency = STREAM_HEADMODULECONCURRENCY_CONCURRENT;
-  };
+  }
 
   //bool                             printProgressDot; // file writer module
   struct ClientServer_ProtocolConfiguration* protocolConfiguration; // protocol handler
@@ -111,7 +111,7 @@ struct ClientServer_StreamConfiguration
   ClientServer_StreamConfiguration ()
    : Stream_Configuration ()
    , userData (NULL)
-  {};
+  {}
 
   struct Test_U_UserData* userData; // user data
 };
@@ -125,7 +125,7 @@ struct ClientServer_Configuration
    , connectionConfigurations ()
    , streamConfiguration ()
    , protocolConfiguration ()
-  {};
+  {}
 
   struct Net_AllocatorConfiguration         allocatorConfiguration;
   // **************************** socket data **********************************

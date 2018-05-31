@@ -263,11 +263,20 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   //         pipe ?
   ACE_ASSERT (inherited2::configuration_);
   ACE_ASSERT (inherited2::configuration_->streamConfiguration_);
-  if (!inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection)
-    inherited2::configuration_->streamConfiguration_->configuration_.notificationStrategy =
-      &(inherited::notificationStrategy_);
+  //if (!inherited2::configuration_->socketHandlerConfiguration.useThreadPerConnection)
+  //  inherited2::configuration_->streamConfiguration_->configuration_.notificationStrategy =
+  //    &(inherited::notificationStrategy_);
   if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration_),
                                      inherited2::state_.handle)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%u: failed to initialize processing stream (name was: \"%s\"), aborting\n"),
+                id (),
+                ACE_TEXT (stream_.name ().c_str ())));
+    goto error;
+  } // end IF
+  if (unlikely (!stream_.initialize_2 (&(inherited::notificationStrategy_),
+                                       ACE_TEXT_ALWAYS_CHAR ("ACE_Stream_Head"))))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to initialize processing stream (name was: \"%s\"), aborting\n"),
@@ -1681,7 +1690,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     //            ACE_TEXT ("failed to Net_ConnectionBase_T::registerc(), aborting\n")));
     goto error;
   } // end IF
-  inherited2::decrease ();
   handle_manager = true;
 
   // step2: initialize/start stream
@@ -1689,73 +1697,50 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   ACE_ASSERT (inherited2::configuration_->streamConfiguration_);
   // step2a: connect the stream head message queue with this handler; the queue
   //         will forward outbound data to handle_output ()
-  inherited2::configuration_->streamConfiguration_->configuration_.notificationStrategy =
-    this;
-  if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration_),
-                                     inherited2::state_.handle)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to initialize processing stream (name was: \"%s\"), aborting\n"),
-                id (),
-                ACE_TEXT (stream_.name ().c_str ())));
-    goto error;
-  } // end IF
+  //inherited2::configuration_->streamConfiguration_->configuration_.notificationStrategy =
+  //  this;
+  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock ());
+    if (unlikely (!stream_.initialize (*(inherited2::configuration_->streamConfiguration_),
+                                       inherited2::state_.handle)))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: failed to initialize processing stream (name was: \"%s\"), aborting\n"),
+                  id (),
+                  ACE_TEXT (stream_.name ().c_str ())));
+      goto error;
+    } // end IF
+    if (unlikely (!stream_.initialize_2 (this,
+                                         ACE_TEXT_ALWAYS_CHAR ("ACE_Stream_Head"))))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: failed to initialize processing stream (name was: \"%s\"), aborting\n"),
+                  id (),
+                  ACE_TEXT (stream_.name ().c_str ())));
+      goto error;
+    } // end IF
 
-  // step2b: update session data
-  // *TODO*: remove type inferences
-  session_data_container_p = &stream_.getR ();
-  session_data_p =
-    &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
-  ACE_ASSERT (session_data_p->lock);
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_p->lock);
-    session_data_p->connectionStates.insert (std::make_pair (inherited2::state_.handle,
-                                                             &(inherited2::state_)));
+    // step2b: update session data
+    // *TODO*: remove type inferences
+    session_data_container_p = &stream_.getR ();
+    session_data_p =
+      &const_cast<typename StreamType::SESSION_DATA_T&> (session_data_container_p->getR ());
+    ACE_ASSERT (session_data_p->lock);
+    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *session_data_p->lock);
+      session_data_p->connectionStates.insert (std::make_pair (inherited2::state_.handle,
+                                                              &(inherited2::state_)));
+    } // end lock scope
+
+    // step2c: start stream
+    stream_.start ();
+    if (unlikely (!stream_.isRunning ()))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: failed to start processing stream, aborting\n"),
+                  id ()));
+      goto error;
+    } // end IF
   } // end lock scope
-
-  // step2c: start stream
-  stream_.start ();
-  if (unlikely (!stream_.isRunning ()))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%u: failed to start processing stream, aborting\n"),
-                id ()));
-    goto error;
-  } // end IF
   handle_stream = true;
-
-//  // step3: start a worker ?
-//  if (inherited::configuration_.streamConfiguration.useThreadPerConnection)
-//  {
-//    ACE_thread_t thread_ids[1];
-//    thread_ids[0] = 0;
-//    ACE_hthread_t thread_handles[1];
-//    thread_handles[0] = 0;
-//    char thread_name[BUFSIZ];
-//    ACE_OS::memset (thread_name, 0, sizeof (thread_name));
-//    ACE_OS::strcpy (thread_name,
-//                    ACE_TEXT_ALWAYS_CHAR (NET_CONNECTION_HANDLER_THREAD_NAME));
-//    const char* thread_names[1];
-//    thread_names[0] = thread_name;
-//    result = inherited::activate ((THR_NEW_LWP      |
-//                                   THR_JOINABLE     |
-//                                   THR_INHERIT_SCHED),                    // flags
-//                                  1,                                      // # threads
-//                                  0,                                      // force spawning
-//                                  ACE_DEFAULT_THREAD_PRIORITY,            // priority
-//                                  NET_CONNECTION_HANDLER_THREAD_GROUP_ID, // group id
-//                                  NULL,                                   // corresp. task --> use 'this'
-//                                  thread_handles,                         // thread handle(s)
-//                                  NULL,                                   // thread stack(s)
-//                                  NULL,                                   // thread stack size(s)
-//                                  thread_ids,                             // thread id(s)
-//                                  thread_names);                          // thread name(s)
-//    if (result == -1)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to ACE_Task_Base::activate(): \"%m\", aborting\n")));
-//      return -1;
-//    } // end IF
-//  } // end IF
 
   inherited2::state_.status = NET_CONNECTION_STATUS_OK;
 
@@ -1766,14 +1751,13 @@ error:
   inherited2::state_.status = NET_CONNECTION_STATUS_INITIALIZATION_FAILED;
 
   if (handle_stream)
+  { ACE_GUARD (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock ());
     stream_.stop (true,  // wait for completion ?
                   true); // locked access ?
+  } // end IF / lock scope
 
-  // *TODO*: cannot 'delete this' here --> leave this to derivates
   if (handle_manager)
     inherited2::deregister ();
-  else
-    inherited2::decrease (); // *NOTE*: 'delete's 'this'
 }
 
 //template <typename HandlerType,
@@ -1927,7 +1911,12 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::handle_close"));
 
+  // sanity check(s)
+  ACE_ASSERT (handle_in == inherited::handle ());
+
   int result = -1;
+  bool cancel_b = false;
+  bool close_socket_b = false;
 
   // *IMPORTANT NOTE*: when control reaches here, the socket handle has already
   //                   gone away, i.e. no new data will be accepted by the
@@ -1942,40 +1931,62 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   //                   invoked by stream_.finished()
   // *TODO*: remove type inference
   if (inherited2::state_.status != NET_CONNECTION_STATUS_CLOSED)
-    inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
-
-  // step0b: notify stream ?
-  if (likely (notify_))
   {
-    notify_ = false;
-    stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
-                    true);
+    inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
+    cancel_b = true;
   } // end IF
 
-  // step1: shut down the processing stream
-  stream_.flush (false,  // do not flush inbound data
-                 false,  // do not flush session messages
-                 false); // flush upstream (if any)
-  stream_.idle ();
-  stream_.stop (true,  // wait for worker(s) (if any)
-                false, // wait for upstream (if any)
-                true); // locked access ?
+  // step0b: notify stream ?
+  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock (), -1);
+    if (likely (notify_))
+    {
+      notify_ = false;
+      stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
+                      true);
+    } // end IF
+
+    // step1: shut down the processing stream
+    stream_.flush (false,  // do not flush inbound data
+                   false,  // do not flush session messages
+                   false); // flush upstream (if any)
+    stream_.idle ();
+    stream_.stop (true,  // wait for worker(s) (if any)
+                  false, // wait for upstream (if any)
+                  true); // locked access ?
+  } // end lock scope
 
   // *NOTE*: pending socket operations are notified by the kernel and will
   //         return automatically
   // *TODO*: consider cancel()ling pending write operations
 
   // step2: invoke base-class maintenance
-  result = inherited::handle_close (handle_in,
-                                    mask_in);
-  if (unlikely (result == -1))
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("%u: failed to HandlerType::handle_close(): \"%m\", continuing\n"),
-                id ()));
+  if (cancel_b)
+    inherited::cancel ();
 
   // step3: deregister with the connection manager (if any)
+  Net_ConnectionId_t connection_id = id ();
+  close_socket_b = (inherited2::count () == 1);
   if (likely (inherited2::isRegistered_))
     inherited2::deregister ();
+
+  // step4: release (read) socket handle
+  if ((handle_in != ACE_INVALID_HANDLE) &&
+      close_socket_b)
+  {
+    result = ACE_OS::closesocket (handle_in);
+    if (unlikely (result == -1))
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
+                  connection_id,
+                  handle_in));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("%u: failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                  connection_id,
+                  handle_in));
+#endif // ACE_WIN32 || ACE_WIN64
+  } // end IF
 
   return result;
 }
@@ -2057,60 +2068,10 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::close"));
 
-  int result = -1;
+  inherited2::state_.status = NET_CONNECTION_STATUS_CLOSED;
 
   // step1: cancel i/o operation(s), release (write) socket handle, ...
-  ACE_HANDLE handle = inherited::handle ();
-  result = inherited::handle_close (handle,
-                                    ACE_Event_Handler::ALL_EVENTS_MASK);
-  if (unlikely (result == -1))
-  {
-    int error = ACE_OS::last_error ();
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    if ((error != ENOENT)          && // 2  : *TODO*
-        (error != ENOMEM)          && // 12 : [server: local close()] *TODO*: ?
-        (error != ERROR_IO_PENDING))  // 997:
-#else
-    if (error == EINPROGRESS)
-      result = 0; // --> AIO_CANCELED
-    if ((error != ENOENT)     && // 2  : *TODO*
-        (error != EBADF)      && // 9  : Linux [client: local close()]
-        (error != EINVAL)     && // 22 : Linux [client: local close()]
-        (error != EPIPE)      && // 32 : Linux [client: remote close()]
-        (error != EINPROGRESS))  // 115: happens on Linux
-#endif
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: failed to HandlerType::handle_close(0x%@,%d): \"%m\", continuing\n"),
-                  id (),
-                  handle,
-                  ACE_Event_Handler::ALL_EVENTS_MASK));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: failed to HandlerType::handle_close(%d,%d): \"%m\", continuing\n"),
-                  id (),
-                  handle,
-                  ACE_Event_Handler::ALL_EVENTS_MASK));
-#endif
-  } // end IF
-
-  //  step2: wake up any open read operation; it will release the connection
-  if (likely (handle != ACE_INVALID_HANDLE))
-  {
-    result = ACE_OS::closesocket (handle);
-    if (unlikely (result == -1))
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
-                  id (),
-                  handle));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                  id (),
-                  handle));
-#endif
-  } // end IF
+  inherited::cancel ();
 }
 
 template <typename HandlerType,

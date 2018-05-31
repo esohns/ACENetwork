@@ -748,12 +748,13 @@ do_work (bool requestBroadcastReplies_in,
     statisticReportingInterval_in;
 
   // step0b: initialize event dispatch
-  struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
-  event_dispatch_configuration_s.numberOfReactorThreads =
-      (useReactor_in ? numberOfDispatchThreads_in : 0);
-  event_dispatch_configuration_s.numberOfProactorThreads =
-      (!useReactor_in ? numberOfDispatchThreads_in : 0);
-  if (!Common_Tools::initializeEventDispatch (event_dispatch_configuration_s))
+  if (useReactor_in)
+    configuration.dispatchConfiguration.numberOfReactorThreads =
+      numberOfDispatchThreads_in;
+  else
+    configuration.dispatchConfiguration.numberOfProactorThreads =
+      numberOfDispatchThreads_in;
+  if (!Common_Tools::initializeEventDispatch (configuration.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
@@ -761,7 +762,7 @@ do_work (bool requestBroadcastReplies_in,
   } // end IF
   struct Common_EventDispatchState event_dispatch_state_s;
   event_dispatch_state_s.configuration =
-      &event_dispatch_configuration_s;
+      &configuration.dispatchConfiguration;
 
   ACE_Time_Value deadline = ACE_Time_Value::zero;
   DHCPClient_IConnector_t* iconnector_p = NULL;
@@ -813,19 +814,18 @@ do_work (bool requestBroadcastReplies_in,
 
   // step0c: initialize signal handling
   CBData_in.configuration = &configuration;
+  configuration.signalHandlerConfiguration.dispatchState =
+    &event_dispatch_state_s;
   //if (useReactor_in)
-  //  CBData_in.configuration->signalHandlerConfiguration.listener =
+  //  configuration.signalHandlerConfiguration.listener =
   //    TEST_U_LISTENER_SINGLETON::instance ();
   //else
-  //  CBData_in.configuration->signalHandlerConfiguration.listener =
+  //  configuration.signalHandlerConfiguration.listener =
   //    TEST_U_ASYNCHLISTENER_SINGLETON::instance ();
-  CBData_in.configuration->signalHandlerConfiguration.statisticReportingHandler =
+  configuration.signalHandlerConfiguration.statisticReportingHandler =
     connection_manager_p;
-  CBData_in.configuration->signalHandlerConfiguration.statisticReportingTimerId =
+  configuration.signalHandlerConfiguration.statisticReportingTimerId =
     timer_id;
-  CBData_in.configuration->signalHandlerConfiguration.dispatch =
-    (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
-                   : COMMON_EVENT_DISPATCH_PROACTOR);
   if (!signalHandler_in.initialize (configuration.signalHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1177,8 +1177,8 @@ allocate:
   // step1a: start GTK event loop ?
   if (!UIDefinitionFileName_in.empty ())
   {
-    CBData_in.finalizationHook = idle_finalize_UI_cb;
-    CBData_in.initializationHook = idle_initialize_UI_cb;
+    CBData_in.eventHooks.finiHook = idle_finalize_UI_cb;
+    CBData_in.eventHooks.initHook = idle_initialize_UI_cb;
     //CBData_in.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
     //  std::make_pair (UIDefinitionFile_in, static_cast<GladeXML*> (NULL));
     CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
@@ -1561,7 +1561,7 @@ ACE_TMAIN (int argc_in,
   } // end IF
   Test_U_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                     : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                       &gtk_cb_data.lock);
+                                       &gtk_cb_data.subscribersLock);
 
   // step1f: handle specific program modes
   if (print_version_and_exit)
@@ -1673,8 +1673,7 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Timer_Tools::periodToString (working_time,
-                                      working_time_string);
+  working_time_string = Common_Timer_Tools::periodToString (working_time);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
@@ -1716,10 +1715,8 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Timer_Tools::periodToString (user_time,
-                                      user_time_string);
-  Common_Timer_Tools::periodToString (system_time,
-                                      system_time_string);
+  user_time_string = Common_Timer_Tools::periodToString (user_time);
+  system_time_string = Common_Timer_Tools::periodToString (system_time);
 
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)

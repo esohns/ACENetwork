@@ -58,9 +58,9 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
               false,
               STREAM_HEADMODULECONCURRENCY_CONCURRENT,
               generateSessionMessages_in)
- , currentBuffer_ (NULL)
- , currentMessage_ (NULL)
- , currentMessageLength_ (0)
+ , buffer_ (NULL)
+ , message_ (NULL)
+ , messageLength_ (0)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_TCPSocketHandler_T::Net_Module_TCPSocketHandler_T"));
 
@@ -97,8 +97,8 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Module_TCPSocketHandler_T::~Net_Module_TCPSocketHandler_T"));
 
-  if (currentMessage_)
-    currentMessage_->release ();
+  if (message_)
+    message_->release ();
 }
 
 template <ACE_SYNCH_DECL,
@@ -136,11 +136,11 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
 
   if (inherited::isInitialized_)
   {
-    currentMessageLength_ = 0;
-    if (currentMessage_)
-      currentMessage_->release ();
-    currentMessage_ = NULL;
-    currentBuffer_ = NULL;
+    messageLength_ = 0;
+    if (message_)
+      message_->release ();
+    message_ = NULL;
+    buffer_ = NULL;
   } // end IF
 
   return inherited::initialize (configuration_in,
@@ -189,12 +189,12 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
   ACE_ASSERT (inherited::isInitialized_);
 
   // perhaps part of this message has already arrived ?
-  if (currentBuffer_)
+  if (buffer_)
   { // chain the inbound buffer
-    currentBuffer_->cont (message_inout);
+    buffer_->cont (message_inout);
   } // end IF
   else
-    currentBuffer_ = message_inout;
+    buffer_ = message_inout;
 
   DataMessageType* message_p = NULL;
   while (bisectMessages (message_p))
@@ -449,17 +449,17 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
   // initialize result
   message_out = NULL;
 
-  if (currentMessageLength_ == 0)
+  if (messageLength_ == 0)
   {
     // --> evaluate the incoming message header
 
     // perhaps part of the header has already arrived ?
-    if (currentMessage_ == NULL)
+    if (message_ == NULL)
     {
       // really don't know anything
       // --> if possible, use the current buffer as head
-      if (currentBuffer_)
-        currentMessage_ = currentBuffer_;
+      if (buffer_)
+        message_ = buffer_;
       else
         return false; // don't have data --> cannot proceed
     } // end IF
@@ -467,7 +467,7 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
     // OK, perhaps start interpreting the message header
 
     // check: received the full header yet ?...
-    if (currentMessage_->total_length () < sizeof (ProtocolHeaderType))
+    if (message_->total_length () < sizeof (ProtocolHeaderType))
     {
       // no, so keep what there is (default behavior)
 
@@ -477,22 +477,22 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
 
     // OK, start parsing this message
 
-    ProtocolHeaderType message_header = currentMessage_->get ();
+    ProtocolHeaderType message_header = message_->get ();
     // *PORTABILITY*: handle endianness && type issues !
     // see also net_remote_comm.h
-    currentMessageLength_ =
+    messageLength_ =
         message_header.length + sizeof (unsigned int);
   } // end IF
 
 //   ACE_DEBUG ((LM_DEBUG,
 //               ACE_TEXT ("[%u]: received %u bytes [current: %u, total: %u]...\n"),
 //               connectionID_,
-//               currentBuffer_->length (),
-//               currentMessage_->total_length (),
-//               currentMessageLength_));
+//               buffer_->length (),
+//               message_->total_length (),
+//               messageLength_));
 
   // check if we received the whole message yet
-  if (currentMessage_->total_length () < currentMessageLength_)
+  if (message_->total_length () < messageLength_)
   {
     // no, so keep what there is (default behavior)
 
@@ -501,17 +501,17 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
   } // end IF
 
   // OK, message complete !
-  message_out = currentMessage_;
+  message_out = message_;
 
   // check if (part of) the next message has arrived
-  if (currentMessage_->total_length () > currentMessageLength_)
+  if (message_->total_length () > messageLength_)
   {
     // adjust write pointer of (current) buffer so (total_-)length() returns
     // the proper size...
-    unsigned int offset = currentMessageLength_;
+    unsigned int offset = messageLength_;
     // in order to find the correct offset in the tail buffer, the total size
     // of the preceding continuation(s) may need to be retrieved
-    ACE_Message_Block* tail_p = currentMessage_;
+    ACE_Message_Block* tail_p = message_;
     do
     {
       if (offset < tail_p->length ())
@@ -521,21 +521,21 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
       if (offset == 0) // <-- no overlap
       {
         // set new message head
-        currentMessage_ =
+        message_ =
           dynamic_cast<DataMessageType*> (tail_p->cont ());
-        ACE_ASSERT (currentMessage_);
+        ACE_ASSERT (message_);
 
         // unchain the rest of the buffer
         tail_p->cont (NULL);
 
         // don't know anything about the next message
-        currentMessageLength_ = 0;
+        messageLength_ = 0;
 
         return true;
       } // end IF
 
       tail_p = tail_p->cont ();
-    } while (tail_p != currentBuffer_);
+    } while (tail_p != buffer_);
 
     // create a shallow copy
     DataMessageType* new_head_p =
@@ -554,16 +554,16 @@ Net_Module_TCPSocketHandler_T<ACE_SYNCH_USE,
     tail_p->wr_ptr (tail_p->rd_ptr () + offset);
 
     // set new message head/current buffer
-    currentBuffer_ = currentMessage_ = new_head_p;
+    buffer_ = message_ = new_head_p;
   } // end IF
   else
   {
-    currentMessage_ = NULL;
-    currentBuffer_ = NULL;
+    message_ = NULL;
+    buffer_ = NULL;
   } // end ELSE
 
   // don't know anything about the next message
-  currentMessageLength_ = 0;
+  messageLength_ = 0;
 
   return true;
 }

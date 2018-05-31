@@ -25,5 +25,6 @@
 #include "http_defines.h"
 #include "http_scanner.h"
 
-HTTP_Export const char libacenetwork_protocol_default_http_parser_module_name_string[] =
+//HTTP_Export const char libacenetwork_protocol_default_http_parser_module_name_string[] =
+const char libacenetwork_protocol_default_http_parser_module_name_string[] =
   ACE_TEXT_ALWAYS_CHAR (HTTP_DEFAULT_MODULE_PARSER_NAME_STRING);

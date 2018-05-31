@@ -19,16 +19,14 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-#include "ace/Synch.h"
-#include "net_configuration.h"
+//#include "ace/Synch.h"
+//#include "net_configuration.h"
 
-#include <cmath>
-
+#if defined (NETLINK_SUPPORT)
 #include "netlink/addr.h"
 
 #include "ace/OS.h"
-
-#include "common_math_defines.h"
+#endif // NETLINK_SUPPORT
 
 #if defined (NETLINK_SUPPORT)
 Net_Netlink_Addr::Net_Netlink_Addr (void)

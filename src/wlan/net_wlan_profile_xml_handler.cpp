@@ -353,7 +353,7 @@ Net_WLAN_Profile_XML_Handler::hexToString (const std::string& hexString_in)
 
   // sanity check(s)
   ACE_ASSERT (!(hexString_in.size () % 2));
-  ACE_ASSERT (!(hexString_in.size () > DOT11_SSID_MAX_LENGTH));
+  ACE_ASSERT (!(hexString_in.size () > (DOT11_SSID_MAX_LENGTH * 2)));
 
   unsigned char character_c = 0, temp = 0;
   std::istringstream string_stream (hexString_in);

@@ -37,6 +37,8 @@
 #include "irc_configuration.h"
 #include "irc_defines.h"
 
+#include "test_i_common.h"
+
 #include "IRC_client_common.h"
 #include "IRC_client_defines.h"
 #include "IRC_client_network.h"
@@ -92,9 +94,11 @@ struct IRC_Client_InputHandlerConfiguration
 };
 
 struct IRC_Client_Configuration
+ : Test_I_Configuration
 {
   IRC_Client_Configuration ()
-   : parserConfiguration ()
+   : Test_I_Configuration ()
+   , parserConfiguration ()
    ///////////////////////////////////////
    , connectionConfigurations ()
    ///////////////////////////////////////

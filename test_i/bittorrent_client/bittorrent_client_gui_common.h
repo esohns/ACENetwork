@@ -64,7 +64,7 @@ struct BitTorrent_Client_GTK_ProgressData
   BitTorrent_Client_GTK_ProgressData ()
    : Test_I_GTK_ProgressData ()
    , transferred (0)
-  {};
+  {}
 
   unsigned int transferred;
 };
@@ -83,7 +83,7 @@ struct BitTorrent_Client_GTK_CBData
    , subscribers ()
    , trackerSubscribers ()
    , UIFileDirectory ()
-  {};
+  {}
 
   struct BitTorrent_Client_Configuration*   configuration;
   guint                                     contextId;
@@ -102,7 +102,7 @@ struct BitTorrent_Client_SessionThreadData
    : BitTorrent_Client_ThreadData ()
    , configuration (NULL)
    , CBData (NULL)
-  {};
+  {}
 
   struct BitTorrent_Client_Configuration* configuration;
   struct BitTorrent_Client_GTK_CBData*    CBData;
@@ -118,7 +118,7 @@ struct BitTorrent_Client_GTK_SessionCBData
    , handler (NULL)
    , label ()
    , session (NULL)
-  {};
+  {}
 
   struct BitTorrent_Client_Configuration* configuration;
   BitTorrent_Client_IControl_t*           controller;
@@ -132,8 +132,9 @@ struct BitTorrent_Client_GTK_SessionCBData
 
 typedef Common_UI_GtkBuilderDefinition_T<struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_GTK_Manager_t;
+typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+                                struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_GTK_Manager_t;
 typedef ACE_Singleton<BitTorrent_Client_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> BITTORRENT_CLIENT_UI_GTK_MANAGER_SINGLETON;
+                      typename ACE_MT_SYNCH::MUTEX> BITTORRENT_CLIENT_UI_GTK_MANAGER_SINGLETON;
 
 #endif

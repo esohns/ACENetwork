@@ -38,14 +38,16 @@
 
 #include "http_codes.h"
 #include "http_common.h"
-#include "http_exports.h"
+//#include "http_exports.h"
 #include "http_module_parser.h"
 #include "http_module_streamer.h"
 #include "http_stream_common.h"
 
 // forward declarations
-extern HTTP_Export const char libacenetwork_default_http_marshal_module_name_string[];
-extern HTTP_Export const char libacenetwork_default_http_stream_name_string[];
+//extern HTTP_Export const char libacenetwork_default_http_marshal_module_name_string[];
+extern const char libacenetwork_default_http_marshal_module_name_string[];
+//extern HTTP_Export const char libacenetwork_default_http_stream_name_string[];
+extern const char libacenetwork_default_http_stream_name_string[];
 
 template <typename StreamStateType,
           ////////////////////////////////

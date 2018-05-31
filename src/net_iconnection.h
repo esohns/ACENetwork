@@ -57,9 +57,8 @@ class Net_IAsynchSocketHandler
  public:
   virtual bool initiate_read () = 0;
 
-  // *NOTE*: this cancels all outstanding asynchronous operations
-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                            // handle
-                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK) = 0; // event mask
+  // *NOTE*: cancels all asynchronous operations
+  virtual void cancel () = 0; // event mask
 
   ////////////////////////////////////////
   virtual int handle_output (ACE_HANDLE = ACE_INVALID_HANDLE) = 0; // handle

@@ -47,7 +47,7 @@ struct Test_I_URLStreamLoad_SignalHandlerConfiguration
   Test_I_URLStreamLoad_SignalHandlerConfiguration ()
    : Test_I_SignalHandlerConfiguration ()
    , statisticReportingHandler (NULL)
-  {};
+  {}
 
   HTTP_StatisticReportingHandler_t* statisticReportingHandler;
 };
@@ -62,7 +62,7 @@ struct Test_I_URLStreamLoad_Configuration
    , streamConfiguration ()
    //, protocolConfiguration ()
    , userData ()
-  {};
+  {}
 
   // **************************** signal data **********************************
   struct Test_I_URLStreamLoad_SignalHandlerConfiguration signalHandlerConfiguration;
@@ -97,7 +97,7 @@ struct Test_I_URLStreamLoad_GTK_ProgressData
    : Test_I_GTK_ProgressData ()
 //   , statistic ()
    , transferred (0)
-  {};
+  {}
 
 //  HTTP_Statistic_t statistic;
   unsigned int transferred; // byte(s)
@@ -112,7 +112,7 @@ struct Test_I_URLStreamLoad_GTK_CBData
    , handle (ACE_INVALID_HANDLE)
    , progressData ()
    , subscribers ()
-  {};
+  {}
 
   struct Test_I_URLStreamLoad_Configuration*   configuration;
 
@@ -126,7 +126,7 @@ struct Test_I_URLStreamLoad_GTK_CBData
 //  Test_I_URLStreamLoad_ThreadData ()
 //   : CBData (NULL)
 //   , eventSourceID (0)
-//  {};
+//  {}
 
 //  struct Test_I_URLStreamLoad_GTK_CBData* CBData;
 //  guint                                   eventSourceID;
@@ -134,8 +134,9 @@ struct Test_I_URLStreamLoad_GTK_CBData
 
 typedef Common_UI_GtkBuilderDefinition_T<struct Test_I_URLStreamLoad_GTK_CBData> Test_I_URLStreamLoad_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<struct Test_I_URLStreamLoad_GTK_CBData> Test_I_URLStreamLoad_GTK_Manager_t;
+typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+                                struct Test_I_URLStreamLoad_GTK_CBData> Test_I_URLStreamLoad_GTK_Manager_t;
 typedef ACE_Singleton<Test_I_URLStreamLoad_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> TEST_I_URLSTREAMLOAD_UI_GTK_MANAGER_SINGLETON;
+                      typename ACE_MT_SYNCH::MUTEX> TEST_I_URLSTREAMLOAD_UI_GTK_MANAGER_SINGLETON;
 
 #endif

@@ -59,7 +59,7 @@
 #include <cstdio>
 #include <string>
 
-#include "http_exports.h"
+// #include "http_exports.h"
 
 /* enum yytokentype
 {
@@ -97,7 +97,7 @@ typedef void* yyscan_t;
 //         header manually, as there is no way to add the export symbol to
 //         the declaration
 #define YYDEBUG 1
-extern int HTTP_Export yydebug;
+extern int yydebug;
 #define YYERROR_VERBOSE 1
 }
 

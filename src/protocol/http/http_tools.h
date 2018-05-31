@@ -28,12 +28,12 @@
 
 #include "http_codes.h"
 #include "http_common.h"
-#include "http_exports.h"
+//#include "http_exports.h"
 
 // forward declarations
 enum Stream_Decoder_CompressionFormatType;
 
-class HTTP_Export HTTP_Tools
+class HTTP_Tools
 {
  public:
   inline virtual ~HTTP_Tools () {};

@@ -55,7 +55,7 @@ struct BitTorrent_AllocatorConfiguration
     // *NOTE*: this facilitates (message block) data buffers to be scanned with
     //         'flex's yy_scan_buffer() method
     paddingBytes = COMMON_PARSER_FLEX_BUFFER_BOUNDARY_SIZE;
-  };
+  }
 };
 
 typedef Stream_DataBase_T<struct BitTorrent_PeerMessageData> BitTorrent_PeerMessageData_t;
@@ -188,7 +188,7 @@ struct BitTorrent_PeerModuleHandlerConfiguration
    , subscribers (NULL)
   {
     demultiplex = true;
-  };
+  }
 
   std::string                              destination; // folder
   struct BitTorrent_ProtocolConfiguration* protocolConfiguration;
@@ -209,7 +209,7 @@ struct BitTorrent_TrackerModuleHandlerConfiguration
 //   , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
-  {};
+  {}
 
 //  struct Common_UI_GTKState*               CBData;
   std::string                              destination; // folder
@@ -228,7 +228,7 @@ struct BitTorrent_PeerStreamConfiguration
    : Stream_Configuration ()
    , filename ()
    , metaInfo (NULL)
-  {};
+  {}
 
   std::string             filename; // .torrent file
   Bencoding_Dictionary_t* metaInfo;
@@ -241,7 +241,7 @@ struct BitTorrent_TrackerStreamConfiguration
    : Stream_Configuration ()
    , filename ()
    , metaInfo (NULL)
-  {};
+  {}
 
   std::string             filename; // .torrent file
   Bencoding_Dictionary_t* metaInfo;
@@ -257,7 +257,7 @@ struct BitTorrent_PeerSessionData
 //   , currentStatistic ()
    , filename ()
    , handShake (NULL)
-  {};
+  {}
 
   struct BitTorrent_PeerSessionData& operator+= (const struct BitTorrent_PeerSessionData& rhs_in)
   {
@@ -285,7 +285,7 @@ struct BitTorrent_TrackerSessionData
    , connectionState (NULL)
    , format (STREAM_COMPRESSION_FORMAT_INVALID)
 //   , userData (NULL)
-  {};
+  {}
 
   struct BitTorrent_TrackerSessionData& operator+= (const struct BitTorrent_TrackerSessionData& rhs_in)
   {
@@ -311,7 +311,7 @@ struct BitTorrent_PeerStreamState
    : Stream_State ()
    , sessionData (NULL)
    , userData (NULL)
-  {};
+  {}
 
   struct BitTorrent_PeerSessionData* sessionData;
   struct BitTorrent_UserData*        userData;
@@ -323,7 +323,7 @@ struct BitTorrent_TrackerStreamState
    : Stream_State ()
    , sessionData (NULL)
    , userData (NULL)
-  {};
+  {}
 
   struct BitTorrent_TrackerSessionData* sessionData;
   struct BitTorrent_UserData*           userData;
@@ -336,7 +336,7 @@ typedef Stream_INotify_T<enum Stream_SessionMessageType> BitTorrent_INotify_t;
 struct BitTorrent_ProtocolConfiguration
 {
   BitTorrent_ProtocolConfiguration ()
-  {};
+  {}
 
 };
 
@@ -424,7 +424,7 @@ typedef Stream_Module_MessageHandler_T<ACE_MT_SYNCH,
                                        Stream_SessionId_t,
                                        struct BitTorrent_PeerSessionData,
                                        struct Stream_UserData> BitTorrent_PeerHandler_t;
-extern BitTorrent_Export const char libacenetwork_default_bittorrent_handler_module_name_string[];
+extern const char libacenetwork_default_bittorrent_handler_module_name_string[];
 DATASTREAM_MODULE_INPUT_ONLY_T (struct BitTorrent_PeerSessionData,                // session data
                                 enum Stream_SessionMessageType,                   // session event type
                                 struct BitTorrent_PeerModuleHandlerConfiguration, // module handler configuration type

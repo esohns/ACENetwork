@@ -23,11 +23,10 @@
 #include "bittorrent_stream_peer.h"
 
 #include "bittorrent_defines.h"
-#include "bittorrent_exports.h"
 
-BitTorrent_Export const char libacenetwork_default_bittorrent_marshal_module_name_string[] =
+const char libacenetwork_default_bittorrent_marshal_module_name_string[] =
   ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_MODULE_MARSHAL_NAME_STRING);
-BitTorrent_Export const char libacenetwork_default_bittorrent_handler_module_name_string[] =
+const char libacenetwork_default_bittorrent_handler_module_name_string[] =
   ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_MODULE_HANDLER_NAME_STRING);
-BitTorrent_Export const char libacenetwork_default_bittorrent_stream_name_string[] =
+const char libacenetwork_default_bittorrent_stream_name_string[] =
   ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_STREAM_NAME_STRING);

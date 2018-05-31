@@ -50,7 +50,6 @@ struct Net_NetlinkSocketConfiguration;
 struct Net_TCPSocketConfiguration;
 struct Net_UDPSocketConfiguration;
 
-//enum Net_LinkLayerType : int
 enum Net_LinkLayerType
 {
   NET_LINKLAYER_802_3   = 0x01, // i.e. CSMA/CD, aka 'Ethernet'
@@ -63,7 +62,6 @@ enum Net_LinkLayerType
   NET_LINKLAYER_INVALID = -1,
 };
 
-//enum Net_NetworkLayerType : int
 enum Net_NetworkLayerType
 {
   NET_NETWORKLAYER_IP_UNICAST   = 0x0001, // i.e. "routable" IP
@@ -74,7 +72,6 @@ enum Net_NetworkLayerType
   NET_NETWORKLAYER_INVALID      = -1,
 };
 
-//enum Net_TransportLayerType : int
 enum Net_TransportLayerType
 {
   NET_TRANSPORTLAYER_INVALID = -1,
@@ -93,7 +90,6 @@ typedef std::vector<std::string> Net_InterfaceIdentifiers_t;
 #endif // ACE_WIN32 || ACE_WIN64
 typedef Net_InterfaceIdentifiers_t::iterator Net_InterfacesIdentifiersIterator_t;
 
-//enum Net_ClientServerRole : int
 enum Net_ClientServerRole
 {
   NET_ROLE_INVALID = -1,

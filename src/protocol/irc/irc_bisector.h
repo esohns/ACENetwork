@@ -418,7 +418,8 @@ static int yy_flex_strlen (yyconst char * ,yyscan_t yyscanner);
 #define YY_DECL_IS_OURS 1
 /* %if-c-only Standard (non-C++) definition */
 
-IRC_Export int IRC_Bisector_lex (yyscan_t yyscanner);
+//IRC_Export int IRC_Bisector_lex (yyscan_t yyscanner);
+int IRC_Bisector_lex (yyscan_t yyscanner);
 
 #define YY_DECL int IRC_Bisector_lex (yyscan_t yyscanner)
 /* %endif */

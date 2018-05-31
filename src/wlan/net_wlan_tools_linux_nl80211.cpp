@@ -1254,7 +1254,7 @@ bool
 Net_WLAN_Tools::authenticate (const std::string& interfaceIdentifier_in,
                               const struct ether_addr& accessPointMACAddress_in,
                               const std::string& ESSID_in,
-                              enum nl80211_auth_type type_in,
+                              enum nl80211_auth_type authenticationType_in,
                               ACE_UINT32 frequency_in,
                               struct nl_sock* socketHandle_in,
                               int driverFamilyId_in)
@@ -1269,6 +1269,8 @@ Net_WLAN_Tools::authenticate (const std::string& interfaceIdentifier_in,
                 Net_Common_Tools::isAny (accessPointMACAddress_in) ||
                 ESSID_in.empty ()                                  ||
                 (ESSID_in.size () > IW_ESSID_MAX_SIZE)             ||
+//                (authenticationType_in != )                ||
+                !frequency_in                                      ||
                 !driverFamilyId_in))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1300,6 +1302,8 @@ Net_WLAN_Tools::authenticate (const std::string& interfaceIdentifier_in,
            NL80211_ATTR_MAC,
            ETH_ALEN,
            &accessPointMACAddress_in.ether_addr_octet);
+  // NL80211_ATTR_INACTIVITY_TIMEOUT
+  // NL80211_ATTR_STATUS_CODE
   NLA_PUT (message_p,
            NL80211_ATTR_SSID,
            ESSID_in.size (),
@@ -1309,7 +1313,8 @@ Net_WLAN_Tools::authenticate (const std::string& interfaceIdentifier_in,
                frequency_in);
   NLA_PUT_U32 (message_p,
                NL80211_ATTR_AUTH_TYPE,
-               type_in);
+               authenticationType_in);
+  // *TODO* support MDE and FTE
   NLA_PUT (message_p,
            NL80211_ATTR_IE, // "...VendorSpecificInfo, but also including RSN IE
            //  and FT IEs..."
@@ -1343,20 +1348,26 @@ nla_put_failure:
 bool
 Net_WLAN_Tools::associate (const std::string& interfaceIdentifier_in,
                            const struct ether_addr& accessPointMACAddress_in,
-                           const std::string& ESSID_in,
+                           const std::string& SSID_in,
                            struct nl_sock* socketHandle_in,
                            int driverFamilyId_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::associate"));
 
   bool result = false;
+  ACE_UINT16 station_capabilities_i = 0;
+  ACE_UINT16 listen_interval_i = 0;
+  uint8_t rates_a[NL80211_MAX_SUPP_RATES];
+  ACE_UINT16 power_capabilities_i = 0;
+  int result_2 = -1;
+  uint8_t ie_buffer_a[BUFSIZ];
 
   // sanity check(s)
   if (unlikely (interfaceIdentifier_in.empty ()                    ||
                 (interfaceIdentifier_in.size () > IFNAMSIZ)        ||
                 Net_Common_Tools::isAny (accessPointMACAddress_in) ||
-                ESSID_in.empty ()                                  ||
-                (ESSID_in.size () > IW_ESSID_MAX_SIZE)             ||
+                SSID_in.empty ()                                   ||
+                (SSID_in.size () > IW_ESSID_MAX_SIZE)              ||
                 !driverFamilyId_in))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1384,15 +1395,148 @@ Net_WLAN_Tools::associate (const std::string& interfaceIdentifier_in,
                 ACE_TEXT ("failed to genlmsg_put(): \"%m\", returning\n")));
     goto error;
   } // end IF
+  // NL80211_ATTR_CONTROL_PORT
   // NL80211_ATTR_PREV_BSSID
-  NLA_PUT (message_p,
-           NL80211_ATTR_MAC,
-           ETH_ALEN,
-           &accessPointMACAddress_in.ether_addr_octet);
+  // NL80211_ATTR_SOCKET_OWNER
+  // NL80211_ATTR_USE_MFP
+  // NL80211_ATTR_USE_RRM
+//  NLA_PUT (message_p,
+//           NL80211_ATTR_MAC,
+//           ETH_ALEN,
+//           &accessPointMACAddress_in.ether_addr_octet);
+  // see also: IEEE Std 802.11-2007 7.3.1.4
+  station_capabilities_i = 1 << 10; // support short preamble
+  station_capabilities_i = 1 << 8;  // support channel agility
+  station_capabilities_i = 1 << 7;  // support DSSS spectrum management
+  station_capabilities_i |= 1 << 5; // support short slot time
+  NLA_PUT_U16 (message_p,
+               NL80211_ATTR_STA_CAPABILITY,
+               station_capabilities_i);
+//  NLA_PUT (message_p,
+//           NL80211_ATTR_STA_EXT_CAPABILITY,
+//           0,
+//           NULL);
+  NLA_PUT_U16 (message_p,
+               NL80211_ATTR_STA_LISTEN_INTERVAL,
+               listen_interval_i);
   NLA_PUT (message_p,
            NL80211_ATTR_SSID,
-           ESSID_in.size (),
-           ESSID_in.c_str ());
+           SSID_in.size (),
+           SSID_in.c_str ());
+  // MSB 1: BSSBasicRateSet (i.e. required), 0: optional; | x of 500kb/s
+  // (see also: IEEE Std 802.11-2007 10.4.4.2)
+  rates_a[0] = ((1 << 7) | 2);  // 1 Mb/s
+  rates_a[1] = ((1 << 7) | 4);  // 2 Mb/s
+  rates_a[2] = ((1 << 7) | 11); // 5,5 Mb/s
+  rates_a[3] = ((1 << 7) | 22); // 11 Mb/s
+  rates_a[4] = 12;   // 6 Mb/s
+  rates_a[5] = 18;   // 9 Mb/s
+  rates_a[6] = 24;   // 12 Mb/s
+  rates_a[7] = 36;   // 18 Mb/s
+  rates_a[8] = 48;   // 24 Mb/s
+  rates_a[9] = 72;   // 36 Mb/s
+  rates_a[10] = 96;  // 48 Mb/s
+  rates_a[11] = 108; // 54 Mb/s
+  NLA_PUT (message_p,
+           NL80211_ATTR_STA_SUPPORTED_RATES,
+           sizeof (uint8_t[NL80211_MAX_SUPP_RATES]),
+           &rates_a);
+//  ACE_OS::memset (ie_buffer_a, 0, sizeof (char[BUFSIZ]));
+//  ie_buffer_a[0] = 33; // see also: IEEE Std 802.11-2007 7.3.2
+//  ie_buffer_a[1] = 2;
+//  // *NOTE*: "...The Minimum{/Maximum} Transmit Power Capability field shall be
+//  //         set to the nominal minimum transmit power with which the STA is
+//  //         capable of transmitting in the current channel, with a tolerance
+//  //         ± 5 dB.
+//  //         The field is coded as a signed integer in units of decibels
+//  //         relative to 1 mW..."
+//  // see also : IEEE Std 802.11-2007 7.3.2.16
+//  power_capabilities_i = (15 << 8) | 15; // 15 dBm
+//  ACE_OS::memcpy (&ie_buffer_a[2], &power_capabilities_i, sizeof (ACE_UINT16));
+//  NLA_PUT (message_p,
+//           NL80211_ATTR_IE,
+//           4,
+//           &ie_buffer_a);
+//  // *NOTE*: regulatory domain policy is an inconsistent mess.
+//  //         see also: output of 'iw reg get' (Germany):
+//  // global
+//  // country DE: DFS-ETSI
+//  //        (2400 - 2483 @ 40), (N/A, 20), (N/A)
+//  //        (5150 - 5250 @ 80), (N/A, 20), (N/A), NO-OUTDOOR, AUTO-BW
+//  //        (5250 - 5350 @ 80), (N/A, 20), (0 ms), NO-OUTDOOR, DFS, AUTO-BW
+//  //        (5470 - 5725 @ 160), (N/A, 26), (0 ms), DFS
+//  //        (5725 - 5875 @ 80), (N/A, 13), (N/A)
+//  //        (57000 - 66000 @ 2160), (N/A, 40), (N/A)
+//  ie_buffer_a[0] = 36; // see also: IEEE Std 802.11-2007 7.3.2
+//  ie_buffer_a[1] = 40;
+//  // 2.4GHz band 2.412-2.472, in steps of 5MHz
+//  ie_buffer_a[2] = 1;
+//  ie_buffer_a[3] = 13;
+//  // 5GHz band 5.18-5.7, spread, 20 MHz separation
+//  // reg. class 1 (US/EU)
+//  ie_buffer_a[4] = 36; // 5.18 GHz
+//  ie_buffer_a[5] = 1;
+//  ie_buffer_a[6] = 40; // 5.2 GHz
+//  ie_buffer_a[7] = 1;
+//  ie_buffer_a[8] = 44; // 5.22 GHz
+//  ie_buffer_a[9] = 1;
+//  ie_buffer_a[10] = 48; // 5.24 GHz
+//  ie_buffer_a[11] = 1;
+//  // reg. class 2 (US/EU)
+//  ie_buffer_a[12] = 52; // 5.26 GHz
+//  ie_buffer_a[13] = 1;
+//  ie_buffer_a[14] = 56; // 5.28 GHz
+//  ie_buffer_a[15] = 1;
+//  ie_buffer_a[16] = 60; // 5.3 GHz
+//  ie_buffer_a[17] = 1;
+//  ie_buffer_a[18] = 64; // 5.32 GHz
+//  ie_buffer_a[19] = 1;
+//  // reg. class 3 (EU)
+//  ie_buffer_a[20] = 100; // 5.5 GHz
+//  ie_buffer_a[21] = 1;
+//  ie_buffer_a[22] = 104; // 5.52 GHz
+//  ie_buffer_a[23] = 1;
+//  ie_buffer_a[24] = 108; // 5.54 GHz
+//  ie_buffer_a[25] = 1;
+//  ie_buffer_a[26] = 112; // 5.56 GHz
+//  ie_buffer_a[27] = 1;
+//  ie_buffer_a[28] = 116; // 5.58 GHz
+//  ie_buffer_a[29] = 1;
+//  ie_buffer_a[30] = 120; // 5.6 GHz
+//  ie_buffer_a[31] = 1;
+//  ie_buffer_a[32] = 124; // 5.62 GHz
+//  ie_buffer_a[33] = 1;
+//  ie_buffer_a[34] = 128; // 5.64 GHz
+//  ie_buffer_a[35] = 1;
+//  ie_buffer_a[36] = 132; // 5.66 GHz
+//  ie_buffer_a[37] = 1;
+//  ie_buffer_a[38] = 136; // 5.68 GHz
+//  ie_buffer_a[39] = 1;
+//  ie_buffer_a[40] = 140; // 5.7 GHz
+//  ie_buffer_a[41] = 1;
+//  NLA_PUT (message_p,
+//           NL80211_ATTR_STA_SUPPORTED_CHANNELS,
+//           42,
+//           &ie_buffer_a);
+//  ie_buffer_a[0] = 48; // see also: IEEE Std 802.11-2007 7.3.2
+//  ie_buffer_a[1] = 2;
+//  ie_buffer_a[2] = 1; // version 1
+//  ie_buffer_a[3] = 0;
+//  NLA_PUT (message_p,
+//           NL80211_ATTR_IE,
+//           4,
+//           &ie_buffer_a);
+//  ie_buffer_a[0] = 46; // see also: IEEE Std 802.11-2007 7.3.2
+//  ie_buffer_a[1] = 1;
+//  ie_buffer_a[2] = 0;
+////  ie_buffer_a[2] |= (1 << 3); // Q-ACK
+////  ie_buffer_a[2] |= (1 << 0); // more data ACK
+//  nla_put_flag (message_p,
+//                NL80211_ATTR_CONTROL_PORT);
+//  NLA_PUT (message_p,
+//           NL80211_ATTR_IE,
+//           3,
+//           &ie_buffer_a);
   NLA_PUT (message_p,
            NL80211_ATTR_IE, // "...VendorSpecificInfo, but also including RSN IE
            //  and FT IEs..."
@@ -1467,6 +1611,9 @@ Net_WLAN_Tools::connect (const std::string& interfaceIdentifier_in,
                 ACE_TEXT ("failed to genlmsg_put(): \"%m\", returning\n")));
     goto error;
   } // end IF
+  // NL80211_ATTR_SOCKET_OWNER
+  // NL80211_ATTR_USE_MFP
+  // NL80211_ATTR_USE_RRM
   NLA_PUT (message_p,
            NL80211_ATTR_MAC,
            ETH_ALEN,

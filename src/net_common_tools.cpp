@@ -100,13 +100,21 @@ operator++ (enum Net_LinkLayerType& lhs_in, int) // postfix-
 
 //////////////////////////////////////////
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
 bool
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+Net_Common_Tools::toggleInterface (REFGUID interfaceIdentifier_in)
+#else
 Net_Common_Tools::toggleInterface (const std::string& interfaceIdentifier_in)
+#endif
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::toggleInterface"));
 
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (false);
+
+  ACE_NOTREACHED (return false;)
 }
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 bool
 Net_Common_Tools::isInterfaceEnabled (const std::string& interfaceIdentifier_in)
@@ -826,13 +834,13 @@ Net_Common_Tools::LinkLayerAddressToString (const unsigned char* const addressDa
 #if defined (ACE_USES_WCHAR)
       PWSTR result_2 =
         RtlEthernetAddressToStringW (reinterpret_cast<const _DL_EUI48* const> (addressDataPtr_in),
-                                     buffer);
+                                     buffer_a);
 #else
-      PSTR result_2 =
+      PSTR result_3 =
         RtlEthernetAddressToStringA (reinterpret_cast<const _DL_EUI48* const> (addressDataPtr_in),
-                                     buffer);
+                                     buffer_a);
 #endif // ACE_USES_WCHAR
-      if (unlikely (result_2 != (buffer + NET_ADDRESS_LINK_ETHERNET_ADDRESS_STRING_SIZE - 1)))
+      if (unlikely (result_3 != (buffer_a + NET_ADDRESS_LINK_ETHERNET_ADDRESS_STRING_SIZE - 1)))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ::RtlEthernetAddressToString(), aborting\n")));
@@ -911,6 +919,12 @@ Net_Common_Tools::stringToLinkLayerAddress (const std::string& address_in)
   // sanity check(s)
   ACE_ASSERT (!address_in.empty ());
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (return_value);
+
+  ACE_NOTREACHED (return return_value;)
+#else
   if (unlikely (!::ether_aton_r (address_in.c_str (),
                                  &return_value)))
   {
@@ -919,6 +933,7 @@ Net_Common_Tools::stringToLinkLayerAddress (const std::string& address_in)
                 ACE_TEXT (address_in.c_str ())));
     return return_value;
   } // end IF
+#endif // ACE_WIN32 || ACE_WIN64
 
   return return_value;
 }
@@ -1397,13 +1412,22 @@ continue_:
   return result;
 }
 
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+struct _GUID
+#else
 std::string
+#endif
 Net_Common_Tools::linkLayerAddressToInterfaceIdentifier (const struct ether_addr& address_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::linkLayerAddressToInterfaceIdentifier"));
 
   // initialize return value(s)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  struct _GUID return_value = GUID_NULL;
+#else
   std::string return_value;
+#endif
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  // sanity check(s)
@@ -1476,9 +1500,9 @@ Net_Common_Tools::linkLayerAddressToInterfaceIdentifier (const struct ether_addr
 //  ACE_FREE_FUNC (ip_interfaceIdentifier_info_p);
 
   ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (false);
+  ACE_NOTSUP_RETURN (return_value);
 
-  ACE_NOTREACHED (return false;)
+  ACE_NOTREACHED (return return_value;)
 #else
 #if defined (ACE_HAS_GETIFADDRS)
   int socket_handle_h = ACE_OS::socket (AF_INET, SOCK_DGRAM, IPPROTO_IP);
@@ -2785,7 +2809,7 @@ Net_Common_Tools::getDefaultInterface (int linkLayerType_in)
 
   // step1: retrieve 'default' device for each link layer type specified
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  std::vector<struct _GUID> interfaces;
+  Net_InterfaceIdentifiers_t interfaces;
   struct _GUID interface_identifier;
 #else
   std::vector<std::string> interfaces;

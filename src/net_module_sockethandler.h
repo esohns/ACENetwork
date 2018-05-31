@@ -97,7 +97,7 @@ class Net_Module_TCPSocketHandler_T
                            Common_TimePolicy_t> ISTREAM_T;
 
   Net_Module_TCPSocketHandler_T (ISTREAM_T* = NULL, // stream handle
-                                 bool = true);      // generate session messages ?
+                              bool = true);      // generate session messages ?
   virtual ~Net_Module_TCPSocketHandler_T ();
 
 #if defined (__GNUG__) || defined (_MSC_VER)
@@ -147,9 +147,9 @@ class Net_Module_TCPSocketHandler_T
   //bool putStatisticMessage (const StatisticContainerType&) const; // statistics info
 
   // protocol
-  DataMessageType* currentBuffer_;
-  DataMessageType* currentMessage_;
-  unsigned int     currentMessageLength_;
+  DataMessageType* buffer_;
+  DataMessageType* message_;
+  unsigned int     messageLength_;
 };
 
 //////////////////////////////////////////

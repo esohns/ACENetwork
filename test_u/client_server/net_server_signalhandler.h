@@ -40,7 +40,7 @@ class Server_SignalHandler
 
  public:
   Server_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
-                        ACE_SYNCH_MUTEX*);              // lock handle
+                        ACE_SYNCH_RECURSIVE_MUTEX*);    // lock handle
   inline virtual ~Server_SignalHandler () {}
 
   // implement Common_ISignal

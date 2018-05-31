@@ -66,7 +66,7 @@ struct IRC_Client_ConnectionEntry
    : hostName ()
    , ports ()
    , netWork ()
-  {};
+  {}
 
   std::string             hostName;
   IRC_Client_PortRanges_t ports;
@@ -83,7 +83,7 @@ struct IRC_Client_PhoneBook
    : networks ()
    , servers ()
    , timeStamp ()
-  {};
+  {}
 
   // *TODO*: this member is redundant (but still useful ?)
   IRC_Client_Networks_t networks;
@@ -106,15 +106,13 @@ struct IRC_Client_InputThreadData
   IRC_Client_InputThreadData ()
    : configuration (NULL)
    , cursesState (NULL)
-   , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
-   , groupId (-1)
+   , dispatchState (NULL)
    , moduleHandlerConfiguration (NULL)
-  {};
+  {}
 
   struct IRC_Client_Configuration*              configuration;
   struct IRC_Client_CursesState*                cursesState;
-  enum Common_EventDispatchType                 dispatch;
-  int                                           groupId;
+  struct Common_EventDispatchState*             dispatchState;
   struct IRC_Client_ModuleHandlerConfiguration* moduleHandlerConfiguration;
 };
 
@@ -124,7 +122,7 @@ struct IRC_Client_UserData
    //: connectionConfiguration (NULL)
    //, moduleConfiguration (NULL)
    //, moduleHandlerConfiguration (NULL)
-  {};
+  {}
 
   //struct IRC_Client_ConnectionConfiguration*    connectionConfiguration;
 
@@ -144,7 +142,7 @@ struct IRC_Client_SignalHandlerConfiguration
    , connector (NULL)
    , cursesState (NULL)
    , peerAddress ()
-  {};
+  {}
 
   IRC_Client_IConnector_t*       connector;
   struct IRC_Client_CursesState* cursesState;

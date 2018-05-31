@@ -38,7 +38,7 @@
 #include "bittorrent_client_network.h"
 
 BitTorrent_Client_SignalHandler::BitTorrent_Client_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
-                                                                  ACE_SYNCH_MUTEX* lock_in,
+                                                                  ACE_SYNCH_RECURSIVE_MUTEX* lock_in,
                                                                   bool useCursesLibrary_in)
  : inherited (dispatchMode_in,
               lock_in,
@@ -139,8 +139,8 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
       } // end IF
 
     // step2: stop event dispatch
-    Common_Tools::finalizeEventDispatch ((inherited::configuration_->dispatch == COMMON_EVENT_DISPATCH_REACTOR),   // stop reactor ?
-                                         (!inherited::configuration_->dispatch == COMMON_EVENT_DISPATCH_PROACTOR), // stop proactor ?
-                                         -1);                                                                      // group Id (--> don't block !)
+    Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,
+                                         inherited::configuration_->dispatchState->reactorGroupId,
+                                         false);                                                    // don't block
   } // end IF
 }

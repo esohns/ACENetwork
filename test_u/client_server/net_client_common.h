@@ -60,7 +60,7 @@ typedef Net_IAsynchConnector_T<ACE_INET_Addr,
 class Net_IPing
 {
  public:
-  virtual ~Net_IPing () {}
+  //virtual ~Net_IPing () {}
 
   virtual void ping () = 0;
 };
@@ -70,7 +70,7 @@ struct Client_ConnectorConfiguration
   Client_ConnectorConfiguration ()
    : connectionManager (NULL)
    , socketHandlerConfiguration (NULL)
-  {};
+  {}
 
   ClientServer_IInetConnectionManager_t*          connectionManager;
   struct ClientServer_SocketHandlerConfiguration* socketHandlerConfiguration;
@@ -81,13 +81,15 @@ struct Client_SignalHandlerConfiguration
 {
   Client_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
+   , address ()
    , actionTimerId (-1)
    , connectionConfiguration (NULL)
    , connector (NULL)
    , messageAllocator (NULL)
    , statisticReportingInterval (0)
-  {};
+  {}
 
+  ACE_INET_Addr                           address;
   long                                    actionTimerId;
   ClientServer_ConnectionConfiguration_t* connectionConfiguration;
   Client_IConnector_t*                    connector;
@@ -102,7 +104,7 @@ struct Client_Configuration
    : ClientServer_Configuration ()
    , signalHandlerConfiguration ()
    , timeoutHandler (NULL)
-  {};
+  {}
 
   struct Client_SignalHandlerConfiguration signalHandlerConfiguration;
   Client_TimeoutHandler*                   timeoutHandler;
@@ -127,7 +129,7 @@ struct Client_GTK_CBData
    : Test_U_GTK_CBData ()
    , configuration (NULL)
    , subscribers ()
-  {};
+  {}
 
   struct Client_Configuration* configuration;
 
@@ -138,8 +140,9 @@ struct Client_GTK_CBData
 
 typedef Common_UI_GtkBuilderDefinition_T<struct Client_GTK_CBData> Client_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<struct Client_GTK_CBData> Client_GTK_Manager_t;
+typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+                                struct Client_GTK_CBData> Client_GTK_Manager_t;
 typedef ACE_Singleton<Client_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> CLIENT_UI_GTK_MANAGER_SINGLETON;
+                      typename ACE_MT_SYNCH::MUTEX> CLIENT_UI_GTK_MANAGER_SINGLETON;
 
 #endif

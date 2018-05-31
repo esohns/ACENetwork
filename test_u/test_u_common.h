@@ -36,7 +36,7 @@ struct Test_U_SignalHandlerConfiguration
 {
   Test_U_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
-  {};
+  {}
 };
 
 //////////////////////////////////////////
@@ -46,16 +46,18 @@ struct Test_U_UserData
 {
   Test_U_UserData ()
    : Net_UserData ()
-  {};
+  {}
 };
 
 struct Test_U_Configuration
 {
   Test_U_Configuration ()
-   : signalHandlerConfiguration ()
+   : dispatchConfiguration ()
+   , signalHandlerConfiguration ()
    , userData ()
-  {};
+  {}
 
+  struct Common_EventDispatchConfiguration dispatchConfiguration;
   struct Test_U_SignalHandlerConfiguration signalHandlerConfiguration;
 
   struct Test_U_UserData                   userData;

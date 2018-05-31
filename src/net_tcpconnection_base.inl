@@ -607,7 +607,7 @@ error:
     ACE_ERROR ((LM_ERROR,
                 ACE_TEXT ("failed to Net_AsynchStreamConnectionBase_T::handle_close(%d,%d): \"%m\", continuing\n"),
                 handle_in, ACE_Event_Handler::ALL_EVENTS_MASK));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 }
 
 template <typename HandlerType,

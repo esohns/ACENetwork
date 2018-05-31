@@ -31,11 +31,12 @@
 
 #include "http_common.h"
 #include "http_defines.h"
-#include "http_exports.h"
+//#include "http_exports.h"
 #include "http_iparser.h"
 #include "http_parser_driver.h"
 
-extern HTTP_Export const char libacenetwork_protocol_default_http_parser_module_name_string[];
+//extern HTTP_Export const char libacenetwork_protocol_default_http_parser_module_name_string[];
+extern const char libacenetwork_protocol_default_http_parser_module_name_string[];
 
 // forward declaration(s)
 class Stream_IAllocator;

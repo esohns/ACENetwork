@@ -48,7 +48,7 @@ struct BitTorrent_Client_ThreadData
    : configuration (NULL)
    , controller (NULL)
    , cursesState (NULL)
-   , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
+   , dispatchState (NULL)
    , filename ()
 //   , groupId (-1)
   {}
@@ -56,7 +56,7 @@ struct BitTorrent_Client_ThreadData
   struct BitTorrent_Client_Configuration* configuration;
   BitTorrent_Client_IControl_t*           controller;
   struct BitTorrent_Client_CursesState*   cursesState;
-  enum Common_EventDispatchType           dispatch;
+  struct Common_EventDispatchState*       dispatchState;
   std::string                             filename; // metainfo (aka '.torrent') file URI
 //  int                                     groupId;
 };

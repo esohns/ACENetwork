@@ -119,8 +119,23 @@ struct WLANMonitor_GTK_CBData
 
 typedef Common_UI_GtkBuilderDefinition_T<struct WLANMonitor_GTK_CBData> WLANMonitor_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<struct WLANMonitor_GTK_CBData> WLANMonitor_GTK_Manager_t;
+typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+                                struct WLANMonitor_GTK_CBData> WLANMonitor_GTK_Manager_t;
 typedef ACE_Singleton<WLANMonitor_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> WLANMONITOR_UI_GTK_MANAGER_SINGLETON;
+                      typename ACE_MT_SYNCH::MUTEX> WLANMONITOR_UI_GTK_MANAGER_SINGLETON;
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_USE)
+typedef NET_WLAN_INETWLANAPIMONITOR_SINGLETON NET_WLAN_INETMONITOR_SINGLETON;
+#endif // WLANAPI_USE
+#elif defined (ACE_LINUX)
+#if defined (WEXT_USE)
+typedef NET_WLAN_INETIOCTLMONITOR_SINGLETON NET_WLAN_INETMONITOR_SINGLETON;
+#elif defined (NL80211_USE)
+typedef NET_WLAN_INETNL80211MONITOR_SINGLETON NET_WLAN_INETMONITOR_SINGLETON;
+#elif defined (DBUS_USE)
+typedef NET_WLAN_INETDBUSMONITOR_SINGLETON NET_WLAN_INETMONITOR_SINGLETON;
+#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #endif

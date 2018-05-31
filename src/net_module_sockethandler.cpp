@@ -24,10 +24,6 @@
 
 #include "net_defines.h"
 
-//Net_Export const char libacenetwork_default_tcp_sockethandler_module_name_string[] =
-//  ACE_TEXT_ALWAYS_CHAR (NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING);
-//Net_Export const char libacenetwork_default_udp_sockethandler_module_name_string[] =
-//  ACE_TEXT_ALWAYS_CHAR (NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING);
 const char libacenetwork_default_tcp_sockethandler_module_name_string[] =
   ACE_TEXT_ALWAYS_CHAR (NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING);
 const char libacenetwork_default_udp_sockethandler_module_name_string[] =

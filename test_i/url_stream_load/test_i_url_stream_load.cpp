@@ -600,10 +600,6 @@ do_work (bool debugParser_in,
   CBData_in.configuration->streamConfiguration.configuration_.userData =
     &CBData_in.configuration->userData;
 
-  CBData_in.configuration->dispatch =
-      (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
-                     : COMMON_EVENT_DISPATCH_PROACTOR);
-
   //module_handler_p->initialize (configuration.moduleHandlerConfiguration);
 
   // step0c: initialize connection manager
@@ -617,22 +613,23 @@ do_work (bool debugParser_in,
   struct Common_TimerConfiguration timer_configuration;
   int group_id = -1;
   Test_I_URLStreamLoad_GTK_Manager_t* gtk_manager_p = NULL;
-  struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
-  event_dispatch_configuration_s.numberOfReactorThreads =
-      (useReactor_in ? 1 : 0);
-  event_dispatch_configuration_s.numberOfProactorThreads =
-      (useReactor_in ? 1 : 0);
+  if (useReactor_in)
+    CBData_in.configuration->dispatchConfiguration.numberOfReactorThreads =
+      1;
+  else
+    CBData_in.configuration->dispatchConfiguration.numberOfProactorThreads =
+      1;
   struct Common_EventDispatchState event_dispatch_state_s;
+  event_dispatch_state_s.configuration =
+    &CBData_in.configuration->dispatchConfiguration;
 
   // step0b: initialize event dispatch
-  if (!Common_Tools::initializeEventDispatch (event_dispatch_configuration_s))
+  if (!Common_Tools::initializeEventDispatch (CBData_in.configuration->dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
     goto clean;
   } // end IF
-  event_dispatch_state_s.configuration =
-      &event_dispatch_configuration_s;
 
   //// step0d: initialize regular (global) statistic reporting
   //Stream_StatisticHandler_Reactor_t statistic_handler (ACTION_REPORT,
@@ -667,9 +664,8 @@ do_work (bool debugParser_in,
   // step0c: initialize signal handling
   //CBData_in.configuration->signalHandlerConfiguration.hasUI =
   //  !interfaceDefinitionFile_in.empty ();
-  CBData_in.configuration->signalHandlerConfiguration.dispatch =
-    (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
-                   : COMMON_EVENT_DISPATCH_PROACTOR);
+  CBData_in.configuration->signalHandlerConfiguration.dispatchState =
+    &event_dispatch_state_s;
   //configuration.signalHandlerConfiguration.statisticReportingHandler =
   //  connection_manager_p;
   //configuration.signalHandlerConfiguration.statisticReportingTimerID = timer_id;
@@ -896,7 +892,7 @@ ACE_TMAIN (int argc_in,
   Common_SignalActions_t previous_signal_actions;
   sigset_t previous_signal_mask;
   Test_I_SignalHandler signal_handler (COMMON_SIGNAL_DISPATCH_SIGNAL,
-                                       &gtk_cb_data.lock);
+                                       &gtk_cb_data.subscribersLock);
   Test_I_URLStreamLoad_GtkBuilderDefinition_t ui_definition (argc_in,
                                                              argv_in);
   ACE_High_Res_Timer timer;
@@ -1110,8 +1106,8 @@ ACE_TMAIN (int argc_in,
     gtk_cb_data.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (ui_definition_file, static_cast<GtkBuilder*> (NULL));
     gtk_cb_data.configuration = &configuration;
-    gtk_cb_data.finalizationHook = idle_finalize_UI_cb;
-    gtk_cb_data.initializationHook = idle_initialize_UI_cb;
+    gtk_cb_data.eventHooks.finiHook = idle_finalize_UI_cb;
+    gtk_cb_data.eventHooks.initHook = idle_initialize_UI_cb;
     gtk_cb_data.progressData.state = &gtk_cb_data;
     gtk_cb_data.userData = &configuration.userData;
     if (!gtk_manager_p->initialize (argc_in,
@@ -1147,8 +1143,7 @@ ACE_TMAIN (int argc_in,
 
   // debug info
   timer.elapsed_time (working_time);
-  Common_Timer_Tools::periodToString (working_time,
-                                      working_time_string);
+  working_time_string = Common_Timer_Tools::periodToString (working_time);
 
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
@@ -1169,10 +1164,8 @@ ACE_TMAIN (int argc_in,
   process_profile.elapsed_rusage (elapsed_rusage);
   user_time.set (elapsed_rusage.ru_utime);
   system_time.set (elapsed_rusage.ru_stime);
-  Common_Timer_Tools::periodToString (user_time,
-                                      user_time_string);
-  Common_Timer_Tools::periodToString (system_time,
-                                      system_time_string);
+  user_time_string = Common_Timer_Tools::periodToString (user_time);
+  system_time_string = Common_Timer_Tools::periodToString (system_time);
 
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)

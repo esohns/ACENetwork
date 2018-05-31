@@ -85,8 +85,9 @@ struct Test_I_ThreadData
 
 typedef Common_UI_GtkBuilderDefinition_T<struct Test_I_GTK_CBData> Test_I_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<struct Test_I_GTK_CBData> Test_I_GTK_Manager_t;
+typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+                                struct Test_I_GTK_CBData> Test_I_GTK_Manager_t;
 typedef ACE_Singleton<Test_I_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> TEST_I_UI_GTK_MANAGER_SINGLETON;
+                      typename ACE_MT_SYNCH::MUTEX> TEST_I_UI_GTK_MANAGER_SINGLETON;
 
 #endif

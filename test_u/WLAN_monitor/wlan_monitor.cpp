@@ -522,8 +522,6 @@ do_work (bool autoAssociate_in,
   Test_U_EventHandler ui_event_handler (&CBData_in);
 
   // ********************** monitor configuration data *************************
-  configuration.signalHandlerConfiguration.dispatch =
-      COMMON_EVENT_DEFAULT_DISPATCH;
   configuration.signalHandlerConfiguration.hasUI =
       !UIDefinitionFile_in.empty ();
   configuration.signalHandlerConfiguration.monitor = iwlanmonitor_p;
@@ -594,8 +592,8 @@ do_work (bool autoAssociate_in,
       WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
 
-    CBData_in.finalizationHook = idle_finalize_ui_cb;
-    CBData_in.initializationHook = idle_initialize_ui_cb;
+    CBData_in.eventHooks.finiHook = idle_finalize_ui_cb;
+    CBData_in.eventHooks.initHook = idle_initialize_ui_cb;
     CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
     CBData_in.userData = &CBData_in;
@@ -1034,8 +1032,7 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Timer_Tools::periodToString (working_time,
-                                      working_time_string);
+  working_time_string = Common_Timer_Tools::periodToString (working_time);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
               ACE_TEXT (working_time_string.c_str ())));
@@ -1075,10 +1072,8 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Timer_Tools::periodToString (user_time,
-                                      user_time_string);
-  Common_Timer_Tools::periodToString (system_time,
-                                      system_time_string);
+  user_time_string = Common_Timer_Tools::periodToString (user_time);
+  system_time_string = Common_Timer_Tools::periodToString (system_time);
 
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)

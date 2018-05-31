@@ -181,7 +181,16 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src>)
+ target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/timer>)
+ target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/xml>)
+
+ target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src>)
+ target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src/modules/lib>)
 endif ()
 target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>)

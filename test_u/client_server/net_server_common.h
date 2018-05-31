@@ -66,7 +66,7 @@ struct Server_SignalHandlerConfiguration
    , listener (NULL)
    , statisticReportingHandler (NULL)
    , statisticReportingTimerId (-1)
-  {};
+  {}
 
   Server_IListener_t*      listener;
   Net_IStatisticHandler_t* statisticReportingHandler;
@@ -86,7 +86,7 @@ struct Server_ListenerConfiguration
    : Net_ListenerConfiguration ()
    , connectionConfiguration (NULL)
    , connectionManager (NULL)
-  {};
+  {}
 
   ClientServer_ConnectionConfiguration_t* connectionConfiguration;
   ClientServer_IInetConnectionManager_t*  connectionManager;
@@ -103,7 +103,7 @@ struct Server_Configuration
    , listener (NULL)
    , listenerConfiguration ()
    , signalHandlerConfiguration ()
-  {};
+  {}
 
   Client_IConnector_t*                     connector;
   Server_IListener_t*                      listener;
@@ -129,7 +129,7 @@ struct Server_GTK_CBData
    : Test_U_GTK_CBData ()
    , configuration (NULL)
    , subscribers ()
-  {};
+  {}
 
   struct Server_Configuration* configuration;
 
@@ -140,8 +140,9 @@ struct Server_GTK_CBData
 
 typedef Common_UI_GtkBuilderDefinition_T<struct Server_GTK_CBData> Server_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<struct Server_GTK_CBData> Server_GTK_Manager_t;
+typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+                                struct Server_GTK_CBData> Server_GTK_Manager_t;
 typedef ACE_Singleton<Server_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> SERVER_GTK_MANAGER_SINGLETON;
+                      typename ACE_MT_SYNCH::MUTEX> SERVER_GTK_MANAGER_SINGLETON;
 
 #endif

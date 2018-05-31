@@ -25,7 +25,7 @@
 
 #include "stream_data_message_base.h"
 
-#include "irc_exports.h"
+//#include "irc_exports.h"
 #include "irc_record.h"
 
 // forward declaration(s)
@@ -45,7 +45,7 @@ class ACE_Message_Block;
 //          typename SessionMessageType>
 //class Stream_CachedMessageAllocator_T;
 
-class IRC_Export IRC_Message
+class IRC_Message
  : public Stream_DataMessageBase_T<struct IRC_AllocatorConfiguration,
                                    enum Stream_MessageType,
                                    IRC_Record,

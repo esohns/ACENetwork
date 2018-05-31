@@ -486,22 +486,21 @@ do_work (bool useThreadPool_in,
   //CBData_in.configuration->streamConfiguration.cloneModule = true;
 
   // step2: initialize event dispatch
-  struct Common_EventDispatchConfiguration event_dispatch_configuration_s;
-  event_dispatch_configuration_s.numberOfReactorThreads =
-      ((CBData_in.configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR) ? numberOfDispatchThreads_in
-                                                                            : 0);
-  event_dispatch_configuration_s.numberOfProactorThreads =
-      ((CBData_in.configuration->dispatch == COMMON_EVENT_DISPATCH_PROACTOR) ? numberOfDispatchThreads_in
-                                                                             : 0);
-  if (!Common_Tools::initializeEventDispatch (event_dispatch_configuration_s))
+  struct Common_EventDispatchState event_dispatch_state_s;
+  event_dispatch_state_s.configuration =
+    &CBData_in.configuration->dispatchConfiguration;
+  if (CBData_in.configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
+    CBData_in.configuration->dispatchConfiguration.numberOfReactorThreads =
+      numberOfDispatchThreads_in;
+  else
+    CBData_in.configuration->dispatchConfiguration.numberOfProactorThreads =
+      numberOfDispatchThreads_in;
+  if (!Common_Tools::initializeEventDispatch (CBData_in.configuration->dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize event dispatch, returning\n")));
     return;
   } // end IF
-  struct Common_EventDispatchState event_dispatch_state_s;
-  event_dispatch_state_s.configuration =
-      &event_dispatch_configuration_s;
 
   // step3a: initialize connection manager
   IRC_Client_Connection_Manager_t* connection_manager_p =
@@ -521,7 +520,7 @@ do_work (bool useThreadPool_in,
 
   // step4: initialize signal handling
   struct IRC_Client_SignalHandlerConfiguration signal_handler_configuration;
-  signal_handler_configuration.dispatch = CBData_in.configuration->dispatch;
+  signal_handler_configuration.dispatchState = &event_dispatch_state_s;
   signal_handler_configuration.hasUI = !UIDefinitionFile_in.empty ();
   if (!signalHandler_in.initialize (signal_handler_configuration))
   {
@@ -554,8 +553,8 @@ do_work (bool useThreadPool_in,
   // [- signal timer expiration to perform server queries] (see above)
 
   // step5: start GTK event loop
-  CBData_in.initializationHook = idle_initialize_UI_cb;
-  CBData_in.finalizationHook = idle_finalize_UI_cb;
+  CBData_in.eventHooks.finiHook = idle_finalize_UI_cb;
+  CBData_in.eventHooks.initHook = idle_initialize_UI_cb;
   CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
     std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
   CBData_in.userData = &CBData_in;
@@ -1281,7 +1280,7 @@ ACE_TMAIN (int argc_in,
   gtk_cb_data.configuration = &configuration;
   IRC_Client_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                         : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                           &gtk_cb_data.lock,
+                                           &gtk_cb_data.subscribersLock,
                                            false);
 
   // step5: handle specific program modes
@@ -1406,8 +1405,8 @@ ACE_TMAIN (int argc_in,
   configuration.protocolConfiguration.loginOptions.channel =
     ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_CHANNEL);
   // populate user/realname
-  Common_Tools::getCurrentUserName (configuration.protocolConfiguration.loginOptions.user.userName,
-                                    configuration.protocolConfiguration.loginOptions.user.realName);
+  Common_Tools::getUserName (configuration.protocolConfiguration.loginOptions.user.userName,
+                             configuration.protocolConfiguration.loginOptions.user.realName);
 
   gtk_cb_data.RCFiles.push_back (UIRC_file_name);
 
@@ -1462,8 +1461,7 @@ ACE_TMAIN (int argc_in,
   std::string working_time_string;
   ACE_Time_Value working_time;
   timer.elapsed_time (working_time);
-  Common_Timer_Tools::periodToString (working_time,
-                                      working_time_string);
+  working_time_string = Common_Timer_Tools::periodToString (working_time);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
               ACE_TEXT (working_time_string.c_str ())));
@@ -1503,10 +1501,8 @@ ACE_TMAIN (int argc_in,
   ACE_Time_Value system_time (elapsed_rusage.ru_stime);
   std::string user_time_string;
   std::string system_time_string;
-  Common_Timer_Tools::periodToString (user_time,
-                                      user_time_string);
-  Common_Timer_Tools::periodToString (system_time,
-                                      system_time_string);
+  user_time_string = Common_Timer_Tools::periodToString (user_time);
+  system_time_string = Common_Timer_Tools::periodToString (system_time);
   // debug info
 #if !defined (ACE_WIN32) && !defined (ACE_WIN64)
   ACE_DEBUG ((LM_DEBUG,

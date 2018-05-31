@@ -93,24 +93,24 @@ Net_WLAN_Monitor_T<AddressType,
   ACE_ASSERT (inherited::configuration_);
 
   // sanity check(s)
-  ACE_ASSERT (inherited::clientinherited::handle_ == ACE_INVALID_HANDLE);
+  ACE_ASSERT (inherited::clientHandle_ == ACE_INVALID_HANDLE);
 
-  if (unlikely (!Net_WLAN_Tools::initialize (inherited::clientinherited::handle_)))
+  if (unlikely (!Net_WLAN_Tools::initialize (inherited::clientHandle_)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_WLAN_Tools::initialize(), returning\n")));
     return;
   } // end IF
-  ACE_ASSERT (inherited::clientinherited::handle_ != ACE_INVALID_HANDLE);
+  ACE_ASSERT (inherited::clientHandle_ != ACE_INVALID_HANDLE);
 
   Net_InterfaceIdentifiers_t interface_identifiers_a =
-      Net_WLAN_Tools::getInterfaces (inherited::clientinherited::handle_);
+      Net_WLAN_Tools::getInterfaces (inherited::clientHandle_);
 
   struct _WLAN_INTERFACE_INFO_LIST* interface_list_p = NULL;
   DWORD notification_mask = WLAN_NOTIFICATION_SOURCE_ALL;
   DWORD previous_notification_mask = 0;
   DWORD result =
-      WlanRegisterNotification (inherited::clientinherited::handle_,
+      WlanRegisterNotification (inherited::clientHandle_,
                                 notification_mask,
                                 FALSE,
                                 inherited::configuration_->notificationCB,
@@ -128,9 +128,9 @@ Net_WLAN_Monitor_T<AddressType,
   goto continue_;
 
 error:
-  if (inherited::clientinherited::handle_ != ACE_INVALID_HANDLE)
-    Net_WLAN_Tools::initialize (inherited::clientinherited::handle_);
-  inherited::clientinherited::handle_ = ACE_INVALID_HANDLE;
+  if (inherited::clientHandle_ != ACE_INVALID_HANDLE)
+    Net_WLAN_Tools::initialize (inherited::clientHandle_);
+  inherited::clientHandle_ = ACE_INVALID_HANDLE;
 
   return;
 
@@ -158,12 +158,12 @@ Net_WLAN_Monitor_T<AddressType,
   // sanity check(s)
   if (unlikely (!inherited::isActive_))
     return;
-  ACE_ASSERT (inherited::clientinherited::handle_ != ACE_INVALID_HANDLE);
+  ACE_ASSERT (inherited::clientHandle_ != ACE_INVALID_HANDLE);
 
   if (likely (inherited::scanTimerId_ != -1))
-    cancelScanTimer ();
-  Net_WLAN_Tools::finalize (inherited::clientinherited::handle_);
-  inherited::clientinherited::handle_ = ACE_INVALID_HANDLE;
+    inherited::cancelScanTimer ();
+  Net_WLAN_Tools::finalize (inherited::clientHandle_);
+  inherited::clientHandle_ = ACE_INVALID_HANDLE;
 
   inherited::isActive_ = false;
 

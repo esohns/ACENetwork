@@ -96,7 +96,7 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
                   ACE_TEXT (SSID_in.c_str ())));
       retries_ = 0;
-      inherited::change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
+      inherited::change (NET_WLAN_MONITOR_STATE_SCANNED);
     } // end IF
     else
     {
@@ -112,7 +112,7 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
 #endif // ACE_WIN32 || ACE_WIN64
 
   // synch access
-  { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_);
+  { ACE_GUARD (typename ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_);
     // *NOTE*: this works because the lock is recursive
     // *WARNING* if callees unsubscribe() within the callback bad things
     //           happen, as the current iterator is invalidated
@@ -138,11 +138,7 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
     return;
 
 #if defined (_DEBUG)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
   if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
-#else
-  if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
-#endif
                                                          inherited::localSAP_,
                                                          inherited::peerSAP_)))
   {
@@ -154,7 +150,7 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
                 ACE_TEXT (interfaceIdentifier_in.c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return;
   } // end IF
 
@@ -186,7 +182,7 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
   } // end lock scope
 #endif // ACE_WIN32 || ACE_WIN64
-continue_:
+//continue_:
   ;
 #endif // _DEBUG
 }

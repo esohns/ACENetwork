@@ -168,8 +168,8 @@ idle_update_info_display_cb (gpointer userData_in)
 
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
     for (Common_UI_Events_t::ITERATOR iterator_2 (data_p->eventStack);
-         !iterator_2.done ();
-         iterator_2.next (event_p))
+         iterator_2.next (event_p);
+         iterator_2.advance ())
     { ACE_ASSERT (event_p);
       switch (*event_p)
       {
@@ -1121,11 +1121,11 @@ button_connect_clicked_cb (GtkWidget* widget_in,
 // *PORTABILITY*: on Windows SIGUSRx are not defined
 // --> use SIGBREAK (21) and SIGTERM (15) instead...
   int signal = 0;
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-  signal = SIGUSR1;
-#else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   signal = SIGBREAK;
-#endif
+#else
+  signal = SIGUSR1;
+#endif // ACE_WIN32 || ACE_WIN64
   result = ACE_OS::raise (signal);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,

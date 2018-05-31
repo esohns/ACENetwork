@@ -33,7 +33,7 @@
 #include "net_defines.h"
 
 #include "dhcp_defines.h"
-#include "dhcp_exports.h"
+//#include "dhcp_exports.h"
 //#include "dhcp_scanner.h"
 
 // forward declaration(s)
@@ -44,7 +44,7 @@ typedef void* yyscan_t;
 typedef struct yy_buffer_state* YY_BUFFER_STATE;
 struct YYLTYPE;
 
-class NET_PROTOCOL_DHCP_Export DHCP_ParserDriver
+class DHCP_ParserDriver
 {
   friend class DHCP_Scanner;
 

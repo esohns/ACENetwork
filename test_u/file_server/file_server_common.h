@@ -152,8 +152,9 @@ struct FileServer_GTK_CBData
 
 typedef Common_UI_GtkBuilderDefinition_T<struct FileServer_GTK_CBData> FileServer_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<struct FileServer_GTK_CBData> FileServer_GTK_Manager_t;
+typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+                                struct FileServer_GTK_CBData> FileServer_GTK_Manager_t;
 typedef ACE_Singleton<FileServer_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::RECURSIVE_MUTEX> FILESERVER_UI_GTK_MANAGER_SINGLETON;
+                      typename ACE_MT_SYNCH::MUTEX> FILESERVER_UI_GTK_MANAGER_SINGLETON;
 
 #endif

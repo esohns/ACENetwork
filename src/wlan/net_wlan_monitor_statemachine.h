@@ -28,12 +28,11 @@
 
 #include "common_istatemachine.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include "common_statemachine_base.h"
 #else
 #include "common_ilock.h"
-#include "common_statemachine.h"
 #include "common_time_common.h"
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
+#include "common_statemachine.h"
 
 #include "net_wlan_common.h"
 

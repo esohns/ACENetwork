@@ -36,7 +36,7 @@ class Test_I_SignalHandler
 
  public:
   Test_I_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
-                        ACE_SYNCH_MUTEX*);              // lock handle
+                        ACE_SYNCH_RECURSIVE_MUTEX*);    // lock handle
   inline virtual ~Test_I_SignalHandler () {}
 
   // implement Common_ISignal

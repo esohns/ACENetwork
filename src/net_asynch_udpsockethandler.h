@@ -57,14 +57,12 @@ class Net_AsynchUDPSocketHandler_T
   // override (part of) ACE_Service_Handler
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
-  inline virtual void addresses (const ACE_INET_Addr& peerSap_in, const ACE_INET_Addr& localSAP_in) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
-  inline virtual ACE_HANDLE handle (void) const { return SocketType::get_handle (); };
-  inline virtual void handle (ACE_HANDLE handle_in) { inherited3::handle (handle_in); };
+  inline virtual void addresses (const ACE_INET_Addr& peerSap_in, const ACE_INET_Addr& localSAP_in) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  inline virtual ACE_HANDLE handle (void) const { return SocketType::get_handle (); }
+  inline virtual void handle (ACE_HANDLE handle_in) { inherited3::handle (handle_in); }
 
   // implement (part of) Net_IAsynchSocketHandler
-  // *NOTE*: this cancels all outstanding asynchronous operations
-  virtual int handle_close (ACE_HANDLE = ACE_INVALID_HANDLE,                        // handle
-                            ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
+  virtual void cancel ();
 
  protected:
   // convenient types
@@ -84,7 +82,7 @@ class Net_AsynchUDPSocketHandler_T
   Common_ReferenceCounterBase counter_;
 #if defined (ACE_LINUX)
   bool                        errorQueue_;
-#endif
+#endif // ACE_LINUX
   ACE_Asynch_Read_Dgram       inputStream_;
   ACE_Asynch_Write_Dgram      outputStream_;
   unsigned int                PDUSize_;
@@ -96,11 +94,11 @@ class Net_AsynchUDPSocketHandler_T
   ACE_UNIMPLEMENTED_FUNC (Net_AsynchUDPSocketHandler_T& operator= (const Net_AsynchUDPSocketHandler_T&))
 
   // override/hide (part of) ACE_Service_Handler
-  virtual void handle_wakeup ();
+  inline virtual void handle_wakeup () { cancel (); }
 
   // implement/hide ACE_Notification_Strategy
   virtual int notify (void);
-  inline virtual int notify (ACE_Event_Handler*, ACE_Reactor_Mask) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) };
+  inline virtual int notify (ACE_Event_Handler*, ACE_Reactor_Mask) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
 };
 
 // include template definiton

@@ -27,9 +27,10 @@
 //#include "stream_statistichandler.h"
 #include "stream_task_base_asynch.h"
 
-#include "dhcp_exports.h"
+//#include "dhcp_exports.h"
 
-extern NET_PROTOCOL_DHCP_Export const char libacenetwork_protocol_default_dhcp_discover_module_name_string[];
+//extern NET_PROTOCOL_DHCP_Export const char libacenetwork_protocol_default_dhcp_discover_module_name_string[];
+extern const char libacenetwork_protocol_default_dhcp_discover_module_name_string[];
 
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,

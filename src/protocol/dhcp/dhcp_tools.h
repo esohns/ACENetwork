@@ -27,9 +27,9 @@
 
 #include "dhcp_codes.h"
 #include "dhcp_common.h"
-#include "dhcp_exports.h"
+//#include "dhcp_exports.h"
 
-class NET_PROTOCOL_DHCP_Export DHCP_Tools
+class DHCP_Tools
 {
  public:
   inline virtual ~DHCP_Tools () {};

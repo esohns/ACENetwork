@@ -34,9 +34,9 @@
 
 #include "net_macros.h"
 
-#ifdef HAVE_CONFIG_H
+#if defined (HAVE_CONFIG_H)
 #include "libACENetwork_config.h"
-#endif
+#endif // HAVE_CONFIG_H
 
 #include "bittorrent_bencoding_scanner.h"
 #include "bittorrent_bencoding_parser_driver.h"
@@ -236,7 +236,11 @@ BitTorrent_Tools::parseMetaInfoFile (const struct Common_ParserConfiguration& co
   bool result = false;
 
   // sanity check(s)
-  ACE_ASSERT (Common_File_Tools::canRead (metaInfoFileName_in));
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_ASSERT (Common_File_Tools::canRead (metaInfoFileName_in, ACE_TEXT_ALWAYS_CHAR ("")));
+#else
+  ACE_ASSERT (Common_File_Tools::canRead (metaInfoFileName_in, static_cast<uid_t> (-1)));
+#endif // ACE_WIN32 || ACE_WIN64
 
   unsigned char* data_p = NULL;
   unsigned int file_size_i = 0;

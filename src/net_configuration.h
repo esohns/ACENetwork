@@ -21,11 +21,14 @@
 #ifndef NET_CONFIGURATION_H
 #define NET_CONFIGURATION_H
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include <cguid.h>
+#endif // ACE_WIN32 || ACE_WIN64
+
 #include <map>
 #include <string>
 
 #include "ace/Basic_Types.h"
-#include "ace/config-lite.h"
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
 #include "ace/Netlink_Addr.h"
@@ -40,8 +43,6 @@
 
 #include "net_common.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <cguid.h>
-
 #include "net_common_tools.h"
 #endif // ACE_WIN32 || ACE_WIN64
 #include "net_defines.h"
@@ -99,13 +100,13 @@ struct Net_SocketConfigurationBase
    , useLoopBackDevice (NET_INTERFACE_DEFAULT_USE_LOOPBACK)
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    interfaceIdentifier =
-      Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
+    //interfaceIdentifier =
+    //  Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_3);
 #endif // ACE_WIN32 || ACE_WIN64
   }
   inline virtual ~Net_SocketConfigurationBase () {}
 
-  int         bufferSize; // socket buffer size (I/O)
+  int          bufferSize; // socket buffer size (I/O)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   struct _GUID interfaceIdentifier; // NIC-
 #else
@@ -122,7 +123,7 @@ struct Net_NetlinkSocketConfiguration
    : Net_SocketConfigurationBase ()
    , address ()
    , protocol (NET_PROTOCOL_DEFAULT_NETLINK)
-  {};
+  {}
 
   Net_Netlink_Addr address;
   int              protocol;

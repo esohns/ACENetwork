@@ -31,7 +31,7 @@
 #include "common_idumpstate.h"
 #include "common_referencecounter_base.h"
 
-#include "irc_exports.h"
+//#include "irc_exports.h"
 #include "irc_codes.h"
 
 // *NOTE*: the list of parameters is essentially a simple list of items
@@ -49,7 +49,7 @@ typedef list_items_ranges_t::const_iterator list_items_ranges_iterator_t;
 typedef string_list_t IRC_Parameters_t;
 typedef string_list_const_iterator_t IRC_ParametersIterator_t;
 
-class IRC_Export IRC_Record
+class IRC_Record
  : public Common_ReferenceCounterBase,
    public Common_IDumpState
 {

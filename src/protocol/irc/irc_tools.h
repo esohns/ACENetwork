@@ -32,7 +32,7 @@
 #include "stream_common.h"
 
 #include "irc_common.h"
-#include "irc_exports.h"
+//#include "irc_exports.h"
 #include "irc_record.h"
 #include "irc_codes.h"
 
@@ -40,7 +40,7 @@
 struct IRC_LoginOptions;
 struct IRC_ModuleHandlerConfiguration;
 
-class IRC_Export IRC_Tools
+class IRC_Tools
 {
  public:
   inline virtual ~IRC_Tools () {};

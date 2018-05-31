@@ -88,7 +88,6 @@ Net_SessionBase_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::~Net_SessionBase_T"));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-
     // sanity check(s)
     ACE_ASSERT (connectionManager_);
     // *TODO*: remove type inference
@@ -106,7 +105,7 @@ Net_SessionBase_T<AddressType,
       iconnection_p = connectionManager_->get (*iterator);
 #else
       iconnection_p = connectionManager_->get (*iterator);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       if (!iconnection_p)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -242,7 +241,7 @@ Net_SessionBase_T<AddressType,
       connectionManager_->get (reinterpret_cast<Net_ConnectionId_t> (handle));
 #else
       connectionManager_->get (static_cast<Net_ConnectionId_t> (handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   if (!iconnection_p)
   {
     ACE_DEBUG ((LM_ERROR,
@@ -256,19 +255,19 @@ Net_SessionBase_T<AddressType,
   ACE_Time_Value initialization_timeout (NET_CONNECTION_DEFAULT_INITIALIZATION_TIMEOUT,
                                          0);
   deadline = COMMON_TIME_NOW + initialization_timeout;
-  Net_Connection_Status status = NET_CONNECTION_STATUS_INVALID;
+  enum Net_Connection_Status status_e = NET_CONNECTION_STATUS_INVALID;
   typename ConnectorType::ISTREAM_CONNECTION_T* istream_connection_p = NULL;
   do
   {
-    status = iconnection_p->status ();
-    if (status == NET_CONNECTION_STATUS_OK) break;
+    status_e = iconnection_p->status ();
+    if (status_e == NET_CONNECTION_STATUS_OK) break;
   } while (COMMON_TIME_NOW < deadline);
-  if (status != NET_CONNECTION_STATUS_OK)
+  if (status_e != NET_CONNECTION_STATUS_OK)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (to: %s) failed to initialize (status was: %d), returning\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
-                status));
+                status_e));
     goto error;
   } // end IF
   // step3b: wait for the connection stream to finish initializing
@@ -388,7 +387,7 @@ Net_SessionBase_T<AddressType,
       iconnection_p = connectionManager_->get (*iterator);
 #else
       iconnection_p = connectionManager_->get (*iterator);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       if (!iconnection_p)
       {
         ACE_DEBUG ((LM_ERROR,
@@ -445,7 +444,6 @@ Net_SessionBase_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_SessionBase_T::connect"));
 
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, lock_);
-
     std::pair<Net_ConnectionIdsIterator_t, bool> result =
         state_.connections.insert (id_in);
 //    ACE_UNUSED_ARG (result);

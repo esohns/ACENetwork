@@ -32,7 +32,7 @@
 #include "net_session_base.h"
 
 #include "bittorrent_common.h"
-#include "bittorrent_exports.h"
+//#include "bittorrent_exports.h"
 #include "bittorrent_isession.h"
 #include "bittorrent_stream_common.h"
 #include "bittorrent_streamhandler.h"
@@ -40,8 +40,7 @@
 // forward declarations
 class ACE_Message_Block;
 
-//ACE_THR_FUNC_RETURN BitTorrent_Export session_setup_function (void*);
-ACE_THR_FUNC_RETURN BitTorrent_Export session_setup_function (void*);
+ACE_THR_FUNC_RETURN net_bittorrent_session_setup_function (void*);
 
 template <typename PeerHandlerConfigurationType, // socket-
           typename TrackerHandlerConfigurationType, // socket-

@@ -375,7 +375,7 @@ idle_initialize_UI_cb (gpointer userData_in)
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_ASYNCH_NAME)));
   ACE_ASSERT (check_button_p);
   gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check_button_p),
-                                (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_PROACTOR));
+                                (data_p->configuration->dispatchConfiguration.numberOfProactorThreads > 0));
   check_button_p =
     GTK_CHECK_BUTTON (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (TEST_I_UI_GTK_CHECKBUTTON_LOOPBACK_NAME)));
@@ -1027,13 +1027,13 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
         ACE_TEXT_ALWAYS_CHAR (TEST_I_URLSTREAMLOAD_DEFAULT_OUTPUT_FILE);
 
     // step3: connect to peer
-    if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_REACTOR)
+    if (data_p->configuration->dispatchConfiguration.numberOfReactorThreads > 0)
     {
 #if defined (SSL_SUPPORT)
       if (use_SSL)
         iconnector_p = &ssl_connector;
       else
-#endif
+#endif // SSL_SUPPORT
         iconnector_p = &connector;
     } // end IF
     else
@@ -1041,7 +1041,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
 #if defined (SSL_SUPPORT)
       // *TODO*: add SSL support to the proactor framework
       ACE_ASSERT (!use_SSL);
-#endif
+#endif // SSL_SUPPORT
       iconnector_p = &asynch_connector;
     } // end ELSE
     if (!iconnector_p->initialize ((*iterator_2).second))
@@ -1065,7 +1065,7 @@ togglebutton_connect_toggled_cb (GtkToggleButton* toggleButton_in,
         iconnector_p->connect ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.address);
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
-    if (data_p->configuration->dispatch == COMMON_EVENT_DISPATCH_PROACTOR)
+    if (data_p->configuration->dispatchConfiguration.numberOfProactorThreads > 0)
     {
       data_p->handle = ACE_INVALID_HANDLE;
 

@@ -36,7 +36,7 @@ class FileServer_SignalHandler
 
  public:
   FileServer_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
-                            ACE_SYNCH_MUTEX*);              // lock handle
+                            ACE_SYNCH_RECURSIVE_MUTEX*);    // lock handle
   inline virtual ~FileServer_SignalHandler () {}
 
   // implement Common_ISignal

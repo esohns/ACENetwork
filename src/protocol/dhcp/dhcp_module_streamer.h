@@ -25,9 +25,10 @@
 
 #include "stream_task_base_synch.h"
 
-#include "dhcp_exports.h"
+//#include "dhcp_exports.h"
 
-extern NET_PROTOCOL_DHCP_Export const char libacenetwork_protocol_default_dhcp_streamer_module_name_string[];
+//extern NET_PROTOCOL_DHCP_Export const char libacenetwork_protocol_default_dhcp_streamer_module_name_string[];
+extern const char libacenetwork_protocol_default_dhcp_streamer_module_name_string[];
 
 template <typename SynchStrategyType,
           typename TimePolicyType,

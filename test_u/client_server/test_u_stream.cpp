@@ -82,16 +82,17 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
                                                            ACE_TEXT_ALWAYS_CHAR (TEST_U_STREAM_MODULE_HEADERPARSER_NAME)),
                   false);
   modules_out.push_back (module_p);
-  module_p = NULL;
-  ACE_NEW_RETURN (module_p,
-                  ClientServer_Module_TCPSocketHandler_Module (this,
-                                                               ACE_TEXT_ALWAYS_CHAR (NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING)),
-                  false);
-  modules_out.push_back (module_p);
+  //module_p = NULL;
+  //ACE_NEW_RETURN (module_p,
+  //                ClientServer_Module_TCPSocketHandler_Module (this,
+  //                                                             ACE_TEXT_ALWAYS_CHAR (NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING)),
+  //                false);
+  //modules_out.push_back (module_p);
 
   delete_out = true;
 
-  return true;
+  return inherited::load (modules_out,
+                          delete_out);
 }
 
 bool
@@ -108,7 +109,8 @@ Test_U_Stream::initialize (const CONFIGURATION_T& configuration_in,
   bool reset_setup_pipeline = false;
 //  struct Test_U_StreamSessionData* session_data_p = NULL;
   Stream_Module_t* module_p = NULL;
-  ClientServer_Module_TCPSocketHandler* socketHandler_impl_p = NULL;
+  //ClientServer_Module_TCPSocketHandler* socketHandler_impl_p = NULL;
+  inherited::WRITER_T* socketHandler_impl_p = NULL;
 
   // allocate a new session state, reset stream
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
@@ -137,26 +139,30 @@ Test_U_Stream::initialize (const CONFIGURATION_T& configuration_in,
 
   // ******************* Socket Handler ************************
   module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING)));
+    //const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING)));
+    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_NET_IO_DEFAULT_NAME_STRING)));
   if (!module_p)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to retrieve \"%s\" module handle, aborting\n"),
                 ACE_TEXT (stream_name_string_),
-                ACE_TEXT (NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING)));
-    goto error;
+                //ACE_TEXT (NET_STREAM_MODULE_SOCKETHANDLER_DEFAULT_NAME_STRING)));
+                ACE_TEXT (MODULE_NET_IO_DEFAULT_NAME_STRING)));
+      goto error;
   } // end IF
-  socketHandler_impl_p =
-    dynamic_cast<ClientServer_Module_TCPSocketHandler*> (module_p->writer ());
-  if (!socketHandler_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("%s: dynamic_cast<Test_U_Module_TCPSocketHandler> failed, aborting\n"),
-                ACE_TEXT (stream_name_string_)));
-    goto error;
-  } // end IF
-  socketHandler_impl_p->setP (&(inherited::state_));
-  socketHandler_impl_p->initialize ();
+  //socketHandler_impl_p =
+  //  //dynamic_cast<ClientServer_Module_TCPSocketHandler*> (module_p->writer ());
+  //  dynamic_cast<inherited::WRITER_T*> (module_p->writer ());
+  //if (!socketHandler_impl_p)
+  //{
+  //  ACE_DEBUG ((LM_ERROR,
+  //              //ACE_TEXT ("%s: dynamic_cast<Test_U_Module_TCPSocketHandler> failed, aborting\n"),
+  //              ACE_TEXT ("%s: dynamic_cast<Stream_Module_Net_IOWriter_T> failed, aborting\n"),
+  //              ACE_TEXT (stream_name_string_)));
+  //  goto error;
+  //} // end IF
+  //socketHandler_impl_p->setP (&(inherited::state_));
+  //socketHandler_impl_p->initialize ();
 
   // *NOTE*: push()ing the module will open() it
   //         --> set the argument that is passed along (head module expects a

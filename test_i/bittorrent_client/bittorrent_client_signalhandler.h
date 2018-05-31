@@ -38,7 +38,7 @@ class BitTorrent_Client_SignalHandler
 
  public:
   BitTorrent_Client_SignalHandler (enum Common_SignalDispatchType,    // dispatch mode
-                                   ACE_SYNCH_MUTEX*,                  // lock handle
+                                   ACE_SYNCH_RECURSIVE_MUTEX*,        // lock handle
                                    ///////
                                    bool = TEST_I_SESSION_USE_CURSES); // use curses library ?
   inline virtual ~BitTorrent_Client_SignalHandler () {}
