@@ -1,11 +1,11 @@
 ﻿option (GTK3_SUPPORT "enable Gtk3 support" ON)
 
 if (UNIX)
-# option (NETLINK_SUPPORT "enable netlink support" ON)
+ option (NETLINK_SUPPORT "enable netlink support" ON)
 
  if (NETLINK_SUPPORT)
-#  include_directories (${PKG_LIBNL_INCLUDE_DIRS})
-#  add_definitions (-DNETLINK_SUPPORT)
+  include_directories (${PKG_LIBNL_INCLUDE_DIRS})
+  add_definitions (-DNETLINK_SUPPORT)
  endif (NETLINK_SUPPORT)
 
 # include (CheckLibraryExists)

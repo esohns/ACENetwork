@@ -6,13 +6,6 @@ add_library (${PROJECT_NAME}_Client STATIC "")
 add_library (${PROJECT_NAME}_Server STATIC "")
 
 if (UNIX)
- option (NETLINK_SUPPORT "enable netlink support" ON)
-
- if (NETLINK_SUPPORT)
-#  include_directories (${PKG_LIBNL_INCLUDE_DIRS})
-  #add_definitions (-DNETLINK_SUPPORT)
- endif (NETLINK_SUPPORT)
-
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE>)
  target_include_directories (${PROJECT_NAME}_Server PUBLIC

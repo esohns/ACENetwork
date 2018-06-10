@@ -13,7 +13,6 @@
 #endif
 
 // C RunTime Header Files
-//#include <sstream>
 #include <string>
 
 // System Library Header Files
@@ -24,6 +23,10 @@
 //#if defined (LIBACENETWORK_ENABLE_VALGRIND_SUPPORT)
 #if defined (VALGRIND_SUPPORT)
 #include "valgrind/valgrind.h"
+#endif
+
+#if defined (HAVE_CONFIG_H)
+#include "libACENetwork_config.h"
 #endif
 
 // Library Header Files
@@ -37,7 +40,3 @@
 // Local Header Files
 #include "net_common.h"
 #include "net_macros.h"
-
-#if defined (HAVE_CONFIG_H)
-#include "libACENetwork_config.h"
-#endif

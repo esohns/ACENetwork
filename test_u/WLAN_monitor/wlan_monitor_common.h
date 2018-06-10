@@ -34,7 +34,6 @@
 #include "common_ui_gtk_manager.h"
 
 #include "net_common.h"
-#include "net_configuration.h"
 
 #include "net_wlan_configuration.h"
 #include "net_wlan_imonitor.h"

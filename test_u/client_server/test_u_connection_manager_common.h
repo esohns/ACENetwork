@@ -26,9 +26,7 @@
 #include "ace/Synch_Traits.h"
 
 #include "net_common.h"
-#if defined (NETLINK_SUPPORT)
 #include "net_configuration.h"
-#endif // NETLINK_SUPPORT
 #include "net_connection_manager.h"
 #include "net_iconnectionmanager.h"
 

@@ -40,6 +40,10 @@
 #include "valgrind/valgrind.h"
 #endif
 
+#if defined (HAVE_CONFIG_H)
+#include "libACENetwork_config.h"
+#endif
+
 // Library Header Files
 #include "common.h"
 #include "common_macros.h"
@@ -51,7 +55,3 @@
 // Local Header Files
 #include "net_common.h"
 #include "net_macros.h"
-
-#if defined (HAVE_CONFIG_H)
-#include "libACENetwork_config.h"
-#endif

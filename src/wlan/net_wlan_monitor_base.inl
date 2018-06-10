@@ -55,10 +55,11 @@
 
 #include "stream_defines.h"
 
+#include "net_common.h"
 #include "net_common_tools.h"
 #include "net_defines.h"
 #include "net_macros.h"
-#include "net_packet_headers.h"
+//#include "net_packet_headers.h"
 
 #include "net_wlan_defines.h"
 

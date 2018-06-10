@@ -46,7 +46,6 @@
 
 #include "net_defines.h"
 
-#include "net_wlan_configuration.h"
 #include "net_wlan_defines.h"
 #include "net_wlan_imonitor.h"
 #include "net_wlan_inetmonitor.h"

@@ -18,8 +18,8 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#ifndef NET_WLAN_MONITOR_BASE_T_H
-#define NET_WLAN_MONITOR_BASE_T_H
+#ifndef NET_WLAN_MONITOR_BASE_H
+#define NET_WLAN_MONITOR_BASE_H
 
 #include <list>
 #include <string>
@@ -51,8 +51,6 @@ extern "C"
 #include "common_timer_common.h"
 #include "common_timer_handler.h"
 #endif // ACE_WIN32 || ACE_WIN64
-
-//#include "stream_messagequeue.h"
 
 #include "net_common.h"
 

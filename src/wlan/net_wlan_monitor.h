@@ -30,29 +30,21 @@
 #include "iwlib.h"
 #endif // WEXT_SUPPORT
 
-#if defined (DBUS_SUPPORT)
-#include <map>
-
 #if defined (NL80211_SUPPORT)
 #include "netlink/handlers.h"
-
-//#include "ace/Asynch_IO.h"
 #endif // NL80211_SUPPORT
+
+#if defined (DBUS_SUPPORT)
+#include <map>
 
 #include "dbus/dbus.h"
 //#include "dbus/dbus-glib.h"
 #endif // DBUS_SUPPORT
-
-//#include "ace/Event_Handler.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Global_Macros.h"
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
-
-//#include "common_event_handler.h"
-
-//#include "net_common.h"
 
 #include "net_wlan_common.h"
 #include "net_wlan_monitor_base.h"
