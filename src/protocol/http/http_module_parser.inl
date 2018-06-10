@@ -377,6 +377,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
     data_container_p->increase ();
     data_container_2 = data_container_p;
     message_p->initialize (data_container_2,
+                           message_p->id (),
                            NULL);
     message_p = dynamic_cast<DataMessageType*> (message_p->cont ());
   } // end WHILE

@@ -112,9 +112,9 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct Stream_ModuleConfiguration,
                                struct IRC_Client_ModuleHandlerConfiguration> IRC_Client_StreamConfiguration_t;
 struct IRC_Client_ConnectionConfiguration;
-typedef Net_StreamConnectionConfiguration_T<struct IRC_Client_ConnectionConfiguration,
-                                            struct IRC_AllocatorConfiguration,
-                                            IRC_Client_StreamConfiguration_t> IRC_Client_ConnectionConfiguration_t;
+typedef Net_ConnectionConfiguration_T<struct IRC_Client_ConnectionConfiguration,
+                                      struct IRC_AllocatorConfiguration,
+                                      IRC_Client_StreamConfiguration_t> IRC_Client_ConnectionConfiguration_t;
 typedef std::map<std::string,
                  IRC_Client_ConnectionConfiguration_t> IRC_Client_ConnectionConfigurations_t;
 struct IRC_Client_ModuleHandlerConfiguration

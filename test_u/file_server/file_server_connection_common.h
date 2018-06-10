@@ -92,9 +92,9 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> FileServer_StreamConfiguration_t;
 struct FileServer_ConnectionConfiguration;
-typedef Net_StreamConnectionConfiguration_T<struct FileServer_ConnectionConfiguration,
-                                            struct Net_AllocatorConfiguration,
-                                            FileServer_StreamConfiguration_t> FileServer_ConnectionConfiguration_t;
+typedef Net_ConnectionConfiguration_T<struct FileServer_ConnectionConfiguration,
+                                      struct Net_AllocatorConfiguration,
+                                      FileServer_StreamConfiguration_t> FileServer_ConnectionConfiguration_t;
 struct FileServer_ConnectionState
  : Net_ConnectionState
 {

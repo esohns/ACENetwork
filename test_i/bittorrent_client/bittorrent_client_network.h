@@ -103,9 +103,9 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct BitTorrent_Client_PeerStreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct BitTorrent_Client_PeerModuleHandlerConfiguration> BitTorrent_Client_PeerStreamConfiguration_t;
-typedef Net_StreamConnectionConfiguration_T<struct BitTorrent_Client_PeerConnectionConfiguration,
-                                            struct BitTorrent_AllocatorConfiguration,
-                                            BitTorrent_Client_PeerStreamConfiguration_t> BitTorrent_Client_PeerConnectionConfiguration_t;
+typedef Net_ConnectionConfiguration_T<struct BitTorrent_Client_PeerConnectionConfiguration,
+                                      struct BitTorrent_AllocatorConfiguration,
+                                      BitTorrent_Client_PeerStreamConfiguration_t> BitTorrent_Client_PeerConnectionConfiguration_t;
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  BitTorrent_Client_PeerConnectionConfiguration_t,
@@ -147,9 +147,9 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct BitTorrent_Client_TrackerStreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct BitTorrent_Client_TrackerModuleHandlerConfiguration> BitTorrent_Client_TrackerStreamConfiguration_t;
-typedef Net_StreamConnectionConfiguration_T<struct BitTorrent_Client_TrackerConnectionConfiguration,
-                                            struct BitTorrent_AllocatorConfiguration,
-                                            BitTorrent_Client_TrackerStreamConfiguration_t> BitTorrent_Client_TrackerConnectionConfiguration_t;
+typedef Net_ConnectionConfiguration_T<struct BitTorrent_Client_TrackerConnectionConfiguration,
+                                      struct BitTorrent_AllocatorConfiguration,
+                                      BitTorrent_Client_TrackerStreamConfiguration_t> BitTorrent_Client_TrackerConnectionConfiguration_t;
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  BitTorrent_Client_TrackerConnectionConfiguration_t,

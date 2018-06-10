@@ -62,9 +62,9 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct Stream_ModuleConfiguration,
                                struct ClientServer_ModuleHandlerConfiguration> ClientServer_StreamConfiguration_t;
 struct ClientServer_ConnectionConfiguration;
-typedef Net_StreamConnectionConfiguration_T<struct ClientServer_ConnectionConfiguration,
-                                            struct Net_AllocatorConfiguration,
-                                            ClientServer_StreamConfiguration_t> ClientServer_ConnectionConfiguration_t;
+typedef Net_ConnectionConfiguration_T<struct ClientServer_ConnectionConfiguration,
+                                      struct Net_AllocatorConfiguration,
+                                      ClientServer_StreamConfiguration_t> ClientServer_ConnectionConfiguration_t;
 struct ClientServer_ConnectionState
  : Net_ConnectionState
 {

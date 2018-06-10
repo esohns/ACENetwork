@@ -182,7 +182,10 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
   } // end lock scope
 #endif // ACE_WIN32 || ACE_WIN64
-//continue_:
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+continue_:
   ;
+#endif // ACE_WIN32 || ACE_WIN64
 #endif // _DEBUG
 }

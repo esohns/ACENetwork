@@ -19,8 +19,8 @@
  ***************************************************************************/
 #include "stdafx.h"
 
-//#include "ace/Synch.h"
-//#include "net_configuration.h"
+#include "ace/Synch.h"
+#include "net_configuration.h"
 
 #if defined (NETLINK_SUPPORT)
 #include "netlink/addr.h"

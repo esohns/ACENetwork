@@ -331,6 +331,12 @@ set_target_properties (${PROJECT_NAME} PROPERTIES DEFINE_SYMBOL NET_BUILD_DLL)
 set_target_properties (${PROJECT_NAME} PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 
 if (UNIX)
+ if (DHCLIENT_SUPPORT)
+  target_link_libraries (${PROJECT_NAME} ${DHCPCTL_LIBRARY})
+  target_link_libraries (${PROJECT_NAME} ${OMAPI_LIBRARY})
+ endif (DHCLIENT_SUPPORT)
+
+ target_link_libraries (${PROJECT_NAME} ${PROJECT_NAME}_WLAN)
 elseif (WIN32)
  target_link_libraries (${PROJECT_NAME} iphlpapi.lib)
  target_link_libraries (${PROJECT_NAME} Wlanapi.lib)

@@ -1358,9 +1358,9 @@ Net_WLAN_Tools::associate (const std::string& interfaceIdentifier_in,
   ACE_UINT16 station_capabilities_i = 0;
   ACE_UINT16 listen_interval_i = 0;
   uint8_t rates_a[NL80211_MAX_SUPP_RATES];
-  ACE_UINT16 power_capabilities_i = 0;
-  int result_2 = -1;
-  uint8_t ie_buffer_a[BUFSIZ];
+//  ACE_UINT16 power_capabilities_i = 0;
+//  int result_2 = -1;
+//  uint8_t ie_buffer_a[BUFSIZ];
 
   // sanity check(s)
   if (unlikely (interfaceIdentifier_in.empty ()                    ||

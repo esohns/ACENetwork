@@ -115,8 +115,8 @@ class Net_StreamConnectionBase_T
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
   // implement (part of) Net_IStreamConnection_T
-  //inline virtual unsigned int increase () { return CONNECTION_BASE_T::REFERENCECOUNTER_T::increase (); };
-  //inline virtual unsigned int decrease () { return CONNECTION_BASE_T::REFERENCECOUNTER_T::decrease (); };
+  //inline virtual unsigned int increase () { return CONNECTION_BASE_T::REFERENCECOUNTER_T::increase (); }
+  //inline virtual unsigned int decrease () { return CONNECTION_BASE_T::REFERENCECOUNTER_T::decrease (); }
   inline virtual bool collect (StatisticContainerType& statistic_out) { return stream_.collect (statistic_out); }
   inline virtual void report () const { stream_.report (); }
   //using CONNECTION_BASE_T::getR;
@@ -246,7 +246,7 @@ class Net_AsynchStreamConnectionBase_T
                                   StreamType,
                                   StreamStatusType> ISTREAM_CONNECTION_T;
 
-  inline virtual ~Net_AsynchStreamConnectionBase_T () {};
+  inline virtual ~Net_AsynchStreamConnectionBase_T () {}
 
   // override (part of) ACE_Service_Handler
   virtual void act (const void*); // act
@@ -262,28 +262,28 @@ class Net_AsynchStreamConnectionBase_T
                             ACE_Reactor_Mask = ACE_Event_Handler::ALL_EVENTS_MASK); // event mask
 
   // implement (part of) Net_IStreamConnection_T
-  inline virtual bool collect (StatisticContainerType& statistic_out) { return stream_.collect (statistic_out); }; // return value: statistic data
-  inline virtual void report () const { stream_.report (); };
+  inline virtual bool collect (StatisticContainerType& statistic_out) { return stream_.collect (statistic_out); }
+  inline virtual void report () const { stream_.report (); }
   virtual void dump_state () const;
-  //inline virtual void info (ACE_HANDLE& handle_out, AddressType& localSAP_out, AddressType& peerSAP_out) const { handle_out = inherited::handle (); localSAP_out = inherited::localSAP_; peerSAP_out = inherited::peerSAP_; };
+  //inline virtual void info (ACE_HANDLE& handle_out, AddressType& localSAP_out, AddressType& peerSAP_out) const { handle_out = inherited::handle (); localSAP_out = inherited::localSAP_; peerSAP_out = inherited::peerSAP_; }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  inline virtual Net_ConnectionId_t id () const { return reinterpret_cast<Net_ConnectionId_t> (inherited::handle ()); };
+  inline virtual Net_ConnectionId_t id () const { return reinterpret_cast<Net_ConnectionId_t> (inherited::handle ()); }
 #else
-  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::handle ()); };
+  inline virtual Net_ConnectionId_t id () const { return static_cast<Net_ConnectionId_t> (inherited::handle ()); }
 #endif
-  inline virtual ACE_Notification_Strategy* notification () { return this; };
-  inline virtual void close ();
+  inline virtual ACE_Notification_Strategy* notification () { return this; }
+  virtual void close ();
   virtual void waitForCompletion (bool = true); // wait for thread(s) ?
   // -------------------------------------
   virtual void set (enum Net_ClientServerRole);
-  inline virtual const HandlerConfigurationType& getR_2 () const { ACE_ASSERT (inherited::configuration_); return *(inherited::configuration_); };
+  inline virtual const HandlerConfigurationType& getR_2 () const { ACE_ASSERT (inherited::configuration_); return *(inherited::configuration_); }
   // *IMPORTANT NOTE*: fire-and-forget API
   virtual void send (ACE_Message_Block*&);
   // -------------------------------------
-  inline virtual unsigned int flush (bool flushSessionMessages_in = false) { return stream_.flush (false, flushSessionMessages_in, false); };
+  inline virtual unsigned int flush (bool flushSessionMessages_in = false) { return stream_.flush (false, flushSessionMessages_in, false); }
   // *NOTE*: this waits for outbound (!) data only
   virtual void waitForIdleState () const;
-  inline virtual const StreamType& stream () const { return stream_; };
+  inline virtual const StreamType& stream () const { return stream_; }
   virtual bool wait (StreamStatusType,
                      const ACE_Time_Value* = NULL); // timeout (absolute) ? : block
 

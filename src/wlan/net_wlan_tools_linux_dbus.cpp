@@ -1465,7 +1465,7 @@ Net_WLAN_Tools::isWPASupplicantManagingInterface (struct DBusConnection* connect
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::isWPASupplicantManagingInterface"));
 
-  bool result = false;
+//  bool result = false;
 
   // sanity check(s)
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
@@ -1503,7 +1503,7 @@ Net_WLAN_Tools::isWPASupplicantManagingInterface (struct DBusConnection* connect
   struct DBusMessage* reply_p = NULL;
   struct DBusMessageIter iterator, iterator_2, iterator_3;
   char* string_p = NULL;
-  char character_c = 0;
+//  char character_c = 0;
   const char* argument_string_p = NULL;
   struct DBusMessage* message_p =
       dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_DBUS_WPASUPPLICANT_SERVICE),
@@ -1611,7 +1611,7 @@ Net_WLAN_Tools::WPASupplicantManageInterface (struct DBusConnection* connection_
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::WPASupplicantManageInterface"));
 
-  bool result = false;
+//  bool result = false;
 
   // sanity check(s)
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
@@ -1753,7 +1753,8 @@ Net_WLAN_Tools::dBusObjectPathToIdentifier (struct DBusConnection* connection_in
   ACE_ASSERT (connection_in);
   ACE_ASSERT (!objectPath_in.empty ());
 
-  struct DBusMessageIter iterator, iterator_2;
+  struct DBusMessageIter iterator;
+//  struct DBusMessageIter iterator_2;
   struct DBusMessage* message_p =
       dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_DBUS_WPASUPPLICANT_SERVICE),
                                     objectPath_in.c_str (),
@@ -1836,7 +1837,8 @@ Net_WLAN_Tools::identifierToDBusObjectPath (struct DBusConnection* connection_in
   ACE_ASSERT (connection_in);
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
 
-  struct DBusMessageIter iterator, iterator_2;
+  struct DBusMessageIter iterator;
+//  struct DBusMessageIter iterator_2;
   struct DBusMessage* message_p =
       dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_DBUS_WPASUPPLICANT_SERVICE),
                                     ACE_TEXT_ALWAYS_CHAR (NET_WLAN_DBUS_WPASUPPLICANT_OBJECT_PATH),

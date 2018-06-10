@@ -69,9 +69,9 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct Test_U_StreamConfiguration,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
-typedef Net_StreamConnectionConfiguration_T<struct Test_U_ConnectionConfiguration,
-                                            struct Common_FlexParserAllocatorConfiguration,
-                                            Test_U_StreamConfiguration_t> Test_U_ConnectionConfiguration_t;
+typedef Net_ConnectionConfiguration_T<struct Test_U_ConnectionConfiguration,
+                                      struct Common_FlexParserAllocatorConfiguration,
+                                      Test_U_StreamConfiguration_t> Test_U_ConnectionConfiguration_t;
 typedef Net_Connection_Manager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  Test_U_ConnectionConfiguration_t,

@@ -89,7 +89,7 @@ struct Test_U_SocketHandlerConfiguration
    ///////////////////////////////////////
    , connectionConfiguration (NULL)
    , userData (NULL)
-  {};
+  {}
 
   struct Test_U_ConnectionConfiguration* connectionConfiguration;
 
@@ -104,9 +104,9 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct Stream_ModuleConfiguration,
                                struct Test_U_ModuleHandlerConfiguration> Test_U_StreamConfiguration_t;
 //struct Test_U_ConnectionConfiguration;
-typedef Net_StreamConnectionConfiguration_T<struct Test_U_ConnectionConfiguration,
-                                            struct Common_FlexParserAllocatorConfiguration,
-                                            Test_U_StreamConfiguration_t> Test_U_ConnectionConfiguration_t;
+typedef Net_ConnectionConfiguration_T<struct Test_U_ConnectionConfiguration,
+                                      struct Common_FlexParserAllocatorConfiguration,
+                                      Test_U_StreamConfiguration_t> Test_U_ConnectionConfiguration_t;
 struct Test_U_ConnectionState
  : HTTP_ConnectionState
 {
@@ -114,7 +114,7 @@ struct Test_U_ConnectionState
    : HTTP_ConnectionState ()
    , configuration (NULL)
    , userData (NULL)
-  {};
+  {}
 
   Test_U_ConnectionConfiguration_t* configuration;
 
@@ -135,7 +135,7 @@ struct Test_U_ConnectionConfiguration
    , connectionManager (NULL)
    , socketHandlerConfiguration ()
    , userData (NULL)
-  {};
+  {}
 
   Test_U_IConnectionManager_t*             connectionManager;
   struct Test_U_SocketHandlerConfiguration socketHandlerConfiguration;

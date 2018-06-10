@@ -15,32 +15,33 @@ add_library (${PROJECT_NAME}_Protocol_BitTorrent STATIC "")
 
 include (FindPkgConfig)
 if (UNIX)
- #pkg_check_modules (PKG_ACE REQUIRED ACE)
+ pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libavformat libswscale)
+ pkg_check_modules (PKG_FLEX REQUIRED libfl)
 # if (GTK3_SUPPORT)
 #  pkg_check_modules (PKG_GTK3 REQUIRED gtk+-3.0)
- pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libavformat libswscale)
-else ()
+#else ()
 ## pkg_check_modules (PKG_GTK_GLADE REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0 libglade-2.0)
 #  pkg_check_modules (PKG_GTK2 REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0)
 # endif ()
-endif ()
+# pkg_check_modules (PKG_ACE REQUIRED ACE)
+endif (UNIX)
 
-set (FLEX_LIB_FILE libfl.so)
+#set (FLEX_LIB_FILE libfl.so)
 if (UNIX)
- find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
-               DOC "searching for ${FLEX_LIB_FILE} (system paths)")
+# find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
+#               DOC "searching for ${FLEX_LIB_FILE} (system paths)")
 elseif (WIN32)
- unset (FLEX_LIB_FILE)
+# unset (FLEX_LIB_FILE)
  set (FLEX_LIB_FILE libfl.lib)
 # find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
 #               PATHS ${PROJECTS_DIRECTORY}/flex
 #               PATH_SUFFIXES lib
 #               DOC "searching for ${FLEX_LIB_FILE}")
+ if (NOT FLEX_LIBRARY)
+  message (FATAL_ERROR "could not find ${FLEX_LIB_FILE} (was: \"${FLEX_LIBRARY}\"), aborting")
+ endif (NOT FLEX_LIBRARY)
 endif ()
 #if (NOT EXISTS ACE_LIBRARY)
-if (NOT FLEX_LIBRARY)
-# message (FATAL_ERROR "could not find ${FLEX_LIB_FILE} (was: \"${FLEX_LIBRARY}\"), aborting")
-endif ()
 
 set (PROJECTS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../../../..)
 set (OPENSSL_LIB_FILE libeay32.lib)
@@ -90,6 +91,8 @@ if (UNIX)
 # endif ()
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${PKG_FLEX_INCLUDE_DIRS}>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/ACE>)

@@ -138,9 +138,9 @@ Test_U_Stream_T<TimerManagerType>::initialize (const typename inherited::CONFIGU
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
-  struct Test_U_HTTPDecoder_SessionData& session_data_r =
-      const_cast<struct Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->getR ());
-  //session_data_r.sessionID = configuration_in.sessionID;
+//  struct Test_U_HTTPDecoder_SessionData& session_data_r =
+//      const_cast<struct Test_U_HTTPDecoder_SessionData&> (inherited::sessionData_->getR ());
+  //session_data_r.sessionId = configuration_in.sessionId;
   // *TODO*: remove type inferences
   //session_data_r.targetFileName =
   //  configuration_in.moduleHandlerConfiguration->targetFileName;

@@ -51,7 +51,7 @@
 #include "net_wlan_imonitor.h"
 #include "net_wlan_inetmonitor.h"
 
-struct  Net_WLAN_MonitorConfiguration
+struct Net_WLAN_MonitorConfiguration
 {
   Net_WLAN_MonitorConfiguration ()
    : autoAssociate (false)
@@ -89,7 +89,7 @@ struct  Net_WLAN_MonitorConfiguration
    , SSID ()
    , subscriber (NULL)
    , userData (NULL)
-  {};
+  {}
 
   bool                          autoAssociate;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

@@ -110,7 +110,6 @@ Test_U_Stream::initialize (const CONFIGURATION_T& configuration_in,
 //  struct Test_U_StreamSessionData* session_data_p = NULL;
   Stream_Module_t* module_p = NULL;
   //ClientServer_Module_TCPSocketHandler* socketHandler_impl_p = NULL;
-  inherited::WRITER_T* socketHandler_impl_p = NULL;
 
   // allocate a new session state, reset stream
   const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =

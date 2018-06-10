@@ -100,9 +100,9 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct Stream_ModuleConfiguration,
                                struct DHCPClient_ModuleHandlerConfiguration> DHCPClient_StreamConfiguration_t;
 struct DHCPClient_ConnectionConfiguration;
-typedef Net_StreamConnectionConfiguration_T<struct DHCPClient_ConnectionConfiguration,
-                                            struct Common_FlexParserAllocatorConfiguration,
-                                            DHCPClient_StreamConfiguration_t> DHCPClient_ConnectionConfiguration_t;
+typedef Net_ConnectionConfiguration_T<struct DHCPClient_ConnectionConfiguration,
+                                      struct Common_FlexParserAllocatorConfiguration,
+                                      DHCPClient_StreamConfiguration_t> DHCPClient_ConnectionConfiguration_t;
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  DHCPClient_ConnectionConfiguration_t,

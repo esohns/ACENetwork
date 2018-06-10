@@ -870,11 +870,11 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
 
     GtkListStore* list_store_p = NULL;
 #if GTK_CHECK_VERSION (3,0,0)
-    GValue value = G_VALUE_INIT;
+    GValue value_s = G_VALUE_INIT;
 #else
-    GValue value;
-    g_value_init (&value, G_TYPE_STRING);
+    GValue value_s;
 #endif
+    g_value_init (&value_s, G_TYPE_STRING);
     GtkTreeIter iterator_2;
     GtkComboBox* combo_box_p =
         GTK_COMBO_BOX (gtk_builder_get_object ((*iterator).second.second,
@@ -890,17 +890,17 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
       gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
                                 &iterator_2,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                1, &value);
-      ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
+                                1, &value_s);
+      ACE_ASSERT (G_VALUE_TYPE (&value_s) == G_TYPE_STRING);
       data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
-        Common_Tools::StringToGUID (g_value_get_string (&value));
+        Common_Tools::StringToGUID (g_value_get_string (&value_s));
 #else
-                                0, &value);
-      ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
+                                0, &value_s);
+      ACE_ASSERT (G_VALUE_TYPE (&value_s) == G_TYPE_STRING);
       data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier =
-          ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value));
+          ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value_s));
 #endif
-      g_value_unset (&value);
+      g_value_unset (&value_s);
     } // end IF
 
     combo_box_p =
@@ -914,14 +914,14 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
           GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
                                                   ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_LISTSTORE_SSID_NAME)));
       ACE_ASSERT (list_store_p);
-      g_value_init (&value, G_TYPE_STRING);
+      g_value_init (&value_s, G_TYPE_STRING);
       gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
                                 &iterator_2,
-                                0, &value);
-      ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
+                                0, &value_s);
+      ACE_ASSERT (G_VALUE_TYPE (&value_s) == G_TYPE_STRING);
       data_p->configuration->WLANMonitorConfiguration.SSID =
-          ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value));
-      g_value_unset (&value);
+          ACE_TEXT_ALWAYS_CHAR (g_value_get_string (&value_s));
+      g_value_unset (&value_s);
     } // end IF
 
     GtkCheckButton* check_button_p =
@@ -1223,7 +1223,7 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
       GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_LISTSTORE_INTERFACE_NAME)));
   ACE_ASSERT (list_store_p);
-  GValue value;
+  GValue value = G_VALUE_INIT;
   g_value_init (&value, G_TYPE_STRING);
   gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
                             &iterator_2,
@@ -1380,7 +1380,7 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   ACE_ASSERT (list_store_p);
   gint n_rows = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (list_store_p),
                                                 NULL);
-  GValue value;
+  GValue value = G_VALUE_INIT;
   g_value_init (&value, G_TYPE_STRING);
 
   GtkTreeIter iterator_2;

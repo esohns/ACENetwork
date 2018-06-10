@@ -33,6 +33,9 @@
 #include <guiddef.h>
 #endif // ACE_WIN32 || ACE_WIN64
 
+#if defined (NETLINK_SUPPORT)
+#include "ace/Netlink_Addr.h"
+#endif // NETLINK_SUPPORT
 #include "ace/Synch_Traits.h"
 #include "ace/Time_Value.h"
 
@@ -161,6 +164,29 @@ enum Net_Connection_Status
   ////////////////////////////////////////
   NET_CONNECTION_STATUS_MAX
 };
+
+#if defined (NETLINK_SUPPORT)
+class Net_Netlink_Addr
+ : public ACE_Netlink_Addr
+{
+  typedef ACE_Netlink_Addr inherited;
+
+ public:
+  Net_Netlink_Addr ();
+  Net_Netlink_Addr (const sockaddr_nl*, // address
+                    int);               // length
+  inline virtual ~Net_Netlink_Addr () {}
+
+  inline Net_Netlink_Addr& operator= (const ACE_Addr& rhs) { *this = rhs; return *this; }
+
+  virtual int addr_to_string (ACE_TCHAR[],    // buffer
+                              size_t,         // size
+                              int = 1) const; // ipaddr_format
+  inline bool is_any (void) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
+
+  inline void reset (void) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+};
+#endif // NETLINK_SUPPORT
 
 typedef Stream_Statistic Net_Statistic_t;
 typedef Common_IStatistic_T<Net_Statistic_t> Net_IStatisticHandler_t;

@@ -31,7 +31,6 @@
 #include "ace/Basic_Types.h"
 #include "ace/INET_Addr.h"
 #include "ace/Log_Msg.h"
-#include "ace/Netlink_Addr.h"
 #include "ace/Time_Value.h"
 
 #include "common_configuration.h"
@@ -51,29 +50,6 @@
 // forward declarations
 class Stream_IAllocator;
 struct Net_UserData;
-
-#if defined (NETLINK_SUPPORT)
-class Net_Netlink_Addr
- : public ACE_Netlink_Addr
-{
-  typedef ACE_Netlink_Addr inherited;
-
- public:
-  Net_Netlink_Addr ();
-  Net_Netlink_Addr (const sockaddr_nl*, // address
-                    int);               // length
-  inline virtual ~Net_Netlink_Addr () {}
-
-  inline Net_Netlink_Addr& operator= (const ACE_Addr& rhs) { *this = rhs; return *this; }
-
-  virtual int addr_to_string (ACE_TCHAR[],    // buffer
-                              size_t,         // size
-                              int = 1) const; // ipaddr_format
-  inline bool is_any (void) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
-
-  inline void reset (void) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
-};
-#endif // NETLINK_SUPPORT
 
 struct Net_AllocatorConfiguration
  : Common_AllocatorConfiguration
@@ -245,11 +221,11 @@ class Common_ITimer;
 template <typename ConnectionConfigurationType, // derives from Net_ConnectionConfiguration
           typename AllocatorConfigurationType,
           typename StreamConfigurationType>
-class Net_StreamConnectionConfiguration_T;
+class Net_ConnectionConfiguration_T;
 struct Net_ConnectionConfiguration;
-typedef Net_StreamConnectionConfiguration_T<struct Net_ConnectionConfiguration,
-                                            struct Net_AllocatorConfiguration,
-                                            struct Stream_Configuration> Net_ConnectionConfiguration_t;
+typedef Net_ConnectionConfiguration_T<struct Net_ConnectionConfiguration,
+                                      struct Net_AllocatorConfiguration,
+                                      struct Stream_Configuration> Net_ConnectionConfiguration_t;
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  Net_ConnectionConfiguration_t,
@@ -289,14 +265,14 @@ typedef Net_ConnectionConfigurations_t::iterator Net_ConnectionConfigurationIter
 template <typename ConnectionConfigurationType, // derives from Net_ConnectionConfiguration
           typename AllocatorConfigurationType,
           typename StreamConfigurationType>
-class Net_StreamConnectionConfiguration_T
+class Net_ConnectionConfiguration_T
  : public ConnectionConfigurationType
 {
   typedef ConnectionConfigurationType inherited;
 
  public:
-  Net_StreamConnectionConfiguration_T ();
-  inline virtual ~Net_StreamConnectionConfiguration_T () {}
+  Net_ConnectionConfiguration_T ();
+  inline virtual ~Net_ConnectionConfiguration_T () {}
 
   bool initialize (const AllocatorConfigurationType&,
                    const StreamConfigurationType&);

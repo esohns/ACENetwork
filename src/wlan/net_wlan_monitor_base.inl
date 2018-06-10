@@ -85,7 +85,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #endif // WLANAPI_SUPPORT
  , scanTimerId_ (-1)
  , timerHandler_ (this,
-                  false)
+                  true) // one-shot ?
  , timerInterface_ (NULL)
 #elif defined (ACE_LINUX)
 #if defined (WEXT_SUPPORT)
@@ -335,8 +335,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #if defined (WEXT_SUPPORT)
     if (buffer_)
     {
-      ACE_OS::free (buffer_);
-      buffer_ = NULL;
+      ACE_OS::free (buffer_); buffer_ = NULL;
     } // end IF
     bufferSize_ = 0;
     ACE_ASSERT (handle_ == ACE_INVALID_HANDLE);
@@ -346,8 +345,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 
     if (socketHandle_)
     {
-      nl_socket_free (socketHandle_);
-      socketHandle_ = NULL;
+      nl_socket_free (socketHandle_); socketHandle_ = NULL;
     } // end  IF
 #endif // NL80211_SUPPORT
 
@@ -518,10 +516,12 @@ retry:
   // sanity check(s)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   bool subscribe_this = false;
-  if (!configuration_->notificationCB)
+  if (!configuration_->notificationCB ||
+      (configuration_->notificationCB == network_wlan_default_notification_cb)) // re-initialized ?
   {
-    ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("WLAN API notification callback not specified, using default implementation\n")));
+    if (!configuration_->notificationCB)
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("WLAN API notification callback not specified, using default implementation\n")));
     configuration_->notificationCB = network_wlan_default_notification_cb;
     configuration_->notificationCBData =
         static_cast<Net_WLAN_IMonitorCB*> (this);
@@ -988,7 +988,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
          )
 #else
-          inherited::hasShutDown ())
+          || inherited::hasShutDown ())
 #endif // ACE_WIN32 || ACE_WIN64
       {
         inherited::change (NET_WLAN_MONITOR_STATE_INITIALIZED);
@@ -1007,6 +1007,15 @@ Net_WLAN_Monitor_Base_T<AddressType,
         break;
 
 continue_:
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_USE)
+        if (unlikely (scanTimerId_ == -1))
+          if (!startScanTimer (ACE_Time_Value::zero))
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to start scan timer, continuing\n")));
+        break; // nothing to do at this point
+#endif // WLANAPI_USE
+#endif // ACE_WIN32 || ACE_WIN64
         inherited::change (NET_WLAN_MONITOR_STATE_SCAN);
         break;
       } // end IF
@@ -1036,6 +1045,15 @@ continue_:
           !essid_is_cached              || // configured SSID unknown (i.e. not cached yet)
           !configuration_->autoAssociate)  // auto-associate disabled
       {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_USE)
+        if (unlikely (scanTimerId_ == -1))
+          if (!startScanTimer (ACE_Time_Value::zero))
+            ACE_DEBUG ((LM_ERROR,
+                        ACE_TEXT ("failed to start scan timer, continuing\n")));
+        break; // nothing to do at this point
+#endif // WLANAPI_USE
+#endif // ACE_WIN32 || ACE_WIN64
         inherited::change (NET_WLAN_MONITOR_STATE_SCAN);
         goto reset_state;
       } // end IF
@@ -1730,7 +1748,7 @@ associate:
       std::string SSID_string = this->SSID ();
       if (unlikely (!isConnectionNotified_ &&
                     ((configuration_->SSID.empty () &&
-                      !SSID_string.empty ()) ||                 // not configured, associated
+                      !SSID_string.empty ()) ||                  // not configured, associated
                      (!configuration_->SSID.empty () &&
                       !SSID_string.empty ()          &&
                       !ACE_OS::strcmp (configuration_->SSID.c_str (),
@@ -1774,9 +1792,9 @@ associate:
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
                     &scan_interval));
-#endif // ACE_WIN32 || ACE_WIN64
 
       inherited::change (NET_WLAN_MONITOR_STATE_IDLE);
+#endif // ACE_WIN32 || ACE_WIN64
 
       break;
     }
@@ -1929,10 +1947,7 @@ continue_2:
 continue_3:
       if (unlikely (isFirstConnect_))
         isFirstConnect_ = false;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      if (unlikely (scanTimerId_ == -1))
-        startScanTimer ();
-#endif // ACE_WIN32 || ACE_WIN64
+
       inherited::change (NET_WLAN_MONITOR_STATE_IDLE);
       
       break;
@@ -1951,69 +1966,82 @@ continue_3:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 template <typename AddressType,
           typename ConfigurationType>
-void
+bool
 Net_WLAN_Monitor_Base_T<AddressType,
-                        ConfigurationType>::startScanTimer ()
+                        ConfigurationType>::startScanTimer (const ACE_Time_Value& delay_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::startScanTimer"));
+
+  bool result = false;
 
   // sanity check(s)
   ACE_ASSERT (scanTimerId_ == -1);
   ACE_ASSERT (timerInterface_);
 
-  ACE_Time_Value scan_interval (NET_WLAN_MONITOR_WIN32_SCAN_INTERVAL,
-                                0);
+  // *NOTE*: the timer is restarted automatically in the callback handler
+  //         --> do not delay
+  ACE_Time_Value elapsed = COMMON_TIME_NOW;
   try {
     scanTimerId_ =
       timerInterface_->schedule_timer (&timerHandler_,
                                        NULL, // no ACT
-                                       COMMON_TIME_NOW + scan_interval,
-                                       scan_interval);
+                                       delay_in,
+                                       ACE_Time_Value::zero);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in Common_ITimer_T::schedule_timer(%T#), continuing\n"),
-                &scan_interval));
+                &delay_in));
   }
   if (unlikely (scanTimerId_ == -1))
+  {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_ITimer_T::schedule_timer(%T#): \"%m\", continuing\n"),
-                &scan_interval));
+                &delay_in));
+    return false;
+  } // end IF
 #if defined (_DEBUG)
-  else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("started WLAN scan interval timer (id: %d, %#T)\n"),
-                scanTimerId_,
-                &scan_interval));
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("started WLAN scan timer (id: %d)\n"),
+              scanTimerId_));
 #endif // _DEBUG
+
+  return true;
 }
 template <typename AddressType,
           typename ConfigurationType>
-void
+bool
 Net_WLAN_Monitor_Base_T<AddressType,
                         ConfigurationType>::cancelScanTimer ()
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::cancelScanTimer"));
 
+  bool result = false;
+
   // sanity check(s)
   ACE_ASSERT (scanTimerId_ != -1);
 
-  int result = -1;
+  int result_2 = -1;
   const void* act_p = NULL;
   try {
-    result = timerInterface_->cancel_timer (scanTimerId_,
-                                            &act_p,
-                                            1);
+    result_2 = timerInterface_->cancel_timer (scanTimerId_,
+                                              &act_p,
+                                              1);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_ITimer_T::cancel_timer(%d), continuing\n"),
+                ACE_TEXT ("caught exception in Common_ITimer_T::cancel_timer(%d), aborting\n"),
                 scanTimerId_));
   }
-  if (unlikely (result == -1))
+  if (unlikely (result_2 == -1))
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_ITimer_T::cancel_timer(%d): \"%m\", continuing\n"),
+                ACE_TEXT ("failed to Common_ITimer_T::cancel_timer(%d): \"%m\", aborting\n"),
                 scanTimerId_));
+  else
+    result = true;
+
   scanTimerId_ = -1;
   ACE_UNUSED_ARG (act_p);
+
+  return result;
 }
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -2562,6 +2590,12 @@ Net_WLAN_Monitor_Base_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::onScanComplete"));
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // step0: restart scan timer ?
+  if (likely (scanTimerId_ == -1))
+    if (unlikely (!startScanTimer (ACE_Time_Value (NET_WLAN_MONITOR_WIN32_SCAN_INTERVAL, 0))))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to start scan timer, continuing\n")));
+
   // step1: update the cache
   Net_WLAN_AccessPointCacheConstIterator_t iterator;
 #if defined (_DEBUG)
@@ -2614,8 +2648,8 @@ Net_WLAN_Monitor_Base_T<AddressType,
                   ACE_TEXT ((*iterator_2).c_str ())));
 #endif // _DEBUG
 
-  inherited::change (NET_WLAN_MONITOR_STATE_SCANNED);
 #elif defined (ACE_LINUX)
+  inherited::change (NET_WLAN_MONITOR_STATE_SCANNED);
 #endif // ACE_WIN32 || ACE_WIN64
 
   // synch access

@@ -87,9 +87,9 @@ typedef Stream_Configuration_T<//stream_name_string_,
                                struct Stream_ModuleConfiguration,
                                struct Test_I_URLStreamLoad_ModuleHandlerConfiguration> Test_I_URLStreamLoad_StreamConfiguration_t;
 struct Test_I_URLStreamLoad_ConnectionConfiguration;
-typedef Net_StreamConnectionConfiguration_T<struct Test_I_URLStreamLoad_ConnectionConfiguration,
-                                            struct Common_FlexParserAllocatorConfiguration,
-                                            Test_I_URLStreamLoad_StreamConfiguration_t> Test_I_URLStreamLoad_ConnectionConfiguration_t;
+typedef Net_ConnectionConfiguration_T<struct Test_I_URLStreamLoad_ConnectionConfiguration,
+                                      struct Common_FlexParserAllocatorConfiguration,
+                                      Test_I_URLStreamLoad_StreamConfiguration_t> Test_I_URLStreamLoad_ConnectionConfiguration_t;
 typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
                                  ACE_INET_Addr,
                                  Test_I_URLStreamLoad_ConnectionConfiguration_t,

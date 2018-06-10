@@ -325,7 +325,8 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::cancel ()
         (error != ERROR_NOT_FOUND)         && // 1168: [client: local close()]
         (error != ERROR_CONNECTION_ABORTED))  // 1236: [client: local close()]
 #else
-    if (error == EINPROGRESS) result_2 = 0; // --> AIO_CANCELED
+    if (error == EINPROGRESS)
+      result = 0; // --> AIO_CANCELED
     if ((error != ENOENT)     && // 2  : *TODO*
         (error != EBADF)      && // 9  : Linux [client: local close()]
         (error != EPIPE)      && // 32 : Linux [client: remote close()]

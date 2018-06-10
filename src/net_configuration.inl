@@ -25,15 +25,15 @@
 template <typename ConnectionConfigurationType,
           typename AllocatorConfigurationType,
           typename StreamConfigurationType>
-Net_StreamConnectionConfiguration_T<ConnectionConfigurationType,
-                                    AllocatorConfigurationType,
-                                    StreamConfigurationType>::Net_StreamConnectionConfiguration_T ()
+Net_ConnectionConfiguration_T<ConnectionConfigurationType,
+                              AllocatorConfigurationType,
+                              StreamConfigurationType>::Net_ConnectionConfiguration_T ()
  : inherited ()
  , allocatorConfiguration_ ()
  , streamConfiguration_ (NULL)
  , isInitialized_ (false)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionConfiguration_T::Net_StreamConnectionConfiguration_T"));
+  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionConfiguration_T::Net_ConnectionConfiguration_T"));
 
 }
 
@@ -41,12 +41,12 @@ template <typename ConnectionConfigurationType,
           typename AllocatorConfigurationType,
           typename StreamConfigurationType>
 bool
-Net_StreamConnectionConfiguration_T<ConnectionConfigurationType,
-                                    AllocatorConfigurationType,
-                                    StreamConfigurationType>::initialize (const AllocatorConfigurationType& allocatorConfiguration_in,
-                                                                          const StreamConfigurationType& streamConfiguration_in)
+Net_ConnectionConfiguration_T<ConnectionConfigurationType,
+                              AllocatorConfigurationType,
+                              StreamConfigurationType>::initialize (const AllocatorConfigurationType& allocatorConfiguration_in,
+                                                                    const StreamConfigurationType& streamConfiguration_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_StreamConnectionConfiguration_T::initialize"));
+  NETWORK_TRACE (ACE_TEXT ("Net_ConnectionConfiguration_T::initialize"));
 
   if (isInitialized_)
   {

@@ -44,6 +44,9 @@ class Net_IConnectorBase_T
 //////////////////////////////////////////
 
 template <typename AddressType,
+          typename ConfigurationType>
+class Net_IAsynchConnector_T;
+template <typename AddressType,
           typename ConfigurationType> // connection-
 class Net_IConnector_T
  : public Net_IConnectorBase_T<AddressType>
@@ -53,6 +56,8 @@ class Net_IConnector_T
  public:
   // convenient types
   typedef ConfigurationType CONFIGURATION_T;
+  typedef Net_IAsynchConnector_T<AddressType,
+                                 ConfigurationType> IASYNCH_CONNECTOR_T;
 };
 
 template <typename AddressType,

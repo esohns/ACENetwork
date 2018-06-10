@@ -24,6 +24,11 @@
 #include <limits>
 #include <string>
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#include <net/ethernet.h>
+#endif // ACE_WIN32 || ACE_WIN64
+
 #include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #elif defined (ACE_LINUX)
@@ -39,8 +44,9 @@ extern "C"
 #include "ace/INET_Addr.h"
 
 #include "net_common.h"
-#include "net_configuration.h"
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "net_packet_headers.h"
+#endif // ACE_WIN32 || ACE_WIN64
 
 // forward declarations
 #if defined (NETLINK_SUPPORT)

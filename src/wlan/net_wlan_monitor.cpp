@@ -1052,6 +1052,7 @@ nla_put_failure:
 
       enum nl80211_reg_initiator initiator_e =
           static_cast<enum nl80211_reg_initiator> (nla_get_u32 (nlattr_a[NL80211_ATTR_REG_INITIATOR]));
+      ACE_UNUSED_ARG (initiator_e);
       unsigned int wiphy_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_WIPHY]);
       enum nl80211_reg_type reg_type_e =
           static_cast<enum nl80211_reg_type> (nla_get_u32 (nlattr_a[NL80211_ATTR_REG_TYPE]));

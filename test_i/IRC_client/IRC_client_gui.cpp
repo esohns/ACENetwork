@@ -1405,8 +1405,14 @@ ACE_TMAIN (int argc_in,
   configuration.protocolConfiguration.loginOptions.channel =
     ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_CHANNEL);
   // populate user/realname
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   Common_Tools::getUserName (configuration.protocolConfiguration.loginOptions.user.userName,
                              configuration.protocolConfiguration.loginOptions.user.realName);
+#else
+  Common_Tools::getUserName (static_cast<uid_t> (-1),
+                             configuration.protocolConfiguration.loginOptions.user.userName,
+                             configuration.protocolConfiguration.loginOptions.user.realName);
+#endif // ACE_WIN32 || ACE_WIN64
 
   gtk_cb_data.RCFiles.push_back (UIRC_file_name);
 

@@ -43,10 +43,9 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
-#include "net_common.h"
-#include "net_packet_headers.h"
+//#include "net_common.h"
+//#include "net_packet_headers.h"
 
-//#include "net_wlan_exports.h"
 #include "net_wlan_common.h"
 
 // forward declarations

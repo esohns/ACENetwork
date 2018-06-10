@@ -151,9 +151,7 @@ Net_WLAN_Monitor_T<AddressType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_bus_get_private(DBUS_BUS_SYSTEM): \"%s\", returning\n"),
                 ACE_TEXT (error_s.message)));
-
     dbus_error_free (&error_s);
-
     return;
   } // end IF
   dbus_connection_set_exit_on_disconnect (connection_,
@@ -211,9 +209,7 @@ Net_WLAN_Monitor_T<AddressType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to dbus_bus_add_match(): \"%s\", returning\n"),
                 ACE_TEXT (error_s.message)));
-
     dbus_error_free (&error_s);
-
     goto error;
   } // end IF
 
@@ -476,8 +472,8 @@ Net_WLAN_Monitor_T<AddressType,
   // step2: retrieve corresponding access point object path
   std::string access_point_object_path_string =
       Net_WLAN_Tools::SSIDToAccessPointDBusObjectPath (connection_,
-                                                 device_object_path_string,
-                                                 SSID_in);
+                                                       device_object_path_string,
+                                                       SSID_in);
   if (unlikely (access_point_object_path_string.empty ()))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -491,8 +487,8 @@ Net_WLAN_Monitor_T<AddressType,
   // step3: retrieve available and matching connection profile(s)
   std::string connection_object_path_string =
       Net_WLAN_Tools::SSIDToConnectionDBusObjectPath (connection_,
-                                                device_object_path_string,
-                                                SSID_in);
+                                                      device_object_path_string,
+                                                      SSID_in);
   if (unlikely (connection_object_path_string.empty ()))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -696,11 +692,9 @@ sleep:
         dbus_connection_close (connection_);
       } // end IF
       message_block_p->release ();
-
       break; // done
     } // end IF
-    message_block_p->release ();
-    message_block_p = NULL;
+    message_block_p->release (); message_block_p = NULL;
   } while (true);
 
   return 0;

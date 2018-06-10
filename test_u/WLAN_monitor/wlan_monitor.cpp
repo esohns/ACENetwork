@@ -592,10 +592,11 @@ do_work (bool autoAssociate_in,
       WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
 
-    CBData_in.eventHooks.finiHook = idle_finalize_ui_cb;
-    CBData_in.eventHooks.initHook = idle_initialize_ui_cb;
     CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
+    CBData_in.eventHooks.finiHook = idle_finalize_ui_cb;
+    CBData_in.eventHooks.initHook = idle_initialize_ui_cb;
+    CBData_in.monitor = iwlanmonitor_p;
     CBData_in.userData = &CBData_in;
 
     gtk_manager_p->start ();

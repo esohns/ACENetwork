@@ -73,8 +73,8 @@
 #if defined (DBUS_SUPPORT)
 #include "net_wlan_defines.h"
 #endif // DBUS_SUPPORT
-#endif // ACE_LINUX
 #include "net_wlan_tools.h"
+#endif // ACE_LINUX
 
 //////////////////////////////////////////
 
@@ -109,71 +109,16 @@ Net_Common_Tools::toggleInterface (const std::string& interfaceIdentifier_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::toggleInterface"));
 
+  bool result = false;
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
   ACE_ASSERT (false);
   ACE_NOTSUP_RETURN (false);
-
   ACE_NOTREACHED (return false;)
-}
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-bool
-Net_Common_Tools::isInterfaceEnabled (const std::string& interfaceIdentifier_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::isInterfaceEnabled"));
-
-  // sanity check(s)
-  ACE_ASSERT (!interfaceIdentifier_in.empty ());
-
-  bool result = false;
-  struct ifreq ifreq_s;
-  char buffer_a[BUFSIZ];
-  int result_2 = -1;
-  int socket_handle_h = ACE_INVALID_HANDLE;
-
-  socket_handle_h = ACE_OS::socket (AF_INET, SOCK_DGRAM, IPPROTO_IP);
-  if (unlikely (socket_handle_h == -1))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::socket(AF_INET,SOCK_DGRAM,IPPROTO_IP): \"%m\", aborting\n")));
-    return false; // *TODO*: avoid false negatives
-  } // end IF
-
-  ACE_OS::memset (&ifreq_s, 0, sizeof (struct ifreq));
-  ACE_OS::strcpy (ifreq_s.ifr_name, interfaceIdentifier_in.c_str ());
-  result_2 = ACE_OS::ioctl (socket_handle_h,
-                            SIOCGIFFLAGS,
-                            &ifreq_s);
-  if (unlikely (result_2 == -1))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCGIFFLAGS): \"%m\", aborting\n")));
-    goto error;
-  } // end IF
-
-  result = (ifreq_s.ifr_ifru.ifru_flags & IFF_UP);
-
-error:
-  if (socket_handle_h != ACE_INVALID_HANDLE)
-  {
-    result_2 = ACE_OS::close (socket_handle_h);
-    if (unlikely (result_2 == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
-                  socket_handle_h));
-  } // end IF
-
-  return result;
-}
-
-bool
-Net_Common_Tools::toggleInterface (const std::string& interfaceIdentifier_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::toggleInterface"));
-
-  bool result = false;
   struct ifreq ifreq_s;
 //  struct ifconf ifconf_s;
-  char buffer_a[BUFSIZ];
+//  char buffer_a[BUFSIZ];
   int result_2 = -1;
 
   int socket_handle_h = ACE_OS::socket (AF_INET, SOCK_DGRAM, IPPROTO_IP);
@@ -214,6 +159,56 @@ Net_Common_Tools::toggleInterface (const std::string& interfaceIdentifier_in)
   } // end IF
 
   result = true;
+
+error:
+  if (socket_handle_h != ACE_INVALID_HANDLE)
+  {
+    result_2 = ACE_OS::close (socket_handle_h);
+    if (unlikely (result_2 == -1))
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
+                  socket_handle_h));
+  } // end IF
+#endif
+
+  return result;
+}
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+bool
+Net_Common_Tools::isInterfaceEnabled (const std::string& interfaceIdentifier_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::isInterfaceEnabled"));
+
+  // sanity check(s)
+  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+
+  bool result = false;
+  struct ifreq ifreq_s;
+  int result_2 = -1;
+  int socket_handle_h = ACE_INVALID_HANDLE;
+
+  socket_handle_h = ACE_OS::socket (AF_INET, SOCK_DGRAM, IPPROTO_IP);
+  if (unlikely (socket_handle_h == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::socket(AF_INET,SOCK_DGRAM,IPPROTO_IP): \"%m\", aborting\n")));
+    return false; // *TODO*: avoid false negatives
+  } // end IF
+
+  ACE_OS::memset (&ifreq_s, 0, sizeof (struct ifreq));
+  ACE_OS::strcpy (ifreq_s.ifr_name, interfaceIdentifier_in.c_str ());
+  result_2 = ACE_OS::ioctl (socket_handle_h,
+                            SIOCGIFFLAGS,
+                            &ifreq_s);
+  if (unlikely (result_2 == -1))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_OS::ioctl(%d,SIOCGIFFLAGS): \"%m\", aborting\n")));
+    goto error;
+  } // end IF
+
+  result = (ifreq_s.ifr_ifru.ifru_flags & IFF_UP);
 
 error:
   if (socket_handle_h != ACE_INVALID_HANDLE)
@@ -2814,7 +2809,7 @@ Net_Common_Tools::getDefaultInterface (int linkLayerType_in)
 #else
   std::vector<std::string> interfaces;
   std::string interface_identifier;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   for (enum Net_LinkLayerType i = NET_LINKLAYER_ATM;
        i < NET_LINKLAYER_MAX;
        ++i)
@@ -2825,7 +2820,7 @@ Net_Common_Tools::getDefaultInterface (int linkLayerType_in)
       if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
 #else
       if (unlikely (interface_identifier.empty ()))
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_Common_Tools::getDefaultInterface() (type was: \"%s\"), continuing\n"),
@@ -2842,7 +2837,7 @@ Net_Common_Tools::getDefaultInterface (int linkLayerType_in)
   return GUID_NULL;
 #else
   return ACE_TEXT_ALWAYS_CHAR ("");
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 }
 
 bool
@@ -5041,6 +5036,7 @@ Net_Common_Tools::hasDHClientOmapiSupport ()
       is_comment_b = false;
       is_omapi_stanza_b = false;
       is_omapi_port_stanza_b = false;
+      ACE_UNUSED_ARG (is_omapi_port_stanza_b);
       continue;
     } // end IF
     if (!std::regex_match (buffer_line_string,
@@ -5072,6 +5068,7 @@ Net_Common_Tools::hasDHClientOmapiSupport ()
                                 ACE_TEXT_ALWAYS_CHAR ("port")))
       {
         is_omapi_port_stanza_b = true;
+        ACE_UNUSED_ARG (is_omapi_port_stanza_b);
         if (!is_comment_b &&
             match_results[index_i + 1].matched)
         {
@@ -5096,8 +5093,6 @@ bool
 Net_Common_Tools::DHClientOmapiSupport (bool toggle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::DHClientOmapiSupport"));
-
-  bool result = false;
 
   // sanity check(s)
   std::string configuration_file_path =
@@ -5158,6 +5153,7 @@ Net_Common_Tools::DHClientOmapiSupport (bool toggle_in)
     if (Common_Tools::isspace (buffer_line_string))
     {
       is_comment_b = false;
+      ACE_UNUSED_ARG (is_comment_b);
       buffer_string += buffer_line_string;
       continue;
     } // end IF
