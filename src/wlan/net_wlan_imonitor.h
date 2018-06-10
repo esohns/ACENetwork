@@ -197,6 +197,9 @@ class Net_WLAN_IMonitor_T
  , public Common_ISubscribe_T<Net_WLAN_IMonitorCB>
 {
  public:
+  // convenient types
+  typedef Common_ISubscribe_T<Net_WLAN_IMonitorCB> ISUBSCRIBE_T;
+
   virtual bool addresses (AddressType&,            // return value: local SAP
                           AddressType&) const = 0; // return value: peer SAP
 };
