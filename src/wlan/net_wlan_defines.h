@@ -23,6 +23,15 @@
 
 #include "ace/config-lite.h"
 
+// protocol
+// (see also: http://standards.ieee.org/findstds/standard/802.11-2016.html)
+
+// information elements
+// (see also: "Table 7-26—Element IDs")
+#define NET_WLAN_IEEE80211_INFORMATION_ELEMENT_ID_SSID                    0
+
+//////////////////////////////////////////
+
 // monitor
 #define NET_WLAN_MONITOR_AP_ASSOCIATION_RETRIES                           3
 // *NOTE*: 'connection' really refers to the level-3 (i.e. IP) address handshake

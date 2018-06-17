@@ -43,9 +43,6 @@
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 
-//#include "net_common.h"
-//#include "net_packet_headers.h"
-
 #include "net_wlan_common.h"
 
 // forward declarations
@@ -85,6 +82,9 @@ network_wlan_nl80211_feature_cb (struct nl_msg*,
 class Net_WLAN_Tools
 {
  public:
+  static std::string decodeSSID (void*,   // data
+                                 size_t); // length
+
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
   static bool initialize (HANDLE&); // return value: WLAN API client handle
@@ -217,6 +217,8 @@ class Net_WLAN_Tools
   static bool associate (const std::string&,       // interface identifier
                          const struct ether_addr&, // access point BSSID (i.e. access point MAC address)
                          const std::string&,       // (E)SSID
+                         enum nl80211_auth_type,   // authentication type
+                         ACE_UINT32,               // channel frequency (MHz)
                          struct nl_sock*,          // nl80211 (socket) handle (if any)
                          int);                     // "nl80211" driver family identifier
   // *NOTE*: sends NL80211_CMD_CONNECT (and dispatches the result(s)); data

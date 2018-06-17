@@ -131,7 +131,9 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
 #if defined (DHCLIENT_SUPPORT)
+#define NET_EXE_DHCLIENT_CONNECTION_RETRIES                  3
 #define NET_EXE_DHCLIENT_STRING                              "dhclient"
+#define NET_EXE_DHCLIENT_LEASES_FILE                         "/var/lib/dhcp/dhclient.leases"
 #define NET_EXE_DHCLIENT_LOCALHOST_IP_STRING                 "127.0.0.1"
 #define NET_EXE_DHCLIENT_OMAPI_PORT                          7911
 

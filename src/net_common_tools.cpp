@@ -62,6 +62,8 @@
 #include "common_dbus_defines.h"
 #include "common_dbus_tools.h"
 #endif // DBUS_SUPPORT
+
+#include "common_timer_tools.h"
 #endif // ACE_LINUX
 
 #include "net_common.h"
@@ -1220,7 +1222,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
 
   std::string external_ip_address;
   std::istringstream converter;
-  char buffer [BUFSIZ];
+  char buffer_a[BUFSIZ];
   std::string regex_string =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_TEXT_ALWAYS_CHAR ("^([^:]+)(?::[[:blank:]]*)(.+)(?:\r)$");
@@ -1234,8 +1236,8 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
   std::string buffer_string;
   do
   {
-    converter.getline (buffer, sizeof (buffer));
-    buffer_string = buffer;
+    converter.getline (buffer_a, sizeof (char[BUFSIZ]));
+    buffer_string = buffer_a;
     if (!std::regex_match (buffer_string,
                            match_results,
                            regex,
@@ -4353,9 +4355,16 @@ next_3:
 
   if (modified_b)
   {
+    bool drop_capabilities = false;
     bool drop_privileges = false;
     if (!Common_File_Tools::canWrite (configuration_file_path, static_cast<uid_t> (-1)))
-      drop_privileges = Common_Tools::switchUser (0);
+    {
+      if (Common_Tools::canCapability (CAP_DAC_OVERRIDE))
+        drop_capabilities = Common_Tools::setCapability (CAP_DAC_OVERRIDE,
+                                                         CAP_EFFECTIVE);
+      else if (Common_Tools::switchUser (0)) // try seteuid()
+        drop_privileges = true;
+    } // end IF
 
     if (unlikely (!Common_File_Tools::backup (configuration_file_path)))
       ACE_DEBUG ((LM_ERROR,
@@ -4369,13 +4378,15 @@ next_3:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Ini_ImpExp::export_config(\"%s\"): \"%m\", aborting\n"),
                   ACE_TEXT (configuration_file_path.c_str ())));
-
-      if (drop_privileges)
+      if (drop_capabilities)
+        Common_Tools::dropCapability (CAP_DAC_OVERRIDE);
+      else if (drop_privileges)
         Common_Tools::switchUser (static_cast<uid_t> (-1));
-
       return false;
     } // end IF
-    if (drop_privileges)
+    if (drop_capabilities)
+      Common_Tools::dropCapability (CAP_DAC_OVERRIDE);
+    else if (drop_privileges)
       Common_Tools::switchUser (static_cast<uid_t> (-1));
   } // end IF
 
@@ -5207,208 +5218,275 @@ clean:
 }
 
 bool
-Net_Common_Tools::hasActiveLease (dhcpctl_handle connection_in,
+Net_Common_Tools::hasActiveLease (const std::string& leasesFilename_in,
                                   const std::string& interfaceIdentifier_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::hasActiveLease"));
 
   bool result = false;
-  struct __omapi_object* lease_p = dhcpctl_null_handle;
-  isc_result_t status_i, status_2;
-  omapi_data_string_t* string_p = NULL;
-  struct ether_addr ether_addr_s;
-  //  ACE_INET_Addr inet_address, inet_address_2;
-//  std::string ip_address_string;
-#if defined (_DEBUG)
-  char buffer_a[INET_ADDRSTRLEN];
-#endif // _DEBUG
 
   // sanity check(s)
-  ACE_ASSERT (connection_in != dhcpctl_null_handle);
+  ACE_ASSERT (Common_File_Tools::isReadable (leasesFilename_in));
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
-  ACE_OS::memset (&ether_addr_s, 0, sizeof (struct ether_addr));
-//  if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
-//                                                         inet_address,
-//                                                         inet_address_2)))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), aborting\n"),
-//                ACE_TEXT (interfaceIdentifier_in.c_str ())));
-//    return false; // *TODO*: avoid false negatives
-//  } // end IF
-//  ip_address_string =
-//      Net_Common_Tools::IPAddressToString (inet_address,
-//                                           true); // address only
-//  ACE_ASSERT (!ip_address_string.empty ());
-  ether_addr_s =
-      Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in);
 
-  status_i =
-      dhcpctl_new_object (&lease_p,
-                          connection_in,
-                          ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_LEASE_STRING));
-  if (unlikely (status_i != ISC_R_SUCCESS))
+  unsigned char* data_p = NULL;
+  unsigned int file_size_i = 0;
+  std::string file_content_string;
+  std::string::size_type position_i = std::string::npos;
+  if (unlikely (!Common_File_Tools::load (leasesFilename_in,
+                                          data_p,
+                                          file_size_i)))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::dhcpctl_new_object(%@,%s): \"%s\", aborting\n"),
-                connection_in,
-                ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_LEASE_STRING),
-                ACE_TEXT (isc_result_totext (status_i))));
-    return false; // *TODO*: avoid false negatives
+                ACE_TEXT ("failed to Common_File_Tools::load(\"%s\"), aborting\n"),
+                ACE_TEXT (leasesFilename_in.c_str ())));
+    return false;
   } // end IF
-  ACE_ASSERT (lease_p != dhcpctl_null_handle);
+  file_content_string = reinterpret_cast<char*> (data_p);
+  delete [] data_p; data_p = NULL;
+
+  std::istringstream converter;
+  char buffer_a [BUFSIZ];
+  std::string buffer_string;
+  std::string regex_string =
+    ACE_TEXT_ALWAYS_CHAR ("^(?: interface \")(.+)(?:\";)$");
+  std::string regex_string_2 =
+    ACE_TEXT_ALWAYS_CHAR ("^(?: expire [[:digit:]]{1} )(.+)(?:;)$");
+  std::regex regex (regex_string);
+  std::regex regex_2 (regex_string_2);
+  std::smatch match_results;
+  ACE_Time_Value timestamp = ACE_Time_Value::zero;
+
+  converter.str (file_content_string);
+  do
+  {
+    converter.getline (buffer_a, sizeof (char[BUFSIZ]));
+    buffer_string = buffer_a;
+    position_i = buffer_string.find (ACE_TEXT_ALWAYS_CHAR ("lease {"));
+    if (position_i                       ||
+        (position_i == std::string::npos))
+      continue;
+next_attribute:
+    converter.getline (buffer_a, sizeof (char[BUFSIZ]));
+    if (converter.fail ())
+      break;
+    buffer_string = buffer_a;
+    if (!std::regex_match (buffer_string,
+                           match_results,
+                           regex,
+                           std::regex_constants::match_default))
+      goto next_attribute;
+    ACE_ASSERT (match_results.ready () && !match_results.empty ());
+    if (ACE_OS::strcmp (interfaceIdentifier_in.c_str (),
+                        match_results[1].str ().c_str ()))
+      continue;
+next_attribute_2:
+    converter.getline (buffer_a, sizeof (char[BUFSIZ]));
+    if (converter.fail ())
+      break;
+    buffer_string = buffer_a;
+    if (!std::regex_match (buffer_string,
+                           match_results,
+                           regex_2,
+                           std::regex_constants::match_default))
+      goto next_attribute_2;
+    ACE_ASSERT (match_results.ready () && !match_results.empty ());
+    timestamp =
+        Common_Timer_Tools::stringToTimestamp (match_results[1].str ());
+    if (timestamp > COMMON_TIME_NOW)
+    {
+      result = true;
+      break;
+    } // end IF
+  } while (!converter.fail ());
+
+  return result;
+}
+//bool
+//Net_Common_Tools::hasActiveLease (dhcpctl_handle connection_in,
+//                                  const std::string& interfaceIdentifier_in)
+//{
+//  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::hasActiveLease"));
+
+//  bool result = false;
+//  struct __omapi_object* lease_p = dhcpctl_null_handle;
+//  isc_result_t status_i, status_2;
+//  omapi_data_string_t* string_p = NULL;
+//  struct ether_addr ether_addr_s;
+//  ACE_OS::memset (&ether_addr_s, 0, sizeof (struct ether_addr));
+//  //  ACE_INET_Addr inet_address, inet_address_2;
+////  std::string ip_address_string;
+//#if defined (_DEBUG)
+//  char buffer_a[INET_ADDRSTRLEN];
+//#endif // _DEBUG
+
+//  // sanity check(s)
+//  ACE_ASSERT (connection_in != dhcpctl_null_handle);
+//  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+
+//  ether_addr_s =
+//        Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in);
+
 //  status_i =
-////      dhcpctl_set_string_value (lease_p,
-////                                ACE_TEXT_ALWAYS_CHAR (ip_address_string.c_str ()),
-////                                ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_VALUE_IPADDRESS_STRING));
-//  // *NOTE*: see also: http://www.ipamworldwide.com/ipam/isc-dhcp-api.html
-//      dhcpctl_set_int_value (lease_p,
-//                             2, // 2: active
-//                             ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_VALUE_STATE_STRING));
+//      dhcpctl_new_object (&lease_p,
+//                          connection_in,
+//                          ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_LEASE_STRING));
 //  if (unlikely (status_i != ISC_R_SUCCESS))
 //  {
 //    ACE_DEBUG ((LM_ERROR,
-////                ACE_TEXT ("failed to ::dhcpctl_set_string_value(%@,%s,\"%s\"): \"%s\", returning\n"),
-//                ACE_TEXT ("failed to ::dhcpctl_set_int_value(%@,2,\"%s\"): \"%s\", returning\n"),
+//                ACE_TEXT ("failed to ::dhcpctl_new_object(%@,%s): \"%s\", aborting\n"),
+//                connection_in,
+//                ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_LEASE_STRING),
+//                ACE_TEXT (isc_result_totext (status_i))));
+//    return false; // *TODO*: avoid false negatives
+//  } // end IF
+//  ACE_ASSERT (lease_p != dhcpctl_null_handle);
+////  status_i =
+////      dhcpctl_set_string_value (lease_p,
+////                                interfaceIdentifier_in.c_str (),
+////                                ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_INTERFACE_STRING));
+////  if (unlikely (status_i != ISC_R_SUCCESS))
+////  {
+////    ACE_DEBUG ((LM_ERROR,
+////                ACE_TEXT ("failed to ::dhcpctl_set_string_value(%@,\"%s\",\"%s\"): \"%s\", returning\n"),
+////                lease_p,
+////                ACE_TEXT (interfaceIdentifier_in.c_str ()),
+////                ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_INTERFACE_STRING),
+////                ACE_TEXT (isc_result_totext (status_i))));
+////    goto clean; // *TODO*: avoid false negatives
+////  } // end IF
+//  status_i =
+//      dhcpctl_set_data_value (lease_p,
+//                              reinterpret_cast<char*> (&ether_addr_s.ether_addr_octet),
+//                              ETH_ALEN,
+//                              ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_VALUE_HARDWAREADDRESS_STRING));
+//  if (unlikely (status_i != ISC_R_SUCCESS))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ::dhcpctl_set_data_value(%@,%s,\"%s\"): \"%s\", returning\n"),
 //                lease_p,
-////                ACE_TEXT (ip_address_string.c_str ()),
-////                ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_VALUE_IPADDRESS_STRING),
+//                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
+//                ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_VALUE_HARDWAREADDRESS_STRING),
+//                ACE_TEXT (isc_result_totext (status_i))));
+//    goto clean; // *TODO*: avoid false negatives
+//  } // end IF
+//  status_i =
+//      dhcpctl_set_int_value (lease_p,
+//                             1, // 1: ethernet
+//                             ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_VALUE_HARDWARETYPE_STRING));
+//  if (unlikely (status_i != ISC_R_SUCCESS))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ::dhcpctl_set_int_value(%@,%d,\"%s\"): \"%s\", returning\n"),
+//                lease_p,
+//                1,
+//                ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_VALUE_HARDWARETYPE_STRING),
+//                ACE_TEXT (isc_result_totext (status_i))));
+//    goto clean; // *TODO*: avoid false negatives
+//  } // end IF
+
+//  status_i = dhcpctl_open_object (lease_p,
+//                                  connection_in,
+//                                  0);
+//  if (unlikely (status_i != ISC_R_SUCCESS))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ::dhcpctl_open_object(%@,%@,0): \"%s\", returning\n"),
+//                lease_p,
+//                connection_in,
+//                ACE_TEXT (isc_result_totext (status_i))));
+//    goto clean; // *TODO*: avoid false negatives
+//  } // end IF
+//  // *TODO*: add a timeout here, or use asynchronous operations
+//  status_i = dhcpctl_wait_for_completion (lease_p,
+//                                          &status_2);
+//  if (unlikely (status_i != ISC_R_SUCCESS))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ::dhcpctl_wait_for_completion(%@): \"%s\", returning\n"),
+//                lease_p,
+//                ACE_TEXT (isc_result_totext (status_i))));
+//    goto clean; // *TODO*: avoid false negatives
+//  } // end IF
+//  if (unlikely (status_2 != ISC_R_SUCCESS))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ::dhcpctl_open_object(%@,%@,0): \"%s\", returning\n"),
+//                lease_p,
+//                connection_in,
+//                ACE_TEXT (isc_result_totext (status_2))));
+//    goto clean; // *TODO*: avoid false negatives
+//  } // end IF
+
+//  // check lease state
+//  status_i =
+//      dhcpctl_get_value (&string_p,
+//                         lease_p,
+//                         ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_VALUE_STATE_STRING));
+//  if (unlikely (status_i != ISC_R_SUCCESS))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ::dhcpctl_get_value(%@,\"%s\"): \"%s\", returning\n"),
+//                lease_p,
 //                ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_VALUE_STATE_STRING),
 //                ACE_TEXT (isc_result_totext (status_i))));
 //    goto clean; // *TODO*: avoid false negatives
 //  } // end IF
-  status_i =
-      dhcpctl_set_data_value (lease_p,
-                              reinterpret_cast<char*> (&ether_addr_s.ether_addr_octet),
-                              ETH_ALEN,
-                              ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_VALUE_HARDWAREADDRESS_STRING));
-  if (unlikely (status_i != ISC_R_SUCCESS))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::dhcpctl_set_data_value(%@,%s,\"%s\"): \"%s\", returning\n"),
-                lease_p,
-                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
-                ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_VALUE_HARDWAREADDRESS_STRING),
-                ACE_TEXT (isc_result_totext (status_i))));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-  status_i =
-      dhcpctl_set_int_value (lease_p,
-                             1, // 1: ethernet
-                             ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_VALUE_HARDWARETYPE_STRING));
-  if (unlikely (status_i != ISC_R_SUCCESS))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::dhcpctl_set_int_value(%@,%d,\"%s\"): \"%s\", returning\n"),
-                lease_p,
-                1,
-                ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_VALUE_HARDWARETYPE_STRING),
-                ACE_TEXT (isc_result_totext (status_i))));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
+//  ACE_ASSERT (string_p);
+////  if (!omapi_ds_strcmp (string_p,
+////                        ACE_TEXT_ALWAYS_CHAR ("active")))
+////    result = true;
+//  result = (*reinterpret_cast<unsigned int*> (string_p->value) == 2);
+//  status_i =
+//      omapi_data_string_dereference (&string_p, MDL);
+//  ACE_ASSERT (status_i == ISC_R_SUCCESS);
 
-  status_i = dhcpctl_open_object (lease_p,
-                                  connection_in,
-                                  0);
-  if (unlikely (status_i != ISC_R_SUCCESS))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::dhcpctl_open_object(%@,%@,0): \"%s\", returning\n"),
-                lease_p,
-                connection_in,
-                ACE_TEXT (isc_result_totext (status_i))));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-  // *TODO*: add a timeout here, or use asynchronous operations
-  status_i = dhcpctl_wait_for_completion (lease_p,
-                                          &status_2);
-  if (unlikely (status_i != ISC_R_SUCCESS))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::dhcpctl_wait_for_completion(%@): \"%s\", returning\n"),
-                lease_p,
-                ACE_TEXT (isc_result_totext (status_i))));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-  if (unlikely (status_2 != ISC_R_SUCCESS))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::dhcpctl_open_object(%@,%@,0): \"%s\", returning\n"),
-                lease_p,
-                connection_in,
-                ACE_TEXT (isc_result_totext (status_2))));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
+//#if defined (_DEBUG)
+//  string_p = NULL;
+//  status_i =
+//      dhcpctl_get_value (&string_p,
+//                         lease_p,
+//                         ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_VALUE_IPADDRESS_STRING));
+//  if (unlikely (status_i != ISC_R_SUCCESS))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ::dhcpctl_get_value(%@,\"%s\"): \"%s\", returning\n"),
+//                lease_p,
+//                ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_VALUE_IPADDRESS_STRING),
+//                ACE_TEXT (isc_result_totext (status_i))));
+//    goto clean; // *TODO*: avoid false negatives
+//  } // end IF
+//  ACE_ASSERT (string_p);
+//  ACE_OS::memset (buffer_a, 0, sizeof (char[INET_ADDRSTRLEN]));
+//  if (unlikely (!ACE_OS::inet_ntop (AF_INET,
+//                                    string_p->value,
+//                                    buffer_a,
+//                                    sizeof (char[INET_ADDRSTRLEN]))))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ACE_OS::inet_ntop(%d,%@): \"%m\", returning\n"),
+//                AF_INET,
+//                string_p->value));
+//    goto clean; // *TODO*: avoid false negatives
+//  } // end IF
+//  status_i =
+//      omapi_data_string_dereference (&string_p, MDL);
+//  ACE_ASSERT (status_i == ISC_R_SUCCESS);
+//  ACE_DEBUG ((LM_DEBUG,
+//              ACE_TEXT ("DHCP client (IP address: %s) %s an active lease \n"),
+//              ACE_TEXT (buffer_a),
+//              (result ? ACE_TEXT ("has") : ACE_TEXT ("does not have"))));
+//#endif // _DEBUG
 
-  // check lease state
-  status_i =
-      dhcpctl_get_value (&string_p,
-                         lease_p,
-                         ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_VALUE_STATE_STRING));
-  if (unlikely (status_i != ISC_R_SUCCESS))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::dhcpctl_get_value(%@,\"%s\"): \"%s\", returning\n"),
-                lease_p,
-                ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_VALUE_STATE_STRING),
-                ACE_TEXT (isc_result_totext (status_i))));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-  ACE_ASSERT (string_p);
-//  if (!omapi_ds_strcmp (string_p,
-//                        ACE_TEXT_ALWAYS_CHAR ("active")))
-//    result = true;
-  result = (*reinterpret_cast<unsigned int*> (string_p->value) == 2);
-  status_i =
-      omapi_data_string_dereference (&string_p, MDL);
-  ACE_ASSERT (status_i == ISC_R_SUCCESS);
+//clean:
+//  if (likely (lease_p))
+//  {
+//    status_i =
+//        omapi_object_dereference (&lease_p, MDL);
+//    ACE_ASSERT (status_i == ISC_R_SUCCESS);
+//  } // end IF
 
-#if defined (_DEBUG)
-  string_p = NULL;
-  status_i =
-      dhcpctl_get_value (&string_p,
-                         lease_p,
-                         ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_VALUE_IPADDRESS_STRING));
-  if (unlikely (status_i != ISC_R_SUCCESS))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::dhcpctl_get_value(%@,\"%s\"): \"%s\", returning\n"),
-                lease_p,
-                ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_VALUE_IPADDRESS_STRING),
-                ACE_TEXT (isc_result_totext (status_i))));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-  ACE_ASSERT (string_p);
-  ACE_OS::memset (buffer_a, 0, sizeof (char[INET_ADDRSTRLEN]));
-  if (unlikely (!ACE_OS::inet_ntop (AF_INET,
-                                    string_p->value,
-                                    buffer_a,
-                                    sizeof (char[INET_ADDRSTRLEN]))))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::inet_ntop(%d,%@): \"%m\", returning\n"),
-                AF_INET,
-                string_p->value));
-    goto clean; // *TODO*: avoid false negatives
-  } // end IF
-  status_i =
-      omapi_data_string_dereference (&string_p, MDL);
-  ACE_ASSERT (status_i == ISC_R_SUCCESS);
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("DHCP client (IP address: %s) %s an active lease \n"),
-              ACE_TEXT (buffer_a),
-              (result ? ACE_TEXT ("has") : ACE_TEXT ("does not have"))));
-#endif // _DEBUG
-
-clean:
-  if (likely (lease_p))
-  {
-    status_i =
-        omapi_object_dereference (&lease_p, MDL);
-    ACE_ASSERT (status_i == ISC_R_SUCCESS);
-  } // end IF
-
-  return result;
-}
+//  return result;
+//}
 #endif // DHCLIENT_SUPPORT
 #endif // ACE_LINUX

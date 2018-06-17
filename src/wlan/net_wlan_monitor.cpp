@@ -26,6 +26,8 @@
 #else
 #if defined (NL80211_SUPPORT)
 #include "netlink/errno.h"
+
+//#include "iwlib.h"
 #endif  // NL80211_SUPPORT
 
 #if defined (DBUS_SUPPORT)
@@ -880,9 +882,10 @@ nla_put_failure:
       int offset_i = 0;
       struct Net_WLAN_IEEE802_11_InformationElement* information_element_p =
           NULL;
-      char buffer_2[4 + 1]; // '\\xyz\0'
       std::string ssid_string;
+#if defined (_DEBUG)
       char buffer_a[IF_NAMESIZE + 1];
+#endif // _DEBUG
       struct Net_WLAN_AccessPointState state_s;
 
       if (//!nlattr_a[NL80211_ATTR_SCAN_FREQUENCIES] ||
@@ -911,9 +914,21 @@ nla_put_failure:
           !nlattr_2[NL80211_BSS_SEEN_MS_AGO])
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("'bss freq/signal/bssid/ies/age' attribute(s) missing, aborting\n")));
+                    ACE_TEXT ("'bss freq/signal/bssid/IEs/age' attribute(s) missing, aborting\n")));
         return NL_STOP;
       } // end IF
+
+#if defined (_DEBUG)
+      ACE_OS::memset (buffer_a, 0, sizeof (char[IF_NAMESIZE + 1]));
+      if (unlikely (!::if_indextoname (if_index_i,
+                                       buffer_a)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to if_indextoname(%u): \"%m\", aborting\n"),
+                    if_index_i));
+        return NL_STOP;
+      } // end IF
+#endif // _DEBUG
 
       state_s.frequency = nla_get_u32 (nlattr_2[NL80211_BSS_FREQUENCY]);
       state_s.lastSeen = nla_get_u32 (nlattr_2[NL80211_BSS_SEEN_MS_AGO]);
@@ -935,7 +950,7 @@ nla_put_failure:
         information_element_p =
               reinterpret_cast<struct Net_WLAN_IEEE802_11_InformationElement*> (data_p + offset_i);
         // *NOTE*: see aforementioned document "Table 7-26—Element IDs"
-        if (information_element_p->id == 0)
+        if (information_element_p->id == NET_WLAN_IEEE80211_INFORMATION_ELEMENT_ID_SSID)
           break;
         offset_i += (1 + 1 + information_element_p->length);
         information_element_p = NULL;
@@ -943,41 +958,29 @@ nla_put_failure:
       if (unlikely (!information_element_p))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("missing 'SSID' information element, aborting\n")));
+                    ACE_TEXT ("\"%s\": 'bss' missing information element (id was: %u), aborting\n"),
+                    ACE_TEXT (buffer_a),
+                    NET_WLAN_IEEE80211_INFORMATION_ELEMENT_ID_SSID));
         return NL_STOP;
       } // end IF
-      ACE_ASSERT (information_element_p->length <= IW_ESSID_MAX_SIZE);
-      for (int i = 0;
-           i < information_element_p->length;
-           ++i)
+      // *TODO*: the returned SSID IE does not seem to contain any data in some
+      //         cases; find out why
+      if (unlikely (!information_element_p->length ||
+                    (information_element_p->length > IW_ESSID_MAX_SIZE)))
       {
-        if (::isprint (information_element_p->data[i]) &&
-            information_element_p->data[i] != ' '      &&
-            information_element_p->data[i] != '\\')
-          ssid_string += static_cast<char> (information_element_p->data[i]);
-        else if (information_element_p->data[i] == ' ')
-          ssid_string += ' ';
-        else
-        { ACE_ASSERT (information_element_p->data[i] == '\\');
-          ACE_OS::memset (buffer_2, 0, sizeof (char[4 + 1]));
-          result =
-              ACE_OS::sprintf (buffer_2,
-                               ACE_TEXT_ALWAYS_CHAR ("\\x%.2x"),
-                               information_element_p->data[i + 1]);
-          ACE_ASSERT (result >= 0);
-          ssid_string += buffer_2;
-        } // end ELSE
-      } // end FOR
-      if (ssid_string.empty ())
-        ACE_ASSERT (!ssid_string.empty ());
-      if (unlikely (!::if_indextoname (if_index_i,
-                                       buffer_a)))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to if_indextoname(%u): \"%m\", aborting\n"),
-                    if_index_i));
+        // *NOTE*: "...A 0 length information field is used within Probe Request
+        //         management frames to indicate the wildcard SSID. ..."
+        ACE_DEBUG (((!information_element_p->length ? LM_ERROR : LM_WARNING),
+                    ACE_TEXT ("\"%s\": (MAC: %s) 'bss' information element (id was: %u) has invalid length (was: %u), aborting\n"),
+                    ACE_TEXT (buffer_a),
+                    ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (state_s.linkLayerAddress.ether_addr_octet, NET_LINKLAYER_802_11).c_str ()),
+                    NET_WLAN_IEEE80211_INFORMATION_ELEMENT_ID_SSID,
+                    information_element_p->length));
         return NL_STOP;
       } // end IF
+      ssid_string = Net_WLAN_Tools::decodeSSID (information_element_p->data,
+                                                information_element_p->length);
+      ACE_ASSERT (!ssid_string.empty ());
       cb_data_p->monitor->set3R (ssid_string,
                                  buffer_a,
                                  state_s);
@@ -1034,16 +1037,58 @@ nla_put_failure:
     case NL80211_CMD_REG_CHANGE:
     {
       // sanity check(s)
-      ACE_ASSERT (nlattr_a[NL80211_ATTR_IFINDEX]);
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_WIPHY]);
+
+      struct nlattr* nlattr_2[NL80211_WIPHY_MAX + 1];
+      uint8_t length_i = 0;
+      uint8_t* data_p = NULL;
+      int offset_i = 0;
+      struct Net_WLAN_IEEE802_11_InformationElement* information_element_p =
+          NULL;
+      std::string ssid_string;
+#if defined (_DEBUG)
+      char buffer_a[IF_NAMESIZE + 1];
+#endif // _DEBUG
+      struct Net_WLAN_AccessPointState state_s;
+
+      if (//!nlattr_a[NL80211_ATTR_SCAN_FREQUENCIES] ||
+          //!nlattr_a[NL80211_ATTR_SCAN_SSIDS] ||
+          !nlattr_a[NL80211_ATTR_BSS])
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("'bss' attribute missing, aborting\n")));
+        return NL_STOP;
+      } // end IF
+      result = nla_parse_nested (nlattr_2,
+                                 NL80211_BSS_MAX,
+                                 nlattr_a[NL80211_ATTR_BSS],
+                                 NULL);
+      if (unlikely (result < 0))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to nla_parse_nested(NL80211_ATTR_BSS): \"%s\", aborting\n"),
+                    ACE_TEXT (nl_geterror (result))));
+        return NL_STOP;
+      } // end IF
+      if (!nlattr_2[NL80211_BSS_FREQUENCY]            ||
+          !nlattr_2[NL80211_BSS_SIGNAL_MBM]           ||
+          !nlattr_2[NL80211_BSS_BSSID]                ||
+          !nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS] ||
+          !nlattr_2[NL80211_BSS_SEEN_MS_AGO])
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("'bss freq/signal/bssid/IEs/age' attribute(s) missing, aborting\n")));
+        return NL_STOP;
+      } // end IF
+
 
       unsigned int if_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_IFINDEX]);
       ACE_ASSERT (if_index_i);
       if (static_cast<unsigned int> (cb_data_p->index) != if_index_i)
         return NL_SKIP;
 
-      if (!nlattr_a[NL80211_ATTR_REG_INITIATOR] ||
-          !nlattr_a[NL80211_ATTR_WIPHY]         ||
-          !nlattr_a[NL80211_ATTR_REG_TYPE])
+      if (!nlattr_a[NL80211_ATTR_REG_INITIATOR] || // 48
+          !nlattr_a[NL80211_ATTR_REG_TYPE])        // 49
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("attribute missing, aborting\n")));
@@ -1100,7 +1145,6 @@ nla_put_failure:
     case NL80211_CMD_AUTHENTICATE:
     {
       // sanity check(s)
-//      ACE_ASSERT (nlattr_a[NL80211_ATTR_FRAME]);
       ACE_ASSERT (nlattr_a[NL80211_ATTR_IFINDEX]);
 
       unsigned int if_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_IFINDEX]);
@@ -1133,20 +1177,38 @@ nla_put_failure:
         return NL_STOP;
       } // end IF
 
-//#if defined (_DEBUG)
-//      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("\"%s\": authenticated with access point (was: MAC: %s; SSID: %s)\n"),
-//                  ACE_TEXT (buffer_a),
-//                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
-//                  ACE_TEXT (cb_data_p->monitor->SSID ().c_str ())));
-//#endif // _DEBUG
+      // sanity check(s)
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_FRAME]);
+
+      uint8_t* data_p =
+          reinterpret_cast<uint8_t*> (nla_data (nlattr_a[NL80211_ATTR_FRAME]));
+      size_t length_i = nla_len (nlattr_a[NL80211_ATTR_FRAME]);
+      uint16_t status_i = 0;
+
+      // sanity check(s)
+      ACE_ASSERT ((data_p[0] & 0xFC) == 0xB0); // auth
+      ACE_ASSERT (length_i >= 30);
+      ACE_OS::memcpy (&(ap_mac_address_s.ether_addr_octet),
+                      data_p + 10,
+                      ETH_ALEN);
+      status_i = (data_p[29] << 8) + data_p[28];
+#if defined (_DEBUG)
+      ACE_DEBUG (((status_i ? LM_ERROR : LM_DEBUG),
+                  ACE_TEXT ("\"%s\": authenticated with access point (was: MAC: %s): %u\n"),
+                  ACE_TEXT (buffer_a),
+                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
+//                  ACE_TEXT (get_status_str (status_i))));
+                  status_i));
+#endif // _DEBUG
 
       ACE_ASSERT (cb_data_p->monitor);
       Net_WLAN_Monitor_IStateMachine_t* istate_machine_p =
           dynamic_cast<Net_WLAN_Monitor_IStateMachine_t*> (cb_data_p->monitor);
       ACE_ASSERT (istate_machine_p);
       try {
-        istate_machine_p->change (NET_WLAN_MONITOR_STATE_AUTHENTICATED);
+        // *TODO*: retry only if the nature of the error is transient
+        istate_machine_p->change (status_i ? NET_WLAN_MONITOR_STATE_AUTHENTICATE // retry
+                                           : NET_WLAN_MONITOR_STATE_AUTHENTICATED);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_AUTHENTICATED), aborting\n")));
@@ -1176,22 +1238,52 @@ nla_put_failure:
         return NL_STOP;
       } // end IF
 
-//#if defined (_DEBUG)
-//      struct ether_addr ap_mac_address_s;
-//      ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
-//      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("\"%s\": associated with access point (was: MAC: %s; SSID: %s)\n"),
-//                  ACE_TEXT (buffer_a),
-//                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
-//                  ACE_TEXT (cb_data_p->monitor->SSID ().c_str ())));
-//#endif // _DEBUG
+      struct ether_addr ap_mac_address_s;
+      ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
+      if (nlattr_a[NL80211_ATTR_TIMED_OUT])
+      { ACE_ASSERT (nlattr_a[NL80211_ATTR_MAC]);
+        ACE_OS::memcpy (&(ap_mac_address_s.ether_addr_octet),
+                        nla_data (nlattr_a[NL80211_ATTR_MAC]),
+                        ETH_ALEN);
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("\"%s\": failed to associate to access point (MAC was: %s), timed out, aborting\n"),
+                    ACE_TEXT (buffer_a),
+                    ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ())));
+        *(cb_data_p->error) = ETIMEDOUT;
+        return NL_STOP;
+      } // end IF
+
+      // sanity check(s)
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_FRAME]);
+
+      uint8_t* data_p =
+          reinterpret_cast<uint8_t*> (nla_data (nlattr_a[NL80211_ATTR_FRAME]));
+      size_t length_i = nla_len (nlattr_a[NL80211_ATTR_FRAME]);
+      uint16_t status_i = 0;
+
+      // sanity check(s)
+      ACE_ASSERT ((data_p[0] & 0xFC) == 0x10); // assoc
+      ACE_ASSERT (length_i >= 124);
+      ACE_OS::memcpy (&(ap_mac_address_s.ether_addr_octet),
+                      data_p + 10,
+                      ETH_ALEN);
+      status_i = (data_p[27] << 8) + data_p[26];
+#if defined (_DEBUG)
+      ACE_DEBUG (((status_i ? LM_ERROR : LM_DEBUG),
+                  ACE_TEXT ("\"%s\": associated with access point (was: MAC: %s): %u\n"),
+                  ACE_TEXT (buffer_a),
+                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
+//                  ACE_TEXT (get_status_str (status_i))));
+                  status_i));
+#endif // _DEBUG
 
       ACE_ASSERT (cb_data_p->monitor);
       Net_WLAN_Monitor_IStateMachine_t* istate_machine_p =
           dynamic_cast<Net_WLAN_Monitor_IStateMachine_t*> (cb_data_p->monitor);
       ACE_ASSERT (istate_machine_p);
       try {
-        istate_machine_p->change (NET_WLAN_MONITOR_STATE_ASSOCIATED);
+        istate_machine_p->change (status_i ? NET_WLAN_MONITOR_STATE_ASSOCIATE // retry
+                                           : NET_WLAN_MONITOR_STATE_ASSOCIATED);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_ASSOCIATED), aborting\n")));
@@ -1358,31 +1450,48 @@ nla_put_failure:
     {
       // sanity check(s)
       ACE_ASSERT (nlattr_a[NL80211_ATTR_IFINDEX]);
-//      ACE_ASSERT (nlattr_a[NL80211_ATTR_WIPHY]);
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_MAC]);
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_STATUS_CODE]);
 
       unsigned int if_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_IFINDEX]);
       ACE_ASSERT (if_index_i);
       if (static_cast<unsigned int> (cb_data_p->index) != if_index_i)
         return NL_SKIP;
 
-//      char buffer_a[IF_NAMESIZE + 1];
-//      if (unlikely (!::if_indextoname (if_index_i,
-//                                       buffer_a)))
-//      {
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("failed to if_indextoname(%u): \"%m\", aborting\n"),
-//                    if_index_i));
-//        return NL_STOP;
-//      } // end IF
-//#if defined (_DEBUG)
-//      struct ether_addr ap_mac_address_s;
-//      ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
-//      ACE_DEBUG ((LM_DEBUG,
-//                  ACE_TEXT ("\"%s\": connected to access point (is: MAC: %s; SSID: %s)\n"),
-//                  ACE_TEXT (buffer_a),
-//                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
-//                  ACE_TEXT (cb_data_p->monitor->SSID ().c_str ())));
-//#endif // _DEBUG
+      char buffer_a[IF_NAMESIZE + 1];
+      if (unlikely (!::if_indextoname (if_index_i,
+                                       buffer_a)))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to if_indextoname(%u): \"%m\", aborting\n"),
+                    if_index_i));
+        return NL_STOP;
+      } // end IF
+
+      struct ether_addr ap_mac_address_s;
+      ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
+      ACE_OS::memcpy (&(ap_mac_address_s.ether_addr_octet),
+                      nla_data (nlattr_a[NL80211_ATTR_MAC]),
+                      ETH_ALEN);
+      ACE_UINT16 status_i = nla_get_u16 (nlattr_a[NL80211_ATTR_STATUS_CODE]);
+      if (nlattr_a[NL80211_ATTR_TIMED_OUT])
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("\"%s\": failed to associate to access point (MAC was: %s), timed out: %u, aborting\n"),
+                    ACE_TEXT (buffer_a),
+                    ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
+                    status_i));
+        *(cb_data_p->error) = ETIMEDOUT;
+        return NL_STOP;
+      } // end IF
+#if defined (_DEBUG)
+      ACE_DEBUG (((status_i ? LM_ERROR : LM_DEBUG),
+                  ACE_TEXT ("\"%s\": connected to access point (is: MAC: %s; SSID: %s): %u\n"),
+                  ACE_TEXT (buffer_a),
+                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
+                  ACE_TEXT (cb_data_p->monitor->SSID ().c_str ()),
+                  status_i));
+#endif // _DEBUG
 
       ACE_ASSERT (cb_data_p->monitor);
       Net_WLAN_Monitor_IStateMachine_t* istate_machine_p =

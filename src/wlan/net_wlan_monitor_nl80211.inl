@@ -838,6 +838,25 @@ Net_WLAN_Monitor_T<AddressType,
   else
     interface_identifiers_a.push_back (interfaceIdentifier_in);
 
+  // check cache
+  enum nl80211_auth_type authenticationType_e = NL80211_AUTHTYPE_AUTOMATIC;
+  ACE_UINT32 frequency_i = 0;
+  { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_, false);
+    Net_WLAN_AccessPointCacheConstIterator_t iterator =
+        inherited::SSIDCache_.find (SSID_in);
+    ACE_ASSERT (iterator != inherited::SSIDCache_.end ());
+//    ACE_ASSERT ((*iterator).second.second.authenticationType == inherited::configuration_->authenticationType);
+    authenticationType_e = inherited::configuration_->authenticationType;
+//    ACE_ASSERT ((*iterator).second.second.frequency == inherited::configuration_->frequency);
+    if (unlikely (inherited::configuration_->frequency &&
+                  ((*iterator).second.second.frequency != inherited::configuration_->frequency)))
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("cached access point frequency (is: %u MHz) differs from configured frequency (expected: %u MHz), continuing\n"),
+                  (*iterator).second.second.frequency,
+                  inherited::configuration_->frequency));
+    frequency_i = (*iterator).second.second.frequency;
+  } // end lock scope
+
   bool result_2 = false;
   for (Net_InterfacesIdentifiersIterator_t iterator = interface_identifiers_a.begin ();
        iterator != interface_identifiers_a.end ();
@@ -860,6 +879,8 @@ Net_WLAN_Monitor_T<AddressType,
                           : Net_WLAN_Tools::associate (interfaceIdentifier_in,
                                                        accessPointMACAddress_in,
                                                        SSID_in,
+                                                       authenticationType_e,
+                                                       frequency_i,
                                                        inherited::socketHandle_,
                                                        inherited::familyId_));
     if (unlikely (!result_2))
@@ -925,9 +946,15 @@ Net_WLAN_Monitor_T<AddressType,
         inherited::SSIDCache_.find (SSID_in);
     ACE_ASSERT (iterator != inherited::SSIDCache_.end ());
 //    ACE_ASSERT ((*iterator).second.second.authenticationType == inherited::configuration_->authenticationType);
-    ACE_ASSERT ((*iterator).second.second.frequency == inherited::configuration_->frequency);
     authenticationType_e = inherited::configuration_->authenticationType;
-    frequency_i = inherited::configuration_->frequency;
+//    ACE_ASSERT ((*iterator).second.second.frequency == inherited::configuration_->frequency);
+    if (unlikely (inherited::configuration_->frequency &&
+                  ((*iterator).second.second.frequency != inherited::configuration_->frequency)))
+      ACE_DEBUG ((LM_WARNING,
+                  ACE_TEXT ("cached access point frequency (is: %u MHz) differs from configured frequency (expected: %u MHz), continuing\n"),
+                  (*iterator).second.second.frequency,
+                  inherited::configuration_->frequency));
+    frequency_i = (*iterator).second.second.frequency;
   } // end lock scope
 
   bool result_2 = false;

@@ -1577,11 +1577,11 @@ Net_WLAN_Tools::isWPASupplicantManagingInterface (struct DBusConnection* connect
 continue_:
   dbus_message_unref (reply_p); reply_p = NULL;
 
-  for (Common_DBus_ObjectPathsIterator_t iterator_3 = interface_object_paths_a.begin ();
-       iterator_3 != interface_object_paths_a.end ();
-       ++iterator_3)
+  for (Common_DBus_ObjectPathsIterator_t iterator_4 = interface_object_paths_a.begin ();
+       iterator_4 != interface_object_paths_a.end ();
+       ++iterator_4)
     interface_identifiers_a.push_back (Net_WLAN_Tools::dBusObjectPathToIdentifier (connection_p,
-                                                                                   *iterator_3));
+                                                                                   *iterator_4));
 
 error:
   if (message_p)
@@ -1594,11 +1594,11 @@ error:
     dbus_connection_unref (connection_p);
   } // end IF
 
-  for (Net_InterfacesIdentifiersIterator_t iterator_3 = interface_identifiers_a.begin ();
-       iterator_3 != interface_identifiers_a.end ();
-       ++iterator_3)
+  for (Net_InterfacesIdentifiersIterator_t iterator_4 = interface_identifiers_a.begin ();
+       iterator_4 != interface_identifiers_a.end ();
+       ++iterator_4)
     if (!ACE_OS::strcmp (interfaceIdentifier_in.c_str (),
-                         (*iterator_3).c_str ()))
+                         (*iterator_4).c_str ()))
       return true;
 
   return false;
@@ -1706,22 +1706,18 @@ Net_WLAN_Tools::WPASupplicantManageInterface (struct DBusConnection* connection_
     goto error;
   } // end IF
 
-  if (unlikely (!dbus_message_iter_init (reply_p, &iterator)))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
-    goto error;
-  } // end IF
   if (toggle_in)
   {
+    if (unlikely (!dbus_message_iter_init (reply_p, &iterator)))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to dbus_message_iter_init(), aborting\n")));
+      goto error;
+    } // end IF
     ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator) == DBUS_TYPE_OBJECT_PATH);
     dbus_message_iter_get_basic (&iterator_2, &string_p);
     ACE_ASSERT (string_p);
   } // end IF
-//  else
-//  {
-
-//  } // end ELSE
   dbus_message_unref (reply_p); reply_p = NULL;
 
   return true;
@@ -1753,8 +1749,7 @@ Net_WLAN_Tools::dBusObjectPathToIdentifier (struct DBusConnection* connection_in
   ACE_ASSERT (connection_in);
   ACE_ASSERT (!objectPath_in.empty ());
 
-  struct DBusMessageIter iterator;
-//  struct DBusMessageIter iterator_2;
+  struct DBusMessageIter iterator, iterator_2;
   struct DBusMessage* message_p =
       dbus_message_new_method_call (ACE_TEXT_ALWAYS_CHAR (NET_WLAN_DBUS_WPASUPPLICANT_SERVICE),
                                     objectPath_in.c_str (),
@@ -1808,9 +1803,11 @@ Net_WLAN_Tools::dBusObjectPathToIdentifier (struct DBusConnection* connection_in
     goto error;
   } // end IF
   if (unlikely (!Common_DBus_Tools::validateType (iterator,
-                                                  DBUS_TYPE_STRING)))
+                                                  DBUS_TYPE_VARIANT)))
     goto error;
-  dbus_message_iter_get_basic (&iterator, &string_p);
+  dbus_message_iter_recurse (&iterator, &iterator_2);
+  ACE_ASSERT (dbus_message_iter_get_arg_type (&iterator_2) == DBUS_TYPE_STRING);
+  dbus_message_iter_get_basic (&iterator_2, &string_p);
   ACE_ASSERT (string_p);
   return_value = string_p;
   dbus_message_unref (reply_p); reply_p = NULL;

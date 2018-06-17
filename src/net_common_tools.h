@@ -279,8 +279,13 @@ class Net_Common_Tools
 #if defined (DHCLIENT_SUPPORT)
   static bool DHClientOmapiSupport (bool); // toggle
 
-  static bool hasActiveLease (dhcpctl_handle,      // connection handle
+  // *TODO*: apparently, omapi cannot retrieve leases (tried interface
+  //         identifier, MAC address); go ahead, try it with omshell
+  //         --> parse the dhclient.leases file manually for now
+  static bool hasActiveLease (const std::string&,  // FQ dhclient.leases filename
                               const std::string&); // interface identifier
+//  static bool hasActiveLease (dhcpctl_handle,      // connection handle
+//                              const std::string&); // interface identifier
 #endif // DHCLIENT_SUPPORT
 #endif // ACE_LINUX
 

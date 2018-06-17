@@ -109,25 +109,14 @@ network_wlan_nl80211_error_cb (struct sockaddr_nl* address_in,
     default:
       break;
   } // end SWITCH
-
-  if (likely (return_value == NL_STOP))
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("\"%s\": nl80211 error: \"%s\" (was: command: %d; errno: \"%s\" (%d)), stopping\n"),
-                ACE_TEXT (Net_Common_Tools::NetlinkAddressToString (netlink_address).c_str ()),
-                ACE_TEXT (string_p),
-                genlmsghdr_p->cmd,
-                ACE_TEXT (ACE_OS::strerror (-message_in->error)),
-                -message_in->error));
-#if defined (_DEBUG)
-  else
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("\"%s\": nl80211 error: \"%s\" (was: command: %d; errno: \"%s\" (%d)), skipping\n"),
-                ACE_TEXT (Net_Common_Tools::NetlinkAddressToString (netlink_address).c_str ()),
-                ACE_TEXT (string_p),
-                genlmsghdr_p->cmd,
-                ACE_TEXT (ACE_OS::strerror (-message_in->error)),
-                -message_in->error));
-#endif // _DEBUG
+  ACE_DEBUG ((((return_value == NL_STOP) ? LM_ERROR : LM_DEBUG),
+              ACE_TEXT ("\"%s\": nl80211 error: \"%s\" (was: command: %d; errno: \"%s\" (%d)), %s\n"),
+              ACE_TEXT (Net_Common_Tools::NetlinkAddressToString (netlink_address).c_str ()),
+              ACE_TEXT (string_p),
+              genlmsghdr_p->cmd,
+              ACE_TEXT (ACE_OS::strerror (-message_in->error)),
+              -message_in->error,
+              ((return_value == NL_STOP) ? ACE_TEXT ("stopping") : ACE_TEXT ("skipping"))));
 
   *(cb_data_p->error) = message_in->error;
 
@@ -354,11 +343,11 @@ network_wlan_nl80211_ssid_cb (struct nl_msg* message_in,
   ACE_ASSERT (genlmsghdr_p->cmd == NL80211_CMD_NEW_SCAN_RESULTS);
   struct Net_WLAN_nl80211_CBData* cb_data_p =
       static_cast<struct Net_WLAN_nl80211_CBData*> (argument_in);
+  ACE_ASSERT (cb_data_p->done);
+  ACE_ASSERT (!(*cb_data_p->done));
   ACE_ASSERT (cb_data_p->index);
   ACE_ASSERT (cb_data_p->SSIDs);
   ACE_ASSERT (cb_data_p->SSIDs->empty ());
-  ACE_ASSERT (cb_data_p->done);
-  ACE_ASSERT (!(*cb_data_p->done));
 
   struct nlattr* nlattr_a[NL80211_ATTR_MAX + 1];
   struct nlattr* nlattr_2[NL80211_BSS_MAX + 1];
@@ -468,7 +457,7 @@ network_wlan_nl80211_ssid_cb (struct nl_msg* message_in,
 
   *cb_data_p->done = 1;
 
-  return NL_OK;
+  return NL_STOP;
 }
 
 int
@@ -1243,7 +1232,7 @@ Net_WLAN_Tools::getProtocolFeatures (const std::string& interfaceIdentifier_in,
   result = true;
 
 clean:
-nla_put_failure:
+//nla_put_failure:
   if (message_p)
     nlmsg_free (message_p);
 
@@ -1349,15 +1338,17 @@ bool
 Net_WLAN_Tools::associate (const std::string& interfaceIdentifier_in,
                            const struct ether_addr& accessPointMACAddress_in,
                            const std::string& SSID_in,
+                           enum nl80211_auth_type authenticationType_in,
+                           ACE_UINT32 frequency_in,
                            struct nl_sock* socketHandle_in,
                            int driverFamilyId_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::associate"));
 
   bool result = false;
-  ACE_UINT16 station_capabilities_i = 0;
-  ACE_UINT16 listen_interval_i = 0;
-  uint8_t rates_a[NL80211_MAX_SUPP_RATES];
+//  ACE_UINT16 station_capabilities_i = 0;
+//  ACE_UINT16 listen_interval_i = 0;
+//  uint8_t rates_a[NL80211_MAX_SUPP_RATES];
 //  ACE_UINT16 power_capabilities_i = 0;
 //  int result_2 = -1;
 //  uint8_t ie_buffer_a[BUFSIZ];
@@ -1405,42 +1396,55 @@ Net_WLAN_Tools::associate (const std::string& interfaceIdentifier_in,
 //           ETH_ALEN,
 //           &accessPointMACAddress_in.ether_addr_octet);
   // see also: IEEE Std 802.11-2007 7.3.1.4
-  station_capabilities_i = 1 << 10; // support short preamble
-  station_capabilities_i = 1 << 8;  // support channel agility
-  station_capabilities_i = 1 << 7;  // support DSSS spectrum management
-  station_capabilities_i |= 1 << 5; // support short slot time
-  NLA_PUT_U16 (message_p,
-               NL80211_ATTR_STA_CAPABILITY,
-               station_capabilities_i);
+//  station_capabilities_i |= 1 << 10; // support short preamble
+//  station_capabilities_i |= 1 << 8;  // support channel agility
+//  station_capabilities_i |= 1 << 7;  // support DSSS spectrum management
+//  station_capabilities_i |= 1 << 5;  // support short slot time
+//  NLA_PUT_U16 (message_p,
+//               NL80211_ATTR_STA_CAPABILITY,
+//               station_capabilities_i);
 //  NLA_PUT (message_p,
 //           NL80211_ATTR_STA_EXT_CAPABILITY,
 //           0,
 //           NULL);
-  NLA_PUT_U16 (message_p,
-               NL80211_ATTR_STA_LISTEN_INTERVAL,
-               listen_interval_i);
+  // see also: IEEE Std 802.11-2007 7.3.1.6
+//  NLA_PUT_U16 (message_p,
+//               NL80211_ATTR_STA_LISTEN_INTERVAL,
+//               listen_interval_i);
   NLA_PUT (message_p,
            NL80211_ATTR_SSID,
            SSID_in.size (),
            SSID_in.c_str ());
+  if (unlikely (!Net_Common_Tools::isAny (accessPointMACAddress_in)))
+    NLA_PUT (message_p,
+             NL80211_ATTR_MAC,
+             ETH_ALEN,
+             &(accessPointMACAddress_in.ether_addr_octet));
+  NLA_PUT_U32 (message_p,
+               NL80211_ATTR_WIPHY_FREQ,
+               frequency_in);
+  NLA_PUT_U32 (message_p,
+               NL80211_ATTR_AUTH_TYPE,
+               authenticationType_in);
+  //  ACE_OS::memset (rates_a, 0, sizeof (uint8_t[NL80211_MAX_SUPP_RATES]));
   // MSB 1: BSSBasicRateSet (i.e. required), 0: optional; | x of 500kb/s
   // (see also: IEEE Std 802.11-2007 10.4.4.2)
-  rates_a[0] = ((1 << 7) | 2);  // 1 Mb/s
-  rates_a[1] = ((1 << 7) | 4);  // 2 Mb/s
-  rates_a[2] = ((1 << 7) | 11); // 5,5 Mb/s
-  rates_a[3] = ((1 << 7) | 22); // 11 Mb/s
-  rates_a[4] = 12;   // 6 Mb/s
-  rates_a[5] = 18;   // 9 Mb/s
-  rates_a[6] = 24;   // 12 Mb/s
-  rates_a[7] = 36;   // 18 Mb/s
-  rates_a[8] = 48;   // 24 Mb/s
-  rates_a[9] = 72;   // 36 Mb/s
-  rates_a[10] = 96;  // 48 Mb/s
-  rates_a[11] = 108; // 54 Mb/s
-  NLA_PUT (message_p,
-           NL80211_ATTR_STA_SUPPORTED_RATES,
-           sizeof (uint8_t[NL80211_MAX_SUPP_RATES]),
-           &rates_a);
+//  rates_a[0] = ((1 << 7) | 2);  // 1 Mb/s
+//  rates_a[1] = ((1 << 7) | 4);  // 2 Mb/s
+//  rates_a[2] = ((1 << 7) | 11); // 5,5 Mb/s
+//  rates_a[3] = ((1 << 7) | 22); // 11 Mb/s
+//  rates_a[4] = 12;   // 6 Mb/s
+//  rates_a[5] = 18;   // 9 Mb/s
+//  rates_a[6] = 24;   // 12 Mb/s
+//  rates_a[7] = 36;   // 18 Mb/s
+//  rates_a[8] = 48;   // 24 Mb/s
+//  rates_a[9] = 72;   // 36 Mb/s
+//  rates_a[10] = 96;  // 48 Mb/s
+//  rates_a[11] = 108; // 54 Mb/s
+//  NLA_PUT (message_p,
+//           NL80211_ATTR_STA_SUPPORTED_RATES,
+//           sizeof (uint8_t[NL80211_MAX_SUPP_RATES]),
+//           &rates_a);
 //  ACE_OS::memset (ie_buffer_a, 0, sizeof (char[BUFSIZ]));
 //  ie_buffer_a[0] = 33; // see also: IEEE Std 802.11-2007 7.3.2
 //  ie_buffer_a[1] = 2;
@@ -1539,7 +1543,7 @@ Net_WLAN_Tools::associate (const std::string& interfaceIdentifier_in,
 //           &ie_buffer_a);
   NLA_PUT (message_p,
            NL80211_ATTR_IE, // "...VendorSpecificInfo, but also including RSN IE
-           //  and FT IEs..."
+                            //  and FT IEs..."
            0,
            NULL);
 
@@ -1944,19 +1948,17 @@ Net_WLAN_Tools::scan (const std::string& interfaceIdentifier_in,
   ACE_UINT32 scan_flags_i = 0;
 
 #if defined (ACE_LINUX)
-  // (temporarily) elevate privileges to start scan
+  // (temporarily try to) elevate privileges to start scan
   if (!Common_Tools::hasCapability (CAP_NET_ADMIN,
                                     CAP_EFFECTIVE))
   {
-    if (unlikely (!Common_Tools::setCapability (CAP_NET_ADMIN,
-                                                CAP_EFFECTIVE)))
-    {
+    if (likely (!Common_Tools::setCapability (CAP_NET_ADMIN,
+                                              CAP_EFFECTIVE)))
+      handle_capabilities_b = true;
+    else
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Tools::setCapability(%s): \"%m\", aborting\n"),
+                  ACE_TEXT ("failed to Common_Tools::setCapability(%s): \"%m\", continuing\n"),
                   ACE_TEXT (Common_Tools::capabilityToString (CAP_NET_ADMIN).c_str ())));
-      return false;
-    } // end IF
-    handle_capabilities_b = true;
   } // end IF
 #endif // ACE_LINUX
 
