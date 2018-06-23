@@ -53,7 +53,7 @@ class Net_TCPSocketHandler_T
 
  protected:
   Net_TCPSocketHandler_T ();
-  inline virtual ~Net_TCPSocketHandler_T () {};
+  inline virtual ~Net_TCPSocketHandler_T () {}
 
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 
@@ -88,7 +88,7 @@ class Net_TCPSocketHandler_T<ACE_SYNCH_USE,
 
  protected:
   Net_TCPSocketHandler_T ();
-  inline virtual ~Net_TCPSocketHandler_T () {};
+  inline virtual ~Net_TCPSocketHandler_T () {}
 
   ACE_Reactor_Notification_Strategy notificationStrategy_;
 

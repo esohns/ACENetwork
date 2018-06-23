@@ -22,7 +22,6 @@
 #define NET_ASYNCH_UDP_SOCKETHANDLER_H
 
 #include "ace/Asynch_IO.h"
-#include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 #include "ace/Message_Block.h"
@@ -34,6 +33,8 @@
 #include "net_sockethandler_base.h"
 
 // forward declarations
+typedef unsigned long ACE_Reactor_Mask;
+class ACE_Event_Handler;
 class Stream_IAllocator;
 
 template <typename SocketType, // implements ACE_SOCK
@@ -60,6 +61,9 @@ class Net_AsynchUDPSocketHandler_T
   inline virtual void addresses (const ACE_INET_Addr& peerSap_in, const ACE_INET_Addr& localSAP_in) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
   inline virtual ACE_HANDLE handle (void) const { return SocketType::get_handle (); }
   inline virtual void handle (ACE_HANDLE handle_in) { inherited3::handle (handle_in); }
+
+  virtual int handle_close (ACE_HANDLE,        // handle
+                            ACE_Reactor_Mask); // event mask
 
   // implement (part of) Net_IAsynchSocketHandler
   virtual void cancel ();

@@ -1037,68 +1037,12 @@ nla_put_failure:
     case NL80211_CMD_REG_CHANGE:
     {
       // sanity check(s)
-      ACE_ASSERT (nlattr_a[NL80211_ATTR_WIPHY]);
-
-      struct nlattr* nlattr_2[NL80211_WIPHY_MAX + 1];
-      uint8_t length_i = 0;
-      uint8_t* data_p = NULL;
-      int offset_i = 0;
-      struct Net_WLAN_IEEE802_11_InformationElement* information_element_p =
-          NULL;
-      std::string ssid_string;
-#if defined (_DEBUG)
-      char buffer_a[IF_NAMESIZE + 1];
-#endif // _DEBUG
-      struct Net_WLAN_AccessPointState state_s;
-
-      if (//!nlattr_a[NL80211_ATTR_SCAN_FREQUENCIES] ||
-          //!nlattr_a[NL80211_ATTR_SCAN_SSIDS] ||
-          !nlattr_a[NL80211_ATTR_BSS])
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("'bss' attribute missing, aborting\n")));
-        return NL_STOP;
-      } // end IF
-      result = nla_parse_nested (nlattr_2,
-                                 NL80211_BSS_MAX,
-                                 nlattr_a[NL80211_ATTR_BSS],
-                                 NULL);
-      if (unlikely (result < 0))
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to nla_parse_nested(NL80211_ATTR_BSS): \"%s\", aborting\n"),
-                    ACE_TEXT (nl_geterror (result))));
-        return NL_STOP;
-      } // end IF
-      if (!nlattr_2[NL80211_BSS_FREQUENCY]            ||
-          !nlattr_2[NL80211_BSS_SIGNAL_MBM]           ||
-          !nlattr_2[NL80211_BSS_BSSID]                ||
-          !nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS] ||
-          !nlattr_2[NL80211_BSS_SEEN_MS_AGO])
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("'bss freq/signal/bssid/IEs/age' attribute(s) missing, aborting\n")));
-        return NL_STOP;
-      } // end IF
-
-
-      unsigned int if_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_IFINDEX]);
-      ACE_ASSERT (if_index_i);
-      if (static_cast<unsigned int> (cb_data_p->index) != if_index_i)
-        return NL_SKIP;
-
-      if (!nlattr_a[NL80211_ATTR_REG_INITIATOR] || // 48
-          !nlattr_a[NL80211_ATTR_REG_TYPE])        // 49
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("attribute missing, aborting\n")));
-        return NL_STOP;
-      } // end IF
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_REG_INITIATOR]);
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_REG_TYPE]);
 
       enum nl80211_reg_initiator initiator_e =
           static_cast<enum nl80211_reg_initiator> (nla_get_u32 (nlattr_a[NL80211_ATTR_REG_INITIATOR]));
       ACE_UNUSED_ARG (initiator_e);
-      unsigned int wiphy_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_WIPHY]);
       enum nl80211_reg_type reg_type_e =
           static_cast<enum nl80211_reg_type> (nla_get_u32 (nlattr_a[NL80211_ATTR_REG_TYPE]));
       std::string reg_domain_string;
@@ -1129,15 +1073,18 @@ nla_put_failure:
       } // end SWITCH
 
 #if defined (_DEBUG)
+      // sanity check(s)
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_WIPHY]);
       ACE_ASSERT (cb_data_p->monitor);
       std::string interface_identifier_string =
           cb_data_p->monitor->interfaceIdentifier ();
+      unsigned int wiphy_index_i = nla_get_u32 (nlattr_a[NL80211_ATTR_WIPHY]);
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("\"%s\" \"%s\" [%u]: switched regulatory domain: %s\n"),
+                  ACE_TEXT ("\"%s\"/\"%s\" [%u]: switched regulatory domain: %s\n"),
                   ACE_TEXT (interface_identifier_string.c_str ()),
                   ACE_TEXT (Net_WLAN_Tools::wiPhyIndexToWiPhyNameString (interface_identifier_string, NULL, cb_data_p->monitor->get_3 (), wiphy_index_i).c_str ()),
                   wiphy_index_i,
-                  reg_type_e));
+                  ACE_TEXT (reg_domain_string.c_str ())));
 #endif // _DEBUG
 
       break;

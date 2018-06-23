@@ -22,7 +22,6 @@
 #define NET_ASYNCH_TCP_SOCKETHANDLER_T_H
 
 #include "ace/Asynch_IO.h"
-#include "ace/Event_Handler.h"
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
 #include "ace/Message_Block.h"
@@ -31,6 +30,11 @@
 #include "common_referencecounter_base.h"
 
 #include "net_sockethandler_base.h"
+
+// forward declarations
+typedef unsigned long ACE_Reactor_Mask;
+class ACE_Event_Handler;
+class Stream_IAllocator;
 
 template <typename ConfigurationType>
 class Net_AsynchTCPSocketHandler_T
@@ -48,7 +52,10 @@ class Net_AsynchTCPSocketHandler_T
   // override (part of) ACE_Service_Handler
   virtual void open (ACE_HANDLE,          // (socket) handle
                      ACE_Message_Block&); // initial data (if any)
-  inline virtual void addresses (const ACE_INET_Addr& peerAddress_in, const ACE_INET_Addr& localAddress_in) { peerSAP_ = peerAddress_in; localSAP_ = localAddress_in; };
+  inline virtual void addresses (const ACE_INET_Addr& peerAddress_in, const ACE_INET_Addr& localAddress_in) { peerSAP_ = peerAddress_in; localSAP_ = localAddress_in; }
+
+  virtual int handle_close (ACE_HANDLE,        // handle
+                            ACE_Reactor_Mask); // event mask
 
   // implement (part of) Net_IAsynchSocketHandler
   virtual void cancel ();
@@ -84,7 +91,7 @@ class Net_AsynchTCPSocketHandler_T
 
   // implement/hide ACE_Notification_Strategy
   virtual int notify (void);
-  inline virtual int notify (ACE_Event_Handler*, ACE_Reactor_Mask) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) };
+  inline virtual int notify (ACE_Event_Handler*, ACE_Reactor_Mask) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
 };
 
 // include template definition

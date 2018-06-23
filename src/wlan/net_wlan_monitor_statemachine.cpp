@@ -67,7 +67,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
   ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, *inherited::stateLock_, false);
   // *NOTE*: the state machine is asynchronous; the 'current' state may (!) be
   //         at the tail end of the transition stack
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::msg_queue_->lock (), false);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard_2, inherited::msg_queue_->lock (), false);
     inherited::MESSAGE_QUEUE_ITERATOR_T iterator (*inherited::msg_queue_);
     if (iterator.done ())
       state_e = inherited::state_;
@@ -145,10 +145,10 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_IDLE:         // scan aborted
         case NET_WLAN_MONITOR_STATE_SCAN:         // *TODO*: restarted ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if defined (WLANAPI_USE)
+#if defined (WLANAPI_SUPPORT)
         case NET_WLAN_MONITOR_STATE_SCAN:
         case NET_WLAN_MONITOR_STATE_ASSOCIATE:
-#endif // WLANAPI_USE
+#endif // WLANAPI_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
         case NET_WLAN_MONITOR_STATE_INITIALIZED:  // monitor stopped
         case NET_WLAN_MONITOR_STATE_SCANNED:      // scan completed
@@ -260,6 +260,16 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         // good case
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         case NET_WLAN_MONITOR_STATE_CONNECT:     // connection failed (e.g. failed to obtain DHCP lease) (retrying)
+#elif defined (ACE_LINUX)
+#if defined (NL80211_SUPPORT)
+        // *NOTE*: the 'connected' notification arrives automatically, shortly
+        //         after the kernel sends the 'associated' event notification.
+        //         Therefore the 'idle' state change enqueued by the 'connected'
+        //         event processing "overtakes" the 'connect' processing
+        //         triggered by the 'associated' event
+        // *TODO*: this is a mess
+        case NET_WLAN_MONITOR_STATE_IDLE:
+#endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
         //////////////////////////////////
         case NET_WLAN_MONITOR_STATE_INITIALIZED: // monitor stopped

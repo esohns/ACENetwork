@@ -2013,7 +2013,7 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
   std::string interface_identifier_string = interfaceIdentifier_in;
   if (unlikely (interface_identifier_string.empty ()))
     interface_identifier_string = Net_Common_Tools::getDefaultInterface ();
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   // sanity check(s)
   ACE_ASSERT (!InlineIsEqualGUID (interface_identifier, GUID_NULL));
@@ -2205,10 +2205,7 @@ continue_:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
-
-      // clean up
       ::freeifaddrs (ifaddrs_p);
-
       return false;
     } // end IF
     break;
@@ -2224,7 +2221,7 @@ continue_:
 #endif /* ACE_HAS_GETIFADDRS */
 
   gatewayIPAddress_out = Net_Common_Tools::getGateway (interfaceIdentifier_in);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 //  result = IPAddress_out.addr_to_string (buffer,
 //                                         sizeof (buffer),
@@ -5249,9 +5246,9 @@ Net_Common_Tools::hasActiveLease (const std::string& leasesFilename_in,
   char buffer_a [BUFSIZ];
   std::string buffer_string;
   std::string regex_string =
-    ACE_TEXT_ALWAYS_CHAR ("^(?: interface \")(.+)(?:\";)$");
+    ACE_TEXT_ALWAYS_CHAR ("^(?:  interface \x22)([^\x22]+)(?:\x22;)$");
   std::string regex_string_2 =
-    ACE_TEXT_ALWAYS_CHAR ("^(?: expire [[:digit:]]{1} )(.+)(?:;)$");
+    ACE_TEXT_ALWAYS_CHAR ("^(?:  expire [[:digit:]]{1} )(.+)(?:;)$");
   std::regex regex (regex_string);
   std::regex regex_2 (regex_string_2);
   std::smatch match_results;
@@ -5293,7 +5290,7 @@ next_attribute_2:
     ACE_ASSERT (match_results.ready () && !match_results.empty ());
     timestamp =
         Common_Timer_Tools::stringToTimestamp (match_results[1].str ());
-    if (timestamp > COMMON_TIME_NOW)
+    if (timestamp > COMMON_TIME_NOW_UTC)
     {
       result = true;
       break;

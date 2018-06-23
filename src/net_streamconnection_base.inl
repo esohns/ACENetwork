@@ -1911,9 +1911,6 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_AsynchStreamConnectionBase_T::handle_close"));
 
-  // sanity check(s)
-  ACE_ASSERT (handle_in == inherited::handle ());
-
   int result = -1;
   bool cancel_b = false;
   bool close_socket_b = false;
@@ -1960,33 +1957,20 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   // *TODO*: consider cancel()ling pending write operations
 
   // step2: invoke base-class maintenance
+  // step2a: cancel pending operation(s) ?
   if (cancel_b)
     inherited::cancel ();
 
-  // step3: deregister with the connection manager (if any)
+  // step2b: deregister with the connection manager (if any) ?
   Net_ConnectionId_t connection_id = id ();
   close_socket_b = (inherited2::count () == 1);
   if (likely (inherited2::isRegistered_))
     inherited2::deregister ();
 
-  // step4: release (read) socket handle
-  if ((handle_in != ACE_INVALID_HANDLE) &&
-      close_socket_b)
-  {
-    result = ACE_OS::closesocket (handle_in);
-    if (unlikely (result == -1))
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
-                  connection_id,
-                  handle_in));
-#else
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("%u: failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
-                  connection_id,
-                  handle_in));
-#endif // ACE_WIN32 || ACE_WIN64
-  } // end IF
+  // step2c: release socket handle(s) ?
+  if (close_socket_b)
+    result = inherited::handle_close (handle_in,
+                                      mask_in);
 
   return result;
 }

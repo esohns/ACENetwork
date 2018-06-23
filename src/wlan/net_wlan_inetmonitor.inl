@@ -133,11 +133,11 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
     } // end FOR
   } // end lock scope
 
+#if defined (_DEBUG)
   // sanity check(s)
   if (!success_in)
     return;
 
-#if defined (_DEBUG)
   if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
                                                          inherited::localSAP_,
                                                          inherited::peerSAP_)))
@@ -176,7 +176,7 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
                 ACE_TEXT ("\"%s\": (MAC: %s) connected to access point (MAC: %s; SSID: %s): %s <---> %s\n"),
                 ACE_TEXT (interfaceIdentifier_in.c_str ()),
                 ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s), NET_LINKLAYER_802_11).c_str ()),
-                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&(*iterator).second.second), NET_LINKLAYER_802_11).c_str ()),
+                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&(*iterator).second.second.linkLayerAddress.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
                 ACE_TEXT (SSID_in.c_str ()),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));

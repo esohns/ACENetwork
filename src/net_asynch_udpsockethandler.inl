@@ -495,6 +495,55 @@ error:
 
 template <typename SocketType,
           typename ConfigurationType>
+int
+Net_AsynchUDPSocketHandler_T<SocketType,
+                             ConfigurationType>::handle_close (ACE_HANDLE handle_in,
+                                                               ACE_Reactor_Mask mask_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_AsynchUDPSocketHandler_T::handle_close"));
+
+  ACE_UNUSED_ARG (handle_in);
+  ACE_UNUSED_ARG (mask_in);
+
+  int result = -1;
+  ACE_HANDLE handle_h = SocketType::get_handle ();
+
+  if (handle_h != ACE_INVALID_HANDLE)
+  {
+    result = ACE_OS::closesocket (handle_h);
+    if (unlikely (result == -1))
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
+                  handle_h));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                  handle_h));
+#endif // ACE_WIN32 || ACE_WIN64
+  } // end IF
+  SocketType::set_handle (ACE_INVALID_HANDLE);
+  if (writeHandle_ != ACE_INVALID_HANDLE)
+  {
+    result = ACE_OS::closesocket (writeHandle_);
+    if (unlikely (result == -1))
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
+                  writeHandle_));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
+                  writeHandle_));
+#endif // ACE_WIN32 || ACE_WIN64
+  } // end IF
+  writeHandle_ = ACE_INVALID_HANDLE;
+
+  return result;
+}
+
+template <typename SocketType,
+          typename ConfigurationType>
 void
 Net_AsynchUDPSocketHandler_T<SocketType,
                              ConfigurationType>::cancel ()

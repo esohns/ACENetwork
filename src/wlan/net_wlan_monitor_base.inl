@@ -471,11 +471,14 @@ Net_WLAN_Monitor_Base_T<AddressType,
 
   dhcpctl_handle authenticator_h = dhcpctl_null_handle;
   unsigned int retries_i = 0;
+  ACE_INET_Addr inet_address (static_cast<u_short> (NET_EXE_DHCLIENT_OMAPI_PORT),
+                              ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_LOCALHOST_IP_STRING),
+                              AF_INET);
 retry:
   isc_result_t status_i =
       dhcpctl_connect (&connection_,
-                       ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_LOCALHOST_IP_STRING),
-                       NET_EXE_DHCLIENT_OMAPI_PORT,
+                       inet_address.get_host_name (),
+                       inet_address.get_port_number (),
                        authenticator_h);
   if (unlikely (status_i != ISC_R_SUCCESS))
   {
@@ -485,9 +488,8 @@ retry:
       if (retries_i < NET_EXE_DHCLIENT_CONNECTION_RETRIES)
       {
         ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("failed to ::dhcpctl_connect(%s:%u): \"%s\", retrying...\n"),
-                  ACE_TEXT (NET_EXE_DHCLIENT_LOCALHOST_IP_STRING),
-                  NET_EXE_DHCLIENT_OMAPI_PORT,
+                  ACE_TEXT ("failed to ::dhcpctl_connect(%s): \"%s\", retrying...\n"),
+                  ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address, false).c_str ()),
                   ACE_TEXT (isc_result_totext (status_i))));
         result = ACE_OS::sleep (ACE_Time_Value (1, 0));
         ACE_ASSERT (result != -1);
@@ -495,12 +497,18 @@ retry:
       } // end IF
     } // end IF
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::dhcpctl_connect(%s:%u): \"%s\", aborting\n"),
-                ACE_TEXT (NET_EXE_DHCLIENT_LOCALHOST_IP_STRING),
-                NET_EXE_DHCLIENT_OMAPI_PORT,
+                ACE_TEXT ("failed to ::dhcpctl_connect(%s): \"%s\", aborting\n"),
+                ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address, false).c_str ()),
                 ACE_TEXT (isc_result_totext (status_i))));
     return false;
   } // end IF
+#if defined (_DEBUG)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("connected to dhclient process (address was: %s): %d/%d\n"),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address, false).c_str ()),
+              omapi_connection_readfd (connection_),
+              omapi_connection_writefd (connection_)));
+#endif // _DEBUG
   ACE_ASSERT (connection_ != dhcpctl_null_handle);
   status_i = dhcpctl_set_callback (connection_,
                                    NULL,

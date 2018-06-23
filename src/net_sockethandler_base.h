@@ -36,7 +36,7 @@ class Net_SocketHandlerBase_T
  , virtual public Common_IInitialize_T<ConfigurationType>
 {
  public:
-  inline virtual ~Net_SocketHandlerBase_T () {};
+  inline virtual ~Net_SocketHandlerBase_T () {}
 
   // implement Common_IInitialize_T
   virtual bool initialize (const ConfigurationType&); // handler configuration
