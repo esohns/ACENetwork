@@ -15,11 +15,11 @@ if (UNIX)
  add_feature_info (nl80211 NL80211_SUPPORT "support nl80211")
  add_feature_info (DBus/NetworkManager DBUS_SUPPORT "support DBus/NetworkManager")
 
- # DHCP client
- option (DHCLIENT_SUPPORT "enable ISC dhclient support" ON)
- option (DHCPD_SUPPORT "enable dhcpd support" OFF)
- add_feature_info (ISC dhclient DHCLIENT_SUPPORT "support ISC dhclient")
- add_feature_info (dhcpd DHCPD_SUPPORT "support dhcpd")
+# # DHCP client
+# option (DHCLIENT_SUPPORT "enable ISC dhclient support" ON)
+# option (DHCPD_SUPPORT "enable dhcpd support" OFF)
+# add_feature_info (ISC dhclient DHCLIENT_SUPPORT "support ISC dhclient")
+# add_feature_info (dhcpd DHCPD_SUPPORT "support dhcpd")
 elseif (WIN32)
  option (WLANAPI_SUPPORT "compile wlanapi support" ON)
  add_feature_info (wlanapi WLANAPI_SUPPORT "support wlanapi")
@@ -61,45 +61,45 @@ if (UNIX)
   add_definitions (-DDBUS_SUPPORT)
  endif (DBUS_SUPPORT)
 
- # DHCP client
- if (DHCLIENT_SUPPORT)
+# # DHCP client
+# if (DHCLIENT_SUPPORT)
 #  pkg_check_modules (PKG_DHCP REQUIRED bind-exports isc-dhcp-client)
-  set (JSON_LIB_FILE libjson-c.so.3)
-  find_library (JSON_LIBRARY ${JSON_LIB_FILE}
-                HINTS /usr/lib
-                PATH_SUFFIXES x86_64-linux-gnu
-                DOC "searching for ${JSON_LIB_FILE} (system paths)")
-  if (NOT JSON_LIBRARY)
-   message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found json library \"${JSON_LIBRARY}\"")
-  endif ()
+#  set (JSON_LIB_FILE libjson-c.so.3)
+#  find_library (JSON_LIBRARY ${JSON_LIB_FILE}
+#                HINTS /usr/lib
+#                PATH_SUFFIXES x86_64-linux-gnu
+#                DOC "searching for ${JSON_LIB_FILE} (system paths)")
+#  if (NOT JSON_LIBRARY)
+#   message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found json library \"${JSON_LIBRARY}\"")
+#  endif ()
 
-  set (ISC_LIB_FILE libisc.a)
-  #set (ISC_LIB_FILE libisc.so.166)
-  find_library (ISC_LIBRARY ${ISC_LIB_FILE}
-                HINTS /usr/lib64 /usr/lib
-                PATH_SUFFIXES dhcp x86_64-linux-gnu
-                DOC "searching for ${ISC_LIB_FILE} (system paths)")
-  if (NOT ISC_LIBRARY)
-   message (FATAL_ERROR "could not find ${ISC_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found isc library \"${ISC_LIBRARY}\"")
-  endif ()
+#  set (ISC_LIB_FILE libisc.a)
+#  #set (ISC_LIB_FILE libisc.so.166)
+#  find_library (ISC_LIBRARY ${ISC_LIB_FILE}
+#                HINTS /usr/lib64 /usr/lib
+#                PATH_SUFFIXES dhcp x86_64-linux-gnu
+#                DOC "searching for ${ISC_LIB_FILE} (system paths)")
+#  if (NOT ISC_LIBRARY)
+#   message (FATAL_ERROR "could not find ${ISC_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found isc library \"${ISC_LIBRARY}\"")
+#  endif ()
 
-  set (DHCPCTL_LIB_FILE libdhcpctl.a)
-  find_library (DHCPCTL_LIBRARY ${DHCPCTL_LIB_FILE}
-               HINTS /usr/lib64 /usr/lib
-               PATH_SUFFIXES dhcp x86_64-linux-gnu
-               DOC "searching for ${DHCPCTL_LIB_FILE} (system paths)")
-  if (NOT DHCPCTL_LIBRARY)
-   message (FATAL_ERROR "could not find ${DHCPCTL_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found dhcpctl library \"${DHCPCTL_LIBRARY}\"")
-  endif ()
- pkg_check_modules (PKG_LIBXML REQUIRED libxml-2.0)
- add_definitions (-DDHCLIENT_SUPPORT)
- endif (DHCLIENT_SUPPORT)
+#  set (DHCPCTL_LIB_FILE libdhcpctl.a)
+#  find_library (DHCPCTL_LIBRARY ${DHCPCTL_LIB_FILE}
+#               HINTS /usr/lib64 /usr/lib
+#               PATH_SUFFIXES dhcp x86_64-linux-gnu
+#               DOC "searching for ${DHCPCTL_LIB_FILE} (system paths)")
+#  if (NOT DHCPCTL_LIBRARY)
+#   message (FATAL_ERROR "could not find ${DHCPCTL_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found dhcpctl library \"${DHCPCTL_LIBRARY}\"")
+#  endif ()
+#  pkg_check_modules (PKG_LIBXML REQUIRED libxml-2.0)
+#  add_definitions (-DDHCLIENT_SUPPORT)
+# endif (DHCLIENT_SUPPORT)
 elseif (WIN32)
  # API
  if (WLANAPI_SUPPORT)
@@ -154,12 +154,12 @@ if (UNIX)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/dbus>)
  endif (DBUS_SUPPORT)
- if (DHCLIENT_SUPPORT)
+# if (DHCLIENT_SUPPORT)
 #  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
 #                              $<BUILD_INTERFACE:/usr/include/bind-export>)
 #  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
 #                              $<BUILD_INTERFACE:/usr/include/dhcp>)
- endif (DHCLIENT_SUPPORT)
+# endif (DHCLIENT_SUPPORT)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE>)
 
@@ -301,24 +301,24 @@ if (UNIX)
  if (DBUS_SUPPORT)
   target_link_libraries (${PROJECT_NAME}_WLAN CommonDBus)
  endif (DBUS_SUPPORT)
- if (DHCLIENT_SUPPORT)
-  target_link_libraries (${PROJECT_NAME}_WLAN ${ISC_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_WLAN ${DHCPCTL_LIBRARY})
+# if (DHCLIENT_SUPPORT)
+#  target_link_libraries (${PROJECT_NAME}_WLAN ${ISC_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME}_WLAN ${DHCPCTL_LIBRARY})
   # target_link_libraries (${EXECUTABLE} ${DHCP_LIBRARY})
   # target_link_libraries (${EXECUTABLE} -Wl,--start-group ${OMAPI_LIBRARY} ${ISC_LIBRARY} ${DNS_LIBRARY} -Wl,--end-group)
-  target_link_libraries (${PROJECT_NAME}_WLAN ${OMAPI_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_WLAN ${IRS_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_WLAN ${DNS_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_WLAN -Wl,--start-group ${DNS_LIBRARY} ${GSS_KRB5_LIBRARY} ${KRB5_LIBRARY} -Wl,--end-group)
-  target_link_libraries (${PROJECT_NAME}_WLAN ${KRB5_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_WLAN ${ISC_CFG_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_WLAN ${ISC_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_WLAN ${PKG_LIBXML_LIBRARIES})
-  target_link_libraries (${PROJECT_NAME}_WLAN ${JSON_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_WLAN ${PKG_SSL_LIBRARIES})
-  target_link_libraries (${PROJECT_NAME}_WLAN ${GEOIP_LIBRARY})
-  target_link_libraries (${PROJECT_NAME}_WLAN ${GSS_LIBRARY})
- endif (DHCLIENT_SUPPORT)
+#  target_link_libraries (${PROJECT_NAME}_WLAN ${OMAPI_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME}_WLAN ${IRS_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME}_WLAN ${DNS_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME}_WLAN -Wl,--start-group ${DNS_LIBRARY} ${GSS_KRB5_LIBRARY} ${KRB5_LIBRARY} -Wl,--end-group)
+#  target_link_libraries (${PROJECT_NAME}_WLAN ${KRB5_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME}_WLAN ${ISC_CFG_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME}_WLAN ${ISC_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME}_WLAN ${PKG_LIBXML_LIBRARIES})
+#  target_link_libraries (${PROJECT_NAME}_WLAN ${JSON_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME}_WLAN ${PKG_SSL_LIBRARIES})
+#  target_link_libraries (${PROJECT_NAME}_WLAN ${GEOIP_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME}_WLAN ${GSS_LIBRARY})
+# endif (DHCLIENT_SUPPORT)
 elseif (WIN32)
 # target_link_libraries (${PROJECT_NAME}_WLAN ${ACE_LIBRARY})
 

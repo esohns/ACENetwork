@@ -69,7 +69,7 @@ struct DHCPClient_SocketHandlerConfiguration
    ///////////////////////////////////////
    , connectionConfiguration (NULL)
    , userData (NULL)
-  {};
+  {}
 
   struct DHCPClient_ConnectionConfiguration* connectionConfiguration;
 
@@ -84,7 +84,7 @@ struct DHCPClient_ConnectionState
    : DHCP_ConnectionState ()
    , configuration (NULL)
    , userData (NULL)
-  {};
+  {}
 
   struct DHCPClient_ConnectionConfiguration* configuration;
 
@@ -118,7 +118,7 @@ struct DHCPClient_ConnectionConfiguration
    , connectionManager (NULL)
    , socketHandlerConfiguration ()
    , userData (NULL)
-  {};
+  {}
 
   DHCPClient_IConnectionManager_t*             connectionManager;
   struct DHCPClient_SocketHandlerConfiguration socketHandlerConfiguration;
@@ -139,27 +139,28 @@ typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 DHCPClient_ConnectionConfiguration_t,
                                 struct DHCPClient_ConnectionState,
                                 DHCP_Statistic_t,
-                                struct Net_SocketConfiguration,
+                                struct Net_UDPSocketConfiguration,
                                 struct DHCPClient_SocketHandlerConfiguration,
                                 Test_U_OutboundConnectionStream,
-                                enum Stream_StateMachine_ControlState> DHCPClient_IStreamConnection_t;
+                                enum Stream_StateMachine_ControlState> DHCPClient_IOutboundStreamConnection_t;
 typedef Net_IStreamConnection_T<ACE_INET_Addr,
                                 DHCPClient_ConnectionConfiguration_t,
                                 struct DHCPClient_ConnectionState,
                                 DHCP_Statistic_t,
-                                struct Net_SocketConfiguration,
+                                struct Net_UDPSocketConfiguration,
                                 struct DHCPClient_SocketHandlerConfiguration,
                                 Test_U_InboundConnectionStream,
                                 enum Stream_StateMachine_ControlState> DHCPClient_IInboundStreamConnection_t;
 
 //////////////////////////////////////////
 
-// inbound
 typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
                                Net_SOCK_Dgram_Bcast,
                                struct DHCPClient_SocketHandlerConfiguration> DHCPClient_SocketHandlerBcast_t;
 typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
                                      struct DHCPClient_SocketHandlerConfiguration> DHCPClient_AsynchSocketHandlerBcast_t;
+
+// inbound
 typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
                                Net_SOCK_Dgram,
                                struct DHCPClient_SocketHandlerConfiguration> DHCPClient_SocketHandler_t;
@@ -174,7 +175,7 @@ typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
                                 struct DHCPClient_SocketHandlerConfiguration,
                                 Test_U_InboundConnectionStream,
                                 Common_Timer_Manager_t,
-                                struct Test_U_UserData> DHCPClient_ConnectionBcast_t;
+                                struct Test_U_UserData> DHCPClient_InboundConnectionBcast_t;
 typedef Net_AsynchUDPConnectionBase_T<DHCPClient_AsynchSocketHandlerBcast_t,
                                       DHCPClient_ConnectionConfiguration_t,
                                       struct DHCPClient_ConnectionState,
@@ -182,7 +183,7 @@ typedef Net_AsynchUDPConnectionBase_T<DHCPClient_AsynchSocketHandlerBcast_t,
                                       struct DHCPClient_SocketHandlerConfiguration,
                                       Test_U_InboundConnectionStream,
                                       Common_Timer_Manager_t,
-                                      struct Test_U_UserData> DHCPClient_AsynchConnectionBcast_t;
+                                      struct Test_U_UserData> DHCPClient_InboundAsynchConnectionBcast_t;
 typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
                                 DHCPClient_SocketHandler_t,
                                 DHCPClient_ConnectionConfiguration_t,
@@ -191,7 +192,7 @@ typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
                                 struct DHCPClient_SocketHandlerConfiguration,
                                 Test_U_InboundConnectionStream,
                                 Common_Timer_Manager_t,
-                                struct Test_U_UserData> DHCPClient_Connection_t;
+                                struct Test_U_UserData> DHCPClient_InboundConnection_t;
 typedef Net_AsynchUDPConnectionBase_T<DHCPClient_AsynchSocketHandler_t,
                                       DHCPClient_ConnectionConfiguration_t,
                                       struct DHCPClient_ConnectionState,
@@ -199,14 +200,14 @@ typedef Net_AsynchUDPConnectionBase_T<DHCPClient_AsynchSocketHandler_t,
                                       struct DHCPClient_SocketHandlerConfiguration,
                                       Test_U_InboundConnectionStream,
                                       Common_Timer_Manager_t,
-                                      struct Test_U_UserData> DHCPClient_AsynchConnection_t;
+                                      struct Test_U_UserData> DHCPClient_InboundAsynchConnection_t;
 
 // outbound
-typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
-                               Net_SOCK_Dgram_Bcast,
-                               struct DHCPClient_SocketHandlerConfiguration> DHCPClient_OutboundSocketHandlerBcast_t;
-typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
-                                     struct DHCPClient_SocketHandlerConfiguration> DHCPClient_OutboundAsynchSocketHandlerBcast_t;
+//typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
+//                               Net_SOCK_Dgram_Bcast,
+//                               struct DHCPClient_SocketHandlerConfiguration> DHCPClient_OutboundSocketHandlerBcast_t;
+//typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_Dgram_Bcast,
+//                                     struct DHCPClient_SocketHandlerConfiguration> DHCPClient_OutboundAsynchSocketHandlerBcast_t;
 typedef Net_UDPSocketHandler_T<ACE_MT_SYNCH,
                                Net_SOCK_CODgram,
                                struct DHCPClient_SocketHandlerConfiguration> DHCPClient_OutboundSocketHandler_t;
@@ -214,7 +215,7 @@ typedef Net_AsynchUDPSocketHandler_T<Net_SOCK_CODgram,
                                      struct DHCPClient_SocketHandlerConfiguration> DHCPClient_OutboundAsynchSocketHandler_t;
 
 typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
-                                DHCPClient_OutboundSocketHandlerBcast_t,
+                                DHCPClient_SocketHandlerBcast_t,
                                 DHCPClient_ConnectionConfiguration_t,
                                 struct DHCPClient_ConnectionState,
                                 DHCP_Statistic_t,
@@ -222,7 +223,7 @@ typedef Net_UDPConnectionBase_T<ACE_MT_SYNCH,
                                 Test_U_OutboundConnectionStream,
                                 Common_Timer_Manager_t,
                                 struct Test_U_UserData> DHCPClient_OutboundConnectionBcast_t;
-typedef Net_AsynchUDPConnectionBase_T<DHCPClient_OutboundAsynchSocketHandlerBcast_t,
+typedef Net_AsynchUDPConnectionBase_T<DHCPClient_AsynchSocketHandlerBcast_t,
                                       DHCPClient_ConnectionConfiguration_t,
                                       struct DHCPClient_ConnectionState,
                                       DHCP_Statistic_t,
@@ -256,7 +257,7 @@ typedef Net_IConnector_T<ACE_INET_Addr,
 //////////////////////////////////////////
 
 // inbound
-typedef Net_Client_AsynchConnector_T<DHCPClient_AsynchConnectionBcast_t,
+typedef Net_Client_AsynchConnector_T<DHCPClient_InboundAsynchConnectionBcast_t,
                                      ACE_INET_Addr,
                                      DHCPClient_ConnectionConfiguration_t,
                                      struct DHCPClient_ConnectionState,
@@ -264,9 +265,9 @@ typedef Net_Client_AsynchConnector_T<DHCPClient_AsynchConnectionBcast_t,
                                      struct Net_UDPSocketConfiguration,
                                      struct DHCPClient_SocketHandlerConfiguration,
                                      Test_U_InboundConnectionStream,
-                                     struct Test_U_UserData> DHCPClient_AsynchConnectorBcast_t;
+                                     struct Test_U_UserData> DHCPClient_InboundAsynchConnectorBcast_t;
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
-                               DHCPClient_ConnectionBcast_t,
+                               DHCPClient_InboundConnectionBcast_t,
                                Net_SOCK_Connector,
                                ACE_INET_Addr,
                                DHCPClient_ConnectionConfiguration_t,
@@ -275,8 +276,8 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                struct Net_UDPSocketConfiguration,
                                struct DHCPClient_SocketHandlerConfiguration,
                                Test_U_InboundConnectionStream,
-                               struct Test_U_UserData> DHCPClient_ConnectorBcast_t;
-typedef Net_Client_AsynchConnector_T<DHCPClient_AsynchConnection_t,
+                               struct Test_U_UserData> DHCPClient_InboundConnectorBcast_t;
+typedef Net_Client_AsynchConnector_T<DHCPClient_InboundAsynchConnection_t,
                                      ACE_INET_Addr,
                                      DHCPClient_ConnectionConfiguration_t,
                                      struct DHCPClient_ConnectionState,
@@ -284,9 +285,9 @@ typedef Net_Client_AsynchConnector_T<DHCPClient_AsynchConnection_t,
                                      struct Net_UDPSocketConfiguration,
                                      struct DHCPClient_SocketHandlerConfiguration,
                                      Test_U_InboundConnectionStream,
-                                     struct Test_U_UserData> DHCPClient_AsynchConnector_t;
+                                     struct Test_U_UserData> DHCPClient_InboundAsynchConnector_t;
 typedef Net_Client_Connector_T<ACE_MT_SYNCH,
-                               DHCPClient_Connection_t,
+                               DHCPClient_InboundConnection_t,
                                Net_SOCK_Connector,
                                ACE_INET_Addr,
                                DHCPClient_ConnectionConfiguration_t,
@@ -295,7 +296,7 @@ typedef Net_Client_Connector_T<ACE_MT_SYNCH,
                                struct Net_UDPSocketConfiguration,
                                struct DHCPClient_SocketHandlerConfiguration,
                                Test_U_InboundConnectionStream,
-                               struct Test_U_UserData> DHCPClient_Connector_t;
+                               struct Test_U_UserData> DHCPClient_InboundConnector_t;
 
 // outbound
 typedef Net_Client_AsynchConnector_T<DHCPClient_OutboundAsynchConnectionBcast_t,

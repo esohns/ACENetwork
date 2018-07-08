@@ -69,12 +69,12 @@ struct DHCPClient_MessageData
 {
   DHCPClient_MessageData ()
    : record (NULL)
-  {};
+  {}
   ~DHCPClient_MessageData ()
   {
     if (record)
       delete record;
-  };
+  }
 
   struct DHCP_Record* record;
 };
@@ -90,22 +90,17 @@ struct DHCPClient_SessionData
 {
   DHCPClient_SessionData ()
    : Test_U_StreamSessionData ()
-   , broadcastConnection (NULL)
-   , connection (NULL)
+   , connection (NULL) // inbound
    , targetFileName ()
    , serverAddress (static_cast<u_short> (0),
                     static_cast<ACE_UINT32> (INADDR_ANY))
    , timeStamp (ACE_Time_Value::zero)
    , xid (0)
-  {};
-  
+  {}
   struct DHCPClient_SessionData& operator= (struct DHCPClient_SessionData& rhs_in)
   {
     Test_U_StreamSessionData::operator= (rhs_in);
 
-    broadcastConnection =
-        (broadcastConnection ? broadcastConnection
-                             : rhs_in.broadcastConnection);
     connection = (connection ? connection : rhs_in.connection);
     targetFileName = (targetFileName.empty () ? rhs_in.targetFileName
                                               : targetFileName);
@@ -113,13 +108,13 @@ struct DHCPClient_SessionData
     return *this;
   }
 
-  DHCPClient_IConnection_t* broadcastConnection; // DISCOVER/REQUEST/INFORM
+//  DHCPClient_IConnection_t* broadcastConnection; // DISCOVER/REQUEST/INFORM
   DHCPClient_IConnection_t* connection;          // RELEASE
   std::string               targetFileName;      // file writer module
 
   ACE_INET_Addr             serverAddress;
   ACE_Time_Value            timeStamp;           // lease timeout
-  unsigned int              xid;                 // session id
+  ACE_UINT32                xid;                 // session id
 };
 typedef Stream_SessionData_T<struct DHCPClient_SessionData> DHCPClient_SessionData_t;
 
@@ -162,9 +157,8 @@ struct DHCPClient_ModuleHandlerConfiguration
 {
   DHCPClient_ModuleHandlerConfiguration ()
    : DHCP_ModuleHandlerConfiguration ()
-   , broadcastConnection (NULL)
+   , connection (NULL)
    , connectionConfigurations (NULL)
-   //, contextId (0)
    , streamConfiguration (NULL)
    , subscriber (NULL)
    , subscribers (NULL)
@@ -172,11 +166,10 @@ struct DHCPClient_ModuleHandlerConfiguration
   {
     inbound = true;
     passive = false;
-  };
+  }
 
-  DHCPClient_IConnection_t*              broadcastConnection; // UDP target/net IO module
+  DHCPClient_IConnection_t*              connection; // UDP target/net IO module
   DHCPClient_ConnectionConfigurations_t* connectionConfigurations;
-  //guint                                     contextId;
   DHCPClient_StreamConfiguration_t*      streamConfiguration; // dhcp discover module
   DHCPClient_ISessionNotify_t*           subscriber;
   DHCPClient_Subscribers_t*              subscribers;
@@ -189,7 +182,7 @@ struct DHCPClient_StreamConfiguration
   DHCPClient_StreamConfiguration ()
    : DHCP_StreamConfiguration ()
    , userData (NULL)
-  {};
+  {}
 
   struct Test_U_UserData* userData;
 };
@@ -200,56 +193,56 @@ struct DHCPClient_StreamState
   DHCPClient_StreamState ()
    : Test_U_StreamState ()
    , sessionData (NULL)
-  {};
+  {}
 
   struct DHCPClient_SessionData* sessionData;
 };
 
-struct DHCPClient_SocketHandlerConfiguration;
-struct DHCPClient_ListenerConfiguration
- : Net_ListenerConfiguration
-{
-  DHCPClient_ListenerConfiguration ()
-   : Net_ListenerConfiguration ()
-   , socketHandlerConfiguration ()
-   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
-                                 0)
-  {
-    int result =
-      socketHandlerConfiguration.socketConfiguration_2.peerAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
-                                                                        static_cast<ACE_UINT32> (INADDR_ANY),
-                                                                        1,
-                                                                        0);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
-    result =
-      socketHandlerConfiguration.socketConfiguration_2.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_SERVER_PORT),
-                                                                          static_cast<ACE_UINT32> (INADDR_ANY),
-                                                                          1,
-                                                                          0);
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
-  };
+//struct DHCPClient_SocketHandlerConfiguration;
+//struct DHCPClient_ListenerConfiguration
+// : Net_ListenerConfiguration
+//{
+//  DHCPClient_ListenerConfiguration ()
+//   : Net_ListenerConfiguration ()
+//   , socketHandlerConfiguration ()
+//   , statisticReportingInterval (NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL,
+//                                 0)
+//  {
+//    int result =
+//      socketHandlerConfiguration.socketConfiguration_2.peerAddress.set (static_cast<u_short> (DHCP_DEFAULT_CLIENT_PORT),
+//                                                                        static_cast<ACE_UINT32> (INADDR_ANY),
+//                                                                        1,
+//                                                                        0);
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
+//    result =
+//      socketHandlerConfiguration.socketConfiguration_2.listenAddress.set (static_cast<u_short> (DHCP_DEFAULT_SERVER_PORT),
+//                                                                          static_cast<ACE_UINT32> (INADDR_ANY),
+//                                                                          1,
+//                                                                          0);
+//    if (result == -1)
+//      ACE_DEBUG ((LM_ERROR,
+//                  ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", continuing\n")));
+//  }
 
-  struct DHCPClient_SocketHandlerConfiguration socketHandlerConfiguration;
-  ACE_Time_Value                               statisticReportingInterval; // [ACE_Time_Value::zero: off]
-};
-typedef Net_IListener_T<struct DHCPClient_ListenerConfiguration,
-                        struct DHCPClient_SocketHandlerConfiguration> DHCPClient_IListener_t;
+//  struct DHCPClient_SocketHandlerConfiguration socketHandlerConfiguration;
+//  ACE_Time_Value                               statisticReportingInterval; // [ACE_Time_Value::zero: off]
+//};
+//typedef Net_IListener_T<struct DHCPClient_ListenerConfiguration,
+//                        struct DHCPClient_SocketHandlerConfiguration> DHCPClient_IListener_t;
 
 struct DHCPClient_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
   DHCPClient_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
-   , listener (NULL)
+//   , listener (NULL)
    , statisticReportingHandler (NULL)
    , statisticReportingTimerId (-1)
-  {};
+  {}
 
-  DHCPClient_IListener_t*           listener;
+//  DHCPClient_IListener_t*           listener;
   DHCP_StatisticReportingHandler_t* statisticReportingHandler;
   long                              statisticReportingTimerId;
 };
@@ -264,29 +257,31 @@ struct DHCPClient_Configuration
    , signalHandlerConfiguration ()
    , connectionConfigurations ()
    , parserConfiguration ()
+//   , allocatorConfiguration ()
    , streamConfiguration ()
-   , listenerConfiguration ()
+//   , listenerConfiguration ()
    , broadcastHandle (ACE_INVALID_HANDLE)
    , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , handle (ACE_INVALID_HANDLE)
-  {};
+  {}
 
   // **************************** signal data **********************************
-  struct DHCPClient_SignalHandlerConfiguration signalHandlerConfiguration;
+  struct DHCPClient_SignalHandlerConfiguration   signalHandlerConfiguration;
   // **************************** socket data **********************************
-  DHCPClient_ConnectionConfigurations_t        connectionConfigurations;
+  DHCPClient_ConnectionConfigurations_t          connectionConfigurations;
   // **************************** parser data **********************************
-  struct Common_ParserConfiguration            parserConfiguration;
+  struct Common_ParserConfiguration              parserConfiguration;
   // **************************** stream data **********************************
-  DHCPClient_StreamConfiguration_t             streamConfiguration;
+//  struct Common_FlexParserAllocatorConfiguration allocatorConfiguration;
+  DHCPClient_StreamConfiguration_t               streamConfiguration;
   // *************************** protocol data *********************************
-  struct DHCP_ProtocolConfiguration            protocolConfiguration;
+  struct DHCP_ProtocolConfiguration              protocolConfiguration;
   // *************************** listener data *********************************
-  struct DHCPClient_ListenerConfiguration      listenerConfiguration;
+//  struct DHCPClient_ListenerConfiguration        listenerConfiguration;
 
-  ACE_HANDLE                                   broadcastHandle; // listen handle (broadcast)
-  enum Common_EventDispatchType                dispatch;
-  ACE_HANDLE                                   handle;          // listen handle (unicast)
+  ACE_HANDLE                                     broadcastHandle; // listen handle (broadcast)
+  enum Common_EventDispatchType                  dispatch;
+  ACE_HANDLE                                     handle;          // listen handle (unicast)
 };
 
 //typedef Common_ISubscribe_T<DHCPClient_ISessionNotify_t> DHCPClient_ISubscribe_t;
@@ -300,7 +295,7 @@ struct DHCPClient_GTK_ProgressData
    : Test_U_GTK_ProgressData ()
    , statistic ()
    , transferred (0)
-  {};
+  {}
 
   DHCP_Statistic_t statistic;
   unsigned int     transferred; // byte(s)
@@ -315,7 +310,7 @@ struct DHCPClient_GTK_CBData
    , progressData ()
    , progressEventSourceId (0)
    , subscribers ()
-  {};
+  {}
 
   struct DHCPClient_Configuration*   configuration;
   struct DHCPClient_GTK_ProgressData progressData;
@@ -329,7 +324,7 @@ struct DHCPClient_ThreadData
   DHCPClient_ThreadData ()
    : Test_U_GTK_ThreadData ()
    , CBData (NULL)
-  {};
+  {}
 
   struct DHCPClient_GTK_CBData* CBData;
 };

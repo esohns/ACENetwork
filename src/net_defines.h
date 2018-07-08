@@ -132,10 +132,12 @@
 #else
 #if defined (DHCLIENT_SUPPORT)
 #define NET_EXE_DHCLIENT_CONNECTION_RETRIES                  3
-#define NET_EXE_DHCLIENT_STRING                              "dhclient"
+#define NET_EXE_DHCLIENT_INTERFACE_STATE_UP_STRING           "up"
 #define NET_EXE_DHCLIENT_LEASES_FILE                         "/var/lib/dhcp/dhclient.leases"
 #define NET_EXE_DHCLIENT_LOCALHOST_IP_STRING                 "127.0.0.1"
 #define NET_EXE_DHCLIENT_OMAPI_PORT                          7911
+#define NET_EXE_DHCLIENT_STRING                              "dhclient"
+#define NET_EXE_DHCLIENT_SWITCH_RUN_IN_FOREGROUND_STRING     "d"
 
 #define NET_EXE_DHCLIENT_OBJECT_INTERFACE_STRING             "interface"
 #define NET_EXE_DHCLIENT_OBJECT_LEASE_STRING                 "lease"
@@ -146,5 +148,10 @@
 #define NET_EXE_DHCLIENT_OBJECT_VALUE_STATE_STRING           "state"
 #endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
+
+#define NET_CHECK_VERSION(major,minor,micro)                                                                              \
+    ((ACENETWORK_VERSION_MAJOR > major)                                                                                || \
+     ((ACENETWORK_VERSION_MAJOR == major) && (ACENETWORK_VERSION_MINOR > minor))                                       || \
+     ((ACENETWORK_VERSION_MAJOR == major) && (ACENETWORK_VERSION_MINOR == minor) && (ACENETWORK_VERSION_MICRO >= micro)))
 
 #endif

@@ -53,7 +53,7 @@ struct FileServer_SessionData
    : Test_U_StreamSessionData ()
    , connection (NULL)
    , userData (NULL)
-  {};
+  {}
 
   FileServer_IConnection_t*   connection;
 
@@ -66,11 +66,11 @@ struct FileServer_StreamState
 {
   FileServer_StreamState ()
    : Test_U_StreamState ()
-   , currentSessionData (NULL)
+   , sessionData (NULL)
    , userData (NULL)
-  {};
+  {}
 
-  struct FileServer_SessionData* currentSessionData;
+  struct FileServer_SessionData* sessionData;
 
   struct FileServer_UserData*    userData;
 };
@@ -127,7 +127,7 @@ struct Test_U_ModuleHandlerConfiguration
    , subscribers (NULL)
   {
     inbound = true;
-  };
+  }
 
   struct Net_AllocatorConfiguration*     allocatorConfiguration;
   FileServer_UDPIStreamConnection_t*     connection;               // net target module
@@ -149,7 +149,7 @@ struct FileServer_StreamConfiguration
    : Stream_Configuration ()
    , dispatch (COMMON_EVENT_DEFAULT_DISPATCH)
    , userData (NULL)
-  {};
+  {}
 
   enum Common_EventDispatchType dispatch;
 

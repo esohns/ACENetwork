@@ -101,9 +101,9 @@ Net_WLAN_Monitor_T<AddressType,
 //  inherited::TASK_T::reactor (ACE_Reactor::instance ());
 //  inherited2::proactor (ACE_Proactor::instance ());
 
-  inherited::CBData_.error = &error_;
-  inherited::CBData_.features = &features_;
-  inherited::CBData_.monitor = this;
+  inherited::nl80211CBData_.error = &error_;
+  inherited::nl80211CBData_.features = &features_;
+  inherited::nl80211CBData_.monitor = this;
 }
 
 template <typename AddressType,
@@ -206,7 +206,7 @@ Net_WLAN_Monitor_T<AddressType,
   int result = -1;
   struct nl_msg* message_p = NULL;
   Net_WLAN_nl80211_MulticastGroupIds_t multicast_group_ids_m;
-  inherited::CBData_.map = &multicast_group_ids_m;
+  inherited::nl80211CBData_.map = &multicast_group_ids_m;
   ACE_HANDLE socket_handle_h = nl_socket_get_fd (inherited::socketHandle_);
   ACE_Time_Value deadline;
 
@@ -284,25 +284,25 @@ continue_3:
   result = nl_cb_err (callbacks_,
                       NL_CB_CUSTOM,
                       network_wlan_nl80211_error_cb,
-                      &(inherited::CBData_));
+                      &(inherited::nl80211CBData_));
   ACE_ASSERT (result >= 0);
   result = nl_cb_set (callbacks_,
                       NL_CB_ACK,
                       NL_CB_CUSTOM,
                       network_wlan_nl80211_ack_cb,
-                      &(inherited::CBData_));
+                      &(inherited::nl80211CBData_));
   ACE_ASSERT (result >= 0);
   result = nl_cb_set (callbacks_,
                       NL_CB_FINISH,
                       NL_CB_CUSTOM,
                       network_wlan_nl80211_finish_cb,
-                      &(inherited::CBData_));
+                      &(inherited::nl80211CBData_));
   ACE_ASSERT (result >= 0);
   result = nl_cb_set (callbacks_,
                       NL_CB_VALID,
                       NL_CB_CUSTOM,
                       network_wlan_nl80211_multicast_groups_cb,
-                      &(inherited::CBData_));
+                      &(inherited::nl80211CBData_));
   ACE_ASSERT (result >= 0);
   result = 1;
   while ((result > 0) &&
@@ -354,13 +354,13 @@ continue_3:
                       NL_CB_SEQ_CHECK,
                       NL_CB_CUSTOM,
                       network_wlan_nl80211_no_seq_check_cb,
-                      &(inherited::CBData_));
+                      &(inherited::nl80211CBData_));
   ACE_ASSERT (result >= 0);
   result = nl_cb_set (callbacks_,
                       NL_CB_VALID,
                       NL_CB_CUSTOM,
                       network_wlan_nl80211_default_handler_cb,
-                      &(inherited::CBData_));
+                      &(inherited::nl80211CBData_));
   ACE_ASSERT (result >= 0);
 
   if (unlikely (!Net_WLAN_Tools::getWiPhyFeatures (inherited::configuration_->interfaceIdentifier,
@@ -821,6 +821,9 @@ Net_WLAN_Monitor_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::do_associate"));
 
   bool result = true;
+  enum nl80211_auth_type authenticationType_e = NL80211_AUTHTYPE_AUTOMATIC;
+  ACE_UINT32 frequency_i = 0;
+  bool result_2 = false;
 
   // sanity check(s)
   ACE_ASSERT (inherited::familyId_);
@@ -838,9 +841,9 @@ Net_WLAN_Monitor_T<AddressType,
   else
     interface_identifiers_a.push_back (interfaceIdentifier_in);
 
-  // check cache
-  enum nl80211_auth_type authenticationType_e = NL80211_AUTHTYPE_AUTOMATIC;
-  ACE_UINT32 frequency_i = 0;
+  // check cache ?
+  if (SSID_in.empty ())
+    goto continue_;
   { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_, false);
     Net_WLAN_AccessPointCacheConstIterator_t iterator =
         inherited::SSIDCache_.find (SSID_in);
@@ -857,13 +860,13 @@ Net_WLAN_Monitor_T<AddressType,
     frequency_i = (*iterator).second.second.frequency;
   } // end lock scope
 
-  bool result_2 = false;
+continue_:
   for (Net_InterfacesIdentifiersIterator_t iterator = interface_identifiers_a.begin ();
        iterator != interface_identifiers_a.end ();
        ++iterator)
   {
-    inherited::CBData_.index = ::if_nametoindex ((*iterator).c_str ());
-    if (unlikely (!inherited::CBData_.index))
+    inherited::nl80211CBData_.index = ::if_nametoindex ((*iterator).c_str ());
+    if (unlikely (!inherited::nl80211CBData_.index))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ::if_nametoindex(\"%s\"): \"%m\", continuing\n"),
@@ -962,8 +965,8 @@ Net_WLAN_Monitor_T<AddressType,
        iterator != interface_identifiers_a.end ();
        ++iterator)
   {
-    inherited::CBData_.index = ::if_nametoindex ((*iterator).c_str ());
-    if (unlikely (!inherited::CBData_.index))
+    inherited::nl80211CBData_.index = ::if_nametoindex ((*iterator).c_str ());
+    if (unlikely (!inherited::nl80211CBData_.index))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ::if_nametoindex(\"%s\"): \"%m\", continuing\n"),
@@ -1019,15 +1022,15 @@ Net_WLAN_Monitor_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::do_scan"));
 
-  inherited::CBData_.index = ::if_nametoindex (interfaceIdentifier_in.c_str ());
-  if (unlikely (!inherited::CBData_.index))
+  inherited::nl80211CBData_.index = ::if_nametoindex (interfaceIdentifier_in.c_str ());
+  if (unlikely (!inherited::nl80211CBData_.index))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::if_nametoindex(\"%s\"): \"%m\", returning\n"),
                 ACE_TEXT (interfaceIdentifier_in.c_str ())));
     return;
   } // end IF
-  inherited::CBData_.scanning = true;
+  inherited::nl80211CBData_.scanning = true;
 
   if (unlikely (!Net_WLAN_Tools::scan (interfaceIdentifier_in,
                                        inherited::socketHandle_,
@@ -1043,7 +1046,7 @@ Net_WLAN_Monitor_T<AddressType,
                 ACE_TEXT ("failed to Net_WLAN_Tools::scan(\"%s\"), returning\n"),
                 ACE_TEXT (interfaceIdentifier_in.c_str ())));
 
-    inherited::CBData_.scanning = false;
+    inherited::nl80211CBData_.scanning = false;
 
     return;
   } // end IF

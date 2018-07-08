@@ -51,9 +51,9 @@ Test_U_Module_EventHandler::clone ()
   {
     inherited* inherited_p = dynamic_cast<inherited*> (task_p);
     ACE_ASSERT (inherited_p);
-    ACE_ASSERT (inherited::configuration_);
-    inherited_p->initialize (*inherited::configuration_,
-                             inherited::allocator_);
+    if (inherited::configuration_)
+      inherited_p->initialize (*inherited::configuration_,
+                               inherited::allocator_);
   } // end ELSE
 
   return task_p;

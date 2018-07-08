@@ -46,7 +46,7 @@ struct Test_U_StreamSessionData
    , connectionState (NULL)
    , statistic ()
    , userData (NULL)
-  {};
+  {}
 
   struct Net_ConnectionState* connectionState;
   Test_U_Statistic_t          statistic;
@@ -62,7 +62,7 @@ struct Test_U_StreamState
    : Stream_State ()
    , sessionData (NULL)
    , userData (NULL)
-  {};
+  {}
 
   struct Test_U_StreamSessionData* sessionData;
 

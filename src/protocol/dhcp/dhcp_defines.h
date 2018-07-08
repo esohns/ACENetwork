@@ -56,7 +56,7 @@
 
 // protocol
 #define DHCP_DEFAULT_CLIENT_PORT                  68 // UDP
-#define DHCP_DEFAULT_SERVER_PORT                  67 // UDP
+#define DHCP_DEFAULT_SERVER_PORT                  67 // UDP (bcast)
 
 // *TODO*: this is the minimum, DHCP supports negotiation of larger frames
 #define DHCP_MESSAGE_SIZE                         576

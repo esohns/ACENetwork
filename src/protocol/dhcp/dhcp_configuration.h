@@ -67,7 +67,7 @@ typedef Net_IConnectionManager_T<ACE_MT_SYNCH,
 //                         DHCP_SessionMessage> DHCP_IStreamNotify_t;
 
 struct DHCP_SocketHandlerConfiguration
-  : Net_SocketHandlerConfiguration
+ : Net_SocketHandlerConfiguration
 {
   DHCP_SocketHandlerConfiguration ()
    : Net_SocketHandlerConfiguration ()
@@ -76,7 +76,15 @@ struct DHCP_SocketHandlerConfiguration
    , userData (NULL)
   {
     socketConfiguration = &socketConfiguration_2;
-  };
+  }
+  DHCP_SocketHandlerConfiguration (const DHCP_SocketHandlerConfiguration& rhs_in)
+   : Net_SocketHandlerConfiguration (rhs_in)
+   ///////////////////////////////////////
+   , socketConfiguration_2 (rhs_in.socketConfiguration_2)
+   , userData (rhs_in.userData)
+  {
+    socketConfiguration = &socketConfiguration_2;
+  }
 
   struct Net_UDPSocketConfiguration socketConfiguration_2;
 
@@ -96,7 +104,7 @@ struct DHCP_ConnectionConfiguration
   {
     PDUSize = DHCP_MESSAGE_SIZE;
     //PDUSize = DHCP_BUFFER_SIZE;
-  };
+  }
 
   struct DHCP_SocketHandlerConfiguration socketHandlerConfiguration;
   struct DHCP_StreamConfiguration*       streamConfiguration;
@@ -126,7 +134,7 @@ struct DHCP_ProtocolConfiguration
   DHCP_ProtocolConfiguration ()
    : requestBroadcastReplies (DHCP_DEFAULT_FLAGS_BROADCAST)
    , sendRequestOnOffer (false)
-  {};
+  {}
 
   bool requestBroadcastReplies;
   bool sendRequestOnOffer;
@@ -146,7 +154,7 @@ struct DHCP_ModuleHandlerConfiguration
   {
     crunchMessages = DHCP_DEFAULT_CRUNCH_MESSAGES; // dhcp parser module
     printFinalReport = true;
-  };
+  }
 
 //  Test_U_IConnection_t*       connection; // UDP target/net IO module
   DHCP_ConnectionConfigurations_t*   connectionConfigurations;
@@ -166,7 +174,7 @@ struct DHCP_StreamConfiguration
    , moduleHandlerConfigurations ()
    , protocolConfiguration (NULL)
    //, userData (NULL)
-  {};
+  {}
 
   struct Stream_ModuleConfiguration* moduleConfiguration;        // stream module configuration
   DHCP_ModuleHandlerConfigurations_t moduleHandlerConfigurations; // module handler configuration

@@ -27,9 +27,6 @@
 //#include "stream_statistichandler.h"
 #include "stream_task_base_asynch.h"
 
-//#include "dhcp_exports.h"
-
-//extern NET_PROTOCOL_DHCP_Export const char libacenetwork_protocol_default_dhcp_discover_module_name_string[];
 extern const char libacenetwork_protocol_default_dhcp_discover_module_name_string[];
 
 template <ACE_SYNCH_DECL,
@@ -95,11 +92,10 @@ class DHCP_Module_Discover_T
 
   // helper methods
   DataMessageType* allocateMessage (unsigned int); // (requested) size
-  ACE_HANDLE connect (const ACE_INET_Addr&, // peer address
-                      bool&);               // reuturn value: use reactor ?
+  ACE_HANDLE connect (const ACE_INET_Addr&, // peer (i.e. server) address
+                      bool&);               // return value: use reactor ?
 
-  ACE_HANDLE broadcastConnectionHandle_;
-  ACE_HANDLE connectionHandle_; // unicast
+  ACE_HANDLE handle_;
   bool       isSessionConnection_;
   bool       sendRequestOnOffer_;
 };
@@ -163,7 +159,7 @@ class DHCP_Module_DiscoverH_T
 #endif
                            bool = false, // auto-start ?
                            bool = true); // generate session messages ?
-  inline virtual ~DHCP_Module_DiscoverH_T () {};
+  inline virtual ~DHCP_Module_DiscoverH_T () {}
 
   // *PORTABILITY*: for some reason, this base class member is not exposed
   //                (MSVC/gcc)
@@ -182,7 +178,6 @@ class DHCP_Module_DiscoverH_T
   // implement Common_IStatistic
   // *NOTE*: this reuses the interface to implement timer-based data collection
   virtual bool collect (StatisticContainerType&); // return value: (currently unused !)
-  //virtual void report () const;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (DHCP_Module_DiscoverH_T ())

@@ -98,7 +98,8 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   int result = -1;
 #if defined (ACE_LINUX)
   unsigned short port_number = 0;
-  bool handle_privileges = false;
+  bool drop_capabilities = false;
+  bool drop_privileges = false;
 #endif // ACE_LINUX
   bool handle_sockets = false;
   // *IMPORTANT NOTE*: associate the outbound socket with the peer address as
@@ -118,7 +119,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   ACE_ASSERT (proactor_p);
   ACE_ASSERT (socket_configuration_p);
 
-  //connect_socket = socket_configuration_p->connect;
+  connect_socket = socket_configuration_p->connect;
   if (unlikely (socket_configuration_p->writeOnly))
   { ACE_ASSERT (socket_configuration_p->connect);
     //connect_socket = true;
@@ -182,13 +183,11 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   if (unlikely (!socket_configuration_p->writeOnly &&
                 (port_number <= NET_ADDRESS_MAXIMUM_PRIVILEGED_PORT)))
   {
-    if (!Common_Tools::switchUser (0))
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to Common_Tools::switchUser(0): \"%m\", aborting\n")));
-      goto error;
-    } // end IF
-    handle_privileges = true;
+    if (Common_Tools::canCapability (CAP_NET_BIND_SERVICE))
+      drop_capabilities = Common_Tools::setCapability (CAP_NET_BIND_SERVICE,
+                                                       CAP_EFFECTIVE);
+    else if (Common_Tools::switchUser (0)) // try seteuid()
+      drop_privileges = true;
   } // end IF
 #endif // ACE_LINUX
   result =
@@ -208,8 +207,17 @@ Net_AsynchUDPSocketHandler_T<SocketType,
     goto error;
   } // end IF
 #if defined (ACE_LINUX)
-  if (handle_privileges)
-    Common_Tools::switchUser (-1);
+  if (drop_capabilities)
+  {
+    Common_Tools::dropCapability (CAP_NET_BIND_SERVICE,
+                                  CAP_EFFECTIVE);
+    drop_capabilities = false;
+  } // end IF
+  if (drop_privileges)
+  {
+    Common_Tools::switchUser (static_cast<uid_t> (-1));
+    drop_privileges = false;
+  } // end IF
 #endif // ACE_LINUX
   handle = inherited2::get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
@@ -223,13 +231,10 @@ Net_AsynchUDPSocketHandler_T<SocketType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::socket(%d,%d,0): \"%m\", aborting\n"),
                   AF_INET, SOCK_DGRAM));
-
-      // clean up
       result = inherited2::close ();
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to SocketType::close(): \"%m\", continuing\n")));
-
       goto error;
     } // end IF
 
@@ -460,13 +465,16 @@ Net_AsynchUDPSocketHandler_T<SocketType,
 //              ACE_TEXT ("maximum message size for UDP socket %d: %u byte(s)\n"),
 //              handle,
 //              so_max_msg_size));
-//#endif
+//#endif // ACE_WIN32 || ACE_WIN64
 
   return;
 
 error:
 #if defined (ACE_LINUX)
-  if (handle_privileges)
+  if (drop_capabilities)
+    Common_Tools::dropCapability (CAP_NET_BIND_SERVICE,
+                                  CAP_EFFECTIVE);
+  if (drop_privileges)
     Common_Tools::switchUser (static_cast<uid_t> (-1));
 #endif // ACE_LINUX
   if (handle_sockets)
@@ -491,6 +499,7 @@ error:
       writeHandle_ = ACE_INVALID_HANDLE;
     } // end IF
   } // end IF
+  inherited::isInitialized_ = false;
 }
 
 template <typename SocketType,
@@ -505,7 +514,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   ACE_UNUSED_ARG (handle_in);
   ACE_UNUSED_ARG (mask_in);
 
-  int result = -1;
+  int result = 0;
   ACE_HANDLE handle_h = SocketType::get_handle ();
 
   if (handle_h != ACE_INVALID_HANDLE)

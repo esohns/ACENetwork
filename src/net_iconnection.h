@@ -124,7 +124,7 @@ template <typename AddressType,
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename SocketConfigurationType,
+          typename SocketConfigurationType,  // inherits Net_SocketConfiguration
           typename HandlerConfigurationType> // socket-
 class Net_ISocketConnection_T
  : public virtual Net_IConnection_T<AddressType,
@@ -154,7 +154,7 @@ template <typename AddressType,
           typename StateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename SocketConfigurationType,
+          typename SocketConfigurationType,  // inherits Net_SocketConfiguration
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename StreamType,
@@ -209,7 +209,7 @@ template <typename AddressType,
           typename ConnectionStateType,
           typename StatisticContainerType,
           ////////////////////////////////
-          typename SocketConfigurationType,
+          typename SocketConfigurationType,  // inherits Net_SocketConfiguration
           typename HandlerConfigurationType, // socket-
           ////////////////////////////////
           typename PeerStreamType,

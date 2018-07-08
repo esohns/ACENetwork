@@ -74,9 +74,14 @@ struct nl_sock;
 #endif // NL80211_SUPPORT
 
 #if defined (DHCLIENT_SUPPORT)
-void net_wlan_dhclient_cb (dhcpctl_handle, // omapi object handle
-                           dhcpctl_status, // result status
-                           void*);         // user data
+void
+net_wlan_dhclient_connection_event_cb (dhcpctl_handle, // omapi object handle
+                                       dhcpctl_status, // result status
+                                       void*);         // user data
+void
+net_wlan_dhclient_connect_cb (dhcpctl_handle, // omapi object handle
+                              dhcpctl_status, // result status
+                              void*);         // user data
 #endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -181,7 +186,7 @@ class Net_WLAN_Monitor_Base_T
   ACE_HANDLE                            handle_;
 #endif // WEXT_SUPPORT
 #if defined (NL80211_SUPPORT)
-  struct Net_WLAN_nl80211_CBData        CBData_;
+  struct Net_WLAN_nl80211_CBData        nl80211CBData_;
   int                                   familyId_;
   struct nl_sock*                       socketHandle_;
 #endif // NL80211_SUPPORT
@@ -189,8 +194,7 @@ class Net_WLAN_Monitor_Base_T
 #endif // DBUS_SUPPORT
 
 #if defined (DHCLIENT_SUPPORT)
-  dhcpctl_handle                        connection_;
-  dhcpctl_handle                        interface_;
+  struct Net_WLAN_dhclient_CBData       dhclientCBData_;
 #endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
   ConfigurationType*                    configuration_;

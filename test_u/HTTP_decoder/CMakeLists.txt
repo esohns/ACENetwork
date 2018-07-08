@@ -348,22 +348,6 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
 if (UNIX)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
-
- target_link_libraries (${EXECUTABLE} ${PKG_LIBXML_LIBRARIES})
- target_link_libraries (${EXECUTABLE} ${JSON_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${DHCPCTL_LIBRARY})
-# target_link_libraries (${EXECUTABLE} ${DHCP_LIBRARY})
-# target_link_libraries (${EXECUTABLE} -Wl,--start-group ${OMAPI_LIBRARY} ${ISC_LIBRARY} ${DNS_LIBRARY} -Wl,--end-group)
- target_link_libraries (${EXECUTABLE} ${OMAPI_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${IRS_LIBRARY})
-# target_link_libraries (${EXECUTABLE} ${DNS_LIBRARY})
- target_link_libraries (${EXECUTABLE} -Wl,--start-group ${DNS_LIBRARY} ${GSS_KRB5_LIBRARY} ${KRB5_LIBRARY} -Wl,--end-group)
-# target_link_libraries (${EXECUTABLE} ${KRB5_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${ISC_CFG_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${ISC_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${PKG_SSL_LIBRARIES})
- target_link_libraries (${EXECUTABLE} ${GEOIP_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${GSS_LIBRARY})
 endif (UNIX)
 
 # add PCH

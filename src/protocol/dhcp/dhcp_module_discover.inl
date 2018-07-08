@@ -61,8 +61,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                        ConnectorType>::DHCP_Module_Discover_T (typename inherited::ISTREAM_T* stream_in)
 #endif
  : inherited (stream_in)
- , broadcastConnectionHandle_ (ACE_INVALID_HANDLE)
- , connectionHandle_ (ACE_INVALID_HANDLE)
+ , handle_ (ACE_INVALID_HANDLE)
  , isSessionConnection_ (false)
  , sendRequestOnOffer_ (false)
 {
@@ -101,67 +100,31 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   session_data_p =
       &const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
-  if (!session_data_p->broadcastConnection)
+  if (!session_data_p->connection)
     return;
 
-  if (broadcastConnectionHandle_ != ACE_INVALID_HANDLE)
+  if (handle_ != ACE_INVALID_HANDLE)
   {
     // sanity check(s)
-    ACE_ASSERT (session_data_p->broadcastConnection);
+    ACE_ASSERT (session_data_p->connection);
 
-    session_data_p->broadcastConnection->close ();
-    session_data_p->broadcastConnection->decrease ();
-    session_data_p->broadcastConnection = NULL;
+    session_data_p->connection->close ();
+    session_data_p->connection->decrease (); session_data_p->connection = NULL;
   } // end IF
   else
   {
     if (isSessionConnection_)
     {
       // sanity check(s)
-      ACE_ASSERT (session_data_p->broadcastConnection);
+      ACE_ASSERT (session_data_p->connection);
 
-      session_data_p->broadcastConnection->decrease ();
+      session_data_p->connection->decrease ();
     } // end IF
     else
-      session_data_p->broadcastConnection = NULL;
+      session_data_p->connection = NULL;
   } // end ELSE
-
-  if (connectionHandle_ != ACE_INVALID_HANDLE)
-  {
-    // sanity check(s)
-    ACE_ASSERT (session_data_p->connection);
-
-    session_data_p->connection->close ();
-    session_data_p->connection->decrease ();
-    session_data_p->connection = NULL;
-  } // end IF
 }
 
-//template <ACE_SYNCH_DECL,
-//          typename TimePolicyType,
-//          typename ControlMessageType,
-//          typename DataMessageType,
-//          typename SessionMessageType,
-//          typename ConfigurationType,
-//          typename ConnectionManagerType,
-//          typename ConnectorTypeBcast,
-//          typename ConnectorType>
-//const ConfigurationType&
-//DHCP_Module_Discover_T<ACE_SYNCH_USE,
-//                       TimePolicyType,
-//                       SessionMessageType,
-//                       DataMessageType,
-//                       ConfigurationType,
-//                       ConnectionManagerType,
-//                       ConnectorTypeBcast,
-//                       ConnectorType>::get () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("DHCP_Module_Discover_T::get"));
-//
-//  ACE_ASSERT (configuration_);
-//
-//  return *configuration_;
-//}
 template <ACE_SYNCH_DECL,
           typename TimePolicyType,
           typename ControlMessageType,
@@ -190,7 +153,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   // sanity check(s)
   ACE_ASSERT (configuration_in.protocolConfiguration);
 
-  if (inherited::isInitialized_)
+  if (unlikely (inherited::isInitialized_))
   {
   } // end IF
 
@@ -242,7 +205,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
   // sanity check(s)
-  ACE_ASSERT (session_data_r.broadcastConnection);
+  ACE_ASSERT (session_data_r.connection);
 
   u_short port_number = DHCP_DEFAULT_SERVER_PORT;
   ACE_INET_Addr address;
@@ -261,7 +224,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (inherited::mod_->name ()));
   if (iterator_2 == inherited::configuration_->connectionConfigurations->end ())
     iterator_2 =
-      inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (""));
+      inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR ("Out"));
   else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s: applying connection configuration\n"),
@@ -284,17 +247,19 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
                                         *reinterpret_cast<const ACE_UINT32*> ((*iterator).second.c_str ()),
                                         0, // encode ?
                                         0);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to ACE_INET_Addr::set(): \"%m\", returning\n"),
                 inherited::mod_->name ()));
     return;
   } // end IF
-  //ACE_DEBUG ((LM_DEBUG,
-  //            ACE_TEXT ("%s: DHCP server address: \"%s\"\n"),
-  //            inherited::mod_->name (),
-  //            ACE_TEXT (Net_Common_Tools::IPAddressToString (session_data_r.serverAddress).c_str ())));
+#if defined (_DEBUG)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("%s: DHCP server address: \"%s\"\n"),
+              inherited::mod_->name (),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (session_data_r.serverAddress).c_str ())));
+#endif // _DEBUG
 
   // step2a: set up the (broadcast) connection configuration
   // step2aa: set up the socket configuration
@@ -344,9 +309,9 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   //connection_manager_p->set ((*iterator_2).second,
   //                           configuration_->userData);
 
-  connectionHandle_ = this->connect (session_data_r.serverAddress,
-                                     use_reactor);
-  if (connectionHandle_ == ACE_INVALID_HANDLE)
+  handle_ = this->connect (session_data_r.serverAddress,
+                           use_reactor);
+  if (unlikely (handle_ == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to connect to %s, returning\n"),
@@ -357,14 +322,14 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   if (use_reactor)
     session_data_r.connection =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (connectionHandle_));
+      connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_));
 #else
-      connection_manager_p->get (static_cast<Net_ConnectionId_t> (connectionHandle_));
+      connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_));
 #endif
   else
     session_data_r.connection =
         connection_manager_p->get (session_data_r.serverAddress);
-  if (!session_data_r.connection)
+  if (unlikely (!session_data_r.connection))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to connect to %s, returning\n"),
@@ -413,7 +378,7 @@ continue_:
 
   DataMessageType* message_p =
       inherited::allocateMessage ((*iterator_2).second.PDUSize);
-  if (!message_p)
+  if (unlikely (!message_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to Stream_TaskBase_T::allocateMessage(%u): \"%m\", returning\n"),
@@ -466,17 +431,14 @@ continue_:
                          NULL);
 
   typename ConnectorType::ISTREAM_CONNECTION_T* istream_connection_p =
-    dynamic_cast<typename ConnectorType::ISTREAM_CONNECTION_T*> (session_data_r.broadcastConnection);
-  if (!istream_connection_p)
+    dynamic_cast<typename ConnectorType::ISTREAM_CONNECTION_T*> (session_data_r.connection);
+  if (unlikely (!istream_connection_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to dynamic_cast<Net_ISocketConnection_T>(%@): \"%m\", returning\n"),
                 inherited::mod_->name (),
-                session_data_r.broadcastConnection));
-
-    // clean up
+                session_data_r.connection));
     message_p->release ();
-
     return;
   } // end IF
   ACE_Message_Block* message_block_p = message_p;
@@ -520,7 +482,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     case STREAM_SESSION_MESSAGE_BEGIN:
     {
       // sanity check(s)
-      ACE_ASSERT (broadcastConnectionHandle_ == ACE_INVALID_HANDLE);
+      ACE_ASSERT (handle_ == ACE_INVALID_HANDLE);
 
       // step1: retrieve a handle to the session data
       typename SessionMessageType::DATA_T::DATA_T& session_data_r =
@@ -546,19 +508,18 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
       ACE_ASSERT (inherited::configuration_);
 
       // *TODO*: remove type inferences
-      if (inherited::configuration_->broadcastConnection)
+      if (inherited::configuration_->connection)
       {
         // sanity check(s)
-        ACE_ASSERT (!session_data_r.broadcastConnection);
+        ACE_ASSERT (!session_data_r.connection);
 
-        session_data_r.broadcastConnection =
-            inherited::configuration_->broadcastConnection;
+        session_data_r.connection = inherited::configuration_->connection;
 
         goto continue_;
       } // end IF
-      else if (session_data_r.broadcastConnection)
+      else if (session_data_r.connection)
       {
-        session_data_r.broadcastConnection->increase ();
+        session_data_r.connection->increase ();
 
         isSessionConnection_ = true;
 
@@ -589,17 +550,17 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
           deadline = COMMON_TIME_NOW + timeout;
           do
           {
-            if (!session_data_r.broadcastConnection)
-              session_data_r.broadcastConnection =
+            if (!session_data_r.connection)
+              session_data_r.connection =
                 connection_manager_p->get (static_cast<Net_ConnectionId_t> (inherited::configuration_->streamConfiguration->configuration_.sessionId));
-            if (!session_data_r.broadcastConnection)
+            if (!session_data_r.connection)
               continue;
 
-            status = session_data_r.broadcastConnection->status ();
+            status = session_data_r.connection->status ();
             if (status == NET_CONNECTION_STATUS_OK)
               break;
           } while (COMMON_TIME_NOW < deadline);
-          if (!session_data_r.broadcastConnection)
+          if (unlikely (!session_data_r.connection))
           {
             ACE_DEBUG ((LM_ERROR,
                         ACE_TEXT ("%s: failed to retrieve connection handle (handle was: %u), aborting\n"),
@@ -612,97 +573,97 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
         } // end IF
       } // end ELSE
 
-      // step2a: set up the (broadcast) connection configuration
-      iterator =
-        inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (inherited::mod_->name ()));
-      if (iterator == inherited::configuration_->connectionConfigurations->end ())
-        iterator =
-          inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (""));
-      //else
-      //  ACE_DEBUG ((LM_DEBUG,
-      //              ACE_TEXT ("%s: applying connection configuration\n"),
-      //              inherited::mod_->name ()));
-      ACE_ASSERT (iterator != inherited::configuration_->connectionConfigurations->end ());
+//      // step2a: set up the (broadcast) connection configuration
+//      iterator =
+//        inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (inherited::mod_->name ()));
+//      if (iterator == inherited::configuration_->connectionConfigurations->end ())
+//        iterator =
+//          inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR ("In"));
+//      else
+//        ACE_DEBUG ((LM_DEBUG,
+//                    ACE_TEXT ("%s: applying connection configuration\n"),
+//                    inherited::mod_->name ()));
+//      ACE_ASSERT (iterator != inherited::configuration_->connectionConfigurations->end ());
 
-      // step2aa: set up the socket configuration
-      // *TODO*: remove type inferences
-      ACE_ASSERT ((*iterator).second.socketHandlerConfiguration.socketConfiguration);
-      socket_configuration_p =
-        dynamic_cast<struct Net_UDPSocketConfiguration*> ((*iterator).second.socketHandlerConfiguration.socketConfiguration);
-      ACE_ASSERT (socket_configuration_p);
-      write_only = socket_configuration_p->writeOnly;
-      socket_configuration_p->writeOnly = true;
+//      // step2aa: set up the socket configuration
+//      // *TODO*: remove type inferences
+//      ACE_ASSERT ((*iterator).second.socketHandlerConfiguration.socketConfiguration);
+//      socket_configuration_p =
+//        dynamic_cast<struct Net_UDPSocketConfiguration*> ((*iterator).second.socketHandlerConfiguration.socketConfiguration);
+//      ACE_ASSERT (socket_configuration_p);
+//      write_only = socket_configuration_p->writeOnly;
+//      socket_configuration_p->writeOnly = true;
 
-      // step2ab: set up the connection manager
-      // *NOTE*: the stream configuration may contain a module handle that is
-      //         meant to be the final module of 'this' processing stream. As
-      //         the (possibly external) DHCP (broadcast) connection probably
-      //         (!) is oblivious of 'this' pipeline, the connection probably
-      //         (!) should not enqueue that same module again
-      //         --> temporarily 'hide' the module handle, if any
-      // *TODO*: this 'measure' diminishes the generic utility of this module
-      //         --> to be removed ASAP
-      // *TODO*: remove type inferences
-      // sanity check(s)
-      //ACE_ASSERT (inherited::configuration_->connectionConfiguration);
-      ACE_ASSERT (inherited::configuration_->streamConfiguration);
+//      // step2ab: set up the connection manager
+//      // *NOTE*: the stream configuration may contain a module handle that is
+//      //         meant to be the final module of 'this' processing stream. As
+//      //         the (possibly external) DHCP (broadcast) connection probably
+//      //         (!) is oblivious of 'this' pipeline, the connection probably
+//      //         (!) should not enqueue that same module again
+//      //         --> temporarily 'hide' the module handle, if any
+//      // *TODO*: this 'measure' diminishes the generic utility of this module
+//      //         --> to be removed ASAP
+//      // *TODO*: remove type inferences
+//      // sanity check(s)
+//      //ACE_ASSERT (inherited::configuration_->connectionConfiguration);
+//      ACE_ASSERT (inherited::configuration_->streamConfiguration);
 
-      // *TODO*: remove type inferences
-      clone_module =
-          inherited::configuration_->streamConfiguration->configuration_.cloneModule;
-      delete_module =
-          inherited::configuration_->streamConfiguration->configuration_.deleteModule;
-      module_p =
-        inherited::configuration_->streamConfiguration->configuration_.module;
-      inherited::configuration_->streamConfiguration->configuration_.cloneModule =
-        false;
-      inherited::configuration_->streamConfiguration->configuration_.deleteModule =
-        false;
-      inherited::configuration_->streamConfiguration->configuration_.module =
-        NULL;
-      reset_configuration = true;
+//      // *TODO*: remove type inferences
+//      clone_module =
+//          inherited::configuration_->streamConfiguration->configuration_.cloneModule;
+//      delete_module =
+//          inherited::configuration_->streamConfiguration->configuration_.deleteModule;
+//      module_p =
+//        inherited::configuration_->streamConfiguration->configuration_.module;
+//      inherited::configuration_->streamConfiguration->configuration_.cloneModule =
+//        false;
+//      inherited::configuration_->streamConfiguration->configuration_.deleteModule =
+//        false;
+//      inherited::configuration_->streamConfiguration->configuration_.module =
+//        NULL;
+//      reset_configuration = true;
 
-      //connection_manager_p->set (*configuration_,
-      //                           configuration_->userData);
+//      //connection_manager_p->set (*configuration_,
+//      //                           configuration_->userData);
 
-      broadcastConnectionHandle_ =
-          this->connect (socket_configuration_p->peerAddress,
-                         use_reactor);
-      if (broadcastConnectionHandle_ == ACE_INVALID_HANDLE)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: failed to connect to %s, aborting\n"),
-                    inherited::mod_->name (),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->peerAddress).c_str ())));
-        goto error;
-      } // end IF
-      if (use_reactor)
-        session_data_r.broadcastConnection =
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-            connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (broadcastConnectionHandle_));
-#else
-            connection_manager_p->get (static_cast<Net_ConnectionId_t> (broadcastConnectionHandle_));
-#endif
-      else
-        session_data_r.broadcastConnection =
-            connection_manager_p->get (socket_configuration_p->peerAddress);
-      if (!session_data_r.broadcastConnection)
-      {
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("%s: failed to connect to %s, aborting\n"),
-                    inherited::mod_->name (),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->peerAddress).c_str ())));
-        goto error;
-      } // end IF
+//      handle_ =
+//          this->connect (socket_configuration_p->peerAddress,
+//                         use_reactor);
+//      if (unlikely (broadcastConnectionHandle_ == ACE_INVALID_HANDLE))
+//      {
+//        ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("%s: failed to connect to %s, aborting\n"),
+//                    inherited::mod_->name (),
+//                    ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->peerAddress).c_str ())));
+//        goto error;
+//      } // end IF
+//      if (use_reactor)
+//        session_data_r.connection =
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//            connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (handle_));
+//#else
+//            connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_));
+//#endif
+//      else
+//        session_data_r.connection =
+//            connection_manager_p->get (socket_configuration_p->peerAddress);
+//      if (unlikely (!session_data_r.connection))
+//      {
+//        ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("%s: failed to connect to %s, aborting\n"),
+//                    inherited::mod_->name (),
+//                    ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->peerAddress).c_str ())));
+//        goto error;
+//      } // end IF
 
-      // step2e: reset the connection configuration
-      socket_configuration_p->writeOnly = write_only;
-      inherited::configuration_->streamConfiguration->configuration_.cloneModule =
-        clone_module;
-      inherited::configuration_->streamConfiguration->configuration_.deleteModule =
-        delete_module;
-      inherited::configuration_->streamConfiguration->configuration_.module =
-        module_p;
+//      // step2e: reset the connection configuration
+//      socket_configuration_p->writeOnly = write_only;
+//      inherited::configuration_->streamConfiguration->configuration_.cloneModule =
+//        clone_module;
+//      inherited::configuration_->streamConfiguration->configuration_.deleteModule =
+//        delete_module;
+//      inherited::configuration_->streamConfiguration->configuration_.module =
+//        module_p;
 
       //connection_manager_p->set (*inherited::configuration_,
       //                           inherited::configuration_->userData);
@@ -725,27 +686,26 @@ error:
         //                           configuration_->userData);
       } // end IF
 
-      if (!session_data_r.broadcastConnection)
+      if (!session_data_r.connection)
         goto continue_2;
 
-      if (broadcastConnectionHandle_ != ACE_INVALID_HANDLE)
+      if (handle_ != ACE_INVALID_HANDLE)
       {
-        session_data_r.broadcastConnection->close ();
-        session_data_r.broadcastConnection->decrease ();
-        session_data_r.broadcastConnection = NULL;
+        session_data_r.connection->close ();
+        session_data_r.connection->decrease (); session_data_r.connection = NULL;
 
-        broadcastConnectionHandle_ = ACE_INVALID_HANDLE;
+        handle_ = ACE_INVALID_HANDLE;
       } // end IF
       else
       {
         if (isSessionConnection_)
         {
-          session_data_r.broadcastConnection->decrease ();
+          session_data_r.connection->decrease ();
 
           isSessionConnection_ = false;
         } // end ELSE IF
         else
-          session_data_r.broadcastConnection = NULL;
+          session_data_r.connection = NULL;
       } // end ELSE
 
 continue_2:
@@ -758,46 +718,45 @@ continue_2:
       typename SessionMessageType::DATA_T::DATA_T& session_data_r =
         const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
-      if (!session_data_r.broadcastConnection)
+      if (!session_data_r.connection)
         goto continue_3;
 
-      if (broadcastConnectionHandle_ != ACE_INVALID_HANDLE)
+      if (handle_ != ACE_INVALID_HANDLE)
       {
         // sanity check(s)
-        ACE_ASSERT (session_data_r.broadcastConnection);
+        ACE_ASSERT (session_data_r.connection);
 
-        session_data_r.broadcastConnection->close ();
-        session_data_r.broadcastConnection->decrease ();
-        session_data_r.broadcastConnection = NULL;
+        session_data_r.connection->close ();
+        session_data_r.connection->decrease (); session_data_r.connection = NULL;
 
-        broadcastConnectionHandle_ = ACE_INVALID_HANDLE;
+        handle_ = ACE_INVALID_HANDLE;
       } // end IF
       else
       {
         if (isSessionConnection_)
         {
           // sanity check(s)
-          ACE_ASSERT (session_data_r.broadcastConnection);
+          ACE_ASSERT (session_data_r.connection);
 
-          session_data_r.broadcastConnection->decrease ();
+          session_data_r.connection->decrease ();
 
           isSessionConnection_ = false;
         } // end ELSE IF
         else
-          session_data_r.broadcastConnection = NULL;
+          session_data_r.connection = NULL;
       } // end ELSE
 
-      if (connectionHandle_ != ACE_INVALID_HANDLE)
-      {
-        // sanity check(s)
-        ACE_ASSERT (session_data_r.connection);
+//      if (connectionHandle_ != ACE_INVALID_HANDLE)
+//      {
+//        // sanity check(s)
+//        ACE_ASSERT (session_data_r.connection);
 
-        session_data_r.connection->close ();
-        session_data_r.connection->decrease ();
-        session_data_r.connection = NULL;
+//        session_data_r.connection->close ();
+//        session_data_r.connection->decrease ();
+//        session_data_r.connection = NULL;
 
-        connectionHandle_ = ACE_INVALID_HANDLE;
-      } // end IF
+//        connectionHandle_ = ACE_INVALID_HANDLE;
+//      } // end IF
 
 continue_3:
       break;
@@ -857,29 +816,22 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (inherited::mod_->name ()));
   if (iterator == inherited::configuration_->connectionConfigurations->end ())
     iterator =
-      inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR (""));
-  //else
-  //  ACE_DEBUG ((LM_DEBUG,
-  //              ACE_TEXT ("%s: applying connection configuration\n"),
-  //              inherited::mod_->name ()));
+      inherited::configuration_->connectionConfigurations->find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+  else
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("%s: applying connection configuration\n"),
+                inherited::mod_->name ()));
   ACE_ASSERT (iterator != inherited::configuration_->connectionConfigurations->end ());
 
+  ConnectorTypeBcast broadcast_connector (connection_manager_p,
+                                          (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
+  ConnectorType connector (connection_manager_p,
+                           (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
   if (is_broadcast)
-    ACE_NEW_NORETURN (iconnector_p,
-                      ConnectorTypeBcast (connection_manager_p,
-                                          (*iterator).second.socketHandlerConfiguration.statisticReportingInterval));
+    iconnector_p = &broadcast_connector;
   else
-    ACE_NEW_NORETURN (iconnector_p,
-                      ConnectorType (connection_manager_p,
-                                     (*iterator).second.socketHandlerConfiguration.statisticReportingInterval));
-  if (!iconnector_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("%s: failed to allocate memory, aborting\n"),
-                inherited::mod_->name ()));
-    return ACE_INVALID_HANDLE;
-  } // end IF
-  if (!iconnector_p->initialize ((*iterator).second))
+    iconnector_p = &connector;
+  if (unlikely (!iconnector_p->initialize ((*iterator).second)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to initialize connector, aborting\n"),
@@ -888,7 +840,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   } // end IF
   // step1: connect
   result = iconnector_p->connect (address_in);
-  if (result == ACE_INVALID_HANDLE)
+  if (unlikely (result == ACE_INVALID_HANDLE))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to connect to %s, aborting\n"),
@@ -922,7 +874,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
         break;
     } while (COMMON_TIME_NOW < deadline);
   } // end IF
-  if (!iconnection_p)
+  if (unlikely (!iconnection_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to connect to %s, aborting\n"),
@@ -938,7 +890,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     status = iconnection_p->status ();
     if (status == NET_CONNECTION_STATUS_OK) break;
   } while (COMMON_TIME_NOW < deadline);
-  if (status != NET_CONNECTION_STATUS_OK)
+  if (unlikely (status != NET_CONNECTION_STATUS_OK))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%s: failed to initialize connection to %s (status was: %d), aborting\n"),
@@ -954,7 +906,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   {
     istream_connection_p =
         dynamic_cast<typename ConnectorTypeBcast::ISTREAM_CONNECTION_T*> (iconnection_p);
-    if (!istream_connection_p)
+    if (unlikely (!istream_connection_p))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to dynamic_cast<ConnectorTypeBcast::ISTREAM_CONNECTION_T>(0x%@), aborting\n"),
@@ -969,7 +921,7 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
   {
     isocket_connection_2 =
         dynamic_cast<typename ConnectorType::ISTREAM_CONNECTION_T*> (iconnection_p);
-    if (!isocket_connection_2)
+    if (unlikely (!isocket_connection_2))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to dynamic_cast<ConnectorType::ISTREAM_CONNECTION_T>(0x%@), aborting\n"),
@@ -980,25 +932,22 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
     isocket_connection_2->wait (STREAM_STATE_RUNNING,
                                 NULL); // <-- block
   } // end ELSE
+#if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("%s: connected to %s (id: %u)...\n"),
               inherited::mod_->name (),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (address_in).c_str ()),
               iconnection_p->id ()));
-
+#endif // _DEBUG
   useReactor_out = iconnector_p->useReactor ();
 
   // clean up
-  if (iconnector_p)
-    delete iconnector_p;
   if (iconnection_p)
     iconnection_p->decrease ();
 
   return result;
 
 error:
-  if (iconnector_p)
-    delete iconnector_p;
   if (iconnection_p)
     iconnection_p->decrease ();
 
@@ -1080,7 +1029,7 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::initialize"));
 
-  bool result = false;
+//  bool result = false;
 
   // sanity check(s)
   ACE_ASSERT (configuration_in.streamConfiguration);
@@ -1172,9 +1121,9 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
       const SessionDataType& session_data_r = session_data_container_r.get ();
       ACE_ASSERT (inherited::streamState_);
       ACE_ASSERT (inherited::streamState_->currentSessionData);
-      ACE_Guard<ACE_SYNCH_MUTEX> aGuard (*(inherited::streamState_->currentSessionData->lock));
-      inherited::streamState_->currentSessionData->sessionID =
-          session_data_r.sessionID;
+      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, *(inherited::streamState_->sessionData->lock));
+      inherited::streamState_->sessionData->sessionId =
+          session_data_r.sessionId;
 
       // start profile timer...
       //profile_.start ();
@@ -1226,7 +1175,7 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
   // *NOTE*: information is collected by the statistic module (if any)
 
   // step1: send the container downstream
-  if (!inherited::putStatisticMessage (data_out)) // data container
+  if (unlikely (!inherited::putStatisticMessage (data_out)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to putStatisticMessage(SESSION_STATISTICS), aborting\n")));
@@ -1235,35 +1184,6 @@ DHCP_Module_DiscoverH_T<ACE_SYNCH_USE,
 
   return true;
 }
-
-//template <typename LockType,
-//          ACE_SYNCH_DECL,
-//          typename TimePolicyType,
-//          typename SessionMessageType,
-//          typename DataMessageType,
-//          typename ConfigurationType,
-//          typename StreamStateType,
-//          typename SessionDataType,
-//          typename SessionDataContainerType,
-//          typename StatisticContainerType>
-//void
-//DHCP_Module_DiscoverH_T<LockType,
-//                        ACE_SYNCH_USE,
-//                        TimePolicyType,
-//                        SessionMessageType,
-//                        DataMessageType,
-//                        ConfigurationType,
-//                        StreamStateType,
-//                        SessionDataType,
-//                        SessionDataContainerType,
-//                        StatisticContainerType>::report () const
-//{
-//  NETWORK_TRACE (ACE_TEXT ("DHCP_Module_DiscoverH_T::report"));
-//
-//  ACE_ASSERT (false);
-//  ACE_NOTSUP;
-//  ACE_NOTREACHED (return);
-//}
 
 //template <typename LockType,
 //          ACE_SYNCH_DECL,

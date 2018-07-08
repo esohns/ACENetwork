@@ -100,10 +100,10 @@ class Net_Client_AsynchConnector_T
   // implement Net_IAsynchConnector_T
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; };
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; };
+  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; }
   virtual enum Net_TransportLayerType transportLayer () const;
-  inline virtual bool useReactor () const { return false; };
+  inline virtual bool useReactor () const { return false; }
   virtual ACE_HANDLE connect (const AddressType&);
   virtual void abort ();
   virtual int wait (ACE_HANDLE,                                    // connect handle
@@ -224,15 +224,15 @@ class Net_Client_AsynchConnector_T<HandlerType,
 
   Net_Client_AsynchConnector_T (ICONNECTION_MANAGER_T* = NULL,                 // connection manager handle
                                 const ACE_Time_Value& = ACE_Time_Value::zero); // statistic collecting interval [ACE_Time_Value::zero: off]
-  inline virtual ~Net_Client_AsynchConnector_T () {};
+  inline virtual ~Net_Client_AsynchConnector_T () {}
 
   // implement Net_IAsynchConnector_T
   // *NOTE*: handlers receive the configuration object via
   //         ACE_Service_Handler::act ()
-  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; };
-  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; };
-  inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_UDP; };
-  inline virtual bool useReactor () const { return false; };
+  inline virtual const ConfigurationType& getR () const { ACE_ASSERT (configuration_); return *configuration_; }
+  inline virtual bool initialize (const ConfigurationType& configuration_in) { configuration_ = &const_cast<ConfigurationType&> (configuration_in); configuration_->socketHandlerConfiguration.connectionConfiguration = configuration_; return true; }
+  inline virtual enum Net_TransportLayerType transportLayer () const { return NET_TRANSPORTLAYER_UDP; }
+  inline virtual bool useReactor () const { return false; }
   // *NOTE*: UDP is a datagram-based protocol. The Berkeley (datagram) socket
   //         API is essentially stateless from a user-space perspective (send/
   //         recv only) and thus does not translate to a client/server role
@@ -245,9 +245,9 @@ class Net_Client_AsynchConnector_T<HandlerType,
   //            distinct sockets to implement 'read-write' semantics and may (!)
   //            therefore also maintain two socket handles
   virtual ACE_HANDLE connect (const ACE_INET_Addr&);
-  inline virtual void abort () {};
-  inline virtual int wait (ACE_HANDLE handle_in, const ACE_Time_Value& timeout_in = ACE_Time_Value::zero) { ACE_UNUSED_ARG (timeout_in); return ((handle_in != ACE_INVALID_HANDLE) ? 0 : -1); }; // block : (relative-) timeout
-  inline virtual void onConnect (ACE_HANDLE, int) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) };
+  inline virtual void abort () {}
+  inline virtual int wait (ACE_HANDLE handle_in, const ACE_Time_Value& timeout_in = ACE_Time_Value::zero) { ACE_UNUSED_ARG (timeout_in); return ((handle_in != ACE_INVALID_HANDLE) ? 0 : -1); } // block : (relative-) timeout
+  inline virtual void onConnect (ACE_HANDLE, int) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  protected:
   // override default creation strategy

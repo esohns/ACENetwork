@@ -7,9 +7,12 @@
 # return value: - 0 success, 1 failure
 
 # sanity checks
-command -v gksudo >/dev/null 2>&1 || { echo "gksudo is not installed, aborting" >&2; exit 1; }
+#command -v gksudo >/dev/null 2>&1 || { echo "gksudo is not installed, aborting" >&2; exit 1; }
+#command -v kdesudo >/dev/null 2>&1 || { echo "kdesudo is not installed, aborting" >&2; exit 1; }
+#command -v pkexec >/dev/null 2>&1 || { echo "pkexec is not installed, aborting" >&2; exit 1; }
 
-[ "root" != "$USER" ] && exec gksudo $0 "$@"
+#[ "root" != "$USER" ] && exec gksudo $0 "$@"
+#[ "root" != "$USER" ] && exec pkexec $0 "$@"
 
 echo "starting..."
 
@@ -69,13 +72,13 @@ do
 # [ ! -r "${BIN_TMP}" ] && echo "ERROR: invalid binary file (was: \"${BIN_TMP}\"), aborting" && exit 1
 
 # chown --quiet root ${BIN_TMP}
- chown --quiet root ${BIN}
- [ $? -ne 0 ] && echo "ERROR: failed to chown ${BIN}: \"$?\", aborting" && exit 1
- chgrp --quiet root ${BIN}
- [ $? -ne 0 ] && echo "ERROR: failed to chgrp ${BIN}: \"$?\", aborting" && exit 1
+# chown --quiet root ${BIN}
+# [ $? -ne 0 ] && echo "ERROR: failed to chown ${BIN}: \"$?\", aborting" && exit 1
+# chgrp --quiet root ${BIN}
+#[ $? -ne 0 ] && echo "ERROR: failed to chgrp ${BIN}: \"$?\", aborting" && exit 1
 # chmod --quiet +s ${BIN_TMP}
- chmod --quiet +s ${BIN}
- [ $? -ne 0 ] && echo "ERROR: failed to chmod +s ${BIN}: \"$?\", aborting" && exit 1
+# chmod --quiet +s ${BIN}
+# [ $? -ne 0 ] && echo "ERROR: failed to chmod +s ${BIN}: \"$?\", aborting" && exit 1
 
 # /sbin/setcap 'cap_net_bind_service=eip' ${BIN_TMP}
  /sbin/setcap 'cap_net_bind_service=eip' ${BIN}

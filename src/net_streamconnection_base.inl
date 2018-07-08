@@ -866,16 +866,29 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   //                   waitForCompletion() (see below), which may be implicitly
   //                   invoked by stream_.finished()
   // *TODO*: remove type inference
-  if (inherited2::state_.status != NET_CONNECTION_STATUS_CLOSED)
+  if ((inherited2::state_.status != NET_CONNECTION_STATUS_INITIALIZATION_FAILED) && // initialization failed ?
+      (inherited2::state_.status != NET_CONNECTION_STATUS_CLOSED))
     inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
 
   // step0b: notify stream ?
-  if (notify_)
-  {
-    notify_ = false;
-    stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
-                    true);
-  } // end IF
+  { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock (), -1);
+    if (likely (notify_ &&
+                (inherited2::state_.status != NET_CONNECTION_STATUS_INITIALIZATION_FAILED)))
+    {
+      notify_ = false;
+      stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
+                      true);
+    } // end IF
+
+    // step1: shut down the processing stream
+    stream_.flush (false,  // do not flush inbound data
+                   false,  // do not flush session messages
+                   false); // flush upstream (if any)
+    stream_.idle ();
+    stream_.stop (true,  // wait for worker(s) (if any)
+                  false, // wait for upstream (if any)
+                  true); // locked access ?
+  } // end lock scope
 
   switch (mask_in)
   {
@@ -895,12 +908,12 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
       // *IMPORTANT NOTE*: when the socket closes, any dispatching threads
       //                   currently servicing the socket handle will call
       //                   handle_close()
-      stream_.flush (false,  // flush inbound ?
-                     false,  // flush session messages ?
-                     false); // flush upstream ?
-      stream_.wait (true,   // wait for worker(s) (if any)
-                    false,  // wait for upstream (if any)
-                    false); // wait for downstream (if any)
+//      stream_.flush (false,  // flush inbound ?
+//                     false,  // flush session messages ?
+//                     false); // flush upstream ?
+//      stream_.wait (true,   // wait for worker(s) (if any)
+//                    false,  // wait for upstream (if any)
+//                    false); // wait for downstream (if any)
 
       // step2: purge any pending (!) notifications ?
       // *TODO*: remove type inference
@@ -917,7 +930,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
         result =
             reactor_p->purge_pending_notifications (this,
                                                     ACE_Event_Handler::ALL_EVENTS_MASK);
-        if (result == -1)
+        if (unlikely (result == -1))
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("%u: failed to ACE_Reactor::purge_pending_notifications(0x%@,%d): \"%m\", continuing\n"),
                       id (),
@@ -1313,7 +1326,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   ACE_ASSERT (task_p);
   //result = task_p->reply (message_inout, NULL);
   result = task_p->put (message_inout, NULL);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u/%s/%s: failed to ACE_Task::put(): \"%m\", returning\n"),
@@ -1326,8 +1339,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
   return;
 
 error:
-  message_inout->release ();
-  message_inout = NULL;
+  message_inout->release (); message_inout = NULL;
 }
 
 template <ACE_SYNCH_DECL,
@@ -1364,7 +1376,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
   Stream_Module_t* top_module_p = NULL;
   int result = stream_.top (top_module_p);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to ACE_Stream::top(): \"%m\", aborting\n"),
@@ -1375,7 +1387,7 @@ Net_StreamConnectionBase_T<ACE_SYNCH_USE,
 
   Stream_IStateMachine_t* istatemachine_p =
       dynamic_cast<Stream_IStateMachine_t*> (top_module_p->writer ());
-  if (!istatemachine_p)
+  if (unlikely (!istatemachine_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u/%s/%s: failed to dynamic_cast<Stream_IStateMachine_t>(0x%@), aborting\n"),
@@ -1472,7 +1484,7 @@ allocate:
                                          ACE_Time_Value::max_time,
                                          NULL,
                                          NULL));
-  if (!message_block_p)
+  if (unlikely (!message_block_p))
   {
     if (inherited2::configuration_->streamConfiguration_->configuration_.messageAllocator)
     {
@@ -1616,14 +1628,14 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   } // end SWITCH
   ACE_ASSERT (configuration_p);
 
-  if (!inherited::initialize (configuration_p->socketHandlerConfiguration))
+  if (unlikely (!inherited::initialize (configuration_p->socketHandlerConfiguration)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to Net_SocketHandlerBase_T::initialize(): \"%m\", returning\n"),
                 id ()));
     return;
   } // end IF
-  if (!inherited2::initialize (*configuration_p))
+  if (unlikely (!inherited2::initialize (*configuration_p)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to Net_ConnectionBase_T::initialize(): \"%m\", returning\n"),
@@ -1677,8 +1689,17 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   // step1: initialize/tweak socket, initialize I/O, ...
   // *TODO*: remove type inference
+  ACE_ASSERT (inherited::isInitialized_);
   inherited::open (handle_in,
                    messageBlock_in);
+  if (unlikely (!inherited::isInitialized_))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("%u: failed to HandlerType::open (handle was: %u), aborting\n"),
+                id (),
+                handle_in));
+    goto error;
+  } // end IF
   this->info (inherited2::state_.handle,
               local_SAP, peer_SAP);
 
@@ -1927,7 +1948,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   //                   waitForCompletion() (see below), which may be implicitly
   //                   invoked by stream_.finished()
   // *TODO*: remove type inference
-  if (inherited2::state_.status != NET_CONNECTION_STATUS_CLOSED)
+  if ((inherited2::state_.status != NET_CONNECTION_STATUS_INITIALIZATION_FAILED) && // initialization failed ?
+      (inherited2::state_.status != NET_CONNECTION_STATUS_CLOSED))
   {
     inherited2::state_.status = NET_CONNECTION_STATUS_PEER_CLOSED;
     cancel_b = true;
@@ -1935,7 +1957,8 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   // step0b: notify stream ?
   { ACE_GUARD_RETURN (ACE_SYNCH_RECURSIVE_MUTEX, aGuard, stream_.getLock (), -1);
-    if (likely (notify_))
+    if (likely (notify_ &&
+                (inherited2::state_.status != NET_CONNECTION_STATUS_INITIALIZATION_FAILED)))
     {
       notify_ = false;
       stream_.notify (STREAM_SESSION_MESSAGE_DISCONNECT,
@@ -1968,9 +1991,10 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     inherited2::deregister ();
 
   // step2c: release socket handle(s) ?
-  if (close_socket_b)
-    result = inherited::handle_close (handle_in,
-                                      mask_in);
+  result =
+    (close_socket_b ? inherited::handle_close (handle_in,
+                                               mask_in)
+                    : 0);
 
   return result;
 }
@@ -2156,7 +2180,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
                 ACE_TEXT ("%u: caught exception in Net_ITransportLayer_T::initialize(), continuing\n"),
                 id ()));
   }
-  if (!result)
+  if (unlikely (!result))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to Net_ITransportLayer_T::initialize(), continuing\n"),
                 id ()));
@@ -2202,7 +2226,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   ACE_ASSERT (task_p);
   //result = task_p->reply (message_inout, NULL);
   result = task_p->put (message_inout, NULL);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u/%s%s: failed to ACE_Task::put(): \"%m\", returning\n"),
@@ -2215,8 +2239,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   return;
 
 error:
-  message_inout->release ();
-  message_inout = NULL;
+  message_inout->release (); message_inout = NULL;
 }
 
 template <typename HandlerType,
@@ -2290,7 +2313,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   Stream_Module_t* top_module_p = NULL;
   int result = stream_.top (top_module_p);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u: failed to ACE_Stream::top(): \"%m\", aborting\n"),
@@ -2301,7 +2324,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
 
   Stream_IStateMachine_t* istatemachine_p =
       dynamic_cast<Stream_IStateMachine_t*> (top_module_p->writer ());
-  if (!istatemachine_p)
+  if (unlikely (!istatemachine_p))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("%u/%s/%s: failed to dynamic_cast<Stream_IStateMachine_t>(0x%@), aborting\n"),
@@ -2396,7 +2419,7 @@ allocate:
                                          ACE_Time_Value::max_time,
                                          NULL,
                                          NULL));
-  if (!message_block_p)
+  if (unlikely (!message_block_p))
   {
     if (inherited2::configuration_->streamConfiguration_->configuration_.messageAllocator)
     {
@@ -2708,7 +2731,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
   {
     result = handle_close (result_in.handle (),
                            ACE_Event_Handler::ALL_EVENTS_MASK);
-    if (result == -1)
+    if (unlikely (result == -1))
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_StreamAsynchUDPSocketBase_T::handle_close(0x%@,%d): \"%m\", continuing\n"),

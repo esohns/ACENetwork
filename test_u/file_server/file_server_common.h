@@ -72,7 +72,7 @@ struct FileServer_UserData
 {
   FileServer_UserData ()
    : Net_UserData ()
-  {};
+  {}
 };
 
 struct FileServer_SignalHandlerConfiguration
@@ -83,7 +83,7 @@ struct FileServer_SignalHandlerConfiguration
    , listener (NULL)
    , statisticReportingHandler (NULL)
    , statisticReportingTimerId (-1)
-  {};
+  {}
 
   Test_U_IListener_t*      listener;
   Net_IStatisticHandler_t* statisticReportingHandler;
@@ -103,7 +103,7 @@ struct FileServer_Configuration
    , signalHandlerConfiguration ()
    , streamConfiguration ()
    , userData ()
-  {};
+  {}
 
   struct Net_AllocatorConfiguration            allocatorConfiguration;
   FileServer_ConnectionConfigurations_t        connectionConfigurations;
@@ -144,7 +144,7 @@ struct FileServer_GTK_CBData
    : Test_U_GTK_CBData ()
    , configuration (NULL)
    , subscribers ()
-  {};
+  {}
 
   struct FileServer_Configuration* configuration;
   FileServer_Subscribers_t         subscribers;

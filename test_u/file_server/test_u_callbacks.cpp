@@ -206,8 +206,8 @@ idle_update_info_display_cb (gpointer userData_in)
 
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
     for (Common_UI_Events_t::ITERATOR iterator_2 (data_p->eventStack);
-         !iterator_2.done ();
-         iterator_2.next (event_p))
+         iterator_2.next (event_p);
+         iterator_2.advance ())
     { ACE_ASSERT (event_p);
       switch (*event_p)
       {

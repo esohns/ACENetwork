@@ -78,7 +78,7 @@ struct Net_WLAN_MonitorConfiguration
    , lowPriorityScans (NET_WLAN_MONITOR_NL80211_DEFAULT_LOWPRIORITYSCANS)
    , randomizeMACAddressForScans (NET_WLAN_MONITOR_NL80211_DEFAULT_RANDOMIZEMACADDRESSFORSCANS)
    , wiPhyIdentifier ()
- #endif // NL80211_SUPPORT
+#endif // NL80211_SUPPORT
 #if defined (DBUS_SUPPORT)
    , notificationCB (NULL)
    , notificationCBData (NULL)

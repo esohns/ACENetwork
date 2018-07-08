@@ -1,6 +1,7 @@
 ﻿# target system introspection (see configure.ac)
 #include (CheckFunctionExists)
 #include (InstallRequiredSystemLibraries)
+include (FeatureSummary)
 #check_function_exists (memset HAVE_FUNC_MEMSET)
 #check_function_exists (socket HAVE_FUNC_SOCKET)
 #check_function_exists (strerror HAVE_FUNC_STRERROR)
@@ -11,12 +12,149 @@ if (UNIX)
  option (NETLINK_SUPPORT "enable netlink support" ON)
  option (DBUS_SUPPORT "enable DBus support" ON)
 
+ # DHCP client
+ option (DHCLIENT_SUPPORT "enable ISC dhclient support" ON)
+ add_feature_info (ISC dhclient DHCLIENT_SUPPORT "support ISC dhclient")
+ option (DHCPD_SUPPORT "enable dhcpd support" OFF)
+ add_feature_info (dhcpd DHCPD_SUPPORT "support dhcpd")
+
 # include (CheckLibraryExists)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
  include (FindThreads)
  set (CMAKE_THREAD_PREFER_PTHREAD ON)
  find_package (Threads)
-endif ()
+endif (UNIX)
+
+if (UNIX)
+# DHCP client
+ if (DHCLIENT_SUPPORT)
+#  pkg_check_modules (PKG_DHCP REQUIRED bind-exports isc-dhcp-client)
+  set (JSON_LIB_FILE libjson-c.so.3)
+  find_library (JSON_LIBRARY ${JSON_LIB_FILE}
+                HINTS /usr/lib
+                PATH_SUFFIXES x86_64-linux-gnu
+                DOC "searching for ${JSON_LIB_FILE} (system paths)")
+  if (NOT JSON_LIBRARY)
+   message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
+  else ()
+   message (STATUS "Found json library \"${JSON_LIBRARY}\"")
+  endif ()
+
+  set (ISC_LIB_FILE libisc.a)
+#set (ISC_LIB_FILE libisc.so.166)
+  find_library (ISC_LIBRARY ${ISC_LIB_FILE}
+                HINTS /usr/lib64 /usr/lib
+                PATH_SUFFIXES dhcp x86_64-linux-gnu
+                DOC "searching for ${ISC_LIB_FILE} (system paths)")
+  if (NOT ISC_LIBRARY)
+   message (FATAL_ERROR "could not find ${ISC_LIB_FILE}, aborting")
+  else ()
+   message (STATUS "Found isc library \"${ISC_LIBRARY}\"")
+  endif ()
+
+# set (GSS_LIB_FILE libgss.so.3)
+  set (GSS_LIB_FILE libgssglue.so)
+  find_library (GSS_LIBRARY ${GSS_LIB_FILE}
+                HINTS /usr/lib64 /usr/lib
+                PATH_SUFFIXES x86_64-linux-gnu
+                DOC "searching for ${GSS_LIB_FILE} (system paths)")
+  if (NOT GSS_LIBRARY)
+   message (FATAL_ERROR "could not find ${GSS_LIB_FILE}, aborting")
+  else ()
+   message (STATUS "Found generic security services library \"${GSS_LIBRARY}\"")
+  endif ()
+
+  set (KRB5_LIB_FILE libkrb5.so.3)
+  find_library (KRB5_LIBRARY ${KRB5_LIB_FILE}
+                HINTS /usr/lib
+                PATH_SUFFIXES x86_64-linux-gnu
+                DOC "searching for ${KRB5_LIB_FILE} (system paths)")
+  if (NOT KRB5_LIBRARY)
+   message (FATAL_ERROR "could not find ${KRB5_LIB_FILE}, aborting")
+  else ()
+   message (STATUS "Found MIT kerberos library \"${KRB5_LIBRARY}\"")
+  endif ()
+
+  set (GSS_KRB5_LIB_FILE libgssapi_krb5.so.2)
+  find_library (GSS_KRB5_LIBRARY ${GSS_KRB5_LIB_FILE}
+                HINTS /usr/lib
+                PATH_SUFFIXES x86_64-linux-gnu
+                DOC "searching for ${GSS_KRB5_LIB_FILE} (system paths)")
+  if (NOT GSS_KRB5_LIBRARY)
+   message (FATAL_ERROR "could not find ${GSS_KRB5_LIB_FILE}, aborting")
+  else ()
+   message (STATUS "Found MIT kerberos library \"${GSS_KRB5_LIBRARY}\"")
+  endif ()
+
+  set (GEOIP_LIB_FILE libGeoIP.so.1)
+  find_library (GEOIP_LIBRARY ${GEOIP_LIB_FILE}
+                HINTS /usr/lib
+                PATH_SUFFIXES x86_64-linux-gnu
+                DOC "searching for ${GEOIP_LIB_FILE} (system paths)")
+  if (NOT GEOIP_LIBRARY)
+   message (FATAL_ERROR "could not find ${GEOIP_LIB_FILE}, aborting")
+  else ()
+   message (STATUS "Found GeoIP library \"${GEOIP_LIBRARY}\"")
+  endif ()
+
+  set (DNS_LIB_FILE libdns.a)
+  find_library (DNS_LIBRARY ${DNS_LIB_FILE}
+                HINTS /usr/lib64 /usr/lib
+                PATH_SUFFIXES dhcp x86_64-linux-gnu
+                DOC "searching for ${DNS_LIB_FILE} (system paths)")
+  if (NOT DNS_LIBRARY)
+   message (FATAL_ERROR "could not find ${DNS_LIB_FILE}, aborting")
+  else ()
+   message (STATUS "Found dns library \"${DNS_LIBRARY}\"")
+  endif ()
+
+  set (ISC_CFG_LIB_FILE libisccfg.a)
+  find_library (ISC_CFG_LIBRARY ${ISC_CFG_LIB_FILE}
+                HINTS /usr/lib64 /usr/lib
+                PATH_SUFFIXES dhcp x86_64-linux-gnu
+                DOC "searching for ${ISC_CFG_LIB_FILE} (system paths)")
+  if (NOT ISC_CFG_LIBRARY)
+   message (FATAL_ERROR "could not find ${ISC_CFG_LIB_FILE}, aborting")
+  else ()
+   message (STATUS "Found isccfg library \"${ISC_CFG_LIBRARY}\"")
+  endif ()
+
+  set (IRS_LIB_FILE libirs.a)
+  find_library (IRS_LIBRARY ${IRS_LIB_FILE}
+                HINTS /usr/lib64 /usr/lib
+                PATH_SUFFIXES dhcp x86_64-linux-gnu
+                DOC "searching for ${IRS_LIB_FILE} (system paths)")
+  if (NOT IRS_LIBRARY)
+   message (FATAL_ERROR "could not find ${IRS_LIB_FILE}, aborting")
+  else ()
+   message (STATUS "Found irs library \"${IRS_LIBRARY}\"")
+  endif ()
+
+  set (OMAPI_LIB_FILE libomapi.a)
+  find_library (OMAPI_LIBRARY ${OMAPI_LIB_FILE}
+                HINTS /usr/lib64 /usr/lib
+                PATH_SUFFIXES dhcp x86_64-linux-gnu
+                DOC "searching for ${OMAPI_LIB_FILE} (system paths)")
+  if (NOT OMAPI_LIBRARY)
+   message (FATAL_ERROR "could not find ${OMAPI_LIB_FILE}, aborting")
+  else ()
+   message (STATUS "Found omapi library \"${OMAPI_LIBRARY}\"")
+  endif ()
+
+  set (DHCPCTL_LIB_FILE libdhcpctl.a)
+  find_library (DHCPCTL_LIBRARY ${DHCPCTL_LIB_FILE}
+               HINTS /usr/lib64 /usr/lib
+               PATH_SUFFIXES dhcp x86_64-linux-gnu
+               DOC "searching for ${DHCPCTL_LIB_FILE} (system paths)")
+  if (NOT DHCPCTL_LIBRARY)
+   message (FATAL_ERROR "could not find ${DHCPCTL_LIB_FILE}, aborting")
+  else ()
+   message (STATUS "Found dhcpctl library \"${DHCPCTL_LIBRARY}\"")
+  endif ()
+  pkg_check_modules (PKG_LIBXML REQUIRED libxml-2.0)
+  add_definitions (-DDHCLIENT_SUPPORT)
+ endif (DHCLIENT_SUPPORT)
+endif (UNIX)
 
 set (ACE_LIB_FILE libACE.so)
 if (UNIX)
@@ -334,6 +472,17 @@ if (UNIX)
  if (DHCLIENT_SUPPORT)
   target_link_libraries (${PROJECT_NAME} ${DHCPCTL_LIBRARY})
   target_link_libraries (${PROJECT_NAME} ${OMAPI_LIBRARY})
+  target_link_libraries (${PROJECT_NAME} ${IRS_LIBRARY})
+  target_link_libraries (${PROJECT_NAME} ${ISC_CFG_LIBRARY})
+  target_link_libraries (${PROJECT_NAME} ${DNS_LIBRARY})
+  target_link_libraries (${PROJECT_NAME} ${GEOIP_LIBRARY})
+  target_link_libraries (${PROJECT_NAME} ${PKG_SSL_LIBRARIES})
+  target_link_libraries (${PROJECT_NAME} ${GSS_KRB5_LIBRARY})
+  target_link_libraries (${PROJECT_NAME} ${KRB5_LIBRARY})
+  target_link_libraries (${PROJECT_NAME} ${GSS_LIBRARY})
+  target_link_libraries (${PROJECT_NAME} ${ISC_LIBRARY})
+  target_link_libraries (${PROJECT_NAME} ${JSON_LIBRARY})
+  target_link_libraries (${PROJECT_NAME} ${PKG_LIBXML_LIBRARIES})
  endif (DHCLIENT_SUPPORT)
 
  target_link_libraries (${PROJECT_NAME} ${PROJECT_NAME}_WLAN)

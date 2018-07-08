@@ -34,13 +34,13 @@
 #include "stream_common.h"
 #include "stream_macros.h"
 
+#if defined (HAVE_CONFIG_H)
+#include "libACENetwork_config.h"
+#endif // HAVE_CONFIG_H
+
 // Local Header Files
 #include "net_common.h"
 #include "net_macros.h"
-
-#if defined (HAVE_CONFIG_H)
-#include "libACENetwork_config.h"
-#endif
 
 #if defined (_MSC_VER)
 #include "targetver.h"

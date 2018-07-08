@@ -724,6 +724,7 @@ idle_end_session_client_cb (gpointer userData_in)
   ACE_ASSERT (spin_button_p);
   if (!gtk_spin_button_get_value_as_int (spin_button_p))
     done = true;
+  ACE_UNUSED_ARG (done);
 
   return G_SOURCE_REMOVE;
 }

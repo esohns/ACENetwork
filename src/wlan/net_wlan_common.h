@@ -85,7 +85,7 @@ enum Net_WLAN_MonitorState
   NET_WLAN_MONITOR_STATE_AUTHENTICATED,  // authenticated to access point
   NET_WLAN_MONITOR_STATE_ASSOCIATED,     // associated to access point
 #endif // ACE_WIN32 || ACE_WIN64
-  NET_WLAN_MONITOR_STATE_CONNECTED,      // 'online': interface is associated to access point and has a valid IP address
+  NET_WLAN_MONITOR_STATE_CONNECTED,      // has a valid IP address (i.e. DHCP handshake completed, lease obtained)
   ////////////////////////////////////////
   NET_WLAN_MONITOR_STATE_MAX
 };
@@ -301,6 +301,19 @@ int
 network_wlan_nl80211_default_handler_cb (struct nl_msg*,
                                          void*);
 #endif // NL80211_SUPPORT
+
+#if defined (DHCLIENT_SUPPORT)
+struct Net_WLAN_dhclient_CBData
+{
+  Net_WLAN_dhclient_CBData ()
+   : connection (NULL)
+   , monitor (NULL)
+  {}
+
+  dhcpctl_handle         connection;
+  Net_WLAN_IMonitorBase* monitor;
+};
+#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 struct Net_WLAN_AssociationConfiguration

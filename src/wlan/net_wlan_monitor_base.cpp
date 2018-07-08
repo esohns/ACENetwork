@@ -35,33 +35,132 @@
 #elif defined (ACE_LINUX)
 #if defined (DHCLIENT_SUPPORT)
 void
-net_wlan_dhclient_cb (dhcpctl_handle handle_in,
-                      dhcpctl_status status_in,
-                      void* userData_in)
+net_wlan_dhclient_connection_event_cb (dhcpctl_handle handle_in,
+                                       dhcpctl_status status_in,
+                                       void* userData_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("::net_wlan_dhclient_cb"));
+  NETWORK_TRACE (ACE_TEXT ("::net_wlan_dhclient_connection_event_cb"));
 
   // sanity check(s)
   ACE_ASSERT (handle_in != dhcpctl_null_handle);
+  if (unlikely (status_in != ISC_R_SUCCESS))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("dhclient result: \"%s\" (handle was: %@), returning\n"),
+                ACE_TEXT (isc_result_totext (status_in)),
+                handle_in));
+    return;
+  } // end IF
+#if defined (_DEBUG)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("dhclient result: \"%s\" (handle was: %@)\n"),
+              ACE_TEXT (isc_result_totext (status_in)),
+              handle_in));
+#endif // _DEBUG
   ACE_ASSERT (userData_in);
 
-//  Net_WLAN_IMonitorCB* iwlanmonitor_cb_p =
-//    static_cast<Net_WLAN_IMonitorCB*> (userData_in);
+  struct Net_WLAN_dhclient_CBData* cb_data_p =
+      static_cast<struct Net_WLAN_dhclient_CBData*> (userData_in);
+  ACE_UNUSED_ARG (cb_data_p);
+}
 
+void
+net_wlan_dhclient_connect_cb (dhcpctl_handle handle_in,
+                              dhcpctl_status status_in,
+                              void* userData_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("::net_wlan_dhclient_connect_cb"));
+
+  // sanity check(s)
+  ACE_ASSERT (handle_in != dhcpctl_null_handle);
   if (unlikely (status_in != ISC_R_SUCCESS))
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dhclient result: \"%s\" (handle was: %@)\n"),
-                ACE_TEXT (isc_result_totext (status_in)),
-                handle_in));
-  else
   {
-#if defined (_DEBUG)
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("dhclient result: \"%s\" (handle was: %@)\n"),
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("dhclient result: \"%s\" (handle was: %@), returning\n"),
                 ACE_TEXT (isc_result_totext (status_in)),
                 handle_in));
+    return;
+  } // end IF
+#if defined (_DEBUG)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("dhclient result: \"%s\" (handle was: %@)\n"),
+              ACE_TEXT (isc_result_totext (status_in)),
+              handle_in));
 #endif // _DEBUG
-  } // end ELSE
+  ACE_ASSERT (userData_in);
+  struct Net_WLAN_dhclient_CBData* cb_data_p =
+      static_cast<struct Net_WLAN_dhclient_CBData*> (userData_in);
+  ACE_ASSERT (cb_data_p->connection != dhcpctl_null_handle);
+  ACE_ASSERT (cb_data_p->monitor);
+
+  dhcpctl_data_string data_string_p = NULL;
+  dhcpctl_status status_i = ISC_R_SUCCESS;
+  std::string interface_identifier_string;
+  bool reconnect_b = false;
+  std::string leases_file_path =
+      ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_LEASES_FILE);
+  Net_WLAN_Monitor_IStateMachine_t* istate_machine_p = NULL;
+
+  status_i =
+      dhcpctl_get_value (&data_string_p,
+                         handle_in,
+                         ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_VALUE_NAME_STRING));
+  if (unlikely (status_i != ISC_R_SUCCESS))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::dhcpctl_get_value(%@,\"%s\"): \"%s\", returning\n"),
+                handle_in,
+                ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_VALUE_NAME_STRING),
+                ACE_TEXT (isc_result_totext (status_i))));
+    return;
+  } // end IF
+  ACE_ASSERT (data_string_p);
+  interface_identifier_string.assign (reinterpret_cast<char*> (data_string_p->value),
+                                      data_string_p->len);
+  status_i = dhcpctl_data_string_dereference (&data_string_p, MDL);
+  ACE_ASSERT (status_i == ISC_R_SUCCESS);
+  data_string_p = NULL;
+
+  if (!Net_Common_Tools::hasState (handle_in,
+                                   ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_INTERFACE_STATE_UP_STRING)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("\"%s\": invalid state, retrying\n"),
+                ACE_TEXT (interface_identifier_string.c_str ())));
+    reconnect_b = true;
+    goto continue_;
+  } // end IF
+
+  // interface is 'up'; verify that it has a valid active lease
+//      if (unlikely (!Net_Common_Tools::hasActiveLease (cb_data_p->connection,
+  if (unlikely (!Net_Common_Tools::hasActiveLease (leases_file_path,
+                                                   interface_identifier_string)))
+  {
+    ACE_DEBUG ((LM_ERROR,
+//                    ACE_TEXT ("\"%s\": failed to Net_Common_Tools::hasActiveLease(%@), continuing\n"),
+                ACE_TEXT ("\"%s\": failed to Net_Common_Tools::hasActiveLease(%s), retrying\n"),
+                ACE_TEXT (interface_identifier_string.c_str ()),
+//                    cb_data_p->connection));
+                ACE_TEXT (leases_file_path.c_str ())));
+    reconnect_b = true;
+    goto continue_;
+  } // end IF
+
+continue_:
+  Net_Common_Tools::disconnectDHClient (cb_data_p->connection);
+//  cb_data_p->connection = NULL;
+
+  istate_machine_p =
+      dynamic_cast<Net_WLAN_Monitor_IStateMachine_t*> (cb_data_p->monitor);
+  ACE_ASSERT (istate_machine_p);
+  try {
+    istate_machine_p->change ((reconnect_b ? NET_WLAN_MONITOR_STATE_CONNECT
+                                           : NET_WLAN_MONITOR_STATE_CONNECTED));
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_ASSOCIATED), returning\n")));
+    return;
+  }
 }
 #endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64

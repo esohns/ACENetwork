@@ -666,10 +666,7 @@ begin:
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_DLList::insert_tail(): \"%m\", returning\n")));
-
-        // clean up
         connection_p->decrease ();
-
         return;
       } // end IF
     } // end FOR
@@ -690,9 +687,7 @@ begin:
                   ACE_TEXT ("%u: caught exception in Net_IConnection_T::close(), continuing\n"),
                   connection_p->id ()));
     }
-
-    connection_p->decrease ();
-    connection_p = NULL;
+    connection_p->decrease (); connection_p = NULL;
   } // end FOR
   // debug info
   if (is_first_b)

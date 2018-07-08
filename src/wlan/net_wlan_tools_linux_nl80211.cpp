@@ -373,10 +373,11 @@ network_wlan_nl80211_ssid_cb (struct nl_msg* message_in,
   if (cb_data_p->index != nla_get_u32 (nlattr_a[NL80211_ATTR_IFINDEX]))
     return NL_SKIP;
 
-  if (unlikely (!nlattr_a[NL80211_ATTR_BSS]))
+  if (unlikely (//!nlattr_a[NL80211_ATTR_GENERATION] ||
+                !nlattr_a[NL80211_ATTR_BSS]))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("missing 'bss' attribute, aborting\n")));
+                ACE_TEXT ("missing 'generation/bss' attribute(s), aborting\n")));
     return NL_STOP;
   } // end IF
   result = nla_parse_nested (nlattr_2,
@@ -391,13 +392,14 @@ network_wlan_nl80211_ssid_cb (struct nl_msg* message_in,
     return NL_STOP;
   } // end IF
   if (unlikely (!nlattr_2[NL80211_BSS_BSSID]               ||
-                !nlattr_2[NL80211_BSS_STATUS]))//              ||
-//                !nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]))
+                !nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]))
   {
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("missing bss 'bssid/status' attribute(s), continuing\n")));
-    return NL_SKIP; // not associated
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("missing bss 'bssid/IEs' attribute(s), aborting\n")));
+    return NL_STOP;
   } // end IF
+  if (!nlattr_2[NL80211_BSS_STATUS])
+    return NL_SKIP;
   status_e =
     static_cast<enum nl80211_bss_status> (nla_get_u32 (nlattr_2[NL80211_BSS_STATUS]));
   switch (status_e)
@@ -418,13 +420,6 @@ network_wlan_nl80211_ssid_cb (struct nl_msg* message_in,
   ACE_OS::memcpy (&cb_data_p->address.ether_addr_octet,
                   nla_data (nlattr_2[NL80211_BSS_BSSID]),
                   ETH_ALEN);
-
-  if (unlikely (!nlattr_2[NL80211_BSS_INFORMATION_ELEMENTS]))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("missing bss 'information elements' attribute, aborting\n")));
-    return NL_STOP;
-  } // end IF
 
   // *NOTE*: information elements are encoded like so: id[1]len[1]/data[len]
   //         (see also: http://standards.ieee.org/findstds/standard/802.11-2016.html)
@@ -2220,7 +2215,8 @@ Net_WLAN_Tools::associatedSSID (const std::string& interfaceIdentifier_in,
                               NL_AUTO_SEQ,                // sequence #
                               driverFamilyId_in,          // family id
                               0,                          // (user-) hdrlen
-                              NLM_F_REQUEST | NLM_F_DUMP, // flags
+//                              NLM_F_REQUEST | NLM_F_DUMP, // flags
+                              NLM_F_DUMP,                 // flags
                               NL80211_CMD_GET_SCAN,       // command id
                               0)))                        // interface version
   {
@@ -2406,8 +2402,7 @@ Net_WLAN_Tools::nL80211Command (struct nl_sock* socketHandle_in,
       goto clean;
     } // end IF
     nl_socket_set_cb (socket_handle_p, callback_p);
-    nl_cb_put (callback_p);
-    callback_p = NULL;
+    nl_cb_put (callback_p); callback_p = NULL;
   } // end IF
   ACE_ASSERT (socket_handle_p);
 
@@ -2476,8 +2471,7 @@ Net_WLAN_Tools::nL80211Command (struct nl_sock* socketHandle_in,
                 ACE_TEXT (nl_geterror (result_2))));
     goto clean;
   } // end IF
-  nlmsg_free (message_inout);
-  message_inout = NULL;
+  nlmsg_free (message_inout); message_inout = NULL;
 
   if (!dispatchReplies_in)
     goto continue_;
@@ -2549,8 +2543,7 @@ clean:
 nla_put_failure:
   if (message_inout)
   {
-    nlmsg_free (message_inout);
-    message_inout = NULL;
+    nlmsg_free (message_inout); message_inout = NULL;
   } // end IF
   if (callback_2)
     nl_cb_put (callback_2);

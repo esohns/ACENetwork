@@ -756,6 +756,8 @@ network_wlan_nl80211_default_handler_cb (struct nl_msg* message_in,
 //  nl_msg_dump (message_in, stderr);
 #endif // _DEBUG
 
+  int return_value = NL_OK;
+
   struct genlmsghdr* genlmsghdr_p =
       static_cast<struct genlmsghdr*> (nlmsg_data (nlmsg_hdr (message_in)));
   ACE_ASSERT (genlmsghdr_p);
@@ -1111,26 +1113,30 @@ nla_put_failure:
 
       struct ether_addr ap_mac_address_s;
       ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
+      uint16_t status_i = 0;
+      uint8_t* data_p = NULL;
+      size_t length_i = 0;
       if (nlattr_a[NL80211_ATTR_TIMED_OUT])
       { ACE_ASSERT (nlattr_a[NL80211_ATTR_MAC]);
         ACE_OS::memcpy (&(ap_mac_address_s.ether_addr_octet),
                         nla_data (nlattr_a[NL80211_ATTR_MAC]),
                         ETH_ALEN);
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("\"%s\": failed to authenticate to access point (MAC was: %s), timed out, aborting\n"),
+                    ACE_TEXT ("\"%s\": failed to authenticate to access point (MAC was: %s), timed out, retrying\n"),
                     ACE_TEXT (buffer_a),
                     ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ())));
         *(cb_data_p->error) = ETIMEDOUT;
-        return NL_STOP;
+        status_i = ETIMEDOUT;
+        return_value = NL_STOP;
+        goto update_state;
       } // end IF
 
       // sanity check(s)
       ACE_ASSERT (nlattr_a[NL80211_ATTR_FRAME]);
 
-      uint8_t* data_p =
+      data_p =
           reinterpret_cast<uint8_t*> (nla_data (nlattr_a[NL80211_ATTR_FRAME]));
-      size_t length_i = nla_len (nlattr_a[NL80211_ATTR_FRAME]);
-      uint16_t status_i = 0;
+      length_i = nla_len (nlattr_a[NL80211_ATTR_FRAME]);
 
       // sanity check(s)
       ACE_ASSERT ((data_p[0] & 0xFC) == 0xB0); // auth
@@ -1148,6 +1154,7 @@ nla_put_failure:
                   status_i));
 #endif // _DEBUG
 
+update_state:
       ACE_ASSERT (cb_data_p->monitor);
       Net_WLAN_Monitor_IStateMachine_t* istate_machine_p =
           dynamic_cast<Net_WLAN_Monitor_IStateMachine_t*> (cb_data_p->monitor);
@@ -1187,26 +1194,30 @@ nla_put_failure:
 
       struct ether_addr ap_mac_address_s;
       ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
+      uint16_t status_i = 0;
+      uint8_t* data_p = NULL;
+      size_t length_i = 0;
       if (nlattr_a[NL80211_ATTR_TIMED_OUT])
       { ACE_ASSERT (nlattr_a[NL80211_ATTR_MAC]);
         ACE_OS::memcpy (&(ap_mac_address_s.ether_addr_octet),
                         nla_data (nlattr_a[NL80211_ATTR_MAC]),
                         ETH_ALEN);
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("\"%s\": failed to associate to access point (MAC was: %s), timed out, aborting\n"),
+                    ACE_TEXT ("\"%s\": failed to associate to access point (MAC was: %s), timed out, retrying\n"),
                     ACE_TEXT (buffer_a),
                     ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ())));
         *(cb_data_p->error) = ETIMEDOUT;
-        return NL_STOP;
+        status_i = ETIMEDOUT;
+        return_value = NL_STOP;
+        goto update_state_2;
       } // end IF
 
       // sanity check(s)
       ACE_ASSERT (nlattr_a[NL80211_ATTR_FRAME]);
 
-      uint8_t* data_p =
+      data_p =
           reinterpret_cast<uint8_t*> (nla_data (nlattr_a[NL80211_ATTR_FRAME]));
-      size_t length_i = nla_len (nlattr_a[NL80211_ATTR_FRAME]);
-      uint16_t status_i = 0;
+      length_i = nla_len (nlattr_a[NL80211_ATTR_FRAME]);
 
       // sanity check(s)
       ACE_ASSERT ((data_p[0] & 0xFC) == 0x10); // assoc
@@ -1224,6 +1235,7 @@ nla_put_failure:
                   status_i));
 #endif // _DEBUG
 
+update_state_2:
       ACE_ASSERT (cb_data_p->monitor);
       Net_WLAN_Monitor_IStateMachine_t* istate_machine_p =
           dynamic_cast<Net_WLAN_Monitor_IStateMachine_t*> (cb_data_p->monitor);
@@ -1258,15 +1270,36 @@ nla_put_failure:
                     if_index_i));
         return NL_STOP;
       } // end IF
-#if defined (_DEBUG)
+
       struct ether_addr ap_mac_address_s;
       ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
+      uint16_t reason_i = 0;
+      uint8_t* data_p = NULL;
+      size_t length_i = 0;
+
+      // sanity check(s)
+      ACE_ASSERT (nlattr_a[NL80211_ATTR_FRAME]);
+
+      data_p =
+          reinterpret_cast<uint8_t*> (nla_data (nlattr_a[NL80211_ATTR_FRAME]));
+      length_i = nla_len (nlattr_a[NL80211_ATTR_FRAME]);
+
+      // sanity check(s)
+      ACE_ASSERT ((data_p[0] & 0xFC) == 0xC0); // deauth
+      ACE_ASSERT (length_i >= 26);
+      ACE_OS::memcpy (&(ap_mac_address_s.ether_addr_octet),
+                      data_p + 10,
+                      ETH_ALEN);
+      reason_i = (data_p[25] << 8) + data_p[24];
+#if defined (_DEBUG)
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("\"%s\": deauthenticated with access point (was: MAC: %s; SSID: %s)\n"),
+                  ACE_TEXT ("\"%s\": deauthenticated with access point (was: MAC: %s; SSID: %s): %d\n"),
                   ACE_TEXT (buffer_a),
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&(ap_mac_address_s.ether_addr_octet)), NET_LINKLAYER_802_11).c_str ()),
-                  ACE_TEXT (cb_data_p->monitor->SSID ().c_str ())));
+                  ACE_TEXT (cb_data_p->monitor->SSID ().c_str ()),
+                  reason_i));
 #endif // _DEBUG
+      ACE_UNUSED_ARG (reason_i);
 
       ACE_ASSERT (cb_data_p->monitor);
       Net_WLAN_Monitor_IStateMachine_t* istate_machine_p =
@@ -1445,10 +1478,10 @@ nla_put_failure:
           dynamic_cast<Net_WLAN_Monitor_IStateMachine_t*> (cb_data_p->monitor);
       ACE_ASSERT (istate_machine_p);
       try {
-        istate_machine_p->change (NET_WLAN_MONITOR_STATE_CONNECTED);
+        istate_machine_p->change (NET_WLAN_MONITOR_STATE_CONNECT);
       } catch (...) {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_CONNECTED), aborting\n")));
+                    ACE_TEXT ("caught exception in Common_IStateMachine_T::change(NET_WLAN_MONITOR_STATE_CONNECT), aborting\n")));
         return NL_STOP;
       }
 
@@ -1467,7 +1500,7 @@ nla_put_failure:
     }
   } // end SWITCH
 
-  return NL_OK;
+  return return_value;
 }
 #endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
