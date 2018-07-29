@@ -86,14 +86,18 @@ if (UNIX)
                 DOC "searching for ${ACE_XML_LIB_FILE} (system paths)")
  endif ()
 elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
+# *TODO*: this does not work
+ set (LIB_FILE_SUFFIX "")
+ if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR
+     CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+  set (LIB_FILE_SUFFIX "d")
  endif ()
  unset (ACE_XML_LIB_FILE)
  set (ACE_XML_LIB_FILE ACEXML${LIB_FILE_SUFFIX}.lib)
  find_library (ACE_XML_LIBRARY ${ACE_XML_LIB_FILE}
                PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib
+               PATHS ${CMAKE_CURRENT_BINARY_DIR}/../../../../ATCD/ACE
+               PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
                DOC "searching for ${ACE_XML_LIB_FILE}"
                NO_DEFAULT_PATH)
 endif ()
@@ -118,14 +122,18 @@ if (UNIX)
                 DOC "searching for ${ACE_XML_PARSER_LIB_FILE} (system paths)")
  endif ()
 elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
+# *TODO*: this does not work
+ set (LIB_FILE_SUFFIX "")
+ if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR
+     CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+  set (LIB_FILE_SUFFIX "d")
  endif ()
  unset (ACE_XML_PARSER_LIB_FILE)
  set (ACE_XML_PARSER_LIB_FILE ACEXML_Parser${LIB_FILE_SUFFIX}.lib)
  find_library (ACE_XML_PARSER_LIBRARY ${ACE_XML_PARSER_LIB_FILE}
                PATHS ENV ACE_ROOT
-               PATH_SUFFIXES lib
+               PATHS ${CMAKE_CURRENT_BINARY_DIR}/../../../../ATCD/ACE
+               PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
                DOC "searching for ${ACE_XML_PARSER_LIB_FILE}"
                NO_DEFAULT_PATH)
 endif ()
@@ -309,10 +317,11 @@ elseif (WIN32)
 # *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 
- target_link_libraries (${EXECUTABLE} ntdll.lib)
- target_link_libraries (${EXECUTABLE} dxguid.lib)
+# target_link_libraries (${EXECUTABLE} ntdll.lib)
+# target_link_libraries (${EXECUTABLE} dxguid.lib)
  target_link_libraries (${EXECUTABLE} mf.lib)
  target_link_libraries (${EXECUTABLE} mfplat.lib)
+
 # *TODO*: repair WIN32 pkgconfig support
  if (SSL_SUPPORT)
   #target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/libeay32.lib)
@@ -322,7 +331,7 @@ elseif (WIN32)
  target_link_libraries (${EXECUTABLE} ${ACE_XML_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${ACE_XML_PARSER_LIBRARY})
 
- target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
+# target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 endif ()
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (SSL_SUPPORT)

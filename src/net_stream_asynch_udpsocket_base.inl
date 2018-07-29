@@ -85,7 +85,7 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
   int result = -1;
 #if defined (ACE_LINUX)
   bool handle_privileges = false;
-#endif
+#endif // ACE_LINUX
   bool handle_socket = false;
   bool decrease_reference_count = false;
   const ConfigurationType& configuration_r = this->getR ();
@@ -662,6 +662,8 @@ Net_StreamAsynchUDPSocketBase_T<HandlerType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::waitForCompletion"));
 
+  ACE_UNUSED_ARG (waitForThreads_in);
+  
   int result = -1;
   ACE_Time_Value one_second (1, 0);
 
@@ -1360,6 +1362,8 @@ Net_StreamAsynchUDPSocketBase_T<Net_AsynchNetlinkSocketHandler_T<HandlerConfigur
 {
   NETWORK_TRACE (ACE_TEXT ("Net_StreamAsynchUDPSocketBase_T::waitForCompletion"));
 
+  ACE_UNUSED_ARG (waitForThreads_in);
+  
   int result = -1;
   ACE_Time_Value one_second (1, 0);
 

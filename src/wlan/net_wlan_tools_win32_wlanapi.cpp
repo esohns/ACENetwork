@@ -261,6 +261,7 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
             ACE_TEXT_ALWAYS_CHAR ("wlan_notification_acm_adhoc_network_state_change");
           break;
         }
+#if defined (_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602) // _WIN32_WINNT_WIN8
         case wlan_notification_acm_profile_unblocked:
           notification_string =
             ACE_TEXT_ALWAYS_CHAR ("wlan_notification_acm_profile_unblocked");
@@ -290,6 +291,12 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
             ACE_TEXT_ALWAYS_CHAR ("wlan_notification_acm_scan_list_refresh");
           break;
         }
+#endif // _WIN32_WINNT) && (_WIN32_WINNT >= 0x0602
+        //case wlan_notification_acm_operational_state_change:
+        //  notification_string =
+        //    ACE_TEXT_ALWAYS_CHAR ("wlan_notification_acm_operational_state_change");
+        //  break;
+        case wlan_notification_acm_end:
         default:
         {
           ACE_DEBUG ((LM_ERROR,

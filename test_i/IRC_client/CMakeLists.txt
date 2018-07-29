@@ -249,7 +249,7 @@ if (UNIX)
   target_link_libraries (${EXECUTABLE} ${PKG_GTK2_LIBRARIES})
  endif ()
 elseif (WIN32)
- target_link_libraries (${EXECUTABLE} ntdll.lib)
+# target_link_libraries (${EXECUTABLE} ntdll.lib)
  target_link_libraries (${EXECUTABLE} ${CURSES_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${PANEL_LIBRARY})
 
@@ -397,7 +397,7 @@ if (UNIX)
   target_link_libraries (${EXECUTABLE_GUI} ${PKG_GTK2_LIBRARIES})
  endif ()
 elseif (WIN32)
- target_link_libraries (${EXECUTABLE_GUI} ntdll.lib)
+# target_link_libraries (${EXECUTABLE_GUI} ntdll.lib)
 
 # *TODO*: repair WIN32 pkgconfig support
  if (GTK3_SUPPORT)

@@ -98,13 +98,8 @@ class Test_U_InboundConnectionStream
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const typename inherited::CONFIGURATION_T&,
-                           ACE_HANDLE);                                // socket handle
-
-  // implement Common_IStatistic_T
-  // *NOTE*: these delegate to runtimeStatistic_
-  virtual bool collect (DHCP_Statistic_t&); // return value: statistic data
-  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  virtual bool initialize (const inherited::CONFIGURATION_T&,
+                           ACE_HANDLE);                       // socket handle
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_InboundConnectionStream (const Test_U_InboundConnectionStream&))
@@ -170,13 +165,8 @@ class Test_U_OutboundConnectionStream
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const typename inherited::CONFIGURATION_T&,
-                           ACE_HANDLE);                                // socket handle
-
-  // implement Common_IStatistic_T
-  // *NOTE*: these delegate to runtimeStatistic_
-  virtual bool collect (DHCP_Statistic_t&); // return value: statistic data
-  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+  virtual bool initialize (const inherited::CONFIGURATION_T&,
+                           ACE_HANDLE);                       // socket handle
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_OutboundConnectionStream (const Test_U_OutboundConnectionStream&))

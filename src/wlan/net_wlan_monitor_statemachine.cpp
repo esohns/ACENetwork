@@ -162,8 +162,8 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_SCAN:         // *TODO*: restarted ?
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
-        case NET_WLAN_MONITOR_STATE_SCAN:
-        case NET_WLAN_MONITOR_STATE_ASSOCIATE:
+//        case NET_WLAN_MONITOR_STATE_SCAN:
+        case NET_WLAN_MONITOR_STATE_CONNECT:
 #endif // WLANAPI_SUPPORT
 #elif defined (ACE_LINUX)
 #if defined (NL80211_SUPPORT)

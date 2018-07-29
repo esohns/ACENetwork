@@ -110,13 +110,8 @@ class Test_U_Stream
                      bool&);               // return value: delete ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const typename inherited::CONFIGURATION_T&,
+  virtual bool initialize (const inherited::CONFIGURATION_T&,
                            ACE_HANDLE);
-
-  // implement Common_IStatistic_T
-  // *NOTE*: these delegate to the statistic report module
-  virtual bool collect (Net_Statistic_t&); // return value: statistic data
-  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_Stream (const Test_U_Stream&))
@@ -182,13 +177,8 @@ class Test_U_UDPStream
                      bool&);               // return value: delete ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const typename inherited::CONFIGURATION_T&,
+  virtual bool initialize (const inherited::CONFIGURATION_T&,
                            ACE_HANDLE);
-
-  // implement Common_IStatistic_T
-  // *NOTE*: these delegate to the statistic report module
-  virtual bool collect (Net_Statistic_t&); // return value: statistic data
-  inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Test_U_UDPStream (const Test_U_UDPStream&))

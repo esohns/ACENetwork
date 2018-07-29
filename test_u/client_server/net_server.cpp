@@ -909,7 +909,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 
     ACE_HANDLE handle_h =
       CBData_in.configuration->connector->connect ((*iterator).second.socketHandlerConfiguration.socketConfiguration_3.listenAddress);
-    typename ClientServer_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
+    ClientServer_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
       NULL;
     if (CBData_in.configuration->connector->useReactor ())
     {
@@ -920,7 +920,7 @@ do_work (unsigned int maximumNumberOfConnections_in,
 #else
         iconnection_p =
           connection_manager_p->get (static_cast<Net_ConnectionId_t> (handle_h));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     } // end IF
     else
     {

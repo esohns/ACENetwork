@@ -20,7 +20,7 @@
 
 #if defined (_MSC_VER)
 #include <crtdefs.h>
-#endif
+#endif // _MSC_VER
 
 #include "ace/Default_Constants.h"
 #include "ace/INET_Addr.h"
@@ -30,7 +30,7 @@
 #include "ace/WIN32_Proactor.h"
 #else
 #include "ace/POSIX_Asynch_IO.h"
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "common.h"
 #include "common_tools.h"
@@ -254,9 +254,7 @@ Net_Server_AsynchListener_T<HandlerType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Accept::accept(): \"%m\", aborting\n")));
-
-    // clean up
-    message_block_p->release ();
+    message_block_p->release (); message_block_p = NULL;
 //    result = ACE_OS::closesocket (accept_handle);
 //    if (result == -1)
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -268,7 +266,6 @@ Net_Server_AsynchListener_T<HandlerType,
 //                  ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
 //                  accept_handle));
 //#endif
-
     return -1;
   } // end IF
 
@@ -369,18 +366,12 @@ Net_Server_AsynchListener_T<HandlerType,
                                  proactor_in);  // proactor handle
   if (unlikely (result == -1))
   {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Asynch_Accept::open(0x%@): \"%m\", aborting\n"),
                 listen_handle));
-#else
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Asynch_Accept::open(%d): \"%m\", aborting\n"),
-                listen_handle));
-#endif
     goto close;
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   if (likely (reuseAddr_in))
   {
@@ -401,24 +392,26 @@ Net_Server_AsynchListener_T<HandlerType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,SO_REUSEADDR): \"%m\", aborting\n"),
                   listen_handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       goto close;
     } // end IF
   } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  // enable SIO_LOOPBACK_FAST_PATH on Win32
-  if (unlikely ((address_type == ACE_ADDRESS_FAMILY_INET) &&
-                listenAddress_in.is_loopback ()           &&
-                NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH))
-    if (!Net_Common_Tools::setLoopBackFastPath (listen_handle))
+#if defined (_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602) // _WIN32_WINNT_WIN8
+  // enable SIO_LOOPBACK_FAST_PATH on Win32 ?
+  if ((address_type == ACE_ADDRESS_FAMILY_INET) &&
+      listenAddress_in.is_loopback ()           &&
+      NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH))
+    if (unlikely (!Net_Common_Tools::setLoopBackFastPath (listen_handle)))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setLoopBackFastPath(0x%@): \"%m\", aborting\n"),
                   listen_handle));
       goto close;
     } // end IF
-#endif
+#endif // _WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)
+#endif // ACE_WIN32 || ACE_WIN64
 
   // If port is not specified, bind to any port.
   if (unlikely (listenAddress_in == SAP_any))
@@ -441,7 +434,7 @@ Net_Server_AsynchListener_T<HandlerType,
                   listen_handle,
                   INADDR_ANY,
                   address_type));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       goto close;
     } // end IF
   } // end IF
@@ -464,7 +457,7 @@ Net_Server_AsynchListener_T<HandlerType,
                 ACE_TEXT ("failed to ACE_OS::bind(%d[\"%s\"]): \"%m\", aborting\n"),
                 listen_handle,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (listenAddress_in).c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     goto close;
   } // end IF
 
@@ -484,7 +477,7 @@ Net_Server_AsynchListener_T<HandlerType,
                 listen_handle,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (listenAddress_in).c_str ()),
                 backLog_in));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     goto close;
   } // end IF
 
@@ -505,7 +498,7 @@ Net_Server_AsynchListener_T<HandlerType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Server_AsynchListener_T::accept(%d): \"%m\", aborting\n"),
                   listen_handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       goto close;
     } // end IF
   } // end FOR
@@ -533,7 +526,7 @@ close:
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                 listen_handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   inherited::handle (ACE_INVALID_HANDLE);
 
   return -1;
@@ -617,7 +610,7 @@ Net_Server_AsynchListener_T<HandlerType,
               ACE_TEXT ("%d: started listening: %s\n"),
               inherited::get_handle (),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (configuration_->connectionConfiguration->socketHandlerConfiguration.socketConfiguration_2.address).c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   isListening_ = true;
 }
@@ -684,7 +677,7 @@ Net_Server_AsynchListener_T<HandlerType,
   if (unlikely (result == -1))
     ACE_DEBUG((LM_ERROR,
                ACE_TEXT ("failed to ACE_POSIX_Asynch_Accept::close(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   else
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("stopped listening\n")));
@@ -816,7 +809,7 @@ Net_Server_AsynchListener_T<HandlerType,
   if (likely (this->should_reissue_accept ()        &&
               (listen_handle != ACE_INVALID_HANDLE) &&
               (result.error () != ECANCELED)))
-#endif
+#endif // ACE_WIN32
     this->accept (this->bytes_to_read (), result.act ());
 }
 

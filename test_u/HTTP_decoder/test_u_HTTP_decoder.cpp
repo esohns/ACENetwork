@@ -330,7 +330,8 @@ do_processArguments (int argc_in,
                       ACE_TEXT (URI_string.c_str ())));
           return false;
         } // end IF
-        ACE_ASSERT (match_results_3.ready () && !match_results_3.empty ());
+//        ACE_ASSERT (match_results_3.ready () && !match_results_3.empty ());
+        ACE_ASSERT (!match_results_3.empty ());
 
         if (!match_results_3[2].matched)
           URL_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_URL);

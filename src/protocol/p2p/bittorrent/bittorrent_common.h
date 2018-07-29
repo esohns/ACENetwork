@@ -115,7 +115,7 @@ struct BitTorrent_PeerHandShake
 {
   BitTorrent_PeerHandShake ()
    : pstr (ACE_TEXT_ALWAYS_CHAR (BITTORRENT_PEER_HANDSHAKE_PSTR_STRING))
-   , reserved ()
+//   , reserved ()
    , info_hash ()
    , peer_id ()
   {

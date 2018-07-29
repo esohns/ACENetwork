@@ -825,7 +825,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
 
       return;
     } // end IF
-    typename ClientServer_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
+    ClientServer_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
       NULL;
     if (useReactor_in)
     {

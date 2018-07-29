@@ -1016,7 +1016,8 @@ namespace yy {
                                                                      ACE_TEXT ((yystack_[1].value.sval)->c_str ())));
                                                          YYABORT;
                                                        } // end IF
-                                                       ACE_ASSERT (match_results.ready () && !match_results.empty ());
+//                                                       ACE_ASSERT (match_results.ready () && !match_results.empty ());
+                                                       ACE_ASSERT (!match_results.empty ());
                                                        ACE_ASSERT (match_results[1].matched);
 
                                                        record_r.version =
@@ -1154,7 +1155,8 @@ namespace yy {
                                                                      ACE_TEXT ((yystack_[0].value.sval)->c_str ())));
                                                          break;
                                                        } // end IF
-                                                       ACE_ASSERT (match_results.ready () && !match_results.empty ());
+//                                                       ACE_ASSERT (match_results.ready () && !match_results.empty ());
+                                                       ACE_ASSERT (!match_results.empty ());
                                                        ACE_ASSERT (match_results[1].matched);
                                                        ACE_ASSERT (match_results[2].matched);
                                                        ACE_ASSERT (!match_results[2].str ().empty ());

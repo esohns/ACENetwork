@@ -35,12 +35,6 @@ Net_SOCK_Acceptor::Net_SOCK_Acceptor ()
 
 }
 
-Net_SOCK_Acceptor::~Net_SOCK_Acceptor ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_SOCK_Acceptor::~Net_SOCK_Acceptor"));
-
-}
-
 int
 Net_SOCK_Acceptor::open (const ACE_Addr &localAddress_in,
                          int reuseAddr_in,
@@ -68,7 +62,7 @@ Net_SOCK_Acceptor::open (const ACE_Addr &localAddress_in,
                            protocolFamily_in,
                            protocol_in,
                            reuseAddr_in);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK::open(SOCK_STREAM,%d,%d,%d): \"%m\", aborting\n"),
@@ -121,7 +115,7 @@ Net_SOCK_Acceptor::shared_open (const ACE_Addr& localAddress_in,
                                  IPV6_V6ONLY,
                                  reinterpret_cast<const char*> (&zero),
                                  sizeof (zero));
-    if (result == -1)
+    if (unlikely (result == -1))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::setsockopt(0x%@,IPV6_V6ONLY): \"%m\", aborting\n"),
@@ -135,7 +129,7 @@ Net_SOCK_Acceptor::shared_open (const ACE_Addr& localAddress_in,
     result = ACE_OS::bind (handle,
                            reinterpret_cast<sockaddr*> (&local_inet6_addr),
                            sizeof (local_inet6_addr));
-    if (result == -1)
+    if (unlikely (result == -1))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -145,12 +139,12 @@ Net_SOCK_Acceptor::shared_open (const ACE_Addr& localAddress_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::bind(%d): \"%m\", aborting\n"),
                   handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       goto close;
     } // end IF
   } // end IF
   else
-#endif
+#endif // ACE_HAS_IPV6
   if (protocolFamily_in == PF_INET)
   {
     sockaddr_in local_inet_addr;
@@ -166,7 +160,7 @@ Net_SOCK_Acceptor::shared_open (const ACE_Addr& localAddress_in,
     {
       result = ACE::bind_port (handle,
                                 ACE_NTOHL (ACE_UINT32 (local_inet_addr.sin_addr.s_addr)));
-      if (result == -1)
+      if (unlikely (result == -1))
       {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
@@ -176,7 +170,7 @@ Net_SOCK_Acceptor::shared_open (const ACE_Addr& localAddress_in,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE::bind_port(%d): \"%m\", aborting\n"),
                     handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         goto close;
       } // end IF
     } // end IF
@@ -185,7 +179,7 @@ Net_SOCK_Acceptor::shared_open (const ACE_Addr& localAddress_in,
       result = ACE_OS::bind (handle,
                              reinterpret_cast<sockaddr*> (&local_inet_addr),
                              sizeof local_inet_addr);
-      if (result == -1)
+      if (unlikely (result == -1))
       {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         ACE_DEBUG ((LM_ERROR,
@@ -195,7 +189,7 @@ Net_SOCK_Acceptor::shared_open (const ACE_Addr& localAddress_in,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_OS::bind(%d): \"%m\", aborting\n"),
                     handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         goto close;
       } // end IF
     } // end ELSE
@@ -206,7 +200,7 @@ Net_SOCK_Acceptor::shared_open (const ACE_Addr& localAddress_in,
       ACE_OS::bind (handle,
                     reinterpret_cast<sockaddr*> (localAddress_in.get_addr ()),
                     localAddress_in.get_size ());
-    if (result == -1)
+    if (unlikely (result == -1))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       ACE_DEBUG ((LM_ERROR,
@@ -216,7 +210,7 @@ Net_SOCK_Acceptor::shared_open (const ACE_Addr& localAddress_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::bind(%d): \"%m\", aborting\n"),
                   handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       goto close;
     } // end IF
   } // end ELSE
@@ -224,12 +218,13 @@ Net_SOCK_Acceptor::shared_open (const ACE_Addr& localAddress_in,
   ///////////////////////////////////////
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  // enable SIO_LOOPBACK_FAST_PATH on Win32
+#if defined (_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602) // _WIN32_WINNT_WIN8
+  // enable SIO_LOOPBACK_FAST_PATH on Win32 ?
   if (localAddress_in.get_type () == ACE_ADDRESS_FAMILY_INET)
   {
     const ACE_INET_Addr* inet_addr_p = NULL;
     inet_addr_p = dynamic_cast<const ACE_INET_Addr*> (&localAddress_in);
-    if (!inet_addr_p)
+    if (unlikely (!inet_addr_p))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to dynamic_cast<ACE_INET_Addr>(0x%@), aborting\n"),
@@ -238,7 +233,7 @@ Net_SOCK_Acceptor::shared_open (const ACE_Addr& localAddress_in,
     } // end IF
     if (inet_addr_p->is_loopback () &&
         NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH)
-      if (!Net_Common_Tools::setLoopBackFastPath (handle))
+      if (unlikely (!Net_Common_Tools::setLoopBackFastPath (handle)))
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_Common_Tools::setLoopBackFastPath(0x%@): \"%m\", aborting\n"),
@@ -246,11 +241,12 @@ Net_SOCK_Acceptor::shared_open (const ACE_Addr& localAddress_in,
         goto close;
       } // end IF
   } // end IF
-#endif
+#endif // _WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)
+#endif // ACE_WIN32 || ACE_WIN64
 
   result = ACE_OS::listen (handle,
                            backLog_in);
-  if (result == -1)
+  if (unlikely (result == -1))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
@@ -260,7 +256,7 @@ Net_SOCK_Acceptor::shared_open (const ACE_Addr& localAddress_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::listen(%d): \"%m\", aborting\n"),
                 handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     goto close;
   } // end IF
 
@@ -270,7 +266,7 @@ close:
   ACE_Errno_Guard errno_guard (errno);
 
   result = inherited::close ();
-  if (result == -1)
+  if (unlikely (result == -1))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK_Acceptor::close(): \"%m\", continuing\n")));
 

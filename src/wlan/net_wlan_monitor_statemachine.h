@@ -82,15 +82,13 @@ class Net_WLAN_MonitorStateMachine
  protected:
   // convenient types
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  typename ACE_NULL_SYNCH::MUTEX MUTEX_T;
-
-  ACE_SYNCH_NULL_MUTEX lock_;
+  typedef ACE_NULL_SYNCH::MUTEX MUTEX_T;
 #else
-  typename ACE_MT_SYNCH::MUTEX MUTEX_T;
+  typedef ACE_MT_SYNCH::MUTEX MUTEX_T;
 
-  bool                 dispatchStarted_;
-  ACE_SYNCH_MUTEX      lock_;
+  bool    dispatchStarted_;
 #endif // ACE_WIN32 || ACE_WIN64
+  MUTEX_T lock_;
 
   // implement (part of) Common_IStateMachine_T
   // *NOTE*: only derived classes can change state

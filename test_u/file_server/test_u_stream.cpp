@@ -88,7 +88,7 @@ Test_U_Stream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
+Test_U_Stream::initialize (const inherited::CONFIGURATION_T& configuration_in,
                            ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::initialize"));
@@ -97,13 +97,13 @@ Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configurat
   ACE_ASSERT (!inherited::isInitialized_);
 
   // update configuration
-  typename inherited::MODULE_T* module_p = inherited::head ();
+  inherited::MODULE_T* module_p = inherited::head ();
   ACE_ASSERT (module_p);
-  typename inherited::TASK_T* task_p = module_p->reader ();
+  inherited::TASK_T* task_p = module_p->reader ();
   ACE_ASSERT (task_p);
-  typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).end ());
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != const_cast<inherited::CONFIGURATION_T&> (configuration_in).end ());
   (*iterator).second.second.outboundQueue =
     dynamic_cast<Stream_IMessageQueue*> (task_p->msg_queue ());
   ACE_ASSERT ((*iterator).second.second.outboundQueue);
@@ -115,7 +115,7 @@ Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configurat
   Test_U_Module_Net_Writer_t* net_io_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -126,7 +126,7 @@ Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configurat
                 ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
@@ -186,79 +186,10 @@ Test_U_Stream::initialize (const typename inherited::CONFIGURATION_T& configurat
 
 error:
   if (reset_setup_pipeline)
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
       setup_pipeline;
 
   return false;
-}
-
-bool
-Test_U_Stream::collect (Net_Statistic_t& data_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_Stream::collect"));
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::sessionData_);
-
-  int result = -1;
-
-  Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR ("StatisticReport")));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT ("StatisticReport")));
-    return false;
-  } // end IF
-  Test_U_Module_StatisticReport_WriterTask_t* statistic_report_impl_p =
-    dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
-  if (!statistic_report_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t> failed, aborting\n")));
-    return false;
-  } // end IF
-
-  // synch access
-  struct FileServer_SessionData& session_data_r =
-      const_cast<struct FileServer_SessionData&> (inherited::sessionData_->getR ());
-  if (session_data_r.lock)
-  {
-    result = session_data_r.lock->acquire ();
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", aborting\n")));
-      return false;
-    } // end IF
-  } // end IF
-
-  session_data_r.statistic.timeStamp = COMMON_TIME_NOW;
-
-  // delegate to the statistics module
-  bool result_2 = false;
-  try {
-    result_2 = statistic_report_impl_p->collect (data_out);
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), continuing\n")));
-  }
-  if (!result)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_IStatistic_T::collect(), aborting\n")));
-  else
-    session_data_r.statistic = data_out;
-
-  if (session_data_r.lock)
-  {
-    result = session_data_r.lock->release ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
-  } // end IF
-
-  return result_2;
 }
 
 //////////////////////////////////////////
@@ -321,7 +252,7 @@ Test_U_UDPStream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
+Test_U_UDPStream::initialize (const inherited::CONFIGURATION_T& configuration_in,
                               ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_UDPStream::initialize"));
@@ -330,9 +261,9 @@ Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configu
   ACE_ASSERT (!inherited::isInitialized_);
 
   // update configuration
-  typename inherited::CONFIGURATION_T::ITERATOR_T iterator =
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator != const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).end ());
+  inherited::CONFIGURATION_T::ITERATOR_T iterator =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator != const_cast<inherited::CONFIGURATION_T&> (configuration_in).end ());
   //(*iterator).second.second.stream = this;
 
 //  bool result = false;
@@ -343,7 +274,7 @@ Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configu
   Test_U_FileReaderH* file_source_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -354,7 +285,7 @@ Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configu
                 ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
@@ -414,77 +345,8 @@ Test_U_UDPStream::initialize (const typename inherited::CONFIGURATION_T& configu
 
 error:
   if (reset_setup_pipeline)
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
       setup_pipeline;
 
   return false;
-}
-
-bool
-Test_U_UDPStream::collect (Net_Statistic_t& data_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_UDPStream::collect"));
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::sessionData_);
-
-  int result = -1;
-
-  Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
-    return false;
-  } // end IF
-  Test_U_Module_StatisticReport_WriterTask_t* statistic_report_impl_p =
-    dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
-  if (!statistic_report_impl_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t> failed, aborting\n")));
-    return false;
-  } // end IF
-
-  // synch access
-  struct FileServer_SessionData& session_data_r =
-      const_cast<struct FileServer_SessionData&> (inherited::sessionData_->getR ());
-  if (session_data_r.lock)
-  {
-    result = session_data_r.lock->acquire ();
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", aborting\n")));
-      return false;
-    } // end IF
-  } // end IF
-
-  session_data_r.statistic.timeStamp = COMMON_TIME_NOW;
-
-  // delegate to the statistics module
-  bool result_2 = false;
-  try {
-    result_2 = statistic_report_impl_p->collect (data_out);
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), continuing\n")));
-  }
-  if (!result)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_IStatistic_T::collect(), aborting\n")));
-  else
-    session_data_r.statistic = data_out;
-
-  if (session_data_r.lock)
-  {
-    result = session_data_r.lock->release ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
-  } // end IF
-
-  return result_2;
 }

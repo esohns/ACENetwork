@@ -22,12 +22,9 @@
 #define NET_SOCK_ACCEPTOR_H
 
 #include "ace/Addr.h"
+#include "ace/Default_Constants.h"
 #include "ace/Global_Macros.h"
-//#include "ace/OS_QoS.h"
 #include "ace/SOCK_Acceptor.h"
-#include "ace/SOCK_Stream.h"
-
-//#include "net_exports.h"
 
 // forward declarations
 class ACE_Time_Value;
@@ -35,13 +32,14 @@ class ACE_Time_Value;
 // *TODO*: move this class to Net_Client. 'friend'liness of
 //         Net_TCPConnectionBase_T currently precludes this
 
-//class Net_Export Net_SOCK_Acceptor
 class Net_SOCK_Acceptor
  : public ACE_SOCK_Acceptor
 {
+  typedef ACE_SOCK_Acceptor inherited;
+
  public:
   Net_SOCK_Acceptor ();
-  virtual ~Net_SOCK_Acceptor ();
+  inline virtual ~Net_SOCK_Acceptor () {}
 
   int open (const ACE_Addr&,           // local address
             int = 0,                   // SO_REUSEADDR ?
@@ -63,8 +61,6 @@ class Net_SOCK_Acceptor
                    int);            // backlog
 
  private:
-  typedef ACE_SOCK_Acceptor inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Net_SOCK_Acceptor (const Net_SOCK_Acceptor&))
   ACE_UNIMPLEMENTED_FUNC (Net_SOCK_Acceptor& operator= (const Net_SOCK_Acceptor&))
 };

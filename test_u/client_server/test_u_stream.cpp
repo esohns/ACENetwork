@@ -112,7 +112,7 @@ Test_U_Stream::initialize (const CONFIGURATION_T& configuration_in,
   //ClientServer_Module_TCPSocketHandler* socketHandler_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -123,7 +123,7 @@ Test_U_Stream::initialize (const CONFIGURATION_T& configuration_in,
                 ACE_TEXT (stream_name_string_)));
     goto error;
   } // end IF
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
@@ -188,7 +188,7 @@ Test_U_Stream::initialize (const CONFIGURATION_T& configuration_in,
 
 error:
   if (reset_setup_pipeline)
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
       setup_pipeline;
 
   return false;

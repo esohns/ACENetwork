@@ -40,12 +40,22 @@ if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/stat>)
 elseif (WIN32)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libCommon/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libCommon/src/ui)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src/modules/net)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src/modules/stat)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+#                             $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ATCD/ACE>)
+
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../libCommon/src>)
+# target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../libCommon/src/ui>)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src>)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src/modules/net>)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src/modules/stat>)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party>)
 endif ()
 #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison)
 target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC

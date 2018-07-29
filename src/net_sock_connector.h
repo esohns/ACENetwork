@@ -23,13 +23,10 @@
 
 #include "ace/Addr.h"
 #include "ace/Global_Macros.h"
-//#include "ace/OS_QoS.h"
 #include "ace/SOCK_Connector.h"
 #include "ace/SOCK_Stream.h"
 //#include "ace/SSL/SSL_SOCK_Connector.h"
 //#include "ace/SSL/SSL_SOCK_Stream.h"
-
-//#include "net_exports.h"
 
 // forward declarations
 class ACE_Time_Value;
@@ -37,13 +34,14 @@ class ACE_Time_Value;
 // *TODO*: move this class to Net_Client. 'friend'liness of
 //         Net_TCPConnectionBase_T currently precludes this
 
-//class Net_Export Net_SOCK_Connector
 class Net_SOCK_Connector
  : public ACE_SOCK_Connector
 {
+  typedef ACE_SOCK_Connector inherited;
+
  public:
   Net_SOCK_Connector ();
-  inline virtual ~Net_SOCK_Connector () {};
+  inline virtual ~Net_SOCK_Connector () {}
 
   int connect (ACE_SOCK_Stream&,                    // stream
                const ACE_Addr&,                     // remote address
@@ -78,15 +76,12 @@ class Net_SOCK_Connector
   //                           int);                  // result
 
  private:
-  typedef ACE_SOCK_Connector inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Net_SOCK_Connector (const Net_SOCK_Connector&))
   ACE_UNIMPLEMENTED_FUNC (Net_SOCK_Connector& operator= (const Net_SOCK_Connector&))
 };
 
 //////////////////////////////////////////
 
-////class Net_Export Net_SOCK_SSL_Connector
 //class Net_SOCK_SSL_Connector
 // : public ACE_SSL_SOCK_Connector
 //{

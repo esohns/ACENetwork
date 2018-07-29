@@ -51,10 +51,19 @@ if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/libACEStream/src/modules/stat>)
 elseif (WIN32)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libCommon/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src/modules/stat)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party)
+ target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party>)
+
+ target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ATCD/ACE>)
+
+ target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../libCommon/src>)
+
+ target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src>)
+ target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../libACEStream/src/modules/stat>)
 endif ()
 target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison>)
@@ -163,12 +172,15 @@ set_target_properties (${PROJECT_NAME}_Protocol_DHCP PROPERTIES VERSION ${VERSIO
 
 #target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${CMAKE_THREAD_LIBS_INIT})
 if (WIN32)
- target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ntdll.lib)
+# target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ntdll.lib)
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ${ACE_LIBRARY})
+
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP Common)
+
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACEStream)
+
  target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACENetwork)
- target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACENetwork_WLAN)
+# target_link_libraries (${PROJECT_NAME}_Protocol_DHCP ACENetwork_WLAN)
 endif ()
 
 # add PCH

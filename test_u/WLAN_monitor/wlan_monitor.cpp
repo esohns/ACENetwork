@@ -31,14 +31,15 @@
 #include "ace/High_Res_Timer.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Init_ACE.h"
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 #include "ace/Log_Msg.h"
 #include "ace/Synch.h"
 #include "ace/Proactor.h"
 #include "ace/Profile_Timer.h"
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
 #include "ace/POSIX_Proactor.h"
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 #include "ace/Reactor.h"
 #include "ace/Sig_Handler.h"
 #include "ace/Signal.h"

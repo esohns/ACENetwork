@@ -252,13 +252,14 @@ Net_Client_AsynchConnector_T<HandlerType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::setsockopt(%d,SO_REUSEADDR): \"%m\", aborting\n"),
                   socket_h));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       goto error;
     } // end IF
   } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  // enable SIO_LOOPBACK_FAST_PATH on Win32
+#if defined (_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602) // _WIN32_WINNT_WIN8
+  // enable SIO_LOOPBACK_FAST_PATH on Win32 ?
   if ((protocol_family_i == ACE_ADDRESS_FAMILY_INET) &&
       remoteAddress_in.is_loopback ()                &&
       NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH)
@@ -269,7 +270,8 @@ Net_Client_AsynchConnector_T<HandlerType,
                   socket_h));
       goto error;
     } // end IF
-#endif
+#endif // _WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)
+#endif // ACE_WIN32 || ACE_WIN64
 
   ///////////////////////////////////////
 
@@ -304,7 +306,7 @@ error:
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                 socket_h));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, lock_, -1);
     iterator = handles_.find (socket_h);
@@ -441,7 +443,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                 connectHandle_in,
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (SAP_).c_str ()),
                 ACE_TEXT (ACE_OS::strerror (error_in))));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 }
 
 template <typename HandlerType,
@@ -509,7 +511,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                 ACE_TEXT ("caught exception in Net_IAsynchConnector_T::onConnect(%d,%d), continuing\n"),
                 result_in.connect_handle (),
                 result));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   }
 
   return ((result_in.success () == 0) ? -1 : 0);
@@ -762,7 +764,7 @@ Net_Client_AsynchConnector_T<HandlerType,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
                 ACE_TEXT (Net_Common_Tools::IPAddressToString (peer_address).c_str ()),
                 ACE_TEXT (ACE_OS::strerror (error))));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 
   return ((result == 1) ? 0 : -1);
@@ -942,11 +944,7 @@ Net_Client_AsynchConnector_T<HandlerType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Client_AsynchConnector_T::connect(%s): \"%s\", aborting\n"),
                 ACE_TEXT (Net_Common_Tools::NetlinkAddressToString (peer_address).c_str ()),
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-                ACE::sock_error (error)));
-#else
                 ACE_TEXT (ACE_OS::strerror (error))));
-#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 
   return ((result == 0) ? -1 : 0);

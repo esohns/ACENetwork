@@ -334,8 +334,8 @@ if (UNIX)
   target_link_libraries (${EXECUTABLE} ${PKG_GTK2_LIBRARIES})
  endif (GTK3_SUPPORT)
 elseif (WIN32)
- target_link_libraries (${EXECUTABLE} ntdll.lib)
- target_link_libraries (${EXECUTABLE} dxguid.lib)
+# target_link_libraries (${EXECUTABLE} ntdll.lib)
+# target_link_libraries (${EXECUTABLE} dxguid.lib)
  target_link_libraries (${EXECUTABLE} mfplat.lib)
 # *TODO*: repair WIN32 pkgconfig support
 

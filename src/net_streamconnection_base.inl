@@ -1985,7 +1985,7 @@ Net_AsynchStreamConnectionBase_T<HandlerType,
     inherited::cancel ();
 
   // step2b: deregister with the connection manager (if any) ?
-  Net_ConnectionId_t connection_id = id ();
+//  Net_ConnectionId_t connection_id = id ();
   close_socket_b = (inherited2::count () == 1);
   if (likely (inherited2::isRegistered_))
     inherited2::deregister ();

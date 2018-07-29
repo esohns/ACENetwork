@@ -172,13 +172,17 @@ if (UNIX)
                 DOC "searching for ${ACE_LIB_FILE} (system paths)")
  endif ()
 elseif (WIN32)
- if (CMAKE_BUILD_TYPE STREQUAL Debug)
-  set (LIB_FILE_SUFFIX d)
+# *TODO*: this does not work
+ set (LIB_FILE_SUFFIX "")
+ if (CMAKE_BUILD_TYPE STREQUAL "Debug" OR
+     CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+  set (LIB_FILE_SUFFIX "d")
  endif ()
  unset (ACE_LIB_FILE)
  set (ACE_LIB_FILE ACE${LIB_FILE_SUFFIX}.lib)
  find_library (ACE_LIBRARY ${ACE_LIB_FILE}
                PATHS ENV ACE_ROOT
+               PATHS ${CMAKE_CURRENT_BINARY_DIR}/../../../ATCD/ACE
                PATH_SUFFIXES lib lib\\${CMAKE_BUILD_TYPE}\\Win32
                DOC "searching for ${ACE_LIB_FILE}")
 endif ()
@@ -307,7 +311,8 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libACEStream/src/modules/stat>)
 elseif (WIN32)
  target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
+#                             $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ATCD/ACE>)
 
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../openssl/include>)
@@ -487,6 +492,7 @@ if (UNIX)
 
  target_link_libraries (${PROJECT_NAME} ${PROJECT_NAME}_WLAN)
 elseif (WIN32)
+# target_link_libraries (${PROJECT_NAME} ntdll.lib)
  target_link_libraries (${PROJECT_NAME} iphlpapi.lib)
  target_link_libraries (${PROJECT_NAME} Wlanapi.lib)
 

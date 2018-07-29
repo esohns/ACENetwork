@@ -128,7 +128,7 @@ Client_TimeoutHandler::handle (const void* arg_in)
   ACE_ASSERT (connector_);
   ACE_ASSERT (connection_manager_p);
 
-  const typename Client_IConnector_t::CONFIGURATION_T& configuration_r =
+  const Client_IConnector_t::CONFIGURATION_T& configuration_r =
     connector_->getR ();
   unsigned int number_of_connections_i = 0;
 
@@ -388,7 +388,7 @@ continue_:
 
       return;
     } // end IF
-    typename ClientServer_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
+    ClientServer_InetConnectionManager_t::ICONNECTION_T* iconnection_p =
       NULL;
     if (connector_->useReactor ())
     {

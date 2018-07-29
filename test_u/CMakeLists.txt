@@ -57,17 +57,25 @@ elseif (WIN32)
    include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../gtk/gtk/Win32/debug/include/glib-2.0)
    include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../gtk/gtk/Win32/debug/include/gtk-3.0)
   endif ()
- endif ()
+ endif (GTK_SUPPORT)
 
- include_directories ($ENV{ACE_ROOT})
+# include_directories ($ENV{ACE_ROOT})
+ target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ATCD/ACE>)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/timer)
+ target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src>)
+ target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/timer>)
  if (GTK_SUPPORT)
-  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/ui)
-  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/ui/gtk)
- endif ()
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src)
+  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/ui>)
+  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/ui/gtk>)
+ endif (GTK_SUPPORT)
+
+ target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src>)
 endif ()
 target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../src>)

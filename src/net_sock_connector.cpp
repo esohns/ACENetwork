@@ -68,7 +68,7 @@ Net_SOCK_Connector::connect (ACE_SOCK_Stream& stream_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK_Connector::shared_open(%d): \"%m\", aborting\n"),
                 stream_in.get_handle ()));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return -1;
   } // end IF
 
@@ -86,7 +86,7 @@ Net_SOCK_Connector::connect (ACE_SOCK_Stream& stream_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_SOCK_Connector::shared_connect_start(%d): \"%m\", aborting\n"),
                 stream_in.get_handle ()));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return -1;
   } // end IF
 
@@ -104,7 +104,7 @@ Net_SOCK_Connector::connect (ACE_SOCK_Stream& stream_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::connect(%d): \"%m\", aborting\n"),
                 stream_in.get_handle ()));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return -1;
   } // end IF
 
@@ -121,7 +121,7 @@ Net_SOCK_Connector::connect (ACE_SOCK_Stream& stream_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK_Connector::shared_connect_finish(%d): \"%m\", aborting\n"),
                 stream_in.get_handle ()));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
     return -1;
   } // end IF
 
@@ -139,7 +139,7 @@ Net_SOCK_Connector::shared_connect_start (ACE_SOCK_Stream& stream_in,
   int result = -1;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   const ACE_INET_Addr* inet_addr_p = NULL;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   ACE_HANDLE handle = stream_in.get_handle ();
 
   // sanity check(s)
@@ -161,7 +161,7 @@ Net_SOCK_Connector::shared_connect_start (ACE_SOCK_Stream& stream_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::bind(%d): \"%m\", aborting\n"),
                   handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       goto close;
     } // end IF
   } // end IF
@@ -180,7 +180,7 @@ Net_SOCK_Connector::shared_connect_start (ACE_SOCK_Stream& stream_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_SOCK_Stream::enable(ACE_NONBLOCK) (handle was: %d): \"%m\", continuing\n"),
                   handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       goto close;
     } // end IF
   } // end IF
@@ -188,7 +188,8 @@ Net_SOCK_Connector::shared_connect_start (ACE_SOCK_Stream& stream_in,
   ///////////////////////////////////////
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  // enable SIO_LOOPBACK_FAST_PATH on Win32
+#if defined (_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602) // _WIN32_WINNT_WIN8
+  // enable SIO_LOOPBACK_FAST_PATH on Win32 ?
   if (likely (remoteAddress_in.get_type () == ACE_ADDRESS_FAMILY_INET))
   { // *TODO*: use static_cast<> and assert here
     inet_addr_p = dynamic_cast<const ACE_INET_Addr*> (&remoteAddress_in);
@@ -209,7 +210,8 @@ Net_SOCK_Connector::shared_connect_start (ACE_SOCK_Stream& stream_in,
         goto close;
       } // end IF
   } // end IF
-#endif
+#endif // _WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)
+#endif // ACE_WIN32 || ACE_WIN64
 
   return 0;
 
@@ -218,7 +220,7 @@ close:
   ACE_Errno_Guard error (errno);
 
   result = stream_in.close ();
-  if (result == -1)
+  if (unlikely (result == -1))
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK_Stream::close(0x%@): \"%m\", continuing\n"),
@@ -227,7 +229,7 @@ close:
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_SOCK_Stream::close(%d): \"%m\", continuing\n"),
                 handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   return -1;
 }

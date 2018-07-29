@@ -312,21 +312,18 @@ Net_AsynchTCPSocketHandler_T<ConfigurationType>::handle_close (ACE_HANDLE handle
 #endif // ACE_WIN32 || ACE_WIN64
   } // end IF
   inherited2::handle (ACE_INVALID_HANDLE);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
   if (writeHandle_ != ACE_INVALID_HANDLE)
   {
     result = ACE_OS::closesocket (writeHandle_);
     if (unlikely (result == -1))
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::closesocket(0x%@): \"%m\", continuing\n"),
-                  writeHandle_));
-#else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                   writeHandle_));
-#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
   writeHandle_ = ACE_INVALID_HANDLE;
+#endif // ACE_WIN32 || ACE_WIN64
 
   return result;
 }

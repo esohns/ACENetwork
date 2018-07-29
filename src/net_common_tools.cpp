@@ -30,6 +30,7 @@
 #include <guiddef.h>
 #include <iphlpapi.h>
 #include <mstcpip.h>
+#include <wlanapi.h>
 #else
 #include <linux/if_ether.h>
 #include <linux/if_packet.h>
@@ -370,7 +371,8 @@ Net_Common_Tools::matchIPAddress (std::string& address_in)
                                    regex,
                                    std::regex_constants::match_default)))
     return false;
-  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+//  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+  ACE_ASSERT (!match_results.empty ());
 
   // validate all groups
   std::stringstream converter;
@@ -828,8 +830,10 @@ Net_Common_Tools::LinkLayerAddressToString (const unsigned char* const addressDa
       // *PORTABILITY*: ether_ntoa_r is not portable
       // *TODO*: implement an ACE wrapper function for unsupported platforms
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+//#if defined (_WIN32_WINNT) && (_WIN32_WINNT >= 0x0601) // _WIN32_WINNT_WIN7 *TODO*: Windows XP support
+#if defined (_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602) // _WIN32_WINNT_WIN7
 #if defined (ACE_USES_WCHAR)
-      PWSTR result_2 =
+      PWSTR result_3 =
         RtlEthernetAddressToStringW (reinterpret_cast<const _DL_EUI48* const> (addressDataPtr_in),
                                      buffer_a);
 #else
@@ -843,6 +847,26 @@ Net_Common_Tools::LinkLayerAddressToString (const unsigned char* const addressDa
                     ACE_TEXT ("failed to ::RtlEthernetAddressToString(), aborting\n")));
         break;
       } // end IF
+#else
+      const struct ether_addr* const ether_addr_p =
+          reinterpret_cast<const struct ether_addr* const> (addressDataPtr_in);
+      result_2 =
+          ACE_OS::snprintf (buffer_a,
+                            NET_ADDRESS_LINK_ETHERNET_ADDRESS_STRING_SIZE,
+                            ACE_TEXT ("%02x:%02x:%02x:%02x:%02x:%02x"),
+                            ether_addr_p->ether_addr_octet[0],
+                            ether_addr_p->ether_addr_octet[1],
+                            ether_addr_p->ether_addr_octet[2],
+                            ether_addr_p->ether_addr_octet[3],
+                            ether_addr_p->ether_addr_octet[4],
+                            ether_addr_p->ether_addr_octet[5]);
+      if (unlikely (result_2 < 0))
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("failed to ACE_OS::snprintf(): \"%m\", aborting\n")));
+        break;
+      } // end IF
+#endif // _WIN32_WINNT) && (_WIN32_WINNT >= 0x0601)
 #else
       const struct ether_addr* const ether_addr_p =
           reinterpret_cast<const struct ether_addr* const> (addressDataPtr_in);
@@ -1243,7 +1267,8 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
                            regex,
                            std::regex_constants::match_default))
       continue;
-    ACE_ASSERT (match_results.ready () && !match_results.empty ());
+//    ACE_ASSERT (match_results.ready () && !match_results.empty ());
+    ACE_ASSERT (!match_results.empty ());
 
     if (match_results[1].matched &&
         !ACE_OS::strcmp (match_results[1].str ().c_str (),
@@ -3709,6 +3734,7 @@ error:
 }
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602) // _WIN32_WINNT_WIN8
 bool
 Net_Common_Tools::setLoopBackFastPath (ACE_HANDLE handle_in)
 {
@@ -3744,7 +3770,8 @@ Net_Common_Tools::setLoopBackFastPath (ACE_HANDLE handle_in)
 
   return true;
 }
-#endif
+#endif // _WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)
+#endif // ACE_WIN32 || ACE_WIN64
 
 //Net_IInetConnectionManager_t*
 //Net_Common_Tools::getConnectionManager ()
@@ -3777,7 +3804,8 @@ Net_Common_Tools::URLToHostName (const std::string& URL_in,
                 ACE_TEXT (URL_in.c_str ())));
     return result;
   } // end IF
-  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+//  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+  ACE_ASSERT (!match_results.empty ());
   if (unlikely (!match_results[2].matched))
   {
     ACE_DEBUG ((LM_ERROR,

@@ -102,7 +102,7 @@ Test_U_InboundConnectionStream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
+Test_U_InboundConnectionStream::initialize (const inherited::CONFIGURATION_T& configuration_in,
                                             ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_InboundConnectionStream::initialize"));
@@ -114,12 +114,12 @@ Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURAT
   bool setup_pipeline = configuration_in.configuration_.setupPipeline;
   bool reset_setup_pipeline = false;
   struct DHCPClient_SessionData* session_data_p = NULL;
-  typename inherited::CONFIGURATION_T::ITERATOR_T iterator;
+  inherited::CONFIGURATION_T::ITERATOR_T iterator;
 //  Stream_Module_t* module_p = NULL;
 //  DHCPClient_Module_Net_Writer_t* netIO_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -130,14 +130,14 @@ Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURAT
                 ACE_TEXT (stream_name_string_)));
     goto failed;
   } // end IF
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
   session_data_p =
     &const_cast<struct DHCPClient_SessionData&> (inherited::sessionData_->getR ());
   iterator =
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.end ());
   // *TODO*: remove type inferences
   //session_data_p->sessionID = configuration_in.sessionID;
@@ -193,7 +193,7 @@ Test_U_InboundConnectionStream::initialize (const typename inherited::CONFIGURAT
 
 failed:
   if (reset_setup_pipeline)
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
       setup_pipeline;
   if (!inherited::reset ())
     ACE_DEBUG ((LM_ERROR,
@@ -201,75 +201,6 @@ failed:
                 ACE_TEXT (stream_name_string_)));
 
   return false;
-}
-
-bool
-Test_U_InboundConnectionStream::collect (DHCP_Statistic_t& data_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_InboundConnectionStream::collect"));
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::sessionData_);
-
-  int result = -1;
-  struct DHCPClient_SessionData& session_data_r =
-    const_cast<struct DHCPClient_SessionData&> (inherited::sessionData_->getR ());
-
-  Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
-    return false;
-  } // end IF
-  DHCPClient_Module_StatisticReport_WriterTask_t* statistic_report_impl =
-    dynamic_cast<DHCPClient_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
-  if (!statistic_report_impl)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<Test_U_Module_StatisticReport_WriterTask_t> failed, aborting\n")));
-    return false;
-  } // end IF
-
-    // synch access
-  if (session_data_r.lock)
-  {
-    result = session_data_r.lock->acquire ();
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", aborting\n")));
-      return false;
-    } // end IF
-  } // end IF
-
-  session_data_r.statistic.timeStamp = COMMON_TIME_NOW;
-
-  // delegate to the statistics module
-  bool result_2 = false;
-  try {
-    result_2 = statistic_report_impl->collect (data_out);
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), continuing\n")));
-  }
-  if (!result)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_IStatistic_T::collect(), aborting\n")));
-  else
-    session_data_r.statistic = data_out;
-
-  if (session_data_r.lock)
-  {
-    result = session_data_r.lock->release ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
-  } // end IF
-
-  return result_2;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -321,7 +252,7 @@ Test_U_OutboundConnectionStream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_U_OutboundConnectionStream::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
+Test_U_OutboundConnectionStream::initialize (const inherited::CONFIGURATION_T& configuration_in,
                                              ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_OutboundConnectionStream::initialize"));
@@ -333,12 +264,12 @@ Test_U_OutboundConnectionStream::initialize (const typename inherited::CONFIGURA
   bool setup_pipeline = configuration_in.configuration_.setupPipeline;
   bool reset_setup_pipeline = false;
   struct DHCPClient_SessionData* session_data_p = NULL;
-  typename inherited::CONFIGURATION_T::ITERATOR_T iterator;
+  inherited::CONFIGURATION_T::ITERATOR_T iterator;
 //  typename inherited::ISTREAM_T::MODULE_T* module_p = NULL;
 //  DHCPClient_Module_Net_Writer_t* netIO_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -349,14 +280,14 @@ Test_U_OutboundConnectionStream::initialize (const typename inherited::CONFIGURA
                 ACE_TEXT (stream_name_string_)));
     goto failed;
   } // end IF
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
   session_data_p =
     &const_cast<struct DHCPClient_SessionData&> (inherited::sessionData_->getR ());
   iterator =
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.end ());
   session_data_p->targetFileName = (*iterator).second.second.targetFileName;
 
@@ -410,80 +341,11 @@ Test_U_OutboundConnectionStream::initialize (const typename inherited::CONFIGURA
 
 failed:
   if (reset_setup_pipeline)
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
       setup_pipeline;
   if (!inherited::reset ())
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Stream_Base_T::reset(): \"%m\", continuing\n")));
 
   return false;
-}
-
-bool
-Test_U_OutboundConnectionStream::collect (DHCP_Statistic_t& data_out)
-{
-  NETWORK_TRACE (ACE_TEXT ("Test_U_OutboundConnectionStream::collect"));
-
-  // sanity check(s)
-  ACE_ASSERT (inherited::sessionData_);
-
-  int result = -1;
-  struct DHCPClient_SessionData& session_data_r =
-    const_cast<struct DHCPClient_SessionData&> (inherited::sessionData_->getR ());
-
-  Stream_Module_t* module_p =
-    const_cast<Stream_Module_t*> (inherited::find (ACE_TEXT_ALWAYS_CHAR (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
-  if (!module_p)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to retrieve \"%s\" module handle, aborting\n"),
-                ACE_TEXT (MODULE_STAT_REPORT_DEFAULT_NAME_STRING)));
-    return false;
-  } // end IF
-  DHCPClient_Module_StatisticReport_WriterTask_t* statistic_report_impl =
-    dynamic_cast<DHCPClient_Module_StatisticReport_WriterTask_t*> (module_p->writer ());
-  if (!statistic_report_impl)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("dynamic_cast<DHCPClient_Module_StatisticReport_WriterTask_t> failed, aborting\n")));
-    return false;
-  } // end IF
-
-  // synch access
-  if (session_data_r.lock)
-  {
-    result = session_data_r.lock->acquire ();
-    if (result == -1)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", aborting\n")));
-      return false;
-    } // end IF
-  } // end IF
-
-  session_data_r.statistic.timeStamp = COMMON_TIME_NOW;
-
-  // delegate to the statistic module
-  bool result_2 = false;
-  try {
-    result_2 = statistic_report_impl->collect (data_out);
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_IStatistic_T::collect(), continuing\n")));
-  }
-  if (!result)
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_IStatistic_T::collect(), aborting\n")));
-  else
-    session_data_r.statistic = data_out;
-
-  if (session_data_r.lock)
-  {
-    result = session_data_r.lock->release ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_SYNCH_MUTEX::release(): \"%m\", continuing\n")));
-  } // end IF
-
-  return result_2;
 }

@@ -1202,7 +1202,7 @@ button_ping_clicked_cb (GtkWidget* widget_in,
   index = ((ACE_OS::rand_r (&usecs) % number_of_connections) + 1);
 #endif
 
-  typename ClientServer_InetConnectionManager_t::CONNECTION_T* connection_base_p =
+  ClientServer_InetConnectionManager_t::CONNECTION_T* connection_base_p =
       CLIENTSERVER_CONNECTIONMANAGER_SINGLETON::instance ()->operator[] (index - 1);
   if (!connection_base_p)
   {

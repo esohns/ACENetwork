@@ -333,7 +333,7 @@ BitTorrent_Tools::generatePeerId ()
   result += ACE_TEXT_ALWAYS_CHAR (BITTORRENT_TRACKER_REQUEST_PEER_ID_CLIENT_ID);
 
   std::string library_version = ACE_TEXT_ALWAYS_CHAR ("0000");
-#ifdef HAVE_CONFIG_H
+#if defined (HAVE_CONFIG_H)
   // parse library version
   library_version =
       ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_VERSION);
@@ -351,7 +351,8 @@ BitTorrent_Tools::generatePeerId ()
                 ACE_TEXT (library_version.c_str ())));
     return std::string ();
   } // end IF
-  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+//  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+  ACE_ASSERT (!match_results.empty ());
 
   library_version = match_results[1];
   if (library_version.size () < 4)
@@ -361,7 +362,7 @@ BitTorrent_Tools::generatePeerId ()
   if (library_version.size () < 4)
     library_version += ACE_TEXT_ALWAYS_CHAR ("0");
   library_version.resize (4);
-#endif
+#endif // HAVE_CONFIG_H
   result += library_version;
   result += ACE_TEXT_ALWAYS_CHAR ("-");
 

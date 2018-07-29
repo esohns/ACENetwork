@@ -50,8 +50,10 @@ echo "using tmp directory \"$TMP_DIR\"..."
 
 # sanity check(s)
 [ ${BUILD} != "Debug" -a ${BUILD} != "debug_tracing" -a ${BUILD} != "release" ] && echo "WARNING: invalid/unknown build (was: \"${BUILD}\"), continuing"
+#BUILD_DIR="${PROJECT_DIR}/build"
 BUILD_DIR="${PROJECT_DIR}/cmake"
 [ ! -d "${BUILD_DIR}" ] && echo "ERROR: invalid build dir (was: \"${BUILD_DIR}\"), aborting" && exit 1
+echo "using project build directory \"$BUILD_DIR\"..."
 
 TEST_U_DIR="test_u"
 SUB_DIRS="DHCP_client"
@@ -107,13 +109,13 @@ do
 # [ ! -r "${BIN_TMP}" ] && echo "ERROR: invalid binary file (was: \"${BIN_TMP}\"), aborting" && exit 1
 
 # chown --quiet root ${BIN_TMP}
- chown --quiet root ${BIN}
- [ $? -ne 0 ] && echo "ERROR: failed to chown ${BIN}: \"$?\", aborting" && exit 1
- chgrp --quiet root ${BIN}
- [ $? -ne 0 ] && echo "ERROR: failed to chgrp ${BIN}: \"$?\", aborting" && exit 1
+# chown --quiet root ${BIN}
+# [ $? -ne 0 ] && echo "ERROR: failed to chown ${BIN}: \"$?\", aborting" && exit 1
+# chgrp --quiet root ${BIN}
+# [ $? -ne 0 ] && echo "ERROR: failed to chgrp ${BIN}: \"$?\", aborting" && exit 1
 # chmod --quiet +s ${BIN_TMP}
- chmod --quiet +s ${BIN}
- [ $? -ne 0 ] && echo "ERROR: failed to chmod +s ${BIN}: \"$?\", aborting" && exit 1
+# chmod --quiet +s ${BIN}
+# [ $? -ne 0 ] && echo "ERROR: failed to chmod +s ${BIN}: \"$?\", aborting" && exit 1
 
 # /sbin/setcap 'cap_net_bind_service=eip' ${BIN_TMP}
  /sbin/setcap 'cap_net_admin=eip' ${BIN}

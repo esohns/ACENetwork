@@ -99,7 +99,7 @@ class Test_I_ConnectionStream
                      bool&);               // return value: delete modules ?
 
   // implement Common_IInitialize_T
-  virtual bool initialize (const typename inherited::CONFIGURATION_T&,
+  virtual bool initialize (const inherited::CONFIGURATION_T&,
                            ACE_HANDLE);
 
  private:

@@ -24,6 +24,7 @@
 #include "ace/Asynch_Acceptor.h"
 #include "ace/Asynch_IO.h"
 #include "ace/Global_Macros.h"
+#include "ace/INET_Addr.h"
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 

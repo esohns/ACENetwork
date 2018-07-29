@@ -430,7 +430,8 @@ HTTP_Tools::parseURL (const std::string& URL_in,
                 ACE_TEXT (URL_in.c_str ())));
     return false;
   } // end IF
-  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+//  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+  ACE_ASSERT (!match_results.empty ());
 
   if (match_results[1].matched)
     useSSL_out = true;
@@ -497,7 +498,8 @@ HTTP_Tools::parseURL (const std::string& URL_in,
                 ACE_TEXT (URI_out.c_str ())));
     return false;
   } // end IF
-  ACE_ASSERT (match_results_3.ready () && !match_results_3.empty ());
+//  ACE_ASSERT (match_results_3.ready () && !match_results_3.empty ());
+  ACE_ASSERT (!match_results_3.empty ());
 
   return true;
 }
@@ -520,7 +522,8 @@ HTTP_Tools::URLRequiresSSL (const std::string& URL_in)
                 ACE_TEXT (URL_in.c_str ())));
     return false;
   } // end IF
-  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+//  ACE_ASSERT (match_results.ready () && !match_results.empty ());
+  ACE_ASSERT (!match_results.empty ());
 
   return match_results[1].matched;
 }

@@ -81,7 +81,7 @@ Test_I_ConnectionStream::load (Stream_ModuleList_t& modules_out,
 }
 
 bool
-Test_I_ConnectionStream::initialize (const typename inherited::CONFIGURATION_T& configuration_in,
+Test_I_ConnectionStream::initialize (const inherited::CONFIGURATION_T& configuration_in,
                                      ACE_HANDLE handle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_I_ConnectionStream::initialize"));
@@ -93,13 +93,13 @@ Test_I_ConnectionStream::initialize (const typename inherited::CONFIGURATION_T& 
   bool setup_pipeline = configuration_in.configuration_.setupPipeline;
   bool reset_setup_pipeline = false;
   struct Test_I_URLStreamLoad_SessionData* session_data_p = NULL;
-  typename inherited::CONFIGURATION_T::ITERATOR_T iterator;
+  inherited::CONFIGURATION_T::ITERATOR_T iterator;
   Stream_Module_t* module_p = NULL;
 //  Test_I_Net_Writer_t* netIO_impl_p = NULL;
   Test_I_HTTPParser* parser_impl_p = NULL;
 
   // allocate a new session state, reset stream
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     false;
   reset_setup_pipeline = true;
   if (!inherited::initialize (configuration_in,
@@ -110,14 +110,14 @@ Test_I_ConnectionStream::initialize (const typename inherited::CONFIGURATION_T& 
                 ACE_TEXT (stream_name_string_)));
     goto failed;
   } // end IF
-  const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+  const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
     setup_pipeline;
   reset_setup_pipeline = false;
   ACE_ASSERT (inherited::sessionData_);
   session_data_p =
     &const_cast<struct Test_I_URLStreamLoad_SessionData&> (inherited::sessionData_->getR ());
   iterator =
-      const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
+      const_cast<inherited::CONFIGURATION_T&> (configuration_in).find (ACE_TEXT_ALWAYS_CHAR (""));
   ACE_ASSERT (iterator != configuration_in.end ());
   // *TODO*: remove type inferences
   //session_data_p->sessionID = configuration_in.sessionID;
@@ -173,7 +173,7 @@ Test_I_ConnectionStream::initialize (const typename inherited::CONFIGURATION_T& 
 
 failed:
   if (reset_setup_pipeline)
-    const_cast<typename inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
+    const_cast<inherited::CONFIGURATION_T&> (configuration_in).configuration_.setupPipeline =
       setup_pipeline;
   if (!inherited::reset ())
     ACE_DEBUG ((LM_ERROR,

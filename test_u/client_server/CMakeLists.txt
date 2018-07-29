@@ -128,7 +128,8 @@ if (UNIX)
 elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
 
- include_directories ($ENV{ACE_ROOT})
+# include_directories ($ENV{ACE_ROOT})
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
  # *TODO*: repair pkgconfig support
 # gtk
@@ -235,7 +236,8 @@ if (UNIX)
   target_link_libraries (${EXECUTABLE_SOURCE} ${PKG_GTK2_LIBRARIES})
  endif ()
 elseif (WIN32)
- target_link_libraries (${EXECUTABLE_SOURCE} ntdll.lib)
+# target_link_libraries (${EXECUTABLE_SOURCE} ntdll.lib)
+
 # *TODO*: repair WIN32 pkgconfig support
  target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gio-2.0.lib)
  target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/glib-2.0.lib)
@@ -352,7 +354,8 @@ if (UNIX)
   target_link_libraries (${EXECUTABLE_TARGET} ${PKG_GTK2_LIBRARIES})
  endif ()
 elseif (WIN32)
- target_link_libraries (${EXECUTABLE_TARGET} ntdll.lib)
+# target_link_libraries (${EXECUTABLE_TARGET} ntdll.lib)
+
 # *TODO*: repair WIN32 pkgconfig support
  target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gio-2.0.lib)
  target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/glib-2.0.lib)

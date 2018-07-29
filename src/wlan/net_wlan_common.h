@@ -26,6 +26,7 @@
 #include <vector>
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include <cstdint>
 #else
 #if defined (NL80211_SUPPORT)
 #include <set>

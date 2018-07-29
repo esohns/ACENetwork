@@ -162,7 +162,7 @@ connection_setup_function (void* arg_in)
   ACE_HANDLE handle = ACE_INVALID_HANDLE;
   bool result_2 = false;
   IRC_IControl* icontrol_p = NULL;
-  const typename Stream_IStream_t::STREAM_T* stream_p = NULL;
+  const Stream_IStream_t::STREAM_T* stream_p = NULL;
   const Stream_Module_t* module_p = NULL;
   const Stream_Module_t* current_p = NULL;
   Stream_Module_t* tail_p = NULL;
@@ -344,7 +344,7 @@ connection_failed:
        iterator_2.advance ())
   {
     tail_p =
-      const_cast<typename Stream_IStream_t::STREAM_T*> (stream_p)->tail ();
+      const_cast<Stream_IStream_t::STREAM_T*> (stream_p)->tail ();
     if (current_p != tail_p)
       module_p = current_p;
   } // end FOR

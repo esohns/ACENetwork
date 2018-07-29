@@ -32,14 +32,14 @@ if (UNIX)
 #               DOC "searching for ${FLEX_LIB_FILE} (system paths)")
 elseif (WIN32)
 # unset (FLEX_LIB_FILE)
- set (FLEX_LIB_FILE libfl.lib)
+# set (FLEX_LIB_FILE libfl.lib)
 # find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
 #               PATHS ${PROJECTS_DIRECTORY}/flex
 #               PATH_SUFFIXES lib
 #               DOC "searching for ${FLEX_LIB_FILE}")
- if (NOT FLEX_LIBRARY)
-  message (FATAL_ERROR "could not find ${FLEX_LIB_FILE} (was: \"${FLEX_LIBRARY}\"), aborting")
- endif (NOT FLEX_LIBRARY)
+# if (NOT FLEX_LIBRARY)
+#  message (FATAL_ERROR "could not find ${FLEX_LIB_FILE} (was: \"${FLEX_LIBRARY}\"), aborting")
+# endif (NOT FLEX_LIBRARY)
 endif ()
 #if (NOT EXISTS ACE_LIBRARY)
 
@@ -101,6 +101,7 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libCommon/src>)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libCommon/src/timer>)
+ # *TODO*: remove ASAP
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libCommon/src/ui>)
 
@@ -114,32 +115,34 @@ if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../modules/libACEStream/src/modules/stat>)
 elseif (WIN32)
-# *TODO*: repair pkgconfig support
-# include_directories (${PKG_GTK_GLADE_INCLUDE_DIRS})
-# gtk
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/include/atk-1.0)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/include/gdk-pixbuf-2.0)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/include/cairo)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/include/pango-1.0)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/lib/glib-2.0/include)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/include/glib-2.0)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk-win32/gtk/Win32/debug/include/gtk-3.0)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party>)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party/flex>)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ffmpeg)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ffmpeg>)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../openssl/include)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../openssl/include>)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libCommon/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libCommon/src/ui)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../ATCD/ACE>)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libACEStream/src)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libACEStream/src/modules/dec)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libACEStream/src/modules/dev)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libACEStream/src/modules/net)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libACEStream/src/modules/stat)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libCommon/src>)
+ # *TODO*: remove ASAP
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libCommon/src/ui>)
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party/flex)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libACEStream/src>)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libACEStream/src/modules/dec>)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libACEStream/src/modules/net>)
+ target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../libACEStream/src/modules/stat>)
 endif ()
 target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../3rd_party/bison>)

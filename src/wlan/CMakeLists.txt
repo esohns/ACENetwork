@@ -178,7 +178,8 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src>)
 elseif (WIN32)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
+#                             $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE>)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src>)
