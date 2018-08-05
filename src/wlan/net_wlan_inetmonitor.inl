@@ -30,7 +30,7 @@ template <typename ConfigurationType,
 #else
           ACE_SYNCH_DECL,
           typename TimePolicyType,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
           enum Net_WLAN_MonitorAPIType MonitorAPI_e,
           typename UserDataType>
 Net_WLAN_InetMonitor_T<ConfigurationType,
@@ -38,7 +38,7 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
 #else
                        ACE_SYNCH_USE,
                        TimePolicyType,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                        MonitorAPI_e,
                        UserDataType>::Net_WLAN_InetMonitor_T ()
  : inherited ()
@@ -54,7 +54,7 @@ template <typename ConfigurationType,
 #else
           ACE_SYNCH_DECL,
           typename TimePolicyType,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
           enum Net_WLAN_MonitorAPIType MonitorAPI_e,
           typename UserDataType>
 void
@@ -63,13 +63,13 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
 #else
                        ACE_SYNCH_USE,
                        TimePolicyType,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                        MonitorAPI_e,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                        UserDataType>::onConnect (REFGUID interfaceIdentifier_in,
 #else
                        UserDataType>::onConnect (const std::string& interfaceIdentifier_in,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                                                  const std::string& SSID_in,
                                                  bool success_in)
 {
@@ -138,9 +138,21 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
   if (!success_in)
     return;
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
                                                          inherited::localSAP_,
                                                          inherited::peerSAP_)))
+#else
+  if (unlikely (!Net_Common_Tools::interfaceToIPAddress (Net_Common_Tools::interfaceToString (interfaceIdentifier_in),
+                                                         inherited::localSAP_,
+                                                         inherited::peerSAP_)))
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+  if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
+                                                         inherited::localSAP_,
+                                                         inherited::peerSAP_)))
+#endif // ACE_WIN32 || ACE_WIN64
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     ACE_DEBUG ((LM_ERROR,
@@ -155,6 +167,7 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
   } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\"%s\": (MAC: %s) connected to access point (MAC: %s; SSID: %s): %s <---> %s\n"),
               ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
@@ -163,6 +176,16 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
               ACE_TEXT (SSID_in.c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("\"%s\": (MAC: %s) connected to access point (MAC: %s; SSID: %s): %s <---> %s\n"),
+              ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&Net_Common_Tools::interfaceToLinkLayerAddress (Net_Common_Tools::interfaceToString (interfaceIdentifier_in))), NET_LINKLAYER_802_11).c_str ()),
+              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
+              ACE_TEXT (SSID_in.c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   Net_WLAN_AccessPointCacheConstIterator_t iterator;
   { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_);

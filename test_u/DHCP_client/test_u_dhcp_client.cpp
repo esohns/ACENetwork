@@ -194,10 +194,14 @@ do_processArguments (int argc_in,
                      std::string& UIDefinitonFileName_out,
                      bool& logToFile_out,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
                      struct _GUID& interfaceIdentifier_out,
 #else
                      std::string& interfaceIdentifier_out,
-#endif
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+                     std::string& interfaceIdentifier_out,
+#endif // ACE_WIN32 || ACE_WIN64
                      bool& useLoopback_out,
                      bool& useThreadPool_out,
                      bool& sendRequestOnOffer_out,
@@ -464,7 +468,7 @@ do_initializeSignals (bool allowUserRuntimeConnect_in,
   if (RUNNING_ON_VALGRIND)
     signals_out.sig_del (SIGRTMAX);        // 64
 #endif
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 }
 
 void
@@ -473,10 +477,14 @@ do_work (bool requestBroadcastReplies_in,
          const std::string& fileName_in,
          const std::string& UIDefinitionFileName_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
          REFGUID interfaceIdentifier_in,
 #else
          const std::string& interfaceIdentifier_in,
-#endif
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+         const std::string& interfaceIdentifier_in,
+#endif // ACE_WIN32 || ACE_WIN64
          bool useLoopback_in,
          bool useThreadPool_in,
          bool sendRequestOnOffer_in,
@@ -495,7 +503,7 @@ do_work (bool requestBroadcastReplies_in,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-#if defined (DEBUG)
+#if defined (_DEBUG)
 //  Common_Tools::printCapabilities ();
   if (!Common_Tools::hasCapability (CAP_NET_BIND_SERVICE))
     if (!Common_Tools::setCapability (CAP_NET_BIND_SERVICE))
@@ -520,8 +528,8 @@ do_work (bool requestBroadcastReplies_in,
     } // end IF
   ACE_ASSERT (Common_Tools::hasCapability (CAP_NET_BIND_SERVICE));
 //  Common_Tools::printPriviledges ();
-#endif
-#endif
+#endif // _DEBUG
+#endif // ACE_WIN32 || ACE_WIN64
 
   // step0b: initialize random number generator
   Common_Tools::initialize ();
@@ -695,10 +703,14 @@ do_work (bool requestBroadcastReplies_in,
                                                                                                    1,
                                                                                                    ACE_ADDRESS_FAMILY_INET);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   else if (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
 #else
   else if (!interfaceIdentifier_in.empty ())
-#endif
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+  else if (!interfaceIdentifier_in.empty ())
+#endif // ACE_WIN32 || ACE_WIN64
   {
     ACE_INET_Addr gateway_address;
     if (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
@@ -706,15 +718,21 @@ do_work (bool requestBroadcastReplies_in,
                                                  gateway_address))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), continuing\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ())));
 #else
       ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), continuing\n"),
+                  ACE_TEXT (interfaceIdentifier_in.c_str ())));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+      ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), continuing\n"),
                   ACE_TEXT (interfaceIdentifier_in.c_str ()),
                   NULL));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       result = -1;
     } // end IF
     connection_configuration.socketHandlerConfiguration.socketConfiguration_2.listenAddress.set_port_number (DHCP_DEFAULT_CLIENT_PORT,
@@ -1345,7 +1363,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
     return EXIT_FAILURE;
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   Common_Tools::initialize ();
 
   // *PROCESS PROFILE*
@@ -1374,10 +1392,14 @@ ACE_TMAIN (int argc_in,
   ui_definition_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GLADE_FILE);
   bool log_to_file = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   struct _GUID interface_identifier = GUID_NULL;
 #else
-  std::string interface_identifier_string;
-#endif
+  std::string interface_identifier;
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+  std::string interface_identifier;
+#endif // ACE_WIN32 || ACE_WIN64
   bool use_loopback = NET_INTERFACE_DEFAULT_USE_LOOPBACK;
   bool use_thread_pool = COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   bool send_request_on_offer =
@@ -1401,10 +1423,14 @@ ACE_TMAIN (int argc_in,
                             ui_definition_file,
                             log_to_file,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
                             interface_identifier,
 #else
-                            interface_identifier_string,
-#endif
+                            interface_identifier,
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+                            interface_identifier,
+#endif // ACE_WIN32 || ACE_WIN64
                             use_loopback,
                             use_thread_pool,
                             send_request_on_offer,
@@ -1423,7 +1449,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1446,10 +1472,14 @@ ACE_TMAIN (int argc_in,
     use_thread_pool = true;
   } // end IF
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   if ((ui_definition_file.empty () && InlineIsEqualGUID (interface_identifier, GUID_NULL)) ||
 #else
-  if ((ui_definition_file.empty () && interface_identifier_string.empty ())           ||
-#endif
+  if ((ui_definition_file.empty () && interface_identifier.empty ())           ||
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+  if ((ui_definition_file.empty () && interface_identifier.empty ())           ||
+#endif // ACE_WIN32 || ACE_WIN64
       (!ui_definition_file.empty () &&
        !Common_File_Tools::isReadable (ui_definition_file))                ||
       (!gtk_rc_file.empty () &&
@@ -1467,7 +1497,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1496,7 +1526,7 @@ ACE_TMAIN (int argc_in,
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
       return EXIT_FAILURE;
     } // end IF
@@ -1518,7 +1548,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1544,7 +1574,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1563,7 +1593,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1588,7 +1618,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_SUCCESS;
   } // end IF
@@ -1614,7 +1644,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1647,7 +1677,7 @@ ACE_TMAIN (int argc_in,
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-    #endif
+#endif // ACE_WIN32 || ACE_WIN64
 
       return EXIT_FAILURE;
     } // end IF
@@ -1660,10 +1690,14 @@ ACE_TMAIN (int argc_in,
            output_file,
            ui_definition_file,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
            interface_identifier,
 #else
-           interface_identifier_string,
-#endif
+           interface_identifier,
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+           interface_identifier,
+#endif // ACE_WIN32 || ACE_WIN64
            use_loopback,
            use_thread_pool,
            send_request_on_offer,
@@ -1712,7 +1746,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1727,7 +1761,15 @@ ACE_TMAIN (int argc_in,
   system_time_string = Common_Timer_Tools::periodToString (system_time);
 
   // debug info
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),
+              elapsed_time.real_time,
+              elapsed_time.user_time,
+              elapsed_time.system_time,
+              ACE_TEXT (user_time_string.c_str ()),
+              ACE_TEXT (system_time_string.c_str ())));
+#else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\nmaximum resident set size = %d\nintegral shared memory size = %d\nintegral unshared data size = %d\nintegral unshared stack size = %d\npage reclaims = %d\npage faults = %d\nswaps = %d\nblock input operations = %d\nblock output operations = %d\nmessages sent = %d\nmessages received = %d\nsignals received = %d\nvoluntary context switches = %d\ninvoluntary context switches = %d\n"),
               elapsed_time.real_time,
@@ -1749,15 +1791,7 @@ ACE_TMAIN (int argc_in,
               elapsed_rusage.ru_nsignals,
               elapsed_rusage.ru_nvcsw,
               elapsed_rusage.ru_nivcsw));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),
-              elapsed_time.real_time,
-              elapsed_time.user_time,
-              elapsed_time.system_time,
-              ACE_TEXT (user_time_string.c_str ()),
-              ACE_TEXT (system_time_string.c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                               : COMMON_SIGNAL_DISPATCH_PROACTOR),
@@ -1772,7 +1806,7 @@ ACE_TMAIN (int argc_in,
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   return EXIT_SUCCESS;
 } // end main

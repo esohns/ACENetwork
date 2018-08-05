@@ -141,8 +141,13 @@ do_printUsage (const std::string& programName_in)
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [GUID]    : network interface [\"")
-            << ACE_TEXT_ALWAYS_CHAR (Net_Common_Tools::interfaceToString (Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11)).c_str ())
+            << Net_Common_Tools::interfaceToString (Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11)).c_str ()
+#else
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [STRING]  : network interface [\"")
+            << Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11).c_str ()
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-n [STRING]  : network interface [\"")
             << ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_WLAN)
@@ -172,7 +177,11 @@ do_processArguments (const int& argc_in,
                      std::string& UIDefinitionFilePath_out,
                      bool& logToFile_out,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
                      struct _GUID& interfaceIdentifier_out,
+#else
+                     std::string& interfaceIdentifier_out,
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
                      std::string& interfaceIdentifier_out,
 #endif // ACE_WIN32 || ACE_WIN64
@@ -282,10 +291,14 @@ do_processArguments (const int& argc_in,
       {
         interfaceIdentifier_out =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
             Common_Tools::StringToGUID (ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ()));
 #else
             ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
-#endif
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+            ACE_TEXT_ALWAYS_CHAR (argumentParser.opt_arg ());
+#endif // ACE_WIN32 || ACE_WIN64
         break;
       }
       case 'r':
@@ -415,7 +428,7 @@ do_initializeSignals (bool useReactor_in,
     if (proactor_impl_p->get_impl_type () == ACE_POSIX_Proactor::PROACTOR_SIG)
       signals_out.sig_del (COMMON_EVENT_PROACTOR_SIG_RT_SIGNAL);
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 }
 
 void
@@ -423,13 +436,17 @@ do_work (bool autoAssociate_in,
          enum Net_WLAN_MonitorAPIType API_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
          bool showConsole_in,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
          const std::string& UIDefinitionFile_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
          REFGUID interfaceIdentifier_in,
 #else
          const std::string& interfaceIdentifier_in,
-#endif
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+         const std::string& interfaceIdentifier_in,
+#endif // ACE_WIN32 || ACE_WIN64
          unsigned int statisticReportingInterval_in,
          const std::string& SSID_in,
          struct WLANMonitor_GTK_CBData& CBData_in,
@@ -449,7 +466,7 @@ do_work (bool autoAssociate_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HWND window_p = NULL;
   BOOL was_visible_b = true;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 //  long timer_id = -1;
 //  int group_id = -1;
 //  bool stop_event_dispatch = false;
@@ -531,9 +548,12 @@ do_work (bool autoAssociate_in,
   configuration.WLANMonitorConfiguration.autoAssociate =
       autoAssociate_in;
   configuration.WLANMonitorConfiguration.interfaceIdentifier =
-      interfaceIdentifier_in;
-  configuration.WLANMonitorConfiguration.SSID =
-      SSID_in;
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    interfaceIdentifier_in;
+#else
+    Net_Common_Tools::indexToInterface (Net_Common_Tools::interfaceToIndex (interfaceIdentifier_in));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+  configuration.WLANMonitorConfiguration.SSID = SSID_in;
   configuration.WLANMonitorConfiguration.subscriber = &ui_event_handler;
 
   // step1: initialize regular (global) statistic reporting ?
@@ -754,7 +774,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
     return EXIT_FAILURE;
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // *PROCESS PROFILE*
   ACE_Profile_Timer process_profile;
@@ -775,18 +795,23 @@ ACE_TMAIN (int argc_in,
   enum Net_WLAN_MonitorAPIType API_e = NET_WLAN_MONITOR_DEFAULT_API;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   bool show_console = false;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   std::string UI_definition_file_path = configuration_path;
   UI_definition_file_path += ACE_DIRECTORY_SEPARATOR_STR;
   UI_definition_file_path +=
       ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_UI_DEFINITION_FILE);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   struct _GUID interface_identifier =
       Net_Common_Tools::getDefaultInterface (NET_LINKLAYER_802_11);
 #else
   std::string interface_identifier =
     ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_WLAN);
-#endif
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+  std::string interface_identifier =
+    ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_WLAN);
+#endif // ACE_WIN32 || ACE_WIN64
   bool log_to_file = false;
 //  bool use_reactor = NET_EVENT_USE_REACTOR;
   unsigned int statistic_reporting_interval =
@@ -802,7 +827,7 @@ ACE_TMAIN (int argc_in,
                             API_e,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
                             show_console,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                             UI_definition_file_path,
                             log_to_file,
                             interface_identifier,
@@ -813,15 +838,13 @@ ACE_TMAIN (int argc_in,
                             print_version_and_exit))
   {
     do_printUsage (ACE::basename (argv_in[0]));
-
     // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
-
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 
@@ -836,17 +859,14 @@ ACE_TMAIN (int argc_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid arguments, aborting\n")));
-
     do_printUsage (ACE::basename (argv_in[0]));
-
     // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
-
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 
@@ -876,15 +896,13 @@ ACE_TMAIN (int argc_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeLogging(), aborting\n")));
-
     // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
-
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 
@@ -905,7 +923,6 @@ ACE_TMAIN (int argc_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::sigemptyset(): \"%m\", aborting\n")));
-
     Common_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -913,8 +930,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
-
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
   if (!Common_Signal_Tools::preInitialize (signal_set,
@@ -925,7 +941,6 @@ ACE_TMAIN (int argc_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
-
     Common_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -933,8 +948,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
-
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
   Test_U_SignalHandler signal_handler ((UI_definition_file_path.empty () ? NULL
@@ -944,7 +958,6 @@ ACE_TMAIN (int argc_in,
   if (print_version_and_exit)
   {
     do_printVersion (ACE::basename (argv_in[0]));
-
     Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                    signal_set,
                                    previous_signal_actions,
@@ -956,8 +969,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
-
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_SUCCESS;
   } // end IF
 
@@ -971,7 +983,7 @@ ACE_TMAIN (int argc_in,
   use_fd_based_reactor =
     ((COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR) &&
      !(COMMON_EVENT_REACTOR_TYPE == COMMON_REACTOR_WFMO));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   bool stack_traces = true;
 //  bool use_signal_based_proactor = !use_reactor;
   bool use_signal_based_proactor =
@@ -982,7 +994,6 @@ ACE_TMAIN (int argc_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::setResourceLimits(), aborting\n")));
-
     Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                    signal_set,
                                    previous_signal_actions,
@@ -994,8 +1005,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
-
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
 
@@ -1017,7 +1027,7 @@ ACE_TMAIN (int argc_in,
            API_e,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
            show_console,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
            UI_definition_file_path,
            interface_identifier,
 //           use_reactor,
@@ -1051,7 +1061,6 @@ ACE_TMAIN (int argc_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
-
     Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                    signal_set,
                                    previous_signal_actions,
@@ -1063,8 +1072,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
-
+#endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
   ACE_Profile_Timer::Rusage elapsed_rusage;
@@ -1078,7 +1086,15 @@ ACE_TMAIN (int argc_in,
   system_time_string = Common_Timer_Tools::periodToString (system_time);
 
   // debug info
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),
+              elapsed_time.real_time,
+              elapsed_time.user_time,
+              elapsed_time.system_time,
+              ACE_TEXT (user_time_string.c_str ()),
+              ACE_TEXT (system_time_string.c_str ())));
+#else
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT(" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\nmaximum resident set size = %d\nintegral shared memory size = %d\nintegral unshared data size = %d\nintegral unshared stack size = %d\npage reclaims = %d\npage faults = %d\nswaps = %d\nblock input operations = %d\nblock output operations = %d\nmessages sent = %d\nmessages received = %d\nsignals received = %d\nvoluntary context switches = %d\ninvoluntary context switches = %d\n"),
              elapsed_time.real_time,
@@ -1100,15 +1116,7 @@ ACE_TMAIN (int argc_in,
              elapsed_rusage.ru_nsignals,
              elapsed_rusage.ru_nvcsw,
              elapsed_rusage.ru_nivcsw));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),
-              elapsed_time.real_time,
-              elapsed_time.user_time,
-              elapsed_time.system_time,
-              ACE_TEXT (user_time_string.c_str ()),
-              ACE_TEXT (system_time_string.c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   Common_Signal_Tools::finalize (//COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                  COMMON_SIGNAL_DISPATCH_REACTOR,
@@ -1126,7 +1134,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
     return EXIT_FAILURE;
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   return EXIT_SUCCESS;
 } // end main

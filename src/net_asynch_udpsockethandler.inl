@@ -129,12 +129,25 @@ Net_AsynchUDPSocketHandler_T<SocketType,
   if (unlikely (socket_configuration_p->sourcePort))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     struct _GUID interface_identifier;
 #else
     std::string interface_identifier;
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+    std::string interface_identifier;
 #endif // ACE_WIN32 || ACE_WIN64
-    if (unlikely (!Net_Common_Tools::IPAddressToInterface (socket_configuration_p->peerAddress,
-                                                           interface_identifier)))
+    interface_identifier =
+      Net_Common_Tools::IPAddressToInterface (socket_configuration_p->peerAddress);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
+#else
+    if (unlikely (interface_identifier.empty ()))
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+    if (unlikely (interface_identifier.empty ()))
+#endif // ACE_WIN32 || ACE_WIN64
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::IPAddressToInterface(%s), aborting\n"),
@@ -147,9 +160,15 @@ Net_AsynchUDPSocketHandler_T<SocketType,
                                                            gateway_address)))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(%s): \"%m\", aborting\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(%s): \"%m\", aborting\n"),
+                  ACE_TEXT (interface_identifier.c_str ())));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(%s): \"%m\", aborting\n"),

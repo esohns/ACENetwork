@@ -719,7 +719,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::scan"));
 
-  Net_InterfaceIdentifiers_t interface_identifiers_a;
+  Common_Identifiers_t interface_identifiers_a;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   if (InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
 #if defined (WLANAPI_USE)

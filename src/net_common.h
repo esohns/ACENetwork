@@ -62,6 +62,7 @@ class Net_ITransportLayer_T;
 struct Net_NetlinkSocketConfiguration;
 struct Net_TCPSocketConfiguration;
 struct Net_UDPSocketConfiguration;
+class Net_Common_Tools;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -104,7 +105,20 @@ enum Net_TransportLayerType
 };
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
 typedef std::vector<struct _GUID> Net_InterfaceIdentifiers_t;
+#else
+typedef std::vector<std::string> Net_InterfaceIdentifiers_t;
+//Net_InterfaceIdentifiers_t& Net_InterfaceIdentifiers_t::operator=(Common_Identifiers_t& rhs_in)
+//{
+//  this->clear ();
+//  for (Common_IdentifiersIterator_t iterator = rhs_in.begin ();
+//       iterator != rhs_in.end ();
+//       ++iterator)
+//    this->push_back (Net_Common_Tools::interfaceToString (*iterator));
+//  return *this;
+//};
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
 typedef std::vector<std::string> Net_InterfaceIdentifiers_t;
 #endif // ACE_WIN32 || ACE_WIN64
@@ -217,7 +231,7 @@ struct Net_UserData
 {
   Net_UserData ()
    : userData (NULL)
-  {};
+  {}
 
   void* userData;
 };
@@ -233,7 +247,7 @@ struct Net_ConnectionState
    , statistic ()
    , status (NET_CONNECTION_STATUS_INVALID)
    , userData (NULL)
-  {};
+  {}
 
   ACE_HANDLE                 handle;
   ACE_Time_Value             lastCollectionTimestamp;

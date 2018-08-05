@@ -56,26 +56,28 @@ load_wlan_interfaces (GtkListStore* listStore_in)
   Net_WLAN_IInetMonitor_t* iinetwlanmonitor_p =
       NET_WLAN_INETMONITOR_SINGLETON::instance ();
   ACE_ASSERT (iinetwlanmonitor_p);
-#endif
-  Net_InterfaceIdentifiers_t interface_identifiers_a =
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  Common_Identifiers_t interface_identifiers_a =
       Net_WLAN_Tools::getInterfaces (iinetwlanmonitor_p->get ());
+  for (Common_IdentifiersIterator_t iterator = interface_identifiers_a.begin ();
 #else
-      Net_WLAN_Tools::getInterfaces (AF_UNSPEC,
-                                     0);
-#endif
+  Net_InterfaceIdentifiers_t interface_identifiers_a =
+    Net_WLAN_Tools::getInterfaces (AF_UNSPEC, 0);
   for (Net_InterfacesIdentifiersIterator_t iterator = interface_identifiers_a.begin ();
+#endif // ACE_WIN32 || ACE_WIN64
        iterator != interface_identifiers_a.end ();
        ++iterator)
   {
     gtk_list_store_append (listStore_in, &tree_iterator);
     gtk_list_store_set (listStore_in, &tree_iterator,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                        0, ACE_TEXT_ALWAYS_CHAR (Net_Common_Tools::interfaceToString (*iterator).c_str ()),
-                        1, ACE_TEXT_ALWAYS_CHAR (Common_Tools::GUIDToString (*iterator).c_str ()),
+                        0, Net_Common_Tools::interfaceToString (*iterator).c_str (),
+                        1, Common_Tools::GUIDToString (*iterator).c_str (),
 #else
-                        0, ACE_TEXT_ALWAYS_CHAR ((*iterator).c_str ()),
-#endif
+                        0, (*iterator).c_str (),
+                        1, (*iterator).c_str (),
+#endif // ACE_WIN32 || ACE_WIN64
                         -1);
   } // end FOR
 }

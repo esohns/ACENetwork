@@ -1,6 +1,4 @@
-﻿#option (GTK3_SUPPORT "compile Gtk3 support" ON)
-
-#message (STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
+﻿#message (STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
 set (LLVM_COMPILER_ID_STRING "Clang")
 string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
 string (TOLOWER "${CMAKE_CXX_COMPILER_ID}" CXX_COMPILER_ID_STRING_LOWER)
@@ -26,23 +24,6 @@ if (UNIX)
 # pkg_check_modules (PKG_ACE REQUIRED ACE)
 endif (UNIX)
 
-#set (FLEX_LIB_FILE libfl.so)
-if (UNIX)
-# find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
-#               DOC "searching for ${FLEX_LIB_FILE} (system paths)")
-elseif (WIN32)
-# unset (FLEX_LIB_FILE)
-# set (FLEX_LIB_FILE libfl.lib)
-# find_library (FLEX_LIBRARY ${FLEX_LIB_FILE}
-#               PATHS ${PROJECTS_DIRECTORY}/flex
-#               PATH_SUFFIXES lib
-#               DOC "searching for ${FLEX_LIB_FILE}")
-# if (NOT FLEX_LIBRARY)
-#  message (FATAL_ERROR "could not find ${FLEX_LIB_FILE} (was: \"${FLEX_LIBRARY}\"), aborting")
-# endif (NOT FLEX_LIBRARY)
-endif ()
-#if (NOT EXISTS ACE_LIBRARY)
-
 set (PROJECTS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../../../..)
 set (OPENSSL_LIB_FILE libeay32.lib)
 if (UNIX)
@@ -57,6 +38,8 @@ elseif (WIN32)
   message (FATAL_ERROR "could not find ${OPENSSL_LIB_FILE} (was: \"${OPENSSL_LIBRARY}\"), aborting")
  endif ()
 endif ()
+
+add_definitions (-DACE_HAS_DLL)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
@@ -84,11 +67,6 @@ endif ()
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
 if (UNIX)
-# if (GTK3_SUPPORT)
-#  include_directories (${PKG_GTK3_INCLUDE_DIRS})
-# else ()
-#  include_directories (${PKG_GTK2_INCLUDE_DIRS})
-# endif ()
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
@@ -218,10 +196,10 @@ set (script_files
 
 unset (absolute_source_files)
 foreach (source_file ${source_files})
-  get_filename_component (abs_source_file ${source_file} ABSOLUTE)
-  list (APPEND absolute_source_files
-    ${abs_source_file})
-  #       $<INSTALL_INTERFACE:${INCLUDE_DIR}/${source_file}>)
+ get_filename_component (abs_source_file ${source_file} ABSOLUTE)
+ list (APPEND absolute_source_files
+  ${abs_source_file})
+#       $<INSTALL_INTERFACE:${INCLUDE_DIR}/${source_file}>)
 endforeach ()
 unset (absolute_script_files)
 foreach (script_file ${script_files})
@@ -249,7 +227,7 @@ if (WIN32)
 # set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
  source_group (scripts FILES ${PROJECT_NAME}_Protocol_BitTorrent_SCRIPTS)
  source_group (exports FILES etc/exports.def)
-endif ()
+endif (WIN32)
 
 # *NOTE*: this is needed to export yydebug, so it can be imported from template
 #         instances. Note that there is no way to #define YYDEBUG in the .y
@@ -260,7 +238,7 @@ endif ()
 
 set_property (TARGET ${PROJECT_NAME}_Protocol_BitTorrent PROPERTY FOLDER "protocols")
 
-#add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
+#add_dependencies (${PROJECT_NAME}_Protocol_BitTorrent ACE)
 add_dependencies (${PROJECT_NAME}_Protocol_BitTorrent Common)
 add_dependencies (${PROJECT_NAME}_Protocol_BitTorrent ACEStream)
 
@@ -268,17 +246,20 @@ set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES DEFINE_SYM
 set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 if (WIN32 AND MSVC)
  set_target_properties (${PROJECT_NAME}_Protocol_BitTorrent PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/etc/exports.def\"")
-endif ()
+endif (WIN32 AND MSVC)
 
 #target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
-# target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${FLEX_LIBRARY})
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${PKG_OPENSSL_LIBRARIES})
 elseif (WIN32)
- target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${ACE_LIBRARY})
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${OPENSSL_LIBRARY})
+
+ target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${ACE_LIBRARY})
+
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent Common)
+
  target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ACEStream)
+
 # target_link_libraries (${PROJECT_NAME}_Protocol_BitTorrent ${PROJECT_NAME}_Protocol_HTTP)
 endif ()
 

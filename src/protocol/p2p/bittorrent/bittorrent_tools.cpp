@@ -187,7 +187,6 @@ BitTorrent_Tools::MetaInfoToLength (const Bencoding_Dictionary_t& metaInfo_in)
        ++iterator_3)
   {
     ACE_ASSERT ((*iterator_3)->type == Bencoding_Element::BENCODING_TYPE_DICTIONARY);
-
 //    iterator = (*iterator_3)->dictionary->find (&key);
     iterator = (*iterator_3)->dictionary->begin ();
     for (;
@@ -220,9 +219,8 @@ BitTorrent_Tools::parseMetaInfoFile (const struct Common_ParserConfiguration& co
   BitTorrent_Bencoding_ParserDriver_T<BitTorrent_TrackerSessionMessage_t> parser (configuration_in.debugScanner,
                                                                                   configuration_in.debugParser);
 
-
   const_cast<struct Common_ParserConfiguration&> (configuration_in).block =
-      false;
+    false;
   if (!parser.initialize (configuration_in))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -230,7 +228,7 @@ BitTorrent_Tools::parseMetaInfoFile (const struct Common_ParserConfiguration& co
     return false;
   } // end IF
   const_cast<struct Common_ParserConfiguration&> (configuration_in).block =
-      block_in_parse;
+    block_in_parse;
 
   // slurp the whole file
   bool result = false;
@@ -276,7 +274,7 @@ BitTorrent_Tools::parseMetaInfoFile (const struct Common_ParserConfiguration& co
   result = true;
 
 clean:
-  delete [] data_p;
+  delete [] data_p; data_p = NULL;
 
   return result;
 }
@@ -319,8 +317,7 @@ BitTorrent_Tools::free (Bencoding_Dictionary_t*& dictionary_inout)
     } // end SWITCH
   } // end FOR
 
-  delete dictionary_inout;
-  dictionary_inout = NULL;
+  delete dictionary_inout; dictionary_inout = NULL;
 }
 
 std::string
@@ -367,7 +364,8 @@ BitTorrent_Tools::generatePeerId ()
   result += ACE_TEXT_ALWAYS_CHAR ("-");
 
   // generate 14 bytes of random data
-  time_t now = COMMON_TIME_NOW.sec ();
+  // *TODO*: ACE_Time_Value::sec() causes linkage trouble; find out why
+  time_t now = COMMON_TIME_NOW.msec () / 1000;
   std::ostringstream converter;
   converter << now;
   std::string random_string = converter.str ();
@@ -391,7 +389,8 @@ BitTorrent_Tools::generateKey ()
   std::string result;
 
   // generate 20 bytes of random data
-  time_t now = COMMON_TIME_NOW.sec ();
+  // *TODO*: ACE_Time_Value::sec() causes linkage trouble; find out why
+  time_t now = COMMON_TIME_NOW.msec () / 1000;
   std::ostringstream converter;
   converter << now;
   std::string random_string = converter.str ();
@@ -726,6 +725,5 @@ BitTorrent_Tools::free (Bencoding_List_t*& list_inout)
     } // end SWITCH
   } // end FOR
 
-  delete list_inout;
-  list_inout = NULL;
+  delete list_inout; list_inout = NULL;
 }

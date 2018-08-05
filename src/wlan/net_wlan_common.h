@@ -192,7 +192,7 @@ typedef std::vector<std::string> Net_WLAN_SSIDs_t;
 typedef Net_WLAN_SSIDs_t::iterator Net_WLAN_SSIDsIterator_t;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 typedef std::vector<std::string> Net_WLAN_Profiles_t;
-typedef Net_WLAN_Profiles_t::iterator Net_WLAN_ProfilesIterator_t;
+typedef Net_WLAN_Profiles_t::const_iterator Net_WLAN_ProfilesIterator_t;
 
 struct Net_WLAN_Profile_ParserContext
 {

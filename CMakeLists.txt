@@ -1,6 +1,12 @@
 ﻿include (${CMAKE_CURRENT_SOURCE_DIR}/../libCommon/scripts/PreToolChain.cmake)
 include (${CMAKE_CURRENT_SOURCE_DIR}/../libCommon/scripts/SetToolChain.cmake)
 include (${CMAKE_CURRENT_SOURCE_DIR}/../libCommon/scripts/ToolChain.cmake)
+# *NOTE*: or use the cmake.exe '-T' option instead
+include (${CMAKE_CURRENT_SOURCE_DIR}/../libCommon/scripts/SetTargetPlatform.cmake)
+include (${CMAKE_CURRENT_SOURCE_DIR}/../libCommon/scripts/TargetPlatform.cmake)
+
+include (${CMAKE_CURRENT_SOURCE_DIR}/../libCommon/scripts/Configuration.cmake)
+include (${CMAKE_CURRENT_SOURCE_DIR}/../libCommon/scripts/Macros.cmake)
 
 cmake_minimum_required (VERSION 2.8)
 
@@ -235,12 +241,10 @@ if (UNIX)
  set (CMAKE_THREAD_PREFER_PTHREAD ON)
 elseif (WIN32)
  if (MSVC)
-#  message (STATUS "CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION: ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
 #  set (CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION "10.0.16299.0") # set Windows SDK version
-  message (STATUS "CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION: ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
+#  message (STATUS "CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION: ${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION}")
 #  add_definitions (-CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION=${CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION})
- endif ()
- include (InstallRequiredSystemLibraries)
+ endif (MSVC)
 endif ()
 
 #set (NSIS_PROJECT_FILE "lib${PROJECT_NAME}.nsi")
@@ -252,7 +256,13 @@ endif ()
 #                    VERBATIM)
 
 # build a CPack driven installer package
-#include (InstallRequiredSystemLibraries)
+# *NOTE*: "... If CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_NO_WARNINGS is NOT set, then
+#         this file warns about required files that do not exist. You can set
+#         this variable to ON before including this file to avoid the warning.
+#         For example, the Visual Studio Express editions do not include the
+#         redistributable files, so if you include this file on a machine with
+#         only VS Express installed, you’ll get the warning. ..."
+include (InstallRequiredSystemLibraries)
 set (CPACK_PACKAGE_VERSION_MAJOR ${VERSION_MAJOR})
 set (CPACK_PACKAGE_VERSION_MINOR ${VERSION_MINOR})
 set (CPACK_PACKAGE_VERSION_PATCH ${VERSION_MICRO})

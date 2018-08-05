@@ -69,7 +69,11 @@ struct Net_SocketConfigurationBase
   Net_SocketConfigurationBase ()
    : bufferSize (NET_SOCKET_DEFAULT_RECEIVE_BUFFER_SIZE)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
    , interfaceIdentifier (GUID_NULL)
+#else
+   , interfaceIdentifier ()
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
    , interfaceIdentifier (ACE_TEXT_ALWAYS_CHAR (NET_INTERFACE_DEFAULT_ETHERNET))
 #endif // ACE_WIN32 || ACE_WIN64
@@ -84,7 +88,11 @@ struct Net_SocketConfigurationBase
 
   int          bufferSize; // socket buffer size (I/O)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   struct _GUID interfaceIdentifier; // NIC-
+#else
+  std::string  interfaceIdentifier; // NIC-
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   std::string  interfaceIdentifier; // NIC-
 #endif // ACE_WIN32 || ACE_WIN64

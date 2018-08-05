@@ -94,7 +94,7 @@ class Net_WLAN_Tools
                                      REFGUID); // interface identifier
   static struct ether_addr associatedBSSID (HANDLE,   // WLAN API client handle
                                             REFGUID); // interface identifier
-  static Net_InterfaceIdentifiers_t getInterfaces (HANDLE); // WLAN API client handle
+  static Common_Identifiers_t getInterfaces (HANDLE); // WLAN API client handle
   static struct ether_addr getAccessPointAddress (HANDLE,              // WLAN API client handle
                                                   REFGUID,             // interface identifier
                                                   const std::string&); // (E)SSID ("": return first)

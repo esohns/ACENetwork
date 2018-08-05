@@ -26,6 +26,7 @@
 
 #include "ace/config-lite.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include <ifdef.h>
 #else
 #include <net/ethernet.h>
 
@@ -62,7 +63,16 @@ class Net_Common_Tools
  public:
   // physical layer
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // *NOTE*: as of Vista, interface GUIDs can be used consistently; prior to
+  //         that, the 'FriendlyName' attribute must be used (which may not be
+  //         truly unique)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+  static bool isInterfaceEnabled (REFGUID);
   static bool toggleInterface (REFGUID);
+#else
+  static bool isInterfaceEnabled (const std::string&);
+  static bool toggleInterface (const std::string&);
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   static bool isInterfaceEnabled (const std::string&);
   static bool toggleInterface (const std::string&);
@@ -94,7 +104,11 @@ class Net_Common_Tools
   //         does not check connectedness yet)
   //         - the Win32 is incomplete (returns first 'connected' interface)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   static struct _GUID getDefaultInterface (enum Net_LinkLayerType = NET_LINKLAYER_802_3);
+#else
+  static std::string getDefaultInterface (enum Net_LinkLayerType = NET_LINKLAYER_802_3);
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   static std::string getDefaultInterface (enum Net_LinkLayerType = NET_LINKLAYER_802_3);
 #endif // ACE_WIN32 || ACE_WIN64
@@ -102,16 +116,23 @@ class Net_Common_Tools
   //         'default' one (bitmask-version of the above)
   // *TODO*: only Ethernet (IEEE 802.3) and PPP is currently supported
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   static struct _GUID getDefaultInterface (int); // link layer type(s) (bitmask)
+#else
+  static std::string getDefaultInterface (int); // link layer type(s) (bitmask)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   static std::string getDefaultInterface (int); // link layer type(s) (bitmask)
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  // *TODO*: this API is obviously broken (race conditions)
-  //         --> remove ASAP
-  static ULONG interfaceToIndex (REFGUID); // interface identifier
-  static struct _GUID indexToInterface (ULONG); // interface index
+  static NET_IFINDEX interfaceToIndex (REFGUID); // interface identifier
+  static struct _GUID indexToInterface (NET_IFINDEX); // interface index
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+#else
+  static NET_IFINDEX interfaceToIndex (const std::string&); // interface identifier ('FriendlyName')
+  static std::string indexToInterface_2 (NET_IFINDEX); // interface index
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #endif // ACE_WIN32 || ACE_WIN64
 
   // *NOTE*: the argument is assumed to be in network byte order (i.e. bytes
@@ -133,8 +154,13 @@ class Net_Common_Tools
   // *NOTE*: returns the ethernet 'MAC' address
   // *TODO*: support other link layers
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   static struct ether_addr interfaceToLinkLayerAddress (REFGUID);            // interface identifier
   static struct _GUID linkLayerAddressToInterfaceIdentifier (const struct ether_addr&);
+#else
+  static struct ether_addr interfaceToLinkLayerAddress (const std::string&); // interface identifier
+  static std::string linkLayerAddressToInterfaceIdentifier (const struct ether_addr&);
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   static struct ether_addr interfaceToLinkLayerAddress (const std::string&); // interface identifier
   static std::string linkLayerAddressToInterfaceIdentifier (const struct ether_addr&);
@@ -142,44 +168,60 @@ class Net_Common_Tools
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   static std::string interfaceToString (REFGUID); // interface identifier
+  static std::string interfaceToString (NET_IFINDEX); // interface identifier
 #endif // ACE_WIN32 || ACE_WIN64
 
   // network layer
   static bool getAddress (std::string&,  // host name
                           std::string&); // dotted-decimal
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
   // *NOTE*: 'gateway' really means the 'next hop' router with regard to some
   //         policy (e.g. routing table entry metric/priority/...).
   //         Consequently, this API is non-functional at this point
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+  static ACE_INET_Addr getGateway (REFGUID); // interface identifier
+#else
+  static ACE_INET_Addr getGateway (const std::string&); // interface identifier
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
   static ACE_INET_Addr getGateway (const std::string&); // interface identifier
 #endif // ACE_WIN32 || ACE_WIN64
 
   // *NOTE*: this returns the external (i.e. routable) IP address (for clients
   //         behind a (NATted-) gateway)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   static bool interfaceToExternalIPAddress (REFGUID,            // interface identifier
+#else
+  static bool interfaceToExternalIPAddress (const std::string&, // interface identifier
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   static bool interfaceToExternalIPAddress (const std::string&, // interface identifier
 #endif // ACE_WIN32 || ACE_WIN64
                                             ACE_INET_Addr&);    // return value: external IP address
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   static bool interfaceToIPAddress (REFGUID,                // device identifier
+#else
+  static bool interfaceToIPAddress (const std::string&,     // device identifier
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   static bool interfaceToIPAddress (const std::string&,     // device identifier
 #endif // ACE_WIN32 || ACE_WIN64
                                     ACE_INET_Addr&,         // return value: (first) IP address
                                     ACE_INET_Addr&);        // return value: (first) gateway IP address
-  static bool IPAddressToInterface (const ACE_INET_Addr&, // IP address
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-                                    struct _GUID&);       // return value: interface identifier
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+  static struct _GUID IPAddressToInterface (const ACE_INET_Addr&); // IP address
 #else
-                                    std::string&);        // return value: interface identifier
+  static std::string IPAddressToInterface (const ACE_INET_Addr&); // IP address
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+  static std::string IPAddressToInterface (const ACE_INET_Addr&); // IP address
 #endif // ACE_WIN32 || ACE_WIN64
 
-  inline static std::string IPAddressToString (const ACE_INET_Addr& address_in,
-                                               bool addressOnly_in = false) { return Net_Common_Tools::IPAddressToString ((addressOnly_in ? 0 : ACE_HTONS (address_in.get_port_number ())), ACE_HTONL (address_in.get_ip_address ())); };
+  inline static std::string IPAddressToString (const ACE_INET_Addr& address_in, bool addressOnly_in = false) { return Net_Common_Tools::IPAddressToString ((addressOnly_in ? 0 : ACE_HTONS (address_in.get_port_number ())), ACE_HTONL (address_in.get_ip_address ())); }
 #if defined (NETLINK_SUPPORT)
   static std::string NetlinkAddressToString (const Net_Netlink_Addr&);
 
@@ -216,10 +258,10 @@ class Net_Common_Tools
   // --- socket API ---
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if defined (_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602) // _WIN32_WINNT_WIN8
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0602) // _WIN32_WINNT_WIN8
   // *NOTE*: applies to TCP sockets only (see also: SO_MAX_MSG_SIZE)
   static bool setLoopBackFastPath (ACE_HANDLE); // socket handle
-#endif // _WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0602)
 #endif // ACE_WIN32 || ACE_WIN64
 
   // MTU

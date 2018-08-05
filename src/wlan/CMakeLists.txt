@@ -24,7 +24,7 @@ elseif (WIN32)
  option (WLANAPI_SUPPORT "compile wlanapi support" ON)
  add_feature_info (wlanapi WLANAPI_SUPPORT "support wlanapi")
 
- include (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/scripts/cmake_macros.txt)
+# include (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/scripts/Macros.cmake)
  get_WIN32_Version (WINDOWS_VERSION_MAJOR WINDOWS_VERSION_MINOR WINDOWS_VERSION_MICRO)
 # message (STATUS "WINDOWS_VERSION: ${WINDOWS_VERSION_MAJOR}.${WINDOWS_VERSION_MINOR}.${WINDOWS_VERSION_MICRO}")
  if (WINDOWS_VERSION_MAJOR GREATER 5)

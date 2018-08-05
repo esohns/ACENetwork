@@ -205,7 +205,7 @@ set (bittorrent_client_SRCS
 
 if (UNIX)
  add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
-endif ()
+endif (UNIX)
 
 set (LLVM_COMPILER_ID_STRING "Clang")
 string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
@@ -228,7 +228,7 @@ if (WIN32)
  if (CMAKE_BUILD_TYPE STREQUAL Debug)
   set_target_properties (${EXECUTABLE} PROPERTIES COMPILE_FLAGS "/wd4503")
  endif ()
-endif ()
+endif (WIN32)
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)
@@ -252,6 +252,7 @@ if (UNIX)
  target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})
  target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
 elseif (WIN32)
+ set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 
 # target_link_libraries (${EXECUTABLE} ntdll.lib)
@@ -283,6 +284,8 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
 if (UNIX)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
+elseif (WIN32)
+ target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 endif (UNIX)
 
 # add PCH

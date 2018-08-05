@@ -103,7 +103,7 @@ Net_WLAN_Monitor_T<AddressType,
   } // end IF
   ACE_ASSERT (inherited::clientHandle_ != ACE_INVALID_HANDLE);
 
-  Net_InterfaceIdentifiers_t interface_identifiers_a =
+  Common_Identifiers_t interface_identifiers_a =
       Net_WLAN_Tools::getInterfaces (inherited::clientHandle_);
 
   struct _WLAN_INTERFACE_INFO_LIST* interface_list_p = NULL;

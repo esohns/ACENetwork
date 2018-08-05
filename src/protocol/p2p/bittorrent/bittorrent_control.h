@@ -44,10 +44,10 @@ class BitTorrent_Control_T
   typedef typename SESSIONS_T::iterator SESSIONS_ITERATOR_T;
 
   BitTorrent_Control_T (SessionConfigurationType*);
-  virtual ~BitTorrent_Control_T ();
+  inline virtual ~BitTorrent_Control_T () { stop (true); }
 
   // implement BitTorrent_IControl_T
-  inline virtual const SESSIONS_T& getR () const { return sessions_; };
+  inline virtual const SESSIONS_T& getR () const { return sessions_; }
   virtual void request (const std::string&); // metainfo (aka '.torrent') file URI
   virtual SessionInterfaceType* get (const std::string&); // metainfo (aka '.torrent') file URI
   virtual void stop (bool = false); // wait ?

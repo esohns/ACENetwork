@@ -596,10 +596,14 @@ idle_initialize_UI_cb (gpointer userData_in)
   if (n_rows)
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     if (InlineIsEqualGUID ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier, GUID_NULL))
 #else
     if ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.empty ())
-#endif
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+    if ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.empty ())
+#endif // ACE_WIN32 || ACE_WIN64
       gtk_combo_box_set_active (combo_box_p, 0);
     else
     {
@@ -612,11 +616,15 @@ idle_initialize_UI_cb (gpointer userData_in)
                     ACE_TEXT ("failed to gtk_tree_model_get_iter_first(): \"%m\", aborting\n")));
         return G_SOURCE_REMOVE;
       } // end IF
-      GValue value = {0,};
+      GValue value = G_VALUE_INIT;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      std::string interface_identifier_string =
+      std::string interface_identifier =
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
         Common_Tools::GUIDToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier);
-#endif
+#else
+        (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier;
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // ACE_WIN32 || ACE_WIN64
       do
       {
         gtk_tree_model_get_value (tree_model_p,
@@ -625,13 +633,13 @@ idle_initialize_UI_cb (gpointer userData_in)
                                   1, &value);
 #else
                                   0, &value);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         ACE_ASSERT (G_VALUE_TYPE (&value) == G_TYPE_STRING);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        if (ACE_OS::strcmp (interface_identifier_string.c_str (),
+        if (ACE_OS::strcmp (interface_identifier.c_str (),
 #else
         if (ACE_OS::strcmp ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str (),
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
                             g_value_get_string (&value)) == 0)
         {
           // clean up
@@ -1308,6 +1316,7 @@ allocate:
                                                gateway_address))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier))));
@@ -1316,7 +1325,13 @@ allocate:
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), returning\n"),
                 ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ()),
                 NULL));
-#endif
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), returning\n"),
+                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ()),
+                NULL));
+#endif // ACE_WIN32 || ACE_WIN64
     return;
   } // end IF
   DHCP_record.ciaddr = IP_address.get_ip_address ();
@@ -1568,6 +1583,7 @@ allocate:
                                                gateway_address))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier))));
@@ -1576,7 +1592,13 @@ allocate:
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), returning\n"),
                 ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ()),
                 NULL));
-#endif
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\",0x%@), returning\n"),
+                ACE_TEXT ((*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier.c_str ()),
+                NULL));
+#endif // ACE_WIN32 || ACE_WIN64
     return;
   } // end IF
   DHCP_record.ciaddr = IP_address.get_ip_address ();
@@ -1685,10 +1707,14 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
 //#endif
   (*iterator_2).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     Common_Tools::StringToGUID (g_value_get_string (&value));
 #else
     g_value_get_string (&value);
-#endif
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+    g_value_get_string (&value);
+#endif // ACE_WIN32 || ACE_WIN64
   g_value_unset (&value);
 }
 

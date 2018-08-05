@@ -44,7 +44,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
  , address_ ()
 #if defined (ACE_LINUX)
  , errorQueue_ (NET_SOCKET_DEFAULT_ERRORQUEUE)
-#endif
+#endif // ACE_LINUX
  , notificationStrategy_ (ACE_Reactor::instance (),      // reactor
                           this,                          // event handler
                           ACE_Event_Handler::WRITE_MASK) // handle output only
@@ -75,7 +75,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 }
 
@@ -101,7 +101,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 #if defined (ACE_LINUX)
   unsigned short port_number = 0;
   bool handle_privileges = false;
-#endif
+#endif // ACE_LINUX
   bool handle_sockets = false;
 
   configuration_p = reinterpret_cast<ConfigurationType*> (arg_in);
@@ -121,12 +121,25 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   if (unlikely (socket_configuration_p->sourcePort))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     struct _GUID interface_identifier;
 #else
     std::string interface_identifier;
-#endif
-    if (unlikely (!Net_Common_Tools::IPAddressToInterface (socket_configuration_p->peerAddress,
-                                                           interface_identifier)))
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+    std::string interface_identifier;
+#endif // ACE_WIN32 || ACE_WIN64
+    interface_identifier =
+      Net_Common_Tools::IPAddressToInterface (socket_configuration_p->peerAddress);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
+#else
+    if (unlikely (interface_identifier.empty ()))
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+    if (unlikely (interface_identifier.empty ()))
+#endif // ACE_WIN32 || ACE_WIN64
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::IPAddressToInterface(%s), aborting\n"),
@@ -139,6 +152,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
                                                            gateway_address)))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(%s): \"%m\", aborting\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
@@ -146,7 +160,12 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(%s): \"%m\", aborting\n"),
                   ACE_TEXT (interface_identifier.c_str ())));
-#endif
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(%s): \"%m\", aborting\n"),
+                  ACE_TEXT (interface_identifier.c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
       goto error;
     } // end IF
     source_SAP.set_port_number (static_cast<u_short> (socket_configuration_p->sourcePort),
@@ -182,7 +201,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
     } // end IF
     handle_privileges = true;
   } // end IF
-#endif
+#endif // ACE_LINUX
   result =
     inherited2::peer_.open ((socket_configuration_p->writeOnly ? (socket_configuration_p->sourcePort ? source_SAP
                                                                                                      : inet_addr_sap_any)
@@ -202,7 +221,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 #if defined (ACE_LINUX)
   if (handle_privileges)
     Common_Tools::switchUser (static_cast<uid_t> (-1));
-#endif
+#endif // ACE_LINUX
   handle = inherited2::peer_.get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
   if (likely (!socket_configuration_p->writeOnly))
@@ -250,7 +269,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
                     ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", aborting\n"),
                     writeHandle_,
                     ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         goto error;
       } // end IF
     } // end IF
@@ -278,7 +297,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
                   ACE_TEXT ("failed to ACE_OS::connect(%d,%s): \"%m\", aborting\n"),
                   writeHandle_,
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (socket_configuration_p->peerAddress).c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       goto error;
     } // end IF
 //#if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -313,7 +332,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), aborting\n"),
                     handle, socket_configuration_p->bufferSize));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         goto error;
       } // end IF
 
@@ -330,7 +349,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
                   handle, (socket_configuration_p->linger ? ACE_TEXT ("true") : ACE_TEXT ("false"))));
       goto error;
     } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 
   // *TODO*: remove type inferences
@@ -352,7 +371,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
                   writeHandle_, socket_configuration_p->bufferSize));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       goto error;
     } // end IF
 
@@ -369,7 +388,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
                 writeHandle_));
     goto error;
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_LINUX)
   if (likely (errorQueue_))
@@ -390,7 +409,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
       goto error;
     } // end IF
   } // end IF
-#endif
+#endif // ACE_LINUX
 
 //  // debug info
 //  unsigned int so_max_msg_size = Net_Common_Tools::getMaxMsgSize (handle);
@@ -428,7 +447,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Svc_Handler::open(0x%@) (handle was: %d): \"%m\", aborting\n"),
                   arg_in, handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       goto error;
     } // end IF
   } // end IF
@@ -441,7 +460,7 @@ error:
 #if defined (ACE_LINUX)
   if (handle_privileges)
     Common_Tools::switchUser (static_cast<uid_t> (-1));
-#endif
+#endif // ACE_LINUX
   if (handle_sockets)
   {
     result = inherited2::peer_.close ();
@@ -460,7 +479,7 @@ error:
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                     writeHandle_));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       writeHandle_ = ACE_INVALID_HANDLE;
     } // end IF
   } // end IF
@@ -584,7 +603,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
                   ACE_TEXT ("handle_close called for unknown reasons (handle: %d, mask: %d) --> check implementation !, continuing\n"),
                   handle_in,
                   mask_in));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       break;
   } // end SWITCH
 
@@ -605,7 +624,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
  , address_ ()
 #if defined (ACE_LINUX)
  , errorQueue_ (NET_SOCKET_DEFAULT_ERRORQUEUE)
-#endif
+#endif // ACE_LINUX
  , notificationStrategy_ (ACE_Reactor::instance (),      // reactor
                           this,                          // event handler
                           ACE_Event_Handler::WRITE_MASK) // handle output only
@@ -635,7 +654,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 #else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 }
 
@@ -659,7 +678,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   int result = -1;
 #if defined (ACE_LINUX)
   bool handle_privileges = false;
-#endif
+#endif // ACE_LINUX
   bool handle_sockets = false;
 
   configuration_p =
@@ -680,12 +699,24 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
   if (unlikely (socket_configuration_p->sourcePort))
   {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    struct _GUID interface_identifier;
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    struct _GUID interface_identifier =
 #else
-    std::string interface_identifier;
-#endif
-    if (unlikely (!Net_Common_Tools::IPAddressToInterface (socket_configuration_p->peerAddress,
-                                                           interface_identifier)))
+    std::string interface_identifier =
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+    std::string interface_identifier =
+#endif // ACE_WIN32 || ACE_WIN64
+      Net_Common_Tools::IPAddressToInterface (socket_configuration_p->peerAddress);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
+#else
+    if (unlikely (interface_identifier.empty ()))
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+    if (unlikely (interface_identifier.empty ()))
+#endif // ACE_WIN32 || ACE_WIN64
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::IPAddressToInterface(%s), aborting\n"),
@@ -698,6 +729,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
                                                            gateway_address)))
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(%s): \"%m\", aborting\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ())));
@@ -705,7 +737,12 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(%s): \"%m\", aborting\n"),
                   ACE_TEXT (interface_identifier.c_str ())));
-#endif
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(%s): \"%m\", aborting\n"),
+                  ACE_TEXT (interface_identifier.c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
       goto error;
     } // end IF
     source_SAP.set_port_number (static_cast<u_short> (socket_configuration_p->sourcePort),
@@ -738,7 +775,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
     } // end IF
     handle_privileges = true;
   } // end IF
-#endif
+#endif // ACE_LINUX
   result =
     inherited2::peer_.open (socket_configuration_p->peerAddress,                                         // remote SAP
                             (socket_configuration_p->writeOnly ? (socket_configuration_p->sourcePort ? source_SAP 
@@ -760,7 +797,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
 #if defined (ACE_LINUX)
   if (handle_privileges)
     Common_Tools::switchUser (static_cast<uid_t> (-1));
-#endif
+#endif // ACE_LINUX
   handle = inherited2::peer_.get_handle ();
   ACE_ASSERT (handle != ACE_INVALID_HANDLE);
   if (likely (!socket_configuration_p->writeOnly))
@@ -809,7 +846,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
                       ACE_TEXT ("failed to ACE_OS::bind(%d,%s): \"%m\", aborting\n"),
                       writeHandle_,
                       ACE_TEXT (Net_Common_Tools::IPAddressToString (source_SAP).c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
           goto error;
         } // end IF
       } // end IF
@@ -841,7 +878,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_RCVBUF,%u), aborting\n"),
                     handle, socket_configuration_p->bufferSize));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
         goto error;
       } // end IF
 
@@ -858,7 +895,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
                   handle, (socket_configuration_p->linger ? ACE_TEXT ("true") : ACE_TEXT ("false"))));
       goto error;
     } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 
   // step3b: tweak outbound socket
@@ -877,7 +914,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_Common_Tools::setSocketBuffer(%d,SO_SNDBUF,%u), continuing\n"),
                   writeHandle_, socket_configuration_p->bufferSize));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       goto error;
     } // end IF
 
@@ -894,7 +931,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
                 writeHandle_));
     goto error;
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_LINUX)
   if (errorQueue_)
@@ -915,7 +952,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
       goto error;
     } // end IF
   } // end IF
-#endif
+#endif // ACE_LINUX
 
 //  // debug info
 //  unsigned int so_max_msg_size = Net_Common_Tools::getMaxMsgSize (handle);
@@ -953,7 +990,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Svc_Handler::open(0x%@) (handle was: %d): \"%m\", aborting\n"),
                   arg_in, handle));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       goto error;
     } // end IF
   } // end IF
@@ -966,7 +1003,7 @@ error:
 #if defined (ACE_LINUX)
   if (handle_privileges)
     Common_Tools::switchUser (static_cast<uid_t> (-1));
-#endif
+#endif // ACE_LINUX
   if (handle_sockets)
   {
     result = inherited2::peer_.close ();
@@ -985,7 +1022,7 @@ error:
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_OS::closesocket(%d): \"%m\", continuing\n"),
                     writeHandle_));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       writeHandle_ = ACE_INVALID_HANDLE;
     } // end IF
   } // end IF
@@ -1106,7 +1143,7 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
                   ACE_TEXT ("handle_close called for unknown reasons (handle: %d, mask: %d) --> check implementation !, continuing\n"),
                   handle_in,
                   mask_in));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
       break;
   } // end SWITCH
 
