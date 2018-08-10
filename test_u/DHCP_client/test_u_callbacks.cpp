@@ -616,7 +616,12 @@ idle_initialize_UI_cb (gpointer userData_in)
                     ACE_TEXT ("failed to gtk_tree_model_get_iter_first(): \"%m\", aborting\n")));
         return G_SOURCE_REMOVE;
       } // end IF
+#if GTK_CHECK_VERSION(2,30,0)
       GValue value = G_VALUE_INIT;
+#else
+      GValue value;
+      g_value_init (&value, G_TYPE_STRING);
+#endif // GTK_CHECK_VERSION (2,30,0)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
       std::string interface_identifier =
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA

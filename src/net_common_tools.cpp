@@ -1335,15 +1335,7 @@ Net_Common_Tools::interfaceToExternalIPAddress (const std::string& interfaceIden
 }
 
 struct ether_addr
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-Net_Common_Tools::interfaceToLinkLayerAddress (REFGUID interfaceIdentifier_in)
-#else
 Net_Common_Tools::interfaceToLinkLayerAddress (const std::string& interfaceIdentifier_in)
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-Net_Common_Tools::interfaceToLinkLayerAddress (const std::string& interfaceIdentifier_in)
-#endif // ACE_WIN32 || ACE_WIN64
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceToLinkLayerAddress"));
 
@@ -1352,15 +1344,7 @@ Net_Common_Tools::interfaceToLinkLayerAddress (const std::string& interfaceIdent
   ACE_OS::memset (&result, 0, sizeof (struct ether_addr));
 
   // sanity check(s)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
-#else
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-  ACE_ASSERT (!interfaceIdentifier_in.empty ());
-#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   NET_IFINDEX interface_index = 0;
@@ -1373,15 +1357,9 @@ Net_Common_Tools::interfaceToLinkLayerAddress (const std::string& interfaceIdent
     Net_Common_Tools::interfaceToIndex (interfaceIdentifier_in);
   if (unlikely (!interface_index))
   {
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIndex(%s), aborting\n"),
-                ACE_TEXT (Common_Tools::GUIDToString (interfaceIdentifier_in).c_str ())));
-#else
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Net_Common_Tools::interfaceToIndex(%s), aborting\n"),
                 ACE_TEXT (interfaceIdentifier_in.c_str ())));
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
     return result;
   } // end IF
 
@@ -1477,32 +1455,14 @@ continue_:
 
   return result;
 }
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-struct _GUID
-#else
 std::string
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-std::string
-#endif // ACE_WIN32 || ACE_WIN64
-Net_Common_Tools::linkLayerAddressToInterfaceIdentifier (const struct ether_addr& address_in)
+Net_Common_Tools::linkLayerAddressToInterface (const struct ether_addr& address_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::linkLayerAddressToInterfaceIdentifier"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::linkLayerAddressToInterface"));
 
   // initialize return value(s)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  struct _GUID return_value = GUID_NULL;
-#else
   std::string return_value;
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-  std::string return_value;
-#endif // ACE_WIN32 || ACE_WIN64
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
 //  // sanity check(s)
 //  ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
 //  //ACE_ASSERT (sizeof (MACAddress_out) >= MAX_ADAPTER_ADDRESS_LENGTH);
@@ -1576,104 +1536,174 @@ Net_Common_Tools::linkLayerAddressToInterfaceIdentifier (const struct ether_addr
   ACE_NOTSUP_RETURN (return_value);
 
   ACE_NOTREACHED (return return_value;)
-#else
-#if defined (ACE_HAS_GETIFADDRS)
-  int socket_handle_h = ACE_OS::socket (AF_INET, SOCK_DGRAM, IPPROTO_IP);
-  if (unlikely (socket_handle_h == ACE_INVALID_HANDLE))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_OS::socket(AF_INET): \"%m\", aborting\n")));
-    return return_value;
-  } // end IF
-
-  int result = -1;
-  struct ifaddrs* ifaddrs_p = NULL;
-  result = ::getifaddrs (&ifaddrs_p);
-  if (unlikely (result == -1))
-  {
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("failed to ::getifaddrs(): \"%m\", aborting\n")));
-    return return_value;
-  } // end IF
-  ACE_ASSERT (ifaddrs_p);
-
-  struct sockaddr_ll* sockaddr_ll_p = NULL;
-  struct ifreq ifreq_s;
-  ACE_OS::memset (&ifreq_s, 0, sizeof (struct ifreq));
-  for (struct ifaddrs* ifaddrs_2 = ifaddrs_p;
-       ifaddrs_2;
-       ifaddrs_2 = ifaddrs_2->ifa_next)
-  {
-#if defined (ACE_LINUX)
-    if (ifaddrs_2->ifa_addr->sa_family != AF_PACKET)
-#else
-    // *TODO*: this may work on BSD and APPLE systems
-    if (ifaddrs_2->ifa_addr->sa_family != AF_LINK)
-#endif // ACE_LINUX
-      continue;
-
-    sockaddr_ll_p =
-        reinterpret_cast<struct sockaddr_ll*> (ifaddrs_2->ifa_addr);
-    if (!ACE_OS::memcmp (address_in.ether_addr_octet,
-                         sockaddr_ll_p->sll_addr,
-                         ETH_ALEN))
-    {
-      return_value = ifaddrs_2->ifa_name;
-      break;
-    } // end IF
-  } // end FOR
-
-  // clean up
-  ::freeifaddrs (ifaddrs_p);
-  if (socket_handle_h != ACE_INVALID_HANDLE)
-  {
-    result = ACE_OS::close (socket_handle_h);
-    if (unlikely (result == -1))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE_OS::close(%d): \"%m\", continuing\n"),
-                  socket_handle_h));
-  } // end IF
-#else
-//  struct ifreq ifr;
-//  struct ifconf ifc;
-//  char buf[1024];
-//  int success = 0;
-
-//  int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
-//  if (sock == -1) { /* handle error*/ };
-
-//  ifc.ifc_len = sizeof(buf);
-//  ifc.ifc_buf = buf;
-//  if (ioctl(sock, SIOCGIFCONF, &ifc) == -1) { /* handle error */ }
-
-//  struct ifreq* it = ifc.ifc_req;
-//  const struct ifreq* const end = it + (ifc.ifc_len / sizeof(struct ifreq));
-
-//  for (; it != end; ++it) {
-//    strcpy(ifr.ifr_name, it->ifr_name);
-//    if (ioctl(sock, SIOCGIFFLAGS, &ifr) == 0) {
-//      if (! (ifr.ifr_flags & IFF_LOOPBACK)) { // don't count loopback
-//        if (ioctl(sock, SIOCGIFHWADDR, &ifr) == 0) {
-//          success = 1;
-//          break;
-//        }
-//      }
-//    }
-//    else { /* handle error */ }
-//  }
-
-//  unsigned char mac_address[6];
-
-//  if (success) memcpy(mac_address, ifr.ifr_hwaddr.sa_data, 6);
-  ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (false);
-
-  ACE_NOTREACHED (return false;)
-#endif /* ACE_HAS_GETIFADDRS */
-#endif // ACE_WIN32 || ACE_WIN64
 
   return return_value;
 }
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+struct ether_addr
+Net_Common_Tools::interfaceToLinkLayerAddress_2 (REFGUID interfaceIdentifier_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceToLinkLayerAddress_2"));
+
+  // initialize return value(s)
+  struct ether_addr result;
+  ACE_OS::memset (&result, 0, sizeof (struct ether_addr));
+
+  // sanity check(s)
+  ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
+
+  NET_IFINDEX interface_index = 0;
+  struct _IP_ADAPTER_INFO* ip_interfaceIdentifier_info_p = NULL;
+  struct _IP_ADAPTER_INFO* ip_interfaceIdentifier_info_2 = NULL;
+  ULONG buffer_length = 0;
+  ULONG result_2 = 0;
+
+  interface_index =
+    Net_Common_Tools::interfaceToIndex_2 (interfaceIdentifier_in);
+  if (unlikely (!interface_index))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIndex_2(%s), aborting\n"),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ())));
+    return result;
+  } // end IF
+
+  result_2 = GetAdaptersInfo (ip_interfaceIdentifier_info_p, &buffer_length);
+  if (unlikely (result_2 != ERROR_BUFFER_OVERFLOW))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+    return result;
+  } // end IF
+  ACE_ASSERT (buffer_length);
+  ip_interfaceIdentifier_info_p =
+    static_cast<struct _IP_ADAPTER_INFO*> (ACE_MALLOC_FUNC (buffer_length));
+  if (unlikely (!ip_interfaceIdentifier_info_p))
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  result_2 = GetAdaptersInfo (ip_interfaceIdentifier_info_p, &buffer_length);
+  if (unlikely (result_2 != NO_ERROR))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+    ACE_FREE_FUNC (ip_interfaceIdentifier_info_p);
+    return result;
+  } // end IF
+
+  ip_interfaceIdentifier_info_2 = ip_interfaceIdentifier_info_p;
+  do
+  {
+    if (static_cast<DWORD> (interface_index) != ip_interfaceIdentifier_info_2->Index)
+      goto continue_;
+
+    ACE_OS::memcpy (&result,
+                    ip_interfaceIdentifier_info_2->Address,
+                    ETH_ALEN);
+    break;
+
+continue_:
+    ip_interfaceIdentifier_info_2 = ip_interfaceIdentifier_info_2->Next;
+  } while (ip_interfaceIdentifier_info_2);
+
+  // clean up
+  if (ip_interfaceIdentifier_info_p)
+    ACE_FREE_FUNC (ip_interfaceIdentifier_info_p);
+
+  return result;
+}
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+struct _GUID
+Net_Common_Tools::linkLayerAddressToInterface_2 (const struct ether_addr& address_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::linkLayerAddressToInterface_2"));
+
+  // initialize return value(s)
+  struct _GUID return_value = GUID_NULL;
+
+//  // sanity check(s)
+//  ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
+//  //ACE_ASSERT (sizeof (MACAddress_out) >= MAX_ADAPTER_ADDRESS_LENGTH);
+
+//  NET_IFINDEX interface_index = 0;
+//  struct _IP_ADAPTER_INFO* ip_interfaceIdentifier_info_p = NULL;
+//  struct _IP_ADAPTER_INFO* ip_interfaceIdentifier_info_2 = NULL;
+//  ULONG buffer_length = 0;
+//  ULONG result_2 = 0;
+
+//  interface_index =
+//    Net_Common_Tools::interfaceToIndex (interfaceIdentifier_in);
+//  if (unlikely (!interface_index))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIndex(%s), aborting\n"),
+//                ACE_TEXT (Common_Tools::GUIDToString (interfaceIdentifier_in).c_str ())));
+//    return result;
+//  } // end IF
+
+//  result_2 = GetAdaptersInfo (ip_interfaceIdentifier_info_p,
+//                              &buffer_length);
+//  if (unlikely (result_2 != ERROR_BUFFER_OVERFLOW))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
+//                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+//    return result;
+//  } // end IF
+//  ACE_ASSERT (buffer_length);
+//  ip_interfaceIdentifier_info_p =
+//    static_cast<struct _IP_ADAPTER_INFO*> (ACE_MALLOC_FUNC (buffer_length));
+//  if (unlikely (!ip_interfaceIdentifier_info_p))
+//  {
+//    ACE_DEBUG ((LM_CRITICAL,
+//                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+//    return result;
+//  } // end IF
+//  result_2 = GetAdaptersInfo (ip_interfaceIdentifier_info_p,
+//                              &buffer_length);
+//  if (unlikely (result_2 != NO_ERROR))
+//  {
+//    ACE_DEBUG ((LM_ERROR,
+//                ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
+//                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+
+//    // clean up
+//    ACE_FREE_FUNC (ip_interfaceIdentifier_info_p);
+
+//    return result;
+//  } // end IF
+
+//  ip_interfaceIdentifier_info_2 = ip_interfaceIdentifier_info_p;
+//  do
+//  {
+//    if (static_cast<DWORD> (interface_index) != ip_interfaceIdentifier_info_2->Index)
+//      goto continue_;
+
+//    ACE_OS::memcpy (&result, ip_interfaceIdentifier_info_2->Address,
+//                    ETH_ALEN);
+//    break;
+
+//continue_:
+//    ip_interfaceIdentifier_info_2 = ip_interfaceIdentifier_info_2->Next;
+//  } while (ip_interfaceIdentifier_info_2);
+
+//  // clean up
+//  ACE_FREE_FUNC (ip_interfaceIdentifier_info_p);
+
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (return_value);
+
+  ACE_NOTREACHED (return return_value;)
+
+  return return_value;
+}
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 std::string
@@ -1687,15 +1717,22 @@ Net_Common_Tools::interfaceToString (REFGUID interfaceIdentifier_in)
   // sanity check(s)
   ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
 
-  NET_IFINDEX interface_index =
-    Net_Common_Tools::interfaceToIndex (interfaceIdentifier_in);
+  NET_IFINDEX interface_index = 0;
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+  interface_index =
+    Net_Common_Tools::interfaceToIndex_2 (interfaceIdentifier_in);
   if (unlikely (!interface_index))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIndex(%s), aborting\n"),
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIndex_2(%s), aborting\n"),
                 ACE_TEXT (Common_Tools::GUIDToString (interfaceIdentifier_in).c_str ())));
     return ACE_TEXT_ALWAYS_CHAR ("");
   } // end IF
+#else
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_NOTREACHED (return ACE_TEXT_ALWAYS_CHAR ("");)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 
   return Net_Common_Tools::interfaceToString (interface_index);
 }
@@ -1767,9 +1804,9 @@ error:
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 NET_IFINDEX
-Net_Common_Tools::interfaceToIndex (REFGUID interfaceIdentifier_in)
+Net_Common_Tools::interfaceToIndex_2 (REFGUID interfaceIdentifier_in)
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceToIndex"));
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceToIndex_2"));
 
   // initialize return value(s)
   NET_IFINDEX result = 0;
@@ -1801,74 +1838,55 @@ Net_Common_Tools::interfaceToIndex (REFGUID interfaceIdentifier_in)
     return result;
   } // end IF
 #else
-#define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
-#define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
-  std::string interface_identifier =
-    Net_Common_Tools::interfaceToString (interfaceIdentifier_in);
-  struct _IP_ADAPTER_INFO* adapter_info_p = NULL, *adapter_info_2 = NULL;
-  ULONG result_2 = 0;
-  ULONG buffer_length_u = sizeof (struct _IP_ADAPTER_INFO);
-
-  adapter_info_p =
-    (struct _IP_ADAPTER_INFO*) MALLOC(sizeof (struct _IP_ADAPTER_INFO));
-  if (!adapter_info_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-    return result;
-  } // end IF
-  // retrieve the necessary size into the ulOutBufLen variable
-  result_2 = GetAdaptersInfo (adapter_info_p, &buffer_length_u);
-  if (result_2 != ERROR_BUFFER_OVERFLOW)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
-    goto error;
-  } // end IF
-  FREE(adapter_info_p); adapter_info_p = NULL;
-  adapter_info_p = (struct _IP_ADAPTER_INFO*) MALLOC(buffer_length_u);
-  if (!adapter_info_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-    goto error;
-  } // end IF
-  result_2 = GetAdaptersInfo (adapter_info_p, &buffer_length_u);
-  if (result_2 != NO_ERROR)
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::GetAdaptersInfo(%u): \"%s\", aborting\n"),
-                buffer_length_u,
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
-    goto error;
-  } // end IF
-
-  adapter_info_2 = adapter_info_p;
-  while (adapter_info_2)
-  {
-    if (!ACE_OS::strcmp (adapter_info_2->AdapterName,
-                         interface_identifier.c_str ()))
-    {
-      result = adapter_info_2->Index;
-      break;
-    } // end IF
-
-    adapter_info_2 = adapter_info_2->Next;
-  } // end WHILE
-
-error:
-  if (adapter_info_p)
-    FREE(adapter_info_p);
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (0);
+  ACE_NOTREACHED (return 0;)
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 
   return result;
 }
-#endif // ACE_WIN32 || ACE_WIN64
+struct _GUID
+Net_Common_Tools::indexToInterface_2 (NET_IFINDEX interfaceIndex_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::indexToInterface_2"));
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  // initialize return value(s)
+  struct _GUID result = GUID_NULL;
+
+  // sanity check(s)
+  ACE_ASSERT (interfaceIndex_in);
+
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+  union _NET_LUID_LH interface_luid_u;
+  interface_luid_u.Value = 0;
+  DWORD result_2 = ConvertInterfaceIndexToLuid (interfaceIndex_in,
+                                                &interface_luid_u);
+  if (unlikely (result_2 != NO_ERROR))
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to ConvertInterfaceIndexToLuid(%u), aborting\n"),
+                interfaceIndex_in,
+                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+    return GUID_NULL;
+  } // end IF
+  result_2 = ConvertInterfaceLuidToGuid (&interface_luid_u,
+                                         &result);
+  if (unlikely (result_2 != NO_ERROR))
+  {
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("failed to ConvertInterfaceLuidToGuid(%q), aborting\n"),
+                interface_luid_u.Value,
+                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+    return GUID_NULL;
+  } // end IF
 #else
+  ACE_ASSERT (false);
+  ACE_NOTSUP_RETURN (GUID_NULL);
+  ACE_NOTREACHED (return GUID_NULL;)
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+
+  return result;
+}
 NET_IFINDEX
 Net_Common_Tools::interfaceToIndex (const std::string& interfaceIdentifier_in)
 {
@@ -1894,7 +1912,7 @@ Net_Common_Tools::interfaceToIndex (const std::string& interfaceIdentifier_in)
   //char buffer_2[32];
 
   adapter_info_p =
-    (struct _IP_ADAPTER_INFO*) MALLOC(sizeof (struct _IP_ADAPTER_INFO));
+    (struct _IP_ADAPTER_INFO*)MALLOC (sizeof (struct _IP_ADAPTER_INFO));
   if (!adapter_info_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -1910,8 +1928,8 @@ Net_Common_Tools::interfaceToIndex (const std::string& interfaceIdentifier_in)
                 ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
     goto error;
   } // end IF
-  FREE(adapter_info_p); adapter_info_p = NULL;
-  adapter_info_p = (struct _IP_ADAPTER_INFO*) MALLOC(buffer_length_u);
+  FREE (adapter_info_p); adapter_info_p = NULL;
+  adapter_info_p = (struct _IP_ADAPTER_INFO*)MALLOC (buffer_length_u);
   if (!adapter_info_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -2031,61 +2049,14 @@ Net_Common_Tools::interfaceToIndex (const std::string& interfaceIdentifier_in)
 
 error:
   if (adapter_info_p)
-    FREE(adapter_info_p);
+    FREE (adapter_info_p);
 
   return result;
 }
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-
-struct _GUID
+std::string
 Net_Common_Tools::indexToInterface (NET_IFINDEX interfaceIndex_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::indexToInterface"));
-
-  // initialize return value(s)
-  struct _GUID result = GUID_NULL;
-
-  // sanity check(s)
-  ACE_ASSERT (interfaceIndex_in);
-
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  union _NET_LUID_LH interface_luid_u;
-  interface_luid_u.Value = 0;
-  DWORD result_2 = ConvertInterfaceIndexToLuid (interfaceIndex_in,
-                                                &interface_luid_u);
-  if (unlikely (result_2 != NO_ERROR))
-  {
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("failed to ConvertInterfaceIndexToLuid(%u), aborting\n"),
-                interfaceIndex_in,
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
-    return GUID_NULL;
-  } // end IF
-  result_2 = ConvertInterfaceLuidToGuid (&interface_luid_u,
-                                         &result);
-  if (unlikely (result_2 != NO_ERROR))
-  {
-    ACE_DEBUG ((LM_DEBUG,
-                ACE_TEXT ("failed to ConvertInterfaceLuidToGuid(%q), aborting\n"),
-                interface_luid_u.Value,
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
-    return GUID_NULL;
-  } // end IF
-#else
-  ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (result);
-  ACE_NOTREACHED (return result;)
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-
-  return result;
-}
-
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-#else
-std::string
-Net_Common_Tools::indexToInterface_2 (NET_IFINDEX interfaceIndex_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::indexToInterface_2"));
 
   // initialize return value(s)
   std::string result;
@@ -2100,7 +2071,7 @@ Net_Common_Tools::indexToInterface_2 (NET_IFINDEX interfaceIndex_in)
   ULONG buffer_length_u = sizeof (struct _IP_ADAPTER_INFO);
 
   adapter_info_p =
-    (struct _IP_ADAPTER_INFO*) MALLOC(sizeof (struct _IP_ADAPTER_INFO));
+    (struct _IP_ADAPTER_INFO*)MALLOC (sizeof (struct _IP_ADAPTER_INFO));
   if (!adapter_info_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -2116,8 +2087,8 @@ Net_Common_Tools::indexToInterface_2 (NET_IFINDEX interfaceIndex_in)
                 ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
     goto error;
   } // end IF
-  FREE(adapter_info_p); adapter_info_p = NULL;
-  adapter_info_p = (struct _IP_ADAPTER_INFO*) MALLOC(buffer_length_u);
+  FREE (adapter_info_p); adapter_info_p = NULL;
+  adapter_info_p = (struct _IP_ADAPTER_INFO*)MALLOC (buffer_length_u);
   if (!adapter_info_p)
   {
     ACE_DEBUG ((LM_CRITICAL,
@@ -2148,11 +2119,10 @@ Net_Common_Tools::indexToInterface_2 (NET_IFINDEX interfaceIndex_in)
 
 error:
   if (adapter_info_p)
-    FREE(adapter_info_p);
+    FREE (adapter_info_p);
 
   return result;
 }
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #endif // ACE_WIN32 || ACE_WIN64
 
 ACE_INET_Addr
@@ -2483,15 +2453,7 @@ clean:
 }
 
 bool
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-Net_Common_Tools::interfaceToIPAddress (REFGUID interfaceIdentifier_in,
-#else
 Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_in,
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_in,
-#endif // ACE_WIN32 || ACE_WIN64
                                         ACE_INET_Addr& IPAddress_out,
                                         ACE_INET_Addr& gatewayIPAddress_out)
 {
@@ -2746,29 +2708,13 @@ continue_:
   return true;
 }
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-struct _GUID
-#else
 std::string
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-std::string
-#endif // ACE_WIN32 || ACE_WIN64
 Net_Common_Tools::IPAddressToInterface (const ACE_INET_Addr& IPAddress_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::IPAddressToInterface"));
 
   // initialize return value(s)
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  struct _GUID result = GUID_NULL;
-#else
   std::string result;
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-  std::string result;
-#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   if (Net_Common_Tools::isLocal (IPAddress_in))
@@ -2871,16 +2817,8 @@ Net_Common_Tools::IPAddressToInterface (const ACE_INET_Addr& IPAddress_in)
         goto continue_;
 
       result =
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
         Net_Common_Tools::indexToInterface (ip_adapter_addresses_2->IfIndex);
-#else
-        Net_Common_Tools::indexToInterface_2 (ip_adapter_addresses_2->IfIndex);
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-      if (unlikely (InlineIsEqualGUID (result, GUID_NULL)))
-#else
       if (unlikely (result.empty ()))
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_Common_Tools::indexToInterface(%u), aborting\n"),
                     ip_adapter_addresses_2->IfIndex));
@@ -2913,16 +2851,8 @@ continue_:
     } // end IF
 
     result =
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
       Net_Common_Tools::indexToInterface (route_s.dwForwardIfIndex);
-#else
-      Net_Common_Tools::indexToInterface_2 (route_s.dwForwardIfIndex);
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-    if (unlikely (InlineIsEqualGUID (result, GUID_NULL)))
-#else
     if (unlikely (result.empty ()))
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("failed to Net_Common_Tools::indexToInterface(%u), aborting\n"),
                   route_s.dwForwardIfIndex));
@@ -2979,29 +2909,14 @@ continue_:
   return result;
 }
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-struct _GUID
-#else
 std::string
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-std::string
-#endif // ACE_WIN32 || ACE_WIN64
 Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getDefaultInterface"));
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  struct _GUID result = GUID_NULL;
-#else
   std::string result;
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-  std::string result;
-#endif // ACE_WIN32 || ACE_WIN64
 
+  std::string interface_identifier;
   switch (type_in)
   {
     case NET_LINKLAYER_802_3:
@@ -3011,13 +2926,7 @@ Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
       IP_ADAPTER_ADDRESSES* ip_adapter_addresses_p = NULL, *ip_adapter_addresses_2 = NULL;
       ULONG buffer_length = 0;
       ULONG result_2 = 0;
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-      struct _GUID interface_identifier = GUID_NULL;
-      std::map<ULONG, struct _GUID> connected_interfaces;
-#else
-      std::string interface_identifier;
       std::map<ULONG, std::string> connected_interfaces;
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
       ACE_INET_Addr inet_address, gateway_address;
 
       result_2 =
@@ -3073,15 +2982,11 @@ Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
 
         interface_identifier =
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-          Net_Common_Tools::indexToInterface (ip_adapter_addresses_2->IfIndex);
-#else
           Net_Common_Tools::indexToInterface_2 (ip_adapter_addresses_2->IfIndex);
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-        if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
 #else
-        if (unlikely (interface_identifier.empty ()))
+          Net_Common_Tools::indexToInterface (ip_adapter_addresses_2->IfIndex);
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+        if (unlikely (interface_identifier.empty ()))
         {
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to Net_Common_Tools::indexToInterface(%u), aborting\n"),
@@ -3136,28 +3041,15 @@ error:
                                                                inet_address,
                                                                gateway_address)))
         {
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-          ACE_DEBUG ((LM_ERROR,
-                      ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), aborting\n"),
-                      ACE_TEXT (Net_Common_Tools::interfaceToString (result).c_str ())));
-#else
           ACE_DEBUG ((LM_ERROR,
                       ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), aborting\n"),
                       ACE_TEXT (result.c_str ())));
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
           goto error;
         } // end IF
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-        ACE_DEBUG ((LM_DEBUG,
-                    ACE_TEXT ("default interface: \"%s\" (gateway: %s)\n"),
-                    ACE_TEXT (Net_Common_Tools::interfaceToString (result).c_str ()),
-                    ACE_TEXT (Net_Common_Tools::IPAddressToString (gateway_address).c_str ())));
-#else
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT ("default interface: \"%s\" (gateway: %s)\n"),
                     ACE_TEXT (result.c_str ()),
                     ACE_TEXT (Net_Common_Tools::IPAddressToString (gateway_address).c_str ())));
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #endif // _DEBUG
       } // end IF
 #else
@@ -3203,7 +3095,6 @@ error:
         ACE_ASSERT (match_results[1].matched);
         ACE_ASSERT (match_results[2].matched);
         result = match_results[2];
-
         break;
       } while (!converter.fail ());
       if (unlikely (result.empty ()))
@@ -3226,7 +3117,6 @@ error:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
       DWORD maximum_client_version =
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA; see wlanapi.h:55
 #if defined (WINXP_SUPPORT)
         WLAN_API_VERSION_1_0;
 #pragma message ("compiling for WLAN API version " WLAN_API_VERSION_1_0)
@@ -3234,10 +3124,6 @@ error:
         WLAN_API_VERSION; // use SDK-native
 #pragma message ("compiling for WLAN API version " COMMON_STRINGIZE(WLAN_API_VERSION))
 #endif // WINXP_SUPPORT
-#else
-        WLAN_API_VERSION; // use SDK-native
-#pragma message ("compiling for WLAN API version " COMMON_STRINGIZE(WLAN_API_VERSION))
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
       DWORD negotiated_version = 0;
       HANDLE client_handle = ACE_INVALID_HANDLE;
       DWORD result_2 = WlanOpenHandle (maximum_client_version,
@@ -3270,10 +3156,10 @@ error:
       for (DWORD i = 0;
            i < interface_list_p->dwNumberOfItems;
            ++i)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA; see wlanapi.h:55
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
         interface_identifiers_a.push_back (interface_list_p->InterfaceInfo[i].InterfaceGuid);
 #else
-        interface_identifiers_a.push_back (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (interface_list_p->InterfaceInfo[i].InterfaceGuid)));
+        interface_identifiers_a.push_back (Net_Common_Tools::indexToInterface (Net_Common_Tools::interfaceToIndex_2 (interface_list_p->InterfaceInfo[i].InterfaceGuid)));
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
       WlanFreeMemory (interface_list_p);
 
@@ -3329,7 +3215,6 @@ clean:
 #else
     ACE_ASSERT (false);
     ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
-
     ACE_NOTREACHED (return ACE_TEXT_ALWAYS_CHAR ("");)
 #endif /* ACE_HAS_GETIFADDRS */
 #endif // ACE_WIN32 || ACE_WIN64
@@ -3341,15 +3226,7 @@ clean:
     case NET_LINKLAYER_FDDI:
     {
       ACE_ASSERT (false);
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-      ACE_NOTSUP_RETURN (GUID_NULL);
-#else
       ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-      ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
-#endif // ACE_WIN32 || ACE_WIN64
       ACE_NOTREACHED (break;)
     }
     default:
@@ -3361,55 +3238,24 @@ clean:
     }
   } // end SWITCH
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  return GUID_NULL;
-#else
   return ACE_TEXT_ALWAYS_CHAR ("");
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-  return ACE_TEXT_ALWAYS_CHAR ("");
-#endif // ACE_WIN32 || ACE_WIN64
 }
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-struct _GUID
-#else
+
 std::string
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-std::string
-#endif // ACE_WIN32 || ACE_WIN64
 Net_Common_Tools::getDefaultInterface (int linkLayerType_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::getDefaultInterface"));
 
   // step1: retrieve 'default' device for each link layer type specified
   Net_InterfaceIdentifiers_t interfaces_a;
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  struct _GUID interface_identifier;
-#else
   std::string interface_identifier;
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-  std::string interface_identifier;
-#endif // ACE_WIN32 || ACE_WIN64
   for (enum Net_LinkLayerType i = NET_LINKLAYER_ATM;
        i < NET_LINKLAYER_MAX;
        ++i)
     if (linkLayerType_in & i)
     {
       interface_identifier = Net_Common_Tools::getDefaultInterface (i);
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-      if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
-#else
       if (unlikely (interface_identifier.empty ()))
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-      if (unlikely (interface_identifier.empty ()))
-#endif // ACE_WIN32 || ACE_WIN64
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to Net_Common_Tools::getDefaultInterface() (type was: \"%s\"), continuing\n"),
@@ -3422,15 +3268,7 @@ Net_Common_Tools::getDefaultInterface (int linkLayerType_in)
   if (likely (!interfaces_a.empty ()))
     return interfaces_a.front ();
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  return GUID_NULL;
-#else
   return ACE_TEXT_ALWAYS_CHAR ("");
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-  return ACE_TEXT_ALWAYS_CHAR ("");
-#endif // ACE_WIN32 || ACE_WIN64
 }
 
 bool

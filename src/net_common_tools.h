@@ -105,10 +105,9 @@ class Net_Common_Tools
   //         - the Win32 is incomplete (returns first 'connected' interface)
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  static struct _GUID getDefaultInterface (enum Net_LinkLayerType = NET_LINKLAYER_802_3);
-#else
-  static std::string getDefaultInterface (enum Net_LinkLayerType = NET_LINKLAYER_802_3);
+  inline static struct _GUID getDefaultInterface_2 (enum Net_LinkLayerType type_in = NET_LINKLAYER_802_3) { return (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (Net_Common_Tools::getDefaultInterface (type_in)))); }
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+  static std::string getDefaultInterface (enum Net_LinkLayerType = NET_LINKLAYER_802_3);
 #else
   static std::string getDefaultInterface (enum Net_LinkLayerType = NET_LINKLAYER_802_3);
 #endif // ACE_WIN32 || ACE_WIN64
@@ -117,22 +116,16 @@ class Net_Common_Tools
   // *TODO*: only Ethernet (IEEE 802.3) and PPP is currently supported
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  static struct _GUID getDefaultInterface (int); // link layer type(s) (bitmask)
-#else
-  static std::string getDefaultInterface (int); // link layer type(s) (bitmask)
+  inline static struct _GUID getDefaultInterface_2 (int types_in) { return (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (Net_Common_Tools::getDefaultInterface (types_in)))); }
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-  static std::string getDefaultInterface (int); // link layer type(s) (bitmask)
 #endif // ACE_WIN32 || ACE_WIN64
+  static std::string getDefaultInterface (int); // link layer type(s) (bitmask)
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  static NET_IFINDEX interfaceToIndex (REFGUID); // interface identifier
-  static struct _GUID indexToInterface (NET_IFINDEX); // interface index
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-#else
+  static NET_IFINDEX interfaceToIndex_2 (REFGUID); // interface identifier
+  static struct _GUID indexToInterface_2 (NET_IFINDEX); // interface index
   static NET_IFINDEX interfaceToIndex (const std::string&); // interface identifier ('FriendlyName')
-  static std::string indexToInterface_2 (NET_IFINDEX); // interface index
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+  static std::string indexToInterface (NET_IFINDEX); // interface index
 #endif // ACE_WIN32 || ACE_WIN64
 
   // *NOTE*: the argument is assumed to be in network byte order (i.e. bytes
@@ -154,17 +147,13 @@ class Net_Common_Tools
   // *NOTE*: returns the ethernet 'MAC' address
   // *TODO*: support other link layers
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  static struct ether_addr interfaceToLinkLayerAddress_2 (REFGUID); // interface identifier
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  static struct ether_addr interfaceToLinkLayerAddress (REFGUID);            // interface identifier
-  static struct _GUID linkLayerAddressToInterfaceIdentifier (const struct ether_addr&);
-#else
-  static struct ether_addr interfaceToLinkLayerAddress (const std::string&); // interface identifier
-  static std::string linkLayerAddressToInterfaceIdentifier (const struct ether_addr&);
+  static struct _GUID linkLayerAddressToInterface_2 (const struct ether_addr&);
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-  static struct ether_addr interfaceToLinkLayerAddress (const std::string&); // interface identifier
-  static std::string linkLayerAddressToInterfaceIdentifier (const struct ether_addr&);
 #endif // ACE_WIN32 || ACE_WIN64
+  static struct ether_addr interfaceToLinkLayerAddress (const std::string&); // interface identifier
+  static std::string linkLayerAddressToInterface (const struct ether_addr&);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   static std::string interfaceToString (REFGUID); // interface identifier
@@ -201,25 +190,17 @@ class Net_Common_Tools
 #endif // ACE_WIN32 || ACE_WIN64
                                             ACE_INET_Addr&);    // return value: external IP address
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  static bool interfaceToIPAddress (REFGUID,                // device identifier
-#else
-  static bool interfaceToIPAddress (const std::string&,     // device identifier
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-  static bool interfaceToIPAddress (const std::string&,     // device identifier
+  inline static bool interfaceToIPAddress_2 (REFGUID interfaceIdentifier_in, ACE_INET_Addr& IPAddress_out, ACE_INET_Addr& gatewayAddress_out) { return Net_Common_Tools::interfaceToIPAddress (Net_Common_Tools::indexToInterface (Net_Common_Tools::interfaceToIndex_2 (interfaceIdentifier_in)), IPAddress_out, gatewayAddress_out); }
 #endif // ACE_WIN32 || ACE_WIN64
+  static bool interfaceToIPAddress (const std::string&,     // device identifier
                                     ACE_INET_Addr&,         // return value: (first) IP address
                                     ACE_INET_Addr&);        // return value: (first) gateway IP address
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  static struct _GUID IPAddressToInterface (const ACE_INET_Addr&); // IP address
-#else
-  static std::string IPAddressToInterface (const ACE_INET_Addr&); // IP address
+  inline static struct _GUID IPAddressToInterface_2 (const ACE_INET_Addr& IPAddress_in) { return (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (Net_Common_Tools::IPAddressToInterface (IPAddress_in)))); }
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-#else
-  static std::string IPAddressToInterface (const ACE_INET_Addr&); // IP address
 #endif // ACE_WIN32 || ACE_WIN64
+  static std::string IPAddressToInterface (const ACE_INET_Addr&); // IP address
 
   inline static std::string IPAddressToString (const ACE_INET_Addr& address_in, bool addressOnly_in = false) { return Net_Common_Tools::IPAddressToString ((addressOnly_in ? 0 : ACE_HTONS (address_in.get_port_number ())), ACE_HTONL (address_in.get_ip_address ())); }
 #if defined (NETLINK_SUPPORT)

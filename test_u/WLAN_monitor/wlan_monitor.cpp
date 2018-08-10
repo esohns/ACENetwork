@@ -551,7 +551,7 @@ do_work (bool autoAssociate_in,
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     interfaceIdentifier_in;
 #else
-    Net_Common_Tools::indexToInterface (Net_Common_Tools::interfaceToIndex (interfaceIdentifier_in));
+    Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (interfaceIdentifier_in));
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
   configuration.WLANMonitorConfiguration.SSID = SSID_in;
   configuration.WLANMonitorConfiguration.subscriber = &ui_event_handler;

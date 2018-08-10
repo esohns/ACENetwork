@@ -139,15 +139,9 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
     return;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
-                                                         inherited::localSAP_,
-                                                         inherited::peerSAP_)))
-#else
-  if (unlikely (!Net_Common_Tools::interfaceToIPAddress (Net_Common_Tools::interfaceToString (interfaceIdentifier_in),
-                                                         inherited::localSAP_,
-                                                         inherited::peerSAP_)))
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+  if (unlikely (!Net_Common_Tools::interfaceToIPAddress_2 (interfaceIdentifier_in,
+                                                           inherited::localSAP_,
+                                                           inherited::peerSAP_)))
 #else
   if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
                                                          inherited::localSAP_,
@@ -167,25 +161,14 @@ Net_WLAN_InetMonitor_T<ConfigurationType,
   } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\"%s\": (MAC: %s) connected to access point (MAC: %s; SSID: %s): %s <---> %s\n"),
               ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
-              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in)), NET_LINKLAYER_802_11).c_str ()),
+              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&Net_Common_Tools::interfaceToLinkLayerAddress_2 (interfaceIdentifier_in)), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (SSID_in.c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("\"%s\": (MAC: %s) connected to access point (MAC: %s; SSID: %s): %s <---> %s\n"),
-              ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
-              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&Net_Common_Tools::interfaceToLinkLayerAddress (Net_Common_Tools::interfaceToString (interfaceIdentifier_in))), NET_LINKLAYER_802_11).c_str ()),
-              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
-              ACE_TEXT (SSID_in.c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::localSAP_).c_str ()),
-              ACE_TEXT (Net_Common_Tools::IPAddressToString (inherited::peerSAP_).c_str ())));
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   Net_WLAN_AccessPointCacheConstIterator_t iterator;
   { ACE_GUARD (typename ACE_SYNCH_USE::RECURSIVE_MUTEX, aGuard, inherited::subscribersLock_);

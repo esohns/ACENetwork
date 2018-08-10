@@ -238,15 +238,6 @@ if (UNIX)
 elseif (WIN32)
 # target_link_libraries (${EXECUTABLE_SOURCE} ntdll.lib)
 
-# *TODO*: repair WIN32 pkgconfig support
- target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gio-2.0.lib)
- target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/glib-2.0.lib)
- target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gobject-2.0.lib)
- target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gthread-2.0.lib)
- target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gdk-3.0.lib)
- target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gtk-3.0.lib)
- target_link_libraries (${EXECUTABLE_SOURCE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/pango-1.0.lib)
-
  target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_WLAN)
 endif ()
 target_link_libraries (${EXECUTABLE_SOURCE} Common)
@@ -266,7 +257,9 @@ target_link_libraries (${EXECUTABLE_SOURCE} ACEStream_Statistic)
 target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_WLAN)
 
-target_link_libraries (${EXECUTABLE_SOURCE} Common)
+target_link_libraries (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_Test_U)
+
+#target_link_libraries (${EXECUTABLE_SOURCE} Common)
 
 if (UNIX)
  target_link_libraries (${EXECUTABLE_SOURCE} ${PKG_CAP_LIBRARIES})
@@ -356,15 +349,6 @@ if (UNIX)
 elseif (WIN32)
 # target_link_libraries (${EXECUTABLE_TARGET} ntdll.lib)
 
-# *TODO*: repair WIN32 pkgconfig support
- target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gio-2.0.lib)
- target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/glib-2.0.lib)
- target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gobject-2.0.lib)
- target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gthread-2.0.lib)
- target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gdk-3.0.lib)
- target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gtk-3.0.lib)
- target_link_libraries (${EXECUTABLE_TARGET} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/pango-1.0.lib)
-
  target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_WLAN)
 endif ()
 target_link_libraries (${EXECUTABLE_TARGET} Common)
@@ -384,6 +368,8 @@ target_link_libraries (${EXECUTABLE_TARGET} ACEStream_Statistic)
 target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Server)
+
+target_link_libraries (${EXECUTABLE_TARGET} ${PROJECT_NAME}_Test_U)
 
 if (UNIX)
  target_link_libraries (${EXECUTABLE_TARGET} ${PKG_CAP_LIBRARIES})

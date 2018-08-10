@@ -32,10 +32,9 @@
 
 #if defined (DBUS_SUPPORT)
 #include "dbus/dbus.h"
-#endif
-#endif
+#endif // DBUS_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
 
-//#include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
 
 #include "common_iget.h"
@@ -51,7 +50,7 @@ class Net_WLAN_IMonitorCB
 {
  public:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onSignalQualityChange (REFGUID,                  // interface identifier
+  virtual void onSignalQualityChange (REFGUID,            // interface identifier
                                       WLAN_SIGNAL_QUALITY) = 0; // signal quality (of current association)
 #else
   virtual void onSignalQualityChange (const std::string&, // interface identifier
@@ -137,11 +136,11 @@ class Net_WLAN_IMonitorBase
                            Net_WLAN_AccessPointCacheValue_t> // cache access
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
  , public Common_ISet3R_T<std::string,
-                          struct _GUID,
+                          struct _GUID,                     // interface identifier
                           struct Net_WLAN_AccessPointState> // cache access
 #else
  , public Common_ISet3R_T<std::string,
-                          std::string,
+                          std::string,                      // interface identifier
                           struct Net_WLAN_AccessPointState> // cache access
 #endif // ACE_WIN32 || ACE_WIN64
 {
@@ -171,7 +170,7 @@ class Net_WLAN_IMonitorBase
   //         - reset the 'auto-associate' flag
   //         - resume scanning
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void scan (REFGUID) = 0; // interface identifier {GUID_NULL: all}
+  virtual void scan (REFGUID) = 0;            // interface identifier {GUID_NULL: all}
 #else
   virtual void scan (const std::string&) = 0; // interface identifier {"": all}
 #endif // ACE_WIN32 || ACE_WIN64
@@ -179,7 +178,7 @@ class Net_WLAN_IMonitorBase
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   virtual struct _GUID interfaceIdentifier () const = 0; // returns currently monitored interface (if any)
 #else
-  virtual std::string interfaceIdentifier () const = 0; // returns currently monitored interface (if any)
+  virtual std::string interfaceIdentifier () const = 0;  // returns currently monitored interface (if any)
 #endif // ACE_WIN32 || ACE_WIN64
   virtual std::string SSID () const = 0; // returns currently associated (E)SSID (if any)
 

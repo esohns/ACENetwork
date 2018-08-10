@@ -696,13 +696,17 @@ idle_initialize_ui_cb (gpointer userData_in)
   ACE_ASSERT (scale_p);
   gtk_range_set_show_fill_level (GTK_RANGE (scale_p),
                                  TRUE);
-  GValue value_s = G_VALUE_INIT;
-  g_value_init (&value_s, G_TYPE_INT);
-  g_value_set_int (&value_s, 0);
+#if GTK_CHECK_VERSION(2,30,0)
+  GValue value = G_VALUE_INIT;
+#else
+  GValue value;
+  g_value_init (&value, G_TYPE_INT);
+#endif // GTK_CHECK_VERSION (2,30,0)
+  g_value_set_int (&value, 0);
   g_object_set_property (G_OBJECT (scale_p),
                          ACE_TEXT_ALWAYS_CHAR ("slider-width"),
-                         &value_s);
-  g_value_unset (&value_s);
+                         &value);
+  g_value_unset (&value);
 
   // step5: disable some functions ?
   GtkButton* button_p =
@@ -1225,8 +1229,12 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
       GTK_LIST_STORE (gtk_builder_get_object ((*iterator).second.second,
                                               ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_LISTSTORE_INTERFACE_NAME)));
   ACE_ASSERT (list_store_p);
+#if GTK_CHECK_VERSION(2,30,0)
   GValue value = G_VALUE_INIT;
+#else
+  GValue value;
   g_value_init (&value, G_TYPE_STRING);
+#endif // GTK_CHECK_VERSION (2,30,0)
   gtk_tree_model_get_value (GTK_TREE_MODEL (list_store_p),
                             &iterator_2,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1382,37 +1390,41 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   ACE_ASSERT (list_store_p);
   gint n_rows = gtk_tree_model_iter_n_children (GTK_TREE_MODEL (list_store_p),
                                                 NULL);
+#if GTK_CHECK_VERSION(2,30,0)
   GValue value = G_VALUE_INIT;
+#else
+  GValue value;
   g_value_init (&value, G_TYPE_STRING);
+#endif // GTK_CHECK_VERSION (2,30,0)
 
   GtkTreeIter iterator_2;
   std::string current_essid_string =
-    #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    #if defined (WLANAPI_USE)
-          Net_WLAN_Tools::associatedSSID (data_p->monitor->get (),
-                                          data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier);
-    #else
-          ACE_TEXT_ALWAYS_CHAR ("");
-      ACE_ASSERT (false);
-      ACE_NOTSUP;
-      ACE_NOTREACHED (return;)
-    #endif // WLANAPI_USE
-    #else
-          Net_WLAN_Tools::associatedSSID (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
-    #if defined (WEXT_USE)
-                                          data_p->monitor->get ());
-    #elif defined (NL80211_USE)
-                                          const_cast<struct nl_sock*> (data_p->monitor->getP ()),
-                                          data_p->monitor->get ());
-    #elif defined (DBUS_USE)
-                                          data_p->monitor->getP ());
-    #else
-                                          NULL);
-      ACE_ASSERT (false);
-      ACE_NOTSUP;
-      ACE_NOTREACHED (return;)
-    #endif
-    #endif // ACE_WIN32 || ACE_WIN64
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_USE)
+    Net_WLAN_Tools::associatedSSID (data_p->monitor->get (),
+                                    data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier);
+#else
+  ACE_TEXT_ALWAYS_CHAR ("");
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+  ACE_NOTREACHED (return;)
+#endif // WLANAPI_USE
+#else
+  Net_WLAN_Tools::associatedSSID (data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
+#if defined (WEXT_USE)
+                                  data_p->monitor->get ());
+#elif defined (NL80211_USE)
+                                  const_cast<struct nl_sock*> (data_p->monitor->getP ()),
+                                  data_p->monitor->get ());
+#elif defined (DBUS_USE)
+                                  data_p->monitor->getP ());
+#else
+                                  NULL);
+  ACE_ASSERT (false);
+  ACE_NOTSUP;
+  ACE_NOTREACHED (return;)
+#endif
+#endif // ACE_WIN32 || ACE_WIN64
   std::string selected_essid_string;
   gchar* string_p = NULL;
   guint index_i = std::numeric_limits<unsigned int>::max ();

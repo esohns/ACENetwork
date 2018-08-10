@@ -269,6 +269,8 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_IRC)
 
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_I)
+
 if (UNIX)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
 endif (UNIX)
@@ -437,6 +439,8 @@ target_link_libraries (${EXECUTABLE_GUI} ACEStream_Statistic)
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_IRC)
+
+target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Test_I)
 
 if (UNIX)
  target_link_libraries (${EXECUTABLE_GUI} ${PKG_CAP_LIBRARIES})

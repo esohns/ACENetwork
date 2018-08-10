@@ -282,11 +282,13 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_BitTorrent)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_I)
+
 if (UNIX)
  target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
 elseif (WIN32)
  target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
-endif (UNIX)
+endif ()
 
 # add PCH
 set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
@@ -402,15 +404,6 @@ if (UNIX)
 elseif (WIN32)
 # target_link_libraries (${EXECUTABLE_GUI} ntdll.lib)
 
-# *TODO*: repair WIN32 pkgconfig support
- target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gio-2.0.lib)
- target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/glib-2.0.lib)
- target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gobject-2.0.lib)
- target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gthread-2.0.lib)
- target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gdk-3.0.lib)
- target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/gtk-3.0.lib)
- target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/pango-1.0.lib)
-
  target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 endif ()
 target_link_libraries (${EXECUTABLE_GUI} Common)
@@ -424,10 +417,12 @@ target_link_libraries (${EXECUTABLE_GUI} CommonUI_GTK)
 
 target_link_libraries (${EXECUTABLE_GUI} ACEStream)
 
-target_link_libraries (${EXECUTABLE_GUI} ACENetwork)
-target_link_libraries (${EXECUTABLE_GUI} ACENetwork_WLAN)
-target_link_libraries (${EXECUTABLE_GUI} ACENetwork_Protocol_BitTorrent)
-target_link_libraries (${EXECUTABLE_GUI} ACENetwork_Protocol_HTTP)
+target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_WLAN)
+target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_BitTorrent)
+target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_HTTP)
+
+target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Test_I)
 
 if (UNIX)
  target_link_libraries (${EXECUTABLE_GUI} ${PKG_CAP_LIBRARIES})

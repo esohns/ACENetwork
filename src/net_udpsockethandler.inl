@@ -130,7 +130,15 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
     std::string interface_identifier;
 #endif // ACE_WIN32 || ACE_WIN64
     interface_identifier =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+      Net_Common_Tools::IPAddressToInterface_2 (socket_configuration_p->peerAddress);
+#else
       Net_Common_Tools::IPAddressToInterface (socket_configuration_p->peerAddress);
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+      Net_Common_Tools::IPAddressToInterface (socket_configuration_p->peerAddress);
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
@@ -147,9 +155,21 @@ Net_UDPSocketHandler_T<ACE_SYNCH_USE,
       goto error;
     } // end IF
     ACE_INET_Addr gateway_address;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    if (unlikely (!Net_Common_Tools::interfaceToIPAddress_2 (interface_identifier,
+                                                             source_SAP,
+                                                             gateway_address)))
+#else
     if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
                                                            source_SAP,
                                                            gateway_address)))
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+    if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interface_identifier,
+                                                           source_SAP,
+                                                           gateway_address)))
+#endif // ACE_WIN32 || ACE_WIN64
     {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
