@@ -163,12 +163,13 @@ class Net_WLAN_Monitor_Base_T
   Net_WLAN_Monitor_Base_T ();
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  bool startScanTimer (const ACE_Time_Value&); // delay {ACE_Time_Value::zero: expire immediately}
+  bool startScanTimer (const ACE_Time_Value& = ACE_Time_Value::zero); // delay {ACE_Time_Value::zero: expire immediately}
   bool cancelScanTimer ();
 
   // implement Common_ITimerHandler
   // *NOTE*: the scan timer is one-shot and restarted in the callback
-  inline virtual void handle (const void*) { ACE_ASSERT (scanTimerId_ != -1); scanTimerId_ = -1; inherited::change (NET_WLAN_MONITOR_STATE_SCAN); }
+  // *NOTE*: the timer handler may trigger before scanTimerId_ has been set
+  inline virtual void handle (const void*) { if (likely (scanTimerId_ != -1)) scanTimerId_ = -1; inherited::change (NET_WLAN_MONITOR_STATE_SCAN); }
 #endif // ACE_WIN32 || ACE_WIN64
 
   // *TODO*: remove any implementation-specific members

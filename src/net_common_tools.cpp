@@ -65,6 +65,8 @@
 #endif // DBUS_SUPPORT
 
 #include "common_timer_tools.h"
+#elif (defined (ACE_WIN32) || defined (ACE_WIN64))
+#include "common_error_tools.h"
 #endif // ACE_LINUX
 
 #include "net_common.h"
@@ -325,8 +327,8 @@ Net_Common_Tools::IPAddressToString (unsigned short port_in,
 
   int result = -1;
   ACE_INET_Addr inet_addr;
-  ACE_TCHAR buffer[32]; // "xxx.xxx.xxx.xxx:yyyyy\0"
-  ACE_OS::memset (&buffer, 0, sizeof (buffer));
+  char buffer_a[32]; // "xxx.xxx.xxx.xxx:yyyyy\0"
+  ACE_OS::memset (&buffer_a, 0, sizeof (char[32]));
   result = inet_addr.set (port_in,
                           IPAddress_in,
                           0,  // no need to encode, data IS in network byte order !
@@ -337,8 +339,8 @@ Net_Common_Tools::IPAddressToString (unsigned short port_in,
                 ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
     return return_value;
   } // end IF
-  result = inet_addr.addr_to_string (buffer,
-                                     sizeof (buffer),
+  result = inet_addr.addr_to_string (buffer_a,
+                                     sizeof (char[32]),
                                      1); // want IP address, not hostname !
   if (unlikely (result == -1))
   {
@@ -348,7 +350,7 @@ Net_Common_Tools::IPAddressToString (unsigned short port_in,
   } // end IF
 
   // copy string from buffer
-  return_value = buffer;
+  return_value = buffer_a;
 
   // clean up: if port number was 0, cut off the trailing ":0" !
   if (!port_in)
@@ -452,7 +454,7 @@ Net_Common_Tools::isLocal (const ACE_INET_Addr& address_in)
   //{
   //  ACE_DEBUG ((LM_ERROR,
   //              ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
-  //              ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
+  //              ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
   //  return false;
   //} // end IF
   //ACE_ASSERT (buffer_length);
@@ -474,7 +476,7 @@ Net_Common_Tools::isLocal (const ACE_INET_Addr& address_in)
   //{
   //  ACE_DEBUG ((LM_ERROR,
   //              ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
-  //              ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
+  //              ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
 
   //  // clean up
   //  ACE_FREE_FUNC (ip_adapter_addresses_p);
@@ -545,7 +547,7 @@ Net_Common_Tools::isLocal (const ACE_INET_Addr& address_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::HeapAlloc(%u): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (::GetLastError ()).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (::GetLastError ()).c_str ())));
     return false; // *TODO*: this could lead to false negatives
   } // end IF
   // step1: determine size of the table
@@ -555,7 +557,7 @@ Net_Common_Tools::isLocal (const ACE_INET_Addr& address_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetIpAddrTable(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (::GetLastError ()).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (::GetLastError ()).c_str ())));
 
     HeapFree (GetProcessHeap (), 0, table_p);
 
@@ -571,7 +573,7 @@ Net_Common_Tools::isLocal (const ACE_INET_Addr& address_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::HeapAlloc(%u): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (::GetLastError ()).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (::GetLastError ()).c_str ())));
     return false; // *TODO*: this could lead to false negatives
   } // end IF
   // step2: get the actual table data
@@ -580,7 +582,7 @@ Net_Common_Tools::isLocal (const ACE_INET_Addr& address_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetIpAddrTable(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
 
     HeapFree (GetProcessHeap (), 0, table_p);
 
@@ -826,7 +828,7 @@ Net_Common_Tools::TransportLayerTypeToString (enum Net_TransportLayerType type_i
 }
 
 std::string
-Net_Common_Tools::LinkLayerAddressToString (const unsigned char* const addressDataPtr_in,
+Net_Common_Tools::LinkLayerAddressToString (const uint8_t* const addressDataPtr_in,
                                             enum Net_LinkLayerType type_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::LinkLayerAddressToString"));
@@ -1368,7 +1370,7 @@ Net_Common_Tools::interfaceToLinkLayerAddress (const std::string& interfaceIdent
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     return result;
   } // end IF
   ACE_ASSERT (buffer_length);
@@ -1385,7 +1387,7 @@ Net_Common_Tools::interfaceToLinkLayerAddress (const std::string& interfaceIdent
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     ACE_FREE_FUNC (ip_interfaceIdentifier_info_p);
     return result;
   } // end IF
@@ -1489,7 +1491,7 @@ Net_Common_Tools::linkLayerAddressToInterface (const struct ether_addr& address_
 //  {
 //    ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-//                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+//                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
 //    return result;
 //  } // end IF
 //  ACE_ASSERT (buffer_length);
@@ -1507,7 +1509,7 @@ Net_Common_Tools::linkLayerAddressToInterface (const struct ether_addr& address_
 //  {
 //    ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-//                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+//                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
 
 //    // clean up
 //    ACE_FREE_FUNC (ip_interfaceIdentifier_info_p);
@@ -1574,7 +1576,7 @@ Net_Common_Tools::interfaceToLinkLayerAddress_2 (REFGUID interfaceIdentifier_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     return result;
   } // end IF
   ACE_ASSERT (buffer_length);
@@ -1591,7 +1593,7 @@ Net_Common_Tools::interfaceToLinkLayerAddress_2 (REFGUID interfaceIdentifier_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     ACE_FREE_FUNC (ip_interfaceIdentifier_info_p);
     return result;
   } // end IF
@@ -1652,7 +1654,7 @@ Net_Common_Tools::linkLayerAddressToInterface_2 (const struct ether_addr& addres
 //  {
 //    ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-//                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+//                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
 //    return result;
 //  } // end IF
 //  ACE_ASSERT (buffer_length);
@@ -1670,7 +1672,7 @@ Net_Common_Tools::linkLayerAddressToInterface_2 (const struct ether_addr& addres
 //  {
 //    ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-//                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+//                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
 
 //    // clean up
 //    ACE_FREE_FUNC (ip_interfaceIdentifier_info_p);
@@ -1707,36 +1709,6 @@ Net_Common_Tools::linkLayerAddressToInterface_2 (const struct ether_addr& addres
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 std::string
-Net_Common_Tools::interfaceToString (REFGUID interfaceIdentifier_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceToString"));
-
-  // initialize return value(s)
-  std::string result;
-
-  // sanity check(s)
-  ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
-
-  NET_IFINDEX interface_index = 0;
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  interface_index =
-    Net_Common_Tools::interfaceToIndex_2 (interfaceIdentifier_in);
-  if (unlikely (!interface_index))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIndex_2(%s), aborting\n"),
-                ACE_TEXT (Common_Tools::GUIDToString (interfaceIdentifier_in).c_str ())));
-    return ACE_TEXT_ALWAYS_CHAR ("");
-  } // end IF
-#else
-  ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_NOTREACHED (return ACE_TEXT_ALWAYS_CHAR ("");)
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-
-  return Net_Common_Tools::interfaceToString (interface_index);
-}
-std::string
 Net_Common_Tools::interfaceToString (NET_IFINDEX interfaceIdentifier_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceToString"));
@@ -1757,7 +1729,7 @@ Net_Common_Tools::interfaceToString (NET_IFINDEX interfaceIdentifier_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     return ACE_TEXT_ALWAYS_CHAR ("");
   } // end IF
   ACE_ASSERT (buffer_length);
@@ -1775,7 +1747,7 @@ Net_Common_Tools::interfaceToString (NET_IFINDEX interfaceIdentifier_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     goto error;
   } // end IF
 
@@ -1824,7 +1796,7 @@ Net_Common_Tools::interfaceToIndex_2 (REFGUID interfaceIdentifier_in)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::ConvertInterfaceGuidToLuid(%s): \"%s\", aborting\n"),
                 ACE_TEXT (Common_Tools::GUIDToString (interfaceIdentifier_in).c_str ()),
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     return result;
   } // end IF
   result_2 = ConvertInterfaceLuidToIndex (&interface_luid_u,
@@ -1834,13 +1806,43 @@ Net_Common_Tools::interfaceToIndex_2 (REFGUID interfaceIdentifier_in)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::ConvertInterfaceLuidToIndex(%q): \"%s\", aborting\n"),
                 interface_luid_u.Value,
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     return result;
   } // end IF
 #else
-  ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (0);
-  ACE_NOTREACHED (return 0;)
+  IP_INTERFACE_NAME_INFO* ip_interface_name_info_p = NULL;
+  DWORD count = 0;
+  DWORD dwFlags = 0;
+  DWORD result_2 =
+    NhpAllocateAndGetInterfaceInfoFromStack (&ip_interface_name_info_p, // ppTable
+                                             &count,                    // pdwCount
+                                             FALSE,                     // bOrder
+                                             GetProcessHeap (),         // hHeap
+                                             dwFlags);                  // Flags
+  if (unlikely (result_2 != ERROR_SUCCESS))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::NhpAllocateAndGetInterfaceInfoFromStack(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
+    return result;
+  } // end IF
+  for (DWORD i = 0;
+       i < count;
+       ++i)
+  { //ACE_ASSERT (ip_interface_name_info_p[i]);
+    if (InlineIsEqualGUID (ip_interface_name_info_p[i].DeviceGuid, interfaceIdentifier_in))
+    {
+      result = ip_interface_name_info_p[i].Index;
+      break;
+    } // end IF
+  } // end FOR
+
+  // clean up
+  if (!HeapFree (GetProcessHeap (), dwFlags, ip_interface_name_info_p))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::HeapFree(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Error_Tools::errorToString (GetLastError ()).c_str ())));
+  ip_interface_name_info_p = NULL;
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 
   return result;
@@ -1866,7 +1868,7 @@ Net_Common_Tools::indexToInterface_2 (NET_IFINDEX interfaceIndex_in)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to ConvertInterfaceIndexToLuid(%u), aborting\n"),
                 interfaceIndex_in,
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     return GUID_NULL;
   } // end IF
   result_2 = ConvertInterfaceLuidToGuid (&interface_luid_u,
@@ -1876,14 +1878,118 @@ Net_Common_Tools::indexToInterface_2 (NET_IFINDEX interfaceIndex_in)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("failed to ConvertInterfaceLuidToGuid(%q), aborting\n"),
                 interface_luid_u.Value,
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     return GUID_NULL;
   } // end IF
 #else
-  ACE_ASSERT (false);
-  ACE_NOTSUP_RETURN (GUID_NULL);
-  ACE_NOTREACHED (return GUID_NULL;)
+  IP_INTERFACE_NAME_INFO* ip_interface_name_info_p = NULL;
+  DWORD count = 0;
+  DWORD dwFlags = 0;
+  DWORD result_2 =
+    NhpAllocateAndGetInterfaceInfoFromStack (&ip_interface_name_info_p, // ppTable
+                                             &count,                    // pdwCount
+                                             FALSE,                     // bOrder
+                                             GetProcessHeap (),         // hHeap
+                                             dwFlags);                  // Flags
+  if (unlikely (result_2 != ERROR_SUCCESS))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::NhpAllocateAndGetInterfaceInfoFromStack(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
+    return GUID_NULL;
+  } // end IF
+  for (DWORD i = 0;
+       i < count;
+       ++i)
+  { //ACE_ASSERT (ip_interface_name_info_p[i]);
+    if (ip_interface_name_info_p[i].Index == interfaceIndex_in)
+    {
+      result = ip_interface_name_info_p[i].DeviceGuid;
+      break;
+    } // end IF
+  } // end FOR
+
+  // clean up
+  if (!HeapFree (GetProcessHeap (), dwFlags, ip_interface_name_info_p))
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::HeapFree(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Error_Tools::errorToString (GetLastError ()).c_str ())));
+  ip_interface_name_info_p = NULL;
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+
+  return result;
+}
+
+std::string
+Net_Common_Tools::adapterName (const std::string& friendlyName_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::adapterName"));
+
+  // initialize return value(s)
+  std::string result;
+
+  // sanity check(s)
+  ACE_ASSERT (!friendlyName_in.empty ());
+
+  ULONG flags = (GAA_FLAG_INCLUDE_PREFIX             |
+                 GAA_FLAG_INCLUDE_WINS_INFO          |
+                 GAA_FLAG_INCLUDE_GATEWAYS           |
+                 GAA_FLAG_INCLUDE_ALL_INTERFACES     |
+                 GAA_FLAG_INCLUDE_ALL_COMPARTMENTS   |
+                 GAA_FLAG_INCLUDE_TUNNEL_BINDINGORDER);
+  IP_ADAPTER_ADDRESSES* ip_adapter_addresses_p = NULL;
+  ULONG buffer_length = 0;
+  ULONG result_2 =
+    GetAdaptersAddresses (AF_UNSPEC,              // Family
+                          flags,                  // Flags
+                          NULL,                   // Reserved
+                          ip_adapter_addresses_p, // AdapterAddresses
+                          &buffer_length);        // SizePointer
+  if (unlikely (result_2 != ERROR_BUFFER_OVERFLOW))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
+    return result;
+  } // end IF
+  ACE_ASSERT (buffer_length);
+  ip_adapter_addresses_p =
+    static_cast<IP_ADAPTER_ADDRESSES*> (ACE_MALLOC_FUNC (buffer_length));
+  if (unlikely (!ip_adapter_addresses_p))
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
+    return result;
+  } // end IF
+  result_2 =
+    GetAdaptersAddresses (AF_UNSPEC,              // Family
+                          flags,                  // Flags
+                          NULL,                   // Reserved
+                          ip_adapter_addresses_p, // AdapterAddresses
+                          &buffer_length);        // SizePointer
+  if (unlikely (result_2 != NO_ERROR))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
+    ACE_FREE_FUNC (ip_adapter_addresses_p); ip_adapter_addresses_p = NULL;
+    return result;
+  } // end IF
+
+  IP_ADAPTER_ADDRESSES* ip_adapter_addresses_2 = ip_adapter_addresses_p;
+  do
+  {
+    if (!ACE_OS::strcmp (ACE_TEXT_ALWAYS_CHAR (ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->FriendlyName)),
+                         friendlyName_in.c_str ()))
+      break;
+
+    ip_adapter_addresses_2 = ip_adapter_addresses_2->Next;
+  } while (ip_adapter_addresses_2);
+  if (ip_adapter_addresses_2)
+    result = ip_adapter_addresses_2->AdapterName;
+
+  // clean up
+  ACE_FREE_FUNC (ip_adapter_addresses_p); ip_adapter_addresses_p = NULL;
 
   return result;
 }
@@ -1902,33 +2008,16 @@ Net_Common_Tools::interfaceToIndex (const std::string& interfaceIdentifier_in)
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
   struct _IP_ADAPTER_INFO* adapter_info_p = NULL, *adapter_info_2 = NULL;
   ULONG result_2 = 0;
-  //UINT i;
-  ULONG buffer_length_u = sizeof (struct _IP_ADAPTER_INFO);
-  //struct ether_addr ether_addr_s;
-  //std::string adapter_type_string;
-  //errno_t error_i;
-  //struct tm tm_s;
-  //char buffer_a[32];
-  //char buffer_2[32];
-
-  adapter_info_p =
-    (struct _IP_ADAPTER_INFO*)MALLOC (sizeof (struct _IP_ADAPTER_INFO));
-  if (!adapter_info_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-    return result;
-  } // end IF
+  ULONG buffer_length_u = 0;
   // retrieve the necessary size into the ulOutBufLen variable
   result_2 = GetAdaptersInfo (adapter_info_p, &buffer_length_u);
   if (result_2 != ERROR_BUFFER_OVERFLOW)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     goto error;
   } // end IF
-  FREE (adapter_info_p); adapter_info_p = NULL;
   adapter_info_p = (struct _IP_ADAPTER_INFO*)MALLOC (buffer_length_u);
   if (!adapter_info_p)
   {
@@ -1942,101 +2031,13 @@ Net_Common_Tools::interfaceToIndex (const std::string& interfaceIdentifier_in)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersInfo(%u): \"%s\", aborting\n"),
                 buffer_length_u,
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     goto error;
   } // end IF
 
   adapter_info_2 = adapter_info_p;
   while (adapter_info_2)
   {
-//#if defined (_DEBUG)
-//    ACE_OS::memset (&ether_addr_s, 0, sizeof (struct ether_addr));
-//    ACE_ASSERT (adapter_info_2->AddressLength == ETH_ALEN);
-//    ACE_OS::memcpy (&ether_addr_s.ether_addr_octet, &adapter_info_2->Address[0], ETH_ALEN);
-//    switch (adapter_info_2->Type)
-//    {
-//      case MIB_IF_TYPE_OTHER:
-//        adapter_type_string = ACE_TEXT_ALWAYS_CHAR ("Other");
-//        break;
-//      case MIB_IF_TYPE_ETHERNET:
-//        adapter_type_string = ACE_TEXT_ALWAYS_CHAR ("Ethernet");
-//        break;
-//      case MIB_IF_TYPE_TOKENRING:
-//        adapter_type_string = ACE_TEXT_ALWAYS_CHAR ("Token Ring");
-//        break;
-//      case MIB_IF_TYPE_FDDI:
-//        adapter_type_string = ACE_TEXT_ALWAYS_CHAR ("FDDI");
-//        break;
-//      case MIB_IF_TYPE_PPP:
-//        adapter_type_string = ACE_TEXT_ALWAYS_CHAR ("PPP");
-//        break;
-//      case MIB_IF_TYPE_LOOPBACK:
-//        adapter_type_string = ACE_TEXT_ALWAYS_CHAR ("Lookback");
-//        break;
-//      case MIB_IF_TYPE_SLIP:
-//        adapter_type_string = ACE_TEXT_ALWAYS_CHAR ("Slip");
-//        break;
-//      default:
-//      {
-//        ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("invalid/unknown adapter type (was: %d), aborting\n"),
-//                    adapter_info_2->Type));
-//        goto error;
-//      }
-//    } // end SWITCH
-//    error_i = _localtime32_s (&tm_s, (__time32_t*)&adapter_info_2->LeaseObtained);
-//    if (error_i)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to _localtime32_s(%d): \"%s\", aborting\n"),
-//                  adapter_info_2->LeaseObtained,
-//                  ACE_TEXT (Common_Tools::errorToString (error_i).c_str ())));
-//      goto error;
-//    } // end IF
-//    error_i = asctime_s (buffer_a, sizeof (char[32]), &tm_s);
-//    if (error_i)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to asctime_s(): \"%s\", aborting\n"),
-//                  ACE_TEXT (Common_Tools::errorToString (error_i).c_str ())));
-//      goto error;
-//    } // end IF
-//    error_i = _localtime32_s (&tm_s, (__time32_t*)&adapter_info_2->LeaseExpires);
-//    if (error_i)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to _localtime32_s(%d): \"%s\", aborting\n"),
-//                  adapter_info_2->LeaseExpires,
-//                  ACE_TEXT (Common_Tools::errorToString (error_i).c_str ())));
-//      goto error;
-//    } // end IF
-//    error_i = asctime_s (buffer_2, sizeof (char[32]), &tm_s);
-//    if (error_i)
-//    {
-//      ACE_DEBUG ((LM_ERROR,
-//                  ACE_TEXT ("failed to asctime_s(): \"%s\", aborting\n"),
-//                  ACE_TEXT (Common_Tools::errorToString (error_i).c_str ())));
-//      goto error;
-//    } // end IF
-//    ACE_DEBUG ((LM_DEBUG,
-//                ACE_TEXT ("\tComboIndex: \t%d\n\tAdapter Name: \t%s\n\tAdapter Description: \t%s\n\tAdapter Address: \t%s\n\tIndex: \t%d\n\tType: \t%s\n\tIP Address: \t%s\n\tIP Mask: \t%s\n\tGateway: \t%s\n\tDHCP Enabled: \t%s\n\tDHCP Server: \t%s\n\tLease Obtained: \t%s\n\tLease Expires: \t%s\n\tPrimary Wins Server: \t%s\n\tSecondary Wins Server: \t%s\n"),
-//                adapter_info_2->ComboIndex,
-//                ACE_TEXT (adapter_info_2->AdapterName),
-//                ACE_TEXT_WCHAR_TO_TCHAR (adapter_info_2->Description),
-//                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (&ether_addr_s.ether_addr_octet, NET_LINKLAYER_802_3).c_str ()),
-//                adapter_info_2->Index,
-//                ACE_TEXT (adapter_type_string.c_str ()),
-//                ACE_TEXT (adapter_info_2->IpAddressList.IpAddress.String),
-//                ACE_TEXT (adapter_info_2->IpAddressList.IpMask.String),
-//                ACE_TEXT (adapter_info_2->GatewayList.IpAddress.String),
-//                (adapter_info_2->DhcpEnabled ? ACE_TEXT ("Yes") : ACE_TEXT ("No")),
-//                ACE_TEXT (adapter_info_2->DhcpServer.IpAddress.String),
-//                ACE_TEXT (buffer_a),
-//                ACE_TEXT (buffer_2),
-//                (adapter_info_2->HaveWins ? ACE_TEXT ("Yes") : ACE_TEXT ("No")),
-//                ACE_TEXT (adapter_info_2->PrimaryWinsServer.IpAddress.String),
-//                ACE_TEXT (adapter_info_2->SecondaryWinsServer.IpAddress.String)));
-//#endif // _DEBUG
     if (!ACE_OS::strcmp (adapter_info_2->AdapterName,
                          interfaceIdentifier_in.c_str ()))
     {
@@ -2068,26 +2069,17 @@ Net_Common_Tools::indexToInterface (NET_IFINDEX interfaceIndex_in)
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
   struct _IP_ADAPTER_INFO* adapter_info_p = NULL, *adapter_info_2 = NULL;
   ULONG result_2 = 0;
-  ULONG buffer_length_u = sizeof (struct _IP_ADAPTER_INFO);
+  ULONG buffer_length_u = 0;
 
-  adapter_info_p =
-    (struct _IP_ADAPTER_INFO*)MALLOC (sizeof (struct _IP_ADAPTER_INFO));
-  if (!adapter_info_p)
-  {
-    ACE_DEBUG ((LM_CRITICAL,
-                ACE_TEXT ("failed to allocate memory: \"%m\", aborting\n")));
-    return result;
-  } // end IF
   // retrieve the necessary size into the ulOutBufLen variable
   result_2 = GetAdaptersInfo (adapter_info_p, &buffer_length_u);
   if (result_2 != ERROR_BUFFER_OVERFLOW)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     goto error;
   } // end IF
-  FREE (adapter_info_p); adapter_info_p = NULL;
   adapter_info_p = (struct _IP_ADAPTER_INFO*)MALLOC (buffer_length_u);
   if (!adapter_info_p)
   {
@@ -2101,7 +2093,7 @@ Net_Common_Tools::indexToInterface (NET_IFINDEX interfaceIndex_in)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersInfo(%u): \"%s\", aborting\n"),
                 buffer_length_u,
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     goto error;
   } // end IF
 
@@ -2123,6 +2115,162 @@ error:
 
   return result;
 }
+
+#if defined (_DEBUG)
+void
+Net_Common_Tools::dump (const std::string& interfaceIdentifier_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::dump"));
+
+  // sanity check(s)
+  ACE_ASSERT (!interfaceIdentifier_in.empty ());
+
+#define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
+#define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
+  struct _IP_ADAPTER_INFO* adapter_info_p = NULL, *adapter_info_2 = NULL;
+  ULONG result_2 = 0;
+  ULONG buffer_length_u = sizeof (struct _IP_ADAPTER_INFO);
+  struct ether_addr ether_addr_s;
+  std::string adapter_type_string;
+  errno_t error_i;
+  struct tm tm_s;
+  char buffer_a[32];
+  char buffer_2[32];
+
+  adapter_info_p =
+    (struct _IP_ADAPTER_INFO*)MALLOC (sizeof (struct _IP_ADAPTER_INFO));
+  if (!adapter_info_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+    return;
+  } // end IF
+  // retrieve the necessary size into the ulOutBufLen variable
+  result_2 = GetAdaptersInfo (adapter_info_p, &buffer_length_u);
+  if (result_2 != ERROR_BUFFER_OVERFLOW)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", returning\n"),
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
+    goto error;
+  } // end IF
+  FREE (adapter_info_p); adapter_info_p = NULL;
+  adapter_info_p = (struct _IP_ADAPTER_INFO*)MALLOC (buffer_length_u);
+  if (!adapter_info_p)
+  {
+    ACE_DEBUG ((LM_CRITICAL,
+                ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
+    goto error;
+  } // end IF
+  result_2 = GetAdaptersInfo (adapter_info_p, &buffer_length_u);
+  if (result_2 != NO_ERROR)
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ::GetAdaptersInfo(%u): \"%s\", returning\n"),
+                buffer_length_u,
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
+    goto error;
+  } // end IF
+
+  adapter_info_2 = adapter_info_p;
+  while (adapter_info_2)
+  {
+    ACE_OS::memset (&ether_addr_s, 0, sizeof (struct ether_addr));
+    ACE_ASSERT (adapter_info_2->AddressLength == ETH_ALEN);
+    ACE_OS::memcpy (&ether_addr_s.ether_addr_octet, &adapter_info_2->Address[0], ETH_ALEN);
+    switch (adapter_info_2->Type)
+    {
+      case MIB_IF_TYPE_OTHER:
+        adapter_type_string = ACE_TEXT_ALWAYS_CHAR ("Other");
+        break;
+      case MIB_IF_TYPE_ETHERNET:
+        adapter_type_string = ACE_TEXT_ALWAYS_CHAR ("Ethernet");
+        break;
+      case MIB_IF_TYPE_TOKENRING:
+        adapter_type_string = ACE_TEXT_ALWAYS_CHAR ("Token Ring");
+        break;
+      case MIB_IF_TYPE_FDDI:
+        adapter_type_string = ACE_TEXT_ALWAYS_CHAR ("FDDI");
+        break;
+      case MIB_IF_TYPE_PPP:
+        adapter_type_string = ACE_TEXT_ALWAYS_CHAR ("PPP");
+        break;
+      case MIB_IF_TYPE_LOOPBACK:
+        adapter_type_string = ACE_TEXT_ALWAYS_CHAR ("Lookback");
+        break;
+      case MIB_IF_TYPE_SLIP:
+        adapter_type_string = ACE_TEXT_ALWAYS_CHAR ("Slip");
+        break;
+      default:
+      {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("invalid/unknown adapter type (was: %d), returning\n"),
+                    adapter_info_2->Type));
+        goto error;
+      }
+    } // end SWITCH
+    error_i = _localtime32_s (&tm_s, (__time32_t*)&adapter_info_2->LeaseObtained);
+    if (error_i)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to _localtime32_s(%d): \"%s\", returning\n"),
+                  adapter_info_2->LeaseObtained,
+                  ACE_TEXT (Common_Error_Tools::errorToString (error_i).c_str ())));
+      goto error;
+    } // end IF
+    error_i = asctime_s (buffer_a, sizeof (char[32]), &tm_s);
+    if (error_i)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to asctime_s(): \"%s\", returning\n"),
+                  ACE_TEXT (Common_Error_Tools::errorToString (error_i).c_str ())));
+      goto error;
+    } // end IF
+    error_i = _localtime32_s (&tm_s, (__time32_t*)&adapter_info_2->LeaseExpires);
+    if (error_i)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to _localtime32_s(%d): \"%s\", returning\n"),
+                  adapter_info_2->LeaseExpires,
+                  ACE_TEXT (Common_Error_Tools::errorToString (error_i).c_str ())));
+      goto error;
+    } // end IF
+    error_i = asctime_s (buffer_2, sizeof (char[32]), &tm_s);
+    if (error_i)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to asctime_s(): \"%s\", returning\n"),
+                  ACE_TEXT (Common_Error_Tools::errorToString (error_i).c_str ())));
+      goto error;
+    } // end IF
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("\tComboIndex: \t%d\n\tAdapter Name: \t%s\n\tAdapter Description: \t%s\n\tAdapter Address: \t%s\n\tIndex: \t%d\n\tType: \t%s\n\tIP Address: \t%s\n\tIP Mask: \t%s\n\tGateway: \t%s\n\tDHCP Enabled: \t%s\n\tDHCP Server: \t%s\n\tLease Obtained: \t%s\n\tLease Expires: \t%s\n\tPrimary Wins Server: \t%s\n\tSecondary Wins Server: \t%s\n"),
+                adapter_info_2->ComboIndex,
+                ACE_TEXT (adapter_info_2->AdapterName),
+                //ACE_TEXT_WCHAR_TO_TCHAR (adapter_info_2->Description),
+                ACE_TEXT (adapter_info_2->Description),
+                ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<uint8_t*> (&(ether_addr_s.ether_addr_octet)), NET_LINKLAYER_802_3).c_str ()),
+                adapter_info_2->Index,
+                ACE_TEXT (adapter_type_string.c_str ()),
+                ACE_TEXT (adapter_info_2->IpAddressList.IpAddress.String),
+                ACE_TEXT (adapter_info_2->IpAddressList.IpMask.String),
+                ACE_TEXT (adapter_info_2->GatewayList.IpAddress.String),
+                (adapter_info_2->DhcpEnabled ? ACE_TEXT ("Yes") : ACE_TEXT ("No")),
+                ACE_TEXT (adapter_info_2->DhcpServer.IpAddress.String),
+                ACE_TEXT (buffer_a),
+                ACE_TEXT (buffer_2),
+                (adapter_info_2->HaveWins ? ACE_TEXT ("Yes") : ACE_TEXT ("No")),
+                ACE_TEXT (adapter_info_2->PrimaryWinsServer.IpAddress.String),
+                ACE_TEXT (adapter_info_2->SecondaryWinsServer.IpAddress.String)));
+
+    adapter_info_2 = adapter_info_2->Next;
+  } // end WHILE
+
+error:
+  if (adapter_info_p)
+    FREE (adapter_info_p);
+}
+#endif // _DEBUG
 #endif // ACE_WIN32 || ACE_WIN64
 
 ACE_INET_Addr
@@ -2159,7 +2307,7 @@ Net_Common_Tools::getGateway (const std::string& interfaceIdentifier_in)
   std::string ip_address_string;
 
   NET_IFINDEX interface_index =
-    Net_Common_Tools::interfaceToIndex (interfaceIdentifier_in);
+    Net_Common_Tools::interfaceToIndex (Net_Common_Tools::adapterName (interfaceIdentifier_in));
   if (unlikely (!interface_index))
   {
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
@@ -2179,7 +2327,7 @@ Net_Common_Tools::getGateway (const std::string& interfaceIdentifier_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     return result;
   } // end IF
   ACE_ASSERT (buffer_length);
@@ -2196,7 +2344,7 @@ Net_Common_Tools::getGateway (const std::string& interfaceIdentifier_in)
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersInfo(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     ACE_FREE_FUNC (ip_interfaceIdentifier_info_p); ip_interfaceIdentifier_info_p = NULL;
     return result;
   } // end IF
@@ -2523,7 +2671,7 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
     return false;
   } // end IF
   ACE_ASSERT (buffer_length);
@@ -2545,7 +2693,7 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
     ACE_FREE_FUNC (ip_adapter_addresses_p); ip_adapter_addresses_p = NULL;
     return false;
   } // end IF
@@ -2731,7 +2879,7 @@ Net_Common_Tools::IPAddressToInterface (const ACE_INET_Addr& IPAddress_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
-                  ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                  ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
       return result;
     } // end IF
     ACE_ASSERT (buffer_length);
@@ -2753,7 +2901,7 @@ Net_Common_Tools::IPAddressToInterface (const ACE_INET_Addr& IPAddress_in)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
-                  ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                  ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
       ACE_FREE_FUNC (ip_adapter_addresses_p); ip_adapter_addresses_p = NULL;
       return result;
     } // end IF
@@ -2846,7 +2994,7 @@ continue_:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ::GetBestRoute(%s): \"%s\", aborting\n"),
                   ACE_TEXT (Net_Common_Tools::IPAddressToString (IPAddress_in).c_str ()),
-                  ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                  ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
       return result;
     } // end IF
 
@@ -2939,7 +3087,7 @@ Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
-                    ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                    ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
         return result;
       } // end IF
       ACE_ASSERT (buffer_length);
@@ -2961,7 +3109,7 @@ Net_Common_Tools::getDefaultInterface (enum Net_LinkLayerType type_in)
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ::GetAdaptersAddresses(): \"%s\", aborting\n"),
-                    ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                    ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
         goto error;
       } // end IF
 
@@ -3131,11 +3279,12 @@ error:
                                        &negotiated_version,
                                        &client_handle);
       if (unlikely (result_2 != ERROR_SUCCESS))
-      {
+      { // *NOTE*: most likely reason: ERROR_SERVICE_NOT_ACTIVE (1062): Wireless
+        //         Zero Configuration (WZC) service has not been started
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ::WlanOpenHandle(%u): \"%s\", aborting\n"),
                     maximum_client_version,
-                    ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                    ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
         return result;
       } // end IF
       ACE_ASSERT (client_handle != ACE_INVALID_HANDLE);
@@ -3149,7 +3298,7 @@ error:
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ::WlanEnumInterfaces(0x%@): \"%s\", aborting\n"),
                     client_handle,
-                    ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                    ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
         goto error_2;
       } // end IF
       ACE_ASSERT (interface_list_p);
@@ -3169,7 +3318,7 @@ error_2:
       if (unlikely (result_2 != ERROR_SUCCESS))
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ::WlanCloseHandle(): \"%s\", continuing\n"),
-                    ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                    ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
 #else
       ACE_ASSERT (false);
       ACE_NOTSUP_RETURN (false);
@@ -4144,7 +4293,7 @@ Net_Common_Tools::setLoopBackFastPath (ACE_HANDLE handle_in)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::ioctl(0x%@,SIO_LOOPBACK_FAST_PATH): \"%s\", aborting\n"),
                 handle_in,
-                ACE_TEXT (Common_Tools::errorToString (::GetLastError ()).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (::GetLastError ()).c_str ())));
     return false;
   } // end IF
   ACE_DEBUG ((LM_DEBUG,

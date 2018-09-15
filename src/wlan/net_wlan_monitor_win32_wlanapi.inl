@@ -121,7 +121,7 @@ Net_WLAN_Monitor_T<AddressType,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::WlanRegisterNotification(): \"%s\", aborting\n"),
-                ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
     goto error;
   } // end IF
 

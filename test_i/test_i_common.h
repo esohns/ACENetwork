@@ -21,7 +21,14 @@
 #ifndef TEST_I_COMMON_H
 #define TEST_I_COMMON_H
 
-#include "common_configuration.h"
+#include "common.h"
+//#include "common_configuration.h"
+#include "common_statistic_handler.h"
+#include "common_time_common.h"
+
+#if defined (GUI_SUPPORT)
+#include "common_ui_common.h"
+#endif // GUI_SUPPORT
 
 #include "stream_common.h"
 #include "stream_configuration.h"
@@ -106,5 +113,62 @@ struct Test_I_Configuration
 
   struct Test_I_UserData                   userData;
 };
+
+//////////////////////////////////////////
+
+#if defined (GUI_SUPPORT)
+struct Test_I_UI_ProgressData
+{
+  Test_I_UI_ProgressData ()
+   : state (NULL)
+   , statistic ()
+  {
+    ACE_OS::memset (&statistic, 0, sizeof (Test_I_Statistic_t));
+  }
+
+  struct Common_UI_State* state;
+  Test_I_Statistic_t      statistic;
+};
+
+struct Test_I_UI_CBData
+{
+  Test_I_UI_CBData ()
+   : allowUserRuntimeStatistic (true)
+   //, configuration (NULL)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+   , mediaFramework (MODULE_LIB_DEFAULT_MEDIAFRAMEWORK)
+#endif // ACE_WIN32 || ACE_WIN64
+   , progressData ()
+   , UIState ()
+  {
+    progressData.state = &UIState;
+  }
+
+  bool                            allowUserRuntimeStatistic;
+  //struct Test_U_Configuration*    configuration;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  enum Stream_MediaFramework_Type mediaFramework;
+#endif // ACE_WIN32 || ACE_WIN64
+  struct Test_I_UI_ProgressData   progressData;
+  struct Common_UI_State          UIState;
+};
+
+struct Test_I_UI_ThreadData
+{
+  Test_I_UI_ThreadData ()
+   : CBData (NULL)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+   , mediaFramework (MODULE_LIB_DEFAULT_MEDIAFRAMEWORK)
+#endif // ACE_WIN32 || ACE_WIN64
+   , sessionId (0)
+  {}
+
+  struct Test_I_UI_CBData*        CBData;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  enum Stream_MediaFramework_Type mediaFramework;
+#endif // ACE_WIN32 || ACE_WIN64
+  size_t                          sessionId;
+};
+#endif // GUI_SUPPORT
 
 #endif

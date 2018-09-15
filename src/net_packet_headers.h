@@ -21,6 +21,8 @@
 #ifndef NET_PACKET_HEADERS_H
 #define NET_PACKET_HEADERS_H
 
+#include <cstdint>
+
 #include "ace/config-lite.h"
 #include "ace/Basic_Types.h"
 
@@ -199,7 +201,7 @@ struct iphdr
 
 struct ether_addr
 {
-  u_char ether_addr_octet[ETH_ALEN];
+  uint8_t ether_addr_octet[ETH_ALEN];
 };
 
 // *INFORMATION*

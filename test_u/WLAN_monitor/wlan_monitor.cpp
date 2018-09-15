@@ -609,11 +609,10 @@ do_work (bool autoAssociate_in,
   // step5a: start GTK event loop ?
   if (!UIDefinitionFile_in.empty ())
   {
-    gtk_manager_p =
-      WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ();
+    gtk_manager_p = WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
 
-    CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
+    CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
     CBData_in.eventHooks.finiHook = idle_finalize_ui_cb;
     CBData_in.eventHooks.initHook = idle_initialize_ui_cb;

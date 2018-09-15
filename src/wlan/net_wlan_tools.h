@@ -78,7 +78,6 @@ network_wlan_nl80211_feature_cb (struct nl_msg*,
 #endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
-//class Net_WLAN_Export Net_WLAN_Tools
 class Net_WLAN_Tools
 {
  public:
@@ -109,9 +108,10 @@ class Net_WLAN_Tools
                        REFGUID,             // interface identifier
                        const std::string&); // (E)SSID
 
-  static bool getDeviceSettingBool (HANDLE,   // WLAN API client handle
-                                    REFGUID, // interface identifier
-                                    enum _WLAN_INTF_OPCODE); // code
+  static bool getDeviceSettingBool (HANDLE,                 // WLAN API client handle
+                                    REFGUID,                // interface identifier
+                                    enum _WLAN_INTF_OPCODE, // code
+                                    BOOL&);                 // return value: setting
   static bool setDeviceSettingBool (HANDLE,                 // WLAN API client handle
                                     REFGUID,                // interface identifier
                                     enum _WLAN_INTF_OPCODE, // code

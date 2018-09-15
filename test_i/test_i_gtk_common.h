@@ -50,44 +50,53 @@ struct Test_I_GTK_ProgressData
   Test_I_GTK_ProgressData ()
    : Common_UI_GTK_ProgressData ()
    , statistic ()
-  {};
+  {
+    ACE_OS::memset (&statistic, 0, sizeof (Test_I_Statistic_t));
+  }
 
   Test_I_Statistic_t statistic;
 };
 
 struct Test_I_GTK_CBData
- : Common_UI_GTK_State
+ : Test_I_UI_CBData
 {
   Test_I_GTK_CBData ()
-   : Common_UI_GTK_State ()
+   : Test_I_UI_CBData ()
    , configuration (NULL)
 //   , cursorType (GDK_LAST_CURSOR)
    , progressData ()
    , progressEventSourceId (0)
-  {};
+   , UIState ()
+  {
+    progressData.state = &UIState;
+  }
 
   struct Test_I_Configuration*   configuration;
 //  GdkCursorType                      cursorType;
   struct Test_I_GTK_ProgressData progressData;
   guint                          progressEventSourceId;
+  Common_UI_GTK_State_t          UIState;
 };
 
 struct Test_I_ThreadData
+ : Test_I_UI_ThreadData
 {
   Test_I_ThreadData ()
-   : CBData (NULL)
+   : Test_I_UI_ThreadData ()
+   , CBData (NULL)
    , eventSourceId (0)
-  {};
+  {}
 
   struct Test_I_GTK_CBData* CBData;
   guint                     eventSourceId;
 };
 
-typedef Common_UI_GtkBuilderDefinition_T<struct Test_I_GTK_CBData> Test_I_GtkBuilderDefinition_t;
+typedef Common_UI_GtkBuilderDefinition_T<struct Common_UI_GTK_State,
+                                         struct Test_I_GTK_CBData> Test_I_GtkBuilderDefinition_t;
 
 typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-                                struct Test_I_GTK_CBData> Test_I_GTK_Manager_t;
+                                struct Common_UI_GTK_State> Test_I_GTK_Manager_t;
 typedef ACE_Singleton<Test_I_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::MUTEX> TEST_I_UI_GTK_MANAGER_SINGLETON;
+                      ACE_MT_SYNCH::MUTEX> TEST_I_UI_GTK_MANAGER_SINGLETON;
 
 #endif

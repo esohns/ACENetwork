@@ -423,7 +423,7 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to WlanReasonCodeToString(%d): %s, continuing\n"),
                   reason_i,
-                  ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
+                  ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("\"%s\": received notification %s%s%s\n"),
                 ACE_TEXT (interface_identifier.c_str ()),
@@ -632,7 +632,7 @@ network_wlan_default_notification_cb (struct _L2_NOTIFICATION_DATA* data_in,
 //    ACE_DEBUG ((LM_ERROR,
 //                ACE_TEXT ("failed to ::WlanEnumInterfaces(0x%@): \"%s\", aborting\n"),
 //                clientHandle_in,
-//                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+//                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
 //    return result;
 //  } // end IF
 //  ACE_ASSERT (interface_list_p);
@@ -679,7 +679,7 @@ Net_WLAN_Tools::initialize (HANDLE& clientHandle_out)
     if (result != ERROR_SUCCESS)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ::WlanCloseHandle(): \"%s\", continuing\n"),
-                  ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
+                  ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
     clientHandle_out = ACE_INVALID_HANDLE;
   } // end IF
 
@@ -706,7 +706,7 @@ Net_WLAN_Tools::initialize (HANDLE& clientHandle_out)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::WlanOpenHandle(%u): \"%s\", aborting\n"),
                 maximum_client_version,
-                ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
     return false;
   } // end IF
   ACE_ASSERT (clientHandle_out != ACE_INVALID_HANDLE);
@@ -727,17 +727,19 @@ Net_WLAN_Tools::finalize (HANDLE clientHandle_in)
   if (unlikely (result != ERROR_SUCCESS))
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::WlanCloseHandle(): \"%s\", continuing\n"),
-                ACE_TEXT (Common_Tools::errorToString (result).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
 }
 
 bool
 Net_WLAN_Tools::getDeviceSettingBool (HANDLE clientHandle_in,
                                       REFGUID interfaceIdentifier_in,
-                                      enum _WLAN_INTF_OPCODE parameter_in)
+                                      enum _WLAN_INTF_OPCODE parameter_in,
+                                      BOOL& value_out)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::getDeviceSettingBool"));
 
-  bool result = false;
+  // initialize return value(s)
+  value_out = FALSE;
 
   // sanity check(s)
   if  (unlikely ((clientHandle_in == ACE_INVALID_HANDLE) ||
@@ -747,14 +749,45 @@ Net_WLAN_Tools::getDeviceSettingBool (HANDLE clientHandle_in,
                 ACE_TEXT ("invalid argument, aborting\n")));
     return false;
   } // end IF
-#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0501) // _WIN32_WINNT_WINXP
   switch (parameter_in)
   {
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0501) // _WIN32_WINNT_WINXP
     case wlan_intf_opcode_autoconf_enabled:
-    //case wlan_intf_opcode_bss_type:
-    //case wlan_intf_opcode_interface_state:
-    //case wlan_intf_opcode_current_connection:
+    case wlan_intf_opcode_bss_type:
+    case wlan_intf_opcode_interface_state:
+    case wlan_intf_opcode_current_connection:
       break;
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0501)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+    case wlan_intf_opcode_background_scan_enabled:
+    case wlan_intf_opcode_radio_state:
+    case wlan_intf_opcode_channel_number:
+    case wlan_intf_opcode_supported_infrastructure_auth_cipher_pairs:
+    case wlan_intf_opcode_supported_adhoc_auth_cipher_pairs:
+    case wlan_intf_opcode_supported_country_or_region_string_list:
+    case wlan_intf_opcode_media_streaming_mode:
+    case wlan_intf_opcode_statistics:
+    case wlan_intf_opcode_rssi:
+    case wlan_intf_opcode_current_operation_mode:
+    case wlan_intf_opcode_supported_safe_mode:
+    case wlan_intf_opcode_certified_safe_mode:
+      break;
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+//#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0601) // _WIN32_WINNT_WIN7
+//    case wlan_intf_opcode_hosted_network_capable:
+//#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0601)
+//#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0602) // _WIN32_WINNT_WIN8
+//    case wlan_intf_opcode_management_frame_protection_capable:
+//#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0602)
+      //break;
+    //case wlan_intf_opcode_autoconf_start:
+    //case wlan_intf_opcode_autoconf_end:
+    //case wlan_intf_opcode_msm_start:
+    //case wlan_intf_opcode_msm_end:
+    //case wlan_intf_opcode_security_start:
+    //case wlan_intf_opcode_security_end:
+    //case wlan_intf_opcode_ihv_start:
+    //case wlan_intf_opcode_ihv_end:
     default:
     {
       ACE_DEBUG ((LM_ERROR,
@@ -763,33 +796,32 @@ Net_WLAN_Tools::getDeviceSettingBool (HANDLE clientHandle_in,
       return false;
     }
   } // end SWITCH
-#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0501)
 
   enum _WLAN_OPCODE_VALUE_TYPE value_type = wlan_opcode_value_type_invalid;
   DWORD data_size = 0;
   PVOID data_p = NULL;
-  DWORD result_2 = WlanQueryInterface (clientHandle_in,
-                                       &interfaceIdentifier_in,
-                                       parameter_in,
-                                       NULL,
-                                       &data_size,
-                                       &data_p,
-                                       &value_type);
-  if (unlikely (result_2 != ERROR_SUCCESS))
+  DWORD result = WlanQueryInterface (clientHandle_in,
+                                     &interfaceIdentifier_in,
+                                     parameter_in,
+                                     NULL,
+                                     &data_size,
+                                     &data_p,
+                                     &value_type);
+  if (unlikely (result != ERROR_SUCCESS))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("\"%s\": failed to ::WlanQueryInterface(0x%@,%d): \"%s\", aborting\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                 clientHandle_in, parameter_in,
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result).c_str ())));
     return false;
   } // end IF
   ACE_ASSERT (data_p && (data_size == sizeof (BOOL)));
-  result = *static_cast<BOOL*> (data_p);
+  value_out = *static_cast<BOOL*> (data_p);
 
   WlanFreeMemory (data_p); data_p = NULL;
 
-  return result;
+  return true;
 }
 bool
 Net_WLAN_Tools::setDeviceSettingBool (HANDLE clientHandle_in,
@@ -802,18 +834,22 @@ Net_WLAN_Tools::setDeviceSettingBool (HANDLE clientHandle_in,
   bool result = false;
   HANDLE client_handle = clientHandle_in;
   bool release_handle = false;
+  BOOL value_b = FALSE;
+#if defined (_DEBUG)
+  std::string opcode_string;
+#endif // _DEBUG
   if (unlikely (client_handle == ACE_INVALID_HANDLE))
   {
     if (unlikely (!Net_WLAN_Tools::initialize (client_handle)))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Net_WLAN_Tools::initialize(), aborting\n")));
-      return result;
+      return false;
     } // end IF
     ACE_ASSERT (client_handle != ACE_INVALID_HANDLE);
     release_handle = true;
   } // end IF
-    // sanity check(s)
+  // sanity check(s)
   ACE_ASSERT (client_handle != ACE_INVALID_HANDLE);
   ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
 
@@ -821,22 +857,59 @@ Net_WLAN_Tools::setDeviceSettingBool (HANDLE clientHandle_in,
   switch (parameter_in)
   {
     case wlan_intf_opcode_autoconf_enabled:
+    case wlan_intf_opcode_background_scan_enabled:
+    case wlan_intf_opcode_media_streaming_mode:
+    case wlan_intf_opcode_radio_state:
     case wlan_intf_opcode_bss_type:
+    case wlan_intf_opcode_current_operation_mode:
       break;
+    case wlan_intf_opcode_autoconf_start:
+    case wlan_intf_opcode_interface_state:
+    case wlan_intf_opcode_current_connection:
+    case wlan_intf_opcode_channel_number:
+    case wlan_intf_opcode_supported_infrastructure_auth_cipher_pairs:
+    case wlan_intf_opcode_supported_adhoc_auth_cipher_pairs:
+    case wlan_intf_opcode_supported_country_or_region_string_list:
+    case wlan_intf_opcode_supported_safe_mode:
+    case wlan_intf_opcode_certified_safe_mode:
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0601) // _WIN32_WINNT_WIN7
+    case wlan_intf_opcode_hosted_network_capable:
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0601)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0602) // _WIN32_WINNT_WIN8
+    case wlan_intf_opcode_management_frame_protection_capable:
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0602)
+    case wlan_intf_opcode_autoconf_end:
+    case wlan_intf_opcode_msm_start:
+    case wlan_intf_opcode_statistics:
+    case wlan_intf_opcode_rssi:
+    case wlan_intf_opcode_msm_end:
+    case wlan_intf_opcode_security_start:
+    case wlan_intf_opcode_security_end:
+    case wlan_intf_opcode_ihv_start:
+    case wlan_intf_opcode_ihv_end:
     default:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("invalid argument (was: %d), aborting\n"),
                   parameter_in));
-      return false;
+      goto clean;
     }
   } // end SWITCH
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0501)
-  if (Net_WLAN_Tools::getDeviceSettingBool (client_handle,
-                                            interfaceIdentifier_in,
-                                            parameter_in) == enable_in)
+  if (!Net_WLAN_Tools::getDeviceSettingBool (client_handle,
+                                             interfaceIdentifier_in,
+                                             parameter_in,
+                                             value_b))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_WLAN_Tools::getDeviceSettingBool(%d), continuing\n"),
+                parameter_in));
+    goto continue_;
+  } // end IF
+  if (static_cast<bool> (value_b) == enable_in) 
     return true; // nothing to do
 
+continue_:
   BOOL data_b = (enable_in ? TRUE : FALSE);
   DWORD result_2 = WlanSetInterface (client_handle,
                                      &interfaceIdentifier_in,
@@ -850,12 +923,11 @@ Net_WLAN_Tools::setDeviceSettingBool (HANDLE clientHandle_in,
                 ACE_TEXT ("\"%s\": failed to ::WlanSetInterface(0x%@,%d): \"%s\", aborting\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                 client_handle, parameter_in,
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
-    return result;
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
+    goto clean;
   } // end IF
   result = true;
 #if defined (_DEBUG)
-  std::string opcode_string;
   switch (parameter_in)
   {
     case wlan_intf_opcode_autoconf_enabled:
@@ -875,7 +947,7 @@ Net_WLAN_Tools::setDeviceSettingBool (HANDLE clientHandle_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("unknown/invalid opcode (was: %d), aborting\n"),
                   parameter_in));
-      return result;
+      goto clean;
     }
   } // end SWITCH
   ACE_DEBUG ((LM_DEBUG,
@@ -884,6 +956,7 @@ Net_WLAN_Tools::setDeviceSettingBool (HANDLE clientHandle_in,
               (enable_in ? ACE_TEXT ("enabled") : ACE_TEXT ("disabled")),
               ACE_TEXT (opcode_string.c_str ())));
 #endif // _DEBUG
+clean:
   if (release_handle)
     Net_WLAN_Tools::finalize (client_handle);
 
@@ -922,7 +995,7 @@ Net_WLAN_Tools::getInterfaces (HANDLE clientHandle_in)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::WlanEnumInterfaces(0x%@): \"%s\", aborting\n"),
                 client_handle,
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     goto clean;
   } // end IF
   ACE_ASSERT (interface_list_p);
@@ -982,6 +1055,12 @@ Net_WLAN_Tools::getAccessPointAddress (HANDLE clientHandle_in,
   struct ether_addr result;
   ACE_OS::memset (&result, 0, sizeof (struct ether_addr));
 
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0501) // _WIN32_WINNT_WINXP
+  // sanity check(s)
+  ACE_UNUSED_ARG (clientHandle_in);
+  ACE_UNUSED_ARG (interfaceIdentifier_in);
+  ACE_UNUSED_ARG (SSID_in);
+#else
   HANDLE client_handle = clientHandle_in;
   bool release_handle = false;
   if (unlikely (client_handle == ACE_INVALID_HANDLE))
@@ -1039,7 +1118,7 @@ Net_WLAN_Tools::getAccessPointAddress (HANDLE clientHandle_in,
                   ACE_TEXT ("\"%s\": failed to ::WlanGetNetworkBssList(0x%@): \"%s\", continuing\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (*iterator).c_str ()),
                   client_handle,
-                  ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                  ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
       continue;
     } // end IF
     ACE_ASSERT (wlan_bss_list_p);
@@ -1146,6 +1225,7 @@ Net_WLAN_Tools::getAccessPointAddress (HANDLE clientHandle_in,
     WlanFreeMemory (wlan_bss_list_p);
   if (release_handle)
     Net_WLAN_Tools::finalize (client_handle);
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0501)
 
   return result;
 }
@@ -1183,7 +1263,7 @@ Net_WLAN_Tools::getProfiles (HANDLE clientHandle_in,
                   ACE_TEXT ("\"%s\": failed to ::WlanGetProfileList(0x%@): \"%s\", continuing\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (*iterator).c_str ()),
                   clientHandle_in,
-                  ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                  ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
       continue;
     } // end IF
     ACE_ASSERT (profile_list_p);
@@ -1277,7 +1357,7 @@ Net_WLAN_Tools::getProfile (HANDLE clientHandle_in,
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                   clientHandle_in,
                   ACE_TEXT ((*iterator).c_str ()),
-                  ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                  ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
       profile_name_string_p = NULL;
       continue;
     } // end IF
@@ -1402,7 +1482,7 @@ Net_WLAN_Tools::associate (HANDLE clientHandle_in,
                 (SSID_in.empty () ? ACE_TEXT ("WlanDisconnect") : ACE_TEXT ("WlanConnect")),
                 client_handle,
                 ACE_TEXT (SSID_in.c_str ()),
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     goto clean;
   } // end IF
 
@@ -1467,7 +1547,7 @@ Net_WLAN_Tools::disassociate (HANDLE clientHandle_in,
                   ACE_TEXT ("\"%s\": failed to ::WlanDisconnect(0x%@): \"%s\", aborting\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (*iterator).c_str ()),
                   client_handle,
-                  ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                  ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
       goto clean;
     } // end IF
   } // end FOR
@@ -1525,7 +1605,7 @@ Net_WLAN_Tools::scan (HANDLE clientHandle_in,
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                   clientHandle_in,
                   ACE_TEXT (ESSID_in.c_str ()),
-                  ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                  ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
 #if defined (_DEBUG)
     else
       ACE_DEBUG ((LM_DEBUG,
@@ -1533,7 +1613,7 @@ Net_WLAN_Tools::scan (HANDLE clientHandle_in,
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                   clientHandle_in,
                   ACE_TEXT (ESSID_in.c_str ()),
-                  ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                  ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
 #endif // _DEBUG
   } // end IF
 }
@@ -1574,7 +1654,7 @@ Net_WLAN_Tools::associatedBSSID (HANDLE clientHandle_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::WlanQueryInterface(\"%s\",wlan_intf_opcode_current_connection): \"%s\", aborting\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     return return_value;
   } // end IF
   if (result_2 == ERROR_INVALID_STATE) // <-- not connected
@@ -1646,9 +1726,10 @@ Net_WLAN_Tools::associatedSSID (HANDLE clientHandle_in,
                 (result_2 != ERROR_INVALID_STATE)))
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ::WlanQueryInterface(\"%s\",wlan_intf_opcode_current_connection): \"%s\", aborting\n"),
+                ACE_TEXT ("failed to ::WlanQueryInterface(\"%s\",%d): \"%s\", aborting\n"),
                 ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ()),
-                ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                wlan_intf_opcode_current_connection,
+                ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
     goto clean;
   } // end IF
   if (result_2 == ERROR_INVALID_STATE) // <-- not connected
@@ -1726,7 +1807,7 @@ Net_WLAN_Tools::getSSIDs (HANDLE clientHandle_in,
                   ACE_TEXT ("\"%s\": failed to ::WlanGetAvailableNetworkList(0x%@): \"%s\", aborting\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (*iterator).c_str ()),
                   client_handle,
-                  ACE_TEXT (Common_Tools::errorToString (result_2).c_str ())));
+                  ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
       goto error;
     } // end IF
     ACE_ASSERT (wlan_network_list_p);

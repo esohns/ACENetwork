@@ -147,7 +147,7 @@ Client_TimeoutHandler::handle (const void* arg_in)
         // *TODO*: use STL random funcionality instead
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         index_i =
-          (ACE_OS::rand_r (&Common_Tools::randomSeed_) %
+          (ACE_OS::rand_r (&Common_Tools::randomSeed) %
            number_of_connections_i);
 #else
         result = ::random_r (&randomState_, &index_i);
@@ -199,7 +199,8 @@ Client_TimeoutHandler::handle (const void* arg_in)
             // *TODO*: use STL funcionality instead
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
             index_i =
-              (ACE_OS::rand_r (&Common_Tools::randomSeed_) % number_of_connections_i);
+              (ACE_OS::rand_r (&Common_Tools::randomSeed) %
+               number_of_connections_i);
 #else
             result = ::random_r (&randomState_, &index_i);
             if (result == -1)
@@ -268,7 +269,8 @@ Client_TimeoutHandler::handle (const void* arg_in)
         //        index_i = distribution (randomGenerator_);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
         index_i =
-          (ACE_OS::rand_r (&Common_Tools::randomSeed_) % number_of_connections_i);
+          (ACE_OS::rand_r (&Common_Tools::randomSeed) %
+           number_of_connections_i);
 #else
         result = ::random_r (&randomState_, &index_i);
         if (result == -1)

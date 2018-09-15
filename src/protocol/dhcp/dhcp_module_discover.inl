@@ -489,11 +489,10 @@ DHCP_Module_Discover_T<ACE_SYNCH_USE,
         const_cast<typename SessionMessageType::DATA_T::DATA_T&> (inherited::sessionData_->getR ());
 
       // step2: set up a (UDP) connection ?
-//      int result = -1;
       ConnectionManagerType* connection_manager_p =
         ConnectionManagerType::SINGLETON_T::instance ();
       ACE_ASSERT (connection_manager_p);
-      bool clone_module, delete_module;
+      bool clone_module = false, delete_module = false;
       typename ConnectorType::STREAM_T::MODULE_T* module_p = NULL;
       bool reset_configuration = false;
       ACE_Time_Value deadline = ACE_Time_Value::zero;

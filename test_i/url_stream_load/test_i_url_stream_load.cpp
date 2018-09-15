@@ -1103,7 +1103,7 @@ ACE_TMAIN (int argc_in,
   {
     gtk_cb_data.argc = argc_in;
     gtk_cb_data.argv = argv_in;
-    gtk_cb_data.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
+    gtk_cb_data.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (ui_definition_file, static_cast<GtkBuilder*> (NULL));
     gtk_cb_data.configuration = &configuration;
     gtk_cb_data.eventHooks.finiHook = idle_finalize_UI_cb;

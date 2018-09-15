@@ -778,7 +778,7 @@ do_work (
   {
     CBData_in.eventHooks.finiHook = idle_finalize_ui_cb;
     CBData_in.eventHooks.initHook = idle_initialize_ui_cb;
-    CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
+    CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
     //CBData_in.userData = &CBData_in;
 

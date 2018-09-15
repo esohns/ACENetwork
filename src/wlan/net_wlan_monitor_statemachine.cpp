@@ -131,6 +131,7 @@ Net_WLAN_MonitorStateMachine::change (enum Net_WLAN_MonitorState newState_in)
         case NET_WLAN_MONITOR_STATE_INITIALIZED:   // monitor stopped
         case NET_WLAN_MONITOR_STATE_SCANNED:       // (background) scan has completed
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+        case NET_WLAN_MONITOR_STATE_CONNECTED:     // already connected (initially)
 #elif defined (ACE_LINUX)
         case NET_WLAN_MONITOR_STATE_AUTHENTICATED: // already connected (initially)
 #if defined (NL80211_SUPPORT)

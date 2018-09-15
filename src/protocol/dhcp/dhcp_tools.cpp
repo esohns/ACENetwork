@@ -457,5 +457,5 @@ DHCP_Tools::generateXID ()
 {
   NETWORK_TRACE (ACE_TEXT ("DHCP_Tools::generateXID"));
 
-  return static_cast<unsigned int> (ACE_OS::rand_r (&Common_Tools::randomSeed_));
+  return static_cast<unsigned int> (ACE_OS::rand_r (&Common_Tools::randomSeed));
 }

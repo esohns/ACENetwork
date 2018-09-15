@@ -25,7 +25,10 @@
 
 #include "common_defines.h"
 #include "common_macros.h"
-#include "common_tools.h"
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#include "common_error_tools.h"
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "stream_iallocator.h"
 
@@ -627,7 +630,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
           (error != ERROR_IO_PENDING))       // 997: 
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Asynch_Read_Dgram::cancel(): \"%s\", continuing\n"),
-                    ACE_TEXT (Common_Tools::errorToString (error, false).c_str ())));
+                    ACE_TEXT (Common_Error_Tools::errorToString (error, false).c_str ())));
 #else
       ACE_UNUSED_ARG (error);
       ACE_DEBUG ((LM_ERROR,
@@ -644,7 +647,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
         (error != ERROR_IO_PENDING))       // 997:
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_Asynch_Write_Dgram::cancel(): \"%s\", continuing\n"),
-                  ACE_TEXT (Common_Tools::errorToString (error, false).c_str ())));
+                  ACE_TEXT (Common_Error_Tools::errorToString (error, false).c_str ())));
 #else
     ACE_UNUSED_ARG (error);
     ACE_DEBUG ((LM_ERROR,
@@ -783,7 +786,7 @@ Net_AsynchUDPSocketHandler_T<SocketType,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to write to output stream (handle was: 0x%@, address: %s): \"%s\", aborting\n"),
                   result_in.handle (), ACE_TEXT (Net_Common_Tools::IPAddressToString (Net_Common_Tools::getBoundAddress (result_in.handle ())).c_str ()),
-                  ACE_TEXT (Common_Tools::errorToString (static_cast<DWORD> (error), false).c_str ())));
+                  ACE_TEXT (Common_Error_Tools::errorToString (static_cast<DWORD> (error), false).c_str ())));
 #else
     if ((error != EBADF) && // 9 : Linux (local close())
         (error != EPIPE))   // 32:

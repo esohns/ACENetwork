@@ -124,14 +124,19 @@ class Net_Common_Tools
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   static NET_IFINDEX interfaceToIndex_2 (REFGUID); // interface identifier
   static struct _GUID indexToInterface_2 (NET_IFINDEX); // interface index
-  static NET_IFINDEX interfaceToIndex (const std::string&); // interface identifier ('FriendlyName')
+  static std::string adapterName (const std::string&); // interface identifier ('FriendlyName')
+  static NET_IFINDEX interfaceToIndex (const std::string&); // interface identifier ('AdapterName')
   static std::string indexToInterface (NET_IFINDEX); // interface index
+
+#if defined (_DEBUG)
+  static void dump (const std::string&); // interface identifier ('FriendlyName')
+#endif // _DEBUG
 #endif // ACE_WIN32 || ACE_WIN64
 
   // *NOTE*: the argument is assumed to be in network byte order (i.e. bytes
   //         ordered left to right)
   // *NOTE*: make sure the argument points to at least ETH_ALEN bytes of allocated (!) memory
-  static std::string LinkLayerAddressToString (const unsigned char* const, // pointer to address data (i.e. ethernet header address field)
+  static std::string LinkLayerAddressToString (const uint8_t* const, // pointer to address data (i.e. ethernet header address field)
                                                enum Net_LinkLayerType = NET_LINKLAYER_802_3);
   static struct ether_addr stringToLinkLayerAddress (const std::string&);
   static std::string LinkLayerTypeToString (enum Net_LinkLayerType);
@@ -156,7 +161,7 @@ class Net_Common_Tools
   static std::string linkLayerAddressToInterface (const struct ether_addr&);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  static std::string interfaceToString (REFGUID); // interface identifier
+  inline static std::string interfaceToString (REFGUID interfaceIdentifier_in) { return Net_Common_Tools::indexToInterface (Net_Common_Tools::interfaceToIndex_2 (interfaceIdentifier_in)); }
   static std::string interfaceToString (NET_IFINDEX); // interface identifier
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -171,7 +176,7 @@ class Net_Common_Tools
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   static ACE_INET_Addr getGateway (REFGUID); // interface identifier
 #else
-  static ACE_INET_Addr getGateway (const std::string&); // interface identifier
+  static ACE_INET_Addr getGateway (const std::string&); // interface identifier ('FriendlyName')
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   static ACE_INET_Addr getGateway (const std::string&); // interface identifier
@@ -183,7 +188,7 @@ class Net_Common_Tools
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
   static bool interfaceToExternalIPAddress (REFGUID,            // interface identifier
 #else
-  static bool interfaceToExternalIPAddress (const std::string&, // interface identifier
+  static bool interfaceToExternalIPAddress (const std::string&, // interface identifier ('FriendlyName')
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
   static bool interfaceToExternalIPAddress (const std::string&, // interface identifier
