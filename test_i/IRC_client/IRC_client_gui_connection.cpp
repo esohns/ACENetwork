@@ -45,14 +45,14 @@
 #include "IRC_client_gui_defines.h"
 #include "IRC_client_gui_messagehandler.h"
 
-IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (struct Common_UI_GTK_State* GTKState_in,
+IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (struct Common_UI_GTK_State& GTKState_in,
                                                       IRC_Client_GUI_Connections_t* connections_in,
-                                                      guint contextID_in,
+                                                      guint contextId_in,
                                                       const std::string& label_in,
                                                       const std::string& UIFileDirectory_in)
  : closing_ (false)
  , CBData_ ()
- , contextID_ (contextID_in)
+ , contextId_ (contextId_in)
  , isFirstUsersMsg_ (true)
  , sessionState_ (NULL)
  , UIFileDirectory_ (UIFileDirectory_in)
@@ -62,7 +62,6 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (struct Common_UI_GTK_State
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_GUI_Connection::IRC_Client_GUI_Connection"));
 
   // sanity check(s)
-  ACE_ASSERT (GTKState_in);
   ACE_ASSERT (connections_in);
   if (!Common_File_Tools::isDirectory (UIFileDirectory_in))
   {
@@ -75,7 +74,7 @@ IRC_Client_GUI_Connection::IRC_Client_GUI_Connection (struct Common_UI_GTK_State
   // initialize cb data
   CBData_.connections = connections_in;
   CBData_.eventSourceId = 0;
-  CBData_.state = GTKState_in;
+  CBData_.state = &GTKState_in;
   //   CBData_.nick.clear(); // cannot set this now...
   CBData_.label = label_in;
   ACE_TCHAR time_stamp[27]; // ISO-8601 format
@@ -1919,7 +1918,7 @@ IRC_Client_GUI_Connection::error (const IRC_Record& message_in,
   } // end IF
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    CBData_.state->builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
+    CBData_.state->builders.find (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN);
   // sanity check(s)
   if (iterator == CBData_.state->builders.end ())
   {
@@ -1936,7 +1935,7 @@ IRC_Client_GUI_Connection::error (const IRC_Record& message_in,
                                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_STATUSBAR)));
   ACE_ASSERT (statusbar_p);
   gtk_statusbar_push (statusbar_p,
-                      contextID_,
+                      contextId_,
                       IRC_Tools::dump (message_in).c_str ());
   gdk_threads_leave ();
 
@@ -2099,7 +2098,7 @@ IRC_Client_GUI_Connection::createMessageHandler (const std::string& id_in,
         (messageHandlers_.size () == 2)) // server log + first channel
     {
       iterator =
-        CBData_.state->builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
+        CBData_.state->builders.find (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN);
       // sanity check(s)
       ACE_ASSERT (iterator != CBData_.state->builders.end ());
       gdk_threads_enter ();
@@ -2176,7 +2175,7 @@ IRC_Client_GUI_Connection::terminateMessageHandler (const std::string& id_in,
       (messageHandlers_.size () == 1)) // server log
   {
     Common_UI_GTK_BuildersIterator_t iterator =
-      CBData_.state->builders.find (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN);
+      CBData_.state->builders.find (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN);
     // sanity check(s)
     ACE_ASSERT (iterator != CBData_.state->builders.end ());
     gdk_threads_enter ();

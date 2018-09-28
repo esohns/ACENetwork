@@ -553,19 +553,26 @@ do_work (bool useThreadPool_in,
   // [- signal timer expiration to perform server queries] (see above)
 
   // step5: start GTK event loop
-  CBData_in.eventHooks.finiHook = idle_finalize_UI_cb;
-  CBData_in.eventHooks.initHook = idle_initialize_UI_cb;
-  CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
-    std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
-  CBData_in.userData = &CBData_in;
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
-  IRC_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
+  state_r.eventHooks.finiHook = idle_finalize_UI_cb;
+  state_r.eventHooks.initHook = idle_initialize_UI_cb;
+  state_r.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
+    std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
+  state_r.userData = &CBData_in;
+
+  gtk_manager_p->start ();
   ACE_Time_Value one_second (1, 0);
   int result = ACE_OS::sleep (one_second);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::sleep(): \"%m\", continuing\n")));
-  if (!IRC_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
+  if (!gtk_manager_p->isRunning ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
@@ -575,6 +582,8 @@ do_work (bool useThreadPool_in,
 
     return;
   } // end IF
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
   // step6: initialize worker(s)
   int group_id = -1;
@@ -585,7 +594,11 @@ do_work (bool useThreadPool_in,
 
     // clean up
     timer_manager_p->stop ();
-    IRC_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+    gtk_manager_p->stop ();
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
     return;
   } // end IF
@@ -597,8 +610,12 @@ do_work (bool useThreadPool_in,
                                 group_id);
 
   // step8: clean up
-  IRC_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->wait ();
   timer_manager_p->stop ();
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  gtk_manager_p->wait ();
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
   // wait for connection processing to complete
   IRC_CLIENT_CONNECTIONMANAGER_SINGLETON::instance ()->abort ();
@@ -1034,12 +1051,12 @@ do_printVersion (const std::string& programName_in)
 
   std::cout << ACE_TEXT ("libraries: ")
             << std::endl
-#ifdef HAVE_CONFIG_H
+#if defined (HAVE_CONFIG_H)
             << ACE_TEXT (ACENETWORK_PACKAGE_NAME)
             << ACE_TEXT (": ")
             << ACE_TEXT (ACENETWORK_PACKAGE_VERSION)
             << std::endl
-#endif
+#endif // HAVE_CONFIG_H
             ;
 
   converter.str ("");
@@ -1090,7 +1107,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ACE::init(): \"%m\", aborting\n")));
     return EXIT_FAILURE;
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // *PROCESS PROFILE*
   ACE_Profile_Timer process_profile;
@@ -1124,19 +1141,19 @@ ACE_TMAIN (int argc_in,
     ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_UI_RC_FILE);
 
   bool use_thread_pool                       =
-      COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
+    COMMON_EVENT_REACTOR_DEFAULT_USE_THREADPOOL;
   bool log_to_file                           = false;
 
   std::string phonebook_file_name            = configuration_path;
   phonebook_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebook_file_name                       +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
+    ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
   phonebook_file_name                       += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   phonebook_file_name                       +=
-      ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
+    ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_DEF_FILE_PHONEBOOK);
 
   bool use_reactor                           =
-      (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
+    (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR);
 
   unsigned int reporting_interval            =
     NET_STREAM_DEFAULT_STATISTIC_REPORTING_INTERVAL;
@@ -1174,7 +1191,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1198,7 +1215,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1225,7 +1242,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1252,7 +1269,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1271,16 +1288,33 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
+
+  Common_MessageStack_t* logstack_p = NULL;
+  ACE_SYNCH_MUTEX* lock_p = NULL;
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+  logstack_p = &state_r.logStack;
+  lock_p = &state_r.logStackLock;
+#endif // GTK_USE
+
   struct IRC_Client_Configuration configuration;
   struct IRC_Client_GTK_CBData gtk_cb_data;
   gtk_cb_data.configuration = &configuration;
+  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
+#if defined (GTK_USE)
+  lock_2 = &state_r.subscribersLock;
+#endif // GTK_USE
   IRC_Client_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                         : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                           &gtk_cb_data.subscribersLock,
+                                           lock_2,
                                            false);
 
   // step5: handle specific program modes
@@ -1300,7 +1334,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_SUCCESS;
   } // end IF
@@ -1322,7 +1356,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1381,7 +1415,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1414,7 +1448,9 @@ ACE_TMAIN (int argc_in,
                              configuration.protocolConfiguration.loginOptions.user.realName);
 #endif // ACE_WIN32 || ACE_WIN64
 
-  gtk_cb_data.RCFiles.push_back (UIRC_file_name);
+#if defined (GTK_USE)
+  state_r.RCFiles.push_back (UIRC_file_name);
+#endif // GTK_USE
 
   // step7: parse configuration file(s) (if any)
   if (Common_File_Tools::isReadable (phonebook_file_name))
@@ -1439,15 +1475,20 @@ ACE_TMAIN (int argc_in,
       (use_reactor ? COMMON_EVENT_DISPATCH_REACTOR
                    : COMMON_EVENT_DISPATCH_PROACTOR);
 
-  gtk_cb_data.progressData.state = &gtk_cb_data;
+#if defined (GTK_USE)
+  gtk_cb_data.progressData.state =
+    &const_cast<struct Common_UI_GTK_State&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
+#endif // GTK_USE
 
   // step8: initialize GTK UI
+#if defined (GTK_USE)
   IRC_Client_GtkBuilderDefinition_t ui_definition (argc_in,
-                                                   argv_in);
-  IRC_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                                argv_in,
-                                                                &gtk_cb_data,
-                                                                &ui_definition);
+                                                   argv_in,
+                                                   &gtk_cb_data);
+  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
+                                                            argv_in,
+                                                            &ui_definition);
+#endif // GTK_USE
 
   // step9: do work
   ACE_High_Res_Timer timer;
@@ -1496,7 +1537,7 @@ ACE_TMAIN (int argc_in,
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
     return EXIT_FAILURE;
   } // end IF
@@ -1510,7 +1551,15 @@ ACE_TMAIN (int argc_in,
   user_time_string = Common_Timer_Tools::periodToString (user_time);
   system_time_string = Common_Timer_Tools::periodToString (system_time);
   // debug info
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),
+              elapsed_time.real_time,
+              elapsed_time.user_time,
+              elapsed_time.system_time,
+              ACE_TEXT (user_time_string.c_str ()),
+              ACE_TEXT (system_time_string.c_str ())));
+#else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\nmaximum resident set size = %d\nintegral shared memory size = %d\nintegral unshared data size = %d\nintegral unshared stack size = %d\npage reclaims = %d\npage faults = %d\nswaps = %d\nblock input operations = %d\nblock output operations = %d\nmessages sent = %d\nmessages received = %d\nsignals received = %d\nvoluntary context switches = %d\ninvoluntary context switches = %d\n"),
               elapsed_time.real_time,
@@ -1532,15 +1581,7 @@ ACE_TMAIN (int argc_in,
               elapsed_rusage.ru_nsignals,
               elapsed_rusage.ru_nvcsw,
               elapsed_rusage.ru_nivcsw));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),
-              elapsed_time.real_time,
-              elapsed_time.user_time,
-              elapsed_time.system_time,
-              ACE_TEXT (user_time_string.c_str ()),
-              ACE_TEXT (system_time_string.c_str ())));
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   // step10: clean up
   Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
@@ -1560,7 +1601,7 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("failed to ACE::fini(): \"%m\", aborting\n")));
     return EXIT_FAILURE;
   } // end IF
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
   return EXIT_SUCCESS;
 } // end main

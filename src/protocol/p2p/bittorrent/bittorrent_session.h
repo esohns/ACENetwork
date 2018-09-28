@@ -21,18 +21,17 @@
 #ifndef BITTORRENT_SESSION_H
 #define BITTORRENT_SESSION_H
 
-//#include "ace/Asynch_Connector.h"
-//#include "ace/config-macros.h"
-//#include "ace/Connector.h"
+#include <map>
+#include <string>
+#include <utility>
+
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
-//#include "ace/SOCK_Connector.h"
 #include "ace/Synch_Traits.h"
 
 #include "net_session_base.h"
 
 #include "bittorrent_common.h"
-//#include "bittorrent_exports.h"
 #include "bittorrent_isession.h"
 #include "bittorrent_stream_common.h"
 #include "bittorrent_streamhandler.h"
@@ -69,8 +68,13 @@ template <typename PeerHandlerConfigurationType, // socket-
           typename PeerUserDataType,
           typename TrackerUserDataType,
           ////////////////////////////////
-          typename ControllerInterfaceType, // derived from BitTorrent_IControl_T
-          typename CBDataType> // ui feedback data type
+          typename ControllerInterfaceType // derived from BitTorrent_IControl_T
+          ////////////////////////////////
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 class BitTorrent_Session_T
  : public Net_SessionBase_T<ACE_INET_Addr,
                             PeerConnectionConfigurationType,
@@ -111,7 +115,7 @@ class BitTorrent_Session_T
   virtual bool initialize (const ConfigurationType&);
   virtual void connect (const ACE_INET_Addr&);
   virtual void trackerConnect (const ACE_INET_Addr&);
-  inline virtual void trackerDisconnect (const ACE_INET_Addr& address_in) { inherited::disconnect (address_in); };
+  inline virtual void trackerDisconnect (const ACE_INET_Addr& address_in) { inherited::disconnect (address_in); }
 
  protected:
   TrackerConnectionConfigurationType* trackerConnectionConfiguration_;
@@ -192,12 +196,20 @@ class BitTorrent_Session_T
 
   typedef BitTorrent_PeerStreamHandler_T<typename PeerStreamType::SESSION_DATA_T,
                                          PeerUserDataType,
-                                         typename inherited::ISESSION_T,
-                                         CBDataType> PEER_HANDLER_T;
+                                         typename inherited::ISESSION_T
+#if defined (GUI_SUPPORT)
+                                         ,CBDataType> PEER_HANDLER_T;
+#else
+                                         > PEER_HANDLER_T;
+#endif // GUI_SUPPORT
   typedef BitTorrent_TrackerStreamHandler_T<typename TrackerStreamType::SESSION_DATA_T,
                                             TrackerUserDataType,
-                                            typename inherited::ISESSION_T,
-                                            CBDataType> TRACKER_HANDLER_T;
+                                            typename inherited::ISESSION_T
+#if defined (GUI_SUPPORT)
+                                            ,CBDataType> TRACKER_HANDLER_T;
+#else
+                                            > TRACKER_HANDLER_T;
+#endif // GUI_SUPPORT
 
   typedef typename std::map<std::string,
                             std::pair <struct Stream_ModuleConfiguration,

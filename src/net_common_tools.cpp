@@ -3267,7 +3267,7 @@ error:
       DWORD maximum_client_version =
 #if defined (WINXP_SUPPORT)
         WLAN_API_VERSION_1_0;
-#pragma message ("compiling for WLAN API version " WLAN_API_VERSION_1_0)
+#pragma message ("compiling for WLAN API version " COMMON_STRINGIZE(WLAN_API_VERSION_1_0))
 #else
         WLAN_API_VERSION; // use SDK-native
 #pragma message ("compiling for WLAN API version " COMMON_STRINGIZE(WLAN_API_VERSION))

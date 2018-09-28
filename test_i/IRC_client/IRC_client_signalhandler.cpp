@@ -30,6 +30,8 @@
 
 #include "common_tools.h"
 
+#include "common_ui_gtk_manager_common.h"
+
 #include "net_macros.h"
 
 #include "IRC_client_curses.h"
@@ -165,8 +167,8 @@ done_connect:
     {
       // step1: stop GTK event dispatch ?
       if (inherited::configuration_->hasUI)
-        IRC_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false,  // wait ?
-                                                                false); // N/A
+        COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false,  // wait ?
+                                                            false); // N/A
       else
       {
         if (inherited::configuration_->cursesState)

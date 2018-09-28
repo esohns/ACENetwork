@@ -23,20 +23,28 @@
 //#if defined (LIBACENETWORK_ENABLE_VALGRIND_SUPPORT)
 #if defined (VALGRIND_SUPPORT)
 #include "valgrind/valgrind.h"
-#endif
-
-#if defined (HAVE_CONFIG_H)
-#include "libACENetwork_config.h"
-#endif
+#endif // VALGRIND_SUPPORT
 
 // Library Header Files
+#if defined (HAVE_CONFIG_H)
+#include "libCommon_config.h"
+#endif // HAVE_CONFIG_H
+
 #include "common.h"
 #include "common_macros.h"
 #include "common_pragmas.h"
+
+#if defined (HAVE_CONFIG_H)
+#include "libACEStream_config.h"
+#endif // HAVE_CONFIG_H
 
 #include "stream_common.h"
 #include "stream_macros.h"
 
 // Local Header Files
+#if defined (HAVE_CONFIG_H)
+#include "libACENetwork_config.h"
+#endif // HAVE_CONFIG_H
+
 #include "net_common.h"
 #include "net_macros.h"

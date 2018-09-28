@@ -721,7 +721,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
   // [- signal timer expiration to perform server queries] (see above)
 
   // step1a: start GTK event loop ?
-  Client_GTK_Manager_t* gtk_manager_p = NULL;
+  Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
   if (!UIDefinitionFile_in.empty ())
   {
     CBData_in.eventHooks.finiHook = idle_finalize_UI_cb;
@@ -732,8 +732,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
     CBData_in.userData = &CBData_in;
 
-    gtk_manager_p =
-      CLIENT_UI_GTK_MANAGER_SINGLETON::instance ();
+    gtk_manager_p = COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
     gtk_manager_p->start ();
     ACE_Time_Value timeout (0,
@@ -747,10 +746,7 @@ do_work (enum Client_TimeoutHandler::ActionModeType actionMode_in,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
-
-      // clean up
       Common_Timer_Tools::finalizeTimers (timer_configuration.dispatch);
-
       return;
     } // end IF
 
@@ -1300,11 +1296,11 @@ ACE_TMAIN (int argc_in,
 
   // step1h: init GLIB / G(D|T)K[+] / GNOME ?
   Client_GtkBuilderDefinition_t ui_definition (argc_in,
-                                               argv_in);
+                                               argv_in,
+                                               &gtk_cb_data);
   if (!UI_file.empty ())
-    CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                               argv_in,
-                                                              &gtk_cb_data,
                                                               &ui_definition);
 
   ACE_High_Res_Timer timer;

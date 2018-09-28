@@ -60,8 +60,12 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
-          typename ControllerInterfaceType,
-          typename CBDataType>
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerHandlerConfigurationType,
                      PeerConnectionConfigurationType,
@@ -82,8 +86,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      StateType,
                      PeerUserDataType,
                      TrackerUserDataType,
-                     ControllerInterfaceType,
-                     CBDataType>::BitTorrent_Session_T ()
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::BitTorrent_Session_T ()
+#else
+                     >::BitTorrent_Session_T ()
+#endif // GUI_SUPPORT
  : inherited ()
  , trackerConnectionConfiguration_ (NULL)
  , trackerConnectionManager_ (NULL)
@@ -140,8 +148,12 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
-          typename ControllerInterfaceType,
-          typename CBDataType>
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerHandlerConfigurationType,
                      PeerConnectionConfigurationType,
@@ -162,8 +174,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      StateType,
                      PeerUserDataType,
                      TrackerUserDataType,
-                     ControllerInterfaceType,
-                     CBDataType>::~BitTorrent_Session_T ()
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::~BitTorrent_Session_T ()
+#else
+                     >::~BitTorrent_Session_T ()
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::~BitTorrent_Session_T"));
 
@@ -195,8 +211,12 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
-          typename ControllerInterfaceType,
-          typename CBDataType>
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 bool
 BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerHandlerConfigurationType,
@@ -218,8 +238,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      StateType,
                      PeerUserDataType,
                      TrackerUserDataType,
-                     ControllerInterfaceType,
-                     CBDataType>::initialize (const ConfigurationType& configuration_in)
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::initialize (const ConfigurationType& configuration_in)
+#else
+                     >::initialize (const ConfigurationType& configuration_in)
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::initialize"));
 
@@ -230,7 +254,6 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
 
   // *TODO*: remove type inferences
   { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, inherited::lock_, false);
-
     inherited::state_.controller = configuration_in.controller;
     inherited::state_.metaInfo = configuration_in.metaInfo;
   } // end lock scope
@@ -268,8 +291,12 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
-          typename ControllerInterfaceType,
-          typename CBDataType>
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 void
 BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerHandlerConfigurationType,
@@ -291,8 +318,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      StateType,
                      PeerUserDataType,
                      TrackerUserDataType,
-                     ControllerInterfaceType,
-                     CBDataType>::connect (const ACE_INET_Addr& address_in)
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::connect (const ACE_INET_Addr& address_in)
+#else
+                     >::connect (const ACE_INET_Addr& address_in)
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::connect"));
 
@@ -378,8 +409,12 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
-          typename ControllerInterfaceType,
-          typename CBDataType>
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 void
 BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerHandlerConfigurationType,
@@ -401,8 +436,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      StateType,
                      PeerUserDataType,
                      TrackerUserDataType,
-                     ControllerInterfaceType,
-                     CBDataType>::connect (Net_ConnectionId_t id_in)
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::connect (Net_ConnectionId_t id_in)
+#else
+                     >::connect (Net_ConnectionId_t id_in)
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::connect"));
 
@@ -557,8 +596,12 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
-          typename ControllerInterfaceType,
-          typename CBDataType>
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 void
 BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerHandlerConfigurationType,
@@ -580,8 +623,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      StateType,
                      PeerUserDataType,
                      TrackerUserDataType,
-                     ControllerInterfaceType,
-                     CBDataType>::disconnect (Net_ConnectionId_t id_in)
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::disconnect (Net_ConnectionId_t id_in)
+#else
+                     >::disconnect (Net_ConnectionId_t id_in)
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::disconnect"));
 
@@ -629,8 +676,12 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
-          typename ControllerInterfaceType,
-          typename CBDataType>
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 void
 BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerHandlerConfigurationType,
@@ -652,8 +703,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      StateType,
                      PeerUserDataType,
                      TrackerUserDataType,
-                     ControllerInterfaceType,
-                     CBDataType>::scrape ()
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::scrape ()
+#else
+                     >::scrape ()
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::scrape"));
 
@@ -834,8 +889,12 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
-          typename ControllerInterfaceType,
-          typename CBDataType>
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 void
 BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerHandlerConfigurationType,
@@ -857,8 +916,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      StateType,
                      PeerUserDataType,
                      TrackerUserDataType,
-                     ControllerInterfaceType,
-                     CBDataType>::trackerConnect (const ACE_INET_Addr& address_in)
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::trackerConnect (const ACE_INET_Addr& address_in)
+#else
+                     >::trackerConnect (const ACE_INET_Addr& address_in)
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::trackerConnect"));
 
@@ -1052,8 +1115,12 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
-          typename ControllerInterfaceType,
-          typename CBDataType>
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 void
 BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerHandlerConfigurationType,
@@ -1075,8 +1142,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      StateType,
                      PeerUserDataType,
                      TrackerUserDataType,
-                     ControllerInterfaceType,
-                     CBDataType>::trackerConnect (Net_ConnectionId_t id_in)
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::trackerConnect (Net_ConnectionId_t id_in)
+#else
+                     >::trackerConnect (Net_ConnectionId_t id_in)
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::trackerConnect"));
 
@@ -1114,8 +1185,12 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
-          typename ControllerInterfaceType,
-          typename CBDataType>
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 void
 BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerHandlerConfigurationType,
@@ -1137,8 +1212,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      StateType,
                      PeerUserDataType,
                      TrackerUserDataType,
-                     ControllerInterfaceType,
-                     CBDataType>::trackerDisconnect (Net_ConnectionId_t id_in)
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::trackerDisconnect (Net_ConnectionId_t id_in)
+#else
+                     >::trackerDisconnect (Net_ConnectionId_t id_in)
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::trackerDisconnect"));
 
@@ -1189,8 +1268,12 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
-          typename ControllerInterfaceType,
-          typename CBDataType>
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 void
 BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerHandlerConfigurationType,
@@ -1212,8 +1295,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      StateType,
                      PeerUserDataType,
                      TrackerUserDataType,
-                     ControllerInterfaceType,
-                     CBDataType>::notify (const Bencoding_Dictionary_t& record_in)
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::notify (const Bencoding_Dictionary_t& record_in)
+#else
+                     >::notify (const Bencoding_Dictionary_t& record_in)
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::notify"));
 
@@ -1456,8 +1543,12 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
-          typename ControllerInterfaceType,
-          typename CBDataType>
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 void
 BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerHandlerConfigurationType,
@@ -1479,8 +1570,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      StateType,
                      PeerUserDataType,
                      TrackerUserDataType,
-                     ControllerInterfaceType,
-                     CBDataType>::notify (const struct BitTorrent_PeerHandShake& record_in)
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::notify (const struct BitTorrent_PeerHandShake& record_in)
+#else
+                     >::notify (const struct BitTorrent_PeerHandShake& record_in)
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::notify"));
 
@@ -1510,8 +1605,12 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
-          typename ControllerInterfaceType,
-          typename CBDataType>
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 void
 BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerHandlerConfigurationType,
@@ -1533,9 +1632,13 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      StateType,
                      PeerUserDataType,
                      TrackerUserDataType,
-                     ControllerInterfaceType,
-                     CBDataType>::notify (const struct BitTorrent_PeerRecord& record_in,
-                                          ACE_Message_Block* messageBlock_in)
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::notify (const struct BitTorrent_PeerRecord& record_in,
+#else
+                     >::notify (const struct BitTorrent_PeerRecord& record_in,
+#endif // GUI_SUPPORT
+                                           ACE_Message_Block* messageBlock_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::notify"));
 
@@ -1588,8 +1691,12 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
-          typename ControllerInterfaceType,
-          typename CBDataType>
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 void
 BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerHandlerConfigurationType,
@@ -1611,8 +1718,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      StateType,
                      PeerUserDataType,
                      TrackerUserDataType,
-                     ControllerInterfaceType,
-                     CBDataType>::error (const struct BitTorrent_PeerRecord& record_in)
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::error (const struct BitTorrent_PeerRecord& record_in)
+#else
+                     >::error (const struct BitTorrent_PeerRecord& record_in)
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::error"));
 
@@ -1642,8 +1753,12 @@ template <typename PeerHandlerConfigurationType,
           typename StateType,
           typename PeerUserDataType,
           typename TrackerUserDataType,
-          typename ControllerInterfaceType,
-          typename CBDataType>
+          typename ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType> // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 void
 BitTorrent_Session_T<PeerHandlerConfigurationType,
                      TrackerHandlerConfigurationType,
@@ -1665,8 +1780,12 @@ BitTorrent_Session_T<PeerHandlerConfigurationType,
                      StateType,
                      PeerUserDataType,
                      TrackerUserDataType,
-                     ControllerInterfaceType,
-                     CBDataType>::log (const struct BitTorrent_PeerRecord& record_in)
+                     ControllerInterfaceType
+#if defined (GUI_SUPPORT)
+                     ,CBDataType>::log (const struct BitTorrent_PeerRecord& record_in)
+#else
+                     >::log (const struct BitTorrent_PeerRecord& record_in)
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Session_T::log"));
 

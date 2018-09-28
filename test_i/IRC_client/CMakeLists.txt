@@ -139,6 +139,7 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/log)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/timer)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui)
 

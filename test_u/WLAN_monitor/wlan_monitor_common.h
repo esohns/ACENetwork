@@ -119,10 +119,10 @@ struct WLANMonitor_GTK_CBData
 typedef Common_UI_GtkBuilderDefinition_T<struct Common_UI_GTK_State,
                                          struct WLANMonitor_GTK_CBData> WLANMonitor_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-                                struct Common_UI_GTK_State> WLANMonitor_GTK_Manager_t;
-typedef ACE_Singleton<WLANMonitor_GTK_Manager_t,
-                      ACE_MT_SYNCH::MUTEX> WLANMONITOR_UI_GTK_MANAGER_SINGLETON;
+//typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+//                                struct Common_UI_GTK_State> WLANMonitor_GTK_Manager_t;
+//typedef ACE_Singleton<WLANMonitor_GTK_Manager_t,
+//                      ACE_MT_SYNCH::MUTEX> WLANMONITOR_UI_GTK_MANAGER_SINGLETON;
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)

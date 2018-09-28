@@ -44,11 +44,15 @@ class BitTorrent_SessionMessage_T;
 template <typename SessionMessageType>
 class BitTorrent_Bencoding_ParserDriver_T;
 
-template <typename SessionDataType,      // not (!) reference-counted
+template <typename SessionDataType,     // not (!) reference-counted
           typename UserDataType,
-          typename SessionInterfaceType, // derived from Net_ISession_T
+          typename SessionInterfaceType // derived from Net_ISession_T
           ////////////////////////////////
-          typename CBDataType>           // ui feedback data type
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType>         // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 class BitTorrent_PeerStreamHandler_T
  : public Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                       SessionDataType,
@@ -59,9 +63,12 @@ class BitTorrent_PeerStreamHandler_T
                                                                   UserDataType> >
 {
  public:
-  BitTorrent_PeerStreamHandler_T (SessionInterfaceType*, // session handle
-
-                                  CBDataType* = NULL);   // ui feedback data handle
+  BitTorrent_PeerStreamHandler_T (SessionInterfaceType* // session handle
+#if defined (GUI_SUPPORT)
+                                  ,CBDataType* = NULL);  // ui feedback data handle
+#else
+                                 );
+#endif // GUI_SUPPORT
   inline virtual ~BitTorrent_PeerStreamHandler_T () {}
 
   // implement Stream_ISessionDataNotify_T
@@ -77,26 +84,34 @@ class BitTorrent_PeerStreamHandler_T
                        const BitTorrent_SessionMessage_T<SessionDataType,
                                                          UserDataType>&); // session message
 
+ protected:
+  // convenient types
+  typedef std::map<Stream_SessionId_t, SessionDataType*> SESSION_DATA_T;
+  typedef typename SESSION_DATA_T::iterator SESSION_DATA_ITERATOR_T;
+
+#if defined (GUI_SUPPORT)
+  CBDataType*           CBData_;
+#endif // GUI_SUPPORT
+  SessionInterfaceType* session_;
+  SESSION_DATA_T        sessionData_;
+
  private:
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_PeerStreamHandler_T ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_PeerStreamHandler_T (const BitTorrent_PeerStreamHandler_T&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_PeerStreamHandler_T& operator= (const BitTorrent_PeerStreamHandler_T&))
-
-  typedef std::map<Stream_SessionId_t, SessionDataType*> SESSION_DATA_T;
-  typedef typename SESSION_DATA_T::iterator SESSION_DATA_ITERATOR_T;
-
-  CBDataType*           CBData_;
-  SessionInterfaceType* session_;
-  SESSION_DATA_T        sessionData_;
 };
 
 //////////////////////////////////////////
 
-template <typename SessionDataType,      // not (!) reference-counted
+template <typename SessionDataType,     // not (!) reference-counted
           typename UserDataType,
-          typename SessionInterfaceType, // derived from Net_ISession_T
+          typename SessionInterfaceType // derived from Net_ISession_T
           ////////////////////////////////
-          typename CBDataType>           // ui feedback data type
+#if defined (GUI_SUPPORT)
+          ,typename CBDataType>         // ui feedback data type
+#else
+          >
+#endif // GUI_SUPPORT
 class BitTorrent_TrackerStreamHandler_T
  : public Stream_ISessionDataNotify_T<Stream_SessionId_t,
                                       SessionDataType,
@@ -108,9 +123,12 @@ class BitTorrent_TrackerStreamHandler_T
  , public Common_IInitialize_T<struct Common_ParserConfiguration>
 {
  public:
-  BitTorrent_TrackerStreamHandler_T (SessionInterfaceType*, // session handle
-
-                                     CBDataType* = NULL);   // ui feedback data handle
+  BitTorrent_TrackerStreamHandler_T (SessionInterfaceType* // session handle
+#if defined (GUI_SUPPORT)
+                                     ,CBDataType* = NULL); // ui feedback data handle
+#else
+                                    );
+#endif // GUI_SUPPORT
   inline virtual ~BitTorrent_TrackerStreamHandler_T () {}
 
   // implement Stream_ISessionDataNotify_T
@@ -127,13 +145,9 @@ class BitTorrent_TrackerStreamHandler_T
                                                          UserDataType>&); // session message
 
   // implement Common_IInitialize_T
-  inline virtual bool initialize (const struct Common_ParserConfiguration& configuration_in) { configuration_ = &const_cast<struct Common_ParserConfiguration&> (configuration_in); return true; };
+  inline virtual bool initialize (const struct Common_ParserConfiguration& configuration_in) { configuration_ = &const_cast<struct Common_ParserConfiguration&> (configuration_in); return true; }
 
- private:
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStreamHandler_T ())
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStreamHandler_T (const BitTorrent_TrackerStreamHandler_T&))
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStreamHandler_T& operator= (const BitTorrent_TrackerStreamHandler_T&))
-
+ protected:
   // convenient types
   typedef std::map<Stream_SessionId_t, SessionDataType*> SESSION_DATA_T;
   typedef typename SESSION_DATA_T::iterator SESSION_DATA_ITERATOR_T;
@@ -144,9 +158,16 @@ class BitTorrent_TrackerStreamHandler_T
   typedef BitTorrent_Bencoding_ParserDriver_T<SESSION_MESSAGE_T> PARSER_T;
 
   struct Common_ParserConfiguration* configuration_;
+#if defined (GUI_SUPPORT)
   CBDataType*                        CBData_;
+#endif // GUI_SUPPORT
   SessionInterfaceType*              session_;
   SESSION_DATA_T                     sessionData_;
+
+ private:
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStreamHandler_T ())
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStreamHandler_T (const BitTorrent_TrackerStreamHandler_T&))
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerStreamHandler_T& operator= (const BitTorrent_TrackerStreamHandler_T&))
 };
 
 // include template definition

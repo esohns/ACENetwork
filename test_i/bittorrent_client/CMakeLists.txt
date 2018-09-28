@@ -1,4 +1,8 @@
-﻿option (GTK3_SUPPORT "enable Gtk3 support" ON)
+﻿# disable GUI support
+is_UI_graphical (${UI_FRAMEWORK})
+if (NOT UI_FRAMEWORK STREQUAL "")
+
+endif (NOT UI_FRAMEWORK STREQUAL "")
 
 if (UNIX)
  include (CheckLibraryExists)
@@ -53,33 +57,10 @@ include (FindPkgConfig)
 if (UNIX)
 # *NOTE*: libCommon requires libcap
  pkg_check_modules (PKG_CAP REQUIRED libcap)
- pkg_check_modules (PKG_CURSES REQUIRED ncurses panel)
  pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libavformat libswscale)
- if (GTK3_SUPPORT)
-  pkg_check_modules (PKG_GTK3 REQUIRED gtk+-3.0)
- else ()
-# pkg_check_modules (PKG_GTK_GLADE REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0 libglade-2.0)
-  pkg_check_modules (PKG_GTK2 REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0)
- endif ()
 # *TODO*: repair WIN32 pkgconfig support
 elseif (WIN32)
- find_library (CURSES_LIBRARY pdcurses.lib
-               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses
-               PATH_SUFFIXES win32
-               DOC "searching for pdcurses.lib")
- find_library (PANEL_LIBRARY panel.lib
-               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses
-               PATH_SUFFIXES win32
-               DOC "searching for panel.lib")
-
- if (NOT CURSES_LIBRARY)
-  message (FATAL_ERROR "could not find pdcurses.lib, aborting")
- endif ()
- if (NOT PANEL_LIBRARY)
-  message (FATAL_ERROR "could not find panel.lib, aborting")
- endif ()
 endif ()
-#if (NOT EXISTS PDCURSES_LIBRARY)
 
 #include (FindPkgConfig)
 #pkg_check_modules (PKGACE REQUIRED ACE)
@@ -123,9 +104,6 @@ endif ()
 if (UNIX)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
  include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
-# *WORKAROUND*
- add_definitions (-DNCURSES_INTERNALS)
- include_directories (${PKG_CURSES_INCLUDE_DIRS})
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
 
@@ -143,8 +121,6 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/include)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ffmpeg)
-
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
@@ -182,8 +158,6 @@ set (bittorrent_client_SRCS
      bittorrent_client_common.h
      bittorrent_client_common_modules.h
      bittorrent_client_configuration.h
-     bittorrent_client_curses.cpp
-     bittorrent_client_curses.h
      bittorrent_client_defines.h
 #     bittorrent_client_inputhandler.cpp
 #     bittorrent_client_inputhandler.h
@@ -198,8 +172,19 @@ set (bittorrent_client_SRCS
 #     bittorrent_client_stream.cpp
 #     bittorrent_client_stream.h
      bittorrent_client_stream_common.h
+     bittorrent_client_streamhandler.cpp
+     bittorrent_client_streamhandler.h
+     bittorrent_client_streamhandler.inl
      bittorrent_client_tools.cpp
      bittorrent_client_tools.h)
+if (GUI_SUPPORT)
+ if (CURSES_USE)
+  set (bittorrent_client_SRCS
+       ${bittorrent_client_SRCS}
+       bittorrent_client_curses.cpp
+       bittorrent_client_curses.h)
+ endif (CURSES_USE)
+endif (GUI_SUPPORT)
 
 #set_source_files_properties(${bittorrent_client_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
@@ -233,7 +218,9 @@ endif (WIN32)
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)
 add_dependencies (${EXECUTABLE} CommonTimer)
-add_dependencies (${EXECUTABLE} CommonUI)
+if (GUI_SUPPORT)
+ add_dependencies (${EXECUTABLE} CommonUI)
+endif (GUI_SUPPORT)
 
 add_dependencies (${EXECUTABLE} ACEStream)
 add_dependencies (${EXECUTABLE} ACEStream_Decoder)
@@ -250,7 +237,6 @@ if (UNIX)
  target_link_libraries (${EXECUTABLE} iw)
 # target_link_libraries (${EXECUTABLE} ${FLEX_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})
- target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
 elseif (WIN32)
  set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
@@ -259,11 +245,8 @@ elseif (WIN32)
 # target_link_libraries (${EXECUTABLE} dxguid.lib)
  target_link_libraries (${EXECUTABLE} mf.lib)
  target_link_libraries (${EXECUTABLE} mfplat.lib)
-# *TODO*: repair WIN32 pkgconfig support
- target_link_libraries (${EXECUTABLE} ${CURSES_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${PANEL_LIBRARY})
 
- target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
+# target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 endif ()
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} CommonTimer)
@@ -278,7 +261,7 @@ target_link_libraries (${EXECUTABLE} ACEStream_Network)
 target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
-target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
+#target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_BitTorrent)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
@@ -304,30 +287,19 @@ install (TARGETS ${EXECUTABLE}
 
 ################################################################################
 
-if (UNIX)
- if (GTK3_SUPPORT)
-  include_directories (${PKG_GTK3_INCLUDE_DIRS})
- else ()
-  include_directories (${PKG_GTK2_INCLUDE_DIRS})
- endif ()
+#if (UNIX)
+# if (GTK3_SUPPORT)
+#  include_directories (${PKG_GTK3_INCLUDE_DIRS})
+# else ()
+#  include_directories (${PKG_GTK2_INCLUDE_DIRS})
+# endif ()
 
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui/gtk)
-elseif (WIN32)
- # *TODO*: repair pkgconfig support
-# gtk
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/atk-1.0)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/gdk-pixbuf-2.0)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/cairo)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/pango-1.0)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/glib-2.0/include)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/glib-2.0)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/gtk-3.0)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtkglarea)
-
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui/gtk)
-endif ()
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui/gtk)
+#elseif (WIN32)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui/gtk)
+#endif ()
 
 ########### next target ###############
 set (bittorrent_client_gui_SRCS
@@ -357,6 +329,9 @@ set (bittorrent_client_gui_SRCS
 #     bittorrent_client_stream.cpp
 #     bittorrent_client_stream.h
      bittorrent_client_stream_common.h
+     bittorrent_client_streamhandler.cpp
+     bittorrent_client_streamhandler.h
+     bittorrent_client_streamhandler.inl
      bittorrent_client_tools.cpp
      bittorrent_client_tools.h)
 
@@ -396,11 +371,11 @@ if (UNIX)
 # target_link_libraries (${EXECUTABLE_GUI} ${FLEX_LIBRARY})
  target_link_libraries (${EXECUTABLE_GUI} X11)
  target_link_libraries (${EXECUTABLE_GUI} ${PKG_FFMPEG_LIBRARIES})
- if (GTK3_SUPPORT)
-  target_link_libraries (${EXECUTABLE_GUI} ${PKG_GTK3_LIBRARIES})
- else ()
-  target_link_libraries (${EXECUTABLE_GUI} ${PKG_GTK2_LIBRARIES})
- endif ()
+# if (GTK3_SUPPORT)
+#  target_link_libraries (${EXECUTABLE_GUI} ${PKG_GTK3_LIBRARIES})
+# else ()
+#  target_link_libraries (${EXECUTABLE_GUI} ${PKG_GTK2_LIBRARIES})
+# endif ()
 elseif (WIN32)
 # target_link_libraries (${EXECUTABLE_GUI} ntdll.lib)
 
@@ -413,12 +388,12 @@ if (WIN32)
  set_target_properties (${EXECUTABLE_GUI} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
 #target_link_libraries (${EXECUTABLE_GUI} CommonUI)
-target_link_libraries (${EXECUTABLE_GUI} CommonUI_GTK)
+#target_link_libraries (${EXECUTABLE_GUI} CommonUI_GTK)
 
 target_link_libraries (${EXECUTABLE_GUI} ACEStream)
 
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME})
-target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_WLAN)
+#target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_BitTorrent)
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_HTTP)
 

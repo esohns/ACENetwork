@@ -391,19 +391,10 @@ if (UNIX)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
 elseif (WIN32)
- include_directories ($ENV{ACE_ROOT})
-
-# gtk
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/atk-1.0)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/gdk-pixbuf-2.0)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/cairo)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/pango-1.0)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/lib/glib-2.0/include)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/glib-2.0)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtk/gtk/Win32/debug/include/gtk-3.0)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../gtkglarea)
+# include_directories ($ENV{ACE_ROOT})
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/log)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/timer)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui/gtk)

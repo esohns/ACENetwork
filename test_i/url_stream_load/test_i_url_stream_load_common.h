@@ -132,11 +132,12 @@ struct Test_I_URLStreamLoad_GTK_CBData
 //  guint                                   eventSourceID;
 //};
 
-typedef Common_UI_GtkBuilderDefinition_T<struct Test_I_URLStreamLoad_GTK_CBData> Test_I_URLStreamLoad_GtkBuilderDefinition_t;
+typedef Common_UI_GtkBuilderDefinition_T<struct Common_UI_GTK_State,
+                                         struct Test_I_URLStreamLoad_GTK_CBData> Test_I_URLStreamLoad_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-                                struct Test_I_URLStreamLoad_GTK_CBData> Test_I_URLStreamLoad_GTK_Manager_t;
-typedef ACE_Singleton<Test_I_URLStreamLoad_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::MUTEX> TEST_I_URLSTREAMLOAD_UI_GTK_MANAGER_SINGLETON;
+//typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+//                                struct Test_I_URLStreamLoad_GTK_CBData> Test_I_URLStreamLoad_GTK_Manager_t;
+//typedef ACE_Singleton<Test_I_URLStreamLoad_GTK_Manager_t,
+//                      typename ACE_MT_SYNCH::MUTEX> TEST_I_URLSTREAMLOAD_UI_GTK_MANAGER_SINGLETON;
 
 #endif

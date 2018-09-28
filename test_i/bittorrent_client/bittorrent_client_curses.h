@@ -24,9 +24,8 @@
 #include <map>
 #include <string>
 
-#include "ace/Synch_Traits.h"
-
-#if defined (_MSC_VER)
+#include "ace/config-lite.h"
+#if defined (ACE_WIN32) || defined (ACE_WIN32)
 #include "curses.h"
 #else
 #include "ncurses.h"
@@ -34,11 +33,12 @@
 //         ACE_Synch_Options::timeout. Since not currently used, it's safe to
 //         undefine
 #undef timeout
-#endif
+#endif // ACE_WIN32 || ACE_WIN32
 #include "panel.h"
 
-#include "common.h"
+#include "ace/Synch_Traits.h"
 
+#include "common.h"
 
 #include "bittorrent_client_common.h"
 #include "bittorrent_client_network.h"
@@ -69,7 +69,7 @@ struct BitTorrent_Client_CursesState
    , sessionState (NULL)
   {
     activePanel = panels.begin ();
-  };
+  }
 
   // curses
   BitTorrent_Client_CursesSessionsIterator_t activePanel;

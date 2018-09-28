@@ -1345,12 +1345,12 @@ ACE_TMAIN (int argc_in,
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
   FileServer_GtkBuilderDefinition_t ui_definition (argc_in,
-                                                   argv_in);
+                                                   argv_in,
+                                                   &gtk_cb_data);
   if (!UI_file.empty ())
-    FILESERVER_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                                  argv_in,
-                                                                  &gtk_cb_data,
-                                                                  &ui_definition);
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
+                                                              argv_in,
+                                                              &ui_definition);
 
   ACE_High_Res_Timer timer;
   timer.start ();

@@ -65,26 +65,29 @@ connection_setup_function (void* arg_in)
   result = arg_in;
 #endif
 
+  // sanity check(s)
   struct IRC_Client_ConnectionThreadData* data_p =
     static_cast<struct IRC_Client_ConnectionThreadData*> (arg_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->CBData);
   ACE_ASSERT (data_p->configuration);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   guint context_id = 0;
   GtkProgressBar* progress_bar_p = NULL;
   GtkStatusbar* statusbar_p = NULL;
   gchar* string_p = NULL;
-  {
-//    ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->lock);
-
+  {// ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->CBData->lock);
     // step1: create new connection handler
     Common_UI_GTK_BuildersIterator_t iterator =
-      data_p->CBData->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+      state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
     // sanity check(s)
-    ACE_ASSERT (iterator != data_p->CBData->builders.end ());
+    ACE_ASSERT (iterator != state_r.builders.end ());
 
     // retrieve progress bar handle
     gdk_threads_enter ();
@@ -126,7 +129,7 @@ connection_setup_function (void* arg_in)
   IRC_Client_GUI_Connection* connection_p = NULL;
 //  gdk_threads_enter ();
   ACE_NEW_NORETURN (connection_p,
-                    IRC_Client_GUI_Connection (data_p->CBData,
+                    IRC_Client_GUI_Connection (const_cast<struct Common_UI_GTK_State&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ()),
                                                &data_p->CBData->connections,
                                                context_id,
                                                data_p->phonebookEntry.hostName,
@@ -139,9 +142,9 @@ connection_setup_function (void* arg_in)
     // clean up
 //    gdk_threads_leave ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->lock, result);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, result);
 #else
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->lock, std::numeric_limits<void*>::max ());
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, std::numeric_limits<void*>::max ());
 #endif
     data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
     delete data_p;
@@ -369,9 +372,9 @@ connection_failed:
                             icontrol_p);
   { // synch access
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->lock, result);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, result);
 #else
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->lock, std::numeric_limits<void*>::max ());
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, std::numeric_limits<void*>::max ());
 #endif
     // *TODO*: who deletes the module ? (the stream won't do it !)
     data_p->CBData->connections.insert (std::make_pair (connection_p->getR ().timeStamp,
@@ -398,9 +401,9 @@ connection_failed:
     connection_2->close ();
     connection_2->decrease ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->lock, result);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, result);
 #else
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->lock, std::numeric_limits<void*>::max ());
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, std::numeric_limits<void*>::max ());
 #endif
     data_p->CBData->connections.erase (connection_p->getR ().timeStamp);
 
@@ -427,9 +430,9 @@ remove_page:
 done:
   { // synch access
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->lock, result);
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, result);
 #else
-    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->CBData->lock, std::numeric_limits<void*>::max ());
+    ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, std::numeric_limits<void*>::max ());
 #endif
     data_p->CBData->progressData.completedActions.insert (ACE_Thread::self ());
   } // end lock scope
@@ -463,13 +466,16 @@ idle_add_channel_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_add_channel_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_HandlerCBData* data_p =
     static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->state);
   ACE_ASSERT (data_p->eventSourceId);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   GtkWindow* window_p = NULL;
   GtkHBox* hbox_p = NULL;
@@ -483,12 +489,12 @@ idle_add_channel_cb (gpointer userData_in)
   GtkNotebook* notebook_p = NULL;
   gint page_number = -1;
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->state->builders.find (data_p->builderLabel);
+    state_r.builders.find (data_p->builderLabel);
   // sanity check(s)
-  if (iterator == data_p->state->builders.end ())
+  if (iterator == state_r.builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("channel (was: \"%s\") builder not found, aborting\n"),
@@ -561,9 +567,9 @@ idle_add_channel_cb (gpointer userData_in)
   gtk_container_remove (GTK_CONTAINER (window_p),
                         GTK_WIDGET (vbox_p));
 
-  iterator_2 = data_p->state->builders.find (data_p->timeStamp);
+  iterator_2 = state_r.builders.find (data_p->timeStamp);
   // sanity check(s)
-  if (iterator_2 == data_p->state->builders.end ())
+  if (iterator_2 == state_r.builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (timestamp was: \"%s\") builder not found, aborting\n"),
@@ -602,14 +608,14 @@ idle_add_channel_cb (gpointer userData_in)
   if (IRC_Tools::isValidChannelName (data_p->id))
   {
     // *IMPORTANT NOTE*: release lock while switching pages
-    ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->state->lock);
+    ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (state_r.lock);
     ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard_2, reverse_lock, G_SOURCE_REMOVE);
     gtk_notebook_set_current_page (notebook_p,
                                    page_number);
   } // end IF
 
 clean_up:
-  data_p->state->eventSourceIds.erase (data_p->eventSourceId);
+  state_r.eventSourceIds.erase (data_p->eventSourceId);
   data_p->eventSourceId = 0;
 
   return G_SOURCE_REMOVE;
@@ -620,13 +626,16 @@ idle_add_connection_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_add_connection_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_ConnectionCBData* data_p =
     static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
 //  ACE_ASSERT (data_p->eventSourceId); // *NOTE*: seems to be a race condition
-  ACE_ASSERT (data_p->state);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   GtkWindow* window_p = NULL;
   GtkHBox* hbox_p = NULL;
@@ -637,17 +646,17 @@ idle_add_connection_cb (gpointer userData_in)
   GtkNotebook* notebook_p = NULL;
   gint page_number = -1;
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->state->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   Common_UI_GTK_BuildersIterator_t iterator_2 =
-    data_p->state->builders.find (data_p->timeStamp);
+    state_r.builders.find (data_p->timeStamp);
   // sanity check(s)
-  if (iterator_2 == data_p->state->builders.end ())
+  if (iterator_2 == state_r.builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (was: \"%s\") builder not found, aborting\n"),
@@ -741,7 +750,7 @@ idle_add_connection_cb (gpointer userData_in)
                                  page_number);
 
 clean_up:
-  data_p->state->eventSourceIds.erase (data_p->eventSourceId);
+  state_r.eventSourceIds.erase (data_p->eventSourceId);
   data_p->eventSourceId = 0;
 
   return G_SOURCE_REMOVE;
@@ -752,11 +761,15 @@ idle_finalize_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_finalize_UI_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_CBData* data_p =
     static_cast<struct IRC_Client_GTK_CBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   // step1: remove any remaining event sources
   // *NOTE*: should be 2: 'this', and idle_update_display_cb...
@@ -767,9 +780,9 @@ idle_finalize_UI_cb (gpointer userData_in)
     ACE_DEBUG ((LM_WARNING,
                 ACE_TEXT ("removed %u queued event(s)...\n"),
                 removed_events));
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
   //ACE_ASSERT (removed_events == data_p->eventSourceIds.size ());
-  data_p->eventSourceIds.clear ();
+  state_r.eventSourceIds.clear ();
 
   // step2: leave GTK
   gtk_main_quit ();
@@ -782,16 +795,20 @@ idle_initialize_UI_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_UI_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_CBData* data_p =
     static_cast<struct IRC_Client_GTK_CBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
 
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   // step2: populate phonebook
   GtkTreeStore* tree_store_p =
@@ -987,9 +1004,9 @@ idle_initialize_UI_cb (gpointer userData_in)
 //              ACE_TEXT ("idle_update_display_cb: %d\n"),
 //              event_source_id));
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
-  data_p->eventSourceIds.clear ();
-  data_p->eventSourceIds.insert (event_source_id);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
+  state_r.eventSourceIds.clear ();
+  state_r.eventSourceIds.insert (event_source_id);
 
   return G_SOURCE_REMOVE;
 }
@@ -999,15 +1016,18 @@ idle_remove_channel_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_remove_channel_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_HandlerCBData* data_p =
     static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->connection);
 //  ACE_ASSERT (data_p->eventSourceId); // *NOTE*: seems to be a race condition
-  ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->handler);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   GtkNotebook* notebook_p = NULL;
   Common_UI_GTK_BuildersIterator_t iterator_2;
@@ -1015,12 +1035,12 @@ idle_remove_channel_cb (gpointer userData_in)
   gint page_number = -1;
   gint number_of_pages = 0;
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->state->builders.find (data_p->timeStamp);
+    state_r.builders.find (data_p->timeStamp);
   // sanity check(s)
-  if (iterator == data_p->state->builders.end ())
+  if (iterator == state_r.builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (timestamp was: \"%s\") builder not found, aborting\n"),
@@ -1036,10 +1056,9 @@ idle_remove_channel_cb (gpointer userData_in)
   if (data_p->handler->isServerLog ())
     goto done; // skip page removal (that page belongs to the connection)
 
-  iterator_2 =
-      data_p->state->builders.find (data_p->builderLabel);
+  iterator_2 = state_r.builders.find (data_p->builderLabel);
   // sanity check(s)
-  if (iterator == data_p->state->builders.end ())
+  if (iterator == state_r.builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("handler (was: \"%s\") builder not found, aborting\n"),
@@ -1057,7 +1076,7 @@ idle_remove_channel_cb (gpointer userData_in)
   if (gtk_notebook_get_current_page (notebook_p) == page_number)
   { // flip away from "this" page ?
     // *IMPORTANT NOTE*: release lock while switching pages
-    ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->state->lock);
+    ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (state_r.lock);
     ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard_2, reverse_lock, G_SOURCE_REMOVE);
 
     gtk_notebook_prev_page (notebook_p);
@@ -1095,14 +1114,17 @@ idle_remove_connection_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_remove_connection_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_ConnectionCBData* data_p =
     static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->connections);
 //  ACE_ASSERT (data_p->eventSourceId); // *NOTE*: seems to be a race condition
-  ACE_ASSERT (data_p->state);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   GtkNotebook* notebook_p = NULL;
   GtkVBox* vbox_p = NULL;
@@ -1110,23 +1132,23 @@ idle_remove_connection_cb (gpointer userData_in)
   GtkWindow* window_p = NULL;
   Common_UI_GTK_BuildersIterator_t iterator, iterator_2;
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
 
   IRC_Client_GUI_ConnectionsIterator_t iterator_3 =
-      data_p->connections->end ();
+    data_p->connections->end ();
 
   iterator =
-    data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  if (iterator == data_p->state->builders.end ())
+  if (iterator == state_r.builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("main builder not found, aborting\n")));
     goto clean_up;
   } // end IF
-  iterator_2 = data_p->state->builders.find (data_p->timeStamp);
+  iterator_2 = state_r.builders.find (data_p->timeStamp);
   // sanity check(s)
-  if (iterator_2 == data_p->state->builders.end ())
+  if (iterator_2 == state_r.builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (was: \"%s\") builder not found, aborting\n"),
@@ -1149,7 +1171,7 @@ idle_remove_connection_cb (gpointer userData_in)
   if (gtk_notebook_get_current_page (notebook_p) == page_number)
   {
     // *IMPORTANT NOTE*: release lock while switching pages
-    ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (data_p->state->lock);
+    ACE_Reverse_Lock<ACE_SYNCH_MUTEX> reverse_lock (state_r.lock);
     ACE_GUARD_RETURN (ACE_Reverse_Lock<ACE_SYNCH_MUTEX>, aGuard_2, reverse_lock, G_SOURCE_REMOVE);
 
     gtk_notebook_prev_page (notebook_p);
@@ -1168,7 +1190,7 @@ idle_remove_connection_cb (gpointer userData_in)
   gtk_window_resize (window_p, 1, 1);
 
 clean_up:
-  data_p->state->eventSourceIds.erase (data_p->eventSourceId);
+  state_r.eventSourceIds.erase (data_p->eventSourceId);
   iterator_3 = data_p->connections->find (data_p->timeStamp);
   if (iterator_3 != data_p->connections->end ())
   {
@@ -1184,23 +1206,26 @@ idle_update_channel_modes_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_initialize_UI_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_HandlerCBData* data_p =
     static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
 //  ACE_ASSERT (data_p->eventSourceId); // *NOTE*: seems to be a race condition
-  ACE_ASSERT (data_p->state);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   GtkToggleButton* toggle_button_p = NULL;
   GtkHBox* hbox_p = NULL;
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->state->builders.find (data_p->builderLabel);
+    state_r.builders.find (data_p->builderLabel);
   // sanity check(s)
-  if (iterator == data_p->state->builders.end ())
+  if (iterator == state_r.builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("channel (was: \"%s\") builder not found, aborting\n"),
@@ -1287,7 +1312,7 @@ idle_update_channel_modes_cb (gpointer userData_in)
                             data_p->channelModes.test (CHANNELMODE_OPERATOR));
 
 clean_up:
-  data_p->state->eventSourceIds.erase (data_p->eventSourceId);
+  state_r.eventSourceIds.erase (data_p->eventSourceId);
   data_p->eventSourceId = 0;
 
   return G_SOURCE_REMOVE;
@@ -1298,19 +1323,23 @@ idle_update_display_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_display_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_CBData* data_p =
     static_cast<IRC_Client_GTK_CBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
   if (data_p->connections.empty ())
     return G_SOURCE_CONTINUE;
 
   // step0: retrieve active connection
   IRC_Client_GUI_Connection* connection_p =
-    IRC_Client_UI_Tools::current (*data_p,
+    IRC_Client_UI_Tools::current (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 (),
                                   data_p->connections);
   if (!connection_p) // *NOTE*: most probable cause: no server page/corresponding connection (yet)
     return G_SOURCE_CONTINUE;
@@ -1337,18 +1366,21 @@ idle_update_progress_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_progress_cb"));
 
+  // sanity check(s)
   IRC_Client_GTK_ProgressData* data_p =
     static_cast<IRC_Client_GTK_ProgressData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->state);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   int result = -1;
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->state->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   GtkProgressBar* progress_bar_p =
     GTK_PROGRESS_BAR (gtk_builder_get_object ((*iterator).second.second,
@@ -1359,8 +1391,7 @@ idle_update_progress_cb (gpointer userData_in)
   ACE_Thread_Manager* thread_manager_p = ACE_Thread_Manager::instance ();
   ACE_ASSERT (thread_manager_p);
   // synch access
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
-
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
     for (Common_UI_GTK_CompletedActionsIterator_t iterator_2 = data_p->completedActions.begin ();
          iterator_2 != data_p->completedActions.end ();
          ++iterator_2)
@@ -1429,25 +1460,28 @@ idle_update_user_modes_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_user_modes_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_ConnectionCBData* data_p =
     static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->connections);
 //  ACE_ASSERT (data_p->eventSourceId); // *NOTE*: seems to be a race condition
-  ACE_ASSERT (data_p->state);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   GtkToggleButton* toggle_button_p = NULL;
   Common_UI_GTK_BuildersIterator_t iterator;
   IRC_Client_GUI_ConnectionsConstIterator_t iterator_2;
   const IRC_Client_SessionState* connection_state_p = NULL;
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, G_SOURCE_REMOVE);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, G_SOURCE_REMOVE);
 
-  iterator = data_p->state->builders.find (data_p->timeStamp);
+  iterator = state_r.builders.find (data_p->timeStamp);
   // sanity check(s)
-  if (iterator == data_p->state->builders.end ())
+  if (iterator == state_r.builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (was: \"%s\") builder not found, aborting\n"),
@@ -1512,7 +1546,7 @@ idle_update_user_modes_cb (gpointer userData_in)
                                 connection_state_p->userModes[USERMODE_RECVWALLOPS]);
 
 clean_up:
-  data_p->state->eventSourceIds.erase (data_p->eventSourceId);
+  state_r.eventSourceIds.erase (data_p->eventSourceId);
   data_p->eventSourceId = 0;
 
   return G_SOURCE_REMOVE;
@@ -1527,17 +1561,22 @@ button_about_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_about_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  struct IRC_Client_GTK_CBData* data_p =
-    static_cast<IRC_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
+  struct IRC_Client_GTK_CBData* data_p =
+    static_cast<IRC_Client_GTK_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   // retrieve about dialog handle
   GtkDialog* dialog_p =
@@ -1558,18 +1597,23 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_connect_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  struct IRC_Client_GTK_CBData* data_p =
-    static_cast<IRC_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
+  struct IRC_Client_GTK_CBData* data_p =
+    static_cast<IRC_Client_GTK_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
   int result = -1;
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   // step1: retrieve active phonebook entry
   GtkComboBox* combo_box_p =
@@ -1732,9 +1776,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
 
     // sanity check: nickname already in use ?
     nick_name_taken = false;
-    { // synch access
-      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
-
+    { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
       for (IRC_Client_GUI_ConnectionsConstIterator_t iterator_2 = data_p->connections.begin ();
            iterator_2 != data_p->connections.end ();
            ++iterator_2)
@@ -1882,9 +1924,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
   gtk_widget_get_size_request (GTK_WIDGET (progress_bar_p), &width, &height);
   gtk_progress_bar_set_pulse_step (progress_bar_p,
                                    1.0 / static_cast<double> (width));
-  { // synch access
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
-
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     gtk_widget_show (GTK_WIDGET (progress_bar_p));
 
     guint event_source_id =
@@ -1919,7 +1959,7 @@ button_connect_clicked_cb (GtkWidget* widget_in,
 //    ACE_DEBUG ((LM_DEBUG,
 //                ACE_TEXT ("idle_update_progress_cb: %d\n"),
 //                event_source_id));
-    data_p->eventSourceIds.insert (event_source_id);
+    state_r.eventSourceIds.insert (event_source_id);
   } // end lock scope
 }
 
@@ -1929,16 +1969,20 @@ entry_send_changed_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::entry_send_changed_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_CBData* data_p =
     static_cast<IRC_Client_GTK_CBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
 
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   GtkEntry* entry_p = GTK_ENTRY (widget_in);
   ACE_ASSERT (entry_p);
@@ -1961,16 +2005,21 @@ entry_send_kb_focused_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (event_in);
+
+  // sanity check(s)
   struct IRC_Client_GTK_CBData* data_p =
     static_cast<IRC_Client_GTK_CBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
 
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   // make the "change" button the default widget...
   GtkButton* button_p =
@@ -1990,23 +2039,28 @@ button_send_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::button_send_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  struct IRC_Client_GTK_CBData* data_p =
-    static_cast<IRC_Client_GTK_CBData*> (userData_in);
 
   // sanity check(s)
+  struct IRC_Client_GTK_CBData* data_p =
+    static_cast<IRC_Client_GTK_CBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->configuration);
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   // step0: retrieve active connection
   IRC_Client_GUI_Connection* connection_p =
-    IRC_Client_UI_Tools::current (*data_p,
+    IRC_Client_UI_Tools::current (state_r,
                                   data_p->connections);
   if (!connection_p)
   {
@@ -2145,9 +2199,7 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   //ACE_ASSERT (data_p);
 
   //// step1: remove event sources
-  //{
-  //  ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->lock);
-
+  //{ ACE_Guard<ACE_SYNCH_MUTEX> aGuard (data_p->lock);
   //  for (Common_UI_GTKeventSourceIdsIterator_t iterator = data_p->eventSourceIds.begin ();
   //       iterator != data_p->eventSourceIds.end ();
   //       iterator++)
@@ -2168,7 +2220,7 @@ button_quit_clicked_cb (GtkWidget* widget_in,
   // step3: stop GTK event processing
   // *NOTE*: triggering UI shutdown here is more consistent, compared to doing
   //         it from the signal handler
-  COMMON_UI_GTK_MANAGER_SINGLETON::instance()->stop (false, true);
+  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false, true);
 }
 
 void
@@ -2177,14 +2229,17 @@ button_disconnect_clicked_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::button_disconnect_clicked_cb"));
 
-  struct IRC_Client_GTK_ConnectionCBData* data_p =
-    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
-
   // sanity check(s)
   ACE_ASSERT (widget_in);
+  struct IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->controller);
-  ACE_ASSERT (data_p->state);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   try {
     data_p->controller->quit (ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_LEAVE_REASON));
@@ -2194,7 +2249,7 @@ button_disconnect_clicked_cb (GtkWidget* widget_in,
   }
 
   // update widgets
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 
   // *NOTE*: the server should close the connection after this...
   //         --> the connection notebook page cleans itself (see end ())
@@ -2222,18 +2277,22 @@ nickname_entry_kb_focused_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (event_in);
-  struct IRC_Client_GTK_ConnectionCBData* data_p =
-    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
+  struct IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->state);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   // step0: retrieve active connection
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->state->builders.find (data_p->timeStamp);
+    state_r.builders.find (data_p->timeStamp);
   // sanity check(s)
-  if (iterator == data_p->state->builders.end ())
+  if (iterator == state_r.builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (was: \"%s\") builder not found, returning\n"),
@@ -2258,18 +2317,22 @@ nickname_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::nickname_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  struct IRC_Client_GTK_ConnectionCBData* data_p =
-    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
+  struct IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->state);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   // step0: retrieve active connection
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->state->builders.find (data_p->timeStamp);
+    state_r.builders.find (data_p->timeStamp);
   // sanity check(s)
-  if (iterator == data_p->state->builders.end ())
+  if (iterator == state_r.builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (was: \"%s\") builder not found, returning\n"),
@@ -2335,15 +2398,17 @@ usersbox_changed_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::usersbox_changed_cb"));
 
-  ACE_UNUSED_ARG (widget_in);
-  struct IRC_Client_GTK_ConnectionCBData* data_p =
-    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
-
   // sanity check(s)
   ACE_ASSERT (widget_in);
+  struct IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->connections);
-  ACE_ASSERT (data_p);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   // step1: retrieve active users entry
   // retrieve server tab users combobox handle
@@ -2367,7 +2432,7 @@ usersbox_changed_cb (GtkWidget* widget_in,
 //   user_string = g_value_get_string(&active_value);
   std::string username =
     Common_UI_GTK_Tools::UTF8ToLocale (string_p,
-                                   g_utf8_strlen (string_p, -1));
+                                       g_utf8_strlen (string_p, -1));
   if (username.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
@@ -2386,9 +2451,7 @@ usersbox_changed_cb (GtkWidget* widget_in,
     username.resize (IRC_PRT_MAXIMUM_NICKNAME_LENGTH);
 
   // *TODO*: if a conversation exists, simply activate the corresponding page
-  { // synch access
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock);
-
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
     IRC_Client_GUI_ConnectionsConstIterator_t iterator =
       data_p->connections->find (data_p->timeStamp);
     if (iterator == data_p->connections->end ())
@@ -2412,10 +2475,10 @@ refresh_users_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::refresh_users_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  struct IRC_Client_GTK_ConnectionCBData* data_p =
-    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
+  struct IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->controller);
 
@@ -2451,18 +2514,22 @@ channel_entry_kb_focused_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (event_in);
-  struct IRC_Client_GTK_ConnectionCBData* data_p =
-    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
+  struct IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   // step0: retrieve active connection
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->state->builders.find (data_p->timeStamp);
+    state_r.builders.find (data_p->timeStamp);
   // sanity check(s)
-  if (iterator == data_p->state->builders.end ())
+  if (iterator == state_r.builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (was: \"%s\") builder not found, returning\n"),
@@ -2487,19 +2554,23 @@ join_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::join_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  struct IRC_Client_GTK_ConnectionCBData* data_p =
-    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
+  struct IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->controller);
-  ACE_ASSERT (data_p->state);
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   // step0: retrieve active connection
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->state->builders.find (data_p->timeStamp);
+    state_r.builders.find (data_p->timeStamp);
   // sanity check(s)
-  if (iterator == data_p->state->builders.end ())
+  if (iterator == state_r.builders.end ())
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("connection (was: \"%s\") builder not found, returning\n"),
@@ -2571,11 +2642,10 @@ channelbox_changed_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::channelbox_changed_cb"));
 
-  struct IRC_Client_GTK_ConnectionCBData* data_p =
-    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
-
   // sanity check(s)
   ACE_ASSERT (widget_in);
+  struct IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->controller);
 
@@ -2609,7 +2679,7 @@ channelbox_changed_cb (GtkWidget* widget_in,
 //   channel_string = g_value_get_string(&active_value);
   std::string channel_string =
     Common_UI_GTK_Tools::UTF8ToLocale (channel_value,
-                                   g_utf8_strlen (channel_value, -1));
+                                       g_utf8_strlen (channel_value, -1));
   if (channel_string.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
@@ -2623,7 +2693,7 @@ channelbox_changed_cb (GtkWidget* widget_in,
   } // end IF
 
   // clean up
-  g_free(channel_value);
+  g_free (channel_value);
 
   // sanity check(s): has '#' prefix ?
   if (channel_string.find ('#', 0) != 0)
@@ -2652,10 +2722,10 @@ refresh_channels_clicked_cb (GtkWidget* widget_in,
   NETWORK_TRACE (ACE_TEXT ("::refresh_channels_clicked_cb"));
 
   ACE_UNUSED_ARG (widget_in);
-  struct IRC_Client_GTK_ConnectionCBData* data_p =
-    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
 
   // sanity check(s)
+  struct IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->controller);
 
@@ -2675,18 +2745,24 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::user_mode_toggled_cb"));
 
-  int result = -1;
-
-  struct IRC_Client_GTK_ConnectionCBData* data_p =
-    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
-
   // sanity check(s)
   ACE_ASSERT (toggleButton_in);
+  struct IRC_Client_GTK_ConnectionCBData* data_p =
+    static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
   ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->connections);
+  ACE_ASSERT (data_p->controller);
 
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
+  int result = -1;
   IRC_UserMode mode = USERMODE_INVALID;
   // find out which button toggled...
-  const gchar* name_p = gtk_buildable_get_name (GTK_BUILDABLE (toggleButton_in));
+  const gchar* name_p =
+    gtk_buildable_get_name (GTK_BUILDABLE (toggleButton_in));
   result = ACE_OS::strcmp (name_p,
                            ACE_TEXT_ALWAYS_CHAR (IRC_CLIENT_GUI_GTK_TOGGLEBUTTON_USERMODE_AWAY));
   if (result == 0)
@@ -2755,12 +2831,7 @@ user_mode_toggled_cb (GtkToggleButton* toggleButton_in,
     return; // done
   } // end IF
 
-  // sanity check(s)
-  ACE_ASSERT (data_p->connections);
-  ACE_ASSERT (data_p->controller);
-  ACE_ASSERT (data_p->state);
-
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock);
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 
   IRC_Client_GUI_ConnectionsConstIterator_t iterator =
     data_p->connections->find (data_p->timeStamp);
@@ -2806,19 +2877,23 @@ switch_channel_cb (GtkNotebook* notebook_in,
 
   ACE_UNUSED_ARG (notebook_in);
   ACE_UNUSED_ARG (page_in);
+
+  // sanity check(s)
   struct IRC_Client_GTK_ConnectionCBData* data_p =
     static_cast<IRC_Client_GTK_ConnectionCBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->state);
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->state->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   // check whether the switch was to the server log tab
   // --> disable corresponding widget(s) in the main UI
@@ -2835,20 +2910,23 @@ action_away_cb (GtkAction* action_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::action_away_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_ConnectionCBData* data_p =
     static_cast<IRC_Client_GTK_ConnectionCBData*>(userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->controller);
-  ACE_ASSERT (data_p->state);
 
-  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
+  ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, state_r.lock);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->state->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    state_r.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->state->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   GtkToggleButton* togglebutton_p =
     GTK_TOGGLE_BUTTON (gtk_builder_get_object ((*iterator).second.second,
@@ -2951,19 +3029,16 @@ channel_mode_toggled_cb (GtkToggleButton* toggleButton_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::channel_mode_toggled_cb"));
 
-  int result = -1;
-
-  struct IRC_Client_GTK_HandlerCBData* data_p =
-    static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
-
   // sanity check(s)
   ACE_ASSERT (toggleButton_in);
+  struct IRC_Client_GTK_HandlerCBData* data_p =
+    static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->connection);
   ACE_ASSERT (data_p->controller);
-  ACE_ASSERT (data_p);
   ACE_ASSERT (!data_p->id.empty ());
 
+  int result = -1;
   IRC_ChannelMode mode           = CHANNELMODE_INVALID;
   bool            need_parameter = false;
   std::string     entry_label;
@@ -3227,15 +3302,19 @@ topic_clicked_cb (GtkWidget* widget_in,
 
   ACE_UNUSED_ARG (widget_in);
   ACE_UNUSED_ARG (event_in);
-  struct IRC_Client_GTK_HandlerCBData* data_p =
-    static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
 
   // sanity check(s)
+  struct IRC_Client_GTK_HandlerCBData* data_p =
+    static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->connection);
   ACE_ASSERT (data_p->controller);
-  ACE_ASSERT (data_p->state);
   ACE_ASSERT (!data_p->id.empty ());
+
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
   // *NOTE*: see also: IRC_Client_MessageHandler ctor
   std::string page_tab_label_string;
@@ -3258,9 +3337,9 @@ topic_clicked_cb (GtkWidget* widget_in,
   builder_label += page_tab_label_string;
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->state->builders.find (builder_label);
+    state_r.builders.find (builder_label);
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->state->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   // retrieve entry handle
   GtkEntry* entry_p =
@@ -3324,11 +3403,10 @@ part_clicked_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::part_clicked_cb"));
 
-  struct IRC_Client_GTK_HandlerCBData* data_p =
-    static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
-
   // sanity check(s)
   ACE_ASSERT (widget_in);
+  struct IRC_Client_GTK_HandlerCBData* data_p =
+    static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->controller);
   ACE_ASSERT (!data_p->id.empty ());
@@ -3359,25 +3437,28 @@ members_clicked_cb (GtkWidget* widget_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::members_clicked_cb"));
 
+  // sanity check(s)
+  ACE_ASSERT (widget_in);
+  ACE_ASSERT (GTK_TREE_VIEW (widget_in));
   struct IRC_Client_GTK_HandlerCBData* data_p =
     static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
-
+  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->connection);
   // supposed to be a context menu -> right-clicked ?
   if (event_in->button != 3)
     return FALSE; // --> propagate event
 
-  // sanity check(s)
-  ACE_ASSERT (GTK_TREE_VIEW (widget_in));
-  ACE_ASSERT (data_p);
-  ACE_ASSERT (data_p->connection);
-  ACE_ASSERT (data_p->state);
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
 
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->state->lock, TRUE);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, state_r.lock, TRUE);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->state->builders.find (data_p->builderLabel);
+    state_r.builders.find (data_p->builderLabel);
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->state->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   // find out which row was actually clicked
   GtkTreePath* tree_path_p = NULL;
@@ -3602,10 +3683,9 @@ action_msg_cb (GtkAction* action_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::action_msg_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_HandlerCBData* data_p =
     static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->connection);
   ACE_ASSERT (!data_p->parameters.empty ());
@@ -3630,19 +3710,22 @@ action_invite_cb (GtkAction* action_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::action_invite_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_HandlerCBData* data_p =
     static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->controller);
-  ACE_ASSERT (data_p->state);
   ACE_ASSERT (!data_p->parameters.empty ());
 
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->state->builders.find (data_p->builderLabel);
+    state_r.builders.find (data_p->builderLabel);
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->state->builders.end ());
+  ACE_ASSERT (iterator != state_r.builders.end ());
 
   // retrieve the channel
   // --> currently active menuitem of the invite_channel_members_menu
@@ -3678,10 +3761,9 @@ action_info_cb (GtkAction* action_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::action_info_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_HandlerCBData* data_p =
     static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->controller);
   ACE_ASSERT (!data_p->parameters.empty ());
@@ -3700,10 +3782,9 @@ action_kick_cb (GtkAction* action_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::action_kick_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_HandlerCBData* data_p =
     static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->controller);
   ACE_ASSERT (!data_p->id.empty ());
@@ -3730,10 +3811,9 @@ action_ban_cb (GtkAction* action_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::action_ban_cb"));
 
+  // sanity check(s)
   struct IRC_Client_GTK_HandlerCBData* data_p =
     static_cast<IRC_Client_GTK_HandlerCBData*> (userData_in);
-
-  // sanity check(s)
   ACE_ASSERT (data_p);
   ACE_ASSERT (data_p->controller);
   ACE_ASSERT (!data_p->id.empty ());

@@ -16,34 +16,43 @@
 //#include <iostream>
 #include <string>
 
-//#ifdef LIBACENETWORK_ENABLE_VALGRIND_SUPPORT
-#if defined (VALGRIND_SUPPORT)
-#include "valgrind/valgrind.h"
-#endif
-
 // System Library Header Files
 #include "ace/config-lite.h"
 #include "ace/Global_Macros.h"
 #include "ace/Log_Msg.h"
 
+#if defined (VALGRIND_SUPPORT)
+#include "valgrind/valgrind.h"
+#endif // VALGRIND_SUPPORT
+
 // Library Header Files
+#if defined (HAVE_CONFIG_H)
+#include "libCommon_config.h"
+#endif // HAVE_CONFIG_H
+
 #include "common.h"
 #include "common_macros.h"
 #include "common_pragmas.h"
 
+#if defined (HAVE_CONFIG_H)
+#include "libACEStream_config.h"
+#endif // HAVE_CONFIG_H
+
 #include "stream_common.h"
 #include "stream_macros.h"
 
+// Local Header Files
 #if defined (HAVE_CONFIG_H)
 #include "libACENetwork_config.h"
 #endif // HAVE_CONFIG_H
 
-// Local Header Files
 #include "net_common.h"
 #include "net_macros.h"
 
 #if defined (_MSC_VER)
 #include "targetver.h"
-#endif
+#endif // _MSC_VER
 
 // *TODO*: reference additional headers your program requires here
+//#include "net_client_common.h"
+//#include "net_server_common.h"

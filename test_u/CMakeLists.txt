@@ -1,18 +1,39 @@
-﻿option (BUILD_TEST_U "build test_u" OFF)
-option (GTK_SUPPORT "enable GTK support" ON)
-# option (GTK3_SUPPORT "enable Gtk3 support" ON)
- # *NOTE*: implies DHCLIENT_SUPPORT off
-include (CMakeDependentOption)
-CMAKE_DEPENDENT_OPTION (GTK3_SUPPORT "enable GTK 3 support" ON
-                        "GTK_SUPPORT" OFF)
-CMAKE_DEPENDENT_OPTION (GTK2_SUPPORT "enable GTK 2 support" ON
-                        "GTK_SUPPORT; NOT GTK3_SUPPORT" OFF)
-CMAKE_DEPENDENT_OPTION (GTKGL_SUPPORT "enable GTK OpenGL support" ON
-                        "GTK_SUPPORT" OFF)
+﻿include (CMakeDependentOption)
+option (BUILD_TEST_U "build test_u" OFF)
+
+# user interface
+option (GUI_SUPPORT "enable graphical user interface support" ON)
+if (GUI_SUPPORT)
+ add_definitions (-DGUI_SUPPORT)
+ include (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/ui/scripts/Macros.cmake)
+ include (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/ui/scripts/PreUIFramework.cmake)
+ include (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/ui/scripts/SetUIFramework.cmake)
+
+ if (WXWIDGETS_SUPPORT)
+  message (STATUS "wxWidgets_DEFINITIONS: ${wxWidgets_DEFINITIONS}")
+  message (STATUS "wxWidgets_DEFINITIONS_DEBUG: ${wxWidgets_DEFINITIONS_DEBUG}")
+  message (STATUS "wxWidgets_CXX_FLAGS: ${wxWidgets_CXX_FLAGS}")
+  message (STATUS "wxWidgets_USE_FILE: ${wxWidgets_USE_FILE}")
+  # *NOTE*: re-enable ANSI mode
+  add_definitions (-DwxUSE_UNICODE=0)
+  add_definitions (-D__WXMSW__)
+  add_definitions (-DWXUSINGDLL)
+  add_definitions (-DwxUSE_GUI=1)
+  if (CMAKE_BUILD_TYPE STREQUAL Debug)
+   add_definitions (-D__WXDEBUG__)
+  endif (CMAKE_BUILD_TYPE STREQUAL Debug)
+ endif (WXWIDGETS_SUPPORT)
+
+ if (GTK_USE)
+  include (${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/ui/scripts/SetGTKVersion.cmake)
+  CMAKE_DEPENDENT_OPTION (GTKGL_SUPPORT "enable GTK OpenGL support" ON
+                          "GUI_SUPPORT" OFF)
 # *IMPORTANT NOTE*: to use gtkglarea on gtk2, check out the 'gtkglarea-2' branch
 #                   of the project
-CMAKE_DEPENDENT_OPTION (GTKGLAREA_SUPPORT "enable GtkGLArea support" OFF
-                        "GTK_SUPPORT; GTKGL_SUPPORT" OFF)
+  CMAKE_DEPENDENT_OPTION (GTKGLAREA_SUPPORT "enable GtkGLArea support" OFF
+                          "GUI_SUPPORT; GTKGL_SUPPORT" OFF)
+ endif (GTK_USE)
+endif (GUI_SUPPORT)
 
 add_library (${PROJECT_NAME}_Test_U STATIC "")
 
@@ -87,7 +108,11 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ATCD/ACE>)
 
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/cmake>)
+ target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src>)
+ target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/log>)
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/timer>)
  if (GTK_SUPPORT)
@@ -97,6 +122,8 @@ elseif (WIN32)
                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libCommon/src/ui/gtk>)
  endif (GTK_SUPPORT)
 
+ target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/cmake>)
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../libACEStream/src>)
 endif ()

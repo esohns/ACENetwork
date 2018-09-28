@@ -34,16 +34,30 @@
 
 #include "net_macros.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
 #include "bittorrent_client_curses.h"
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
 #include "bittorrent_client_network.h"
 
 BitTorrent_Client_SignalHandler::BitTorrent_Client_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
-                                                                  ACE_SYNCH_RECURSIVE_MUTEX* lock_in,
-                                                                  bool useCursesLibrary_in)
+                                                                  ACE_SYNCH_RECURSIVE_MUTEX* lock_in
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
+                                                                  ,bool useCursesLibrary_in)
+#else
+                                                                 )
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
  : inherited (dispatchMode_in,
               lock_in,
               this) // event handler handle
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
  , useCursesLibrary_ (useCursesLibrary_in)
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SignalHandler::BitTorrent_Client_SignalHandler"));
 
@@ -131,12 +145,16 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
   // ...shutdown ?
   if (shutdown)
   {
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
     // step1: notify curses dispatch ?
     if (inherited::configuration_)
       if (inherited::configuration_->cursesState)
       { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);
         inherited::configuration_->cursesState->finished = true;
       } // end IF
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
 
     // step2: stop event dispatch
     Common_Tools::finalizeEventDispatch (inherited::configuration_->dispatchState->proactorGroupId,

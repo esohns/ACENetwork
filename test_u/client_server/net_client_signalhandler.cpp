@@ -28,7 +28,8 @@
 #include "common_timer_manager_common.h"
 #include "common_tools.h"
 
-#include "common_ui_gtk_manager.h"
+#include "common_ui_gtk_manager_common.h"
+//#include "common_ui_gtk_manager.h"
 
 #include "net_common_tools.h"
 #include "net_macros.h"
@@ -229,6 +230,6 @@ Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 
     // step6: stop UI ?
     if (hasUI_)
-      CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
+      COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop ();
   } // end IF
 }

@@ -150,7 +150,8 @@ struct FileServer_GTK_CBData
   FileServer_Subscribers_t         subscribers;
 };
 
-typedef Common_UI_GtkBuilderDefinition_T<struct FileServer_GTK_CBData> FileServer_GtkBuilderDefinition_t;
+typedef Common_UI_GtkBuilderDefinition_T<struct Common_UI_GTK_State,
+                                         struct FileServer_GTK_CBData> FileServer_GtkBuilderDefinition_t;
 
 typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
                                 struct FileServer_GTK_CBData> FileServer_GTK_Manager_t;

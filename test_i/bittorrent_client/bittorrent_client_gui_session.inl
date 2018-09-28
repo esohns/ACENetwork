@@ -20,8 +20,8 @@
 
 #include <sstream>
 
-#include <ace/ACE.h>
-#include <ace/Log_Msg.h>
+#include "ace/ACE.h"
+#include "ace/Log_Msg.h"
 
 #include "common_file_tools.h"
 
@@ -47,7 +47,7 @@ template <typename SessionInterfaceType,
 BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
                                 ConnectionType,
                                 ConnectionCBDataType>::BitTorrent_Client_GUI_Session_T (const struct BitTorrent_Client_Configuration& configuration_in,
-                                                                                        struct Common_UI_GTK_State* GTKState_in,
+                                                                                        const struct Common_UI_GTK_State& GTKState_in,
                                                                                         guint contextId_in,
                                                                                         const std::string& label_in,
                                                                                         const std::string& UIFileDirectory_in,
@@ -61,7 +61,6 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::BitTorrent_Client_GUI_Session_T"));
 
   // sanity check(s)
-  ACE_ASSERT (GTKState_in);
   if (!Common_File_Tools::isDirectory (UIFileDirectory_in))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -75,7 +74,7 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
       &const_cast<struct BitTorrent_Client_Configuration&> (configuration_in);
   CBData_.controller = controller_in;
   CBData_.eventSourceId = 0;
-  CBData_.state = GTKState_in;
+  CBData_.state = &const_cast<struct Common_UI_GTK_State&> (GTKState_in);
   CBData_.handler = this;
   CBData_.label = label_in;
 

@@ -41,12 +41,12 @@
 #include "bittorrent_stream_common.h"
 #include "bittorrent_stream_peer.h"
 #include "bittorrent_stream_tracker.h"
-#include "bittorrent_streamhandler.h"
 
 #include "test_i_gtk_common.h"
 
 #include "bittorrent_client_common.h"
 #include "bittorrent_client_network.h"
+#include "bittorrent_client_streamhandler.h"
 
 //struct BitTorrent_Client_PeerUserData;
 struct BitTorrent_Client_PeerSessionData
@@ -56,7 +56,7 @@ struct BitTorrent_Client_PeerSessionData
    : BitTorrent_PeerSessionData ()
    , connectionState (NULL)
    , userData (NULL)
-  {};
+  {}
   struct BitTorrent_Client_PeerSessionData& operator+= (const struct BitTorrent_Client_PeerSessionData& rhs_in)
   {
     // *NOTE*: the idea is to 'merge' the data
@@ -79,7 +79,7 @@ struct BitTorrent_Client_TrackerSessionData
    : BitTorrent_TrackerSessionData ()
    , connectionState (NULL)
    , userData (NULL)
-  {};
+  {}
   
   struct BitTorrent_Client_TrackerSessionData& operator+= (const struct BitTorrent_Client_TrackerSessionData& rhs_in)
   {
@@ -217,7 +217,7 @@ struct BitTorrent_Client_PeerModuleHandlerConfiguration
    , subscriber (NULL)
    , subscribers (NULL)
    , userData (NULL)
-  {};
+  {}
 
   struct BitTorrent_Client_GTK_CBData*         CBData;
   BitTorrent_Client_ISession_t*                session;
@@ -248,7 +248,7 @@ struct BitTorrent_Client_TrackerModuleHandlerConfiguration
    , subscriber (NULL)
    , subscribers (NULL)
    , userData (NULL)
-  {};
+  {}
 
   struct BitTorrent_Client_GTK_CBData*            CBData;
   BitTorrent_Client_ISession_t*                   session;
@@ -266,7 +266,7 @@ struct BitTorrent_Client_PeerStreamState
    : BitTorrent_PeerStreamState ()
    , sessionData (NULL)
    , userData (NULL)
-  {};
+  {}
 
   struct BitTorrent_Client_PeerSessionData* sessionData;
 
@@ -279,7 +279,7 @@ struct BitTorrent_Client_TrackerStreamState
    : BitTorrent_TrackerStreamState ()
    , sessionData (NULL)
    , userData (NULL)
-  {};
+  {}
 
   struct BitTorrent_Client_TrackerSessionData* sessionData;
 

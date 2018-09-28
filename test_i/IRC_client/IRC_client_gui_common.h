@@ -155,11 +155,12 @@ struct IRC_Client_GTK_HandlerCBData
   std::string                    timeStamp;
 };
 
-typedef Common_UI_GtkBuilderDefinition_T<struct IRC_Client_GTK_CBData> IRC_Client_GtkBuilderDefinition_t;
+typedef Common_UI_GtkBuilderDefinition_T<struct Common_UI_GTK_State,
+                                         struct IRC_Client_GTK_CBData> IRC_Client_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-                                struct IRC_Client_GTK_CBData> IRC_Client_GTK_Manager_t;
-typedef ACE_Singleton<IRC_Client_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::MUTEX> IRC_CLIENT_UI_GTK_MANAGER_SINGLETON;
+//typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+//                                struct IRC_Client_GTK_CBData> IRC_Client_GTK_Manager_t;
+//typedef ACE_Singleton<IRC_Client_GTK_Manager_t,
+//                      typename ACE_MT_SYNCH::MUTEX> IRC_CLIENT_UI_GTK_MANAGER_SINGLETON;
 
 #endif

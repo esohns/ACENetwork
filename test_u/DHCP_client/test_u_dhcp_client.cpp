@@ -1212,20 +1212,17 @@ allocate:
 
     //CBData_in.stream = stream_p;
 
-    DHCPCLIENT_GTK_MANAGER_SINGLETON::instance ()->start ();
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
     ACE_Time_Value one_second (1, 0);
     result = ACE_OS::sleep (one_second);
     if (result == -1)
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_OS::sleep(): \"%m\", continuing\n")));
-    if (!DHCPCLIENT_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
+    if (!COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->isRunning ())
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to start GTK event dispatch, returning\n")));
-
-      // clean up
       connection_manager_p->abort ();
-
       return;
     } // end IF
 
@@ -1241,7 +1238,7 @@ allocate:
     //ACE_UNUSED_ARG (was_visible_b);
 #endif
 
-    DHCPCLIENT_GTK_MANAGER_SINGLETON::instance ()->wait ();
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->wait ();
   } // end IF
   else
     Common_Tools::dispatchEvents (useReactor_in,
@@ -1270,7 +1267,7 @@ allocate:
   } // end IF
 
 //  if (!UIDefinitionFileName_in.empty ())
-//    DHCPCLIENT_GTK_MANAGER_SINGLETON::instance ()->stop (true);
+//    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (true);
   //		{ // synch access
   //			ACE_Guard<ACE_Recursive_Thread_Mutex> aGuard(CBData_in.lock);
 
@@ -1645,7 +1642,6 @@ ACE_TMAIN (int argc_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
 #endif // ACE_WIN32 || ACE_WIN64
-
     return EXIT_FAILURE;
   } // end IF
 
@@ -1655,12 +1651,12 @@ ACE_TMAIN (int argc_in,
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
   DHCPClient_GtkBuilderDefinition_t ui_definition (argc_in,
-                                                   argv_in);
+                                                   argv_in,
+                                                   &gtk_cb_data);
   if (!ui_definition_file.empty ())
-    if (!DHCPCLIENT_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                                    argv_in,
-                                                                    &gtk_cb_data,
-                                                                    &ui_definition))
+    if (!COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
+                                                                   argv_in,
+                                                                   &ui_definition))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to Common_UI_GTK_Manager::initialize(), aborting\n")));
@@ -1678,7 +1674,6 @@ ACE_TMAIN (int argc_in,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
 #endif // ACE_WIN32 || ACE_WIN64
-
       return EXIT_FAILURE;
     } // end IF
 
@@ -1747,7 +1742,6 @@ ACE_TMAIN (int argc_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
 #endif // ACE_WIN32 || ACE_WIN64
-
     return EXIT_FAILURE;
   } // end IF
   ACE_Profile_Timer::Rusage elapsed_rusage;

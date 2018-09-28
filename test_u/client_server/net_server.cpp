@@ -689,18 +689,18 @@ do_work (unsigned int maximumNumberOfConnections_in,
   // - dispatch UI events (if any)
 
   // step4a: start GTK event loop ?
-  Server_GTK_Manager_t* gtk_manager_p = NULL;
+  Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
   if (!UIDefinitionFile_in.empty ())
   {
     CBData_in.eventHooks.finiHook = idle_finalize_UI_cb;
     CBData_in.eventHooks.initHook = idle_initialize_server_UI_cb;
     //CBData_in.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
     //  std::make_pair (UIDefinitionFile_in, static_cast<GladeXML*> (NULL));
-    CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
+    CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
     CBData_in.userData = &CBData_in;
 
-    gtk_manager_p = SERVER_GTK_MANAGER_SINGLETON::instance ();
+    gtk_manager_p = COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
     gtk_manager_p->start ();
     ACE_Time_Value timeout (0,
@@ -1354,12 +1354,12 @@ ACE_TMAIN (int argc_in,
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
   Server_GtkBuilderDefinition_t ui_definition (argc_in,
-                                               argv_in);
+                                               argv_in,
+                                               &gtk_cb_data);
   if (!UI_file.empty ())
-    SERVER_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                           argv_in,
-                                                           &gtk_cb_data,
-                                                           &ui_definition);
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
+                                                              argv_in,
+                                                              &ui_definition);
 
   ACE_High_Res_Timer timer;
   timer.start ();

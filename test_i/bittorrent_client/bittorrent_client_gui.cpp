@@ -549,14 +549,20 @@ do_work (bool useThreadPool_in,
   // [- signal timer expiration to perform server queries] (see above)
 
   // step5: start GTK event loop
-  CBData_in.eventHooks.initHook = idle_initialize_UI_cb;
-  CBData_in.eventHooks.finiHook = idle_finalize_UI_cb;
-  CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN)] =
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+  state_r.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
     std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
-  CBData_in.userData = &CBData_in;
+  state_r.eventHooks.initHook = idle_initialize_UI_cb;
+  state_r.eventHooks.finiHook = idle_finalize_UI_cb;
+#endif // GTK_USE
+  //CBData_in.userData = &CBData_in;
 
-  BitTorrent_Client_GTK_Manager_t* gtk_manager_p =
-      BITTORRENT_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ();
+#if defined (GTK_USE)
   gtk_manager_p->start ();
   ACE_Time_Value one_second (1, 0);
   int result = ACE_OS::sleep (one_second);
@@ -573,6 +579,7 @@ do_work (bool useThreadPool_in,
 
     return;
   } // end IF
+#endif // GTK_USE
 
   // step6: initialize worker(s)
   int group_id = -1;
@@ -583,7 +590,9 @@ do_work (bool useThreadPool_in,
 
     // clean up
     timer_manager_p->stop ();
+#if defined (GTK_USE)
     gtk_manager_p->stop ();
+#endif // GTK_USE
 
     return;
   } // end IF
@@ -595,7 +604,9 @@ do_work (bool useThreadPool_in,
                                 group_id);
 
   // step8: clean up
+#if defined (GTK_USE)
   gtk_manager_p->wait ();
+#endif // GTK_USE
   timer_manager_p->stop ();
 
   // wait for connection processing to complete
@@ -1273,14 +1284,34 @@ ACE_TMAIN (int argc_in,
 
     return EXIT_FAILURE;
   } // end IF
+
+  Common_MessageStack_t* logstack_p = NULL;
+  ACE_SYNCH_MUTEX* lock_p = NULL;
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+  logstack_p = &state_r.logStack;
+  lock_p = &state_r.logStackLock;
+#endif // GTK_USE
+
   struct BitTorrent_Client_Configuration configuration;
   struct BitTorrent_Client_GTK_CBData gtk_cb_data;
   gtk_cb_data.configuration = &configuration;
-
+  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
+#if defined (GTK_USE)
+  lock_2 = &state_r.subscribersLock;
+#endif // GTK_USE
   BitTorrent_Client_SignalHandler signal_handler  ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                                 : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                                   &gtk_cb_data.subscribersLock,
-                                                   false);
+                                                   lock_2
+#if defined (CURSES_USE)
+                                                   ,false);
+#else
+                                                  );
+#endif // CURSES_USE
 
   // step5: handle specific program modes
   if (print_version_and_exit)
@@ -1380,24 +1411,31 @@ ACE_TMAIN (int argc_in,
   configuration.trackerConnectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (""),
                                                                         tracker_connection_configuration));
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   gtk_cb_data.UIFileDirectory = UIDefinitionFile_directory;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 //   userData.phoneBook;
 //   userData.loginOptions.password = ;
 //  gtk_cb_data.configuration->protocolConfiguration.loginOptions.nickName =
 //      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_NICKNAME);
 //   userData.loginOptions.user.username = ;
 
-  gtk_cb_data.RCFiles.push_back (rc_file_name);
-
-  gtk_cb_data.progressData.state = &gtk_cb_data;
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  state_r.RCFiles.push_back (rc_file_name);
+  gtk_cb_data.progressData.state = &state_r;
 
   // step8: initialize GTK UI
   BitTorrent_Client_GtkBuilderDefinition_t ui_definition (argc_in,
-                                                          argv_in);
-  BITTORRENT_CLIENT_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                                       argv_in,
-                                                                       &gtk_cb_data,
-                                                                       &ui_definition);
+                                                          argv_in,
+                                                          &gtk_cb_data);
+  COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
+                                                            argv_in,
+                                                            &ui_definition);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
   // step9: do work
   ACE_High_Res_Timer timer;
@@ -1460,7 +1498,15 @@ ACE_TMAIN (int argc_in,
   user_time_string = Common_Timer_Tools::periodToString (user_time);
   system_time_string = Common_Timer_Tools::periodToString (system_time);
   // debug info
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),
+              elapsed_time.real_time,
+              elapsed_time.user_time,
+              elapsed_time.system_time,
+              ACE_TEXT (user_time_string.c_str ()),
+              ACE_TEXT (system_time_string.c_str ())));
+#else
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\nmaximum resident set size = %d\nintegral shared memory size = %d\nintegral unshared data size = %d\nintegral unshared stack size = %d\npage reclaims = %d\npage faults = %d\nswaps = %d\nblock input operations = %d\nblock output operations = %d\nmessages sent = %d\nmessages received = %d\nsignals received = %d\nvoluntary context switches = %d\ninvoluntary context switches = %d\n"),
               elapsed_time.real_time,
@@ -1482,14 +1528,6 @@ ACE_TMAIN (int argc_in,
               elapsed_rusage.ru_nsignals,
               elapsed_rusage.ru_nvcsw,
               elapsed_rusage.ru_nivcsw));
-#else
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT (" --> Process Profile <--\nreal time = %A seconds\nuser time = %A seconds\nsystem time = %A seconds\n --> Resource Usage <--\nuser time used: %s\nsystem time used: %s\n"),
-              elapsed_time.real_time,
-              elapsed_time.user_time,
-              elapsed_time.system_time,
-              ACE_TEXT (user_time_string.c_str ()),
-              ACE_TEXT (system_time_string.c_str ())));
 #endif
 
   // step10: clean up

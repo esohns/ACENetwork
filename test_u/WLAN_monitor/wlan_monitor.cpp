@@ -462,7 +462,7 @@ do_work (bool autoAssociate_in,
   Common_Timer_Manager_t* timer_manager_p = NULL;
   Net_WLAN_IInetMonitor_t* iwlanmonitor_p = NULL;
   Net_IStatisticHandler_t* istatistic_handler_p = NULL;
-  WLANMonitor_GTK_Manager_t* gtk_manager_p = NULL;
+  Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HWND window_p = NULL;
   BOOL was_visible_b = true;
@@ -609,7 +609,7 @@ do_work (bool autoAssociate_in,
   // step5a: start GTK event loop ?
   if (!UIDefinitionFile_in.empty ())
   {
-    gtk_manager_p = WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ();
+    gtk_manager_p = COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
 
     CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
@@ -1012,12 +1012,12 @@ ACE_TMAIN (int argc_in,
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
   WLANMonitor_GtkBuilderDefinition_t ui_definition (argc_in,
-                                                    argv_in);
+                                                    argv_in,
+                                                    &gtk_cb_data);
   if (!UI_definition_file_path.empty ())
-    WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                                   argv_in,
-                                                                   &gtk_cb_data,
-                                                                   &ui_definition);
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
+                                                              argv_in,
+                                                              &ui_definition);
 
   ACE_High_Res_Timer timer;
   timer.start ();

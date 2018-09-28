@@ -52,7 +52,7 @@ class IRC_Client_GUI_Connection
   friend class IRC_Client_GUI_MessageHandler;
 
  public:
-  IRC_Client_GUI_Connection (struct Common_UI_GTK_State*,   // GTK state handle
+  IRC_Client_GUI_Connection (struct Common_UI_GTK_State&,   // GTK state handle
                              IRC_Client_GUI_Connections_t*, // connections handle
                              guint,                         // (statusbar) context ID
                              const std::string&,            // (server tab) label
@@ -79,7 +79,7 @@ class IRC_Client_GUI_Connection
                        const IRC_Client_SessionMessage&);
 
   // implement Common_IGet_T
-  inline virtual const struct IRC_Client_GTK_ConnectionCBData& getR () const { return CBData_; };
+  inline virtual const struct IRC_Client_GTK_ConnectionCBData& getR () const { return CBData_; }
 
   // *NOTE*: a return value of -1 indicates non-existence
   gint exists (const std::string&, // channel/nick
@@ -104,7 +104,7 @@ class IRC_Client_GUI_Connection
 
  private:
   typedef std::map<std::string,
-                   IRC_Client_GUI_MessageHandler* > MESSAGE_HANDLERS_T;
+                   IRC_Client_GUI_MessageHandler*> MESSAGE_HANDLERS_T;
   typedef MESSAGE_HANDLERS_T::const_iterator MESSAGE_HANDLERSCONSTITERATOR_T;
   typedef MESSAGE_HANDLERS_T::iterator MESSAGE_HANDLERSITERATOR_T;
 
@@ -123,7 +123,7 @@ class IRC_Client_GUI_Connection
   IRC_Client_GUI_MessageHandler* getHandler (const std::string&); // id (channel/nickname)
 
   struct IRC_Client_GTK_ConnectionCBData CBData_;
-  guint                                  contextID_;
+  guint                                  contextId_;
   bool                                   isFirstUsersMsg_;
   struct IRC_Client_SessionState*        sessionState_;
   std::string                            UIFileDirectory_;

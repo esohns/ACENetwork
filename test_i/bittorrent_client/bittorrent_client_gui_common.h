@@ -130,11 +130,12 @@ struct BitTorrent_Client_GTK_SessionCBData
   BitTorrent_Client_ISession_t*           session;
 };
 
-typedef Common_UI_GtkBuilderDefinition_T<struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_GtkBuilderDefinition_t;
+typedef Common_UI_GtkBuilderDefinition_T<struct Common_UI_GTK_State,
+                                         struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-                                struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_GTK_Manager_t;
-typedef ACE_Singleton<BitTorrent_Client_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::MUTEX> BITTORRENT_CLIENT_UI_GTK_MANAGER_SINGLETON;
+//typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+//                                struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_GTK_Manager_t;
+//typedef ACE_Singleton<BitTorrent_Client_GTK_Manager_t,
+//                      typename ACE_MT_SYNCH::MUTEX> BITTORRENT_CLIENT_UI_GTK_MANAGER_SINGLETON;
 
 #endif

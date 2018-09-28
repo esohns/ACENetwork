@@ -551,7 +551,7 @@ idle_initialize_ui_cb (gpointer userData_in)
     } // end ELSE
       // schedule asynchronous updates of the info view
     event_source_id =
-        g_timeout_add (COMMON_UI_GTK_INTERVAL_DEFAULT_WIDGET_REFRESH,
+        g_timeout_add (COMMON_UI_REFRESH_DEFAULT_WIDGET,
                        idle_update_info_display_cb,
                        userData_in);
     if (event_source_id > 0)
@@ -675,7 +675,7 @@ idle_initialize_ui_cb (gpointer userData_in)
     } // end ELSE
     // schedule asynchronous updates of the info view
     event_source_id =
-        g_timeout_add (COMMON_UI_GTK_INTERVAL_DEFAULT_WIDGET_REFRESH,
+        g_timeout_add (COMMON_UI_REFRESH_DEFAULT_WIDGET,
                        idle_update_info_display_cb,
                        data_p);
     if (event_source_id > 0)

@@ -138,11 +138,12 @@ struct Server_GTK_CBData
 
 //////////////////////////////////////////
 
-typedef Common_UI_GtkBuilderDefinition_T<struct Server_GTK_CBData> Server_GtkBuilderDefinition_t;
+typedef Common_UI_GtkBuilderDefinition_T<struct Common_UI_GTK_State,
+                                         struct Server_GTK_CBData> Server_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-                                struct Server_GTK_CBData> Server_GTK_Manager_t;
-typedef ACE_Singleton<Server_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::MUTEX> SERVER_GTK_MANAGER_SINGLETON;
+//typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+//                                struct Server_GTK_CBData> Server_GTK_Manager_t;
+//typedef ACE_Singleton<Server_GTK_Manager_t,
+//                      typename ACE_MT_SYNCH::MUTEX> SERVER_GTK_MANAGER_SINGLETON;
 
 #endif

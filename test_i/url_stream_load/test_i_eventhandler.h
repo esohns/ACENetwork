@@ -36,8 +36,12 @@ class Test_I_EventHandler
  : public Test_I_ISessionNotify_t
 {
  public:
+#if defined (GUI_SUPPORT) && defined (GTK_USE)
   Test_I_EventHandler (struct Test_I_URLStreamLoad_GTK_CBData*); // GTK state
-  virtual ~Test_I_EventHandler ();
+#else
+  Test_I_EventHandler ();
+#endif // GUI_SUPPORT && GTK_USE
+  inline virtual ~Test_I_EventHandler () {}
 
   // implement Stream_ISessionDataNotify_T
   virtual void start (Stream_SessionId_t,                              // session id
@@ -58,7 +62,9 @@ class Test_I_EventHandler
   typedef std::map<unsigned int, struct Test_I_URLStreamLoad_SessionData*> SESSION_DATA_MAP_T;
   typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
 
+#if defined (GUI_SUPPORT)
   struct Test_I_URLStreamLoad_GTK_CBData* CBData_;
+#endif // GUI_SUPPORT
   SESSION_DATA_MAP_T                      sessionDataMap_;
 };
 

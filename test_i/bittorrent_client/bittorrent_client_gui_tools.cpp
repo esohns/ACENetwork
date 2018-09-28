@@ -91,7 +91,7 @@ BitTorrent_Client_UI_Tools::current (const Common_UI_GTK_State& GTKState_in,
 
   // sanity check(s)
   Common_UI_GTK_BuildersConstIterator_t iterator =
-    GTKState_in.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_GTK_DEFINITION_DESCRIPTOR_MAIN));
+    GTKState_in.builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
   ACE_ASSERT (iterator != GTKState_in.builders.end ());
 

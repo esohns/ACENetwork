@@ -753,7 +753,7 @@ idle_initialize_ui_cb (gpointer userData_in)
     } // end ELSE
     // schedule asynchronous updates of the info view
     event_source_id =
-        g_timeout_add (COMMON_UI_GTK_INTERVAL_DEFAULT_WIDGET_REFRESH,
+        g_timeout_add (COMMON_UI_REFRESH_DEFAULT_WIDGET,
                        idle_update_info_display_cb,
                        data_p);
     if (event_source_id > 0)
@@ -960,8 +960,8 @@ togglebutton_monitor_toggled_cb (GtkToggleButton* toggleButton_in,
           //                 idle_update_progress_cb,
           //                 &data_p->progressData,
           //                 NULL);
-          g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,                            // _LOW doesn't work (on Win32)
-                              COMMON_UI_GTK_INTERVAL_DEFAULT_PROGRESSBAR_REFRESH, // ms (?)
+          g_timeout_add_full (G_PRIORITY_DEFAULT_IDLE,            // _LOW doesn't work (on Win32)
+                              COMMON_UI_REFRESH_DEFAULT_PROGRESS, // ms (?)
                               idle_update_progress_cb,
                               userData_in,
                               NULL);
@@ -1793,8 +1793,8 @@ button_quit_clicked_cb (GtkButton* button_in,
   // step3: stop GTK event processing
   // *NOTE*: triggering UI shutdown here is more consistent, compared to doing
   //         it from the signal handler
-  WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance()->stop (false,  // wait ?
-                                                          false); // N/A
+  COMMON_UI_GTK_MANAGER_SINGLETON::instance()->stop (false,  // wait ?
+                                                     false); // N/A
 } // button_quit_clicked_cb
 #ifdef __cplusplus
 }
