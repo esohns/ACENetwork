@@ -21,6 +21,8 @@
 #ifndef NETWORK_MACROS_H
 #define NETWORK_MACROS_H
 
+// tracing //
+
 #define NETWORK_TRACE_IMPL(X) ACE_Trace ____ (ACE_TEXT (X), __LINE__, ACE_TEXT (__FILE__))
 
 // by default tracing is turned off
@@ -38,12 +40,24 @@
 #  include "ace/Trace.h"
 #endif /* NETWORK_NTRACE */
 
-#ifdef __GNUC__
-#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
-#endif
-#define COMPILER_NAME ACE::compiler_name()
-#define COMPILER_VERSION (ACE::compiler_major_version() * 10000 + ACE::compiler_minor_version() * 100 + ACE::compiler_beta_version())
+// application //
 
-#define NETWORK_STRINGIZE(X) #X
+#define NETWORK_CHECK_VERSION(major,minor,micro)                                                                         \
+  ((ACENetwork_VERSION_MAJOR > major)                                                                                 || \
+   ((ACENetwork_VERSION_MAJOR == major) && (ACENetwork_VERSION_MINOR > minor))                                        || \
+   ((ACENetwork_VERSION_MAJOR == major) && (ACENetwork_VERSION_MINOR == minor) && (ACENetwork_VERSION_MICRO >= micro)))
+
+// *NOTE*: arguments must be strings
+#define NETWORK_MAKE_VERSION_STRING_VARIABLE(program,version,variable)                                                          \
+  std::string variable = program; variable += ACE_TEXT_ALWAYS_CHAR (\\" \\");                                                   \
+  variable += version; variable += ACE_TEXT_ALWAYS_CHAR (\\" compiled on \\");                                                  \
+  variable += ACE_TEXT_ALWAYS_CHAR (COMPILATION_DATE_TIME);                                                                     \
+  variable += ACE_TEXT_ALWAYS_CHAR (\\" host platform \\"); variable += Common_Tools::compilerPlatformName ();                  \
+  variable += ACE_TEXT_ALWAYS_CHAR (\\" with \\"); variable += Common_Tools::compilerName ();                                   \
+  variable += ACE_TEXT_ALWAYS_CHAR (\\" \\"); variable += Common_Tools::compilerVersion ();                                     \
+  variable += ACE_TEXT_ALWAYS_CHAR (\\" against ACE \\"); variable += Common_Tools::compiledVersion_ACE ();                     \
+  variable += ACE_TEXT_ALWAYS_CHAR (\\" , libCommon \\"); variable += ACE_TEXT_ALWAYS_CHAR (Common_PACKAGE_VERSION_FULL);       \
+  variable += ACE_TEXT_ALWAYS_CHAR (\\" , libACEStream \\"); variable += ACE_TEXT_ALWAYS_CHAR (ACEStream_PACKAGE_VERSION_FULL); \
+  variable += ACE_TEXT_ALWAYS_CHAR (\\" , libACENetwork \\"); variable += ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION_FULL);
 
 #endif
