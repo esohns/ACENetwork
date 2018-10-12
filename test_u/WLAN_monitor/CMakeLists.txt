@@ -385,9 +385,10 @@ if (UNIX)
  if (DBUS_USE)
   include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/dbus)
  endif (DBUS_USE)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/signal)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/timer)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui/gtk)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui/gtk)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
 elseif (WIN32)
@@ -395,9 +396,10 @@ elseif (WIN32)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/log)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/signal)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/timer)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui/gtk)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui/gtk)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/xml)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
@@ -409,19 +411,34 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ########### next target ###############
-set (WLAN_monitor_SRCS
+set (EXECUTABLE WLAN_monitor)
+set (${EXECUTABLE}_EXE_SRCS
      stdafx.cpp
      stdafx.h
      test_u_eventhandler.cpp
      test_u_eventhandler.h
      test_u_signalhandler.cpp
      test_u_signalhandler.h
-     test_u_ui_callbacks.cpp
-     test_u_ui_callbacks.h
      wlan_monitor.cpp
      wlan_monitor_common.h
      wlan_monitor_configuration.h
      wlan_monitor_defines.h)
+if (GUI_SUPPORT)
+ if (GTK_USE)
+  set (${EXECUTABLE}_EXE_SRCS
+       ${${EXECUTABLE}_EXE_SRCS}
+       test_u_ui_callbacks.cpp
+       test_u_ui_callbacks.h)
+ elseif (WXWIDGETS_USE)
+#  set (${EXECUTABLE}_EXE_SRCS
+#       ${${EXECUTABLE}_EXE_SRCS}
+#       test_u_wxwidgets_ui.cpp
+#       test_u_wxwidgets_ui.h
+#       test_u_wxwidgets_ui.inl
+#       test_u_wxwidgets_ui_base.cpp
+#       test_u_wxwidgets_ui_base.h)
+ endif ()
+endif (GUI_SUPPORT)
 
 if (UNIX)
  add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
@@ -436,11 +453,26 @@ if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
  add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
 endif ()
 
-set (EXECUTABLE WLAN_monitor)
+set (ui_definition_file "")
+if (GUI_SUPPORT)
+ if (GTK_USE)
+  if (GTK3_USE)
+#   set (ui_definition_file ${EXECUTABLE}.gtk3)
+  elseif (GTK2_USE)
+#   set (ui_definition_file ${EXECUTABLE}.gtk2)
+  endif ()
+  set (ui_definition_file ${EXECUTABLE}.glade)
+ elseif (WXWIDGETS_USE)
+  if (WIN32)
+   add_definitions(-DUNICODE -D_UNICODE)
+  endif (WIN32)
+#  set (ui_definition_file ${EXECUTABLE}.xrc)
+ endif ()
+endif (GUI_SUPPORT)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
-                ${WLAN_monitor_SRCS}
-                etc/wlan_monitor.glade)
+                ${${EXECUTABLE}_EXE_SRCS}
+                etc/${ui_definition_file})
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_u")
 if (UNIX)
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_INTERFACE_MULTIPLICITY 4)
@@ -462,9 +494,9 @@ if (UNIX)
   add_dependencies (${EXECUTABLE} CommonDBus)
  endif (DBUS_USE)
 endif (UNIX)
+add_dependencies (${EXECUTABLE} CommonLog)
+add_dependencies (${EXECUTABLE} CommonSignal)
 add_dependencies (${EXECUTABLE} CommonTimer)
-add_dependencies (${EXECUTABLE} CommonUI)
-add_dependencies (${EXECUTABLE} CommonUI_GTK)
 if (WIN32)
  add_dependencies (${EXECUTABLE} CommonXML)
 endif (WIN32)
@@ -509,12 +541,7 @@ if (UNIX)
   target_link_libraries (${EXECUTABLE} ${GSS_LIBRARY})
  endif (DHCLIENT_SUPPORT)
 
- target_link_libraries (${EXECUTABLE} X11)
- if (GTK3_SUPPORT)
-  target_link_libraries (${EXECUTABLE} ${PKG_GTK3_LIBRARIES})
- else ()
-  target_link_libraries (${EXECUTABLE} ${PKG_GTK2_LIBRARIES})
- endif ()
+# target_link_libraries (${EXECUTABLE} X11)
 elseif (WIN32)
 # target_link_libraries (${EXECUTABLE} ntdll.lib)
 
@@ -522,13 +549,13 @@ elseif (WIN32)
  target_link_libraries (${EXECUTABLE} ${ACE_XML_PARSER_LIBRARY})
 endif ()
 target_link_libraries (${EXECUTABLE} Common)
+target_link_libraries (${EXECUTABLE} CommonLog)
+target_link_libraries (${EXECUTABLE} CommonSignal)
 target_link_libraries (${EXECUTABLE} CommonTimer)
 if (WIN32)
  # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
-#target_link_libraries (${EXECUTABLE} CommonUI)
-target_link_libraries (${EXECUTABLE} CommonUI_GTK)
 target_link_libraries (${EXECUTABLE} CommonXML)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
@@ -571,41 +598,69 @@ install (TARGETS ${EXECUTABLE}
          EXPORT ${PROJECT_NAME}Targets
          RUNTIME DESTINATION "${INSTALL_BIN_DIR}" COMPONENT bin
          COMPONENT dev)
-install (FILES etc/file_server.glade
+install (FILES etc/wlan_monitor.glade
          DESTINATION etc/lib${PROJECT_NAME}/test_u COMPONENT config)
 
 ##########################################
 
+set (ARGS "-a -l")
+if (CMAKE_BUILD_TYPE STREQUAL Debug)
+ set (ARGS "${ARGS} -t")
+endif (CMAKE_BUILD_TYPE STREQUAL Debug)
 if (UNIX)
- create_target_launcher (${EXECUTABLE}
-                         ARGS "-a -l -t"
-#                         FORWARD_ARGS
-                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib
-                                              ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug
-                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/ui/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/modules/dev/Debug
-                                              /usr/local/lib
-                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/wlan_monitor
-                         ENVIRONMENT foo=bar)
+ if (GUI_SUPPORT)
+  if (GTK_SUPPORT)
+   set (ARGS "-g./etc/${ui_definition_file} ${ARGS}")
+  endif (GTK_SUPPORT)
+ else ()
+  set (ARGS "-g ${ARGS}")
+ endif (GUI_SUPPORT)
+
+ set (RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/modules/ATCD/ACE/lib)
+# set (ENVIRONMENT "GDK_BACKEND=x11")
 elseif (WIN32)
- create_target_launcher (${EXECUTABLE}
-                         ARGS "-a -l -t"
-#                        FORWARD_ARGS
-                         RUNTIME_LIBRARY_DIRS ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib
-                                              ${PROJECT_SOURCE_DIR}/../openssl/bin
-                                              ${PROJECT_SOURCE_DIR}/../pdcurses/win32
-                                              ${PROJECT_SOURCE_DIR}/../gtk/gtk/Win32/debug/bin
-                                              G:/software/Development/dll
-                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/err/Debug
-                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/image/Debug
-                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/math/Debug
-                                              ${PROJECT_SOURCE_DIR}/../libCommon/cmake/src/ui/Debug
-                                              ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/Debug
-                                              ${PROJECT_SOURCE_DIR}/../libACEStream/cmake/src/modules/dec/Debug
-                                              ${PROJECT_SOURCE_DIR}/cmake/src/Debug
-                         WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/wlan_monitor
-                         ENVIRONMENT foo=bar)
+ if (GUI_SUPPORT)
+  set (ARGS "-g.\\\\etc\\\\${ui_definition_file} ${ARGS}")
+
+  if (GTK3_SUPPORT)
+   set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                             G:/software/Development/dll
+                             ${PROJECT_SOURCE_DIR}/../gtk3/bin)
+  elseif (GTK2_SUPPORT)
+   set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                             G:/software/Development/dll
+                             ${PROJECT_SOURCE_DIR}/../gtk2/bin)
+  endif ()
+  if (WXWIDGETS_SUPPORT)
+  set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                            ${wxWidgets_LIB_DIR})
+  endif (WXWIDGETS_SUPPORT)
+ else ()
+  set (ARGS "-g ${ARGS}")
+ endif (GUI_SUPPORT)
+ set (RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                           ${PROJECT_SOURCE_DIR}/../libpng-1.6.25/cmake/${CMAKE_BUILD_TYPE}
+#                           ${PROJECT_SOURCE_DIR}/../ffmpeg/libavcodec
+#                           ${PROJECT_SOURCE_DIR}/../ffmpeg/libavutil
+#                           ${PROJECT_SOURCE_DIR}/../ffmpeg/libswresample
+#                           ${PROJECT_SOURCE_DIR}/../ffmpeg/libswscale
+#                           ${PROJECT_SOURCE_DIR}/../assimp/cmake/code/${CMAKE_BUILD_TYPE}
+                           ${PROJECT_SOURCE_DIR}/../ATCD/ACE/lib)
 endif ()
+create_target_launcher (${EXECUTABLE}
+                        ARGS ${ARGS}
+#                        FORWARD_ARGS
+                        RUNTIME_LIBRARY_DIRS ${RUNTIME_LIBRARY_DIRS}
+                        WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/../test_u/wlan_monitor
+                        ENVIRONMENT ${ENVIRONMENT})
+
+##########################################
+
+add_test (NAME ${EXECUTABLE}_test
+          COMMAND ${PROJECT_BINARY_DIR}/${EXECUTABLE} -a -l -t
+          WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
+
+set_tests_properties (${EXECUTABLE}_test
+                      PROPERTIES
+                      ENVIRONMENT "PATH=D:\\projects\\ATCD\\ACE\\lib;D:\\projects\\gtk\\bin;D:\\projects\\libglade\\bin;D:\\projects\\libxml2-2.9.1\\.libs;G:\\software\\Development\\dll;${PROJECT_SOURCE_DIR}\\..\\libCommon\\cmake\\src\\Debug;${PROJECT_SOURCE_DIR}\\..\\libCommon\\cmake\\src\\ui\\Debug;${PROJECT_SOURCE_DIR}\\cmake\\src\\Debug;${PROJECT_SOURCE_DIR}\\cmake\\src\\modules\\dev\\Debug;${PROJECT_SOURCE_DIR}\\..\\libACENetwork\\cmake\\src\\Debug;%PATH%")
+#PATH=%PATH%;$(ProjectDir)..\..\..\..\ATCD\ACE\lib;$(ProjectDir)..\..\..\..\gtk3\bin;$(ProjectDir)..\..\..\..\libav-11.7\libavcodec;$(ProjectDir)..\..\..\..\libav-11.7\libavresample;$(ProjectDir)..\..\..\..\libav-11.7\libavutil;$(ProjectDir)..\..\..\..\libCommon\cmake\src\Debug;$(ProjectDir)..\..\..\..\libCommon\cmake\src\err\Debug;$(ProjectDir)..\..\..\..\libCommon\cmake\src\ui\Debug;$(ProjectDir)..\..\src\Debug;$(ProjectDir)..\..\src\modules\dev\Debug;$(ProjectDir)..\..\src\modules\vis\Debug

@@ -230,7 +230,7 @@ Test_U_UDPStream::load (Stream_ModuleList_t& modules_out,
   module_p = NULL;
   ACE_NEW_RETURN (module_p,
                   Test_U_MPEG_TS_Decoder_Module (this,
-                                                 ACE_TEXT_ALWAYS_CHAR (MODULE_DEC_DECODER_MPEG_TS_DEFAULT_NAME_STRING)),
+                                                 ACE_TEXT_ALWAYS_CHAR (STREAM_DEC_DECODER_MPEG_TS_DEFAULT_NAME_STRING)),
                   false);
   modules_out.push_back (module_p);
   module_p = NULL;

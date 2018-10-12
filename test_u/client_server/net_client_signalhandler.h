@@ -25,7 +25,7 @@
 #include "ace/INET_Addr.h"
 
 #include "common_isignal.h"
-#include "common_signalhandler.h"
+#include "common_signal_handler.h"
 
 #include "net_client_common.h"
 

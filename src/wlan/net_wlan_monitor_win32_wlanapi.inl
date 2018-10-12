@@ -57,18 +57,6 @@ Net_WLAN_Monitor_T<AddressType,
 template <typename AddressType,
           typename ConfigurationType,
           typename UserDataType>
-Net_WLAN_Monitor_T<AddressType,
-                   ConfigurationType,
-                   NET_WLAN_MONITOR_API_WLANAPI,
-                   UserDataType>::~Net_WLAN_Monitor_T ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_T::~Net_WLAN_Monitor_T"));
-
-}
-
-template <typename AddressType,
-          typename ConfigurationType,
-          typename UserDataType>
 void
 Net_WLAN_Monitor_T<AddressType,
                    ConfigurationType,
@@ -103,7 +91,7 @@ Net_WLAN_Monitor_T<AddressType,
   } // end IF
   ACE_ASSERT (inherited::clientHandle_ != ACE_INVALID_HANDLE);
 
-  Common_Identifiers_t interface_identifiers_a =
+  Net_InterfaceIdentifiers_t interface_identifiers_a =
       Net_WLAN_Tools::getInterfaces (inherited::clientHandle_);
 
   struct _WLAN_INTERFACE_INFO_LIST* interface_list_p = NULL;

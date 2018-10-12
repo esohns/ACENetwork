@@ -24,28 +24,30 @@
 #include "ace/Global_Macros.h"
 
 #include "common.h"
-#include "common_signalhandler.h"
+
+#include "common_signal_handler.h"
 
 #include "wlan_monitor_common.h"
 
 class Test_U_SignalHandler
  : public Common_SignalHandler_T<struct WLANMonitor_SignalHandlerConfiguration>
 {
+  typedef Common_SignalHandler_T<struct WLANMonitor_SignalHandlerConfiguration> inherited;
+
  public:
-  Test_U_SignalHandler (struct WLANMonitor_GTK_CBData*); // GTK state
+  Test_U_SignalHandler (enum Common_SignalDispatchType,
+                        ACE_SYNCH_RECURSIVE_MUTEX*);
   inline virtual ~Test_U_SignalHandler () {}
 
   // implement Common_ISignal
   virtual void handle (const struct Common_Signal&); // signal information
 
  private:
-  typedef Common_SignalHandler_T<struct WLANMonitor_SignalHandlerConfiguration> inherited;
-
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler (const Test_U_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_SignalHandler& operator= (const Test_U_SignalHandler&))
 
-  struct WLANMonitor_GTK_CBData* CBData_;
+  struct WLANMonitor_UI_CBData* CBData_;
 };
 
 #endif

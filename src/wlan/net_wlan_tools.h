@@ -86,43 +86,43 @@ class Net_WLAN_Tools
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
-  static bool initialize (HANDLE&); // return value: WLAN API client handle
-  static void finalize (HANDLE); // WLAN API client handle
+  static bool initialize (HANDLE&); // return value: API client handle
+  static void finalize (HANDLE); // API client handle
 
-  static std::string associatedSSID (HANDLE,   // WLAN API client handle
+  static std::string associatedSSID (HANDLE,   // API client handle
                                      REFGUID); // interface identifier
-  static struct ether_addr associatedBSSID (HANDLE,   // WLAN API client handle
+  static struct ether_addr associatedBSSID (HANDLE,   // API client handle
                                             REFGUID); // interface identifier
-  static Common_Identifiers_t getInterfaces (HANDLE); // WLAN API client handle
-  static struct ether_addr getAccessPointAddress (HANDLE,              // WLAN API client handle
+  static Net_InterfaceIdentifiers_t getInterfaces (HANDLE); // API client handle
+  static struct ether_addr getAccessPointAddress (HANDLE,              // API client handle
                                                   REFGUID,             // interface identifier
                                                   const std::string&); // (E)SSID ("": return first)
-  static Net_WLAN_Profiles_t getProfiles (HANDLE,   // WLAN API client handle
+  static Net_WLAN_Profiles_t getProfiles (HANDLE,   // API client handle
                                           REFGUID); // interface identifier (GUID_NULL: all)
-  static std::string getProfile (HANDLE,              // WLAN API client handle
+  static std::string getProfile (HANDLE,              // API client handle
                                  REFGUID,             // interface identifier
                                  const std::string&); // (E)SSID
-  static Net_WLAN_SSIDs_t getSSIDs (HANDLE,   // WLAN API client handle
+  static Net_WLAN_SSIDs_t getSSIDs (HANDLE,   // API client handle
                                     REFGUID); // interface identifier (GUID_NULL: all)
-  static bool hasSSID (HANDLE,              // WLAN API client handle
+  static bool hasSSID (HANDLE,              // API client handle
                        REFGUID,             // interface identifier
                        const std::string&); // (E)SSID
 
-  static bool getDeviceSettingBool (HANDLE,                 // WLAN API client handle
+  static bool getDeviceSettingBool (HANDLE,                 // API client handle
                                     REFGUID,                // interface identifier
                                     enum _WLAN_INTF_OPCODE, // code
                                     BOOL&);                 // return value: setting
-  static bool setDeviceSettingBool (HANDLE,                 // WLAN API client handle
+  static bool setDeviceSettingBool (HANDLE,                 // API client handle
                                     REFGUID,                // interface identifier
                                     enum _WLAN_INTF_OPCODE, // code
                                     bool);                  // enable ? : disable
 
-  static bool associate (HANDLE,              // WLAN API client handle
+  static bool associate (HANDLE,              // API client handle
                          REFGUID,             // interface identifier
                          const std::string&); // (E)SSID
-  static bool disassociate (HANDLE,   // WLAN API client handle
+  static bool disassociate (HANDLE,   // API client handle
                             REFGUID); // interface identifier (GUID_NULL: all)
-  static void scan (HANDLE,              // WLAN API client handle
+  static void scan (HANDLE,              // API client handle
                     REFGUID,             // interface identifier
                     const std::string&); // (E)SSID ("": scan all)
 #endif // WLANAPI_SUPPORT

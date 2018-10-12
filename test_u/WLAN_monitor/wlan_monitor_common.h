@@ -21,25 +21,36 @@
 #ifndef WLAN_MONITOR_COMMON_H
 #define WLAN_MONITOR_COMMON_H
 
-#include <deque>
-
-#include "ace/INET_Addr.h"
+#include "ace/Containers_T.h"
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "common_istatistic.h"
 #include "common_isubscribe.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "net_common.h"
 
+#include "net_wlan_common.h"
 #include "net_wlan_configuration.h"
 #include "net_wlan_imonitor.h"
 
 #include "test_u_common.h"
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_u_gtk_common.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "wlan_monitor_configuration.h"
 
@@ -82,48 +93,6 @@ struct WLANMonitor_Configuration
 
 //////////////////////////////////////////
 
-enum WLANMMMonitor_EventType
-{
-  WLAN_MONITOR_EVENT_INTERFACE_HOTPLUG = 0,
-  WLAN_MONITOR_EVENT_INTERFACE_REMOVE,
-  WLAN_MONITOR_EVENT_SCAN_COMPLETE,
-  WLAN_MONITOR_EVENT_ASSOCIATE,
-  WLAN_MONITOR_EVENT_DISASSOCIATE,
-  WLAN_MONITOR_EVENT_CONNECT,
-  WLAN_MONITOR_EVENT_DISCONNECT,
-  WLAN_MONITOR_EVENT_SIGNAL_QUALITY_CHANGED,
-  ////////////////////////////////////////
-  WLAN_MONITOR_EVENT_MAX,
-  WLAN_MONITOR_EVENT_INVALID
-};
-typedef std::deque<enum WLANMMMonitor_EventType> WLANMMMonitor_Events_t;
-typedef WLANMMMonitor_Events_t::const_iterator WLANMMMonitor_EventsIterator_t;
-
-struct WLANMonitor_GTK_CBData
- : Test_U_GTK_CBData
-{
-  WLANMonitor_GTK_CBData ()
-   : Test_U_GTK_CBData ()
-   , configuration (NULL)
-   , eventSourceId (0)
-   , eventStack ()
-   , monitor (NULL)
-  {}
-
-  struct WLANMonitor_Configuration* configuration;
-  guint                             eventSourceId; // progress bar
-  WLANMMMonitor_Events_t            eventStack;
-  Net_WLAN_IInetMonitor_t*          monitor;
-};
-
-typedef Common_UI_GtkBuilderDefinition_T<struct Common_UI_GTK_State,
-                                         struct WLANMonitor_GTK_CBData> WLANMonitor_GtkBuilderDefinition_t;
-
-//typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-//                                struct Common_UI_GTK_State> WLANMonitor_GTK_Manager_t;
-//typedef ACE_Singleton<WLANMonitor_GTK_Manager_t,
-//                      ACE_MT_SYNCH::MUTEX> WLANMONITOR_UI_GTK_MANAGER_SINGLETON;
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)
 typedef NET_WLAN_INETWLANAPIMONITOR_SINGLETON NET_WLAN_INETMONITOR_SINGLETON;
@@ -137,5 +106,84 @@ typedef NET_WLAN_INETNL80211MONITOR_SINGLETON NET_WLAN_INETMONITOR_SINGLETON;
 typedef NET_WLAN_INETDBUSMONITOR_SINGLETON NET_WLAN_INETMONITOR_SINGLETON;
 #endif
 #endif // ACE_WIN32 || ACE_WIN64
+
+//////////////////////////////////////////
+
+enum WLANMMMonitor_EventType
+{
+#if defined (GUI_SUPPORT)
+  WLAN_MONITOR_EVENT_INTERFACE_HOTPLUG = COMMON_UI_EVENT_OTHER_USER_BASE,
+#else
+  WLAN_MONITOR_EVENT_INTERFACE_HOTPLUG = 0,
+#endif // GUI_SUPPORT
+  WLAN_MONITOR_EVENT_INTERFACE_REMOVE,
+  WLAN_MONITOR_EVENT_SCAN_COMPLETE,
+  WLAN_MONITOR_EVENT_ASSOCIATE,
+  WLAN_MONITOR_EVENT_DISASSOCIATE,
+  WLAN_MONITOR_EVENT_CONNECT,
+  WLAN_MONITOR_EVENT_DISCONNECT,
+  WLAN_MONITOR_EVENT_SIGNAL_QUALITY_CHANGED,
+  ////////////////////////////////////////
+  WLAN_MONITOR_EVENT_MAX,
+  WLAN_MONITOR_EVENT_INVALID
+};
+typedef ACE_Unbounded_Stack<enum WLANMMMonitor_EventType> WLANMMMonitor_Events_t;
+typedef ACE_Unbounded_Stack<enum WLANMMMonitor_EventType>::ITERATOR WLANMMMonitor_EventsIterator_t;
+
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+struct WLANMonitor_UI_GTK_State
+ : Common_UI_GTK_State
+{
+  WLANMonitor_UI_GTK_State ()
+   : Common_UI_GTK_State ()
+   , eventStack ()
+  {}
+
+  WLANMMMonitor_Events_t eventStack;
+};
+#endif // GTK_USE
+
+struct WLANMonitor_UI_CBData
+#if defined (GTK_USE)
+ : Test_U_GTK_CBData
+#elif defined (WXWIDGETS_USE)
+ : Test_U_wxWidgets_CBData
+#endif
+{
+  WLANMonitor_UI_CBData ()
+#if defined (GTK_USE)
+   : Test_U_GTK_CBData ()
+#elif defined (WXWIDGETS_USE)
+   : Test_U_wxWidgets_CBData ()
+#endif
+   , configuration (NULL)
+   , monitor (NULL)
+#if defined (GTK_USE)
+   , UIState (NULL)
+#endif // GTK_USE
+  {}
+
+  struct WLANMonitor_Configuration* configuration;
+  Net_WLAN_IInetMonitor_t*          monitor;
+#if defined (GTK_USE)
+  struct WLANMonitor_UI_GTK_State*  UIState;
+#endif // GTK_USE
+};
+
+#if defined (GTK_USE)
+typedef Common_UI_GtkBuilderDefinition_T<struct WLANMonitor_UI_GTK_State,
+                                         struct WLANMonitor_UI_CBData> WLANMonitor_GtkBuilderDefinition_t;
+
+//////////////////////////////////////////
+
+typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+                                struct WLANMonitor_UI_GTK_State> WLANMonitor_UI_GTK_Manager_t;
+typedef ACE_Singleton<WLANMonitor_UI_GTK_Manager_t,
+                      ACE_MT_SYNCH::MUTEX> WLANMONITOR_UI_GTK_MANAGER_SINGLETON;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+
+//////////////////////////////////////////
 
 #endif

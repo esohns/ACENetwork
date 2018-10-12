@@ -21,9 +21,17 @@
 #ifndef TEST_U_COMMON_H
 #define TEST_U_COMMON_H
 
+#if defined (GUI_SUPPORT)
+#include "ace/OS.h"
+#endif // GUI_SUPPORT
+
 #include "common_configuration.h"
 #include "common_istatistic.h"
 #include "common_statistic_handler.h"
+
+#if defined (GUI_SUPPORT)
+#include "common_ui_common.h"
+#endif // GUI_SUPPORT
 
 #include "net_common.h"
 
@@ -62,5 +70,48 @@ struct Test_U_Configuration
 
   struct Test_U_UserData                   userData;
 };
+
+//////////////////////////////////////////
+
+#if defined (GUI_SUPPORT)
+struct Test_U_UI_ProgressData
+{
+  Test_U_UI_ProgressData ()
+   : state (NULL)
+   , statistic ()
+  {
+    ACE_OS::memset (&statistic, 0, sizeof (Test_U_Statistic_t));
+  }
+
+  struct Common_UI_State* state;
+  Test_U_Statistic_t      statistic;
+};
+
+struct Test_U_UI_CBData
+{
+  Test_U_UI_CBData ()
+   : allowUserRuntimeStatistic (true)
+   , progressData ()
+   , UIState ()
+  {
+    progressData.state = &UIState;
+  }
+
+  bool                          allowUserRuntimeStatistic;
+  struct Test_U_UI_ProgressData progressData;
+  struct Common_UI_State        UIState;
+};
+
+struct Test_U_UI_ThreadData
+{
+  Test_U_UI_ThreadData ()
+   : CBData (NULL)
+   , sessionId (0)
+  {}
+
+  struct Test_U_UI_CBData* CBData;
+  size_t                   sessionId;
+};
+#endif // GUI_SUPPORT
 
 #endif

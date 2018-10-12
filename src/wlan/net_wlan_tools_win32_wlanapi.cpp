@@ -34,7 +34,7 @@
 #include "ace/OS.h"
 #include "ace/Synch.h"
 
-#include "common_tools.h"
+#include "common_error_tools.h"
 
 #include "common_xml_defines.h"
 
@@ -963,13 +963,13 @@ clean:
   return result;
 }
 
-Common_Identifiers_t
+Net_InterfaceIdentifiers_t
 Net_WLAN_Tools::getInterfaces (HANDLE clientHandle_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::getInterfaces"));
 
   // initialize return value(s)
-  Common_Identifiers_t result;
+  Net_InterfaceIdentifiers_t result;
 
   HANDLE client_handle = clientHandle_in;
   bool release_handle = false;
@@ -1033,7 +1033,11 @@ Net_WLAN_Tools::getInterfaces (HANDLE clientHandle_in)
     //            ACE_TEXT_WCHAR_TO_TCHAR (interface_list_p->InterfaceInfo[i].strInterfaceDescription),
     //            ACE_TEXT (interface_state_string.c_str ())));
 #endif // _DEBUG
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     result.push_back (interface_list_p->InterfaceInfo[i].InterfaceGuid);
+#else
+    result.push_back (Net_Common_Tools::interfaceToString (interface_list_p->InterfaceInfo[i].InterfaceGuid));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
   } // end FOR
   WlanFreeMemory (interface_list_p); interface_list_p = NULL;
 
@@ -1240,30 +1244,46 @@ Net_WLAN_Tools::getProfiles (HANDLE clientHandle_in,
 
   // sanity check(s)
   ACE_ASSERT (clientHandle_in != ACE_INVALID_HANDLE);
-  Common_Identifiers_t interface_identifiers;
+  Net_InterfaceIdentifiers_t interface_identifiers;
   if (unlikely (InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL)))
     interface_identifiers = Net_WLAN_Tools::getInterfaces (clientHandle_in);
   else
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     interface_identifiers.push_back (interfaceIdentifier_in);
+#else
+    interface_identifiers.push_back (Net_Common_Tools::indexToInterface (Net_Common_Tools::interfaceToIndex_2 (interfaceIdentifier_in)));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
   DWORD result_2 = 0;
   struct _WLAN_PROFILE_INFO_LIST* profile_list_p = NULL;
   struct _WLAN_PROFILE_INFO* profile_p = NULL;
-  for (Common_IdentifiersIterator_t iterator = interface_identifiers.begin ();
+  for (Net_InterfacesIdentifiersIterator_t iterator = interface_identifiers.begin ();
        iterator != interface_identifiers.end ();
        ++iterator)
   {
     ACE_ASSERT (!profile_list_p);
     result_2 = WlanGetProfileList (clientHandle_in,
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
                                    &(*iterator),
+#else
+                                   &Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (*iterator)),
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
                                    NULL,
                                    &profile_list_p);
     if (unlikely (result_2 != ERROR_SUCCESS))
     {
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("\"%s\": failed to ::WlanGetProfileList(0x%@): \"%s\", continuing\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (*iterator).c_str ()),
                   clientHandle_in,
                   ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("\"%s\": failed to ::WlanGetProfileList(0x%@): \"%s\", continuing\n"),
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (*iterator))).c_str ()),
+                  clientHandle_in,
+                  ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
       continue;
     } // end IF
     ACE_ASSERT (profile_list_p);
@@ -1519,7 +1539,7 @@ Net_WLAN_Tools::disassociate (HANDLE clientHandle_in,
   } // end IF
   ACE_ASSERT (client_handle != ACE_INVALID_HANDLE);
   DWORD result_2 = 0;
-  Common_Identifiers_t interface_identifiers_a;
+  Net_InterfaceIdentifiers_t interface_identifiers_a;
   if (unlikely (InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL)))
   {
     interface_identifiers_a = Net_WLAN_Tools::getInterfaces (clientHandle_in);
@@ -1531,23 +1551,39 @@ Net_WLAN_Tools::disassociate (HANDLE clientHandle_in,
     } // end IF
   } // end IF
   else
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     interface_identifiers_a.push_back (interfaceIdentifier_in);
+#else
+    interface_identifiers_a.push_back (Net_Common_Tools::interfaceToString (interfaceIdentifier_in));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 
-  for (Common_IdentifiersIterator_t iterator = interface_identifiers_a.begin ();
+  for (Net_InterfacesIdentifiersIterator_t iterator = interface_identifiers_a.begin ();
        iterator != interface_identifiers_a.end ();
        ++iterator)
   {
     // *NOTE*: this returns immediately
     result_2 = WlanDisconnect (client_handle,
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
                                &(*iterator),
+#else
+                               &Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (*iterator)),
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
                                NULL);
     if (unlikely (result_2 != ERROR_SUCCESS))
     {
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("\"%s\": failed to ::WlanDisconnect(0x%@): \"%s\", aborting\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (*iterator).c_str ()),
                   client_handle,
                   ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("\"%s\": failed to ::WlanDisconnect(0x%@): \"%s\", aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (*iterator))).c_str ()),
+                  client_handle,
+                  ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
       goto clean;
     } // end IF
   } // end FOR
@@ -1685,7 +1721,7 @@ Net_WLAN_Tools::associatedSSID (HANDLE clientHandle_in,
   struct _GUID interface_identifier = interfaceIdentifier_in;
   if (unlikely (InlineIsEqualGUID (interface_identifier, GUID_NULL)))
   {
-    Common_Identifiers_t interface_identifiers_a =
+    Net_InterfaceIdentifiers_t interface_identifiers_a =
       Net_WLAN_Tools::getInterfaces (clientHandle_in);
     if (interface_identifiers_a.empty ())
     {
@@ -1693,7 +1729,16 @@ Net_WLAN_Tools::associatedSSID (HANDLE clientHandle_in,
                   ACE_TEXT ("invalid argument, aborting\n")));
       return result;
     } // end IF
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     interface_identifier = interface_identifiers_a.front ();
+#else
+    interface_identifier =
+      Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (interface_identifiers_a.front ()));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+    interface_identifier = interface_identifiers_a.front ();
+#endif // ACE_WIN32 || ACE_WIN64
   } // end IF
 
   HANDLE client_handle = clientHandle_in;
@@ -1757,7 +1802,7 @@ Net_WLAN_Tools::getSSIDs (HANDLE clientHandle_in,
 
   Net_WLAN_SSIDs_t result;
 
-  Common_Identifiers_t interface_identifiers_a;
+  Net_InterfaceIdentifiers_t interface_identifiers_a;
   HANDLE client_handle = clientHandle_in;
   bool release_handle = false;
   if (unlikely (client_handle == ACE_INVALID_HANDLE))
@@ -1776,7 +1821,11 @@ Net_WLAN_Tools::getSSIDs (HANDLE clientHandle_in,
   if (unlikely (InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL)))
     interface_identifiers_a = Net_WLAN_Tools::getInterfaces (clientHandle_in);
   else
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     interface_identifiers_a.push_back (interfaceIdentifier_in);
+#else
+    interface_identifiers_a.push_back (Net_Common_Tools::interfaceToString (interfaceIdentifier_in));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 
   DWORD result_2 = 0;
   DWORD flags =
@@ -1791,23 +1840,35 @@ Net_WLAN_Tools::getSSIDs (HANDLE clientHandle_in,
   std::string SSID_string;
   std::string bss_network_type_string;
 #endif // _DEBUG
-  for (Common_IdentifiersIterator_t iterator = interface_identifiers_a.begin ();
+  for (Net_InterfacesIdentifiersIterator_t iterator = interface_identifiers_a.begin ();
        iterator != interface_identifiers_a.end ();
        ++iterator)
   {
     result_2 =
       WlanGetAvailableNetworkList (client_handle,
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
                                    &(*iterator),
+#else
+                                   &Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (*iterator)),
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
                                    flags,
                                    NULL,
                                    &wlan_network_list_p);
     if (unlikely (result_2 != ERROR_SUCCESS))
     {
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("\"%s\": failed to ::WlanGetAvailableNetworkList(0x%@): \"%s\", aborting\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (*iterator).c_str ()),
                   client_handle,
                   ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
+#else
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("\"%s\": failed to ::WlanGetAvailableNetworkList(0x%@): \"%s\", aborting\n"),
+                  ACE_TEXT (Net_Common_Tools::interfaceToString (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (*iterator))).c_str ()),
+                  client_handle,
+                  ACE_TEXT (Common_Error_Tools::errorToString (result_2).c_str ())));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
       goto error;
     } // end IF
     ACE_ASSERT (wlan_network_list_p);

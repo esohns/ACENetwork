@@ -719,11 +719,13 @@ Net_WLAN_Monitor_Base_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::scan"));
 
-  Common_Identifiers_t interface_identifiers_a;
+  Net_InterfaceIdentifiers_t interface_identifiers_a;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   if (InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL))
 #if defined (WLANAPI_USE)
     interface_identifiers_a = Net_WLAN_Tools::getInterfaces (clientHandle_);
+#else
+    ACE_ASSERT (false); // *TODO*
 #endif // WLANAPI_USE
 #elif defined (ACE_LINUX)
   if (interfaceIdentifier_in.empty ())
@@ -744,11 +746,19 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #endif // WEXT_USE
 #endif // ACE_WIN32 || ACE_WIN64
   else
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     interface_identifiers_a.push_back (interfaceIdentifier_in);
+#else
+    interface_identifiers_a.push_back (Net_Common_Tools::interfaceToString (interfaceIdentifier_in));
+#endif // _WIN32_WINNT_VISTA
+#else
+    interface_identifiers_a.push_back (interfaceIdentifier_in);
+#endif // ACE_WIN32 || ACE_WIN64
   if (interface_identifiers_a.empty ())
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("no WLAN interfaces found; cannot auto-select, returning\n")));
+                ACE_TEXT ("no wireless LAN interfaces found; cannot auto-select, returning\n")));
     return;
   } // end IF
 
@@ -793,7 +803,16 @@ Net_WLAN_Monitor_Base_T<AddressType,
   if (likely (configuration_))
   { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     configuration_->autoAssociate = false;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
     configuration_->interfaceIdentifier = interface_identifiers_a.front ();
+#else
+    configuration_->interfaceIdentifier =
+      Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (interface_identifiers_a.front ()));
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+    configuration_->interfaceIdentifier = interface_identifiers_a.front ();
+#endif // ACE_WIN32 || ACE_WIN64
     configuration_->SSID.clear ();
 //    isConnectionNotified_ = false;
   } // end IF

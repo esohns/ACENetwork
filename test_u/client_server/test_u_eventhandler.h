@@ -30,11 +30,24 @@
 
 #include "net_client_common.h"
 
+// forward declarations
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+struct Test_U_GTK_CBData;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+
 class ClientServer_EventHandler
  : public ClientServer_ISessionNotify_t
 {
  public:
-  ClientServer_EventHandler (struct Test_U_GTK_CBData*); // GTK state
+  ClientServer_EventHandler (
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+                             struct Test_U_GTK_CBData* // UI callback data
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+                            );
   inline virtual ~ClientServer_EventHandler () {}
 
   // implement Common_INotify_T
@@ -53,7 +66,9 @@ class ClientServer_EventHandler
   ACE_UNIMPLEMENTED_FUNC (ClientServer_EventHandler (const ClientServer_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (ClientServer_EventHandler& operator=(const ClientServer_EventHandler&))
 
+#if defined (GUI_SUPPORT)
   struct Test_U_GTK_CBData* CBData_;
+#endif // GUI_SUPPORT
 };
 
 #endif

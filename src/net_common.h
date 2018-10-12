@@ -105,19 +105,11 @@ enum Net_TransportLayerType
 };
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+// *NOTE*: prior to Vista, Win32 used 'indexes' integer identifiers
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
 typedef std::vector<struct _GUID> Net_InterfaceIdentifiers_t;
 #else
 typedef std::vector<std::string> Net_InterfaceIdentifiers_t;
-//Net_InterfaceIdentifiers_t& Net_InterfaceIdentifiers_t::operator=(Common_Identifiers_t& rhs_in)
-//{
-//  this->clear ();
-//  for (Common_IdentifiersIterator_t iterator = rhs_in.begin ();
-//       iterator != rhs_in.end ();
-//       ++iterator)
-//    this->push_back (Net_Common_Tools::interfaceToString (*iterator));
-//  return *this;
-//};
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
 typedef std::vector<std::string> Net_InterfaceIdentifiers_t;

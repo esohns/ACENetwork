@@ -27,7 +27,7 @@
 #include "ace/Get_Opt.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "ace/Init_ACE.h"
-#endif
+#endif // ACE_WIN32 || ACE_WIN32
 #include "ace/Log_Msg.h"
 #include "ace/Profile_Timer.h"
 #include "ace/Sig_Handler.h"
@@ -35,17 +35,28 @@
 #include "ace/Synch.h"
 #include "ace/Version.h"
 
-#ifdef LIBACESTREAM_ENABLE_VALGRIND_SUPPORT
-#include <valgrind/valgrind.h>
-#endif
+#if defined (VALGRIND_SUPPORT)
+#include "valgrind/valgrind.h"
+#endif // VALGRIND_SUPPORT
+
+#if defined (HAVE_CONFIG_H)
+#include "libCommon_config.h"
+#endif // HAVE_CONFIG_H
 
 #include "common.h"
-#include "common_file_tools.h"
-#include "common_logger.h"
-#include "common_signal_tools.h"
+//#include "common_file_tools.h"
 #include "common_tools.h"
 
+#include "common_logger.h"
+#include "common_log_tools.h"
+
+#include "common_signal_tools.h"
+
 #include "common_timer_tools.h"
+
+#if defined (HAVE_CONFIG_H)
+#include "libACEStream_config.h"
+#endif // HAVE_CONFIG_H
 
 #include "stream_allocatorheap.h"
 #include "stream_macros.h"
@@ -53,9 +64,9 @@
 #include "ace/Synch.h"
 #include "stream_file_sink.h"
 
-#ifdef HAVE_CONFIG_H
+#if defined (HAVE_CONFIG_H)
 #include "libACENetwork_config.h"
-#endif
+#endif // HAVE_CONFIG_H
 
 #include "net_common_tools.h"
 
@@ -555,7 +566,7 @@ do_work (unsigned int bufferSize_in,
     &configuration.connectionConfigurations;
   modulehandler_configuration.connectionManager = connection_manager_p;
   modulehandler_configuration.dumpFileName =
-    Common_File_Tools::getLogDirectory (ACENETWORK_PACKAGE_NAME);
+    Common_Log_Tools::getLogDirectory (ACENETWORK_PACKAGE_NAME);
   modulehandler_configuration.dumpFileName += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   modulehandler_configuration.dumpFileName += ACE_TEXT_ALWAYS_CHAR ("dump.txt");
   modulehandler_configuration.hostName = hostName_in;
@@ -1122,17 +1133,17 @@ ACE_TMAIN (int argc_in,
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
-      Common_File_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_NAME),
-                                         ACE::basename (argv_in[0]));
-  if (!Common_Tools::initializeLogging (ACE::basename (argv_in[0]),           // program name
-                                        log_file_name,                        // log file name
-                                        false,                                // log to syslog ?
-                                        false,                                // trace messages ?
-                                        trace_information,                    // debug messages ?
-                                        NULL))                                // logger ?
+      Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_NAME),
+                                        ACE::basename (argv_in[0]));
+  if (!Common_Log_Tools::initializeLogging (ACE::basename (argv_in[0]),           // program name
+                                            log_file_name,                        // log file name
+                                            false,                                // log to syslog ?
+                                            false,                                // trace messages ?
+                                            trace_information,                    // debug messages ?
+                                            NULL))                                // logger ?
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeLogging(), aborting\n")));
+                ACE_TEXT ("failed to Common_Log_Tools::initializeLogging(), aborting\n")));
 
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1159,7 +1170,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::sigemptyset(): \"%m\", aborting\n")));
 
-    Common_Tools::finalizeLogging ();
+    Common_Log_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1178,7 +1189,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
 
-    Common_Tools::finalizeLogging ();
+    Common_Log_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1204,7 +1215,7 @@ ACE_TMAIN (int argc_in,
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
-    Common_Tools::finalizeLogging ();
+    Common_Log_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1230,7 +1241,7 @@ ACE_TMAIN (int argc_in,
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
-    Common_Tools::finalizeLogging ();
+    Common_Log_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1289,7 +1300,7 @@ ACE_TMAIN (int argc_in,
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
-    Common_Tools::finalizeLogging ();
+    Common_Log_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1348,7 +1359,7 @@ ACE_TMAIN (int argc_in,
                                  signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
-  Common_Tools::finalizeLogging ();
+  Common_Log_Tools::finalizeLogging ();
 
   // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

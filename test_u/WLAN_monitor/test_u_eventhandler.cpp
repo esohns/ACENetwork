@@ -28,10 +28,24 @@
 
 #include "net_macros.h"
 
-#include "test_u_ui_callbacks.h"
+#include "net_wlan_common.h"
 
-Test_U_EventHandler::Test_U_EventHandler (struct WLANMonitor_GTK_CBData* CBData_in)
+#include "wlan_monitor_common.h"
+
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+#include "test_u_ui_callbacks.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+
+Test_U_EventHandler::Test_U_EventHandler (
+#if defined (GUI_SUPPORT)
+                                          struct WLANMonitor_UI_CBData* CBData_in
+#endif // GUI_SUPPORT
+                                         )
+#if defined (GUI_SUPPORT)
  : CBData_ (CBData_in)
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_EventHandler::Test_U_EventHandler"));
 
@@ -52,19 +66,26 @@ Test_U_EventHandler::onSignalQualityChange (const std::string& interfaceIdentifi
   ACE_UNUSED_ARG (signalQuality_in);
 
   // sanity check(s)
+#if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+  ACE_ASSERT (CBData_->UIState);
+#endif // GUI_SUPPORT
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   guint event_source_id = g_idle_add (idle_update_signal_quality_cb,
                                       CBData_);
   if (!event_source_id)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to g_idle_add(idle_update_signal_quality_cb): \"%m\", continuing\n")));
+#endif // GTK_USE
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
     //CBData_->eventSourceIds.insert (event_source_id);
-    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_SIGNAL_QUALITY_CHANGED);
+    CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_SIGNAL_QUALITY_CHANGED);
   } // end lock scope
+#endif // GUI_SUPPORT
 }
 
 void
@@ -83,9 +104,14 @@ Test_U_EventHandler::onAssociate (const std::string& interfaceIdentifier_in,
   ACE_UNUSED_ARG (success_in);
 
   // sanity check(s)
+#if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+  ACE_ASSERT (CBData_->UIState);
+#endif // GUI_SUPPORT
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   guint event_source_id = 0;
   if (success_in)
   {
@@ -97,10 +123,12 @@ Test_U_EventHandler::onAssociate (const std::string& interfaceIdentifier_in,
     //else
     //  CBData_->eventSourceIds.insert (event_source_id);
   } // end IF
+#endif // GTK_USE
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_ASSOCIATE);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
+    CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_ASSOCIATE);
   } // end lock scope
+#endif // GUI_SUPPORT
 }
 
 void
@@ -119,9 +147,14 @@ Test_U_EventHandler::onDisassociate (const std::string& interfaceIdentifier_in,
   ACE_UNUSED_ARG (success_in);
 
   // sanity check(s)
+#if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+  ACE_ASSERT (CBData_->UIState);
+#endif // GUI_SUPPORT
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   guint event_source_id = 0;
   if (success_in)
   {
@@ -133,10 +166,12 @@ Test_U_EventHandler::onDisassociate (const std::string& interfaceIdentifier_in,
     //else
     //  CBData_->eventSourceIds.insert (event_source_id);
   } // end IF
+#endif // GTK_USE
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_DISASSOCIATE);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
+    CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_DISASSOCIATE);
   } // end lock scope
+#endif // GUI_SUPPORT
 }
 
 void
@@ -155,9 +190,14 @@ Test_U_EventHandler::onConnect (const std::string& interfaceIdentifier_in,
   ACE_UNUSED_ARG (success_in);
 
   // sanity check(s)
+#if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+  ACE_ASSERT (CBData_->UIState);
+#endif // GUI_SUPPORT
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   guint event_source_id = 0;
   if (success_in)
   {
@@ -169,10 +209,12 @@ Test_U_EventHandler::onConnect (const std::string& interfaceIdentifier_in,
     //else
     //  CBData_->eventSourceIds.insert (event_source_id);
   } // end IF
+#endif // GTK_USE
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_CONNECT);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
+    CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_CONNECT);
   } // end lock scope
+#endif // GUI_SUPPORT
 }
 
 void
@@ -191,9 +233,14 @@ Test_U_EventHandler::onDisconnect (const std::string& interfaceIdentifier_in,
   ACE_UNUSED_ARG (success_in);
 
   // sanity check(s)
+#if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+  ACE_ASSERT (CBData_->UIState);
+#endif // GUI_SUPPORT
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   guint event_source_id = 0;
   if (success_in)
   {
@@ -205,10 +252,12 @@ Test_U_EventHandler::onDisconnect (const std::string& interfaceIdentifier_in,
     //else
     //  CBData_->eventSourceIds.insert (event_source_id);
   } // end IF
+#endif // GTK_USE
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_DISCONNECT);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
+    CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_DISCONNECT);
   } // end lock scope
+#endif // GUI_SUPPORT
 }
 
 void
@@ -225,12 +274,17 @@ Test_U_EventHandler::onHotPlug (const std::string& interfaceIdentifier_in,
   ACE_UNUSED_ARG (enabled_in);
 
   // sanity check(s)
+#if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+  ACE_ASSERT (CBData_->UIState);
+#endif // GUI_SUPPORT
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_INTERFACE_HOTPLUG);
+#if defined (GUI_SUPPORT)
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
+    CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_INTERFACE_HOTPLUG);
   } // end lock scope
+#endif // GUI_SUPPORT
 }
 
 void
@@ -247,12 +301,17 @@ Test_U_EventHandler::onRemove (const std::string& interfaceIdentifier_in,
   ACE_UNUSED_ARG (enabled_in);
 
   // sanity check(s)
+#if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+  ACE_ASSERT (CBData_->UIState);
+#endif // GUI_SUPPORT
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_INTERFACE_REMOVE);
+#if defined (GUI_SUPPORT)
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
+    CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_INTERFACE_REMOVE);
   } // end lock scope
+#endif // GUI_SUPPORT
 }
 
 void
@@ -267,9 +326,14 @@ Test_U_EventHandler::onScanComplete (const std::string& interfaceIdentifier_in)
   ACE_UNUSED_ARG (interfaceIdentifier_in);
 
   // sanity check(s)
+#if defined (GUI_SUPPORT)
   if (!CBData_)
     return;
+  ACE_ASSERT (CBData_->UIState);
+#endif // GUI_SUPPORT
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   guint event_source_id = g_idle_add (idle_update_ssids_cb,
                                       CBData_);
   if (!event_source_id)
@@ -277,8 +341,10 @@ Test_U_EventHandler::onScanComplete (const std::string& interfaceIdentifier_in)
                 ACE_TEXT ("failed to g_idle_add(idle_update_ssids_cb): \"%m\", continuing\n")));
   //else
   //  CBData_->eventSourceIds.insert (event_source_id);
+#endif // GTK_USE
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->lock);
-    CBData_->eventStack.push_back (WLAN_MONITOR_EVENT_SCAN_COMPLETE);
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
+    CBData_->UIState->eventStack.push (WLAN_MONITOR_EVENT_SCAN_COMPLETE);
   } // end lock scope
+#endif // GUI_SUPPORT
 }

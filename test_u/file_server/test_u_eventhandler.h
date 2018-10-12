@@ -30,12 +30,25 @@
 
 #include "file_server_common.h"
 
+// forward declarations
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+struct FileServer_GTK_CBData;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+
 class Test_U_EventHandler
  : public FileServer_ISessionNotify_t
 {
  public:
-  Test_U_EventHandler (struct FileServer_GTK_CBData*); // GTK state
-  virtual ~Test_U_EventHandler ();
+  Test_U_EventHandler (
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+                       struct FileServer_GTK_CBData* // UI callback data
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+                      );
+  inline virtual ~Test_U_EventHandler () {}
 
   // implement Common_INotify_T
   virtual void start (Stream_SessionId_t,
@@ -53,7 +66,11 @@ class Test_U_EventHandler
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler (const Test_U_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_U_EventHandler& operator=(const Test_U_EventHandler&))
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   struct FileServer_GTK_CBData*  CBData_;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   struct FileServer_SessionData* sessionData_;
 };
 

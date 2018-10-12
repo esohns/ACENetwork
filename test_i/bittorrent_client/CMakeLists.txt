@@ -108,6 +108,8 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/log)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/signal)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/timer)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libACEStream/src)
@@ -125,6 +127,8 @@ elseif (WIN32)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/log)
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/signal)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/timer)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libACEStream/src)
@@ -217,10 +221,12 @@ endif (WIN32)
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE} Common)
+add_dependencies (${EXECUTABLE} CommonLog)
+add_dependencies (${EXECUTABLE} CommonSignal)
 add_dependencies (${EXECUTABLE} CommonTimer)
-if (GUI_SUPPORT)
- add_dependencies (${EXECUTABLE} CommonUI)
-endif (GUI_SUPPORT)
+#if (GUI_SUPPORT)
+# add_dependencies (${EXECUTABLE} CommonUI)
+#endif (GUI_SUPPORT)
 
 add_dependencies (${EXECUTABLE} ACEStream)
 add_dependencies (${EXECUTABLE} ACEStream_Decoder)
@@ -249,6 +255,8 @@ elseif (WIN32)
 # target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 endif ()
 target_link_libraries (${EXECUTABLE} Common)
+target_link_libraries (${EXECUTABLE} CommonLog)
+target_link_libraries (${EXECUTABLE} CommonSignal)
 target_link_libraries (${EXECUTABLE} CommonTimer)
 
 target_link_libraries (${EXECUTABLE} ACEStream)
@@ -261,7 +269,6 @@ target_link_libraries (${EXECUTABLE} ACEStream_Network)
 target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
-#target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_BitTorrent)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
@@ -284,22 +291,6 @@ install (TARGETS ${EXECUTABLE}
          COMPONENT dev)
 #install (FILES etc/net_client.glade
 #         DESTINATION etc/lib${PROJECT_NAME}/test_i COMPONENT config)
-
-################################################################################
-
-#if (UNIX)
-# if (GTK3_SUPPORT)
-#  include_directories (${PKG_GTK3_INCLUDE_DIRS})
-# else ()
-#  include_directories (${PKG_GTK2_INCLUDE_DIRS})
-# endif ()
-
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/libCommon/src/ui/gtk)
-#elseif (WIN32)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../libCommon/src/ui/gtk)
-#endif ()
 
 ########### next target ###############
 set (bittorrent_client_gui_SRCS
@@ -353,8 +344,9 @@ endif ()
 
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE_GUI} Common)
-add_dependencies (${EXECUTABLE_GUI} CommonUI)
-add_dependencies (${EXECUTABLE_GUI} CommonUI_GTK)
+add_dependencies (${EXECUTABLE_GUI} CommonLog)
+add_dependencies (${EXECUTABLE_GUI} CommonSignal)
+add_dependencies (${EXECUTABLE_GUI} CommonTimer)
 
 add_dependencies (${EXECUTABLE_GUI} ACEStream)
 
@@ -382,18 +374,17 @@ elseif (WIN32)
  target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 endif ()
 target_link_libraries (${EXECUTABLE_GUI} Common)
+target_link_libraries (${EXECUTABLE_GUI} CommonLog)
+target_link_libraries (${EXECUTABLE_GUI} CommonSignal)
 target_link_libraries (${EXECUTABLE_GUI} CommonTimer)
 if (WIN32)
  # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE_GUI} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
-#target_link_libraries (${EXECUTABLE_GUI} CommonUI)
-#target_link_libraries (${EXECUTABLE_GUI} CommonUI_GTK)
 
 target_link_libraries (${EXECUTABLE_GUI} ACEStream)
 
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME})
-#target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_BitTorrent)
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_HTTP)
 

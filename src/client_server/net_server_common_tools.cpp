@@ -31,6 +31,8 @@
 #include "common_defines.h"
 #include "common_file_tools.h"
 
+#include "common_log_tools.h"
+
 #include "net_macros.h"
 
 #include "net_server_defines.h"
@@ -82,12 +84,12 @@ Net_Server_Common_Tools::getNextLogFileName (const std::string& packageName_in,
   unsigned int fallback_level = 0;
 
 fallback:
-  directory = Common_File_Tools::getLogDirectory (packageName_in,
-                                                  fallback_level);
+  directory = Common_Log_Tools::getLogDirectory (packageName_in,
+                                                 fallback_level);
   if (directory.empty ())
   {
     ACE_DEBUG ((LM_WARNING,
-                ACE_TEXT ("failed to Common_File_Tools::getLogDirectory(\"%s\",%d), falling back\n"),
+                ACE_TEXT ("failed to Common_Log_Tools::getLogDirectory(\"%s\",%d), falling back\n"),
                 ACE_TEXT (packageName_in.c_str ()),
                 fallback_level));
 

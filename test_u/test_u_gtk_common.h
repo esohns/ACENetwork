@@ -24,39 +24,40 @@
 #include "gtk/gtk.h"
 
 #include "common_ui_gtk_common.h"
+//#if defined (GTKGL_SUPPORT)
+//#include "common_ui_gtk_gl_common.h"
+//#endif // GTKGL_SUPPORT
 
 #include "test_u_common.h"
 
 struct Test_U_GTK_ProgressData
+ : Common_UI_GTK_ProgressData
 {
   Test_U_GTK_ProgressData ()
-   : /*cursorType (GDK_LAST_CURSOR)
-   ,*/ size (0)
-   , state (NULL)
+   : Common_UI_GTK_ProgressData ()
+   , size (0)
    , transferred (0)
    , statistic ()
-  {};
+  {}
 
-//GdkCursorType                 cursorType;
-  size_t                      size; // bytes
-  struct Common_UI_GTK_State* state;
-  size_t                      transferred; // bytes
-  Test_U_Statistic_t          statistic;
+  size_t             size; // bytes
+  size_t             transferred; // bytes
+  Test_U_Statistic_t statistic;
 };
 
 struct Test_U_GTK_CBData
- : Common_UI_GTK_State
+ : Test_U_UI_CBData
 {
   Test_U_GTK_CBData ()
-   : Common_UI_GTK_State ()
+   : Test_U_UI_CBData ()
    , allowUserRuntimeStatistic (true)
    , progressData ()
-   , progressEventSourceId (0)
-  {};
+   , UIState (NULL)
+  {}
 
   bool                           allowUserRuntimeStatistic;
   struct Test_U_GTK_ProgressData progressData;
-  guint                          progressEventSourceId;
+  Common_UI_GTK_State_t*         UIState;
 };
 
 struct Test_U_GTK_ThreadData
@@ -64,7 +65,7 @@ struct Test_U_GTK_ThreadData
   Test_U_GTK_ThreadData ()
    : CBData (NULL)
    , eventSourceId (0)
-  {};
+  {}
 
   struct Test_U_GTK_CBData* CBData;
   guint                     eventSourceId;

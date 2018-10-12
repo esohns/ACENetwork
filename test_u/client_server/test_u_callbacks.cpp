@@ -69,9 +69,9 @@ idle_update_log_display_cb (gpointer userData_in)
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   GtkTextView* view_p =
     GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,
@@ -85,14 +85,14 @@ idle_update_log_display_cb (gpointer userData_in)
                                 &text_iterator);
 
   gchar* converted_text = NULL;
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
     // sanity check
-    if (data_p->logStack.empty ())
+    if (data_p->UIState->logStack.empty ())
       return G_SOURCE_CONTINUE;
 
     // step1: convert text
-    for (Common_MessageStackConstIterator_t iterator_2 = data_p->logStack.begin ();
-         iterator_2 != data_p->logStack.end ();
+    for (Common_MessageStackConstIterator_t iterator_2 = data_p->UIState->logStack.begin ();
+         iterator_2 != data_p->UIState->logStack.end ();
          ++iterator_2)
     {
       converted_text = Common_UI_GTK_Tools::localeToUTF8 (*iterator_2);
@@ -114,7 +114,7 @@ idle_update_log_display_cb (gpointer userData_in)
       g_free (converted_text);
     } // end FOR
 
-    data_p->logStack.clear ();
+    data_p->UIState->logStack.clear ();
   } // end lock scope
 
     // step3: scroll the view accordingly
@@ -149,11 +149,11 @@ idle_update_info_display_cb (gpointer userData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("::idle_update_info_display_cb"));
 
+  // sanity check(s)
+  ACE_ASSERT (userData_in);
   struct Test_U_GTK_CBData* data_p =
     static_cast<struct Test_U_GTK_CBData*> (userData_in);
-
-  // sanity check(s)
-  ACE_ASSERT (data_p);
+  ACE_ASSERT (data_p->UIState);
 
   GtkSpinButton* spin_button_p = NULL;
   bool is_session_message = false;
@@ -162,12 +162,12 @@ idle_update_info_display_cb (gpointer userData_in)
   enum Common_UI_EventType event_e = COMMON_UI_EVENT_INVALID;
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
-    for (Common_UI_Events_t::ITERATOR iterator_2 (data_p->eventStack);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
+    for (Common_UI_Events_t::ITERATOR iterator_2 (data_p->UIState->eventStack);
          iterator_2.next (event_p);
          iterator_2.advance ())
     { ACE_ASSERT (event_p);
@@ -247,9 +247,9 @@ idle_update_info_display_cb (gpointer userData_in)
     } // end FOR
 
     // clean up
-    while (!data_p->eventStack.is_empty ())
+    while (!data_p->UIState->eventStack.is_empty ())
     {
-      result = data_p->eventStack.pop (event_e);
+      result = data_p->UIState->eventStack.pop (event_e);
       if (result == -1)
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE_Unbounded_Stack::pop(): \"%m\", continuing\n")));
@@ -275,9 +275,9 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   ACE_ASSERT (data_p->configuration->timeoutHandler);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // step1: initialize dialog window(s)
   GtkWidget* dialog_p =
@@ -426,13 +426,13 @@ idle_initialize_client_UI_cb (gpointer userData_in)
   //  g_object_unref (buffer_p);
 
   // step5: initialize updates
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
     // schedule asynchronous updates of the log view
     guint event_source_id = g_timeout_add_seconds (1,
                                                    idle_update_log_display_cb,
                                                    userData_in);
     if (event_source_id > 0)
-      data_p->eventSourceIds.insert (event_source_id);
+      data_p->UIState->eventSourceIds.insert (event_source_id);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -444,7 +444,7 @@ idle_initialize_client_UI_cb (gpointer userData_in)
                                      idle_update_info_display_cb,
                                      userData_in);
     if (event_source_id > 0)
-      data_p->eventSourceIds.insert (event_source_id);
+      data_p->UIState->eventSourceIds.insert (event_source_id);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -708,13 +708,13 @@ idle_end_session_client_cb (gpointer userData_in)
   ACE_ASSERT (data_p);
 
   // synch access
-  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
+  ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
 
 //  int result = -1;
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // step1: done ?
   bool done = false;
@@ -744,9 +744,9 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   ACE_ASSERT (data_p->configuration);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // step1: initialize dialog window(s)
   GtkWidget* dialog_p =
@@ -870,13 +870,13 @@ idle_initialize_server_UI_cb (gpointer userData_in)
   g_object_unref (rc_style_p);
 
   // step4: initialize updates
-  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->lock, G_SOURCE_REMOVE);
+  { ACE_GUARD_RETURN (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock, G_SOURCE_REMOVE);
     // schedule asynchronous updates of the log view
     guint event_source_id = g_timeout_add_seconds (1,
                                                    idle_update_log_display_cb,
                                                    userData_in);
     if (event_source_id > 0)
-      data_p->eventSourceIds.insert (event_source_id);
+      data_p->UIState->eventSourceIds.insert (event_source_id);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -888,7 +888,7 @@ idle_initialize_server_UI_cb (gpointer userData_in)
                                      idle_update_info_display_cb,
                                      userData_in);
     if (event_source_id > 0)
-      data_p->eventSourceIds.insert (event_source_id);
+      data_p->UIState->eventSourceIds.insert (event_source_id);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1260,9 +1260,9 @@ togglebutton_test_toggled_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p->configuration->timeoutHandler);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // schedule action interval timer ?
   if (data_p->configuration->signalHandlerConfiguration.actionTimerId == -1)
@@ -1478,13 +1478,13 @@ spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   gint value = gtk_spin_button_get_value_as_int (spinButton_in);
   if (value == 0)
-    data_p->progressEventSourceId = 0;
+    data_p->progressData.eventSourceId = 0;
 
   // step1: update buttons
   GtkWidget* widget_p = NULL;
@@ -1507,13 +1507,13 @@ spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
   } // end IF
 
   // step2: start progress reporting ?
-  if ((value != 1) || data_p->progressEventSourceId)
+  if ((value != 1) || data_p->progressData.eventSourceId)
     goto continue_;
 
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), true);
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
-    data_p->progressEventSourceId =
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
+    data_p->progressData.eventSourceId =
       //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
       //                 idle_update_progress_cb,
       //                 &data_p->progressData,
@@ -1523,8 +1523,8 @@ spinbutton_connections_value_changed_client_cb (GtkSpinButton* spinButton_in,
                           idle_update_progress_client_cb,
                           &data_p->progressData,
                           NULL);
-    if (data_p->progressEventSourceId > 0)
-      data_p->eventSourceIds.insert (data_p->progressEventSourceId);
+    if (data_p->progressData.eventSourceId > 0)
+      data_p->UIState->eventSourceIds.insert (data_p->progressData.eventSourceId);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1569,13 +1569,13 @@ spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   gint value = gtk_spin_button_get_value_as_int (spinButton_in);
   if (value == 0)
-    data_p->progressEventSourceId = 0;
+    data_p->progressData.eventSourceId = 0;
 
   // step1: update buttons
   GtkWidget* widget_p = NULL;
@@ -1585,13 +1585,13 @@ spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
   ACE_ASSERT (progress_bar_p);
 
   // step2: start progress reporting ?
-  if ((value != 1) || data_p->progressEventSourceId)
+  if ((value != 1) || data_p->progressData.eventSourceId)
     goto continue_;
 
   gtk_widget_set_sensitive (GTK_WIDGET (progress_bar_p), true);
 
-  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->lock);
-    data_p->progressEventSourceId =
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
+    data_p->progressData.eventSourceId =
       //g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
       //                 idle_update_progress_cb,
       //                 &data_p->progressData,
@@ -1601,8 +1601,8 @@ spinbutton_connections_value_changed_server_cb (GtkSpinButton* spinButton_in,
                           idle_update_progress_server_cb,
                           &data_p->progressData,
                           NULL);
-    if (data_p->progressEventSourceId > 0)
-      data_p->eventSourceIds.insert (data_p->progressEventSourceId);
+    if (data_p->progressData.eventSourceId > 0)
+      data_p->UIState->eventSourceIds.insert (data_p->progressData.eventSourceId);
     else
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1683,9 +1683,9 @@ button_clear_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   GtkTextView* view_p =
     GTK_TEXT_VIEW (gtk_builder_get_object ((*iterator).second.second,
@@ -1715,9 +1715,9 @@ button_about_clicked_cb (GtkWidget* widget_in,
   ACE_ASSERT (data_p);
 
   Common_UI_GTK_BuildersIterator_t iterator =
-    data_p->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
+    data_p->UIState->builders.find (ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN));
   // sanity check(s)
-  ACE_ASSERT (iterator != data_p->builders.end ());
+  ACE_ASSERT (iterator != data_p->UIState->builders.end ());
 
   // retrieve about dialog handle
   GtkDialog* about_dialog =
@@ -1761,16 +1761,16 @@ button_quit_clicked_cb (GtkWidget* widget_in,
 
   //// step1: remove event sources
   //{
-  //  ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->lock);
+  //  ACE_Guard<ACE_Thread_Mutex> aGuard (data_p->UIState->lock);
 
-  //  for (Common_UI_GTKEventSourceIdsIterator_t iterator = data_p->eventSourceIds.begin ();
-  //       iterator != data_p->eventSourceIds.end ();
+  //  for (Common_UI_GTKEventSourceIdsIterator_t iterator = data_p->UIState->eventSourceIds.begin ();
+  //       iterator != data_p->UIState->eventSourceIds.end ();
   //       iterator++)
   //    if (!g_source_remove (*iterator))
   //      ACE_DEBUG ((LM_ERROR,
   //                  ACE_TEXT ("failed to g_source_remove(%u), continuing\n"),
   //                  *iterator));
-  //  data_p->eventSourceIds.clear ();
+  //  data_p->UIState->eventSourceIds.clear ();
   //} // end lock scope
 
   // step2: initiate shutdown sequence

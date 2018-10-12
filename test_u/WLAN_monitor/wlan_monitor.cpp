@@ -45,25 +45,36 @@
 #include "ace/Signal.h"
 #include "ace/Version.h"
 
-#include "common_file_tools.h"
-#include "common_logger.h"
-#include "common_signal_tools.h"
+#if defined (HAVE_CONFIG_H)
+#include "libCommon_config.h"
+#endif // HAVE_CONFIG_H
+
+//#include "common_file_tools.h"
 #include "common_tools.h"
+
+#include "common_logger.h"
+#include "common_log_tools.h"
+
+#include "common_signal_tools.h"
 
 #include "common_timer_manager_common.h"
 #include "common_timer_tools.h"
 
+#if defined (GUI_SUPPORT)
 #include "common_ui_defines.h"
+#if defined (GTK_USE)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager_common.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+
+#if defined (HAVE_CONFIG_H)
+#include "libACENetwork_config.h"
+#endif // HAVE_CONFIG_H
 
 #include "net_common_tools.h"
 #include "net_defines.h"
 #include "net_macros.h"
-
-#ifdef HAVE_CONFIG_H
-#include "libACENetwork_config.h"
-#endif
 
 #include "test_u_defines.h"
 
@@ -97,8 +108,8 @@ do_printUsage (const std::string& programName_in)
             << std::endl
             << std::endl;
   std::cout << ACE_TEXT_ALWAYS_CHAR ("available configuration options:") << std::endl;
-  std::cout << ACE_TEXT_ALWAYS_CHAR ("-a           : auto-associate with the AP [")
-            << false
+  std::cout << ACE_TEXT_ALWAYS_CHAR ("-a           : auto-associate with the wireless access point [")
+            << true
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -200,7 +211,7 @@ do_processArguments (const int& argc_in,
 #endif // DEBUG_DEBUGGER
 
   // initialize results
-  autoAssociate_out = false;
+  autoAssociate_out = true;
   API_out = NET_WLAN_MONITOR_DEFAULT_API;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   showConsole_out = false;
@@ -449,8 +460,10 @@ do_work (bool autoAssociate_in,
 #endif // ACE_WIN32 || ACE_WIN64
          unsigned int statisticReportingInterval_in,
          const std::string& SSID_in,
-         struct WLANMonitor_GTK_CBData& CBData_in,
-         const ACE_Sig_Set& signalSet_in,
+#if defined (GUI_SUPPORT)
+         struct WLANMonitor_UI_CBData& CBData_in,
+#endif // GUI_SUPPORT
+           const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
          Test_U_SignalHandler& signalHandler_in)
@@ -462,7 +475,6 @@ do_work (bool autoAssociate_in,
   Common_Timer_Manager_t* timer_manager_p = NULL;
   Net_WLAN_IInetMonitor_t* iwlanmonitor_p = NULL;
   Net_IStatisticHandler_t* istatistic_handler_p = NULL;
-  Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   HWND window_p = NULL;
   BOOL was_visible_b = true;
@@ -607,18 +619,38 @@ do_work (bool autoAssociate_in,
   // - dispatch UI events (if any)
 
   // step5a: start GTK event loop ?
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  WLANMonitor_UI_GTK_Manager_t* gtk_manager_p = NULL;
+#endif // GTK_USE
   if (!UIDefinitionFile_in.empty ())
   {
-    gtk_manager_p = COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+#if defined (GTK_USE)
+    gtk_manager_p = WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ();
     ACE_ASSERT (gtk_manager_p);
 
-    CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
+    CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
       std::make_pair (UIDefinitionFile_in, static_cast<GtkBuilder*> (NULL));
-    CBData_in.eventHooks.finiHook = idle_finalize_ui_cb;
-    CBData_in.eventHooks.initHook = idle_initialize_ui_cb;
+    CBData_in.UIState->eventHooks.finiHook = idle_finalize_ui_cb;
+    CBData_in.UIState->eventHooks.initHook = idle_initialize_ui_cb;
+#endif // GTK_USE
     CBData_in.monitor = iwlanmonitor_p;
-    CBData_in.userData = &CBData_in;
+    //CBData_in.userData = &CBData_in;
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    window_p = GetConsoleWindow ();
+    if (!window_p)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ::GetConsoleWindow(), aborting\n")));
+      goto error;
+    } // end IF
+    if (!showConsole_in)
+      was_visible_b = ShowWindow (window_p, SW_HIDE);
+#endif
+
+#if defined (GTK_USE)
+    ACE_ASSERT (gtk_manager_p);
     gtk_manager_p->start ();
     ACE_Time_Value timeout (0,
                             COMMON_UI_GTK_TIMEOUT_DEFAULT_MANAGER_INITIALIZATION * 1000);
@@ -633,33 +665,12 @@ do_work (bool autoAssociate_in,
                   ACE_TEXT ("failed to start GTK event dispatch, aborting\n")));
       goto error;
     } // end IF
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    window_p = GetConsoleWindow ();
-    if (!window_p)
-    {
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ::GetConsoleWindow(), aborting\n")));
-      goto error;
-    } // end IF
-    if (!showConsole_in)
-      was_visible_b = ShowWindow (window_p, SW_HIDE);
-#endif
+    gtk_manager_p->wait ();
+#endif // GTK_USE
   } // end IF
-
-//  // step4b: initialize worker(s)
-//  if (!Common_Tools::startEventDispatch (thread_data,
-//                                         group_id))
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("failed to start event dispatch, aborting\n")));
-//    goto error;
-//  } // end IF
-//  stop_event_dispatch = true;
-
-  // step4c: start monitoring ?
-  if (UIDefinitionFile_in.empty ())
+  else
   {
+#endif // GUI_SUPPORT
     if (!iwlanmonitor_p->initialize (configuration.WLANMonitorConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
@@ -674,9 +685,9 @@ do_work (bool autoAssociate_in,
                   ACE_TEXT ("failed to start WLAN monitor, aborting\n")));
       goto error;
     } // end IF
-  } // end IF
-  else
-    gtk_manager_p->wait ();
+#if defined (GUI_SUPPORT)
+  } // end ELSE
+#endif // GUI_SUPPORT
 
   iwlanmonitor_p->wait (false); // wait for message queue ?
 
@@ -790,7 +801,7 @@ ACE_TMAIN (int argc_in,
 #endif // #ifdef DEBUG_DEBUGGER
 
   // step1a set defaults
-  bool auto_associate = false;
+  bool auto_associate = true;
   enum Net_WLAN_MonitorAPIType API_e = NET_WLAN_MONITOR_DEFAULT_API;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   bool show_console = false;
@@ -859,6 +870,7 @@ ACE_TMAIN (int argc_in,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("invalid arguments, aborting\n")));
     do_printUsage (ACE::basename (argv_in[0]));
+
     // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -869,32 +881,53 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
 
-  struct WLANMonitor_GTK_CBData gtk_cb_data;
-  gtk_cb_data.allowUserRuntimeStatistic =
-    (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
-                                         // iff regular reporting
-                                         // is off
-  gtk_cb_data.progressData.state = &gtk_cb_data;
+  // step1d: initialize logging and/or tracing
+  Common_MessageStack_t* logstack_p = NULL;
+  ACE_SYNCH_MUTEX* lock_p = NULL;
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  WLANMonitor_UI_GTK_Manager_t* gtk_manager_p =
+    WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  struct WLANMonitor_UI_GTK_State& state_r =
+    const_cast<struct WLANMonitor_UI_GTK_State&> (gtk_manager_p->getR_2 ());
+  logstack_p = &state_r.logStack;
+  lock_p = &state_r.logStackLock;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
   // step1d: initialize logging and/or tracing
-  Common_Logger_t logger (&gtk_cb_data.logStack,
-                          &gtk_cb_data.logStackLock);
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  Common_Logger_t logger (logstack_p,
+                          lock_p);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
-        Common_File_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_NAME),
-                                           ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
-                                                                                ACE_DIRECTORY_SEPARATOR_CHAR)));
-  if (!Common_Tools::initializeLogging (ACE::basename (argv_in[0]),    // program name
-                                        log_file_name,                 // log file name
-                                        true,                          // log to syslog ?
-                                        false,                         // trace messages ?
-                                        trace_information,             // debug messages ?
-                                        (UI_definition_file_path.empty () ? NULL
-                                                                          : &logger))) // logger ?
+      Common_Log_Tools::getLogFilename (ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_NAME),
+                                        ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
+                                                                             ACE_DIRECTORY_SEPARATOR_CHAR)));
+  if (!Common_Log_Tools::initializeLogging (ACE::basename (argv_in[0]),    // program name
+                                            log_file_name,                 // log file name
+                                            true,                          // log to syslog ?
+                                            false,                         // trace messages ?
+                                            trace_information,             // debug messages ?
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+                                            (UI_definition_file_path.empty () ? NULL
+                                                                              : &logger))) // (ui) logger ?
+#elif defined (WXWIDGETS_USE)
+                                            NULL))                                         // (ui) logger ?
+#endif // XXX_USE
+#else
+                                            NULL))                                         // (ui) logger ?
+#endif // GUI_SUPPORT
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeLogging(), aborting\n")));
+                ACE_TEXT ("failed to Common_Log_Tools::initializeLogging(), aborting\n")));
+
     // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -904,15 +937,54 @@ ACE_TMAIN (int argc_in,
 #endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
+
+  // step1f: handle specific program modes
+  if (print_version_and_exit)
+  {
+    do_printVersion (ACE::basename (argv_in[0]));
+
+    Common_Log_Tools::finalizeLogging ();
+    // *PORTABILITY*: on Windows, finalize ACE
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
+    return EXIT_SUCCESS;
+  } // end IF
+
+  // step1h: initialize UI framework
+#if defined (GUI_SUPPORT)
+  struct WLANMonitor_UI_CBData ui_cb_data;
+  ui_cb_data.allowUserRuntimeStatistic =
+    (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
+                                         // iff regular reporting
+                                         // is off
+
+#if defined (GTK_USE)
+  ui_cb_data.UIState = &state_r;
+
+  //Common_UI_GladeDefinition ui_definition (argc_in,
+  //                                         argv_in);
+  WLANMonitor_GtkBuilderDefinition_t ui_definition (argc_in,
+                                                    argv_in,
+                                                    &ui_cb_data);
+  if (!UI_definition_file_path.empty ())
+    WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
+                                                                   argv_in,
+                                                                   &ui_definition);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
   // step1e: (pre-)initialize signal handling
   ACE_Sig_Set signal_set (0);
   ACE_Sig_Set ignored_signal_set (0);
   do_initializeSignals (//use_reactor,
                         (COMMON_EVENT_DEFAULT_DISPATCH == COMMON_EVENT_DISPATCH_REACTOR),
-                        gtk_cb_data.allowUserRuntimeStatistic, // handle SIGUSR1/SIGBREAK
-                                                                    // iff regular reporting
-                                                                    // is off
+                        (statistic_reporting_interval == 0), // handle SIGUSR1/SIGBREAK
+                                                             // iff regular reporting
+                                                             // is off
                         signal_set,
                         ignored_signal_set);
   Common_SignalActions_t previous_signal_actions;
@@ -922,7 +994,8 @@ ACE_TMAIN (int argc_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_OS::sigemptyset(): \"%m\", aborting\n")));
-    Common_Tools::finalizeLogging ();
+
+    Common_Log_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -940,7 +1013,8 @@ ACE_TMAIN (int argc_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Signal_Tools::preInitialize(), aborting\n")));
-    Common_Tools::finalizeLogging ();
+
+    Common_Log_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -950,27 +1024,14 @@ ACE_TMAIN (int argc_in,
 #endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
-  Test_U_SignalHandler signal_handler ((UI_definition_file_path.empty () ? NULL
-                                                                         : &gtk_cb_data));
-
-  // step1f: handle specific program modes
-  if (print_version_and_exit)
-  {
-    do_printVersion (ACE::basename (argv_in[0]));
-    Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
-                                   signal_set,
-                                   previous_signal_actions,
-                                   previous_signal_mask);
-    Common_Tools::finalizeLogging ();
-    // *PORTABILITY*: on Windows, finalize ACE
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    result = ACE::fini ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif // ACE_WIN32 || ACE_WIN64
-    return EXIT_SUCCESS;
-  } // end IF
+  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  lock_2 = &state_r.subscribersLock;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+  Test_U_SignalHandler signal_handler (COMMON_SIGNAL_DISPATCH_SIGNAL,
+                                       lock_2);
 
   // step1g: set process resource limits
   // *NOTE*: settings will be inherited by any child processes
@@ -997,7 +1058,7 @@ ACE_TMAIN (int argc_in,
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
-    Common_Tools::finalizeLogging ();
+    Common_Log_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1007,17 +1068,6 @@ ACE_TMAIN (int argc_in,
 #endif // ACE_WIN32 || ACE_WIN64
     return EXIT_FAILURE;
   } // end IF
-
-  // step1h: init GLIB / G(D|T)K[+] / GNOME ?
-  //Common_UI_GladeDefinition ui_definition (argc_in,
-  //                                         argv_in);
-  WLANMonitor_GtkBuilderDefinition_t ui_definition (argc_in,
-                                                    argv_in,
-                                                    &gtk_cb_data);
-  if (!UI_definition_file_path.empty ())
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
-                                                              argv_in,
-                                                              &ui_definition);
 
   ACE_High_Res_Timer timer;
   timer.start ();
@@ -1032,7 +1082,9 @@ ACE_TMAIN (int argc_in,
 //           use_reactor,
            statistic_reporting_interval,
            SSID_string,
-           gtk_cb_data,
+#if defined (GUI_SUPPORT)
+           ui_cb_data,
+#endif // GUI_SUPPORT
            signal_set,
            ignored_signal_set,
            previous_signal_actions,
@@ -1048,10 +1100,10 @@ ACE_TMAIN (int argc_in,
               ACE_TEXT ("total working time (h:m:s.us): \"%s\"...\n"),
               ACE_TEXT (working_time_string.c_str ())));
 
-  // stop profile timer...
+  // stop profile timer
   process_profile.stop ();
 
-  // only process profile left to do...
+  // only process profile left to do
   ACE_Profile_Timer::ACE_Elapsed_Time elapsed_time;
   elapsed_time.real_time = 0.0;
   elapsed_time.user_time = 0.0;
@@ -1060,11 +1112,12 @@ ACE_TMAIN (int argc_in,
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ACE_Profile_Timer::elapsed_time: \"%m\", aborting\n")));
+
     Common_Signal_Tools::finalize (COMMON_SIGNAL_DEFAULT_DISPATCH_MODE,
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
-    Common_Tools::finalizeLogging ();
+    Common_Log_Tools::finalizeLogging ();
     // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
@@ -1122,7 +1175,8 @@ ACE_TMAIN (int argc_in,
                                  signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
-  Common_Tools::finalizeLogging ();
+
+  Common_Log_Tools::finalizeLogging ();
 
   // *PORTABILITY*: on Windows, finalize ACE...
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

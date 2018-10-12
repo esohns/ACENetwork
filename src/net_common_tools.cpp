@@ -3310,7 +3310,7 @@ error:
 #else
         interface_identifiers_a.push_back (Net_Common_Tools::indexToInterface (Net_Common_Tools::interfaceToIndex_2 (interface_list_p->InterfaceInfo[i].InterfaceGuid)));
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
-      WlanFreeMemory (interface_list_p);
+      WlanFreeMemory (interface_list_p); interface_list_p = NULL;
 
 error_2:
       result_2 = WlanCloseHandle (client_handle,
@@ -3411,7 +3411,15 @@ Net_Common_Tools::getDefaultInterface (int linkLayerType_in)
                     ACE_TEXT (Net_Common_Tools::LinkLayerTypeToString (i).c_str ())));
         continue;
       } // end IF
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
+      interfaces_a.push_back (Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (interface_identifier)));
+#else
       interfaces_a.push_back (interface_identifier);
+#endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+      interfaces_a.push_back (interface_identifier);
+#endif // ACE_WIN32 || ACE_WIN64
     } // end IF
 
   if (likely (!interfaces_a.empty ()))

@@ -87,12 +87,6 @@ if (NOT EXISTS ${Common_DIR})
 endif ()
 
 if (UNIX)
- target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE>)
-
- target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src>)
- #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/timer)
  if (GUI_SUPPORT)
   if (GTK_SUPPORT)
    target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
@@ -103,6 +97,22 @@ if (UNIX)
                                $<BUILD_INTERFACE:${PKG_CURSES_INCLUDE_DIRS}>)
   endif (CURSES_SUPPORT)
 
+  target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/ui>)
+  if (GTK_SUPPORT)
+   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/ui/gtk>)
+  endif (GTK_SUPPORT)
+ endif (GUI_SUPPORT)
+
+ target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE>)
+
+ target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src>)
+ #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/timer)
+
+ if (GUI_SUPPORT)
   target_include_directories (${PROJECT_NAME}_Test_I PUBLIC
                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/libCommon/src/ui>)
   if (GTK_SUPPORT)
@@ -203,6 +213,10 @@ if (UNIX)
  endif (GUI_SUPPORT)
 elseif (WIN32)
  if (GUI_SUPPORT)
+  if (CURSES_SUPPORT)
+   target_link_libraries (${PROJECT_NAME}_Test_I ${CURSES_LIBRARY})
+   target_link_libraries (${PROJECT_NAME}_Test_I ${PANEL_LIBRARY})
+  endif (CURSES_SUPPORT)
   if (GTK_SUPPORT)
    if (GTK3_SUPPORT)
     target_link_libraries (${PROJECT_NAME}_Test_I ${CMAKE_CURRENT_SOURCE_DIR}/../../gtk3/lib/gio-2.0.lib)
@@ -213,7 +227,7 @@ elseif (WIN32)
     target_link_libraries (${PROJECT_NAME}_Test_I ${CMAKE_CURRENT_SOURCE_DIR}/../../gtk3/lib/gdk-win32-3.0.lib)
     target_link_libraries (${PROJECT_NAME}_Test_I ${CMAKE_CURRENT_SOURCE_DIR}/../../gtk3/lib/gtk-win32-3.0.lib)
     target_link_libraries (${PROJECT_NAME}_Test_I ${CMAKE_CURRENT_SOURCE_DIR}/../../gtk3/lib/pango-1.0.lib)
-   else ()
+   elseif (GTK2_SUPPORT)
     target_link_libraries (${PROJECT_NAME}_Test_I ${CMAKE_CURRENT_SOURCE_DIR}/../../gtk2/lib/libgio-2.0.dll.a)
     target_link_libraries (${PROJECT_NAME}_Test_I ${CMAKE_CURRENT_SOURCE_DIR}/../../gtk2/lib/libglib-2.0.dll.a)
     target_link_libraries (${PROJECT_NAME}_Test_I ${CMAKE_CURRENT_SOURCE_DIR}/../../gtk2/lib/libgobject-2.0.dll.a)
@@ -224,23 +238,39 @@ elseif (WIN32)
     target_link_libraries (${PROJECT_NAME}_Test_I ${CMAKE_CURRENT_SOURCE_DIR}/../../gtk2/lib/libcairo.dll.a)
     target_link_libraries (${PROJECT_NAME}_Test_I ${CMAKE_CURRENT_SOURCE_DIR}/../../gtk2/lib/libpango-1.0.dll.a)
  #  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../gtkglarea/gtkgl/.libs/libgtkglarea-win32-1.0.dll.a)
-   endif (GTK3_SUPPORT)
+   endif ()
    if (GTKGL_SUPPORT)
     target_link_libraries (${PROJECT_NAME}_Test_I OpenGL32.lib)
     target_link_libraries (${PROJECT_NAME}_Test_I ${CMAKE_CURRENT_SOURCE_DIR}/../../libepoxy/cmake/${CMAKE_BUILD_TYPE}/epoxy1_static.lib)
     target_link_libraries (${PROJECT_NAME}_Test_I "C:/Documents and Settings/Erik/My Documents/Visual Studio 2010/Projects/gtkglarea/${CMAKE_BUILD_TYPE}/gtkglarea.lib")
+
+    target_link_libraries (${PROJECT_NAME}_Test_I CommonOpenGL)
    endif (GTKGL_SUPPORT)
 
    target_link_libraries (${PROJECT_NAME}_Test_I CommonUI_GTK)
   endif (GTK_SUPPORT)
-  if (CURSES_SUPPORT)
-   target_link_libraries (${PROJECT_NAME}_Test_I ${CURSES_LIBRARY})
-   target_link_libraries (${PROJECT_NAME}_Test_I ${PANEL_LIBRARY})
-  endif (CURSES_SUPPORT)
+  if (WXWIDGETS_SUPPORT)
+   target_link_libraries (${PROJECT_NAME}_Test_I ${wxWidgets_LIBRARIES})
+  endif (WXWIDGETS_SUPPORT)
 
   target_link_libraries (${PROJECT_NAME}_Test_I CommonUI)
  endif (GUI_SUPPORT)
 endif ()
+
+##########################################
+
+add_dependencies (${PROJECT_NAME}_Test_I Common)
+if (GUI_SUPPORT)
+ add_dependencies (${PROJECT_NAME}_Test_I CommonUI)
+ if (GTK_SUPPORT)
+  add_dependencies (${PROJECT_NAME}_Test_I CommonUI_GTK)
+  if (GTKGL_SUPPORT)
+   add_dependencies (${PROJECT_NAME}_Test_I CommonOpenGL)
+  endif (GTKGL_SUPPORT)
+ endif (GTK_SUPPORT)
+endif (GUI_SUPPORT)
+
+##########################################
 
 #if (WIN32)
 # add_definitions (-DWIN32)

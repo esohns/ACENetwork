@@ -137,6 +137,10 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
 typedef std::list<FileServer_ISessionNotify_t*> FileServer_Subscribers_t;
 typedef FileServer_Subscribers_t::const_iterator FileServer_SubscribersIterator_t;
 
+//////////////////////////////////////////
+
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 struct FileServer_GTK_CBData
  : Test_U_GTK_CBData
 {
@@ -150,12 +154,14 @@ struct FileServer_GTK_CBData
   FileServer_Subscribers_t         subscribers;
 };
 
-typedef Common_UI_GtkBuilderDefinition_T<struct Common_UI_GTK_State,
+typedef Common_UI_GtkBuilderDefinition_T<Common_UI_GTK_State_t,
                                          struct FileServer_GTK_CBData> FileServer_GtkBuilderDefinition_t;
 
-typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-                                struct FileServer_GTK_CBData> FileServer_GTK_Manager_t;
-typedef ACE_Singleton<FileServer_GTK_Manager_t,
-                      typename ACE_MT_SYNCH::MUTEX> FILESERVER_UI_GTK_MANAGER_SINGLETON;
+//typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
+//                                struct FileServer_GTK_CBData> FileServer_GTK_Manager_t;
+//typedef ACE_Singleton<FileServer_GTK_Manager_t,
+//                      typename ACE_MT_SYNCH::MUTEX> FILESERVER_UI_GTK_MANAGER_SINGLETON;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #endif

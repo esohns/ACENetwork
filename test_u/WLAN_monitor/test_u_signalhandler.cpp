@@ -27,24 +27,28 @@
 
 #include "ace/Assert.h"
 #include "ace/Log_Msg.h"
-#include "ace/Proactor.h"
-#include "ace/Reactor.h"
+//#include "ace/Proactor.h"
+//#include "ace/Reactor.h"
 
 #include "common_icontrol.h"
 #include "common_timer_manager_common.h"
 #include "common_tools.h"
 
-#include "common_ui_gtk_manager.h"
+//#if defined (GUI_SUPPORT)
+//#if defined (GTK_USE)
+//#include "common_ui_gtk_manager.h"
+//#endif // GTK_USE
+//#endif // GUI_SUPPORT
 
 #include "net_macros.h"
 
-#include "net_wlan_configuration.h"
+//#include "net_wlan_configuration.h"
 
-Test_U_SignalHandler::Test_U_SignalHandler (struct WLANMonitor_GTK_CBData* CBData_in)
- : inherited (COMMON_SIGNAL_DISPATCH_SIGNAL,
-              NULL,
+Test_U_SignalHandler::Test_U_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
+                                            ACE_SYNCH_RECURSIVE_MUTEX* lock_in)
+ : inherited (dispatchMode_in,
+              lock_in,
               this) // event handler handle
- , CBData_ (CBData_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Test_U_SignalHandler::Test_U_SignalHandler"));
 
@@ -145,9 +149,7 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
                     ACE_TEXT ("failed to cancel timer (id: %d): \"%m\", returning\n"),
                     inherited::configuration_->statisticReportingTimerId));
 
-        // clean up
         inherited::configuration_->statisticReportingTimerId = -1;
-
         return;
       } // end IF
       inherited::configuration_->statisticReportingTimerId = -1;

@@ -46,7 +46,12 @@
 #endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
+#include "ace/Containers_T.h"
 #include "ace/OS.h"
+
+#if defined (GUI_SUPPORT)
+#include "common_ui_common.h"
+#endif // GUI_SUPPORT
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "common_xml_common.h"
@@ -331,5 +336,28 @@ struct Net_WLAN_AssociationConfiguration
   struct ether_addr accessPointLinkLayerAddress;
   unsigned int      authenticationType;
 };
+
+//////////////////////////////////////////
+
+enum Net_WLAN_UI_EventType
+{
+#if defined (GUI_SUPPORT)
+  NET_WLAN_UI_EVENT_INTERFACE_HOTPLUG = COMMON_UI_EVENT_OTHER_USER_BASE,
+#else
+  NET_WLAN_UI_EVENT_INTERFACE_HOTPLUG = 0,
+#endif // GUI_SUPPORT
+  NET_WLAN_UI_EVENT_INTERFACE_REMOVE,
+  NET_WLAN_UI_EVENT_SCAN_COMPLETE,
+  NET_WLAN_UI_EVENT_ASSOCIATE,
+  NET_WLAN_UI_EVENT_DISASSOCIATE,
+  NET_WLAN_UI_EVENT_CONNECT,
+  NET_WLAN_UI_EVENT_DISCONNECT,
+  NET_WLAN_UI_EVENT_SIGNAL_QUALITY_CHANGED,
+  ////////////////////////////////////////
+  NET_WLAN_UI_EVENT_MAX,
+  NET_WLAN_UI_EVENT_INVALID
+};
+typedef ACE_Unbounded_Stack<enum NET_WLAN_UI_EventType> NET_WLAN_UI_Events_t;
+typedef ACE_Unbounded_Stack<enum NET_WLAN_UI_EventType>::ITERATOR NET_WLAN_UI_EventsIterator_t;
 
 #endif

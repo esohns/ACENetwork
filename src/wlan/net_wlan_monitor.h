@@ -161,7 +161,7 @@ class Net_WLAN_Monitor_T<AddressType,
                              ACE_SYNCH_MUTEX>;
 
  public:
-  virtual ~Net_WLAN_Monitor_T ();
+  inline virtual ~Net_WLAN_Monitor_T () {}
 
   // override (part of) Common_ITaskControl_T
   virtual void start ();

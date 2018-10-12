@@ -28,7 +28,7 @@
 #elif defined (ACE_LINUX)
 #include <sys/capability.h>
 #include <linux/capability.h>
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Get_Opt.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -41,16 +41,29 @@
 #include "ace/Synch.h"
 #include "ace/Version.h"
 
+#if defined (HAVE_CONFIG_H)
+#include "libCommon_config.h"
+#endif // HAVE_CONFIG_H
+
 #include "common.h"
-#include "common_file_tools.h"
-#include "common_logger.h"
 #include "common_tools.h"
+
+#include "common_log_tools.h"
+#include "common_logger.h"
 
 #include "common_timer_tools.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_defines.h"
 #include "common_ui_gtk_manager_common.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+
+#if defined (HAVE_CONFIG_H)
+#include "libACEStream_config.h"
+#endif // HAVE_CONFIG_H
 
 #include "stream_allocatorheap.h"
 
@@ -1081,9 +1094,9 @@ ACE_TMAIN (int argc_in,
   if (log_to_file)
   {
     log_file_name =
-      Common_File_Tools::getLogFilename (std::string (ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_NAME)),
-                                         std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
-                                                                                           ACE_DIRECTORY_SEPARATOR_CHAR))));
+      Common_Log_Tools::getLogFilename (std::string (ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_NAME)),
+                                        std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
+                                                                                          ACE_DIRECTORY_SEPARATOR_CHAR))));
     if (log_file_name.empty ())
     {
       ACE_DEBUG ((LM_ERROR,
@@ -1091,17 +1104,17 @@ ACE_TMAIN (int argc_in,
       goto error;
     } // end IF
   } // end IF
-  if (!Common_Tools::initializeLogging (std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
-                                                                                          ACE_DIRECTORY_SEPARATOR_CHAR))), // program name
-                                        log_file_name,                                                                     // log file name
-                                        false,                                                                             // log to syslog ?
-                                        false,                                                                             // trace messages ?
-                                        trace_information,                                                                 // debug messages ?
-                                        (ui_definition_file.empty () ? NULL
-                                                                     : &logger)))                                          // logger ?
+  if (!Common_Log_Tools::initializeLogging (std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
+                                                                                              ACE_DIRECTORY_SEPARATOR_CHAR))), // program name
+                                            log_file_name,                                                                     // log file name
+                                            false,                                                                             // log to syslog ?
+                                            false,                                                                             // trace messages ?
+                                            trace_information,                                                                 // debug messages ?
+                                            (ui_definition_file.empty () ? NULL
+                                                                         : &logger)))                                          // logger ?
   {
     ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_Tools::initializeLogging(), aborting\n")));
+                ACE_TEXT ("failed to Common_Log_Tools::initializeLogging(), aborting\n")));
     goto error;
   } // end IF
 
@@ -1137,7 +1150,7 @@ ACE_TMAIN (int argc_in,
                                    signal_set,
                                    previous_signal_actions,
                                    previous_signal_mask);
-    Common_Tools::finalizeLogging ();
+    Common_Log_Tools::finalizeLogging ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     result = ACE::fini ();
     if (result == -1)
@@ -1281,7 +1294,7 @@ ACE_TMAIN (int argc_in,
                                  signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
-  Common_Tools::finalizeLogging ();
+  Common_Log_Tools::finalizeLogging ();
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = ACE::fini ();
@@ -1298,7 +1311,7 @@ error:
                                  signal_set,
                                  previous_signal_actions,
                                  previous_signal_mask);
-  Common_Tools::finalizeLogging ();
+  Common_Log_Tools::finalizeLogging ();
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   result = ACE::fini ();
   if (result == -1)

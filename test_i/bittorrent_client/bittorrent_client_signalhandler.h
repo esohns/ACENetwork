@@ -25,7 +25,8 @@
 #include "ace/Synch_Traits.h"
 
 #include "common.h"
-#include "common_signalhandler.h"
+
+#include "common_signal_handler.h"
 
 #include "bittorrent_client_common.h"
 
