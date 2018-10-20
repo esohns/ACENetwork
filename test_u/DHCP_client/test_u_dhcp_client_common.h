@@ -29,16 +29,24 @@
 #include "ace/Singleton.h"
 #include "ace/Time_Value.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "gtk/gtk.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "common.h"
 #include "common_istatistic.h"
 #include "common_isubscribe.h"
 #include "common_time_common.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_manager.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "stream_base.h"
 #include "stream_common.h"
@@ -59,8 +67,11 @@
 
 #include "test_u_common.h"
 #include "test_u_stream_common.h"
-
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_u_gtk_common.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "test_u_connection_common.h"
 #include "test_u_defines.h"
@@ -266,34 +277,41 @@ struct DHCPClient_Configuration
   {}
 
   // **************************** signal data **********************************
-  struct DHCPClient_SignalHandlerConfiguration   signalHandlerConfiguration;
+  struct DHCPClient_SignalHandlerConfiguration signalHandlerConfiguration;
   // **************************** socket data **********************************
-  DHCPClient_ConnectionConfigurations_t          connectionConfigurations;
+  DHCPClient_ConnectionConfigurations_t        connectionConfigurations;
   // **************************** parser data **********************************
-  struct Common_ParserConfiguration              parserConfiguration;
+  struct Common_ParserConfiguration            parserConfiguration;
   // **************************** stream data **********************************
 //  struct Common_FlexParserAllocatorConfiguration allocatorConfiguration;
-  DHCPClient_StreamConfiguration_t               streamConfiguration;
+  DHCPClient_StreamConfiguration_t             streamConfiguration;
   // *************************** protocol data *********************************
-  struct DHCP_ProtocolConfiguration              protocolConfiguration;
+  struct DHCP_ProtocolConfiguration            protocolConfiguration;
   // *************************** listener data *********************************
 //  struct DHCPClient_ListenerConfiguration        listenerConfiguration;
 
-  ACE_HANDLE                                     broadcastHandle; // listen handle (broadcast)
-  enum Common_EventDispatchType                  dispatch;
-  ACE_HANDLE                                     handle;          // listen handle (unicast)
+  ACE_HANDLE                                   broadcastHandle; // listen handle (broadcast)
+  enum Common_EventDispatchType                dispatch;
+  ACE_HANDLE                                   handle;          // listen handle (unicast)
 };
 
 //typedef Common_ISubscribe_T<DHCPClient_ISessionNotify_t> DHCPClient_ISubscribe_t;
 
 //////////////////////////////////////////
 
-struct DHCPClient_GTK_ProgressData
+#if defined (GUI_SUPPORT)
+struct DHCPClient_UI_ProgressData
+#if defined (GTK_USE)
  : Test_U_GTK_ProgressData
+#endif // GTK_USE
 {
-  DHCPClient_GTK_ProgressData ()
+  DHCPClient_UI_ProgressData ()
+#if defined (GTK_USE)
    : Test_U_GTK_ProgressData ()
    , statistic ()
+#else
+   : statistic ()
+#endif // GTK_USE
    , transferred (0)
   {}
 
@@ -301,42 +319,52 @@ struct DHCPClient_GTK_ProgressData
   unsigned int     transferred; // byte(s)
 };
 
-struct DHCPClient_GTK_CBData
+struct DHCPClient_UI_CBData
+#if defined (GTK_USE)
  : Test_U_GTK_CBData
+#endif // GTK_USE
 {
-  DHCPClient_GTK_CBData ()
+  DHCPClient_UI_CBData ()
+#if defined (GTK_USE)
    : Test_U_GTK_CBData ()
    , configuration (NULL)
+#else
+   : configuration (NULL)
+#endif // GTK_USE
    , progressData ()
-   , progressEventSourceId (0)
    , subscribers ()
   {}
 
-  struct DHCPClient_Configuration*   configuration;
-  struct DHCPClient_GTK_ProgressData progressData;
-  guint                              progressEventSourceId;
-  DHCPClient_Subscribers_t           subscribers;
+  struct DHCPClient_Configuration*  configuration;
+  struct DHCPClient_UI_ProgressData progressData;
+  DHCPClient_Subscribers_t          subscribers;
 };
 
 struct DHCPClient_ThreadData
+#if defined (GTK_USE)
  : Test_U_GTK_ThreadData
+#endif // GTK_USE
 {
   DHCPClient_ThreadData ()
+#if defined (GTK_USE)
    : Test_U_GTK_ThreadData ()
    , CBData (NULL)
+#else
+   : CBData (NULL)
+#endif // GTK_USE
   {}
 
-  struct DHCPClient_GTK_CBData* CBData;
+  struct DHCPClient_UI_CBData* CBData;
 };
+#endif // GUI_SUPPORT
 
 //////////////////////////////////////////
 
-typedef Common_UI_GtkBuilderDefinition_T<struct Common_UI_GTK_State,
-                                         struct DHCPClient_GTK_CBData> DHCPClient_GtkBuilderDefinition_t;
-
-//typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-//                                struct DHCPClient_GTK_CBData> DHCPClient_GTK_Manager_t;
-//typedef ACE_Singleton<DHCPClient_GTK_Manager_t,
-//                      typename ACE_MT_SYNCH::MUTEX> DHCPCLIENT_GTK_MANAGER_SINGLETON;
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+typedef Common_UI_GtkBuilderDefinition_T<Common_UI_GTK_State_t,
+                                         struct DHCPClient_UI_CBData> DHCPClient_GtkBuilderDefinition_t;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #endif

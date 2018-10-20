@@ -44,13 +44,16 @@
 #if defined (HAVE_CONFIG_H)
 #include "libCommon_config.h"
 #endif // HAVE_CONFIG_H
-
 #include "common.h"
 #include "common_file_tools.h"
 #include "common_tools.h"
 
-#include "common_logger.h"
 #include "common_log_tools.h"
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+#include "common_logger.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "common_signal_tools.h"
 
@@ -67,7 +70,6 @@
 #if defined (HAVE_CONFIG_H)
 #include "libACEStream_config.h"
 #endif // HAVE_CONFIG_H
-
 #include "stream_allocatorheap.h"
 
 #include "stream_file_sink.h"
@@ -77,7 +79,6 @@
 #if defined (HAVE_CONFIG_H)
 #include "libACENetwork_config.h"
 #endif // HAVE_CONFIG_H
-
 #include "net_common_tools.h"
 #include "net_defines.h"
 #include "net_macros.h"
@@ -132,6 +133,8 @@ do_printUsage (const std::string& programName_in)
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
       ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   std::string gtk_rc_file = configuration_path;
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   gtk_rc_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GTK_RC_FILE);
@@ -139,6 +142,8 @@ do_printUsage (const std::string& programName_in)
             << gtk_rc_file
             << ACE_TEXT_ALWAYS_CHAR ("\"]")
             << std::endl;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   std::string output_file = path;
   output_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   output_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
@@ -146,6 +151,7 @@ do_printUsage (const std::string& programName_in)
             << output_file
             << ACE_TEXT_ALWAYS_CHAR ("]")
             << std::endl;
+#if defined (GUI_SUPPORT)
   std::string UI_file = configuration_path;
   UI_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UI_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GLADE_FILE);
@@ -153,6 +159,7 @@ do_printUsage (const std::string& programName_in)
             << UI_file
             << ACE_TEXT_ALWAYS_CHAR ("\"] {\"\": no GUI}")
             << std::endl;
+#endif // GUI_SUPPORT
   std::cout << ACE_TEXT_ALWAYS_CHAR ("-l          : log to a file [")
             << false
             << ACE_TEXT_ALWAYS_CHAR ("]")
@@ -204,9 +211,15 @@ do_processArguments (int argc_in,
                      ACE_TCHAR** argv_in, // cannot be const...
                      bool& requestBroadcastReplies_out,
                      bool& debugParser_out,
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
                      std::string& GtkRcFileName_out,
+#endif // GTK_USE
+#endif // GUI_SUPPORT
                      std::string& fileName_out,
+#if defined (GUI_SUPPORT)
                      std::string& UIDefinitonFileName_out,
+#endif // GUI_SUPPORT
                      bool& logToFile_out,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
@@ -238,15 +251,21 @@ do_processArguments (int argc_in,
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
       ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   GtkRcFileName_out = configuration_path;
   GtkRcFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   GtkRcFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GTK_RC_FILE);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   fileName_out = path;
   fileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   fileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
+#if defined (GUI_SUPPORT)
   UIDefinitonFileName_out = configuration_path;
   UIDefinitonFileName_out += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   UIDefinitonFileName_out += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GLADE_FILE);
+#endif // GUI_SUPPORT
   logToFile_out = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   interfaceIdentifier_out =
@@ -269,10 +288,26 @@ do_processArguments (int argc_in,
   ACE_Get_Opt argumentParser (argc_in,
                               argv_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
                               ACE_TEXT ("bde:f::g::lopqrs:tvx:"),
 #else
+                              ACE_TEXT ("bdf::g::lopqrs:tvx:"),
+#endif // GTK_USE
+#else
+                              ACE_TEXT ("bdf::lopqrs:tvx:"),
+#endif // GUI_SUPPORT
+#else
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
                               ACE_TEXT ("bde:f::g::ln::opqrs:tvx:"),
-#endif
+#else
+                              ACE_TEXT ("bdf::g::ln::opqrs:tvx:"),
+#endif // GTK_USE
+#else
+                              ACE_TEXT ("bdf::ln::opqrs:tvx:"),
+#endif // GUI_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
                               1,                         // skip command name
                               1,                         // report parsing errors
                               ACE_Get_Opt::PERMUTE_ARGS, // ordering
@@ -294,11 +329,15 @@ do_processArguments (int argc_in,
         debugParser_out = true;
         break;
       }
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
       case 'e':
       {
         GtkRcFileName_out = argumentParser.opt_arg ();
         break;
       }
+#endif // GTK_USE
+#endif // GUI_SUPPORT
       case 'f':
       {
         ACE_TCHAR* opt_arg = argumentParser.opt_arg ();
@@ -308,6 +347,7 @@ do_processArguments (int argc_in,
           fileName_out.clear ();
         break;
       }
+#if defined (GUI_SUPPORT)
       case 'g':
       {
         ACE_TCHAR* opt_arg = argumentParser.opt_arg ();
@@ -316,6 +356,7 @@ do_processArguments (int argc_in,
         else
           UIDefinitonFileName_out.clear ();
         break;
+#endif // GUI_SUPPORT
       }
       case 'l':
       {
@@ -490,7 +531,9 @@ void
 do_work (bool requestBroadcastReplies_in,
          bool debugParser_in,
          const std::string& fileName_in,
+#if defined (GUI_SUPPORT)
          const std::string& UIDefinitionFileName_in,
+#endif // GUI_SUPPORT
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
          REFGUID interfaceIdentifier_in,
@@ -506,7 +549,10 @@ do_work (bool requestBroadcastReplies_in,
          bool useReactor_in,
          unsigned int statisticReportingInterval_in,
          unsigned int numberOfDispatchThreads_in,
-         struct DHCPClient_GTK_CBData& CBData_in,
+         struct DHCPClient_Configuration& configuration_in,
+#if defined (GUI_SUPPORT)
+         struct DHCPClient_UI_CBData& CBData_in,
+#endif // GUI_SUPPORT
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -550,12 +596,11 @@ do_work (bool requestBroadcastReplies_in,
   Common_Tools::initialize ();
 
   // step0c: initialize configuration and stream
-  struct DHCPClient_Configuration configuration;
-  //configuration.userData.connectionConfiguration =
-  //    &configuration.connectionConfiguration;
-  //configuration.userData.streamConfiguration =
-  //    &configuration.streamConfiguration;
-  configuration.dispatch =
+  //configuration_in.userData.connectionConfiguration =
+  //    &configuration_in.connectionConfiguration;
+  //configuration_in.userData.streamConfiguration =
+  //    &configuration_in.streamConfiguration;
+  configuration_in.dispatch =
       (useReactor_in ? COMMON_EVENT_DISPATCH_REACTOR
                      : COMMON_EVENT_DISPATCH_PROACTOR);
 
@@ -577,7 +622,7 @@ do_work (bool requestBroadcastReplies_in,
 
   Stream_AllocatorHeap_T<ACE_MT_SYNCH,
                          struct Common_FlexParserAllocatorConfiguration> heap_allocator;
-  if (!heap_allocator.initialize (configuration.streamConfiguration.allocatorConfiguration_))
+  if (!heap_allocator.initialize (configuration_in.streamConfiguration.allocatorConfiguration_))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize heap allocator, returning\n")));
@@ -587,30 +632,33 @@ do_work (bool requestBroadcastReplies_in,
                                                    &heap_allocator,     // heap allocator handle
                                                    true);               // block ?
 
-  Test_U_EventHandler ui_event_handler (&CBData_in);
+  Test_U_EventHandler ui_event_handler (
+#if defined (GUI_SUPPORT)
+                                        &CBData_in);
+#else
+                                        NULL);
+#endif // GUI_SUPPORT
   Test_U_Module_EventHandler_Module event_handler (NULL,
                                                    ACE_TEXT_ALWAYS_CHAR (MODULE_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
-  //Test_U_Stream_t stream;
-  //Test_U_AsynchStream_t asynch_stream;
-  //Test_U_StreamBase_t* stream_p = &stream;
-  //if (!useReactor_in) stream_p = &asynch_stream;
-//  Test_U_Module_EventHandler* event_handler_p =
-//      dynamic_cast<Test_U_Module_EventHandler*> (event_handler.writer ());
-//  if (!event_handler_p)
-//  {
-//    ACE_DEBUG ((LM_ERROR,
-//                ACE_TEXT ("dynamic_cast<Test_U_Module_EventHandler> failed, returning\n")));
-//    return;
-//  } // end IF
 
   DHCPClient_ConnectionManager_t* connection_manager_p =
     DHCPCLIENT_CONNECTIONMANAGER_SINGLETON::instance ();
   ACE_ASSERT (connection_manager_p);
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+
   // *********************** parser configuration data *************************
-  configuration.parserConfiguration.debugParser = debugParser_in;
+  configuration_in.parserConfiguration.debugParser = debugParser_in;
   if (debugParser_in)
-    configuration.parserConfiguration.debugScanner = true;
+    configuration_in.parserConfiguration.debugScanner = true;
   // *********************** socket configuration data *************************
   // *IMPORTANT NOTE*: (global) UDP broadcast appears to be broken on
   //                   Windows 7 and above (see e.g.:
@@ -646,29 +694,29 @@ do_work (bool requestBroadcastReplies_in,
   connection_configuration.socketHandlerConfiguration.statisticReportingInterval =
     statisticReportingInterval_in;
   connection_configuration.socketHandlerConfiguration.userData =
-    &configuration.userData;
+    &configuration_in.userData;
 
   connection_configuration.messageAllocator = &message_allocator;
-  connection_configuration.userData = &configuration.userData;
-  connection_configuration.initialize (configuration.streamConfiguration.allocatorConfiguration_,
-                                       configuration.streamConfiguration);
+  connection_configuration.userData = &configuration_in.userData;
+  connection_configuration.initialize (configuration_in.streamConfiguration.allocatorConfiguration_,
+                                       configuration_in.streamConfiguration);
 
-  configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Out"),
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("Out"),
                                                                  connection_configuration));
   DHCPClient_ConnectionConfigurationIterator_t iterator =
-    configuration.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
-  ACE_ASSERT (iterator != configuration.connectionConfigurations.end ());
+    configuration_in.connectionConfigurations.find (ACE_TEXT_ALWAYS_CHAR ("Out"));
+  ACE_ASSERT (iterator != configuration_in.connectionConfigurations.end ());
   (*iterator).second.socketHandlerConfiguration.connectionConfiguration =
     &((*iterator).second);
 
   // ********************** stream configuration data **************************
-  configuration.streamConfiguration.configuration_.cloneModule = true;
-  configuration.streamConfiguration.configuration_.messageAllocator =
+  configuration_in.streamConfiguration.configuration_.cloneModule = true;
+  configuration_in.streamConfiguration.configuration_.messageAllocator =
     &message_allocator;
-  configuration.streamConfiguration.configuration_.module =
+  configuration_in.streamConfiguration.configuration_.module =
     (!UIDefinitionFileName_in.empty () ? &event_handler
                                        : NULL);
-  configuration.streamConfiguration.configuration_.printFinalReport = true;
+  configuration_in.streamConfiguration.configuration_.printFinalReport = true;
 
   // ********************** module configuration data **************************
   struct Stream_ModuleConfiguration module_configuration;
@@ -677,33 +725,33 @@ do_work (bool requestBroadcastReplies_in,
   modulehandler_configuration.connectionConfigurations =
     &CBData_in.configuration->connectionConfigurations;
   modulehandler_configuration.parserConfiguration =
-    &configuration.parserConfiguration;
+    &configuration_in.parserConfiguration;
   modulehandler_configuration.printFinalReport = true;
   modulehandler_configuration.protocolConfiguration =
-    &configuration.protocolConfiguration;
+    &configuration_in.protocolConfiguration;
   modulehandler_configuration.statisticReportingInterval =
     (statisticReportingInterval_in ? ACE_Time_Value (statisticReportingInterval_in, 0)
                                    : ACE_Time_Value::zero);
   modulehandler_configuration.streamConfiguration =
-    &configuration.streamConfiguration;
+    &configuration_in.streamConfiguration;
   modulehandler_configuration.subscriber = &ui_event_handler;
   modulehandler_configuration.subscribers = &CBData_in.subscribers;
   modulehandler_configuration.subscribersLock =
-    &CBData_in.subscribersLock;
+    &state_r.subscribersLock;
   modulehandler_configuration.targetFileName = fileName_in;
-  configuration.streamConfiguration.initialize (module_configuration,
+  configuration_in.streamConfiguration.initialize (module_configuration,
                                                 modulehandler_configuration,
-                                                configuration.streamConfiguration.allocatorConfiguration_,
-                                                configuration.streamConfiguration.configuration_);
+                                                configuration_in.streamConfiguration.allocatorConfiguration_,
+                                                configuration_in.streamConfiguration.configuration_);
 
   DHCPClient_StreamConfiguration_t::ITERATOR_T iterator_2 =
-    configuration.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
-  ACE_ASSERT (iterator_2 != configuration.streamConfiguration.end ());
+    configuration_in.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));
+  ACE_ASSERT (iterator_2 != configuration_in.streamConfiguration.end ());
 
   // ********************** protocol configuration data ************************
-  configuration.protocolConfiguration.requestBroadcastReplies =
+  configuration_in.protocolConfiguration.requestBroadcastReplies =
       requestBroadcastReplies_in;
-  configuration.protocolConfiguration.sendRequestOnOffer =
+  configuration_in.protocolConfiguration.sendRequestOnOffer =
       sendRequestOnOffer_in;
 
   // ********************* listener configuration data *************************
@@ -766,7 +814,7 @@ do_work (bool requestBroadcastReplies_in,
                 ACE_TEXT ("failed to set listening address: \"%m\", returning\n")));
     return;
   } // end IF
-  configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("In"),
+  configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("In"),
                                                                  connection_configuration));
 
   if (requestBroadcastReplies_in)
@@ -782,36 +830,36 @@ do_work (bool requestBroadcastReplies_in,
                   ACE_TEXT ("failed to set listening address: \"%m\", returning\n")));
       return;
     } // end IF
-    configuration.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("In_2"),
+    configuration_in.connectionConfigurations.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR ("In_2"),
                                                                    connection_configuration));
   } // end IF
 
 //  if (useReactor_in);
 //  else
-//    configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.connect =
+//    configuration_in.listenerconfiguration_in.socketHandlerConfiguration.socketConfiguration_2.connect =
 //        true;
-//  configuration.listenerConfiguration.socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice =
+//  configuration_in.listenerconfiguration_in.socketHandlerConfiguration.socketConfiguration_2.useLoopBackDevice =
 //    useLoopback_in;
-//  configuration.listenerConfiguration.socketHandlerConfiguration.connectionConfiguration =
+//  configuration_in.listenerconfiguration_in.socketHandlerConfiguration.connectionConfiguration =
 //    &(*iterator).second;
-//  configuration.listenerConfiguration.statisticReportingInterval =
+//  configuration_in.listenerconfiguration_in.statisticReportingInterval =
 //    statisticReportingInterval_in;
 
   // step0b: initialize event dispatch
   if (useReactor_in)
-    configuration.dispatchConfiguration.numberOfReactorThreads =
+    configuration_in.dispatchConfiguration.numberOfReactorThreads =
       numberOfDispatchThreads_in;
   else
-    configuration.dispatchConfiguration.numberOfProactorThreads =
+    configuration_in.dispatchConfiguration.numberOfProactorThreads =
       numberOfDispatchThreads_in;
-  if (!Common_Tools::initializeEventDispatch (configuration.dispatchConfiguration))
+  if (!Common_Tools::initializeEventDispatch (configuration_in.dispatchConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Tools::initializeEventDispatch(), returning\n")));
     return;
   } // end IF
   struct Common_EventDispatchState event_dispatch_state_s;
-  event_dispatch_state_s.configuration = &configuration.dispatchConfiguration;
+  event_dispatch_state_s.configuration = &configuration_in.dispatchConfiguration;
 
   ACE_Time_Value deadline = ACE_Time_Value::zero;
   DHCPClient_IConnector_t* iconnector_p = NULL;
@@ -832,7 +880,7 @@ do_work (bool requestBroadcastReplies_in,
   // step0c: initialize connection manager
   connection_manager_p->initialize (std::numeric_limits<unsigned int>::max ());
   connection_manager_p->set ((*iterator).second,
-                             &configuration.userData);
+                             &configuration_in.userData);
 
   // step0d: initialize regular (global) statistic reporting
   Common_Timer_Manager_t* timer_manager_p =
@@ -862,20 +910,19 @@ do_work (bool requestBroadcastReplies_in,
   } // end IF
 
   // step0c: initialize signal handling
-  CBData_in.configuration = &configuration;
-  configuration.signalHandlerConfiguration.dispatchState =
+  configuration_in.signalHandlerConfiguration.dispatchState =
     &event_dispatch_state_s;
   //if (useReactor_in)
-  //  configuration.signalHandlerConfiguration.listener =
+  //  configuration_in.signalHandlerConfiguration.listener =
   //    TEST_U_LISTENER_SINGLETON::instance ();
   //else
-  //  configuration.signalHandlerConfiguration.listener =
+  //  configuration_in.signalHandlerConfiguration.listener =
   //    TEST_U_ASYNCHLISTENER_SINGLETON::instance ();
-  configuration.signalHandlerConfiguration.statisticReportingHandler =
+  configuration_in.signalHandlerConfiguration.statisticReportingHandler =
     connection_manager_p;
-  configuration.signalHandlerConfiguration.statisticReportingTimerId =
+  configuration_in.signalHandlerConfiguration.statisticReportingTimerId =
     timer_id;
-  if (!signalHandler_in.initialize (configuration.signalHandlerConfiguration))
+  if (!signalHandler_in.initialize (configuration_in.signalHandlerConfiguration))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to initialize signal handler, returning\n")));
@@ -914,14 +961,14 @@ do_work (bool requestBroadcastReplies_in,
   // *NOTE*: the DHCP server address may not be known at this stage, so
   //         connection to the unicast address is handled by the discovery
   //         module
-  configuration.streamConfiguration.configuration_.module = NULL;
+  configuration_in.streamConfiguration.configuration_.module = NULL;
   connection_manager_p->set ((*iterator).second,
-                             &configuration.userData);
+                             &configuration_in.userData);
 
   //Test_U_OutboundConnector_t connector (connection_manager_p,
-  //                                      configuration.socketHandlerConfiguration.statisticReportingInterval);
+  //                                      configuration_in.socketHandlerConfiguration.statisticReportingInterval);
   //Test_U_OutboundAsynchConnector_t asynch_connector (connection_manager_p,
-  //                                                   configuration.socketHandlerConfiguration.statisticReportingInterval);
+  //                                                   configuration_in.socketHandlerConfiguration.statisticReportingInterval);
   DHCPClient_OutboundConnectorBcast_t connector (connection_manager_p,
                                                  (*iterator).second.socketHandlerConfiguration.statisticReportingInterval);
   DHCPClient_OutboundAsynchConnectorBcast_t asynch_connector (connection_manager_p,
@@ -1023,11 +1070,11 @@ do_work (bool requestBroadcastReplies_in,
       false;
   (*iterator).second.socketHandlerConfiguration.socketConfiguration_2.writeOnly =
     false;
-  configuration.streamConfiguration.configuration_.module =
+  configuration_in.streamConfiguration.configuration_.module =
     (!UIDefinitionFileName_in.empty () ? &event_handler
                                        : NULL);
   //connection_manager_p->set (configuration,
-  //                           &configuration.userData);
+  //                           &configuration_in.userData);
 
   // step1cb: start listening ?
   if (UIDefinitionFileName_in.empty ())
@@ -1052,9 +1099,9 @@ do_work (bool requestBroadcastReplies_in,
     // *********************** socket configuration data ***********************
     // *TODO*: support one-thread operation by scheduling a signal and manually
     //         running the dispatch loop for a limited time...
-    configuration.handle =
+    configuration_in.handle =
         iconnector_p->connect ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.listenAddress);
-    if (configuration.handle == ACE_INVALID_HANDLE)
+    if (configuration_in.handle == ACE_INVALID_HANDLE)
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to connect to %s, returning\n"),
@@ -1065,13 +1112,13 @@ do_work (bool requestBroadcastReplies_in,
     if (useReactor_in)
       iconnection_p =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-        connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (configuration.handle));
+        connection_manager_p->get (reinterpret_cast<Net_ConnectionId_t> (configuration_in.handle));
 #else
-        connection_manager_p->get (static_cast<Net_ConnectionId_t> (configuration.handle));
+        connection_manager_p->get (static_cast<Net_ConnectionId_t> (configuration_in.handle));
 #endif
     else
     {
-      configuration.handle = ACE_INVALID_HANDLE;
+      configuration_in.handle = ACE_INVALID_HANDLE;
 
       // *TODO*: avoid tight loop here
       ACE_Time_Value timeout (NET_CLIENT_DEFAULT_ASYNCH_CONNECT_TIMEOUT, 0);
@@ -1089,10 +1136,10 @@ do_work (bool requestBroadcastReplies_in,
         if (iconnection_p)
         {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-          configuration.handle =
+          configuration_in.handle =
               reinterpret_cast<ACE_HANDLE> (iconnection_p->id ());
 #else
-          configuration.handle =
+          configuration_in.handle =
               static_cast<ACE_HANDLE> (iconnection_p->id ());
 #endif
           iconnection_p->decrease ();
@@ -1163,7 +1210,7 @@ allocate:
     DHCP_record.htype = DHCP_FRAME_HTYPE;
     DHCP_record.hlen = DHCP_FRAME_HLEN;
     DHCP_record.xid = DHCP_Tools::generateXID ();
-    if (configuration.protocolConfiguration.requestBroadcastReplies)
+    if (configuration_in.protocolConfiguration.requestBroadcastReplies)
       DHCP_record.flags = DHCP_FLAGS_BROADCAST;
     struct ether_addr ether_addrs_s =
       Net_Common_Tools::interfaceToLinkLayerAddress ((*iterator).second.socketHandlerConfiguration.socketConfiguration_2.interfaceIdentifier);
@@ -1214,20 +1261,24 @@ allocate:
 
   // *NOTE*: from this point on, clean up any remote connections !
 
-  // step1a: start GTK event loop ?
+#if defined (GUI_SUPPORT)
+  // step1a: start UI event loop ?
   if (!UIDefinitionFileName_in.empty ())
   {
-    CBData_in.eventHooks.finiHook = idle_finalize_UI_cb;
-    CBData_in.eventHooks.initHook = idle_initialize_UI_cb;
+#if defined (GTK_USE)
+    ACE_ASSERT (gtk_manager_p);
+
+    CBData_in.UIState->eventHooks.finiHook = idle_finalize_UI_cb;
+    CBData_in.UIState->eventHooks.initHook = idle_initialize_UI_cb;
     //CBData_in.gladeXML[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
     //  std::make_pair (UIDefinitionFile_in, static_cast<GladeXML*> (NULL));
-    CBData_in.builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
+    CBData_in.UIState->builders[ACE_TEXT_ALWAYS_CHAR (COMMON_UI_DEFINITION_DESCRIPTOR_MAIN)] =
         std::make_pair (UIDefinitionFileName_in, static_cast<GtkBuilder*> (NULL));
-    CBData_in.userData = &CBData_in;
+    //CBData_in.userData = &CBData_in;
 
     //CBData_in.stream = stream_p;
 
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->start ();
+    gtk_manager_p->start ();
     ACE_Time_Value one_second (1, 0);
     result = ACE_OS::sleep (one_second);
     if (result == -1)
@@ -1240,6 +1291,7 @@ allocate:
       connection_manager_p->abort ();
       return;
     } // end IF
+#endif // GTK_USE
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
     HWND window_p = ::GetConsoleWindow ();
@@ -1253,9 +1305,12 @@ allocate:
     //ACE_UNUSED_ARG (was_visible_b);
 #endif
 
-    COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->wait ();
+#if defined (GTK_USE)
+    gtk_manager_p->wait ();
+#endif // GTK_USE
   } // end IF
   else
+#endif // GUI_SUPPORT
     Common_Tools::dispatchEvents (useReactor_in,
                                   group_id);
 
@@ -1271,7 +1326,7 @@ allocate:
 
   if ((*iterator_2).second.second.connection)
   {
-//    configuration.moduleHandlerConfiguration.connection->close ();
+//    configuration_in.moduleHandlerconfiguration_in.connection->close ();
     (*iterator_2).second.second.connection->decrease ();
     (*iterator_2).second.second.connection = NULL;
   } // end IF
@@ -1393,15 +1448,21 @@ ACE_TMAIN (int argc_in,
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
       ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   std::string gtk_rc_file = configuration_path;
   gtk_rc_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   gtk_rc_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GTK_RC_FILE);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   std::string output_file = path;
   path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   path += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_OUTPUT_FILE);
+#if defined (GUI_SUPPORT)
   std::string ui_definition_file = configuration_path;
   ui_definition_file += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   ui_definition_file += ACE_TEXT_ALWAYS_CHAR (TEST_U_DEFAULT_GLADE_FILE);
+#endif // GUI_SUPPORT
   bool log_to_file = false;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
@@ -1430,9 +1491,15 @@ ACE_TMAIN (int argc_in,
                             argv_in,
                             request_broadcast_replies,
                             debug_parser,
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
                             gtk_rc_file,
+#endif // GTK_USE
+#endif // GUI_SUPPORT
                             output_file,
+#if defined (GUI_SUPPORT)
                             ui_definition_file,
+#endif // GUI_SUPPORT
                             log_to_file,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
@@ -1452,7 +1519,7 @@ ACE_TMAIN (int argc_in,
                             print_version_and_exit,
                             number_of_dispatch_threads))
   {
-    // make 'em learn...
+    // make 'em learn
     do_printUsage (ACE::basename (argv_in[0]));
 
     // *PORTABILITY*: on Windows, finalize ACE...
@@ -1462,7 +1529,6 @@ ACE_TMAIN (int argc_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
 #endif // ACE_WIN32 || ACE_WIN64
-
     return EXIT_FAILURE;
   } // end IF
 
@@ -1483,19 +1549,25 @@ ACE_TMAIN (int argc_in,
                 ACE_TEXT ("the select()-based reactor is not reentrant, using the thread-pool reactor instead...\n")));
     use_thread_pool = true;
   } // end IF
+  if (
+#if defined (GUI_SUPPORT)
+      (ui_definition_file.empty () ||
+       !Common_File_Tools::isReadable (ui_definition_file)) ||
+#if defined (GTK_USE)
+      (!gtk_rc_file.empty () &&
+       !Common_File_Tools::isReadable (gtk_rc_file))        ||
+#endif // GTK_USE
+#else
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-  if ((ui_definition_file.empty () && InlineIsEqualGUID (interface_identifier, GUID_NULL)) ||
+      InlineIsEqualGUID (interface_identifier, GUID_NULL)   ||
 #else
-  if ((ui_definition_file.empty () && interface_identifier.empty ())           ||
+      interface_identifier.empty ()                         ||
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
 #else
-  if ((ui_definition_file.empty () && interface_identifier.empty ())           ||
+      interface_identifier.empty ()                         ||
 #endif // ACE_WIN32 || ACE_WIN64
-      (!ui_definition_file.empty () &&
-       !Common_File_Tools::isReadable (ui_definition_file))                ||
-      (!gtk_rc_file.empty () &&
-       !Common_File_Tools::isReadable (gtk_rc_file))                       ||
+#endif // GUI_SUPPORT
       (use_reactor && (number_of_dispatch_threads > 1) && !use_thread_pool))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -1510,17 +1582,32 @@ ACE_TMAIN (int argc_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
 #endif // ACE_WIN32 || ACE_WIN64
-
     return EXIT_FAILURE;
   } // end IF
   if (number_of_dispatch_threads == 0)
     number_of_dispatch_threads = 1;
 
-  struct DHCPClient_GTK_CBData gtk_cb_data;
-  gtk_cb_data.progressData.state = &gtk_cb_data;
   // step1d: initialize logging and/or tracing
-  Common_Logger_t logger (&gtk_cb_data.logStack,
-                          &gtk_cb_data.logStackLock);
+  Common_MessageStack_t* logstack_p = NULL;
+  ACE_SYNCH_MUTEX* lock_p = NULL;
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  Common_UI_GTK_Manager_t* gtk_manager_p =
+    COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
+  ACE_ASSERT (gtk_manager_p);
+  Common_UI_GTK_State_t& state_r =
+    const_cast<Common_UI_GTK_State_t&> (gtk_manager_p->getR_2 ());
+  logstack_p = &state_r.logStack;
+  lock_p = &state_r.logStackLock;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
+
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  Common_Logger_t logger (logstack_p,
+                          lock_p);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   std::string log_file_name;
   if (log_to_file)
   {
@@ -1539,7 +1626,6 @@ ACE_TMAIN (int argc_in,
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
 #endif // ACE_WIN32 || ACE_WIN64
-
       return EXIT_FAILURE;
     } // end IF
   } // end IF
@@ -1548,8 +1634,16 @@ ACE_TMAIN (int argc_in,
                                             false,                                    // log to syslog ?
                                             false,                                    // trace messages ?
                                             trace_information,                        // debug messages ?
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
                                             (ui_definition_file.empty () ? NULL
-                                                                         : &logger))) // logger ?
+                                                                         : &logger))) // (ui) logger ?
+#elif defined (WXWIDGETS_USE)
+                                            NULL))                                    // (ui) logger ?
+#endif // XXX_USE
+#else
+                                            NULL))                                    // (ui) logger ?
+#endif // GUI_SUPPORT
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to Common_Log_Tools::initializeLogging(), aborting\n")));
@@ -1561,8 +1655,24 @@ ACE_TMAIN (int argc_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
 #endif // ACE_WIN32 || ACE_WIN64
-
     return EXIT_FAILURE;
+  } // end IF
+
+  // step1f: handle specific program modes
+  if (print_version_and_exit)
+  {
+    do_printVersion (ACE::basename (argv_in[0]));
+
+    Common_Log_Tools::finalizeLogging ();
+    // *PORTABILITY*: on Windows, finalize ACE...
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    result = ACE::fini ();
+    if (result == -1)
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
+#endif // ACE_WIN32 || ACE_WIN64
+
+    return EXIT_SUCCESS;
   } // end IF
 
   // step1e: pre-initialize signal handling
@@ -1606,34 +1716,17 @@ ACE_TMAIN (int argc_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
 #endif // ACE_WIN32 || ACE_WIN64
-
     return EXIT_FAILURE;
   } // end IF
+  ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  lock_2 = &state_r.subscribersLock;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   Test_U_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                     : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                       &gtk_cb_data.subscribersLock);
-
-  // step1f: handle specific program modes
-  if (print_version_and_exit)
-  {
-    do_printVersion (ACE::basename (argv_in[0]));
-
-    Common_Signal_Tools::finalize ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
-                                                : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                   signal_set,
-                                   previous_signal_actions,
-                                   previous_signal_mask);
-    Common_Log_Tools::finalizeLogging ();
-    // *PORTABILITY*: on Windows, finalize ACE...
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-    result = ACE::fini ();
-    if (result == -1)
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to ACE::fini(): \"%m\", continuing\n")));
-#endif // ACE_WIN32 || ACE_WIN64
-
-    return EXIT_SUCCESS;
-  } // end IF
+                                       lock_2);
 
   // step1g: set process resource limits
   // *NOTE*: settings will be inherited by any child processes
@@ -1660,14 +1753,19 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
 
-  // step1h: initialize GLIB / G(D|T)K[+] / GNOME ?
+  struct DHCPClient_Configuration configuration_s;
+#if defined (GUI_SUPPORT)
+  // step1h: initialize GLIB / G(D|T)K[+] / GNOME
+  struct DHCPClient_UI_CBData ui_cb_data;
+  ui_cb_data.configuration = &configuration_s;
+#if defined (GTK_USE)
   if (!gtk_rc_file.empty ())
-    gtk_cb_data.RCFiles.push_back (gtk_rc_file);
+    state_r.RCFiles.push_back (gtk_rc_file);
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
   DHCPClient_GtkBuilderDefinition_t ui_definition (argc_in,
                                                    argv_in,
-                                                   &gtk_cb_data);
+                                                   &ui_cb_data);
   if (!ui_definition_file.empty ())
     if (!COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                                    argv_in,
@@ -1691,6 +1789,8 @@ ACE_TMAIN (int argc_in,
 #endif // ACE_WIN32 || ACE_WIN64
       return EXIT_FAILURE;
     } // end IF
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
   ACE_High_Res_Timer timer;
   timer.start ();
@@ -1698,7 +1798,9 @@ ACE_TMAIN (int argc_in,
   do_work (request_broadcast_replies,
            debug_parser,
            output_file,
+#if defined (GUI_SUPPORT)
            ui_definition_file,
+#endif // GUI_SUPPORT
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
            interface_identifier,
@@ -1714,7 +1816,10 @@ ACE_TMAIN (int argc_in,
            use_reactor,
            statistic_reporting_interval,
            number_of_dispatch_threads,
-           gtk_cb_data,
+           configuration_s,
+#if defined (GUI_SUPPORT)
+           ui_cb_data,
+#endif // GUI_SUPPORT
            signal_set,
            ignored_signal_set,
            previous_signal_actions,

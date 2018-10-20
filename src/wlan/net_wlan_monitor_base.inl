@@ -222,13 +222,21 @@ Net_WLAN_Monitor_Base_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::get1R"));
 
-  Net_WLAN_AccessPointCacheValue_t return_value_s;
+  // *NOTE*: this must be static so the returned reference does not fall off the
+  //         stack early when no match has been found
+  static Net_WLAN_AccessPointCacheValue_t return_value_s;
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  return_value_s.first = GUID_NULL;
+#else
+  return_value_s.first.clear ();
+#endif // ACE_WIN32 || ACE_WIN64
+  return_value_s.second.IPAddress.reset ();
 
   Net_WLAN_AccessPointCacheConstIterator_t iterator;
   { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_, return_value_s);
     iterator = SSIDCache_.find (SSID_in);
     if (iterator != SSIDCache_.end ())
-      return_value_s = (*iterator).second;
+      return (*iterator).second;
   } // end lock scope
 
   return return_value_s;
@@ -1805,10 +1813,6 @@ continue_2:
         inherited::state_ = NET_WLAN_MONITOR_STATE_CONNECTED;
       } // end lock scope
 
-      if (likely (isConnectionNotified_))
-        goto continue_3;
-      isConnectionNotified_ = true;
-
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)
       ACE_ASSERT (configuration_);
@@ -1846,6 +1850,10 @@ continue_2:
 #endif // WLANAPI_USE
 #endif // ACE_WIN32 || ACE_WIN64
 
+      if (likely (isConnectionNotified_))
+        goto continue_3;
+      isConnectionNotified_ = true;
+
       try {
         onConnect (configuration_->interfaceIdentifier,
                    this->SSID (),
@@ -1869,7 +1877,7 @@ continue_3:
         isFirstConnect_ = false;
 
       inherited::change (NET_WLAN_MONITOR_STATE_IDLE);
-      
+
       break;
     }
     default:
@@ -2305,20 +2313,22 @@ Net_WLAN_Monitor_Base_T<AddressType,
   ACE_ASSERT (clientHandle_ != ACE_INVALID_HANDLE);
   ACE_ASSERT (configuration_);
   ACE_ASSERT (!configuration_->SSID.empty ());
+  ACE_ASSERT (SSID_in.empty ());
 
-  struct Net_WLAN_AccessPointState access_point_state_s;
-  { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
-    // check cache whether the configured ESSID (if any) is known
-    Net_WLAN_AccessPointCacheConstIterator_t iterator =
-      SSIDCache_.find (SSID_in);
-    ACE_ASSERT (iterator != SSIDCache_.end ());
-    access_point_state_s = (*iterator).second.second;
-  } // end lock scope
+  //struct Net_WLAN_AccessPointState access_point_state_s;
+  //{ ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
+  //  // check cache whether the configured ESSID (if any) is known
+  //  Net_WLAN_AccessPointCacheConstIterator_t iterator =
+  //    SSIDCache_.find (SSID_in);
+  //  if (iterator != SSIDCache_.end ())
+  //    access_point_state_s = (*iterator).second.second;
+  //} // end lock scope
 
   if (success_in)
   {
-    if (!ACE_OS::strcmp (SSID_in.c_str (),
-                         configuration_->SSID.c_str ()))
+    //if (!ACE_OS::strcmp (SSID_in.c_str (),
+    //                     configuration_->SSID.c_str ()))
+    if (InlineIsEqualGUID (interfaceIdentifier_in, configuration_->interfaceIdentifier))
       inherited::change (NET_WLAN_MONITOR_STATE_IDLE);
   } // end IF
 #endif // ACE_WIN32 || ACE_WIN64

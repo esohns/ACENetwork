@@ -161,6 +161,7 @@ class Net_Common_Tools
   static std::string linkLayerAddressToInterface (const struct ether_addr&);
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  static std::string interfaceToConnection (REFGUID);
   inline static std::string interfaceToString (REFGUID interfaceIdentifier_in) { return Net_Common_Tools::indexToInterface (Net_Common_Tools::interfaceToIndex_2 (interfaceIdentifier_in)); }
   static std::string interfaceToString (NET_IFINDEX); // interface identifier
 #endif // ACE_WIN32 || ACE_WIN64

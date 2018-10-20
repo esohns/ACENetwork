@@ -26,9 +26,9 @@
 #include <sstream>
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#include <cguid.h>
 #include <guiddef.h>
 #include <iphlpapi.h>
+#include <Ks.h>
 #include <mstcpip.h>
 #include <wlanapi.h>
 #else
@@ -1709,6 +1709,40 @@ Net_Common_Tools::linkLayerAddressToInterface_2 (const struct ether_addr& addres
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 std::string
+Net_Common_Tools::interfaceToConnection (REFGUID interfaceIdentifier_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceToConnection"));
+
+  // initialize return value(s)
+  std::string result;
+
+  // sanity check(s)
+  ACE_ASSERT (!InlineIsEqualGUID (interfaceIdentifier_in, GUID_NULL));
+
+  std::string section_string =
+    ACE_TEXT_ALWAYS_CHAR ("SYSTEM\\CurrentControlSet\\Control\\Network\\{4D36E972-E325-11CE-BFC1-08002BE10318}\\");
+  section_string += Common_Tools::GUIDToString (interfaceIdentifier_in);
+  HKEY key_p =
+    ACE_Configuration_Win32Registry::resolve_key (HKEY_LOCAL_MACHINE,
+                                                  ACE_TEXT_CHAR_TO_TCHAR (section_string.c_str ()),
+                                                  0); // do not create
+  if (unlikely (!key_p))
+  {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to ACE_Configuration_Win32Registry::resolve_key(HKEY_LOCAL_MACHINE,\"%s\"): \"%m\", aborting\n"),
+                ACE_TEXT (section_string.c_str ())));
+    return result;
+  } // end IF
+  result = Common_Tools::getKeyValue (key_p,
+                                      ACE_TEXT_ALWAYS_CHAR ("Connection"),
+                                      ACE_TEXT_ALWAYS_CHAR ("Name"));
+  ACE_ASSERT (!result.empty ());
+  //RegCloseKey (key_p); key_p = NULL;
+
+  return result;
+}
+
+std::string
 Net_Common_Tools::interfaceToString (NET_IFINDEX interfaceIdentifier_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_Common_Tools::interfaceToString"));
@@ -1769,6 +1803,14 @@ error:
   // clean up
   if (ip_interfaceIdentifier_info_p)
     ACE_FREE_FUNC (ip_interfaceIdentifier_info_p);
+
+  // strip trailing note
+  std::string::size_type last_dash_pos =
+    result.find_last_of ('-',
+                         std::string::npos); // begin searching at the end !
+  if ((last_dash_pos != std::string::npos) &&
+      (result[last_dash_pos - 1] == ' '))
+    result.erase (last_dash_pos - 1, std::string::npos);
 
   return result;
 }
@@ -2003,7 +2045,12 @@ Net_Common_Tools::interfaceToIndex (const std::string& interfaceIdentifier_in)
 
   // sanity check(s)
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
+  struct _GUID interface_identifier_s = GUID_NULL, interface_identifier_2 = GUID_NULL;
+  if (Common_Tools::isGUID (interfaceIdentifier_in))
+    interface_identifier_s =
+      Common_Tools::StringToGUID (interfaceIdentifier_in);
 
+  std::string interface_identifier;
 #define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
 #define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
   struct _IP_ADAPTER_INFO* adapter_info_p = NULL, *adapter_info_2 = NULL;
@@ -2038,12 +2085,23 @@ Net_Common_Tools::interfaceToIndex (const std::string& interfaceIdentifier_in)
   adapter_info_2 = adapter_info_p;
   while (adapter_info_2)
   {
-    if (!ACE_OS::strcmp (adapter_info_2->AdapterName,
+    if (Common_Tools::isGUID (adapter_info_2->AdapterName))
+    {
+      interface_identifier_2 =
+        Common_Tools::StringToGUID (adapter_info_2->AdapterName);
+      interface_identifier =
+        Net_Common_Tools::interfaceToConnection (interface_identifier_2);
+      ACE_ASSERT (!interface_identifier.empty ());
+    } // end IF
+    else
+      interface_identifier = adapter_info_2->AdapterName;
+    if (InlineIsEqualGUID (interface_identifier_s, interface_identifier_2) ||
+        !ACE_OS::strcmp (interface_identifier.c_str (),
                          interfaceIdentifier_in.c_str ()))
     {
       result = adapter_info_2->Index;
       break;
-    } // end IF
+    } // end ELSE IF
 
     adapter_info_2 = adapter_info_2->Next;
   } // end WHILE
@@ -2065,8 +2123,8 @@ Net_Common_Tools::indexToInterface (NET_IFINDEX interfaceIndex_in)
   // sanity check(s)
   ACE_ASSERT (interfaceIndex_in);
 
-#define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
-#define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
+#define MALLOC(x) HeapAlloc (GetProcessHeap (), 0, (x))
+#define FREE(x) HeapFree (GetProcessHeap (), 0, (x))
   struct _IP_ADAPTER_INFO* adapter_info_p = NULL, *adapter_info_2 = NULL;
   ULONG result_2 = 0;
   ULONG buffer_length_u = 0;
@@ -2102,7 +2160,14 @@ Net_Common_Tools::indexToInterface (NET_IFINDEX interfaceIndex_in)
   {
     if (adapter_info_2->Index == interfaceIndex_in)
     {
-      result = adapter_info_2->AdapterName;
+      // *NOTE*: apparently AdapterName contains the interface identifier GUID
+      //         --> look up its 'friendly name' in the registry
+      // *TODO*: use GetAdaptersAddresses() instead
+      if (Common_Tools::isGUID (adapter_info_2->AdapterName))
+        result =
+          Net_Common_Tools::interfaceToConnection (Common_Tools::StringToGUID (adapter_info_2->AdapterName));
+      else
+        result = adapter_info_2->AdapterName;
       break;
     } // end IF
 
@@ -2712,19 +2777,17 @@ Net_Common_Tools::interfaceToIPAddress (const std::string& interfaceIdentifier_i
       goto continue_;
 
     unicast_address_p = ip_adapter_addresses_2->FirstUnicastAddress;
-    ACE_ASSERT (unicast_address_p);
-    do
+    while (unicast_address_p)
     {
       socket_address_p = &unicast_address_p->Address;
       ACE_ASSERT (socket_address_p->lpSockaddr);
       if (socket_address_p->lpSockaddr->sa_family == AF_INET)
         break;
-
       unicast_address_p = unicast_address_p->Next;
-    } while (unicast_address_p);
-    if (!unicast_address_p)
+    } // end WHILE
+    if (unlikely (!unicast_address_p))
     {
-      ACE_DEBUG ((LM_ERROR,
+      ACE_DEBUG ((LM_WARNING,
                   ACE_TEXT ("adapter \"%s\":\"%s\" does not currently have any unicast IPv4 address, aborting\n"),
                   ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->FriendlyName),
                   ACE_TEXT_WCHAR_TO_TCHAR (ip_adapter_addresses_2->Description)));

@@ -47,6 +47,7 @@
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Containers_T.h"
+#include "ace/INET_Addr.h"
 #include "ace/OS.h"
 
 #if defined (GUI_SUPPORT)
@@ -140,6 +141,7 @@ struct Net_WLAN_AccessPointState
 #endif // NL80211_SUPPORT
    , frequency (0)
 #endif // ACE_WIN32 || ACE_WIN64
+   , IPAddress ()
    , lastSeen (0)
    , linkLayerAddress ()
    , signalQuality (0)
@@ -154,6 +156,7 @@ struct Net_WLAN_AccessPointState
 #endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
   ACE_UINT32             frequency;
+  ACE_INET_Addr          IPAddress;
   unsigned int           lastSeen; // ms
   struct ether_addr      linkLayerAddress;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -339,25 +342,28 @@ struct Net_WLAN_AssociationConfiguration
 
 //////////////////////////////////////////
 
-enum Net_WLAN_UI_EventType
+enum Net_WLAN_EventType
 {
 #if defined (GUI_SUPPORT)
-  NET_WLAN_UI_EVENT_INTERFACE_HOTPLUG = COMMON_UI_EVENT_OTHER_USER_BASE,
+  NET_WLAN_EVENT_INTERFACE_HOTPLUG = COMMON_UI_EVENT_OTHER_USER_BASE,
 #else
-  NET_WLAN_UI_EVENT_INTERFACE_HOTPLUG = 0,
+  NET_WLAN_EVENT_INTERFACE_HOTPLUG = 0,
 #endif // GUI_SUPPORT
-  NET_WLAN_UI_EVENT_INTERFACE_REMOVE,
-  NET_WLAN_UI_EVENT_SCAN_COMPLETE,
-  NET_WLAN_UI_EVENT_ASSOCIATE,
-  NET_WLAN_UI_EVENT_DISASSOCIATE,
-  NET_WLAN_UI_EVENT_CONNECT,
-  NET_WLAN_UI_EVENT_DISCONNECT,
-  NET_WLAN_UI_EVENT_SIGNAL_QUALITY_CHANGED,
+  NET_WLAN_EVENT_INTERFACE_REMOVE,
+  NET_WLAN_EVENT_SCAN_COMPLETE,
+//#if defined (ACE_WIN32) || defined (ACE_WIN64)
+//#else
+  NET_WLAN_EVENT_ASSOCIATE,
+  NET_WLAN_EVENT_DISASSOCIATE,
+//#endif // ACE_WIN32 || ACE_WIN64
+  NET_WLAN_EVENT_CONNECT,
+  NET_WLAN_EVENT_DISCONNECT,
+  NET_WLAN_EVENT_SIGNAL_QUALITY_CHANGED,
   ////////////////////////////////////////
-  NET_WLAN_UI_EVENT_MAX,
-  NET_WLAN_UI_EVENT_INVALID
+  NET_WLAN_EVENT_MAX,
+  NET_WLAN_EVENT_INVALID
 };
-typedef ACE_Unbounded_Stack<enum NET_WLAN_UI_EventType> NET_WLAN_UI_Events_t;
-typedef ACE_Unbounded_Stack<enum NET_WLAN_UI_EventType>::ITERATOR NET_WLAN_UI_EventsIterator_t;
+typedef ACE_Unbounded_Stack<enum NET_WLAN_EventType> NET_WLAN_Events_t;
+typedef ACE_Unbounded_Stack<enum NET_WLAN_EventType>::ITERATOR NET_WLAN_EventsIterator_t;
 
 #endif

@@ -132,7 +132,7 @@ class Net_WLAN_IMonitorBase
 #endif // DBUS_SUPPORT
  , public Common_IGet_2_T<unsigned int> // signal quality
 #endif // ACE_WIN32 || ACE_WIN64
- , public Common_IGet1RR_T<std::string,
+ , public Common_IGet1RR_T<std::string,                      // SSID
                            Net_WLAN_AccessPointCacheValue_t> // cache access
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
  , public Common_ISet3R_T<std::string,
@@ -202,10 +202,5 @@ class Net_WLAN_IMonitor_T
   virtual bool addresses (AddressType&,            // return value: local SAP
                           AddressType&) const = 0; // return value: peer SAP
 };
-
-//////////////////////////////////////////
-
-//typedef Net_WLAN_IMonitor_T<ACE_INET_Addr,
-//                            struct Net_WLANMonitorConfiguration> Net_IInetWLANMonitor_t;
 
 #endif
