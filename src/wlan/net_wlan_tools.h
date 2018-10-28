@@ -102,6 +102,9 @@ class Net_WLAN_Tools
   static std::string getProfile (HANDLE,              // API client handle
                                  REFGUID,             // interface identifier
                                  const std::string&); // (E)SSID
+  static bool setProfile (HANDLE,              // API client handle
+                          REFGUID,             // interface identifier
+                          const std::string&); // (E)SSID
   static Net_WLAN_SSIDs_t getSSIDs (HANDLE,   // API client handle
                                     REFGUID); // interface identifier (GUID_NULL: all)
   static bool hasSSID (HANDLE,              // API client handle

@@ -119,7 +119,7 @@ class Net_WLAN_Monitor_Base_T
   inline bool isRunning () const { return isActive_; }
 
   // implement Net_IWLANMonitor_T
-  inline virtual const ConfigurationType& getR_2 () const { ACE_ASSERT (configuration_); return *configuration_; }
+  inline virtual const ConfigurationType& getR_4 () const { ACE_ASSERT (configuration_); return *configuration_; }
   virtual const Net_WLAN_AccessPointCacheValue_t& get1RR (const std::string&) const;
   virtual void set3R (const std::string&,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -148,10 +148,10 @@ class Net_WLAN_Monitor_Base_T
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   inline virtual struct _GUID interfaceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->interfaceIdentifier; }
-  inline virtual const WLAN_SIGNAL_QUALITY get_2 () const;
+  inline virtual const WLAN_SIGNAL_QUALITY get_3 () const;
 #else
   inline virtual std::string interfaceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->interfaceIdentifier; }
-  inline virtual const unsigned int get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
+  inline virtual const unsigned int get_3 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
 #endif // ACE_WIN32 || ACE_WIN64
 
   virtual Net_WLAN_SSIDs_t SSIDs () const;
@@ -167,9 +167,9 @@ class Net_WLAN_Monitor_Base_T
   bool cancelScanTimer ();
 
   // implement Common_ITimerHandler
-  // *NOTE*: the scan timer is one-shot and restarted in the callback
-  // *NOTE*: the timer handler may trigger before scanTimerId_ has been set
-  inline virtual void handle (const void*) { if (likely (scanTimerId_ != -1)) scanTimerId_ = -1; inherited::change (NET_WLAN_MONITOR_STATE_SCAN); }
+  // *NOTE*: the scan timer is one-shot and restarted during the state-change
+  inline virtual const long get () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
+  virtual void handle (const void*);
 #endif // ACE_WIN32 || ACE_WIN64
 
   // *TODO*: remove any implementation-specific members
@@ -210,6 +210,7 @@ class Net_WLAN_Monitor_Base_T
 
   // *IMPORTANT NOTE*: this must be 'recursive', so that callees may unsubscribe
   //                   from within the notification callbacks
+  // *NOTE*: also secures scanTimerId_
   mutable ACE_MT_SYNCH::RECURSIVE_MUTEX subscribersLock_;
   SUBSCRIBERS_T                         subscribers_;
 
@@ -271,14 +272,6 @@ class Net_WLAN_Monitor_Base_T
   ////////////////////////////////////////
 
  private:
-  // comvenient types
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//#else
-//  typedef Stream_MessageQueue_T<ACE_SYNCH_USE,
-//                                TimePolicyType,
-//                                ACE_Message_Block> MESSAGEQUEUE_T;
-//#endif // ACE_WIN32 || ACE_WIN64
-
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_Base_T (const Net_WLAN_Monitor_Base_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_Base_T& operator= (const Net_WLAN_Monitor_Base_T&))
 
@@ -315,10 +308,6 @@ class Net_WLAN_Monitor_Base_T
   // *TODO*: report (current) interface statistic(s)
   inline virtual void report () const { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
 
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//#else
-//  MESSAGEQUEUE_T                        queue_;
-//#endif // ACE_WIN32 || ACE_WIN64
   bool                                  SSIDSeenBefore_;
 };
 

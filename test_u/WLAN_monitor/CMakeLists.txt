@@ -543,8 +543,6 @@ if (UNIX)
 
 # target_link_libraries (${EXECUTABLE} X11)
 elseif (WIN32)
-# target_link_libraries (${EXECUTABLE} ntdll.lib)
-
  target_link_libraries (${EXECUTABLE} ${ACE_XML_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${ACE_XML_PARSER_LIBRARY})
 endif ()

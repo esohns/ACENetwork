@@ -62,7 +62,7 @@ load_wlan_interfaces (GtkListStore* listStore_in)
 #endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   Net_InterfaceIdentifiers_t interface_identifiers_a =
-      Net_WLAN_Tools::getInterfaces (iinetwlanmonitor_p->get ());
+      Net_WLAN_Tools::getInterfaces (iinetwlanmonitor_p->get_2 ());
 #else
   Net_InterfaceIdentifiers_t interface_identifiers_a =
     Net_WLAN_Tools::getInterfaces (AF_UNSPEC, 0);
@@ -484,7 +484,7 @@ idle_update_signal_quality_cb (gpointer userData_in)
                                        ACE_TEXT_ALWAYS_CHAR (WLAN_MONITOR_GTK_SCALE_SIGNALQUALITY_NAME)));
   ACE_ASSERT (scale_p);
   gtk_range_set_value (GTK_RANGE (scale_p),
-                       static_cast<gdouble> (data_p->monitor->get_2 ()));
+                       static_cast<gdouble> (data_p->monitor->get_3 ()));
 
   return G_SOURCE_REMOVE;
 }
@@ -1291,7 +1291,7 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, data_p->UIState->lock);
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)
-    load_ssids (data_p->monitor->get (),
+    load_ssids (data_p->monitor->get_2 (),
                 data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
 #endif // WLANAPI_USE
 #else
@@ -1320,7 +1320,7 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
   std::string current_essid_string =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)
-      Net_WLAN_Tools::associatedSSID (data_p->monitor->get (),
+      Net_WLAN_Tools::associatedSSID (data_p->monitor->get_2 (),
                                       data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier);
 #else
       ACE_TEXT_ALWAYS_CHAR ("");
@@ -1422,7 +1422,7 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
   std::string current_essid_string =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)
-    Net_WLAN_Tools::associatedSSID (data_p->monitor->get (),
+    Net_WLAN_Tools::associatedSSID (data_p->monitor->get_2 (),
                                     data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier);
 #else
   ACE_TEXT_ALWAYS_CHAR ("");
@@ -1694,7 +1694,7 @@ togglebutton_backgroundscan_toggled_cb (GtkToggleButton* toggleButton_in,
   //if (!iinetwlanmonitor_p->isRunning ())
   //  return; // nothing to do
 
-  Net_WLAN_Tools::setDeviceSettingBool (iinetwlanmonitor_p->get (),
+  Net_WLAN_Tools::setDeviceSettingBool (iinetwlanmonitor_p->get_2 (),
                                         data_p->configuration->WLANMonitorConfiguration.interfaceIdentifier,
                                         wlan_intf_opcode_background_scan_enabled,
                                         data_p->configuration->WLANMonitorConfiguration.enableBackgroundScans);

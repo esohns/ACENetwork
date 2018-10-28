@@ -206,10 +206,14 @@ struct Net_WLAN_Profile_ParserContext
 {
   Net_WLAN_SSIDs_t SSIDs;
 };
+//typedef Common_XML_Parser_T<ACE_MT_SYNCH,
+//                            struct Common_XML_ParserConfiguration,
+//                            struct Net_WLAN_Profile_ParserContext,
+//                            Net_WLAN_Profile_XML_Handler> Net_WLAN_Profile_Parser_t;
 typedef Common_XML_Parser_T<ACE_MT_SYNCH,
                             struct Common_XML_ParserConfiguration,
                             struct Net_WLAN_Profile_ParserContext,
-                            Net_WLAN_Profile_XML_Handler> Net_WLAN_Profile_Parser_t;
+                            Net_WLAN_Profile_XML_ListHandler> Net_WLAN_Profile_ListParser_t;
 #elif defined (ACE_LINUX)
 typedef std::map<std::string, unsigned int> Net_WLAN_WiPhyIdentifiers_t;
 typedef Net_WLAN_WiPhyIdentifiers_t::iterator Net_WLAN_WiPhyIdentifiersIterator_t;

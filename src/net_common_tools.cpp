@@ -1722,16 +1722,31 @@ Net_Common_Tools::interfaceToConnection (REFGUID interfaceIdentifier_in)
   std::string section_string =
     ACE_TEXT_ALWAYS_CHAR ("SYSTEM\\CurrentControlSet\\Control\\Network\\{4D36E972-E325-11CE-BFC1-08002BE10318}\\");
   section_string += Common_Tools::GUIDToString (interfaceIdentifier_in);
-  HKEY key_p =
+  HKEY key_p = NULL;
+  // *NOTE*: this fails intermittently (*TODO*: why ?) --> retry a few times
+retry:
+  unsigned int retry_resolve_key_i = 0;
+  key_p =
     ACE_Configuration_Win32Registry::resolve_key (HKEY_LOCAL_MACHINE,
                                                   ACE_TEXT_CHAR_TO_TCHAR (section_string.c_str ()),
                                                   0); // do not create
   if (unlikely (!key_p))
   {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to ACE_Configuration_Win32Registry::resolve_key(HKEY_LOCAL_MACHINE,\"%s\"): \"%m\", aborting\n"),
-                ACE_TEXT (section_string.c_str ())));
-    return result;
+    ++retry_resolve_key_i;
+    if (retry_resolve_key_i >= COMMON_WIN32_REGISTRY_RESOLVE_RETRIES)
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to ACE_Configuration_Win32Registry::resolve_key(HKEY_LOCAL_MACHINE,\"%s\"): \"%m\", aborting\n"),
+                  ACE_TEXT (section_string.c_str ())));
+      return result;
+    } // end IF
+#if defined (_DEBUG)
+    else
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("failed to ACE_Configuration_Win32Registry::resolve_key(HKEY_LOCAL_MACHINE,\"%s\"): \"%m\", retrying\n"),
+                  ACE_TEXT (section_string.c_str ())));
+#endif // _DEBUG
+    goto retry;
   } // end IF
   result = Common_Tools::getKeyValue (key_p,
                                       ACE_TEXT_ALWAYS_CHAR ("Connection"),
@@ -2051,8 +2066,6 @@ Net_Common_Tools::interfaceToIndex (const std::string& interfaceIdentifier_in)
       Common_Tools::StringToGUID (interfaceIdentifier_in);
 
   std::string interface_identifier;
-#define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
-#define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
   struct _IP_ADAPTER_INFO* adapter_info_p = NULL, *adapter_info_2 = NULL;
   ULONG result_2 = 0;
   ULONG buffer_length_u = 0;
@@ -2123,8 +2136,6 @@ Net_Common_Tools::indexToInterface (NET_IFINDEX interfaceIndex_in)
   // sanity check(s)
   ACE_ASSERT (interfaceIndex_in);
 
-#define MALLOC(x) HeapAlloc (GetProcessHeap (), 0, (x))
-#define FREE(x) HeapFree (GetProcessHeap (), 0, (x))
   struct _IP_ADAPTER_INFO* adapter_info_p = NULL, *adapter_info_2 = NULL;
   ULONG result_2 = 0;
   ULONG buffer_length_u = 0;

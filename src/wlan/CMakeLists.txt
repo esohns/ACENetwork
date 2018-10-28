@@ -250,15 +250,15 @@ if (UNIX)
        net_wlan_tools_linux_dbus.cpp)
  endif (DBUS_SUPPORT)
 elseif (WIN32)
- set (source_files
-      ${source_files}
-      net_wlan_profile_xml_handler.cpp
-      net_wlan_profile_xml_handler.h)
  if (WLANAPI_SUPPORT)
   set (source_files
        ${source_files}
        net_wlan_monitor_win32_wlanapi.inl
+       net_wlan_profile_xml_handler.cpp
+       net_wlan_profile_xml_handler.h
        net_wlan_tools_win32_wlanapi.cpp)
+  set (script_files
+       etc/wlanapi_profile_template.xml)
  endif (WLANAPI_SUPPORT)
 endif ()
 
@@ -272,11 +272,15 @@ foreach (source_file ${source_files})
   #       $<INSTALL_INTERFACE:${INCLUDE_DIR}/${source_file}>)
 endforeach ()
 unset (absolute_script_files)
-#foreach (script_file ${script_files})
-#  get_filename_component (abs_script_file ${script_file} ABSOLUTE)
-#  list (APPEND absolute_script_files
-#        ${absolute_script_file})
-#endforeach ()
+if (WIN32)
+ if (WLANAPI_SUPPORT)
+  foreach (script_file ${script_files})
+   get_filename_component (abs_script_file ${script_file} ABSOLUTE)
+   list (APPEND absolute_script_files
+         ${absolute_script_file})
+  endforeach ()
+ endif (WLANAPI_SUPPORT)
+endif (WIN32)
 target_sources (${PROJECT_NAME}_WLAN
                 PRIVATE stdafx.cpp
                 PRIVATE stdafx.h
@@ -333,7 +337,7 @@ if (UNIX)
 #  target_link_libraries (${PROJECT_NAME}_WLAN ${GSS_LIBRARY})
 # endif (DHCLIENT_SUPPORT)
 elseif (WIN32)
-# target_link_libraries (${PROJECT_NAME}_WLAN ${ACE_LIBRARY})
+ target_link_libraries (${PROJECT_NAME}_WLAN msxml2.lib)
 
 # target_link_libraries (${PROJECT_NAME}_WLAN CommonXML)
 endif ()
@@ -367,6 +371,11 @@ endif (WIN32)
 install (FILES
          ${include_files}
          DESTINATION include)
+if (WIN32)
+install (FILES
+         etc/wlanapi_profile_template.xml
+         DESTINATION etc)
+endif (WIN32)
 install (TARGETS ${PROJECT_NAME}_WLAN
          EXPORT ${PROJECT_NAME}Targets
          ARCHIVE DESTINATION "${INSTALL_LIB_DIR}" COMPONENT lib

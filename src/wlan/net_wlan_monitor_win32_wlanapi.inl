@@ -40,10 +40,11 @@
 
 #include "net_wlan_defines.h"
 
-template <typename AddressType,
+template <//typename AddressType,
           typename ConfigurationType,
           typename UserDataType>
-Net_WLAN_Monitor_T<AddressType,
+Net_WLAN_Monitor_T<//AddressType,
+                   ACE_INET_Addr,
                    ConfigurationType,
                    NET_WLAN_MONITOR_API_WLANAPI,
                    UserDataType>::Net_WLAN_Monitor_T ()
@@ -54,11 +55,12 @@ Net_WLAN_Monitor_T<AddressType,
 
 }
 
-template <typename AddressType,
+template <//typename AddressType,
           typename ConfigurationType,
           typename UserDataType>
 void
-Net_WLAN_Monitor_T<AddressType,
+Net_WLAN_Monitor_T<//AddressType,
+                   ACE_INET_Addr,
                    ConfigurationType,
                    NET_WLAN_MONITOR_API_WLANAPI,
                    UserDataType>::start ()
@@ -128,11 +130,12 @@ continue_:
   inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_IDLE);
 }
 
-template <typename AddressType,
+template <//typename AddressType,
           typename ConfigurationType,
           typename UserDataType>
 void
-Net_WLAN_Monitor_T<AddressType,
+Net_WLAN_Monitor_T<//AddressType,
+                   ACE_INET_Addr,
                    ConfigurationType,
                    NET_WLAN_MONITOR_API_WLANAPI,
                    UserDataType>::stop (bool waitForCompletion_in,
@@ -158,11 +161,12 @@ Net_WLAN_Monitor_T<AddressType,
   inherited::STATEMACHINE_T::change (NET_WLAN_MONITOR_STATE_INITIALIZED);
 }
 
-template <typename AddressType,
+template <//typename AddressType,
           typename ConfigurationType,
           typename UserDataType>
 bool
-Net_WLAN_Monitor_T<AddressType,
+Net_WLAN_Monitor_T<//AddressType,
+                   ACE_INET_Addr,
                    ConfigurationType,
                    NET_WLAN_MONITOR_API_WLANAPI,
                    UserDataType>::initialize (const ConfigurationType& configuration_in)

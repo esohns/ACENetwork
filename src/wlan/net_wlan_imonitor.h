@@ -50,7 +50,7 @@ class Net_WLAN_IMonitorCB
 {
  public:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  virtual void onSignalQualityChange (REFGUID,            // interface identifier
+  virtual void onSignalQualityChange (REFGUID,                  // interface identifier
                                       WLAN_SIGNAL_QUALITY) = 0; // signal quality (of current association)
 #else
   virtual void onSignalQualityChange (const std::string&, // interface identifier
@@ -112,25 +112,25 @@ class Net_WLAN_IMonitorBase
 // , virtual public Common_IStateMachine_T<enum Net_WLAN_MonitorState>
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
- , public Common_IGet_T<HANDLE>
+ , public Common_IGet_2_T<HANDLE>
 #endif // WLANAPI_SUPPORT
- , public Common_IGet_2_T<WLAN_SIGNAL_QUALITY>
+ , public Common_IGet_3_T<WLAN_SIGNAL_QUALITY>
 #else
 #if defined (WEXT_SUPPORT)
- , public Common_IGet_T<ACE_HANDLE>
+ , public Common_IGet_2_T<ACE_HANDLE>
 #endif // WEXT_SUPPORT
 #if defined (NL80211_SUPPORT)
  , public Common_IGetP_T<struct nl_sock>
- , public Common_IGet_3_T<int> // family id
+ , public Common_IGet_2_T<int> // family id
 #endif // WEXT_SUPPORT
 #if defined (DBUS_SUPPORT)
- , public Common_IGetP_2_T<struct DBusConnection>
+ , public Common_IGetP_T<struct DBusConnection>
  , public Common_IGet1RR_2_T<std::string,
                              std::string> // cache access
  , public Common_ISet2R_T<std::string,
                           std::string>  // cache access
 #endif // DBUS_SUPPORT
- , public Common_IGet_2_T<unsigned int> // signal quality
+ , public Common_IGet_3_T<unsigned int> // signal quality
 #endif // ACE_WIN32 || ACE_WIN64
  , public Common_IGet1RR_T<std::string,                      // SSID
                            Net_WLAN_AccessPointCacheValue_t> // cache access
@@ -191,7 +191,7 @@ class Net_WLAN_IMonitor_T
  : public Net_WLAN_IMonitorBase
  , virtual public Common_ITaskControl_T<ACE_MT_SYNCH,
                                         Common_ILock_T<ACE_MT_SYNCH> >
- , public Common_IGetR_2_T<ConfigurationType>
+ , public Common_IGetR_4_T<ConfigurationType>
  , public Common_IInitialize_T<ConfigurationType>
  , public Common_ISubscribe_T<Net_WLAN_IMonitorCB>
 {

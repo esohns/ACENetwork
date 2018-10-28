@@ -132,7 +132,7 @@ do_printUsage (const std::string& programName_in)
   std::string configuration_path = path;
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
+      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   std::string gtk_rc_file = configuration_path;
@@ -250,7 +250,7 @@ do_processArguments (int argc_in,
   std::string configuration_path = path;
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
+      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   GtkRcFileName_out = configuration_path;
@@ -1447,7 +1447,7 @@ ACE_TMAIN (int argc_in,
   std::string configuration_path = path;
   configuration_path += ACE_DIRECTORY_SEPARATOR_CHAR_A;
   configuration_path +=
-      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_DIRECTORY);
+      ACE_TEXT_ALWAYS_CHAR (COMMON_LOCATION_CONFIGURATION_SUBDIRECTORY);
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   std::string gtk_rc_file = configuration_path;

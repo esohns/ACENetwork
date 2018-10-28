@@ -27,9 +27,9 @@
 // *PORTABILITY*: NIC device names are not portable
 //                Win32: let the user choose the device identifier from a list
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#if defined (_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602) // _WIN32_WINNT_WIN8
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0602) // _WIN32_WINNT_WIN8
 #define NET_INTERFACE_ENABLE_LOOPBACK_FASTPATH               true // SIO_LOOPBACK_FAST_PATH
-#endif // _WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)
+#endif // _WIN32_WINNT_WIN8
 
 #define NET_INTERFACE_DEFAULT_ETHERNET                       ""
 #define NET_INTERFACE_DEFAULT_LOOPBACK                       ""

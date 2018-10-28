@@ -540,9 +540,9 @@ template <typename AddressType,
           typename ConfigurationType>
 const WLAN_SIGNAL_QUALITY
 Net_WLAN_Monitor_Base_T<AddressType,
-                        ConfigurationType>::get_2 () const
+                        ConfigurationType>::get_3 () const
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::get_2"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::get_3"));
 
   // sanity check(s)
   if (unlikely (!isActive_))
@@ -938,15 +938,29 @@ Net_WLAN_Monitor_Base_T<AddressType,
 continue_:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)
-        if (unlikely (scanTimerId_ == -1))
-          if (!startScanTimer (ACE_Time_Value::zero))
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to start scan timer, continuing\n")));
-        break; // nothing to do at this point
+        // *NOTE*: the timer handler might trigger before scanTimerId_ has been
+        //         set --> grab the lock
+        { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
+          if (unlikely (scanTimerId_ == -1))
+          {
+            ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX> reverse_lock (subscribersLock_,
+                                                                          ACE_Acquire_Method::ACE_REGULAR);
+            { ACE_GUARD (ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX>, aGuard_2, reverse_lock);
+              if (!startScanTimer (ACE_Time_Value::zero))
+                ACE_DEBUG ((LM_ERROR,
+                            ACE_TEXT ("failed to start scan timer, continuing\n")));
+            } // end lock scope
+          } // end IF
+        } // end lock scope
 #endif // WLANAPI_USE
 #endif // ACE_WIN32 || ACE_WIN64
         inherited::change (NET_WLAN_MONITOR_STATE_SCAN);
-        break;
+        // *NOTE*: there is no need to reset the state when returning from a
+        //         transitional state, as the current state is not set until this
+        //         method returns. Note that this holds only iff the state has not
+        //         already changed; see: common_state_machine_base.inl:214
+        //         --> reset the state just in case
+        goto reset_state;
       } // end IF
 
       // not connected
@@ -964,26 +978,34 @@ continue_:
           SSIDSeenBefore_ = true;
       } // end lock scope
 
-      // *NOTE*: there is no need to reset the state when returning from a
-      //         transitional state, as the current state is not set until this
-      //         method returns. Note that this holds only iff the state hasn't
-      //         already changed; see: common_state_machine_base.inl:214
-      //         --> reset the state just in case
-
       if (configuration_->SSID.empty () || // not configured
           !essid_is_cached              || // configured SSID unknown (i.e. not cached yet)
           !configuration_->autoAssociate)  // auto-associate disabled
       {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_USE)
-        if (unlikely (scanTimerId_ == -1))
-          if (!startScanTimer (ACE_Time_Value::zero))
-            ACE_DEBUG ((LM_ERROR,
-                        ACE_TEXT ("failed to start scan timer, continuing\n")));
-        break; // nothing to do at this point
+        // *NOTE*: the timer handler might trigger before scanTimerId_ has been
+        //         set --> grab the lock
+        { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
+          if (unlikely (scanTimerId_ == -1))
+          {
+            ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX> reverse_lock (subscribersLock_,
+                                                                          ACE_Acquire_Method::ACE_REGULAR);
+            { ACE_GUARD (ACE_Reverse_Lock<ACE_MT_SYNCH::RECURSIVE_MUTEX>, aGuard_2, reverse_lock);
+              if (!startScanTimer (ACE_Time_Value::zero))
+                ACE_DEBUG ((LM_ERROR,
+                            ACE_TEXT ("failed to start scan timer, continuing\n")));
+            } // end lock scope
+          } // end IF
+        } // end lock scope
 #endif // WLANAPI_USE
 #endif // ACE_WIN32 || ACE_WIN64
         inherited::change (NET_WLAN_MONITOR_STATE_SCAN);
+        // *NOTE*: there is no need to reset the state when returning from a
+        //         transitional state, as the current state is not set until this
+        //         method returns. Note that this holds only iff the state has not
+        //         already changed; see: common_state_machine_base.inl:214
+        //         --> reset the state just in case
         goto reset_state;
       } // end IF
 
@@ -1241,10 +1263,11 @@ authenticate:
       // sanity check(s)
       ACE_ASSERT (configuration_);
       ACE_ASSERT (!configuration_->SSID.empty ());
-#if defined (ACE_LINUX)
+
       std::string interface_identifier;
       struct ether_addr ap_mac_address_s;
       ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
+#if defined (ACE_LINUX)
 #if defined (WEXT_USE)
       struct ether_addr ether_addr_s;
       bool result = false;
@@ -1257,8 +1280,9 @@ authenticate:
       bool shutdown = false;
 #endif // WEXT_USE
 #endif // ACE_LINUX
+
+      // check cache whether the configured ESSID (if any) is known
       { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
-        // check cache whether the configured ESSID (if any) is known
         Net_WLAN_AccessPointCacheConstIterator_t iterator =
           SSIDCache_.find (configuration_->SSID);
         ACE_ASSERT (iterator != SSIDCache_.end ());
@@ -1274,11 +1298,9 @@ authenticate:
                     ACE_TEXT (configuration_->interfaceIdentifier.c_str ())));
 
       std::string SSID_string = this->SSID ();
-      if ((!configuration_->SSID.empty ()              &&
-           !SSID_string.empty ()                       &&
-           ACE_OS::strcmp (configuration_->SSID.c_str (),
-                           SSID_string.c_str ())) &&
-          configuration_->autoAssociate)
+      if (!SSID_string.empty ()                       &&
+          ACE_OS::strcmp (configuration_->SSID.c_str (),
+                          SSID_string.c_str ()))
       {
         inherited::change (NET_WLAN_MONITOR_STATE_DISCONNECT);
         break;
@@ -1424,20 +1446,58 @@ associate:
       ACE_ASSERT (configuration_);
       ACE_ASSERT (!configuration_->SSID.empty ());
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      struct _GUID interface_identifier =
+#else
+      std::string interface_identifier =
+#endif // ACE_WIN32 || ACE_WIN64
+        configuration_->interfaceIdentifier;
+      //struct ether_addr ap_mac_address_s;
+      //ACE_OS::memset (&ap_mac_address_s, 0, sizeof (struct ether_addr));
+      // check cache whether the configured ESSID (if any) is known
+      { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
+        Net_WLAN_AccessPointCacheConstIterator_t iterator =
+          SSIDCache_.find (configuration_->SSID);
+        ACE_ASSERT (iterator != SSIDCache_.end ());
+        interface_identifier = (*iterator).second.first;
+        //ap_mac_address_s = (*iterator).second.second.linkLayerAddress;
+      } // end lock scope
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+      if (unlikely (!InlineIsEqualGUID (interface_identifier, configuration_->interfaceIdentifier)))
+        ACE_DEBUG ((LM_WARNING,
+                    ACE_TEXT ("found SSID (was: %s) on interface \"%s\" (configured interface was: \"%s\"), continuing\n"),
+                    ACE_TEXT (configuration_->SSID.c_str ()),
+                    ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ()),
+                    ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ())));
+#else
+      if (unlikely (ACE_OS::strcmp (interface_identifier.c_str (),
+                                    configuration_->interfaceIdentifier.c_str ())))
+        ACE_DEBUG ((LM_WARNING,
+                    ACE_TEXT ("found SSID (was: %s) on interface \"%s\" (configured interface was: \"%s\"), continuing\n"),
+                    ACE_TEXT (configuration_->SSID.c_str ()),
+                    ACE_TEXT (interface_identifier.c_str ()),
+                    ACE_TEXT (configuration_->interfaceIdentifier.c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
+
       std::string SSID_string = this->SSID ();
-      if ((!configuration_->SSID.empty ()              &&
-           !SSID_string.empty ()                       &&
-           ACE_OS::strcmp (configuration_->SSID.c_str (),
-                           SSID_string.c_str ())) &&
-          configuration_->autoAssociate)
+      if (unlikely (!SSID_string.empty ()                       &&
+                    ACE_OS::strcmp (configuration_->SSID.c_str (),
+                                    SSID_string.c_str ())))
       {
         inherited::change (NET_WLAN_MONITOR_STATE_DISCONNECT);
         break;
       } // end IF
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-      // *NOTE*: the Win32 API currently does not let developers hook into the
-      //         DHCP handshake/addressing mechanism at this time
+      try {
+        do_associate (interface_identifier,
+                      configuration_->SSID);
+      } catch (...) {
+        ACE_DEBUG ((LM_ERROR,
+                    ACE_TEXT ("caught exception in Net_WLAN_IManager::do_associate(\"%s\",%s), continuing\n"),
+                    ACE_TEXT (Net_Common_Tools::interfaceToString (interface_identifier).c_str ()),
+                    ACE_TEXT (configuration_->SSID.c_str ())));
+      }
 #elif defined (ACE_LINUX)
       // *NOTE*: query the interface-local DHCP server on the current IP address
       //         lease (if any), and/or request an address for the configured
@@ -1588,6 +1648,9 @@ associate:
       break;
     case NET_WLAN_MONITOR_STATE_SCANNED:
     {
+      std::string SSID_string = this->SSID ();
+      enum Net_WLAN_MonitorState next_state_e =
+          NET_WLAN_MONITOR_STATE_INVALID;
       // *NOTE*: scans complete asynchronously; change state only when actually
       //         in 'scan mode'
       enum Net_WLAN_MonitorState previous_state_e =
@@ -1599,32 +1662,34 @@ associate:
 #else
       { ACE_GUARD (ACE_MT_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
 #endif // ACE_WIN32 || ACE_WIN64
-        previous_state_e = inherited::state_;
+        previous_state_e =
+          (SSID_string.empty () ? inherited::state_
+                                : NET_WLAN_MONITOR_STATE_CONNECTED);
         inherited::state_ = NET_WLAN_MONITOR_STATE_SCANNED;
       } // end lock scope
 
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
       // sanity check(s)
       ACE_ASSERT (configuration_);
 
       try {
         onScanComplete (configuration_->interfaceIdentifier);
       } catch (...) {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-        ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onScanComplete(\"%s\"), continuing\n"),
-                    ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ())));
-#else
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("caught exception in Net_WLAN_IMonitorCB::onScanComplete(\"%s\"), continuing\n"),
                     ACE_TEXT (configuration_->interfaceIdentifier.c_str ())));
-#endif // ACE_WIN32 || ACE_WIN64
       }
+#endif // ACE_WIN32 || ACE_WIN64
 
       bool done = true;
       switch (previous_state_e)
       {
         case NET_WLAN_MONITOR_STATE_IDLE:
         case NET_WLAN_MONITOR_STATE_SCAN:
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+        case NET_WLAN_MONITOR_STATE_SCANNED: // *TODO*: remove ASAP
+#endif // ACE_WIN32 || ACE_WIN64
         {
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
@@ -1636,8 +1701,8 @@ associate:
                         ACE_TEXT ("failed to ACE_OS::sleep(%#T): \"%m\", continuing\n"),
                         &scan_interval));
 
-          inherited::change (NET_WLAN_MONITOR_STATE_IDLE);
 #endif // ACE_WIN32 || ACE_WIN64
+          inherited::change (NET_WLAN_MONITOR_STATE_IDLE);
           break;
         }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1660,10 +1725,20 @@ associate:
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
         case NET_WLAN_MONITOR_STATE_AUTHENTICATED:
+          next_state_e = NET_WLAN_MONITOR_STATE_DEAUTHENTICATE;
+          // *WARNING*: falls through
         case NET_WLAN_MONITOR_STATE_ASSOCIATED:
+          next_state_e =
+            ((previous_state_e == NET_WLAN_MONITOR_STATE_AUTHENTICATED) ? NET_WLAN_MONITOR_STATE_DEAUTHENTICATE
+                                                                        : NET_WLAN_MONITOR_STATE_DISASSOCIATE);
+          // *WARNING*: falls through
 #endif // ACE_WIN32 || ACE_WIN64
         case NET_WLAN_MONITOR_STATE_CONNECTED:
         {
+          next_state_e =
+            ((previous_state_e == NET_WLAN_MONITOR_STATE_CONNECTED) ? NET_WLAN_MONITOR_STATE_DISCONNECT
+                                                                    : next_state_e);
+
           // reset state
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
           { ACE_GUARD (ACE_NULL_SYNCH::MUTEX, aGuard, *(inherited::stateLock_));
@@ -1673,14 +1748,13 @@ associate:
             inherited::state_ = previous_state_e;
           } // end lock scope
 
-          std::string SSID_string = this->SSID ();
-          if (unlikely ((!configuration_->SSID.empty () &&
-                         SSID_string.empty ())                 || // configured, not associated
-                        (!configuration_->SSID.empty () &&
-                         !SSID_string.empty ()          &&
-                         ACE_OS::strcmp (configuration_->SSID.c_str (),
-                                         SSID_string.c_str ())))) // configured, associated to different SSID
+          ACE_ASSERT (!SSID_string.empty ());
+          if (unlikely (!configuration_->SSID.empty () &&
+                        ACE_OS::strcmp (configuration_->SSID.c_str (),
+                                        SSID_string.c_str ()))) // configured, associated to different SSID
             done = false;
+          else
+            inherited::change (NET_WLAN_MONITOR_STATE_IDLE);
           break;
         }
         default:
@@ -1695,25 +1769,22 @@ associate:
       if (done)
         break;
 
-      // (try to) auto-associate ?
+      // configured, associated to different SSID
+      ACE_ASSERT (!configuration_->SSID.empty ());
+      // --> check cache whether the configured ESSID is within reach
       bool essid_is_cached = false;
       { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
-        // check cache whether the configured ESSID (if any) is known
         Net_WLAN_AccessPointCacheConstIterator_t iterator =
             SSIDCache_.find (configuration_->SSID);
         essid_is_cached = (iterator != SSIDCache_.end ());
       } // end lock scope
-      if (unlikely (!configuration_->SSID.empty () && // configured
-                    essid_is_cached                && // configured SSID known (i.e. cached)
-                    configuration_->autoAssociate))   // auto-associate enabled
-      {
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-        inherited::change (NET_WLAN_MONITOR_STATE_CONNECT);
-#else
-        inherited::change (NET_WLAN_MONITOR_STATE_AUTHENTICATE);
-#endif // ACE_WIN32 || ACE_WIN64
-      } // end IF
 
+      // (try to) auto-associate ?
+      if (unlikely (essid_is_cached              && // configured SSID within reach
+                    configuration_->autoAssociate)) // auto-associate enabled
+        inherited::change (next_state_e);
+      else
+        inherited::change (NET_WLAN_MONITOR_STATE_IDLE);
       break;
     }
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -1876,7 +1947,16 @@ continue_3:
       if (unlikely (isFirstConnect_))
         isFirstConnect_ = false;
 
-      inherited::change (NET_WLAN_MONITOR_STATE_IDLE);
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#if defined (WLANAPI_USE)
+      ACE_ASSERT (configuration_);
+
+      if (unlikely (configuration_->enableBackgroundScans))
+        inherited::change (NET_WLAN_MONITOR_STATE_SCAN);
+      else
+#endif // WLANAPI_USE
+#endif // ACE_WIN32 || ACE_WIN64
+        inherited::change (NET_WLAN_MONITOR_STATE_IDLE);
 
       break;
     }
@@ -1909,29 +1989,33 @@ Net_WLAN_Monitor_Base_T<AddressType,
   // *NOTE*: the timer is restarted automatically in the callback handler
   //         --> do not delay
   ACE_Time_Value elapsed = COMMON_TIME_NOW;
-  try {
-    scanTimerId_ =
-      timerInterface_->schedule_timer (&timerHandler_,
-                                       NULL, // no ACT
-                                       delay_in,
-                                       ACE_Time_Value::zero);
-  } catch (...) {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("caught exception in Common_ITimer_T::schedule_timer(%T#), continuing\n"),
-                &delay_in));
-  }
-  if (unlikely (scanTimerId_ == -1))
-  {
-    ACE_DEBUG ((LM_ERROR,
-                ACE_TEXT ("failed to Common_ITimer_T::schedule_timer(%T#): \"%m\", continuing\n"),
-                &delay_in));
-    return false;
-  } // end IF
+  // *NOTE*: the timer handler might trigger before scanTimerId_ has been set
+  //         --> grab the lock
+  { ACE_GUARD_RETURN (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_, result);
+    try {
+      scanTimerId_ =
+        timerInterface_->schedule_timer (&timerHandler_,
+                                         NULL, // no ACT
+                                         delay_in,
+                                         ACE_Time_Value::zero);
+    } catch (...) {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("caught exception in Common_ITimer_T::schedule_timer(%T#), continuing\n"),
+                  &delay_in));
+    }
+    if (unlikely (scanTimerId_ == -1))
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("failed to Common_ITimer_T::schedule_timer(%T#): \"%m\", continuing\n"),
+                  &delay_in));
+      return false;
+    } // end IF
 #if defined (_DEBUG)
-  ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("started WLAN scan timer (id: %d)\n"),
-              scanTimerId_));
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT ("started WLAN scan timer (id: %d)\n"),
+                scanTimerId_));
 #endif // _DEBUG
+  } // end lock scope
 
   return true;
 }
@@ -1949,10 +2033,10 @@ Net_WLAN_Monitor_Base_T<AddressType,
   ACE_ASSERT (scanTimerId_ != -1);
 
   int result_2 = -1;
-  const void* act_p = NULL;
+  const void* ACT_p = NULL;
   try {
     result_2 = timerInterface_->cancel_timer (scanTimerId_,
-                                              &act_p,
+                                              &ACT_p,
                                               1);
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
@@ -1966,11 +2050,51 @@ Net_WLAN_Monitor_Base_T<AddressType,
   else
     result = true;
 
+#if defined (_DEBUG)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("cancelled WLAN scan timer (id was: %d)\n"),
+              scanTimerId_));
+#endif // _DEBUG
   scanTimerId_ = -1;
-  ACE_UNUSED_ARG (act_p);
+  ACE_UNUSED_ARG (ACT_p);
 
   return result;
 }
+
+template <typename AddressType,
+          typename ConfigurationType>
+void
+Net_WLAN_Monitor_Base_T<AddressType,
+                        ConfigurationType>::handle (const void* ACT_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::handle"));
+
+  // *NOTE*: the timer handler might trigger before scanTimerId_ has been set
+  //         --> grab the lock
+  { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
+    if (likely (scanTimerId_ != -1))
+      scanTimerId_ = -1;
+  } // end lock scope
+
+#if COMMON_OS_WIN32_TARGET_PLATFORM(0x0501) // _WIN32_WINNT_WINXP
+  // *NOTE*: the WinXP SP2/SP3 WLAN API does not report completed scans (see
+  //         also: https://docs.microsoft.com/en-us/windows/desktop/api/wlanapi/nf-wlanapi-wlanscan)
+  //         so the scan timer also serves as timeout after which results are
+  //         retrieved 'manually'
+  ACE_ASSERT (configuration_);
+
+  try {
+    this->onScanComplete (configuration_->interfaceIdentifier);
+  } catch (...) {
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("\"%s\": caught exception in Net_WLAN_IMonitorCB::onScanComplete(), continuing\n"),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ())));
+  }
+#else
+  inherited::change (NET_WLAN_MONITOR_STATE_SCAN);
+#endif // _WIN32_WINNT_WINXP
+}
+
 #endif // ACE_WIN32 || ACE_WIN64
 
 //////////////////////////////////////////
@@ -2202,25 +2326,23 @@ Net_WLAN_Monitor_Base_T<AddressType,
     // check cache whether the configured ESSID (if any) is known
     Net_WLAN_AccessPointCacheConstIterator_t iterator =
       SSIDCache_.find (SSID_in);
-    ACE_ASSERT (iterator != SSIDCache_.end ());
-    access_point_state_s = (*iterator).second.second;
+    if (iterator != SSIDCache_.end ())
+      access_point_state_s = (*iterator).second.second;
+    else
+      access_point_state_s.linkLayerAddress =
+        Net_WLAN_Tools::getAccessPointAddress (clientHandle_,
+                                               interfaceIdentifier_in,
+                                               SSID_in);
   } // end lock scope
 
-  if (success_in)
-  {
-    if (!ACE_OS::strcmp (SSID_in.c_str (),
-                         configuration_->SSID.c_str ()) &&
-        !isFirstConnect_)
-      inherited::change (NET_WLAN_MONITOR_STATE_CONNECTED);
-  } // end IF
-  else
+  if (!success_in)
   {
     if (unlikely (retries_ == NET_WLAN_MONITOR_AP_CONNECTION_RETRIES))
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to connect to %s (interface was: \"%s\", SSID was: %s), giving up\n"),
-                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&access_point_state_s.linkLayerAddress)).c_str ()),
+                  ACE_TEXT ("\"%s\": failed to connect to %s (SSID was: %s), giving up\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+                  ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&access_point_state_s.linkLayerAddress)).c_str ()),
                   ACE_TEXT (SSID_in.c_str ())));
       retries_ = 0;
       inherited::change (NET_WLAN_MONITOR_STATE_SCANNED);
@@ -2228,7 +2350,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
     else
     {
       ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to connect to %s (interface was: \"%s\", SSID was: %s), retrying...\n"),
+                  ACE_TEXT ("\"%s\": failed to connect to %s (SSID was: %s), retrying...\n"),
                   ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<unsigned char*> (&access_point_state_s.linkLayerAddress)).c_str ()),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
                   ACE_TEXT (SSID_in.c_str ())));
@@ -2260,31 +2382,58 @@ Net_WLAN_Monitor_Base_T<AddressType,
     } // end FOR
   } // end lock scope
 
+#if defined (_DEBUG)
   // sanity check(s)
-  ACE_ASSERT (configuration_);
   if (!success_in)
     return;
 
-  // --> connected successfully
-  // *NOTE*: the address type isn't specified at this level of abstraction
-  //         --> peer address resolution must be notified by super-class(es)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  if (unlikely (!Net_Common_Tools::interfaceToIPAddress_2 (interfaceIdentifier_in,
+                                                           localSAP_,
+                                                           peerSAP_)))
+#else
+  if (unlikely (!Net_Common_Tools::interfaceToIPAddress (interfaceIdentifier_in,
+                                                         localSAP_,
+                                                         peerSAP_)))
+#endif // ACE_WIN32 || ACE_WIN64
+  {
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
+                ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ())));
+#else
+    ACE_DEBUG ((LM_ERROR,
+                ACE_TEXT ("failed to Net_Common_Tools::interfaceToIPAddress(\"%s\"), returning\n"),
+                ACE_TEXT (interfaceIdentifier_in.c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
+    return;
+  } // end IF
 
-//#if defined (ACE_WIN32) || defined (ACE_WIN64)
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("\"%s\": connected to access point (SSID: %s): %s <---> %s\n"),
-//              //ACE_TEXT (Net_Common_Tools::WLANInterfaceToString (clientHandle_, interfaceIdentifier_in).c_str ()),
-//              ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
-//              ACE_TEXT (SSID_in.c_str ()),
-//              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_).c_str ()),
-//              ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_).c_str ())));
-//#else
-//  ACE_DEBUG ((LM_DEBUG,
-//              ACE_TEXT ("\"%s\": connected to access point (SSID: %s): %s <---> %s\n"),
-//              ACE_TEXT (interfaceIdentifier_in.c_str ()),
-//              ACE_TEXT (SSID_in.c_str ()),
-//              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_).c_str ()),
-//              ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_).c_str ())));
-//#endif // ACE_WIN32 || ACE_WIN64
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("\"%s\": (MAC: %s) connected to access point (MAC: %s; SSID: %s): %s <---> %s\n"),
+              ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
+              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&Net_Common_Tools::interfaceToLinkLayerAddress_2 (interfaceIdentifier_in)), NET_LINKLAYER_802_11).c_str ()),
+              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&access_point_state_s.linkLayerAddress.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
+              ACE_TEXT (SSID_in.c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_).c_str ())));
+#else
+  ACE_DEBUG ((LM_DEBUG,
+              ACE_TEXT ("\"%s\": (MAC: %s) connected to access point (MAC: %s; SSID: %s): %s <---> %s\n"),
+              ACE_TEXT (interfaceIdentifier_in.c_str ()),
+              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in)), NET_LINKLAYER_802_11).c_str ()),
+              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&access_point_state_s.linkLayerAddress.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
+              ACE_TEXT (SSID_in.c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_).c_str ()),
+              ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_).c_str ())));
+#endif // ACE_WIN32 || ACE_WIN64
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+continue_:
+  ;
+#endif // ACE_WIN32 || ACE_WIN64
+#endif // _DEBUG
 }
 template <typename AddressType,
           typename ConfigurationType
@@ -2520,12 +2669,6 @@ Net_WLAN_Monitor_Base_T<AddressType,
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::onScanComplete"));
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  // step0: restart scan timer ?
-  if (likely (scanTimerId_ == -1))
-    if (unlikely (!startScanTimer (ACE_Time_Value (NET_WLAN_MONITOR_WIN32_SCAN_INTERVAL, 0))))
-      ACE_DEBUG ((LM_ERROR,
-                  ACE_TEXT ("failed to start scan timer, continuing\n")));
-
   // step1: update the cache
   Net_WLAN_AccessPointCacheConstIterator_t iterator;
 #if defined (_DEBUG)
@@ -2573,7 +2716,7 @@ Net_WLAN_Monitor_Base_T<AddressType,
        ++iterator_2)
     if (current_ssids.find (*iterator_2) == current_ssids.end ())
       ACE_DEBUG ((LM_DEBUG,
-                  ACE_TEXT ("\"%s\": lost contact to (E)SSID (was: %s)...\n"),
+                  ACE_TEXT ("\"%s\": lost contact to (E)SSID (was: %s)\n"),
                   ACE_TEXT (Net_Common_Tools::interfaceToString (configuration_->interfaceIdentifier).c_str ()),
                   ACE_TEXT ((*iterator_2).c_str ())));
 #endif // _DEBUG
@@ -2598,4 +2741,8 @@ Net_WLAN_Monitor_Base_T<AddressType,
       }
     } // end FOR
   } // end lock scope
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+  inherited::change (NET_WLAN_MONITOR_STATE_SCANNED);
+#endif // ACE_WIN32 || ACE_WIN64
 }

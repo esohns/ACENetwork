@@ -144,9 +144,10 @@ typedef Net_WLAN_IMonitor_T<ACE_INET_Addr,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
-typedef Net_WLAN_InetMonitor_T<struct Net_WLAN_MonitorConfiguration,
-                               NET_WLAN_MONITOR_API_WLANAPI,
-                               struct Net_UserData> Net_WLAN_InetWlanAPIMonitor_t;
+typedef Net_WLAN_Monitor_T<ACE_INET_Addr,
+                           struct Net_WLAN_MonitorConfiguration,
+                           NET_WLAN_MONITOR_API_WLANAPI,
+                           struct Net_UserData> Net_WLAN_InetWlanAPIMonitor_t;
 typedef ACE_Singleton<Net_WLAN_InetWlanAPIMonitor_t,
                       ACE_SYNCH_MUTEX> NET_WLAN_INETWLANAPIMONITOR_SINGLETON;
 #endif // WLANAPI_SUPPORT

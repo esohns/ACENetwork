@@ -93,6 +93,7 @@ class ClientServer_Module_ProtocolHandler
   ACE_UNIMPLEMENTED_FUNC (ClientServer_Module_ProtocolHandler& operator= (const ClientServer_Module_ProtocolHandler&))
 
   // implement Common_ITimerHandler
+  inline virtual const long get () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
   virtual void handle (const void*); // asynchronous completion token
 
   // timer

@@ -30,14 +30,57 @@
 // forward declarations
 struct Net_WLAN_Profile_ParserContext;
 
-class Net_WLAN_Profile_XML_Handler
+//class Net_WLAN_Profile_XML_Handler
+// : public Common_XML_Handler_Base_T<struct Net_WLAN_Profile_ParserContext>
+//{
+//  typedef Common_XML_Handler_Base_T<struct Net_WLAN_Profile_ParserContext> inherited;
+//
+// public:
+//  Net_WLAN_Profile_XML_Handler (struct Net_WLAN_Profile_ParserContext*); // parser context handle
+//  inline virtual ~Net_WLAN_Profile_XML_Handler () {}
+//
+//  // implement (part of) ACEXML_ContentHandler
+//  virtual void characters (const ACEXML_Char*, // chars
+//                           size_t,             // start
+//                           size_t);            // length
+//  virtual void endElement (const ACEXML_Char*,  // namespace uri
+//                           const ACEXML_Char*,  // localname
+//                           const ACEXML_Char*); // qname
+//  virtual void startElement (const ACEXML_Char*,  // namespace uri
+//                             const ACEXML_Char*,  // localname
+//                             const ACEXML_Char*,  // qname
+//                             ACEXML_Attributes*); // attrs
+//
+//  // implement ACEXML_ErrorHandler
+//  virtual void error (ACEXML_SAXParseException&); // exception
+//  virtual void fatalError (ACEXML_SAXParseException&); // exception
+//  virtual void warning (ACEXML_SAXParseException&); // exception
+//
+// private:
+//  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Profile_XML_Handler ());
+//  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Profile_XML_Handler (const Net_WLAN_Profile_XML_Handler&));
+//  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Profile_XML_Handler& operator= (const Net_WLAN_Profile_XML_Handler&));
+//
+//  // helper methods
+//  unsigned char hexToValue (unsigned char);
+//  std::string hexToString (const std::string&);
+//
+//  bool                                   inHex_;
+//  bool                                   inSSID_;
+//  bool                                   inSSIDConfig_;
+//  struct Net_WLAN_Profile_ParserContext* parserContextHandle_;
+//};
+
+//////////////////////////////////////////
+
+class Net_WLAN_Profile_XML_ListHandler
  : public Common_XML_Handler_Base_T<struct Net_WLAN_Profile_ParserContext>
 {
   typedef Common_XML_Handler_Base_T<struct Net_WLAN_Profile_ParserContext> inherited;
 
  public:
-  Net_WLAN_Profile_XML_Handler (struct Net_WLAN_Profile_ParserContext*); // parser context handle
-  inline virtual ~Net_WLAN_Profile_XML_Handler () {}
+  Net_WLAN_Profile_XML_ListHandler (struct Net_WLAN_Profile_ParserContext*); // parser context handle
+  inline virtual ~Net_WLAN_Profile_XML_ListHandler () {}
 
   // implement (part of) ACEXML_ContentHandler
   virtual void characters (const ACEXML_Char*, // chars
@@ -57,9 +100,9 @@ class Net_WLAN_Profile_XML_Handler
   virtual void warning (ACEXML_SAXParseException&); // exception
 
  private:
-  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Profile_XML_Handler ());
-  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Profile_XML_Handler (const Net_WLAN_Profile_XML_Handler&));
-  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Profile_XML_Handler& operator= (const Net_WLAN_Profile_XML_Handler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Profile_XML_ListHandler ());
+  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Profile_XML_ListHandler (const Net_WLAN_Profile_XML_ListHandler&));
+  ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Profile_XML_ListHandler& operator= (const Net_WLAN_Profile_XML_ListHandler&));
 
   // helper methods
   unsigned char hexToValue (unsigned char);

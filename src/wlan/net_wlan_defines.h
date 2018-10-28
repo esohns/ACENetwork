@@ -43,7 +43,7 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #define NET_WLAN_MONITOR_DEFAULT_API                                      NET_WLAN_MONITOR_API_WLANAPI
 // *TODO*: see timeout below
-#define NET_WLAN_MONITOR_WIN32_SCAN_INTERVAL                              5 // s
+#define NET_WLAN_MONITOR_WIN32_SCAN_INTERVAL                              NET_WLAN_MONITOR_WIN32_SCAN_SSID_TIMEOUT // s
 #else
 #define NET_WLAN_MONITOR_DEFAULT_API                                      NET_WLAN_MONITOR_API_NL80211
 #define NET_WLAN_MONITOR_UNIX_SCAN_INTERVAL                               3 // s
@@ -51,7 +51,7 @@
 #define NET_WLAN_MONITOR_SCAN_SSID_RETRIES                                3
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-// *NOTE*: this is a 'Windows-Logo' requirement
+// *NOTE*: this is a 'Windows-Logo' requirement (see also: https://docs.microsoft.com/en-us/windows/desktop/api/wlanapi/nf-wlanapi-wlanscan)
 #define NET_WLAN_MONITOR_WIN32_SCAN_SSID_TIMEOUT                          4 // seconds
 
 #define NET_WLAN_MONITOR_WIN32_DEFAULT_AUTOCONF                           true
@@ -60,6 +60,9 @@
 #define NET_WLAN_MONITOR_WIN32_DEFAULT_MEDIASTREAMINGMODE                 false
 
 // XML WLAN profile
+#define NET_WLAN_PROFILE_TEMPLATE_FILENAME                                "wlanapi_profile_template.xml"
+#define NET_WLAN_PROFILE_SSIDCONFIG_SSID_XPATH                            L"//SSIDConfig/SSID[1]/name"
+
 #define NET_WLAN_PROFILE_HEX_ELEMENT_STRING                               "hex"
 #define NET_WLAN_PROFILE_SSIDCONFIG_ELEMENT_STRING                        "SSIDConfig"
 #define NET_WLAN_PROFILE_SSID_ELEMENT_STRING                              "SSID"
