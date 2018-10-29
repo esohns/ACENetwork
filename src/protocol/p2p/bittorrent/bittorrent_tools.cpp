@@ -35,7 +35,7 @@
 #include "net_macros.h"
 
 #if defined (HAVE_CONFIG_H)
-#include "libACENetwork_config.h"
+#include "ACENetwork_config.h"
 #endif // HAVE_CONFIG_H
 
 #include "bittorrent_bencoding_scanner.h"
@@ -333,7 +333,7 @@ BitTorrent_Tools::generatePeerId ()
 #if defined (HAVE_CONFIG_H)
   // parse library version
   library_version =
-      ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_VERSION);
+      ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION);
   std::string regex_string =
     ACE_TEXT_ALWAYS_CHAR ("^([[:digit:]]+).([[:digit:]]+).([[:digit:]]+)(.+)?$");
   std::regex regex (regex_string);

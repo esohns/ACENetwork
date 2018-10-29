@@ -2201,8 +2201,6 @@ Net_Common_Tools::dump (const std::string& interfaceIdentifier_in)
   // sanity check(s)
   ACE_ASSERT (!interfaceIdentifier_in.empty ());
 
-#define MALLOC(x) HeapAlloc(GetProcessHeap(), 0, (x))
-#define FREE(x) HeapFree(GetProcessHeap(), 0, (x))
   struct _IP_ADAPTER_INFO* adapter_info_p = NULL, *adapter_info_2 = NULL;
   ULONG result_2 = 0;
   ULONG buffer_length_u = sizeof (struct _IP_ADAPTER_INFO);

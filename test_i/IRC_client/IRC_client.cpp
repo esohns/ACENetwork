@@ -58,7 +58,7 @@ using namespace std;
 #endif // ACE_WIN32 || ACE_WIN32
 
 #if defined (HAVE_CONFIG_H)
-#include "libCommon_config.h"
+#include "Common_config.h"
 #endif // HAVE_CONFIG_H
 
 //#include "common_file_tools.h"
@@ -71,13 +71,13 @@ using namespace std;
 #include "common_timer_tools.h"
 
 #if defined (HAVE_CONFIG_H)
-#include "libACEStream_config.h"
+#include "ACEStream_config.h"
 #endif // HAVE_CONFIG_H
 
 #include "stream_cachedallocatorheap.h"
 
 #if defined (HAVE_CONFIG_H)
-#include "libACENetwork_config.h"
+#include "ACENetwork_config.h"
 #endif // HAVE_CONFIG_H
 
 #include "net_defines.h"

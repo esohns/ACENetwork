@@ -32,7 +32,7 @@
 #include "common_tools.h"
 
 #ifdef HAVE_CONFIG_H
-#include "libACENetwork_config.h"
+#include "ACENetwork_config.h"
 #endif
 
 #include "net_common.h"

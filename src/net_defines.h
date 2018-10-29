@@ -151,9 +151,9 @@
 #endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
-#define NET_CHECK_VERSION(major,minor,micro)                                                                              \
-    ((ACENETWORK_VERSION_MAJOR > major)                                                                                || \
-     ((ACENETWORK_VERSION_MAJOR == major) && (ACENETWORK_VERSION_MINOR > minor))                                       || \
-     ((ACENETWORK_VERSION_MAJOR == major) && (ACENETWORK_VERSION_MINOR == minor) && (ACENETWORK_VERSION_MICRO >= micro)))
+// modules
+#define NET_MODULE_CLIENTSERVER_DIRECTORY_STRING             "client_server"
+#define NET_MODULE_PROTOCOL_DIRECTORY_STRING                 "protocol"
+#define NET_MODULE_WLAN_DIRECTORY_STRING                     "wlan"
 
 #endif

@@ -37,7 +37,7 @@
 
 // Library Header Files
 #if defined (HAVE_CONFIG_H)
-#include "libCommon_config.h"
+#include "Common_config.h"
 #endif // HAVE_CONFIG_H
 
 #include "common.h"
@@ -45,7 +45,7 @@
 #include "common_pragmas.h"
 
 #if defined (HAVE_CONFIG_H)
-#include "libACEStream_config.h"
+#include "ACEStream_config.h"
 #endif // HAVE_CONFIG_H
 
 #include "stream_common.h"
@@ -53,7 +53,7 @@
 
 // Local Header Files
 #if defined (HAVE_CONFIG_H)
-#include "libACENetwork_config.h"
+#include "ACENetwork_config.h"
 #endif // HAVE_CONFIG_H
 
 #include "net_common.h"

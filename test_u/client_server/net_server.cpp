@@ -45,7 +45,7 @@
 #include "ace/Version.h"
 
 #if defined (HAVE_CONFIG_H)
-#include "libCommon_config.h"
+#include "Common_config.h"
 #endif // HAVE_CONFIG_H
 
 //#include "common_file_tools.h"
@@ -68,7 +68,7 @@
 #endif // GUI_SUPPORT
 
 #if defined (HAVE_CONFIG_H)
-#include "libACEStream_config.h"
+#include "ACEStream_config.h"
 #endif // HAVE_CONFIG_H
 
 #include "stream_allocatorheap.h"
@@ -76,7 +76,7 @@
 #include "stream_misc_defines.h"
 
 #if defined (HAVE_CONFIG_H)
-#include "libACENetwork_config.h"
+#include "ACENetwork_config.h"
 #endif // HAVE_CONFIG_H
 
 #include "net_common_tools.h"
@@ -1046,9 +1046,9 @@ do_printVersion (const std::string& programName_in)
   std::cout << ACE_TEXT ("libraries: ")
             << std::endl
 #ifdef HAVE_CONFIG_H
-            << ACE_TEXT (ACENETWORK_PACKAGE_NAME)
+            << ACE_TEXT (ACENetwork_PACKAGE_NAME)
             << ACE_TEXT (": ")
-            << ACE_TEXT (ACENETWORK_PACKAGE_VERSION)
+            << ACE_TEXT (ACENetwork_PACKAGE_VERSION)
             << std::endl
 #endif
   ;
@@ -1249,7 +1249,7 @@ ACE_TMAIN (int argc_in,
   std::string log_file_name;
   if (log_to_file)
     log_file_name =
-        Net_Server_Common_Tools::getNextLogFileName (ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_NAME),
+        Net_Server_Common_Tools::getNextLogFileName (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
                                                      ACE_TEXT_ALWAYS_CHAR (NET_SERVER_LOG_FILENAME_PREFIX));
   if (!Common_Log_Tools::initializeLogging (ACE::basename (argv_in[0]),    // program name
                                             log_file_name,                 // log file name

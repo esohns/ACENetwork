@@ -12,5 +12,4 @@ include ("${ACENetwork_CMAKE_DIR}/ACENetworkTargets.cmake")
 endif ()
 
 # These are IMPORTED targets created by ACENetworkTargets.cmake
-set (ACENetwork_LIBRARIES libACENetwork)
-
+set (ACENetwork_LIBRARIES ACENetwork)

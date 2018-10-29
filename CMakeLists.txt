@@ -1,12 +1,13 @@
-﻿include (${CMAKE_CURRENT_SOURCE_DIR}/../libCommon/scripts/PreToolChain.cmake)
-include (${CMAKE_CURRENT_SOURCE_DIR}/../libCommon/scripts/SetToolChain.cmake)
-include (${CMAKE_CURRENT_SOURCE_DIR}/../libCommon/scripts/ToolChain.cmake)
+﻿include (${CMAKE_CURRENT_SOURCE_DIR}/../Common/scripts/PreToolChain.cmake)
+include (${CMAKE_CURRENT_SOURCE_DIR}/../Common/scripts/SetToolChain.cmake)
+include (${CMAKE_CURRENT_SOURCE_DIR}/../Common/scripts/ToolChain.cmake)
 # *NOTE*: or use the cmake.exe '-T' option instead
-include (${CMAKE_CURRENT_SOURCE_DIR}/../libCommon/scripts/SetTargetPlatform.cmake)
-include (${CMAKE_CURRENT_SOURCE_DIR}/../libCommon/scripts/TargetPlatform.cmake)
+include (${CMAKE_CURRENT_SOURCE_DIR}/../Common/scripts/SetTargetPlatform.cmake)
+include (${CMAKE_CURRENT_SOURCE_DIR}/../Common/scripts/TargetPlatform.cmake)
 
-include (${CMAKE_CURRENT_SOURCE_DIR}/../libCommon/scripts/Configuration.cmake)
-include (${CMAKE_CURRENT_SOURCE_DIR}/../libCommon/scripts/Macros.cmake)
+include (${CMAKE_CURRENT_SOURCE_DIR}/../Common/scripts/Configuration.cmake)
+include (${CMAKE_CURRENT_SOURCE_DIR}/../Common/scripts/Macros.cmake)
+include (${CMAKE_CURRENT_SOURCE_DIR}/scripts/VersionConfig.cmake)
 
 cmake_minimum_required (VERSION 2.8)
 
@@ -191,7 +192,7 @@ configure_file (${PROJECT_NAME}ConfigVersion.cmake.in
 
 set (PACKAGE ${PROJECT_NAME})
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/config.h.cmake.in
-                ${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}_config.h
+                ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_config.h
                 @ONLY)
 #add_custom_target (${PROJECT_NAME}_config)
 #set_target_properties (${PROJECT_NAME}_config PROPERTIES

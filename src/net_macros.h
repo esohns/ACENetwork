@@ -56,8 +56,8 @@
   variable += ACE_TEXT_ALWAYS_CHAR (\\" with \\"); variable += Common_Tools::compilerName ();                                   \
   variable += ACE_TEXT_ALWAYS_CHAR (\\" \\"); variable += Common_Tools::compilerVersion ();                                     \
   variable += ACE_TEXT_ALWAYS_CHAR (\\" against ACE \\"); variable += Common_Tools::compiledVersion_ACE ();                     \
-  variable += ACE_TEXT_ALWAYS_CHAR (\\" , libCommon \\"); variable += ACE_TEXT_ALWAYS_CHAR (Common_PACKAGE_VERSION_FULL);       \
-  variable += ACE_TEXT_ALWAYS_CHAR (\\" , libACEStream \\"); variable += ACE_TEXT_ALWAYS_CHAR (ACEStream_PACKAGE_VERSION_FULL); \
-  variable += ACE_TEXT_ALWAYS_CHAR (\\" , libACENetwork \\"); variable += ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION_FULL);
+  variable += ACE_TEXT_ALWAYS_CHAR (\\" , Common \\"); variable += ACE_TEXT_ALWAYS_CHAR (Common_PACKAGE_VERSION_FULL);       \
+  variable += ACE_TEXT_ALWAYS_CHAR (\\" , ACEStream \\"); variable += ACE_TEXT_ALWAYS_CHAR (ACEStream_PACKAGE_VERSION_FULL); \
+  variable += ACE_TEXT_ALWAYS_CHAR (\\" , ACENetwork \\"); variable += ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION_FULL);
 
 #endif

@@ -44,10 +44,11 @@
 #include "common_xml_defines.h"
 
 #if defined (HAVE_CONFIG_H)
-#include "libACENetwork_config.h"
+#include "ACENetwork_config.h"
 #endif // HAVE_CONFIG_H
 
 #include "net_common_tools.h"
+#include "net_defines.h"
 #include "net_macros.h"
 
 #include "net_wlan_defines.h"
@@ -1488,7 +1489,8 @@ Net_WLAN_Tools::setProfile (HANDLE clientHandle_in,
   //ACE_ASSERT (node_p);
 
   profile_template_path =
-    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_NAME),
+    Common_File_Tools::getConfigurationDataDirectory (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME),
+                                                      ACE_TEXT_ALWAYS_CHAR (NET_MODULE_WLAN_DIRECTORY_STRING),
                                                       true);
   profile_template_path += ACE_DIRECTORY_SEPARATOR_STR;
   profile_template_path +=
