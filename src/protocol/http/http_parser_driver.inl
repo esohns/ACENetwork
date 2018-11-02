@@ -79,7 +79,7 @@ HTTP_ParserDriver_T<SessionMessageType>::HTTP_ParserDriver_T (const std::string&
 //    std::string filename_string;
 //    std::string package_name;
 //#ifdef HAVE_CONFIG_H
-//    package_name = ACE_TEXT_ALWAYS_CHAR (LIBACENETWORK_PACKAGE_NAME);
+//    package_name = ACE_TEXT_ALWAYS_CHAR (LIBACENetwork_PACKAGE_NAME);
 //#else
 //#error "package name not available, set HAVE_CONFIG_H"
 //#endif

@@ -1,3 +1,6 @@
+include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts/PreXMLImplementation.cmake)
+include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts/SetXMLImplementation.cmake)
+
 include (CMakeDependentOption)
 include (FeatureSummary)
 
@@ -179,6 +182,13 @@ if (UNIX)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src>)
 elseif (WIN32)
+ if (LIBXML2_SUPPORT)
+  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../libiconv-1.9.2-1/include>)
+  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                              $<BUILD_INTERFACE:${LIBXML2_INCLUDE_DIR}>)
+ endif (LIBXML2_SUPPORT)
+
  if (DEFINED ENV{ACE_ROOT})
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                               $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
@@ -195,8 +205,10 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/error>)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/timer>)
- target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml>)
+ if (LIBXML2_SUPPORT)
+  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml>)
+ endif (LIBXML2_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../ACEStream/cmake>)
@@ -337,7 +349,11 @@ if (UNIX)
 #  target_link_libraries (${PROJECT_NAME}_WLAN ${GSS_LIBRARY})
 # endif (DHCLIENT_SUPPORT)
 elseif (WIN32)
- target_link_libraries (${PROJECT_NAME}_WLAN msxml2.lib)
+ if (MSXML_SUPPORT)
+  target_link_libraries (${PROJECT_NAME}_WLAN msxml2.lib)
+ elseif (LIBXML2_SUPPORT)
+  target_link_libraries (${PROJECT_NAME}_WLAN ${LIBXML2_LIBRARY})
+ endif ()
 
 # target_link_libraries (${PROJECT_NAME}_WLAN CommonXML)
 endif ()

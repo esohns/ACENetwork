@@ -60,12 +60,15 @@
 #define NET_WLAN_MONITOR_WIN32_DEFAULT_MEDIASTREAMINGMODE                 false
 
 // XML WLAN profile
+#define NET_WLAN_PROFILE_NAMESPACE_PREFIX_STRING                          "WLANProfile"
+#define NET_WLAN_PROFILE_NAMESPACE_HREF_STRING                            "http://www.microsoft.com/networking/WLAN/profile/v1"
 #define NET_WLAN_PROFILE_TEMPLATE_FILENAME                                "wlanapi_profile_template.xml"
-#define NET_WLAN_PROFILE_SSIDCONFIG_SSID_XPATH                            L"//SSIDConfig/SSID[1]/name"
+#define NET_WLAN_PROFILE_WLANCONFIG_SSIDCONFIG_SSID_XPATH_STRING          "/WLANProfile/SSIDConfig/SSID"
 
 #define NET_WLAN_PROFILE_HEX_ELEMENT_STRING                               "hex"
 #define NET_WLAN_PROFILE_SSIDCONFIG_ELEMENT_STRING                        "SSIDConfig"
 #define NET_WLAN_PROFILE_SSID_ELEMENT_STRING                              "SSID"
+#define NET_WLAN_PROFILE_NAME_ELEMENT_STRING                              "name"
 #else
 #define NET_WLAN_MONITOR_ASSOCIATION_DEFAULT_RESULT_POLL_INTERVAL         50 // ms
 #define NET_WLAN_MONITOR_ASSOCIATION_DEFAULT_TIMEOUT                      3 // s

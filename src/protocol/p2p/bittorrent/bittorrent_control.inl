@@ -288,9 +288,9 @@ BitTorrent_Control_T<SessionAsynchType,
                                          session_state_p->trackerId));
 
 #if defined (HAVE_CONFIG_H)
-  user_agent  = ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_NAME);
+  user_agent  = ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME);
   user_agent += ACE_TEXT_ALWAYS_CHAR ("/");
-  user_agent += ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_VERSION);
+  user_agent += ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_VERSION);
 #endif // HAVE_CONFIG_H
   if (!user_agent.empty ())
     record_p->headers.insert (std::make_pair (ACE_TEXT_ALWAYS_CHAR (HTTP_PRT_HEADER_AGENT_STRING),

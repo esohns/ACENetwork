@@ -876,9 +876,9 @@ do_print_version (const std::string& programName_in)
   std::cout << ACE_TEXT ("libraries: ")
             << std::endl
 #if defined (HAVE_CONFIG_H)
-            << ACE_TEXT (ACENETWORK_PACKAGE_NAME)
+            << ACE_TEXT (ACENetwork_PACKAGE_NAME)
             << ACE_TEXT (": ")
-            << ACE_TEXT (ACENETWORK_PACKAGE_VERSION)
+            << ACE_TEXT (ACENetwork_PACKAGE_VERSION)
             << std::endl
 #endif // HAVE_CONFIG_H
             ;
@@ -1094,7 +1094,7 @@ ACE_TMAIN (int argc_in,
   if (log_to_file)
   {
     log_file_name =
-      Common_Log_Tools::getLogFilename (std::string (ACE_TEXT_ALWAYS_CHAR (ACENETWORK_PACKAGE_NAME)),
+      Common_Log_Tools::getLogFilename (std::string (ACE_TEXT_ALWAYS_CHAR (ACENetwork_PACKAGE_NAME)),
                                         std::string (ACE_TEXT_ALWAYS_CHAR (ACE::basename (argv_in[0],
                                                                                           ACE_DIRECTORY_SEPARATOR_CHAR))));
     if (log_file_name.empty ())
