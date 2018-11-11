@@ -23,7 +23,7 @@
 
 #include "ace/config-macros.h"
 
-#include <gtk/gtk.h>
+#include "gtk/gtk.h"
 
 #ifdef __cplusplus
 extern "C"

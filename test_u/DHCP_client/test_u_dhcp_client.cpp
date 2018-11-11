@@ -734,15 +734,19 @@ do_work (bool requestBroadcastReplies_in,
                                    : ACE_Time_Value::zero);
   modulehandler_configuration.streamConfiguration =
     &configuration_in.streamConfiguration;
+#if defined (GUI_SUPPORT)
   modulehandler_configuration.subscriber = &ui_event_handler;
   modulehandler_configuration.subscribers = &CBData_in.subscribers;
+#if defined (GTK_USE)
   modulehandler_configuration.subscribersLock =
     &state_r.subscribersLock;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   modulehandler_configuration.targetFileName = fileName_in;
   configuration_in.streamConfiguration.initialize (module_configuration,
-                                                modulehandler_configuration,
-                                                configuration_in.streamConfiguration.allocatorConfiguration_,
-                                                configuration_in.streamConfiguration.configuration_);
+                                                   modulehandler_configuration,
+                                                   configuration_in.streamConfiguration.allocatorConfiguration_,
+                                                   configuration_in.streamConfiguration.configuration_);
 
   DHCPClient_StreamConfiguration_t::ITERATOR_T iterator_2 =
     configuration_in.streamConfiguration.find (ACE_TEXT_ALWAYS_CHAR (""));

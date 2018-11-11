@@ -37,10 +37,8 @@ class IRC_Client_SignalHandler
   typedef Common_SignalHandler_T<struct IRC_Client_SignalHandlerConfiguration> inherited;
 
  public:
-  IRC_Client_SignalHandler (enum Common_SignalDispatchType,    // dispatch mode
-                            ACE_SYNCH_RECURSIVE_MUTEX*,        // lock handle
-                            //////////////
-                            bool = IRC_CLIENT_SESSION_USE_CURSES); // use curses library ?
+  IRC_Client_SignalHandler (enum Common_SignalDispatchType, // dispatch mode
+                            ACE_SYNCH_RECURSIVE_MUTEX*);    // lock handle
   inline virtual ~IRC_Client_SignalHandler () {}
 
   // implement Common_ISignal
@@ -50,8 +48,6 @@ class IRC_Client_SignalHandler
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_SignalHandler (const IRC_Client_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_SignalHandler& operator= (const IRC_Client_SignalHandler&))
-
-  bool useCursesLibrary_;
 };
 
 #endif

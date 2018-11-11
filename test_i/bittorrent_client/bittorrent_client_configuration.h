@@ -28,6 +28,7 @@
 #include "net_configuration.h"
 #include "net_defines.h"
 
+#include "test_i_common.h"
 #include "test_i_defines.h"
 
 #include "bittorrent_client_network.h"
@@ -62,7 +63,11 @@ struct BitTorrent_Client_Configuration
 //   , protocolConfiguration ()
    , sessionConfiguration ()
    ///////////////////////////////////////
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
    , cursesState (NULL)
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
    , groupId (COMMON_EVENT_REACTOR_THREAD_GROUP_ID + 1)
    , logToFile (TEST_I_DEFAULT_SESSION_LOG)
    , peerUserData ()
@@ -84,8 +89,12 @@ struct BitTorrent_Client_Configuration
 //  struct BitTorrent_ProtocolConfiguration             protocolConfiguration;
   struct BitTorrent_Client_SessionConfiguration       sessionConfiguration;
   // ***************************************************************************
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
   // *TODO*: move this somewhere else
   struct BitTorrent_Client_CursesState*               cursesState;
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
   int                                                 groupId;
   bool                                                logToFile;
 

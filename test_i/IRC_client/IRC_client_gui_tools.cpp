@@ -33,6 +33,7 @@
 #include "IRC_client_gui_connection.h"
 #include "IRC_client_gui_defines.h"
 
+#if defined (GTK_USE)
 bool
 IRC_Client_UI_Tools::current (const std::string& timeStamp_in,
                               const IRC_Client_GUI_Connections_t& connections_in,
@@ -139,3 +140,4 @@ IRC_Client_UI_Tools::current (const Common_UI_GTK_State& GTKState_in,
 
   return result_p;
 }
+#endif // GTK_USE

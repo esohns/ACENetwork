@@ -18,32 +18,24 @@
 *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
 ***************************************************************************/
 
-#ifndef TEST_I_GTK_COMMON_H
-#define TEST_I_GTK_COMMON_H
+#ifndef TEST_I_WXWIDGETS_COMMON_H
+#define TEST_I_WXWIDGETS_COMMON_H
 
 #include "ace/OS.h"
-#include "ace/Synch_Traits.h"
+//#include "ace/Synch_Traits.h"
 
-#include "gtk/gtk.h"
-
-#include "common_ui_common.h"
-
-#include "common_ui_gtk_builder_definition.h"
-#include "common_ui_gtk_common.h"
-#include "common_ui_gtk_manager.h"
-
-#include "stream_common.h"
+#include "common_ui_wxwidgets_common.h"
 
 #include "test_i_common.h"
 
 // forward declarations
 struct Test_I_Configuration;
 
-struct Test_I_GTK_ProgressData
- : Common_UI_GTK_ProgressData
+struct Test_I_wxWidgets_ProgressData
+ : Common_UI_wxWidgets_ProgressData
 {
-  Test_I_GTK_ProgressData ()
-   : Common_UI_GTK_ProgressData ()
+  Test_I_wxWidgets_ProgressData ()
+   : Common_UI_wxWidgets_ProgressData ()
    , statistic ()
   {
     ACE_OS::memset (&statistic, 0, sizeof (Test_I_Statistic_t));
@@ -52,41 +44,30 @@ struct Test_I_GTK_ProgressData
   Test_I_Statistic_t statistic;
 };
 
-struct Test_I_GTK_CBData
+struct Test_I_wxWidgets_CBData
  : Test_I_UI_CBData
 {
-  Test_I_GTK_CBData ()
+  Test_I_wxWidgets_CBData ()
    : Test_I_UI_CBData ()
-   , configuration (NULL)
-//   , cursorType (GDK_LAST_CURSOR)
    , progressData ()
-   , progressEventSourceId (0)
-   , UIState ()
+   , UIState (NULL)
   {
-    progressData.state = &UIState;
+    progressData.state = UIState;
   }
 
-  struct Test_I_Configuration*   configuration;
-//  GdkCursorType                      cursorType;
-  struct Test_I_GTK_ProgressData progressData;
-  guint                          progressEventSourceId;
-  Common_UI_GTK_State_t          UIState;
+  struct Test_I_wxWidgets_ProgressData progressData;
+  struct Common_UI_wxWidgets_State*    UIState;
 };
 
-struct Test_I_ThreadData
+struct Test_I_wxWidgets_ThreadData
  : Test_I_UI_ThreadData
 {
-  Test_I_ThreadData ()
+  Test_I_wxWidgets_ThreadData ()
    : Test_I_UI_ThreadData ()
    , CBData (NULL)
-   , eventSourceId (0)
   {}
 
-  struct Test_I_GTK_CBData* CBData;
-  guint                     eventSourceId;
+  struct Test_I_wxWidgets_CBData* CBData;
 };
-
-typedef Common_UI_GtkBuilderDefinition_T<Common_UI_GTK_State_t,
-                                         struct Test_I_GTK_CBData> Test_I_GtkBuilderDefinition_t;
 
 #endif

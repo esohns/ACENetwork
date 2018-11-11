@@ -46,30 +46,38 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACE>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/Common/cmake>)
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/Common/src>)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/Common/src/timer>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACEStream/cmake>)
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACEStream/src>)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACEStream/src/modules/dec>)
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACEStream/src/modules/lib>)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACEStream/src/modules/net>)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACEStream/src/modules/stat>)
 elseif (WIN32)
- target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ffmpeg>)
+# target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ffmpeg>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ATCD/ACE>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/cmake>)
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/src>)
-# target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/src/ui>)
 
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/cmake>)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/src>)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
@@ -88,12 +96,11 @@ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison>)
 
 target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../../..>)
+target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>)
 target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../client_server>)
-#message (STATUS "CMAKE_CURRENT_BINARY_DIR: \"${CMAKE_CURRENT_BINARY_DIR}\"")
-target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
-                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../../..>)
 
 ########### next target ###############
 set (source_files
@@ -197,14 +204,14 @@ set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES DEFINE_SYMBOL HT
 set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 if (WIN32 AND MSVC)
  set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES LINK_FLAGS "/DEF:\"${CMAKE_CURRENT_SOURCE_DIR}/etc/exports.def\"")
-endif ()
+endif (WIN32 AND MSVC)
 
 #target_link_libraries (${PROJECT_NAME}_Protocol_HTTP ${CMAKE_THREAD_LIBS_INIT})
 if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_HTTP ${ACE_LIBRARY})
  target_link_libraries (${PROJECT_NAME}_Protocol_HTTP Common)
  target_link_libraries (${PROJECT_NAME}_Protocol_HTTP ACEStream)
-endif ()
+endif (WIN32)
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Protocol_HTTP PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")

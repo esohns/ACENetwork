@@ -40,8 +40,6 @@
 #include "ace/Signal.h"
 #include "ace/Version.h"
 
-//#include "gtk/gtk.h"
-
 #if defined (HAVE_CONFIG_H)
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
@@ -82,7 +80,9 @@
 #include "ace/Synch.h"
 #include "bittorrent_client_configuration.h"
 #include "bittorrent_client_defines.h"
+#if defined (GTK_USE)
 #include "bittorrent_client_gui_callbacks.h"
+#endif // GTK_USE
 #include "bittorrent_client_gui_common.h"
 #include "bittorrent_client_gui_defines.h"
 #include "bittorrent_client_network.h"
@@ -445,7 +445,7 @@ void
 do_work (bool useThreadPool_in,
          unsigned int numberOfDispatchThreads_in,
          bool useReactor_in,
-         struct BitTorrent_Client_GTK_CBData& CBData_in,
+         struct BitTorrent_Client_UI_CBData& CBData_in,
          const std::string& UIDefinitionFile_in,
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
@@ -1311,8 +1311,8 @@ ACE_TMAIN (int argc_in,
 #endif // GTK_USE
 
   struct BitTorrent_Client_Configuration configuration;
-  struct BitTorrent_Client_GTK_CBData gtk_cb_data;
-  gtk_cb_data.configuration = &configuration;
+  struct BitTorrent_Client_UI_CBData ui_cb_data;
+  ui_cb_data.configuration = &configuration;
   ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
 #if defined (GTK_USE)
   lock_2 = &state_r.subscribersLock;
@@ -1426,24 +1426,24 @@ ACE_TMAIN (int argc_in,
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
-  gtk_cb_data.UIFileDirectory = UIDefinitionFile_directory;
+  ui_cb_data.UIFileDirectory = UIDefinitionFile_directory;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 //   userData.phoneBook;
 //   userData.loginOptions.password = ;
-//  gtk_cb_data.configuration->protocolConfiguration.loginOptions.nickName =
+//  ui_cb_data.configuration->protocolConfiguration.loginOptions.nickName =
 //      ACE_TEXT_ALWAYS_CHAR (BITTORRENT_DEFAULT_NICKNAME);
 //   userData.loginOptions.user.username = ;
 
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
   state_r.RCFiles.push_back (rc_file_name);
-  gtk_cb_data.progressData.state = &state_r;
+  ui_cb_data.progressData.state = &state_r;
 
   // step8: initialize GTK UI
   BitTorrent_Client_GtkBuilderDefinition_t ui_definition (argc_in,
                                                           argv_in,
-                                                          &gtk_cb_data);
+                                                          &ui_cb_data);
   COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                             argv_in,
                                                             &ui_definition);
@@ -1456,7 +1456,7 @@ ACE_TMAIN (int argc_in,
   do_work (use_thread_pool,
            number_of_thread_pool_threads,
            use_reactor,
-           gtk_cb_data,
+           ui_cb_data,
            ui_definition_file_name,
            signal_set,
            ignored_signal_set,

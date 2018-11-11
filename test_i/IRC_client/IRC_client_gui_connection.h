@@ -27,7 +27,9 @@
 #include "ace/Global_Macros.h"
 #include "ace/Synch_Traits.h"
 
+#if defined (GTK_USE)
 #include "gtk/gtk.h"
+#endif // GTK_USE
 
 #include "common_iget.h"
 
@@ -39,22 +41,20 @@
 #include "IRC_client_stream_common.h"
 
 // forward declaration(s)
-struct Common_UI_GTKState;
 class IRC_Client_GUI_MessageHandler;
 
-/**
-  @author Erik Sohns <eriksohns@123mail.org>
-*/
 class IRC_Client_GUI_Connection
  : public IRC_Client_ISessionNotify_t
- , public Common_IGetR_T<struct IRC_Client_GTK_ConnectionCBData>
+ , public Common_IGetR_T<struct IRC_Client_UI_ConnectionCBData>
 {
   friend class IRC_Client_GUI_MessageHandler;
 
  public:
-  IRC_Client_GUI_Connection (struct Common_UI_GTK_State&,   // GTK state handle
-                             IRC_Client_GUI_Connections_t*, // connections handle
-                             guint,                         // (statusbar) context ID
+  IRC_Client_GUI_Connection (IRC_Client_GUI_Connections_t*, // connections handle
+#if defined (GTK_USE)
+                             Common_UI_GTK_State_t&,        // GTK state handle
+                             guint,                         // (statusbar) context id
+#endif // GTK_USE
                              const std::string&,            // (server tab) label
                              const std::string&);           // UI (glade) file directory
   // *WARNING*: must be called with
@@ -79,11 +79,13 @@ class IRC_Client_GUI_Connection
                        const IRC_Client_SessionMessage&);
 
   // implement Common_IGet_T
-  inline virtual const struct IRC_Client_GTK_ConnectionCBData& getR () const { return CBData_; }
+  inline virtual const struct IRC_Client_UI_ConnectionCBData& getR () const { return CBData_; }
 
   // *NOTE*: a return value of -1 indicates non-existence
+#if defined (GTK_USE)
   gint exists (const std::string&, // channel/nick
                bool = true) const; // locked access (GDK) ?
+#endif // GTK_USE
   void channels (string_list_t&); // return value: list of active channels
 
   // *WARNING*: callers may need protection from:
@@ -100,7 +102,7 @@ class IRC_Client_GUI_Connection
   void terminateMessageHandler (const std::string&, // channel/nickname
                                 bool = true);       // locked access ?
 
-  bool closing_;
+  bool                                  closing_;
 
  private:
   typedef std::map<std::string,
@@ -122,14 +124,16 @@ class IRC_Client_GUI_Connection
 
   IRC_Client_GUI_MessageHandler* getHandler (const std::string&); // id (channel/nickname)
 
-  struct IRC_Client_GTK_ConnectionCBData CBData_;
-  guint                                  contextId_;
-  bool                                   isFirstUsersMsg_;
-  struct IRC_Client_SessionState*        sessionState_;
-  std::string                            UIFileDirectory_;
+  struct IRC_Client_UI_ConnectionCBData CBData_;
+#if defined (GTK_USE)
+  guint                                 contextId_;
+#endif // GTK_USE
+  bool                                  isFirstUsersMsg_;
+  struct IRC_Client_SessionState*       sessionState_;
+  std::string                           UIFileDirectory_;
 
-  mutable ACE_SYNCH_MUTEX                lock_;
-  MESSAGE_HANDLERS_T                     messageHandlers_;
+  mutable ACE_SYNCH_MUTEX               lock_;
+  MESSAGE_HANDLERS_T                    messageHandlers_;
 };
 
 #endif

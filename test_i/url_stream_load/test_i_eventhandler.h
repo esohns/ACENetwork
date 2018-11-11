@@ -36,11 +36,12 @@ class Test_I_EventHandler
  : public Test_I_ISessionNotify_t
 {
  public:
-#if defined (GUI_SUPPORT) && defined (GTK_USE)
-  Test_I_EventHandler (struct Test_I_URLStreamLoad_GTK_CBData*); // GTK state
+  Test_I_EventHandler (
+#if defined (GUI_SUPPORT)
+                       struct Test_I_URLStreamLoad_UI_CBData*); // UI state
 #else
-  Test_I_EventHandler ();
-#endif // GUI_SUPPORT && GTK_USE
+                      );
+#endif // GUI_SUPPORT
   inline virtual ~Test_I_EventHandler () {}
 
   // implement Stream_ISessionDataNotify_T
@@ -55,7 +56,9 @@ class Test_I_EventHandler
                        const Test_I_SessionMessage&);   // session message
 
  private:
+#if defined (GUI_SUPPORT)
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler ())
+#endif // GUI_SUPPORT
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler (const Test_I_EventHandler&))
   ACE_UNIMPLEMENTED_FUNC (Test_I_EventHandler& operator= (const Test_I_EventHandler&))
 
@@ -63,9 +66,9 @@ class Test_I_EventHandler
   typedef SESSION_DATA_MAP_T::iterator SESSION_DATA_MAP_ITERATOR_T;
 
 #if defined (GUI_SUPPORT)
-  struct Test_I_URLStreamLoad_GTK_CBData* CBData_;
+  struct Test_I_URLStreamLoad_UI_CBData* CBData_;
 #endif // GUI_SUPPORT
-  SESSION_DATA_MAP_T                      sessionDataMap_;
+  SESSION_DATA_MAP_T                     sessionDataMap_;
 };
 
 #endif

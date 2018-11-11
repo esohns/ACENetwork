@@ -21,7 +21,7 @@
 #ifndef TEST_U_CALLBACKS_H
 #define TEST_U_CALLBACKS_H
 
-#include <gtk/gtk.h>
+#include "gtk/gtk.h"
 
 //------------------------------------------------------------------------------
 

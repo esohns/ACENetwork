@@ -30,22 +30,28 @@
 
 #include "common_tools.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "common_ui_gtk_manager_common.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "net_macros.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
 #include "IRC_client_curses.h"
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
 #include "IRC_client_network.h"
 
 #include "IRC_client_gui_common.h"
 
 IRC_Client_SignalHandler::IRC_Client_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
-                                                    ACE_SYNCH_RECURSIVE_MUTEX* lock_in,
-                                                    bool useCursesLibrary_in)
+                                                    ACE_SYNCH_RECURSIVE_MUTEX* lock_in)
  : inherited (dispatchMode_in,
               lock_in,
               this) // event handler handle
- , useCursesLibrary_ (useCursesLibrary_in)
 {
   NETWORK_TRACE (ACE_TEXT ("IRC_Client_SignalHandler::IRC_Client_SignalHandler"));
 
@@ -165,17 +171,25 @@ done_connect:
   {
     if (inherited::configuration_)
     {
+#if defined (GUI_SUPPORT)
       // step1: stop GTK event dispatch ?
       if (inherited::configuration_->hasUI)
+#if defined (GTK_USE)
         COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->stop (false,  // wait ?
                                                             false); // N/A
+#else
+        ;
+#endif // GTK_USE
       else
       {
+#if defined (CURSES_USE)
         if (inherited::configuration_->cursesState)
         { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, inherited::configuration_->cursesState->lock);
           inherited::configuration_->cursesState->finished = true;
         } // end IF
+#endif // CURSES_USE
       } // end IF
+#endif // GUI_SUPPORT
     } // end IF
 
     // step2: stop event dispatch

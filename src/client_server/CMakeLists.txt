@@ -12,18 +12,34 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE>)
 
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src>)
- target_include_directories (${PROJECT_NAME}_Server PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/cmake>)
+ target_include_directories (${PROJECT_NAME}_Client PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src>)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/timer>)
+
+ target_include_directories (${PROJECT_NAME}_Server PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/cmake>)
+ target_include_directories (${PROJECT_NAME}_Server PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src>)
+ target_include_directories (${PROJECT_NAME}_Server PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/log>)
  target_include_directories (${PROJECT_NAME}_Server PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/timer>)
 
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/cmake>)
+ target_include_directories (${PROJECT_NAME}_Client PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src>)
+ target_include_directories (${PROJECT_NAME}_Client PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/lib>)
+
+ target_include_directories (${PROJECT_NAME}_Server PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/cmake>)
  target_include_directories (${PROJECT_NAME}_Server PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src>)
+ target_include_directories (${PROJECT_NAME}_Server PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/lib>)
 elseif (WIN32)
  target_include_directories (${PROJECT_NAME}_Client PUBLIC
 #                             $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
@@ -43,6 +59,8 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/cmake>)
  target_include_directories (${PROJECT_NAME}_Server PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src>)
+ target_include_directories (${PROJECT_NAME}_Server PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/log>)
  target_include_directories (${PROJECT_NAME}_Server PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/timer>)
 

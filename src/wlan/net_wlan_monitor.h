@@ -69,12 +69,11 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection*,
 #endif // ACE_WIN32 || ACE_WIN64
 
 template <typename AddressType,
-          typename ConfigurationType
+          typename ConfigurationType,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-          ,
 #else
           ////////////////////////////////
-          ,ACE_SYNCH_DECL,
+          ACE_SYNCH_DECL,
           typename TimePolicyType,
 #endif // ACE_WIN32 || ACE_WIN64
           ////////////////////////////////
@@ -114,12 +113,6 @@ class Net_WLAN_Monitor_T
 
  public:
   inline virtual ~Net_WLAN_Monitor_T () {}
-
-//  // override (part of) Net_IWLANMonitor_T
-//  // *TODO*: remove ASAP
-//#if defined (DBUS_SUPPORT)
-//  inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
-//#endif
 
  protected:
   Net_WLAN_Monitor_T ();
@@ -254,9 +247,15 @@ class Net_WLAN_Monitor_T<AddressType,
   inline virtual bool do_authenticate (const std::string&, const struct ether_addr&, const std::string&) { ACE_ASSERT (false); ACE_NOTSUP_RETURN (false); ACE_NOTREACHED (return false;) }
   inline virtual void do_scan (const std::string& interfaceIdentifier_in, const struct ether_addr& APMACAddress_in, const std::string& SSID_in) { ACE_UNUSED_ARG (APMACAddress_in); Net_WLAN_Tools::scan (interfaceIdentifier_in, SSID_in, inherited::handle_, false); }
   // *TODO*: remove these ASAP
-  inline virtual const struct DBusConnection* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
+#if defined (NL80211_SUPPORT)
+  inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (inherited::socketHandle_); return inherited::socketHandle_; }
+  inline virtual const int get_3 () const { ACE_ASSERT (inherited::familyId_ > 0); return inherited::familyId_; }
+#endif // NL80211_SUPPORT
+#if defined (DBUS_SUPPORT)
+  inline virtual const struct DBusConnection* const getP_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
   inline virtual const std::string& get1RR_2 (const std::string&) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR ("")); ACE_NOTREACHED (return ACE_TEXT_ALWAYS_CHAR ("");) }
   inline virtual void set2R (const std::string&, const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+#endif // DBUS_SUPPORT
 
   struct iw_range range_;
 
@@ -265,13 +264,6 @@ class Net_WLAN_Monitor_T<AddressType,
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T (const Net_WLAN_Monitor_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T& operator= (const Net_WLAN_Monitor_T&))
-
-  // implement (part of) Common_IStateMachine_T
-//  virtual void onChange (enum Net_WLAN_MonitorState); // new state
-
-  // *TODO*: remove ASAP
-  //inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL); }
-  //inline virtual const int get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
 
   ////////////////////////////////////////
 
@@ -357,14 +349,12 @@ class Net_WLAN_Monitor_T<AddressType,
                                   ConfigurationType,
                                   ACE_SYNCH_USE,
                                   TimePolicyType>
-// , public Common_EventHandlerBase
  , public ACE_Handler
 {
   typedef Net_WLAN_Monitor_Base_T<AddressType,
                                   ConfigurationType,
                                   ACE_SYNCH_USE,
                                   TimePolicyType> inherited;
-//  typedef Common_EventHandlerBase inherited2;
   typedef ACE_Handler inherited2;
 
   // singleton has access to the ctor/dtors
@@ -390,9 +380,14 @@ class Net_WLAN_Monitor_T<AddressType,
   inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (inherited::socketHandle_); return inherited::socketHandle_; }
   inline virtual const int get_3 () const { ACE_ASSERT (inherited::familyId_ > 0); return inherited::familyId_; }
   // *TODO*: remove these ASAP
+#if defined (WEXT_SUPPORT)
+  inline virtual const ACE_HANDLE get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_INVALID_HANDLE); ACE_NOTREACHED (return ACE_INVALID_HANDLE;) }
+#endif // WEXT_SUPPORT
+#if defined (DBUS_SUPPORT)
   inline virtual const struct DBusConnection* const getP_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
   inline virtual const std::string& get1RR_2 (const std::string&) const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_TEXT_ALWAYS_CHAR ("")); ACE_NOTREACHED (return ACE_TEXT_ALWAYS_CHAR ("");) }
   inline virtual void set2R (const std::string&, const std::string&) { ACE_ASSERT (false); ACE_NOTSUP; ACE_NOTREACHED (return;) }
+#endif // DBUS_SUPPORT
 
   inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID ((inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR ("")), NULL, inherited::familyId_); }
 
@@ -410,17 +405,11 @@ class Net_WLAN_Monitor_T<AddressType,
                         const struct ether_addr&, // AP BSSID (i.e. AP MAC address) {0: all}
                         const std::string&);      // (E)SSID {"": all}
 
-  UserDataType*             userData_;
+  UserDataType*                    userData_;
 
  private:
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T (const Net_WLAN_Monitor_T&))
   ACE_UNIMPLEMENTED_FUNC (Net_WLAN_Monitor_T& operator= (const Net_WLAN_Monitor_T&))
-
-  // implement (part of) Common_IStateMachine_T
-//  virtual void onChange (enum Net_WLAN_MonitorState); // new state
-
-  // *TODO*: remove ASAP
-  inline virtual const ACE_HANDLE get () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_INVALID_HANDLE); ACE_NOTREACHED (return ACE_INVALID_HANDLE;) }
 
   ////////////////////////////////////////
 
@@ -437,17 +426,17 @@ class Net_WLAN_Monitor_T<AddressType,
                        ACE_Message_Block*&);      // i/o: message buffer
   bool initiate_read_stream (unsigned int); // buffer size
 
-  ACE_Message_Block*        buffer_;
-  struct nl_cb*             callbacks_;
-  int                       controlId_;
-  int                       error_;
-  Net_WLAN_nl80211_Features features_;
-  bool                      headerReceived_;
-  ACE_Asynch_Read_Stream    inputStream_;
-  bool                      isRegistered_;
-  bool                      isSubscribedToMulticastGroups_;
-  struct nl_msg*            message_;
-  ACE_UINT32                protocolFeatures_;
+  ACE_Message_Block*               buffer_;
+  struct nl_cb*                    callbacks_;
+  int                              controlId_;
+  int                              error_;
+  struct Net_WLAN_nl80211_Features features_;
+  bool                             headerReceived_;
+  ACE_Asynch_Read_Stream           inputStream_;
+  bool                             isRegistered_;
+  bool                             isSubscribedToMulticastGroups_;
+  struct nl_msg*                   message_;
+  ACE_UINT32                       protocolFeatures_;
 };
 #endif // NL80211_SUPPORT
 
@@ -502,9 +491,13 @@ class Net_WLAN_Monitor_T<AddressType,
   virtual void set2R (const std::string&,
                       const std::string&);
   // *TODO*: remove these ASAP
-  inline virtual const ACE_HANDLE get () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_INVALID_HANDLE); ACE_NOTREACHED (return ACE_INVALID_HANDLE;) }
+#if defined (WEXT_SUPPORT)
+  inline virtual const ACE_HANDLE get_2 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (ACE_INVALID_HANDLE); ACE_NOTREACHED (return ACE_INVALID_HANDLE;) }
+#endif // WEXT_SUPPORT
+#if defined (NL80211_SUPPORT)
   inline virtual const struct nl_sock* const getP () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (NULL); ACE_NOTREACHED (return NULL;) }
   inline virtual const int get_3 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (-1); ACE_NOTREACHED (return -1;) }
+#endif // NL80211_SUPPORT
 
   inline virtual std::string SSID () const { return Net_WLAN_Tools::associatedSSID (connection_, (inherited::configuration_ ? inherited::configuration_->interfaceIdentifier : ACE_TEXT_ALWAYS_CHAR (""))); }
 

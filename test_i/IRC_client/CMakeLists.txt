@@ -161,7 +161,8 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ########### next target ###############
-set (IRC_client_SRCS
+set (EXECUTABLE IRC_client)
+set (${EXECUTABLE}_EXE_SRCS
      stdafx.cpp
      stdafx.h
      FILE_Stream.cpp
@@ -199,7 +200,7 @@ set (IRC_client_SRCS
      Streambuf_alt.cpp
      Streambuf_alt.h
      Streambuf_alt.inl)
-set (IRC_client_INI
+set (${EXECUTABLE}_INI
      etc/IRC_client.ini
      etc/IRC_client_phonebook.ini)
 
@@ -218,11 +219,10 @@ if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
  add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
 endif ()
 
-set (EXECUTABLE IRC_client)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
-                ${IRC_client_SRCS}
-                ${IRC_client_INI})
+                ${${EXECUTABLE}_EXE_SRCS}
+                ${${EXECUTABLE}_INI})
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_i")
 if (WIN32 AND NOT BUILD_TEST_I)
  set_target_properties (${EXECUTABLE} PROPERTIES EXCLUDE_FROM_DEFAULT_BUILD TRUE)
@@ -298,21 +298,22 @@ install (FILES
 
 ################################################################################
 
-if (UNIX)
- if (GTK_SUPPORT)
-  if (GTK3_SUPPORT)
-   include_directories (${PKG_GTK3_INCLUDE_DIRS})
-  else ()
-   include_directories (${PKG_GTK2_INCLUDE_DIRS})
-  endif ()
- endif (GTK_SUPPORT)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/ui/gtk)
-elseif (WIN32)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/ui/gtk)
-endif ()
+#if (UNIX)
+# if (GTK_SUPPORT)
+#  if (GTK3_SUPPORT)
+#   include_directories (${PKG_GTK3_INCLUDE_DIRS})
+#  else ()
+#   include_directories (${PKG_GTK2_INCLUDE_DIRS})
+#  endif ()
+# endif (GTK_SUPPORT)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/ui/gtk)
+#elseif (WIN32)
+# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/ui/gtk)
+#endif ()
 
 ########### next target ###############
-set (IRC_client_gui_SRCS
+set (EXECUTABLE_GUI IRC_client_gui)
+set (${EXECUTABLE_GUI}_EXE_SRCS
      stdafx.cpp
      stdafx.h
      IRC_client_common.h
@@ -320,8 +321,6 @@ set (IRC_client_gui_SRCS
      IRC_client_configuration.h
      IRC_client_defines.h
      IRC_client_gui.cpp
-     IRC_client_gui_callbacks.cpp
-     IRC_client_gui_callbacks.h
      IRC_client_gui_common.h
      IRC_client_gui_connection.cpp
      IRC_client_gui_connection.h
@@ -345,14 +344,29 @@ set (IRC_client_gui_SRCS
      IRC_client_stream_common.h
      IRC_client_tools.cpp
      IRC_client_tools.h)
+if (GUI_SUPPORT)
+ if (GTK_USE)
+  set (${EXECUTABLE_GUI}_EXE_SRCS
+       ${${EXECUTABLE_GUI}_EXE_SRCS}
+       IRC_client_gui_callbacks.cpp
+       IRC_client_gui_callbacks.h)
+ elseif (WXWIDGETS_USE)
+   #  set (${EXECUTABLE}_EXE_SRCS
+   #       ${${EXECUTABLE}_EXE_SRCS}
+   #       test_u_wxwidgets_ui.cpp
+   #       test_u_wxwidgets_ui.h
+   #       test_u_wxwidgets_ui.inl
+   #       test_u_wxwidgets_ui_base.cpp
+   #       test_u_wxwidgets_ui_base.h)
+ endif ()
+endif (GUI_SUPPORT)
 
 #set_source_files_properties (${IRC_client_gui_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
-set (EXECUTABLE_GUI IRC_client_gui)
 add_executable (${EXECUTABLE_GUI}
                 EXCLUDE_FROM_ALL
-                ${IRC_client_gui_SRCS}
-                ${IRC_client_INI}
+                ${${EXECUTABLE_GUI}_EXE_SRCS}
+                ${${EXECUTABLE}_INI}
                 etc/IRC_client_channel.glade
                 etc/IRC_client_connection.glade
                 etc/IRC_client_main.glade)

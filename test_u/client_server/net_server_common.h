@@ -30,8 +30,12 @@
 #include "common_istatistic.h"
 #include "common_isubscribe.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "stream_common.h"
 #include "stream_control_message.h"
@@ -44,7 +48,13 @@
 #include "net_iconnector.h"
 #include "net_ilistener.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_u_gtk_common.h"
+#elif defined (WXWIDGETS_USE)
+#include "test_u_wxwidgets_common.h"
+#endif
+#endif // GUI_SUPPORT
 
 #include "test_u_configuration.h"
 #include "test_u_connection_common.h"
@@ -122,11 +132,20 @@ typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
 typedef std::list<ClientServer_ISessionNotify_t*> ClientServer_Subscribers_t;
 typedef ClientServer_Subscribers_t::const_iterator ClientServer_SubscribersIterator_t;
 
-struct Server_GTK_CBData
+#if defined (GUI_SUPPORT)
+struct Server_UI_CBData
+#if defined (GTK_USE)
  : Test_U_GTK_CBData
+#elif defined (WXWIDGETS_USE)
+ : Test_U_wxWidgets_CBData
+#endif
 {
   Server_GTK_CBData ()
+#if defined (GTK_USE)
    : Test_U_GTK_CBData ()
+#elif defined (WXWIDGETS_USE)
+   : Test_U_wxWidgets_CBData ()
+#endif
    , configuration (NULL)
    , subscribers ()
   {}
@@ -138,12 +157,10 @@ struct Server_GTK_CBData
 
 //////////////////////////////////////////
 
-typedef Common_UI_GtkBuilderDefinition_T<struct Common_UI_GTK_State,
-                                         struct Server_GTK_CBData> Server_GtkBuilderDefinition_t;
-
-//typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-//                                struct Server_GTK_CBData> Server_GTK_Manager_t;
-//typedef ACE_Singleton<Server_GTK_Manager_t,
-//                      typename ACE_MT_SYNCH::MUTEX> SERVER_GTK_MANAGER_SINGLETON;
+#if defined (GTK_USE)
+typedef Common_UI_GtkBuilderDefinition_T<Common_UI_GTK_State_t,
+                                         struct Server_UI_CBData> Server_GtkBuilderDefinition_t;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #endif

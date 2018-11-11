@@ -48,7 +48,7 @@
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
 
-//#include "common_file_tools.h"
+#include "common_file_tools.h"
 #include "common_tools.h"
 
 #include "common_log_tools.h"
@@ -85,7 +85,11 @@
 
 #include "net_server_common_tools.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_u_callbacks.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 #include "test_u_common.h"
 #include "test_u_defines.h"
 #include "test_u_connection_manager_common.h"
@@ -492,7 +496,7 @@ void
 do_work (
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
          bool showConsole_in,
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
          const std::string& fileName_in,
          const std::string& UIDefinitionFile_in,
          bool useThreadPool_in,
@@ -505,7 +509,9 @@ do_work (
          unsigned int statisticReportingInterval_in,
          bool useUDP_in,
          unsigned int numberOfDispatchThreads_in,
-         struct FileServer_GTK_CBData& CBData_in,
+#if defined (GUI_SUPPORT)
+         struct FileServer_UI_CBData& CBData_in,
+#endif // GUI_SUPPORT
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
          Common_SignalActions_t& previousSignalActions_inout,
@@ -534,7 +540,9 @@ do_work (
 
   // step0a: initialize configuration
   struct FileServer_Configuration configuration;
+#if defined (GUI_SUPPORT)
   CBData_in.configuration = &configuration;
+#endif // GUI_SUPPORT
 
   Common_Timer_Manager_t* timer_manager_p =
     COMMON_TIMERMANAGER_SINGLETON::instance ();
@@ -549,7 +557,11 @@ do_work (
   Test_U_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
                                                connection_manager_p,
                                                false);
-  Test_U_EventHandler ui_event_handler (&CBData_in);
+  Test_U_EventHandler ui_event_handler (
+#if defined (GUI_SUPPORT)
+                                        &CBData_in
+#endif // GUI_SUPPORT
+                                       );
   Test_U_Module_EventHandler_Module event_handler (NULL,
                                                    ACE_TEXT_ALWAYS_CHAR (MODULE_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
   Test_U_Module_EventHandler* event_handler_p =
@@ -599,9 +611,11 @@ do_work (
   if (!UIDefinitionFile_in.empty ())
   {
     modulehandler_configuration.subscriber = &ui_event_handler;
+#if defined (GUI_SUPPORT)
     modulehandler_configuration.subscribers = &CBData_in.subscribers;
     modulehandler_configuration.subscribersLock =
       &CBData_in.UIState->subscribersLock;
+#endif // GUI_SUPPORT
   } // end IF
 
   configuration.streamConfiguration.configuration_.cloneModule =
@@ -710,16 +724,15 @@ do_work (
 
   // step2: signal handling
   if (useReactor_in)
-    CBData_in.configuration->listener =
+    configuration.listener =
       FILESERVER_LISTENER_SINGLETON::instance ();
   else
-    CBData_in.configuration->listener =
+    configuration.listener =
       FILESERVER_ASYNCHLISTENER_SINGLETON::instance ();
 
   signal_handler_configuration.dispatchState =
     &event_dispatch_state_s;
-  signal_handler_configuration.listener =
-    CBData_in.configuration->listener;
+  signal_handler_configuration.listener = configuration.listener;
   signal_handler_configuration.statisticReportingHandler = connection_manager_p;
   signal_handler_configuration.statisticReportingTimerId = timer_id;
   if (!signalHandler_in.initialize (signal_handler_configuration))
@@ -852,7 +865,7 @@ do_work (
   if (UIDefinitionFile_in.empty ())
   {
 #endif // GUI_SUPPORT
-    if (!CBData_in.configuration->listener->initialize (configuration.listenerConfiguration))
+    if (!configuration.listener->initialize (configuration.listenerConfiguration))
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to initialize listener, aborting\n")));
@@ -953,8 +966,8 @@ do_work (
     } // end IF
     else
     {
-      CBData_in.configuration->listener->start ();
-      if (!CBData_in.configuration->listener->isRunning ())
+      configuration.listener->start ();
+      if (!configuration.listener->isRunning ())
       {
         ACE_DEBUG ((LM_ERROR,
                     ACE_TEXT ("failed to start listener (port: %u), aborting\n"),
@@ -965,7 +978,11 @@ do_work (
 #if defined (GUI_SUPPORT)
   } // end IF
   else
+#if defined (GTK_USE)
     gtk_manager_p->wait ();
+#else
+    ;
+#endif // GTK_USE
 #endif // GUI_SUPPORT
 
   // *NOTE*: from this point on, clean up any remote connections !
@@ -1004,16 +1021,20 @@ error:
 //		} // end lock scope
 #if defined (GUI_SUPPORT)
   if (!UIDefinitionFile_in.empty ())
+#if defined (GTK_USE)
     gtk_manager_p->stop (true);
+#else
+    ;
+#endif // GTK_USE
 #endif // GUI_SUPPORT
   if (stop_event_dispatch)
     Common_Tools::finalizeEventDispatch (useReactor_in,
                                          !useReactor_in,
                                          group_id);
-  if (CBData_in.configuration->listener &&
+  if (configuration.listener &&
       !useUDP_in)
-    CBData_in.configuration->listener->stop (true,
-                                             true);
+    configuration.listener->stop (true,
+                                  true);
 }
 
 void
@@ -1304,14 +1325,12 @@ ACE_TMAIN (int argc_in,
 
 #if defined (GUI_SUPPORT)
   // step1h: initialize UI framework
-#if defined (GTK_USE)
-  struct FileServer_GTK_CBData ui_cb_data;
+  struct FileServer_UI_CBData ui_cb_data;
   ui_cb_data.allowUserRuntimeStatistic =
     (statistic_reporting_interval == 0); // handle SIGUSR1/SIGBREAK
                                          // iff regular reporting
                                          // is off
-
-
+#if defined (GTK_USE)
   //Common_UI_GladeDefinition ui_definition (argc_in,
   //                                         argv_in);
   FileServer_GtkBuilderDefinition_t ui_definition (argc_in,

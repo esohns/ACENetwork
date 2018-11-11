@@ -30,8 +30,12 @@
 #include "common_istatistic.h"
 #include "common_isubscribe.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "stream_common.h"
 #include "stream_control_message.h"
@@ -44,7 +48,13 @@
 #include "net_ilistener.h"
 
 #include "test_u_configuration.h"
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_u_gtk_common.h"
+#elif defined (WXWIDGETS_USE)
+#include "test_u_wxwidgets_common.h"
+#endif
+#endif // GUI_SUPPORT
 
 #include "file_server_connection_common.h"
 #include "file_server_stream_common.h"
@@ -140,12 +150,19 @@ typedef FileServer_Subscribers_t::const_iterator FileServer_SubscribersIterator_
 //////////////////////////////////////////
 
 #if defined (GUI_SUPPORT)
+struct FileServer_UI_CBData
 #if defined (GTK_USE)
-struct FileServer_GTK_CBData
  : Test_U_GTK_CBData
+#elif defined (WXWIDGETS_USE)
+ : Test_U_wxWidgets_CBData
+#endif
 {
-  FileServer_GTK_CBData ()
+  FileServer_UI_CBData ()
+#if defined (GTK_USE)
    : Test_U_GTK_CBData ()
+#elif defined (WXWIDGETS_USE)
+  : Test_U_wxWidgets_CBData ()
+#endif
    , configuration (NULL)
    , subscribers ()
   {}
@@ -154,13 +171,9 @@ struct FileServer_GTK_CBData
   FileServer_Subscribers_t         subscribers;
 };
 
+#if defined (GTK_USE)
 typedef Common_UI_GtkBuilderDefinition_T<Common_UI_GTK_State_t,
-                                         struct FileServer_GTK_CBData> FileServer_GtkBuilderDefinition_t;
-
-//typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-//                                struct FileServer_GTK_CBData> FileServer_GTK_Manager_t;
-//typedef ACE_Singleton<FileServer_GTK_Manager_t,
-//                      typename ACE_MT_SYNCH::MUTEX> FILESERVER_UI_GTK_MANAGER_SINGLETON;
+                                         struct FileServer_UI_CBData> FileServer_GtkBuilderDefinition_t;
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 

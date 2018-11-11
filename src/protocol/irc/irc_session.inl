@@ -27,14 +27,18 @@
 #include "ace/OS.h"
 #include "ace/OS_Memory.h"
 
+//#if defined (HAVE_CONFIG_H)
+//#include "Common_config.h"
+//#endif // HAVE_CONFIG_H
 #include "common_defines.h"
 #include "common_file_tools.h"
 #include "common_tools.h"
 
-#ifdef HAVE_CONFIG_H
-#include "ACENetwork_config.h"
-#endif
+#include "common_log_tools.h"
 
+#if defined (HAVE_CONFIG_H)
+#include "ACENetwork_config.h"
+#endif // HAVE_CONFIG_H
 #include "net_common.h"
 #include "net_macros.h"
 

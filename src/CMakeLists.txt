@@ -282,28 +282,35 @@ endif (UNIX)
 add_library (${PROJECT_NAME} STATIC "")
 
 if (UNIX)
- if (SSL_SUPPORT)
-  target_include_directories (${PROJECT_NAME} PUBLIC ${PKG_SSL_INCLUDE_DIRS})
- endif (SSL_SUPPORT)
  if (NETLINK_SUPPORT)
   target_include_directories (${PROJECT_NAME} PUBLIC ${PKG_LIBNL_INCLUDE_DIRS})
  endif (NETLINK_SUPPORT)
  if (DBUS_SUPPORT)
   target_include_directories (${PROJECT_NAME} PUBLIC ${PKG_DBUS_INCLUDE_DIRS})
-
-  target_include_directories (${PROJECT_NAME} PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/dbus>)
  endif (DBUS_SUPPORT)
+
+ if (SSL_SUPPORT)
+  target_include_directories (${PROJECT_NAME} PUBLIC ${PKG_SSL_INCLUDE_DIRS})
+ endif (SSL_SUPPORT)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE>)
 
  target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/cmake>)
+ target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src>)
+ if (DBUS_SUPPORT)
+  target_include_directories (${PROJECT_NAME} PUBLIC ${PKG_DBUS_INCLUDE_DIRS})
+  target_include_directories (${PROJECT_NAME} PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/dbus>)
+ endif (DBUS_SUPPORT)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/math>)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/timer>)
 
+ target_include_directories (${PROJECT_NAME} PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACEStream/cmake>)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACEStream/src>)
  target_include_directories (${PROJECT_NAME} PUBLIC
@@ -311,12 +318,23 @@ if (UNIX)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACEStream/src/modules/stat>)
 elseif (WIN32)
- target_include_directories (${PROJECT_NAME} PUBLIC
-#                             $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ATCD/ACE>)
+ if (SSL_SUPPORT)
+  if (DEFINED ENV{SSL_ROOT})
+   target_include_directories (${PROJECT_NAME} PUBLIC
+                               $<BUILD_INTERFACE:$ENV{SSL_ROOT}>)
+  else ()
+   target_include_directories (${PROJECT_NAME} PUBLIC
+                               $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../openssl/include>)
+  endif (DEFINED ENV{SSL_ROOT})
+ endif (SSL_SUPPORT)
 
- target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../openssl/include>)
+ if (DEFINED ENV{ACE_ROOT})
+  target_include_directories (${PROJECT_NAME} PUBLIC
+                              $<BUILD_INTERFACE:$ENV{ACE_ROOT}>)
+ else ()
+  target_include_directories (${PROJECT_NAME} PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../ATCD/ACE>)
+ endif (DEFINED ENV{ACE_ROOT})
 
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/cmake>)
@@ -341,18 +359,12 @@ endif ()
 target_include_directories (${PROJECT_NAME} PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../3rd_party/bison>)
 target_include_directories (${PROJECT_NAME} PUBLIC
-                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/wlan>)
-target_include_directories (${PROJECT_NAME} PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..>)
+target_include_directories (${PROJECT_NAME} PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/wlan>)
 
 ############## next target ################
 set (source_files
-     net_asynch_netlinksockethandler.cpp
-     net_asynch_netlinksockethandler.h
-     net_asynch_netlinksockethandler.inl
-     net_asynch_ssl_tcpsockethandler.cpp
-     net_asynch_ssl_tcpsockethandler.h
-     net_asynch_ssl_tcpsockethandler.inl
      net_asynch_tcpsockethandler.cpp
      net_asynch_tcpsockethandler.h
      net_asynch_tcpsockethandler.inl
@@ -387,12 +399,6 @@ set (source_files
      net_module_sockethandler.cpp
      net_module_sockethandler.h
      net_module_sockethandler.inl
-     net_netlinkconnection.cpp
-     net_netlinkconnection.h
-     net_netlinkconnection.inl
-     net_netlinksockethandler.cpp
-     net_netlinksockethandler.h
-     net_netlinksockethandler.inl
      net_packet_headers.h
      net_parser_base.cpp
      net_parser_base.h
@@ -438,8 +444,6 @@ set (source_files
      net_transportlayer_base.inl
      net_transportlayer_ip_cast.cpp
      net_transportlayer_ip_cast.h
-     net_transportlayer_netlink.cpp
-     net_transportlayer_netlink.h
      net_transportlayer_tcp.cpp
      net_transportlayer_tcp.h
      net_transportlayer_udp.cpp
@@ -450,6 +454,30 @@ set (source_files
      net_udpsockethandler.cpp
      net_udpsockethandler.h
      net_udpsockethandler.inl)
+if (UNIX)
+ if (NETLINK_SUPPORT)
+  set (source_files
+       net_asynch_netlinksockethandler.cpp
+       net_asynch_netlinksockethandler.h
+       net_asynch_netlinksockethandler.inl
+       net_netlinkconnection.cpp
+       net_netlinkconnection.h
+       net_netlinkconnection.inl
+       net_netlinksockethandler.cpp
+       net_netlinksockethandler.h
+       net_netlinksockethandler.inl
+       net_transportlayer_netlink.cpp
+       net_transportlayer_netlink.h
+       ${source_files})
+ endif (NETLINK_SUPPORT)
+endif (UNIX)
+if (SSL_SUPPORT)
+ set (source_files
+      net_asynch_ssl_tcpsockethandler.cpp
+      net_asynch_ssl_tcpsockethandler.h
+      net_asynch_ssl_tcpsockethandler.inl
+      ${source_files})
+endif (SSL_SUPPORT)
 if (WIN32)
  set (source_files
       ../include/${PROJECT_NAME}_config.h

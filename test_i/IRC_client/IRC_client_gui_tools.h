@@ -25,7 +25,9 @@
 
 #include "ace/Global_Macros.h"
 
+#if defined (GTK_USE)
 #include "common_ui_gtk_common.h"
+#endif // GTK_USE
 
 #include "IRC_client_gui_common.h"
 
@@ -36,14 +38,16 @@ class IRC_Client_UI_Tools
 {
  public:
   // *WARNING*: these members must be called with
-  //            IRC_Client_GTK_CBData::Common_UI_GTKState::lock held !
+  //            IRC_Client_UI_CBData::Common_UI_GTKState_t::lock held !
   static bool current (const std::string&,                  // (connection-) timestamp
                        const IRC_Client_GUI_Connections_t&, // connections
                        std::string&,                        // return value: nickname
                        std::string&);                       // return value: channel
+#if defined (GTK_USE)
   // *WARNING*: this requires gdk_threads_enter()/leave() protection !
-  static IRC_Client_GUI_Connection* current (const Common_UI_GTK_State&,           // GTK state
+  static IRC_Client_GUI_Connection* current (Common_UI_GTK_State_t&,               // GTK state
                                              const IRC_Client_GUI_Connections_t&); // connections
+#endif // GTK_USE
 
  private:
   ACE_UNIMPLEMENTED_FUNC (IRC_Client_UI_Tools ())

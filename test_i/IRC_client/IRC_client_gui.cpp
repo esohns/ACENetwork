@@ -46,7 +46,7 @@
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
 
-//#include "common_file_tools.h"
+#include "common_file_tools.h"
 #include "common_tools.h"
 
 #include "common_log_tools.h"
@@ -81,7 +81,11 @@
 #include "test_i_defines.h"
 
 #include "IRC_client_defines.h"
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "IRC_client_gui_callbacks.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 #include "IRC_client_gui_common.h"
 #include "IRC_client_gui_defines.h"
 #include "IRC_client_messageallocator.h"
@@ -446,7 +450,7 @@ do_initializeSignals (bool useReactor_in,
 void
 do_work (bool useThreadPool_in,
          unsigned int numberOfDispatchThreads_in,
-         struct IRC_Client_GTK_CBData& CBData_in,
+         struct IRC_Client_UI_CBData& CBData_in,
          const std::string& UIDefinitionFile_in,
          const ACE_Time_Value& statisticReportingInterval_in,
          const ACE_Sig_Set& signalSet_in,
@@ -1309,9 +1313,9 @@ ACE_TMAIN (int argc_in,
     return EXIT_FAILURE;
   } // end IF
 
+#if defined (GTK_USE)
   Common_MessageStack_t* logstack_p = NULL;
   ACE_SYNCH_MUTEX* lock_p = NULL;
-#if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
@@ -1322,16 +1326,15 @@ ACE_TMAIN (int argc_in,
 #endif // GTK_USE
 
   struct IRC_Client_Configuration configuration;
-  struct IRC_Client_GTK_CBData gtk_cb_data;
-  gtk_cb_data.configuration = &configuration;
+  struct IRC_Client_UI_CBData ui_cb_data;
+  ui_cb_data.configuration = &configuration;
   ACE_SYNCH_RECURSIVE_MUTEX* lock_2 = NULL;
 #if defined (GTK_USE)
   lock_2 = &state_r.subscribersLock;
 #endif // GTK_USE
   IRC_Client_SignalHandler signal_handler ((use_reactor ? COMMON_SIGNAL_DISPATCH_REACTOR
                                                         : COMMON_SIGNAL_DISPATCH_PROACTOR),
-                                           lock_2,
-                                           false);
+                                           lock_2);
 
   // step5: handle specific program modes
   if (print_version_and_exit)
@@ -1407,10 +1410,10 @@ ACE_TMAIN (int argc_in,
   configuration.streamConfiguration.configuration_.messageAllocator =
     &message_allocator;
 
-  gtk_cb_data.UIFileDirectory = UIDefinitionFile_directory;
+  ui_cb_data.UIFileDirectory = UIDefinitionFile_directory;
 //   userData.phoneBook;
 //   userData.loginOptions.password = ;
-  gtk_cb_data.configuration->protocolConfiguration.loginOptions.nickname =
+  ui_cb_data.configuration->protocolConfiguration.loginOptions.nickname =
       ACE_TEXT_ALWAYS_CHAR (IRC_DEFAULT_NICKNAME);
 //   userData.loginOptions.user.username = ;
   std::string host_name;
@@ -1471,7 +1474,7 @@ ACE_TMAIN (int argc_in,
   // step7: parse configuration file(s) (if any)
   if (Common_File_Tools::isReadable (phonebook_file_name))
     do_parsePhonebookFile (phonebook_file_name,
-                           gtk_cb_data.phoneBook);
+                           ui_cb_data.phoneBook);
   if (!configuration_file_name.empty ())
   {
     IRC_Client_Connections_t connections;
@@ -1483,7 +1486,7 @@ ACE_TMAIN (int argc_in,
     for (IRC_Client_ConnectionsIterator_t iterator = connections.begin ();
          iterator != connections.end ();
          ++iterator)
-      gtk_cb_data.phoneBook.servers.insert (std::make_pair ((*iterator).hostName,
+      ui_cb_data.phoneBook.servers.insert (std::make_pair ((*iterator).hostName,
                                                              *iterator));
   } // end IF
 
@@ -1492,7 +1495,7 @@ ACE_TMAIN (int argc_in,
                    : COMMON_EVENT_DISPATCH_PROACTOR);
 
 #if defined (GTK_USE)
-  gtk_cb_data.progressData.state =
+  ui_cb_data.progressData.state =
     &const_cast<struct Common_UI_GTK_State&> (COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->getR_2 ());
 #endif // GTK_USE
 
@@ -1500,7 +1503,7 @@ ACE_TMAIN (int argc_in,
 #if defined (GTK_USE)
   IRC_Client_GtkBuilderDefinition_t ui_definition (argc_in,
                                                    argv_in,
-                                                   &gtk_cb_data);
+                                                   &ui_cb_data);
   COMMON_UI_GTK_MANAGER_SINGLETON::instance ()->initialize (argc_in,
                                                             argv_in,
                                                             &ui_definition);
@@ -1511,7 +1514,7 @@ ACE_TMAIN (int argc_in,
   timer.start ();
   do_work (use_thread_pool,
            number_of_thread_pool_threads,
-           gtk_cb_data,
+           ui_cb_data,
            ui_definition_file_name,
            ACE_Time_Value (reporting_interval, 0),
            signal_set,

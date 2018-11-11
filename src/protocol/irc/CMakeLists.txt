@@ -29,12 +29,20 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACE>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/Common/cmake>)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/Common/src>)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/Common/src/log>)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/Common/src/timer>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACEStream/cmake>)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACEStream/src>)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACEStream/src/modules/lib>)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACEStream/src/modules/net>)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
@@ -45,25 +53,31 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ATCD/ACE>)
 
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/cmake>)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/src>)
-# target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
-#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/src/ui>)
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../Common/src/log>)
+
+ target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/cmake>)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/src>)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/src/modules/net>)
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../ACEStream/src/modules/stat>)
+
  target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party>)
 endif ()
 #include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../3rd_party/bison)
 target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
+                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../../..>)
+target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../..>)
 target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../client_server>)
-target_include_directories (${PROJECT_NAME}_Protocol_IRC PUBLIC
-                            $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../../..>)
 
 ########### next target ###############
 set (source_files
@@ -134,12 +148,10 @@ foreach (script_file ${script_files})
     ${absolute_script_file})
 endforeach ()
 target_sources (${PROJECT_NAME}_Protocol_IRC
-  PRIVATE stdafx.cpp
-  PRIVATE stdafx.h
-  PRIVATE
-  ${absolute_source_files}
-  INTERFACE
-  ${absolute_script_files})
+                PRIVATE stdafx.cpp
+                PRIVATE stdafx.h
+                PRIVATE ${absolute_source_files}
+                INTERFACE ${absolute_script_files})
 
 #set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/libACENetwork/protocol/irc")
 #set_source_files_properties (${PROJECT_NAME}_Protocol_IRC_SRCS PROPERTIES COMPILE_DEFINITIONS -DIRC_BUILD_DLL)
@@ -169,7 +181,7 @@ if (WIN32)
  target_link_libraries (${PROJECT_NAME}_Protocol_IRC ${ACE_LIBRARY})
  target_link_libraries (${PROJECT_NAME}_Protocol_IRC Common)
  target_link_libraries (${PROJECT_NAME}_Protocol_IRC ACEStream)
-endif ()
+endif (WIN32)
 
 # add PCH
 set_target_properties (${PROJECT_NAME}_Protocol_IRC PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")

@@ -40,7 +40,7 @@
 // forward declarations
 //class BitTorrent_Client_Message;
 //class BitTorrent_Client_SessionMessage;
-struct BitTorrent_Client_GTK_CBData;
+struct BitTorrent_Client_UI_CBData;
 
 typedef BitTorrent_Module_Streamer_T<ACE_MT_SYNCH,
                                      Common_TimePolicy_t,
@@ -132,7 +132,7 @@ DATASTREAM_MODULE_DUPLEX (struct BitTorrent_Client_PeerSessionData,             
 //                                        struct BitTorrent_Client_Configuration,
 //                                        struct BitTorrent_Client_ConnectionState,
 //                                        struct BitTorrent_Client_SessionState,
-//                                        struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_PeerHandler_t;
+//                                        struct BitTorrent_Client_UI_CBData> BitTorrent_Client_PeerHandler_t;
 
 //DATASTREAM_MODULE_INPUT_ONLY_T (struct BitTorrent_Client_PeerSessionData,            // session data
 //                                enum Stream_SessionMessageType,                      // session event type
@@ -157,7 +157,7 @@ DATASTREAM_MODULE_DUPLEX (struct BitTorrent_Client_PeerSessionData,             
 //                                           struct BitTorrent_Client_Configuration,
 //                                           struct BitTorrent_Client_ConnectionState,
 //                                           struct BitTorrent_Client_SessionState,
-//                                           struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_TrackerHandler_t;
+//                                           struct BitTorrent_Client_UI_CBData> BitTorrent_Client_TrackerHandler_t;
 
 //DATASTREAM_MODULE_INPUT_ONLY_T (struct BitTorrent_Client_TrackerSessionData,         // session data
 //                                enum Stream_SessionMessageType,                      // session event type

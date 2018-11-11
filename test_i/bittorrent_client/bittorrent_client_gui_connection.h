@@ -33,35 +33,35 @@
 #include "bittorrent_icontrol.h"
 
 // forward declaration(s)
-struct BitTorrent_Client_GTK_CBData;
+struct BitTorrent_Client_UI_CBData;
 class BitTorrent_Client_GUI_Connection;
 
 class BitTorrent_Client_GUI_MessageHandler
- : public Common_IGet_T<struct BitTorrent_Client_GTK_CBData>
+ : public Common_IGet_T<struct BitTorrent_Client_UI_CBData>
 {
  public:
   // ctor for default handler (== server log)
-  BitTorrent_Client_GUI_MessageHandler (struct BitTorrent_Client_GTK_CBData*, // GTK state handle
-                                        BitTorrent_Client_GUI_Connection*,    // connection handle
-                                        const std::string&);                  // connection timestamp
+  BitTorrent_Client_GUI_MessageHandler (struct BitTorrent_Client_UI_CBData*, // UI state handle
+                                        BitTorrent_Client_GUI_Connection*,   // connection handle
+                                        const std::string&);                 // connection timestamp
   // *NOTE*: used to lookup the corresponding builder
   // ctor for regular channel handler
   // *WARNING*: must be called with
-  //            BitTorrent_Client_GTK_CBData::Common_UI_GTKState::lock held !
-  BitTorrent_Client_GUI_MessageHandler (struct BitTorrent_Client_GTK_CBData*, // GTK state handle
-                                        BitTorrent_Client_GUI_Connection*,    // connection handle
-                                        BitTorrent_IControl*,                 // controller handle
-                                        const std::string&,                   // identifier (channel/nick)
-                                        const std::string&,                   // UI (glade) file directory
-                                        const std::string&,                   // connection timestamp
+  //            BitTorrent_Client_UI_CBData::Common_UI_GTKState::lock held !
+  BitTorrent_Client_GUI_MessageHandler (struct BitTorrent_Client_UI_CBData*, // UI state handle
+                                        BitTorrent_Client_GUI_Connection*,   // connection handle
+                                        BitTorrent_IControl*,                // controller handle
+                                        const std::string&,                  // identifier (channel/nick)
+                                        const std::string&,                  // UI (glade) file directory
+                                        const std::string&,                  // connection timestamp
                                         // *NOTE*: used to lookup the corresponding builder
-                                        bool = true);                         // locked access (GDK) ?
+                                        bool = true);                        // locked access (GDK) ?
   // *WARNING*: must be called with
-  //            BitTorrent_Client_GTK_CBData::Common_UI_GTKState::lock held !
+  //            BitTorrent_Client_UI_CBData::Common_UI_GTKState::lock held !
   virtual ~BitTorrent_Client_GUI_MessageHandler ();
 
   // implement Common_IGet_T
-  virtual const struct BitTorrent_Client_GTK_CBData& get () const;
+  virtual const struct BitTorrent_Client_UI_CBData& get () const;
 
   bool isPrivateDialog () const;
   bool isServerLog () const;
@@ -121,7 +121,7 @@ class BitTorrent_Client_GUI_MessageHandler
   // helper methods
   void clearMembers (bool = true); // locked access ?
 
-  struct BitTorrent_Client_GTK_CBData* CBData_;
+  struct BitTorrent_Client_UI_CBData* CBData_;
   bool                                 isFirstMemberListMsg_;
   bool                                 isPrivateDialog_;
 //  BitTorrent_Client_MessageQueue_t    messageQueue_;

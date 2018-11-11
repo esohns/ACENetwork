@@ -1,5 +1,4 @@
 ﻿option (SSL_SUPPORT "enable SSL support" OFF)
-option (GTK3_SUPPORT "enable Gtk3 support" ON)
 
 if (UNIX)
  include (CheckLibraryExists)
@@ -73,15 +72,6 @@ if (UNIX)
  pkg_check_modules (PKG_LIBXML2 REQUIRED libxml-2.0)
 # pkg_check_modules (PKG_CURSES REQUIRED ncurses panel)
  pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libavformat libswscale)
- if (GTK3_SUPPORT)
-  pkg_check_modules (PKG_GTK3 REQUIRED gtk+-3.0)
- else ()
-  pkg_check_modules (PKG_GTK2 REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0)
- endif ()
-# if ((!PKG_CURSES) OR (!PKG_GTK_GLADE))
-# if (!PKG_GTK_GLADE)
-#  message (FATAL_ERROR "required packages not found, aborting")
-# endif ()
 # *TODO*: repair WIN32 pkgconfig support
 elseif (WIN32)
 # *TODO*: repair pkgconfig support
@@ -153,12 +143,6 @@ if (UNIX)
  include_directories (${PKG_CAP_INCLUDE_DIRS})
  include_directories (${PKG_LIBXML2_INCLUDE_DIRS})
  include_directories (${PKG_FFMPEG_INCLUDE_DIRS})
-# include_directories (${PKG_CURSES_INCLUDE_DIRS})
- if (GTK3_SUPPORT)
-  include_directories (${PKG_GTK3_INCLUDE_DIRS})
- else ()
-  include_directories (${PKG_GTK2_INCLUDE_DIRS})
- endif (GTK3_SUPPORT)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
 
@@ -216,11 +200,10 @@ if (SSL_SUPPORT)
 endif (SSL_SUPPORT)
 
 ############## next target ################
-set (${PROJECT_NAME}_URLStreamLoad_EXE_SRCS
+set (EXECUTABLE url_stream_load)
+set (${EXECUTABLE}_EXE_SRCS
      stdafx.cpp
      stdafx.h
-     test_i_callbacks.cpp
-     test_i_callbacks.h
      test_i_common_modules.h
      test_i_connection_common.h
      test_i_connection_manager_common.h
@@ -243,7 +226,15 @@ set (${PROJECT_NAME}_URLStreamLoad_EXE_SRCS
      test_i_url_stream_load_defines.h
      test_i_url_stream_load_stream_common.h)
 #  test_i_template_instantiations.cpp
-set (${PROJECT_NAME}_URLStreamLoad_EXE_CFG
+if (GUI_SUPPORT)
+ if (GTK_USE)
+  set (${EXECUTABLE_GUI}_EXE_SRCS
+       ${${EXECUTABLE_GUI}_EXE_SRCS}
+       test_i_callbacks.cpp
+       test_i_callbacks.h)
+ endif (GTK_USE)
+endif (GUI_SUPPORT)
+set (${EXECUTABLE}_EXE_CFG
      etc/test_i.glade
      etc/resources.rc)
 
@@ -261,10 +252,9 @@ if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
 endif ()
 
 #string (TOLOWER "${PROJECT_NAME}_URLStreamLoad" EXECUTABLE)
-set (EXECUTABLE url_stream_load)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
-                ${ACENetwork_URLStreamLoad_EXE_SRCS}
+                ${${EXECUTABLE}_EXE_SRCS}
                 etc/test_i.glade)
 set_property (TARGET ${EXECUTABLE} PROPERTY FOLDER "test_i")
 if (WIN32 AND NOT BUILD_TEST_I)
@@ -304,12 +294,6 @@ if (UNIX)
 # target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
 
  target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})
-
- if (GTK3_SUPPORT)
-  target_link_libraries (${EXECUTABLE} ${PKG_GTK3_LIBRARIES})
- else ()
-  target_link_libraries (${EXECUTABLE} ${PKG_GTK2_LIBRARIES})
- endif (GTK3_SUPPORT)
 elseif (WIN32)
  set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
 

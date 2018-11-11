@@ -23,22 +23,35 @@
 
 #include <string>
 
+#include "common.h"
 #include "common_configuration.h"
 
 #include "net_defines.h"
 
 #include "bittorrent_client_network.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
 struct BitTorrent_Client_CursesState;
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
 struct BitTorrent_Client_SignalHandlerConfiguration
  : Common_SignalHandlerConfiguration
 {
   BitTorrent_Client_SignalHandlerConfiguration ()
    : Common_SignalHandlerConfiguration ()
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
    , cursesState (NULL)
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
   {}
 
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
   struct BitTorrent_Client_CursesState* cursesState;
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
 };
 
 struct BitTorrent_Client_Configuration;
@@ -47,7 +60,11 @@ struct BitTorrent_Client_ThreadData
   BitTorrent_Client_ThreadData ()
    : configuration (NULL)
    , controller (NULL)
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
    , cursesState (NULL)
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
    , dispatchState (NULL)
    , filename ()
 //   , groupId (-1)
@@ -55,7 +72,11 @@ struct BitTorrent_Client_ThreadData
 
   struct BitTorrent_Client_Configuration* configuration;
   BitTorrent_Client_IControl_t*           controller;
+#if defined (GUI_SUPPORT)
+#if defined (CURSES_USE)
   struct BitTorrent_Client_CursesState*   cursesState;
+#endif // CURSES_USE
+#endif // GUI_SUPPORT
   struct Common_EventDispatchState*       dispatchState;
   std::string                             filename; // metainfo (aka '.torrent') file URI
 //  int                                     groupId;

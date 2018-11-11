@@ -32,19 +32,19 @@
 #include <mstcpip.h>
 #include <wlanapi.h>
 #else
-#include <linux/if_ether.h>
-#include <linux/if_packet.h>
-#include <net/if.h>
-#include <netinet/ether.h>
+#include "ifaddrs.h"
+#include "linux/if_ether.h"
+#include "linux/if_packet.h"
+#include "net/if.h"
+#include "netinet/ether.h"
 #if defined (NETLINK_SUPPORT)
-#include <linux/genetlink.h>
-#include <linux/netlink.h>
-#include <linux/nl80211.h>
+#include "linux/genetlink.h"
+#include "linux/netlink.h"
+#include "linux/nl80211.h"
 
 #include "netlink/genl/genl.h"
 #include "netlink/msg.h"
 #endif // NETLINK_SUPPORT
-#include "ifaddrs.h"
 #endif // ACE_WIN32 || ACE_WIN64
 
 #include "ace/Configuration.h"
@@ -63,6 +63,7 @@
 #include "common_dbus_defines.h"
 #include "common_dbus_tools.h"
 #endif // DBUS_SUPPORT
+#include "common_string_tools.h"
 
 #include "common_timer_tools.h"
 #elif (defined (ACE_WIN32) || defined (ACE_WIN64))
@@ -2544,7 +2545,7 @@ continue_:
 
   // parse routing tables entries
   done = false;
-  for (nl_message_header_p = reinterpret_cast<struct nlmsghdr*> (buffer);
+  for (nl_message_header_p = reinterpret_cast<struct nlmsghdr*> (buffer_p);
        (NLMSG_OK (nl_message_header_p, received_bytes) && !done);
        nl_message_header_p = NLMSG_NEXT (nl_message_header_p, received_bytes))
   {
@@ -2577,7 +2578,7 @@ continue_:
         case RTA_OIF:
         {
           char buffer_2[IF_NAMESIZE];
-          ACE_OS::memset (buffer_2, 0, sizeof (buffer_2));
+          ACE_OS::memset (buffer_2, 0, sizeof (char[IF_NAMESIZE]));
           if (unlikely (!::if_indextoname (*static_cast<int*> (RTA_DATA (rt_attribute_p)),
                                            buffer_2)))
           {
@@ -2878,7 +2879,7 @@ continue_:
 //    if (((ifaddrs_2->ifa_flags & IFF_UP) == 0) ||
 //        (!ifaddrs_2->ifa_addr))
 //      continue;
-    if (ACE_OS::strcmp (interface_identifier_string.c_str (),
+    if (ACE_OS::strcmp (interface_identifier.c_str (),
                         ifaddrs_2->ifa_name))
       continue;
 
@@ -2894,14 +2895,14 @@ continue_:
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to ACE_INET_Addr::set(): \"%m\", aborting\n")));
-      ::freeifaddrs (ifaddrs_p);
+      ::freeifaddrs (ifaddrs_p); ifaddrs_p = NULL;
       return false;
     } // end IF
     break;
   } // end FOR
 
   // clean up
-  ::freeifaddrs (ifaddrs_p);
+  ::freeifaddrs (ifaddrs_p); ifaddrs_p = NULL;
 #else
   ACE_ASSERT (false);
   ACE_NOTSUP_RETURN (false);
@@ -4863,7 +4864,7 @@ next:
           struct ether_addr ether_addr_s =
               Net_Common_Tools::stringToLinkLayerAddress (value_string_2);
           value_string_2 =
-              Net_Common_Tools::linkLayerAddressToInterfaceIdentifier (ether_addr_s);
+              Net_Common_Tools::linkLayerAddressToInterface (ether_addr_s);
           ACE_ASSERT (!value_string_2.empty ());
         } // end IF
         else
@@ -5087,7 +5088,7 @@ Net_Common_Tools::isIfUpDownManagingInterface (const std::string& interfaceIdent
   {
     converter.getline (buffer_a, sizeof (char[BUFSIZ]));
     buffer_string = buffer_a;
-    if (Common_Tools::isspace (buffer_string))
+    if (Common_String_Tools::isspace (buffer_string))
     {
       if (is_mapping_b)
         mapped_interface_identifier_string.clear ();
@@ -5679,7 +5680,7 @@ Net_Common_Tools::hasDHClientOmapiSupport ()
   {
     converter.getline (buffer_a, sizeof (char[BUFSIZ]));
     buffer_line_string = buffer_a;
-    if (Common_Tools::isspace (buffer_line_string))
+    if (Common_String_Tools::isspace (buffer_line_string))
     {
       is_comment_b = false;
       is_omapi_stanza_b = false;
@@ -6517,7 +6518,7 @@ Net_Common_Tools::DHClientOmapiSupport (bool toggle_in)
   {
     converter.getline (buffer_a, sizeof (char[BUFSIZ]));
     buffer_line_string = buffer_a;
-    if (Common_Tools::isspace (buffer_line_string))
+    if (Common_String_Tools::isspace (buffer_line_string))
     {
       is_comment_b = false;
       ACE_UNUSED_ARG (is_comment_b);

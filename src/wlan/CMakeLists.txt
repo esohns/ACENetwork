@@ -142,20 +142,17 @@ if (UNIX)
  if (NL80211_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                               $<BUILD_INTERFACE:${PKG_NL80211_INCLUDE_DIRS}>)
-  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              "$<BUILD_INTERFACE:${PKG_DBUS_INCLUDE_DIRS}>")
+#  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+#                              "$<BUILD_INTERFACE:${PKG_DBUS_INCLUDE_DIRS}>")
 
-  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/dbus>)
+#  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+#                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/dbus>)
  endif (NL80211_SUPPORT)
  if (DBUS_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                               "$<BUILD_INTERFACE:${PKG_DBUS_INCLUDE_DIRS}>")
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                               "$<BUILD_INTERFACE:${PKG_NETWORKMANAGER_INCLUDE_DIRS}>")
-
-  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/dbus>)
  endif (DBUS_SUPPORT)
 # if (DHCLIENT_SUPPORT)
 #  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
@@ -167,7 +164,13 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE>)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/cmake>)
+ target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src>)
+ if (DBUS_SUPPORT)
+  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/dbus>)
+ endif (DBUS_SUPPORT)
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/error>)
  if (NL80211_SUPPORT)
@@ -180,7 +183,11 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/xml>)
 
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/cmake>)
+ target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src>)
+ target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/lib>)
 elseif (WIN32)
  if (LIBXML2_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC

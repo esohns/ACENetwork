@@ -29,8 +29,14 @@
 
 #include "common_isubscribe.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager.h"
+#elif defined (WXWIDGETS_USE)
+//#include "common_ui_wxwidgets_common.h"
+#endif
+#endif // GUI_SUPPORT
 
 #include "stream_common.h"
 #include "stream_control_message.h"
@@ -40,7 +46,13 @@
 #include "net_iconnector.h"
 
 #include "test_u_common.h"
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_u_gtk_common.h"
+#else
+#include "test_u_wxwidgets_common.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 #include "test_u_stream_common.h"
 
 #include "test_u_configuration.h"
@@ -112,6 +124,7 @@ struct Client_Configuration
 
 //////////////////////////////////////////
 
+#if defined (GUI_SUPPORT)
 //typedef Stream_ISessionDataNotify_T<Stream_SessionId_t,
 //                                    struct Test_U_StreamSessionData,
 //                                    enum Stream_SessionMessageType,
@@ -122,11 +135,19 @@ struct Client_Configuration
 
 //typedef Common_ISubscribe_T<ClientServer_ISessionNotify_t> ClientServer_ISubscribe_t;
 
-struct Client_GTK_CBData
+struct Client_UI_CBData
+#if defined (GTK_USE)
  : Test_U_GTK_CBData
+#elif defined (WXWIDGETS_USE)
+ : Test_U_WxWidgets_CBData
+#endif
 {
-  Client_GTK_CBData ()
+  Client_UI_CBData ()
+#if defined (GTK_USE)
    : Test_U_GTK_CBData ()
+#elif defined (WXWIDGETS_USE)
+   : Test_U_WxWidgets_CBData ()
+#endif
    , configuration (NULL)
    , subscribers ()
   {}
@@ -138,12 +159,10 @@ struct Client_GTK_CBData
 
 //////////////////////////////////////////
 
-typedef Common_UI_GtkBuilderDefinition_T<struct Common_UI_GTK_State,
-                                         struct Client_GTK_CBData> Client_GtkBuilderDefinition_t;
-
-//typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-//                                struct Client_GTK_CBData> Client_GTK_Manager_t;
-//typedef ACE_Singleton<Client_GTK_Manager_t,
-//                      typename ACE_MT_SYNCH::MUTEX> CLIENT_UI_GTK_MANAGER_SINGLETON;
+#if defined (GTK_USE)
+typedef Common_UI_GtkBuilderDefinition_T<Common_UI_GTK_State_t,
+                                         struct Client_UI_CBData> Client_GtkBuilderDefinition_t;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #endif

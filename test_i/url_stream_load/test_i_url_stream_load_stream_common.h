@@ -31,16 +31,24 @@
 #include "ace/Singleton.h"
 #include "ace/Time_Value.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "gtk/gtk.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "common.h"
 #include "common_istatistic.h"
 #include "common_isubscribe.h"
 #include "common_time_common.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_manager.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "stream_base.h"
 #include "stream_common.h"

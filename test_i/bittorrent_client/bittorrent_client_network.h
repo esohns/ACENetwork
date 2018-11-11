@@ -51,6 +51,8 @@
 #include "bittorrent_isession.h"
 #include "bittorrent_network.h"
 
+//#include "bittorrent_client_stream_common.h"
+
 //////////////////////////////////////////
 
 struct BitTorrent_Client_PeerConnectionConfiguration;
@@ -66,7 +68,7 @@ struct BitTorrent_Client_PeerSocketHandlerConfiguration
    , userData (NULL)
   {
     socketConfiguration = &socketConfiguration_2;
-  };
+  }
 
   struct Net_TCPSocketConfiguration                     socketConfiguration_2;
   struct BitTorrent_Client_PeerConnectionConfiguration* connectionConfiguration;
@@ -87,7 +89,7 @@ struct BitTorrent_Client_TrackerSocketHandlerConfiguration
    , userData (NULL)
   {
     socketConfiguration = &socketConfiguration_2;
-  };
+  }
 
   struct Net_TCPSocketConfiguration                        socketConfiguration_2;
   struct BitTorrent_Client_TrackerConnectionConfiguration* connectionConfiguration;
@@ -96,7 +98,17 @@ struct BitTorrent_Client_TrackerSocketHandlerConfiguration
 };
 
 struct BitTorrent_AllocatorConfiguration;
-struct BitTorrent_Client_PeerStreamConfiguration;
+//struct BitTorrent_Client_PeerStreamConfiguration;
+struct BitTorrent_Client_PeerStreamConfiguration
+ : BitTorrent_PeerStreamConfiguration
+{
+  BitTorrent_Client_PeerStreamConfiguration ()
+   : BitTorrent_PeerStreamConfiguration ()
+   , userData (NULL)
+  {}
+
+  struct BitTorrent_Client_PeerUserData* userData;
+};
 struct BitTorrent_Client_PeerModuleHandlerConfiguration;
 typedef Stream_Configuration_T<//stream_name_string_,
                                struct BitTorrent_AllocatorConfiguration,
@@ -121,7 +133,7 @@ struct BitTorrent_Client_PeerConnectionConfiguration
    , connectionManager (NULL)
    , socketHandlerConfiguration ()
    , userData (NULL)
-  {};
+  {}
 
   BitTorrent_Client_PeerIConnection_Manager_t*            connectionManager;
   struct BitTorrent_Client_PeerSocketHandlerConfiguration socketHandlerConfiguration;
@@ -165,7 +177,7 @@ struct BitTorrent_Client_TrackerConnectionConfiguration
    , connectionManager (NULL)
    , socketHandlerConfiguration ()
    , userData (NULL)
-  {};
+  {}
 
   BitTorrent_Client_TrackerIConnection_Manager_t*            connectionManager;
   struct BitTorrent_Client_TrackerSocketHandlerConfiguration socketHandlerConfiguration;
@@ -264,7 +276,7 @@ struct BitTorrent_Client_PeerConnectionState
    , connection (NULL)
    , session (NULL)
    , userData (NULL)
-  {};
+  {}
 
   struct BitTorrent_Client_Configuration* configuration;
   BitTorrent_Client_IPeerConnection_t*    connection;
@@ -281,7 +293,7 @@ struct BitTorrent_Client_TrackerConnectionState
    , connection (NULL)
    , session (NULL)
    , userData (NULL)
-  {};
+  {}
 
   struct BitTorrent_Client_Configuration*   configuration;
   BitTorrent_Client_ITrackerConnection_t*   connection;
@@ -306,7 +318,7 @@ struct BitTorrent_Client_SessionConfiguration
    , controller (NULL)
    , trackerConnectionConfiguration (NULL)
    , trackerConnectionManager (NULL)
-  {};
+  {}
 
   BitTorrent_Client_PeerConnectionConfiguration_t*    connectionConfiguration;
   BitTorrent_Client_PeerConnection_Manager_t*         connectionManager;

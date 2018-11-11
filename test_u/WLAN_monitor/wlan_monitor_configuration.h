@@ -24,8 +24,10 @@
 #include "net_common.h"
 #include "net_configuration.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_u_gtk_common.h"
-
-#include "wlan_monitor_configuration.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #endif

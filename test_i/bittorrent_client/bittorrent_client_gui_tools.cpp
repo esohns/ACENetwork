@@ -80,8 +80,10 @@
 //  return true;
 //}
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 BitTorrent_Client_GUI_Session_t*
-BitTorrent_Client_UI_Tools::current (const Common_UI_GTK_State& GTKState_in,
+BitTorrent_Client_UI_Tools::current (const Common_UI_GTK_State_t& GTKState_in,
                                      const BitTorrent_Client_GUI_Sessions_t& sessions_in)
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_UI_Tools::current"));
@@ -143,3 +145,5 @@ BitTorrent_Client_UI_Tools::current (const Common_UI_GTK_State& GTKState_in,
 
   return result_p;
 }
+#endif // GTK_USE
+#endif // GUI_SUPPORT

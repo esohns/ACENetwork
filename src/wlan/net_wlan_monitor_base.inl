@@ -535,19 +535,34 @@ Net_WLAN_Monitor_Base_T<AddressType,
   } // end lock scope
 }
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
 template <typename AddressType,
-          typename ConfigurationType>
+          typename ConfigurationType
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+          >
+#else
+          ,ACE_SYNCH_DECL,
+          typename TimePolicyType>
+#endif // ACE_WIN32 || ACE_WIN64
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 const WLAN_SIGNAL_QUALITY
+#else
+const unsigned int
+#endif // ACE_WIN32 || ACE_WIN64
 Net_WLAN_Monitor_Base_T<AddressType,
-                        ConfigurationType>::get_3 () const
+                        ConfigurationType
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                       >::get_4 () const
+#else
+                        ,ACE_SYNCH_USE,
+                        TimePolicyType>::get_4 () const
+#endif // ACE_WIN32 || ACE_WIN64
 {
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::get_3"));
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::get_4"));
 
   // sanity check(s)
   if (unlikely (!isActive_))
     return 0;
-  std::string SSID_string = SSID ();
+  std::string SSID_string = this->SSID ();
   if (unlikely (SSID_string.empty ()))
     return 0;
 
@@ -560,7 +575,6 @@ Net_WLAN_Monitor_Base_T<AddressType,
 
   return 0;
 }
-#endif // ACE_WIN32 || ACE_WIN64
 
 template <typename AddressType,
           typename ConfigurationType
@@ -903,6 +917,8 @@ Net_WLAN_Monitor_Base_T<AddressType,
     }
     case NET_WLAN_MONITOR_STATE_IDLE:
     {
+      bool essid_is_cached = false;
+
       // *NOTE*: actually 'set' intermediate states to support atomic state
       //         transition notifications
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
@@ -968,7 +984,6 @@ continue_:
       // sanity check(s)
       ACE_ASSERT (configuration_);
 
-      bool essid_is_cached = false;
       { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
         // check cache whether the configured ESSID (if any) is known
         Net_WLAN_AccessPointCacheConstIterator_t iterator =
@@ -2315,13 +2330,13 @@ Net_WLAN_Monitor_Base_T<AddressType,
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Monitor_Base_T::onConnect"));
 
+  struct Net_WLAN_AccessPointState access_point_state_s;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   // sanity check(s)
   ACE_ASSERT (clientHandle_ != ACE_INVALID_HANDLE);
   ACE_ASSERT (configuration_);
   ACE_ASSERT (!configuration_->SSID.empty ());
 
-  struct Net_WLAN_AccessPointState access_point_state_s;
   { ACE_GUARD (ACE_MT_SYNCH::RECURSIVE_MUTEX, aGuard, subscribersLock_);
     // check cache whether the configured ESSID (if any) is known
     Net_WLAN_AccessPointCacheConstIterator_t iterator =
@@ -2409,20 +2424,25 @@ Net_WLAN_Monitor_Base_T<AddressType,
     return;
   } // end IF
 
+  struct ether_addr ether_addr_s;
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
+  ether_addr_s =
+      Net_Common_Tools::interfaceToLinkLayerAddress_2 (interfaceIdentifier_in);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\"%s\": (MAC: %s) connected to access point (MAC: %s; SSID: %s): %s <---> %s\n"),
               ACE_TEXT (Net_Common_Tools::interfaceToString (interfaceIdentifier_in).c_str ()),
-              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&Net_Common_Tools::interfaceToLinkLayerAddress_2 (interfaceIdentifier_in)), NET_LINKLAYER_802_11).c_str ()),
+              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&access_point_state_s.linkLayerAddress.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (SSID_in.c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_).c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (peerSAP_).c_str ())));
 #else
+  ether_addr_s =
+      Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in);
   ACE_DEBUG ((LM_DEBUG,
               ACE_TEXT ("\"%s\": (MAC: %s) connected to access point (MAC: %s; SSID: %s): %s <---> %s\n"),
               ACE_TEXT (interfaceIdentifier_in.c_str ()),
-              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&Net_Common_Tools::interfaceToLinkLayerAddress (interfaceIdentifier_in)), NET_LINKLAYER_802_11).c_str ()),
+              ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&ether_addr_s.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (Net_Common_Tools::LinkLayerAddressToString (reinterpret_cast<const unsigned char*> (&access_point_state_s.linkLayerAddress.ether_addr_octet), NET_LINKLAYER_802_11).c_str ()),
               ACE_TEXT (SSID_in.c_str ()),
               ACE_TEXT (Net_Common_Tools::IPAddressToString (localSAP_).c_str ()),

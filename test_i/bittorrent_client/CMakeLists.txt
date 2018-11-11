@@ -293,7 +293,8 @@ install (TARGETS ${EXECUTABLE}
 #         DESTINATION etc/lib${PROJECT_NAME}/test_i COMPONENT config)
 
 ########### next target ###############
-set (bittorrent_client_gui_SRCS
+set (EXECUTABLE_GUI bittorrent_client_gui)
+set (${EXECUTABLE_GUI}_EXE_SRCS
      stdafx.cpp
      stdafx.h
      bittorrent_client_common.h
@@ -301,8 +302,6 @@ set (bittorrent_client_gui_SRCS
      bittorrent_client_configuration.h
      bittorrent_client_defines.h
      bittorrent_client_gui.cpp
-     bittorrent_client_gui_callbacks.cpp
-     bittorrent_client_gui_callbacks.h
      bittorrent_client_gui_common.h
      bittorrent_client_gui_defines.h
      bittorrent_client_gui_session.cpp
@@ -325,13 +324,20 @@ set (bittorrent_client_gui_SRCS
      bittorrent_client_streamhandler.inl
      bittorrent_client_tools.cpp
      bittorrent_client_tools.h)
+if (GUI_SUPPORT)
+ if (GTK_USE)
+  set (${EXECUTABLE_GUI}_EXE_SRCS
+       ${${EXECUTABLE_GUI}_EXE_SRCS}
+       bittorrent_client_gui_callbacks.cpp
+       bittorrent_client_gui_callbacks.h)
+ endif (GTK_USE)
+endif (GUI_SUPPORT)
 
 #set_source_files_properties (${bittorrent_client_gui_SRCS} PROPERTIES COMPILE_DEFINITIONS DATADIR="/usr/local/share/RPG/config")
 
-set (EXECUTABLE_GUI bittorrent_client_gui)
 add_executable (${EXECUTABLE_GUI}
                 EXCLUDE_FROM_ALL
-                ${bittorrent_client_gui_SRCS})
+                ${${EXECUTABLE_GUI}_EXE_SRCS})
 set_property (TARGET ${EXECUTABLE_GUI} PROPERTY FOLDER "test_i")
 if (WIN32)
  if (NOT BUILD_TEST_I)
@@ -359,15 +365,9 @@ target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
 if (UNIX)
  target_link_libraries (${EXECUTABLE_GUI} rt)
  target_link_libraries (${EXECUTABLE_GUI} ${PKG_CAP_LIBRARIES})
- target_link_libraries (${EXECUTABLE_GUI} iw)
+# target_link_libraries (${EXECUTABLE_GUI} iw)
 # target_link_libraries (${EXECUTABLE_GUI} ${FLEX_LIBRARY})
- target_link_libraries (${EXECUTABLE_GUI} X11)
  target_link_libraries (${EXECUTABLE_GUI} ${PKG_FFMPEG_LIBRARIES})
-# if (GTK3_SUPPORT)
-#  target_link_libraries (${EXECUTABLE_GUI} ${PKG_GTK3_LIBRARIES})
-# else ()
-#  target_link_libraries (${EXECUTABLE_GUI} ${PKG_GTK2_LIBRARIES})
-# endif ()
 elseif (WIN32)
 # target_link_libraries (${EXECUTABLE_GUI} ntdll.lib)
 
@@ -380,7 +380,7 @@ target_link_libraries (${EXECUTABLE_GUI} CommonTimer)
 if (WIN32)
  # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE_GUI} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
-endif ()
+endif (WIN32)
 
 target_link_libraries (${EXECUTABLE_GUI} ACEStream)
 

@@ -36,7 +36,9 @@
 #if defined (GTK_USE)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager.h"
-#endif // GTK_USE
+#elif defined (WXWIDGETS_USE)
+#include "common_ui_wxwidgets_common.h"
+#endif
 #endif // GUI_SUPPORT
 
 #include "net_common.h"
@@ -49,7 +51,9 @@
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
 #include "test_u_gtk_common.h"
-#endif // GTK_USE
+#elif defined (WXWIDGETS_USE)
+#include "test_u_wxwidgets_common.h"
+#endif
 #endif // GUI_SUPPORT
 
 #include "wlan_monitor_configuration.h"
@@ -142,7 +146,18 @@ struct WLANMonitor_UI_GTK_State
 
   WLANMMMonitor_Events_t eventStack;
 };
-#endif // GTK_USE
+#elif defined (WXWIDGETS_USE)
+struct WLANMonitor_UI_WxWidgets_State
+ : Common_UI_wxWidgets_State
+{
+  WLANMonitor_UI_WxWidgets_State ()
+   : Common_UI_wxWidgets_State ()
+   , eventStack ()
+  {}
+
+  WLANMMMonitor_Events_t eventStack;
+};
+#endif
 
 struct WLANMonitor_UI_CBData
 #if defined (GTK_USE)
@@ -161,14 +176,18 @@ struct WLANMonitor_UI_CBData
    , monitor (NULL)
 #if defined (GTK_USE)
    , UIState (NULL)
+#elif defined (WXWIDGETS_USE)
+   , UIState (NULL)
 #endif // GTK_USE
   {}
 
-  struct WLANMonitor_Configuration* configuration;
-  Net_WLAN_IInetMonitor_t*          monitor;
+  struct WLANMonitor_Configuration*      configuration;
+  Net_WLAN_IInetMonitor_t*               monitor;
 #if defined (GTK_USE)
-  struct WLANMonitor_UI_GTK_State*  UIState;
-#endif // GTK_USE
+  struct WLANMonitor_UI_GTK_State*       UIState;
+#elif defined (WXWIDGETS_USE)
+  struct WLANMonitor_UI_WxWidgets_State* UIState;
+#endif
 };
 
 #if defined (GTK_USE)

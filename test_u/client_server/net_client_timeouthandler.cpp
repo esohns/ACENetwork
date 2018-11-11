@@ -60,17 +60,17 @@ Client_TimeoutHandler::Client_TimeoutHandler (enum ActionModeType mode_in,
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
-  ACE_OS::memset (randomStateInitializationBuffer_,
+  ACE_OS::memset (randomStateInitializationBuffer,
                   0,
-                  sizeof (randomStateInitializationBuffer_));
+                  sizeof (char[BUFSIZ]));
   int result =
-    ::initstate_r (Common_Tools::randomSeed_,
-                   randomStateInitializationBuffer_, sizeof (randomStateInitializationBuffer_),
-                   &randomState_);
+    ::initstate_r (Common_Tools::randomSeed,
+                   randomStateInitializationBuffer, sizeof (char[BUFSIZ]),
+                   &randomState);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::initstate_r(): \"%m\", continuing\n")));
-  result = ::srandom_r (Common_Tools::randomSeed_, &randomState_);
+  result = ::srandom_r (Common_Tools::randomSeed, &randomState_);
   if (result == -1)
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::srandom_r(): \"%m\", continuing\n")));

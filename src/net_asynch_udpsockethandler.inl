@@ -18,6 +18,10 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
+#if defined (ACE_LINUX)
+#include "linux/capability.h"
+#endif // ACE_LINUX
+
 #include "ace/Log_Msg.h"
 #include "ace/OS.h"
 #include "ace/OS_Memory.h"
@@ -25,6 +29,9 @@
 
 #include "common_defines.h"
 #include "common_macros.h"
+#if defined (ACE_LINUX)
+#include "common_tools.h"
+#endif // ACE_LINUX
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "common_error_tools.h"

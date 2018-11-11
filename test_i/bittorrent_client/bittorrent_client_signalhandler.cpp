@@ -42,22 +42,10 @@
 #include "bittorrent_client_network.h"
 
 BitTorrent_Client_SignalHandler::BitTorrent_Client_SignalHandler (enum Common_SignalDispatchType dispatchMode_in,
-                                                                  ACE_SYNCH_RECURSIVE_MUTEX* lock_in
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
-                                                                  ,bool useCursesLibrary_in)
-#else
-                                                                 )
-#endif // CURSES_USE
-#endif // GUI_SUPPORT
+                                                                  ACE_SYNCH_RECURSIVE_MUTEX* lock_in)
  : inherited (dispatchMode_in,
               lock_in,
               this) // event handler handle
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
- , useCursesLibrary_ (useCursesLibrary_in)
-#endif // CURSES_USE
-#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_SignalHandler::BitTorrent_Client_SignalHandler"));
 
@@ -78,7 +66,8 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     case SIGINT:
     case SIGTERM:
 // *PORTABILITY*: this isn't portable: on Windows SIGQUIT and SIGHUP are not defined...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
     case SIGHUP:
     case SIGQUIT:
 #endif
@@ -95,10 +84,10 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
     }
 // *PORTABILITY*: this isn't portable: on Windows SIGUSR1 and SIGUSR2 are not defined,
 // so we handle SIGBREAK (21) and SIGABRT (22) instead...
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-    case SIGUSR1:
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    case SIGBREAK:
 #else
-  case SIGBREAK:
+    case SIGUSR1:
 #endif
     {
 //      // (try to) connect
@@ -106,10 +95,10 @@ BitTorrent_Client_SignalHandler::handle (const struct Common_Signal& signal_in)
 
       break;
     }
-#if !defined (ACE_WIN32) && !defined (ACE_WIN64)
-    case SIGUSR2:
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+    case SIGABRT:
 #else
-  case SIGABRT:
+    case SIGUSR2:
 #endif
     {
       // abort connection

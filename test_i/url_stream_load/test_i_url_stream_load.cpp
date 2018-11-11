@@ -83,7 +83,11 @@
 
 #include "http_defines.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_i_callbacks.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 #include "test_i_common.h"
 #include "test_i_connection_common.h"
 #include "test_i_connection_manager_common.h"
@@ -529,9 +533,7 @@ do_work (bool debugParser_in,
          const ACE_INET_Addr& remoteHost_in,
          struct Test_I_URLStreamLoad_Configuration& configuration_in,
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-         struct Test_I_URLStreamLoad_GTK_CBData& CBData_in,
-#endif // GTK_USE
+         struct Test_I_URLStreamLoad_UI_CBData& CBData_in,
 #endif // GUI_SUPPORT
          const ACE_Sig_Set& signalSet_in,
          const ACE_Sig_Set& ignoredSignalSet_in,
@@ -544,11 +546,11 @@ do_work (bool debugParser_in,
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
   // step0a: initialize configuration and stream
-#if defined (GUI_SUPPORT) && defined (GTK_USE)
+#if defined (GUI_SUPPORT)
   Test_I_EventHandler message_handler (&CBData_in);
 #else
   Test_I_EventHandler message_handler;
-#endif // GUI_SUPPORT && GTK_USE
+#endif // GUI_SUPPORT
   Test_I_Module_EventHandler_Module event_handler_module (NULL,
                                                           ACE_TEXT_ALWAYS_CHAR (MODULE_MISC_MESSAGEHANDLER_DEFAULT_NAME_STRING));
 
@@ -643,13 +645,15 @@ do_work (bool debugParser_in,
   ACE_ASSERT (timer_manager_p);
   struct Common_TimerConfiguration timer_configuration;
   int group_id = -1;
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   Common_UI_GTK_Manager_t* gtk_manager_p = NULL;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   if (useReactor_in)
-    configuration_in.dispatchConfiguration.numberOfReactorThreads =
-      1;
+    configuration_in.dispatchConfiguration.numberOfReactorThreads = 1;
   else
-    configuration_in.dispatchConfiguration.numberOfProactorThreads =
-      1;
+    configuration_in.dispatchConfiguration.numberOfProactorThreads = 1;
   struct Common_EventDispatchState event_dispatch_state_s;
   event_dispatch_state_s.configuration =
     &configuration_in.dispatchConfiguration;
@@ -930,9 +934,9 @@ ACE_TMAIN (int argc_in,
   Common_MessageStack_t* logstack_p = NULL;
   ACE_SYNCH_MUTEX* lock_p = NULL;
 #if defined (GUI_SUPPORT)
+  struct Test_I_URLStreamLoad_UI_CBData ui_cb_data;
 #if defined (GTK_USE)
   std::string gtk_rc_file;
-  struct Test_I_URLStreamLoad_GTK_CBData gtk_cb_data;
   Common_UI_GTK_Manager_t* gtk_manager_p =
     COMMON_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);
@@ -961,7 +965,7 @@ ACE_TMAIN (int argc_in,
 #if defined (GTK_USE)
   Test_I_URLStreamLoad_GtkBuilderDefinition_t ui_definition (argc_in,
                                                              argv_in,
-                                                             &gtk_cb_data);
+                                                             &ui_cb_data);
 #endif // GTK_USE
 #endif // GUI_SUPPORT
   ACE_High_Res_Timer timer;
@@ -1183,6 +1187,7 @@ ACE_TMAIN (int argc_in,
   if (!ui_definition_file.empty ())
   {
 #if defined (GUI_SUPPORT)
+    ui_cb_data.configuration = &configuration;
 #if defined (GTK_USE)
     state_r.argc = argc_in;
     state_r.argv = argv_in;
@@ -1190,9 +1195,8 @@ ACE_TMAIN (int argc_in,
       std::make_pair (ui_definition_file, static_cast<GtkBuilder*> (NULL));
     state_r.eventHooks.finiHook = idle_finalize_UI_cb;
     state_r.eventHooks.initHook = idle_initialize_UI_cb;
-    gtk_cb_data.configuration = &configuration;
-    gtk_cb_data.progressData.state = &state_r;
-    //gtk_cb_data.userData = &configuration.userData;
+    ui_cb_data.progressData.state = &state_r;
+    //ui_cb_data.userData = &configuration.userData;
     if (!gtk_manager_p->initialize (argc_in,
                                     argv_in,
                                     &ui_definition))
@@ -1217,9 +1221,7 @@ ACE_TMAIN (int argc_in,
            address,
            configuration,
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-           gtk_cb_data,
-#endif // GTK_USE
+           ui_cb_data,
 #endif // GUI_SUPPORT
            signal_set,
            ignored_signal_set,

@@ -42,20 +42,20 @@
 
 #include "net_macros.h"
 
-#include "test_i_callbacks.h"
-#include "test_i_defines.h"
-
-#if defined (GUI_SUPPORT) && defined (GTK_USE)
-Test_I_EventHandler::Test_I_EventHandler (struct Test_I_URLStreamLoad_GTK_CBData* CBData_in)
-#else
-Test_I_EventHandler::Test_I_EventHandler ()
-#endif // GUI_SUPPORT && GTK_USE
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
- : CBData_ (CBData_in)
-#else
- : CBData_ (NULL)
+#include "test_i_callbacks.h"
 #endif // GTK_USE
+#endif // GUI_SUPPORT
+#include "test_i_defines.h"
+
+Test_I_EventHandler::Test_I_EventHandler (
+#if defined (GUI_SUPPORT)
+                                          struct Test_I_URLStreamLoad_UI_CBData* CBData_in
+#endif // GUI_SUPPORT
+                                         )
+#if defined (GUI_SUPPORT)
+ : CBData_ (CBData_in)
  , sessionDataMap_ ()
 #else
  : sessionDataMap_ ()
@@ -183,9 +183,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
   // sanity check(s)
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
   ACE_ASSERT (CBData_);
-#endif // GTK_USE
 #endif // GUI_SUPPORT
 
 #if defined (GUI_SUPPORT)
@@ -199,8 +197,8 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 #endif // GTK_USE
 #endif // GUI_SUPPORT
 
-  CBData_->progressData.transferred += message_in.total_length ();
 #if defined (GUI_SUPPORT)
+  CBData_->progressData.transferred += message_in.total_length ();
 #if defined (GTK_USE)
   state_r.eventStack.push (COMMON_UI_EVENT_DATA);
 #endif // GTK_USE
@@ -216,9 +214,7 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
 
   // sanity check(s)
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
   ACE_ASSERT (CBData_);
-#endif // GTK_USE
 #endif // GUI_SUPPORT
   SESSION_DATA_MAP_ITERATOR_T iterator = sessionDataMap_.find (sessionId_in);
   ACE_ASSERT (iterator != sessionDataMap_.end ());
@@ -257,7 +253,9 @@ Test_I_EventHandler::notify (Stream_SessionId_t sessionId_in,
                       ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
       } // end IF
 
+#if defined (GUI_SUPPORT)
       CBData_->progressData.statistic = (*iterator).second->statistic;
+#endif // GUI_SUPPORT
 
       if ((*iterator).second->lock)
       {

@@ -27,7 +27,11 @@
 #include "ace/INET_Addr.h"
 #include "ace/Synch_Traits.h"
 
-#include <gtk/gtk.h>
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+#include "gtk/gtk.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "common_iget.h"
 
@@ -51,15 +55,21 @@ class BitTorrent_Client_GUI_Session_T
 {
  public:
   BitTorrent_Client_GUI_Session_T (const struct BitTorrent_Client_Configuration&, // configuration
-                                   const struct Common_UI_GTK_State&,             // GTK state
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+                                   const Common_UI_GTK_State_t&,                  // GTK state
                                    guint,                                         // (statusbar) context id
+#endif // GTK_USE
+#endif // GUI_SUPPORT
                                    const std::string&,                            // (session log tab) label
+#if defined (GUI_SUPPORT)
                                    const std::string&,                            // UI (glade) file directory
+#endif // GUI_SUPPORT
                                    ///////
                                    BitTorrent_Client_IControl_t*,                 // controller handle
                                    const std::string&);                           // metainfo (aka '.torrent') file name
   // *WARNING*: must be called with
-  //            BitTorrent_Client_GTK_CBData::Common_UI_GTKState::lock held !
+  //            BitTorrent_Client_UI_CBData::Common_UI_GTKState::lock held !
   virtual ~BitTorrent_Client_GUI_Session_T ();
 
 //  void initialize (struct BitTorrent_Client_SessionState*, // session state handle
@@ -100,9 +110,13 @@ class BitTorrent_Client_GUI_Session_T
 //              bool = true); // locked access ?
 
   ConnectionCBDataType CBData_;
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   guint                contextId_;
+#endif // GTK_USE
 //  struct BitTorrent_Client_SessionState*     sessionState_;
   std::string          UIFileDirectory_;
+#endif // GUI_SUPPORT
 };
 
 // include template definition

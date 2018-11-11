@@ -67,7 +67,7 @@ typedef BitTorrent_Session_T<struct BitTorrent_Client_PeerSocketHandlerConfigura
                              struct BitTorrent_Client_PeerUserData,
                              struct BitTorrent_Client_TrackerUserData,
                              BitTorrent_Client_IControl_t,
-                             struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_Session_t;
+                             struct BitTorrent_Client_UI_CBData> BitTorrent_Client_Session_t;
 typedef BitTorrent_Session_T<struct BitTorrent_Client_PeerSocketHandlerConfiguration,
                              struct BitTorrent_Client_TrackerSocketHandlerConfiguration,
                              BitTorrent_Client_PeerConnectionConfiguration_t,
@@ -89,7 +89,7 @@ typedef BitTorrent_Session_T<struct BitTorrent_Client_PeerSocketHandlerConfigura
                              struct BitTorrent_Client_PeerUserData,
                              struct BitTorrent_Client_TrackerUserData,
                              BitTorrent_Client_IControl_t,
-                             struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_AsynchSession_t;
+                             struct BitTorrent_Client_UI_CBData> BitTorrent_Client_AsynchSession_t;
 
 //////////////////////////////////////////
 

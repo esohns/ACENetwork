@@ -34,7 +34,11 @@
 #include "common_timer_manager_common.h"
 #include "common_tools.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "common_ui_gtk_manager.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "net_macros.h"
 

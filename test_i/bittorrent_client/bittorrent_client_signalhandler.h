@@ -39,15 +39,7 @@ class BitTorrent_Client_SignalHandler
 
  public:
   BitTorrent_Client_SignalHandler (enum Common_SignalDispatchType,    // dispatch mode
-                                   ACE_SYNCH_RECURSIVE_MUTEX*         // lock handle
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
-                                   ///////
-                                   ,bool = TEST_I_SESSION_USE_CURSES); // use curses library ?
-#else
-                                  );
-#endif // CURSES_USE
-#endif // GUI_SUPPORT
+                                   ACE_SYNCH_RECURSIVE_MUTEX*);       // lock handle
   inline virtual ~BitTorrent_Client_SignalHandler () {}
 
   // implement Common_ISignal
@@ -57,12 +49,6 @@ class BitTorrent_Client_SignalHandler
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_SignalHandler ())
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_SignalHandler (const BitTorrent_Client_SignalHandler&))
   ACE_UNIMPLEMENTED_FUNC (BitTorrent_Client_SignalHandler& operator= (const BitTorrent_Client_SignalHandler&))
-
-#if defined (GUI_SUPPORT)
-#if defined (CURSES_USE)
-  bool useCursesLibrary_;
-#endif // CURSES_USE
-#endif // GUI_SUPPORT
 };
 
 #endif

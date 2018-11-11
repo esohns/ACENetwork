@@ -156,11 +156,10 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ############## next target ################
-set (${PROJECT_NAME}_DHCPClient_EXE_SRCS
+set (EXECUTABLE DHCP_client)
+set (${EXECUTABLE}_EXE_SRCS
      stdafx.cpp
      stdafx.h
-     test_u_callbacks.cpp
-     test_u_callbacks.h
      test_u_common_modules.h
      test_u_connection_common.h
      test_u_connection_manager_common.h
@@ -184,6 +183,23 @@ set (${PROJECT_NAME}_DHCPClient_EXE_SRCS
 #     test_u_stream.h
 #     test_u_stream.inl)
 #  test_u_template_instantiations.cpp
+if (GUI_SUPPORT)
+ if (GTK_USE)
+  set (${EXECUTABLE}_EXE_SRCS
+       ${${EXECUTABLE}_EXE_SRCS}
+       test_u_callbacks.cpp
+       test_u_callbacks.h)
+ elseif (WXWIDGETS_USE)
+#  set (${EXECUTABLE}_EXE_SRCS
+#       ${${EXECUTABLE}_EXE_SRCS}
+#       test_u_wxwidgets_ui.cpp
+#       test_u_wxwidgets_ui.h
+#       test_u_wxwidgets_ui.inl
+#       test_u_wxwidgets_ui_base.cpp
+#       test_u_wxwidgets_ui_base.h)
+ endif ()
+endif (GUI_SUPPORT)
+
 set (${PROJECT_NAME}_DHCPClient_EXE_CFG
      etc/test_u.glade
      etc/resources.rc)
@@ -202,7 +218,6 @@ if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
 endif ()
 
 #string (TOLOWER "${PROJECT_NAME}_DHCPClient" EXECUTABLE)
-set (EXECUTABLE DHCP_client)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${ACENetwork_DHCPClient_EXE_SRCS}
@@ -227,7 +242,9 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
-if (WIN32)
+if (UNIX)
+ set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS -nostartfiles)
+elseif (WIN32)
  ## *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()

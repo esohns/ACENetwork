@@ -159,7 +159,8 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ########### next target ###############
-set (client_SRCS
+set (EXECUTABLE_SOURCE client)
+set (${EXECUTABLE_SOURCE}_SRCS
      net_client.cpp
      net_client_common.h
      net_client_connector_common.h
@@ -169,8 +170,6 @@ set (client_SRCS
      net_client_timeouthandler.h
      stdafx.cpp
      stdafx.h
-     test_u_callbacks.cpp
-     test_u_callbacks.h
      test_u_common_modules.h
      test_u_configuration.h
      test_u_connection_common.h
@@ -196,6 +195,22 @@ set (client_SRCS
      test_u_tcpconnection.h
      test_u_udpconnection.cpp
      test_u_udpconnection.h)
+if (GUI_SUPPORT)
+ if (GTK_USE)
+  set (${EXECUTABLE_SOURCE_SRCS}
+       ${EXECUTABLE_SOURCE_SRCS}
+       test_u_callbacks.cpp
+       test_u_callbacks.h)
+ elseif (WXWIDGETS_USE)
+   #  set (${EXECUTABLE}_EXE_SRCS
+   #       ${${EXECUTABLE}_EXE_SRCS}
+   #       test_u_wxwidgets_ui.cpp
+   #       test_u_wxwidgets_ui.h
+   #       test_u_wxwidgets_ui.inl
+   #       test_u_wxwidgets_ui_base.cpp
+   #       test_u_wxwidgets_ui_base.h)
+ endif ()
+endif (GUI_SUPPORT)
 
 set (LLVM_COMPILER_ID_STRING "Clang")
 string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
@@ -205,10 +220,9 @@ if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
  add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
 endif ()
 
-set (EXECUTABLE_SOURCE client)
 add_executable (${EXECUTABLE_SOURCE}
                 EXCLUDE_FROM_ALL
-                ${client_SRCS}
+                ${EXECUTABLE_SOURCE_SRCS}
                 etc/net_client.glade)
 set_property (TARGET ${EXECUTABLE_SOURCE} PROPERTY FOLDER "test_u")
 if (WIN32 AND NOT BUILD_TEST_U)
@@ -218,7 +232,7 @@ endif ()
 #add_dependencies (${ACESTREAM_TARGET_NAME} ACE)
 add_dependencies (${EXECUTABLE_SOURCE} Common)
 add_dependencies (${EXECUTABLE_SOURCE} CommonUI)
-add_dependencies (${EXECUTABLE_SOURCE} CommonUI_GTK)
+#add_dependencies (${EXECUTABLE_SOURCE} CommonUI_GTK)
 add_dependencies (${EXECUTABLE_SOURCE} ACEStream)
 add_dependencies (${EXECUTABLE_SOURCE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE_SOURCE} ${PROJECT_NAME}_Client)
@@ -229,12 +243,7 @@ if (UNIX)
  target_link_libraries (${EXECUTABLE_SOURCE} rt)
  target_link_libraries (${EXECUTABLE_SOURCE} ${PKG_CAP_LIBRARIES})
  target_link_libraries (${EXECUTABLE_SOURCE} iw)
- target_link_libraries (${EXECUTABLE_SOURCE} X11)
- if (GTK3_SUPPORT)
-  target_link_libraries (${EXECUTABLE_SOURCE} ${PKG_GTK3_LIBRARIES})
- else ()
-  target_link_libraries (${EXECUTABLE_SOURCE} ${PKG_GTK2_LIBRARIES})
- endif ()
+# target_link_libraries (${EXECUTABLE_SOURCE} X11)
 elseif (WIN32)
 # target_link_libraries (${EXECUTABLE_SOURCE} ntdll.lib)
 
@@ -244,7 +253,9 @@ target_link_libraries (${EXECUTABLE_SOURCE} Common)
 target_link_libraries (${EXECUTABLE_SOURCE} CommonLog)
 target_link_libraries (${EXECUTABLE_SOURCE} CommonSignal)
 target_link_libraries (${EXECUTABLE_SOURCE} CommonTimer)
-if (WIN32)
+if (UNIX)
+ set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES LINK_FLAGS -nostartfiles)
+elseif (WIN32)
  # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE_SOURCE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
@@ -278,7 +289,8 @@ install (FILES etc/net_client.glade
          DESTINATION etc/lib${PROJECT_NAME}/test_u COMPONENT config)
 
 ########### next target ###############
-set (server_SRCS
+set (EXECUTABLE_TARGET server)
+set (${EXECUTABLE_TARGET}_SRCS
      net_client_timeouthandler.cpp
      net_client_timeouthandler.h
      net_server.cpp
@@ -288,8 +300,6 @@ set (server_SRCS
      net_server_signalhandler.h
      stdafx.cpp
      stdafx.h
-     test_u_callbacks.cpp
-     test_u_callbacks.h
      test_u_common_modules.h
      test_u_configuration.h
      test_u_connection_common.h
@@ -315,11 +325,26 @@ set (server_SRCS
      test_u_tcpconnection.h
      test_u_udpconnection.cpp
      test_u_udpconnection.h)
+if (GUI_SUPPORT)
+ if (GTK_USE)
+  set (${EXECUTABLE_TARGET_SRCS}
+       ${EXECUTABLE_TARGET_SRCS}
+       test_u_callbacks.cpp
+       test_u_callbacks.h)
+ elseif (WXWIDGETS_USE)
+      #  set (${EXECUTABLE}_EXE_SRCS
+      #       ${${EXECUTABLE}_EXE_SRCS}
+      #       test_u_wxwidgets_ui.cpp
+      #       test_u_wxwidgets_ui.h
+      #       test_u_wxwidgets_ui.inl
+      #       test_u_wxwidgets_ui_base.cpp
+      #       test_u_wxwidgets_ui_base.h)
+ endif ()
+endif (GUI_SUPPORT)
 
-set (EXECUTABLE_TARGET server)
 add_executable (${EXECUTABLE_TARGET}
                 EXCLUDE_FROM_ALL
-                ${server_SRCS}
+                ${EXECUTABLE_TARGET_SRCS}
                 etc/net_server.glade)
 set_property (TARGET ${EXECUTABLE_TARGET} PROPERTY FOLDER "test_u")
 if (WIN32 AND NOT BUILD_TEST_U)
@@ -358,7 +383,9 @@ target_link_libraries (${EXECUTABLE_TARGET} Common)
 target_link_libraries (${EXECUTABLE_TARGET} CommonLog)
 target_link_libraries (${EXECUTABLE_TARGET} CommonSignal)
 target_link_libraries (${EXECUTABLE_TARGET} CommonTimer)
-if (WIN32)
+if (UNIX)
+ set_target_properties (${EXECUTABLE_TARGET} PROPERTIES LINK_FLAGS -nostartfiles)
+elseif (WIN32)
  # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE_TARGET} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()

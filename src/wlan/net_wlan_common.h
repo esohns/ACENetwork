@@ -367,7 +367,7 @@ enum Net_WLAN_EventType
   NET_WLAN_EVENT_MAX,
   NET_WLAN_EVENT_INVALID
 };
-typedef ACE_Unbounded_Stack<enum NET_WLAN_EventType> NET_WLAN_Events_t;
-typedef ACE_Unbounded_Stack<enum NET_WLAN_EventType>::ITERATOR NET_WLAN_EventsIterator_t;
+typedef ACE_Unbounded_Stack<enum Net_WLAN_EventType> Net_WLAN_Events_t;
+typedef ACE_Unbounded_Stack<enum Net_WLAN_EventType>::ITERATOR Net_WLAN_EventsIterator_t;
 
 #endif

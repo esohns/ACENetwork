@@ -337,7 +337,6 @@ struct BitTorrent_ProtocolConfiguration
 {
   BitTorrent_ProtocolConfiguration ()
   {}
-
 };
 
 //////////////////////////////////////////

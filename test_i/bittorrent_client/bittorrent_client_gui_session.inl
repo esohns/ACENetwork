@@ -38,7 +38,11 @@
 #include "bittorrent_client_stream_common.h"
 #include "bittorrent_client_tools.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "bittorrent_client_gui_callbacks.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 #include "bittorrent_client_gui_defines.h"
 
 template <typename SessionInterfaceType,
@@ -47,20 +51,31 @@ template <typename SessionInterfaceType,
 BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
                                 ConnectionType,
                                 ConnectionCBDataType>::BitTorrent_Client_GUI_Session_T (const struct BitTorrent_Client_Configuration& configuration_in,
-                                                                                        const struct Common_UI_GTK_State& GTKState_in,
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+                                                                                        const Common_UI_GTK_State_t& GTKState_in,
                                                                                         guint contextId_in,
+#endif // GTK_USE
+#endif // GUI_SUPPORT
                                                                                         const std::string& label_in,
+#if defined (GUI_SUPPORT)
                                                                                         const std::string& UIFileDirectory_in,
+#endif // GUI_SUPPORT
                                                                                         BitTorrent_Client_IControl_t* controller_in,
                                                                                         const std::string& metaInfoFileName_in)
  : closing_ (false)
  , CBData_ ()
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
  , contextId_ (contextId_in)
+#endif // GTK_USE
  , UIFileDirectory_ (UIFileDirectory_in)
+#endif // GUI_SUPPORT
 {
   NETWORK_TRACE (ACE_TEXT ("BitTorrent_Client_GUI_Session_T::BitTorrent_Client_GUI_Session_T"));
 
   // sanity check(s)
+#if defined (GUI_SUPPORT)
   if (!Common_File_Tools::isDirectory (UIFileDirectory_in))
   {
     ACE_DEBUG ((LM_ERROR,
@@ -68,16 +83,23 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
                 ACE_TEXT (UIFileDirectory_in.c_str ())));
     return;
   } // end IF
+#endif // GUI_SUPPORT
 
   // initialize cb data
   CBData_.configuration =
       &const_cast<struct BitTorrent_Client_Configuration&> (configuration_in);
   CBData_.controller = controller_in;
   CBData_.eventSourceId = 0;
-  CBData_.state = &const_cast<struct Common_UI_GTK_State&> (GTKState_in);
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  CBData_.state = &const_cast<Common_UI_GTK_State_t&> (GTKState_in);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   CBData_.handler = this;
   CBData_.label = label_in;
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   // create new GtkBuilder
   GtkBuilder* builder_p = gtk_builder_new ();
   if (!builder_p)
@@ -115,11 +137,8 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
                 ACE_TEXT ("failed to gtk_builder_add_from_file(\"%s\"): \"%s\", aborting\n"),
                 ACE_TEXT (ui_definition_filename.c_str ()),
                 ACE_TEXT (error_p->message)));
-
-    // clean up
-    g_error_free (error_p);
+    g_error_free (error_p); error_p = NULL;
     gdk_threads_leave ();
-
     goto error;
   } // end IF
   gdk_threads_leave ();
@@ -175,12 +194,12 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 //                                    GTK_WIDGET (scrolled_window_p),
 //                                    FALSE);
 
-  { // synch access
-    ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
-
+  { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
     CBData_.state->builders[CBData_.label] =
         std::make_pair (ui_definition_filename, builder_p);
   } // end lock scope
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
   // start session
   ACE_ASSERT (CBData_.controller);
@@ -190,11 +209,12 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in BitTorrent_IControl_T::request(\"%s\"), returning\n"),
                 ACE_TEXT (metaInfoFileName_in.c_str ())));
-
-    // clean up
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 //      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
     CBData_.state->builders.erase (CBData_.label);
-
+#endif // GTK_USE
+#endif // GUI_SUPPORT
     goto error;
   }
 
@@ -205,14 +225,17 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to retrieve session handle (metainfo file was: \"%s\"), aborting\n"),
                 ACE_TEXT (metaInfoFileName_in.c_str ())));
-
-    // clean up
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 //      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
     CBData_.state->builders.erase (CBData_.label);
-
+#endif // GTK_USE
+#endif // GUI_SUPPORT
     goto error;
   } // end IF
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
     CBData_.eventSourceId =
         g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
@@ -223,15 +246,14 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
     {
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_idle_add_full(idle_add_session_cb): \"%m\", returning\n")));
-
-      // clean up
 //      ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
       CBData_.state->builders.erase (CBData_.label);
-
       goto error;
     } // end IF
     CBData_.state->eventSourceIds.insert (CBData_.eventSourceId);
   } // end lock scope
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
   return;
 
@@ -242,7 +264,11 @@ error:
     delete CBData_.session;
     CBData_.session = NULL;
   } // end IF
-  g_object_unref (G_OBJECT (builder_p));
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  g_object_unref (G_OBJECT (builder_p)); builder_p = NULL;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 }
 
 template <typename SessionInterfaceType,
@@ -259,6 +285,8 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 
   ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_.state->lock);
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   // remove builder
   Common_UI_GTK_BuildersIterator_t iterator =
     CBData_.state->builders.find (CBData_.label);
@@ -272,6 +300,8 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   } // end IF
   g_object_unref (G_OBJECT ((*iterator).second.second));
   CBData_.state->builders.erase (iterator);
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 }
 
 //template <typename ConnectionType,
@@ -1479,6 +1509,8 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
     // step1: close connections
     CBData_.session->close (false);
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
     // step2: remove session from the UI
     guint event_source_id =
         g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, // _LOW doesn't work (on Win32)
@@ -1490,6 +1522,8 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
     else
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to g_idle_add_full(idle_remove_connection_cb): \"%m\", continuing\n")));
+#endif // GTK_USE
+#endif // GUI_SUPPORT
   } // end lock scope
 }
 
@@ -1506,6 +1540,8 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
   // sanity check(s)
   ACE_ASSERT (CBData_.state);
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
   gdk_threads_enter ();
   Common_UI_GTK_BuildersIterator_t iterator =
       CBData_.state->builders.find (CBData_.label);
@@ -1591,6 +1627,8 @@ BitTorrent_Client_GUI_Session_T<SessionInterfaceType,
 //   gdk_window_process_all_updates();
 
 //  gdk_threads_leave ();
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 }
 
 //template <typename ConnectionType>

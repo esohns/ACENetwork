@@ -29,14 +29,28 @@
 #include "ace/Synch_Traits.h"
 #include "ace/Singleton.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "gtk/gtk.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_manager.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 //#include "net_common.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_i_gtk_common.h"
+#elif defined (WXWIDGETS_USE)
+#include "test_i_wxwidgets_common.h"
+#endif
+#endif // GUI_SUPPORT
 
 #include "bittorrent_stream_common.h"
 
@@ -49,20 +63,28 @@ template <typename SessionInterfaceType,
           typename ConnectionType,
           typename ConnectionCBDataType>
 class BitTorrent_Client_GUI_Session_T;
-struct BitTorrent_Client_GTK_SessionCBData;
+struct BitTorrent_Client_UI_SessionCBData;
 typedef BitTorrent_Client_GUI_Session_T<BitTorrent_Client_ISession_t,
                                         BitTorrent_Client_IPeerConnection_t,
-                                        struct BitTorrent_Client_GTK_SessionCBData> BitTorrent_Client_GUI_Session_t;
+                                        struct BitTorrent_Client_UI_SessionCBData> BitTorrent_Client_GUI_Session_t;
 typedef std::map<std::string,
                  BitTorrent_Client_GUI_Session_t*> BitTorrent_Client_GUI_Sessions_t;
 typedef BitTorrent_Client_GUI_Sessions_t::iterator BitTorrent_Client_GUI_SessionsIterator_t;
 typedef BitTorrent_Client_GUI_Sessions_t::const_iterator BitTorrent_Client_GUI_SessionsConstIterator_t;
 
-struct BitTorrent_Client_GTK_ProgressData
+struct BitTorrent_Client_UI_ProgressData
+#if defined (GTK_USE)
  : Test_I_GTK_ProgressData
+#elif defined (WXWIDGETS_USE)
+ : Test_I_wxWidgets_ProgressData
+#endif
 {
-  BitTorrent_Client_GTK_ProgressData ()
+  BitTorrent_Client_UI_ProgressData ()
+#if defined (GTK_USE)
    : Test_I_GTK_ProgressData ()
+#elif defined (WXWIDGETS_USE)
+   : Test_I_wxWidgets_ProgressData ()
+#endif
    , transferred (0)
   {}
 
@@ -70,13 +92,23 @@ struct BitTorrent_Client_GTK_ProgressData
 };
 
 struct BitTorrent_Client_Configuration;
-struct BitTorrent_Client_GTK_CBData
+struct BitTorrent_Client_UI_CBData
+#if defined (GTK_USE)
  : Test_I_GTK_CBData
+#elif defined (WXWIDGETS_USE)
+ : Test_I_wxWidgets_CBData
+#endif
 {
-  BitTorrent_Client_GTK_CBData ()
+  BitTorrent_Client_UI_CBData ()
+#if defined (GTK_USE)
    : Test_I_GTK_CBData ()
+#elif defined (WXWIDGETS_USE)
+   : Test_I_wxWidgets_CBData ()
+#endif
    , configuration (NULL)
+#if defined (GTK_USE)
    , contextId (0)
+#endif // GTK_USE
    , controller (NULL)
    , progressData ()
    , sessions ()
@@ -85,14 +117,16 @@ struct BitTorrent_Client_GTK_CBData
    , UIFileDirectory ()
   {}
 
-  struct BitTorrent_Client_Configuration*   configuration;
-  guint                                     contextId;
-  BitTorrent_Client_IControl_t*             controller;
-  struct BitTorrent_Client_GTK_ProgressData progressData;
-  BitTorrent_Client_GUI_Sessions_t          sessions;
-  BitTorrent_Client_IPeerSubscribers_t      subscribers;
-  BitTorrent_Client_ITrackerSubscribers_t   trackerSubscribers;
-  std::string                               UIFileDirectory;
+  struct BitTorrent_Client_Configuration*  configuration;
+#if defined (GTK_USE)
+  guint                                    contextId;
+#endif // GTK_USE
+  BitTorrent_Client_IControl_t*            controller;
+  struct BitTorrent_Client_UI_ProgressData progressData;
+  BitTorrent_Client_GUI_Sessions_t         sessions;
+  BitTorrent_Client_IPeerSubscribers_t     subscribers;
+  BitTorrent_Client_ITrackerSubscribers_t  trackerSubscribers;
+  std::string                              UIFileDirectory;
 };
 
 struct BitTorrent_Client_SessionThreadData
@@ -105,16 +139,18 @@ struct BitTorrent_Client_SessionThreadData
   {}
 
   struct BitTorrent_Client_Configuration* configuration;
-  struct BitTorrent_Client_GTK_CBData*    CBData;
+  struct BitTorrent_Client_UI_CBData*     CBData;
 };
 
-struct BitTorrent_Client_GTK_SessionCBData
+struct BitTorrent_Client_UI_SessionCBData
 {
-  BitTorrent_Client_GTK_SessionCBData ()
+  BitTorrent_Client_UI_SessionCBData ()
    : configuration (NULL)
    , controller (NULL)
+#if defined (GTK_USE)
    , eventSourceId (0)
    , state (NULL)
+#endif // GTK_USE
    , handler (NULL)
    , label ()
    , session (NULL)
@@ -122,20 +158,19 @@ struct BitTorrent_Client_GTK_SessionCBData
 
   struct BitTorrent_Client_Configuration* configuration;
   BitTorrent_Client_IControl_t*           controller;
+#if defined (GTK_USE)
   guint                                   eventSourceId;
-  struct Common_UI_GTK_State*             state;
+  Common_UI_GTK_State_t*                  state;
+#endif // GTK_USE
   BitTorrent_Client_GUI_Session_t*        handler;
   // *TODO*: remove this
   std::string                             label;
   BitTorrent_Client_ISession_t*           session;
 };
 
-typedef Common_UI_GtkBuilderDefinition_T<struct Common_UI_GTK_State,
-                                         struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_GtkBuilderDefinition_t;
-
-//typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-//                                struct BitTorrent_Client_GTK_CBData> BitTorrent_Client_GTK_Manager_t;
-//typedef ACE_Singleton<BitTorrent_Client_GTK_Manager_t,
-//                      typename ACE_MT_SYNCH::MUTEX> BITTORRENT_CLIENT_UI_GTK_MANAGER_SINGLETON;
+#if defined (GTK_USE)
+typedef Common_UI_GtkBuilderDefinition_T<Common_UI_GTK_State_t,
+                                         struct BitTorrent_Client_UI_CBData> BitTorrent_Client_GtkBuilderDefinition_t;
+#endif // GTK_USE
 
 #endif

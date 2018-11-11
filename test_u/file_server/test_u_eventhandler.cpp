@@ -47,16 +47,12 @@
 
 Test_U_EventHandler::Test_U_EventHandler (
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-                                          struct FileServer_GTK_CBData* CBData_in
-#endif // GTK_USE
+                                          struct FileServer_UI_CBData* CBData_in
 #endif // GUI_SUPPORT
                                          )
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
  : CBData_ (CBData_in)
  , sessionData_ (NULL)
-#endif // GTK_USE
 #else
  : sessionData_ (NULL)
 #endif // GUI_SUPPORT
@@ -94,7 +90,9 @@ Test_U_EventHandler::start (Stream_SessionId_t sessionId_in,
     return;
   } // end IF
 #endif // GTK_USE
+#endif // GUI_SUPPORT
 
+#if defined (GUI_SUPPORT)
   { ACE_GUARD (ACE_SYNCH_MUTEX, aGuard, CBData_->UIState->lock);
     //CBData_->eventSourceIds.insert (event_source_id);
     CBData_->UIState->eventStack.push (COMMON_UI_EVENT_CONNECT);
@@ -198,7 +196,9 @@ Test_U_EventHandler::notify (Stream_SessionId_t sessionId_in,
                       ACE_TEXT ("failed to ACE_SYNCH_MUTEX::acquire(): \"%m\", continuing\n")));
       } // end IF
 
+#if defined (GUI_SUPPORT)
       CBData_->progressData.statistic = sessionData_->statistic;
+#endif // GUI_SUPPORT
 
       if (sessionData_->lock)
       {

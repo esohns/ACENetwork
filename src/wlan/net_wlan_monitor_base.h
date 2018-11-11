@@ -148,10 +148,10 @@ class Net_WLAN_Monitor_Base_T
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   inline virtual struct _GUID interfaceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->interfaceIdentifier; }
-  inline virtual const WLAN_SIGNAL_QUALITY get_3 () const;
+  virtual const WLAN_SIGNAL_QUALITY get_4 () const;
 #else
   inline virtual std::string interfaceIdentifier () const { ACE_ASSERT (configuration_); return configuration_->interfaceIdentifier; }
-  inline virtual const unsigned int get_3 () const { ACE_ASSERT (false); ACE_NOTSUP_RETURN (0); ACE_NOTREACHED (return 0;) }
+  virtual const unsigned int get_4 () const;
 #endif // ACE_WIN32 || ACE_WIN64
 
   virtual Net_WLAN_SSIDs_t SSIDs () const;

@@ -34,11 +34,7 @@
 #include "common_timer_manager_common.h"
 #include "common_tools.h"
 
-//#if defined (GUI_SUPPORT)
-//#if defined (GTK_USE)
-//#include "common_ui_gtk_manager.h"
-//#endif // GTK_USE
-//#endif // GUI_SUPPORT
+#include "common_error_tools.h"
 
 #include "net_macros.h"
 
@@ -84,7 +80,7 @@ Test_U_SignalHandler::handle (const struct Common_Signal& signal_in)
 #if defined (_DEBUG)
       // *NOTE*: gdb raises SIGINT with code SI_USER on 'interrupt'
       //         --> do not shutdown in this case
-      shutdown = !(Common_Tools::inDebugSession () &&
+      shutdown = !(Common_Error_Tools::inDebugSession () &&
                    (signal_in.signal == SIGINT)    &&
                    (signal_in.siginfo.si_code == SI_USER));
 #endif

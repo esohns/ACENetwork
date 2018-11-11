@@ -30,7 +30,13 @@
 #include "http_common.h"
 
 #include "test_i_common.h"
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_i_gtk_common.h"
+#elif defined (WXWIDGETS_USE)
+#include "test_i_wxwidgets_common.h"
+#endif
+#endif // GUI_SUPPORT
 
 #include "test_i_url_stream_load_stream_common.h"
 
@@ -90,11 +96,20 @@ typedef Common_ISubscribe_T<Test_I_ISessionNotify_t> Test_I_ISubscribe_t;
 
 //////////////////////////////////////////
 
-struct Test_I_URLStreamLoad_GTK_ProgressData
+#if defined (GUI_SUPPORT)
+struct Test_I_URLStreamLoad_UI_ProgressData
+#if defined (GTK_USE)
  : Test_I_GTK_ProgressData
+#elif defined (WXWIDGETS_USE)
+ : Test_I_wxWidgets_ProgressData
+#endif
 {
-  Test_I_URLStreamLoad_GTK_ProgressData ()
+  Test_I_URLStreamLoad_UI_ProgressData ()
+#if defined (GTK_USE)
    : Test_I_GTK_ProgressData ()
+#elif defined (WXWIDGETS_USE)
+   : Test_I_wxWidgets_ProgressData ()
+#endif
 //   , statistic ()
    , transferred (0)
   {}
@@ -103,22 +118,30 @@ struct Test_I_URLStreamLoad_GTK_ProgressData
   unsigned int transferred; // byte(s)
 };
 
-struct Test_I_URLStreamLoad_GTK_CBData
+struct Test_I_URLStreamLoad_UI_CBData
+#if defined (GTK_USE)
  : Test_I_GTK_CBData
+#elif defined (WXWIDGETS_USE)
+ : Test_I_wxWidgets_CBData
+#endif
 {
-  Test_I_URLStreamLoad_GTK_CBData ()
+  Test_I_URLStreamLoad_UI_CBData ()
+#if defined (GTK_USE)
    : Test_I_GTK_CBData ()
+#elif defined (WXWIDGETS_USE)
+   : Test_I_wxWidgets_CBData ()
+#endif
    , configuration (NULL)
    , handle (ACE_INVALID_HANDLE)
    , progressData ()
    , subscribers ()
   {}
 
-  struct Test_I_URLStreamLoad_Configuration*   configuration;
+  struct Test_I_URLStreamLoad_Configuration*  configuration;
 
-  ACE_HANDLE                                   handle;
-  struct Test_I_URLStreamLoad_GTK_ProgressData progressData;
-  Test_I_Subscribers_t                         subscribers;
+  ACE_HANDLE                                  handle;
+  struct Test_I_URLStreamLoad_UI_ProgressData progressData;
+  Test_I_Subscribers_t                        subscribers;
 };
 
 //struct Test_I_URLStreamLoad_ThreadData
@@ -128,16 +151,14 @@ struct Test_I_URLStreamLoad_GTK_CBData
 //   , eventSourceID (0)
 //  {}
 
-//  struct Test_I_URLStreamLoad_GTK_CBData* CBData;
-//  guint                                   eventSourceID;
+//  struct Test_I_URLStreamLoad_UI_CBData* CBData;
+//  guint                                  eventSourceID;
 //};
 
-typedef Common_UI_GtkBuilderDefinition_T<struct Common_UI_GTK_State,
-                                         struct Test_I_URLStreamLoad_GTK_CBData> Test_I_URLStreamLoad_GtkBuilderDefinition_t;
-
-//typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-//                                struct Test_I_URLStreamLoad_GTK_CBData> Test_I_URLStreamLoad_GTK_Manager_t;
-//typedef ACE_Singleton<Test_I_URLStreamLoad_GTK_Manager_t,
-//                      typename ACE_MT_SYNCH::MUTEX> TEST_I_URLSTREAMLOAD_UI_GTK_MANAGER_SINGLETON;
+#if defined (GTK_USE)
+typedef Common_UI_GtkBuilderDefinition_T<Common_UI_GTK_State_t,
+                                         struct Test_I_URLStreamLoad_UI_CBData> Test_I_URLStreamLoad_GtkBuilderDefinition_t;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #endif

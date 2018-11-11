@@ -49,7 +49,7 @@
 #include "Common_config.h"
 #endif // HAVE_CONFIG_H
 
-//#include "common_file_tools.h"
+#include "common_file_tools.h"
 #include "common_tools.h"
 
 #include "common_logger.h"
@@ -80,7 +80,11 @@
 
 #include "test_u_eventhandler.h"
 #include "test_u_signalhandler.h"
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_u_ui_callbacks.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "wlan_monitor_common.h"
 #include "wlan_monitor_defines.h"
@@ -470,7 +474,7 @@ do_work (bool autoAssociate_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
-  int result = -1;
+//  int result = -1;
   struct Test_U_SignalHandlerConfiguration signal_handler_configuration;
   Common_Timer_Manager_t* timer_manager_p = NULL;
   Net_WLAN_IInetMonitor_t* iwlanmonitor_p = NULL;
@@ -492,7 +496,7 @@ do_work (bool autoAssociate_in,
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
   configuration.WLANMonitorConfiguration.timerInterface =
     timer_manager_p;
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if defined (WLANAPI_SUPPORT)
   iwlanmonitor_p = NET_WLAN_INETWLANAPIMONITOR_SINGLETON::instance ();
@@ -543,7 +547,7 @@ do_work (bool autoAssociate_in,
       return;
     }
   } // end SWITCH
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
   ACE_ASSERT (iwlanmonitor_p);
 
   Test_U_StatisticHandler_t statistic_handler (COMMON_STATISTIC_ACTION_REPORT,
@@ -560,11 +564,15 @@ do_work (bool autoAssociate_in,
   configuration.WLANMonitorConfiguration.autoAssociate =
       autoAssociate_in;
   configuration.WLANMonitorConfiguration.interfaceIdentifier =
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #if COMMON_OS_WIN32_TARGET_PLATFORM(0x0600) // _WIN32_WINNT_VISTA
-    interfaceIdentifier_in;
+      interfaceIdentifier_in;
 #else
-    Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (interfaceIdentifier_in));
+      Net_Common_Tools::indexToInterface_2 (Net_Common_Tools::interfaceToIndex (interfaceIdentifier_in));
 #endif // COMMON_OS_WIN32_TARGET_PLATFORM(0x0600)
+#else
+      interfaceIdentifier_in;
+#endif // ACE_WIN32 || ACE_WIN64
   configuration.WLANMonitorConfiguration.SSID = SSID_in;
   configuration.WLANMonitorConfiguration.subscriber = &ui_event_handler;
 
@@ -710,8 +718,16 @@ error:
 //				g_source_remove(*iterator);
 //		} // end lock scope
   if (!UIDefinitionFile_in.empty ())
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
     gtk_manager_p->stop (true,
                          true);
+#else
+    ;
+#endif // GTK_USE
+#else
+    ;
+#endif // GUI_SUPPORT
 //  if (stop_event_dispatch)
 //    Common_Tools::finalizeEventDispatch (useReactor_in,
 //                                          !useReactor_in,
@@ -882,10 +898,10 @@ ACE_TMAIN (int argc_in,
   } // end IF
 
   // step1d: initialize logging and/or tracing
-  Common_MessageStack_t* logstack_p = NULL;
-  ACE_SYNCH_MUTEX* lock_p = NULL;
 #if defined (GUI_SUPPORT)
 #if defined (GTK_USE)
+  Common_MessageStack_t* logstack_p = NULL;
+  ACE_SYNCH_MUTEX* lock_p = NULL;
   WLANMonitor_UI_GTK_Manager_t* gtk_manager_p =
     WLANMONITOR_UI_GTK_MANAGER_SINGLETON::instance ();
   ACE_ASSERT (gtk_manager_p);

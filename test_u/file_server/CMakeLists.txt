@@ -157,8 +157,6 @@ set (file_server_SRCS
      file_server_signalhandler.cpp
      file_server_signalhandler.h
      file_server_stream_common.h
-     test_u_callbacks.cpp
-     test_u_callbacks.h
      test_u_common_modules.h
      test_u_configuration.h
      test_u_connection_manager_common.h
@@ -181,6 +179,17 @@ set (file_server_SRCS
      test_u_tcpconnection.h
      stdafx.cpp
      stdafx.h)
+if (GUI_SUPPORT)
+ if (GTK_USE)
+  set (${file_server_SRCS}
+       ${file_server_SRCS}
+       test_u_callbacks.cpp
+       test_u_callbacks.h)
+# elseif (WXWIDGETS_USE)
+#  set (${EXECUTABLE_TARGET}_EXE_SRCS
+#       ${${EXECUTABLE_TARGET}_EXE_SRCS})
+ endif (GTK_USE)
+endif (GUI_SUPPORT)
 
 if (UNIX)
  add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)

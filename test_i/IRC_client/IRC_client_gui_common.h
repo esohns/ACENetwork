@@ -29,15 +29,29 @@
 #include "ace/Singleton.h"
 #include "ace/Synch_Traits.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "gtk/gtk.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "common_ui_gtk_builder_definition.h"
 #include "common_ui_gtk_common.h"
 #include "common_ui_gtk_manager.h"
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
 #include "irc_message.h"
 
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_i_gtk_common.h"
+#elif defined (WXWIDGETS_USE)
+#include "test_i_wxwidgets_common.h"
+#endif
+#endif // GUI_SUPPORT
 
 #include "IRC_client_configuration.h"
 #include "IRC_client_stream_common.h"
@@ -51,37 +65,61 @@ typedef std::map<std::string,
 typedef IRC_Client_GUI_Connections_t::iterator IRC_Client_GUI_ConnectionsIterator_t;
 typedef IRC_Client_GUI_Connections_t::const_iterator IRC_Client_GUI_ConnectionsConstIterator_t;
 
-struct IRC_Client_GTK_ProgressData
+struct IRC_Client_UI_ProgressData
+#if defined (GTK_USE)
  : Test_I_GTK_ProgressData
+#elif defined (WXWIDGETS_USE)
+ : Test_I_wxWidgets_ProgressData
+#endif
 {
-  IRC_Client_GTK_ProgressData ()
+  IRC_Client_UI_ProgressData ()
+#if defined (GTK_USE)
    : Test_I_GTK_ProgressData ()
+#elif defined (WXWIDGETS_USE)
+   : Test_I_wxWidgets_ProgressData ()
+#endif
+#if defined (GTK_USE)
    , cursorType (GDK_LAST_CURSOR)
+#endif // GTK_USE
   {}
 
+#if defined (GTK_USE)
   GdkCursorType cursorType;
+#endif // GTK_USE
 };
 
 struct IRC_Client_Configuration;
-struct IRC_Client_GTK_CBData
+struct IRC_Client_UI_CBData
+#if defined (GTK_USE)
  : Test_I_GTK_CBData
+#elif defined (WXWIDGETS_USE)
+ : Test_I_wxWidgets_CBData
+#endif
 {
-  IRC_Client_GTK_CBData ()
+  IRC_Client_UI_CBData ()
+#if defined (GTK_USE)
    : Test_I_GTK_CBData ()
+#elif defined (WXWIDGETS_USE)
+   : Test_I_wxWidgets_CBData ()
+#endif
    , configuration (NULL)
    , connections ()
+#if defined (GTK_USE)
    , contextId (0)
+#endif // GTK_USE
    , phoneBook ()
    , progressData ()
    , UIFileDirectory ()
   {}
 
-  struct IRC_Client_Configuration*   configuration;
-  IRC_Client_GUI_Connections_t       connections;
-  guint                              contextId;
-  struct IRC_Client_PhoneBook        phoneBook;
-  struct IRC_Client_GTK_ProgressData progressData;
-  std::string                        UIFileDirectory;
+  struct IRC_Client_Configuration*  configuration;
+  IRC_Client_GUI_Connections_t      connections;
+#if defined (GTK_USE)
+  guint                             contextId;
+#endif // GTK_USE
+  struct IRC_Client_PhoneBook       phoneBook;
+  struct IRC_Client_UI_ProgressData progressData;
+  std::string                       UIFileDirectory;
 };
 
 struct IRC_Client_ConnectionThreadData
@@ -94,45 +132,55 @@ struct IRC_Client_ConnectionThreadData
   {}
 
   struct IRC_Client_Configuration*  configuration;
-  struct IRC_Client_GTK_CBData*     CBData;
+  struct IRC_Client_UI_CBData*      CBData;
   struct IRC_LoginOptions           loginOptions;
   struct IRC_Client_ConnectionEntry phonebookEntry;
 };
 
-struct IRC_Client_GTK_ConnectionCBData
+struct IRC_Client_UI_ConnectionCBData
 {
-  IRC_Client_GTK_ConnectionCBData ()
+  IRC_Client_UI_ConnectionCBData ()
    : acknowledgements (0)
    , connections (NULL)
    , controller (NULL)
+#if defined (GTK_USE)
    , eventSourceId (0)
+#endif // GTK_USE
    , label ()
    , pending (false)
-   , state (NULL)
+#if defined (GTK_USE)
+   , UIState (NULL)
+#endif // GTK_USE
    , timeStamp ()
   {}
 
   unsigned int                  acknowledgements;
   IRC_Client_GUI_Connections_t* connections;
   IRC_IControl*                 controller;
+#if defined (GTK_USE)
   guint                         eventSourceId;
+#endif // GTK_USE
   // *TODO*: remove this
   std::string                   label;
   bool                          pending;
-  struct Common_UI_GTK_State*   state;
+#if defined (GTK_USE)
+  Common_UI_GTK_State_t*        UIState;
+#endif // GTK_USE
   std::string                   timeStamp;
 };
 
-struct IRC_Client_GTK_HandlerCBData
+struct IRC_Client_UI_HandlerCBData
 {
-  IRC_Client_GTK_HandlerCBData ()
+  IRC_Client_UI_HandlerCBData ()
    : acknowledgements (0)
    , builderLabel ()
    , channelModes ()
    , connection (NULL)
    , controller (NULL)
+#if defined (GTK_USE)
    , eventSourceId (0)
-   , state (NULL)
+   , UIState (NULL)
+#endif // GTK_USE
    , handler (NULL)
    , id ()
    , parameters ()
@@ -145,8 +193,10 @@ struct IRC_Client_GTK_HandlerCBData
   IRC_ChannelModes_t             channelModes;
   IRC_Client_GUI_Connection*     connection;
   IRC_IControl*                  controller;
+#if defined (GTK_USE)
   guint                          eventSourceId;
-  struct Common_UI_GTK_State*    state;
+  Common_UI_GTK_State_t*         UIState;
+#endif // GTK_USE
   IRC_Client_GUI_MessageHandler* handler;
   // *TODO*: remove this
   std::string                    id;
@@ -155,12 +205,9 @@ struct IRC_Client_GTK_HandlerCBData
   std::string                    timeStamp;
 };
 
-typedef Common_UI_GtkBuilderDefinition_T<struct Common_UI_GTK_State,
-                                         struct IRC_Client_GTK_CBData> IRC_Client_GtkBuilderDefinition_t;
-
-//typedef Common_UI_GTK_Manager_T<ACE_MT_SYNCH,
-//                                struct IRC_Client_GTK_CBData> IRC_Client_GTK_Manager_t;
-//typedef ACE_Singleton<IRC_Client_GTK_Manager_t,
-//                      typename ACE_MT_SYNCH::MUTEX> IRC_CLIENT_UI_GTK_MANAGER_SINGLETON;
+#if defined (GTK_USE)
+typedef Common_UI_GtkBuilderDefinition_T<Common_UI_GTK_State_t,
+                                         struct IRC_Client_UI_CBData> IRC_Client_GtkBuilderDefinition_t;
+#endif // GTK_USE
 
 #endif
