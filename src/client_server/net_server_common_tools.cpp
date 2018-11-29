@@ -211,7 +211,8 @@ fallback:
     }
 
     // adjust the index if the number is lower than the maximum
-    if (number < index) index = number + 1;
+    if (number < index)
+      index = number + 1;
 
     // if the number is higher than the maximum AND there are more than enough
     // log files, delete it
