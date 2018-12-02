@@ -11,24 +11,10 @@ endif ()
 
 add_library (${PROJECT_NAME}_Protocol_BitTorrent STATIC "")
 
-include (FindPkgConfig)
-if (UNIX)
- pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libavformat libswscale)
- pkg_check_modules (PKG_FLEX REQUIRED libfl)
-# if (GTK3_SUPPORT)
-#  pkg_check_modules (PKG_GTK3 REQUIRED gtk+-3.0)
-#else ()
-## pkg_check_modules (PKG_GTK_GLADE REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0 libglade-2.0)
-#  pkg_check_modules (PKG_GTK2 REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0)
-# endif ()
-# pkg_check_modules (PKG_ACE REQUIRED ACE)
-endif (UNIX)
-
 set (PROJECTS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../../../..)
-set (OPENSSL_LIB_FILE libeay32.lib)
 if (UNIX)
- pkg_check_modules (PKG_OPENSSL REQUIRED openssl)
 elseif (WIN32)
+ set (OPENSSL_LIB_FILE libeay32.lib)
  find_library (OPENSSL_LIBRARY ${OPENSSL_LIB_FILE}
                PATHS ${PROJECTS_DIRECTORY}/openssl_win32_bin
                PATH_SUFFIXES lib
@@ -36,9 +22,8 @@ elseif (WIN32)
 #if (NOT EXISTS OPENSSL_LIBRARY)
  if (NOT OPENSSL_LIBRARY)
   message (FATAL_ERROR "could not find ${OPENSSL_LIB_FILE} (was: \"${OPENSSL_LIBRARY}\"), aborting")
- endif ()
+ endif (NOT OPENSSL_LIBRARY)
 endif ()
-
 add_definitions (-DACE_HAS_DLL)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
@@ -69,6 +54,12 @@ endif ()
 if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
+ if (DHCLIENT_SUPPORT)
+#  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
+#                              $<BUILD_INTERFACE:/usr/include/bind-export>)
+  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC ${BIND9_CFLAGS})
+ endif (DHCLIENT_SUPPORT)
+
  target_include_directories (${PROJECT_NAME}_Protocol_BitTorrent PUBLIC
                              $<BUILD_INTERFACE:${PKG_FLEX_INCLUDE_DIRS}>)
 

@@ -22,6 +22,3 @@
 #include "ace/Synch.h"
 
 #include "bittorrent_stream_tracker.h"
-
-//#include "bittorrent_message.h"
-//#include "bittorrent_sessionmessage.h"

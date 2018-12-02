@@ -21,13 +21,15 @@
 #ifndef DHCP_DEFINES_H
 #define DHCP_DEFINES_H
 
+#include "ace/config-lite.h"
+
 // stream
-#define DHCP_DEFAULT_MODULE_DISCOVER_NAME_STRING  "DHCPDiscover"
-#define DHCP_DEFAULT_MODULE_MARSHAL_NAME_STRING   "DHCPMarshal"
-#define DHCP_DEFAULT_MODULE_PARSER_NAME_STRING    "DHCPParser"
-#define DHCP_DEFAULT_MODULE_STREAMER_NAME_STRING  "DHCPStreamer"
-#define DHCP_DEFAULT_STREAM_NAME_STRING           "DHCPStream"
-#define DHCP_BUFFER_SIZE                          1024
+#define DHCP_DEFAULT_MODULE_DISCOVER_NAME_STRING          "DHCPDiscover"
+#define DHCP_DEFAULT_MODULE_MARSHAL_NAME_STRING           "DHCPMarshal"
+#define DHCP_DEFAULT_MODULE_PARSER_NAME_STRING            "DHCPParser"
+#define DHCP_DEFAULT_MODULE_STREAMER_NAME_STRING          "DHCPStreamer"
+#define DHCP_DEFAULT_STREAM_NAME_STRING                   "DHCPStream"
+#define DHCP_BUFFER_SIZE                                  1024
 
 // "crunch" messages for easier parsing ?
 // *NOTE*: this comes at the cost of alloc/free, memcopy and locking per
@@ -42,45 +44,59 @@
 // *TODO*: write a (robust) flex-scanner/bison parser that can handle
 //         switching of buffers/"backing-up" reliably and stress-test the
 //         application to see which option proves to be more efficient...
-#define DHCP_DEFAULT_CRUNCH_MESSAGES              true
-// *IMPORTANT NOTE*: scans buffers in-place (avoids a copy,
-//         see: http://flex.sourceforge.net/manual/Multiple-Input-Buffers.html)
-//         --> in order to use yy_scan_buffer(), the buffer needs to have been
-//             prepared for use by flex: buffers need two trailing '\0's
-//             BEYOND their datas' tail byte (i.e. at positions length() + 1 and
-//             length() + 2)
-//#define DHCP_DEFAULT_USE_YY_SCAN_BUFFER           true
+#define DHCP_DEFAULT_CRUNCH_MESSAGES                      true
 
-#define DHCP_DEFAULT_STATISTIC_REPORTING_INTERVAL 0 // seconds {0: off}
-#define DHCP_DEFAULT_PRINT_PROGRESSDOT            false
+#define DHCP_DEFAULT_STATISTIC_REPORTING_INTERVAL         0 // seconds {0: off}
+#define DHCP_DEFAULT_PRINT_PROGRESSDOT                    false
 
 // protocol
-#define DHCP_DEFAULT_CLIENT_PORT                  68 // UDP
-#define DHCP_DEFAULT_SERVER_PORT                  67 // UDP (bcast)
+#define DHCP_DEFAULT_CLIENT_PORT                          68 // UDP
+#define DHCP_DEFAULT_SERVER_PORT                          67 // UDP (bcast)
 
 // *TODO*: this is the minimum, DHCP supports negotiation of larger frames
-#define DHCP_MESSAGE_SIZE                         576
+#define DHCP_MESSAGE_SIZE                                 576
 
 // flags
-#define DHCP_DEFAULT_FLAGS_BROADCAST              false
-#define DHCP_FLAGS_BROADCAST                      0x8000 // 2 bytes
+#define DHCP_DEFAULT_FLAGS_BROADCAST                      false
+#define DHCP_FLAGS_BROADCAST                              0x8000 // 2 bytes
 
-#define DHCP_CHADDR_SIZE                          16
-#define DHCP_SNAME_SIZE                           64
-#define DHCP_FILE_SIZE                            128
+#define DHCP_CHADDR_SIZE                                  16
+#define DHCP_SNAME_SIZE                                   64
+#define DHCP_FILE_SIZE                                    128
 
 // *NOTE*: already in network (== big-endian) byte order
 //         --> swap on little-endian systems
-#define DHCP_MAGIC_COOKIE                         0x63825363 // 99.130.83.99
-#define DHCP_OPTIONS_SIZE                         312 // min. size
+#define DHCP_MAGIC_COOKIE                                 0x63825363 // 99.130.83.99
+#define DHCP_OPTIONS_SIZE                                 312 // min. size
 
-#define DHCP_OPTION_TAG_PAD                       0
-#define DHCP_OPTION_TAG_END                       255
+#define DHCP_OPTION_TAG_PAD                               0
+#define DHCP_OPTION_TAG_END                               255
 
 // *NOTE*: see RFC-2131 (Table 1), and "ARP" section of RFC-1700
 // *TODO*: should correspond with the target hardware
-#define DHCP_FRAME_HTYPE                          1 // --> (10Mb) Ethernet
+#define DHCP_FRAME_HTYPE                                  1 // --> (10Mb) Ethernet
 // *TODO*: should correspond with the target hardware
-#define DHCP_FRAME_HLEN                           6 // --> (10Mb) Ethernet
+#define DHCP_FRAME_HLEN                                   6 // --> (10Mb) Ethernet
+
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+#else
+#if defined (DHCLIENT_SUPPORT)
+#define DHCP_DHCLIENT_CONNECTION_RETRIES                  3
+#define DHCP_DHCLIENT_INTERFACE_STATE_UP_STRING           "up"
+#define DHCP_DHCLIENT_LEASES_FILE                         "/var/lib/dhcp/dhclient.leases"
+#define DHCP_DHCLIENT_LOCALHOST_IP_STRING                 "127.0.0.1"
+#define DHCP_DHCLIENT_OMAPI_PORT                          7911
+#define DHCP_DHCLIENT_STRING                              "dhclient"
+#define DHCP_DHCLIENT_SWITCH_RUN_IN_FOREGROUND_STRING     "d"
+
+#define DHCP_DHCLIENT_OBJECT_INTERFACE_STRING             "interface"
+#define DHCP_DHCLIENT_OBJECT_LEASE_STRING                 "lease"
+#define DHCP_DHCLIENT_OBJECT_VALUE_HARDWAREADDRESS_STRING "hardware-address"
+#define DHCP_DHCLIENT_OBJECT_VALUE_HARDWARETYPE_STRING    "hardware-type"
+#define DHCP_DHCLIENT_OBJECT_VALUE_IPADDRESS_STRING       "ip-address"
+#define DHCP_DHCLIENT_OBJECT_VALUE_NAME_STRING            "name"
+#define DHCP_DHCLIENT_OBJECT_VALUE_STATE_STRING           "state"
+#endif // DHCLIENT_SUPPORT
+#endif // ACE_WIN32 || ACE_WIN64
 
 #endif

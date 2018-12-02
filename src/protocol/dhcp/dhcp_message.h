@@ -28,7 +28,6 @@
 #include "stream_data_message_base.h"
 
 #include "dhcp_common.h"
-//#include "dhcp_exports.h"
 
 // forward declaration(s)
 class ACE_Allocator;

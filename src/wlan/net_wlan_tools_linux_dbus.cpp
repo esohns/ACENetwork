@@ -301,8 +301,8 @@ continue_:
 }
 
 ACE_INET_Addr
-Net_WLAN_Tools::getGateway (const std::string& interfaceIdentifier_in,
-                            struct DBusConnection* connection_in)
+Net_WLAN_Tools::getGateway (struct DBusConnection* connection_in,
+                            const std::string& interfaceIdentifier_in)
 {
   NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::getGateway"));
 
@@ -1309,13 +1309,16 @@ Net_WLAN_Tools::SSIDToDeviceDBusObjectPath (struct DBusConnection* connection_in
 
   // step1: retrieve all wireless adapaters
   std::vector<std::string> wireless_device_identifiers_a =
-      Net_WLAN_Tools::getInterfaces ();
+      Net_WLAN_Tools::getInterfaces (connection_in,
+                                     AF_UNSPEC,
+                                     0);
 
   // step2: retrieve the wireless adapter(s) that can see the SSID
   for (std::vector<std::string>::iterator iterator = wireless_device_identifiers_a.begin ();
        iterator != wireless_device_identifiers_a.end ();
        ++iterator)
-    if (!Net_WLAN_Tools::hasSSID (*iterator,
+    if (!Net_WLAN_Tools::hasSSID (connection_in,
+                                  *iterator,
                                   SSID_in))
       wireless_device_identifiers_a.erase (iterator);
   if (wireless_device_identifiers_a.empty ())

@@ -39,10 +39,17 @@
 #include <wlanapi.h>
 #endif // WLANAPI_SUPPORT
 #else
-#include <net/ethernet.h>
+#include "net/ethernet.h"
+
+#if defined (DHCLIENT_SUPPORT)
+extern "C"
+{
+#include "dhcpctl/dhcpctl.h"
+}
+#endif // DHCLIENT_SUPPORT
 
 #if defined (NL80211_SUPPORT)
-#include <linux/nl80211.h>
+#include "linux/nl80211.h"
 #endif // NL80211_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
@@ -57,7 +64,10 @@
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "common_xml_common.h"
 #include "common_xml_parser.h"
+#endif // ACE_WIN32 || ACE_WIN64
 
+#include "net_common.h"
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "net_packet_headers.h"
 
 #include "net_wlan_profile_xml_handler.h"

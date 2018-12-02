@@ -224,9 +224,6 @@ add_dependencies (${EXECUTABLE} Common)
 add_dependencies (${EXECUTABLE} CommonLog)
 add_dependencies (${EXECUTABLE} CommonSignal)
 add_dependencies (${EXECUTABLE} CommonTimer)
-#if (GUI_SUPPORT)
-# add_dependencies (${EXECUTABLE} CommonUI)
-#endif (GUI_SUPPORT)
 
 add_dependencies (${EXECUTABLE} ACEStream)
 add_dependencies (${EXECUTABLE} ACEStream_Decoder)
@@ -236,24 +233,18 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_BitTorrent)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
+
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (UNIX)
- target_link_libraries (${EXECUTABLE} rt)
- target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
- target_link_libraries (${EXECUTABLE} iw)
 # target_link_libraries (${EXECUTABLE} ${FLEX_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})
 elseif (WIN32)
  set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
- set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
+# set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 
-# target_link_libraries (${EXECUTABLE} ntdll.lib)
-# target_link_libraries (${EXECUTABLE} dxguid.lib)
  target_link_libraries (${EXECUTABLE} mf.lib)
  target_link_libraries (${EXECUTABLE} mfplat.lib)
-
-# target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 endif ()
+
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} CommonLog)
 target_link_libraries (${EXECUTABLE} CommonSignal)
@@ -273,12 +264,6 @@ target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_BitTorrent)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_I)
-
-if (UNIX)
- target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
-elseif (WIN32)
- target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
-endif ()
 
 # add PCH
 set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
@@ -361,25 +346,21 @@ add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_BitTorrent)
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_HTTP)
 
 target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
-if (UNIX)
- target_link_libraries (${EXECUTABLE_GUI} rt)
- target_link_libraries (${EXECUTABLE_GUI} ${PKG_CAP_LIBRARIES})
-# target_link_libraries (${EXECUTABLE_GUI} iw)
-# target_link_libraries (${EXECUTABLE_GUI} ${FLEX_LIBRARY})
- target_link_libraries (${EXECUTABLE_GUI} ${PKG_FFMPEG_LIBRARIES})
-elseif (WIN32)
-# target_link_libraries (${EXECUTABLE_GUI} ntdll.lib)
 
- target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
+target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
+
+if (UNIX)
+# target_link_libraries (${EXECUTABLE_GUI} ${FLEX_LIBRARY})
+elseif (WIN32)
 endif ()
+
 target_link_libraries (${EXECUTABLE_GUI} Common)
 target_link_libraries (${EXECUTABLE_GUI} CommonLog)
 target_link_libraries (${EXECUTABLE_GUI} CommonSignal)
 target_link_libraries (${EXECUTABLE_GUI} CommonTimer)
 if (WIN32)
  # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
- set_target_properties (${EXECUTABLE_GUI} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
+# set_target_properties (${EXECUTABLE_GUI} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif (WIN32)
 
 target_link_libraries (${EXECUTABLE_GUI} ACEStream)
@@ -389,10 +370,6 @@ target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_BitTorrent)
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_HTTP)
 
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Test_I)
-
-if (UNIX)
- target_link_libraries (${EXECUTABLE_GUI} ${PKG_CAP_LIBRARIES})
-endif (UNIX)
 
 # add PCH
 set_target_properties (${EXECUTABLE_GUI} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")

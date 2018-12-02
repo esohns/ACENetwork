@@ -47,6 +47,7 @@ if (UNIX)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
  set (CMAKE_THREAD_PREFER_PTHREAD ON)
  find_package (Threads)
+
  if (WEXT_USE)
   check_library_exists (iw iw_sockets_open /usr/lib/x86_64-linux-gnu HAVE_LIBIW)
   if (NOT HAVE_LIBIW)
@@ -58,121 +59,121 @@ if (UNIX)
  endif ()
 
  if (DHCLIENT_USE)
-  set (JSON_LIB_FILE libjson-c.so.3)
-  find_library (JSON_LIBRARY ${JSON_LIB_FILE}
-                HINTS /usr/lib
-                PATH_SUFFIXES x86_64-linux-gnu
-                DOC "searching for ${JSON_LIB_FILE} (system paths)")
-  if (NOT JSON_LIBRARY)
-   message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found json library \"${JSON_LIBRARY}\"")
-  endif ()
+#  set (JSON_LIB_FILE libjson-c.so.3)
+#  find_library (JSON_LIBRARY ${JSON_LIB_FILE}
+#                HINTS /usr/lib
+#                PATH_SUFFIXES x86_64-linux-gnu
+#                DOC "searching for ${JSON_LIB_FILE} (system paths)")
+#  if (NOT JSON_LIBRARY)
+#   message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found json library \"${JSON_LIBRARY}\"")
+#  endif ()
 
-  set (ISC_LIB_FILE libisc.a)
-  find_library (ISC_LIBRARY ${ISC_LIB_FILE}
-#               HINTS ../../../dhcpctl/dhcp-4.3.6/bind /usr/lib
-                HINTS /usr/lib64 /usr/lib
-                PATH_SUFFIXES dhcp x86_64-linux-gnu
-                DOC "searching for ${ISC_LIB_FILE} (system paths)")
-  if (NOT ISC_LIBRARY)
-   message (FATAL_ERROR "could not find ${ISC_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found isc library \"${ISC_LIBRARY}\"")
-  endif ()
+#  set (ISC_LIB_FILE libisc.a)
+#  find_library (ISC_LIBRARY ${ISC_LIB_FILE}
+##               HINTS ../../../dhcpctl/dhcp-4.3.6/bind /usr/lib
+#                HINTS /usr/lib64 /usr/lib
+#                PATH_SUFFIXES dhcp x86_64-linux-gnu
+#                DOC "searching for ${ISC_LIB_FILE} (system paths)")
+#  if (NOT ISC_LIBRARY)
+#   message (FATAL_ERROR "could not find ${ISC_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found isc library \"${ISC_LIBRARY}\"")
+#  endif ()
 
-  set (ISC_CFG_LIB_FILE libisccfg.a)
-  find_library (ISC_CFG_LIBRARY ${ISC_CFG_LIB_FILE}
-#               HINTS ../../../dhcpctl/dhcp-4.3.6/bind /usr/lib
-                HINTS /usr/lib64 /usr/lib
-                PATH_SUFFIXES dhcp x86_64-linux-gnu
-                DOC "searching for ${ISC_CFG_LIB_FILE} (system paths)")
-  if (NOT ISC_CFG_LIBRARY)
-   message (FATAL_ERROR "could not find ${ISC_CFG_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found isccfg library \"${ISC_CFG_LIBRARY}\"")
-  endif ()
+#  set (ISC_CFG_LIB_FILE libisccfg.a)
+#  find_library (ISC_CFG_LIBRARY ${ISC_CFG_LIB_FILE}
+##               HINTS ../../../dhcpctl/dhcp-4.3.6/bind /usr/lib
+#                HINTS /usr/lib64 /usr/lib
+#                PATH_SUFFIXES dhcp x86_64-linux-gnu
+#                DOC "searching for ${ISC_CFG_LIB_FILE} (system paths)")
+#  if (NOT ISC_CFG_LIBRARY)
+#   message (FATAL_ERROR "could not find ${ISC_CFG_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found isccfg library \"${ISC_CFG_LIBRARY}\"")
+#  endif ()
 
-  set (KRB5_LIB_FILE libkrb5.so.3)
-  find_library (KRB5_LIBRARY ${KRB5_LIB_FILE}
-                HINTS /usr/lib
-                PATH_SUFFIXES x86_64-linux-gnu
-                DOC "searching for ${KRB5_LIB_FILE} (system paths)")
-  if (NOT KRB5_LIBRARY)
-   message (FATAL_ERROR "could not find ${KRB5_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found MIT kerberos library \"${KRB5_LIBRARY}\"")
-  endif ()
+#  set (KRB5_LIB_FILE libkrb5.so.3)
+#  find_library (KRB5_LIBRARY ${KRB5_LIB_FILE}
+#                HINTS /usr/lib
+#                PATH_SUFFIXES x86_64-linux-gnu
+#                DOC "searching for ${KRB5_LIB_FILE} (system paths)")
+#  if (NOT KRB5_LIBRARY)
+#   message (FATAL_ERROR "could not find ${KRB5_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found MIT kerberos library \"${KRB5_LIBRARY}\"")
+#  endif ()
 
-  set (GSS_KRB5_LIB_FILE libgssapi_krb5.so.2)
-  find_library (GSS_KRB5_LIBRARY ${GSS_KRB5_LIB_FILE}
-                HINTS /usr/lib
-                PATH_SUFFIXES x86_64-linux-gnu
-                DOC "searching for ${GSS_KRB5_LIB_FILE} (system paths)")
-  if (NOT GSS_KRB5_LIBRARY)
-   message (FATAL_ERROR "could not find ${GSS_KRB5_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found MIT kerberos library \"${GSS_KRB5_LIBRARY}\"")
-  endif ()
+#  set (GSS_KRB5_LIB_FILE libgssapi_krb5.so.2)
+#  find_library (GSS_KRB5_LIBRARY ${GSS_KRB5_LIB_FILE}
+#                HINTS /usr/lib
+#                PATH_SUFFIXES x86_64-linux-gnu
+#                DOC "searching for ${GSS_KRB5_LIB_FILE} (system paths)")
+#  if (NOT GSS_KRB5_LIBRARY)
+#   message (FATAL_ERROR "could not find ${GSS_KRB5_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found MIT kerberos library \"${GSS_KRB5_LIBRARY}\"")
+#  endif ()
 
 # set (GSS_LIB_FILE libgss.so.3)
-  set (GSS_LIB_FILE libgssglue.so)
-  find_library (GSS_LIBRARY ${GSS_LIB_FILE}
-                HINTS /usr/lib64 /usr/lib
-                PATH_SUFFIXES x86_64-linux-gnu
-                DOC "searching for ${GSS_LIB_FILE} (system paths)")
-  if (NOT GSS_LIBRARY)
-   message (FATAL_ERROR "could not find ${GSS_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found generic security services library \"${GSS_LIBRARY}\"")
-  endif ()
+#  set (GSS_LIB_FILE libgssglue.so)
+#  find_library (GSS_LIBRARY ${GSS_LIB_FILE}
+#                HINTS /usr/lib64 /usr/lib
+#                PATH_SUFFIXES x86_64-linux-gnu
+#                DOC "searching for ${GSS_LIB_FILE} (system paths)")
+#  if (NOT GSS_LIBRARY)
+#   message (FATAL_ERROR "could not find ${GSS_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found generic security services library \"${GSS_LIBRARY}\"")
+#  endif ()
 
-  set (IRS_LIB_FILE libirs.a)
-  find_library (IRS_LIBRARY ${IRS_LIB_FILE}
-#               HINTS ../../../dhcpctl/dhcp-4.3.6/bind /usr/lib
-                HINTS /usr/lib64 /usr/lib
-                PATH_SUFFIXES dhcp x86_64-linux-gnu
-                DOC "searching for ${IRS_LIB_FILE} (system paths)")
-  if (NOT IRS_LIBRARY)
-   message (FATAL_ERROR "could not find ${IRS_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found irs library \"${IRS_LIBRARY}\"")
-  endif ()
+#  set (IRS_LIB_FILE libirs.a)
+#  find_library (IRS_LIBRARY ${IRS_LIB_FILE}
+##               HINTS ../../../dhcpctl/dhcp-4.3.6/bind /usr/lib
+#                HINTS /usr/lib64 /usr/lib
+#                PATH_SUFFIXES dhcp x86_64-linux-gnu
+#                DOC "searching for ${IRS_LIB_FILE} (system paths)")
+#  if (NOT IRS_LIBRARY)
+#   message (FATAL_ERROR "could not find ${IRS_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found irs library \"${IRS_LIBRARY}\"")
+#  endif ()
 
-  set (GEOIP_LIB_FILE libGeoIP.so.1)
-  find_library (GEOIP_LIBRARY ${GEOIP_LIB_FILE}
-                HINTS /usr/lib
-                PATH_SUFFIXES x86_64-linux-gnu
-                DOC "searching for ${GEOIP_LIB_FILE} (system paths)")
-  if (NOT GEOIP_LIBRARY)
-   message (FATAL_ERROR "could not find ${GEOIP_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found GeoIP library \"${GEOIP_LIBRARY}\"")
-  endif ()
+#  set (GEOIP_LIB_FILE libGeoIP.so.1)
+#  find_library (GEOIP_LIBRARY ${GEOIP_LIB_FILE}
+#                HINTS /usr/lib
+#                PATH_SUFFIXES x86_64-linux-gnu
+#                DOC "searching for ${GEOIP_LIB_FILE} (system paths)")
+#  if (NOT GEOIP_LIBRARY)
+#   message (FATAL_ERROR "could not find ${GEOIP_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found GeoIP library \"${GEOIP_LIBRARY}\"")
+#  endif ()
 
-  set (DNS_LIB_FILE libdns.a)
-  find_library (DNS_LIBRARY ${DNS_LIB_FILE}
-#               HINTS ../../../dhcpctl/dhcp-4.3.6/bind /usr/lib
-                HINTS /usr/lib64 /usr/lib
-                PATH_SUFFIXES dhcp x86_64-linux-gnu
-                DOC "searching for ${DNS_LIB_FILE} (system paths)")
-  if (NOT DNS_LIBRARY)
-   message (FATAL_ERROR "could not find ${DNS_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found dns library \"${DNS_LIBRARY}\"")
-  endif ()
+#  set (DNS_LIB_FILE libdns.a)
+#  find_library (DNS_LIBRARY ${DNS_LIB_FILE}
+##               HINTS ../../../dhcpctl/dhcp-4.3.6/bind /usr/lib
+#                HINTS /usr/lib64 /usr/lib
+#                PATH_SUFFIXES dhcp x86_64-linux-gnu
+#                DOC "searching for ${DNS_LIB_FILE} (system paths)")
+#  if (NOT DNS_LIBRARY)
+#   message (FATAL_ERROR "could not find ${DNS_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found dns library \"${DNS_LIBRARY}\"")
+#  endif ()
 
-  set (OMAPI_LIB_FILE libomapi.a)
-  find_library (OMAPI_LIBRARY ${OMAPI_LIB_FILE}
-#               HINTS ../../../dhcpctl/dhcp-4.3.6 /usr/lib
-                HINTS /usr/lib64 /usr/lib
-                PATH_SUFFIXES dhcp x86_64-linux-gnu
-                DOC "searching for ${OMAPI_LIB_FILE} (system paths)")
-  if (NOT OMAPI_LIBRARY)
-   message (FATAL_ERROR "could not find ${OMAPI_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found omapi library \"${OMAPI_LIBRARY}\"")
-  endif ()
+#  set (OMAPI_LIB_FILE libomapi.a)
+#  find_library (OMAPI_LIBRARY ${OMAPI_LIB_FILE}
+##               HINTS ../../../dhcpctl/dhcp-4.3.6 /usr/lib
+#                HINTS /usr/lib64 /usr/lib
+#                PATH_SUFFIXES dhcp x86_64-linux-gnu
+#                DOC "searching for ${OMAPI_LIB_FILE} (system paths)")
+#  if (NOT OMAPI_LIBRARY)
+#   message (FATAL_ERROR "could not find ${OMAPI_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found omapi library \"${OMAPI_LIBRARY}\"")
+#  endif ()
 
 # set (DHCP_LIB_FILE libdhcp.a)
 # find_library (DHCP_LIBRARY ${DHCP_LIB_FILE}
@@ -187,18 +188,18 @@ if (UNIX)
 #  message (STATUS "Found dhcp library \"${DHCP_LIBRARY}\"")
 # endif ()
 
-  set (DHCPCTL_LIB_FILE libdhcpctl.a)
-  find_library (DHCPCTL_LIBRARY ${DHCPCTL_LIB_FILE}
-#               HINTS ../../../dhcpctl/dhcp-4.3.6 /usr/lib
-                HINTS /usr/lib
-#               PATH_SUFFIXES dhcpctl x86_64-linux-gnu
-                PATH_SUFFIXES x86_64-linux-gnu
-                DOC "searching for ${DHCPCTL_LIB_FILE} (system paths)")
-  if (NOT DHCPCTL_LIBRARY)
-   message (FATAL_ERROR "could not find ${DHCPCTL_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found dhcpctl library \"${DHCPCTL_LIBRARY}\"")
-  endif ()
+#  set (DHCPCTL_LIB_FILE libdhcpctl.a)
+#  find_library (DHCPCTL_LIBRARY ${DHCPCTL_LIB_FILE}
+##               HINTS ../../../dhcpctl/dhcp-4.3.6 /usr/lib
+#                HINTS /usr/lib
+##               PATH_SUFFIXES dhcpctl x86_64-linux-gnu
+#                PATH_SUFFIXES x86_64-linux-gnu
+#                DOC "searching for ${DHCPCTL_LIB_FILE} (system paths)")
+#  if (NOT DHCPCTL_LIBRARY)
+#   message (FATAL_ERROR "could not find ${DHCPCTL_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found dhcpctl library \"${DHCPCTL_LIBRARY}\"")
+#  endif ()
 # add_library (dhcpctl STATIC IMPORTED)
 # set_property (TARGET dhcpctl PROPERTY IMPORTED_LOCATION /usr/lib/libdhcpctl.a)
  endif (DHCLIENT_USE)
@@ -294,32 +295,22 @@ else ()
  #message (STATUS "Found ACEXML parser library \"${ACE_XML_PARSER_LIBRARY}\"")
 endif ()
 
-include (FindPkgConfig)
-#pkg_check_modules (PKGACE REQUIRED ACE)
 if (UNIX)
 # *NOTE*: Common requires libcap
- pkg_check_modules (PKG_CAP REQUIRED libcap)
+# pkg_check_modules (PKG_CAP REQUIRED libcap)
  if (WEXT_USE)
  elseif (NL80211_USE)
-  pkg_check_modules (PKG_NL80211 REQUIRED libnl-3.0 libnl-genl-3.0)
-  pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
-  pkg_check_modules (PKG_SYSTEMD REQUIRED libsystemd)
+#  pkg_check_modules (PKG_NL80211 REQUIRED libnl-3.0 libnl-genl-3.0)
+#  pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
+#  pkg_check_modules (PKG_SYSTEMD REQUIRED libsystemd)
  elseif (DBUS_USE)
-  pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
+#  pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
  endif ()
 
  if (DHCLIENT_USE)
   pkg_check_modules (PKG_LIBXML REQUIRED libxml-2.0)
   pkg_check_modules (PKG_SSL REQUIRED openssl)
  endif (DHCLIENT_USE)
-
- if (GTK3_SUPPORT)
-  pkg_check_modules (PKG_GTK3 REQUIRED gtk+-3.0)
- else ()
-# pkg_check_modules (PKG_LIBPNG REQUIRED libpng)
-# pkg_check_modules (PKG_GTK_GLADE REQUIRED libglade-2.0)
-  pkg_check_modules (PKG_GTK2 REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0)
- endif ()
 endif (UNIX)
 # *TODO*: repair WIN32 pkgconfig support
 
@@ -371,15 +362,9 @@ if (UNIX)
   include_directories (${PKG_DBUS_INCLUDE_DIRS})
  endif ()
  if (DHCLIENT_USE)
-  include_directories (/usr/include/bind-export)
-  include_directories (/usr/include/dhcp)
+#  include_directories (/usr/include/bind-export)
+#  include_directories (/usr/include/dhcp)
  endif (DHCLIENT_USE)
-
- if (GTK3_SUPPORT)
-  include_directories (${PKG_GTK3_INCLUDE_DIRS})
- else ()
-  include_directories (${PKG_GTK2_INCLUDE_DIRS})
- endif ()
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
 
@@ -445,7 +430,7 @@ endif (GUI_SUPPORT)
 
 if (UNIX)
  add_definitions (-D_GLIBCXX_INCLUDE_NEXT_C_HEADERS)
-endif ()
+endif (UNIX)
 
 set (LLVM_COMPILER_ID_STRING "Clang")
 string (TOLOWER "${LLVM_COMPILER_ID_STRING}" LLVM_COMPILER_ID_STRING_LOWER)
@@ -510,25 +495,23 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
+
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
 if (UNIX)
- target_link_libraries (${EXECUTABLE} rt)
- target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
- if (WEXT_SUPPORT)
+ if (WEXT_USE)
   target_link_libraries (${EXECUTABLE} iw)
- endif (WEXT_SUPPORT)
- if (NL80211_SUPPORT)
+ elseif (NL80211_USE)
   target_link_libraries (${EXECUTABLE} ${PKG_DBUS_LIBRARIES})
   target_link_libraries (${EXECUTABLE} ${PKG_SYSTEMD_LIBRARIES})
   target_link_libraries (${EXECUTABLE} ${PKG_NL80211_LIBRARIES})
- endif (NL80211_SUPPORT)
- if (DBUS_SUPPORT)
+ elseif (DBUS_USE)
   target_link_libraries (${EXECUTABLE} ${PKG_DBUS_LIBRARIES})
- endif (DBUS_SUPPORT)
+ endif ()
 
- if (DHCLIENT_SUPPORT)
+ if (DHCLIENT_USE)
   target_link_libraries (${EXECUTABLE} ${PKG_LIBXML_LIBRARIES})
-  target_link_libraries (${EXECUTABLE} ${JSON_LIBRARY})
+#  target_link_libraries (${EXECUTABLE} ${JSON_LIBRARY})
+  target_link_libraries (${EXECUTABLE} ${PKG_JSON_LIBRARIES})
   target_link_libraries (${EXECUTABLE} ${DHCPCTL_LIBRARY})
 # target_link_libraries (${EXECUTABLE} ${DHCP_LIBRARY})
 # target_link_libraries (${EXECUTABLE} -Wl,--start-group ${OMAPI_LIBRARY} ${ISC_LIBRARY} ${DNS_LIBRARY} -Wl,--end-group)
@@ -541,8 +524,9 @@ if (UNIX)
   target_link_libraries (${EXECUTABLE} ${ISC_LIBRARY})
   target_link_libraries (${EXECUTABLE} ${PKG_SSL_LIBRARIES})
   target_link_libraries (${EXECUTABLE} ${GEOIP_LIBRARY})
-  target_link_libraries (${EXECUTABLE} ${GSS_LIBRARY})
- endif (DHCLIENT_SUPPORT)
+  target_link_libraries (${EXECUTABLE} ${PKG_KRB5_GSSAPI_LIBRARIES})
+#  target_link_libraries (${EXECUTABLE} ${GSS_LIBRARY})
+ endif (DHCLIENT_USE)
 
 # target_link_libraries (${EXECUTABLE} X11)
 elseif (WIN32)
@@ -565,16 +549,17 @@ if (WIN32)
 endif ()
 target_link_libraries (${EXECUTABLE} CommonXML)
 
-target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
+target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_U)
 
 if (UNIX)
- target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
+# target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
 
  target_link_libraries (${EXECUTABLE} ${PKG_LIBXML_LIBRARIES})
- target_link_libraries (${EXECUTABLE} ${JSON_LIBRARY})
+# target_link_libraries (${EXECUTABLE} ${JSON_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${DHCPCTL_LIBRARY})
 # target_link_libraries (${EXECUTABLE} ${DHCP_LIBRARY})
 # target_link_libraries (${EXECUTABLE} -Wl,--start-group ${OMAPI_LIBRARY} ${ISC_LIBRARY} ${DNS_LIBRARY} -Wl,--end-group)
@@ -587,7 +572,7 @@ if (UNIX)
  target_link_libraries (${EXECUTABLE} ${ISC_LIBRARY})
  target_link_libraries (${EXECUTABLE} ${PKG_SSL_LIBRARIES})
  target_link_libraries (${EXECUTABLE} ${GEOIP_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${GSS_LIBRARY})
+# target_link_libraries (${EXECUTABLE} ${GSS_LIBRARY})
 
   if (NL80211_USE)
   target_link_libraries (${EXECUTABLE} CommonDBus)

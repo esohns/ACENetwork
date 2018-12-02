@@ -6,11 +6,8 @@ include (FeatureSummary)
 #check_function_exists (socket HAVE_FUNC_SOCKET)
 #check_function_exists (strerror HAVE_FUNC_STRERROR)
 
-option (SSL_SUPPORT "enable SSL support" OFF)
-
 if (UNIX)
  option (NETLINK_SUPPORT "enable netlink support" ON)
- option (DBUS_SUPPORT "enable DBus support" ON)
 
  # DHCP client
  option (DHCLIENT_SUPPORT "enable ISC dhclient support" ON)
@@ -25,66 +22,71 @@ if (UNIX)
  find_package (Threads)
 endif (UNIX)
 
+option (SSL_SUPPORT "enable SSL support" OFF)
+
 if (UNIX)
 # DHCP client
  if (DHCLIENT_SUPPORT)
 #  pkg_check_modules (PKG_DHCP REQUIRED bind-exports isc-dhcp-client)
-  set (JSON_LIB_FILE libjson-c.so.3)
-  find_library (JSON_LIBRARY ${JSON_LIB_FILE}
-                HINTS /usr/lib
-                PATH_SUFFIXES x86_64-linux-gnu
-                DOC "searching for ${JSON_LIB_FILE} (system paths)")
-  if (NOT JSON_LIBRARY)
-   message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found json library \"${JSON_LIBRARY}\"")
-  endif ()
+  pkg_check_modules (PKG_JSON REQUIRED json-c)
+#  set (JSON_LIB_FILE libjson-c.so.3)
+#  find_library (JSON_LIBRARY ${JSON_LIB_FILE}
+#                HINTS /usr/lib
+#                PATH_SUFFIXES x86_64-linux-gnu
+#                DOC "searching for ${JSON_LIB_FILE} (system paths)")
+#  if (NOT JSON_LIBRARY)
+#   message (FATAL_ERROR "could not find ${JSON_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found json library \"${JSON_LIBRARY}\"")
+#  endif (NOT JSON_LIBRARY)
 
-  set (ISC_LIB_FILE libisc.a)
-#set (ISC_LIB_FILE libisc.so.166)
+#  set (ISC_LIB_FILE libisc.a)
+#  set (ISC_LIB_FILE libisc.so.166)
+  set (ISC_LIB_FILE libisc-export.so)
   find_library (ISC_LIBRARY ${ISC_LIB_FILE}
                 HINTS /usr/lib64 /usr/lib
-                PATH_SUFFIXES dhcp x86_64-linux-gnu
+                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu
                 DOC "searching for ${ISC_LIB_FILE} (system paths)")
   if (NOT ISC_LIBRARY)
    message (FATAL_ERROR "could not find ${ISC_LIB_FILE}, aborting")
   else ()
-   message (STATUS "Found isc library \"${ISC_LIBRARY}\"")
-  endif ()
+   message (STATUS "Found ISC library \"${ISC_LIBRARY}\"")
+  endif (NOT ISC_LIBRARY)
 
 # set (GSS_LIB_FILE libgss.so.3)
-  set (GSS_LIB_FILE libgssglue.so)
-  find_library (GSS_LIBRARY ${GSS_LIB_FILE}
-                HINTS /usr/lib64 /usr/lib
-                PATH_SUFFIXES x86_64-linux-gnu
-                DOC "searching for ${GSS_LIB_FILE} (system paths)")
-  if (NOT GSS_LIBRARY)
-   message (FATAL_ERROR "could not find ${GSS_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found generic security services library \"${GSS_LIBRARY}\"")
-  endif ()
+#  set (GSS_LIB_FILE libgssglue.so)
+#  find_library (GSS_LIBRARY ${GSS_LIB_FILE}
+#                HINTS /usr/lib64 /usr/lib
+#                PATH_SUFFIXES x86_64-linux-gnu
+#                DOC "searching for ${GSS_LIB_FILE} (system paths)")
+#  if (NOT GSS_LIBRARY)
+#   message (FATAL_ERROR "could not find ${GSS_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found generic security services library \"${GSS_LIBRARY}\"")
+#  endif (NOT GSS_LIBRARY)
 
-  set (KRB5_LIB_FILE libkrb5.so.3)
-  find_library (KRB5_LIBRARY ${KRB5_LIB_FILE}
-                HINTS /usr/lib
-                PATH_SUFFIXES x86_64-linux-gnu
-                DOC "searching for ${KRB5_LIB_FILE} (system paths)")
-  if (NOT KRB5_LIBRARY)
-   message (FATAL_ERROR "could not find ${KRB5_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found MIT kerberos library \"${KRB5_LIBRARY}\"")
-  endif ()
+  pkg_check_modules (PKG_KRB5_GSSAPI REQUIRED krb5-gssapi)
+#  set (KRB5_LIB_FILE libkrb5.so.3)
+#  find_library (KRB5_LIBRARY ${KRB5_LIB_FILE}
+#                HINTS /usr/lib
+#                PATH_SUFFIXES x86_64-linux-gnu
+#                DOC "searching for ${KRB5_LIB_FILE} (system paths)")
+#  if (NOT KRB5_LIBRARY)
+#   message (FATAL_ERROR "could not find ${KRB5_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found MIT kerberos library \"${KRB5_LIBRARY}\"")
+#  endif ()
 
-  set (GSS_KRB5_LIB_FILE libgssapi_krb5.so.2)
-  find_library (GSS_KRB5_LIBRARY ${GSS_KRB5_LIB_FILE}
-                HINTS /usr/lib
-                PATH_SUFFIXES x86_64-linux-gnu
-                DOC "searching for ${GSS_KRB5_LIB_FILE} (system paths)")
-  if (NOT GSS_KRB5_LIBRARY)
-   message (FATAL_ERROR "could not find ${GSS_KRB5_LIB_FILE}, aborting")
-  else ()
-   message (STATUS "Found MIT kerberos library \"${GSS_KRB5_LIBRARY}\"")
-  endif ()
+#  set (GSS_KRB5_LIB_FILE libgssapi_krb5.so.2)
+#  find_library (GSS_KRB5_LIBRARY ${GSS_KRB5_LIB_FILE}
+#                HINTS /usr/lib
+#                PATH_SUFFIXES x86_64-linux-gnu
+#                DOC "searching for ${GSS_KRB5_LIB_FILE} (system paths)")
+#  if (NOT GSS_KRB5_LIBRARY)
+#   message (FATAL_ERROR "could not find ${GSS_KRB5_LIB_FILE}, aborting")
+#  else ()
+#   message (STATUS "Found MIT kerberos library \"${GSS_KRB5_LIBRARY}\"")
+#  endif (NOT GSS_KRB5_LIBRARY)
 
   set (GEOIP_LIB_FILE libGeoIP.so.1)
   find_library (GEOIP_LIBRARY ${GEOIP_LIB_FILE}
@@ -97,40 +99,44 @@ if (UNIX)
    message (STATUS "Found GeoIP library \"${GEOIP_LIBRARY}\"")
   endif ()
 
-  set (DNS_LIB_FILE libdns.a)
+#  set (DNS_LIB_FILE libdns.a)
+  set (DNS_LIB_FILE libdns-export.so)
   find_library (DNS_LIBRARY ${DNS_LIB_FILE}
                 HINTS /usr/lib64 /usr/lib
-                PATH_SUFFIXES dhcp x86_64-linux-gnu
+                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu
                 DOC "searching for ${DNS_LIB_FILE} (system paths)")
   if (NOT DNS_LIBRARY)
    message (FATAL_ERROR "could not find ${DNS_LIB_FILE}, aborting")
   else ()
    message (STATUS "Found dns library \"${DNS_LIBRARY}\"")
-  endif ()
+  endif (NOT DNS_LIBRARY)
 
-  set (ISC_CFG_LIB_FILE libisccfg.a)
+#  set (ISC_CFG_LIB_FILE libisccfg.a)
+  set (ISC_CFG_LIB_FILE libisccfg-export.so)
   find_library (ISC_CFG_LIBRARY ${ISC_CFG_LIB_FILE}
                 HINTS /usr/lib64 /usr/lib
-                PATH_SUFFIXES dhcp x86_64-linux-gnu
+                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu
                 DOC "searching for ${ISC_CFG_LIB_FILE} (system paths)")
   if (NOT ISC_CFG_LIBRARY)
    message (FATAL_ERROR "could not find ${ISC_CFG_LIB_FILE}, aborting")
   else ()
    message (STATUS "Found isccfg library \"${ISC_CFG_LIBRARY}\"")
-  endif ()
+  endif (NOT ISC_CFG_LIBRARY)
 
-  set (IRS_LIB_FILE libirs.a)
+#  set (IRS_LIB_FILE libirs.a)
+  set (IRS_LIB_FILE libirs-export.so)
   find_library (IRS_LIBRARY ${IRS_LIB_FILE}
                 HINTS /usr/lib64 /usr/lib
-                PATH_SUFFIXES dhcp x86_64-linux-gnu
+                PATH_SUFFIXES bind9-export dhcp x86_64-linux-gnu
                 DOC "searching for ${IRS_LIB_FILE} (system paths)")
   if (NOT IRS_LIBRARY)
    message (FATAL_ERROR "could not find ${IRS_LIB_FILE}, aborting")
   else ()
    message (STATUS "Found irs library \"${IRS_LIBRARY}\"")
-  endif ()
+  endif (NOT IRS_LIBRARY)
 
-  set (OMAPI_LIB_FILE libomapi.a)
+#  set (OMAPI_LIB_FILE libomapi.a)
+  set (OMAPI_LIB_FILE libomapi.so)
   find_library (OMAPI_LIBRARY ${OMAPI_LIB_FILE}
                 HINTS /usr/lib64 /usr/lib
                 PATH_SUFFIXES dhcp x86_64-linux-gnu
@@ -139,9 +145,10 @@ if (UNIX)
    message (FATAL_ERROR "could not find ${OMAPI_LIB_FILE}, aborting")
   else ()
    message (STATUS "Found omapi library \"${OMAPI_LIBRARY}\"")
-  endif ()
+  endif (NOT OMAPI_LIBRARY)
 
-  set (DHCPCTL_LIB_FILE libdhcpctl.a)
+#  set (DHCPCTL_LIB_FILE libdhcpctl.a)
+  set (DHCPCTL_LIB_FILE libdhcpctl.so)
   find_library (DHCPCTL_LIBRARY ${DHCPCTL_LIB_FILE}
                HINTS /usr/lib64 /usr/lib
                PATH_SUFFIXES dhcp x86_64-linux-gnu
@@ -150,8 +157,9 @@ if (UNIX)
    message (FATAL_ERROR "could not find ${DHCPCTL_LIB_FILE}, aborting")
   else ()
    message (STATUS "Found dhcpctl library \"${DHCPCTL_LIBRARY}\"")
-  endif ()
-  pkg_check_modules (PKG_LIBXML REQUIRED libxml-2.0)
+  endif (NOT DHCPCTL_LIBRARY)
+
+#  pkg_check_modules (PKG_LIBXML REQUIRED libxml-2.0)
   add_definitions (-DDHCLIENT_SUPPORT)
  endif (DHCLIENT_SUPPORT)
 endif (UNIX)
@@ -194,24 +202,20 @@ else ()
 endif ()
 add_definitions (-DACE_HAS_DLL)
 
-if (SSL_SUPPORT)
- add_definitions (-DSSL_SUPPORT)
-endif (SSL_SUPPORT)
-
-include (FindPkgConfig)
-#pkg_check_modules (PKG_ACE REQUIRED ACE)
 if (UNIX)
- if (SSL_SUPPORT)
-  pkg_check_modules (PKG_SSL REQUIRED libssl)
- endif (SSL_SUPPORT)
  if (NETLINK_SUPPORT)
   pkg_check_modules (PKG_LIBNL REQUIRED libnl-3.0)
   add_definitions (-DNETLINK_SUPPORT)
  endif (NETLINK_SUPPORT)
- if (DBUS_SUPPORT)
-  pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
-  add_definitions (-DDBUS_SUPPORT)
- endif (DBUS_SUPPORT)
+
+ if (SSL_SUPPORT)
+  find_package (OpenSSL MODULE
+                COMPONENTS Crypto SSL)
+  if (OPENSSL_FOUND)
+   add_definitions (-DSSL_SUPPORT)
+  endif (OPENSSL_FOUND)
+#  pkg_check_modules (PKG_SSL REQUIRED libssl)
+ endif (SSL_SUPPORT)
 endif (UNIX)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/.. REALPATH DIRECTORY)
@@ -285,13 +289,27 @@ if (UNIX)
  if (NETLINK_SUPPORT)
   target_include_directories (${PROJECT_NAME} PUBLIC ${PKG_LIBNL_INCLUDE_DIRS})
  endif (NETLINK_SUPPORT)
- if (DBUS_SUPPORT)
-  target_include_directories (${PROJECT_NAME} PUBLIC ${PKG_DBUS_INCLUDE_DIRS})
- endif (DBUS_SUPPORT)
 
  if (SSL_SUPPORT)
   target_include_directories (${PROJECT_NAME} PUBLIC ${PKG_SSL_INCLUDE_DIRS})
  endif (SSL_SUPPORT)
+
+ if (DHCLIENT_SUPPORT)
+  set (BIND9_CONFIG_EXECUTABLE /usr/bin/bind9-export-config)
+  execute_process (COMMAND ${BIND9_CONFIG_EXECUTABLE} --cflags
+                   OUTPUT_VARIABLE BIND9_CFLAGS
+                   ERROR_VARIABLE BIND9_ERROR
+                   RESULT_VARIABLE BIND9_RESULT
+                   OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if (NOT ${BIND9_RESULT} EQUAL 0)
+   message (FATAL_ERROR "Command \"${BIND9_CONFIG_EXECUTABLE} --cflags\" failed with output:\n${BIND9_CFLAGS}\n${BIND9_ERROR}, aborting")
+  endif (NOT ${BIND9_RESULT} EQUAL 0)
+  message (STATUS "BIND9_CFLAGS: ${BIND9_CFLAGS}")
+  string (REGEX REPLACE "^-I(.+)$" "\\1" BIND9_CFLAGS "${BIND9_CFLAGS}")
+  message (STATUS "BIND9_CFLAGS: ${BIND9_CFLAGS}")
+  target_include_directories (${PROJECT_NAME} PUBLIC ${BIND9_CFLAGS})
+ endif (DHCLIENT_SUPPORT)
+
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/ACE>)
 
@@ -299,13 +317,8 @@ if (UNIX)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/cmake>)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src>)
- if (DBUS_SUPPORT)
-  target_include_directories (${PROJECT_NAME} PUBLIC ${PKG_DBUS_INCLUDE_DIRS})
-  target_include_directories (${PROJECT_NAME} PUBLIC
-                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/dbus>)
- endif (DBUS_SUPPORT)
- target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/math>)
+# target_include_directories (${PROJECT_NAME} PUBLIC
+#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/math>)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../modules/Common/src/timer>)
 
@@ -340,8 +353,8 @@ elseif (WIN32)
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/cmake>)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src>)
- target_include_directories (${PROJECT_NAME} PUBLIC
-                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/math>)
+# target_include_directories (${PROJECT_NAME} PUBLIC
+#                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/math>)
  target_include_directories (${PROJECT_NAME} PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/timer>)
  target_include_directories (${PROJECT_NAME} PUBLIC
@@ -520,11 +533,14 @@ if (UNIX)
   target_link_libraries (${PROJECT_NAME} ${DNS_LIBRARY})
   target_link_libraries (${PROJECT_NAME} ${GEOIP_LIBRARY})
   target_link_libraries (${PROJECT_NAME} ${PKG_SSL_LIBRARIES})
-  target_link_libraries (${PROJECT_NAME} ${GSS_KRB5_LIBRARY})
-  target_link_libraries (${PROJECT_NAME} ${KRB5_LIBRARY})
-  target_link_libraries (${PROJECT_NAME} ${GSS_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME} ${GSS_KRB5_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME} ${KRB5_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME} ${GSS_LIBRARY})
+  target_link_libraries (${PROJECT_NAME} ${PKG_KRB5_GSSAPI_LIBRARIES})
   target_link_libraries (${PROJECT_NAME} ${ISC_LIBRARY})
-  target_link_libraries (${PROJECT_NAME} ${JSON_LIBRARY})
+#  target_link_libraries (${PROJECT_NAME} ${JSON_LIBRARY})
+  target_link_libraries (${PROJECT_NAME} ${PKG_JSON_LIBRARIES})
+
   target_link_libraries (${PROJECT_NAME} ${PKG_LIBXML_LIBRARIES})
  endif (DHCLIENT_SUPPORT)
 

@@ -51,7 +51,7 @@
 #include "common_tools.h"
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #include "common_timer_manager_common.h"
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #include "stream_defines.h"
 
@@ -59,6 +59,12 @@
 #include "net_common_tools.h"
 #include "net_defines.h"
 #include "net_macros.h"
+
+#if defined (ACE_LINUX)
+#if defined (DHCLIENT_SUPPORT)
+#include "dhcp_tools.h"
+#endif // DHCLIENT_SUPPORT
+#endif // ACE_LINUX
 
 #include "net_wlan_defines.h"
 
@@ -1528,17 +1534,17 @@ associate:
 #if defined (DHCLIENT_USE)
       ACE_ASSERT (dhclientCBData_.connection == dhcpctl_null_handle);
       dhcpctl_handle authenticator_h = dhcpctl_null_handle;
-      ACE_INET_Addr inet_address (static_cast<u_short> (NET_EXE_DHCLIENT_OMAPI_PORT),
-                                  ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_LOCALHOST_IP_STRING),
+      ACE_INET_Addr inet_address (static_cast<u_short> (DHCP_DHCLIENT_OMAPI_PORT),
+                                  ACE_TEXT_ALWAYS_CHAR (DHCP_DHCLIENT_LOCALHOST_IP_STRING),
                                   AF_INET);
-      if (unlikely (!Net_Common_Tools::connectDHClient (inet_address,
-                                                        authenticator_h,
-                                                        net_wlan_dhclient_connection_event_cb,
-                                                        &dhclientCBData_,
-                                                        dhclientCBData_.connection)))
+      if (unlikely (!DHCP_Tools::connectDHClient (inet_address,
+                                                  authenticator_h,
+                                                  net_wlan_dhclient_connection_event_cb,
+                                                  &dhclientCBData_,
+                                                  dhclientCBData_.connection)))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::connectDHClient(%s), returning\n"),
+                    ACE_TEXT ("failed to DHCP_Tools::connectDHClient(%s), returning\n"),
                     ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address, false).c_str ())));
         break;
       } // end IF
@@ -1552,16 +1558,16 @@ associate:
 #endif // _DEBUG
 
       // verify interface state, address lease
-      if (unlikely (!Net_Common_Tools::getInterfaceState (dhclientCBData_.connection,
-                                                          configuration_->interfaceIdentifier,
-                                                          net_wlan_dhclient_connect_cb,
-                                                          &dhclientCBData_)))
+      if (unlikely (!DHCP_Tools::getInterfaceState (dhclientCBData_.connection,
+                                                    configuration_->interfaceIdentifier,
+                                                    net_wlan_dhclient_connect_cb,
+                                                    &dhclientCBData_)))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::getInterfaceState(%@,\"%s\"), returning\n"),
+                    ACE_TEXT ("failed to DHCP_Tools::getInterfaceState(%@,\"%s\"), returning\n"),
                     dhclientCBData_.connection,
                     ACE_TEXT (configuration_->interfaceIdentifier.c_str ())));
-        Net_Common_Tools::disconnectDHClient (dhclientCBData_.connection);
+        DHCP_Tools::disconnectDHClient (dhclientCBData_.connection);
         dhclientCBData_.connection = NULL;
         break;
       } // end IF
@@ -1600,17 +1606,17 @@ associate:
 #if defined (DHCLIENT_SUPPORT)
       ACE_ASSERT (dhclientCBData_.connection == dhcpctl_null_handle);
       dhcpctl_handle authenticator_h = dhcpctl_null_handle;
-      ACE_INET_Addr inet_address (static_cast<u_short> (NET_EXE_DHCLIENT_OMAPI_PORT),
-                                  ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_LOCALHOST_IP_STRING),
+      ACE_INET_Addr inet_address (static_cast<u_short> (DHCP_DHCLIENT_OMAPI_PORT),
+                                  ACE_TEXT_ALWAYS_CHAR (DHCP_DHCLIENT_LOCALHOST_IP_STRING),
                                   AF_INET);
-      if (unlikely (!Net_Common_Tools::connectDHClient (inet_address,
-                                                        authenticator_h,
-                                                        net_wlan_dhclient_connection_event_cb,
-                                                        &dhclientCBData_,
-                                                        dhclientCBData_.connection)))
+      if (unlikely (!DHCP_Tools::connectDHClient (inet_address,
+                                                  authenticator_h,
+                                                  net_wlan_dhclient_connection_event_cb,
+                                                  &dhclientCBData_,
+                                                  dhclientCBData_.connection)))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::connectDHClient(%s), returning\n"),
+                    ACE_TEXT ("failed to DHCP_Tools::connectDHClient(%s), returning\n"),
                     ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address, false).c_str ())));
         break;
       } // end IF
@@ -1623,18 +1629,18 @@ associate:
                   omapi_connection_writefd (dhclientCBData_.connection)));
 #endif // _DEBUG
 
-      if (unlikely (!Net_Common_Tools::relinquishLease (dhclientCBData_.connection,
-                                                        configuration_->interfaceIdentifier)))
+      if (unlikely (!DHCP_Tools::relinquishLease (dhclientCBData_.connection,
+                                                  configuration_->interfaceIdentifier)))
       {
         ACE_DEBUG ((LM_ERROR,
-                    ACE_TEXT ("failed to Net_Common_Tools::relinquishLease(%@,\"%s\"), returning\n"),
+                    ACE_TEXT ("failed to DHCP_Tools::relinquishLease(%@,\"%s\"), returning\n"),
                     dhclientCBData_.connection,
                     ACE_TEXT (Net_Common_Tools::IPAddressToString (inet_address, false).c_str ())));
-        Net_Common_Tools::disconnectDHClient (dhclientCBData_.connection);
+        DHCP_Tools::disconnectDHClient (dhclientCBData_.connection);
         dhclientCBData_.connection = dhcpctl_null_handle;
         break;
       } // end IF
-      Net_Common_Tools::disconnectDHClient (dhclientCBData_.connection);
+      DHCP_Tools::disconnectDHClient (dhclientCBData_.connection);
       dhclientCBData_.connection = dhcpctl_null_handle;
 #endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64

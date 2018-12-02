@@ -21,9 +21,9 @@
 #ifndef BITTORRENT_COMMON_H
 #define BITTORRENT_COMMON_H
 
-#include <list>
 //#include <unordered_map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "ace/Assert.h"
@@ -155,8 +155,7 @@ struct BitTorrent_PeerRecord
    : length (0)
    , type (BITTORRENT_MESSAGETYPE_INVALID)
   {}
- void operator+= (struct BitTorrent_PeerRecord rhs_in)
- { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); };
+ inline void operator+= (struct BitTorrent_PeerRecord rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
 
   unsigned int                               length;
   enum BitTorrent_MessageType                type;

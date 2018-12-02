@@ -45,6 +45,7 @@
 
 #include "common_tools.h"
 
+#include "net_common.h"
 #include "net_common_tools.h"
 #include "net_configuration.h"
 #include "net_macros.h"

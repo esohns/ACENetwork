@@ -52,7 +52,9 @@ extern "C"
 #include "net_macros.h"
 #include "net_packet_headers.h"
 
+#include "net_wlan_common.h"
 #include "net_wlan_defines.h"
+#include "net_wlan_tools.h"
 
 template <typename AddressType,
           typename ConfigurationType,
@@ -165,7 +167,9 @@ Net_WLAN_Monitor_T<AddressType,
   if (!inherited::configuration_->interfaceIdentifier.empty ())
     interface_identifiers_a.push_back (inherited::configuration_->interfaceIdentifier);
   else
-    interface_identifiers_a = Net_WLAN_Tools::getInterfaces ();
+    interface_identifiers_a = Net_WLAN_Tools::getInterfaces (connection_,
+                                                             AF_UNSPEC,
+                                                             0);
   for (Net_InterfacesIdentifiersIterator_t iterator = interface_identifiers_a.begin ();
        iterator != interface_identifiers_a.end ();
        ++iterator)
@@ -551,7 +555,10 @@ Net_WLAN_Monitor_T<AddressType,
 
   Net_InterfaceIdentifiers_t interface_identifiers_a;
   if (unlikely (interfaceIdentifier_in.empty ()))
-    interface_identifiers_a = Net_WLAN_Tools::getInterfaces ();
+    interface_identifiers_a =
+        Net_WLAN_Tools::getInterfaces (connection_, // DBus connection handle
+                                       AF_UNSPEC,   // address family
+                                       0);          // flag(s)
   else
     interface_identifiers_a.push_back (interfaceIdentifier_in);
 
@@ -585,10 +592,12 @@ Net_WLAN_Monitor_T<AddressType,
   } // end lock scope
 
 //dbus_dispatch_thread:
+#if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("(%s): D-Bus dispatch (group: %d, thread id: %t) starting...\n"),
+              ACE_TEXT ("(%s): D-Bus dispatch (group: %d, thread id: %t) starting\n"),
               ACE_TEXT (inherited::threadName_.c_str ()),
               inherited::grp_id_));
+#endif // _DEBUG
 
   // sanity check(s)
   ACE_ASSERT (connection_);
@@ -622,10 +631,12 @@ Net_WLAN_Monitor_T<AddressType,
   return 0;
 
 monitor_thread:
+#if defined (_DEBUG)
   ACE_DEBUG ((LM_DEBUG,
-              ACE_TEXT ("(%s): monitor (group: %d, thread id: %t) starting...\n"),
+              ACE_TEXT ("(%s): monitor (group: %d, thread id: %t) starting\n"),
               ACE_TEXT (inherited::threadName_.c_str ()),
               inherited::grp_id_));
+#endif // _DEBUG
 
   // sanity check(s)
   ACE_ASSERT (inherited::configuration_);
@@ -635,23 +646,27 @@ monitor_thread:
   ACE_Time_Value interval (1, 0);
   ACE_Message_Block* message_block_p = NULL;
   ACE_Time_Value now = COMMON_TIME_NOW;
+  struct ether_addr ap_mac_address_s_s;
   do
   {
-    if (inherited::configuration_->SSID != Net_WLAN_Tools::associatedSSID (inherited::configuration_->interfaceIdentifier,
-                                                                           inherited::handle_))
+    if (inherited::configuration_->SSID != Net_WLAN_Tools::associatedSSID (connection_,
+                                                                           inherited::configuration_->interfaceIdentifier))
     {
       // SSID not found ? --> initiate scan
-      if (unlikely (!Net_WLAN_Tools::hasSSID (inherited::configuration_->interfaceIdentifier,
+      if (unlikely (!Net_WLAN_Tools::hasSSID (connection_,
+                                              inherited::configuration_->interfaceIdentifier,
                                               inherited::configuration_->SSID)))
       {
-        Net_WLAN_Tools::scan (inherited::configuration_->interfaceIdentifier,
+        Net_WLAN_Tools::scan (connection_,
+                              inherited::configuration_->interfaceIdentifier,
+                              ap_mac_address_s_s,
                               inherited::configuration_->SSID,
-                              inherited::handle_,
+                              false,
+                              false,
                               false);
         goto sleep;
       } // end IF
 
-      struct ether_addr ap_mac_address_s_s;
       if (unlikely (!inherited::associate (inherited::configuration_->interfaceIdentifier,
                                            ap_mac_address_s_s,
                                            inherited::configuration_->SSID)))
@@ -691,7 +706,7 @@ sleep:
       { // *NOTE*: wakes up the other thread (see above)
         dbus_connection_close (connection_);
       } // end IF
-      message_block_p->release ();
+      message_block_p->release (); message_block_p = NULL;
       break; // done
     } // end IF
     message_block_p->release (); message_block_p = NULL;

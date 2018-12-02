@@ -30,9 +30,9 @@
 #endif // WLANAPI_SUPPORT
 #elif defined (ACE_LINUX)
 #if defined (NL80211_SUPPORT)
-#include <linux/nl80211.h>
+#include "linux/nl80211.h"
 
-#include <netlink/handlers.h>
+#include "netlink/handlers.h"
 #endif // NL80211_SUPPORT
 
 #if defined (DBUS_SUPPORT)
@@ -42,6 +42,8 @@
 
 #include "ace/Global_Macros.h"
 #include "ace/INET_Addr.h"
+
+#include "net_common.h"
 
 #include "net_wlan_common.h"
 
@@ -269,6 +271,17 @@ class Net_WLAN_Tools
 
   static std::string associatedSSID (struct DBusConnection*, // DBus connection handle
                                      const std::string&);    // interface identifier
+  static bool hasSSID (struct DBusConnection*, // DBus connection handle
+                       const std::string&,     // interface identifier
+                       const std::string&);    // (E)SSID
+
+  static bool scan (struct DBusConnection*,   // DBus connection handle
+                    const std::string&,       // interface identifier
+                    const struct ether_addr&, // access point MAC address {0: all}
+                    const std::string&,       // (E)SSID {"": all}
+                    bool = false,             // low priority ?
+                    bool = false,             // flush cache first ?
+                    bool = false);            // randomize MAC address ?
 
   static bool activateConnection (struct DBusConnection*, // DBus connection handle
                                   const std::string&,     // connection object path
@@ -277,8 +290,8 @@ class Net_WLAN_Tools
   // *NOTE*: 'gateway' really means the 'next hop' router with regard to some
   //         policy (e.g. routing table entry metric/priority/...).
   //         Consequently, this API is non-functional at this point
-  static ACE_INET_Addr getGateway (const std::string&,      // interface identifier
-                                   struct DBusConnection*); // DBus connection handle
+  static ACE_INET_Addr getGateway (struct DBusConnection*, // DBus connection handle
+                                   const std::string&);    // interface identifier
 
   static std::string accessPointDBusObjectPathToSSID (struct DBusConnection*, // DBus connection handle
                                                       const std::string&);    // access point object path

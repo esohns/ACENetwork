@@ -1,12 +1,9 @@
-﻿option (GTK3_SUPPORT "enable Gtk3 support" ON)
-
-if (UNIX)
+﻿if (UNIX)
  include (CheckLibraryExists)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
  set (CMAKE_THREAD_PREFER_PTHREAD ON)
  find_package (Threads)
- check_library_exists (iwlib iw_sockets_open "" HAVE_LIB_IW)
-endif ()
+endif (UNIX)
 
 set (ACE_LIB_FILE libACE.so)
 if (UNIX)
@@ -32,42 +29,6 @@ endif ()
 if (NOT ACE_LIBRARY)
  message (FATAL_ERROR "could not find ${ACE_LIB_FILE} (was: \"${ACE_LIBRARY}\"), aborting")
 endif ()
-
-include (FindPkgConfig)
-#pkg_check_modules (PKG_ACE REQUIRED ACE)
-if (UNIX)
-# *NOTE*: Common requires libcap
- pkg_check_modules (PKG_CAP REQUIRED libcap)
- #pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
-# pkg_check_modules (PKG_CURSES REQUIRED ncurses panel)
- if (GTK3_SUPPORT)
-  pkg_check_modules (PKG_GTK3 REQUIRED gtk+-3.0)
- else ()
-  pkg_check_modules (PKG_GTK2 REQUIRED libpng gmodule-2.0 gthread-2.0 gtk+-2.0)
- endif ()
-# if ((!PKG_CURSES) OR (!PKG_GTK_GLADE))
-# if (!PKG_GTK_GLADE)
-#  message (FATAL_ERROR "required packages not found, aborting")
-# endif ()
-# *TODO*: repair WIN32 pkgconfig support
-elseif (WIN32)
-# find_library (CURSES_LIBRARY pdcurses.lib
-#               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses
-#               PATH_SUFFIXES win32
-#               DOC "searching for pdcurses.lib")
-# find_library (PANEL_LIBRARY panel.lib
-#               PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses
-#               PATH_SUFFIXES win32
-#               DOC "searching for panel.lib")
-
-# if (NOT CURSES_LIBRARY)
-#  message (FATAL_ERROR "could not find pdcurses.lib, aborting")
-# endif ()
-# if (NOT PANEL_LIBRARY)
-#  message (FATAL_ERROR "could not find panel.lib, aborting")
-# endif ()
-endif ()
-#if (NOT EXISTS PDCURSES_LIBRARY)
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
@@ -109,15 +70,10 @@ add_definitions (-DACENETWORK_HAS_DLL)
 #set_property (SOURCE PROPERTY COMPILE_DEFINITIONS HAVE_CONFIG_H)
 
 if (UNIX)
+# include_directories (${PKG_CAP_INCLUDE_DIRS})
+
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE)
 
- include_directories (${PKG_CAP_INCLUDE_DIRS})
-# include_directories (${PKG_CURSES_INCLUDE_DIRS})
- if (GTK3_SUPPORT)
-  include_directories (${PKG_GTK3_INCLUDE_DIRS})
- else ()
-  include_directories (${PKG_GTK2_INCLUDE_DIRS})
- endif ()
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/log)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/signal)
@@ -130,9 +86,9 @@ if (UNIX)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/net)
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACEStream/src/modules/stat)
 elseif (WIN32)
- include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
-
 # include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../pdcurses)
+
+ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../ATCD/ACE)
 
  include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../3rd_party)
 
@@ -243,29 +199,13 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 if (UNIX)
- set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS -nostartfiles)
+# set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS -nostartfiles)
 elseif (WIN32)
  ## *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
  set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 endif ()
 target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
-if (UNIX)
- target_link_libraries (${EXECUTABLE} rt)
- target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
- target_link_libraries (${EXECUTABLE} iw)
- target_link_libraries (${EXECUTABLE} X11)
-# target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
- if (GTK3_SUPPORT)
-  target_link_libraries (${EXECUTABLE} ${PKG_GTK3_LIBRARIES})
- else ()
-  target_link_libraries (${EXECUTABLE} ${PKG_GTK2_LIBRARIES})
- endif ()
-elseif (WIN32)
-# target_link_libraries (${EXECUTABLE} ${CURSES_LIBRARY})
-# target_link_libraries (${EXECUTABLE} ${PANEL_LIBRARY})
 
-# target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
-endif ()
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} CommonLog)
 target_link_libraries (${EXECUTABLE} CommonSignal)
@@ -277,14 +217,10 @@ target_link_libraries (${EXECUTABLE} ACEStream_Network)
 target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
-target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
+#target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_DHCP)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_U)
-
-if (UNIX)
- target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
-endif (UNIX)
 
 # add PCH
 set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")

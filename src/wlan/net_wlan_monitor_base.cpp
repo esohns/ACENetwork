@@ -98,19 +98,19 @@ net_wlan_dhclient_connect_cb (dhcpctl_handle handle_in,
   std::string interface_identifier_string;
   bool reconnect_b = false;
   std::string leases_file_path =
-      ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_LEASES_FILE);
+      ACE_TEXT_ALWAYS_CHAR (DHCP_DHCLIENT_LEASES_FILE);
   Net_WLAN_Monitor_IStateMachine_t* istate_machine_p = NULL;
 
   status_i =
       dhcpctl_get_value (&data_string_p,
                          handle_in,
-                         ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_OBJECT_VALUE_NAME_STRING));
+                         ACE_TEXT_ALWAYS_CHAR (DHCP_DHCLIENT_OBJECT_VALUE_NAME_STRING));
   if (unlikely (status_i != ISC_R_SUCCESS))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("failed to ::dhcpctl_get_value(%@,\"%s\"): \"%s\", returning\n"),
                 handle_in,
-                ACE_TEXT (NET_EXE_DHCLIENT_OBJECT_VALUE_NAME_STRING),
+                ACE_TEXT (DHCP_DHCLIENT_OBJECT_VALUE_NAME_STRING),
                 ACE_TEXT (isc_result_totext (status_i))));
     return;
   } // end IF
@@ -121,8 +121,8 @@ net_wlan_dhclient_connect_cb (dhcpctl_handle handle_in,
   ACE_ASSERT (status_i == ISC_R_SUCCESS);
   data_string_p = NULL;
 
-  if (!Net_Common_Tools::hasState (handle_in,
-                                   ACE_TEXT_ALWAYS_CHAR (NET_EXE_DHCLIENT_INTERFACE_STATE_UP_STRING)))
+  if (!DHCP_Tools::hasState (handle_in,
+                             ACE_TEXT_ALWAYS_CHAR (DHCP_DHCLIENT_INTERFACE_STATE_UP_STRING)))
   {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("\"%s\": invalid state, retrying\n"),
@@ -133,21 +133,19 @@ net_wlan_dhclient_connect_cb (dhcpctl_handle handle_in,
 
   // interface is 'up'; verify that it has a valid active lease
 //      if (unlikely (!Net_Common_Tools::hasActiveLease (cb_data_p->connection,
-  if (unlikely (!Net_Common_Tools::hasActiveLease (leases_file_path,
-                                                   interface_identifier_string)))
+  if (unlikely (!DHCP_Tools::hasActiveLease (leases_file_path,
+                                             interface_identifier_string)))
   {
     ACE_DEBUG ((LM_ERROR,
-//                    ACE_TEXT ("\"%s\": failed to Net_Common_Tools::hasActiveLease(%@), continuing\n"),
-                ACE_TEXT ("\"%s\": failed to Net_Common_Tools::hasActiveLease(%s), retrying\n"),
+                ACE_TEXT ("\"%s\": failed to DHCP_Tools::hasActiveLease(%s), retrying\n"),
                 ACE_TEXT (interface_identifier_string.c_str ()),
-//                    cb_data_p->connection));
                 ACE_TEXT (leases_file_path.c_str ())));
     reconnect_b = true;
     goto continue_;
   } // end IF
 
 continue_:
-  Net_Common_Tools::disconnectDHClient (cb_data_p->connection);
+  DHCP_Tools::disconnectDHClient (cb_data_p->connection);
 //  cb_data_p->connection = NULL;
 
   istate_machine_p =

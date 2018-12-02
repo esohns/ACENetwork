@@ -34,13 +34,6 @@
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-#if defined (DHCLIENT_SUPPORT)
-extern "C"
-{
-#include "dhcpctl/dhcpctl.h"
-}
-#endif // DHCLIENT_SUPPORT
 #endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (NETLINK_SUPPORT)
@@ -63,13 +56,6 @@ struct Net_NetlinkSocketConfiguration;
 struct Net_TCPSocketConfiguration;
 struct Net_UDPSocketConfiguration;
 class Net_Common_Tools;
-
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-#if defined (DHCLIENT_SUPPORT)
-typedef void (*Net_DHClientCallback_t) (dhcpctl_handle, dhcpctl_status, void*);
-#endif // DHCLIENT_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
 
 enum Net_LinkLayerType
 {

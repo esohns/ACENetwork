@@ -5,7 +5,6 @@ if (UNIX)
 # check_library_exists (pthread pthread_create "" HAVE_LIB_PTHREAD)
  set (CMAKE_THREAD_PREFER_PTHREAD ON)
  find_package (Threads)
- check_library_exists (iwlib iw_sockets_open "" HAVE_LIB_IW)
 endif ()
 
 set (ACE_LIB_FILE libACE.so)
@@ -275,7 +274,7 @@ add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
 if (WIN32)
  ## *WARNING*: linking ACE(d).lib requires "/FORCE:MULTIPLE""
- set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
+# set_target_properties (${EXECUTABLE} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
 
 # target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl/lib/libeay32.lib)
  target_link_libraries (${EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/../../../openssl_win32_bin/lib/ssleay32.lib)
@@ -285,27 +284,19 @@ if (SSL_SUPPORT)
  target_link_libraries (${EXECUTABLE} ${ACE_SSL_LIBRARY})
 endif (SSL_SUPPORT)
 if (UNIX)
- target_link_libraries (${EXECUTABLE} rt)
- target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
- target_link_libraries (${EXECUTABLE} iw)
  target_link_libraries (${EXECUTABLE} ${PKG_OPENSSL_LIBRARIES})
  target_link_libraries (${EXECUTABLE} ${PKG_LIBXML2_LIBRARIES})
- target_link_libraries (${EXECUTABLE} X11)
-# target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
+# target_link_libraries (${EXECUTABLE} X11)
 
  target_link_libraries (${EXECUTABLE} ${PKG_FFMPEG_LIBRARIES})
 elseif (WIN32)
  set (CMAKE_EXE_LINKER_FLAGS /NODEFAULTLIB:\"libcmt.lib\")
 
-# target_link_libraries (${EXECUTABLE} ntdll.lib)
-# target_link_libraries (${EXECUTABLE} dxguid.lib)
  target_link_libraries (${EXECUTABLE} mfplat.lib)
-# *TODO*: repair WIN32 pkgconfig support
 
  target_link_libraries (${EXECUTABLE} ${LIBXML2_LIBRARY})
-
- target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 endif ()
+
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} CommonLog)
 target_link_libraries (${EXECUTABLE} CommonSignal)
@@ -323,14 +314,9 @@ target_link_libraries (${EXECUTABLE} ACEStream_Network)
 target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
-#target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_HTTP)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_I)
-
-if (UNIX)
- target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
-endif (UNIX)
 
 # add PCH
 set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")

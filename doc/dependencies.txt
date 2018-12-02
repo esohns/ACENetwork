@@ -1,0 +1,10 @@
+
+Linux Package Management:
+* Fedora 29 ('sudo dnf install')
+src:           json-c-devel bind-export-devel dhcp-devel krb5-devel
+src/protocols: flex-devel
+src/wlan:      NetworkManager-libnm-devel
+
+test_u:
+test_i:
+

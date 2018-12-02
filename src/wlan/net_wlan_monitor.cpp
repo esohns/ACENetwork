@@ -24,10 +24,12 @@
 
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
 #else
+#if defined (WEXT_SUPPORT)
+#include "iwlib.h"
+#endif  // WEXT_SUPPORT
+
 #if defined (NL80211_SUPPORT)
 #include "netlink/errno.h"
-
-//#include "iwlib.h"
 #endif  // NL80211_SUPPORT
 
 #if defined (DBUS_SUPPORT)
@@ -109,9 +111,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to dbus_message_get_args(): \"%s\", aborting\n"),
                   ACE_TEXT (error_s.message)));
-
       dbus_error_free (&error_s);
-
       goto continue_;
     } // end IF
     ACE_ASSERT (object_path_p);
@@ -159,9 +159,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to dbus_message_get_args(): \"%s\", aborting\n"),
                   ACE_TEXT (error_s.message)));
-
       dbus_error_free (&error_s);
-
       goto continue_;
     } // end IF
     ACE_ASSERT (object_path_p);
@@ -221,9 +219,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to dbus_message_get_args(): \"%s\", aborting\n"),
                   ACE_TEXT (error_s.message)));
-
       dbus_error_free (&error_s);
-
       goto continue_;
     } // end IF
     switch (state_current)
@@ -362,9 +358,7 @@ network_wlan_dbus_default_filter_cb (struct DBusConnection* connection_in,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("failed to dbus_message_get_args(): \"%s\", aborting\n"),
                   ACE_TEXT (error_s.message)));
-
       dbus_error_free (&error_s);
-
       goto continue_;
     } // end IF
     switch (state_current)
@@ -968,7 +962,7 @@ nla_put_failure:
       // *TODO*: the returned SSID IE does not seem to contain any data in some
       //         cases; find out why
       if (unlikely (!information_element_p->length ||
-                    (information_element_p->length > IW_ESSID_MAX_SIZE)))
+                    (information_element_p->length > NET_WLAN_ESSID_MAX_SIZE)))
       {
         // *NOTE*: "...A 0 length information field is used within Probe Request
         //         management frames to indicate the wildcard SSID. ..."

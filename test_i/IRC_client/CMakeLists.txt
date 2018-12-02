@@ -233,35 +233,17 @@ add_dependencies (${EXECUTABLE} Common)
 add_dependencies (${EXECUTABLE} CommonLog)
 add_dependencies (${EXECUTABLE} CommonSignal)
 add_dependencies (${EXECUTABLE} CommonTimer)
-#add_dependencies (${EXECUTABLE} CommonUI)
-#add_dependencies (${EXECUTABLE} CommonUI_GTK)
 
 add_dependencies (${EXECUTABLE} ACEStream)
 
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME})
-add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
+#add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 add_dependencies (${EXECUTABLE} ${PROJECT_NAME}_Protocol_IRC)
 
 target_link_libraries (${EXECUTABLE} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
-if (UNIX)
- target_link_libraries (${EXECUTABLE} rt)
- target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
- target_link_libraries (${EXECUTABLE} iw)
- target_link_libraries (${EXECUTABLE} ${PKG_CURSES_LIBRARIES})
- target_link_libraries (${EXECUTABLE} X11)
- if (GTK3_SUPPORT)
-  target_link_libraries (${EXECUTABLE} ${PKG_GTK3_LIBRARIES})
- else ()
-  target_link_libraries (${EXECUTABLE} ${PKG_GTK2_LIBRARIES})
- endif ()
-elseif (WIN32)
-# target_link_libraries (${EXECUTABLE} ntdll.lib)
- target_link_libraries (${EXECUTABLE} ${CURSES_LIBRARY})
- target_link_libraries (${EXECUTABLE} ${PANEL_LIBRARY})
 
- target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
-endif ()
+target_link_libraries (${EXECUTABLE} ${ACE_LIBRARY})
+
 target_link_libraries (${EXECUTABLE} Common)
 target_link_libraries (${EXECUTABLE} CommonLog)
 target_link_libraries (${EXECUTABLE} CommonSignal)
@@ -273,14 +255,9 @@ target_link_libraries (${EXECUTABLE} ACEStream_Network)
 target_link_libraries (${EXECUTABLE} ACEStream_Statistic)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME})
-target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Protocol_IRC)
 
 target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_Test_I)
-
-if (UNIX)
- target_link_libraries (${EXECUTABLE} ${PKG_CAP_LIBRARIES})
-endif (UNIX)
 
 # add PCH
 set_target_properties (${EXECUTABLE} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")
@@ -295,21 +272,6 @@ install (FILES
          etc/IRC_client.ini
          etc/IRC_client_phonebook.ini
          DESTINATION etc/lib${PROJECT_NAME}/test_i COMPONENT config)
-
-################################################################################
-
-#if (UNIX)
-# if (GTK_SUPPORT)
-#  if (GTK3_SUPPORT)
-#   include_directories (${PKG_GTK3_INCLUDE_DIRS})
-#  else ()
-#   include_directories (${PKG_GTK2_INCLUDE_DIRS})
-#  endif ()
-# endif (GTK_SUPPORT)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/ui/gtk)
-#elseif (WIN32)
-# include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/ui/gtk)
-#endif ()
 
 ########### next target ###############
 set (EXECUTABLE_GUI IRC_client_gui)
@@ -384,36 +346,17 @@ add_dependencies (${EXECUTABLE_GUI} CommonTimer)
 add_dependencies (${EXECUTABLE_GUI} ACEStream)
 
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME})
-add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_WLAN)
+#add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_WLAN)
 add_dependencies (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_IRC)
 
 target_link_libraries (${EXECUTABLE_GUI} ${CMAKE_THREAD_LIBS_INIT})
-target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
-if (UNIX)
- target_link_libraries (${EXECUTABLE_GUI} rt)
- target_link_libraries (${EXECUTABLE_GUI} ${PKG_CAP_LIBRARIES})
-# target_link_libraries (${EXECUTABLE_GUI} iw)
- target_link_libraries (${EXECUTABLE_GUI} X11)
- if (GTK_SUPPORT)
-  if (GTK3_SUPPORT)
-   target_link_libraries (${EXECUTABLE_GUI} ${PKG_GTK3_LIBRARIES})
-  else ()
-   target_link_libraries (${EXECUTABLE_GUI} ${PKG_GTK2_LIBRARIES})
-  endif ()
- endif (GTK_SUPPORT)
-elseif (WIN32)
-# target_link_libraries (${EXECUTABLE_GUI} ntdll.lib)
 
-# target_link_libraries (${EXECUTABLE} ${PROJECT_NAME}_WLAN)
-endif ()
+target_link_libraries (${EXECUTABLE_GUI} ${ACE_LIBRARY})
+
 target_link_libraries (${EXECUTABLE_GUI} Common)
 target_link_libraries (${EXECUTABLE_GUI} CommonLog)
 target_link_libraries (${EXECUTABLE_GUI} CommonSignal)
 target_link_libraries (${EXECUTABLE_GUI} CommonTimer)
-if (WIN32)
- # *WARNING*: linking CommonUI requires "/FORCE:MULTIPLE""
- set_target_properties (${EXECUTABLE_GUI} PROPERTIES LINK_FLAGS /FORCE:MULTIPLE)
-endif ()
 
 target_link_libraries (${EXECUTABLE_GUI} ACEStream)
 target_link_libraries (${EXECUTABLE_GUI} ACEStream_Miscellaneous)
@@ -425,10 +368,6 @@ target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME})
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Protocol_IRC)
 
 target_link_libraries (${EXECUTABLE_GUI} ${PROJECT_NAME}_Test_I)
-
-if (UNIX)
- target_link_libraries (${EXECUTABLE_GUI} ${PKG_CAP_LIBRARIES})
-endif (UNIX)
 
 # add PCH
 set_target_properties (${EXECUTABLE_GUI} PROPERTIES COTIRE_CXX_PREFIX_HEADER_INIT "stdafx.h")

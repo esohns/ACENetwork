@@ -9,6 +9,10 @@ if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
  add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
 endif ()
 
+if (UNIX)
+ pkg_check_modules (PKG_FFMPEG REQUIRED libavutil)
+endif (UNIX)
+
 add_library (${PROJECT_NAME}_Protocol_DHCP STATIC "")
 
 find_package (Common ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO}
@@ -38,6 +42,11 @@ endif ()
 add_definitions (-DNET_HAS_DLL)
 
 if (UNIX)
+ target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
+                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
+
+ target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC ${BIND9_CFLAGS})
+
  target_include_directories (${PROJECT_NAME}_Protocol_DHCP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACE>)
 

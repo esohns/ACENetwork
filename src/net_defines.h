@@ -130,27 +130,6 @@
 #define NET_EXE_NETWORKMANAGER_STRING                        "NetworkManager"
 #endif // ACE_WIN32 || ACE_WIN64
 
-#if defined (ACE_WIN32) || defined (ACE_WIN64)
-#else
-#if defined (DHCLIENT_SUPPORT)
-#define NET_EXE_DHCLIENT_CONNECTION_RETRIES                  3
-#define NET_EXE_DHCLIENT_INTERFACE_STATE_UP_STRING           "up"
-#define NET_EXE_DHCLIENT_LEASES_FILE                         "/var/lib/dhcp/dhclient.leases"
-#define NET_EXE_DHCLIENT_LOCALHOST_IP_STRING                 "127.0.0.1"
-#define NET_EXE_DHCLIENT_OMAPI_PORT                          7911
-#define NET_EXE_DHCLIENT_STRING                              "dhclient"
-#define NET_EXE_DHCLIENT_SWITCH_RUN_IN_FOREGROUND_STRING     "d"
-
-#define NET_EXE_DHCLIENT_OBJECT_INTERFACE_STRING             "interface"
-#define NET_EXE_DHCLIENT_OBJECT_LEASE_STRING                 "lease"
-#define NET_EXE_DHCLIENT_OBJECT_VALUE_HARDWAREADDRESS_STRING "hardware-address"
-#define NET_EXE_DHCLIENT_OBJECT_VALUE_HARDWARETYPE_STRING    "hardware-type"
-#define NET_EXE_DHCLIENT_OBJECT_VALUE_IPADDRESS_STRING       "ip-address"
-#define NET_EXE_DHCLIENT_OBJECT_VALUE_NAME_STRING            "name"
-#define NET_EXE_DHCLIENT_OBJECT_VALUE_STATE_STRING           "state"
-#endif // DHCLIENT_SUPPORT
-#endif // ACE_WIN32 || ACE_WIN64
-
 // modules
 #define NET_MODULE_CLIENTSERVER_DIRECTORY_STRING             "client_server"
 #define NET_MODULE_PROTOCOL_DIRECTORY_STRING                 "protocol"

@@ -22,7 +22,6 @@
 
 #include "common_timer_manager_common.h"
 
-#include "stream_dec_common.h"
 #include "stream_dec_tools.h"
 
 #include "net_defines.h"
@@ -245,15 +244,12 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 continue_:
 error:
   if (release_inbound_message)
-  {
-    ACE_ASSERT (message_inout);
-    message_inout->release ();
-    message_inout = NULL;
+  { ACE_ASSERT (message_inout);
+    message_inout->release (); message_inout = NULL;
   } // end IF
   if (release_message)
-  {
-    ACE_ASSERT (message_p);
-    message_p->release ();
+  { ACE_ASSERT (message_p);
+    message_p->release (); message_p = NULL;
   } // end IF
 }
 
@@ -292,8 +288,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
 
       if (headFragment_)
       {
-        headFragment_->release ();
-        headFragment_ = NULL;
+        headFragment_->release (); headFragment_ = NULL;
       } // end IF
 
       break;
@@ -341,10 +336,12 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   {
     session_data_r.format =
         HTTP_Tools::EncodingToCompressionFormat ((*iterator).second);
+#if defined (_DEBUG)
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT ("%s: set compression format: \"%s\"\n"),
                 inherited::mod_->name (),
                 ACE_TEXT (Stream_Module_Decoder_Tools::compressionFormatToString (session_data_r.format).c_str ())));
+#endif // _DEBUG
   } // end IF
 
   DATA_CONTAINER_T* data_container_p, *data_container_2 = NULL;
@@ -356,10 +353,7 @@ HTTP_Module_Parser_T<ACE_SYNCH_USE,
   {
     ACE_DEBUG ((LM_CRITICAL,
                 ACE_TEXT ("failed to allocate memory: \"%m\", returning\n")));
-
-    delete record_inout;
-    record_inout = NULL;
-
+    delete record_inout; record_inout = NULL;
     goto error;
   } // end IF
   data_container_p->setPR (record_inout);
@@ -642,10 +636,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
       ACE_DEBUG ((LM_ERROR,
                   ACE_TEXT ("%s: failed to ACE_Task_T::put_next(): \"%m\", returning\n"),
                   inherited::mod_->name ()));
-
-      // clean up
       headFragment_->release ();
-
       goto error;
     } // end IF
     headFragment_ = NULL;
@@ -654,15 +645,12 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 continue_:
 error:
   if (release_inbound_message)
-  {
-    ACE_ASSERT (message_inout);
-    message_inout->release ();
-    message_inout = NULL;
+  { ACE_ASSERT (message_inout);
+    message_inout->release (); message_inout = NULL;
   } // end IF
   if (release_message)
-  {
-    ACE_ASSERT (message_p);
-    message_p->release ();
+  { ACE_ASSERT (message_p);
+    message_p->release (); message_p = NULL;
   } // end IF
 }
 
@@ -746,8 +734,7 @@ HTTP_Module_ParserH_T<ACE_SYNCH_USE,
 
       if (headFragment_)
       {
-        headFragment_->release ();
-        headFragment_ = NULL;
+        headFragment_->release (); headFragment_ = NULL;
       } // end IF
 
       // *TODO*: remove type inference

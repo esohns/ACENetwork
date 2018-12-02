@@ -21,8 +21,6 @@
 #ifndef BITTORRENT_MESSAGE_H
 #define BITTORRENT_MESSAGE_H
 
-#include <string>
-
 #include "ace/Global_Macros.h"
 
 #include "stream_control_message.h"
@@ -32,9 +30,7 @@
 #include "http_message.h"
 
 #include "bittorrent_common.h"
-#include "bittorrent_exports.h"
 #include "bittorrent_tools.h"
-//#include "bittorrent_stream_common.h"
 
 // forward declaration(s)
 class ACE_Allocator;
@@ -56,23 +52,20 @@ class ACE_Message_Block;
 
 struct BitTorrent_PeerMessageData
 {
-  inline BitTorrent_PeerMessageData ()
+  BitTorrent_PeerMessageData ()
    : handShakeRecord (NULL)
    , peerRecord (NULL)
-  {};
-  inline ~BitTorrent_PeerMessageData ()
+  {}
+  ~BitTorrent_PeerMessageData ()
   {
     if (handShakeRecord)
       delete handShakeRecord;
     if (peerRecord)
       delete peerRecord;
-  };
-  inline void operator+= (BitTorrent_PeerMessageData rhs_in)
-  { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); };
-  inline operator struct BitTorrent_PeerHandShake& () const
-  { ACE_ASSERT (handShakeRecord); return *handShakeRecord; };
-  inline operator struct BitTorrent_PeerRecord& () const
-  { ACE_ASSERT (peerRecord); return *peerRecord; };
+  }
+  inline void operator+= (BitTorrent_PeerMessageData rhs_in) { ACE_UNUSED_ARG (rhs_in); ACE_ASSERT (false); }
+  inline operator struct BitTorrent_PeerHandShake& () const { ACE_ASSERT (handShakeRecord); return *handShakeRecord; }
+  inline operator struct BitTorrent_PeerRecord& () const { ACE_ASSERT (peerRecord); return *peerRecord; }
 
   struct BitTorrent_PeerHandShake* handShakeRecord;
   struct BitTorrent_PeerRecord*    peerRecord;
@@ -120,10 +113,10 @@ class BitTorrent_Message_T
                         ACE_Allocator*,  // message allocator
                         bool = true);    // increment running message counter ?
   //   BitTorrent_Message (ACE_Allocator*); // message allocator
-  inline virtual ~BitTorrent_Message_T () {};
+  inline virtual ~BitTorrent_Message_T () {}
 
   //virtual enum BitTorrent_MessageType command () const; // return value: message type
-  inline static std::string CommandTypeToString (enum BitTorrent_MessageType type_in) { return BitTorrent_Tools::TypeToString (type_in); };
+  inline static std::string CommandTypeToString (enum BitTorrent_MessageType type_in) { return BitTorrent_Tools::TypeToString (type_in); }
 
   // implement Common_IDumpState
   virtual void dump_state () const;
@@ -160,8 +153,12 @@ template <typename SessionDataType, // *NOTE*: this implements Common_IReference
 class BitTorrent_TrackerMessage_T
  : public HTTP_Message_T<struct BitTorrent_AllocatorConfiguration,
                          enum Stream_MessageType>
-
 {
+//  typedef Stream_DataMessageBase_T<xmlDoc,
+//                                   Stream_CommandType_t> inherited;
+  typedef HTTP_Message_T<struct BitTorrent_AllocatorConfiguration,
+                         enum Stream_MessageType> inherited;
+
   // grant access to specific private ctors
   //friend class Stream_MessageAllocatorHeapBase_T<ACE_MT_SYNCH,
   //                                               struct BitTorrent_AllocatorConfiguration,
@@ -196,7 +193,7 @@ class BitTorrent_TrackerMessage_T
                                ACE_Allocator*,     // message allocator
                                bool = true);       // increment running message counter ?
   //BitTorrent_TrackerMessage_T (ACE_Allocator*); // message allocator
-  inline virtual ~BitTorrent_TrackerMessage_T () {};
+  inline virtual ~BitTorrent_TrackerMessage_T () {}
 
   // overrides from ACE_Message_Block
   // --> create a "shallow" copy of ourselves that references the same packet
@@ -212,17 +209,12 @@ class BitTorrent_TrackerMessage_T
                                                                  UserDataType>&);
 
  private:
-//  typedef Stream_DataMessageBase_T<xmlDoc,
-//                                   Stream_CommandType_t> inherited;
-  typedef HTTP_Message_T<struct BitTorrent_AllocatorConfiguration,
-                         enum Stream_MessageType> inherited;
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerMessage_T ())
+  ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerMessage_T& operator= (const BitTorrent_TrackerMessage_T&))
 
   // convenient types
   typedef BitTorrent_TrackerMessage_T<SessionDataType,
                                       UserDataType> OWN_TYPE_T;
-
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerMessage_T ())
-  ACE_UNIMPLEMENTED_FUNC (BitTorrent_TrackerMessage_T& operator= (const BitTorrent_TrackerMessage_T&))
 };
 
 // include template definition

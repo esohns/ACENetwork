@@ -1,32 +1,17 @@
 include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts/PreXMLImplementation.cmake)
 include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts/SetXMLImplementation.cmake)
-
-include (CMakeDependentOption)
-include (FeatureSummary)
+include (${CMAKE_CURRENT_SOURCE_DIR}/scripts/PreMonitorImplementation.cmake)
+include (${CMAKE_CURRENT_SOURCE_DIR}/scripts/SetMonitorImplementation.cmake)
 
 add_library (${PROJECT_NAME}_WLAN STATIC "")
 
 if (UNIX)
- # API
- option (WEXT_SUPPORT "compile wireless extensions support" ON)
- CMAKE_DEPENDENT_OPTION (NL80211_SUPPORT "compile nl80211 support" ON
-                         "NETLINK_SUPPORT" OFF)
- # *WARNING*; DBus support is out of order ATM (see: "debug" statement below)
- # *TODO*: currently (!) implies DHCLIENT_SUPPORT off
- option (DBUS_SUPPORT "compile DBus/NetworkManager support" OFF)
- add_feature_info (Wext WEXT_SUPPORT "support wireless extensions")
- add_feature_info (nl80211 NL80211_SUPPORT "support nl80211")
- add_feature_info (DBus/NetworkManager DBUS_SUPPORT "support DBus/NetworkManager")
-
 # # DHCP client
 # option (DHCLIENT_SUPPORT "enable ISC dhclient support" ON)
 # option (DHCPD_SUPPORT "enable dhcpd support" OFF)
 # add_feature_info (ISC dhclient DHCLIENT_SUPPORT "support ISC dhclient")
 # add_feature_info (dhcpd DHCPD_SUPPORT "support dhcpd")
 elseif (WIN32)
- option (WLANAPI_SUPPORT "compile wlanapi support" ON)
- add_feature_info (wlanapi WLANAPI_SUPPORT "support wlanapi")
-
 # include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/scripts/Macros.cmake)
  get_WIN32_Version (WINDOWS_VERSION_MAJOR WINDOWS_VERSION_MINOR WINDOWS_VERSION_MICRO)
 # message (STATUS "WINDOWS_VERSION: ${WINDOWS_VERSION_MAJOR}.${WINDOWS_VERSION_MINOR}.${WINDOWS_VERSION_MICRO}")
@@ -38,32 +23,8 @@ elseif (WIN32)
   endif (WINXP_SUPPORT)
  endif (WINDOWS_VERSION_MAJOR GREATER 5)
 endif ()
-#include (SetMonitorImplementation.cmake)
 
-include (FindPkgConfig)
-#pkg_check_modules (PKG_ACE REQUIRED ACE)
 if (UNIX)
- # API
- if (WEXT_SUPPORT)
-#  check_library_exists (iw iw_sockets_open /usr/lib/x86_64-linux-gnu HAVE_LIBIW)
-#  if (NOT HAVE_LIBIW)
-#   message (FATAL_ERROR "libiw not found, aborting")
-#  endif ()
-  add_definitions (-DWEXT_SUPPORT)
- endif (WEXT_SUPPORT)
- if (NL80211_SUPPORT)
-  pkg_check_modules (PKG_NL80211 REQUIRED libnl-3.0 libnl-genl-3.0)
-  pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
-  add_definitions (-DSD_BUS_SUPPORT)
-  add_definitions (-DNL80211_SUPPORT)
- endif (NL80211_SUPPORT)
- if (DBUS_SUPPORT)
-  pkg_check_modules (PKG_DBUS REQUIRED dbus-1)
-#  pkg_check_modules (PKG_NETWORKMANAGER REQUIRED NetworkManager)
-  pkg_check_modules (PKG_NETWORKMANAGER REQUIRED libnm)
-  add_definitions (-DDBUS_SUPPORT)
- endif (DBUS_SUPPORT)
-
 # # DHCP client
 # if (DHCLIENT_SUPPORT)
 #  pkg_check_modules (PKG_DHCP REQUIRED bind-exports isc-dhcp-client)
@@ -104,10 +65,6 @@ if (UNIX)
 #  add_definitions (-DDHCLIENT_SUPPORT)
 # endif (DHCLIENT_SUPPORT)
 elseif (WIN32)
- # API
- if (WLANAPI_SUPPORT)
-  add_definitions (-DWLANAPI_SUPPORT)
- endif (WLANAPI_SUPPORT)
 endif ()
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/.. REALPATH DIRECTORY)
@@ -139,27 +96,33 @@ endif (UNIX)
 #add_definitions (-DCOMMONXML_HAS_DLL)
 
 if (UNIX)
- if (NL80211_SUPPORT)
-  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              $<BUILD_INTERFACE:${PKG_NL80211_INCLUDE_DIRS}>)
-#  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-#                              "$<BUILD_INTERFACE:${PKG_DBUS_INCLUDE_DIRS}>")
+ target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                             $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
 
-#  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-#                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/Common/src/dbus>)
+ if (NL80211_SUPPORT)
+  if (PKG_LIBNL3_FOUND)
+   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                               $<BUILD_INTERFACE:${PKG_LIBNL3_INCLUDE_DIRS}>)
+  elseif (PKG_LIBNL2_FOUND)
+   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                               $<BUILD_INTERFACE:${PKG_LIBNL2_INCLUDE_DIRS}>)
+  else ()
+   message (FATAL_ERROR "libnl not found, aborting")
+  endif ()
  endif (NL80211_SUPPORT)
  if (DBUS_SUPPORT)
   target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                               "$<BUILD_INTERFACE:${PKG_DBUS_INCLUDE_DIRS}>")
-  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-                              "$<BUILD_INTERFACE:${PKG_NETWORKMANAGER_INCLUDE_DIRS}>")
+#  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+#                              "$<BUILD_INTERFACE:${PKG_NETWORKMANAGER_INCLUDE_DIRS}>")
  endif (DBUS_SUPPORT)
-# if (DHCLIENT_SUPPORT)
+
+ if (DHCLIENT_SUPPORT)
 #  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
 #                              $<BUILD_INTERFACE:/usr/include/bind-export>)
-#  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
-#                              $<BUILD_INTERFACE:/usr/include/dhcp>)
-# endif (DHCLIENT_SUPPORT)
+  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC ${BIND9_CFLAGS})
+ endif (DHCLIENT_SUPPORT)
+
  target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../modules/ACE>)
 
@@ -228,6 +191,10 @@ target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/../..>)
 target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/..>)
+if (UNIX)
+ target_include_directories (${PROJECT_NAME}_WLAN PUBLIC
+                             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../protocol/dhcp>)
+endif (UNIX)
 
 ############## next target ################
 set (source_files
@@ -248,6 +215,7 @@ set (source_files
      net_wlan_monitor_base.inl
      net_wlan_monitor_statemachine.cpp
      net_wlan_monitor_statemachine.h
+     net_wlan_tools.cpp
      net_wlan_tools.h)
 if (UNIX)
  if (WEXT_SUPPORT)
@@ -334,7 +302,17 @@ if (UNIX)
  if (WEXT_SUPPORT)
   target_link_libraries (${PROJECT_NAME}_WLAN iw)
  endif (WEXT_SUPPORT)
+ if (NL80211_SUPPORT)
+  if (PKG_LIBNL3_FOUND)
+   target_link_libraries (${PROJECT_NAME}_WLAN ${PKG_LIBNL3_LIBRARIES})
+  elseif (PKG_LIBNL2_FOUND)
+   target_link_libraries (${PROJECT_NAME}_WLAN ${PKG_LIBNL2_LIBRARIES})
+  else ()
+   message (FATAL_ERROR "libnl not found, aborting")
+  endif ()
+ endif (NL80211_SUPPORT)
  if (DBUS_SUPPORT)
+  target_link_libraries (${PROJECT_NAME}_WLAN ${PKG_DBUS_LIBRARIES})
   target_link_libraries (${PROJECT_NAME}_WLAN CommonDBus)
  endif (DBUS_SUPPORT)
 # if (DHCLIENT_SUPPORT)

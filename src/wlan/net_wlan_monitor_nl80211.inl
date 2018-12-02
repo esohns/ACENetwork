@@ -23,8 +23,8 @@
 
 #include "net/ethernet.h"
 
-#include <linux/netlink.h>
-#include <linux/nl80211.h>
+#include "linux/netlink.h"
+#include "linux/nl80211.h"
 
 #include "netlink/handlers.h"
 #include "netlink/netlink.h"
@@ -49,8 +49,10 @@ extern "C"
 
 #include "common_tools.h"
 
+#if defined (ACE_LINUX) && defined (DBUS_SUPPORT) && defined (SD_BUS_SUPPORT)
 #include "common_dbus_defines.h"
 #include "common_dbus_tools.h"
+#endif // ACE_LINUX && DBUS_SUPPORT && SD_BUS_SUPPORT
 
 #include "common_math_tools.h"
 
@@ -65,6 +67,7 @@ extern "C"
 #include "net_macros.h"
 #include "net_packet_headers.h"
 
+#include "net_wlan_common.h"
 #include "net_wlan_defines.h"
 
 template <typename AddressType,
@@ -724,7 +727,7 @@ Net_WLAN_Monitor_T<AddressType,
   nl_socket_set_cb (inherited::socketHandle_, callbacks_);
 
   // sanity check(s)
-#if defined (ACE_LINUX)
+#if defined (ACE_LINUX) && defined (DBUS_SUPPORT) && defined (SD_BUS_SUPPORT)
   if (Common_DBus_Tools::isUnitRunning (NULL,
                                         COMMON_SYSTEMD_UNIT_NETWORKMANAGER))
     if (!Net_Common_Tools::networkManagerManageInterface (configuration_in.interfaceIdentifier,
@@ -752,7 +755,7 @@ Net_WLAN_Monitor_T<AddressType,
 //    ACE_DEBUG ((LM_WARNING,
 //                ACE_TEXT ("systemd unit \"%s\" is running and managing interface \"%s\"; this may interfere with the WLAN monitoring activity: please reinstall, continuing\n"),
 //                ACE_TEXT (COMMON_SYSTEMD_UNIT_IFUPDOWN)));
-#endif // ACE_LINUX
+#endif // ACE_LINUX && DBUS_SUPPORT && SD_BUS_SUPPORT
   if (!Net_WLAN_Tools::getProtocolFeatures (configuration_in.interfaceIdentifier,
                                             inherited::socketHandle_,
                                             inherited::familyId_,

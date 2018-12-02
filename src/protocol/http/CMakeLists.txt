@@ -9,12 +9,12 @@ if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
  add_definitions (-D_GLIBCXX_USE_CXX11_ABI=0)
 endif ()
 
-add_library (${PROJECT_NAME}_Protocol_HTTP STATIC "")
-
-include (FindPkgConfig)
 if (UNIX)
  pkg_check_modules (PKG_FFMPEG REQUIRED libavcodec libavutil libavformat libswscale)
+ pkg_check_modules (PKG_SOX REQUIRED sox)
 endif (UNIX)
+
+add_library (${PROJECT_NAME}_Protocol_HTTP STATIC "")
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
 get_filename_component (BUILD_PATH_SUFFIX ${BUILD_PATH} NAME)
@@ -41,6 +41,10 @@ endif ()
 if (UNIX)
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${PKG_FFMPEG_INCLUDE_DIRS}>)
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
+                             $<BUILD_INTERFACE:${PKG_SOX_INCLUDE_DIRS}>)
+
+ target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC ${BIND9_CFLAGS})
 
  target_include_directories (${PROJECT_NAME}_Protocol_HTTP PUBLIC
                              $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../modules/ACE>)

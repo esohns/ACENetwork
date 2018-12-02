@@ -51,6 +51,10 @@
 #include "net_macros.h"
 
 #include "test_u_common.h"
-#if defined (GTK_SUPPORT)
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
 #include "test_u_gtk_common.h"
-#endif // GTK_SUPPORT
+#elif defined (WXWIDGETS_USE)
+#include "test_u_wxwidgets_common.h"
+#endif
+#endif // GUI_SUPPORT

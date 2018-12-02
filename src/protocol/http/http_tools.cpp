@@ -543,22 +543,18 @@ HTTP_Tools::URLEncode (const std::string& string_in)
   try {
     std::locale us_ascii_locale (ACE_TEXT_ALWAYS_CHAR (COMMON_LOCALE_EN_US_STRING));
     locale = us_ascii_locale;
-  } catch (std::runtime_error exception_in) {
+  } catch (std::runtime_error& exception_in) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in std::locale(\"%s\"): \"%s\", aborting\n"),
                 ACE_TEXT (COMMON_LOCALE_EN_US_STRING),
                 ACE_TEXT (exception_in.what ())));
-
     Common_Tools::printLocales ();
-
     return result;
   } catch (...) {
     ACE_DEBUG ((LM_ERROR,
                 ACE_TEXT ("caught exception in std::locale(\"%s\"), aborting\n"),
                 ACE_TEXT (COMMON_LOCALE_EN_US_STRING)));
-
     Common_Tools::printLocales ();
-
     return result;
   }
   std::ostringstream converter;

@@ -41,47 +41,6 @@
 
 #include "net_wlan_defines.h"
 
-std::string
-Net_WLAN_Tools::decodeSSID (void* data_in,
-                            size_t length_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::decodeSSID"));
-
-  // initialize return value(s)
-  std::string result;
-
-  // sanity check(s)
-  ACE_ASSERT (data_in);
-  ACE_ASSERT (length_in && length_in <= IW_ESSID_MAX_SIZE);
-
-  uint8_t* data_p = static_cast<uint8_t*> (data_in);
-  char buffer_a[4 + 1]; // '\\xAB\0'
-  int result_2 = -1;
-  for (size_t i = 0;
-       i < length_in;
-       ++i)
-  {
-    if (::isprint (data_p[i]) &&
-        data_p[i] != ' '      &&
-        data_p[i] != '\\')
-      result += static_cast<char> (data_p[i]);
-    else if (data_p[i] == ' ')
-      result += ' ';
-    else
-    { ACE_ASSERT (data_p[i] == '\\'); // --> unicode character
-      ACE_OS::memset (buffer_a, 0, sizeof (char[4 + 1]));
-      result_2 =
-          ACE_OS::sprintf (buffer_a,
-                           ACE_TEXT_ALWAYS_CHAR ("\\x%.2x"),
-                           data_p[i + 1]);
-      ACE_ASSERT (result_2 == 4);
-      result += buffer_a;
-    } // end ELSE
-  } // end FOR
-
-  return result;
-}
-
 Net_InterfaceIdentifiers_t
 Net_WLAN_Tools::getInterfaces (int addressFamily_in,
                                int flags_in)
