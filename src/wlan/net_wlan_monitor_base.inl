@@ -753,25 +753,24 @@ Net_WLAN_Monitor_Base_T<AddressType,
 #if defined (WLANAPI_USE)
     interface_identifiers_a = Net_WLAN_Tools::getInterfaces (clientHandle_);
 #else
-    ACE_ASSERT (false); // *TODO*
+    ;
 #endif // WLANAPI_USE
 #elif defined (ACE_LINUX)
   if (interfaceIdentifier_in.empty ())
-    interface_identifiers_a = Net_WLAN_Tools::getInterfaces (
-// *TODO*: compiles only one implementation; move this out of the base class
+// *TODO*: compile only one implementation; move this out of the base class
 #if defined (WEXT_USE)
-                                                             AF_UNSPEC,
+    interface_identifiers_a = Net_WLAN_Tools::getInterfaces (AF_UNSPEC,
                                                              0);
 #elif defined (NL80211_USE)
-                                                             socketHandle_,
+    interface_identifiers_a = Net_WLAN_Tools::getInterfaces (socketHandle_,
                                                              familyId_);
 #elif defined (DBUS_USE)
-                                                             connection_,
+    interface_identifiers_a = Net_WLAN_Tools::getInterfaces (connection_,
                                                              AF_UNSPEC,
                                                              0);
 #else
-                                                             );
-#endif // WEXT_USE
+    ;
+#endif
 #endif // ACE_WIN32 || ACE_WIN64
   else
 #if defined (ACE_WIN32) || defined (ACE_WIN64)

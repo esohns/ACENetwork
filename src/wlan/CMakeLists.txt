@@ -1,7 +1,7 @@
 include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts/PreXMLImplementation.cmake)
-include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts/SetXMLImplementation.cmake)
+#include (${CMAKE_CURRENT_SOURCE_DIR}/../../../Common/src/xml/scripts/SetXMLImplementation.cmake)
 include (${CMAKE_CURRENT_SOURCE_DIR}/scripts/PreMonitorImplementation.cmake)
-include (${CMAKE_CURRENT_SOURCE_DIR}/scripts/SetMonitorImplementation.cmake)
+#include (${CMAKE_CURRENT_SOURCE_DIR}/scripts/SetMonitorImplementation.cmake)
 
 add_library (${PROJECT_NAME}_WLAN STATIC "")
 
@@ -289,6 +289,9 @@ if (UNIX)
  endif (DBUS_SUPPORT)
 endif (UNIX)
 
+add_dependencies (${PROJECT_NAME}_WLAN ${PROJECT_NAME})
+add_dependencies (${PROJECT_NAME}_WLAN ${PROJECT_NAME}_Protocol_DHCP)
+
 set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES DEFINE_SYMBOL NET_WLAN_BUILD_DLL)
 #set_target_properties (${PROJECT_NAME}_WLAN PROPERTIES VERSION ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_MICRO} SOVERSION 1)
 #set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
@@ -342,6 +345,7 @@ elseif (WIN32)
 
 # target_link_libraries (${PROJECT_NAME}_WLAN CommonXML)
 endif ()
+target_link_libraries (${PROJECT_NAME}_WLAN ${PROJECT_NAME})
 
 # add all targets to the build-tree export set
 export (TARGETS ${PROJECT_NAME}_WLAN

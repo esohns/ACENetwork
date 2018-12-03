@@ -181,13 +181,19 @@ class Net_Netlink_Addr
   typedef ACE_Netlink_Addr inherited;
 
  public:
-  Net_Netlink_Addr ();
-  Net_Netlink_Addr (const sockaddr_nl*, // address
-                    int);               // length
+  Net_Netlink_Addr ()
+   : inherited ()
+  {}
+  Net_Netlink_Addr (const sockaddr_nl* address_in,
+                    int length_in)
+   : inherited (address_in,
+                length_in)
+  {}
   inline virtual ~Net_Netlink_Addr () {}
 
   inline Net_Netlink_Addr& operator= (const ACE_Addr& rhs) { *this = rhs; return *this; }
 
+  // *NOTE*: (currently) implemented in net_configuration.cpp
   virtual int addr_to_string (ACE_TCHAR[],    // buffer
                               size_t,         // size
                               int = 1) const; // ipaddr_format

@@ -181,19 +181,93 @@ Net_WLAN_Tools::associatedSSID (struct DBusConnection* connection_in,
 
   std::string device_path_string =
       Net_WLAN_Tools::deviceToDBusObjectPath (connection_in,
-                                        interfaceIdentifier_in);
+                                              interface_identifier);
   ACE_ASSERT (!device_path_string.empty ());
   std::string access_point_path_string =
       Net_WLAN_Tools::deviceDBusObjectPathToActiveAccessPointDBusObjectPath (connection_in,
-                                                                 device_path_string);
+                                                                             device_path_string);
   if (access_point_path_string.empty ())
     return result;
 
   result =
       Net_WLAN_Tools::accessPointDBusObjectPathToSSID (connection_in,
-                                                 access_point_path_string);
+                                                       access_point_path_string);
 
   return result;
+}
+
+bool
+Net_WLAN_Tools::hasSSID (struct DBusConnection*connection_in,
+                         const std::string& interfaceIdentifier_in,
+                         const std::string& SSID_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::hasSSID"));
+
+  // sanity check(s)
+  ACE_ASSERT (connection_in);
+  std::string interface_identifier = interfaceIdentifier_in;
+  if (unlikely (interfaceIdentifier_in.empty ()))
+  {
+    Net_InterfaceIdentifiers_t interface_identifiers_a =
+        Net_WLAN_Tools::getInterfaces (connection_in,
+                                       AF_UNSPEC,
+                                       0);
+    if (interface_identifiers_a.empty ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid argument, aborting\n")));
+      return false;
+    } // end IF
+    interface_identifier = interface_identifiers_a.front ();
+  } // end IF
+
+  std::string device_path_string =
+      Net_WLAN_Tools::deviceToDBusObjectPath (connection_in,
+                                              interface_identifier);
+  ACE_ASSERT (!device_path_string.empty ());
+
+  ACE_ASSERT (false); // *TODO*
+  ACE_NOTSUP_RETURN (false);
+  ACE_NOTREACHED (return false;)
+}
+
+bool
+Net_WLAN_Tools::scan (struct DBusConnection* connection_in,
+                      const std::string& interfaceIdentifier_in,
+                      const struct ether_addr& accessPoint_in,
+                      const std::string& SSID_in,
+                      bool lowPriority_in,
+                      bool flushCache_in,
+                      bool randomizeMACAddress_in)
+{
+  NETWORK_TRACE (ACE_TEXT ("Net_WLAN_Tools::scan"));
+
+  // sanity check(s)
+  ACE_ASSERT (connection_in);
+  std::string interface_identifier = interfaceIdentifier_in;
+  if (unlikely (interfaceIdentifier_in.empty ()))
+  {
+    Net_InterfaceIdentifiers_t interface_identifiers_a =
+        Net_WLAN_Tools::getInterfaces (connection_in,
+                                       AF_UNSPEC,
+                                       0);
+    if (interface_identifiers_a.empty ())
+    {
+      ACE_DEBUG ((LM_ERROR,
+                  ACE_TEXT ("invalid argument, aborting\n")));
+      return false;
+    } // end IF
+    interface_identifier = interface_identifiers_a.front ();
+  } // end IF
+
+  std::string device_path_string =
+      Net_WLAN_Tools::deviceToDBusObjectPath (connection_in,
+                                              interface_identifier);
+  ACE_ASSERT (!device_path_string.empty ());
+
+  ACE_ASSERT (false); // *TODO*
+  ACE_NOTSUP_RETURN (false);
+  ACE_NOTREACHED (return false;)
 }
 
 bool

@@ -81,7 +81,7 @@ if (UNIX)
   elseif (WXWIDGETS_USE)
    target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
                                $<BUILD_INTERFACE:${wxWidgets_INCLUDE_DIRS}>)
-  endif (WXWIDGETS_USE)
+  endif ()
  endif (GUI_SUPPORT)
 
  target_include_directories (${PROJECT_NAME}_Test_U PUBLIC
@@ -257,12 +257,14 @@ target_link_libraries (${PROJECT_NAME}_Test_U Common)
 add_dependencies (${PROJECT_NAME}_Test_U Common)
 if (GUI_SUPPORT)
  add_dependencies (${PROJECT_NAME}_Test_U CommonUI)
- if (GTK_SUPPORT)
+ if (GTK_USE)
   add_dependencies (${PROJECT_NAME}_Test_U CommonUI_GTK)
   if (GTKGL_SUPPORT)
    add_dependencies (${PROJECT_NAME}_Test_U CommonOpenGL)
   endif (GTKGL_SUPPORT)
- endif (GTK_SUPPORT)
+ elseif (WXWIDGETS_USE)
+  add_dependencies (${PROJECT_NAME}_Test_U CommonUI_wxWidgets)
+ endif ()
 endif (GUI_SUPPORT)
 
 ##########################################
@@ -325,7 +327,7 @@ add_subdirectory (WLAN_monitor)
 
 add_custom_target (test_u ALL
                    COMMENT "building test_u...")
-add_dependencies (test_u client server DHCP_client file_server HTTP_decoder WLAN_monitor)
+add_dependencies (test_u client server dhcp_client file_server http_decoder wlan_monitor)
 
 cmake_policy (SET CMP0012 NEW)
 if (NOT BUILD_TEST_U)

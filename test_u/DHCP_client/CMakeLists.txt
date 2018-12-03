@@ -112,7 +112,7 @@ include_directories (${CMAKE_CURRENT_SOURCE_DIR}/..)
 include_directories (${CMAKE_CURRENT_BINARY_DIR}/../..)
 
 ############## next target ################
-set (EXECUTABLE DHCP_client)
+set (EXECUTABLE dhcp_client)
 set (${EXECUTABLE}_EXE_SRCS
      stdafx.cpp
      stdafx.h

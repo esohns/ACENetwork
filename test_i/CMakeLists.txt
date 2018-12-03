@@ -10,13 +10,6 @@ if (GUI_SUPPORT)
  include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/scripts/SetUIFramework.cmake)
 
  if (GTK_USE)
-  include (${CMAKE_CURRENT_SOURCE_DIR}/../../Common/src/ui/scripts/SetGTKVersion.cmake)
-  CMAKE_DEPENDENT_OPTION (GTKGL_SUPPORT "enable GTK OpenGL support" ON
-                          "GUI_SUPPORT" OFF)
-# *IMPORTANT NOTE*: to use gtkglarea on gtk2, check out the 'gtkglarea-2' branch
-#                   of the project
-  CMAKE_DEPENDENT_OPTION (GTKGLAREA_SUPPORT "enable GtkGLArea support" OFF
-                          "GUI_SUPPORT; GTKGL_SUPPORT" OFF)
  elseif (WXWIDGETS_USE)
   message (STATUS "wxWidgets_DEFINITIONS: ${wxWidgets_DEFINITIONS}")
   message (STATUS "wxWidgets_DEFINITIONS_DEBUG: ${wxWidgets_DEFINITIONS_DEBUG}")
@@ -45,37 +38,12 @@ add_library (${PROJECT_NAME}_Test_I STATIC "")
 
 if (UNIX)
  if (GUI_SUPPORT)
-  if (GTK_USE)
-   if (GTK2_SUPPORT)
-    pkg_check_modules (PKG_GTK REQUIRED gmodule-2.0 gthread-2.0 gtk+-2.0)
-   elseif (GTK3_SUPPORT)
-    pkg_check_modules (PKG_GTK REQUIRED gtk+-3.0)
-   endif ()
-  elseif (CURSES_USE)
-   pkg_check_modules (PKG_CURSES REQUIRED ncurses panel)
+  if (CURSES_USE)
 # *WORKAROUND*
    add_definitions (-DNCURSES_INTERNALS)
-  endif (CURSES_USE)
+  endif ()
  endif (GUI_SUPPORT)
 elseif (WIN32)
- if (GUI_SUPPORT)
-  if (CURSES_USE)
-   find_library (CURSES_LIBRARY pdcurses.lib
-                 PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../pdcurses
-                 PATH_SUFFIXES win32
-                 DOC "searching for pdcurses.lib")
-   if (NOT CURSES_LIBRARY)
-    message (FATAL_ERROR "could not find pdcurses.lib, aborting")
-   endif (NOT CURSES_LIBRARY)
-   find_library (PANEL_LIBRARY panel.lib
-                 PATHS ${CMAKE_CURRENT_SOURCE_DIR}/../../pdcurses
-                 PATH_SUFFIXES win32
-                 DOC "searching for panel.lib")
-   if (NOT PANEL_LIBRARY)
-    message (FATAL_ERROR "could not find panel.lib, aborting")
-   endif (NOT PANEL_LIBRARY)
-  endif (CURSES_USE)
- endif (GUI_SUPPORT)
 endif ()
 
 get_filename_component (BUILD_PATH ${CMAKE_CURRENT_BINARY_DIR}/../.. REALPATH DIRECTORY)
@@ -286,6 +254,8 @@ if (GUI_SUPPORT)
   if (GTKGL_SUPPORT)
    add_dependencies (${PROJECT_NAME}_Test_I CommonOpenGL)
   endif (GTKGL_SUPPORT)
+ elseif (WXWIDGETS_USE)
+  add_dependencies (${PROJECT_NAME}_Test_I CommonUI_wxWidgets)
  endif (GTK_USE)
 endif (GUI_SUPPORT)
 

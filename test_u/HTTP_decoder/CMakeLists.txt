@@ -287,7 +287,7 @@ if (CXX_COMPILER_ID_STRING_LOWER STREQUAL LLVM_COMPILER_ID_STRING_LOWER)
 endif ()
 
 #string (TOLOWER "${PROJECT_NAME}_Protocol" EXECUTABLE)
-set (EXECUTABLE HTTP_decoder)
+set (EXECUTABLE http_decoder)
 add_executable (${EXECUTABLE}
                 EXCLUDE_FROM_ALL
                 ${HTTP_decoder_SRCS})

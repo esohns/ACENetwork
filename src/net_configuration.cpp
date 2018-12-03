@@ -29,21 +29,6 @@
 #endif // NETLINK_SUPPORT
 
 #if defined (NETLINK_SUPPORT)
-Net_Netlink_Addr::Net_Netlink_Addr (void)
- : inherited ()
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Netlink_Addr::Net_Netlink_Addr"));
-
-}
-
-Net_Netlink_Addr::Net_Netlink_Addr (const sockaddr_nl* addres_in,
-                                    int length_in)
- : inherited (addres_in, length_in)
-{
-  NETWORK_TRACE (ACE_TEXT ("Net_Netlink_Addr::Net_Netlink_Addr"));
-
-}
-
 int
 Net_Netlink_Addr::addr_to_string (ACE_TCHAR buffer_out[],
                                   size_t size_in,
