@@ -47,7 +47,18 @@
 static bool toggling_connect_button = false;
 
 void
-load_wlan_interfaces (GtkListStore* listStore_in)
+load_wlan_interfaces (GtkListStore* listStore_in
+#if defined (ACE_WIN32) || defined (ACE_WIN64)
+                      )
+#elif defined (ACE_LINUX)
+#if defined (WEXT_USE)
+                      )
+#elif defined (NL80211_USE)
+                      ,struct nl_sock* handle_in,
+                      int driverFamilyId_in)
+#elif defined (DBUS_USE)
+                      struct DBusConnection* connection_in)
+#endif
 {
   NETWORK_TRACE (ACE_TEXT ("::load_wlan_interfaces"));
 
@@ -60,13 +71,25 @@ load_wlan_interfaces (GtkListStore* listStore_in)
       NET_WLAN_INETMONITOR_SINGLETON::instance ();
   ACE_ASSERT (iinetwlanmonitor_p);
 #endif // ACE_WIN32 || ACE_WIN64
+  Net_InterfaceIdentifiers_t interface_identifiers_a =
 #if defined (ACE_WIN32) || defined (ACE_WIN64)
-  Net_InterfaceIdentifiers_t interface_identifiers_a =
       Net_WLAN_Tools::getInterfaces (iinetwlanmonitor_p->get_2 ());
+#elif defined (ACE_LINUX)
+#if defined (WEXT_USE)
+      Net_WLAN_Tools::getInterfaces (AF_UNSPEC, 0);
+#elif defined (NL80211_USE)
+      Net_WLAN_Tools::getInterfaces (handle_in,
+                                     driverFamilyId_in);
+#elif defined (DBUS_USE)
+      Net_WLAN_Tools::getInterfaces (connection_in,
+                                     AF_UNSPEC,
+                                     0);
 #else
-  Net_InterfaceIdentifiers_t interface_identifiers_a =
-    Net_WLAN_Tools::getInterfaces (AF_UNSPEC, 0);
-#endif // ACE_WIN32 || ACE_WIN64
+      Net_InterfaceIdentifiers_t ();
+#endif
+#else
+      Net_InterfaceIdentifiers_t ();
+#endif
   for (Net_InterfacesIdentifiersIterator_t iterator = interface_identifiers_a.begin ();
        iterator != interface_identifiers_a.end ();
        ++iterator)
@@ -1300,7 +1323,7 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
                 data_p->monitor->get (),
 #elif defined (NL80211_USE)
                 const_cast<struct nl_sock*> (data_p->monitor->getP ()),
-                data_p->monitor->get (),
+                data_p->monitor->get_3 (),
 #elif defined (DBUS_USE)
                 data_p->monitor->getP (),
 #endif
@@ -1334,7 +1357,7 @@ combobox_interface_changed_cb (GtkComboBox* comboBox_in,
                                       data_p->monitor->get ());
 #elif defined (NL80211_USE)
                                       const_cast<struct nl_sock*> (data_p->monitor->getP ()),
-                                      data_p->monitor->get ());
+                                      data_p->monitor->get_3 ());
 #elif defined (DBUS_USE)
                                       data_p->monitor->getP ());
 #else
@@ -1436,7 +1459,7 @@ combobox_ssid_changed_cb (GtkComboBox* comboBox_in,
                                   data_p->monitor->get ());
 #elif defined (NL80211_USE)
                                   const_cast<struct nl_sock*> (data_p->monitor->getP ()),
-                                  data_p->monitor->get ());
+                                  data_p->monitor->get_3 ());
 #elif defined (DBUS_USE)
                                   data_p->monitor->getP ());
 #else

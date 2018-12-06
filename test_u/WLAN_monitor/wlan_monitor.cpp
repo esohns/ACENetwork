@@ -474,7 +474,6 @@ do_work (bool autoAssociate_in,
 {
   NETWORK_TRACE (ACE_TEXT ("::do_work"));
 
-//  int result = -1;
   struct Test_U_SignalHandlerConfiguration signal_handler_configuration;
   Common_Timer_Manager_t* timer_manager_p = NULL;
   Net_WLAN_IInetMonitor_t* iwlanmonitor_p = NULL;
@@ -486,6 +485,11 @@ do_work (bool autoAssociate_in,
 //  long timer_id = -1;
 //  int group_id = -1;
 //  bool stop_event_dispatch = false;
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  int result = -1;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
   // step0a: initialize configuration
   struct WLANMonitor_Configuration configuration;
@@ -554,6 +558,11 @@ do_work (bool autoAssociate_in,
                                                dynamic_cast<Test_U_IStatistic_t*> (iwlanmonitor_p),
                                                false);
   Test_U_EventHandler ui_event_handler (&CBData_in);
+#if defined (GUI_SUPPORT)
+#if defined (GTK_USE)
+  WLANMonitor_UI_GTK_Manager_t* gtk_manager_p = NULL;
+#endif // GTK_USE
+#endif // GUI_SUPPORT
 
   // ********************** monitor configuration data *************************
   configuration.signalHandlerConfiguration.hasUI =
@@ -628,9 +637,6 @@ do_work (bool autoAssociate_in,
 
   // step5a: start GTK event loop ?
 #if defined (GUI_SUPPORT)
-#if defined (GTK_USE)
-  WLANMonitor_UI_GTK_Manager_t* gtk_manager_p = NULL;
-#endif // GTK_USE
   if (!UIDefinitionFile_in.empty ())
   {
 #if defined (GTK_USE)
@@ -655,7 +661,7 @@ do_work (bool autoAssociate_in,
     } // end IF
     if (!showConsole_in)
       was_visible_b = ShowWindow (window_p, SW_HIDE);
-#endif
+#endif // ACE_WIN32 || ACE_WIN64
 
 #if defined (GTK_USE)
     ACE_ASSERT (gtk_manager_p);
